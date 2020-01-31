@@ -56,6 +56,10 @@
 *.rar
 *.zip
 
+bin
+obj
+packages
+
 LB Mod Installer/obj/Release/
 LB Mod Installer/obj/Debug/
 EEPK Editor/obj/Release/
