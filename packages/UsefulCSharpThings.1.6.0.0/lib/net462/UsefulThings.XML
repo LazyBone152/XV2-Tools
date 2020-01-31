@@ -1,0 +1,2133 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>UsefulThings</name>
+    </assembly>
+    <members>
+        <member name="T:UsefulThings.Extensions">
+            <summary>
+            Extension methods for various things, both WPF and WinForms
+            </summary>
+        </member>
+        <member name="M:UsefulThings.Extensions.#cctor">
+            <summary>
+            Static constructor.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.Extensions.GetRange``1(``0[],System.Int32,System.Int32)">
+            <summary>
+            Extracts a sub array from another array with a specified number of elements.
+            </summary>
+            <typeparam name="T">Content of array.</typeparam>
+            <param name="oldArray">Current array.</param>
+            <param name="offset">Start index in oldArray.</param>
+            <param name="length">Length to extract.</param>
+            <returns>New array containing elements within the specified range.</returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.GetRange``1(``0[],System.Int32)">
+            <summary>
+            Extracts a sub array from another array starting at offset and reading to end.
+            </summary>
+            <typeparam name="T">Content of array.</typeparam>
+            <param name="oldArray">Current array.</param>
+            <param name="offset">Start index in oldArray.</param>
+            <returns>New array containing elements within the specified range.</returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.ReadFrom(System.IO.Stream,System.IO.Stream,System.Int64,System.Int32)">
+            <summary>
+            Write data to this stream at the current position from another stream at it's current position.
+            </summary>
+            <param name="TargetStream">Stream to copy from.</param>
+            <param name="SourceStream">Stream to copy to.</param>
+            <param name="Length">Number of bytes to read.</param>
+            <param name="bufferSize">Size of buffer to use while copying.</param>
+            <returns>Number of bytes read.</returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.ReadInt32(System.IO.Stream)">
+            <summary>
+            Reads an int from stream at the current position and advances 4 bytes.
+            </summary>
+            <param name="stream">Stream to read from.</param>
+            <returns>Integer read from stream.</returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.ReadUInt32(System.IO.Stream)">
+            <summary>
+            Reads an int from stream at the current position and advances 4 bytes.
+            </summary>
+            <param name="stream">Stream to read from.</param>
+            <returns>Unsigned integer read from stream.</returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.ReadUInt32FromStream(System.IO.Stream)">
+            <summary>
+            Reads an uint from stream at the current position and advances 4 bytes.
+            </summary>
+            <param name="stream">Stream to read from.</param>
+            <returns>Integer read from stream.</returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.ReadInt64FromStream(System.IO.Stream)">
+            <summary>
+            Reads a long from stream at the current position.
+            </summary>
+            <param name="stream">Stream to read from.</param>
+            <returns>Long read from stream.</returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.ReadBytes(System.IO.Stream,System.Int32)">
+            <summary>
+            Reads a number of bytes from stream at the current position and advances that number of bytes.
+            </summary>
+            <param name="stream">Stream to read from.</param>
+            <param name="Length">Number of bytes to read.</param>
+            <returns>Bytes read from stream.</returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.ReadString(System.IO.Stream,System.Boolean)">
+            <summary>
+            Reads a string from a stream. Must be null terminated or have the length written at the start (Pascal strings or something?)
+            </summary>
+            <param name="stream">Stream to read from.</param>
+            <param name="HasLengthWritten">True = Attempt to read string length from stream first.</param>
+            <returns>String read from stream.</returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.ReadStreamFully(System.IO.Stream,System.Int32)">
+            <summary>
+            KFreon: Borrowed this from the DevIL C# Wrapper found here: https://code.google.com/p/devil-net/
+            
+            Reads a stream until the end is reached into a byte array. Based on
+            <a href="http://www.yoda.arachsys.com/csharp/readbinary.html">Jon Skeet's implementation</a>.
+            It is up to the caller to dispose of the stream.
+            </summary>
+            <param name="stream">Stream to read all bytes from</param>
+            <param name="initialLength">Initial buffer length, default is 32K</param>
+            <returns>The byte array containing all the bytes from the stream</returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.WriteBytes(System.IO.Stream,System.Byte[])">
+            <summary>
+            Writes byte array to current position in stream.
+            </summary>
+            <param name="stream">Stream to write to.</param>
+            <param name="data">Data to write to stream.</param>
+        </member>
+        <member name="M:UsefulThings.Extensions.WriteInt64(System.IO.Stream,System.Int64)">
+            <summary>
+            Writes a long (int64) to stream at its current position.
+            </summary>
+            <param name="stream">Stream to write to.</param>
+            <param name="value">Int64 to write to stream.</param>
+        </member>
+        <member name="M:UsefulThings.Extensions.WriteInt32(System.IO.Stream,System.Int32)">
+            <summary>
+            FROM GIBBED.
+            Writes an int to stream at the current position.
+            </summary>
+            <param name="stream">Stream to write to.</param>
+            <param name="value">Integer to write.</param>
+        </member>
+        <member name="M:UsefulThings.Extensions.WriteUInt32(System.IO.Stream,System.UInt32)">
+            <summary>
+            FROM GIBBED.
+            Writes uint to stream at current position.
+            </summary>
+            <param name="stream">Stream to write to.</param>
+            <param name="value">uint to write.</param>
+        </member>
+        <member name="M:UsefulThings.Extensions.WriteFloat32(System.IO.Stream,System.Single)">
+            <summary>
+            FROM GIBBED.
+            Writes a float to stream at the current position.
+            </summary>
+            <param name="stream">Stream to write to.</param>
+            <param name="value">Float to write to stream.</param>
+        </member>
+        <member name="M:UsefulThings.Extensions.WriteString(System.IO.Stream,System.String,System.Boolean)">
+            <summary>
+            Writes string to stream. Terminated by a null char, and optionally writes string length at start of string. (Pascal strings?)
+            </summary>
+            <param name="stream">Stream to write to.</param>
+            <param name="str">String to write.</param>
+            <param name="WriteLength">True = Writes str length before writing string.</param>
+        </member>
+        <member name="M:UsefulThings.Extensions.NaturalSort(System.Collections.Generic.List{System.String})">
+            <summary>
+            Sorts list using Natural Compare i.e. 1 is before 12, etc
+            </summary>
+            <param name="list"></param>
+        </member>
+        <member name="M:UsefulThings.Extensions.IndexOfMin(System.Collections.Generic.IEnumerable{System.Int32},System.Func{System.Int32,System.Int32})">
+            <summary>
+            Returns index of minimum value based on comparer.
+            </summary>
+            <param name="enumerable">Collection to search.</param>
+            <param name="comparer">Comparer to use. e.g. item => item - x</param>
+            <returns>Index of minimum value in enumerable based on comparer.</returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.IndexOfMin(System.Collections.Generic.IEnumerable{System.Byte},System.Func{System.Byte,System.Int32})">
+            <summary>
+            Returns index of minimum value based on comparer.
+            </summary>
+            <param name="enumerable">Collection to search.</param>
+            <param name="comparer">Comparer to use. e.g. item => item - x</param>
+            <returns>Index of minimum value in enumerable based on comparer.</returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.AddRange``2(System.Collections.Generic.Dictionary{``0,``1},System.Collections.Generic.Dictionary{``0,``1})">
+            <summary>
+            Adds elements of a Dictionary to another Dictionary. No checking for duplicates.
+            </summary>
+            <typeparam name="T">Key.</typeparam>
+            <typeparam name="U">Value.</typeparam>
+            <param name="mainDictionary">Dictionary to add to.</param>
+            <param name="newAdditions">Dictionary of elements to be added.</param>
+        </member>
+        <member name="M:UsefulThings.Extensions.AddRangeKinda``1(System.Collections.Concurrent.ConcurrentBag{``0},System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Add range of elements to given collection.
+            </summary>
+            <typeparam name="T">Type of items in collection.</typeparam>
+            <param name="collection">Collection to add to.</param>
+            <param name="additions">Elements to add.</param>
+        </member>
+        <member name="M:UsefulThings.Extensions.AddRangeKinda``1(System.Collections.Generic.ICollection{``0},System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Add range of elements to given collection.
+            </summary>
+            <typeparam name="T">Type of items in collection.</typeparam>
+            <param name="collection">Collection to add to.</param>
+            <param name="additions">Elements to add.</param>
+        </member>
+        <member name="M:UsefulThings.Extensions.Pop``1(System.Collections.Generic.ICollection{``0},System.Int32)">
+            <summary>
+            Removes element from collection at index.
+            </summary>
+            <typeparam name="T">Type of objects in collection.</typeparam>
+            <param name="collection">Collection to remove from.</param>
+            <param name="index">Index to remove from.</param>
+            <returns>Removed element.</returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.ToList``1(System.Collections.Generic.IEnumerable{``0},System.Int32)">
+            <summary>
+            Converts enumerable to List in a more memory efficient way by providing size of list.
+            </summary>
+            <typeparam name="T">Type of elements in lists.</typeparam>
+            <param name="enumerable">Enumerable to convert to list.</param>
+            <param name="size">Size of list.</param>
+            <returns>List containing enumerable contents.</returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.ToArray``1(System.Collections.Generic.IEnumerable{``0},System.Int32)">
+            <summary>
+            Converts enumerable to array in a more memory efficient way by providing size of list.
+            </summary>
+            <typeparam name="T">Type of elements in list.</typeparam>
+            <param name="enumerable">Enumerable to convert to array.</param>
+            <param name="size">Size of lists.</param>
+            <returns>Array containing enumerable elements.</returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.Split(System.String,System.StringSplitOptions,System.String[])">
+            <summary>
+            Splits string on (possibly) multiple elements.
+            </summary>
+            <param name="str">String to split.</param>
+            <param name="options">Options to use while splitting.</param>
+            <param name="splitStrings">Elements to split string on. (Delimiters)</param>
+            <returns></returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.Contains(System.String,System.String,System.StringComparison)">
+            <summary>
+            Compares strings with culture and case sensitivity.
+            </summary>
+            <param name="str">Main string to check in.</param>
+            <param name="toCheck">Substring to check for in Main String.</param>
+            <param name="CompareType">Type of comparison.</param>
+            <returns>True if toCheck found in str, false otherwise.</returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.GetPathWithoutInvalids(System.String)">
+            <summary>
+            Removes invalid characters from path.
+            </summary>
+            <param name="str">String to remove chars from.</param>
+            <returns>New string containing no invalid characters.</returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.GetDirParent(System.String,System.Int32)">
+            <summary>
+            Gets parent directory, optionally to a certain depth (or height?)
+            </summary>
+            <param name="str">String (hopefully path) to get parent of.</param>
+            <param name="depth">Depth to get parent of.</param>
+            <returns>Parent of string.</returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.isDirectory(System.String)">
+            <summary>
+            Determines if string is a Directory.
+            Returns True if directory, false otherwise.
+            </summary>
+            <param name="str">String to check.</param>
+            <returns>True if is a directory, false if not.</returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.isFile(System.String)">
+            <summary>
+            Determines if string is a file.
+            Returns True if file, false otherwise.
+            </summary>
+            <param name="str">String to check.</param>
+            <returns>True if a file, false if not</returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.isDigit(System.String)">
+            <summary>
+            Determines if string is a number.
+            </summary>
+            <param name="str">String to check.</param>
+            <returns>True if string is a number.</returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.isDigit(System.Char)">
+            <summary>
+            Determines if character is a number.
+            </summary>
+            <param name="c">Character to check.</param>
+            <returns>True if c is a number.</returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.isLetter(System.Char)">
+            <summary>
+            Determines if character is a letter.
+            </summary>
+            <param name="c"></param>
+            <returns></returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.isLetter(System.String)">
+            <summary>
+            Determines if string is a letter.
+            </summary>
+            <param name="str">String to check.</param>
+            <returns>True if str is a letter.</returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.AddTextToPage(System.Windows.Documents.FixedPage,System.String)">
+            <summary>
+            Adds text to a FixedPage.
+            </summary>
+            <param name="page">Page to add text to.</param>
+            <param name="text">Text to add.</param>
+        </member>
+        <member name="M:UsefulThings.Extensions.AddPageFromText(System.Windows.Documents.FixedDocument,System.String)">
+            <summary>
+            Add page to a FixedDocument from string.
+            </summary>
+            <param name="document">Document to add to.</param>
+            <param name="text">Text to add as page.</param>
+        </member>
+        <member name="M:UsefulThings.Extensions.AddPageFromFile(System.Windows.Documents.FixedDocument,System.String)">
+            <summary>
+            Add page to a FixedDocument from a file.
+            </summary>
+            <param name="document">Document to add to.</param>
+            <param name="filename">Filename to load from.</param>
+            <returns>Null if successful, error as string otherwise.</returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.InvokeIfRequired(System.Windows.Threading.Dispatcher,System.Action,System.Windows.Threading.DispatcherPriority)">
+            <summary>
+            A simple WPF threading extension method, to invoke a delegate
+            on the correct thread if it is not currently on the correct thread
+            Which can be used with DispatcherObject types
+            </summary>
+            <param name="disp">The Dispatcher object on which to do the Invoke</param>
+            <param name="dotIt">The delegate to run</param>
+            <param name="priority">The DispatcherPriority</param>
+        </member>
+        <member name="M:UsefulThings.Extensions.GetPixelsAsStream(System.Windows.Media.Imaging.BitmapSource)">
+            <summary>
+            Returns pixels of image as RGBA channels in a stream. (R, G, B, A). 1 byte each.
+            </summary>
+            <param name="bmp">Image to extract pixels from.</param>
+            <returns>RGBA channels as stream.</returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.GetPixels(System.Windows.Media.Imaging.BitmapSource)">
+            <summary>
+            Gets pixels of image as byte[].
+            </summary>
+            <param name="bmp">Image to extract pixels from.</param>
+            <returns>Pixels of image.</returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.BeginAdjustableAnimation(System.Windows.ContentElement,System.Windows.DependencyProperty,UsefulThings.WPF.GridLengthAnimation,System.Object)">
+            <summary>
+            Begins an animation that automatically sets final value to be held. Used with FillType.Stop rather than default FillType.Hold.
+            </summary>
+            <param name="element">Content Element to animate.</param>
+            <param name="anim">Animation to use on element.</param>
+            <param name="dp">Property of element to animate using anim.</param>
+            <param name="To">Final value of element's dp.</param>
+        </member>
+        <member name="M:UsefulThings.Extensions.BeginAdjustableAnimation(System.Windows.ContentElement,System.Windows.DependencyProperty,UsefulThings.WPF.GridLengthAnimation)">
+            <summary>
+            Begins adjustable animation for a GridlengthAnimation. 
+            Holds animation end value without Holding it. i.e. Allows it to change after animation without resetting it. Should be possible in WPF...maybe it is.
+            </summary>
+            <param name="element">Element to start animation on.</param>
+            <param name="dp">Property to animate.</param>
+            <param name="anim">Animation to perform. GridLengthAnimation only for now.</param>
+        </member>
+        <member name="M:UsefulThings.Extensions.Shuffle``1(System.Collections.Generic.IList{``0})">
+            <summary>
+            Randomly shuffles a list.
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="list"></param>
+        </member>
+        <member name="M:UsefulThings.Extensions.GetText(System.Windows.Documents.FlowDocument)">
+            <summary>
+            Gets all text from a document.
+            </summary>
+            <param name="document">FlowDocument to extract text from.</param>
+            <returns>All text as a string.</returns>
+        </member>
+        <member name="M:UsefulThings.Extensions.GetDataAsStringArray(System.Windows.DragEventArgs)">
+            <summary>
+            Gets drag/drop data as string[].
+            </summary>
+            <param name="e">Argument from Drop Handler.</param>
+            <returns>Contents of drop.</returns>
+        </member>
+        <member name="T:UsefulThings.General">
+            <summary>
+            General C# helpers.
+            </summary>
+        </member>
+        <member name="T:UsefulThings.General.StreamBitConverter">
+            <summary>
+            Does bit conversion from streams
+            </summary>
+        </member>
+        <member name="M:UsefulThings.General.StreamBitConverter.ToUInt32(System.IO.Stream,System.Int32)">
+            <summary>
+            Reads a UInt32 from a stream at given offset.
+            </summary>
+            <param name="stream">Stream to read from.</param>
+            <param name="offset">Offset to start reading from in stream.</param>
+            <returns>Number read from stream.</returns>
+        </member>
+        <member name="M:UsefulThings.General.GetDPIScalingFactorFROM_REGISTRY">
+            <summary>
+            Gets DPI scaling factor for main monitor from registry keys. 
+            Returns 1 if key is unavailable.
+            </summary>
+            <returns>Returns scale or 1 if not found.</returns>
+        </member>
+        <member name="M:UsefulThings.General.GetDPIScalingFactorFOR_CURRENT_MONITOR(System.Windows.Window)">
+            <summary>
+            Gets DPI Scaling factor for monitor app is currently on. 
+            NOT actual DPI, the scaling factor relative to standard 96 DPI.
+            </summary>
+            <param name="current">Main window to get DPI for.</param>
+            <returns>DPI scaling factor.</returns>
+        </member>
+        <member name="M:UsefulThings.General.GetAbsoluteDPI(System.Windows.Media.Visual)">
+            <summary>
+            Returns actual DPI of given visual object. Application DPI is constant across it's visuals.
+            </summary>
+            <param name="anyVisual">Any visual from the Application UI to test.</param>
+            <returns>DPI of Application.</returns>
+        </member>
+        <member name="M:UsefulThings.General.ChangeFilename(System.String,System.String)">
+            <summary>
+            Changes a filename in a full filepath string.
+            </summary>
+            <param name="fullPath">Original full filepath.</param>
+            <param name="newFilenameWithoutExt">New filename to use.</param>
+            <returns>Filepath with changed filename.</returns>
+        </member>
+        <member name="M:UsefulThings.General.UpperCaseFirst(System.String)">
+            <summary>
+            Ensures the first character of a string is in Upper Case
+            </summary>
+            <param name="s">String to convert first to upper case.</param>
+            <returns>New string with upper case start</returns>
+        </member>
+        <member name="M:UsefulThings.General.IsPowerOfTwo(System.Int32)">
+            <summary>
+            Determines if number is a power of 2. 
+            </summary>
+            <param name="number">Number to check.</param>
+            <returns>True if number is a power of 2.</returns>
+        </member>
+        <member name="M:UsefulThings.General.IsPowerOfTwo(System.Int64)">
+            <summary>
+            Determines if number is a power of 2. 
+            </summary>
+            <param name="number">Number to check.</param>
+            <returns>True if number is a power of 2.</returns>
+        </member>
+        <member name="M:UsefulThings.General.RoundToNearestPowerOfTwo(System.Int32)">
+            <summary>
+            Rounds number to the nearest power of 2. Doesn't use Math. Uses bitshifting (not my method).
+            </summary>
+            <param name="number">Number to round.</param>
+            <returns>Nearest power of 2.</returns>
+        </member>
+        <member name="M:UsefulThings.General.ExtractString(System.String,System.String,System.String)">
+            <summary>
+            Extends on substring functionality to extract string between two other strings. e.g. ExtractString("indigo", "in", "go") == "di"
+            </summary>
+            <param name="str">String to extract from.</param>
+            <param name="left">Extraction starts after this string.</param>
+            <param name="right">Extraction ends before this string.</param>
+            <returns>String between left and right strings.</returns>
+        </member>
+        <member name="M:UsefulThings.General.ExtractString(System.String,System.String)">
+            <summary>
+            Extends on substring functionality to extract string between a delimiter. e.g. ExtractString("I like #snuffles# and things", "#") == "snuffles"
+            </summary>
+            <param name="str">String to extract from.</param>
+            <param name="enclosingElement">Element to extract between. Must be present twice in str.</param>
+            <returns>String between two enclosingElements.</returns>
+        </member>
+        <member name="M:UsefulThings.General.DecompressStream(System.IO.Stream)">
+            <summary>
+            Decompresses stream using GZip. Returns decompressed Stream.
+            Returns null if stream isn't compressed.
+            </summary>
+            <param name="compressedStream">Stream compressed with GZip.</param>
+        </member>
+        <member name="M:UsefulThings.General.CompressStream(System.IO.Stream,System.IO.Compression.CompressionLevel)">
+            <summary>
+            Compresses stream with GZip. Returns new compressed stream.
+            </summary>
+            <param name="DecompressedStream">Stream to compress.</param>
+            <param name="compressionLevel">Level of compression to use.</param>
+        </member>
+        <member name="M:UsefulThings.General.GetFileSizeAsString(System.Double,System.Boolean)">
+            <summary>
+            Converts given double to filesize with appropriate suffix.
+            </summary>
+            <param name="size">Size in bytes.</param>
+            <param name="FullSuffix">True = Bytes, KiloBytes, etc. False = B, KB, etc</param>
+        </member>
+        <member name="M:UsefulThings.General.GetExtsAsFilter(System.Collections.Generic.List{System.String},System.String)">
+            <summary>
+            Gets file extensions as filter string for SaveFileDialog and OpenFileDialog as a SINGLE filter entry.
+            </summary>
+            <param name="exts">List of extensions to use.</param>
+            <param name="filterName">Name of filter entry. e.g. 'Images|*.jpg;*.bmp...', Images is the filter name</param>
+            <returns>Filter string from extensions.</returns>
+        </member>
+        <member name="M:UsefulThings.General.GetExtsAsFilter(System.Collections.Generic.List{System.String},System.Collections.Generic.List{System.String})">
+            <summary>
+            Gets file extensions as filter string for SaveFileDialog and OpenFileDialog as MULTIPLE filter entries.
+            </summary>
+            <param name="exts">List of file extensions. Must have same number as filterNames.</param>
+            <param name="filterNames">List of file names. Must have same number as exts.</param>
+            <returns>Filter string of names and extensions.</returns>
+        </member>
+        <member name="M:UsefulThings.General.GetCallingVersion">
+            <summary>
+            Gets version of assembly calling this function.
+            </summary>
+            <returns>String of assembly version.</returns>
+        </member>
+        <member name="M:UsefulThings.General.GetStartingVersion">
+            <summary>
+            Gets version of main assembly that started this process.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:UsefulThings.General.GetExecutingLoc">
+            <summary>
+            Gets location of assembly calling this function.
+            </summary>
+            <returns>Path to location.</returns>
+        </member>
+        <member name="M:UsefulThings.General.ReadTextFromFile(System.String,System.String@)">
+            <summary>
+            Read text from file as single string.
+            </summary>
+            <param name="filename">Path to filename.</param>
+            <param name="result">Contents of file.</param>
+            <returns>Null if successful, error as string otherwise.</returns>
+        </member>
+        <member name="M:UsefulThings.General.ReadLinesFromFile(System.String,System.Collections.Generic.List{System.String}@)">
+            <summary>
+            Reads lines of file into List.
+            </summary>
+            <param name="filename">File to read from.</param>
+            <param name="Lines">Contents of file.</param>
+            <returns>Null if success, error message otherwise.</returns>
+        </member>
+        <member name="M:UsefulThings.General.GetExternalData(System.String,System.Int32,System.Int32)">
+            <summary>
+            Gets external image data as byte[] with some buffering i.e. retries if fails up to 20 times.
+            </summary>
+            <param name="file">File to get data from.</param>
+            <param name="OnFailureSleepTime">Time (in ms) between attempts for which to sleep.</param>
+            <param name="retries">Number of attempts to read.</param>
+            <returns>byte[] of image.</returns>
+        </member>
+        <member name="T:UsefulThings.MemoryTributary">
+            <summary>
+            MemoryTributary is a re-implementation of MemoryTributary that uses a dynamic list of byte arrays as a backing store, instead of a single byte array, the allocation
+            of which will fail for relatively small streams as it requires contiguous memory.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.MemoryTributary.#ctor">
+            <summary>
+            Creates an empty MemoryTributary-like instance which doesn't require contiguous memory.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.MemoryTributary.#ctor(System.Byte[])">
+            <summary>
+            Creates a MemoryTributary-like instance which doesn't require contiguous memory, based on a byte[] source.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.MemoryTributary.#ctor(System.Int32)">
+            <summary>
+            Creates a MemoryTributary-like instance which doesn't require contiguous memory, with length (ignored).
+            </summary>
+        </member>
+        <member name="P:UsefulThings.MemoryTributary.block">
+            <summary>
+            The block of memory currently addressed by Position
+            </summary>
+        </member>
+        <member name="P:UsefulThings.MemoryTributary.blockId">
+            <summary>
+            The id of the block currently addressed by Position
+            </summary>
+        </member>
+        <member name="P:UsefulThings.MemoryTributary.blockOffset">
+            <summary>
+            The offset of the byte currently addressed by Position, into the block that contains it
+            </summary>
+        </member>
+        <member name="M:UsefulThings.MemoryTributary.Flush">
+            <summary>
+            Does nothing for now.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.MemoryTributary.Read(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            Copies bytes from this stream at the current position TO the buffer.
+            Doesn't reset stream position.
+            Returns number of bytes read from stream.
+            </summary>
+            <param name="buffer">Destination array.</param>
+            <param name="offset">Offset to begin writing at in buffer></param>
+            <param name="count">Number of bytes to read from stream></param>
+        </member>
+        <member name="M:UsefulThings.MemoryTributary.Seek(System.Int64,System.IO.SeekOrigin)">
+            <summary>
+            Changes stream position to given offset based on given origin.
+            Returns new stream position.
+            </summary>
+            <param name="offset">Desired offset from origin.</param>
+            <param name="origin">Origin to base offset on.</param>
+        </member>
+        <member name="M:UsefulThings.MemoryTributary.Write(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            Writes data FROM buffer TO stream at current position. 
+            Doesn't reset stream position.
+            </summary>
+            <param name="buffer">Buffer containing data.</param>
+            <param name="offset">Offset to begin writing from in buffer.</param>
+            <param name="count">Number of bytes to write.</param>
+        </member>
+        <member name="M:UsefulThings.MemoryTributary.ReadByte">
+            <summary>
+            Reads byte from stream at current position and advances stream.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.MemoryTributary.WriteByte(System.Byte)">
+            <summary>
+            Writes byte to stream at current position and advances stream.
+            </summary>
+            <param name="value">Byte to write to stream.</param>
+        </member>
+        <member name="M:UsefulThings.MemoryTributary.ToArray">
+            <summary>
+            Returns the entire content of the stream as a byte array. This is not safe because the call to new byte[] may 
+            fail if the stream is large enough. Where possible use methods which operate on streams directly instead.
+            </summary>
+            <returns>A byte[] containing the current data in the stream</returns>
+        </member>
+        <member name="M:UsefulThings.MemoryTributary.ReadFrom(System.IO.Stream,System.Int64)">
+            <summary>
+            Reads length bytes from source stream into the this instance at the current position.
+            </summary>
+            <param name="source">The stream containing the data to copy</param>
+            <param name="length">The number of bytes to copy</param>
+        </member>
+        <member name="M:UsefulThings.MemoryTributary.WriteTo(System.IO.Stream)">
+            <summary>
+            Writes the entire stream into destination, regardless of Position, which remains unchanged.
+            </summary>
+            <param name="destination">The stream to write the content of this stream to</param>
+        </member>
+        <member name="T:UsefulThings.NaturalSortComparer">
+            <summary>
+            Compares strings using Natural Sort i.e. 1, 5, 12, 15, instead of 12, 15, 1, 2
+            </summary>
+        </member>
+        <member name="M:UsefulThings.NaturalSortComparer.Compare(System.String,System.String)">
+            <summary>
+            Compares strings using Natural Sort i.e. 1, 5, 12, 15, instead of 12, 15, 1, 2
+            </summary>
+            <param name="x">First string.</param>
+            <param name="y">Second string.</param>
+            <returns>Positive means x is before y, negative is opposite.</returns>
+        </member>
+        <member name="T:UsefulThings.RecyclableMemoryManager">
+            <summary>
+            Provides more convenient access to Microsoft's RecyclableMemoryStream methods.  https://github.com/Microsoft/Microsoft.IO.RecyclableMemoryStream
+            </summary>
+        </member>
+        <member name="M:UsefulThings.RecyclableMemoryManager.GetStream">
+            <summary>
+            Gets an empty RecyclableMemoryStream from pool. Not necessarily an unallocated stream.
+            </summary>
+            <returns>RecyclableMemoryStream.</returns>
+        </member>
+        <member name="M:UsefulThings.RecyclableMemoryManager.GetStream(System.Byte[],System.Int32,System.Int32,System.String)">
+            <summary>
+            Gets a RecyclableMemoryStream from the pool and bases it on data.
+            </summary>
+            <param name="data">Data to base stream on.</param>
+            <param name="offset">Offset in array to start at.</param>
+            <param name="length">Length to read from data into stream.</param>
+            <param name="name">Name of stream in pool for later identification.</param>
+            <returns>RecyclableMemoryStream containing data.</returns>
+        </member>
+        <member name="M:UsefulThings.RecyclableMemoryManager.GetStream(System.Int32,System.String)">
+            <summary>
+            Gets a RecyclableMemoryStream of a given size from pool.
+            </summary>
+            <param name="requiredSize">Starting size stream must have.</param>
+            <param name="name">Name of stream in pool for later identification.</param>
+            <returns>RecyclableMemoryStream of at least given size.</returns>
+        </member>
+        <member name="T:UsefulThings.WinForms.BackBone">
+            <summary>
+            Backbone factory for queuing and running tasks threadsafely. Also allows things to be run before and after each job.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.BackBone.#ctor(System.Func{System.Boolean},System.Func{System.Boolean})">
+            <summary>
+            Provides queue like functionality for jobs.
+            Can add jobs (as delegates) from any thread to be executed in sequence.
+            </summary>
+            <param name="First">Function to be run before each job.</param>
+            <param name="Last">Function to be run after each job.</param>
+        </member>
+        <member name="M:UsefulThings.WinForms.BackBone.AddToBackBone(System.Func{System.Boolean,System.Boolean})">
+            <summary>
+            Adds job to backbone.
+            </summary>
+            <param name="job">Job to be added to queue.</param>
+        </member>
+        <member name="T:UsefulThings.WinForms.Gooey">
+            <summary>
+            Allows some control over changing the state (enabled/visible) of a set of controls.
+            Features:
+                Exclude controls from state changes.
+                Switch state changes between enabling and changing visibility.
+                A function can replace state changes. e.g. Instead of enabling, set some text or whatever.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Gooey.ChangeState(System.Boolean)">
+            <summary>
+            Changes state of all listed controls.
+            </summary>
+            <param name="state">If true, enables/makes visible. Functions run regardless and take state as parameter.</param>
+        </member>
+        <member name="M:UsefulThings.WinForms.Gooey.AddControl(System.Object,System.String,System.Object,System.Boolean,System.Boolean)">
+            <summary>
+            Adds given control to list of controls to be maintained by this class.
+            </summary>
+            <param name="control">Control to be added (ToolStripItem or Form Control)</param>
+            <param name="key">Key to identify control. MUST be a unique part of the Control name.</param>
+            <param name="stateChangeEffect">Effect to be run on state change. Bool or Action.</param>
+            <param name="affectedByStateChange">Optional. If true, this control is affected by state changes.</param>
+            <param name="trueIsEnabledProperty">Optional. If true, property affected by state changes is the Enabled property, otherwise uses the visible property.</param>
+            <returns></returns>
+        </member>
+        <member name="M:UsefulThings.WinForms.Gooey.ModifyControl(System.String,System.Boolean)">
+            <summary>
+            Modifies control specified by key, changes whether control is affected by state changes.
+            </summary>
+            <param name="key">Key of control to change.</param>
+            <param name="AffectedByStateChange">If true, control is affected by state changes.</param>
+        </member>
+        <member name="M:UsefulThings.WinForms.Gooey.GetControlAffectedState(System.String)">
+            <summary>
+            Gets whether control specified by key is affected by state changes.
+            </summary>
+            <param name="key">Key of control to look for.</param>
+            <returns>True if control is affected by state changes, else false.</returns>
+        </member>
+        <member name="T:UsefulThings.WinForms.Transitions.IManagedType">
+            <summary>
+            Interface for all types we can perform transitions on. 
+            Each type (e.g. int, double, Color) that we can perform a transition on 
+            needs to have its own class that implements this interface. These classes 
+            tell the transition system how to act on objects of that type.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.IManagedType.getManagedType">
+            <summary>
+            Returns the Type that the instance is managing.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.IManagedType.copy(System.Object)">
+            <summary>
+            Returns a deep copy of the object passed in. (In particular this is 
+            needed for types that are objects.)
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.IManagedType.getIntermediateValue(System.Object,System.Object,System.Double)">
+            <summary>
+            Returns an object holding the value between the start and end corresponding
+            to the percentage passed in. (Note: the percentage can be less than 0% or
+            greater than 100%.)
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.ITransitionType.onTimer(System.Int32,System.Double@,System.Boolean@)">
+            <summary>
+            Called by the Transition framework when its timer ticks to pass in the
+            time (in ms) since the transition started. 
+            
+            You should return (in an out parameter) the percentage movement towards 
+            the destination value for the time passed in. Note: this does not need to
+            be a smooth transition from 0% to 100%. You can overshoot with values
+            greater than 100% or undershoot if you need to (for example, to have some
+            form of "elasticity").
+            
+            The percentage should be returned as (for example) 0.1 for 10%.
+            
+            You should return (in an out parameter) whether the transition has completed.
+            (This may not be at the same time as the percentage has moved to 100%.)
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WinForms.Transitions.ManagedType_Color">
+            <summary>
+            Class that manages transitions for Color properties. For these we
+            need to transition the R, G, B and A sub-properties independently.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.ManagedType_Color.getManagedType">
+            <summary>
+            Returns the type we are managing.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.ManagedType_Color.copy(System.Object)">
+            <summary>
+            Returns a copy of the color object passed in.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.ManagedType_Color.getIntermediateValue(System.Object,System.Object,System.Double)">
+            <summary>
+            Creates an intermediate value for the colors depending on the percentage passed in.
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WinForms.Transitions.ManagedType_Double">
+            <summary>
+            Manages transitions for double properties.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.ManagedType_Double.getManagedType">
+            <summary>
+             Returns the type managed by this class.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.ManagedType_Double.copy(System.Object)">
+            <summary>
+            Returns a copy of the double passed in.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.ManagedType_Double.getIntermediateValue(System.Object,System.Object,System.Double)">
+            <summary>
+            Returns the value between start and end for the percentage passed in.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.ManagedType_Float.getManagedType">
+            <summary>
+            Returns the type we're managing.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.ManagedType_Float.copy(System.Object)">
+            <summary>
+            Returns a copy of the float passed in.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.ManagedType_Float.getIntermediateValue(System.Object,System.Object,System.Double)">
+            <summary>
+            Returns the interpolated value for the percentage passed in.
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WinForms.Transitions.ManagedType_Int">
+            <summary>
+            Manages transitions for int properties.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.ManagedType_Int.getManagedType">
+            <summary>
+            Returns the type we are managing.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.ManagedType_Int.copy(System.Object)">
+            <summary>
+            Returns a copy of the int passed in.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.ManagedType_Int.getIntermediateValue(System.Object,System.Object,System.Double)">
+            <summary>
+            Returns the value between the start and end for the percentage passed in.
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WinForms.Transitions.ManagedType_String">
+            <summary>
+            Manages transitions for strings. This doesn't make as much sense as transitions
+            on other types, but I like the way it looks!
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.ManagedType_String.getManagedType">
+            <summary>
+            Returns the type we're managing.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.ManagedType_String.copy(System.Object)">
+            <summary>
+            Returns a copy of the string passed in.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.ManagedType_String.getIntermediateValue(System.Object,System.Object,System.Double)">
+            <summary>
+            Returns an "interpolated" string.
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WinForms.Transitions.Transition">
+            <summary>
+            Lets you perform animated transitions of properties on arbitrary objects. These 
+            will often be transitions of UI properties, for example an animated fade-in of 
+            a UI object, or an animated move of a UI object from one position to another.
+            
+            Each transition can simulataneously change multiple properties, including properties
+            across multiple objects.
+            
+            Example transition
+            ------------------
+            a.      Transition t = new Transition(new TransitionMethod_Linear(500));
+            b.      t.add(form1, "Width", 500);
+            c.      t.add(form1, "BackColor", Color.Red);
+            d.      t.run();
+              
+            Line a:         Creates a new transition. You specify the transition method.
+                            
+            Lines b. and c: Set the destination values of the properties you are animating.
+            
+            Line d:         Starts the transition.
+            
+            Transition methods
+            ------------------
+            TransitionMethod objects specify how the transition is made. Examples include
+            linear transition, ease-in-ease-out and so on. Different transition methods may
+            need different parameters.
+            
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.Transition.#cctor">
+            <summary>
+            You should register all managed-types here.
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WinForms.Transitions.Transition.Args">
+            <summary>
+            Args passed with the TransitionCompletedEvent.
+            </summary>
+        </member>
+        <member name="E:UsefulThings.WinForms.Transitions.Transition.TransitionCompletedEvent">
+            <summary>
+            Event raised when the transition hass completed.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.Transition.run(System.Object,System.String,System.Object,UsefulThings.WinForms.Transitions.ITransitionType)">
+            <summary>
+            Creates and immediately runs a transition on the property passed in.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.Transition.run(System.Object,System.String,System.Object,System.Object,UsefulThings.WinForms.Transitions.ITransitionType)">
+            <summary>
+            Sets the property passed in to the initial value passed in, then creates and 
+            immediately runs a transition on it.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.Transition.runChain(UsefulThings.WinForms.Transitions.Transition[])">
+            <summary>
+            Creates a TransitionChain and runs it.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.Transition.#ctor(UsefulThings.WinForms.Transitions.ITransitionType)">
+            <summary>
+            Constructor. You pass in the object that holds the properties 
+            that you are performing transitions on.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.Transition.add(System.Object,System.String,System.Object)">
+            <summary>
+            Adds a property that should be animated as part of this transition.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.Transition.run">
+            <summary>
+            Starts the transition.
+            </summary>
+        </member>
+        <member name="P:UsefulThings.WinForms.Transitions.Transition.TransitionedProperties">
+            <summary>
+            Property that returns a list of information about each property managed
+            by this transition.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.Transition.removeProperty(UsefulThings.WinForms.Transitions.Transition.TransitionedPropertyInfo)">
+            <summary>
+            We remove the property with the info passed in from the transition.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.Transition.onTimer">
+            <summary>
+            Called when the transition timer ticks.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.Transition.setProperty(System.Object,UsefulThings.WinForms.Transitions.Transition.PropertyUpdateArgs)">
+            <summary>
+            Sets a property on the object passed in to the value passed in. This method
+            invokes itself on the GUI thread if the property is being invoked on a GUI 
+            object.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.Transition.isDisposed(System.Object)">
+            <summary>
+            Returns true if the object passed in is a Control and is disposed
+            or in the process of disposing. (If this is the case, we don't want
+            to make any changes to its properties.)
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.Transition.registerType(UsefulThings.WinForms.Transitions.IManagedType)">
+            <summary>
+            Registers a transition-type. We hold them in a map.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.TransitionChain.runNextTransition">
+            <summary>
+            Runs the next transition in the list.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.TransitionChain.onTransitionCompleted(System.Object,UsefulThings.WinForms.Transitions.Transition.Args)">
+            <summary>
+            Called when the transition we have just run has completed.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.TransitionElement.#ctor(System.Double,System.Double,UsefulThings.WinForms.Transitions.InterpolationMethod)">
+            <summary>
+            Constructor.
+            </summary>
+        </member>
+        <member name="P:UsefulThings.WinForms.Transitions.TransitionElement.EndTime">
+            <summary>
+            The percentage of elapsed time, expressed as (for example) 75 for 75%.
+            </summary>
+        </member>
+        <member name="P:UsefulThings.WinForms.Transitions.TransitionElement.EndValue">
+            <summary>
+            The value of the animated properties at the EndTime. This is the percentage 
+            movement of the properties between their start and end values. This should
+            be expressed as (for example) 75 for 75%.
+            </summary>
+        </member>
+        <member name="P:UsefulThings.WinForms.Transitions.TransitionElement.InterpolationMethod">
+            <summary>
+            The interpolation method to use when moving between the previous value
+            and the current one.
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WinForms.Transitions.TransitionManager">
+            <summary>
+            This class is responsible for running transitions. It holds the timer that
+            triggers transaction animation. 
+            </summary><remarks>
+            This class is a singleton.
+            
+            We manage the transaction timer here so that we can have a single timer
+            across all transactions. If each transaction has its own timer, this creates
+            one thread for each transaction, and this can lead to too many threads in
+            an application.
+            
+            This class essentially just manages the timer for the transitions. It calls 
+            back into the running transitions, which do the actual work of the transition.
+            
+            </remarks>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.TransitionManager.getInstance">
+            <summary>
+            Singleton's getInstance method.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.TransitionManager.register(UsefulThings.WinForms.Transitions.Transition)">
+            <summary>
+            You register a transition with the manager here. This will start to run
+            the transition as the manager's timer ticks.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.TransitionManager.removeDuplicates(UsefulThings.WinForms.Transitions.Transition)">
+            <summary>
+            Checks if any existing transitions are acting on the same properties as the
+            transition passed in. If so, we remove the duplicated properties from the 
+            older transitions.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.TransitionManager.removeDuplicates(UsefulThings.WinForms.Transitions.Transition,UsefulThings.WinForms.Transitions.Transition)">
+            <summary>
+            Finds any properties in the old-transition that are also in the new one,
+            and removes them from the old one.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.TransitionManager.#ctor">
+            <summary>
+            Private constructor (for singleton).
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.TransitionManager.onTimerElapsed(System.Object,System.Timers.ElapsedEventArgs)">
+            <summary>
+            Called when the timer ticks.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.TransitionManager.onTransitionCompleted(System.Object,UsefulThings.WinForms.Transitions.Transition.Args)">
+            <summary>
+            Called when a transition has completed. 
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WinForms.Transitions.TransitionType_Acceleration">
+            <summary>
+            Manages transitions under constant acceleration from a standing start.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.TransitionType_Acceleration.#ctor(System.Int32)">
+            <summary>
+            Constructor. You pass in the time that the transition 
+            will take (in milliseconds).
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.TransitionType_Acceleration.onTimer(System.Int32,System.Double@,System.Boolean@)">
+            <summary>
+            Works out the percentage completed given the time passed in.
+            This uses the formula:
+              s = ut + 1/2at^2
+            The initial velocity is 0, and the acceleration to get to 1.0
+            at t=1.0 is 2, so the formula just becomes:
+              s = t^2
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WinForms.Transitions.TransitionType_Bounce">
+            <summary>
+            This transition bounces the property to a destination value and back to the
+            original value. It is accelerated to the destination and then decelerated back
+            as if being dropped with gravity and bouncing back against gravity.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.TransitionType_Bounce.#ctor(System.Int32)">
+            <summary>
+            Constructor. You pass in the total time taken for the bounce.
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WinForms.Transitions.TransitionType_CriticalDamping">
+            <summary>
+            This transition animates with an exponential decay. This has a damping effect
+            similar to the motion of a needle on an electomagnetically controlled dial.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.TransitionType_CriticalDamping.#ctor(System.Int32)">
+            <summary>
+            Constructor. You pass in the time that the transition 
+            will take (in milliseconds).
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.TransitionType_CriticalDamping.onTimer(System.Int32,System.Double@,System.Boolean@)">
+            <summary>
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WinForms.Transitions.TransitionType_Deceleration">
+            <summary>
+            Manages a transition starting from a high speed and decelerating to zero by
+            the end of the transition.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.TransitionType_Deceleration.#ctor(System.Int32)">
+            <summary>
+            Constructor. You pass in the time that the transition 
+            will take (in milliseconds).
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.TransitionType_Deceleration.onTimer(System.Int32,System.Double@,System.Boolean@)">
+            <summary>
+            Works out the percentage completed given the time passed in.
+            This uses the formula:
+              s = ut + 1/2at^2
+            The initial velocity is 2, and the acceleration to get to 1.0
+            at t=1.0 is -2, so the formula becomes:
+              s = t(2-t)
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WinForms.Transitions.TransitionType_EaseInEaseOut">
+            <summary>
+            Manages an ease-in-ease-out transition. This accelerates during the first 
+            half of the transition, and then decelerates during the second half.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.TransitionType_EaseInEaseOut.#ctor(System.Int32)">
+            <summary>
+            Constructor. You pass in the time that the transition 
+            will take (in milliseconds).
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.TransitionType_EaseInEaseOut.onTimer(System.Int32,System.Double@,System.Boolean@)">
+            <summary>
+            Works out the percentage completed given the time passed in.
+            This uses the formula:
+              s = ut + 1/2at^2
+            We accelerate as at the rate needed (a=4) to get to 0.5 at t=0.5, and
+            then decelerate at the same rate to end up at 1.0 at t=1.0.
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WinForms.Transitions.TransitionType_Flash">
+            <summary>
+            This transition type 'flashes' the properties a specified number of times, ending
+            up by reverting them to their initial values. You specify the number of bounces and
+            the length of each bounce. 
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.TransitionType_Flash.#ctor(System.Int32,System.Int32)">
+            <summary>
+            You specify the number of bounces and the time taken for each bounce.
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WinForms.Transitions.TransitionType_Linear">
+            <summary>
+            This class manages a linear transition. The percentage complete for the transition
+            increases linearly with time.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.TransitionType_Linear.#ctor(System.Int32)">
+            <summary>
+            Constructor. You pass in the time (in milliseconds) that the
+            transition will take.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.TransitionType_Linear.onTimer(System.Int32,System.Double@,System.Boolean@)">
+            <summary>
+            We return the percentage completed.
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WinForms.Transitions.TransitionType_ThrowAndCatch">
+            <summary>
+            This transition bounces the property to a destination value and back to the
+            original value. It is decelerated to the destination and then acclerated back
+            as if being thrown against gravity and then descending back with gravity.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.TransitionType_ThrowAndCatch.#ctor(System.Int32)">
+            <summary>
+            Constructor. You pass in the total time taken for the bounce.
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WinForms.Transitions.TransitionType_UserDefined">
+            <summary>
+            This class allows you to create user-defined transition types. You specify these
+            as a list of TransitionElements. Each of these defines: 
+            End time , End value, Interpolation method
+            
+            For example, say you want to make a bouncing effect with a decay:
+            
+            EndTime%    EndValue%   Interpolation
+            --------    ---------   -------------
+            50          100         Acceleration 
+            75          50          Deceleration
+            85          100         Acceleration
+            91          75          Deceleration
+            95          100         Acceleration
+            98          90          Deceleration
+            100         100         Acceleration
+            
+            The time values are expressed as a percentage of the overall transition time. This 
+            means that you can create a user-defined transition-type and then use it for transitions
+            of different lengths.
+            
+            The values are percentages of the values between the start and end values of the properties
+            being animated in the transitions. 0% is the start value and 100% is the end value.
+            
+            The interpolation is one of the values from the InterpolationMethod enum.
+            
+            So the example above accelerates to the destination (as if under gravity) by
+            t=50%, then bounces back up to half the initial height by t=75%, slowing down 
+            (as if against gravity) before falling down again and bouncing to decreasing 
+            heights each time.
+            
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.TransitionType_UserDefined.#ctor">
+            <summary>
+            Constructor.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.TransitionType_UserDefined.#ctor(System.Collections.Generic.IList{UsefulThings.WinForms.Transitions.TransitionElement},System.Int32)">
+            <summary>
+            Constructor. You pass in the list of TransitionElements and the total time
+            (in milliseconds) for the transition.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.TransitionType_UserDefined.setup(System.Collections.Generic.IList{UsefulThings.WinForms.Transitions.TransitionElement},System.Int32)">
+            <summary>
+            Sets up the transitions. 
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.TransitionType_UserDefined.onTimer(System.Int32,System.Double@,System.Boolean@)">
+            <summary>
+            Called to find the value for the movement of properties for the time passed in.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.TransitionType_UserDefined.getElementInfo(System.Double,System.Double@,System.Double@,System.Double@,System.Double@,UsefulThings.WinForms.Transitions.InterpolationMethod@)">
+            <summary>
+            Returns the element info for the time-fraction passed in. 
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WinForms.Transitions.Utility">
+            <summary>
+            A class holding static utility functions.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.Utility.getValue(System.Object,System.String)">
+            <summary>
+            Returns the value of the property passed in.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.Utility.setValue(System.Object,System.String,System.Object)">
+            <summary>
+            Sets the value of the property passed in.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.Utility.interpolate(System.Double,System.Double,System.Double)">
+            <summary>
+            Returns a value between d1 and d2 for the percentage passed in.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.Utility.interpolate(System.Int32,System.Int32,System.Double)">
+            <summary>
+            Returns a value betweeen i1 and i2 for the percentage passed in.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.Utility.interpolate(System.Single,System.Single,System.Double)">
+            <summary>
+            Returns a value betweeen f1 and f2 for the percentage passed in.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.Utility.convertLinearToEaseInEaseOut(System.Double)">
+            <summary>
+            Converts a fraction representing linear time to a fraction representing
+            the distance traveled under an ease-in-ease-out transition.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.Utility.convertLinearToAcceleration(System.Double)">
+            <summary>
+            Converts a fraction representing linear time to a fraction representing
+            the distance traveled under a constant acceleration transition.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.Utility.convertLinearToDeceleration(System.Double)">
+            <summary>
+            Converts a fraction representing linear time to a fraction representing
+            the distance traveled under a constant deceleration transition.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Transitions.Utility.raiseEvent``1(System.EventHandler{``0},System.Object,``0)">
+            <summary>
+            Fires the event passed in in a thread-safe way. 
+            </summary><remarks>
+            This method loops through the targets of the event and invokes each in turn. If the
+            target supports ISychronizeInvoke (such as forms or controls) and is set to run 
+            on a different thread, then we call BeginInvoke to marshal the event to the target
+            thread. If the target does not support this interface (such as most non-form classes)
+            or we are on the same thread as the target, then the event is fired on the same
+            thread as this is called from.
+            </remarks>
+        </member>
+        <member name="M:UsefulThings.WinForms.UsefulForms.KFreonMessageBox.#ctor(System.String,System.String,System.String,System.Windows.Forms.MessageBoxIcon,System.String,System.String)">
+            <summary>
+            Provides a more customisable MessageBox with 3 buttons available. 
+            DialogResults: Button1 = OK, button2 = Abort, button3 = Cancel.
+            </summary>
+            <param name="Title">String to display as title.</param>
+            <param name="Message">String to display in the window.</param>
+            <param name="Button1Text">First button text.</param>
+            <param name="Button2Text">Second button text.</param>
+            <param name="Button3Text">Third button text.</param>
+            <param name="icon">Icon to display.</param>
+        </member>
+        <member name="M:UsefulThings.WinForms.UsefulForms.KFreonMessageBox.GetSystemImageForMessageBox(System.Windows.Forms.MessageBoxIcon)">
+            <summary>
+            Converts a MessageBoxIcon to a Bitmap cos that's the only thing the ImageBox can display.
+            </summary>
+            <param name="icon">MessageBox icon to convert.</param>
+            <returns>Bitmap version of Icon.</returns>
+        </member>
+        <member name="F:UsefulThings.WinForms.UsefulForms.KFreonMessageBox.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.UsefulForms.KFreonMessageBox.Dispose(System.Boolean)">
+            <summary>
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:UsefulThings.WinForms.UsefulForms.KFreonMessageBox.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WinForms.UsefulForms.SelectionForm">
+            <summary>
+            Provides an interface to select some items from a list of items. 
+            Provides a method to have an action for changing selected index.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.UsefulForms.SelectionForm.#ctor(System.Collections.Generic.List{System.String},System.String,System.String,System.Boolean,System.Action)">
+            <summary>
+            Contstructor.
+            </summary>
+            <param name="names">Items to display.</param>
+            <param name="Description">Window message to display above selection list.</param>
+            <param name="Title">Window title.</param>
+            <param name="SelectAll">If true, all items are selected.</param>
+            <param name="SelectedIndChanged">Action to perform on selection changed event.</param>
+        </member>
+        <member name="F:UsefulThings.WinForms.UsefulForms.SelectionForm.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.UsefulForms.SelectionForm.Dispose(System.Boolean)">
+            <summary>
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:UsefulThings.WinForms.UsefulForms.SelectionForm.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WinForms.ProgressBarChanger">
+            <summary>
+            Provides threadsafe methods for changing ToolStripProgressBars, incl Incrementing and setting Value and Maximum properties.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.ProgressBarChanger.#ctor(System.Windows.Forms.ToolStrip,System.Windows.Forms.ToolStripProgressBar)">
+            <summary>
+            Contructor.
+            </summary>
+            <param name="strip">Base strip object for correct invoking.</param>
+            <param name="progbar">ProgressBar to be targeted.</param>
+        </member>
+        <member name="M:UsefulThings.WinForms.ProgressBarChanger.IncrementBar(System.Int32)">
+            <summary>
+            Increments targeted ProgressBar.
+            </summary>
+            <param name="amount">Optional. Amount to increment bar by. Defaults to 1.</param>
+        </member>
+        <member name="M:UsefulThings.WinForms.ProgressBarChanger.ChangeProgressBar(System.Int32,System.Int32)">
+            <summary>
+            Sets Value and Maximum properties of targeted ProgressBar.
+            </summary>
+            <param name="start">Value to set Value property to. i.e. Current value.</param>
+            <param name="end">Value to set Maximum property to. i.e. Number of increments in bar.</param>
+        </member>
+        <member name="T:UsefulThings.WinForms.TextUpdater">
+            <summary>
+            Provides threadsafe methods to update text of a ToolStripItem's Text property. 
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.TextUpdater.#ctor(System.Windows.Forms.Control)">
+            <summary>
+            Provides multi-threaded access to Text Controls.
+            Allows changing of the Text property on a given Control.
+            </summary>
+            <param name="givenControl">Control to alter.</param>
+        </member>
+        <member name="M:UsefulThings.WinForms.TextUpdater.#ctor(System.Windows.Forms.ToolStripItem,System.Windows.Forms.ToolStrip)">
+            <summary>
+            Provides multi-threaded access to ToolStrip Text Controls.
+            Allows changing of the Text property on a given Control.
+            </summary>
+            <param name="givenControl">Control to monitor.</param>
+            <param name="givenStrip">Base strip to correctly invoke with.</param>
+        </member>
+        <member name="M:UsefulThings.WinForms.TextUpdater.UpdateText(System.String)">
+            <summary>
+            Updates text of targeted text property.
+            </summary>
+            <param name="text">New text to display.</param>
+        </member>
+        <member name="T:UsefulThings.WinForms.Imaging">
+            <summary>
+            Collection of Image functions
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WinForms.Imaging.PadImageToSquare(System.String,System.Int32)">
+            <summary>
+            Pads a non-square image by adding whitespace where necessary.
+            </summary>
+            <param name="filename">Image location.</param>
+            <param name="maxDimension">Largest size to display.</param>
+            <returns>Square bitmap.</returns>
+        </member>
+        <member name="M:UsefulThings.WinForms.Imaging.PadImageToSquare(System.Drawing.Image,System.Int32)">
+            <summary>
+            Pads a non-square image by adding whitespace where necessary.
+            </summary>
+            <param name="image">Image to make square.</param>
+            <param name="maxDimension">Largest size to display.</param>
+            <returns>Square bitmap.</returns>
+        </member>
+        <member name="M:UsefulThings.WinForms.Imaging.CreateBitmap(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            Creates Bitmap from pixels.
+            </summary>
+            <param name="pixels">Array of pixels.</param>
+            <param name="Width">Width of image.</param>
+            <param name="Height">Height of image.</param>
+            <returns>Bitmap containing pixels.</returns>
+        </member>
+        <member name="M:UsefulThings.WinForms.Imaging.CreateBitmap(System.Windows.Media.Imaging.BitmapSource,System.Boolean)">
+            <summary>
+            Creates a GDI bitmap from a WPF bitmap.
+            </summary>
+            <param name="img">WPF bitmap source.</param>
+            <param name="ignoreAlpha">True = creates a bitmap without alpha.</param>
+            <returns>GDI bitmap.</returns>
+        </member>
+        <member name="M:UsefulThings.WinForms.Imaging.SaveImage(System.Drawing.Image,System.String)">
+            <summary>
+            Saves given image to file.
+            </summary>
+            <param name="image">Image to save.</param>
+            <param name="savepath">Path to save image to.</param>
+            <returns>True if saved successfully. False if failed or already exists.</returns>
+        </member>
+        <member name="M:UsefulThings.WinForms.Imaging.resizeImage(System.Drawing.Image,System.Drawing.Size)">
+            <summary>
+            Salts resize image function. Returns resized image.
+            </summary>
+            <param name="imgToResize">Image to resize</param>
+            <param name="size">Size to shape to</param>
+            <returns>Resized image as an Image.</returns>
+        </member>
+        <member name="M:UsefulThings.WinForms.Imaging.GetPixelDataFromBitmap(System.Drawing.Bitmap)">
+            <summary>
+            Extracts all raw pixels from bitmap.
+            </summary>
+            <param name="bmp">Bitmap to extract data from.</param>
+            <returns>Raw pixels.</returns>
+        </member>
+        <member name="M:UsefulThings.WPF.Misc.FindVisualChild``1(System.Windows.DependencyObject,System.String)">
+            <summary>
+            Finds visual child of given element. Optionally matches name of FrameWorkElement.
+            </summary>
+            <typeparam name="T">Visual Container Object to search within.</typeparam>
+            <param name="obj">Object type to search for. e.g. TextBox, Label, etc</param>
+            <param name="itemName">Name of FrameWorkElement in XAML.</param>
+            <returns>FrameWorkElement</returns>
+        </member>
+        <member name="M:UsefulThings.WPF.Misc.DrawGraph(System.Windows.Controls.Canvas,System.Collections.Generic.Queue{System.Double})">
+            <summary>
+            Draws line graph on a canvas.
+            Adaptive, but only draws dataline.
+            </summary>
+            <param name="canvas">Canvas to draw on.</param>
+            <param name="values">Y values.</param>
+        </member>
+        <member name="T:UsefulThings.WPF.Images">
+            <summary>
+            Provides functions to work with WPF Images
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WPF.Images.Overlay(System.Windows.Media.Imaging.BitmapSource,System.Windows.Media.Imaging.BitmapSource)">
+            <summary>
+            Overlays one image on top of another.
+            Both images MUST be the same size.
+            </summary>
+            <param name="source">Base image i.e. the "bottom" one.</param>
+            <param name="overlay">Overlaying image i.e. the "top" one.</param>
+            <returns>New image with overlay on top of source.</returns>
+        </member>
+        <member name="M:UsefulThings.WPF.Images.CreateWriteableBitmap(System.Array,System.Int32,System.Int32)">
+            <summary>
+            Creates a WriteableBitmap from an array of pixels.
+            </summary>
+            <param name="pixels">Pixel data</param>
+            <param name="width">Width of image</param>
+            <param name="height">Height of image</param>
+            <returns>WriteableBitmap containing pixels</returns>
+        </member>
+        <member name="M:UsefulThings.WPF.Images.CreateWPFBitmap(System.IO.Stream,System.Int32,System.Int32,System.Windows.Media.Imaging.BitmapCacheOption,System.Boolean)">
+            <summary>
+            Creates a WPF style Bitmap (i.e. not using the System.Drawing.Bitmap)
+            </summary>
+            <param name="source">Stream containing bitmap data. NOTE fully formatted bitmap file, not just data.</param>
+            <param name="cacheOption">Determines how/when image data is cached. Default is "Cache to memory on load."</param>
+            <param name="decodeWidth">Specifies width to decode to. Aspect ratio preserved if only this set.</param>
+            <param name="decodeHeight">Specifies height to decode to. Aspect ratio preserved if only this set.</param>
+            <param name="DisposeStream">True = dispose of parent stream.</param>
+            <returns>Bitmap from stream.</returns>
+        </member>
+        <member name="M:UsefulThings.WPF.Images.CreateWPFBitmap(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            Creates WPF Bitmap from byte array.
+            </summary>
+            <param name="source">Fully formatted bitmap in byte[]</param>
+            <param name="decodeWidth">Specifies width to decode to. Aspect ratio preserved if only this set.</param>
+            <param name="decodeHeight">Specifies height to decode to. Aspect ratio preserved if only this set.</param>
+            <returns>BitmapImage object.</returns>
+        </member>
+        <member name="M:UsefulThings.WPF.Images.CreateWPFBitmap(System.Collections.Generic.List{System.Byte},System.Int32,System.Int32)">
+            <summary>
+            Creates WPF Bitmap from List of bytes.
+            </summary>
+            <param name="source">Fully formatted bitmap in List of bytes.</param>
+            <param name="decodeWidth">Specifies width to decode to. Aspect ratio preserved if only this set.</param>
+            <param name="decodeHeight">Specifies height to decode to. Aspect ratio preserved if only this set.</param>
+            <returns>BitmapImage of source data.</returns>
+        </member>
+        <member name="M:UsefulThings.WPF.Images.CreateWPFBitmap(System.String,System.Int32,System.Int32)">
+            <summary>
+            Creates WPF Bitmap from a file.
+            </summary>
+            <param name="Filename">Path to file.</param>
+            <param name="decodeWidth">Specifies width to decode to. Aspect ratio preserved if only this set.</param>
+            <param name="decodeHeight">Specifies height to decode to. Aspect ratio preserved if only this set.</param>
+            <returns>BitmapImage based on file.</returns>
+        </member>
+        <member name="M:UsefulThings.WPF.Images.CreateWPFBitmap(System.Windows.Media.Imaging.BitmapSource,System.Int32,System.Int32)">
+            <summary>
+            Creates a WPF bitmap from another BitmapSource.
+            </summary>
+            <param name="source">Image source to create from.</param>
+            <param name="decodeWidth">Width to decode to.</param>
+            <param name="decodeHeight">Height to decode to.</param>
+            <returns>BitmapImage of source</returns>
+        </member>
+        <member name="M:UsefulThings.WPF.Images.ResizeImage(System.Windows.Media.Imaging.BitmapSource,System.Int32,System.Int32)">
+            <summary>
+            Resizes image to different dimensions.
+            </summary>
+            <param name="img">Image to resize.</param>
+            <param name="NewWidth">Width of resized image.</param>
+            <param name="NewHeight">Height of resized image.</param>
+            <returns>Resized image.</returns>
+        </member>
+        <member name="M:UsefulThings.WPF.Images.ScaleImage(System.Windows.Media.Imaging.BitmapSource,System.Double)">
+            <summary>
+            Scales image by specified scalar.
+            </summary>
+            <param name="img">Image to scale.</param>
+            <param name="scale">Magnitude of scaling i.e. 2 would double size 0.5 would halve.</param>
+            <returns>Scaled image.</returns>
+        </member>
+        <member name="M:UsefulThings.WPF.Images.SaveWPFBitmapToDiskAsJPG(System.Windows.Media.Imaging.BitmapImage,System.String)">
+            <summary>
+            Saves WPF bitmap to disk as a JPG.
+            </summary>
+            <param name="img">Image to save.</param>
+            <param name="Destination">Path to save to.</param>
+        </member>
+        <member name="M:UsefulThings.WPF.Images.SaveWPFBitmapToStreamAsJPG(System.Windows.Media.Imaging.BitmapImage,System.IO.Stream)">
+            <summary>
+            Saves image as JPG to stream.
+            </summary>
+            <param name="img">Image to save.</param>
+            <param name="stream">Destination stream.</param>
+        </member>
+        <member name="T:UsefulThings.WPF.TreeViewNodeSelectionBehaviour">
+            <summary>
+            This behaviour ensures that a selected node (from code-behind) is brought into view.
+            It requires a single property in the back end for the tree's currently selected item. Can't just bind IsSelected to every item it seems.
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WPF.TypeConverters.MultiIntConverter">
+            <summary>
+            Checks if multiple integers are equal.
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WPF.TypeConverters.MutuallyExclusiveCheckersConverter">
+            <summary>
+            Used for when two checkboxes are mutually exclusive, but can both be false.
+            So, when one goes true, the other goes false, but if both go false, nothing changes.
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WPF.TypeConverters.StringToIntConverter">
+            <summary>
+            Converts between strings and integers.
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WPF.TypeConverters.StringToUriConverter">
+            <summary>
+            Converts string to URI.
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WPF.TypeConverters.VisibilitySourceNullConverter">
+            <summary>
+            Converts nullable item to visibility and back. If item is null, visibility is collapsed, otherwise visible.
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WPF.CommandHandler">
+            <summary>
+            Creates a command in an easy manner. Not my code.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WPF.CommandHandler.#ctor(System.Boolean)">
+            <summary>
+            Presents WPF Commands in an easy to use wrapper.
+            </summary>
+            <param name="canExecute">If true, can perform command/action.</param>
+        </member>
+        <member name="M:UsefulThings.WPF.CommandHandler.#ctor(System.Action,System.Boolean)">
+            <summary>
+            Presents WPF Commands in an easy to use wrapper.
+            </summary>
+            <param name="action">Action to perform WITHOUT arguments.</param>
+            <param name="canExecute">true = command can be performed.</param>
+        </member>
+        <member name="M:UsefulThings.WPF.CommandHandler.#ctor(System.Action{System.Object},System.Boolean)">
+            <summary>
+            Presents WPF Commands in an easy to use wrapper.
+            </summary>
+            <param name="action">Action to perform WITH arguments.</param>
+            <param name="canExecute">true = command can be performed.</param>
+        </member>
+        <member name="M:UsefulThings.WPF.CommandHandler.CanExecute(System.Object)">
+            <summary>
+            Changes "enabled" status of command.
+            </summary>
+            <param name="parameter">CURRENTLY NOT USED</param>
+            <returns>CanExecute status</returns>
+        </member>
+        <member name="M:UsefulThings.WPF.CommandHandler.Execute(System.Object)">
+            <summary>
+            Executes command.
+            </summary>
+            <param name="parameter">Parameter to give to Action. Can be null.</param>
+        </member>
+        <member name="T:UsefulThings.WPF.GridLengthAnimation">
+            <summary>
+            Animates Grid properties. Not mine.
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WPF.IRangedCollection`1">
+            <summary>
+            Provides AddRange, InsertRange, and Reset functionality for collections.
+            Mostly used for ObservableCollections, which don't implement these by default.
+            </summary>
+            <typeparam name="T">Type of collection content.</typeparam>
+        </member>
+        <member name="M:UsefulThings.WPF.IRangedCollection`1.AddRange(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Adds a range of elements to a list.
+            </summary>
+            <param name="enumerable">Contents to add.</param>
+        </member>
+        <member name="M:UsefulThings.WPF.IRangedCollection`1.InsertRange(System.Int32,System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Inserts a range of elements into a list at the specified index.
+            </summary>
+            <param name="index">Index to insert at.</param>
+            <param name="enumerable">Elements to insert.</param>
+        </member>
+        <member name="M:UsefulThings.WPF.IRangedCollection`1.Reset(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Clears list and adds elements.
+            </summary>
+            <param name="enumerable">Elements to add.</param>
+        </member>
+        <member name="T:UsefulThings.WPF.ITreeSeekable">
+            <summary>
+            Provides TreeView searching functionality.
+            </summary>
+        </member>
+        <member name="P:UsefulThings.WPF.ITreeSeekable.IsExpanded">
+            <summary>
+            Indicates whether item is open/expanded.
+            </summary>
+        </member>
+        <member name="P:UsefulThings.WPF.ITreeSeekable.IsSelected">
+            <summary>
+            Indicates whether item is selected or not.
+            </summary>
+        </member>
+        <member name="P:UsefulThings.WPF.ITreeSeekable.Parent">
+            <summary>
+            Parent folder to allow for subfolder selection.
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WPF.MTObservableCollection`1">
+            <summary>
+            Multithreaded version of ObservableCollection. Not mine.
+            </summary>
+            <typeparam name="T">Type of content.</typeparam>
+        </member>
+        <member name="M:UsefulThings.WPF.MTObservableCollection`1.#ctor(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Creates a multi-threaded ObservableCollection. 
+            Enables adding/removing etc from other threads.
+            </summary>
+            <param name="collection">Enumerable to initialise with.</param>
+        </member>
+        <member name="M:UsefulThings.WPF.MTObservableCollection`1.#ctor(System.Collections.Generic.List{`0})">
+            <summary>
+            Creates a multi-threaded ObservableCollection. 
+            Enables adding/removing etc from other threads.
+            </summary>
+            <param name="list">List to initialise with.</param>
+        </member>
+        <member name="M:UsefulThings.WPF.MTObservableCollection`1.#ctor">
+            <summary>
+            Creates a multi-threaded ObservableCollection. 
+            Enables adding/removing etc from other threads.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WPF.MTObservableCollection`1.Add(`0)">
+            <summary>
+            Multi-threaded Add.
+            </summary>
+            <param name="item">Item to add.</param>
+        </member>
+        <member name="M:UsefulThings.WPF.MTObservableCollection`1.Clear">
+            <summary>
+            Multi-threaded Clear.
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WPF.MTRangedObservableCollection`1">
+            <summary>
+            Adaptation of Multithreaded ObservableCollection to allow range operations.
+            </summary>
+            <typeparam name="T">Type of content.</typeparam>
+        </member>
+        <member name="M:UsefulThings.WPF.MTRangedObservableCollection`1.#ctor">
+            <summary>
+            Creates a multi-threaded ObservableCollection with range modification capabilities.
+            Allows changes from other threads, and provides AddRange functionality.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WPF.MTRangedObservableCollection`1.#ctor(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Creates a multi-threaded ObservableCollection with range modification capabilities.
+            Allows changes from other threads, and provides AddRange functionality.
+            </summary>
+            <param name="collection">Enumerable to initialise with.</param>
+        </member>
+        <member name="M:UsefulThings.WPF.MTRangedObservableCollection`1.#ctor(System.Collections.Generic.List{`0})">
+            <summary>
+            Creates a multi-threaded ObservableCollection with range modification capabilities.
+            Allows changes from other threads, and provides AddRange functionality.
+            </summary>
+            <param name="list">List to initialise with.</param>
+        </member>
+        <member name="M:UsefulThings.WPF.MTRangedObservableCollection`1.AddRange(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Adds range of elements from IEnumerable.
+            </summary>
+            <param name="enumerable">Enumerable of elements to add.</param>
+        </member>
+        <member name="M:UsefulThings.WPF.MTRangedObservableCollection`1.AddRange(System.Collections.Generic.IList{`0})">
+            <summary>
+            Adds range of elements from List.
+            </summary>
+            <param name="list">List of elements to add.</param>
+        </member>
+        <member name="M:UsefulThings.WPF.MTRangedObservableCollection`1.InsertRange(System.Int32,System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Inserts elements at given index.
+            </summary>
+            <param name="index">Index to add at.</param>
+            <param name="enumerable">Elements to add.</param>
+        </member>
+        <member name="M:UsefulThings.WPF.MTRangedObservableCollection`1.NotifyRangeChange">
+            <summary>
+            Notifications of property changes.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WPF.MTRangedObservableCollection`1.Reset(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Clears collection and adds elements from enumerable.
+            </summary>
+            <param name="enumerable"></param>
+        </member>
+        <member name="T:UsefulThings.WPF.RangedObservableCollection`1">
+            <summary>
+            Adaptation of ObservableCollection to allow ranged operations.
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:UsefulThings.WPF.RangedObservableCollection`1.#ctor">
+            <summary>
+            Creates an ObservableCollection that exposes AddRange functionality.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WPF.RangedObservableCollection`1.#ctor(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Creates an ObservableCollection that exposes AddRange functionality.
+            </summary>
+            <param name="collection">Enumerable to initialise with.</param>
+        </member>
+        <member name="M:UsefulThings.WPF.RangedObservableCollection`1.#ctor(System.Collections.Generic.List{`0})">
+            <summary>
+            Creates an ObservableCollection that exposes AddRange functionality.
+            </summary>
+            <param name="list">List to initialise with.</param>
+        </member>
+        <member name="M:UsefulThings.WPF.RangedObservableCollection`1.AddRange(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Adds range of elements.
+            </summary>
+            <param name="enumerable">Elements to add.</param>
+        </member>
+        <member name="M:UsefulThings.WPF.RangedObservableCollection`1.InsertRange(System.Int32,System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Inserts elements at given index.
+            </summary>
+            <param name="index">Index to add at.</param>
+            <param name="enumerable">Elements to add.</param>
+        </member>
+        <member name="M:UsefulThings.WPF.RangedObservableCollection`1.NotifyRangeChange">
+            <summary>
+            Notifications of property changes.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WPF.RangedObservableCollection`1.Reset(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Clears collection and adds elements from enumerable.
+            </summary>
+            <param name="enumerable"></param>
+        </member>
+        <member name="T:UsefulThings.WPF.TextBoxValidation">
+            <summary>
+            Deals with simple path or number validation.
+            </summary>
+        </member>
+        <member name="T:UsefulThings.WPF.ViewModelBase">
+            <summary>
+            Base class for view models. Provides basic property setting and PropertyChanged notifications.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WPF.ViewModelBase.#ctor">
+            <summary>
+            Provides standard WPF INotifyPropertyChanged functionality.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WPF.ViewModelBase.OnPropertyChanged(System.String)">
+            <summary>
+            Notifies listeners when given property is updated.
+            </summary>
+            <param name="propertyname">Name of property to give notification for. If called in property, argument can be ignored as it will be default.</param>
+        </member>
+        <member name="M:UsefulThings.WPF.ViewModelBase.SetProperty``1(``0@,``0,System.String)">
+            <summary>
+            Sets given property and notifies listeners of its change. IGNORES setting the property to same value.
+            Should be called in property setters.
+            </summary>
+            <typeparam name="T">Type of given property.</typeparam>
+            <param name="field">Backing field to update.</param>
+            <param name="value">New value of property.</param>
+            <param name="propertyName">Name of property.</param>
+            <returns>True if success, false if backing field and new value aren't compatible.</returns>
+        </member>
+        <member name="T:UsefulThings.WPF.VirtualizingWrapPanel">
+            <summary>
+            From: https://uhimaniavwp.codeplex.com/
+            Seems to work perfectly.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WPF.VirtualizingWrapPanel.BringItemIntoView(System.Object)">
+            <summary>
+            Brings item into view, works with virtualisation.
+            </summary>
+            <param name="item">Item to bring into view.</param>
+        </member>
+        <member name="T:UsefulThings.WPF.Documents">
+            <summary>
+            Provides functions to work with WPF Documents
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WPF.Documents.CreateFixedPage(System.String)">
+            <summary>
+            Creates a FixedPage from string.
+            </summary>
+            <param name="text">Text of page.</param>
+            <returns>FixedPage from text.</returns>
+        </member>
+        <member name="M:UsefulThings.WPF.Documents.GeneratePageFromFile(System.String,System.String@)">
+            <summary>
+            Builds a PageContent object from file. 
+            PageContent goes into FixedDocument.
+            </summary>
+            <param name="filename">Path of file to read from.</param>
+            <param name="err">Error container.</param>
+            <returns>PageContent oject from file.</returns>
+        </member>
+        <member name="M:UsefulThings.WPF.Documents.GeneratePageFromText(System.String)">
+            <summary>
+            Builds a PageContent object from string.
+            PageContent goes into FixedDocument.
+            </summary>
+            <param name="text">Text for page.</param>
+            <returns>PageContent from text.</returns>
+        </member>
+        <member name="M:UsefulThings.WPF.Documents.GenerateFixedDocumentFromFile(System.String,System.String@)">
+            <summary>
+            Builds FixedDocument from file.
+            </summary>
+            <param name="filename">Path of file to use.</param>
+            <param name="err">Error container.</param>
+            <returns>FixedDocument of file.</returns>
+        </member>
+        <member name="M:UsefulThings.WPF.Documents.GenerateFixedDocumentFromText(System.String)">
+            <summary>
+            Builds FixedDocument from string.
+            </summary>
+            <param name="text">Text to use.</param>
+            <returns>FixedDocument of text.</returns>
+        </member>
+        <member name="M:UsefulThings.WPF.Documents.GenerateFlowDocumentFromFile(System.String,System.String@)">
+            <summary>
+            Builds a FlowDocument from file.
+            </summary>
+            <param name="filename">Path to file.</param>
+            <param name="err">Error container.</param>
+            <returns>FlowDocument of file.</returns>
+        </member>
+        <member name="M:UsefulThings.WPF.Documents.GenerateFlowDocumentFromText(System.String)">
+            <summary>
+            Builds FlowDocument from text.
+            </summary>
+            <param name="text"></param>
+            <returns>FlowDocument of text.</returns>
+        </member>
+        <member name="T:UsefulThings.WrappingCollection`1">
+            <summary>
+            This Collection wraps its index such that if length = 2, and the call is list[6], the collection would return the first element. 
+            Negative indicies are also supported (maybe)
+            </summary>
+            <typeparam name="T">Type of elements in collection</typeparam>
+        </member>
+        <member name="P:UsefulThings.WrappingCollection`1.Count">
+            <summary>
+            Number of elements in collection.
+            </summary>
+        </member>
+        <member name="P:UsefulThings.WrappingCollection`1.IsReadOnly">
+            <summary>
+            This is always false.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WrappingCollection`1.#ctor">
+            <summary>
+            Creates a collection whose index wraps back to the start when exceeded.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WrappingCollection`1.#ctor(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Creates a collection whose index wraps back to the start when exceeded.
+            </summary>
+            <param name="enumerable">Enumerable to initialise with.</param>
+        </member>
+        <member name="M:UsefulThings.WrappingCollection`1.#ctor(System.Collections.Generic.ICollection{`0})">
+            <summary>
+            Creates a collection whose index wraps back to the start when exceeded.
+            </summary>
+            <param name="collection">Collection to initialise with.</param>
+        </member>
+        <member name="M:UsefulThings.WrappingCollection`1.Add(`0)">
+            <summary>
+            Adds item to list.
+            </summary>
+            <param name="item">Item to add.</param>
+        </member>
+        <member name="M:UsefulThings.WrappingCollection`1.AddRange(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Adds range of items to list.
+            </summary>
+            <param name="collection"></param>
+        </member>
+        <member name="M:UsefulThings.WrappingCollection`1.Clear">
+            <summary>
+            Clears list.
+            </summary>
+        </member>
+        <member name="M:UsefulThings.WrappingCollection`1.Contains(`0)">
+            <summary>
+            Checks if item is in list.
+            </summary>
+            <param name="item">Item to check.</param>
+            <returns>true if item is in list, else false.</returns>
+        </member>
+        <member name="M:UsefulThings.WrappingCollection`1.CopyTo(`0[],System.Int32)">
+            <summary>
+            Copies contents of list to array at arrayIndex.
+            </summary>
+            <param name="array">Array to copy to.</param>
+            <param name="arrayIndex">Index in array to start copying at.</param>
+        </member>
+        <member name="M:UsefulThings.WrappingCollection`1.Remove(`0)">
+            <summary>
+            Removes item from list.
+            </summary>
+            <param name="item">Item to remove.</param>
+            <returns>True if success, false otherwise.</returns>
+        </member>
+        <member name="M:UsefulThings.WrappingCollection`1.GetEnumerator">
+            <summary>
+            Gets enumerator for list.
+            </summary>
+            <returns>Enumerator of list.</returns>
+        </member>
+        <member name="M:UsefulThings.WrappingCollection`1.System#Collections#IEnumerable#GetEnumerator">
+            <summary>
+            Gets enumerator for list.
+            </summary>
+            <returns>Enumerator of list.</returns>
+        </member>
+        <member name="M:UsefulThings.WrappingCollection`1.IndexOf(`0)">
+            <summary>
+            Returns index of item in list.
+            </summary>
+            <param name="item">Item to get index of.</param>
+            <returns>Index of item in list.</returns>
+        </member>
+        <member name="M:UsefulThings.WrappingCollection`1.Insert(System.Int32,`0)">
+            <summary>
+            Inserts item into list at index. Wraps index if required.
+            </summary>
+            <param name="index">Index of item to add.</param>
+            <param name="item">Item to insert.</param>
+        </member>
+        <member name="M:UsefulThings.WrappingCollection`1.RemoveAt(System.Int32)">
+            <summary>
+            Removes item at given index.
+            </summary>
+            <param name="index">Index of item to remove.</param>
+        </member>
+        <member name="P:UsefulThings.WrappingCollection`1.Item(System.Int32)">
+            <summary>
+            Indexer. Works on item at wrappable index.
+            </summary>
+            <param name="index"></param>
+            <returns>Item at index</returns>
+        </member>
+        <member name="M:UsefulThings.WrappingCollection`1.WrapIndex(System.Int32)">
+            <summary>
+            Wraps the index using the mod operator to determine if the index is larger than the list and alters it so it's in range.
+            </summary>
+            <param name="index">Index to wrap to list size.</param>
+            <returns>Index valid for list size.</returns>
+        </member>
+    </members>
+</doc>

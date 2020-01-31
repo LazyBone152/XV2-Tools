@@ -1,0 +1,27 @@
+﻿<Window x:Class="EEPK_Organiser.Forms.TextureSelector"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EEPK_Organiser.Forms"
+        mc:Ignorable="d"
+        Title="Texture Select" Height="340.605" Width="300" ShowInTaskbar="True" ResizeMode="NoResize" WindowStartupLocation="CenterOwner">
+    <Window.Resources>
+        <DataTemplate x:Key="PictureTemplate">
+            <Canvas Width="190" Height="48">
+                <Image Source="{Binding DdsImage}" Height="32" Width="32" Canvas.Left="8" Canvas.Top="8"/>
+                <TextBlock Text="{Binding Name}" Canvas.Left="56" Canvas.Top="8" Width="140"/>
+            </Canvas>
+        </DataTemplate>
+    </Window.Resources>
+    <Grid>
+        <ListBox x:Name="listBox_Textures" ItemsSource="{Binding embFile.Entry}" TextSearch.TextPath="Name" HorizontalAlignment="Left" Height="249" Margin="31,10,0,0" VerticalAlignment="Top" Width="230" ItemTemplate="{DynamicResource PictureTemplate}">
+            <ListBox.Resources>
+                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Black"/>
+
+            </ListBox.Resources>
+        </ListBox>
+        <Button Content="Ok" HorizontalAlignment="Left" Margin="101,283,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click"/>
+
+    </Grid>
+</Window>

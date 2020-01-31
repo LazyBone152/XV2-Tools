@@ -1,0 +1,382 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
+using Xv2CoreLib.EEPK;
+using Xv2CoreLib.EffectContainer;
+using Xv2CoreLib.EMB_CLASS;
+using Xv2CoreLib.EMM;
+using Xv2CoreLib.EMP;
+using Xv2CoreLib.HslColor;
+
+namespace EEPK_Organiser.Forms
+{
+    /// <summary>
+    /// Interaction logic for RecolorAll.xaml
+    /// </summary>
+    public partial class RecolorAll : Window, INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        private enum Mode
+        {
+            Asset,
+            Material,
+            Global,
+            ParticleEffect
+        }
+
+        private AssetType assetType = AssetType.EMO;
+        private Asset asset = null;
+        private Material material = null;
+        private EffectContainerFile effectContainerFile = null;
+        private ParticleEffect particleEffect = null;
+
+        private Mode currentMode = Mode.Asset;
+
+        //Values
+        private double initialHue = 0;
+        private double hueChange = 0;
+        private double initialSaturation = 0;
+        private double saturationChange = 0;
+        private double initialLightness = 0;
+        private double lightnessChange = 0;
+
+        //For use with Global mode. Without multiplying this changing saturation globally is difficult as it doesn't change much.
+        private double _saturationChangeMulti
+        {
+            get
+            {
+                return saturationChange * 2.5;
+            }
+        }
+
+        private RgbColor _rgbColor = new RgbColor(255,255,255);
+        public RgbColor rgbColor
+        {
+            get
+            {
+                return this._rgbColor;
+            }
+            set
+            {
+                if (value != this._rgbColor)
+                {
+                    this._rgbColor = value;
+                    NotifyPropertyChanged("rgbColor");
+                    NotifyPropertyChanged("preview");
+                }
+            }
+        }
+        private HslColor _hslColor = null;
+        public HslColor hslColor
+        {
+            get
+            {
+                return this._hslColor;
+            }
+            set
+            {
+                if (value != this._hslColor)
+                {
+                    this._hslColor = value;
+                    NotifyPropertyChanged("hslColor");
+                }
+            }
+        }
+        
+        public Brush preview
+        {
+            get
+            {
+                return new SolidColorBrush(Color.FromArgb(255, rgbColor.R_int, rgbColor.G_int, rgbColor.B_int));
+            }
+        }
+
+        #region Tooltips
+        public string HueRevertTooltip { get { return string.Format("Revert to original value of {0}", initialHue); } }
+        public string SaturationRevertTooltip { get { return string.Format("Revert to original value of {0}", initialSaturation); } }
+        public string LightnessRevertTooltip { get { return string.Format("Revert to original value of {0}", initialLightness); } }
+        public string RgbPreviewTooltip { get { return string.Format("R: {0} ({3}), G: {1} ({4}), B: {2} ({5})", rgbColor.R, rgbColor.G, rgbColor.B, rgbColor.R_int, rgbColor.G_int, rgbColor.B_int); } }
+        #endregion
+
+        /// <summary>
+        /// Hue shift a asset.
+        /// </summary>
+        public RecolorAll(AssetType _assetType, Asset _asset, Window parent)
+        {
+            currentMode = Mode.Asset;
+            assetType = _assetType;
+            asset = _asset;
+
+            InitializeComponent();
+            DataContext = this;
+            Owner = parent;
+        }
+
+        /// <summary>
+        /// Hue shift a material.
+        /// </summary>
+        /// <param name="_material"></param>
+        public RecolorAll(Material _material, Window parent)
+        {
+            currentMode = Mode.Material;
+            material = _material;
+
+            InitializeComponent();
+            DataContext = this;
+            Owner = parent;
+        }
+
+        /// <summary>
+        /// Hue shift all assets, materials and textures in a EffectContainerFile.
+        /// </summary>
+        public RecolorAll(EffectContainerFile _effectContainerFile, Window parent)
+        {
+            currentMode = Mode.Global;
+            effectContainerFile = _effectContainerFile;
+            InitializeComponent();
+            DataContext = this;
+            Owner = parent;
+        }
+
+        /// <summary>
+        /// Hue shift a ParticleEffect.
+        /// </summary>
+        public RecolorAll(ParticleEffect _particleEffect, Window parent)
+        {
+            currentMode = Mode.ParticleEffect;
+            particleEffect = _particleEffect;
+
+            InitializeComponent();
+            DataContext = this;
+            Owner = parent;
+        }
+
+
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            if(((currentMode == Mode.Asset && assetType == AssetType.EMO) || currentMode == Mode.Global) && !GeneralInfo.LoadTextures)
+            {
+                Close();
+                MessageBox.Show("This option is not available while textures are turned off. Enable Load Textures in the settings to use this option.", "Not Available", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            SetInitialColor();
+        }
+
+        private void SetInitialColor()
+        {
+            List<RgbColor> colors = null;
+
+            if(currentMode == Mode.Asset)
+            {
+                colors = asset.GetUsedColors();
+            }
+            else if (currentMode == Mode.Material)
+            {
+                colors = material.GetUsedColors();
+            }
+            else if (currentMode == Mode.Global)
+            {
+                colors = GetUsedColorsByEverything();
+            }
+            else if (currentMode == Mode.ParticleEffect)
+            {
+                colors = particleEffect.GetUsedColors();
+            }
+            
+
+            if(colors.Count == 0)
+            {
+                Close();
+                MessageBox.Show("No color information was found on this asset so it cannot be hue shifted.\n\nThe most likely cause of this is that all color sources for this asset were either all white (1,1,1) or all black (0,0,0).", "No color information", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            rgbColor = ColorEx.GetAverageColor(colors);
+            hslColor = rgbColor.ToHsl();
+
+            //hslColor.Lightness = 0.5f; //Gives a "pure" color. Not light or dark. Good for previewing.
+            //hslColor.Saturation = 1f; //Completely saturated. Good for previewing.
+            initialHue = hslColor.Hue;
+            initialSaturation = hslColor.Saturation;
+            initialLightness = hslColor.Lightness;
+
+            ValueChanged();
+        }
+
+        private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            ValueChanged();
+        }
+
+        private void IntegerUpDown_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            ValueChanged();
+        }
+
+        private void ValueChanged()
+        {
+            rgbColor = hslColor.ToRgb();
+            NotifyPropertyChanged("HueRevertTooltip");
+            NotifyPropertyChanged("SaturationRevertTooltip");
+            NotifyPropertyChanged("LightnessRevertTooltip");
+            NotifyPropertyChanged("RgbPreviewTooltip");
+        }
+
+        private void Ok_Click(object sender, RoutedEventArgs e)
+        {
+            hueChange = hslColor.Hue - initialHue;
+            saturationChange = hslColor.Saturation - initialSaturation;
+            lightnessChange = hslColor.Lightness - initialLightness;
+
+            if (currentMode == Mode.Asset)
+            {
+                ChangeHueForAsset(asset, hueChange, saturationChange, lightnessChange);
+            }
+            else if(currentMode == Mode.Material)
+            {
+                material.ChangeHsl(hueChange, saturationChange, lightnessChange);
+            }
+            else if(currentMode == Mode.Global)
+            {
+                ChangeHueForEverything(hueChange, _saturationChangeMulti, lightnessChange);
+            }
+            else if (currentMode == Mode.ParticleEffect)
+            {
+                particleEffect.ChangeHue(hueChange, saturationChange, lightnessChange);
+            }
+
+            Close();
+        }
+
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+        
+
+        private void ChangeHueForAsset(Asset _asset, double hueChange, double saturationChange, double lightnessChange)
+        {
+            switch (_asset.assetType)
+            {
+                case AssetType.PBIND:
+                    _asset.Files[0].EmpFile.ChangeHue(hueChange, saturationChange, lightnessChange);
+                    break;
+                case AssetType.TBIND:
+                    _asset.Files[0].EtrFile.ChangeHue(hueChange, saturationChange, lightnessChange);
+                    break;
+                case AssetType.CBIND:
+                    _asset.Files[0].EcfFile.ChangeHue(hueChange, saturationChange, lightnessChange);
+                    break;
+                case AssetType.LIGHT:
+                    _asset.Files[0].EmaFile.ChangeHue(hueChange, saturationChange, lightnessChange);
+                    break;
+                case AssetType.EMO:
+                    foreach (var file in _asset.Files)
+                    {
+                        switch (file.Extension)
+                        {
+                            case ".emb":
+                                file.EmbFile.ChangeHue(hueChange, saturationChange, lightnessChange); //No lightness change
+                                break;
+                            case ".emm":
+                                file.EmmFile.ChangeHsl(hueChange, saturationChange, lightnessChange);
+                                break;
+                        }
+                    }
+                    break;
+            }
+
+        }
+
+        private List<RgbColor> GetUsedColorsByEverything()
+        {
+            List<RgbColor> colors = new List<RgbColor>();
+
+            colors.AddRange(GetUsedColersByContainer(effectContainerFile.Pbind));
+            colors.AddRange(GetUsedColersByContainer(effectContainerFile.Tbind));
+            colors.AddRange(GetUsedColersByContainer(effectContainerFile.Cbind));
+            colors.AddRange(GetUsedColersByContainer(effectContainerFile.LightEma));
+            colors.AddRange(GetUsedColersByContainer(effectContainerFile.Emo));
+            colors.AddRange(effectContainerFile.Pbind.File3_Ref.GetUsedColors());
+            colors.AddRange(effectContainerFile.Tbind.File3_Ref.GetUsedColors());
+            colors.AddRange(effectContainerFile.Pbind.File2_Ref.GetUsedColors());
+            colors.AddRange(effectContainerFile.Tbind.File2_Ref.GetUsedColors());
+
+            return colors;
+        }
+
+        private List<RgbColor> GetUsedColersByContainer(AssetContainerTool container)
+        {
+            List<RgbColor> colors = new List<RgbColor>();
+
+            foreach(var asset in container.Assets)
+            {
+                colors.AddRange(asset.GetUsedColors());
+            }
+
+            return colors;
+        }
+
+        private void ChangeHueForEverything(double hueChange, double saturationChange, double lightnessChange)
+        {
+            ChangeHueForContainer(effectContainerFile.Pbind, hueChange, saturationChange, lightnessChange);
+            ChangeHueForContainer(effectContainerFile.Tbind, hueChange, saturationChange, lightnessChange);
+            ChangeHueForContainer(effectContainerFile.Cbind, hueChange, saturationChange, lightnessChange);
+            ChangeHueForContainer(effectContainerFile.Emo, hueChange, saturationChange, lightnessChange);
+            ChangeHueForContainer(effectContainerFile.LightEma, hueChange, saturationChange, lightnessChange);
+            effectContainerFile.Pbind.File3_Ref.ChangeHue(hueChange, saturationChange, lightnessChange);
+            effectContainerFile.Tbind.File3_Ref.ChangeHue(hueChange, saturationChange, lightnessChange);
+            effectContainerFile.Pbind.File2_Ref.ChangeHsl(hueChange, saturationChange, lightnessChange);
+            effectContainerFile.Tbind.File2_Ref.ChangeHsl(hueChange, saturationChange, lightnessChange);
+        }
+
+        private void ChangeHueForContainer(AssetContainerTool container, double hueChange, double saturationChange, double lightnessChange)
+        {
+            foreach(var _asset in container.Assets)
+            {
+                ChangeHueForAsset(_asset, hueChange, saturationChange, lightnessChange);
+            }
+        }
+
+        private void Button_UndoHueChange_Click(object sender, RoutedEventArgs e)
+        {
+            hslColor.Hue = initialHue;
+            ValueChanged();
+        }
+
+        private void Button_UndoSaturationChange_Click(object sender, RoutedEventArgs e)
+        {
+            hslColor.Saturation = initialSaturation;
+            ValueChanged();
+        }
+
+        private void Button_UndoLightnessChange_Click(object sender, RoutedEventArgs e)
+        {
+            hslColor.Lightness = initialLightness;
+            ValueChanged();
+        }
+    }
+}

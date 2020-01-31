@@ -1,0 +1,424 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>MonoGame.Framework.WpfInterop</name>
+    </assembly>
+    <members>
+        <member name="T:MonoGame.Framework.WpfInterop.D3D11Host">
+            <summary>
+            Host a Direct3D 11 scene.
+            Low level abstraction, should not be used (use <see cref="T:MonoGame.Framework.WpfInterop.WpfGame"/> instead).
+            </summary>
+        </member>
+        <member name="F:MonoGame.Framework.WpfInterop.D3D11Host._sharedRenderTarget">
+            <summary>
+            Shared between WPF and monogame.
+            </summary>
+        </member>
+        <member name="F:MonoGame.Framework.WpfInterop.D3D11Host._cachedRenderTarget">
+            <summary>
+            Actual rendertarget that monogame will draw into.
+            Once a draw call is finished it then copies its content to <see cref="F:MonoGame.Framework.WpfInterop.D3D11Host._sharedRenderTarget"/>.
+            This prevents flickering of the screen when WPF decides to draw the rendertarget to screen while monogame is midway populating it.
+            </summary>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.D3D11Host.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:MonoGame.Framework.WpfInterop.D3D11Host"/> class.
+            </summary>
+        </member>
+        <member name="P:MonoGame.Framework.WpfInterop.D3D11Host.UseASingleSharedGraphicsDevice">
+            <summary>
+            <para>
+            Must be set before the first instance is created.
+            </para>
+            <para>
+            Defaults to false, (prior 2.0 the behaviour was as if this was set to true).
+            If set to false each WpfGame instance gets its own graphicsdevice.
+            If set to true, A single graphics device is shared across all instances of WpfGame.
+            </para>
+            <para>
+            Currently there is bug in monogame when setting this to false AND using MSAA (Disposing rendertargets will crash, so your only option is to not dispose them, causing memoryleaks).
+            Meanwhile if this is true, you can Dispose rendertargets just fine.
+            </para>
+            </summary>
+        </member>
+        <member name="P:MonoGame.Framework.WpfInterop.D3D11Host.IsFixedTimeStep">
+            <summary>
+            Determines whether the game runs in fixed timestep or not.
+            The current implementation always calls Update and Draw after each other continuously.
+            Since the rendering is based on the WPF render thread the exact times at which it will be called cannot be guaranteed.
+            Therefore this value is always false.
+            </summary>
+        </member>
+        <member name="P:MonoGame.Framework.WpfInterop.D3D11Host.TargetElapsedTime">
+            <summary>
+            Gets or sets the target time between two updates. Defaults to 60fps.
+            WPF is limiting its rendering to 60 FPS max, therefore setting a target value higher than 60 fps (lower than TimeSpan.FromSeconds(1 / 60.0)) will have no effect.
+            </summary>
+        </member>
+        <member name="P:MonoGame.Framework.WpfInterop.D3D11Host.IsInDesignMode">
+            <summary>
+            Gets a value indicating whether the controls runs in the context of a designer (e.g.
+            Visual Studio Designer or Expression Blend).
+            </summary>
+            <value>
+            <see langword="true" /> if controls run in design mode; otherwise, 
+            <see langword="false" />.
+            </value>
+        </member>
+        <member name="P:MonoGame.Framework.WpfInterop.D3D11Host.IsActive">
+            <summary>
+            Gets whether the current control is active.
+            This property will be true, when the control is active (parent window has focus).
+            Note that if the game is inside a tab, then this property will only be true if the window has focus and the tab is active.
+            If either the window loses focus or the tab is switched, this property will be false.
+            </summary>
+        </member>
+        <member name="P:MonoGame.Framework.WpfInterop.D3D11Host.DpiScalingFactor">
+            <summary>
+            Gets the scaling factor that is applied to the attached gamecontrol.
+            For legacy compatibility this always defaults to a factor of 1.
+            If your monitor is scaled at 200%, then this will cause the game to render at only half the size.
+            In order to render at full native resolution, set this value to the correct <see cref="!:SystemDpiScalingFactor"/>.
+            </summary>
+        </member>
+        <member name="P:MonoGame.Framework.WpfInterop.D3D11Host.GraphicsDevice">
+            <summary>
+            Gets the graphics device.
+            </summary>
+            <value>The graphics device.</value>
+        </member>
+        <member name="P:MonoGame.Framework.WpfInterop.D3D11Host.Services">
+            <summary>
+            Default services collection.
+            </summary>
+        </member>
+        <member name="E:MonoGame.Framework.WpfInterop.D3D11Host.Activated">
+            <summary>
+            Event is invoked when the game is activated (window receives focus).
+            Note for game instances inside a tab control this will fire only when the tab is activated (or the tab was active and the window is focused).
+            </summary>
+        </member>
+        <member name="E:MonoGame.Framework.WpfInterop.D3D11Host.Deactivated">
+            <summary>
+            Event is invoked when the game is deactivated (window loses focus).
+            Note for game instances inside a tab control this will fire only when the tab is deactivated (or the tab was active and the window loses focus).
+            </summary>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.D3D11Host.OnRenderSizeChanged(System.Windows.SizeChangedInfo)">
+            <summary>
+            Raises the <see cref="E:System.Windows.FrameworkElement.SizeChanged" /> event, using the specified 
+            information as part of the eventual event data.
+            </summary>
+            <param name="sizeInfo">Details of the old and new size involved in the change.</param>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.D3D11Host.RecreateGraphicsDevice(Microsoft.Xna.Framework.Graphics.PresentationParameters)">
+            <summary>
+            Helper that allows applying new presentation parameters.
+            </summary>
+            <param name="pp"></param>
+        </member>
+        <member name="T:MonoGame.Framework.WpfInterop.Internals.D3D11Image">
+            <summary>
+            Wraps the <see cref="T:System.Windows.Interop.D3DImage"/> to make it compatible with Direct3D 11.
+            </summary>
+            <remarks>
+            The <see cref="T:MonoGame.Framework.WpfInterop.Internals.D3D11Image"/> should be disposed if no longer needed!
+            </remarks>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.Internals.D3D11Image.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:MonoGame.Framework.WpfInterop.Internals.D3D11Image"/> class.
+            </summary>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.Internals.D3D11Image.Finalize">
+            <summary>
+            Releases unmanaged resources before an instance of the <see cref="T:MonoGame.Framework.WpfInterop.Internals.D3D11Image"/> class is 
+            reclaimed by garbage collection.
+            </summary>
+            <remarks>
+            This method releases unmanaged resources by calling the virtual <see cref="M:MonoGame.Framework.WpfInterop.Internals.D3D11Image.Dispose(System.Boolean)"/> 
+            method, passing in <see langword="false"/>.
+            </remarks>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.Internals.D3D11Image.Dispose">
+            <summary>
+            Releases all resources used by an instance of the <see cref="T:MonoGame.Framework.WpfInterop.Internals.D3D11Image"/> class.
+            </summary>
+            <remarks>
+            This method calls the virtual <see cref="M:MonoGame.Framework.WpfInterop.Internals.D3D11Image.Dispose(System.Boolean)"/> method, passing in 
+            <see langword="true"/>, and then suppresses finalization of the instance.
+            </remarks>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.Internals.D3D11Image.Invalidate">
+            <summary>
+            Invalidates the front buffer. (Needs to be called when the back buffer has changed.)
+            </summary>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.Internals.D3D11Image.SetBackBuffer(Microsoft.Xna.Framework.Graphics.Texture2D)">
+            <summary>
+            Sets the back buffer of the <see cref="T:MonoGame.Framework.WpfInterop.Internals.D3D11Image"/>.
+            </summary>
+            <param name="texture">The Direct3D 11 texture to be used as the back buffer.</param>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.Internals.D3D11Image.Dispose(System.Boolean)">
+            <summary>
+            Releases the unmanaged resources used by an instance of the <see cref="T:MonoGame.Framework.WpfInterop.Internals.D3D11Image"/> class 
+            and optionally releases the managed resources.
+            </summary>
+            <param name="disposing">
+            <see langword="true"/> to release both managed and unmanaged resources; 
+            <see langword="false"/> to release only unmanaged resources.
+            </param>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.Internals.D3D11Image.InitializeD3D9">
+            <summary>
+            Initializes the Direct3D 9 device.
+            </summary>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.Internals.D3D11Image.UninitializeD3D9">
+            <summary>
+            Un-initializes the Direct3D 9 device, if no longer needed.
+            </summary>
+        </member>
+        <member name="T:MonoGame.Framework.WpfInterop.Internals.D3D9">
+            <summary>
+            Represents a Direct3D 9 device required for Direct3D 11 interoperability.
+            </summary>
+            <remarks>
+            It is not possible to set a Direct3D 11 resource (e.g. a texture or render target) in WPF
+            directly because WPF requires Direct3D 9. The <see cref="T:MonoGame.Framework.WpfInterop.Internals.D3D9"/> class creates a new
+            Direct3D 9 device which can be used for sharing resources between Direct3D 11 and Direct3D
+            9. Call <see cref="M:MonoGame.Framework.WpfInterop.Internals.D3D9.GetSharedTexture(Microsoft.Xna.Framework.Graphics.Texture2D)"/> to convert a texture from Direct3D 11 to Direct3D 9.
+            The code requires Windows Vista and up using the Windows Display Driver Model (WDDM).
+            It does not work with the Windows 2000 Display Driver Model (XDDM).
+            </remarks>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.Internals.D3D9.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:MonoGame.Framework.WpfInterop.Internals.D3D9"/> class.
+            </summary>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.Internals.D3D9.Finalize">
+            <summary>
+            Releases unmanaged resources before an instance of the <see cref="T:MonoGame.Framework.WpfInterop.Internals.D3D9"/> class is 
+            reclaimed by garbage collection.
+            </summary>
+            <remarks>
+            This method releases unmanaged resources by calling the virtual <see cref="M:MonoGame.Framework.WpfInterop.Internals.D3D9.Dispose(System.Boolean)"/> 
+            method, passing in <see langword="false"/>.
+            </remarks>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.Internals.D3D9.Dispose">
+            <summary>
+            Releases all resources used by an instance of the <see cref="T:MonoGame.Framework.WpfInterop.Internals.D3D9"/> class.
+            </summary>
+            <remarks>
+            This method calls the virtual <see cref="M:MonoGame.Framework.WpfInterop.Internals.D3D9.Dispose(System.Boolean)"/> method, passing in 
+            <see langword="true"/>, and then suppresses finalization of the instance.
+            </remarks>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.Internals.D3D9.GetSharedTexture(Microsoft.Xna.Framework.Graphics.Texture2D)">
+            <summary>
+            Creates Direct3D 9 texture from the specified Direct3D 11 texture. 
+            (The content is shared between the devices.)
+            </summary>
+            <param name="renderTarget">The Direct3D 11 texture.</param>
+            <returns>The Direct3D 9 texture.</returns>
+            <exception cref="T:System.ArgumentException">
+            The Direct3D 11 texture is not a shared resource, or the texture format is not 
+            supported.
+            </exception>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.Internals.D3D9.Dispose(System.Boolean)">
+            <summary>
+            Releases the unmanaged resources used by an instance of the <see cref="T:MonoGame.Framework.WpfInterop.Internals.D3D9"/> class 
+            and optionally releases the managed resources.
+            </summary>
+            <param name="disposing">
+            <see langword="true"/> to release both managed and unmanaged resources; 
+            <see langword="false"/> to release only unmanaged resources.
+            </param>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.Internals.LogicalTreeHelperEx.FindParent``1(System.Windows.DependencyObject)">
+            <summary>
+            Gets the parent of a specific type that hosts the specific child.
+            Returns null if no match is found
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="child"></param>
+            <returns></returns>
+        </member>
+        <member name="F:MonoGame.Framework.WpfInterop.Input.WindowHelper.FindWindow">
+            <summary>
+            Returns the window of the given control or null if unable to find a window.
+            If null, the default implementation is used
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:MonoGame.Framework.WpfInterop.Input.WpfKeyboard">
+            <summary>
+            Helper class that accesses a native API to get the current keystate.
+            Required for any WPF hosted control.
+            </summary>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.Input.WpfKeyboard.#ctor(MonoGame.Framework.WpfInterop.WpfGame)">
+            <summary>
+            Creates a new instance of the keyboard helper.
+            </summary>
+            <param name="focusElement">The element that will be used as the focus point. Provide your implementation of <see cref="T:MonoGame.Framework.WpfInterop.WpfGame"/> here.</param>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.Input.WpfKeyboard.GetState">
+            <summary>
+            Gets the active keyboardstate.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:MonoGame.Framework.WpfInterop.Input.WpfMouse">
+            <summary>
+            Helper class that converts WPF mouse input to the XNA/MonoGame <see cref="F:MonoGame.Framework.WpfInterop.Input.WpfMouse._mouseState"/>.
+            Required for any WPF hosted control.
+            </summary>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.Input.WpfMouse.#ctor(MonoGame.Framework.WpfInterop.WpfGame)">
+            <summary>
+            Creates a new instance of the mouse helper.
+            </summary>
+            <param name="focusElement">The element that will be used as the focus point. Provide your implementation of <see cref="T:MonoGame.Framework.WpfInterop.WpfGame"/> here.</param>
+        </member>
+        <member name="P:MonoGame.Framework.WpfInterop.Input.WpfMouse.CaptureMouseWithin">
+            <summary>
+            Gets or sets the mouse capture behaviour.
+            If true, the mouse will be captured within the control. This means that the control will still capture mouse events when the user drags the mouse outside the control.
+            E.g. mouse down on game window, mouse drag to outside of the window, mouse release -> the game will still register the mouse release. The downside is that overlayed elements (textbox, etc.) will never be able to receive focus.
+            If false, mouse events outside the game window are never registered. E.g. mouse down on game window, mouse drag to outside of the window, mouse release -> the game will still thing the mouse is pressed until the cursor enters the window again.
+            The upside is that overlayed controls (e.g. textboxes) can receive focus and input.
+            Defaults to true.
+            </summary>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.Input.WpfMouse.SetCursor(System.Int32,System.Int32)">
+            <summary>
+            Sets the cursor to the specific coordinates within the attached game.
+            This is required as the monogame Mouse.SetPosition function relies on the underlying Winforms implementation and will not work with WPF.
+            </summary>
+            <param name="x"></param>
+            <param name="y"></param>
+        </member>
+        <member name="T:MonoGame.Framework.WpfInterop.WpfDrawableGameComponent">
+            <summary>
+            A drawable game component that allows drawing as well as updating.
+            </summary>
+        </member>
+        <member name="T:MonoGame.Framework.WpfInterop.WpfGame">
+            <summary>
+            The replacement for <see cref="T:Microsoft.Xna.Framework.Game"/>. Unlike <see cref="T:Microsoft.Xna.Framework.Game"/> the <see cref="T:MonoGame.Framework.WpfInterop.WpfGame"/> is a WPF control and can be hosted inside WPF windows.
+            </summary>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.WpfGame.#ctor(System.String)">
+            <summary>
+            Creates a new instance of a game host panel.
+            </summary>
+        </member>
+        <member name="P:MonoGame.Framework.WpfInterop.WpfGame.FocusOnMouseOver">
+            <summary>
+            Gets or sets whether this instance takes focus instantly on mouse over.
+            If set to false, the user must click into the game panel to gain focus.
+            This applies to both <see cref="T:MonoGame.Framework.WpfInterop.Input.WpfMouse"/> and <see cref="T:MonoGame.Framework.WpfInterop.Input.WpfKeyboard"/> behaviour.
+            Defaults to true.
+            </summary>
+        </member>
+        <member name="P:MonoGame.Framework.WpfInterop.WpfGame.Components">
+            <summary>
+            Mirrors the game component collection behaviour of monogame.
+            </summary>
+        </member>
+        <member name="P:MonoGame.Framework.WpfInterop.WpfGame.Content">
+            <summary>
+            The content manager for this game.
+            </summary>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.WpfGame.Dispose(System.Boolean)">
+            <summary>
+            Dispose is called to dispose of resources.
+            </summary>
+            <param name="disposing"></param>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.WpfGame.Draw(Microsoft.Xna.Framework.GameTime)">
+            <summary>
+            The draw method that is called to render your scene.
+            </summary>
+            <param name="gameTime"></param>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.WpfGame.Initialize">
+            <summary>
+            Initialize is called once when the control is created.
+            </summary>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.WpfGame.LoadContent">
+            <summary>
+            Load content is called once by <see cref="M:MonoGame.Framework.WpfInterop.WpfGame.Initialize"/>.
+            </summary>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.WpfGame.Render(Microsoft.Xna.Framework.GameTime)">
+            <summary>
+            Internal method used to integrate <see cref="M:MonoGame.Framework.WpfInterop.WpfGame.Update(Microsoft.Xna.Framework.GameTime)"/> and <see cref="M:MonoGame.Framework.WpfInterop.WpfGame.Draw(Microsoft.Xna.Framework.GameTime)"/> with the WPF control.
+            </summary>
+            <param name="time"></param>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.WpfGame.UnloadContent">
+            <summary>
+            Unload content is called once when the control is destroyed.
+            </summary>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.WpfGame.Update(Microsoft.Xna.Framework.GameTime)">
+            <summary>
+            The update method that is called to update your game logic.
+            </summary>
+            <param name="gameTime"></param>
+        </member>
+        <member name="T:MonoGame.Framework.WpfInterop.WpfGameComponent">
+            <summary>
+            A game component much like the original, but compatible with <see cref="T:MonoGame.Framework.WpfInterop.WpfGame"/>.
+            </summary>
+        </member>
+        <member name="T:MonoGame.Framework.WpfInterop.WpfGraphicsDeviceService">
+            <summary>
+            The <see cref="T:Microsoft.Xna.Framework.Content.ContentManager"/> needs a <see cref="T:Microsoft.Xna.Framework.Graphics.IGraphicsDeviceService"/> to be in the <see cref="T:System.ComponentModel.Design.IServiceContainer"/>. This class fulfills this purpose.
+            </summary>
+        </member>
+        <member name="M:MonoGame.Framework.WpfInterop.WpfGraphicsDeviceService.#ctor(MonoGame.Framework.WpfInterop.WpfGame)">
+            <summary>
+            Create a new instance of the dummy. The constructor will autom. add the instance itself to the <see cref="P:MonoGame.Framework.WpfInterop.D3D11Host.Services"/> container of <see cref="!:host"/>.
+            </summary>
+            <param name="host"></param>
+        </member>
+        <member name="E:MonoGame.Framework.WpfInterop.WpfGraphicsDeviceService.DeviceCreated">
+            <inheritdoc />
+        </member>
+        <member name="E:MonoGame.Framework.WpfInterop.WpfGraphicsDeviceService.DeviceDisposing">
+            <inheritdoc />
+        </member>
+        <member name="E:MonoGame.Framework.WpfInterop.WpfGraphicsDeviceService.DeviceReset">
+            <inheritdoc />
+        </member>
+        <member name="E:MonoGame.Framework.WpfInterop.WpfGraphicsDeviceService.DeviceResetting">
+            <inheritdoc />
+        </member>
+        <member name="P:MonoGame.Framework.WpfInterop.WpfGraphicsDeviceService.DpiScalingFactor">
+            <summary>
+            Gets the scaling factor that is applied to the attached gamecontrol.
+            For legacy compatibility this always defaults to a factor of 1.
+            If your monitor is scaled at 200%, then this will cause the game to render at only half the size.
+            In order to render at full native resolution, set this value to the correct <see cref="P:MonoGame.Framework.WpfInterop.WpfGraphicsDeviceService.SystemDpiScalingFactor"/>.
+            </summary>
+        </member>
+        <member name="P:MonoGame.Framework.WpfInterop.WpfGraphicsDeviceService.SystemDpiScalingFactor">
+            <summary>
+            When called returns the system Dpi scaling factor.
+            The scaling factor may be different between different monitors.
+            This value will always return the value based on the monitor where the attached gamecontrol is positioned.
+            </summary>
+        </member>
+    </members>
+</doc>
