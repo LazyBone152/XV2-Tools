@@ -56,6 +56,12 @@
 *.rar
 *.zip
 
+LB Mod Installer/obj/Release/
+LB Mod Installer/obj/Debug/
+EEPK Editor/obj/Release/
+EEPK Editor/obj/Debug/
+XV2 Xml Serializer/obj/Release/
+XV2 Xml Serializer/obj/Debug/
 
 LB Mod Installer/bin/Release/
 LB Mod Installer/bin/Debug/
