@@ -1,0 +1,700 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\Costura.Fody.3.2.0\build\Costura.Fody.props" Condition="Exists('..\packages\Costura.Fody.3.2.0\build\Costura.Fody.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{BDCC8384-CC9F-45C2-A8C5-1CAA31C98951}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>AudioCueEditor</RootNamespace>
+    <AssemblyName>AudioCueEditor</AssemblyName>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;NvvmLight</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;NvvmLight</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;NvvmLight</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE;NvvmLight</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="CommonServiceLocator, Version=2.0.2.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
+      <HintPath>..\packages\CommonServiceLocator.2.0.2\lib\net47\CommonServiceLocator.dll</HintPath>
+    </Reference>
+    <Reference Include="ControlzEx, Version=3.0.2.4, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ControlzEx.3.0.2.4\lib\net462\ControlzEx.dll</HintPath>
+    </Reference>
+    <Reference Include="Costura, Version=3.2.0.0, Culture=neutral, PublicKeyToken=9919ef960d84173d, processorArchitecture=MSIL">
+      <HintPath>..\packages\Costura.Fody.3.2.0\lib\net46\Costura.dll</HintPath>
+    </Reference>
+    <Reference Include="GalaSoft.MvvmLight, Version=5.4.1.0, Culture=neutral, PublicKeyToken=e7570ab207bcb616, processorArchitecture=MSIL">
+      <HintPath>..\packages\MvvmLightLibs.5.4.1.1\lib\net45\GalaSoft.MvvmLight.dll</HintPath>
+    </Reference>
+    <Reference Include="GalaSoft.MvvmLight.Extras, Version=5.4.1.0, Culture=neutral, PublicKeyToken=669f0b5e8f868abf, processorArchitecture=MSIL">
+      <HintPath>..\packages\MvvmLightLibs.5.4.1.1\lib\net45\GalaSoft.MvvmLight.Extras.dll</HintPath>
+    </Reference>
+    <Reference Include="GalaSoft.MvvmLight.Platform, Version=5.4.1.0, Culture=neutral, PublicKeyToken=5f873c45e98af8a1, processorArchitecture=MSIL">
+      <HintPath>..\packages\MvvmLightLibs.5.4.1.1\lib\net45\GalaSoft.MvvmLight.Platform.dll</HintPath>
+    </Reference>
+    <Reference Include="MahApps.Metro, Version=1.6.5.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.1.6.5\lib\net47\MahApps.Metro.dll</HintPath>
+    </Reference>
+    <Reference Include="MahApps.Metro.IconPacks, Version=3.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.IconPacks.3.0.1\lib\net47\MahApps.Metro.IconPacks.dll</HintPath>
+    </Reference>
+    <Reference Include="MahApps.Metro.IconPacks.BoxIcons, Version=3.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.IconPacks.3.0.1\lib\net47\MahApps.Metro.IconPacks.BoxIcons.dll</HintPath>
+    </Reference>
+    <Reference Include="MahApps.Metro.IconPacks.Core, Version=3.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.IconPacks.3.0.1\lib\net47\MahApps.Metro.IconPacks.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="MahApps.Metro.IconPacks.Entypo, Version=3.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.IconPacks.3.0.1\lib\net47\MahApps.Metro.IconPacks.Entypo.dll</HintPath>
+    </Reference>
+    <Reference Include="MahApps.Metro.IconPacks.EvaIcons, Version=3.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.IconPacks.3.0.1\lib\net47\MahApps.Metro.IconPacks.EvaIcons.dll</HintPath>
+    </Reference>
+    <Reference Include="MahApps.Metro.IconPacks.FeatherIcons, Version=3.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.IconPacks.3.0.1\lib\net47\MahApps.Metro.IconPacks.FeatherIcons.dll</HintPath>
+    </Reference>
+    <Reference Include="MahApps.Metro.IconPacks.FontAwesome, Version=3.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.IconPacks.3.0.1\lib\net47\MahApps.Metro.IconPacks.FontAwesome.dll</HintPath>
+    </Reference>
+    <Reference Include="MahApps.Metro.IconPacks.Ionicons, Version=3.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.IconPacks.3.0.1\lib\net47\MahApps.Metro.IconPacks.Ionicons.dll</HintPath>
+    </Reference>
+    <Reference Include="MahApps.Metro.IconPacks.JamIcons, Version=3.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.IconPacks.3.0.1\lib\net47\MahApps.Metro.IconPacks.JamIcons.dll</HintPath>
+    </Reference>
+    <Reference Include="MahApps.Metro.IconPacks.Material, Version=3.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.IconPacks.3.0.1\lib\net47\MahApps.Metro.IconPacks.Material.dll</HintPath>
+    </Reference>
+    <Reference Include="MahApps.Metro.IconPacks.MaterialDesign, Version=3.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.IconPacks.3.0.1\lib\net47\MahApps.Metro.IconPacks.MaterialDesign.dll</HintPath>
+    </Reference>
+    <Reference Include="MahApps.Metro.IconPacks.MaterialLight, Version=3.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.IconPacks.3.0.1\lib\net47\MahApps.Metro.IconPacks.MaterialLight.dll</HintPath>
+    </Reference>
+    <Reference Include="MahApps.Metro.IconPacks.Microns, Version=3.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.IconPacks.3.0.1\lib\net47\MahApps.Metro.IconPacks.Microns.dll</HintPath>
+    </Reference>
+    <Reference Include="MahApps.Metro.IconPacks.Modern, Version=3.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.IconPacks.3.0.1\lib\net47\MahApps.Metro.IconPacks.Modern.dll</HintPath>
+    </Reference>
+    <Reference Include="MahApps.Metro.IconPacks.Octicons, Version=3.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.IconPacks.3.0.1\lib\net47\MahApps.Metro.IconPacks.Octicons.dll</HintPath>
+    </Reference>
+    <Reference Include="MahApps.Metro.IconPacks.PicolIcons, Version=3.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.IconPacks.3.0.1\lib\net47\MahApps.Metro.IconPacks.PicolIcons.dll</HintPath>
+    </Reference>
+    <Reference Include="MahApps.Metro.IconPacks.RPGAwesome, Version=3.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.IconPacks.3.0.1\lib\net47\MahApps.Metro.IconPacks.RPGAwesome.dll</HintPath>
+    </Reference>
+    <Reference Include="MahApps.Metro.IconPacks.SimpleIcons, Version=3.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.IconPacks.3.0.1\lib\net47\MahApps.Metro.IconPacks.SimpleIcons.dll</HintPath>
+    </Reference>
+    <Reference Include="MahApps.Metro.IconPacks.Typicons, Version=3.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.IconPacks.3.0.1\lib\net47\MahApps.Metro.IconPacks.Typicons.dll</HintPath>
+    </Reference>
+    <Reference Include="MahApps.Metro.IconPacks.Unicons, Version=3.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.IconPacks.3.0.1\lib\net47\MahApps.Metro.IconPacks.Unicons.dll</HintPath>
+    </Reference>
+    <Reference Include="MahApps.Metro.IconPacks.WeatherIcons, Version=3.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.IconPacks.3.0.1\lib\net47\MahApps.Metro.IconPacks.WeatherIcons.dll</HintPath>
+    </Reference>
+    <Reference Include="MahApps.Metro.IconPacks.Zondicons, Version=3.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.IconPacks.3.0.1\lib\net47\MahApps.Metro.IconPacks.Zondicons.dll</HintPath>
+    </Reference>
+    <Reference Include="NAudio, Version=1.9.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NAudio.1.9.0\lib\net35\NAudio.dll</HintPath>
+    </Reference>
+    <Reference Include="Ookii.Dialogs.Wpf, Version=1.0.0.0, Culture=neutral, PublicKeyToken=66aa232afad40158, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ookii.Dialogs.Wpf.1.1.0\lib\net45\Ookii.Dialogs.Wpf.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationFramework.Aero" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Design" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="YAXLib, Version=2.15.0.0, Culture=neutral, PublicKeyToken=15c43682c986900f, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\XV2 Tools\DLLs\YAXLib.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="Audio\ADX.cs" />
+    <Compile Include="Audio\AT9.cs" />
+    <Compile Include="Audio\AudioPlayer.cs" />
+    <Compile Include="Audio\CommonFormats.cs" />
+    <Compile Include="Audio\HCA.cs" />
+    <Compile Include="Audio\Helper.cs" />
+    <Compile Include="Audio\LoopStream.cs" />
+    <Compile Include="Audio\VGAudio.Cli\ConvertStream.cs" />
+    <Compile Include="Audio\WavStream.cs" />
+    <Compile Include="Converters\VisibilityToNullableBoolean.cs" />
+    <Compile Include="LB Mod Installer\Installer\InstallerXml.cs" />
+    <Compile Include="Utils\DataGridSelectedItemsBinding.cs" />
+    <Compile Include="Utils\DataGridSelectedItemsBinding2.cs" />
+    <Compile Include="Utils\FileAssociation.cs" />
+    <Compile Include="Utils\ListBoxSelectedItemsBinding.cs" />
+    <Compile Include="Audio\VGAudio.Cli\AudioFormat.cs" />
+    <Compile Include="Audio\VGAudio.Cli\Batch.cs" />
+    <Compile Include="Audio\VGAudio.Cli\CliArguments.cs" />
+    <Compile Include="Audio\VGAudio.Cli\ContainerTypes.cs" />
+    <Compile Include="Audio\VGAudio.Cli\Convert.cs" />
+    <Compile Include="Audio\VGAudio.Cli\Converter.cs" />
+    <Compile Include="Audio\VGAudio.Cli\CreateConfiguration.cs" />
+    <Compile Include="Audio\VGAudio.Cli\Metadata\Common.cs" />
+    <Compile Include="Audio\VGAudio.Cli\Metadata\Containers\Adx.cs" />
+    <Compile Include="Audio\VGAudio.Cli\Metadata\Containers\Atrac9.cs" />
+    <Compile Include="Audio\VGAudio.Cli\Metadata\Containers\Bcstm.cs" />
+    <Compile Include="Audio\VGAudio.Cli\Metadata\Containers\Bcwav.cs" />
+    <Compile Include="Audio\VGAudio.Cli\Metadata\Containers\Bfstm.cs" />
+    <Compile Include="Audio\VGAudio.Cli\Metadata\Containers\Bfwav.cs" />
+    <Compile Include="Audio\VGAudio.Cli\Metadata\Containers\Brstm.cs" />
+    <Compile Include="Audio\VGAudio.Cli\Metadata\Containers\Brwav.cs" />
+    <Compile Include="Audio\VGAudio.Cli\Metadata\Containers\Bxstm.cs" />
+    <Compile Include="Audio\VGAudio.Cli\Metadata\Containers\Dsp.cs" />
+    <Compile Include="Audio\VGAudio.Cli\Metadata\Containers\GcAdpcm.cs" />
+    <Compile Include="Audio\VGAudio.Cli\Metadata\Containers\Genh.cs" />
+    <Compile Include="Audio\VGAudio.Cli\Metadata\Containers\Hca.cs" />
+    <Compile Include="Audio\VGAudio.Cli\Metadata\Containers\Hps.cs" />
+    <Compile Include="Audio\VGAudio.Cli\Metadata\Containers\Idsp.cs" />
+    <Compile Include="Audio\VGAudio.Cli\Metadata\Containers\Wave.cs" />
+    <Compile Include="Audio\VGAudio.Cli\Metadata\MetadataReader.cs" />
+    <Compile Include="Audio\VGAudio.Cli\Metadata\Print.cs" />
+    <Compile Include="Audio\VGAudio.Cli\Options.cs" />
+    <Compile Include="Audio\VGAudio.Cli\ProgressBar.cs" />
+    <Compile Include="Audio\VGAudio.Cli\VGAudioCli.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Atrac9\Atrac9Config.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Atrac9\Atrac9Decoder.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Atrac9\Atrac9Parameters.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Atrac9\Atrac9Rng.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Atrac9\BandExtension.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Atrac9\BitAllocation.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Atrac9\Block.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Atrac9\Channel.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Atrac9\ChannelConfig.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Atrac9\Frame.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Atrac9\HuffmanCodebook.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Atrac9\PackedTables.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Atrac9\Quantization.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Atrac9\ScaleFactors.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Atrac9\Stereo.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Atrac9\Tables.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Atrac9\Unpack.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\CodecParameters.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\CriAdx\CriAdxCodec.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\CriAdx\CriAdxEncryption.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\CriAdx\CriAdxEncryptionKeys.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\CriAdx\CriAdxKey.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\CriAdx\CriAdxParameters.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\CriAdx\CriAdxType.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\CriHca\ChannelType.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\CriHca\CriHcaChannel.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\CriHca\CriHcaConstants.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\CriHca\CriHcaDecoder.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\CriHca\CriHcaEncoder.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\CriHca\CriHcaEncryption.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\CriHca\CriHcaEncryptionKeys.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\CriHca\CriHcaFrame.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\CriHca\CriHcaKey.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\CriHca\CriHcaPacking.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\CriHca\CriHcaParameters.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\CriHca\CriHcaQuality.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\CriHca\CriHcaTables.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\CriHca\HcaInfo.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\GcAdpcm\GcAdpcmCoefficients.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\GcAdpcm\GcAdpcmDecoder.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\GcAdpcm\GcAdpcmEncoder.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\GcAdpcm\GcAdpcmMath.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\GcAdpcm\GcAdpcmParameters.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Celt\AutocorrelationUnsafe.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Celt\Bands.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Celt\CeltCommon.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Celt\CeltConstants.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Celt\CeltLPC.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Celt\CeltLPCUnsafe.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Celt\CeltPitchXCorr.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Celt\CeltPitchXCorrUnsafe.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Celt\CWRS.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Celt\Enums\Spread.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Celt\Kernels.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Celt\KernelsUnsafe.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Celt\KissFFT.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Celt\KissFFTUnsafe.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Celt\Laplace.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Celt\MDCT.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Celt\Pitch.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Celt\QuantizeBands.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Celt\Rate.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Celt\Structs\AnalysisInfo.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Celt\Structs\CELTDecoder.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Celt\Structs\CeltEncoder.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Celt\Structs\CELTMode.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Celt\Structs\FFTState.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Celt\Structs\MDCTLookup.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Celt\Structs\PulseCache.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Celt\Tables.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Celt\VQ.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Common\Autocorrelation.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Common\CPlusPlus\Arrays.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Common\CPlusPlus\BoxedValue.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Common\CPlusPlus\Pointer.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Common\EntropyCoder.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Common\Inlines.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Common\Resampler.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\OpusFrame.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\OpusParameters.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Opus\Analysis.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Opus\CodecHelpers.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Opus\Downmix.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Opus\Enums\OpusApplication.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Opus\Enums\OpusBandwidth.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Opus\Enums\OpusControl.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Opus\Enums\OpusError.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Opus\Enums\OpusFramesize.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Opus\Enums\OpusMode.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Opus\Enums\OpusSignal.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Opus\MultiLayerPerceptron.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Opus\OpusCompare.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Opus\OpusConstants.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Opus\OpusException.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Opus\OpusMultistream.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Opus\Structs\ChannelLayout.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Opus\Structs\MLP.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Opus\Structs\OpusDecoder.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Opus\Structs\OpusEncoder.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Opus\Structs\OpusMSDecoder.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Opus\Structs\OpusMSEncoder.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Opus\Structs\OpusPacketInfo.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Opus\Structs\OpusRepacketizer.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Opus\Structs\StereoWidthState.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Opus\Structs\TonalityAnalysisState.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Opus\Structs\VorbisLayout.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Opus\Tables.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\ApplySineWindow.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\BurgModified.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\BurgModifiedUnsafe.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\BWExpander.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\CNG.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\CodeSigns.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\CorrelateMatrix.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\DecodeAPI.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\DecodeCore.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\DecodeIndices.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\DecodeParameters.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\DecodePitch.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\DecodePulses.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\EncodeAPI.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\EncodeIndices.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\EncodePulses.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Enums\DecoderAPIFlag.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Enums\SilkError.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Filters.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\FindLPC.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\FindLTP.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\FindPitchLags.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\FindPredCoefs.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\GainQuantization.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\HPVariableCutoff.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\K2A.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\LinearAlgebra.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\LPCInversePredGain.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\LTPAnalysisFilter.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\LTPScaleControl.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\NLSF.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\NoiseShapeAnalysis.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\PitchAnalysisCore.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\PLC.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\ProcessGains.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\QuantizeLTPGains.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\RegularizeCorrelations.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Resampler.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\ResidualEnergy.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Schur.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\ShellCoder.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Sigmoid.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\SilkConstants.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Sort.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Stereo.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Structs\CNGState.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Structs\DecControlState.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Structs\EncControlState.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Structs\NLSFCodebook.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Structs\PLCStruct.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Structs\SideInfoIndices.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Structs\SilkChannelDecoder.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Structs\SilkChannelEncoder.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Structs\SilkDecoder.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Structs\SilkDecoderControl.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Structs\SilkEncoder.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Structs\SilkEncoderControl.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Structs\SilkLPState.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Structs\SilkNSQState.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Structs\SilkPrefilterState.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Structs\SilkResamplerState.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Structs\SilkShapeState.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Structs\SilkVADState.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Structs\StereoDecodeState.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Structs\StereoEncodeState.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Structs\TOCStruct.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\SumSqrShift.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\Tables.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\TuningParameters.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\VoiceActivityDetection.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Opus\Silk\VQ_WMat_EC.cs" />
+    <Compile Include="Audio\VGAudio\Codecs\Pcm8\Pcm8Codec.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Adx\AdxConfiguration.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Adx\AdxReader.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Adx\AdxStructure.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Adx\AdxWriter.cs" />
+    <Compile Include="Audio\VGAudio\Containers\At9\At9Configuration.cs" />
+    <Compile Include="Audio\VGAudio\Containers\At9\At9DataChunk.cs" />
+    <Compile Include="Audio\VGAudio\Containers\At9\At9FactChunk.cs" />
+    <Compile Include="Audio\VGAudio\Containers\At9\At9Reader.cs" />
+    <Compile Include="Audio\VGAudio\Containers\At9\At9Structure.cs" />
+    <Compile Include="Audio\VGAudio\Containers\At9\At9WaveExtensible.cs" />
+    <Compile Include="Audio\VGAudio\Containers\AudioReader.cs" />
+    <Compile Include="Audio\VGAudio\Containers\AudioWithConfig.cs" />
+    <Compile Include="Audio\VGAudio\Containers\AudioWriter.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Configuration.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Dsp\DspConfiguration.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Dsp\DspReader.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Dsp\DspStructure.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Dsp\DspWriter.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Genh\GenhConfiguration.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Genh\GenhReader.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Genh\GenhStructure.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Hca\HcaConfiguration.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Hca\HcaReader.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Hca\HcaStructure.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Hca\HcaWriter.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Hps\HpsBlock.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Hps\HpsBlockChannel.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Hps\HpsChannelInfo.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Hps\HpsConfiguration.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Hps\HpsReader.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Hps\HpsStructure.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Hps\HpsWriter.cs" />
+    <Compile Include="Audio\VGAudio\Containers\IAudioReader.cs" />
+    <Compile Include="Audio\VGAudio\Containers\IAudioWriter.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Idsp\IdspChannelInfo.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Idsp\IdspConfiguration.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Idsp\IdspReader.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Idsp\IdspStructure.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Idsp\IdspWriter.cs" />
+    <Compile Include="Audio\VGAudio\Containers\NintendoWare\BCFstmReader.cs" />
+    <Compile Include="Audio\VGAudio\Containers\NintendoWare\BCFstmWriter.cs" />
+    <Compile Include="Audio\VGAudio\Containers\NintendoWare\BrstmReader.cs" />
+    <Compile Include="Audio\VGAudio\Containers\NintendoWare\BrstmWriter.cs" />
+    <Compile Include="Audio\VGAudio\Containers\NintendoWare\BrwavReader.cs" />
+    <Compile Include="Audio\VGAudio\Containers\NintendoWare\BrwavStructure.cs" />
+    <Compile Include="Audio\VGAudio\Containers\NintendoWare\BxstmConfiguration.cs" />
+    <Compile Include="Audio\VGAudio\Containers\NintendoWare\BxstmStructure.cs" />
+    <Compile Include="Audio\VGAudio\Containers\NintendoWare\Common.cs" />
+    <Compile Include="Audio\VGAudio\Containers\NintendoWare\NwCodec.cs" />
+    <Compile Include="Audio\VGAudio\Containers\NintendoWare\NwTarget.cs" />
+    <Compile Include="Audio\VGAudio\Containers\NintendoWare\NwVersion.cs" />
+    <Compile Include="Audio\VGAudio\Containers\NintendoWare\Structures\BrstmHeader.cs" />
+    <Compile Include="Audio\VGAudio\Containers\NintendoWare\Structures\BrstmSeekTableType.cs" />
+    <Compile Include="Audio\VGAudio\Containers\NintendoWare\Structures\BrstmTrackType.cs" />
+    <Compile Include="Audio\VGAudio\Containers\NintendoWare\Structures\ChannelInfo.cs" />
+    <Compile Include="Audio\VGAudio\Containers\NintendoWare\Structures\PrefetchData.cs" />
+    <Compile Include="Audio\VGAudio\Containers\NintendoWare\Structures\Reference.cs" />
+    <Compile Include="Audio\VGAudio\Containers\NintendoWare\Structures\ReferenceTable.cs" />
+    <Compile Include="Audio\VGAudio\Containers\NintendoWare\Structures\ReferenceType.cs" />
+    <Compile Include="Audio\VGAudio\Containers\NintendoWare\Structures\RegionInfo.cs" />
+    <Compile Include="Audio\VGAudio\Containers\NintendoWare\Structures\RwavChannelInfo.cs" />
+    <Compile Include="Audio\VGAudio\Containers\NintendoWare\Structures\RwavWaveInfo.cs" />
+    <Compile Include="Audio\VGAudio\Containers\NintendoWare\Structures\SizedReference.cs" />
+    <Compile Include="Audio\VGAudio\Containers\NintendoWare\Structures\StreamInfo.cs" />
+    <Compile Include="Audio\VGAudio\Containers\NintendoWare\Structures\TrackInfo.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Oggfile\BufferedReadStream.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Oggfile\DataPacket.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Oggfile\IContainerReader.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Oggfile\IPacketProvider.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Oggfile\NewStreamEventArgs.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Oggfile\OggContainerReader.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Oggfile\OggCrc.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Oggfile\OggPacket.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Oggfile\OggPacketReader.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Oggfile\OggPageFlags.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Oggfile\OpusHeader.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Oggfile\OpusOggReadStream.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Oggfile\OpusOggWriteStream.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Oggfile\OpusTagName.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Oggfile\OpusTags.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Oggfile\ParameterChangeEventArgs.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Oggfile\StreamReadBuffer.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Opus\NxOpusConfiguration.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Opus\NxOpusReader.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Opus\NxOpusStructure.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Opus\NxOpusWriter.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Opus\OggOpusReader.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Opus\OggOpusStructure.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Opus\OggOpusWriter.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Wave\WaveCodec.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Wave\WaveConfiguration.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Wave\WaveReader.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Wave\WaveStructure.cs" />
+    <Compile Include="Audio\VGAudio\Containers\Wave\WaveWriter.cs" />
+    <Compile Include="Audio\VGAudio\Formats\Atrac9\Atrac9Format.cs" />
+    <Compile Include="Audio\VGAudio\Formats\Atrac9\Atrac9FormatBuilder.cs" />
+    <Compile Include="Audio\VGAudio\Formats\AudioData.cs" />
+    <Compile Include="Audio\VGAudio\Formats\AudioFormatBase.cs" />
+    <Compile Include="Audio\VGAudio\Formats\AudioFormatBaseBuilder.cs" />
+    <Compile Include="Audio\VGAudio\Formats\AudioTrack.cs" />
+    <Compile Include="Audio\VGAudio\Formats\CriAdx\CriAdxChannel.cs" />
+    <Compile Include="Audio\VGAudio\Formats\CriAdx\CriAdxFormat.cs" />
+    <Compile Include="Audio\VGAudio\Formats\CriAdx\CriAdxFormatBuilder.cs" />
+    <Compile Include="Audio\VGAudio\Formats\CriAdx\CriAdxHelpers.cs" />
+    <Compile Include="Audio\VGAudio\Formats\CriHca\CriHcaFormat.cs" />
+    <Compile Include="Audio\VGAudio\Formats\CriHca\CriHcaFormatBuilder.cs" />
+    <Compile Include="Audio\VGAudio\Formats\GcAdpcm\GcAdpcmAlignment.cs" />
+    <Compile Include="Audio\VGAudio\Formats\GcAdpcm\GcAdpcmChannel.cs" />
+    <Compile Include="Audio\VGAudio\Formats\GcAdpcm\GcAdpcmChannelBuilder.cs" />
+    <Compile Include="Audio\VGAudio\Formats\GcAdpcm\GcAdpcmChannelInfo.cs" />
+    <Compile Include="Audio\VGAudio\Formats\GcAdpcm\GcAdpcmContext.cs" />
+    <Compile Include="Audio\VGAudio\Formats\GcAdpcm\GcAdpcmFormat.cs" />
+    <Compile Include="Audio\VGAudio\Formats\GcAdpcm\GcAdpcmFormatBuilder.cs" />
+    <Compile Include="Audio\VGAudio\Formats\GcAdpcm\GcAdpcmLoopContext.cs" />
+    <Compile Include="Audio\VGAudio\Formats\GcAdpcm\GcAdpcmSeekTable.cs" />
+    <Compile Include="Audio\VGAudio\Formats\IAudioFormat.cs" />
+    <Compile Include="Audio\VGAudio\Formats\Opus\OpusFormat.cs" />
+    <Compile Include="Audio\VGAudio\Formats\Opus\OpusFormatBuilder.cs" />
+    <Compile Include="Audio\VGAudio\Formats\Pcm16\Pcm16Format.cs" />
+    <Compile Include="Audio\VGAudio\Formats\Pcm16\Pcm16FormatBuilder.cs" />
+    <Compile Include="Audio\VGAudio\Formats\Pcm8\Pcm8Format.cs" />
+    <Compile Include="Audio\VGAudio\Formats\Pcm8\Pcm8FormatBuilder.cs" />
+    <Compile Include="Audio\VGAudio\Formats\Pcm8\Pcm8SignedFormat.cs" />
+    <Compile Include="Audio\VGAudio\IProgressReport.cs" />
+    <Compile Include="Audio\VGAudio\Utilities\Arrays.cs" />
+    <Compile Include="Audio\VGAudio\Utilities\ArrayUnpacker.cs" />
+    <Compile Include="Audio\VGAudio\Utilities\BinaryReaderBE.cs" />
+    <Compile Include="Audio\VGAudio\Utilities\BinaryWriterBE.cs" />
+    <Compile Include="Audio\VGAudio\Utilities\Bit.cs" />
+    <Compile Include="Audio\VGAudio\Utilities\BitReader.cs" />
+    <Compile Include="Audio\VGAudio\Utilities\BitWriter.cs" />
+    <Compile Include="Audio\VGAudio\Utilities\Byte.cs" />
+    <Compile Include="Audio\VGAudio\Utilities\Crc16.cs" />
+    <Compile Include="Audio\VGAudio\Utilities\Endianness.cs" />
+    <Compile Include="Audio\VGAudio\Utilities\Extensions.cs" />
+    <Compile Include="Audio\VGAudio\Utilities\Helpers.cs" />
+    <Compile Include="Audio\VGAudio\Utilities\Interleave.cs" />
+    <Compile Include="Audio\VGAudio\Utilities\Mdct.cs" />
+    <Compile Include="Audio\VGAudio\Utilities\Parallel.cs" />
+    <Compile Include="Audio\VGAudio\Utilities\Riff\MediaSubtypes.cs" />
+    <Compile Include="Audio\VGAudio\Utilities\Riff\RiffChunk.cs" />
+    <Compile Include="Audio\VGAudio\Utilities\Riff\RiffParser.cs" />
+    <Compile Include="Audio\VGAudio\Utilities\Riff\RiffSubchunk.cs" />
+    <Compile Include="Audio\VGAudio\Utilities\Riff\WaveDataChunk.cs" />
+    <Compile Include="Audio\VGAudio\Utilities\Riff\WaveFactChunk.cs" />
+    <Compile Include="Audio\VGAudio\Utilities\Riff\WaveFmtChunk.cs" />
+    <Compile Include="Audio\VGAudio\Utilities\Riff\WaveFormatExtensible.cs" />
+    <Compile Include="Audio\VGAudio\Utilities\Riff\WaveFormatTags.cs" />
+    <Compile Include="Audio\VGAudio\Utilities\Riff\WaveSmplChunk.cs" />
+    <Compile Include="ViewModel\MainViewModel.cs" />
+    <Compile Include="ViewModel\ViewModelLocator.cs" />
+    <Compile Include="View\AddCueForm.xaml.cs">
+      <DependentUpon>AddCueForm.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\AddTrackForm.xaml.cs">
+      <DependentUpon>AddTrackForm.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\CreateMusicInstaller.xaml.cs">
+      <DependentUpon>CreateMusicInstaller.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\CueEditorView.xaml.cs">
+      <DependentUpon>CueEditorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\EditCueLimit.xaml.cs">
+      <DependentUpon>EditCueLimit.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\EditLoopForm.xaml.cs">
+      <DependentUpon>EditLoopForm.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\EditVolume.xaml.cs">
+      <DependentUpon>EditVolume.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\VolumeControl.xaml.cs">
+      <DependentUpon>VolumeControl.xaml</DependentUpon>
+    </Compile>
+    <Page Include="MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Page Include="View\AddCueForm.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\AddTrackForm.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\CreateMusicInstaller.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\CueEditorView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\EditCueLimit.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\EditLoopForm.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\EditVolume.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\VolumeControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Controls\" />
+    <Folder Include="Resources\" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.7">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.7 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Xv2CoreLib\Xv2CoreLib.csproj">
+      <Project>{fdb88e51-0d73-47b9-a342-e574ec0ba583}</Project>
+      <Name>Xv2CoreLib</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Costura.Fody.3.2.0\build\Costura.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Costura.Fody.3.2.0\build\Costura.Fody.props'))" />
+    <Error Condition="!Exists('..\packages\Fody.3.3.2\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.3.3.2\build\Fody.targets'))" />
+  </Target>
+  <Import Project="..\packages\Fody.3.3.2\build\Fody.targets" Condition="Exists('..\packages\Fody.3.3.2\build\Fody.targets')" />
+</Project>

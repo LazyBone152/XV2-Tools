@@ -1,0 +1,314 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\Costura.Fody.3.2.0\build\Costura.Fody.props" Condition="Exists('..\packages\Costura.Fody.3.2.0\build\Costura.Fody.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{FDB88E51-0D73-47B9-A342-E574EC0BA583}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Xv2CoreLib</RootNamespace>
+    <AssemblyName>Xv2CoreLib</AssemblyName>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.1</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;UndoRedo</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>7.1</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AForge.Imaging">
+      <HintPath>..\DLLs\AForge.Imaging.dll</HintPath>
+    </Reference>
+    <Reference Include="AForge.Imaging.Formats">
+      <HintPath>..\DLLs\AForge.Imaging.Formats.dll</HintPath>
+    </Reference>
+    <Reference Include="AForge.Math">
+      <HintPath>..\DLLs\AForge.Math.dll</HintPath>
+    </Reference>
+    <Reference Include="Costura, Version=3.2.0.0, Culture=neutral, PublicKeyToken=9919ef960d84173d, processorArchitecture=MSIL">
+      <HintPath>..\packages\Costura.Fody.3.2.0\lib\net46\Costura.dll</HintPath>
+    </Reference>
+    <Reference Include="CSharpImageLibrary, Version=3.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CSharpImageLibrary.3.2.0.0\lib\net462\CSharpImageLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IO.RecyclableMemoryStream, Version=1.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.IO.RecyclableMemoryStream.1.2.2\lib\net45\Microsoft.IO.RecyclableMemoryStream.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="Shim, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c55ec16d10c4b366, processorArchitecture=MSIL">
+      <HintPath>..\packages\shim.2.0.0\lib\net40\Shim.dll</HintPath>
+    </Reference>
+    <Reference Include="Shim.Drawing, Version=3.0.0.0, Culture=neutral, PublicKeyToken=a7d03c0bc8d64dbc, processorArchitecture=MSIL">
+      <HintPath>..\packages\shim.drawing.3.0.0\lib\net45\Shim.Drawing.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.Common, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Data.Common.4.3.0\lib\net451\System.Data.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Half">
+      <HintPath>..\DLLs\System.Half.dll</HintPath>
+    </Reference>
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.3.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Dataflow, Version=4.5.24.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Tpl.Dataflow.4.5.24\lib\portable-net45+win8+wpa81\System.Threading.Tasks.Dataflow.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UsefulThings, Version=1.7.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\UsefulCSharpThings.1.7.3\lib\net462\UsefulThings.dll</HintPath>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="WriteableBitmapEx.Wpf, Version=1.6.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\WriteableBitmapEx.1.6.2\lib\net40\WriteableBitmapEx.Wpf.dll</HintPath>
+    </Reference>
+    <Reference Include="YAXLib">
+      <HintPath>..\DLLs\YAXLib.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ACB\ACB_File.cs" />
+    <Compile Include="ACB_NEW\ACB_File.cs" />
+    <Compile Include="ACB_NEW\ACB_Wrapper.cs" />
+    <Compile Include="AFS2\AFS2_File.cs" />
+    <Compile Include="AGD\AGD_File.cs" />
+    <Compile Include="AIG\AIG_File.cs" />
+    <Compile Include="AIT\AIT_File.cs" />
+    <Compile Include="AMK\AMK_File.cs" />
+    <Compile Include="ATA\ATA_File.cs" />
+    <Compile Include="AUR\AUR_File.cs" />
+    <Compile Include="BAC\BAC_File.cs" />
+    <Compile Include="BAC\Deserializer.cs" />
+    <Compile Include="BAC\Parser.cs" />
+    <Compile Include="BAC_XV1\BAC_File.cs" />
+    <Compile Include="BAC_XV1\Parser.cs" />
+    <Compile Include="BAI\BAI_File.cs" />
+    <Compile Include="BAI\Deserializer.cs" />
+    <Compile Include="BAI\Parser.cs" />
+    <Compile Include="BAS\BAS_File.cs" />
+    <Compile Include="BAS\Deserializer.cs" />
+    <Compile Include="BAS\Parser.cs" />
+    <Compile Include="BCM\BCM_File.cs" />
+    <Compile Include="BCM\Deserializer.cs" />
+    <Compile Include="BCM\Parser.cs" />
+    <Compile Include="BCM_XML\BCM_File.cs" />
+    <Compile Include="BCM_XML\Deserializer.cs" />
+    <Compile Include="BCM_XML\Parser.cs" />
+    <Compile Include="BCS\BCS_File.cs" />
+    <Compile Include="BCS\Deserializer.cs" />
+    <Compile Include="BCS\Parser.cs" />
+    <Compile Include="BDM\BDM_File.cs" />
+    <Compile Include="BDM\Deserializer.cs" />
+    <Compile Include="BDM\Parser.cs" />
+    <Compile Include="BEV\BEV_File.cs" />
+    <Compile Include="BEV\Deserializer.cs" />
+    <Compile Include="BEV\Parser.cs" />
+    <Compile Include="BPE\BPE_File.cs" />
+    <Compile Include="BPE\Deserializer.cs" />
+    <Compile Include="BPE\Parser.cs" />
+    <Compile Include="BSA\BSA_File.cs" />
+    <Compile Include="BSA\Deserializer.cs" />
+    <Compile Include="BSA\Parser.cs" />
+    <Compile Include="BSA_XV1\BSA_File.cs" />
+    <Compile Include="BSA_XV1\Deserializer.cs" />
+    <Compile Include="BSA_XV1\Parser.cs" />
+    <Compile Include="Class1.cs" />
+    <Compile Include="CMS\CMS_File.cs" />
+    <Compile Include="CMS\Deserializer.cs" />
+    <Compile Include="CMS\Parser.cs" />
+    <Compile Include="CNC\CNC_File.cs" />
+    <Compile Include="CNS\CNS_File.cs" />
+    <Compile Include="CPK\CPK_Reader.cs" />
+    <Compile Include="CPK\CriPakTools\CPK.cs" />
+    <Compile Include="CPK\CriPakTools\Endian.cs" />
+    <Compile Include="CPK\CriPakTools\Tools.cs" />
+    <Compile Include="CSO\CSO_File.cs" />
+    <Compile Include="CSO\Deserializer.cs" />
+    <Compile Include="CSO\Parser.cs" />
+    <Compile Include="CUS\CUS_File.cs" />
+    <Compile Include="CUS\Deserializer.cs" />
+    <Compile Include="CUS\Parser.cs" />
+    <Compile Include="DEM\DEM_File.cs" />
+    <Compile Include="DEM\Deserializer.cs" />
+    <Compile Include="DEM\Parser.cs" />
+    <Compile Include="DML\DML_File.cs" />
+    <Compile Include="DSE\DSE_File.cs" />
+    <Compile Include="EAN\Deserializer.cs" />
+    <Compile Include="EAN\EAN_File.cs" />
+    <Compile Include="EAN\Parser.cs" />
+    <Compile Include="EAN\SimpleEan.cs" />
+    <Compile Include="ECF\Deserializer.cs" />
+    <Compile Include="ECF\ECF_File.cs" />
+    <Compile Include="ECF\Parser.cs" />
+    <Compile Include="EEPK\Deserializer.cs" />
+    <Compile Include="EEPK\EEPK_File.cs" />
+    <Compile Include="EEPK\Parser.cs" />
+    <Compile Include="EffectContainer\EepkToolInterlop.cs" />
+    <Compile Include="EffectContainer\EffectContainer.cs" />
+    <Compile Include="EMA\EMA_File.cs" />
+    <Compile Include="EMA\Skeleton.cs" />
+    <Compile Include="EMB\EmbIndex.cs" />
+    <Compile Include="EMB\Extractor.cs" />
+    <Compile Include="EMB\Repacker.cs" />
+    <Compile Include="EMB\XmlRepack.cs" />
+    <Compile Include="EMB_CLASS\Deserializer.cs" />
+    <Compile Include="EMB_CLASS\EMB_File.cs" />
+    <Compile Include="EMB_CLASS\Parser.cs" />
+    <Compile Include="EMD\Deserializer.cs" />
+    <Compile Include="EMD\EMD_File.cs" />
+    <Compile Include="EMD\Parser.cs" />
+    <Compile Include="EMM\Deserializer.cs" />
+    <Compile Include="EMM\EMM_File.cs" />
+    <Compile Include="EMM\Parser.cs" />
+    <Compile Include="EMP\Deserializer.cs" />
+    <Compile Include="EMP\EMP File.cs" />
+    <Compile Include="EMP\Parser.cs" />
+    <Compile Include="ERS\Deserializer.cs" />
+    <Compile Include="ERS\ERS_File.cs" />
+    <Compile Include="ERS\Parser.cs" />
+    <Compile Include="ESK\Deserializer.cs" />
+    <Compile Include="ESK\ESK_File.cs" />
+    <Compile Include="ESK\Parser.cs" />
+    <Compile Include="ETR\ETR_File.cs" />
+    <Compile Include="FPF\FPF_File.cs" />
+    <Compile Include="HCA\HcaMetadata.cs" />
+    <Compile Include="IDB\Deserializer.cs" />
+    <Compile Include="IDB\IDB_File.cs" />
+    <Compile Include="IDB\Parser.cs" />
+    <Compile Include="Interfaces\Interfaces.cs" />
+    <Compile Include="LCP\LCP_File.cs" />
+    <Compile Include="MSG\Deserializer.cs" />
+    <Compile Include="MSG\MSG_File.cs" />
+    <Compile Include="MSG\Parser.cs" />
+    <Compile Include="OBL\OBL_File.cs" />
+    <Compile Include="OCC\Deserializer.cs" />
+    <Compile Include="OCC\OCC_File.cs" />
+    <Compile Include="OCC\Parser.cs" />
+    <Compile Include="OCO\Deserializer.cs" />
+    <Compile Include="OCO\OCO_File.cs" />
+    <Compile Include="OCO\Parser.cs" />
+    <Compile Include="OCP\Deserializer.cs" />
+    <Compile Include="OCP\OCP_File.cs" />
+    <Compile Include="OCP\Parser.cs" />
+    <Compile Include="OCS\Deserializer.cs" />
+    <Compile Include="OCS\OCS_File.cs" />
+    <Compile Include="OCS\Parser.cs" />
+    <Compile Include="OCT\Deserializer.cs" />
+    <Compile Include="OCT\OCT_File.cs" />
+    <Compile Include="OCT\Parser.cs" />
+    <Compile Include="ODF\ODF_File.cs" />
+    <Compile Include="PAL\PAL_File.cs" />
+    <Compile Include="PFL\PFL_File.cs" />
+    <Compile Include="PFP\PFP_File.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PSA\PSA_File.cs" />
+    <Compile Include="PSC\PSC_File.cs" />
+    <Compile Include="PSL\PSL_File.cs" />
+    <Compile Include="PSO\PSO_File.cs" />
+    <Compile Include="PUP\PUP_File.cs" />
+    <Compile Include="QSF\Deserializer.cs" />
+    <Compile Include="QSF\Parser.cs" />
+    <Compile Include="QSF\QSF_File.cs" />
+    <Compile Include="Quests\QBT\Deserializer.cs" />
+    <Compile Include="Quests\QBT\Parser.cs" />
+    <Compile Include="Quests\QBT\QBT_File.cs" />
+    <Compile Include="Quests\QED\Deserializer.cs" />
+    <Compile Include="Quests\QED\Parser.cs" />
+    <Compile Include="Quests\QED\QED Types.cs" />
+    <Compile Include="Quests\QED\QED_File.cs" />
+    <Compile Include="Quests\QML\Deserializer.cs" />
+    <Compile Include="Quests\QML\Parser.cs" />
+    <Compile Include="Quests\QML\QML_File.cs" />
+    <Compile Include="Quests\QSL\Deserializer.cs" />
+    <Compile Include="Quests\QSL\Parser.cs" />
+    <Compile Include="Quests\QSL\QSL_File.cs" />
+    <Compile Include="QXD\Deserializer.cs" />
+    <Compile Include="QXD\Parser.cs" />
+    <Compile Include="QXD\QXD_File.cs" />
+    <Compile Include="Resource\BinaryConverter.cs" />
+    <Compile Include="Resource\ColorEx.cs" />
+    <Compile Include="Resource\UndoRedo\UndoActionDelegate.cs" />
+    <Compile Include="Resource\Utils.cs" />
+    <Compile Include="Resource\ObjectExtensions.cs" />
+    <Compile Include="Resource\RgbConverter.cs" />
+    <Compile Include="Resource\Sorting.cs" />
+    <Compile Include="Resource\UndoRedo\CompositeUndo.cs" />
+    <Compile Include="Resource\UndoRedo\IUndoRedo.cs" />
+    <Compile Include="Resource\UndoRedo\LimitedStack.cs" />
+    <Compile Include="Resource\UndoRedo\UndoableListAdd.cs" />
+    <Compile Include="Resource\UndoRedo\UndoableListRemove.cs" />
+    <Compile Include="Resource\UndoRedo\UndoableProperty.cs" />
+    <Compile Include="Resource\UndoRedo\UndoableStateChange.cs" />
+    <Compile Include="Resource\UndoRedo\UndoManager.cs" />
+    <Compile Include="Resource\WriteableBitmapExtensions.cs" />
+    <Compile Include="Resource\Xv2FileIO.cs" />
+    <Compile Include="Resource\ZipManager.cs" />
+    <Compile Include="SAV\Encrypt.cs" />
+    <Compile Include="SAV\SAV_File.cs" />
+    <Compile Include="TDB\TDB_File.cs" />
+    <Compile Include="TNL\Deserializer.cs" />
+    <Compile Include="TNL\Parser.cs" />
+    <Compile Include="TNL\TNL_File.cs" />
+    <Compile Include="TSD\Deserializer.cs" />
+    <Compile Include="TSD\Parser.cs" />
+    <Compile Include="TSD\TSD_File.cs" />
+    <Compile Include="TSR\TSR_File.cs" />
+    <Compile Include="TSR\TSR_Reader.cs" />
+    <Compile Include="UTF\UTF_File.cs" />
+    <Compile Include="X2M\Skill.cs" />
+    <Compile Include="Xenoverse2.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="costura32\AesCtrLibrary.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="FodyWeavers.xml" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\packages\Fody.3.3.2\build\Fody.targets" Condition="Exists('..\packages\Fody.3.3.2\build\Fody.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Fody.3.3.2\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.3.3.2\build\Fody.targets'))" />
+    <Error Condition="!Exists('..\packages\Costura.Fody.3.2.0\build\Costura.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Costura.Fody.3.2.0\build\Costura.Fody.props'))" />
+  </Target>
+</Project>
