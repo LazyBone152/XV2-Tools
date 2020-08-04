@@ -1,19 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Xv2CoreLib.Resource.UndoRedo
 {
     /// <summary>
     /// Undo/Redo functionality for adding an object from an IList.
     /// </summary>
-    class UndoableListAdd<T> : IUndoRedo where T : class
+    public class UndoableListAdd<T> : IUndoRedo where T : class
     {
+        public bool doLast { get; set; }
         public string Message { get; private set; }
 
         private IList<T> list;
         private T obj;
         private int idx;
 
-        public UndoableListAdd(IList<T> _list, T _obj, string message)
+        public UndoableListAdd(IList<T> _list, T _obj, string message = "")
         {
             list = _list;
             obj = _obj;

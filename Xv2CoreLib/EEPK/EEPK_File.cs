@@ -18,7 +18,6 @@ namespace Xv2CoreLib.EEPK
         EMO = 0,
         PBIND = 1,
         TBIND = 2,
-        [YAXEnum("LIGHT.EMA")]
         LIGHT = 3,
         CBIND = 4
     }
@@ -148,7 +147,15 @@ namespace Xv2CoreLib.EEPK
             //A container of this type wasn't found in the eepk, so we must add it.
             Assets.Add(container);
         }
-        
+
+        public int NextFreeId(int minId = 100)
+        {
+            int id = minId;
+            while (Effects.Any(x => x.SortID == id))
+                id++;
+            return id;
+        }
+
     }
 
     [Serializable]
@@ -295,7 +302,7 @@ namespace Xv2CoreLib.EEPK
         }
 
         [YAXDontSerialize]
-        public int SortID { get { return IndexNum; } }
+        public int SortID { get { return IndexNum; } set { IndexNum = (ushort)value; } }
         [YAXDontSerialize]
         public string Index { get { return IndexNum.ToString(); } set { IndexNum = ushort.Parse(value); } }
 
@@ -526,9 +533,9 @@ namespace Xv2CoreLib.EEPK
         [YAXAttributeFor("StartTime")]
         [YAXSerializeAs("Frames")]
         public ushort I_28 { get; set; } //delay/start time
-        [YAXAttributeFor("Placement")]
+        [YAXAttributeFor("Attachment")]
         [YAXSerializeAs("value")]
-        public Placement I_03 { get; set; }//int8
+        public Attachment I_03 { get; set; }//int8
         [YAXAttributeFor("RotateOnMovement")]
         [YAXSerializeAs("value")]
         public byte I_04 { get; set; }
@@ -572,7 +579,7 @@ namespace Xv2CoreLib.EEPK
         [YAXSerializeAs("OnGroundOnly")]
         public bool I_32_3 { get; set; } //I_32
         [YAXAttributeFor("AttachFlags")]
-        [YAXSerializeAs("Unk4")]
+        [YAXSerializeAs("UseTimeScale")]
         public bool I_32_4 { get; set; } //I_32
         [YAXAttributeFor("StartEffectPosition")]
         [YAXSerializeAs("UseBoneDirection")]
@@ -746,12 +753,12 @@ namespace Xv2CoreLib.EEPK
             AfterAnimationLoop = 2
         }
         
-        public enum Placement : byte
+        public enum Attachment : byte
         {
-            Unk0,
+            External,
             Unk1,
-            OnBone = 2,
-            OnCamera = 3
+            Bone = 2,
+            Camera = 3
         }
         
         public EffectPart Clone()

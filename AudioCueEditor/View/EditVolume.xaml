@@ -1,0 +1,27 @@
+﻿<Window x:Class="AudioCueEditor.View.EditVolume"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AudioCueEditor.View"
+        mc:Ignorable="d"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
+        Dialog:DialogParticipation.Register="{Binding}"
+        Title="Volume / Bus" Height="156.327" Width="309.6" ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner">
+    <Grid>
+        <StackPanel Margin="0,10,0,0">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Bus" HorizontalContentAlignment="Right" Width="80" VerticalAlignment="Center"/>
+                <ComboBox SelectedItem="{Binding StringValue}" ItemsSource="{Binding StringValues}" DisplayMemberPath="StringValue" Width="180" Margin="5,0,0,0"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,5">
+                <Label Content="Volume" ToolTip="Warning: all audio tracks on the same bus will be affected!" HorizontalContentAlignment="Right" Width="80" VerticalAlignment="Center"/>
+                <Slider Value="{Binding Volume}" Minimum="0" Maximum="10000" Width="180" Margin="5,0,0,0"/>
+            </StackPanel>
+            <StackPanel Margin="0,5">
+                <Button Click="Button_Click" Content="Done" Margin="110,0,110,0"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

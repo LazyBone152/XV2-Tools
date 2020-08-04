@@ -32,6 +32,7 @@ using Xv2CoreLib.TSD;
 using Xv2CoreLib.TNL;
 using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.QXD;
+using Xv2CoreLib.PAL;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -151,9 +152,17 @@ namespace LB_Mod_Installer.Installer
         
         private void ResolveFileType(string path, _File file)
         {
+            //Special cases
+            if (path == Music.MusicInstaller.DIRECT_INSTALL_TYPE || path == Music.MusicInstaller.OPTION_INSTALL_TYPE)
+            {
+                Uninstall_BGM_ACB(path, file);
+                return;
+            }
+
             //If file doesn't exist in game data dir then it doesn't need to be uninstalled.
             if (!FileIO.FileExistsInGameDataDir(path)) return;
-
+            
+            //Standard cases
             switch (Path.GetExtension(path))
             {
                 case ".idb":
@@ -224,6 +233,9 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".qxd":
                     Uninstall_QXD(path, file);
+                    break;
+                case ".pal":
+                    Uninstall_PAL(path, file);
                     break;
                 default:
                     throw new Exception(string.Format("The filetype of \"{0}\" is unsupported. Uninstall failed.\n\nThis mod was likely installed by a newer version of the installer.", path));
@@ -854,6 +866,40 @@ namespace LB_Mod_Installer.Installer
             catch (Exception ex)
             {
                 string error = string.Format("Failed at {0} uninstall phase ({1}).", ErrorCode.QXD, path);
+                throw new Exception(error, ex);
+            }
+        }
+
+        private void Uninstall_BGM_ACB(string path, _File file)
+        {
+            try
+            {
+                new Music.MusicUninstaller(this, file);
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at BGM ACB uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
+
+        private void Uninstall_PAL(string path, _File file)
+        {
+            try
+            {
+                PAL_File binaryFile = (PAL_File)GetParsedFile<PAL_File>(path, false);
+                PAL_File cpkBinFile = (PAL_File)GetParsedFile<PAL_File>(path, true);
+
+                Section section = file.GetSection(Sections.PAL_Entry);
+
+                if (section != null)
+                {
+                    UninstallEntries(binaryFile.PalEntries, (cpkBinFile != null) ? cpkBinFile.PalEntries : null, section.IDs);
+                }
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at PAL uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }

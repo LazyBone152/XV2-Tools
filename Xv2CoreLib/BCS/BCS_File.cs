@@ -124,7 +124,7 @@ namespace Xv2CoreLib.BCS
 
         [YAXAttributeForClass]
         [BindingAutoId(999)]
-        public string Index { get; set; } //int16
+        public string Index { get; set; } //uint16
         
         //Parts
         [YAXDontSerializeIfNull]

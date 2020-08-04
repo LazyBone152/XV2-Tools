@@ -1,7 +1,10 @@
-﻿namespace Xv2CoreLib.Resource.UndoRedo
+﻿using System;
+
+namespace Xv2CoreLib.Resource.UndoRedo
 {
     public class UndoableProperty<T> : IUndoRedo
     {
+        public bool doLast { get; set; }
         private object _oldValue;
         private object _newValue;
         private string _property;

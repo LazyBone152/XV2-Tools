@@ -17,9 +17,8 @@ namespace XV2_Xml_Serializer
         static void Main(string[] args)
         {
             //for debugging only
-            //args = new string[1] { @"000_GOK_CKM.cam.ean" };
+            args = new string[1] { @"E:\VS_Test\BAC\ALL BAC" };
             
-
 #if DEBUG
             DEBUG_MODE = true;
 #endif
@@ -252,6 +251,12 @@ namespace XV2_Xml_Serializer
                                 case ".amk":
                                     Xv2CoreLib.AMK.AMK_File.Read(fileLocation, true);
                                     break;
+                                case ".obl":
+                                    Xv2CoreLib.OBL.OBL_File.Parse(fileLocation, true);
+                                    break;
+                                case ".pal":
+                                    Xv2CoreLib.PAL.PAL_File.Parse(fileLocation, true);
+                                    break;
                                 case ".xml":
                                     LoadXmlInitial(fileLocation);
                                     break;
@@ -482,6 +487,12 @@ namespace XV2_Xml_Serializer
                     case ".emd":
                         new Xv2CoreLib.EMD.Deserializer(fileLocation);
                         break;
+                    case ".obl":
+                        Xv2CoreLib.OBL.OBL_File.Write(fileLocation);
+                        break;
+                    case ".pal":
+                        Xv2CoreLib.PAL.PAL_File.Write(fileLocation);
+                        break;
                     default:
                         FileTypeNotSupported(fileLocation);
                         break;
@@ -494,12 +505,11 @@ namespace XV2_Xml_Serializer
             Console.WriteLine(String.Format("\"{0}\" file type not supported.", fileName));
             Console.ReadLine();
         }
-
+        
         private static bool LoadBinaryInitial_Debug(string fileLocation)
         {
-            //This method is for debug use only and not for the public release build.
 
-            if (DEBUG_MODE == false) return false; //return the method right here if debug mode is not active
+            if (DEBUG_MODE == false) return false;
 
             switch (Path.GetExtension(fileLocation))
             {
@@ -519,9 +529,8 @@ namespace XV2_Xml_Serializer
 
         private static bool LoadXmlInitial_Debug(string fileLocation)
         {
-            //This method is for debug use only and not for the public release build.
 
-            if (DEBUG_MODE == false) return false; //return the method right here if debug mode is not active
+            if (DEBUG_MODE == false) return false;
 
             switch (Path.GetExtension(Path.GetFileNameWithoutExtension(fileLocation)))
             {
@@ -670,8 +679,7 @@ namespace XV2_Xml_Serializer
             //Console.ReadLine();
 
         }
-
-
+        
         static void BulkParseEma(string directory)
         {
             string[] files = Directory.GetFiles(directory);
@@ -726,8 +734,7 @@ namespace XV2_Xml_Serializer
                 }
             }
         }
-
-
+        
         static void BulkParseEcf(string directory)
         {
             string[] files = Directory.GetFiles(directory);
@@ -1218,44 +1225,38 @@ namespace XV2_Xml_Serializer
                     //try
                     {
                         var acb = Xv2CoreLib.ACB_NEW.ACB_File.Load(s, false);
+                        
 
-                        foreach(var seq in acb.Sequences)
+                        foreach (var commandGroup in acb.CommandTables.GetIterator())
                         {
-                            if((seq.Type == Xv2CoreLib.ACB_NEW.SequenceType.RandomNoRepeat ||
-                                seq.Type == Xv2CoreLib.ACB_NEW.SequenceType.Random))
+                            foreach(var command in commandGroup.Commands)
                             {
-                                //if(((seq.TrackValues.Length / 2) - 1) != seq.Tracks.Count)
+                                if(command.CommandType == (Xv2CoreLib.ACB_NEW.CommandType)67)
                                 {
-                                    //Console.WriteLine("This. " + seq.ControlWorkArea1);
-                                    //Console.ReadLine();
+                                    //if(!UsedValues.Contains(command.Param2.ToString()))
+                                     //   UsedValues.Add(command.Param2.ToString());
+                                    Console.WriteLine($"This (Param1: {command.Param1}, Param2: {command.Param2}, Param3: {command.Param3}): {commandGroup.Index}");
+                                    Console.ReadLine();
                                 }
                             }
-                            //if (!UsedValues.Contains(seq.TargetName.ToString()))
-                            {
-                                //UsedValues.Add(action.TargetName.ToString());
-                            }
                         }
+
                     }
                     //catch (Exception ex)
-                    //{
-                    //    Console.WriteLine(ex.Message);
-                    //    Console.ReadLine();
-                    //}
-
-
-                    
-                    
+                    {
+                     //   Console.WriteLine(ex.Message);
+                     //   Console.ReadLine();
+                    }
                 }
                 
             }
-
-
+            return;
             //Create text file
             StringBuilder log = new StringBuilder();
-
-            foreach(string s in UsedValues)
+            
+            for(int i = 0; i < UsedValues.Count; i++)
             {
-                log.Append(s).AppendLine();
+                log.AppendLine($"{UsedValues[i]}");
             }
 
             File.WriteAllText("acb_debug.txt", log.ToString());

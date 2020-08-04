@@ -1,0 +1,60 @@
+﻿<Controls:MetroWindow x:Class="AudioCueEditor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AudioCueEditor"
+        xmlns:view="clr-namespace:AudioCueEditor.View"
+        xmlns:utils="clr-namespace:AudioCueEditor.Utils"
+        xmlns:Themes1="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:acb="clr-namespace:Xv2CoreLib.ACB_NEW;assembly=Xv2CoreLib"
+        mc:Ignorable="d"
+        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:undoRedo="clr-namespace:Xv2CoreLib.Resource.UndoRedo;assembly=Xv2CoreLib"
+        Title="Audio Cue Editor" TitleCaps="False" MinWidth="790" MinHeight="460" Height="600" Width="900" WindowStartupLocation="CenterScreen">
+    <Window.InputBindings>
+        <KeyBinding Key="Z" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=UndoCommand}"/>
+        <KeyBinding Key="Y" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=RedoCommand}"/>
+    </Window.InputBindings>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="25"/>
+        </Grid.RowDefinitions>
+        <Menu Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <MenuItem Header="File">
+                <MenuItem Header="New" Command="{Binding NewAcbCommand}"/>
+                <MenuItem Header="Open" Command="{Binding LoadAcbCommand}"/>
+                <MenuItem Header="Save" Command="{Binding SaveAcbCommand}"/>
+                <MenuItem Header="Save As.." Command="{Binding SaveAsAcbCommand}"/>
+                <Separator/>
+                <MenuItem Header="Exit" Command="{Binding ExitCommand}"/>
+            </MenuItem>
+            <MenuItem Header="Edit">
+                <MenuItem Header="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=UndoDescription}" Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=UndoCommand}"/>
+                <MenuItem Header="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=RedoDescription}" Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=RedoCommand}"/>
+            </MenuItem>
+            <MenuItem Header='Tools'>
+                <MenuItem Header="Extract All (raw)" Command="{Binding ExtractAllTracksRawCommand}"/>
+                <MenuItem Header="Extract All (wav)" Command="{Binding ExtractAllTracksWavCommand}"/>
+                <Separator/>
+                <MenuItem Header="Associate ACB Extension" Command="{Binding SetAcbFileAssociationCommand}"/>
+                <MenuItem Header="Associate MusicPackage Extension" Command="{Binding SetMusicPackageAssociationCommand}"/>
+                <Separator/>
+                <MenuItem Header="Create Music Installer" Command="{Binding CreateMusicInstallerCommand}"/>
+                <MenuItem Header="MusicPackage Type">
+                    <MenuItem Header="New Option" IsCheckable="True" IsChecked="{Binding AcbFile.MusicPackage_IsNewOptions, UpdateSourceTrigger=PropertyChanged}"/>
+                    <MenuItem Header="Direct" IsCheckable="True" IsChecked="{Binding AcbFile.MusicPackage_IsDirect, UpdateSourceTrigger=PropertyChanged}"/>
+                </MenuItem>
+                <MenuItem Header="Randomize Cue IDs" Command="{Binding RandomizeCueIDsCommand}"/>
+            </MenuItem>
+        </Menu>
+        <view:CueEditorView Grid.Row="1" AcbFile="{Binding AcbFile}"/>
+        <Grid Grid.Row="2" Background="{DynamicResource AccentColorBrush2}">
+            <TextBlock Text="{Binding AcbPathDisplay}" VerticalAlignment="Stretch" HorizontalAlignment="Right" FontSize="12" Margin="0,6,-0.2,0.309"/>
+        </Grid>
+    </Grid>
+</Controls:MetroWindow>

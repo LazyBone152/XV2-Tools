@@ -177,7 +177,8 @@ namespace Xv2CoreLib.BDM
         private BDM_Type GetBdmType()
         {
 
-            switch (bdm_File.BDM_Type) {
+            switch (bdm_File.BDM_Type)
+            {
                 case BDM_Type.XV2_0:
                     if (bdm_File.BDM_Entries != null) { count = bdm_File.BDM_Entries.Count(); }
                     return bdm_File.BDM_Type;
@@ -239,19 +240,19 @@ namespace Xv2CoreLib.BDM
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_04));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_06));
                 bytes.AddRange(BitConverter.GetBytes(Convert.ToSingle(type0[properOrder[i]].F_08)));
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_12));
+                bytes.AddRange(BitConverter.GetBytes((ushort)type0[properOrder[i]].I_12));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_14));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_16));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_18));
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_20));
+                bytes.AddRange(BitConverter.GetBytes((ushort)type0[properOrder[i]].I_20));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_22));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_24));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_26));
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_28));
+                bytes.AddRange(BitConverter.GetBytes((ushort)type0[properOrder[i]].I_28));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_30));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_32));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_34));
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_36));
+                bytes.AddRange(BitConverter.GetBytes((ushort)type0[properOrder[i]].I_36));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_38));
                 bytes.AddRange(BitConverter.GetBytes(Convert.ToSingle(type0[properOrder[i]].F_40)));
                 bytes.AddRange(BitConverter.GetBytes(Convert.ToSingle(type0[properOrder[i]].F_44)));
@@ -278,7 +279,7 @@ namespace Xv2CoreLib.BDM
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_96[0]));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_96[1]));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_100));
-                bytes.AddRange(BitConverter.GetBytes(HexConverter.ToInt16(type0[properOrder[i]].I_102)));
+                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_102));
                 bytes.Add((Byte)type0[properOrder[i]].I_104);
                 bytes.Add(0);
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_106));
@@ -379,7 +380,7 @@ namespace Xv2CoreLib.BDM
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_88[0]));
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_88[1]));
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_92));
-                bytes.AddRange(BitConverter.GetBytes(HexConverter.ToInt16(type[properOrder[i]].I_94)));
+                bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_94));
                 bytes.Add((Byte)type[properOrder[i]].I_96);
                 bytes.Add(0);
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_98));
@@ -389,8 +390,6 @@ namespace Xv2CoreLib.BDM
                 Assertion.AssertArraySize(type[properOrder[i]].I_80, 3, "BDM_Entry", "I_80");
                 Assertion.AssertArraySize(type[properOrder[i]].I_88, 2, "BDM_Entry", "I_88");
             }
-            
-
         }
 
         void WriteType1_Xv1(List<Type1SubEntry> type, int bdmId)
@@ -474,7 +473,7 @@ namespace Xv2CoreLib.BDM
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_88[0]));
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_88[1]));
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_92));
-                bytes.AddRange(BitConverter.GetBytes(HexConverter.ToInt16(type[properOrder[i]].I_94)));
+                bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_94));
                 bytes.Add((Byte)type[properOrder[i]].I_96);
                 bytes.Add(0);
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_98));

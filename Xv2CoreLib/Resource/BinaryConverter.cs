@@ -11,6 +11,23 @@ namespace Xv2CoreLib.Resource
     /// </summary>
     public static class BigEndianConverter
     {
+        public static int IndexOfValue(this byte[] bytes, int value, int startIndex, int count, bool bigEndian)
+        {
+            for(int i = startIndex; i < startIndex + count; i++)
+            {
+                if (bigEndian)
+                {
+                    if (ReadInt32(bytes, i) == value) return i;
+                }
+                else
+                {
+                    if (BitConverter.ToInt32(bytes, i) == value) return i;
+                }
+            }
+
+            return -1;
+        }
+
         public static Version UIntToVersion(uint value, bool hex)
         {
             var values = BitConverter.GetBytes(value);

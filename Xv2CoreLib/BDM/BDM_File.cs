@@ -21,12 +21,36 @@ namespace Xv2CoreLib.BDM
 
     public enum BDM_Type
     {
-        XV2_0,
+        XV2_0, //Just auto-convert all BDMs to this
         XV2_1,
         XV1
     }
 
+    public enum AcbType : ushort
+    {
+        Common = 0,
+        Character_SE = 2,
+        Character_VOX = 3,
+        Skill_SE = 10,
+        Skill_VOX = 11
+    }
+
+    public enum EepkType : ushort
+    {
+        Common = 0,
+        StageBG = 1,
+        Character = 2,
+        AwokenSkill = 3,
+        SuperSkill = 5,
+        UltimateSkill = 6,
+        EvasiveSkill = 7,
+        KiBlastSkill = 9,
+        Stage = 11
+    }
+
+
     [YAXSerializeAs("BDM")]
+    [Serializable]
     public class BDM_File : ISorting, IIsNull
     {
         [YAXAttributeForClass]
@@ -117,6 +141,13 @@ namespace Xv2CoreLib.BDM
             BDM_Entries.Add(entry);
         }
 
+        public int AddEntry(BDM_Entry entry)
+        {
+            entry.ID = NextID(0);
+            BDM_Entries.Add(entry);
+            return entry.ID;
+        }
+
         public void ConvertToXv2()
         {
             if (BDM_Type == BDM_Type.XV1)
@@ -150,15 +181,15 @@ namespace Xv2CoreLib.BDM
                             I_102 = subEntry.I_94,
                             I_04 = subEntry.I_04,
                             I_94 = subEntry.I_86,
-                            I_12 = subEntry.I_12,
+                            I_12 = (AcbType)subEntry.I_12,
                             I_14 = subEntry.I_14,
                             I_16 = subEntry.I_16,
                             I_18 = subEntry.I_18,
-                            I_20 = subEntry.I_20,
+                            I_20 = (EepkType)subEntry.I_20,
                             I_22 = subEntry.I_22,
                             I_24 = subEntry.I_24,
                             I_26 = subEntry.I_26,
-                            I_28 = subEntry.I_28,
+                            I_28 = (EepkType)subEntry.I_28,
                             I_32 = -1,
                             F_40 = subEntry.F_32,
                             F_44 = subEntry.F_36,
@@ -224,15 +255,15 @@ namespace Xv2CoreLib.BDM
                             I_102 = subEntry.I_94,
                             I_04 = subEntry.I_04,
                             I_94 = subEntry.I_86,
-                            I_12 = subEntry.I_12,
+                            I_12 = (AcbType)subEntry.I_12,
                             I_14 = subEntry.I_14,
                             I_16 = subEntry.I_16,
                             I_18 = subEntry.I_18,
-                            I_20 = subEntry.I_20,
+                            I_20 = (EepkType)subEntry.I_20,
                             I_22 = subEntry.I_22,
                             I_24 = subEntry.I_24,
                             I_26 = subEntry.I_26,
-                            I_28 = subEntry.I_28,
+                            I_28 = (EepkType)subEntry.I_28,
                             I_32 = -1,
                             F_40 = subEntry.F_32,
                             F_44 = subEntry.F_36,
@@ -320,15 +351,15 @@ namespace Xv2CoreLib.BDM
                             I_102 = subEntry.I_94,
                             I_04 = subEntry.I_04,
                             I_94 = subEntry.I_86,
-                            I_12 = subEntry.I_12,
+                            I_12 = (AcbType)subEntry.I_12,
                             I_14 = subEntry.I_14,
                             I_16 = (short)skillID1,
                             I_18 = subEntry.I_18,
-                            I_20 = subEntry.I_20,
+                            I_20 = (EepkType)subEntry.I_20,
                             I_22 = subEntry.I_22,
                             I_24 = (short)skillID2,
                             I_26 = subEntry.I_26,
-                            I_28 = subEntry.I_28,
+                            I_28 = (EepkType)subEntry.I_28,
                             I_32 = -1,
                             F_40 = subEntry.F_32,
                             F_44 = subEntry.F_36,
@@ -443,9 +474,11 @@ namespace Xv2CoreLib.BDM
         }
     }
 
+    [Serializable]
     public class BDM_Entry : IInstallable, INotifyPropertyChanged
     {
         #region INotifyPropChanged
+        [field:NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void NotifyPropertyChanged(String propertyName = "")
@@ -469,7 +502,7 @@ namespace Xv2CoreLib.BDM
         }
         [YAXDontSerialize]
         public int ID { get { return int.Parse(Index); } set { Index = value.ToString(); NotifyPropertyChanged("ID"); } }
-
+        
         #endregion
 
         [YAXAttributeForClass]
@@ -524,9 +557,42 @@ namespace Xv2CoreLib.BDM
         }
     }
 
-    [YAXSerializeAs("BDM_Type0")]
+    [YAXSerializeAs("BDM_SubEntry")]
+    [Serializable]
     public class Type0SubEntry
     {
+
+        #region WrapperProps
+        [YAXDontSerialize]
+        public AcbType AcbType { get { return I_12; } set { I_12 = value; } }
+        [YAXDontSerialize]
+        public ushort CueID { get { return (ushort)I_14; } set { I_14 = (short)value; } }
+
+        [YAXDontSerialize]
+        public ushort Effect1_ID { get { return (ushort)I_16; } set { I_16 = (short)value; } }
+        [YAXDontSerialize]
+        public ushort Effect1_SkillID { get { return (ushort)I_18; } set { I_18 = (short)value; } }
+        [YAXDontSerialize]
+        public EepkType Effect1_EepkType { get { return I_20; } set { I_20 = value; } }
+
+        [YAXDontSerialize]
+        public ushort Effect2_ID { get { return (ushort)I_24; } set { I_24 = (short)value; } }
+        [YAXDontSerialize]
+        public ushort Effect2_SkillID { get { return (ushort)I_26; } set { I_26 = (short)value; } }
+        [YAXDontSerialize]
+        public EepkType Effect2_EepkType { get { return I_28; } set { I_28 = value; } }
+
+        [YAXDontSerialize]
+        public ushort Effect3_ID { get { return (ushort)I_32; } set { I_32 = (short)value; } }
+        [YAXDontSerialize]
+        public ushort Effect3_SkillID { get { return (ushort)I_34; } set { I_34 = (short)value; } }
+        [YAXDontSerialize]
+        public EepkType Effect3_EepkType { get { return I_36; } set { I_36 = value; } }
+
+        [YAXDontSerialize]
+        public ushort StaminaBrokenOverrideBdmId { get { return (ushort)I_112; } set { I_112 = (short)value; } }
+        #endregion
+
 
         [YAXAttributeForClass]
         [YAXSerializeAs("Index")]
@@ -536,7 +602,8 @@ namespace Xv2CoreLib.BDM
         public UInt16 I_00 { get; set; }
         [YAXAttributeFor("Damage")]
         [YAXSerializeAs("Secondary_Type")]
-        public string I_102 { get; set; } //uint16
+        [YAXHexValue]
+        public ushort I_102 { get; set; } //uint16
         [YAXAttributeFor("Damage")]
         [YAXSerializeAs("Amount")]
         public UInt16 I_04 { get; set; }
@@ -544,8 +611,8 @@ namespace Xv2CoreLib.BDM
         [YAXSerializeAs("Special")]
         public UInt16 I_94 { get; set; }
         [YAXAttributeFor("Sound")]
-        [YAXSerializeAs("Type")]
-        public UInt16 I_12 { get; set; }
+        [YAXSerializeAs("AcbType")]
+        public AcbType I_12 { get; set; }
         [YAXAttributeFor("Sound")]
         [YAXSerializeAs("CueID")]
         public short I_14 { get; set; }
@@ -556,8 +623,8 @@ namespace Xv2CoreLib.BDM
         [YAXSerializeAs("Skill_ID")]
         public short I_18 { get; set; }
         [YAXAttributeFor("Effect_1")]
-        [YAXSerializeAs("Skill_Type")]
-        public short I_20 { get; set; }
+        [YAXSerializeAs("EepkType")]
+        public EepkType I_20 { get; set; }
         [YAXAttributeFor("Effect_2")]
         [YAXSerializeAs("ID")]
         public short I_24 { get; set; }
@@ -565,8 +632,8 @@ namespace Xv2CoreLib.BDM
         [YAXSerializeAs("Skill_ID")]
         public short I_26 { get; set; }
         [YAXAttributeFor("Effect_2")]
-        [YAXSerializeAs("Skill_Type")]
-        public short I_28 { get; set; }
+        [YAXSerializeAs("EepkType")]
+        public EepkType I_28 { get; set; }
         [YAXAttributeFor("Effect_3")]
         [YAXSerializeAs("ID")]
         public short I_32 { get; set; }
@@ -574,8 +641,8 @@ namespace Xv2CoreLib.BDM
         [YAXSerializeAs("Skill_ID")]
         public short I_34 { get; set; }
         [YAXAttributeFor("Effect_3")]
-        [YAXSerializeAs("Skill_Type")]
-        public short I_36 { get; set; }
+        [YAXSerializeAs("EepkType")]
+        public EepkType I_36 { get; set; }
         
 
 
@@ -774,8 +841,9 @@ namespace Xv2CoreLib.BDM
         }
 
     }
+    
 
-    [YAXSerializeAs("BDM_Type1")]
+    [Serializable]
     public class Type1SubEntry
     {
         [YAXAttributeForClass]
@@ -786,7 +854,8 @@ namespace Xv2CoreLib.BDM
         public UInt16 I_00 { get; set; }
         [YAXAttributeFor("Damage")]
         [YAXSerializeAs("Secondary_Type")]
-        public string I_94 { get; set; } //uint16
+        [YAXHexValue]
+        public ushort I_94 { get; set; } //uint16
         [YAXAttributeFor("Damage")]
         [YAXSerializeAs("Amount")]
         public UInt16 I_04 { get; set; }

@@ -288,6 +288,7 @@ namespace Xv2CoreLib.BCM
     #endregion
 
     [YAXSerializeAs("BCM")]
+    [Serializable]
     public class BCM_File
     {
         [YAXDontSerializeIfNull]
@@ -370,6 +371,7 @@ namespace Xv2CoreLib.BCM
     }
 
     [YAXSerializeAs("BCMEntry")]
+    [Serializable]
     public class BCM_Entry
     {
         [YAXAttributeForClass]

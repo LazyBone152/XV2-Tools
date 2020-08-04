@@ -78,7 +78,7 @@ namespace Xv2CoreLib.IDB
                         I_20 = BitConverter.ToInt32(rawBytes, offset + 20),
                         I_24 = BitConverter.ToInt32(rawBytes, offset + 24),
                         I_28 = BitConverter.ToInt32(rawBytes, offset + 28),
-                        I_32 = BitConverter.ToInt32(rawBytes, offset + 32),
+                        I_32 = BitConverter.ToInt32(rawBytes, offset + 32).ToString(),
                         I_36 = BitConverter.ToUInt16(rawBytes, offset + 36),
                         I_38 = (LB_Color)BitConverter.ToUInt16(rawBytes, offset + 38),
                         I_40 = BitConverter.ToUInt16(rawBytes, offset + 40),

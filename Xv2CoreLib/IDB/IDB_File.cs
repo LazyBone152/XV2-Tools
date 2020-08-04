@@ -224,7 +224,7 @@ namespace Xv2CoreLib.IDB
         public int I_28 { get; set; }
         [YAXAttributeFor("Model")]
         [YAXSerializeAs("value")]
-        public int I_32 { get; set; }
+        public string I_32 { get; set; } //int32
         [YAXAttributeFor("LimitBurst.EEPK_Effect")]
         [YAXSerializeAs("ID")]
         public ushort I_36 { get; set; }

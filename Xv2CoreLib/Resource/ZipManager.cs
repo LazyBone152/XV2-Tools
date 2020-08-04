@@ -20,6 +20,7 @@ namespace Xv2CoreLib.Resource
             archive = _archive;
         }
 
+
         public bool Exists(string path)
         {
             return (GetZipEntry(path, false) == null) ? false : true;
@@ -170,12 +171,15 @@ namespace Xv2CoreLib.Resource
             archive = _archive;
         }
 
-        public void AddFile(string path, byte[] bytes, CompressionLevel compression = CompressionLevel.Optimal)
+        public void AddFile(string path, byte[] bytes, CompressionLevel compression = CompressionLevel.Optimal, bool createMode = false)
         {
-            //First look for an existing entry, and if it exists delete it.
-            var existingEntry = archive.GetEntry(path);
-            if(existingEntry != null)
-                existingEntry.Delete();
+            if (!createMode)
+            {
+                //First look for an existing entry, and if it exists delete it.
+                var existingEntry = archive.GetEntry(path);
+                if (existingEntry != null)
+                    existingEntry.Delete();
+            }
 
             //Create new entry
             var entry = archive.CreateEntry(path, compression);

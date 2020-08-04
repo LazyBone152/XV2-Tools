@@ -4,9 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EEPK_Organiser.Forms.LIGHTEMA"
-        xmlns:ema="clr-namespace:Xv2CoreLib.EMA"
+        xmlns:ema="clr-namespace:Xv2CoreLib.EMA;assembly=Xv2CoreLib"
         xmlns:col="clr-namespace:System.Collections;assembly=mscorlib"
-        xmlns:EMP="clr-namespace:Xv2CoreLib.EMP" xmlns:Converters="clr-namespace:EEPK_Organiser.Converters" x:Class="EEPK_Organiser.Forms.LIGHTEMA.LightEmaEditor"
+        xmlns:EMP="clr-namespace:Xv2CoreLib.EMP;assembly=Xv2CoreLib" xmlns:Converters="clr-namespace:EEPK_Organiser.Converters" x:Class="EEPK_Organiser.Forms.LIGHTEMA.LightEmaEditor"
         mc:Ignorable="d"
         Title="Light Editor" Height="450" Width="750" WindowStartupLocation="CenterOwner" ResizeMode="CanMinimize">
     <Window.Resources>

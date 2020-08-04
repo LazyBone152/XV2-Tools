@@ -3,20 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Xv2CoreLib.CUS;
 using Xv2CoreLib.CMS;
-using Xv2CoreLib.BCS;
-using Xv2CoreLib.BPE;
-using Xv2CoreLib.BSA;
-using Xv2CoreLib.CNS;
-using Xv2CoreLib.CSO;
-using Xv2CoreLib.ERS;
-using Xv2CoreLib.IDB;
 using Xv2CoreLib;
-using Xv2CoreLib.BEV;
-using Xv2CoreLib.CNC;
-using Xv2CoreLib.BAC;
-using Xv2CoreLib.MSG;
 using System.Reflection;
 using System.Collections;
+using Xv2CoreLib.BCS;
+using LB_Mod_Installer.Installer;
 
 namespace LB_Mod_Installer.Binding
 {
@@ -84,11 +75,11 @@ namespace LB_Mod_Installer.Binding
             return String.Empty;
         }
 
-        public bool HasArgument()
+        public bool HasArgument(int arg = 1)
         {
             if(Arguments != null)
             {
-                if(Arguments.Length > 0)
+                if(Arguments.Length >= arg)
                 {
                     return true;
                 }
@@ -135,6 +126,7 @@ namespace LB_Mod_Installer.Binding
         DefaultValue,
         X2MSkillID1,
         X2MSkillID2,
+        AutoPartSet
     }
 
     public enum ErrorHandling
@@ -146,12 +138,35 @@ namespace LB_Mod_Installer.Binding
 
     public class IdBindingManager
     {
-        public const string NullTokenStr = "1280070990";
         public const int NullTokenInt = 1280070990;
+        public const string NullTokenStr = "1280070990";
 
-        //These files will be loaded only once during the install process
-        private CUS_File cusFile { get; set; }
-        private CMS_File cmsFile { get; set; }
+        private const string CUS_PATH = "system/custom_skill.cus";
+        private const string CMS_PATH = "system/char_model_spec.cms";
+        private const string HUM_BCS_PATH = "chara/HUM/HUM.bcs";
+        private const string HUF_BCS_PATH = "chara/HUF/HUF.bcs";
+        private const string MAM_BCS_PATH = "chara/MAM/MAM.bcs";
+        private const string MAF_BCS_PATH = "chara/MAF/MAF.bcs";
+        private const string FRI_BCS_PATH = "chara/FRI/FRI.bcs";
+        private const string NMC_BCS_PATH = "chara/NMC/NMC.bcs";
+        
+        private enum CusIdType
+        {
+            ID1,
+            ID2
+        }
+
+        public enum CusSkillType
+        {
+            Super,
+            Ultimate,
+            Evasive,
+            Blast,
+            Awoken
+        }
+
+        Install_NEW install;
+        List<int> usedPartSets = new List<int>();
 
         //Alias
         private List<AliasValue> Aliases = new List<AliasValue>();
@@ -159,12 +174,13 @@ namespace LB_Mod_Installer.Binding
         //X2M
         private X2MHelper _X2MHelper = new X2MHelper();
 
-        public IdBindingManager(CUS_File _cusFile, CMS_File _cmsFile)
+
+        public IdBindingManager(Install_NEW install)
         {
-            cusFile = _cusFile;
-            cmsFile = _cmsFile;
+            this.install = install;
         }
 
+        //Binding
         private string ParseBinding<T>(string binding, string comment, string section, string filePath, IEnumerable<T> entries1, IEnumerable<T> entries2, bool allowAutoId = true, ushort maxId = ushort.MaxValue, List<string> usedIds = null) where T : IInstallable
         {
             if (IsBinding(binding))
@@ -252,7 +268,22 @@ namespace LB_Mod_Installer.Binding
                                 ID = id2;
                                 break;
                             }
-                            
+                        case Function.AutoPartSet:
+                            {
+                                if (!allowAutoId) throw new Exception(String.Format("The AutoPartSet binding function is not available for this value. ({0})", comment));
+                                int min = (b.HasArgument(1)) ? int.Parse(b.GetArgument1()) : 0;
+                                int max = (b.HasArgument(2)) ? int.Parse(b.GetArgument2()) : 999;
+                                int nextId = GetFreePartSet(min, max);
+
+                                if (nextId == NullTokenInt && errorHandler == ErrorHandling.Stop)
+                                {
+                                    GeneralInfo.SpecialFailState = GeneralInfo.SpecialFailStates.AutoIdBindingFailed;
+                                    throw new Exception(String.Format("A PartSet ID could not be allocated in {2}. Install failed. \n\nBinding: {1}\nProperty: {0}", comment, binding, filePath));
+                                }
+
+                                ID = nextId;
+                            }
+                            break;
                     }
                 }
 
@@ -344,6 +375,9 @@ namespace LB_Mod_Installer.Binding
                         break;
                     case "x2mskillid2":
                         bindings.Add(new BindingValue() { Function = Function.X2MSkillID2, Arguments = arguments });
+                        break;
+                    case "autopartset":
+                        bindings.Add(new BindingValue() { Function = Function.AutoPartSet, Arguments = arguments });
                         break;
                     default:
                         throw new FormatException(String.Format("Invalid ID Binding Function (Function = {0}, Argument = {1})\nFull binding: {2}", function, argument, originalBinding));
@@ -456,6 +490,8 @@ namespace LB_Mod_Installer.Binding
             return bindings;
         }
 
+
+        //Function Helpers
         private int GetAliasId(string alias, string comment)
         {
             foreach(var a in Aliases)
@@ -547,7 +583,6 @@ namespace LB_Mod_Installer.Binding
             }
         }
         
-        //Utility
         private CusSkillType GetSkillType(string argument)
         {
             switch (argument.ToLower())
@@ -566,11 +601,12 @@ namespace LB_Mod_Installer.Binding
                     return CusSkillType.Super;
             }
         }
-
-
+        
         private int GetSkillId(CusIdType idType, CusSkillType skillType, string shortName)
         {
-            List<Xv2CoreLib.CUS.Skill> skills = null;
+            CUS_File cusFile = (CUS_File)install.GetParsedFile<CUS_File>(CUS_PATH);
+
+            List<Skill> skills = null;
             switch (skillType)
             {
                 case CusSkillType.Super:
@@ -609,7 +645,9 @@ namespace LB_Mod_Installer.Binding
 
         private int GetCharaId(string shortName)
         {
-            foreach(var chara in cmsFile.CMS_Entries)
+            CMS_File cmsFile = (CMS_File)install.GetParsedFile<CMS_File>(CMS_PATH);
+
+            foreach (var chara in cmsFile.CMS_Entries)
             {
                 if (chara.Str_04.ToLower() == shortName) return int.Parse(chara.Index);
             }
@@ -617,22 +655,35 @@ namespace LB_Mod_Installer.Binding
             return NullTokenInt; //Chara wasn't found, so defaulting to 0
         }
 
-        private enum CusIdType
+        private int GetFreePartSet(int min, int max)
         {
-            ID1,
-            ID2
+            int id = min;
+
+            while (IsPartSetUsed(id) && id < max)
+            {
+                id++;
+            }
+
+            if (IsPartSetUsed(id))
+                return NullTokenInt;
+
+            usedPartSets.Add(id);
+            return id;
         }
 
-        public enum CusSkillType
+        private bool IsPartSetUsed(int partSet)
         {
-            Super,
-            Ultimate,
-            Evasive,
-            Blast,
-            Awoken
+            if (usedPartSets.Contains(partSet)) return true;
+            if (((BCS_File)install.GetParsedFile<BCS_File>(HUM_BCS_PATH)).PartSets.Any(x => x.ID == partSet)) return true;
+            if (((BCS_File)install.GetParsedFile<BCS_File>(HUF_BCS_PATH)).PartSets.Any(x => x.ID == partSet)) return true;
+            if (((BCS_File)install.GetParsedFile<BCS_File>(MAM_BCS_PATH)).PartSets.Any(x => x.ID == partSet)) return true;
+            if (((BCS_File)install.GetParsedFile<BCS_File>(MAF_BCS_PATH)).PartSets.Any(x => x.ID == partSet)) return true;
+            if (((BCS_File)install.GetParsedFile<BCS_File>(FRI_BCS_PATH)).PartSets.Any(x => x.ID == partSet)) return true;
+            if (((BCS_File)install.GetParsedFile<BCS_File>(NMC_BCS_PATH)).PartSets.Any(x => x.ID == partSet)) return true;
+            return false;
         }
-
         
+        //Class parsing
         /// <summary>
         /// Parse the bindings on all string properties.
         /// </summary>
@@ -729,7 +780,7 @@ namespace LB_Mod_Installer.Binding
                         object value = childProp.GetValue(obj);
                         childProp.SetValue(obj, ParseBinding<T>((string)value, string.Format("{0}", childProp.Name), section, filePath, null, null, false, ushort.MaxValue).ToString());
                     }
-                    else
+                    else if(childProp.PropertyType.IsClass)
                     {
                         object value = childProp.GetValue(obj);
                         var bindingSubClassAtr = (BindingSubClass[])childProp.GetCustomAttributes(typeof(BindingSubClass), false);
@@ -748,6 +799,7 @@ namespace LB_Mod_Installer.Binding
                 }
             }
         }
+
 
         /// <summary>
         /// Removes all entries that has a NullToken (caused by a failed AutoID or X2M binding).

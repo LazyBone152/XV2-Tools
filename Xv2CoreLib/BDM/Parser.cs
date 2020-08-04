@@ -47,7 +47,8 @@ namespace Xv2CoreLib.BDM
             return bdmFile;
         }
 
-        void Parse() {
+        void Parse()
+        {
             int count = BitConverter.ToInt32(rawBytes, 8);
             int offset = BitConverter.ToInt32(rawBytes, 12);
 
@@ -55,7 +56,6 @@ namespace Xv2CoreLib.BDM
 
             if (count > 0)
             {
-
                 switch (type)
                 {
                     case BDM_Type.XV2_0:
@@ -95,6 +95,10 @@ namespace Xv2CoreLib.BDM
 
                 
             }
+
+            //Auto-convert
+            bdmFile.ConvertToXv2();
+            type = BDM_Type.XV2_0;
         }
 
         private BDM_Type GetBdmType()
@@ -135,19 +139,19 @@ namespace Xv2CoreLib.BDM
                 type0[i].I_04 = BitConverter.ToUInt16(rawBytes, offset + 4);
                 type0[i].I_06 = BitConverter.ToUInt16(rawBytes, offset + 6);
                 type0[i].F_08 = BitConverter.ToSingle(rawBytes, offset + 8);
-                type0[i].I_12 = BitConverter.ToUInt16(rawBytes, offset + 12);
+                type0[i].I_12 = (AcbType)BitConverter.ToUInt16(rawBytes, offset + 12);
                 type0[i].I_14 = BitConverter.ToInt16(rawBytes, offset + 14);
                 type0[i].I_16 = BitConverter.ToInt16(rawBytes, offset + 16);
                 type0[i].I_18 = BitConverter.ToInt16(rawBytes, offset + 18);
-                type0[i].I_20 = BitConverter.ToInt16(rawBytes, offset + 20);
+                type0[i].I_20 = (EepkType)BitConverter.ToUInt16(rawBytes, offset + 20);
                 type0[i].I_22 = BitConverter.ToUInt16(rawBytes, offset + 22);
                 type0[i].I_24 = BitConverter.ToInt16(rawBytes, offset + 24);
                 type0[i].I_26 = BitConverter.ToInt16(rawBytes, offset + 26);
-                type0[i].I_28 = BitConverter.ToInt16(rawBytes, offset + 28);
+                type0[i].I_28 = (EepkType)BitConverter.ToUInt16(rawBytes, offset + 28);
                 type0[i].I_30 = BitConverter.ToUInt16(rawBytes, offset + 30);
                 type0[i].I_32 = BitConverter.ToInt16(rawBytes, offset + 32);
                 type0[i].I_34 = BitConverter.ToInt16(rawBytes, offset + 34);
-                type0[i].I_36 = BitConverter.ToInt16(rawBytes, offset + 36);
+                type0[i].I_36 = (EepkType)BitConverter.ToUInt16(rawBytes, offset + 36);
                 type0[i].I_38 = BitConverter.ToUInt16(rawBytes, offset + 38);
                 type0[i].F_40 = BitConverter.ToSingle(rawBytes, offset + 40);
                 type0[i].F_44 = BitConverter.ToSingle(rawBytes, offset + 44);
@@ -169,7 +173,7 @@ namespace Xv2CoreLib.BDM
                 type0[i].I_86 = BitConverter.ToInt16(rawBytes, offset + 86);
                 type0[i].I_94 = BitConverter.ToUInt16(rawBytes, offset + 94);
                 type0[i].I_100 = BitConverter.ToUInt16(rawBytes, offset + 100);
-                type0[i].I_102 = HexConverter.GetHexString(BitConverter.ToUInt16(rawBytes, offset + 102));
+                type0[i].I_102 = BitConverter.ToUInt16(rawBytes, offset + 102);
                 type0[i].I_104 = (SByte)rawBytes[offset + 104];
                 type0[i].I_106 = BitConverter.ToUInt16(rawBytes, offset + 106);
                 type0[i].I_108 = BitConverter.ToInt16(rawBytes, offset + 108);
@@ -244,7 +248,7 @@ namespace Xv2CoreLib.BDM
                 type[i].I_78 = BitConverter.ToInt16(rawBytes, offset + 78);
                 type[i].I_86 = BitConverter.ToUInt16(rawBytes, offset + 86);
                 type[i].I_92 = BitConverter.ToUInt16(rawBytes, offset + 92);
-                type[i].I_94 = HexConverter.GetHexString(BitConverter.ToUInt16(rawBytes, offset + 94));
+                type[i].I_94 = BitConverter.ToUInt16(rawBytes, offset + 94);
                 type[i].I_96 = (SByte)rawBytes[offset + 96];
                 type[i].I_98 = BitConverter.ToUInt16(rawBytes, offset + 98);
                 type[i].I_100 = BitConverter.ToInt16(rawBytes, offset + 100);
@@ -321,7 +325,7 @@ namespace Xv2CoreLib.BDM
                 type[i].I_78 = BitConverter.ToInt16(rawBytes, offset + 78);
                 type[i].I_86 = BitConverter.ToUInt16(rawBytes, offset + 86);
                 type[i].I_92 = BitConverter.ToUInt16(rawBytes, offset + 92);
-                type[i].I_94 = HexConverter.GetHexString(BitConverter.ToUInt16(rawBytes, offset + 94));
+                type[i].I_94 = BitConverter.ToUInt16(rawBytes, offset + 94);
                 type[i].I_96 = (SByte)rawBytes[offset + 96];
                 type[i].I_98 = BitConverter.ToUInt16(rawBytes, offset + 98);
                 type[i].I_100 = BitConverter.ToInt16(rawBytes, offset + 100);

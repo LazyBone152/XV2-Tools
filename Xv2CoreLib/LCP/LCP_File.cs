@@ -13,16 +13,11 @@ namespace Xv2CoreLib.LCP
     {
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "LCP_Entry")]
         public List<LCP_Entry> LcpEntries { get; set; }
-
-
-        //Parsing
-        private byte[] rawBytes { get; set; }
-
+        
         public LCP_File(string path, bool _writeXml)
         {
-            rawBytes = File.ReadAllBytes(path);
             LcpEntries = new List<LCP_Entry>();
-            ParseLcp();
+            ParseLcp(File.ReadAllBytes(path));
 
             if (_writeXml)
             {
@@ -36,7 +31,7 @@ namespace Xv2CoreLib.LCP
 
         }
 
-        private void ParseLcp()
+        private void ParseLcp(byte[] rawBytes)
         {
             int offset = (8 * BitConverter.ToInt32(rawBytes, 8)) + 24;
             int count = BitConverter.ToInt32(rawBytes, 8);

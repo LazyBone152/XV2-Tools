@@ -10,6 +10,20 @@ using System.Security.Cryptography;
 
 namespace Xv2CoreLib
 {
+    public static class ArrayExtensions
+    {
+        public static byte[] DeepCopy(this byte[] array)
+        {
+            byte[] newArray = new byte[array.Length];
+
+            for (int i = 0; i < array.Length; i++)
+                newArray[i] = array[i];
+
+            return newArray;
+        }
+
+    }
+
     public static class EnumEx
     {
         public static T SetFlag<T>(this Enum value, T append, bool state)
@@ -149,20 +163,29 @@ namespace Xv2CoreLib
         
         public static float Range(float min, float max)
         {
+            start:
             InitRandomGenerator();
-            return (float)(RandomGenerator.NextDouble() * (max - min) + min);
+            var value = (float)(RandomGenerator.NextDouble() * (max - min) + min);
+            if (value < min || value > max) goto start;
+            return value;
         }
 
         public static double Range(double min, double max)
         {
+            start:
             InitRandomGenerator();
-            return RandomGenerator.NextDouble() * (max - min) + min;
+            var value = RandomGenerator.NextDouble() * (max - min) + min;
+            if (value < min || value > max) goto start;
+            return value;
         }
 
         public static int Range(int min, int max)
         {
+            start:
             InitRandomGenerator();
-            return RandomGenerator.Next() * (max - min) + min;
+            var value = RandomGenerator.Next() * (max - min) + min;
+            if (value < min || value > max) goto start;
+            return value;
         }
 
         private static void InitRandomGenerator()
@@ -381,6 +404,13 @@ namespace Xv2CoreLib
                 Replace(Path.AltDirectorySeparatorChar, '/').
                 Replace(string.Format("{0}{0}", Path.DirectorySeparatorChar), "/").
                 Replace(string.Format("{0}{0}", Path.AltDirectorySeparatorChar), "/");
+        }
+
+        public static string PathRemoveRoot(string path)
+        {
+            path = SanitizePath(path);
+            if (path.StartsWith("/")) path = path.Remove(0);
+            return path.Substring(path.IndexOf("/") + 1);
         }
 
         /// <summary>
@@ -866,7 +896,7 @@ namespace Xv2CoreLib
         /// </summary>
         public static List<byte> ReplaceRange(List<byte> list, byte[] insertedData, int startIndex)
         {
-            if (insertedData.Count() >= list.Count())
+            if (insertedData.Length > list.Count)
             {
                 throw new InvalidOperationException("Cannot insert more data than is in the original list");
             }

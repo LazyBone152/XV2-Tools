@@ -83,8 +83,7 @@ namespace Xv2CoreLib.BCS
                         bcsFile.PartSets.Add(new PartSet() { Index = i.ToString() });
                         if (BitConverter.ToInt32(rawBytes, thisPartsetOffset + 20) != 10)
                         {
-                            Console.WriteLine(String.Format("Part count mismatch on PartSet {0} (Expected 10, but found {1})\nThis BCS file cannot be parsed.", i, BitConverter.ToInt32(rawBytes, thisPartsetOffset + 20)));
-                            Utils.WaitForInputThenQuit();
+                            throw new Exception(string.Format("Part count mismatch on PartSet {0} (Expected 10, but found {1})\nThis BCS file cannot be parsed.", i, BitConverter.ToInt32(rawBytes, thisPartsetOffset + 20)));
                         }
 
                         int tableOffset = thisPartsetOffset + BitConverter.ToInt32(rawBytes, thisPartsetOffset + 24);

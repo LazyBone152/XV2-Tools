@@ -42,7 +42,7 @@ namespace Xv2CoreLib.BAC
 
         private void WriteBac()
         {
-            bacFile.SortEntries();
+            SortEntries();
 
             int count = (bacFile.BacEntries != null) ? bacFile.BacEntries.Count() : 0;
             List<int> BacEntryOffsets = new List<int>();
@@ -200,6 +200,34 @@ namespace Xv2CoreLib.BAC
 
         }
 
+        /// <summary>
+        /// Sort entries to be in ascending order with no gaps.
+        /// </summary>
+        private void SortEntries()
+        {
+            //Quick and dirty duplicate ID check
+            var conflicts = bacFile.BacEntries.Where(x => bacFile.BacEntries.Any(y => y.SortID == x.SortID && y != x));
+
+            if (conflicts.Count() > 0)
+            {
+                throw new Exception($"Multiple BAC entries with the ID {conflicts.First().SortID} were found!");
+            }
+
+            //Duplicate bacFile so changes here dont affect the original (would really cause havok with the undo stack on XenoKit...)
+            bacFile = bacFile.Copy();
+            bacFile.SortEntries();
+            if (bacFile.BacEntries.Count == 0) return; //No bac entries. Gtfo
+
+            int lastIndex = bacFile.BacEntries[bacFile.BacEntries.Count - 1].SortID;
+
+            for(int a = 0; a <= lastIndex; a++)
+            {
+                if (bacFile.BacEntries.FirstOrDefault(x => x.SortID == a) == null)
+                    bacFile.BacEntries.Add(BAC_Entry.Empty(a));
+            }
+
+            bacFile.SortEntries();
+        }
 
         //Utility
 
@@ -599,35 +627,6 @@ namespace Xv2CoreLib.BAC
             }
 
         }
-
-        private List<BAC_Type17> ValidateType17Size(List<BAC_Type17> type17)
-        {
-            //If one of the Type17 entries is of Full type, it will convert all of them to be Full.
-
-            bool isFull = false;
-
-            foreach(var e in type17)
-            {
-                if(e.F_20 != null)
-                {
-                    isFull = true;
-                    break;
-                }
-            }
-
-            if (isFull)
-            {
-                for (int i = 0; i < type17.Count(); i++)
-                {
-                    if (type17[i].F_20 == null)
-                    {
-                        type17[i].F_20 = new float[3];
-                    }
-                }
-            }
-
-            return type17;
-        }
-
+        
     }
 }

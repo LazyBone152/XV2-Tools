@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Xv2CoreLib.ACB_NEW;
 using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.Resource;
 
@@ -115,6 +116,18 @@ namespace LB_Mod_Installer.Installer
                 ecf.AddEffects(((EffectContainerFile)data).Effects);
                 cachedFile.backupEffectContainerFile = ecf;
             }
+            else if(data.GetType() == typeof(ACB_File))
+            {
+                //Might be better to change this to a shallow-copy
+                ACB_File acb = ACB_File.NewXv2Acb();
+                
+                foreach(var cue in ((ACB_File)data).Cues)
+                {
+                    acb.CopyCue((int)cue.ID, (ACB_File)data);
+                }
+
+                cachedFile.backupBgmFile = acb;
+            }
 
             cachedFiles.Add(cachedFile);
         }
@@ -134,18 +147,25 @@ namespace LB_Mod_Installer.Installer
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(GeneralInfo.GetPathInGameDir(file.Path)));
 
-                if (file.FileType == CachedFileType.Parsed && file.Data.GetType() != typeof(EffectContainerFile))
-                {
-                    File.WriteAllBytes(GeneralInfo.GetPathInGameDir(file.Path), file.GetBytes());
-                }
-                else if (file.FileType == CachedFileType.Parsed && file.Data.GetType() == typeof(EffectContainerFile))
+                if (file.FileType == CachedFileType.Parsed && file.Data.GetType() == typeof(EffectContainerFile))
                 {
                     string savePath = GeneralInfo.GetPathInGameDir(file.Path);
                     EffectContainerFile ecf = (EffectContainerFile)file.Data;
                     ecf.Directory = Path.GetDirectoryName(savePath);
                     ecf.Name = Path.GetFileNameWithoutExtension(savePath);
-                    ecf.saveFormat = SaveFormat.Binary;
+                    ecf.saveFormat = Xv2CoreLib.EffectContainer.SaveFormat.Binary;
                     ecf.Save();
+                }
+                else if (file.FileType == CachedFileType.Parsed && file.Data.GetType() == typeof(ACB_File))
+                {
+                    string path = GeneralInfo.GetPathInGameDir(file.Path);
+                    string acbPath = string.Format("{0}/{1}", Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
+                    ACB_File acbFile = (ACB_File)file.Data;
+                    acbFile.Save(acbPath, true);
+                }
+                else if (file.FileType == CachedFileType.Parsed)
+                {
+                    File.WriteAllBytes(GeneralInfo.GetPathInGameDir(file.Path), file.GetBytes());
                 }
             }
         }
@@ -175,7 +195,7 @@ namespace LB_Mod_Installer.Installer
                         File.Delete(GeneralInfo.GetPathInGameDir(file.Path));
                     }
                 }
-                else if (file.backupEffectContainerFile == null)
+                else if (file.backupEffectContainerFile == null && file.backupBgmFile == null)
                 {
                     //Restore backup
                     File.Delete(GeneralInfo.GetPathInGameDir(file.Path));
@@ -194,8 +214,15 @@ namespace LB_Mod_Installer.Installer
                     string savePath = GeneralInfo.GetPathInGameDir(file.Path);
                     file.backupEffectContainerFile.Directory = Path.GetDirectoryName(savePath);
                     file.backupEffectContainerFile.Name = Path.GetFileNameWithoutExtension(savePath);
-                    file.backupEffectContainerFile.saveFormat = SaveFormat.Binary;
+                    file.backupEffectContainerFile.saveFormat = Xv2CoreLib.EffectContainer.SaveFormat.Binary;
                     file.backupEffectContainerFile.Save();
+                }
+                else if(file.backupBgmFile != null)
+                {
+                    //Restore CAR_BGM.acb
+                    string path = GeneralInfo.GetPathInGameDir(file.Path);
+                    path = string.Format("{0}/{1}", Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
+                    file.backupBgmFile.Save(path, true);
                 }
             }
         }
@@ -213,6 +240,8 @@ namespace LB_Mod_Installer.Installer
         public bool alreadyExists = false; //If false and install fails, delete the file from disk
         public byte[] backupBytes = null; //If the file already exists, back it up into this array
         public EffectContainerFile backupEffectContainerFile = null;
+        public ACB_File backupBgmFile = null; 
+
 
         public CachedFile(string _path, object _data, bool _allowOverwrite)
         {

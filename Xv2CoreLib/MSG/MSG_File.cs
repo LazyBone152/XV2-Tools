@@ -403,6 +403,13 @@ namespace Xv2CoreLib.MSG
                 }
             }
         }
+
+        public int AddEntry(string name, string message)
+        {
+            int id = GetLowestUnusedID();
+            MSG_Entries.Add(new MSG_Entry() { Name = name, Index = id.ToString(), Msg_Content = new List<Msg_Line>() { new Msg_Line() { Text = message } } });
+            return id;
+        }
     }
 
     [YAXSerializeAs("MsgEntry")]

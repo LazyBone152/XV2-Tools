@@ -24,8 +24,10 @@ namespace Xv2CoreLib.EAN
     }
 
     [YAXSerializeAs("EAN")]
+    [Serializable]
     public class EAN_File : INotifyPropertyChanged, ISorting, IIsNull
     {
+        [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
 
         // This method is called by the Set accessor of each property.
@@ -362,8 +364,11 @@ namespace Xv2CoreLib.EAN
     }
 
     [YAXSerializeAs("Animation")]
+    [Serializable]
     public class EAN_Animation : INotifyPropertyChanged, IInstallable
     {
+        #region NotifyPropertyChanged
+        [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
 
         // This method is called by the Set accessor of each property.
@@ -376,6 +381,54 @@ namespace Xv2CoreLib.EAN
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
+        #endregion
+
+        public enum IntPrecision
+        {
+            _8Bit = 0,
+            _16Bit = 1
+        }
+
+        public enum FloatPrecision
+        {
+            _8Bit = 0,
+            _16Bit = 1,
+            _32Bit = 2,
+            _64Bit = 3
+        }
+
+        #region WrapperProps
+        [YAXDontSerialize]
+        public int SortID { get { return IndexNumeric; } }
+        [YAXDontSerialize]
+        public int IndexNumeric
+        {
+            get
+            {
+                return int.Parse(Index);
+            }
+            set
+            {
+                Index = value.ToString();
+            }
+        }
+        [YAXDontSerialize]
+        public string DisplayName
+        {
+            get
+            {
+                return String.Format("[{0}] {1}", IndexNumeric, Name);
+            }
+        }
+
+        [YAXDontSerialize]
+        public ushort Id_Short
+        {
+            //For binding in WPF - cant be bothered doing a (int > ushort) value converter
+            get { return ushort.Parse(Index); }
+            set { Index = Id_Short.ToString(); }
+        }
+        #endregion
 
         private string _index = null;
         [YAXAttributeForClass]
@@ -397,36 +450,7 @@ namespace Xv2CoreLib.EAN
                 }
             }
         }
-        [YAXDontSerialize]
-        public int SortID { get { return IndexNumeric; } }
         
-
-        public enum IntPrecision
-        {
-            _8Bit = 0,
-            _16Bit = 1
-        }
-
-        public enum FloatPrecision
-        {
-            _8Bit = 0,
-            _16Bit = 1,
-            _32Bit = 2,
-            _64Bit = 3
-        }
-        
-        [YAXDontSerialize]
-        public int IndexNumeric
-        {
-            get
-            {
-                return int.Parse(Index);
-            }
-            set
-            {
-                Index = value.ToString();
-            }
-        }
         private string _NameValue = String.Empty;
         [YAXAttributeForClass]
         public string Name
@@ -447,14 +471,6 @@ namespace Xv2CoreLib.EAN
             }
         }
 
-        [YAXDontSerialize]
-        public string DisplayName
-        {
-            get
-            {
-                return String.Format("[{0}] {1}", IndexNumeric, Name);
-            }
-        }
         [YAXDontSerialize]
         public byte FloatType
         {
@@ -814,6 +830,7 @@ namespace Xv2CoreLib.EAN
     }
 
     [YAXSerializeAs("AnimationNode")]
+    [Serializable]
     public class EAN_Node
     {
         [YAXAttributeForClass]
@@ -1155,6 +1172,7 @@ namespace Xv2CoreLib.EAN
     }
 
     [YAXSerializeAs("Keyframes")]
+    [Serializable]
     public class EAN_AnimationComponent
     {
         public enum ComponentType : byte
@@ -1489,7 +1507,7 @@ namespace Xv2CoreLib.EAN
             if(I_00 == ComponentType.Scale && I_01 == 3)
             {
                 //Camera
-                keyframe.Y = 0.785398f; //Radians, for 45 degree FOV
+                keyframe.Y = 0.69775401155f; //Radians, for 39.97836 degree FOV
             }
             else
             {
@@ -1636,6 +1654,7 @@ namespace Xv2CoreLib.EAN
     }
 
     [YAXSerializeAs("Keyframe")]
+    [Serializable]
     public class EAN_Keyframe
     {
         [YAXAttributeForClass]
@@ -1676,6 +1695,7 @@ namespace Xv2CoreLib.EAN
 
     #region CameraWrapper
 
+    [Serializable]
     public class KeyframeListEntry : INotifyPropertyChanged
     {
         #region INotifyPropertyChanged
@@ -1805,6 +1825,7 @@ namespace Xv2CoreLib.EAN
     //Skeleton
 
     [YAXSerializeAs("Skeleton")]
+    [Serializable]
     public class ESK_Skeleton
     {
         [YAXAttributeForClass]
@@ -2335,6 +2356,7 @@ namespace Xv2CoreLib.EAN
     }
 
     [YAXSerializeAs("Bone")]
+    [Serializable]
     public class ESK_Bone : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
@@ -2444,6 +2466,7 @@ namespace Xv2CoreLib.EAN
     }
 
     [YAXSerializeAs("RelativeTransform")]
+    [Serializable]
     public class ESK_RelativeTransform
     {
         [YAXAttributeFor("Position")]
@@ -2537,6 +2560,7 @@ namespace Xv2CoreLib.EAN
     }
 
     [YAXSerializeAs("AbsoluteTransform")]
+    [Serializable]
     public class ESK_AbsoluteTransform
     {
         [YAXAttributeFor("Line1")]
@@ -2656,6 +2680,7 @@ namespace Xv2CoreLib.EAN
     }
 
     [YAXSerializeAs("Unk1")]
+    [Serializable]
     public class ESK_Unk1
     {
         //All are Int32!
@@ -2802,6 +2827,7 @@ namespace Xv2CoreLib.EAN
 
 
     //Special, for rewriting binary file
+    [Serializable]
     public class ESK_BoneNonHierarchal
     {
         public string Name { get; set; }

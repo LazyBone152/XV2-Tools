@@ -1,0 +1,29 @@
+﻿<Controls:MetroWindow x:Class="AudioCueEditor.View.VolumeControl"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AudioCueEditor.View"
+        mc:Ignorable="d"
+        xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
+        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        Dialog:DialogParticipation.Register="{Binding}"
+        Title="Volume Control" TitleCaps="False" Height="140" Width="350" ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner">
+    <Grid>
+        <StackPanel Margin="0,10,0,0">
+            <StackPanel Orientation="Horizontal" ToolTip="The base volume level of the track. The sum of this and Random Range may not exceed 100.">
+                <Label Content="Base Volume" HorizontalContentAlignment="Right" Width="100" VerticalAlignment="Center"/>
+                <Slider Value="{Binding BaseVolume, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="{Binding MaxVolume}" Width="180" Margin="5,0,0,0"/>
+                <Label Content="{Binding BaseVolume}" VerticalAlignment="Center"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" ToolTip="This will randomize the volume level of the audio track by upto the amount set, in addition to the base volume.">
+                <Label Content="Random Range" HorizontalContentAlignment="Right" Width="100" VerticalAlignment="Center"/>
+                <Slider Value="{Binding RandomRange, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="{Binding MaxRandom}" Width="180" Margin="5,0,0,0"/>
+                <Label Content="{Binding RandomRange}" VerticalAlignment="Center"/>
+            </StackPanel>
+            <StackPanel Margin="0,5">
+                <Button Click="Button_Click" Content="Done" Margin="130,0,130,0"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Controls:MetroWindow>

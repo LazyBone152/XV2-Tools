@@ -69,7 +69,7 @@ namespace Xv2CoreLib.IDB
                 bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_20));
                 bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_24));
                 bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_28));
-                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_32));
+                bytes.AddRange(BitConverter.GetBytes(int.Parse(idbFile.Entries[i].I_32)));
                 bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_36));
                 bytes.AddRange(BitConverter.GetBytes((UInt16)idbFile.Entries[i].I_38));
                 bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_40));

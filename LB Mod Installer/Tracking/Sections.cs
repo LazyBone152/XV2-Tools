@@ -47,6 +47,8 @@
         public const string QXD_Character1 = "QXD_Character1";
         public const string QXD_Character2 = "QXD_Character2";
         public const string QXD_Collection = "QXD_Collection";
+        public const string ACB_Cue = "ACB_Cue";
+        public const string PAL_Entry = "PAL_Entry";
 
         public static string GetBcsPartColor(string id) { return string.Format("{0}{1}", BCS_PartColors, id); }
         public static string GetErsEntry(string id) { return string.Format("{0}{1}", ERS_Entries, id); }

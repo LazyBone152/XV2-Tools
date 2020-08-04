@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Xv2CoreLib.Resource.UndoRedo
 {
@@ -8,6 +9,7 @@ namespace Xv2CoreLib.Resource.UndoRedo
     public class UndoableStateChange<T> : IUndoRedo
     {
         public string Message { get; set; }
+        public bool doLast { get; set; }
 
         private int idx;
         private IList<T> list;

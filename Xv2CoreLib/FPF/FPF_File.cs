@@ -11,11 +11,17 @@ namespace Xv2CoreLib.FPF
     [YAXSerializeAs("FPF")]
     public class FPF_File
     {
+        [YAXDontSerialize]
         public const int FPF_SIGNATURE = 1179665955;
+        [YAXDontSerialize]
         public const int UnknownIndexListOffset = 112;
+        [YAXDontSerialize]
         public const int UnknownIndexListCount = 60;
+        [YAXDontSerialize]
         public const int EntryPointerListOffset = 352;
+        [YAXDontSerialize]
         public const int EntryPointerListEntryCount = 70;
+        [YAXDontSerialize]
         public const int EntryPointerListEntrySize = 8;
 
         [YAXAttributeForClass]

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EEPK_Organiser"
         xmlns:utils="clr-namespace:EEPK_Organiser.Utils"
-        xmlns:eepk="clr-namespace:Xv2CoreLib.EEPK"
+        xmlns:eepk="clr-namespace:Xv2CoreLib.EEPK;assembly=Xv2CoreLib"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
@@ -16,7 +16,7 @@
         <ObjectDataProvider x:Key="PlacementEnum" MethodName="GetValues"
                         ObjectType="{x:Type sys:Enum}">
             <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="eepk:EffectPart+Placement"/>
+                <x:Type TypeName="eepk:EffectPart+Attachment"/>
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
         <ObjectDataProvider x:Key="DeactivationModeEnum" MethodName="GetValues"
@@ -399,7 +399,7 @@
                                 <Label Content="Asset" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="106"/>
                                 <TextBox IsEnabled="False" Text="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.AssetRefDetails, Mode=OneWay}" IsReadOnly="True" VerticalContentAlignment="Center" HorizontalAlignment="Left" Height="23" Margin="116,12,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="248"/>
                                 <Button Click="EffectPart_ChangeAsset_Click" Content="Change" HorizontalAlignment="Left" Margin="369,13,0,0" VerticalAlignment="Top" Width="75"/>
-                                <Label Content="Placement" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="10,70,0,0" VerticalAlignment="Top" Width="106"/>
+                                <Label Content="Attachement" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="10,70,0,0" VerticalAlignment="Top" Width="106"/>
                                 <ComboBox SelectedItem="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_03, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={StaticResource ResourceKey=PlacementEnum}}" HorizontalAlignment="Left" Margin="116,73,0,0" VerticalAlignment="Top" Width="120"/>
                                 <xctk:IntegerUpDown Value="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_04, UpdateSourceTrigger=PropertyChanged}" DisplayDefaultValueOnEmptyText="True" Minimum="0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="120" Margin="116,104,0,0" />
                                 <Label Content="Rotate Movement" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="10,100,0,0" VerticalAlignment="Top" Width="106"/>

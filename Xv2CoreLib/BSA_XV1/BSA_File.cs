@@ -149,21 +149,21 @@ namespace Xv2CoreLib.BSA_XV1
     public class BSA_SubEntries
     {
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Collision")]
-        public List<BSA.Unk1> Unk1 { get; set; }
+        public List<BSA.BSA_Collision> Unk1 { get; set; }
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Expiration")]
-        public List<BSA.Unk2> Unk2 { get; set; }
+        public List<BSA.BSA_Expiration> Unk2 { get; set; }
 
         public BSA.BSA_SubEntries ConvertToXv2(int skillID)
         {
             if(skillID != -1)
             {
-                Unk1 = BSA.Unk1.ChangeSkillId(Unk1, skillID);
+                Unk1 = BSA_Collision.ChangeSkillId(Unk1, skillID);
             }
 
             return new BSA.BSA_SubEntries()
             {
-                Unk1 = Unk1,
-                Unk2 = Unk2
+                CollisionEntries = Unk1,
+                ExpirationEntries = Unk2
             };
         }
     }
@@ -174,13 +174,14 @@ namespace Xv2CoreLib.BSA_XV1
     {
         [YAXAttributeFor("Start_Time")]
         [YAXSerializeAs("frames")]
-        public short StartTime { get; set; }
+        public ushort StartTime { get; set; }
         [YAXAttributeFor("Duration")]
         [YAXSerializeAs("frames")]
-        public short Duration { get; set; }
+        public ushort Duration { get; set; }
         [YAXAttributeFor("Motion_Flags")]
         [YAXSerializeAs("value")]
-        public string I_00 { get; set; }
+        [YAXHexValue]
+        public int I_00 { get; set; }
         [YAXAttributeFor("Speed")]
         [YAXSerializeAs("X")]
         [YAXFormat("0.0#######")]
@@ -220,7 +221,7 @@ namespace Xv2CoreLib.BSA_XV1
                 xv2Types.Add(new BSA.BSA_Type1()
                 {
                     I_00 = type.I_00,
-                    Duration = type.Duration,
+                    Duration = (ushort)type.Duration,
                     F_04 = type.F_04,
                     F_08 = type.F_08,
                     F_12 = type.F_12,
@@ -228,7 +229,7 @@ namespace Xv2CoreLib.BSA_XV1
                     F_20 = type.F_20,
                     F_24 = type.F_24,
                     F_28 = type.F_28,
-                    StartTime = type.StartTime
+                    StartTime = (ushort)type.StartTime
                 });
             }
             return xv2Types;

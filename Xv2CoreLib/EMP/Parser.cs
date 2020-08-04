@@ -10,7 +10,7 @@ using System.Collections.ObjectModel;
 
 namespace Xv2CoreLib.EMP
 {
-    class Parser
+    public class Parser
     {
 
         string saveLocation;

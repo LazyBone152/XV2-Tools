@@ -1,0 +1,331 @@
+﻿<UserControl x:Class="AudioCueEditor.View.CueEditorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:AudioCueEditor.View"
+             xmlns:utils="clr-namespace:AudioCueEditor.Utils"
+             xmlns:Themes1="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:acb="clr-namespace:Xv2CoreLib.ACB_NEW;assembly=Xv2CoreLib"
+             mc:Ignorable="d"
+             xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
+             Dialog:DialogParticipation.Register="{Binding}" d:DesignHeight="450" d:DesignWidth="800" x:Name="root">
+    <UserControl.Resources>
+        <ObjectDataProvider x:Key="RefTypeEnum" MethodName="GetValues"
+                        ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="acb:ReferenceType"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <ObjectDataProvider x:Key="SeqTypeEnum" MethodName="GetValues"
+                        ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="acb:SequenceType"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+
+    </UserControl.Resources>
+    <Grid x:Name="rootGrid">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition MinWidth="500" Width="500*"/>
+            <ColumnDefinition Width="3"/>
+            <ColumnDefinition Width="290"/>
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="1" HorizontalAlignment="Stretch" Background="{DynamicResource AccentColorBrush4}" Margin="0,0,0.236,0.564"/>
+
+        <DataGrid x:Name="dataGrid" Grid.Column="0" ItemsSource="{Binding AcbFile.Cues}" Drop="DataGrid_Drop" AllowDrop="True" VirtualizingPanel.ScrollUnit="Pixel" EnableRowVirtualization="True" EnableColumnVirtualization="True" SelectionMode="Extended" RowDetailsVisibilityMode="VisibleWhenSelected" Margin="10,64,6.927,10.327" CanUserResizeRows="False" CanUserAddRows="False" AutoGenerateColumns="False" CanUserDeleteRows="False">
+            <DataGrid.Resources>
+                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="SteelBlue"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="SteelBlue"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="White"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="White"/>
+
+                <!-- For aligning the arrow button to the top, instead of the centre -->
+                <BooleanToVisibilityConverter x:Key="bool2VisibilityConverter"/>
+
+                <Style x:Key="RowHeaderGripperStyle" TargetType="{x:Type Thumb}">
+                    <Setter Property="Height" Value="8"/>
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="Cursor" Value="SizeNS"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type Thumb}">
+                                <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}"/>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+                <Style xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero" TargetType="{x:Type DataGridRowHeader}">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type DataGridRowHeader}">
+                                <Grid>
+                                    <Themes1:DataGridHeaderBorder BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" IsPressed="{TemplateBinding IsPressed}" IsHovered="{TemplateBinding IsMouseOver}" IsSelected="{TemplateBinding IsRowSelected}" Orientation="Horizontal" Padding="{TemplateBinding Padding}" SeparatorBrush="{TemplateBinding SeparatorBrush}" SeparatorVisibility="{TemplateBinding SeparatorVisibility}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <ContentPresenter RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="Stretch"/>
+                                            <Control SnapsToDevicePixels="false" Template="{Binding ValidationErrorTemplate, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Visibility="{Binding (Validation.HasError), Converter={StaticResource bool2VisibilityConverter}, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}"/>
+                                        </StackPanel>
+                                    </Themes1:DataGridHeaderBorder>
+                                    <Thumb x:Name="PART_TopHeaderGripper" Style="{StaticResource RowHeaderGripperStyle}" VerticalAlignment="Top"/>
+                                    <Thumb x:Name="PART_BottomHeaderGripper" Style="{StaticResource RowHeaderGripperStyle}" VerticalAlignment="Bottom"/>
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+
+            </DataGrid.Resources>
+
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Add Track" Command="{Binding AddTrackToCueCommand}"/>
+                    <MenuItem Header="Add Action" Command="{Binding AddActionToCueCommand}"/>
+                    <Separator/>
+                    <MenuItem Header="Volume" Command="{Binding EditVolumeCommand}"/>
+                    <MenuItem Header="Cue Limit" Command="{Binding EditCueLimitCommand}"/>
+                    <MenuItem Header="Enable 3D" IsCheckable="True" IsChecked="{Binding SelectedCue.UndoableIs3DSound}"/>
+                    <Separator/>
+                    <MenuItem Header="Copy" Command="{Binding CopyCuesCommand}"/>
+                    <MenuItem Header="Paste" Command="{Binding PasteCuesCommand}"/>
+                    <MenuItem Header="Delete" Command="{Binding DeleteCueCommand}"/>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+
+            <DataGrid.InputBindings>
+                <KeyBinding Key="Return" Command="{Binding PlaySelectedTrackCommand}"/>
+                <KeyBinding Key="C" Modifiers="Ctrl" Command="{Binding CopyCuesCommand}"/>
+                <KeyBinding Key="V" Modifiers="Ctrl" Command="{Binding PasteCuesCommand}"/>
+            </DataGrid.InputBindings>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Cue ID" Width="*" Binding="{Binding UndoableCueId, UpdateSourceTrigger=LostFocus}" IsReadOnly="False"/>
+                <DataGridTextColumn Header="Name" Width="*" Binding="{Binding CueRef.UndoableName, UpdateSourceTrigger=LostFocus}" IsReadOnly="False"/>
+                <DataGridTextColumn Header="Type" Width="*" Binding="{Binding CueRef.ReferenceType}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Num Tracks" Width="*" Binding="{Binding NumTracks}" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Num Actions" Width="*" Binding="{Binding NumActionTracks}" IsReadOnly="True"/>
+
+            </DataGrid.Columns>
+
+            <DataGrid.RowDetailsTemplate>
+                <DataTemplate>
+                    <ListBox MouseDoubleClick="TrackListBox_DoubleMouseClick" Drop="ListBox_Drop" AllowDrop="True" VirtualizingPanel.ScrollUnit="Pixel" ItemsSource="{Binding Tracks}" SelectionMode="Extended" SelectedItem="{Binding SelectedTrack, UpdateSourceTrigger=PropertyChanged}" utils:AttachedProperties.SelectedItems="{Binding SelectedTracks}">
+                        <ListBox.Resources>
+                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Black"/>
+
+                        </ListBox.Resources>
+
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Orientation="Horizontal">
+                                        <StackPanel.Resources>
+                                            <Style TargetType="{x:Type TextBlock}">
+                                                <Setter Property="Margin" Value="10,0,0,0"/>
+                                            </Style>
+                                            <Style TargetType="{x:Type iconPacks:PackIconMaterialDesign}">
+                                                <Setter Property="Margin" Value="10,0,0,0"/>
+                                            </Style>
+                                        </StackPanel.Resources>
+                                        <iconPacks:PackIconMaterialDesign Visibility="{Binding IsTrack}" Kind="Audiotrack" Foreground="{DynamicResource AccentColorBrush}"/>
+                                        <iconPacks:PackIconMaterialDesign Visibility="{Binding IsAction}" Kind="CallToAction" Foreground="{DynamicResource AccentColorBrush}"/>
+                                        <TextBlock Text="{Binding DisplayName}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+
+                        <ListBox.InputBindings>
+                            <KeyBinding Key="C" Modifiers="Ctrl" Command="{Binding CopyTrackCommand}"/>
+                            <KeyBinding Key="V" Modifiers="Ctrl" Command="{Binding PasteTrackCommand}"/>
+                        </ListBox.InputBindings>
+                        <ListBox.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Play" Click="ListBoxEvent_PlaySelectedTrack"/>
+                                <Separator/>
+                                <MenuItem Header="Replace" Click="ListBoxEvent_ReplaceSelectedTrack"/>
+                                <MenuItem Header="Extract" Click="ListBoxEvent_ExtractSelectedTrack"/>
+                                <Separator/>
+                                <MenuItem Header="Edit Loop" Click="ListBoxEvent_EditLoop_Click"/>
+                                <MenuItem Header="Volume" Click="ListBoxEvent_EditVolumeOnTrack_Click"/>
+                                <Separator/>
+                                <MenuItem Header="Copy" Command="{Binding CopyTrackCommand}"/>
+                                <MenuItem Header="Paste" Command="{Binding PasteTrackCommand}"/>
+                                <MenuItem Header="Delete" Command="{Binding DeleteTrackCommand}"/>
+                                
+                            </ContextMenu>
+                        </ListBox.ContextMenu>
+                    </ListBox>
+                </DataTemplate>
+            </DataGrid.RowDetailsTemplate>
+
+        </DataGrid>
+        <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left" Height="50" Margin="10,9,0,0" VerticalAlignment="Top" Width="370">
+            <StackPanel.Resources>
+                <Style TargetType="{x:Type StackPanel}">
+                    <Setter Property="Margin" Value="10,0,0,0"/>
+                </Style>
+                <Style TargetType="{x:Type Grid}">
+                    <Setter Property="Margin" Value="5,0,0,0"/>
+                </Style>
+            </StackPanel.Resources>
+            <StackPanel VerticalAlignment="Center">
+                <Button Command="{Binding PlayCommand}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Height="30">
+                    <iconPacks:PackIconMaterialLight Kind="Play" />
+                </Button>
+                <TextBlock Text="Play" HorizontalAlignment="Center" FontSize="8"/>
+            </StackPanel>
+            <StackPanel VerticalAlignment="Center">
+                <Button Command="{Binding PauseCommand}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Height="30">
+                    <iconPacks:PackIconMaterialLight Kind="Pause" />
+                </Button>
+                <TextBlock Text="Pause" HorizontalAlignment="Center" FontSize="8"/>
+            </StackPanel>
+            <StackPanel VerticalAlignment="Center">
+                <Button Command="{Binding StopCommand}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Height="30">
+                    <iconPacks:PackIconMaterialLight Kind="Stop" />
+                </Button>
+                <TextBlock Text="Stop" HorizontalAlignment="Center" FontSize="8"/>
+            </StackPanel>
+
+            <StackPanel VerticalAlignment="Center">
+                <RepeatButton Command="{Binding RewindCommand}" ClickMode="Press" HorizontalAlignment="Left" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Height="30">
+                    <iconPacks:PackIconMaterialLight Kind="SeekPrevious" />
+                </RepeatButton>
+                <TextBlock Text="Rewind" HorizontalAlignment="Center" FontSize="8"/>
+            </StackPanel>
+            <StackPanel VerticalAlignment="Center">
+                <RepeatButton Command="{Binding FastForwardCommand}" ClickMode="Press" HorizontalAlignment="Left" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Height="30">
+                    <iconPacks:PackIconMaterialLight Kind="SeekNext" />
+                </RepeatButton>
+                <TextBlock Text="Forward" HorizontalAlignment="Center" FontSize="8"/>
+            </StackPanel>
+
+
+
+            <Grid VerticalAlignment="Center" Margin="5,15,0,15.618" Width="22">
+                <Separator HorizontalAlignment="Left" VerticalAlignment="Bottom" Height="20"  Width="44" RenderTransformOrigin="0.5,0.5" Margin="-12,-3,-10,2.2">
+                    <Separator.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="90"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Separator.RenderTransform>
+                </Separator>
+            </Grid>
+
+
+            <StackPanel VerticalAlignment="Center">
+                <Button Command="{Binding AddNewCueCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Height="30">
+                    <iconPacks:PackIconMaterialLight Kind="Plus"/>
+                </Button>
+                <TextBlock Text="New Cue" HorizontalAlignment="Center" FontSize="8"/>
+            </StackPanel>
+
+            <StackPanel VerticalAlignment="Center">
+                <Button Command="{Binding AddTrackToCueCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Height="30">
+                    <iconPacks:PackIconMaterialLight Kind="Plus"/>
+                </Button>
+                <TextBlock Text="Add Track" HorizontalAlignment="Center" FontSize="8"/>
+            </StackPanel>
+
+            <StackPanel VerticalAlignment="Center">
+                <Button Command="{Binding AddActionToCueCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Height="30">
+                    <iconPacks:PackIconMaterialLight Kind="Plus"/>
+                </Button>
+                <TextBlock Text="Add Action" HorizontalAlignment="Center" FontSize="8"/>
+            </StackPanel>
+        </StackPanel>
+
+
+        <Grid Grid.Column="2">
+
+            <ScrollViewer Margin="0,65,-0.255,10.327">
+                <StackPanel>
+
+                    <Expander Header="Sequence" IsExpanded="True">
+                        <Grid Height="150">
+                            <Label Visibility="{Binding SequenceCueNotVisibile}" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Margin="0,63,0.182,60" Content="&lt;Select a Sequence type Cue to edit its details>" VerticalAlignment="Stretch" Width="266"/>
+
+                            <ComboBox Visibility="{Binding SequenceCueVisibile}" SelectedItem="{Binding Path=SelectedItem.SequenceRef.UndoableSequenceType, ElementName=dataGrid}" ItemsSource="{Binding Source={StaticResource SeqTypeEnum}}" HorizontalAlignment="Left" Margin="84,10,0,0" VerticalAlignment="Top" Width="173"/>
+                            <Label ToolTip="Polyphonic: All tracks are played simultaneously.
+                                   &#x0a;Sequential: All tracks are played sequentialy.
+&#x0a;Shuffle: All tracks play, but are shuffled (e.g in a different order each time)
+&#x0a;Random: A single, random track is played.
+&#x0a;RandomNoRepeat: The same as random, but the same track will not be repeated.
+&#x0a;Switch: Unknown
+&#x0a;ComboSequential: Unknown" Visibility="{Binding SequenceCueVisibile}" Content="Type" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="7,11,0,0" VerticalAlignment="Top" Width="72"/>
+
+                            <DataGrid Visibility="{Binding SequenceCueVisibile}" ItemsSource="{Binding Path=SelectedItem.SequenceRef.Tracks, ElementName=dataGrid}" LoadingRow="SeqTrack_DataGrid_LoadingRow" HeadersVisibility="All" RowHeaderWidth="25" HorizontalAlignment="Left" Height="94" Margin="84,46,0,0" VerticalAlignment="Top" Width="173" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Weight" Width="*" Binding="{Binding UndoablePercentage}" IsReadOnly="False"/>
+
+                                </DataGrid.Columns>
+                            </DataGrid>
+                            <Label Visibility="{Binding SequenceCueVisibile}" Content="Random" ToolTip="The assigned weight of each track. This comes into play for Random and RandomNoRepeat, determining what track has a higher chance of playing." HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="0,46,0,0" VerticalAlignment="Top" Width="79"/>
+
+                        </Grid>
+                    </Expander>
+                    <Expander Header="Track" IsExpanded="True">
+                        <Grid>
+                            <Grid Height="170" Visibility="{Binding TrackVisibile}">
+                                <Label Content="Encode Type:" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" Width="81"/>
+                                <Label Content="{Binding Path=SelectedItem.SelectedTrack.WaveformWrapper.WaveformRef.EncodeType, ElementName=dataGrid}" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Margin="91,0,0,0" VerticalAlignment="Top" Width="151"/>
+                                <Label Content="Duration:" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="10,25,0,0" VerticalAlignment="Top" Width="81"/>
+                                <Label Content="{Binding Path=SelectedItem.SelectedTrack.WaveformWrapper.HcaMeta.Duration, ElementName=dataGrid}" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Margin="91,25,0,0" VerticalAlignment="Top" Width="151"/>
+                                <Label Content="Channels:" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="10,50,0,0" VerticalAlignment="Top" Width="81"/>
+                                <Label Content="{Binding Path=SelectedItem.SelectedTrack.WaveformWrapper.HcaMeta.Channels, ElementName=dataGrid}" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Margin="91,50,0,0" VerticalAlignment="Top" Width="151"/>
+                                <Label Content="Sample Rate:" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="10,75,0,0" VerticalAlignment="Top" Width="81"/>
+                                <Label Content="{Binding Path=SelectedItem.SelectedTrack.WaveformWrapper.HcaMeta.SampleRate, ElementName=dataGrid}" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Margin="91,75,0,0" VerticalAlignment="Top" Width="151"/>
+                                <CheckBox IsChecked="{Binding Path=SelectedItem.SelectedTrack.WaveformWrapper.WaveformRef.UndoableStreaming, ElementName=dataGrid}" ToolTip="Streaming tracks will be stored in an external AWB and will only be loaded by the game when played (there may be a delay before playing starts, as they are not pre-loaded).&#x0a;&#x0a;This is ideally used for long tracks that are not played repeatedly, such as music. Sound effects or voicelines that need to play on demand should not be streamed." Content="Streaming" HorizontalAlignment="Left" Margin="72,106,0,0" VerticalAlignment="Top" Width="156"/>
+
+                            </Grid>
+                            <Grid Height="170" Visibility="{Binding TrackNotVisibile}">
+                                <Label HorizontalContentAlignment="Center" HorizontalAlignment="Center" Margin="10,73,10.182,71" Content="&lt;Select a track to view its details>" VerticalAlignment="Center" Height="26" Width="246"/>
+
+                            </Grid>
+
+                        </Grid>
+                    </Expander>
+                    <Expander Header="Action" IsExpanded="True">
+                        <Grid>
+                            <Grid Height="225" Visibility="{Binding ActionVisibile}">
+                                <ComboBox SelectedIndex="{Binding Path=SelectedItem.SelectedTrack.TrackRef.UndoableTargetType, ElementName=dataGrid}" HorizontalAlignment="Left" Margin="78,10,0,0" VerticalAlignment="Top" Width="179">
+                                    <ComboBoxItem Content="Any ACB"/>
+                                    <ComboBoxItem Content="Specific ACB"/>
+                                </ComboBox>
+                                <Label Content="Target Type" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="0,7,0,0" VerticalAlignment="Top" Width="78"/>
+                                <Label Content="Target Name" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="0,37,0,0" VerticalAlignment="Top" Width="78"/>
+                                <TextBox Text="{Binding Path=SelectedItem.SelectedTrack.TrackRef.UndoableTargetAcbName, ElementName=dataGrid}" HorizontalAlignment="Left" Height="23" Margin="78,39,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="124"/>
+                                <Label Content="Target ID" ToolTip="Usually this is the Cue ID that the Action is targeting. Depending on the above settings, the cue may be in another ACB file." HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="0,67,0,0" VerticalAlignment="Top" Width="78"/>
+                                <TextBox Text="{Binding Path=SelectedItem.SelectedTrack.UndoableTargetId, ElementName=dataGrid}" HorizontalAlignment="Left" Height="23" Margin="78,67,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="124"/>
+                                <ComboBox x:Name="actionComboBox" DisplayMemberPath="DisplayName" ItemsSource="{Binding Path=SelectedItem.SelectedTrack.TrackCommand.Commands, ElementName=dataGrid}" HorizontalAlignment="Left" Margin="64,117,0,0" VerticalAlignment="Top" Width="151" SelectionChanged="ActionComboBox_SelectionChanged"/>
+                                <Separator Background="{DynamicResource AccentColorBrush3}" HorizontalAlignment="Left" Height="15" Margin="10,102,0,0" VerticalAlignment="Top" Width="247"/>
+                                <Button Click="ActionCommandAdd_Proxy" Content="Add" HorizontalAlignment="Left" Margin="53,148,0,0" VerticalAlignment="Top" Width="75"/>
+                                <Button Click="ActionCommandRemove_Proxy" Content="Remove" HorizontalAlignment="Left" Margin="152,148,0,0" VerticalAlignment="Top" Width="75"/>
+                                <ComboBox Visibility="{Binding ActionChoiceVisible}" SelectedItem="{Binding Path=SelectedItem.UndoableCommandType, ElementName=actionComboBox}" ItemsSource="{Binding ActionCommandTypes}" HorizontalAlignment="Left" Margin="78,193,0,0" VerticalAlignment="Top" Width="179"/>
+                                <Label Visibility="{Binding ActionChoiceVisible}" Content="Action" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="0,194,0,0" VerticalAlignment="Top" Width="78"/>
+                                <CheckBox IsChecked="{Binding Path=SelectedItem.SelectedTrack.TrackRef.UndoableTargetSelf, ElementName=dataGrid}" ToolTip="Enable this when the Action should target a Cue in this ACB file.&#x0a;&#x0a; NOTE: TargetName will be automatically set to the ACB name when saving. Changing it here with this option enabled will have no effect." Content="Self" HorizontalAlignment="Left" Margin="207,41,0,0" VerticalAlignment="Top" Width="50"/>
+
+                            </Grid>
+                            <Grid Height="225" Visibility="{Binding ActionNotVisibile}">
+                                <Label HorizontalContentAlignment="Center" HorizontalAlignment="Center" Margin="10,100,10.182,97"  Content="&lt;Select a action to view its details>" VerticalAlignment="Center" Height="28" Width="246"/>
+
+                            </Grid>
+                        </Grid>
+                    </Expander>
+
+                </StackPanel>
+
+            </ScrollViewer>
+        </Grid>
+        <Label Content="{Binding audioPlayer.PlaybackTime}" HorizontalContentAlignment="Right" HorizontalAlignment="Stretch" Margin="380,17,9.927,0" VerticalAlignment="Top" Height="27"/>
+
+    </Grid>
+</UserControl>

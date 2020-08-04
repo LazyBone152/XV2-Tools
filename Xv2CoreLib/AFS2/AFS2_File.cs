@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xv2CoreLib.HCA;
 using YAXLib;
+using Xv2CoreLib.Resource.UndoRedo;
 
 namespace Xv2CoreLib.AFS2
 {
@@ -15,6 +16,7 @@ namespace Xv2CoreLib.AFS2
         UInt32 = 4
     }
 
+    [Serializable]
     public class AFS2_File
     {
         public const int AFS2_SIGNATURE = 844318273;
@@ -25,12 +27,12 @@ namespace Xv2CoreLib.AFS2
         [YAXAttributeForClass]
         public int ByteAlignment { get; set; }
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "AudioFile")]
-        public List<AFS2_AudioFile> EmbeddedFiles { get; set; }
+        public List<AFS2_AudioFile> Entries { get; set; }
 
         public void SortEntries()
         {
-            if (EmbeddedFiles != null)
-                EmbeddedFiles.Sort((x, y) => x.AwbId - y.AwbId);
+            if (Entries != null)
+                Entries.Sort((x, y) => x.AwbId - y.AwbId);
         }
 
         public void Save(string path)
@@ -65,7 +67,7 @@ namespace Xv2CoreLib.AFS2
                 size = rawBytes.Length;
             }
 
-            AFS2_File afs2File = new AFS2_File() { EmbeddedFiles = new List<AFS2_AudioFile>() };
+            AFS2_File afs2File = new AFS2_File() { Entries = new List<AFS2_AudioFile>() };
 
             if(BitConverter.ToInt32(rawBytes, offset + 0) != AFS2_SIGNATURE)
             {
@@ -89,7 +91,7 @@ namespace Xv2CoreLib.AFS2
             for (int i = 0; i < count; i++)
             {
                 //IDs
-                afs2File.EmbeddedFiles.Add(new AFS2_AudioFile()
+                afs2File.Entries.Add(new AFS2_AudioFile()
                 {
                     AwbId = BitConverter.ToUInt16(rawBytes, cueIdOffset)
                 });
@@ -135,7 +137,7 @@ namespace Xv2CoreLib.AFS2
                 int length = 0;
                 length = Pointers[i + 1] - PointersFiltered[i];
 
-                afs2File.EmbeddedFiles[i].bytes = rawBytes.GetRange(PointersFiltered[i], length);
+                afs2File.Entries[i].bytes = rawBytes.GetRange(PointersFiltered[i], length);
             }
 
             return afs2File;
@@ -173,7 +175,7 @@ namespace Xv2CoreLib.AFS2
             if (afs2File == null) return bytes.ToArray();
 
             //Init
-            int count = (afs2File.EmbeddedFiles != null) ? afs2File.EmbeddedFiles.Count : 0;
+            int count = (afs2File.Entries != null) ? afs2File.Entries.Count : 0;
             int finalPointer = 0;
             List<int> Pointers = new List<int>();
             afs2File.Version[1] = (byte)PointerSize.UInt32; //Hardcode a 32 bit pointer size.
@@ -190,7 +192,7 @@ namespace Xv2CoreLib.AFS2
             //Cue ID list
             for(int i = 0; i < count; i++)
             {
-                bytes.AddRange(BitConverter.GetBytes(afs2File.EmbeddedFiles[i].AwbId));
+                bytes.AddRange(BitConverter.GetBytes(afs2File.Entries[i].AwbId));
             }
 
             //Pointer List
@@ -232,7 +234,7 @@ namespace Xv2CoreLib.AFS2
                 bytes.AddRange(new byte[CalculatePadding(bytes.Count, afs2File.ByteAlignment)]);
 
                 //Add data
-                bytes.AddRange(afs2File.EmbeddedFiles[i].bytes);
+                bytes.AddRange(afs2File.Entries[i].bytes);
             }
 
             //Fill in final pointer
@@ -277,7 +279,7 @@ namespace Xv2CoreLib.AFS2
         {
             int id = 0;
 
-            foreach(var file in EmbeddedFiles)
+            foreach(var file in Entries)
             {
                 if(id <= file.AwbId)
                 {
@@ -294,7 +296,7 @@ namespace Xv2CoreLib.AFS2
 
         private bool IsIdUsed(int id)
         {
-            foreach(var awbTrack in EmbeddedFiles)
+            foreach(var awbTrack in Entries)
             {
                 if (id == awbTrack.AwbId) return true;
             }
@@ -312,7 +314,7 @@ namespace Xv2CoreLib.AFS2
             else
             {
                 ushort newId = (ushort)NextID();
-                EmbeddedFiles.Add(new AFS2_AudioFile()
+                Entries.Add(new AFS2_AudioFile()
                 {
                     AwbId = newId,
                     bytes = entry.bytes
@@ -321,10 +323,10 @@ namespace Xv2CoreLib.AFS2
                 return newId;
             }
         }
-
+        
         public AFS2_AudioFile GetEntry(ushort id)
         {
-            foreach(var file in EmbeddedFiles)
+            foreach(var file in Entries)
             {
                 if (file.AwbId == id) return file;
             }
@@ -333,7 +335,7 @@ namespace Xv2CoreLib.AFS2
 
         public ushort GetExistingEntry(AFS2_AudioFile entry)
         {
-            foreach(var _entry in EmbeddedFiles)
+            foreach(var _entry in Entries)
             {
                 if (Utils.CompareArray(_entry.bytes, entry.bytes)) return _entry.AwbId;
             }
@@ -341,18 +343,87 @@ namespace Xv2CoreLib.AFS2
             return ushort.MaxValue;
         }
 
+        public ushort GetExistingEntry(byte[] bytes)
+        {
+            foreach (var _entry in Entries)
+            {
+                if (Utils.CompareArray(bytes, _entry.bytes)) return _entry.AwbId;
+            }
+
+            return ushort.MaxValue;
+        }
+        
         public static AFS2_File CreateNewAwbFile()
         {
             return new AFS2_File()
             {
                 ByteAlignment = 32,
-                EmbeddedFiles = new List<AFS2_AudioFile>(),
+                Entries = new List<AFS2_AudioFile>(),
                 Version = new byte[] { 1, 4, 2, 0 }
             };
         }
+        
+        public void PadWithNullEntries()
+        {
+            //Keeps all IDs consecutive by adding null entries (need for compatibility with Eternity Audio Tool)
+
+            int maxId = Entries.Max(x => x.AwbId);
+            /*
+            List<AFS2_AudioFile> newEntries = new List<AFS2_AudioFile>();
+
+            for (int i = 0; i <= maxId; i++)
+            {
+                if(!Entries.Any(x => x.AwbId == i))
+                {
+                    newEntries.Add(new AFS2_AudioFile() { AwbId = (ushort)i, bytes = new byte[0] });
+                }
+                else
+                {
+                    newEntries.Add(Entries.FirstOrDefault(x => x.AwbId == i));
+                }
+            }
+            */
+            for(int i = 0; i < maxId; i++)
+            {
+                if (!Entries.Any(x => x.AwbId == i))
+                    Entries.Add(new AFS2_AudioFile() { AwbId = (ushort)i, bytes = new byte[0] });
+            }
+
+            SortEntries();
+        }
+
+        //Undoable
+        public List<IUndoRedo> AddEntry(byte[] bytes, bool reuseExistingEntries, out ushort newAwbId)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            ushort existingEntry = GetExistingEntry(bytes);
+
+            if (existingEntry != ushort.MaxValue)
+            {
+                newAwbId = existingEntry;
+            }
+            else
+            {
+                ushort newId = (ushort)NextID();
+                var newEntry = new AFS2_AudioFile()
+                {
+                    AwbId = newId,
+                    bytes = bytes
+                };
+                Entries.Add(newEntry);
+                undos.Add(new UndoableListAdd<AFS2_AudioFile>(Entries, newEntry));
+
+                newAwbId = newId;
+            }
+
+            return undos;
+        }
+
     }
 
     [YAXSerializeAs("AudioFile")]
+    [Serializable]
     public class AFS2_AudioFile
     {
         [YAXAttributeForClass]
@@ -363,5 +434,11 @@ namespace Xv2CoreLib.AFS2
 
         [YAXDontSerialize]
         public HcaMetadata HcaInfo { get { return new HcaMetadata(bytes); } }
+
+        public bool BytesIsNullOrEmpty()
+        {
+            if (bytes == null) return true;
+            return bytes.Length == 0;
+        }
     }
 }

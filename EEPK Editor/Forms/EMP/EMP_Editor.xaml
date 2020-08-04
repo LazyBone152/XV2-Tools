@@ -7,8 +7,8 @@
         xmlns:local="clr-namespace:EEPK_Organiser"
         xmlns:converters="clr-namespace:EEPK_Organiser.Converters"
         xmlns:system="clr-namespace:System;assembly=mscorlib"
-        xmlns:emp="clr-namespace:Xv2CoreLib.EMP"
-        xmlns:empAnim="clr-namespace:Xv2CoreLib.EMP"
+        xmlns:emp="clr-namespace:Xv2CoreLib.EMP;assembly=Xv2CoreLib"
+        xmlns:empAnim="clr-namespace:Xv2CoreLib.EMP;assembly=Xv2CoreLib"
         xmlns:utils="clr-namespace:EEPK_Organiser.Utils"
         mc:Ignorable="d"
         Title="EMP Editor" Height="565.065" Width="1110" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen" AllowDrop="True" WindowStyle="ThreeDBorderWindow">

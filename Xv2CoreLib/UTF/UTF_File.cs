@@ -13,6 +13,7 @@ namespace Xv2CoreLib.UTF
     /// <summary>
     /// Represents CRIWARE's UTF format.
     /// </summary>
+    [Serializable]
     public class UTF_File
     {
         public UTF_File()
@@ -879,7 +880,7 @@ namespace Xv2CoreLib.UTF
 
             return buf;
         }
-
+        
 
         //Column Manipulation
         public bool ColumnExists(string name)
@@ -1508,6 +1509,7 @@ namespace Xv2CoreLib.UTF
     }
 
     [YAXSerializeAs("Column")]
+    [Serializable]
     public class UTF_Column
     {
         public UTF_Column() { }
@@ -1747,6 +1749,7 @@ namespace Xv2CoreLib.UTF
     }
 
     [YAXSerializeAs("Row")]
+    [Serializable]
     public class UTF_Row
     {
         [YAXAttributeForClass]
@@ -1800,6 +1803,7 @@ namespace Xv2CoreLib.UTF
     }
 
     //
+    [Serializable]
     public class DataInfo
     {
         public bool dataIsNull { get
@@ -1866,6 +1870,7 @@ namespace Xv2CoreLib.UTF
 
     }
 
+    [Serializable]
     public class DataWriteObject
     {
         public byte[] bytes { get; set; }
@@ -1873,7 +1878,8 @@ namespace Xv2CoreLib.UTF
         public StorageFlag storageFlag { get; set; }
         public int rowIndex { get; set; }
     }
-    
+
+    [Serializable]
     public class StringWriteObject
     {
         public string Str { get; set; }

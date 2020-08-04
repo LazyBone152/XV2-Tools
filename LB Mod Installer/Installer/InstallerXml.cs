@@ -133,9 +133,14 @@ namespace LB_Mod_Installer.Installer
         public List<FilePath> GetInstallFiles()
         {
             List<FilePath> files = new List<FilePath>();
+            
+            if (InstallFiles != null)
+            {
+                files.AddRange(InstallFiles);
+            }
 
             //Create a list of all files that are to be installed, based on what the user selected.
-            for(int i = 0; i < InstallOptionSteps.Count; i++)
+            for (int i = 0; i < InstallOptionSteps.Count; i++)
             {
                 //Ignore all steps that require a flag that has not been set by previous steps.
                 if (FlagIsSet(InstallOptionSteps[i].HasFlag))
@@ -152,20 +157,17 @@ namespace LB_Mod_Installer.Installer
                     {
                         if (InstallOptionSteps[i].OptionList != null)
                         {
-                            foreach (var option in InstallOptionSteps[i].OptionList)
+                            foreach (var option in InstallOptionSteps[i].OptionList.Where(x => x.IsSelected_OptionMultiSelect && x.Paths != null))
                             {
-                                if (option.Paths != null)
-                                    files.AddRange(option.Paths);
+                                files.AddRange(option.Paths);
                             }
                         }
                     }
                 }
             }
 
-            if(InstallFiles != null)
-            {
-                files.AddRange(InstallFiles);
-            }
+            //Remove all files with empty SourcePaths
+            files.RemoveAll(x => string.IsNullOrWhiteSpace(x.SourcePath));
 
             return files;
         }
@@ -750,8 +752,8 @@ namespace LB_Mod_Installer.Installer
             {
                 step.OptionList[i].Name = string.Format(step.OptionList[i].Name, GeneralInfo.CurrentModName, GeneralInfo.CurrentModVersion, GeneralInfo.InstalledModVersion);
                 step.OptionList[i].Tooltip = string.Format(step.OptionList[i].Tooltip, GeneralInfo.CurrentModName, GeneralInfo.CurrentModVersion, GeneralInfo.InstalledModVersion);
-
-                if(i == step.SelectedOptions[0])
+                
+                if(i == 0)
                 {
                     step.OptionList[i].IsSelected_Option = true;
                 }
@@ -874,6 +876,7 @@ namespace LB_Mod_Installer.Installer
         public string SourcePath { get; set; }
         [YAXAttributeFor("InstallPath")]
         [YAXSerializeAs("value")]
+        [YAXDontSerializeIfNull]
         public string InstallPath { get; set; }
         [YAXAttributeForClass]
         [YAXDontSerializeIfNull]

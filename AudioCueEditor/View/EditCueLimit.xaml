@@ -1,0 +1,23 @@
+﻿<Controls:MetroWindow x:Class="AudioCueEditor.View.EditCueLimit"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AudioCueEditor.View"
+        mc:Ignorable="d"
+        xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
+        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        Dialog:DialogParticipation.Register="{Binding}"
+        Title="Cue Limit" TitleCaps="False" Height="120" Width="270" ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner">
+    <Grid>
+        <StackPanel Margin="0, 10">
+            <StackPanel Orientation="Horizontal" ToolTip="The maximum amount of instances of this cue allowed to be playing at any given time. (0 = Infinite)">
+                <Label Content="Cue Limit" HorizontalContentAlignment="Right" Width="80" VerticalAlignment="Center"/>
+                <Controls:NumericUpDown Value="{Binding CueLimit, UpdateSourceTrigger=LostFocus}" Width="150" Margin="5,0,0,0"/>
+            </StackPanel>
+            <StackPanel Margin="0,10">
+                <Button Click="Button_Click" Content="Done" Margin="90,0,90,0"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Controls:MetroWindow>

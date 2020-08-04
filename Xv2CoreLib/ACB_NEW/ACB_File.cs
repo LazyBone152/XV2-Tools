@@ -8,17 +8,44 @@ using Xv2CoreLib.UTF;
 using YAXLib;
 using Xv2CoreLib.AFS2;
 using Xv2CoreLib.Resource;
+using Xv2CoreLib.Resource.UndoRedo;
 using System.IO;
 using System.Security.Cryptography;
 using System.ComponentModel;
+using System.Collections;
+using Xv2CoreLib.HCA;
+using System.Windows;
 
 namespace Xv2CoreLib.ACB_NEW
 {
+    public enum SaveFormat
+    {
+        Default,
+        MusicPackage //Same as Default, except different extension (.musicpackage) and no external awb (all streaming tracks are stored internally). Used by LB Mod Installer for installing music.
+    }
+
+    public enum MusicPackageType : int
+    {
+        NewOption = 0,
+        Direct = 1
+    }
+
 
     [YAXSerializeAs("ACB")]
+    [Serializable]
     public class ACB_File
     {
-        //Supported Versions
+        public const string MUSIC_PACKAGE_EXTENSION = ".musicpackage";
+
+        //Clipboard Constants
+        public const string CLIPBOARD_ACB_CUES = "ACB_CUES";
+        public const string CLIPBOARD_ACB_TRACK = "ACB_TRACK";
+        public const string CLIPBOARD_ACB_ACTION = "ACB_ACTION";
+
+        //Global Aisacs
+        public const string GLOBAL_AISAC_3DVOL_DEF = "3Dvol_def";
+
+        //Known ACB Versions
         public static Version _1_30_0_0 = new Version("1.30.0.0"); //SDBH
         public static Version _1_29_2_0 = new Version("1.29.2.0"); //SDBH
         public static Version _1_29_0_0 = new Version("1.29.0.0"); //SDBH
@@ -31,26 +58,23 @@ namespace Xv2CoreLib.ACB_NEW
         public static Version _1_21_1_0 = new Version("1.21.1.0"); //Used in XV1, and a few old XV2 ACBs (leftovers from xv1)
         public static Version _1_6_0_0 = new Version("1.6.0.0"); //Used in 1 file in XV1. Missing a lot of data.
         public static Version _0_81_1_0 = new Version("0.81.1.0"); //Used in MGS3 3D. Uses CPK AWB files instead of AFS2. (wont support)
+        
+        [YAXDontSerialize]
+        public bool TableValidationFailed { get; private set; }
+        [YAXDontSerialize]
+        public bool ExternalAwbError { get; private set; }
 
-        public static Version[] SupportedVersions = new Version[] 
-        {
-            _1_21_1_0,
-            _1_22_0_0,
-            _1_22_4_0,
-            _1_27_2_0,
-            _1_27_7_0,
-            _1_28_2_0,
-            _1_29_0_0,
-            _1_29_2_0,
-            _1_30_0_0
-        };
+        [YAXDontSerialize]
+        public SaveFormat SaveFormat { get; set; } = SaveFormat.Default;
+        [YAXDontSerialize]
+        public MusicPackageType MusicPackageType { get; set; } = MusicPackageType.NewOption;
 
         [YAXAttributeFor("Name")]
         [YAXSerializeAs("value")]
         public string Name { get; set; }
 
         [YAXDontSerialize]
-        public Version Version = null;
+        public Version Version = null; //If manually changed, then call SetCommandTableVersion().
         [YAXAttributeFor("Version")]
         [YAXSerializeAs("value")]
         public string _versionStrProp
@@ -67,10 +91,10 @@ namespace Xv2CoreLib.ACB_NEW
 
         [YAXAttributeFor("Volume")]
         [YAXSerializeAs("value")]
-        public float AcbVolume { get; set; }
+        public float AcbVolume { get; set; } = 1.0f;
         [YAXAttributeFor("GUID")]
         [YAXSerializeAs("value")]
-        public Guid GUID { get; set; }
+        public Guid GUID { get; set; } = Guid.NewGuid();
 
         [YAXAttributeFor("FileIdentifier")]
         [YAXSerializeAs("value")]
@@ -94,22 +118,12 @@ namespace Xv2CoreLib.ACB_NEW
         [YAXAttributeFor("VersionString")]
         [YAXSerializeAs("value")]
         public string VersionString { get; set; } //Maybe calculate this based on Version?
-        [YAXAttributeFor("CueLimitWorkTable")]
-        [YAXSerializeAs("values")]
-        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]
-        public byte[] CueLimitWorkTable { get; set; }
-        [YAXAttributeFor("NumCueLimitListWorks")]
-        [YAXSerializeAs("value")]
-        public ushort NumCueLimitListWorks { get; set; }
-        [YAXAttributeFor("NumCueLimitNodeWorks")]
-        [YAXSerializeAs("value")]
-        public ushort NumCueLimitNodeWorks { get; set; }
         [YAXAttributeFor("CharacterEncodingType")]
         [YAXSerializeAs("value")]
         public byte CharacterEncodingType { get; set; }
         [YAXAttributeFor("CuePriorityType")]
         [YAXSerializeAs("value")]
-        public byte CuePriorityType { get; set; }
+        public byte CuePriorityType { get; set; } = 255;
         [YAXAttributeFor("NumCueLimit")]
         [YAXSerializeAs("value")]
         public ushort NumCueLimit { get; set; }
@@ -129,10 +143,10 @@ namespace Xv2CoreLib.ACB_NEW
         public List<ACB_Sequence> Sequences { get; set; } = new List<ACB_Sequence>();
         public List<ACB_AutoModulation> AutoModulations { get; set; } = new List<ACB_AutoModulation>();
         public List<ACB_Track> ActionTracks { get; set; } = new List<ACB_Track>();
+        public List<ACB_StringValue> StringValues { get; set; } = new List<ACB_StringValue>();
 
         public AFS2_File AudioTracks { get; set; } = AFS2_File.CreateNewAwbFile();
-
-        public UTF_File StringValueTable { get; set; } // No need to parse this
+        
         public UTF_File OutsideLinkTable { get; set; } // No need to parse this
         public UTF_File AcfReferenceTable { get; set; } // No need to parse this
         public UTF_File SoundGeneratorTable { get; set; } // No need to parse this
@@ -143,14 +157,15 @@ namespace Xv2CoreLib.ACB_NEW
             //Check for external awb file
             byte[] awbFile = null;
             string awbPath = string.Format("{0}/{1}.awb", Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
+            bool isMusicPackage = Path.GetExtension(path).ToLower() == MUSIC_PACKAGE_EXTENSION;
 
-            if (File.Exists(awbPath))
+            if (File.Exists(awbPath) && !isMusicPackage)
             {
                 awbFile = File.ReadAllBytes(awbPath);
             }
 
 
-            var file = Load(File.ReadAllBytes(path), awbFile);
+            var file = Load(File.ReadAllBytes(path), awbFile, writeXml, isMusicPackage);
 
             if (writeXml)
             {
@@ -161,14 +176,15 @@ namespace Xv2CoreLib.ACB_NEW
             return file;
         }
 
-        public static ACB_File Load(byte[] acbBytes, byte[] awbBytes)
+        public static ACB_File Load(byte[] acbBytes, byte[] awbBytes, bool loadUnknownCommands = false, bool isMusicPackage = false)
         {
-            return Load(UTF_File.LoadUtfTable(acbBytes, acbBytes.Length), awbBytes);
+            return Load(UTF_File.LoadUtfTable(acbBytes, acbBytes.Length), awbBytes, loadUnknownCommands, isMusicPackage);
         }
 
-        public static ACB_File Load(UTF_File utfFile, byte[] awbBytes)
+        public static ACB_File Load(UTF_File utfFile, byte[] awbBytes, bool loadUnknownCommands = false, bool isMusicPackage = false)
         {
             ACB_File acbFile = new ACB_File();
+            acbFile.ValidateTables(utfFile);
 
             acbFile.Version = BigEndianConverter.UIntToVersion(utfFile.GetValue<uint>("Version", TypeFlag.UInt32, 0), true);
 
@@ -181,17 +197,13 @@ namespace Xv2CoreLib.ACB_NEW
             acbFile.FileIdentifier = utfFile.GetValue<uint>("FileIdentifier", TypeFlag.UInt32, 0);
             acbFile.GUID = new Guid(utfFile.GetData("AcbGuid", 0));
             acbFile.Name = utfFile.GetValue<string>("Name", TypeFlag.String, 0);
-            acbFile.NumCueLimitListWorks = utfFile.GetValue<ushort>("NumCueLimitListWorks", TypeFlag.UInt16, 0);
-            acbFile.NumCueLimitNodeWorks = utfFile.GetValue<ushort>("NumCueLimitNodeWorks", TypeFlag.UInt16, 0);
             acbFile.Size = utfFile.GetValue<uint>("Size", TypeFlag.UInt32, 0);
             acbFile.Target = utfFile.GetValue<byte>("Target", TypeFlag.UInt8, 0);
             acbFile.Type = utfFile.GetValue<byte>("Type", TypeFlag.UInt8, 0);
             acbFile.VersionString = utfFile.GetValue<string>("VersionString", TypeFlag.String, 0);
             acbFile.AcbVolume = utfFile.GetValue<float>("AcbVolume", TypeFlag.Single, 0);
-            acbFile.CueLimitWorkTable = utfFile.GetData("CueLimitWorkTable", 0);
             acbFile.AcfReferenceTable = utfFile.GetColumnTable("AcfReferenceTable", true);
             acbFile.OutsideLinkTable = utfFile.GetColumnTable("OutsideLinkTable", true);
-            acbFile.StringValueTable = utfFile.GetColumnTable("StringValueTable", true);
             acbFile.StreamAwbTocWork = utfFile.GetData("StreamAwbTocWork", 0);
 
             if (acbFile.Version >= ACB_File._1_27_2_0)
@@ -216,7 +228,12 @@ namespace Xv2CoreLib.ACB_NEW
             acbFile.Aisacs = ACB_Aisac.Load(utfFile.GetColumnTable("AisacTable", false), utfFile.GetColumnTable("AisacControlNameTable", false), acbFile.Version);
             acbFile.Graphs = ACB_Graph.Load(utfFile.GetColumnTable("GraphTable", false), acbFile.Version);
             acbFile.AutoModulations = ACB_AutoModulation.Load(utfFile.GetColumnTable("AutoModulationTable", false), acbFile.Version);
-            acbFile.CommandTables = ACB_CommandTables.Load(utfFile, acbFile.Version, acbFile);
+            acbFile.CommandTables = ACB_CommandTables.Load(utfFile, acbFile.Version, acbFile, loadUnknownCommands);
+            acbFile.StringValues = ACB_StringValue.Load(utfFile.GetColumnTable("StringValueTable", false), acbFile.Version);
+
+            //If no StringValueTable exists, then use default table. (this is required for some commands)
+            if (acbFile.StringValues.Count == 0)
+                acbFile.StringValues = ACB_StringValue.DefaultStringTable();
 
             //AWB
             var internalAwbFile = utfFile.GetColumnAfs2File("AwbFile");
@@ -225,8 +242,19 @@ namespace Xv2CoreLib.ACB_NEW
             if(awbBytes != null)
                 acbFile.LoadAwbFile(AFS2_File.LoadAfs2File(awbBytes), true);
 
+            if (awbBytes == null && acbFile.Waveforms.Any(x => x.Streaming) && !isMusicPackage)
+                acbFile.ExternalAwbError = true;
+
+            //MusicPackage values
+            if (utfFile.ColumnExists("MusicPackageType"))
+            {
+                acbFile.MusicPackageType = (MusicPackageType)utfFile.GetValue<int>("MusicPackageType", TypeFlag.Int32, 0);
+            }
+
             //Finalization
-            acbFile.SetTableRoot();
+            acbFile.SetCommandTableVersion();
+            acbFile.LinkTableGuids();
+            acbFile.SaveFormat = (isMusicPackage) ? SaveFormat.MusicPackage : SaveFormat.Default;
 
             return acbFile;
         }
@@ -235,12 +263,13 @@ namespace Xv2CoreLib.ACB_NEW
         {
             YAXSerializer serializer = new YAXSerializer(typeof(ACB_File), YAXSerializationOptions.DontSerializeNullObjects);
             ACB_File acbFile = (ACB_File)serializer.DeserializeFromFile(path);
-            acbFile.SetTableRoot();
+            acbFile.SetCommandTableVersion();
+            acbFile.InitializeValues();
 
             if (saveBinary)
             {
                 string savePath = String.Format("{0}/{1}", Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(path)));
-                acbFile.Save(savePath);
+                acbFile.Save(savePath, false); //No full rebuild for XML - keep the indexes and tables completely unchanged
             }
 
             return acbFile;
@@ -251,10 +280,97 @@ namespace Xv2CoreLib.ACB_NEW
             ACB_File acbFile = new ACB_File();
             acbFile.Version = _1_27_7_0;
             acbFile.CommandTables = new ACB_CommandTables();
-            acbFile.CommandTables.CommandTables = new List<ACB_CommandTable>() { new ACB_CommandTable() { Type = CommandTableType.SequenceCommand, Root = acbFile } };
-            acbFile.SetTableRoot();
+            acbFile.CommandTables.CommandTables = new List<ACB_CommandTable>() { new ACB_CommandTable() { Type = CommandTableType.SequenceCommand } };
+            acbFile.SetCommandTableVersion();
+            acbFile.VersionString = @"&#xA;ACB Format/PC Ver.1.27.07 Build:&#xA;";
+            acbFile.OutsideLinkTable = acbFile.CreateDefaultStringValueTable();
+            acbFile.AcfMd5Hash = new byte[] { 103, 60, 108, 22, 196, 140, 254, 73, 5, 182, 132, 96, 160, 88, 222, 176 };
             return acbFile;
         }
+        
+        public static ACB_File LoadFromClipboard()
+        {
+            if (!Clipboard.ContainsData(CLIPBOARD_ACB_CUES)) return null;
+            ACB_File tempAcb = (ACB_File)Clipboard.GetData(CLIPBOARD_ACB_CUES);
+            tempAcb.SetCommandTableVersion();
+            //tempAcb.LinkTableGuids();
+            return tempAcb;
+        }
+
+        private void InitializeValues()
+        {
+            //Call when loading from xml.
+
+            if (Cues == null) Cues = new List<ACB_Cue>();
+            if (Sequences == null) Sequences = new List<ACB_Sequence>();
+            if (Synths == null) Synths = new List<ACB_Synth>();
+            if (Waveforms == null) Waveforms = new List<ACB_Waveform>();
+            if (Tracks == null) Tracks = new List<ACB_Track>();
+            if (ActionTracks == null) ActionTracks = new List<ACB_Track>();
+            if (Aisacs == null) Aisacs = new List<ACB_Aisac>();
+            if (Graphs == null) Graphs = new List<ACB_Graph>();
+            if (AutoModulations == null) AutoModulations = new List<ACB_AutoModulation>();
+            if (GlobalAisacReferences == null) GlobalAisacReferences = new List<ACB_GlobalAisacReference>();
+
+            foreach (var entry in Cues)
+                entry.Initialize();
+
+            foreach (var entry in Sequences)
+                entry.Initialize();
+
+            foreach (var entry in Synths)
+                entry.Initialize();
+
+            foreach (var entry in Tracks)
+                entry.Initialize();
+
+            foreach (var entry in Aisacs)
+                entry.Initialize();
+
+            foreach (var entry in ActionTracks)
+                entry.Initialize();
+
+            foreach(var commandTable in CommandTables.CommandTables)
+            {
+                if (commandTable.CommandGroups == null) commandTable.CommandGroups = new List<ACB_CommandGroup>();
+
+                foreach(var commandGroup in commandTable.CommandGroups)
+                {
+                    if (commandGroup.Commands == null) commandGroup.Commands = new ObservableCollection<ACB_Command>();
+                }
+            }
+
+        }
+        
+        private void ValidateTables(UTF_File utfFile)
+        {
+            if (utfFile.ColumnTableExists("BlockSequenceTable") || utfFile.ColumnTableExists("BlockTable") || utfFile.ColumnTableExists("EventTable") 
+                || utfFile.ColumnTableExists("AisacNameTable") || utfFile.ColumnTableExists("BeatSyncInfoTable")
+                || utfFile.ColumnTableExists("SeqParameterPalletTable") || utfFile.ColumnTableExists("TrackParameterPalletTable") || utfFile.ColumnTableExists("SynthParameterPalletTable"))
+                TableValidationFailed = true;
+        }
+
+        private void LoadAwbFile(AFS2_File afs2File, bool streaming)
+        {
+            if (afs2File == null) return;
+            if (afs2File.Entries == null) return;
+
+            foreach (var entry in afs2File.Entries.Where(x => !x.BytesIsNullOrEmpty()))
+            {
+                int oldId = entry.AwbId;
+                int newId = AudioTracks.AddEntry(entry, true);
+
+                if (oldId != newId)
+                    WaveformAwbIdRefactor(oldId, newId, streaming);
+            }
+        }
+
+        public void SetCommandTableVersion()
+        {
+            if (CommandTables != null)
+                CommandTables.AcbVersion = Version;
+        }
+
         #endregion
 
         #region SaveFunctions
@@ -262,8 +378,18 @@ namespace Xv2CoreLib.ACB_NEW
         /// Save the acb + awb.
         /// </summary>
         /// <param name="path">The save location, minus the extension.</param>
-        public void Save(string path)
+        /// <param name="fullRebuild">Determines if table indexes will be dynamicly re-linked upon saving, using the TableGuid/InstanceGuid linkage.\n\nRecommended: Disabled for XMLs, enabled for all other uses.</param>
+        /// <returns> Undos steps for the table clean up (only relevant if fullRebuild is true)</returns>
+        public void Save(string path, bool fullRebuild = true)
         {
+            SortCues();
+            TrimSequenceTrackPercentages();
+            if (fullRebuild)
+            {
+                LinkTableIndexes();
+            }
+
+
             AFS2_File externalAwb = GenerateAwbFile(true);
             byte[] awbHeader = null;
             byte[] awbBytes = null;
@@ -284,10 +410,21 @@ namespace Xv2CoreLib.ACB_NEW
 
             UTF_File utfFile = WriteToTable(awbHeader, streamAwbHash, Path.GetFileName(path));
 
-            utfFile.Save(path + ".acb");
+            if(SaveFormat == SaveFormat.Default)
+                utfFile.Save(path + ".acb");
+            else if (SaveFormat == SaveFormat.MusicPackage)
+                utfFile.Save(path + MUSIC_PACKAGE_EXTENSION);
 
-            if(awbBytes != null)
+            if (awbBytes != null)
                 File.WriteAllBytes(path + ".awb", awbBytes);
+            
+        }
+
+        public void SaveToClipboard()
+        {
+            TrimSequenceTrackPercentages();
+            LinkTableIndexes();
+            Clipboard.SetData(CLIPBOARD_ACB_CUES, this);
         }
 
         public UTF_File WriteToTable(byte[] streamAwbHeader, byte[] streamAwbHash, string name)
@@ -315,6 +452,7 @@ namespace Xv2CoreLib.ACB_NEW
             UTF_File graphTable = CreateDefaultGraphTable();
             UTF_File autoModTable = CreateDefaultAutoModulationTable();
             UTF_File waveformExtensionTable = CreateDefaultWaveformExtensionTable();
+            UTF_File stringValueTable = CreateDefaultStringValueTable();
 
             //Reordering
             SortActionTracks(); //Sort them to be sequential, as in the UTF file ActionTracks are specified with a StartIndex and Count
@@ -331,6 +469,7 @@ namespace Xv2CoreLib.ACB_NEW
             ACB_Track.WriteToTable(ActionTracks, Version, actionTrackTable, Name);
             ACB_Graph.WriteToTable(Graphs, Version, graphTable);
             ACB_AutoModulation.WriteToTable(AutoModulations, Version, autoModTable);
+            ACB_StringValue.WriteToTable(StringValues, Version, stringValueTable);
 
             //Columns
             utfFile.AddValue("FileIdentifier", TypeFlag.UInt32, 0, FileIdentifier.ToString());
@@ -340,14 +479,14 @@ namespace Xv2CoreLib.ACB_NEW
             utfFile.AddValue("Target", TypeFlag.UInt8, 0, Target.ToString());
             utfFile.AddData("AcfMd5Hash", 0, AcfMd5Hash);
             utfFile.AddValue("CategoryExtension", TypeFlag.UInt8, 0, CategoryExtension.ToString());
-            utfFile.AddData("CueTable", 0, cueTable.Write());
-            utfFile.AddData("CueNameTable", 0, cueNameTable.Write());
-            utfFile.AddData("WaveformTable", 0, waveformTable.Write());
-            utfFile.AddData("AisacTable", 0, aisacTable.Write());
-            utfFile.AddData("GraphTable", 0, graphTable.Write());
-            utfFile.AddData("GlobalAisacReferenceTable", 0, globalAisacRefTable.Write());
+            utfFile.AddData("CueTable", 0, (Cues.Count > 0) ? cueTable.Write() : null);
+            utfFile.AddData("CueNameTable", 0, (Cues.Count > 0) ? cueNameTable.Write() : null);
+            utfFile.AddData("WaveformTable", 0, (Waveforms.Count > 0) ? waveformTable.Write() : null);
+            utfFile.AddData("AisacTable", 0, (Aisacs.Count > 0) ? aisacTable.Write() : null);
+            utfFile.AddData("GraphTable", 0, (Graphs.Count > 0) ? graphTable.Write() : null);
+            utfFile.AddData("GlobalAisacReferenceTable", 0, (GlobalAisacReferences.Count > 0) ? globalAisacRefTable.Write() : null);
             utfFile.AddData("AisacNameTable", 0, null); //Unknown
-            utfFile.AddData("SynthTable", 0, synthTable.Write());
+            utfFile.AddData("SynthTable", 0, (Synths.Count > 0) ? synthTable.Write() : null);
 
             if(Version >= _1_29_0_0)
                 utfFile.AddData("SeqCommandTable", 0, CommandTables.WriteToTable(CommandTableType.SequenceCommand).Write());
@@ -355,50 +494,60 @@ namespace Xv2CoreLib.ACB_NEW
                 utfFile.AddData("CommandTable", 0, CommandTables.WriteToTable(CommandTableType.SequenceCommand).Write());
 
 
-            utfFile.AddData("TrackTable", 0, trackTable.Write());
-            utfFile.AddData("SequenceTable", 0, sequenceTable.Write());
-            utfFile.AddData("AisacControlNameTable", 0, aisacControlNameTable.Write());
-            utfFile.AddData("AutoModulationTable", 0, autoModTable.Write());
+            utfFile.AddData("TrackTable", 0, (Tracks.Count > 0) ? trackTable.Write() : null);
+            utfFile.AddData("SequenceTable", 0, (Sequences.Count > 0) ? sequenceTable.Write() : null);
+            utfFile.AddData("AisacControlNameTable", 0, (Aisacs.Count > 0) ? aisacControlNameTable.Write() : null);
+            utfFile.AddData("AutoModulationTable", 0, (AutoModulations.Count > 0) ? autoModTable.Write() : null);
             utfFile.AddData("StreamAwbTocWorkOld", 0, null);
-
-            if(internalAwb != null)
-                utfFile.AddData("AwbFile", 0, internalAwb.WriteAfs2File());
-            else
-                utfFile.AddData("AwbFile", 0, null);
-
+            utfFile.AddData("AwbFile", 0, (internalAwb != null) ? internalAwb.WriteAfs2File() : null);
             utfFile.AddValue("VersionString", TypeFlag.String, 0, VersionString);
-            utfFile.AddData("CueLimitWorkTable", 0, null); // Unknown
-            utfFile.AddValue("NumCueLimitListWorks", TypeFlag.UInt16, 0, NumCueLimitListWorks.ToString());
-            utfFile.AddValue("NumCueLimitNodeWorks", TypeFlag.UInt16, 0, NumCueLimitNodeWorks.ToString());
+            
+            //CueLimitWorkTable is populated by null bytes (?) according to the 2 following values. The logic behind them is unknown, but idealy they should be equal to the amount of cues. The Command for "CueLimit" requires this to function correctly.
+            //-Header = 8 bytes
+            //-List Entry = 48 bytes
+            //-Node Entry = 16 bytes
+            //Not all ACBs actually have this table, but it should be safe to generate it even when its not needed.
+            utfFile.AddData("CueLimitWorkTable", 0, new byte[8 + (64 * Cues.Count)]); 
+            utfFile.AddValue("NumCueLimitListWorks", TypeFlag.UInt16, 0, Cues.Count.ToString());
+            utfFile.AddValue("NumCueLimitNodeWorks", TypeFlag.UInt16, 0, Cues.Count.ToString());
+
+
             utfFile.AddData("AcbGuid", 0, GUID.ToByteArray());
             
-            if (Version >= _1_27_2_0)
+            if(streamAwbHash != null)
             {
-                UTF_File streamAwbHashTable = CreateDefaultStreamAwbHashTable();
-                streamAwbHashTable.AddValue("Name", TypeFlag.String, 0, name);
-                streamAwbHashTable.AddData("Hash", 0, streamAwbHash);
-                utfFile.AddData("StreamAwbHash", 0, streamAwbHashTable.Write());
+                if (Version >= _1_27_2_0)
+                {
+                    UTF_File streamAwbHashTable = CreateDefaultStreamAwbHashTable();
+                    streamAwbHashTable.AddValue("Name", TypeFlag.String, 0, name);
+                    streamAwbHashTable.AddData("Hash", 0, streamAwbHash);
+                    utfFile.AddData("StreamAwbHash", 0, streamAwbHashTable.Write());
+                }
+                else
+                {
+                    utfFile.AddData("StreamAwbHash", 0, streamAwbHash);
+                }
             }
             else
             {
-                utfFile.AddData("StreamAwbHash", 0, streamAwbHash);
+                utfFile.AddData("StreamAwbHash", 0, new byte[16]);
             }
 
             utfFile.AddData("StreamAwbTocWork_Old", 0, null);
             utfFile.AddValue("AcbVolume", TypeFlag.Single, 0, AcbVolume.ToString());
-            utfFile.AddData("StringValueTable", 0, (StringValueTable != null) ? StringValueTable.Write() : null);
+            utfFile.AddData("StringValueTable", 0, (StringValues.Count > 0) ? stringValueTable.Write() : null);
             utfFile.AddData("OutsideLinkTable", 0, (OutsideLinkTable != null) ? OutsideLinkTable.Write() : null);
             utfFile.AddData("BlockSequenceTable", 0, null); //Not implemented
             utfFile.AddData("BlockTable", 0, null); //Not implemented
             utfFile.AddValue("Name", TypeFlag.String, 0, name);
             utfFile.AddValue("CharacterEncodingType", TypeFlag.UInt8, 0, CharacterEncodingType.ToString());
             utfFile.AddData("EventTable", 0, null); //Not implemented
-            utfFile.AddData("ActionTrackTable", 0, actionTrackTable.Write());
+            utfFile.AddData("ActionTrackTable", 0, (ActionTracks.Count > 0) ? actionTrackTable.Write() : null);
             utfFile.AddData("AcfReferenceTable", 0, (AcfReferenceTable != null) ? AcfReferenceTable.Write() : null);
 
             if(Version >= _1_22_0_0)
             {
-                utfFile.AddData("WaveformExtensionDataTable", 0, waveformExtensionTable.Write());
+                utfFile.AddData("WaveformExtensionDataTable", 0, (Waveforms.Any(x => x.LoopFlag)) ? waveformExtensionTable.Write() : null);
             }
             else
             {
@@ -462,8 +611,8 @@ namespace Xv2CoreLib.ACB_NEW
 
             utfFile.AddData("PaddingArea", 0, null);
             utfFile.AddData("StreamAwbTocWork", 0, StreamAwbTocWork); //Not sure what this is...
-
-            if (Version >= _1_27_2_0)
+            
+            if (Version >= _1_27_2_0 && streamAwbHeader != null)
             {
                 UTF_File streamAwbHeaderTable = CreateDefaultStreamAwbHeaderTable();
                 streamAwbHeaderTable.AddData("Header", 0, streamAwbHeader);
@@ -474,60 +623,865 @@ namespace Xv2CoreLib.ACB_NEW
                 utfFile.AddData("StreamAwbAfs2Header", 0, streamAwbHeader);
             }
 
+            //MusicPackage values
+            if(SaveFormat == SaveFormat.MusicPackage)
+            {
+                utfFile.AddValue("MusicPackageType", TypeFlag.Int32, 0, ((int)MusicPackageType).ToString());
+            }
+
             return utfFile;
         }
-
-        #endregion
-
-        #region InitFunctions
-        private void LoadAwbFile(AFS2_File afs2File, bool streaming)
+        
+        public byte[] SaveMusicPackageToBytes()
         {
-            if (afs2File == null) return;
-            if (afs2File.EmbeddedFiles == null) return;
-
-            foreach (var entry in afs2File.EmbeddedFiles)
-            {
-                int oldId = entry.AwbId;
-                int newId = AudioTracks.AddEntry(entry, true);
-
-                if (oldId != newId)
-                    WaveformAwbIdRefactor(oldId, newId, streaming);
-            }
-        }
-
-        public void SetTableRoot()
-        {
-            CommandTables.Root = this;
-            foreach (var commandTable in CommandTables.CommandTables)
-            {
-                commandTable.Root = this;
-            }
+            TrimSequenceTrackPercentages();
+            LinkTableIndexes();
+            UTF_File utfFile = WriteToTable(null, null, Name);
+            return utfFile.Write(true);
         }
         #endregion
 
         #region AddFunctions
-        public ACB_Cue AddCue(string name, ReferenceType type)
+        /// <summary>
+        /// Add a new cue with no tracks.
+        /// </summary>
+        /// <returns></returns>
+        public List<IUndoRedo> AddCue(string name, ReferenceType type, out ACB_Cue newCue)
         {
-            ACB_Cue newCue = new ACB_Cue();
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            newCue = new ACB_Cue();
             newCue.ID = (uint)GetFreeCueId();
             newCue.Name = name;
             newCue.ReferenceType = type;
-            newCue.ReferenceIndex = ushort.MaxValue;
-            
-            if(type == ReferenceType.Sequence)
+            newCue.ReferenceIndex = new AcbTableReference(ushort.MaxValue);
+
+            if (type == ReferenceType.Sequence)
             {
-                newCue.ReferenceIndex = (ushort)Sequences.Count;
-                Sequences.Add(new ACB_Sequence());
+                var seq = new ACB_Sequence();
+                Sequences.Add(seq);
+                newCue.ReferenceIndex.TableGuid = seq.InstanceGuid;
+                undos.Add(new UndoableListAdd<ACB_Sequence>(Sequences, seq, ""));
             }
-            else if(type == ReferenceType.Synth)
+            else if (type == ReferenceType.Synth)
             {
-                newCue.ReferenceIndex = (ushort)Synths.Count;
-                Synths.Add(new ACB_Synth());
+                var synth = new ACB_Synth();
+                synth.ReferenceType = ReferenceType.Waveform;
+                Synths.Add(synth);
+                newCue.ReferenceIndex.TableGuid = synth.InstanceGuid;
+                undos.Add(new UndoableListAdd<ACB_Synth>(Synths, synth, ""));
             }
             //Dont add Waveform entry until a track is added
 
             Cues.Add(newCue);
-            return newCue;
+            undos.Add(new UndoableListAdd<ACB_Cue>(Cues, newCue, ""));
+
+            return undos;
+        }
+
+        /// <summary>
+        /// Add a new cue with 1 track.
+        /// </summary>
+        /// <returns></returns>
+        public List<IUndoRedo> AddCue(string name, ReferenceType type, byte[] hca, bool streaming, bool loop, out ACB_Cue newCue)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+            
+            undos.AddRange(AddCue(name, type, out newCue));
+            undos.AddRange(AddTrackToCue(newCue, hca, streaming, loop));
+            
+            return undos;
+        }
+
+        //Add Action
+        /// <summary>
+        /// Add a new empty action to the specified cue.
+        /// </summary>
+        /// <returns></returns>
+        public List<IUndoRedo> AddActionToCue(ACB_Cue cue, CopiedAction copiedAction = null)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            switch (cue.ReferenceType)
+            {
+                case ReferenceType.Sequence:
+                    undos.AddRange(AddAction_IActionTrack(GetSequence(cue.ReferenceIndex.TableGuid, false), copiedAction));
+                    break;
+                case ReferenceType.Synth:
+                    undos.AddRange(AddAction_IActionTrack(GetSynth(cue.ReferenceIndex.TableGuid, false), copiedAction));
+                    break;
+                case ReferenceType.Waveform:
+                    throw new InvalidOperationException($"ACB_File.AddActionToCue: ReferenceType {cue.ReferenceType} does not support actions.");
+                default:
+                    throw new InvalidOperationException($"ACB_File.AddActionToCue: ReferenceType {cue.ReferenceType} not supported.");
+            }
+
+            return undos;
+        }
+
+        private List<IUndoRedo> AddAction_IActionTrack(IActionTrack action, CopiedAction copiedAction = null)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            Guid newActionGuid;
+            undos.AddRange(AddAction(out newActionGuid, copiedAction));
+            AcbTableReference actionTableReference = new AcbTableReference();
+            actionTableReference.TableGuid = newActionGuid;
+            action.ActionTracks.Add(actionTableReference);
+            undos.Add(new UndoableListAdd<AcbTableReference>(action.ActionTracks, actionTableReference));
+
+            return undos;
+        }
+
+        private List<IUndoRedo> AddAction(out Guid actionGuid, CopiedAction copiedAction = null)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            ACB_Track action = (copiedAction != null) ? copiedAction.Track : new ACB_Track();
+            ACB_CommandGroup commandGroup = (copiedAction != null) ? copiedAction.Commands : new ACB_CommandGroup();
+            
+            if(copiedAction == null)
+            {
+                //Set default action values
+                action.CommandIndex.TableGuid = commandGroup.InstanceGuid;
+                action.TargetType = TargetType.SpecificAcb;
+                action.TargetAcbName = Name;
+                action.TargetSelf = true;
+            }
+
+            //Finalize
+            ActionTracks.Add(action);
+            undos.Add(new UndoableListAdd<ACB_Track>(ActionTracks, action));
+            undos.AddRange(CommandTables.AddCommand(commandGroup, CommandTableType.TrackEvent));
+
+            actionGuid = action.InstanceGuid;
+            return undos;
+        }
+
+        //Add Track
+        public List<IUndoRedo> AddTrackToCue(ACB_Cue cue, byte[] hca, bool streaming, bool loop)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+            undos.AddRange(AddTrack_IRefItems(cue, hca, streaming, loop));
+            undos.AddRange(UpdateCueLength(cue));
+            return undos;
+        }
+        
+        private List<IUndoRedo> AddWaveform(byte[] hca, bool streaming, bool loop, out Guid waveformGuid)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            var waveform = new ACB_Waveform();
+            var hcaMetadata = new HCA.HcaMetadata(hca);
+            undos.AddRange(AudioTracks.AddEntry(hca, true, out ushort awbId));
+
+            //Create waveform
+            waveform.AwbId = awbId;
+            waveform.Streaming = streaming;
+            waveform.StreamAwbPortNo = (streaming) ? (ushort)0 : ushort.MaxValue;
+            waveform.EncodeType = EncodeType.HCA;
+            waveform.LoopFlag = loop;
+            waveform.LoopStart = (loop) ? hcaMetadata.LoopStart : 0;
+            waveform.LoopEnd = (loop) ? hcaMetadata.LoopEnd : 0;
+            waveform.NumChannels = hcaMetadata.Channels;
+            waveform.SamplingRate = hcaMetadata.SampleRate;
+            waveform.NumSamples = (uint)hcaMetadata.NumSamples;
+
+            Waveforms.Add(waveform);
+            undos.Add(new UndoableListAdd<ACB_Waveform>(Waveforms, waveform));
+
+            waveformGuid = waveform.InstanceGuid;
+            return undos;
+        }
+        
+        private List<IUndoRedo> AddTrackToSynth(ACB_Synth synth, byte[] hca, bool streaming, bool loop)
+        {
+            return AddTrack_IRefItems(synth, hca, streaming, loop);
+        }
+
+        private List<IUndoRedo> AddTrack_IRefItems(IReferenceType refItem, byte[] hca, bool streaming, bool loop)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            switch (refItem.ReferenceType)
+            {
+                case ReferenceType.Waveform:
+                    if (refItem.ReferenceIndex.IsNull)
+                    {
+                        undos.AddRange(AddWaveform(hca, streaming, loop, out refItem.ReferenceIndex._tableGuid));
+                    }
+                    else
+                        throw new InvalidDataException($"ACB_File.AddTrackToCue: ReferenceType is {refItem.ReferenceType} - cannot add multiple tracks.");
+                    break;
+                case ReferenceType.Synth:
+                    undos.AddRange(AddTrackToSynth(GetSynth(refItem.ReferenceIndex.TableGuid, false), hca, streaming, loop));
+                    break;
+                case ReferenceType.Sequence:
+                    undos.AddRange(AddTrackToSequence(GetSequence(refItem.ReferenceIndex.TableGuid, false), hca, streaming, loop));
+                    break;
+            }
+
+            return undos;
+        }
+        
+        private List<IUndoRedo> AddTrackToSequence(ACB_Sequence sequence, byte[] hca, bool streaming, bool loop)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            ACB_SequenceTrack newTrack = new ACB_SequenceTrack();
+            ACB_Track track = new ACB_Track();
+            newTrack.Index.TableGuid = track.InstanceGuid;
+            newTrack.Percentage = (ushort)(100 / (sequence.Tracks.Count + 1));
+            
+            //Create command
+            ACB_Command command = new ACB_Command();
+            command.CommandType = CommandType.ReferenceItem;
+            command.Parameters = new byte[4].ToList();
+            command.ReferenceType = ReferenceType.Synth;
+            command.ReferenceIndex = new AcbTableReference();
+
+            //Create synth
+            ACB_Synth synth = new ACB_Synth();
+            synth.ReferenceType = ReferenceType.Waveform;
+            command.ReferenceIndex.TableGuid = synth.InstanceGuid;
+            Synths.Add(synth);
+            undos.Add(new UndoableListAdd<ACB_Synth>(Synths, synth));
+            undos.AddRange(AddTrackToSynth(synth, hca, streaming, loop));
+
+            ACB_CommandGroup commandGroup = new ACB_CommandGroup();
+            commandGroup.Commands.Add(command);
+            commandGroup.Commands.Add(new ACB_Command()); //IMPROTANT! Game will crash without this!
+
+            undos.AddRange(CommandTables.AddCommand(commandGroup, CommandTableType.TrackEvent));
+
+            //Create track
+            track.TargetId.TableIndex = uint.MaxValue;
+            track.EventIndex.TableGuid = commandGroup.InstanceGuid;
+
+            Tracks.Add(track);
+            undos.Add(new UndoableListAdd<ACB_Track>(Tracks, track));
+
+            //Add track to sequence
+            sequence.Tracks.Add(newTrack);
+            undos.Add(new UndoableListAdd<ACB_SequenceTrack>(sequence.Tracks, newTrack));
+
+            return undos;
+        }
+        
+        //Replace Track
+        public List<IUndoRedo> ReplaceTrackOnWaveform(ACB_Waveform waveform, byte[] hca, bool streaming)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            undos.AddRange(AudioTracks.AddEntry(hca, true, out ushort newAwbId));
+
+            var hcaMetadata = new HCA.HcaMetadata(hca);
+
+            ushort oldAwbId = waveform.AwbId;
+            ushort newStreamAwbPortNo = (streaming) ? (ushort)0 : ushort.MaxValue;
+
+            undos.Add(new UndoableProperty<ACB_Waveform>("AwbId", waveform, waveform.AwbId, newAwbId));
+            undos.Add(new UndoableProperty<ACB_Waveform>("Streaming", waveform, waveform.Streaming, streaming));
+            undos.Add(new UndoableProperty<ACB_Waveform>("StreamAwbPortNo", waveform, waveform.StreamAwbPortNo, newStreamAwbPortNo));
+            undos.Add(new UndoableProperty<ACB_Waveform>("EncodeType", waveform, waveform.EncodeType, EncodeType.HCA));
+            undos.Add(new UndoableProperty<ACB_Waveform>("LoopFlag", waveform, waveform.LoopFlag, hcaMetadata.HasLoopData));
+            undos.Add(new UndoableProperty<ACB_Waveform>("LoopStart", waveform, waveform.LoopStart, hcaMetadata.LoopEndSamples));
+            undos.Add(new UndoableProperty<ACB_Waveform>("LoopEnd", waveform, waveform.AwbId, hcaMetadata.LoopEndSamples));
+            undos.Add(new UndoableProperty<ACB_Waveform>("NumChannels", waveform, waveform.NumChannels, hcaMetadata.Channels));
+            undos.Add(new UndoableProperty<ACB_Waveform>("SamplingRate", waveform, waveform.SamplingRate, hcaMetadata.SampleRate));
+            undos.Add(new UndoableProperty<ACB_Waveform>("NumSamples", waveform, waveform.SamplingRate, (uint)hcaMetadata.NumSamples));
+
+            waveform.AwbId = newAwbId;
+            waveform.Streaming = streaming;
+            waveform.StreamAwbPortNo = newStreamAwbPortNo;
+            waveform.EncodeType = EncodeType.HCA;
+            waveform.LoopFlag = hcaMetadata.HasLoopData;
+            waveform.LoopStart = hcaMetadata.LoopStartSamples;
+            waveform.LoopEnd = hcaMetadata.LoopEndSamples;
+            waveform.NumChannels = hcaMetadata.Channels;
+            waveform.SamplingRate = hcaMetadata.SampleRate;
+            waveform.NumSamples = (uint)hcaMetadata.NumSamples;
+
+            //Remove previous AWB entry if nothing else uses it.
+            if(Waveforms.All(x=> x.AwbId != oldAwbId))
+            {
+                var entry = AudioTracks.Entries.FirstOrDefault(x => x.AwbId == oldAwbId);
+                if(entry != null)
+                {
+                    undos.Add(new UndoableListRemove<AFS2_AudioFile>(AudioTracks.Entries, entry, AudioTracks.Entries.IndexOf(entry)));
+                    AudioTracks.Entries.Remove(entry);
+                }
+            }
+            
+            waveform.UpdateProperties();
+            undos.Add(new UndoActionDelegate(waveform, "UpdateProperties", true));
+
+            return undos;
+        }
+        
+        //Loop
+        public List<IUndoRedo> EditLoopOnWaveform(ACB_Waveform waveform, bool loop, int startMs, int endMs)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            var awbEntry = GetAfs2Entry(waveform.AwbId);
+            if (awbEntry == null) return undos;
+
+            double startSeconds = startMs / 1000.0;
+            double endSeconds = endMs / 1000.0;
+
+            byte[] originalFile = awbEntry.bytes.DeepCopy();
+            awbEntry.bytes = HcaMetadata.SetLoop(awbEntry.bytes, loop, startSeconds, endSeconds);
+            
+            HcaMetadata metadata = new HcaMetadata(awbEntry.bytes);
+
+            undos.Add(new UndoableProperty<AFS2_AudioFile>("bytes", awbEntry, originalFile, awbEntry.bytes.DeepCopy()));
+            undos.Add(new UndoableProperty<ACB_Waveform>("LoopStart", waveform, waveform.LoopStart, metadata.LoopStartSamples));
+            undos.Add(new UndoableProperty<ACB_Waveform>("LoopEnd", waveform, waveform.LoopEnd, metadata.LoopEndSamples));
+            undos.Add(new UndoableProperty<ACB_Waveform>("LoopFlag", waveform, waveform.LoopFlag, metadata.HasLoopData));
+
+            //Update waveform
+            waveform.LoopStart = metadata.LoopStartSamples;
+            waveform.LoopEnd = metadata.LoopEndSamples;
+            waveform.LoopFlag = metadata.HasLoopData;
+
+            return undos;
+        }
+        #endregion
+
+        #region MiscFunctions
+        public List<IUndoRedo> UpdateCueLength(ACB_Cue cue)
+        {
+            uint length = 0;
+
+            foreach(var waveform in GetWaveformsFromCue(cue))
+            {
+                var awbEntry = GetAfs2Entry(waveform.AwbId, true);
+                var hcaInfo = (awbEntry != null) ? awbEntry.HcaInfo : new HCA.HcaMetadata();
+
+                if (hcaInfo.DurationSeconds * 1000 > length)
+                    length = (uint)(hcaInfo.DurationSeconds * 1000);
+            }
+
+            uint originalLength = cue.Length;
+            cue.Length = length;
+
+            return new List<IUndoRedo>() { new UndoableProperty<ACB_Cue>("Length", cue, originalLength, length) };
+        }
+        
+        /// <summary>
+        /// Checks if the specified cue can add any more tracks.
+        /// </summary>
+        public bool CanAddTrack(ACB_Cue cue)
+        {
+            if(cue.ReferenceType == ReferenceType.Sequence)
+            {
+                return true;
+            }
+            else if(cue.ReferenceType == ReferenceType.Waveform)
+            {
+                return cue.ReferenceIndex.IsNull;
+            }
+            else if(cue.ReferenceType == ReferenceType.Synth)
+            {
+                var synth = GetSynth(cue.ReferenceIndex.TableGuid);
+
+                if(synth != null)
+                {
+                    while(synth.ReferenceType != ReferenceType.Waveform && synth.ReferenceIndex.IsNull)
+                    {
+                        if (synth.ReferenceType == ReferenceType.Waveform && !synth.ReferenceIndex.IsNull) return false;
+
+                        if (synth.ReferenceType == ReferenceType.Synth && !synth.ReferenceIndex.IsNull)
+                        {
+                            synth = GetSynth(synth.ReferenceIndex.TableGuid);
+                            if (synth == null) return false;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+
+                        if (synth.ReferenceType == ReferenceType.Sequence) return false;
+                    }
+                }
+                return false;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Checks if the specified cue can add any actions.
+        /// </summary>
+        public bool CanAddAction(ACB_Cue cue)
+        {
+            return cue.ReferenceType == ReferenceType.Sequence || cue.ReferenceType == ReferenceType.Synth;
+        }
+        
+        public List<IUndoRedo> RandomizeCueIds()
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            int startCueId = Random.Range(5000, int.MaxValue / 2);
+
+            for (int i = 0; i < Cues.Count; i++)
+            {
+                uint newId = (uint)(startCueId + i);
+                undos.Add(new UndoableProperty<ACB_Cue>(nameof(ACB_Cue.ID), Cues[i], Cues[i].ID, newId));
+                Cues[i].ID = newId;
+            }
+
+            return undos;
+        }
+        
+        //3Dvol_def
+        public List<IUndoRedo> Add3dDefToCue(ACB_Cue cue)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+            if (DoesCueHave3dDef(cue)) return undos;
+
+            IGlobalAisacRef globalAisacHolder;
+
+            switch (cue.ReferenceType)
+            {
+                case ReferenceType.Sequence:
+                    globalAisacHolder = GetSequence(cue.ReferenceIndex.TableGuid);
+                    break;
+                case ReferenceType.Synth:
+                    globalAisacHolder = GetSynth(cue.ReferenceIndex.TableGuid);
+                    break;
+                default:
+                    return undos;
+            }
+
+
+            ACB_GlobalAisacReference globalAisacRef = new ACB_GlobalAisacReference() { Name = GLOBAL_AISAC_3DVOL_DEF, InstanceGuid = Guid.NewGuid() };
+            GlobalAisacReferences.Add(globalAisacRef);
+            undos.Add(new UndoableListAdd<ACB_GlobalAisacReference>(GlobalAisacReferences, globalAisacRef));
+
+            AcbTableReference _3dRef = new AcbTableReference() { TableGuid = globalAisacRef.InstanceGuid };
+
+            globalAisacHolder.GlobalAisacRefs.Add(_3dRef);
+            undos.Add(new UndoableListAdd<AcbTableReference>(globalAisacHolder.GlobalAisacRefs, _3dRef));
+
+            return undos;
+        }
+
+        public List<IUndoRedo> Remove3dDefFromCue(ACB_Cue cue)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+            
+            IGlobalAisacRef globalAisacHolder;
+
+            switch (cue.ReferenceType)
+            {
+                case ReferenceType.Sequence:
+                    globalAisacHolder = GetSequence(cue.ReferenceIndex.TableGuid);
+                    break;
+                case ReferenceType.Synth:
+                    globalAisacHolder = GetSynth(cue.ReferenceIndex.TableGuid);
+                    break;
+                default:
+                    return undos;
+            }
+            
+            foreach (var aisac in globalAisacHolder.GlobalAisacRefs)
+            {
+                var aisacRef = GetGlobalAisacReference(aisac.TableGuid);
+                if (aisacRef != null)
+                {
+                    if (aisacRef.Name == GLOBAL_AISAC_3DVOL_DEF)
+                    {
+                        undos.Add(new UndoableListRemove<AcbTableReference>(globalAisacHolder.GlobalAisacRefs, aisac));
+                        globalAisacHolder.GlobalAisacRefs.Remove(aisac);
+                        break;
+                    }
+                }
+            }
+
+            return undos;
+        }
+
+        public bool DoesCueHave3dDef(ACB_Cue cue)
+        {
+            IGlobalAisacRef globalAisacHolder;
+
+            switch (cue.ReferenceType)
+            {
+                case ReferenceType.Sequence:
+                    globalAisacHolder = GetSequence(cue.ReferenceIndex.TableGuid);
+                    break;
+                case ReferenceType.Synth:
+                    globalAisacHolder = GetSynth(cue.ReferenceIndex.TableGuid);
+                    break;
+                default:
+                    return false;
+            }
+
+            foreach(var aisac in globalAisacHolder.GlobalAisacRefs)
+            {
+                var aisacRef = GetGlobalAisacReference(aisac.TableGuid);
+                if(aisacRef != null)
+                {
+                    if (aisacRef.Name == GLOBAL_AISAC_3DVOL_DEF) return true;
+                }
+            }
+
+            return false;
+        }
+        
+        #endregion
+
+        #region CopyFunctions
+        public List<IUndoRedo> CopyCue(int cueId, ACB_File copyAcb)
+        {
+            //For when you dont care about the new cue ID
+            int id;
+            return CopyCue(cueId, copyAcb, out id);
+        }
+
+        public List<IUndoRedo> CopyCue(int cueId, ACB_File copyAcb, out int newCueId)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            //Get and copy the cue
+            ACB_Cue cue = copyAcb.GetCue(cueId);
+            if (cue == null)
+            {
+                newCueId = -1;
+                return undos;
+            }
+            cue = cue.Copy();
+
+            //Calculate new cueID if needed
+            if(Cues.Any(x => x.ID == cue.ID))
+                cue.ID = (uint)GetFreeCueId();
+
+            //Copy referenced tables (if needed)
+            undos.AddRange(CopyReferenceItems(cue, copyAcb));
+
+            //Add to acb
+            Cues.Add(cue);
+            undos.Add(new UndoableListAdd<ACB_Cue>(Cues, cue));
+
+            newCueId = (int)cue.ID;
+            return undos;
+        }
+
+        private List<IUndoRedo> CopyReferenceItems(IReferenceType referenceItem, ACB_File copyAcb)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+            if (referenceItem.ReferenceIndex.IsNull) return undos;
+
+            switch (referenceItem.ReferenceType)
+            {
+                case ReferenceType.Waveform:
+                    undos.AddRange(CopyWaveform(copyAcb.GetWaveform(referenceItem.ReferenceIndex.TableGuid, false), copyAcb));
+                    break;
+                case ReferenceType.Synth:
+                    undos.AddRange(CopySynth(copyAcb.GetSynth(referenceItem.ReferenceIndex.TableGuid, false), copyAcb));
+                    break;
+                case ReferenceType.Sequence:
+                    undos.AddRange(CopySequence(copyAcb.GetSequence(referenceItem.ReferenceIndex.TableGuid, false), copyAcb));
+                    break;
+                default:
+                    throw new InvalidDataException($"ACB_File.CopyReferenceItems: Encountered a non-supported ReferenceType ({referenceItem.ReferenceType}). Copy failed.");
+            }
+
+            return undos;
+        }
+
+        private List<IUndoRedo> CopyWaveform(ACB_Waveform waveform, ACB_File copyAcb)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            if (GetWaveform(waveform.InstanceGuid) == null)
+            {
+                waveform = waveform.Copy();
+                Waveforms.Add(waveform);
+                undos.Add(new UndoableListAdd<ACB_Waveform>(Waveforms, waveform));
+
+                if(waveform.AwbId != ushort.MaxValue)
+                {
+                    ushort awbId;
+                    undos.AddRange(CopyAwbEntry(copyAcb.GetAfs2Entry(waveform.AwbId, false), copyAcb, out awbId));
+                    waveform.AwbId = awbId;
+                }
+                
+            }
+
+            return undos;
+        }
+
+        private List<IUndoRedo> CopySynth(ACB_Synth synth, ACB_File copyAcb)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            if (GetSynth(synth.InstanceGuid) == null)
+            {
+                synth = synth.Copy();
+
+                //ReferenceItems
+                undos.AddRange(CopyReferenceItems(synth, copyAcb));
+
+                //Commnad
+                if (!synth.CommandIndex.IsNull)
+                    undos.AddRange(CopyCommand(copyAcb.CommandTables.GetCommand(synth.CommandIndex.TableGuid, CommandTableType.SynthCommand, false), copyAcb, CommandTableType.SynthCommand));
+
+                undos.AddRange(CopyLocalAisacs(synth, copyAcb));
+                undos.AddRange(CopyGlobalAisacs(synth, copyAcb));
+                undos.AddRange(CopyActionTracks(synth, copyAcb));
+
+                Synths.Add(synth);
+                undos.Add(new UndoableListAdd<ACB_Synth>(Synths, synth));
+            }
+
+            return undos;
+        }
+        
+        private List<IUndoRedo> CopySequence(ACB_Sequence sequence, ACB_File copyAcb)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            if (GetSequence(sequence.InstanceGuid) == null)
+            {
+                sequence = sequence.Copy();
+
+                //Commnad
+                if (!sequence.CommandIndex.IsNull)
+                    undos.AddRange(CopyCommand(copyAcb.CommandTables.GetCommand(sequence.CommandIndex.TableGuid, CommandTableType.SequenceCommand, false), copyAcb, CommandTableType.SequenceCommand));
+                
+                undos.AddRange(CopyLocalAisacs(sequence, copyAcb));
+                undos.AddRange(CopyGlobalAisacs(sequence, copyAcb));
+                undos.AddRange(CopyActionTracks(sequence, copyAcb));
+
+                //Tracks
+                foreach(var track in sequence.Tracks)
+                {
+                    if (!track.Index.IsNull)
+                        undos.AddRange(CopyTrack(copyAcb.GetTrack(track.Index.TableGuid, false), copyAcb));
+                }
+
+                Sequences.Add(sequence);
+                undos.Add(new UndoableListAdd<ACB_Sequence>(Sequences, sequence));
+            }
+
+            return undos;
+        }
+
+        private List<IUndoRedo> CopyAwbEntry(AFS2_AudioFile awbEntry, ACB_File copyAcb, out ushort newAwbId)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            ushort id = AudioTracks.GetExistingEntry(awbEntry);
+            if (id == ushort.MaxValue)
+            {
+                //Awb entry doesn't exist, adding it..
+                awbEntry = awbEntry.Copy();
+                id = (ushort)AudioTracks.NextID();
+                awbEntry.AwbId = id;
+                AudioTracks.Entries.Add(awbEntry);
+                undos.Add(new UndoableListAdd<AFS2_AudioFile>(AudioTracks.Entries, awbEntry));
+            }
+
+            newAwbId = id;
+            return undos;
+        }
+
+        private List<IUndoRedo> CopyCommand(ACB_CommandGroup command, ACB_File copyAcb, CommandTableType commandTableType)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            if(CommandTables.GetCommand(command.InstanceGuid, commandTableType) == null)
+            {
+                command = command.Copy();
+
+                //Copy referenced tables
+                foreach(var cmd in command.Commands)
+                {
+                    switch (cmd.CommandType)
+                    {
+                        case CommandType.ReferenceItem:
+                        case CommandType.ReferenceItem2:
+                            undos.AddRange(CopyReferenceItems(cmd, copyAcb));
+                            break;
+                        case CommandType.GlobalAisacReference:
+                            undos.AddRange(CopyGlobalAisac(copyAcb, cmd.ReferenceIndex));
+                            break;
+                        case CommandType.VolumeBus:
+                        case CommandType.Bus:
+                            undos.AddRange(CopyStringValue(cmd.ReferenceIndex, copyAcb));
+                            break;
+                    }
+                }
+
+                undos.AddRange(CommandTables.AddCommand(command, commandTableType));
+            }
+
+            return undos;
+        }
+        
+        private List<IUndoRedo> CopyTrack(ACB_Track track, ACB_File copyAcb)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            if(GetTrack(track.InstanceGuid) == null)
+            {
+                track = track.Copy();
+
+                undos.AddRange(CopyLocalAisacs(track, copyAcb));
+                undos.AddRange(CopyGlobalAisacs(track, copyAcb));
+
+                if(!track.CommandIndex.IsNull)
+                    undos.AddRange(CopyCommand(copyAcb.CommandTables.GetCommand(track.CommandIndex.TableGuid, CommandTableType.TrackCommand, false), copyAcb, CommandTableType.TrackCommand));
+
+                if (!track.EventIndex.IsNull)
+                    undos.AddRange(CopyCommand(copyAcb.CommandTables.GetCommand(track.EventIndex.TableGuid, CommandTableType.TrackEvent, false), copyAcb, CommandTableType.TrackEvent));
+
+                Tracks.Add(track);
+                undos.Add(new UndoableListAdd<ACB_Track>(Tracks, track));
+
+            }
+
+            return undos;
+        }
+
+        private List<IUndoRedo> CopyGraphs(IGraphIndexes graphs, ACB_File copyAcb)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            foreach(var graph in graphs.GraphIndexes)
+            {
+                if(GetGraph(graph.TableGuid) == null && !graph.IsNull)
+                {
+                    var graphTable = copyAcb.GetGraph(graph.TableGuid, false).Copy();
+                    Graphs.Add(graphTable);
+                    undos.Add(new UndoableListAdd<ACB_Graph>(Graphs, graphTable));
+                }
+            }
+
+            return undos;
+        }
+
+        private List<IUndoRedo> CopyAutoModulation(IAutoModulationIndex autoMod, ACB_File copyAcb)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+            if (autoMod.AutoModulationIndex.IsNull) return undos;
+
+            if (GetAutoModulation(autoMod.AutoModulationIndex.TableGuid) == null)
+            {
+                var newAutoMod = copyAcb.GetAutoModulation(autoMod.AutoModulationIndex.TableGuid).Copy();
+                AutoModulations.Add(newAutoMod);
+                undos.Add(new UndoableListAdd<ACB_AutoModulation>(AutoModulations, newAutoMod));
+            }
+
+            return undos;
+        }
+
+        private List<IUndoRedo> CopyLocalAisacs(ILocalAisac localAisacs, ACB_File copyAcb)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            foreach (var aisac in localAisacs.LocalAisac)
+            {
+                if (GetAisac(aisac.TableGuid) == null && !aisac.IsNull)
+                {
+                    var aisacTable = copyAcb.GetAisac(aisac.TableGuid, false).Copy();
+
+                    if (aisacTable.GraphIndexes.Count > 0)
+                        undos.AddRange(CopyGraphs(aisacTable, copyAcb));
+
+                    if (!aisacTable.AutoModulationIndex.IsNull)
+                        undos.AddRange(CopyAutoModulation(aisacTable, copyAcb));
+
+                    Aisacs.Add(aisacTable);
+                    undos.Add(new UndoableListAdd<ACB_Aisac>(Aisacs, aisacTable));
+                }
+            }
+
+            return undos;
+        }
+
+        private List<IUndoRedo> CopyGlobalAisacs(IGlobalAisacRef globalAisacs, ACB_File copyAcb)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            foreach (var aisac in globalAisacs.GlobalAisacRefs)
+            {
+                undos.AddRange(CopyGlobalAisac(copyAcb, aisac));
+            }
+
+            return undos;
+        }
+
+        private List<IUndoRedo> CopyGlobalAisac(ACB_File copyAcb, AcbTableReference aisac)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            if (GetGlobalAisacReference(aisac.TableGuid) == null && !aisac.IsNull)
+            {
+                var aisacTable = copyAcb.GetGlobalAisacReference(aisac.TableGuid, false).Copy();
+                GlobalAisacReferences.Add(aisacTable);
+                undos.Add(new UndoableListAdd<ACB_GlobalAisacReference>(GlobalAisacReferences, aisacTable));
+            }
+
+            return undos;
+        }
+
+        private List<IUndoRedo> CopyActionTracks(IActionTrack actionTracks, ACB_File copyAcb)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            foreach (var action in actionTracks.ActionTracks)
+            {
+                if (GetActionTrack(action.TableGuid) == null && !action.IsNull)
+                {
+                    var actionTable = copyAcb.GetActionTrack(action.TableGuid, false).Copy();
+
+                    undos.AddRange(CopyLocalAisacs(actionTable, copyAcb));
+                    undos.AddRange(CopyGlobalAisacs(actionTable, copyAcb));
+
+                    if (!actionTable.CommandIndex.IsNull)
+                        undos.AddRange(CopyCommand(copyAcb.CommandTables.GetCommand(actionTable.CommandIndex.TableGuid, CommandTableType.TrackEvent, false), copyAcb, CommandTableType.TrackEvent));
+
+                    if (!actionTable.EventIndex.IsNull)
+                        undos.AddRange(CopyCommand(copyAcb.CommandTables.GetCommand(actionTable.EventIndex.TableGuid, CommandTableType.TrackEvent, false), copyAcb, CommandTableType.TrackEvent));
+
+                    ActionTracks.Add(actionTable);
+                    undos.Add(new UndoableListAdd<ACB_Track>(ActionTracks, actionTable));
+                }
+            }
+
+            return undos;
+        }
+
+        private List<IUndoRedo> CopyStringValue(AcbTableReference tableRef, ACB_File copyAcb)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            var strValue = copyAcb.GetStringValue(tableRef.TableGuid);
+
+            if(strValue != null)
+            {
+                var strValueInThisAcb = GetStringValue(strValue.StringValue);
+
+                if(strValueInThisAcb != null)
+                {
+                    //Set the GUID
+                    tableRef.TableGuid = strValueInThisAcb.InstanceGuid;
+                }
+                else
+                {
+                    //Add StringValue
+                    StringValues.Add(strValue);
+                    undos.Add(new UndoableListAdd<ACB_StringValue>(StringValues, strValue));
+                }
+            }
+
+            return undos;
         }
 
         #endregion
@@ -550,7 +1504,7 @@ namespace Xv2CoreLib.ACB_NEW
             //Synths
             foreach(var synth in Synths)
             {
-                synth.ActionTracks.Sort();
+                synth.ActionTracks.Sort((x, y) => x.TableIndex_Int - y.TableIndex_Int);
                 ushort startIndex = CheckTableSequence(synth.ActionTracks, newActionTracks, ActionTracks);
 
                 //If the correct sequence of entries doesn't exist, then we must add them
@@ -560,21 +1514,21 @@ namespace Xv2CoreLib.ACB_NEW
 
                     for (int i = 0; i < synth.ActionTracks.Count; i++)
                     {
-                        newActionTracks.Add(ActionTracks[i]);
+                        newActionTracks.Add(ActionTracks[synth.ActionTracks[i].TableIndex_Int]);
                     }
                 }
 
                 //Set new indexes
                 for (int i = 0; i < synth.ActionTracks.Count; i++)
                 {
-                    synth.ActionTracks[i] = (ushort)(startIndex + i);
+                    synth.ActionTracks[i].TableIndex = (ushort)(startIndex + i);
                 }
             }
 
             //Sequences
             foreach (var sequence in Sequences)
             {
-                sequence.ActionTracks.Sort();
+                sequence.ActionTracks.Sort((x, y) => x.TableIndex_Int - y.TableIndex_Int);
                 ushort startIndex = CheckTableSequence(sequence.ActionTracks, newActionTracks, ActionTracks);
 
                 //If the correct sequence of entries doesn't exist, then we must add them
@@ -584,14 +1538,14 @@ namespace Xv2CoreLib.ACB_NEW
 
                     for (int i = 0; i < sequence.ActionTracks.Count; i++)
                     {
-                        newActionTracks.Add(ActionTracks[i]);
+                        newActionTracks.Add(ActionTracks[sequence.ActionTracks[i].TableIndex_Int]);
                     }
                 }
 
                 //Set new indexes
                 for (int i = 0; i < sequence.ActionTracks.Count; i++)
                 {
-                    sequence.ActionTracks[i] = (ushort)(startIndex + i);
+                    sequence.ActionTracks[i].TableIndex = (ushort)(startIndex + i);
                 }
             }
 
@@ -604,7 +1558,7 @@ namespace Xv2CoreLib.ACB_NEW
             //Synths
             foreach (var synth in Synths)
             {
-                synth.GlobalAisacRefs.Sort();
+                synth.GlobalAisacRefs.Sort((x, y) => x.TableIndex_Int - y.TableIndex_Int);
                 ushort startIndex = CheckTableSequence(synth.GlobalAisacRefs, newAisacRefs, GlobalAisacReferences);
 
                 //If the correct sequence of entries doesn't exist, then we must add them
@@ -614,21 +1568,21 @@ namespace Xv2CoreLib.ACB_NEW
 
                     for (int i = 0; i < synth.GlobalAisacRefs.Count; i++)
                     {
-                        newAisacRefs.Add(GlobalAisacReferences[i]);
+                        newAisacRefs.Add(GlobalAisacReferences[synth.GlobalAisacRefs[i].TableIndex_Int]);
                     }
                 }
 
                 //Set new indexes
                 for (int i = 0; i < synth.GlobalAisacRefs.Count; i++)
                 {
-                    synth.GlobalAisacRefs[i] = (ushort)(startIndex + i);
+                    synth.GlobalAisacRefs[i].TableIndex = (ushort)(startIndex + i);
                 }
             }
 
             //Sequences
             foreach (var sequence in Sequences)
             {
-                sequence.GlobalAisacRefs.Sort();
+                sequence.GlobalAisacRefs.Sort((x, y) => x.TableIndex_Int - y.TableIndex_Int);
                 ushort startIndex = CheckTableSequence(sequence.GlobalAisacRefs, newAisacRefs, GlobalAisacReferences);
 
                 //If the correct sequence of entries doesn't exist, then we must add them
@@ -638,21 +1592,21 @@ namespace Xv2CoreLib.ACB_NEW
 
                     for (int i = 0; i < sequence.GlobalAisacRefs.Count; i++)
                     {
-                        newAisacRefs.Add(GlobalAisacReferences[i]);
+                        newAisacRefs.Add(GlobalAisacReferences[sequence.GlobalAisacRefs[i].TableIndex_Int]);
                     }
                 }
 
                 //Set new indexes
                 for (int i = 0; i < sequence.GlobalAisacRefs.Count; i++)
                 {
-                    sequence.GlobalAisacRefs[i] = (ushort)(startIndex + i);
+                    sequence.GlobalAisacRefs[i].TableIndex = (ushort)(startIndex + i);
                 }
             }
 
             //Tracks
             foreach (var track in Tracks)
             {
-                track.GlobalAisacRefs.Sort();
+                track.GlobalAisacRefs.Sort((x, y) => x.TableIndex_Int - y.TableIndex_Int);
                 ushort startIndex = CheckTableSequence(track.GlobalAisacRefs, newAisacRefs, GlobalAisacReferences);
 
                 //If the correct sequence of entries doesn't exist, then we must add them
@@ -662,21 +1616,21 @@ namespace Xv2CoreLib.ACB_NEW
 
                     for (int i = 0; i < track.GlobalAisacRefs.Count; i++)
                     {
-                        newAisacRefs.Add(GlobalAisacReferences[i]);
+                        newAisacRefs.Add(GlobalAisacReferences[track.GlobalAisacRefs[i].TableIndex_Int]);
                     }
                 }
 
                 //Set new indexes
                 for (int i = 0; i < track.GlobalAisacRefs.Count; i++)
                 {
-                    track.GlobalAisacRefs[i] = (ushort)(startIndex + i);
+                    track.GlobalAisacRefs[i].TableIndex = (ushort)(startIndex + i);
                 }
             }
 
             //ActionTracks
             foreach (var track in ActionTracks)
             {
-                track.GlobalAisacRefs.Sort();
+                track.GlobalAisacRefs.Sort((x, y) => x.TableIndex_Int - y.TableIndex_Int);
                 ushort startIndex = CheckTableSequence(track.GlobalAisacRefs, newAisacRefs, GlobalAisacReferences);
 
                 //If the correct sequence of entries doesn't exist, then we must add them
@@ -686,38 +1640,132 @@ namespace Xv2CoreLib.ACB_NEW
 
                     for (int i = 0; i < track.GlobalAisacRefs.Count; i++)
                     {
-                        newAisacRefs.Add(GlobalAisacReferences[i]);
+                        newAisacRefs.Add(GlobalAisacReferences[track.GlobalAisacRefs[i].TableIndex_Int]);
                     }
                 }
 
                 //Set new indexes
                 for (int i = 0; i < track.GlobalAisacRefs.Count; i++)
                 {
-                    track.GlobalAisacRefs[i] = (ushort)(startIndex + i);
+                    track.GlobalAisacRefs[i].TableIndex = (ushort)(startIndex + i);
                 }
             }
         }
-
-        private ushort CheckTableSequence<T>(List<ushort> idx, List<T> newList, List<T> mainList) where T : AcbTableBase
+        
+        private ushort CheckTableSequence<T>(List<AcbTableReference> idx, List<T> newList, List<T> mainList) where T : AcbTableBase
         {
             if (idx.Count == 0) return ushort.MaxValue;
 
             for (int i = 0; i < newList.Count; i++)
             {
-                if (newList[i] == mainList[idx[0]])
+                if(idx[0].TableIndex_Int >= 0 && idx[0].TableIndex_Int <= mainList.Count - 1)
                 {
-                    for (int a = 1; a < idx.Count; a++)
+                    if (newList[i] == mainList[idx[0].TableIndex_Int])
                     {
-                        if ((i + a) >= newList.Count) break;
-                        if (a >= ActionTracks.Count) break;
-                        if (newList[i + a] != mainList[a]) break;
+                        for (int a = 1; a < idx.Count; a++)
+                        {
+                            if ((i + a) >= newList.Count) break;
+                            if (a >= ActionTracks.Count) break;
+                            if (newList[i + a] != mainList[a]) break;
 
-                        if (idx.Count == a - 1) return (ushort)i; //Reached end of idx list, and no breaks have happened
+                            if (idx.Count == a - 1) return (ushort)i; //Reached end of idx list, and no breaks have happened
+                        }
                     }
                 }
             }
 
             return ushort.MaxValue;
+        }
+
+        /// <summary>
+        /// Creates new InstanceGuids for all tables and updates all references.
+        /// </summary>
+        internal void NewInstanceGuids()
+        {
+            NewInstanceGuids_EachTable(Cues);
+            NewInstanceGuids_EachTable(Waveforms);
+            NewInstanceGuids_EachTable(Aisacs);
+            NewInstanceGuids_EachTable(Graphs);
+            NewInstanceGuids_EachTable(GlobalAisacReferences);
+            NewInstanceGuids_EachTable(Synths);
+            NewInstanceGuids_EachTable(Tracks);
+            NewInstanceGuids_EachTable(Sequences);
+            NewInstanceGuids_EachTable(AutoModulations);
+            NewInstanceGuids_EachTable(ActionTracks);
+
+            foreach (var commandTable in CommandTables.CommandTables)
+                NewInstanceGuids_EachTable(commandTable.CommandGroups);
+        }
+
+        private void NewInstanceGuids_EachTable<T>(IList<T> table) where T : AcbTableBase
+        {
+            foreach(var entry in table)
+            {
+                Guid oldGuid = entry.InstanceGuid;
+                entry.InstanceGuid = Guid.NewGuid();
+                InstanceGuidRefactor(oldGuid, entry.InstanceGuid);
+            }
+        }
+
+        /// <summary>
+        /// Changes all references to the specified InstanceGuid with the new GUID (does not change the actual InstanceGuid on AcbTableBase, just references via AcbTableReference).
+        /// </summary>
+        /// <returns></returns>
+        public void InstanceGuidRefactor(Guid oldGuid, Guid newGuid)
+        {
+            InstanceGuidRefactor_Reflection(Cues, oldGuid, newGuid);
+            InstanceGuidRefactor_Reflection(Sequences, oldGuid, newGuid);
+            InstanceGuidRefactor_Reflection(Synths, oldGuid, newGuid);
+            InstanceGuidRefactor_Reflection(Waveforms, oldGuid, newGuid);
+            InstanceGuidRefactor_Reflection(Tracks, oldGuid, newGuid);
+            InstanceGuidRefactor_Reflection(ActionTracks, oldGuid, newGuid);
+            InstanceGuidRefactor_Reflection(Aisacs, oldGuid, newGuid);
+            //InstanceGuidRefactor_Reflection(GlobalAisacReferences, oldGuid, newGuid);
+            //InstanceGuidRefactor_Reflection(AutoModulations, oldGuid, newGuid);
+            //InstanceGuidRefactor_Reflection(Graphs, oldGuid, newGuid);
+
+            foreach (var commandTable in CommandTables.CommandTables)
+                foreach (var commandGroup in commandTable.CommandGroups)
+                    InstanceGuidRefactor_Reflection(commandGroup.Commands, oldGuid, newGuid);
+            
+        }
+
+        private void InstanceGuidRefactor_Reflection<T>(IList<T> entries, Guid oldGuid, Guid newGuid) where T : class
+        {
+            foreach (var entry in entries)
+            {
+                InstanceGuidRefactor_ReflectionRecursive(entry, oldGuid, newGuid);
+            }
+        }
+
+        private void InstanceGuidRefactor_ReflectionRecursive<T>(T entry, Guid oldGuid, Guid newGuid)
+        {
+            if (entry == null) return;
+            var props = entry.GetType().GetProperties();
+
+            foreach (var prop in props.Where(x => x.Name != "InstanceGuid"))
+            {
+                if (prop.PropertyType == typeof(Guid))
+                {
+                    if ((Guid)prop.GetValue(entry) == oldGuid)
+                    {
+                        prop.SetValue(entry, newGuid);
+                    }
+                }
+                else if (prop.PropertyType == typeof(AcbTableReference))
+                {
+                    InstanceGuidRefactor_ReflectionRecursive(prop.GetValue(entry) as AcbTableReference, oldGuid, newGuid);
+                }
+                else if (prop.PropertyType == typeof(List<AcbTableReference>))
+                {
+                    InstanceGuidRefactor_Reflection(prop.GetValue(entry) as List<AcbTableReference>, oldGuid, newGuid);
+                }
+                else if (prop.PropertyType == typeof(ObservableCollection<ACB_SequenceTrack>))
+                {
+                    InstanceGuidRefactor_Reflection(prop.GetValue(entry) as ObservableCollection<ACB_SequenceTrack>, oldGuid, newGuid);
+                }
+            }
+            
         }
 
         #endregion
@@ -728,8 +1776,17 @@ namespace Xv2CoreLib.ACB_NEW
             //Get list of tracks to include
             List<int> tracks = new List<int>();
 
-            foreach (var waveforms in Waveforms.Where(w => w.Streaming == streamingAwb && w.AwbId != ushort.MaxValue))
-                tracks.Add(waveforms.AwbId);
+            if(SaveFormat == SaveFormat.Default)
+            {
+                foreach (var waveforms in Waveforms.Where(w => w.Streaming == streamingAwb && w.AwbId != ushort.MaxValue))
+                    tracks.Add(waveforms.AwbId);
+            }
+            else if(SaveFormat == SaveFormat.MusicPackage && !streamingAwb)
+            {
+                //All tracks are stored internally, ignoring the streaming flag.
+                foreach (var waveforms in Waveforms.Where(w => w.AwbId != ushort.MaxValue))
+                    tracks.Add(waveforms.AwbId);
+            }
 
             //If there are no tracks then dont create a awb file.
             if (tracks.Count == 0)
@@ -738,17 +1795,402 @@ namespace Xv2CoreLib.ACB_NEW
             //Create the AWB file
             AFS2_File awbFile = AFS2_File.CreateNewAwbFile();
 
-            foreach(var track in AudioTracks.EmbeddedFiles)
+            foreach(var track in AudioTracks.Entries)
             {
                 if (tracks.Contains(track.AwbId))
                 {
-                    awbFile.EmbeddedFiles.Add(track);
+                    awbFile.Entries.Add(track);
                 }
             }
 
+            //For EAT compatibility
+            awbFile.PadWithNullEntries();
             return awbFile;
         }
+        
+        /// <summary>
+        /// Removes unused tables. (Except Cues and Awb Entries)
+        /// </summary>
+        /// <returns></returns>
+        public List<IUndoRedo> CleanUpTables()
+        {
+            //Operation must be undoable to preserve any deletes in the undo history
+            List<IUndoRedo> undos = new List<IUndoRedo>();
 
+            //We must loop over them all multiple times to ensure every unused table is caught, as some unusued tables that get removed later on may reference an earlier one
+            for (int i = 0; i < 11; i++)
+            {
+                undos.AddRange(CleanUpTable(Sequences));
+                undos.AddRange(CleanUpTable(Synths));
+                undos.AddRange(CleanUpTable(Waveforms));
+                undos.AddRange(CleanUpTable(Tracks));
+                undos.AddRange(CleanUpTable(ActionTracks));
+                undos.AddRange(CleanUpTable(Aisacs));
+                undos.AddRange(CleanUpTable(GlobalAisacReferences));
+                undos.AddRange(CleanUpTable(Graphs));
+                undos.AddRange(CleanUpTable(AutoModulations));
+                //StringValues dont get deleted (some commands require them and they are small and harmless by themselves)
+
+                foreach (var commandTable in CommandTables.CommandTables)
+                    undos.AddRange(CleanUpTable(commandTable.CommandGroups));
+            }
+            
+            return undos;
+        }
+
+        private List<IUndoRedo> CleanUpTable<T>(IList<T> entries) where T : AcbTableBase
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            for (int i = entries.Count - 1; i >= 0; i--)
+            {
+                if(!IsTableUsed(entries[i].InstanceGuid))
+                {
+                    T original = entries[i];
+                    entries.Remove(entries[i]);
+                    undos.Add(new UndoableListRemove<T>(entries, original, i));
+                }
+            }
+
+            return undos;
+        }
+        
+        /// <summary>
+        /// Ensure that all ACB_SequenceTrack Percentage values do not exceed 100.
+        /// </summary>
+        private void TrimSequenceTrackPercentages()
+        {
+            foreach (var sequence in Sequences)
+            {
+                sequence.AdjustTrackPercentage();
+            }
+        }
+        
+        private void SortCues()
+        {
+            Cues.Sort((x, y) => (int)x.ID - (int)y.ID);
+        }
+
+        #endregion
+
+        #region TableReferenceLinking
+        /// <summary>
+        /// Link the AcbTableReferences with the InstanceGuid of its matching TableIndex. (Call this once, after loading)
+        /// </summary>
+        private void LinkTableGuids()
+        {
+            LinkRefItemsGuid(Cues);
+
+            LinkRefItemsGuid(Synths);
+            LinkCommandIndexGuid(Synths, CommandTableType.SynthCommand);
+            LinkLocalAisacGuid(Synths);
+            LinkGlobalAisacGuid(Synths);
+            LinkActionTrackGuid(Synths);
+
+            LinkTrackGuid(Sequences);
+            LinkCommandIndexGuid(Sequences, CommandTableType.SequenceCommand);
+            LinkLocalAisacGuid(Sequences);
+            LinkGlobalAisacGuid(Sequences);
+            LinkActionTrackGuid(Sequences);
+
+            LinkLocalAisacGuid(Tracks);
+            LinkGlobalAisacGuid(Tracks);
+            LinkEventIndexGuid(Tracks, CommandTableType.TrackEvent);
+            LinkCommandIndexGuid(Tracks, CommandTableType.TrackCommand);
+
+            LinkLocalAisacGuid(ActionTracks);
+            LinkGlobalAisacGuid(ActionTracks);
+            LinkEventIndexGuid(ActionTracks, CommandTableType.TrackEvent);
+            LinkCommandIndexGuid(ActionTracks, CommandTableType.TrackEvent);
+            LinkTargetIdGuid(ActionTracks);
+
+            LinkAutoModulationIndexGuid(Aisacs);
+            LinkGraphIndexesGuid(Aisacs);
+
+            CommandTables.LinkGuids(this);
+        }
+
+        /// <summary>
+        /// Link the AcbTableReferences with the updated table index of its matching InstanceGuid. (Call this once, right before saving)
+        /// </summary>
+        private void LinkTableIndexes()
+        {
+            LinkRefItemsIndex(Cues);
+
+            LinkRefItemsIndex(Synths);
+            LinkCommandIndexIndex(Synths, CommandTableType.SynthCommand);
+            LinkLocalAisacIndex(Synths);
+            LinkGlobalAisacIndex(Synths);
+            LinkActionTrackIndex(Synths);
+
+            LinkTrackIndex(Sequences);
+            LinkCommandIndexIndex(Sequences, CommandTableType.SequenceCommand);
+            LinkLocalAisacIndex(Sequences);
+            LinkGlobalAisacIndex(Sequences);
+            LinkActionTrackIndex(Sequences);
+
+            LinkLocalAisacIndex(Tracks);
+            LinkGlobalAisacIndex(Tracks);
+            LinkEventIndexIndex(Tracks, CommandTableType.TrackEvent);
+            LinkCommandIndexIndex(Tracks, CommandTableType.TrackCommand);
+
+            LinkLocalAisacIndex(ActionTracks);
+            LinkGlobalAisacIndex(ActionTracks);
+            LinkEventIndexIndex(ActionTracks, CommandTableType.TrackEvent);
+            LinkCommandIndexIndex(ActionTracks, CommandTableType.TrackEvent);
+            LinkActionTargetIdIndex(ActionTracks);
+
+            LinkAutoModulationIndexIndex(Aisacs);
+            LinkGraphIndexesIndex(Aisacs);
+            CommandTables.LinkIndexes(this);
+        }
+
+        //Guid
+        private void LinkRefItemsGuid<T>(IList<T> table) where T : IReferenceType
+        {
+            foreach(var entry in table)
+            {
+                switch (entry.ReferenceType)
+                {
+                    case ReferenceType.Waveform:
+                        entry.ReferenceIndex.TableGuid = GetTableGuid(entry.ReferenceIndex.TableIndex_Int, Waveforms);
+                        break;
+                    case ReferenceType.Sequence:
+                        entry.ReferenceIndex.TableGuid = GetTableGuid(entry.ReferenceIndex.TableIndex_Int, Sequences);
+                        break;
+                    case ReferenceType.Synth:
+                        entry.ReferenceIndex.TableGuid = GetTableGuid(entry.ReferenceIndex.TableIndex_Int, Synths);
+                        break;
+                }
+            }
+        }
+
+        private void LinkLocalAisacGuid<T>(IList<T> table) where T : ILocalAisac
+        {
+            foreach (var entry in table)
+            {
+                foreach (var aisac in entry.LocalAisac)
+                    aisac.TableGuid = GetTableGuid(aisac.TableIndex_Int, Aisacs);
+
+                RemoveUnlinkedReferences(entry.LocalAisac);
+            }
+        }
+
+        private void LinkGlobalAisacGuid<T>(IList<T> table) where T : IGlobalAisacRef
+        {
+            foreach (var entry in table)
+            {
+                foreach (var aisac in entry.GlobalAisacRefs)
+                    aisac.TableGuid = GetTableGuid(aisac.TableIndex_Int, GlobalAisacReferences);
+
+                RemoveUnlinkedReferences(entry.GlobalAisacRefs);
+            }
+        }
+
+        private void LinkCommandIndexGuid<T>(IList<T> table, CommandTableType commandTableType) where T : ICommandIndex
+        {
+            foreach (var entry in table)
+            {
+                entry.CommandIndex.TableGuid = CommandTables.GetCommandGuid(entry.CommandIndex.TableIndex_Int, commandTableType);
+            }
+        }
+
+        private void LinkEventIndexGuid<T>(IList<T> table, CommandTableType commandTableType) where T : IEventIndex
+        {
+            foreach (var entry in table)
+            {
+                entry.EventIndex.TableGuid = CommandTables.GetCommandGuid(entry.EventIndex.TableIndex_Int, commandTableType);
+            }
+        }
+
+        private void LinkActionTrackGuid<T>(IList<T> table) where T : IActionTrack
+        {
+            foreach (var entry in table)
+            {
+                foreach (var track in entry.ActionTracks)
+                    track.TableGuid = GetTableGuid(track.TableIndex_Int, ActionTracks);
+            }
+        }
+
+        private void LinkTrackGuid<T>(IList<T> table) where T : ITrack
+        {
+            foreach (var entry in table)
+            {
+                foreach (var track in entry.Tracks)
+                {
+                    track.Index.TableGuid = GetTableGuid(track.Index.TableIndex_Int, Tracks);
+                }
+
+                //Remove unlinked tracks
+                for (int i = entry.Tracks.Count - 1; i >= 0; i--)
+                {
+                    if (entry.Tracks[i].Index.IsNull)
+                        entry.Tracks.RemoveAt(i);
+                }
+            }
+        }
+
+        private void LinkAutoModulationIndexGuid<T>(IList<T> table) where T : IAutoModulationIndex
+        {
+            foreach (var entry in table)
+                entry.AutoModulationIndex.TableGuid = GetTableGuid(entry.AutoModulationIndex.TableIndex_Int, AutoModulations);
+        }
+
+        private void LinkGraphIndexesGuid<T>(IList<T> table) where T : IGraphIndexes
+        {
+            foreach (var entry in table)
+            {
+                foreach (var graph in entry.GraphIndexes)
+                    graph.TableGuid = GetTableGuid(graph.TableIndex_Int, Graphs);
+
+                RemoveUnlinkedReferences(entry.GraphIndexes);
+            }
+        }
+
+        private void LinkTargetIdGuid<T>(IList<T> table) where T : ITargetId
+        {
+            foreach (var entry in table)
+            {
+                if(entry.TargetSelf && entry.TargetType == TargetType.SpecificAcb && entry.TargetId.TableIndex != uint.MaxValue)
+                {
+                    entry.TargetId.TableGuid = GetCueGuid(entry.TargetId.TableIndex_Int);
+                }
+            }
+        }
+
+        private void RemoveUnlinkedReferences(IList<AcbTableReference> references)
+        {
+            for (int i = references.Count - 1; i >= 0; i--)
+            {
+                if (references[i].IsNull)
+                    references.RemoveAt(i);
+            }
+        }
+        //Index
+        private void LinkRefItemsIndex<T>(IList<T> table) where T : IReferenceType
+        {
+            foreach (var entry in table)
+            {
+                switch (entry.ReferenceType)
+                {
+                    case ReferenceType.Waveform:
+                        entry.ReferenceIndex.TableIndex = (ushort)GetTableIndex(entry.ReferenceIndex.TableGuid, Waveforms);
+                        break;
+                    case ReferenceType.Sequence:
+                        entry.ReferenceIndex.TableIndex = (ushort)GetTableIndex(entry.ReferenceIndex.TableGuid, Sequences);
+                        break;
+                    case ReferenceType.Synth:
+                        entry.ReferenceIndex.TableIndex = (ushort)GetTableIndex(entry.ReferenceIndex.TableGuid, Synths);
+                        break;
+                }
+            }
+        }
+
+        private void LinkLocalAisacIndex<T>(IList<T> table) where T : ILocalAisac
+        {
+            foreach (var entry in table)
+            {
+                foreach (var aisac in entry.LocalAisac)
+                    aisac.TableIndex = GetTableIndex(aisac.TableGuid, Aisacs);
+            }
+        }
+
+        private void LinkGlobalAisacIndex<T>(IList<T> table) where T : IGlobalAisacRef
+        {
+            foreach (var entry in table)
+            {
+                foreach (var aisac in entry.GlobalAisacRefs)
+                    aisac.TableIndex = GetTableIndex(aisac.TableGuid, GlobalAisacReferences);
+            }
+        }
+
+        private void LinkCommandIndexIndex<T>(IList<T> table, CommandTableType commandTableType) where T : ICommandIndex
+        {
+            foreach (var entry in table)
+            {
+                entry.CommandIndex.TableIndex = CommandTables.GetCommandIndex(entry.CommandIndex.TableGuid, commandTableType);
+            }
+        }
+
+        private void LinkEventIndexIndex<T>(IList<T> table, CommandTableType commandTableType) where T : IEventIndex
+        {
+            foreach (var entry in table)
+            {
+                entry.EventIndex.TableIndex = CommandTables.GetCommandIndex(entry.EventIndex.TableGuid, commandTableType);
+            }
+        }
+
+        private void LinkActionTrackIndex<T>(IList<T> table) where T : IActionTrack
+        {
+            foreach (var entry in table)
+            {
+                foreach (var track in entry.ActionTracks)
+                    track.TableIndex = GetTableIndex(track.TableGuid, ActionTracks);
+            }
+        }
+
+        private void LinkTrackIndex<T>(IList<T> table) where T : ITrack
+        {
+            foreach (var entry in table)
+            {
+                foreach (var track in entry.Tracks)
+                    track.Index.TableIndex = GetTableIndex(track.Index.TableGuid, Tracks);
+            }
+        }
+
+        private void LinkAutoModulationIndexIndex<T>(IList<T> table) where T : IAutoModulationIndex
+        {
+            foreach (var entry in table)
+                entry.AutoModulationIndex.TableIndex = GetTableIndex(entry.AutoModulationIndex.TableGuid, AutoModulations);
+        }
+
+        private void LinkGraphIndexesIndex<T>(IList<T> table) where T : IGraphIndexes
+        {
+            foreach (var entry in table)
+            {
+                foreach (var graph in entry.GraphIndexes)
+                    graph.TableIndex = GetTableIndex(graph.TableGuid, Graphs);
+            }
+        }
+
+        private void LinkActionTargetIdIndex(IList<ACB_Track> table)
+        {
+            foreach (var entry in table)
+            {
+                if(entry.TargetType == TargetType.SpecificAcb)
+                    entry.TargetId.TableIndex = GetCueId(entry.TargetId.TableGuid);
+            }
+        }
+
+
+        //Helper
+        internal uint GetCueId(Guid cueGuid)
+        {
+            var cue = Cues.FirstOrDefault(x => x.InstanceGuid == cueGuid);
+            return (cue != null) ? cue.ID : uint.MaxValue;
+        }
+
+        internal Guid GetCueGuid(int cueId)
+        {
+            var cue = Cues.FirstOrDefault(x => x.ID == cueId);
+            return (cue != null) ? cue.InstanceGuid : Guid.Empty;
+        }
+
+        internal Guid GetTableGuid<T>(int index, IList<T> table) where T : AcbTableBase
+        {
+            if (index >= ushort.MaxValue) return Guid.Empty;
+            if (index >= table.Count || index < 0) return Guid.Empty;
+            //if (index >= table.Count || index < 0) throw new ArgumentOutOfRangeException($"ACB_File.GetTableGuid: Cannot find entry at index {index}. Value is out of range.");
+            return table[index].InstanceGuid;
+        }
+
+        internal ushort GetTableIndex<T>(Guid guid, IList<T> table) where T : AcbTableBase
+        {
+            var entry = table.FirstOrDefault(x => x.InstanceGuid == guid);
+            return (entry != null) ? (ushort)table.IndexOf(entry) : ushort.MaxValue;
+            //if (entry == null) throw new ArgumentOutOfRangeException($"ACB_File.GetTableIndex: Cannot find entry with guid {guid}.");
+        }
+        
         #endregion
 
         #region DefaultTableFunctions
@@ -860,6 +2302,10 @@ namespace Xv2CoreLib.ACB_NEW
             utfFile.Columns.Add(new UTF_Column("PaddingArea", TypeFlag.Data));
             utfFile.Columns.Add(new UTF_Column("StreamAwbTocWork", TypeFlag.Data));
             utfFile.Columns.Add(new UTF_Column("StreamAwbAfs2Header", TypeFlag.Data));
+
+            if(SaveFormat == SaveFormat.MusicPackage)
+                utfFile.Columns.Add(new UTF_Column("MusicPackageType", TypeFlag.Int32));
+
 
             return utfFile;
         }
@@ -1108,34 +2554,254 @@ namespace Xv2CoreLib.ACB_NEW
             return utfFile;
         }
 
+        internal UTF_File CreateDefaultStringValueTable()
+        {
+            UTF_File utfFile = new UTF_File("Strings");
+
+            //Columns
+            utfFile.Columns.Add(new UTF_Column("StringValue", TypeFlag.String));
+
+            return utfFile;
+        }
+        
         #endregion
 
-        public AFS2_AudioFile GetAfs2Entry(int id)
+        #region GetHelpers
+        public ACB_Cue GetCue(int cueId) { return Cues.FirstOrDefault(x=>x.ID == (uint)cueId); }
+        public ACB_Cue GetCue(Guid guid, bool allowNull = true) { return GetTable(guid, Cues, allowNull); }
+        public ACB_Sequence GetSequence(Guid guid, bool allowNull = true) { return GetTable(guid, Sequences, allowNull); }
+        public ACB_Synth GetSynth(Guid guid, bool allowNull = true) { return GetTable(guid, Synths, allowNull); }
+        public ACB_Waveform GetWaveform(Guid guid, bool allowNull = true) { return GetTable(guid, Waveforms, allowNull); }
+        public ACB_Track GetTrack(Guid guid, bool allowNull = true) { return GetTable(guid, Tracks, allowNull); }
+        public ACB_Track GetActionTrack(Guid guid, bool allowNull = true) { return GetTable(guid, ActionTracks, allowNull); }
+        public ACB_Aisac GetAisac(Guid guid, bool allowNull = true) { return GetTable(guid, Aisacs, allowNull); }
+        public ACB_GlobalAisacReference GetGlobalAisacReference(Guid guid, bool allowNull = true) { return GetTable(guid, GlobalAisacReferences, allowNull); }
+        public ACB_AutoModulation GetAutoModulation(Guid guid, bool allowNull = true) { return GetTable(guid, AutoModulations, allowNull); }
+        public ACB_Graph GetGraph(Guid guid, bool allowNull = true) { return GetTable(guid, Graphs, allowNull); }
+        public ACB_StringValue GetStringValue(Guid guid, bool allowNull = true) { return GetTable(guid, StringValues, allowNull); }
+        public ACB_StringValue GetStringValue(string stringValue) { return StringValues.FirstOrDefault(x => x.StringValue == stringValue); }
+        public ACB_GlobalAisacReference GetGlobalAisacReference(string globalAisacValue) { return GlobalAisacReferences.FirstOrDefault(x => x.Name == globalAisacValue); }
+
+        public AFS2_AudioFile GetAfs2Entry(int id, bool allowNull = true)
         {
-            return AudioTracks.GetEntry((ushort)id);
+            var entry = AudioTracks.GetEntry((ushort)id);
+            if (entry == null && !allowNull)
+                throw new InvalidDataException(string.Format("ACB_File.GetAfs2Entry: Could not find the AWB entry with ID {0}.", id));
+
+            return entry;
         }
+        
+        /// <summary>
+        /// Check if a table is referenced by any other table.
+        /// </summary>
+        /// <param name="oldGuid">The guid of the table to check for.</param>
+        /// <returns></returns>
+        public bool IsTableUsed(Guid tableGuid)
+        {
+            if (IsTableUsed_Reflection(Cues, tableGuid)) return true;
+            if (IsTableUsed_Reflection(Sequences, tableGuid)) return true;
+            if (IsTableUsed_Reflection(Synths, tableGuid)) return true;
+            if (IsTableUsed_Reflection(Waveforms, tableGuid)) return true;
+            if (IsTableUsed_Reflection(Tracks, tableGuid)) return true;
+            if (IsTableUsed_Reflection(ActionTracks, tableGuid)) return true;
+            if (IsTableUsed_Reflection(Aisacs, tableGuid)) return true;
+
+            foreach (var commandTable in CommandTables.CommandTables)
+                foreach(var commandGroup in commandTable.CommandGroups)
+                    if (IsTableUsed_Reflection(commandGroup.Commands, tableGuid)) return true;
+
+            return false;
+        }
+        
+        private bool IsTableUsed_Reflection<T>(IList<T> entries, Guid tableGuid) where T : class
+        {
+            foreach(var entry in entries)
+            {
+                if (IsTableUsed_ReflectionRecursive(entry, tableGuid))
+                    return true;
+            }
+            return false;
+        }
+        
+        private bool IsTableUsed_ReflectionRecursive<T>(T entry, Guid tableGuid)
+        {
+            if (entry == null) return false;
+            var props = entry.GetType().GetProperties();
+            
+            foreach(var prop in props.Where(x => x.Name != "InstanceGuid"))
+            {
+                if(prop.PropertyType == typeof(Guid))
+                {
+                    if ((Guid)prop.GetValue(entry) == tableGuid) return true;
+                }
+                else if(prop.PropertyType == typeof(AcbTableReference))
+                {
+                    if (IsTableUsed_ReflectionRecursive(prop.GetValue(entry) as AcbTableReference, tableGuid)) return true;
+                }
+                else if (prop.PropertyType == typeof(List<AcbTableReference>))
+                {
+                    if (IsTableUsed_Reflection(prop.GetValue(entry) as List<AcbTableReference>, tableGuid)) return true;
+                }
+                else if (prop.PropertyType == typeof(ObservableCollection<ACB_SequenceTrack>))
+                {
+                    if (IsTableUsed_Reflection(prop.GetValue(entry) as ObservableCollection<ACB_SequenceTrack>, tableGuid)) return true;
+                }
+            }
+
+            return false;
+        }
+
+        public T GetTable<T>(Guid guid, IList<T> tables, bool allowNull) where T : AcbTableBase
+        {
+            var result = tables.FirstOrDefault(x => x.InstanceGuid == guid);
+
+            if (result == null && !allowNull)
+                throw new InvalidDataException(string.Format("ACB_File.GetTable: Could not find the {0} table with the specified GUID.", typeof(T)));
+
+            return result;
+        }
+        
+
+        //GetWaveformFromCue
+        public List<ACB_Waveform> GetWaveformsFromCue(ACB_Cue cue)
+        {
+            List<ACB_Waveform> waveforms = new List<ACB_Waveform>();
+            if (cue.ReferenceIndex.IsNull) return waveforms;
+
+            if(cue.ReferenceType == ReferenceType.Waveform)
+            {
+                waveforms.Add(GetWaveform(cue.ReferenceIndex.TableGuid));
+            }
+            else if(cue.ReferenceType == ReferenceType.Synth)
+            {
+                waveforms.AddRange(GetWaveformsFromSynth(GetSynth(cue.ReferenceIndex.TableGuid)));
+            }
+            else if (cue.ReferenceType == ReferenceType.Sequence)
+            {
+                waveforms.AddRange(GetWaveformsFromSequence(GetSequence(cue.ReferenceIndex.TableGuid)));
+            }
+
+            return waveforms;
+        }
+
+        private List<ACB_Waveform> GetWaveformsFromSequence(ACB_Sequence sequence)
+        {
+            List<ACB_Waveform> waveforms = new List<ACB_Waveform>();
+
+            foreach(var track in sequence.Tracks)
+                if(!track.Index.IsNull)
+                    waveforms.AddRange(GetWaveformsFromTrack(GetTrack(track.Index.TableGuid)));
+
+            return waveforms;
+        }
+
+        private List<ACB_Waveform> GetWaveformsFromSynth(ACB_Synth synth)
+        {
+            List<ACB_Waveform> waveforms = new List<ACB_Waveform>();
+            if (synth.ReferenceIndex.IsNull) return waveforms;
+
+            switch (synth.ReferenceType)
+            {
+                case ReferenceType.Waveform:
+                    waveforms.Add(GetWaveform(synth.ReferenceIndex.TableGuid));
+                    break;
+                case ReferenceType.Sequence:
+                    waveforms.AddRange(GetWaveformsFromSequence(GetSequence(synth.ReferenceIndex.TableGuid)));
+                    break;
+                case ReferenceType.Synth:
+                    waveforms.AddRange(GetWaveformsFromSynth(GetSynth(synth.ReferenceIndex.TableGuid)));
+                    break;
+            }
+
+            return waveforms;
+        }
+
+        public List<ACB_Waveform> GetWaveformsFromTrack(ACB_Track track)
+        {
+            List<ACB_Waveform> waveforms = new List<ACB_Waveform>();
+
+            if (!track.EventIndex.IsNull)
+            {
+                var command = CommandTables.GetCommand(track.EventIndex.TableGuid, CommandTableType.TrackEvent);
+                if(command != null)
+                {
+                    foreach(var cmd in command.Commands.Where(x => (x.CommandType == CommandType.ReferenceItem || x.CommandType == CommandType.ReferenceItem2) && x.ReferenceIndex != null))
+                    {
+                        switch (cmd.ReferenceType)
+                        {
+                            case ReferenceType.Waveform:
+                                waveforms.Add(GetWaveform(cmd.ReferenceIndex.TableGuid));
+                                break;
+                            case ReferenceType.Sequence:
+                                waveforms.AddRange(GetWaveformsFromSequence(GetSequence(cmd.ReferenceIndex.TableGuid)));
+                                break;
+                            case ReferenceType.Synth:
+                                waveforms.AddRange(GetWaveformsFromSynth(GetSynth(cmd.ReferenceIndex.TableGuid)));
+                                break;
+                        }
+                    }
+                }
+            }
+
+            return waveforms;
+        }
+        #endregion
 
         public int GetFreeCueId()
         {
             int id = 0;
-
-            while (Cues.Where(c => c.ID != id).Count() > 0)
+            while (Cues.Exists(c => c.ID == id) && id < int.MaxValue)
                 id++;
-
             return id;
         }
     }
 
     [YAXSerializeAs("Cue")]
-    public class ACB_Cue : AcbTableBase
+    [Serializable]
+    public class ACB_Cue : AcbTableBase, IReferenceType, INotifyPropertyChanged
     {
+        #region NotifyPropertyChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void NotifyPropertyChanged(String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+        #endregion
+
+        #region Undoable
+        [YAXDontSerialize]
+        public string UndoableName
+        {
+            get
+            {
+                return Name;
+            }
+            set
+            {
+                if (Name != value)
+                {
+                    string oldValue = Name;
+                    Name = value;
+                    UndoManager.Instance.AddUndo(new UndoableProperty<ACB_Cue>("Name", this, oldValue, value, "Cue Name"));
+                    NotifyPropertyChanged("UndoableName");
+                }
+            }
+        }
+
+        #endregion
+
         [YAXAttributeForClass]
         public uint ID { get; set; } //CueID (uint)
+        private string _cueName = string.Empty;
         [YAXAttributeForClass]
-        public string Name { get; set; } //CueName
+        public string Name { get { return _cueName; } set { _cueName = value; NotifyPropertyChanged("UndoableName"); } }
         [YAXAttributeFor("UserData")]
         [YAXSerializeAs("value")]
-        public string UserData { get; set; }
+        public string UserData { get; set; } = string.Empty;
         [YAXAttributeFor("Worksize")]
         [YAXSerializeAs("value")]
         public ushort Worksize { get; set; }
@@ -1146,9 +2812,8 @@ namespace Xv2CoreLib.ACB_NEW
         [YAXAttributeFor("ReferenceType")]
         [YAXSerializeAs("value")]
         public ReferenceType ReferenceType { get; set; }
-        [YAXAttributeFor("ReferenceIndex")]
-        [YAXSerializeAs("value")]
-        public ushort ReferenceIndex { get; set; }
+        [YAXSerializeAs("ReferenceIndex")]
+        public AcbTableReference ReferenceIndex { get; set; } = new AcbTableReference(); //ushort
         [YAXAttributeFor("Length")]
         [YAXSerializeAs("value")]
         public uint Length { get; set; }
@@ -1158,7 +2823,12 @@ namespace Xv2CoreLib.ACB_NEW
         [YAXAttributeFor("HeaderVisibility")]
         [YAXSerializeAs("value")]
         public byte HeaderVisibility { get; set; }
-        
+
+        public void Initialize()
+        {
+            if (ReferenceIndex == null) ReferenceIndex = new AcbTableReference();
+        }
+
         public static List<ACB_Cue> Load(UTF_File cueTable, UTF_File nameTable, Version ParseVersion)
         {
             List<ACB_Cue> cues = new List<ACB_Cue>();
@@ -1203,7 +2873,7 @@ namespace Xv2CoreLib.ACB_NEW
 
             //ReferenceItem
             cue.ReferenceType = (ReferenceType)cueTable.GetValue<byte>("ReferenceType", TypeFlag.UInt8, index);
-            cue.ReferenceIndex = cueTable.GetValue<ushort>("ReferenceIndex", TypeFlag.UInt16, index);
+            cue.ReferenceIndex = new AcbTableReference(cueTable.GetValue<ushort>("ReferenceIndex", TypeFlag.UInt16, index));
 
             return cue;
         }
@@ -1219,7 +2889,7 @@ namespace Xv2CoreLib.ACB_NEW
         public void WriteToTable(UTF_File utfTable, int index, Version ParseVersion, UTF_File nameTable)
         {
             utfTable.AddValue("CueId", TypeFlag.UInt32, index, ID.ToString());
-            utfTable.AddValue("UserData", TypeFlag.String, index, UserData.ToString());
+            utfTable.AddValue("UserData", TypeFlag.String, index, UserData);
             utfTable.AddValue("Worksize", TypeFlag.UInt16, index, Worksize.ToString());
             utfTable.AddData("AisacControlMap", index, AisacControlMap);
             utfTable.AddValue("Length", TypeFlag.UInt32, index, Length.ToString());
@@ -1244,7 +2914,8 @@ namespace Xv2CoreLib.ACB_NEW
     }
 
     [YAXSerializeAs("Synth")]
-    public class ACB_Synth : AcbTableBase
+    [Serializable]
+    public class ACB_Synth : AcbTableBase, IReferenceType, ICommandIndex, ILocalAisac, IGlobalAisacRef, IActionTrack
     {
         [YAXAttributeForClass]
         public int Index { get; set; }
@@ -1254,7 +2925,7 @@ namespace Xv2CoreLib.ACB_NEW
         public byte Type { get; set; }
         [YAXAttributeFor("VoiceLimitGroupName")]
         [YAXSerializeAs("value")]
-        public string VoiceLimitGroupName { get; set; }
+        public string VoiceLimitGroupName { get; set; } = string.Empty;
         [YAXAttributeFor("ParameterPallet")]
         [YAXSerializeAs("value")]
         public ushort ParameterPallet { get; set; } = ushort.MaxValue;
@@ -1266,33 +2937,37 @@ namespace Xv2CoreLib.ACB_NEW
         //ReferenceItems
         [YAXAttributeFor("ReferenceType")]
         [YAXSerializeAs("value")]
-        public ReferenceType ReferenceType { get; set; }
-        [YAXAttributeFor("ReferenceIndex")]
-        [YAXSerializeAs("value")]
-        public ushort ReferenceIndex { get; set; } = ushort.MaxValue;
+        public ReferenceType ReferenceType { get; set; } = ReferenceType.Waveform;
+        [YAXSerializeAs("ReferenceIndex")]
+        public AcbTableReference ReferenceIndex { get; set; } = new AcbTableReference(); //ushort
 
         //CommandTable
-        [YAXAttributeFor("CommandIndex")]
-        [YAXSerializeAs("value")]
-        public ushort CommandIndex { get; set; } = ushort.MaxValue;
+        [YAXSerializeAs("CommandIndex")]
+        public AcbTableReference CommandIndex { get; set; } = new AcbTableReference(); //ushort
 
         //LocalAisac
-        [YAXAttributeFor("LocalAisac")]
-        [YAXSerializeAs("values")]
+        [YAXSerializeAs("LocalAisac")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public List<ushort> LocalAisac { get; set; } = new List<ushort>();
+        public List<AcbTableReference> LocalAisac { get; set; } = new List<AcbTableReference>(); //ushort
 
         //GlobalAisac
-        [YAXAttributeFor("GlobalAisacRefs")]
-        [YAXSerializeAs("values")]
+        [YAXSerializeAs("GlobalAisacRefs")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]
-        public List<ushort> GlobalAisacRefs { get; set; } = new List<ushort>();
+        public List<AcbTableReference> GlobalAisacRefs { get; set; } = new List<AcbTableReference>(); //ushort
 
         //ActionTrack
-        [YAXAttributeFor("ActionTracks")]
-        [YAXSerializeAs("values")]
+        [YAXSerializeAs("ActionTracks")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]
-        public List<ushort> ActionTracks { get; set; } = new List<ushort>();
+        public List<AcbTableReference> ActionTracks { get; set; } = new List<AcbTableReference>(); //ushort
+
+        public void Initialize()
+        {
+            if (ReferenceIndex == null) ReferenceIndex = new AcbTableReference();
+            if (ActionTracks == null) ActionTracks = new List<AcbTableReference>();
+            if (CommandIndex == null) CommandIndex = new AcbTableReference();
+            if (LocalAisac == null) LocalAisac = new List<AcbTableReference>();
+            if (GlobalAisacRefs == null) GlobalAisacRefs = new List<AcbTableReference>();
+        }
 
         public static List<ACB_Synth> Load(UTF_File table, Version ParseVersion)
         {
@@ -1319,14 +2994,14 @@ namespace Xv2CoreLib.ACB_NEW
 
             //Attached data
             ushort[] referenceItems = BigEndianConverter.ToUInt16Array(synthTable.GetData("ReferenceItems", index));
-            synth.CommandIndex = synthTable.GetValue<ushort>("CommandIndex", TypeFlag.UInt16, index);
-            synth.LocalAisac = BigEndianConverter.ToUInt16Array(synthTable.GetData("LocalAisacs", index)).ToList();
+            synth.CommandIndex.TableIndex = synthTable.GetValue<ushort>("CommandIndex", TypeFlag.UInt16, index);
+            synth.LocalAisac = AcbTableReference.FromArray(BigEndianConverter.ToUInt16Array(synthTable.GetData("LocalAisacs", index)));
             var globalAisacStartIndex = synthTable.GetValue<ushort>("GlobalAisacStartIndex", TypeFlag.UInt16, index);
             var globalAisacNumRefs = synthTable.GetValue<ushort>("GlobalAisacNumRefs", TypeFlag.UInt16, index);
             
             for (int i = 0; i < globalAisacNumRefs; i++)
             {
-                synth.GlobalAisacRefs.Add((ushort)(globalAisacStartIndex + i));
+                synth.GlobalAisacRefs.Add(new AcbTableReference(globalAisacStartIndex + i));
             }
 
             int numActionTracks = synthTable.GetValue<ushort>("NumActionTracks", TypeFlag.UInt16, index);
@@ -1334,7 +3009,7 @@ namespace Xv2CoreLib.ACB_NEW
 
             for(int i = 0; i < numActionTracks; i++)
             {
-                synth.ActionTracks.Add((ushort)(actionTracksStartIndex + i));
+                synth.ActionTracks.Add(new AcbTableReference(actionTracksStartIndex + i));
             }
 
             //ReferenceItems
@@ -1346,12 +3021,11 @@ namespace Xv2CoreLib.ACB_NEW
             if (referenceItems.Length == 2)
             {
                 synth.ReferenceType = (ReferenceType)referenceItems[0];
-                synth.ReferenceIndex = referenceItems[1];
+                synth.ReferenceIndex.TableIndex = referenceItems[1];
             }
             else
             {
                 synth.ReferenceType = ReferenceType.Nothing;
-                synth.ReferenceIndex = ushort.MaxValue;
             }
 
             return synth;
@@ -1367,10 +3041,10 @@ namespace Xv2CoreLib.ACB_NEW
 
         public void WriteToTable(UTF_File utfTable, int index, Version ParseVersion)
         {
-            ushort actionTrackIndex = (ActionTracks.Count > 0) ? ActionTracks[0] : ushort.MaxValue;
-            ushort globalAisacRefIndex = (GlobalAisacRefs.Count > 0) ? GlobalAisacRefs[0] : ushort.MaxValue;
+            ushort actionTrackIndex = (ActionTracks.Count > 0) ? ActionTracks[0].TableIndex_Ushort : ushort.MaxValue;
+            ushort globalAisacRefIndex = (GlobalAisacRefs.Count > 0) ? GlobalAisacRefs[0].TableIndex_Ushort : ushort.MaxValue;
             utfTable.AddValue("Type", TypeFlag.UInt8, index, Type.ToString());
-            utfTable.AddValue("VoiceLimitGroupName", TypeFlag.String, index, VoiceLimitGroupName.ToString());
+            utfTable.AddValue("VoiceLimitGroupName", TypeFlag.String, index, VoiceLimitGroupName);
             utfTable.AddValue("ControlWorkArea1", TypeFlag.UInt16, index, index.ToString());
             utfTable.AddValue("ControlWorkArea2", TypeFlag.UInt16, index, index.ToString());
             utfTable.AddData("TrackValues", index, TrackValues);
@@ -1383,7 +3057,7 @@ namespace Xv2CoreLib.ACB_NEW
 
             if (ReferenceType != ReferenceType.Nothing)
             {
-                ushort[] refItems = new ushort[2] { (ushort)ReferenceType, ReferenceIndex };
+                ushort[] refItems = new ushort[2] { (ushort)ReferenceType, ReferenceIndex.TableIndex_Ushort };
                 utfTable.AddData("ReferenceItems", index, BigEndianConverter.GetBytes(refItems));
             }
             else
@@ -1393,7 +3067,7 @@ namespace Xv2CoreLib.ACB_NEW
             
             if(LocalAisac != null)
             {
-                utfTable.AddData("LocalAisacs", index, BigEndianConverter.GetBytes(LocalAisac.ToArray()));
+                utfTable.AddData("LocalAisacs", index, BigEndianConverter.GetBytes(AcbTableReference.ToArray(LocalAisac)));
             }
             else
             {
@@ -1401,17 +3075,55 @@ namespace Xv2CoreLib.ACB_NEW
             }
         }
 
+        
     }
 
     [YAXSerializeAs("Sequence")]
-    public class ACB_Sequence : AcbTableBase
+    [Serializable]
+    public class ACB_Sequence : AcbTableBase, ITrack, ICommandIndex, ILocalAisac, IGlobalAisacRef, IActionTrack, INotifyPropertyChanged
     {
+        #region NotifyPropertyChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void NotifyPropertyChanged(String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+        #endregion
+
+
+        #region Undoable
+        [YAXDontSerialize]
+        public SequenceType UndoableSequenceType
+        {
+            get
+            {
+                return Type;
+            }
+            set
+            {
+                if (Type != value)
+                {
+                    SequenceType oldValue = Type;
+                    Type = value;
+                    UndoManager.Instance.AddUndo(new UndoableProperty<ACB_Sequence>("Type", this, oldValue, value, "Sequence Type"));
+                    NotifyPropertyChanged("UndoableSequenceType");
+                }
+            }
+        }
+
+        #endregion
+
         [YAXAttributeForClass]
         public int Index { get; set; }
 
+        private SequenceType _sequenceType = SequenceType.Polyphonic;
         [YAXAttributeFor("Type")]
         [YAXSerializeAs("value")]
-        public SequenceType Type { get; set; }
+        public SequenceType Type { get { return _sequenceType; } set { _sequenceType = value; NotifyPropertyChanged("UndoableSequenceType"); } }
         [YAXAttributeFor("PlaybackRatio")]
         [YAXSerializeAs("value")]
         public ushort PlaybackRatio { get; set; } = 100;
@@ -1424,27 +3136,32 @@ namespace Xv2CoreLib.ACB_NEW
         public ObservableCollection<ACB_SequenceTrack> Tracks { get; set; } = new ObservableCollection<ACB_SequenceTrack>();
 
         //CommandIndex
-        [YAXAttributeFor("CommandIndex")]
-        [YAXSerializeAs("value")]
-        public ushort CommandIndex { get; set; } = ushort.MaxValue;
+        [YAXSerializeAs("CommandIndex")]
+        public AcbTableReference CommandIndex { get; set; } = new AcbTableReference(); //ushort
 
         //LocalAisac
-        [YAXAttributeFor("LocalAisac")]
-        [YAXSerializeAs("values")]
+        [YAXSerializeAs("LocalAisac")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public List<ushort> LocalAisac { get; set; } = new List<ushort>();
+        public List<AcbTableReference> LocalAisac { get; set; } = new List<AcbTableReference>(); //ushort
 
         //GlobalAisac
-        [YAXAttributeFor("GlobalAisacRefs")]
-        [YAXSerializeAs("values")]
+        [YAXSerializeAs("GlobalAisacRefs")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]
-        public List<ushort> GlobalAisacRefs { get; set; } = new List<ushort>();
+        public List<AcbTableReference> GlobalAisacRefs { get; set; } = new List<AcbTableReference>(); //ushort
 
         //ActionTrack
-        [YAXAttributeFor("ActionTracks")]
-        [YAXSerializeAs("values")]
+        [YAXSerializeAs("ActionTracks")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]
-        public List<ushort> ActionTracks { get; set; } = new List<ushort>();
+        public List<AcbTableReference> ActionTracks { get; set; } = new List<AcbTableReference>(); //ushort
+        
+        public void Initialize()
+        {
+            if (Tracks == null) Tracks = new ObservableCollection<ACB_SequenceTrack>();
+            if (ActionTracks == null) ActionTracks = new List<AcbTableReference>();
+            if (CommandIndex == null) CommandIndex = new AcbTableReference();
+            if (LocalAisac == null) LocalAisac = new List<AcbTableReference>();
+            if (GlobalAisacRefs == null) GlobalAisacRefs = new List<AcbTableReference>();
+        }
 
         public static List<ACB_Sequence> Load(UTF_File table, Version ParseVersion)
         {
@@ -1471,15 +3188,15 @@ namespace Xv2CoreLib.ACB_NEW
 
             //Attached data
             //sequence.NumTracks = sequenceTable.GetValue<ushort>("NumTracks", TypeFlag.UInt16, index); //Redundant value...
-            sequence.CommandIndex = sequenceTable.GetValue<ushort>("CommandIndex", TypeFlag.UInt16, index);
-            sequence.LocalAisac = BigEndianConverter.ToUInt16Array(sequenceTable.GetData("LocalAisacs", index)).ToList();
+            sequence.CommandIndex.TableIndex = sequenceTable.GetValue<ushort>("CommandIndex", TypeFlag.UInt16, index);
+            sequence.LocalAisac = AcbTableReference.FromArray(BigEndianConverter.ToUInt16Array(sequenceTable.GetData("LocalAisacs", index)));
 
             var globalAisacStartIndex = sequenceTable.GetValue<ushort>("GlobalAisacStartIndex", TypeFlag.UInt16, index);
             var globalAisacNumRefs = sequenceTable.GetValue<ushort>("GlobalAisacNumRefs", TypeFlag.UInt16, index);
 
             for (int i = 0; i < globalAisacNumRefs; i++)
             {
-                sequence.GlobalAisacRefs.Add((ushort)(globalAisacStartIndex + i));
+                sequence.GlobalAisacRefs.Add(new AcbTableReference(globalAisacStartIndex + i));
             }
 
             int numActionTracks = sequenceTable.GetValue<ushort>("NumActionTracks", TypeFlag.UInt16, index);
@@ -1487,7 +3204,7 @@ namespace Xv2CoreLib.ACB_NEW
 
             for (int i = 0; i < numActionTracks; i++)
             {
-                sequence.ActionTracks.Add((ushort)(actionTracksStartIndex + i));
+                sequence.ActionTracks.Add(new AcbTableReference(actionTracksStartIndex + i));
             }
 
             //Tracks
@@ -1514,7 +3231,7 @@ namespace Xv2CoreLib.ACB_NEW
 
             for (int i = 0; i < tracks.Count; i++)
             {
-                sequence.Tracks.Add(new ACB_SequenceTrack() { Index = tracks[i], Percentage = trackValues[i] });
+                sequence.Tracks.Add(new ACB_SequenceTrack() { Index = new AcbTableReference(tracks[i]), Percentage = trackValues[i] });
             }
             
             
@@ -1539,7 +3256,7 @@ namespace Xv2CoreLib.ACB_NEW
             foreach (var track in Tracks)
             {
                 trackValues.Add(track.Percentage);
-                trackIndexes.Add(track.Index);
+                trackIndexes.Add(track.Index.TableIndex_Ushort);
                 total += track.Percentage;
             }
 
@@ -1548,8 +3265,8 @@ namespace Xv2CoreLib.ACB_NEW
                 trackValues.Add((ushort)(100 - total));
 
             //Write columns
-            ushort actionTrackIndex = (ActionTracks.Count > 0) ? ActionTracks[0] : ushort.MaxValue;
-            ushort globalAisacRefIndex = (GlobalAisacRefs.Count > 0) ? GlobalAisacRefs[0] : ushort.MaxValue;
+            ushort actionTrackIndex = (ActionTracks.Count > 0) ? ActionTracks[0].TableIndex_Ushort : ushort.MaxValue;
+            ushort globalAisacRefIndex = (GlobalAisacRefs.Count > 0) ? GlobalAisacRefs[0].TableIndex_Ushort : ushort.MaxValue;
 
             utfTable.AddValue("PlaybackRatio", TypeFlag.UInt16, index, PlaybackRatio.ToString());
             utfTable.AddValue("ParameterPallet", TypeFlag.UInt16, index, ParameterPallet.ToString());
@@ -1586,7 +3303,7 @@ namespace Xv2CoreLib.ACB_NEW
 
             if (LocalAisac != null)
             {
-                utfTable.AddData("LocalAisacs", index, BigEndianConverter.GetBytes(LocalAisac.ToArray()));
+                utfTable.AddData("LocalAisacs", index, BigEndianConverter.GetBytes(AcbTableReference.ToArray(LocalAisac)));
             }
             else
             {
@@ -1594,67 +3311,221 @@ namespace Xv2CoreLib.ACB_NEW
             }
         }
 
+
+        public void AdjustTrackPercentage()
+        {
+            if (Tracks == null) return;
+
+            while (TrackPercentageExceeds100())
+            {
+                foreach (var track in Tracks)
+                {
+                    track.Percentage = (ushort)(track.Percentage * 0.8);
+                }
+            }
+        }
+
+        private bool TrackPercentageExceeds100()
+        {
+            int total = 0;
+
+            foreach (var track in Tracks)
+                total += track.Percentage;
+
+            return total > 100;
+        }
     }
 
     [YAXSerializeAs("Track")]
-    public class ACB_SequenceTrack
+    [Serializable]
+    public class ACB_SequenceTrack : INotifyPropertyChanged
     {
+        #region NotifyPropertyChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void NotifyPropertyChanged(String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+        #endregion
+
+
         [YAXAttributeForClass]
-        public ushort Index { get; set; } //TrackIndex
+        public AcbTableReference Index { get; set; } = new AcbTableReference(); //TrackIndex, ushort
+        private ushort _percentage = 0;
         [YAXAttributeForClass]
-        public ushort Percentage { get; set; } //TrackValues
+        public ushort Percentage
+        {
+            get
+            {
+                return _percentage;
+            }
+            set
+            {
+                _percentage = value;
+                NotifyPropertyChanged("Percentage");
+                NotifyPropertyChanged("UndoablePercentage");
+            }
+        }
+
+        #region Undoables
+        [YAXDontSerialize]
+        public ushort UndoablePercentage
+        {
+            get
+            {
+                return Percentage;
+            }
+            set
+            {
+                if(Percentage != value)
+                {
+                    ushort oldValue = Percentage;
+                    Percentage = value;
+                    UndoManager.Instance.AddUndo(new UndoableProperty<ACB_SequenceTrack>("Percentage", this, oldValue, value, "SeqTrack Percentage"));
+                    NotifyPropertyChanged("UndoablePercentage");
+                }
+            }
+        }
+
+        #endregion
+
     }
 
     [YAXSerializeAs("Track")]
-    public class ACB_Track : AcbTableBase
+    [Serializable]
+    public class ACB_Track : AcbTableBase, IEventIndex, ICommandIndex, ILocalAisac, IGlobalAisacRef, ITargetId, INotifyPropertyChanged
     {
+        #region NotifyPropertyChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void NotifyPropertyChanged(String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+        #endregion
+
+        #region Undoable
+        [YAXDontSerialize]
+        public int UndoableTargetType
+        {
+            get
+            {
+                return (int)TargetType;
+            }
+            set
+            {
+                if ((int)TargetType != value)
+                {
+                    TargetType oldValue = TargetType;
+                    TargetType = (TargetType)value;
+                    UndoManager.Instance.AddUndo(new UndoableProperty<ACB_Track>("TargetType", this, oldValue, TargetType, "Target Type"));
+                    NotifyPropertyChanged("UndoableTargetType");
+                }
+            }
+        }
+
+        [YAXDontSerialize]
+        public string UndoableTargetAcbName
+        {
+            get
+            {
+                return TargetAcbName;
+            }
+            set
+            {
+                if (TargetAcbName != value)
+                {
+                    string oldValue = TargetAcbName;
+                    TargetAcbName = value;
+                    UndoManager.Instance.AddUndo(new UndoableProperty<ACB_Track>("TargetAcbName", this, oldValue, value, "Target Acb Name"));
+                    NotifyPropertyChanged("UndoableTargetAcbName");
+                }
+            }
+        }
+
+        [YAXDontSerialize]
+        public bool UndoableTargetSelf
+        {
+            get
+            {
+                return TargetSelf;
+            }
+            set
+            {
+                if (TargetSelf != value)
+                {
+                    bool oldValue = TargetSelf;
+                    TargetSelf = value;
+                    UndoManager.Instance.AddUndo(new UndoableProperty<ACB_Track>("TargetSelf", this, oldValue, value, "Target Self"));
+                    NotifyPropertyChanged("UndoableTargetSelf");
+                }
+            }
+        }
+        #endregion
+
+        //Values
+        private TargetType _targetType = TargetType.AnyAcb;
+        private string _targetAcbName = string.Empty;
+        private bool _targetSelf = false;
+
+        //Properties
         [YAXAttributeForClass]
         public int Index { get; set; }
 
         [YAXAttributeFor("ParameterPallet")]
         [YAXSerializeAs("value")]
-        public ushort ParameterPallet { get; set; }
+        public ushort ParameterPallet { get; set; } = ushort.MaxValue;
         [YAXAttributeFor("TargetType")]
         [YAXSerializeAs("value")]
-        public byte TargetType { get; set; }
+        public TargetType TargetType { get { return _targetType; } set { _targetType = value; NotifyPropertyChanged("UndoableTargetType"); } }
         [YAXAttributeFor("TargetName")]
         [YAXSerializeAs("value")]
-        public string TargetName { get; set; }
-        [YAXAttributeFor("TargetId")]
-        [YAXSerializeAs("value")]
-        public uint TargetId { get; set; }
+        public string TargetName { get; set; } = string.Empty;
+        [YAXSerializeAs("TargetId")]
+        public AcbTableReference TargetId { get; set; } = new AcbTableReference(uint.MaxValue); //uint
         [YAXAttributeFor("TargetAcbName")]
         [YAXSerializeAs("value")]
-        public string TargetAcbName { get; set; }
+        public string TargetAcbName { get { return _targetAcbName; } set { _targetAcbName = value; NotifyPropertyChanged("UndoableTargetAcbName"); } }
         [YAXAttributeFor("TargetSelf")]
         [YAXSerializeAs("value")]
-        public bool TargetSelf { get; set; } //When true, set TargetAcbName to current Acb Name
+        public bool TargetSelf { get { return _targetSelf; } set { _targetSelf = value; NotifyPropertyChanged("UndoableTargetSelf"); } }//When true, set TargetAcbName to current Acb Name
         [YAXAttributeFor("Scope")]
         [YAXSerializeAs("value")]
         public byte Scope { get; set; }
         [YAXAttributeFor("TargetTrackNo")]
         [YAXSerializeAs("value")]
-        public ushort TargetTrackNo { get; set; }
+        public ushort TargetTrackNo { get; set; } = 65535;
 
         //Commands
-        [YAXAttributeFor("EventIndex")]
-        [YAXSerializeAs("value")]
-        public ushort EventIndex { get; set; }
-        [YAXAttributeFor("CommandIndex")]
-        [YAXSerializeAs("value")]
-        public ushort CommandIndex { get; set; }
+        [YAXSerializeAs("EventIndex")]
+        public AcbTableReference EventIndex { get; set; } = new AcbTableReference();
+        [YAXSerializeAs("CommandIndex")]
+        public AcbTableReference CommandIndex { get; set; } = new AcbTableReference();
 
         //LocalAisac
-        [YAXAttributeFor("LocalAisac")]
-        [YAXSerializeAs("values")]
+        [YAXSerializeAs("LocalAisac")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public List<ushort> LocalAisac { get; set; }
+        public List<AcbTableReference> LocalAisac { get; set; } = new List<AcbTableReference>();
 
         //GlobalAisac
-        [YAXAttributeFor("GlobalAisacRefs")]
-        [YAXSerializeAs("values")]
+        [YAXSerializeAs("GlobalAisacRefs")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]
-        public List<ushort> GlobalAisacRefs { get; set; } = new List<ushort>();
+        public List<AcbTableReference> GlobalAisacRefs { get; set; } = new List<AcbTableReference>();
+
+        public void Initialize()
+        {
+            if (EventIndex == null) EventIndex = new AcbTableReference();
+            if (CommandIndex == null) CommandIndex = new AcbTableReference();
+            if (LocalAisac == null) LocalAisac = new List<AcbTableReference>();
+            if (GlobalAisacRefs == null) GlobalAisacRefs = new List<AcbTableReference>();
+        }
 
         public static List<ACB_Track> Load(UTF_File table, Version ParseVersion, string currentAcbName)
         {
@@ -1676,23 +3547,23 @@ namespace Xv2CoreLib.ACB_NEW
 
             //Track values
             track.ParameterPallet = trackTable.GetValue<ushort>("ParameterPallet", TypeFlag.UInt16, index);
-            track.TargetType = trackTable.GetValue<byte>("TargetType", TypeFlag.UInt8, index);
+            track.TargetType = (TargetType)trackTable.GetValue<byte>("TargetType", TypeFlag.UInt8, index);
             track.TargetName = trackTable.GetValue<string>("TargetName", TypeFlag.String, index);
-            track.TargetId = trackTable.GetValue<uint>("TargetId", TypeFlag.UInt32, index);
+            track.TargetId.TableIndex = trackTable.GetValue<uint>("TargetId", TypeFlag.UInt32, index);
             track.TargetAcbName = trackTable.GetValue<string>("TargetAcbName", TypeFlag.String, index);
             track.Scope = trackTable.GetValue<byte>("Scope", TypeFlag.UInt8, index);
             track.TargetTrackNo = trackTable.GetValue<ushort>("TargetTrackNo", TypeFlag.UInt16, index);
 
-            track.EventIndex = trackTable.GetValue<ushort>("EventIndex", TypeFlag.UInt16, index);
-            track.CommandIndex = trackTable.GetValue<ushort>("CommandIndex", TypeFlag.UInt16, index);
-            track.LocalAisac = BigEndianConverter.ToUInt16Array(trackTable.GetData("LocalAisacs", index)).ToList();
+            track.EventIndex.TableIndex = trackTable.GetValue<ushort>("EventIndex", TypeFlag.UInt16, index);
+            track.CommandIndex.TableIndex = trackTable.GetValue<ushort>("CommandIndex", TypeFlag.UInt16, index);
+            track.LocalAisac = AcbTableReference.FromArray(BigEndianConverter.ToUInt16Array(trackTable.GetData("LocalAisacs", index)));
 
             var globalAisacStartIndex = trackTable.GetValue<ushort>("GlobalAisacStartIndex", TypeFlag.UInt16, index);
             var globalAisacNumRefs = trackTable.GetValue<ushort>("GlobalAisacNumRefs", TypeFlag.UInt16, index);
             
             for (int i = 0; i < globalAisacNumRefs; i++)
             {
-                track.GlobalAisacRefs.Add((ushort)(globalAisacStartIndex + i));
+                track.GlobalAisacRefs.Add(new AcbTableReference(globalAisacStartIndex + i));
             }
 
             if (currentAcbName == track.TargetAcbName)
@@ -1714,13 +3585,13 @@ namespace Xv2CoreLib.ACB_NEW
             if (TargetSelf)
                 TargetAcbName = currentAcbName;
 
-            ushort globalAisacRefIndex = (GlobalAisacRefs.Count > 0) ? GlobalAisacRefs[0] : ushort.MaxValue;
+            ushort globalAisacRefIndex = (GlobalAisacRefs.Count > 0) ? GlobalAisacRefs[0].TableIndex_Ushort : ushort.MaxValue;
 
-            utfTable.AddValue("TargetType", TypeFlag.UInt8, index, TargetType.ToString());
+            utfTable.AddValue("TargetType", TypeFlag.UInt8, index, ((byte)TargetType).ToString());
             utfTable.AddValue("ParameterPallet", TypeFlag.UInt16, index, ParameterPallet.ToString());
             utfTable.AddValue("TargetName", TypeFlag.String, index, TargetName);
             utfTable.AddValue("TargetId", TypeFlag.UInt32, index, TargetId.ToString());
-            utfTable.AddValue("TargetAcbName", TypeFlag.String, index, TargetAcbName.ToString());
+            utfTable.AddValue("TargetAcbName", TypeFlag.String, index, TargetAcbName);
             utfTable.AddValue("Scope", TypeFlag.UInt8, index, Scope.ToString());
             utfTable.AddValue("TargetTrackNo", TypeFlag.UInt16, index, TargetTrackNo.ToString());
 
@@ -1731,7 +3602,7 @@ namespace Xv2CoreLib.ACB_NEW
             
             if (LocalAisac != null)
             {
-                utfTable.AddData("LocalAisacs", index, BigEndianConverter.GetBytes(LocalAisac.ToArray()));
+                utfTable.AddData("LocalAisacs", index, BigEndianConverter.GetBytes(AcbTableReference.ToArray(LocalAisac)));
             }
             else
             {
@@ -1742,13 +3613,14 @@ namespace Xv2CoreLib.ACB_NEW
     }
 
     [YAXSerializeAs("GlobalAisacReference")]
+    [Serializable]
     public class ACB_GlobalAisacReference : AcbTableBase
     {
         [YAXAttributeForClass]
         public int Index { get; set; }
 
         [YAXAttributeForClass]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         public static List<ACB_GlobalAisacReference> Load(UTF_File table, Version ParseVersion)
         {
@@ -1782,14 +3654,53 @@ namespace Xv2CoreLib.ACB_NEW
 
         public void WriteToTable(UTF_File utfTable, int index, Version ParseVersion)
         {
-            utfTable.AddValue("Name", TypeFlag.String, index, Name.ToString());
+            utfTable.AddValue("Name", TypeFlag.String, index, Name);
         }
 
     }
 
     [YAXSerializeAs("Waveform")]
-    public class ACB_Waveform : AcbTableBase
+    [Serializable]
+    public class ACB_Waveform : AcbTableBase, INotifyPropertyChanged
     {
+        #region NotifyPropertyChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void NotifyPropertyChanged(String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+        #endregion
+
+        #region Undoable
+        [YAXDontSerialize]
+        public bool UndoableStreaming
+        {
+            get
+            {
+                return Streaming;
+            }
+            set
+            {
+                if (Streaming != value)
+                {
+                    bool oldValue = Streaming;
+                    Streaming = value;
+                    UndoManager.Instance.AddUndo(new UndoableProperty<ACB_Waveform>("Streaming", this, oldValue, value, "Streaming"));
+                    NotifyPropertyChanged("UndoableStreaming");
+                }
+            }
+        }
+
+        #endregion
+
+        //Values
+        private bool _streaming = false;
+
+        //Properties
         [YAXAttributeForClass]
         public int Index { get; set; }
 
@@ -1798,7 +3709,7 @@ namespace Xv2CoreLib.ACB_NEW
         public EncodeType EncodeType { get; set; }
         [YAXAttributeFor("Streaming")]
         [YAXSerializeAs("value")]
-        public bool Streaming { get; set; }
+        public bool Streaming { get { return _streaming; } set { _streaming = value; NotifyPropertyChanged("UndoableStreaming"); } }
         [YAXAttributeFor("AwbId")]
         [YAXSerializeAs("value")]
         public ushort AwbId { get; set; } //Tracks will be stored in a seperate section
@@ -1825,6 +3736,7 @@ namespace Xv2CoreLib.ACB_NEW
         [YAXAttributeFor("ExtensionData")]
         [YAXSerializeAs("LoopEnd")]
         public uint LoopEnd { get; set; }
+        
 
         public static List<ACB_Waveform> Load(UTF_File table, UTF_File waveformTable, Version ParseVersion)
         {
@@ -1970,10 +3882,18 @@ namespace Xv2CoreLib.ACB_NEW
 
         }
 
+        public void UpdateProperties()
+        {
+            foreach(var prop in GetType().GetProperties())
+            {
+                NotifyPropertyChanged(prop.Name);
+            }
+        }
     }
 
     [YAXSerializeAs("Aisac")]
-    public class ACB_Aisac : AcbTableBase
+    [Serializable]
+    public class ACB_Aisac : AcbTableBase, IAutoModulationIndex, IGraphIndexes
     {
         [YAXAttributeForClass]
         public int Index { get; set; }
@@ -1990,7 +3910,7 @@ namespace Xv2CoreLib.ACB_NEW
         [YAXAttributeFor("ControlName")]
         [YAXSerializeAs("value")]
         [YAXDontSerializeIfNull]
-        public string ControlName { get; set; } //Optional name
+        public string ControlName { get; set; } = string.Empty; //Optional
         [YAXAttributeFor("RandomRange")]
         [YAXSerializeAs("value")]
         public float RandomRange { get; set; }
@@ -2005,14 +3925,18 @@ namespace Xv2CoreLib.ACB_NEW
         public byte GraphBitFlag { get; set; }
 
         
-        [YAXAttributeFor("AutoModulationIndex")]
-        [YAXSerializeAs("value")]
-        public ushort AutoModulationIndex { get; set; }
+        [YAXSerializeAs("AutoModulationIndex")]
+        public AcbTableReference AutoModulationIndex { get; set; } = new AcbTableReference(); //ushort
         
-        [YAXAttributeFor("GraphIndexes")]
-        [YAXSerializeAs("values")]
+        [YAXSerializeAs("GraphIndexes")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public List<ushort> GraphIndexes { get; set; }
+        public List<AcbTableReference> GraphIndexes { get; set; } = new List<AcbTableReference>(); //ushort
+
+        public void Initialize()
+        {
+            if (AutoModulationIndex == null) AutoModulationIndex = new AcbTableReference();
+            if (GraphIndexes == null) GraphIndexes = new List<AcbTableReference>();
+        }
 
         public static List<ACB_Aisac> Load(UTF_File table, UTF_File aisacNameTable, Version ParseVersion)
         {
@@ -2038,8 +3962,8 @@ namespace Xv2CoreLib.ACB_NEW
             aisac.DefaultControlFlag = aisacTable.GetValue<byte>("DefaultControlFlag", TypeFlag.UInt8, index);
             aisac.DefaultControl = aisacTable.GetValue<float>("DefaultControl", TypeFlag.Single, index);
             aisac.GraphBitFlag = aisacTable.GetValue<byte>("GraphBitFlag", TypeFlag.UInt8, index);
-            aisac.AutoModulationIndex = aisacTable.GetValue<ushort>("AutoModulationIndex", TypeFlag.UInt16, index);
-            aisac.GraphIndexes = BigEndianConverter.ToUInt16Array(aisacTable.GetData("GraphIndexes", index)).ToList();
+            aisac.AutoModulationIndex.TableIndex = aisacTable.GetValue<ushort>("AutoModulationIndex", TypeFlag.UInt16, index);
+            aisac.GraphIndexes = AcbTableReference.FromArray(BigEndianConverter.ToUInt16Array(aisacTable.GetData("GraphIndexes", index)));
 
             //Get ControlName if it is defined
             if(aisacNameTable != null)
@@ -2076,7 +4000,7 @@ namespace Xv2CoreLib.ACB_NEW
 
             if (GraphIndexes != null)
             {
-                utfTable.AddData("GraphIndexes", index, BigEndianConverter.GetBytes(GraphIndexes.ToArray()));
+                utfTable.AddData("GraphIndexes", index, BigEndianConverter.GetBytes(AcbTableReference.ToArray(GraphIndexes)));
             }
             else
             {
@@ -2094,6 +4018,7 @@ namespace Xv2CoreLib.ACB_NEW
     }
 
     [YAXSerializeAs("Graph")]
+    [Serializable]
     public class ACB_Graph : AcbTableBase
     {
         [YAXAttributeForClass]
@@ -2169,6 +4094,7 @@ namespace Xv2CoreLib.ACB_NEW
     }
 
     [YAXSerializeAs("AutoModulation")]
+    [Serializable]
     public class ACB_AutoModulation : AcbTableBase
     {
         [YAXAttributeForClass]
@@ -2225,23 +4151,107 @@ namespace Xv2CoreLib.ACB_NEW
         }
     }
 
+    [Serializable]
+    public class ACB_StringValue : AcbTableBase
+    {
+        [YAXAttributeForClass]
+        public int Index { get; set; }
+
+        [YAXAttributeForClass]
+        public string StringValue { get; set; }
+
+        public ACB_StringValue() { }
+
+        public ACB_StringValue(string stringValue, int index = -1)
+        {
+            StringValue = stringValue;
+            Index = index;
+        }
+
+        public static List<ACB_StringValue> Load(UTF_File table, Version ParseVersion)
+        {
+            List<ACB_StringValue> rows = new List<ACB_StringValue>();
+            if (table == null) return rows;
+
+            for (int i = 0; i < table.DefaultRowCount; i++)
+            {
+                rows.Add(Load(table, i));
+            }
+
+            return rows;
+        }
+
+        public static ACB_StringValue Load(UTF_File stringValueTable, int index)
+        {
+            ACB_StringValue stringValue = new ACB_StringValue();
+            stringValue.Index = index;
+            stringValue.StringValue = stringValueTable.GetValue<string>("StringValue", TypeFlag.String, index);
+
+            return stringValue;
+        }
+        
+        public static void WriteToTable(IList<ACB_StringValue> entries, Version ParseVersion, UTF_File utfTable)
+        {
+            for (int i = 0; i < entries.Count; i++)
+            {
+                entries[i].WriteToTable(utfTable, i, ParseVersion);
+            }
+        }
+
+        public void WriteToTable(UTF_File utfTable, int index, Version ParseVersion)
+        {
+            utfTable.AddValue("StringValue", TypeFlag.String, index, StringValue);
+        }
+        
+        public static List<ACB_StringValue> DefaultStringTable()
+        {
+            List<ACB_StringValue> values = new List<ACB_StringValue>();
+
+            values.Add(new ACB_StringValue("MasterOut", values.Count));
+            values.Add(new ACB_StringValue("BUS1", values.Count));
+            values.Add(new ACB_StringValue("BUS2", values.Count));
+            values.Add(new ACB_StringValue("BUS3", values.Count));
+            values.Add(new ACB_StringValue("BUS4", values.Count));
+            values.Add(new ACB_StringValue("BUS5", values.Count));
+            values.Add(new ACB_StringValue("BUS6", values.Count));
+            values.Add(new ACB_StringValue("BUS7", values.Count));
+
+            return values;
+        }
+    }
+
     #region Commands
+    [Serializable]
     public class ACB_CommandTables
     {
-        public ACB_File Root = null;
+        [YAXDontSerialize]
+        public Version AcbVersion { get; set; }
 
         [YAXComment("Below ver 1.29.0.0: Always use SequenceCommand (just named CommandTable in the ACB file). Later versions separated the command tables.")]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "CommandTable")]
         public List<ACB_CommandTable> CommandTables { get; set; } = new List<ACB_CommandTable>();
 
-        //todo: manager methods
-        public int AddCommand(ACB_CommandGroup command, CommandTableType type)
+        public IEnumerable<ACB_CommandGroup> GetIterator()
         {
-            var table = GetCommandTable(type);
-            table.CommandGroups.Add(command);
-            return table.CommandGroups.Count - 1;
+            foreach(var commandTable in CommandTables)
+            {
+                foreach (var commandGroup in commandTable.CommandGroups)
+                    yield return commandGroup;
+            }
         }
 
+        //todo: manager methods
+        public List<IUndoRedo> AddCommand(ACB_CommandGroup command, CommandTableType type)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            var table = GetCommandTable(type);
+            table.CommandGroups.Add(command);
+            undos.Add(new UndoableListAdd<ACB_CommandGroup>(table.CommandGroups, command));
+
+            return undos;
+        }
+        
         public void SetCommand(int index, CommandTableType type, ACB_CommandGroup command)
         {
             var table = GetCommandTable(type);
@@ -2254,6 +4264,7 @@ namespace Xv2CoreLib.ACB_NEW
 
         public ACB_CommandGroup GetCommand(int index, CommandTableType type)
         {
+            if (index >= ushort.MaxValue) return null;
             var table = GetCommandTable(type);
 
             if (index >= table.CommandGroups.Count)
@@ -2262,10 +4273,28 @@ namespace Xv2CoreLib.ACB_NEW
             return table.CommandGroups[index];
         }
 
+        public ACB_CommandGroup GetCommand(Guid guid, CommandTableType type, bool allowNull = true)
+        {
+            var table = GetCommandTable(type);
+
+            if (table != null)
+            {
+                var result = table.CommandGroups.FirstOrDefault(x => x.InstanceGuid == guid);
+                if(result == null && !allowNull)
+                    throw new Exception($"ACB_CommandTables.GetCommand: Cannot find the command with the specified GUID.");
+
+                return result;
+            }
+            else if (!allowNull)
+                throw new Exception($"ACB_CommandTables.GetCommand: Cannot get the command with the specified GUID in CommandTable {type}. The CommandTable does not exist in the ACB.");
+            else
+                return null;
+        }
+        
         public ACB_CommandTable GetCommandTable(CommandTableType type)
         {
             //If on old ACB version, always return SequenceCommandTable
-            if(Root.Version < ACB_File._1_29_0_0)
+            if(AcbVersion < ACB_File._1_29_0_0)
                 type = CommandTableType.SequenceCommand;
 
             //Find table, create it if needed, and return it
@@ -2284,23 +4313,37 @@ namespace Xv2CoreLib.ACB_NEW
             return table.CommandGroups.IndexOf(command);
         }
 
-        public static ACB_CommandTables Load(UTF_File utfFile, Version ParseVersion, ACB_File acbFile)
+        public Guid GetCommandGuid(int index, CommandTableType type)
+        {
+            var command = GetCommand(index, type);
+            return (command != null) ? command.InstanceGuid : Guid.Empty;
+        }
+
+        public ushort GetCommandIndex(Guid guid, CommandTableType type)
+        {
+            var cmd = GetCommand(guid, type);
+            return (ushort)GetCommandIndex(cmd, type);
+        }
+
+        public static ACB_CommandTables Load(UTF_File utfFile, Version ParseVersion, ACB_File acbFile, bool loadUnknownCommands)
         {
             ACB_CommandTables commandTables = new ACB_CommandTables();
-            commandTables.Root = acbFile;
+            commandTables.AcbVersion = acbFile.Version;
 
             if(ParseVersion >= ACB_File._1_29_0_0)
             {
-                commandTables.CommandTables.Add(ACB_CommandTable.Load(utfFile.GetColumnTable("SeqCommandTable", true), CommandTableType.SequenceCommand));
-                commandTables.CommandTables.Add(ACB_CommandTable.Load(utfFile.GetColumnTable("TrackCommandTable", true), CommandTableType.TrackCommand));
-                commandTables.CommandTables.Add(ACB_CommandTable.Load(utfFile.GetColumnTable("SynthCommandTable", true), CommandTableType.SynthCommand));
-                commandTables.CommandTables.Add(ACB_CommandTable.Load(utfFile.GetColumnTable("TrackEventTable", true), CommandTableType.TrackEvent));
+                commandTables.CommandTables.Add(ACB_CommandTable.Load(utfFile.GetColumnTable("SeqCommandTable", true), CommandTableType.SequenceCommand, loadUnknownCommands));
+                commandTables.CommandTables.Add(ACB_CommandTable.Load(utfFile.GetColumnTable("TrackCommandTable", true), CommandTableType.TrackCommand, loadUnknownCommands));
+                commandTables.CommandTables.Add(ACB_CommandTable.Load(utfFile.GetColumnTable("SynthCommandTable", true), CommandTableType.SynthCommand, loadUnknownCommands));
+                commandTables.CommandTables.Add(ACB_CommandTable.Load(utfFile.GetColumnTable("TrackEventTable", true), CommandTableType.TrackEvent, loadUnknownCommands));
             }
             else
             {
                 //Just CommandTable
-                commandTables.CommandTables.Add(ACB_CommandTable.Load(utfFile.GetColumnTable("CommandTable", true), CommandTableType.SequenceCommand));
+                commandTables.CommandTables.Add(ACB_CommandTable.Load(utfFile.GetColumnTable("CommandTable", true), CommandTableType.SequenceCommand, loadUnknownCommands));
             }
+
+            //commandTables.LinkGuids(acbFile);
 
             return commandTables;
         }
@@ -2309,24 +4352,103 @@ namespace Xv2CoreLib.ACB_NEW
         {
             foreach(var table in CommandTables)
             {
-                if (table.Type == type) return table.WriteToTable();
+                if (table.Type == type) return table.WriteToTable(AcbVersion);
             }
 
-            return ACB_CommandTable.CreateEmptyTable(Root.Version, type);
+            return ACB_CommandTable.CreateEmptyTable(AcbVersion, type);
+        }
+
+
+        //AcbTableReference linking
+        public void LinkGuids(ACB_File root)
+        {
+            foreach(var cmdTable in CommandTables)
+            {
+                foreach(var cmdGroup in cmdTable.CommandGroups)
+                {
+                    foreach(var cmd in cmdGroup.Commands)
+                    {
+                        if(cmd.CommandType == CommandType.ReferenceItem || cmd.CommandType == CommandType.ReferenceItem2)
+                        {
+                            cmd.ReferenceIndex = new AcbTableReference(cmd.Param2);
+
+                            switch ((ReferenceType)cmd.Param1)
+                            {
+                                case ReferenceType.Waveform:
+                                    cmd.ReferenceIndex.TableGuid = root.GetTableGuid(cmd.Param2, root.Waveforms);
+                                        break;
+                                case ReferenceType.Synth:
+                                    cmd.ReferenceIndex.TableGuid = root.GetTableGuid(cmd.Param2, root.Synths);
+                                    break;
+                                case ReferenceType.Sequence:
+                                    cmd.ReferenceIndex.TableGuid = root.GetTableGuid(cmd.Param2, root.Sequences);
+                                    break;
+                            }
+                        }
+                        else if(cmd.CommandType == CommandType.GlobalAisacReference)
+                        {
+                            cmd.ReferenceIndex = new AcbTableReference(cmd.Param1);
+                            cmd.ReferenceIndex.TableGuid = root.GetTableGuid(cmd.Param1, root.GlobalAisacReferences);
+                        }
+                        else if (cmd.CommandType == CommandType.VolumeBus || cmd.CommandType == CommandType.Bus)
+                        {
+                            cmd.ReferenceIndex = new AcbTableReference(cmd.Param1);
+                            cmd.ReferenceIndex.TableGuid = root.GetTableGuid(cmd.Param1, root.StringValues);
+                        }
+                    }
+                }
+            }
+        }
+
+        public void LinkIndexes(ACB_File root)
+        {
+            foreach (var cmdTable in CommandTables)
+            {
+                foreach (var cmdGroup in cmdTable.CommandGroups)
+                {
+                    foreach (var cmd in cmdGroup.Commands)
+                    {
+                        if (cmd.ReferenceIndex == null) continue;
+
+                        if (cmd.CommandType == CommandType.ReferenceItem || cmd.CommandType == CommandType.ReferenceItem2)
+                        {
+                            switch ((ReferenceType)cmd.Param1)
+                            {
+                                case ReferenceType.Waveform:
+                                    cmd.ReferenceIndex.TableIndex = (ushort)root.GetTableIndex(cmd.ReferenceIndex.TableGuid, root.Waveforms);
+                                    break;
+                                case ReferenceType.Synth:
+                                    cmd.ReferenceIndex.TableIndex = (ushort)root.GetTableIndex(cmd.ReferenceIndex.TableGuid, root.Synths);
+                                    break;
+                                case ReferenceType.Sequence:
+                                    cmd.ReferenceIndex.TableIndex = (ushort)root.GetTableIndex(cmd.ReferenceIndex.TableGuid, root.Sequences);
+                                    break;
+                            }
+                        }
+                        else if (cmd.CommandType == CommandType.GlobalAisacReference)
+                        {
+                            cmd.ReferenceIndex.TableIndex = (ushort)root.GetTableIndex(cmd.ReferenceIndex.TableGuid, root.GlobalAisacReferences);
+                        }
+                        else if (cmd.CommandType == CommandType.VolumeBus || cmd.CommandType == CommandType.Bus)
+                        {
+                            cmd.ReferenceIndex.TableIndex = (ushort)root.GetTableIndex(cmd.ReferenceIndex.TableGuid, root.StringValues);
+                        }
+                    }
+                }
+            }
         }
     }
 
+    [Serializable]
     public class ACB_CommandTable
     {
-        public ACB_File Root = null; //Will have to set this manually after loading from XML
-
         [YAXAttributeForClass]
         public CommandTableType Type { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "CommandGroup")]
         public List<ACB_CommandGroup> CommandGroups { get; set; } = new List<ACB_CommandGroup>();
 
-        public static ACB_CommandTable Load(UTF_File commandTable, CommandTableType type)
+        public static ACB_CommandTable Load(UTF_File commandTable, CommandTableType type, bool loadUnknownCommands)
         {
             ACB_CommandTable table = new ACB_CommandTable();
             table.Type = type;
@@ -2336,15 +4458,15 @@ namespace Xv2CoreLib.ACB_NEW
 
             for(int i = 0; i < numRows; i++)
             {
-                table.CommandGroups.Add(ACB_CommandGroup.Load(commandTable, i));
+                table.CommandGroups.Add(ACB_CommandGroup.Load(commandTable, i, loadUnknownCommands));
             }
 
             return table;
         }
 
-        public UTF_File WriteToTable()
+        public UTF_File WriteToTable(Version acbVersion)
         {
-            UTF_File utfTable = CreateEmptyTable(Root.Version, Type);
+            UTF_File utfTable = CreateEmptyTable(acbVersion, Type);
 
             for(int i = 0; i < CommandGroups.Count; i++)
             {
@@ -2389,6 +4511,7 @@ namespace Xv2CoreLib.ACB_NEW
     }
 
     [YAXSerializeAs("CommandGroup")]
+    [Serializable]
     public class ACB_CommandGroup : AcbTableBase
     {
         [YAXAttributeForClass]
@@ -2397,12 +4520,13 @@ namespace Xv2CoreLib.ACB_NEW
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Command")]
         public ObservableCollection<ACB_Command> Commands { get; set; } = new ObservableCollection<ACB_Command>();
 
-        public static ACB_CommandGroup Load(UTF_File commandTable, int index)
+        public static ACB_CommandGroup Load(UTF_File commandTable, int index, bool loadUnknownCommands)
         {
             ACB_CommandGroup commandGroup = new ACB_CommandGroup();
             commandGroup.Index = index;
 
             byte[] commandBytes = commandTable.GetData("Command", index);
+            if (commandBytes == null) commandBytes = new byte[0];
 
             //Parse command bytes. If there are 3 or more bytes left, then there is another command to parse.
             int offset = 0;
@@ -2410,10 +4534,13 @@ namespace Xv2CoreLib.ACB_NEW
             while (((commandBytes.Length) - offset) >= 3)
             {
                 ACB_Command command = new ACB_Command();
-                command.I_00 = commandBytes[offset + 0];
-                command.CommandType = (CommandType)commandBytes[offset + 1];
+                command.CommandType = (CommandType)BigEndianConverter.ReadUInt16(commandBytes, offset);
                 command.Parameters = commandBytes.GetRange(offset + 3, commandBytes[offset + 2]).ToList();
-                commandGroup.Commands.Add(command);
+                
+                //Dont load unknown commands with more than 0 parameters unless loadUnknownCommands is true
+                //For XML we want to load all commands, but otherwise they can cause issues when copying cues and rearanging tables so it's best to ignore them
+                if ((Enum.IsDefined(typeof(CommandType), command.CommandType) || command.NumParameters == 0) || loadUnknownCommands)
+                    commandGroup.Commands.Add(command);
 
                 offset += 3 + command.NumParameters;
             }
@@ -2427,8 +4554,8 @@ namespace Xv2CoreLib.ACB_NEW
 
             foreach (var command in commands.Commands)
             {
-                bytes.Add(command.I_00);
-                bytes.Add((byte)command.CommandType);
+                command.FinalizeParameters();
+                bytes.AddRange(BigEndianConverter.GetBytes((ushort)command.CommandType));
                 bytes.Add(command.NumParameters);
 
                 if (command.Parameters != null)
@@ -2447,9 +4574,11 @@ namespace Xv2CoreLib.ACB_NEW
     }
 
     [YAXSerializeAs("Command")]
-    public class ACB_Command : INotifyPropertyChanged
+    [Serializable]
+    public class ACB_Command : INotifyPropertyChanged, IReferenceType
     {
         #region NotifyPropertyChanged
+        [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
         private void NotifyPropertyChanged(String propertyName = "")
         {
@@ -2459,12 +4588,36 @@ namespace Xv2CoreLib.ACB_NEW
             }
         }
         #endregion
-        
-        [YAXDontSerialize]
-        public string DisplayName { get { return "Entry"; } }
 
-        [YAXAttributeForClass]
-        public byte I_00 { get; set; }
+        #region Undoable
+        [YAXDontSerialize]
+        public CommandType UndoableCommandType
+        {
+            get
+            {
+                return CommandType;
+            }
+            set
+            {
+                if (CommandType != value)
+                {
+                    CommandType oldValue = CommandType;
+                    CommandType = value;
+                    UndoManager.Instance.AddUndo(new UndoableProperty<ACB_Command>("CommandType", this, oldValue, value, "Command Type"));
+                    NotifyPropertyChanged("UndoableCommandType");
+                }
+            }
+        }
+
+        #endregion
+
+        //Values
+
+
+        //Properties
+        [YAXDontSerialize]
+        public string DisplayName { get { return $"Command: {CommandType}"; } }
+        
         [YAXAttributeForClass]
         public CommandType CommandType
         {
@@ -2472,13 +4625,14 @@ namespace Xv2CoreLib.ACB_NEW
             {
                 return this._commandType;
             }
-
             set
             {
                 if (value != this._commandType)
                 {
                     this._commandType = value;
+                    NotifyPropertyChanged("DisplayName");
                     NotifyPropertyChanged("CommandType");
+                    NotifyPropertyChanged("UndoableCommandType");
                 }
             }
         }
@@ -2487,11 +4641,18 @@ namespace Xv2CoreLib.ACB_NEW
         [YAXDontSerialize]
         public byte NumParameters { get { return (byte)Parameters.Count; } }
 
-        //Data, depending on CommandType
+        //Raw parameters. For some types some of these are handled by seperate props, when it is required (such as for linking to a table, since the index value wont be good enough for that)
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
         [YAXAttributeForClass]
-        public List<byte> Parameters { get; set; } = new List<byte>(); 
-        
+        public List<byte> Parameters { get; set; } = new List<byte>();
+
+        //CommandType specific data:
+        [YAXDontSerialize]
+        public ReferenceType ReferenceType { get { return (ReferenceType)Param1; } set { Param1 = (ushort)value; } } //Quick access for the ReferenceType Command.
+        //Used for any command types that require linking to other tables (via GUID). Linking is done on creation of the command or loading of the file (if required).
+        [YAXDontSerialize]
+        public AcbTableReference ReferenceIndex { get; set; }
+
         #region ParameterProperties
         [YAXDontSerialize]
         public ushort Param1 { get { return GetParam(0); } set { SetParam(0, value); } }
@@ -2507,9 +4668,9 @@ namespace Xv2CoreLib.ACB_NEW
         {
             if (Parameters == null) Parameters = new List<byte>();
             int adjustedIndex = idx * 2;
+            int newSize = 2 * (idx + 1);
 
-            //Expand Parameters if needed
-            while (Parameters.Count - 1 < adjustedIndex + 2)
+            while (Parameters.Count < newSize)
             {
                 Parameters.Add(0);
             }
@@ -2521,9 +4682,10 @@ namespace Xv2CoreLib.ACB_NEW
         {
             if (Parameters == null) Parameters = new List<byte>();
             int adjustedIndex = idx * 2;
+            int newSize = 2 * (idx + 1);
 
             //Expand Parameters if needed
-            while (Parameters.Count - 1 < adjustedIndex + 2)
+            while (Parameters.Count < newSize)
             {
                 Parameters.Add(0);
             }
@@ -2531,11 +4693,124 @@ namespace Xv2CoreLib.ACB_NEW
             Utils.ReplaceRange(Parameters, BigEndianConverter.GetBytes(value), adjustedIndex);
         }
         #endregion
-        
+
+        public ACB_Command() { }
+
+        /// <summary>
+        /// Pre-initialize the values required for the command type.
+        /// </summary>
+        public ACB_Command(CommandType commandType)
+        {
+            CommandType = commandType;
+
+            switch (commandType)
+            {
+                case CommandType.Bus:
+                case CommandType.GlobalAisacReference:
+                    Parameters = new byte[2].ToList();
+                    ReferenceIndex = new AcbTableReference();
+                    break;
+                case CommandType.ReferenceItem:
+                case CommandType.VolumeBus:
+                    Parameters = new byte[4].ToList();
+                    ReferenceIndex = new AcbTableReference();
+                    break;
+                case CommandType.VolumeRandomization1:
+                    Parameters = new byte[2].ToList();
+                    break;
+                case CommandType.VolumeRandomization2:
+                    Parameters = new byte[4].ToList();
+                    break;
+                case CommandType.CueLimit:
+                    Parameters = new byte[5].ToList();
+                    break;
+                case CommandType.ReferenceItem2:
+                    Parameters = new byte[6].ToList();
+                    ReferenceIndex = new AcbTableReference();
+                    break;
+            }
+
+        }
+
+        public void FinalizeParameters()
+        {
+            if(ReferenceIndex != null)
+            {
+                switch (CommandType)
+                {
+                    case CommandType.GlobalAisacReference:
+                    case CommandType.VolumeBus:
+                    case CommandType.Bus:
+                        Param1 = ReferenceIndex.TableIndex_Ushort;
+                        break;
+                    case CommandType.ReferenceItem:
+                    case CommandType.ReferenceItem2:
+                        Param2 = ReferenceIndex.TableIndex_Ushort;
+                        break;
+                }
+            }
+        }
     }
 
     #endregion
 
+    #region Interfaces
+    //Interfaces
+    public interface IReferenceType
+    {
+        ReferenceType ReferenceType { get; set; }
+        AcbTableReference ReferenceIndex { get; set; }
+    }
+
+    public interface ILocalAisac
+    {
+        List<AcbTableReference> LocalAisac { get; set; }
+    }
+
+    public interface IGlobalAisacRef
+    {
+        List<AcbTableReference> GlobalAisacRefs { get; set; }
+    }
+
+    public interface ICommandIndex
+    {
+        AcbTableReference CommandIndex { get; set; }
+    }
+
+    public interface IEventIndex
+    {
+        AcbTableReference EventIndex { get; set; }
+    }
+
+    public interface IActionTrack
+    {
+        List<AcbTableReference> ActionTracks { get; set; }
+    }
+
+    public interface ITrack
+    {
+        ObservableCollection<ACB_SequenceTrack> Tracks { get; set; }
+    }
+
+    public interface IAutoModulationIndex
+    {
+        AcbTableReference AutoModulationIndex { get; set; }
+    }
+
+    public interface IGraphIndexes
+    {
+        List<AcbTableReference> GraphIndexes { get; set; }
+    }
+
+    public interface ITargetId
+    {
+        TargetType TargetType { get; set; }
+        AcbTableReference TargetId { get; set; }
+        bool TargetSelf { get; set; }
+    }
+    #endregion
+    
+    #region Enums
     //Enums
     public enum ReferenceType : byte
     {
@@ -2558,14 +4833,47 @@ namespace Xv2CoreLib.ACB_NEW
         NINTENDO_DSP = 13,
         None = 255
     }
-
-    public enum CommandType
+    
+    public enum CommandType : ushort
     {
-        Null = 0, //No parameters. Does nothing.
-        Action_Play = 188,//No parameters. Uses target information from ActionTrack.
-        Action_Stop = 189,//No parameters. Uses target information from ActionTrack.
-        ReferenceItem = 208, //4 parameters (2 uint16s). Identical to ReferenceType/ReferenceIndex on Cue and ReferenceItems on Sequence/Synth.
-        Unk209 = 209, //4 parameters (2 uint16s). First value could be ReferenceType, but 2nd value cant be ReferenceIndex (too high)
+        //Reminder! All values are in big endian!
+        Null = 0, //No parameters. Does nothing?.
+        GlobalAisacReference = 0x004b, //2 parameters (1 uint16). 0 = GlobalAisacReference (index)
+        CueLimit = 0x004f, //5 bytes, 1st value (uint16) = cue limit (Sequence only?)
+        VolumeRandomization1 = 0x0058, //2 parameters (1 uint16) 0 = Random Range (scale 0-100, base volume is 0)
+        VolumeRandomization2 = 0x0059, //4 parameters (2 uint16s) 0 = base volume, 1 = Random Range (scale 0-100)
+        VolumeBus = 0x006f, //4 parameters (2 uint16s). 1st value = StringValue, 2nd value = volume, scale between 0 and 10000 (Sequence only)
+        Action_Play = 0x1bbc,//No parameters. Uses target information from ActionTrack.
+        Action_Stop = 0x1bbd,//No parameters. Uses target information from ActionTrack.
+        ReferenceItem = 0x07d0, //4 parameters (2 uint16s). Identical to ReferenceType/ReferenceIndex on Cue and ReferenceItems on Sequence/Synth. (a Null command MUST follow or the game will crash)
+        ReferenceItem2 = 0x07d3, //6 parameters (3 uint16s). Same as ReferenceItem, but with an additional 2 parameters. Requires Unk199 to function.
+        LoopStart = 0x04b1, //4 parameters, 2 uint16s (0=LoopID,1=Loop Count)
+        LoopEnd = 0x04b0, //6 parameters 3 uint16s (0=LoopID)
+        Wait = 0x07d1, //4 parameters (1 uint32). Wait command, freezes command execution for desired time (0 = miliseconds)
+
+        //Slightly known commands:
+        Unk10 = 0x0010, //2 params (1 uint16). Seems to control volume, but only with a Unk85 entry present.
+        Bus = 0x0055, //2 parameters (1 uint16). Points to a StringValue (Bus).
+
+        //Unknown, but safe to copy commands - these are known not to have any references on them (invalid references will CRASH the game)
+        //Added here so they dont get purged along with the other unknown (unsafe) commands
+        Unk49 = 0x0031, //2 parameters
+        Unk84 = 0x0054, //2 parameters
+        Unk83 = 0x0053, //2 parameters
+        Unk11 = 0x000b, //2 parameters
+        Unk14 = 0x000e, //2 parameters
+        Unk36 = 0x0024, //4 parameters
+        Unk38 = 0x0026, //4 parameters
+        Unk40 = 0x0028, //4 parameters
+        Unk45 = 0x002d, //2 parameters
+        Unk47 = 0x002f, //2 parameters
+        Unk5 = 0x0005, //2 parameters
+        Unk70 = 0x0046, //1 parameter
+        Unk86 = 0x0056, //2 parameters
+        Unk199 = 0x07c7, //6 parameters. Required for ReferencedItem2 to function (must preceed it).
+        Unk65 = 0x0041, //4 parameters
+        Unk87 = 0x0057, //2 parameters
+
     }
 
     public enum SequenceType : byte
@@ -2583,10 +4891,19 @@ namespace Xv2CoreLib.ACB_NEW
     {
         SequenceCommand, //In older ACB versions this is the only command table and was used for everything (was just called "CommandTable")
         SynthCommand,
-        TrackCommand,
-        TrackEvent
+        TrackCommand, //Use by Track Commands
+        TrackEvent //Used by Track Events and ActionTrack Commands (assuming Action events as well...)
     }
 
+    public enum TargetType : byte
+    {
+        AnyAcb = 0,
+        SpecificAcb = 1
+    }
+    #endregion
+
+
+    [Serializable]
     public class AcbTableBase
     {
         /// <summary>
@@ -2594,4 +4911,102 @@ namespace Xv2CoreLib.ACB_NEW
         /// </summary>
         public Guid InstanceGuid = Guid.NewGuid();
     }
+
+    [Serializable]
+    public class AcbTableReference
+    {
+        [YAXDontSerialize]
+        private TypeFlag valueType = TypeFlag.UInt16;
+
+        [YAXDontSerialize]
+        internal Guid _tableGuid = Guid.Empty;
+
+        [YAXAttributeForClass]
+        [YAXSerializeAs("value")]
+        public uint TableIndex { get; set; } //Set upon loading and will be written directly to UTF file when saving.
+        [YAXDontSerialize]
+        public Guid TableGuid { get { return _tableGuid; } set { _tableGuid = value; } } //Set this after loading all tables. Used as a better way to identify tables, even accross multiple instances.
+
+        [YAXDontSerialize]
+        public bool IsNull { get { return TableGuid == Guid.Empty; } }
+        [YAXDontSerialize]
+        public int TableIndex_Int { get { return (int)TableIndex; } }
+        [YAXDontSerialize]
+        public ushort TableIndex_Ushort { get { return (ushort)TableIndex; } }
+
+
+        public AcbTableReference()
+        {
+            TableIndex = ushort.MaxValue;
+        }
+
+        public AcbTableReference(byte index)
+        {
+            TableIndex = index;
+        }
+
+        public AcbTableReference(ushort index)
+        {
+            TableIndex = index;
+        }
+
+        public AcbTableReference(int index)
+        {
+            if (index < ushort.MinValue || index > ushort.MaxValue) throw new ArgumentOutOfRangeException("AcbTableReference.ctor(int index) : index is out of bounds of ushort.MinValue or ushort.MaxValue.");
+            TableIndex = (ushort)index;
+        }
+
+        public AcbTableReference(uint index)
+        {
+            TableIndex = index;
+            valueType = TypeFlag.UInt32;
+        }
+
+        public bool Compare(AcbTableReference tableRef)
+        {
+            if (tableRef.TableGuid == Guid.Empty) return false;
+            return (TableGuid == tableRef.TableGuid);
+        }
+
+        public override string ToString()
+        {
+            if(valueType == TypeFlag.UInt16)
+            {
+                return (TableIndex > ushort.MaxValue) ? ushort.MaxValue.ToString() : TableIndex.ToString();
+            }
+            //else if (valueType == TypeFlag.UInt32)
+            //{
+            //    return (TableIndex >= ushort.MaxValue) ? uint.MaxValue.ToString() : TableIndex.ToString();
+            //}
+            else 
+            {
+                return TableIndex.ToString();
+            }
+        }
+
+        public static List<AcbTableReference> FromArray(IEnumerable<ushort> array)
+        {
+            List<AcbTableReference> list = new List<AcbTableReference>();
+            if (array == null) return list;
+
+            foreach (var val in array)
+                list.Add(new AcbTableReference(val));
+
+            return list;
+        }
+
+        public static ushort[] ToArray(IList<AcbTableReference> list)
+        {
+            if (list == null) return new ushort[0];
+            List<ushort> array = new List<ushort>();
+
+            foreach(var val in list)
+            {
+                array.Add((ushort)val.TableIndex);
+            }
+
+            return array.ToArray();
+        }
+    }
+    
 }

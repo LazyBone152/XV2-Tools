@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EEPK_Organiser.Forms"
         xmlns:utils="clr-namespace:EEPK_Organiser.Utils"
-        xmlns:emm="clr-namespace:Xv2CoreLib.EMM"
+        xmlns:emm="clr-namespace:Xv2CoreLib.EMM;assembly=Xv2CoreLib"
         xmlns:Themes1="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
         mc:Ignorable="d"
         Title="Material Editor" MinHeight="400" MinWidth="600" Height="470" Width="800" ResizeMode="CanResizeWithGrip" WindowStartupLocation="CenterOwner">

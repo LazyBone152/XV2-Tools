@@ -1,0 +1,20 @@
+﻿<Controls:MetroWindow x:Class="AudioCueEditor.View.AddTrackForm"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:local="clr-namespace:AudioCueEditor.View"
+        mc:Ignorable="d"
+        Title="Add Track" TitleCaps="False" Height="160" Width="380" ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner" Closing="MetroWindow_Closing">
+    <Grid>
+        <StackPanel Margin="10,10,10.4,87.655" Orientation="Horizontal">
+            <Label Content="Path" VerticalAlignment="Center"/>
+            <TextBox Text="{Binding AudioFilePath, UpdateSourceTrigger=PropertyChanged}" Width="250" Margin="5,0,0,0"/>
+            <Button Click="AddTrack_Browse_Click" Content="Browse" Width="60" Margin="5,0,0,0"/>
+        </StackPanel>
+        <Button Command="{Binding DoneCommand}" Content="Add" HorizontalAlignment="Left" Margin="147,96,0,0" VerticalAlignment="Top" Width="75"/>
+        <CheckBox ToolTip="Streaming tracks will be stored in an external AWB and will only be loaded by the game when played (there may be a delay before playing starts, as they are not pre-loaded).&#x0a;&#x0a;This is ideally used for long tracks that are not played repeatedly, such as music. Sound effects or voicelines that need to play on demand should not be streamed." IsChecked="{Binding Streaming, UpdateSourceTrigger=PropertyChanged}" Content="Streaming" HorizontalAlignment="Left" Margin="127,45,0,0" VerticalAlignment="Top" Width="113"/>
+        <CheckBox ToolTip="Loop the track based on the loop metadata contained within the audio file. If none exists, the track will be looped from start to finish." IsChecked="{Binding Loop, UpdateSourceTrigger=PropertyChanged}" Content="Loop" HorizontalAlignment="Left" Margin="127,68,0,0" VerticalAlignment="Top" Width="113"/>
+    </Grid>
+</Controls:MetroWindow>

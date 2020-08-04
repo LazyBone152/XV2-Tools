@@ -597,6 +597,8 @@ namespace Xv2CoreLib.SAV
                         return "1.13";
                     case 16:
                         return "1.14";
+                    case 17:
+                        return "1.14.1";
                     default:
                         return String.Format("Unknown ({0})", Version);
 
@@ -630,6 +632,7 @@ namespace Xv2CoreLib.SAV
                     case 14:
                     case 15:
                     case 16:
+                    case 17:
                         return null;
                     default:
                         return "This save version is not supported. It is recommened to update the application (if one is available).";
@@ -661,6 +664,7 @@ namespace Xv2CoreLib.SAV
                     case 14:
                     case 15:
                     case 16:
+                    case 17:
                         return Brushes.Blue;
                     default:
                         return Brushes.Red;
@@ -4862,7 +4866,7 @@ namespace Xv2CoreLib.SAV
 
             ulong combinedRequirement = (ulong)TokipediaEntry.AlternatePaths + (ulong)TokipediaEntry.BranchingPaths; //Joining both paths togher into a single value for easier comparison
             ulong bitTotal = combinedRequirement & setBitsValue; //Copying all bits that belong to a path into a new value
-            int totalRequirementsMeet = CommonOperations.GetSetBitCount((long)bitTotal);
+            int totalRequirementsMeet = Utils.GetSetBitCount((long)bitTotal);
 
             //Now check if any bits that dont belong to any of the paths are set
             ulong nonreqBits = combinedRequirement ^ (ulong)TokipediaFlags.Bitmask;
@@ -4870,7 +4874,7 @@ namespace Xv2CoreLib.SAV
 
             //MessageBox.Show(String.Format("Reqs Meet: {0}\nAlt Paths: {1}\nBranch Paths: {2}\nID: {3}\nnonReqBits: {4}", totalRequirementsMeet, TokipediaEntry.AlternatePaths, TokipediaEntry.BranchingPaths, TokipediaEntry.ID, nonreqBits));
 
-            int totalPaths = CommonOperations.GetSetBitCount((long)combinedRequirement) + 1; //For 100% the game requires all paths to be completed + one non-path completed.
+            int totalPaths = Utils.GetSetBitCount((long)combinedRequirement) + 1; //For 100% the game requires all paths to be completed + one non-path completed.
             return (100f / totalPaths) * totalRequirementsMeet;
         }
         

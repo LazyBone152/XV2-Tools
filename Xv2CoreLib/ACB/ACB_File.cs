@@ -12,8 +12,9 @@ using YAXLib;
 
 namespace Xv2CoreLib.ACB
 {
+    //MADE OBSOLETE BY ACB_NEW - USE THAT INSTEAD!!!
     //Can copy cues between ACB files, and thats about it.
-    //When it's finished, ACB_NEW will be the main ACB class.
+    //Keeping this here because the skill/moveset merger still uses it currently.
 
     public class ACB_File
     {

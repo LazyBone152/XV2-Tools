@@ -228,6 +228,9 @@ namespace Xv2CoreLib.Resource
         /// </summary>
         public string[] GetFilesInDirectory(string directory, string extension)
         {
+            if (!extension.Contains('.'))
+                extension = "." + extension;
+
             //Take in relative path starting at data:
             //Return array of relative paths also starting at data:
 

@@ -91,7 +91,7 @@ namespace Xv2CoreLib.BCS
                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), 24);
                 for(int i = 0; i < PartSetCount; i++)
                 {
-                    for(int a = 0; a < bcsFile.PartSets.Count(); a++)
+                    for(int a = 0; a < bcsFile.PartSets.Count; a++)
                     {
                         if(int.Parse(bcsFile.PartSets[a].Index) == i)
                         {

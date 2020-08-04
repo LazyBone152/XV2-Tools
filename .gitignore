@@ -55,24 +55,20 @@
 #misc
 *.rar
 *.zip
+*.x2m
 
 bin
 obj
 packages
 
-LB Mod Installer/obj/Release/
-LB Mod Installer/obj/Debug/
-EEPK Editor/obj/Release/
-EEPK Editor/obj/Debug/
-XV2 Xml Serializer/obj/Release/
-XV2 Xml Serializer/obj/Debug/
-
-LB Mod Installer/bin/Release/
-LB Mod Installer/bin/Debug/
-EEPK Editor/bin/Release/
-EEPK Editor/bin/Debug/
-XV2 Xml Serializer/bin/Debug/
-XV2 Xml Serializer/bin/Release/
+LB Mod Installer/obj
+EEPK Editor/obj
+XV2 Xml Serializer/obj
+AudioCueEditor/obj
+LB Mod Installer/bin
+EEPK Editor/bin
+XV2 Xml Serializer/bin
+AudioCueEditor/bin
 
 [Ll]ibrary/
 [Tt]emp/

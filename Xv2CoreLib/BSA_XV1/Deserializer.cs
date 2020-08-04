@@ -114,7 +114,7 @@ namespace Xv2CoreLib.BSA_XV1
 
         }
         
-        private void WriteUnk1(List<BSA.Unk1> unk1, int offsetToFill)
+        private void WriteUnk1(List<BSA.BSA_Collision> unk1, int offsetToFill)
         {
             if(unk1 != null)
             {
@@ -135,7 +135,7 @@ namespace Xv2CoreLib.BSA_XV1
             
         }
 
-        private void WriteUnk2(List<BSA.Unk2> unk2, int offsetToFill)
+        private void WriteUnk2(List<BSA.BSA_Expiration> unk2, int offsetToFill)
         {
             if (unk2 != null)
             {
@@ -293,7 +293,7 @@ namespace Xv2CoreLib.BSA_XV1
                 for(int i = 0; i < type.Count(); i++)
                 {
                     bytes.AddRange(BitConverter.GetBytes(type[i].I_00));
-                    bytes.AddRange(BitConverter.GetBytes(HexConverter.ToInt16(type[i].I_02)));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_02));
                     bytes.AddRange(BitConverter.GetBytes(type[i].BSA_EntryID));
                     bytes.AddRange(BitConverter.GetBytes(type[i].I_06));
                     bytes.AddRange(BitConverter.GetBytes(type[i].F_08));
@@ -323,7 +323,7 @@ namespace Xv2CoreLib.BSA_XV1
 
                 for (int i = 0; i < type.Count(); i++)
                 {
-                    bytes.AddRange(BitConverter.GetBytes(HexConverter.ToInt32(type[i].I_00)));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_00));
                     bytes.AddRange(BitConverter.GetBytes(type[i].F_04));
                     bytes.AddRange(BitConverter.GetBytes(type[i].F_08));
                     bytes.AddRange(BitConverter.GetBytes(type[i].F_12));

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using YAXLib;
 
 namespace Xv2CoreLib.BSA
@@ -31,6 +33,7 @@ namespace Xv2CoreLib.BSA
     }
 
     [YAXSerializeAs("BSA")]
+    [Serializable]
     public class BSA_File : ISorting, IIsNull
     {
         [YAXAttributeForClass]
@@ -80,6 +83,13 @@ namespace Xv2CoreLib.BSA
             BSA_Entries.Add(entry);
         }
 
+        public int AddEntry(BSA_Entry entry)
+        {
+            entry.SortID = GetFreeId();
+            BSA_Entries.Add(entry);
+            return entry.SortID;
+        }
+
         public void SaveBinary(string path)
         {
             if (!Directory.Exists(Path.GetDirectoryName(path)))
@@ -93,18 +103,56 @@ namespace Xv2CoreLib.BSA
         {
             return (BSA_Entries.Count == 0);
         }
+
+        private int GetFreeId()
+        {
+            int id = 0;
+            while (BSA_Entries.Any(c => c.SortID == id) && id < int.MaxValue)
+                id++;
+            return id;
+        }
+
+        #region IBsaTypesMethods
+        public void InitializeIBsaTypes()
+        {
+            foreach (var bsaEntry in BSA_Entries)
+            {
+                bsaEntry.InitializeIBsaTypes();
+            }
+        }
+
+        public void SaveIBsaTypes()
+        {
+            foreach (var bsaEntry in BSA_Entries)
+            {
+                bsaEntry.SaveIBsaTypes();
+            }
+        }
+        #endregion
     }
 
     [YAXSerializeAs("BSA_Entry")]
+    [Serializable]
     public class BSA_Entry : IInstallable
     {
+        #region WrapperProps
         [YAXDontSerialize]
         public int SortID { get { return int.Parse(Index); } set { Index = value.ToString(); } }
+
+        [YAXDontSerialize]
+        public ushort Expires { get { return (I_26 == "-1") ? ushort.MaxValue : ushort.Parse(I_26); } set { I_26 = value.ToString(); } }
+        [YAXDontSerialize]
+        public ushort ImpactProjectile { get { return (I_28 == "-1") ? ushort.MaxValue : ushort.Parse(I_28); } set { I_28 = value.ToString(); } }
+        [YAXDontSerialize]
+        public ushort ImpactEnemy { get { return (I_30 == "-1") ? ushort.MaxValue : ushort.Parse(I_30); } set { I_30 = value.ToString(); } }
+        [YAXDontSerialize]
+        public ushort ImpactGround { get { return (I_32 == "-1") ? ushort.MaxValue : ushort.Parse(I_32); } set { I_32 = value.ToString(); } }
+        #endregion
 
         [YAXAttributeForClass]
         [YAXSerializeAs("ID")]
         [BindingAutoId]
-        public string Index { get; set; } //int32
+        public string Index { get; set; } = "0"; //int32
 
         [YAXAttributeFor("I_00")]
         [YAXSerializeAs("value")]
@@ -129,25 +177,25 @@ namespace Xv2CoreLib.BSA
         public ushort I_24 { get; set; }
         [YAXAttributeFor("EntryPassOn_When")]
         [YAXSerializeAs("Expires")]
-        public string I_26 { get; set; } //short
+        public string I_26 { get; set; } = "-1"; //short
         [YAXAttributeFor("EntryPassOn_When")]
         [YAXSerializeAs("ImpactProjectile")]
-        public string I_28 { get; set; } //short
+        public string I_28 { get; set; } = "-1";//short
         [YAXAttributeFor("EntryPassOn_When")]
         [YAXSerializeAs("ImpactEnemy")]
-        public string I_30 { get; set; } //short
+        public string I_30 { get; set; } = "-1"; //short
         [YAXAttributeFor("EntryPassOn_When")]
         [YAXSerializeAs("ImpactGround")]
-        public string I_32 { get; set; } //short
+        public string I_32 { get; set; } = "-1"; //short
         [YAXAttributeFor("I_40")]
         [YAXSerializeAs("values")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public int[] I_40 { get; set; } // size 3
+        public int[] I_40 { get; set; } = new int[3]; // size 3
 
         [YAXDontSerializeIfNull]
         [YAXSerializeAs("AfterEffects")]
         [BindingSubList]
-        public BSA_SubEntries SubEntries { get; set; }
+        public BSA_SubEntries SubEntries { get; set; } = new BSA_SubEntries();
 
         //Types
         [YAXDontSerializeIfNull]
@@ -183,42 +231,143 @@ namespace Xv2CoreLib.BSA
         [BindingSubList]
         public List<BSA_Type8> Type8 { get; set; }
 
+        #region IBsaTypes
+        [YAXDontSerialize]
+        public ObservableCollection<IBsaType> IBsaTypes { get; set; }
 
-        //Properties
-        [YAXDontSerialize]
-        public ushort Expires { get { return (I_26 == "-1") ? ushort.MaxValue : ushort.Parse(I_26); } set { I_26 = value.ToString(); } }
-        [YAXDontSerialize]
-        public ushort ImpactProjectile { get { return (I_28 == "-1") ? ushort.MaxValue : ushort.Parse(I_28); } set { I_28 = value.ToString(); } }
-        [YAXDontSerialize]
-        public ushort ImpactEnemy { get { return (I_30 == "-1") ? ushort.MaxValue : ushort.Parse(I_30); } set { I_30 = value.ToString(); } }
-        [YAXDontSerialize]
-        public ushort ImpactGround { get { return (I_32 == "-1") ? ushort.MaxValue : ushort.Parse(I_32); } set { I_32 = value.ToString(); } }
+        public void InitializeIBsaTypes()
+        {
+            InitBsaLists();
+
+            IBsaTypes = new ObservableCollection<IBsaType>();
+
+            foreach (var bsaEntry in Type0)
+                IBsaTypes.Add(bsaEntry);
+            foreach (var bsaEntry in Type1)
+                IBsaTypes.Add(bsaEntry);
+            foreach (var bsaEntry in Type2)
+                IBsaTypes.Add(bsaEntry);
+            foreach (var bsaEntry in Type3)
+                IBsaTypes.Add(bsaEntry);
+            foreach (var bsaEntry in Type4)
+                IBsaTypes.Add(bsaEntry);
+            foreach (var bsaEntry in Type6)
+                IBsaTypes.Add(bsaEntry);
+            foreach (var bsaEntry in Type7)
+                IBsaTypes.Add(bsaEntry);
+            foreach (var bsaEntry in Type8)
+                IBsaTypes.Add(bsaEntry);
+
+        }
+
+        public void SaveIBsaTypes()
+        {
+            ClearBsaLists();
+
+            foreach (var bsaEntry in IBsaTypes)
+            {
+                if (bsaEntry is BSA_Type0 type)
+                {
+                    Type0.Add(type);
+                }
+                else if (bsaEntry is BSA_Type1 type1)
+                {
+                    Type1.Add(type1);
+                }
+                else if (bsaEntry is BSA_Type2 type2)
+                {
+                    Type2.Add(type2);
+                }
+                else if (bsaEntry is BSA_Type3 type3)
+                {
+                    Type3.Add(type3);
+                }
+                else if (bsaEntry is BSA_Type4 type4)
+                {
+                    Type4.Add(type4);
+                }
+                else if (bsaEntry is BSA_Type6 type6)
+                {
+                    Type6.Add(type6);
+                }
+                else if (bsaEntry is BSA_Type7 type7)
+                {
+                    Type7.Add(type7);
+                }
+                else if (bsaEntry is BSA_Type8 type8)
+                {
+                    Type8.Add(type8);
+                }
+            }
+        }
+        
+        private void InitBsaLists()
+        {
+            if (Type0 == null)
+                Type0 = new List<BSA_Type0>();
+            if (Type1 == null)
+                Type1 = new List<BSA_Type1>();
+            if (Type2 == null)
+                Type2 = new List<BSA_Type2>();
+            if (Type3 == null)
+                Type3 = new List<BSA_Type3>();
+            if (Type4 == null)
+                Type4 = new List<BSA_Type4>();
+            if (Type6 == null)
+                Type6 = new List<BSA_Type6>();
+            if (Type7 == null)
+                Type7 = new List<BSA_Type7>();
+            if (Type8 == null)
+                Type8 = new List<BSA_Type8>();
+        }
+
+        private void ClearBsaLists()
+        {
+            InitBsaLists();
+
+            Type0.Clear();
+            Type1.Clear();
+            Type2.Clear();
+            Type3.Clear();
+            Type4.Clear();
+            Type6.Clear();
+            Type7.Clear();
+            Type8.Clear();
+        }
+
+        #endregion
+        
     }
 
     [YAXSerializeAs("AfterEffects")]
+    [Serializable]
     public class BSA_SubEntries
     {
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Collision")]
         [BindingSubList]
-        public List<Unk1> Unk1 { get; set; }
+        public List<BSA_Collision> CollisionEntries { get; set; } = new List<BSA_Collision>();
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Expiration")]
         [BindingSubList]
-        public List<Unk2> Unk2 { get; set; }
+        public List<BSA_Expiration> ExpirationEntries { get; set; } = new List<BSA_Expiration>();
     }
 
     [YAXSerializeAs("Collision")]
     [BindingSubClass]
-    public class Unk1
+    [Serializable]
+    public class BSA_Collision
     {
         [YAXAttributeFor("EEPK")]
         [YAXSerializeAs("Type")]
         public EepkType I_00 { get; set; } //int16
         [YAXAttributeFor("Skill_ID")]
         [YAXSerializeAs("value")]
-        public string I_02 { get; set; } //ushort
+        public string I_02 { get; set; } = "0"; //ushort
         [YAXAttributeFor("Effect_ID")]
         [YAXSerializeAs("value")]
-        public string I_04 { get; set; } //int
+        public string I_04 { get; set; } = "0"; //ushort
+        [YAXAttributeFor("I_06")]
+        [YAXSerializeAs("value")]
+        public ushort I_06 { get; set; }
         [YAXAttributeFor("I_08")]
         [YAXSerializeAs("value")]
         public int I_08 { get; set; }
@@ -232,13 +381,15 @@ namespace Xv2CoreLib.BSA
         [YAXSerializeAs("value")]
         public int I_20 { get; set; }
 
-        //Propeties
+        //Properties
+        [YAXDontSerialize]
+        public EepkType eepkType { get { return I_00; } set { I_00 = value; } }
         [YAXDontSerialize]
         public ushort SkillID { get { return  ushort.Parse(I_02); } set { I_02 = value.ToString(); } }
         [YAXDontSerialize]
-        public int EffectID { get { return int.Parse(I_04); } set { I_04 = value.ToString(); } }
+        public ushort EffectID { get { return ushort.Parse(I_04); } set { I_04 = value.ToString(); } }
 
-        public static List<Unk1> ChangeSkillId(List<Unk1> types, int skillID)
+        public static List<BSA_Collision> ChangeSkillId(List<BSA_Collision> types, int skillID)
         {
             if (types == null) return null;
 
@@ -262,7 +413,8 @@ namespace Xv2CoreLib.BSA
     }
 
     [YAXSerializeAs("Expiration")]
-    public class Unk2
+    [Serializable]
+    public class BSA_Expiration
     {
         [YAXAttributeFor("I_00")]
         [YAXSerializeAs("value")]
@@ -281,23 +433,25 @@ namespace Xv2CoreLib.BSA
     //Types
     [YAXSerializeAs("BsaEntryPassing")]
     [BindingSubClass]
-    public class BSA_Type0
+    [Serializable]
+    public class BSA_Type0 : IBsaType
     {
         [YAXAttributeFor("Start_Time")]
         [YAXSerializeAs("frames")]
-        public short StartTime { get; set; }
+        public ushort StartTime { get; set; }
         [YAXAttributeFor("Duration")]
         [YAXSerializeAs("frames")]
-        public short Duration { get; set; }
+        public ushort Duration { get; set; }
         [YAXAttributeFor("I_00")]
         [YAXSerializeAs("value")]
         public short I_00 { get; set; }
         [YAXAttributeFor("Main_Condition")]
         [YAXSerializeAs("value")]
-        public string I_02 { get; set; }
+        [YAXHexValue]
+        public ushort I_02 { get; set; }
         [YAXAttributeFor("BSA_Entry")]
         [YAXSerializeAs("ID")]
-        public string I_04 { get; set; } //ushort
+        public string I_04 { get; set; } = "0"; //ushort
         [YAXAttributeFor("I_06")]
         [YAXSerializeAs("value")]
         public short I_06 { get; set; }
@@ -317,17 +471,19 @@ namespace Xv2CoreLib.BSA
     }
 
     [YAXSerializeAs("Movement")]
-    public class BSA_Type1
+    [Serializable]
+    public class BSA_Type1 : IBsaType
     {
         [YAXAttributeFor("Start_Time")]
         [YAXSerializeAs("frames")]
-        public short StartTime { get; set; }
+        public ushort StartTime { get; set; }
         [YAXAttributeFor("Duration")]
         [YAXSerializeAs("frames")]
-        public short Duration { get; set; }
+        public ushort Duration { get; set; }
         [YAXAttributeFor("Motion_Flags")]
         [YAXSerializeAs("value")]
-        public string I_00 { get; set; }
+        [YAXHexValue]
+        public int I_00 { get; set; }
         [YAXAttributeFor("Speed")]
         [YAXSerializeAs("X")]
         [YAXFormat("0.0#######")]
@@ -375,14 +531,15 @@ namespace Xv2CoreLib.BSA
     }
 
     [YAXSerializeAs("BSA_Type2")]
-    public class BSA_Type2
+    [Serializable]
+    public class BSA_Type2 : IBsaType
     {
         [YAXAttributeFor("Start_Time")]
         [YAXSerializeAs("frames")]
-        public short StartTime { get; set; }
+        public ushort StartTime { get; set; }
         [YAXAttributeFor("Duration")]
         [YAXSerializeAs("frames")]
-        public short Duration { get; set; }
+        public ushort Duration { get; set; }
         [YAXAttributeFor("I_00")]
         [YAXSerializeAs("value")]
         public short I_00 { get; set; }
@@ -399,14 +556,15 @@ namespace Xv2CoreLib.BSA
 
     [YAXSerializeAs("Hitbox")]
     [BindingSubClass]
-    public class BSA_Type3
+    [Serializable]
+    public class BSA_Type3 : IBsaType
     {
         [YAXAttributeFor("Start_Time")]
         [YAXSerializeAs("frames")]
-        public short StartTime { get; set; }
+        public ushort StartTime { get; set; }
         [YAXAttributeFor("Duration")]
         [YAXSerializeAs("frames")]
-        public short Duration { get; set; }
+        public ushort Duration { get; set; }
         [YAXAttributeFor("I_00")]
         [YAXSerializeAs("value")]
         public UInt16 I_00 { get; set; }
@@ -485,32 +643,33 @@ namespace Xv2CoreLib.BSA
         public UInt16 I_56 { get; set; }
         [YAXAttributeFor("BDM_ID")]
         [YAXSerializeAs("FirstHit")]
-        public string I_58 { get; set; } //short
+        public string I_58 { get; set; } = "0"; //ushort
         [YAXAttributeFor("BDM_ID")]
         [YAXSerializeAs("MultipleHits")]
-        public string I_60 { get; set; } //short
+        public string I_60 { get; set; } = "0"; //ushort
         [YAXAttributeFor("BDM_ID")]
         [YAXSerializeAs("LastHit")]
-        public string I_62 { get; set; } //short
+        public string I_62 { get; set; } = "0"; //ushort
 
         //Props
         [YAXDontSerialize]
-        public short FirstHit { get { return short.Parse(I_58); } set { I_58 = value.ToString(); } }
+        public ushort FirstHit { get { return (I_58 == "-1") ? ushort.MaxValue : ushort.Parse(I_58); } set { I_58 = value.ToString(); } }
         [YAXDontSerialize]
-        public short MultipleHits { get { return short.Parse(I_60); } set { I_60 = value.ToString(); } }
+        public ushort MultipleHits { get { return (I_60 == "-1") ? ushort.MaxValue : ushort.Parse(I_60); } set { I_60 = value.ToString(); } }
         [YAXDontSerialize]
-        public short LastHit { get { return short.Parse(I_62); } set { I_62 = value.ToString(); } }
+        public ushort LastHit { get { return (I_62 == "-1") ? ushort.MaxValue : ushort.Parse(I_62); } set { I_62 = value.ToString(); } }
     }
 
     [YAXSerializeAs("Deflection")]
-    public class BSA_Type4
+    [Serializable]
+    public class BSA_Type4 : IBsaType
     {
         [YAXAttributeFor("Start_Time")]
         [YAXSerializeAs("frames")]
-        public short StartTime { get; set; }
+        public ushort StartTime { get; set; }
         [YAXAttributeFor("Duration")]
         [YAXSerializeAs("frames")]
-        public short Duration { get; set; }
+        public ushort Duration { get; set; }
         [YAXAttributeFor("I_00")]
         [YAXSerializeAs("value")]
         public int I_00 { get; set; }
@@ -568,20 +727,21 @@ namespace Xv2CoreLib.BSA
 
     [YAXSerializeAs("Effect")]
     [BindingSubClass]
-    public class BSA_Type6
+    [Serializable]
+    public class BSA_Type6 : IBsaType
     {
         [YAXAttributeFor("Start_Time")]
         [YAXSerializeAs("frames")]
-        public short StartTime { get; set; }
+        public ushort StartTime { get; set; }
         [YAXAttributeFor("Duration")]
         [YAXSerializeAs("frames")]
-        public short Duration { get; set; }
+        public ushort Duration { get; set; }
         [YAXAttributeFor("EEPK")]
         [YAXSerializeAs("Type")]
         public EepkType I_00 { get; set; } //Int16
         [YAXAttributeFor("Skill ID")]
         [YAXSerializeAs("value")]
-        public string I_02 { get; set; } //ushort
+        public string I_02 { get; set; } = "0"; //ushort
         [YAXAttributeFor("Effect")]
         [YAXSerializeAs("ID")]
         public UInt16 I_04 { get; set; }
@@ -610,6 +770,10 @@ namespace Xv2CoreLib.BSA
         //Props
         [YAXDontSerialize]
         public ushort SkillID { get { return ushort.Parse(I_02); } set { I_02 = value.ToString(); } }
+        [YAXDontSerialize]
+        public ushort EffectID { get { return ushort.Parse(I_02); } set { I_02 = value.ToString(); } }
+        [YAXDontSerialize]
+        public EepkType eepkType { get { return I_00; } set { I_00 = value; } }
 
         public bool IsSkillEepk()
         {
@@ -649,46 +813,53 @@ namespace Xv2CoreLib.BSA
     }
 
     [YAXSerializeAs("Sound")]
-    public class BSA_Type7
+    [Serializable]
+    public class BSA_Type7 : IBsaType
     {
         [YAXAttributeFor("Start_Time")]
         [YAXSerializeAs("frames")]
-        public short StartTime { get; set; }
+        public ushort StartTime { get; set; }
         [YAXAttributeFor("Duration")]
         [YAXSerializeAs("frames")]
-        public short Duration { get; set; }
+        public ushort Duration { get; set; }
         [YAXAttributeFor("ACB_File")]
         [YAXSerializeAs("value")]
         public AcbType I_00 { get; set; } //int16
         [YAXAttributeFor("I_02")]
         [YAXSerializeAs("value")]
-        public UInt16 I_02 { get; set; }
+        public ushort I_02 { get; set; }
         [YAXAttributeFor("Cue ID")]
         [YAXSerializeAs("value")]
-        public short I_04 { get; set; }
+        public ushort I_04 { get; set; }
         [YAXAttributeFor("I_06")]
         [YAXSerializeAs("value")]
-        public UInt16 I_06 { get; set; }
+        public ushort I_06 { get; set; }
         
-        
+        //Props
+        [YAXDontSerialize]
+        public AcbType acbType { get { return I_00; } set { I_00 = value; } }
+        [YAXDontSerialize]
+        public ushort CueId { get { return I_04; } set { I_04 = value; } }
+
 
     }
 
     [YAXSerializeAs("BSA_Type8")]
-    public class BSA_Type8
+    [Serializable]
+    public class BSA_Type8 : IBsaType
     {
         [YAXAttributeFor("Start_Time")]
         [YAXSerializeAs("frames")]
-        public short StartTime { get; set; }
+        public ushort StartTime { get; set; }
         [YAXAttributeFor("Duration")]
         [YAXSerializeAs("frames")]
-        public short Duration { get; set; }
+        public ushort Duration { get; set; }
         [YAXAttributeFor("I_00")]
         [YAXSerializeAs("value")]
-        public UInt16 I_00 { get; set; }
+        public ushort I_00 { get; set; }
         [YAXAttributeFor("I_02")]
         [YAXSerializeAs("value")]
-        public UInt16 I_02 { get; set; }
+        public ushort I_02 { get; set; }
         [YAXAttributeFor("I_04")]
         [YAXSerializeAs("value")]
         public int I_04 { get; set; }
@@ -706,4 +877,9 @@ namespace Xv2CoreLib.BSA
         public int I_20 { get; set; }
     }
 
+    public interface IBsaType
+    {
+        ushort StartTime { get; set; }
+        ushort Duration { get; set; }
+    }
 }

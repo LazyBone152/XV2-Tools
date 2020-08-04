@@ -37,6 +37,10 @@ using Xv2CoreLib.TSD;
 using Xv2CoreLib.TNL;
 using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.QXD;
+using Xv2CoreLib.OBL;
+using Xv2CoreLib.ACB_NEW;
+using Xv2CoreLib.PAL;
+using LB_Mod_Installer.Installer.Music;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -70,19 +74,18 @@ namespace LB_Mod_Installer.Installer
 
     public class Install_NEW
     {
-        private const string CUS_PATH = "system/custom_skill.cus";
-        private const string CMS_PATH = "system/char_model_spec.cms";
         private const string JUNGLE1 = "JUNGLE1";
         private const string JUNGLE2 = "JUNGLE2";
+        private const string JUNGLE3 = "JUNGLE3";
 
-        private List<FilePath> Files;
-        private InstallerXml installerXml;
-        private ZipReader zipManager;
-        private MainWindow Parent;
-        private Xv2FileIO FileIO;
-        private FileCacheManager fileManager;
-        private MsgComponentInstall msgComponentInstall;
-        private IdBindingManager bindingManager;
+        internal List<FilePath> Files;
+        internal InstallerXml installerXml;
+        internal ZipReader zipManager;
+        internal MainWindow Parent;
+        internal Xv2FileIO FileIO;
+        internal FileCacheManager fileManager;
+        internal MsgComponentInstall msgComponentInstall;
+        internal IdBindingManager bindingManager;
 
         List<string> lightEmaFixed = new List<string>(); //Keep track of all files that have been fixed so we dont waste time on them
 
@@ -102,7 +105,7 @@ namespace LB_Mod_Installer.Installer
             msgComponentInstall = new MsgComponentInstall(this);
             fileManager = _fileManager;
 
-            bindingManager = new IdBindingManager((CUS_File)GetParsedFile<CUS_File>(CUS_PATH), (CMS_File)GetParsedFile<CMS_File>(CMS_PATH));
+            bindingManager = new IdBindingManager(this);
         }
 
         public void Start()
@@ -183,7 +186,15 @@ namespace LB_Mod_Installer.Installer
             //Files. 
             foreach (var File in Files)
             {
+                //Is directory
+                if (File.SourcePath.EndsWith("/") || File.SourcePath.EndsWith(@"\"))
+                {
+                    UpdateProgessBarText($"_Copying {File.SourcePath}...");
+                    ProcessJungle($"{JUNGLE3}/{File.SourcePath}", true, File.InstallPath, true);
+                    continue;
+                }
 
+                //Is file
                 switch (Path.GetExtension(File.SourcePath))
                 {
                     case ".xml":
@@ -195,6 +206,11 @@ namespace LB_Mod_Installer.Installer
                         //Install effects
                         UpdateProgessBarText(String.Format("_Installing \"{0}\"...", Path.GetFileName(File.InstallPath)));
                         Install_EEPK(File.SourcePath, File.InstallPath);
+                        break;
+                    case ACB_File.MUSIC_PACKAGE_EXTENSION:
+                        //Install new BGM tracks
+                        UpdateProgessBarText("_Installing Music...");
+                        Install_BGM_ACB(File.SourcePath);
                         break;
                     default:
                         //Binary file. Copy to dir.
@@ -297,6 +313,9 @@ namespace LB_Mod_Installer.Installer
                 case ".qxd":
                     Install_QXD(xmlPath, installPath);
                     break;
+                case ".pal":
+                    Install_PAL(xmlPath, installPath);
+                    break;
                 default:
                     throw new InvalidDataException(string.Format("The filetype of \"{0}\" is not supported.", xmlPath));
             }
@@ -311,7 +330,7 @@ namespace LB_Mod_Installer.Installer
                 useJungle2 = true;
         }
 
-        private void ProcessJungle(string jungleDir, bool allowOverwrite)
+        private void ProcessJungle(string jungleDir, bool allowOverwrite, string gameDirPath = null, bool isDirCopy = false)
         {
             foreach(var file in zipManager.archive.Entries)
             {
@@ -319,11 +338,13 @@ namespace LB_Mod_Installer.Installer
                 {
                     if(file.FullName.Length > jungleDir.Length + 1)
                     {
-                        string filePath = file.FullName.Remove(0, jungleDir.Length + 1);
+                        //string filePath = file.FullName.Remove(0, jungleDir.Length + 1);
+                        string filePath = Utils.PathRemoveRoot(file.FullName);
+                        if(isDirCopy) filePath = Utils.PathRemoveRoot(filePath);
 
                         if (!IsJungleFileBlacklisted(filePath))
                         {
-                            fileManager.AddStreamFile(filePath, file, allowOverwrite);
+                            fileManager.AddStreamFile((string.IsNullOrWhiteSpace(gameDirPath)) ? filePath : $"{gameDirPath}/{filePath}", file, allowOverwrite);
                         }
                     }
                 }
@@ -646,10 +667,10 @@ namespace LB_Mod_Installer.Installer
                 EepkToolInterlop.AssetReuseMatchName = true;
 
                 //Use LightEmaFix if needed
-                if (GeneralInfo.UseLightEmaFix)
-                {
-                    Patch_EepkEmaFix(installPath);
-                }
+                //if (GeneralInfo.UseLightEmaFix)
+                //{
+                //    Patch_EepkEmaFix(installPath);
+                //}
 
                 //Load files
                 EffectContainerFile installFile;
@@ -710,6 +731,23 @@ namespace LB_Mod_Installer.Installer
             catch (Exception ex)
             {
                 string error = string.Format("Failed at {0} install phase ({1}).", ErrorCode.EMB, xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
+        private void Install_BGM_ACB(string xmlPath)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                new MusicInstaller(this, xmlPath);
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at ACB install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
@@ -1112,6 +1150,30 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
+        private void Install_PAL(string xmlPath, string installPath)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                PAL_File xmlFile = zipManager.DeserializeXmlFromArchive<PAL_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                PAL_File binaryFile = (PAL_File)GetParsedFile<PAL_File>(installPath);
+
+                //Parse bindings
+                bindingManager.ParseProperties(xmlFile.PalEntries, binaryFile.PalEntries, installPath, Sections.PAL_Entry);
+
+                //Install entries
+                InstallEntries(xmlFile.PalEntries, binaryFile.PalEntries, installPath, Sections.PAL_Entry);
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at PAL install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
 
         //Generic Install Methods
         //We need generic methods for IInstallable via List and ObservableCollection. Most file types will be handled with this.
@@ -1368,6 +1430,12 @@ namespace LB_Mod_Installer.Installer
                     return QXD_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".eepk":
                     return EffectContainerFile.Load(path, fileIO, onlyFromCpk);
+                case ".obl":
+                    return OBL_File.Parse(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".pal":
+                    return PAL_File.Parse(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".acb":
+                    return ACB_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk), fileIO.GetFileFromGame(string.Format("{0}/{1}.awb", Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path)), false, onlyFromCpk));
                 default:
                     throw new InvalidDataException(String.Format("GetParsedFileFromGame: The filetype of \"{0}\" is not supported.", path));
             }
@@ -1421,6 +1489,10 @@ namespace LB_Mod_Installer.Installer
                     return ((EMB_File)data).SaveToBytes();
                 case ".qxd":
                     return ((QXD_File)data).SaveToBytes();
+                case ".obl":
+                    return ((OBL_File)data).SaveToBytes();
+                case ".pal":
+                    return ((PAL_File)data).SaveToBytes();
                 default:
                     throw new InvalidDataException(String.Format("GetBytesFromParsedFile: The filetype of \"{0}\" is not supported.", path));
             }

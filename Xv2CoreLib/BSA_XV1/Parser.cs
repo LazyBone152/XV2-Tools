@@ -139,20 +139,21 @@ namespace Xv2CoreLib.BSA_XV1
 
         }
         
-        private List<BSA.Unk1> ParseUnk1(int offset, int count)
+        private List<BSA.BSA_Collision> ParseUnk1(int offset, int count)
         {
             if(count > 0)
             {
 
-                List<BSA.Unk1> unk1 = new List<BSA.Unk1>();
+                List<BSA.BSA_Collision> unk1 = new List<BSA.BSA_Collision>();
 
                 for (int i = 0; i < count; i++)
                 {
-                    unk1.Add(new BSA.Unk1()
+                    unk1.Add(new BSA.BSA_Collision()
                     {
                         I_00 = (BSA.EepkType)BitConverter.ToUInt16(rawBytes, offset + 0),
                         SkillID = BitConverter.ToUInt16(rawBytes, offset + 2),
-                        EffectID = BitConverter.ToInt32(rawBytes, offset + 4),
+                        EffectID = BitConverter.ToUInt16(rawBytes, offset + 4),
+                        I_06 = BitConverter.ToUInt16(rawBytes, offset + 6),
                         I_08 = BitConverter.ToInt32(rawBytes, offset + 8),
                         I_12 = BitConverter.ToInt32(rawBytes, offset + 12),
                         I_16 = BitConverter.ToInt32(rawBytes, offset + 16),
@@ -168,16 +169,16 @@ namespace Xv2CoreLib.BSA_XV1
             }
         }
 
-        private List<BSA.Unk2> ParseUnk2(int offset, int count)
+        private List<BSA.BSA_Expiration> ParseUnk2(int offset, int count)
         {
 
             if(count > 0)
             {
-                List<BSA.Unk2> unk2 = new List<BSA.Unk2>();
+                List<BSA.BSA_Expiration> unk2 = new List<BSA.BSA_Expiration>();
 
                 for (int i = 0; i < count; i++)
                 {
-                    unk2.Add(new BSA.Unk2()
+                    unk2.Add(new BSA.BSA_Expiration()
                     {
                         I_00 = BitConverter.ToUInt16(rawBytes, offset + 0),
                         I_02 = BitConverter.ToUInt16(rawBytes, offset + 2),
@@ -209,13 +210,13 @@ namespace Xv2CoreLib.BSA_XV1
                     Type0.Add(new BSA.BSA_Type0()
                     {
                         I_00 = BitConverter.ToInt16(rawBytes, offset + 0),
-                        I_02 = HexConverter.GetHexString(BitConverter.ToInt16(rawBytes, offset + 2)),
+                        I_02 = BitConverter.ToUInt16(rawBytes, offset + 2),
                         BSA_EntryID = BitConverter.ToUInt16(rawBytes, offset + 4),
                         I_06 = BitConverter.ToInt16(rawBytes, offset + 6),
                         F_08 = BitConverter.ToSingle(rawBytes, offset + 8),
                         F_12 = BitConverter.ToSingle(rawBytes, offset + 12),
-                        StartTime = BitConverter.ToInt16(rawBytes, hdrOffset + 0),
-                        Duration = GetTypeDuration(BitConverter.ToInt16(rawBytes, hdrOffset + 0), BitConverter.ToInt16(rawBytes, hdrOffset + 2)),
+                        StartTime = BitConverter.ToUInt16(rawBytes, hdrOffset + 0),
+                        Duration = GetTypeDuration(BitConverter.ToUInt16(rawBytes, hdrOffset + 0), BitConverter.ToUInt16(rawBytes, hdrOffset + 2)),
                     });
                     hdrOffset += 4;
                     offset += 16;
@@ -239,7 +240,7 @@ namespace Xv2CoreLib.BSA_XV1
                 {
                     Type.Add(new BSA_Type1()
                     {
-                        I_00 = HexConverter.GetHexString(BitConverter.ToInt32(rawBytes, offset + 0)),
+                        I_00 = BitConverter.ToInt32(rawBytes, offset + 0),
                         F_04 = BitConverter.ToSingle(rawBytes, offset + 4),
                         F_08 = BitConverter.ToSingle(rawBytes, offset + 8),
                         F_12 = BitConverter.ToSingle(rawBytes, offset + 12),
@@ -247,8 +248,8 @@ namespace Xv2CoreLib.BSA_XV1
                         F_20 = BitConverter.ToSingle(rawBytes, offset + 20),
                         F_24 = BitConverter.ToSingle(rawBytes, offset + 24),
                         F_28 = BitConverter.ToSingle(rawBytes, offset + 28),
-                        StartTime = BitConverter.ToInt16(rawBytes, hdrOffset + 0),
-                        Duration = GetTypeDuration(BitConverter.ToInt16(rawBytes, hdrOffset + 0), BitConverter.ToInt16(rawBytes, hdrOffset + 2)),
+                        StartTime = BitConverter.ToUInt16(rawBytes, hdrOffset + 0),
+                        Duration = GetTypeDuration(BitConverter.ToUInt16(rawBytes, hdrOffset + 0), BitConverter.ToUInt16(rawBytes, hdrOffset + 2)),
                     });
                     hdrOffset += 4;
                     offset += 32;
@@ -277,8 +278,8 @@ namespace Xv2CoreLib.BSA_XV1
                         I_02 = BitConverter.ToInt16(rawBytes, offset + 2),
                         I_04 = BitConverter.ToInt16(rawBytes, offset + 4),
                         I_06 = BitConverter.ToInt16(rawBytes, offset + 6),
-                        StartTime = BitConverter.ToInt16(rawBytes, hdrOffset + 0),
-                        Duration = GetTypeDuration(BitConverter.ToInt16(rawBytes, hdrOffset + 0), BitConverter.ToInt16(rawBytes, hdrOffset + 2)),
+                        StartTime = BitConverter.ToUInt16(rawBytes, hdrOffset + 0),
+                        Duration = GetTypeDuration(BitConverter.ToUInt16(rawBytes, hdrOffset + 0), BitConverter.ToUInt16(rawBytes, hdrOffset + 2)),
                     });
                     hdrOffset += 4;
                     offset += 8;
@@ -325,11 +326,11 @@ namespace Xv2CoreLib.BSA_XV1
                         I_52 = BitConverter.ToUInt16(rawBytes, offset + 52),
                         I_54 = BitConverter.ToUInt16(rawBytes, offset + 54),
                         I_56 = BitConverter.ToUInt16(rawBytes, offset + 56),
-                        FirstHit = BitConverter.ToInt16(rawBytes, offset + 58),
-                        MultipleHits = BitConverter.ToInt16(rawBytes, offset + 60),
-                        LastHit = BitConverter.ToInt16(rawBytes, offset + 62),
-                        StartTime = BitConverter.ToInt16(rawBytes, hdrOffset + 0),
-                        Duration = GetTypeDuration(BitConverter.ToInt16(rawBytes, hdrOffset + 0), BitConverter.ToInt16(rawBytes, hdrOffset + 2)),
+                        FirstHit = BitConverter.ToUInt16(rawBytes, offset + 58),
+                        MultipleHits = BitConverter.ToUInt16(rawBytes, offset + 60),
+                        LastHit = BitConverter.ToUInt16(rawBytes, offset + 62),
+                        StartTime = BitConverter.ToUInt16(rawBytes, hdrOffset + 0),
+                        Duration = GetTypeDuration(BitConverter.ToUInt16(rawBytes, hdrOffset + 0), BitConverter.ToUInt16(rawBytes, hdrOffset + 2)),
                     });
                     hdrOffset += 4;
                     offset += 64;
@@ -370,8 +371,8 @@ namespace Xv2CoreLib.BSA_XV1
                         I_50 = BitConverter.ToUInt16(rawBytes, offset + 50),
                         I_52 = BitConverter.ToUInt16(rawBytes, offset + 52),
                         I_54 = BitConverter.ToUInt16(rawBytes, offset + 54),
-                        StartTime = BitConverter.ToInt16(rawBytes, hdrOffset + 0),
-                        Duration = GetTypeDuration(BitConverter.ToInt16(rawBytes, hdrOffset + 0), BitConverter.ToInt16(rawBytes, hdrOffset + 2)),
+                        StartTime = BitConverter.ToUInt16(rawBytes, hdrOffset + 0),
+                        Duration = GetTypeDuration(BitConverter.ToUInt16(rawBytes, hdrOffset + 0), BitConverter.ToUInt16(rawBytes, hdrOffset + 2)),
                     });
                     hdrOffset += 4;
                     offset += 56;
@@ -405,8 +406,8 @@ namespace Xv2CoreLib.BSA_XV1
                         F_12 = BitConverter.ToSingle(rawBytes, offset + 12),
                         F_16 = BitConverter.ToSingle(rawBytes, offset + 16),
                         F_20 = BitConverter.ToSingle(rawBytes, offset + 20),
-                        StartTime = BitConverter.ToInt16(rawBytes, hdrOffset + 0),
-                        Duration = GetTypeDuration(BitConverter.ToInt16(rawBytes, hdrOffset + 0), BitConverter.ToInt16(rawBytes, hdrOffset + 2)),
+                        StartTime = BitConverter.ToUInt16(rawBytes, hdrOffset + 0),
+                        Duration = GetTypeDuration(BitConverter.ToUInt16(rawBytes, hdrOffset + 0), BitConverter.ToUInt16(rawBytes, hdrOffset + 2)),
                     });
                     hdrOffset += 4;
                     offset += 24;
@@ -433,10 +434,10 @@ namespace Xv2CoreLib.BSA_XV1
                     {
                         I_00 = (BSA.AcbType)BitConverter.ToUInt16(rawBytes, offset + 0),
                         I_02 = BitConverter.ToUInt16(rawBytes, offset + 2),
-                        I_04 = BitConverter.ToInt16(rawBytes, offset + 4),
+                        I_04 = BitConverter.ToUInt16(rawBytes, offset + 4),
                         I_06 = BitConverter.ToUInt16(rawBytes, offset + 6),
-                        StartTime = BitConverter.ToInt16(rawBytes, hdrOffset + 0),
-                        Duration = GetTypeDuration(BitConverter.ToInt16(rawBytes, hdrOffset + 0), BitConverter.ToInt16(rawBytes, hdrOffset + 2)),
+                        StartTime = BitConverter.ToUInt16(rawBytes, hdrOffset + 0),
+                        Duration = GetTypeDuration(BitConverter.ToUInt16(rawBytes, hdrOffset + 0), BitConverter.ToUInt16(rawBytes, hdrOffset + 2)),
                     });
                     hdrOffset += 4;
                     offset += 8;
@@ -468,8 +469,8 @@ namespace Xv2CoreLib.BSA_XV1
                         I_12 = BitConverter.ToInt32(rawBytes, offset + 12),
                         I_16 = BitConverter.ToInt32(rawBytes, offset + 16),
                         I_20 = BitConverter.ToInt32(rawBytes, offset + 20),
-                        StartTime = BitConverter.ToInt16(rawBytes, hdrOffset + 0),
-                        Duration = GetTypeDuration(BitConverter.ToInt16(rawBytes, hdrOffset + 0), BitConverter.ToInt16(rawBytes, hdrOffset + 2)),
+                        StartTime = BitConverter.ToUInt16(rawBytes, hdrOffset + 0),
+                        Duration = GetTypeDuration(BitConverter.ToUInt16(rawBytes, hdrOffset + 0), BitConverter.ToUInt16(rawBytes, hdrOffset + 2)),
                     });
                     hdrOffset += 4;
                     offset += 24;
@@ -485,10 +486,10 @@ namespace Xv2CoreLib.BSA_XV1
         }
 
         //Utility
-        private short GetTypeDuration(int startTime, int endTime)
+        private ushort GetTypeDuration(ushort startTime, ushort endTime)
         {
             int duration = endTime - startTime;
-            return (short)duration;
+            return (ushort)duration;
         }
 
     }
