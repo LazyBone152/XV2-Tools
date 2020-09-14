@@ -188,7 +188,7 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="YAXLib, Version=2.15.0.0, Culture=neutral, PublicKeyToken=15c43682c986900f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\XV2 Tools\DLLs\YAXLib.dll</HintPath>
+      <HintPath>..\DLLs\YAXLib.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

@@ -58,6 +58,7 @@
 
 bin
 obj
+!packages
 
 LB Mod Installer/obj/Release/
 LB Mod Installer/obj/Debug/
@@ -76,7 +77,6 @@ XV2 Xml Serializer/bin/Release/
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
-[Bb]uild/
 [Bb]uilds/
 Assets/AssetStoreTools*
 
