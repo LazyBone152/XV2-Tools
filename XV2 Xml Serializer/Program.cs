@@ -17,8 +17,8 @@ namespace XV2_Xml_Serializer
         static void Main(string[] args)
         {
             //for debugging only
-            args = new string[1] { @"E:\VS_Test\BAC\ALL BAC" };
-            
+            //args = new string[1] { @"HUM - Copy.bcs.xml" };
+
 #if DEBUG
             DEBUG_MODE = true;
 #endif
@@ -257,6 +257,24 @@ namespace XV2_Xml_Serializer
                                 case ".pal":
                                     Xv2CoreLib.PAL.PAL_File.Parse(fileLocation, true);
                                     break;
+                                case ".sev":
+                                    Xv2CoreLib.SEV.SEV_File.Parse(fileLocation, true);
+                                    break;
+                                case ".ttc":
+                                    Xv2CoreLib.TTC.TTC_File.Parse(fileLocation, true);
+                                    break;
+                                case ".ttb":
+                                    Xv2CoreLib.TTB.TTB_File.Parse(fileLocation, true);
+                                    break;
+                                case ".hci":
+                                    Xv2CoreLib.HCI.HCI_File.Parse(fileLocation, true);
+                                    break;
+                                case ".cml":
+                                    Xv2CoreLib.CML.CML_File.Parse(fileLocation, true);
+                                    break;
+                                case ".tnn":
+                                    Xv2CoreLib.TNN.TNN_File.Parse(fileLocation, true);
+                                    break;
                                 case ".xml":
                                     LoadXmlInitial(fileLocation);
                                     break;
@@ -492,6 +510,21 @@ namespace XV2_Xml_Serializer
                         break;
                     case ".pal":
                         Xv2CoreLib.PAL.PAL_File.Write(fileLocation);
+                        break;
+                    case ".sev":
+                        Xv2CoreLib.SEV.SEV_File.Write(fileLocation);
+                        break;
+                    case ".ttc":
+                        Xv2CoreLib.TTC.TTC_File.Write(fileLocation);
+                        break;
+                    case ".ttb":
+                        Xv2CoreLib.TTB.TTB_File.Write(fileLocation);
+                        break;
+                    case ".hci":
+                        Xv2CoreLib.HCI.HCI_File.Write(fileLocation);
+                        break;
+                    case ".cml":
+                        Xv2CoreLib.CML.CML_File.Write(fileLocation);
                         break;
                     default:
                         FileTypeNotSupported(fileLocation);

@@ -355,6 +355,10 @@ namespace Xv2CoreLib.BAC
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BAC_Type26")]
         public List<BAC_Type26> Type26 { get; set; }
         [YAXDontSerializeIfNull]
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BAC_Type27")]
+        public List<BAC_Type27> Type27 { get; set; }
+
+        [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
         [YAXSerializeAs("Types")]
         [YAXAttributeFor("HasDummy")]
@@ -449,6 +453,9 @@ namespace Xv2CoreLib.BAC
                 IBacTypes.Add(bacEntry);
 
             foreach (var bacEntry in Type26)
+                IBacTypes.Add(bacEntry);
+
+            foreach (var bacEntry in Type27)
                 IBacTypes.Add(bacEntry);
         }
 
@@ -566,6 +573,10 @@ namespace Xv2CoreLib.BAC
                 {
                     Type26.Add(type26);
                 }
+                else if (bacEntry is BAC_Type27 type27)
+                {
+                    Type27.Add(type27);
+                }
             }
         }
 
@@ -625,6 +636,8 @@ namespace Xv2CoreLib.BAC
                 Type25 = new List<BAC_Type25>();
             if (Type26 == null)
                 Type26 = new List<BAC_Type26>();
+            if (Type26 == null)
+                Type27 = new List<BAC_Type27>();
         }
 
         private void ClearBacLists()
@@ -658,6 +671,7 @@ namespace Xv2CoreLib.BAC
             Type24.Clear();
             Type25.Clear();
             Type26.Clear();
+            Type27.Clear();
         }
 
         #if UndoRedo
@@ -753,6 +767,9 @@ namespace Xv2CoreLib.BAC
                 case 26:
                     iBacType = new BAC_Type26();
                     break;
+                case 27:
+                    iBacType = new BAC_Type27();
+                    break;
                 default:
                     throw new InvalidOperationException($"UndoableAddIBacType: Invalid bacType {bacType}!");
             }
@@ -785,7 +802,7 @@ namespace Xv2CoreLib.BAC
             if (Type0 != null || Type1 != null || Type2 != null || Type3 != null || Type4 != null || Type5 != null || Type6 != null ||
                 Type7 != null || Type8 != null || Type9 != null || Type10 != null || Type11 != null || Type12 != null || Type13 != null ||
                 Type14 != null || Type15 != null || Type16 != null || Type17 != null || Type18 != null || Type19 != null || Type20 != null ||
-                Type21 != null || Type22 != null || Type23 != null || Type24 != null || Type25 != null)
+                Type21 != null || Type22 != null || Type23 != null || Type24 != null || Type25 != null || Type26 != null || Type27 != null)
             {
                 return false;
             }
@@ -830,6 +847,7 @@ namespace Xv2CoreLib.BAC
                 Type8 = Type8,
                 Type9 = Type9,
                 Type26 = Type26,
+                Type27 = Type27,
                 TypeDummy = TypeDummy
             };
         }
@@ -4083,6 +4101,101 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.I_72));
                 bytes.AddRange(BitConverter.GetBytes(type.I_76));
             }
+
+            return bytes;
+        }
+    }
+
+    [YAXSerializeAs("BAC_Type27")]
+    [Serializable]
+    public class BAC_Type27 : BAC_TypeBase
+    {
+        [YAXDontSerialize]
+        public string Type { get { return "BAC_Type27"; } }
+
+
+        [YAXAttributeFor("I_08")]
+        [YAXSerializeAs("value")]
+        [YAXHexValue]
+        public ushort I_08 { get; set; }
+        [YAXAttributeFor("I_10")]
+        [YAXSerializeAs("value")]
+        [YAXHexValue]
+        public ushort I_10 { get; set; }
+        [YAXAttributeFor("I_12")]
+        [YAXSerializeAs("value")]
+        [YAXHexValue]
+        public ushort I_12 { get; set; }
+        [YAXAttributeFor("I_14")]
+        [YAXSerializeAs("value")]
+        [YAXHexValue]
+        public ushort I_14 { get; set; }
+        [YAXAttributeFor("I_16")]
+        [YAXSerializeAs("value")]
+        [YAXHexValue]
+        public ushort I_16 { get; set; }
+        [YAXAttributeFor("I_18")]
+        [YAXSerializeAs("value")]
+        [YAXHexValue]
+        public ushort I_18 { get; set; }
+        [YAXAttributeFor("I_20")]
+        [YAXSerializeAs("value")]
+        [YAXHexValue]
+        public ushort I_20 { get; set; }
+        [YAXAttributeFor("I_22")]
+        [YAXSerializeAs("value")]
+        [YAXHexValue]
+        public ushort I_22 { get; set; }
+
+        public static List<BAC_Type27> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        {
+            List<BAC_Type27> Type26 = new List<BAC_Type27>();
+
+            for (int i = 0; i < count; i++)
+            {
+                Type26.Add(new BAC_Type27()
+                {
+                    StartTime = BitConverter.ToInt16(rawBytes, offset + 0),
+                    Duration = BitConverter.ToInt16(rawBytes, offset + 2),
+                    I_04 = BitConverter.ToInt16(rawBytes, offset + 4),
+                    Flags = BitConverter.ToInt16(rawBytes, offset + 6),
+                    I_08 = BitConverter.ToUInt16(rawBytes, offset + 8),
+                    I_10 = BitConverter.ToUInt16(rawBytes, offset + 10),
+                    I_12 = BitConverter.ToUInt16(rawBytes, offset + 12),
+                    I_14 = BitConverter.ToUInt16(rawBytes, offset + 14),
+                    I_16 = BitConverter.ToUInt16(rawBytes, offset + 16),
+                    I_18 = BitConverter.ToUInt16(rawBytes, offset + 18),
+                    I_20 = BitConverter.ToUInt16(rawBytes, offset + 20),
+                    I_22 = BitConverter.ToUInt16(rawBytes, offset + 22),
+                });
+
+                offset += 24;
+            }
+
+            return Type26;
+        }
+
+        public static List<byte> Write(List<BAC_Type27> types)
+        {
+            List<byte> bytes = new List<byte>();
+
+            foreach (var type in types)
+            {
+                bytes.AddRange(BitConverter.GetBytes(type.StartTime));
+                bytes.AddRange(BitConverter.GetBytes(type.Duration));
+                bytes.AddRange(BitConverter.GetBytes(type.I_04));
+                bytes.AddRange(BitConverter.GetBytes(type.Flags));
+                bytes.AddRange(BitConverter.GetBytes(type.I_08));
+                bytes.AddRange(BitConverter.GetBytes(type.I_10));
+                bytes.AddRange(BitConverter.GetBytes(type.I_12));
+                bytes.AddRange(BitConverter.GetBytes(type.I_14));
+                bytes.AddRange(BitConverter.GetBytes(type.I_16));
+                bytes.AddRange(BitConverter.GetBytes(type.I_18));
+                bytes.AddRange(BitConverter.GetBytes(type.I_20));
+                bytes.AddRange(BitConverter.GetBytes(type.I_22));
+            }
+
+            if (bytes.Count != 24 * types.Count) throw new InvalidDataException("BacType27 invalid size.");
 
             return bytes;
         }

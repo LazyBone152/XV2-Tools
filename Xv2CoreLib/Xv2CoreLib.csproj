@@ -25,7 +25,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <LangVersion>7.1</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -147,6 +147,7 @@
     <Compile Include="BSA_XV1\Deserializer.cs" />
     <Compile Include="BSA_XV1\Parser.cs" />
     <Compile Include="Class1.cs" />
+    <Compile Include="CML\CML_File.cs" />
     <Compile Include="CMS\CMS_File.cs" />
     <Compile Include="CMS\Deserializer.cs" />
     <Compile Include="CMS\Parser.cs" />
@@ -170,7 +171,6 @@
     <Compile Include="EAN\Deserializer.cs" />
     <Compile Include="EAN\EAN_File.cs" />
     <Compile Include="EAN\Parser.cs" />
-    <Compile Include="EAN\SimpleEan.cs" />
     <Compile Include="ECF\Deserializer.cs" />
     <Compile Include="ECF\ECF_File.cs" />
     <Compile Include="ECF\Parser.cs" />
@@ -206,6 +206,7 @@
     <Compile Include="ETR\ETR_File.cs" />
     <Compile Include="FPF\FPF_File.cs" />
     <Compile Include="HCA\HcaMetadata.cs" />
+    <Compile Include="HCI\HCI_File.cs" />
     <Compile Include="IDB\Deserializer.cs" />
     <Compile Include="IDB\IDB_File.cs" />
     <Compile Include="IDB\Parser.cs" />
@@ -279,15 +280,19 @@
     <Compile Include="Resource\ZipManager.cs" />
     <Compile Include="SAV\Encrypt.cs" />
     <Compile Include="SAV\SAV_File.cs" />
+    <Compile Include="SEV\SEV_File.cs" />
     <Compile Include="TDB\TDB_File.cs" />
     <Compile Include="TNL\Deserializer.cs" />
     <Compile Include="TNL\Parser.cs" />
     <Compile Include="TNL\TNL_File.cs" />
+    <Compile Include="TNN\TNN_File.cs" />
     <Compile Include="TSD\Deserializer.cs" />
     <Compile Include="TSD\Parser.cs" />
     <Compile Include="TSD\TSD_File.cs" />
     <Compile Include="TSR\TSR_File.cs" />
     <Compile Include="TSR\TSR_Reader.cs" />
+    <Compile Include="TTB\TTB_File.cs" />
+    <Compile Include="TTC\TTC_File.cs" />
     <Compile Include="UTF\UTF_File.cs" />
     <Compile Include="X2M\Skill.cs" />
     <Compile Include="Xenoverse2.cs" />

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -166,6 +167,18 @@ namespace Xv2CoreLib.BCS
             if(offset != 0)
             {
                 offset += partOffset;
+                
+                BitArray _I_28 = new BitArray(rawBytes.GetRange(offset + 28, 4));
+                BitArray _I_32 = new BitArray(rawBytes.GetRange(offset + 32, 4));
+                //validation
+                int i_28 = BitConverter.ToInt32(rawBytes, offset + 28);
+                int i_32 = BitConverter.ToInt32(rawBytes, offset + 32);
+
+                if (i_28 > 0x200)
+                    throw new InvalidDataException($"Unexpected I_28 value: {i_28}.");
+
+                if (i_32 > 0x200)
+                    throw new InvalidDataException($"Unexpected I_32 value: {i_32}.");
 
                 return new Part()
                 {
@@ -173,9 +186,27 @@ namespace Xv2CoreLib.BCS
                     I_02 = BitConverter.ToInt16(rawBytes, offset + 2),
                     I_04 = BitConverter.ToInt16(rawBytes, offset + 4),
                     I_16 = BitConverter.ToInt16(rawBytes, offset + 16),
-                    I_24 = BitConverter.ToInt32(rawBytes, offset + 24),
-                    I_28 = BitConverter.ToInt32(rawBytes, offset + 28),
-                    I_32 = BitConverter.ToInt32(rawBytes, offset + 32),
+                    I_24 = BitConverter.ToUInt32(rawBytes, offset + 24),
+                    Hide_FaceBase = _I_28[0],
+                    Hide_Forehead = _I_28[1],
+                    Hide_Eye = _I_28[2],
+                    Hide_Nose = _I_28[3],
+                    Hide_Ear = _I_28[4],
+                    Hide_Hair = _I_28[5],
+                    Hide_Bust = _I_28[6],
+                    Hide_Pants = _I_28[7],
+                    Hide_Rist = _I_28[8],
+                    Hide_Boots = _I_28[9],
+                    HideMat_FaceBase = _I_32[0],
+                    HideMat_Forehead = _I_32[1],
+                    HideMat_Eye = _I_32[2],
+                    HideMat_Nose = _I_32[3],
+                    HideMat_Ear = _I_32[4],
+                    HideMat_Hair = _I_32[5],
+                    HideMat_Bust = _I_32[6],
+                    HideMat_Pants = _I_32[7],
+                    HideMat_Rist = _I_32[8],
+                    HideMat_Boots = _I_32[9],
                     F_36 = BitConverter.ToSingle(rawBytes, offset + 36),
                     F_40 = BitConverter.ToSingle(rawBytes, offset + 40),
                     I_44 = BitConverter.ToInt32(rawBytes, offset + 44),
@@ -229,24 +260,53 @@ namespace Xv2CoreLib.BCS
 
                 for (int i = 0; i < count; i++)
                 {
+
+                    BitArray _I_28 = new BitArray(rawBytes.GetRange(offset + 28, 4));
+                    BitArray _I_32 = new BitArray(rawBytes.GetRange(offset + 32, 4));
+
+                    //validation
+                    int i_28 = BitConverter.ToInt32(rawBytes, offset + 28);
+                    int i_32 = BitConverter.ToInt32(rawBytes, offset + 32);
+
+                    if (i_28 > 0x200)
+                        throw new InvalidDataException($"Unexpected I_28 value: {i_28}.");
+
+                    if (i_32 > 0x200)
+                        throw new InvalidDataException($"Unexpected I_32 value: {i_32}.");
+
                     physicsObjects.Add(new PhysicsObject()
                     {
                         I_00 = BitConverter.ToInt16(rawBytes, offset + 0),
                         I_02 = BitConverter.ToInt16(rawBytes, offset + 2),
                         I_04 = BitConverter.ToInt16(rawBytes, offset + 4),
-                        I_24 = BitConverter.ToInt32(rawBytes, offset + 24),
-                        I_28 = BitConverter.ToInt16(rawBytes, offset + 28),
-                        I_32 = BitConverter.ToInt16(rawBytes, offset + 32),
+                        I_24 = BitConverter.ToUInt32(rawBytes, offset + 24),
+                        Hide_FaceBase = _I_28[0],
+                        Hide_Forehead = _I_28[1],
+                        Hide_Eye = _I_28[2],
+                        Hide_Nose = _I_28[3],
+                        Hide_Ear = _I_28[4],
+                        Hide_Hair = _I_28[5],
+                        Hide_Bust = _I_28[6],
+                        Hide_Pants = _I_28[7],
+                        Hide_Rist = _I_28[8],
+                        Hide_Boots = _I_28[9],
+                        HideMat_FaceBase = _I_32[0],
+                        HideMat_Forehead = _I_32[1],
+                        HideMat_Eye = _I_32[2],
+                        HideMat_Nose = _I_32[3],
+                        HideMat_Ear = _I_32[4],
+                        HideMat_Hair = _I_32[5],
+                        HideMat_Bust = _I_32[6],
+                        HideMat_Pants = _I_32[7],
+                        HideMat_Rist = _I_32[8],
+                        HideMat_Boots = _I_32[9],
                         Str_36 = Utils.GetString(bytes, offset + 36, 4),
-                        Str_40 = new string[6]
-                        {
-                            GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 40), offset),
-                            GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 44), offset),
-                            GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 48), offset),
-                            GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 52), offset),
-                            GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 56), offset),
-                            GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 60), offset),
-                        }
+                        Files_EMD = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 40), offset),
+                        Files_EMM = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 44), offset),
+                        Files_EMB = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 48), offset),
+                        Files_EAN = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 52), offset),
+                        BoneToAttach = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 56), offset),
+                        Files_SCD = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 60), offset)
                     });
                     offset += 72;
                 }
@@ -401,9 +461,11 @@ namespace Xv2CoreLib.BCS
             if(relativeOffset != 0)
             {
                 return Utils.GetString(bytes, relativeOffset + mainOffset);
-            } else
+            }
+            else
             {
-                return "NULL";
+                return string.Empty;
+                //return "NULL";
             }
         }
 

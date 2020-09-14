@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -327,6 +328,12 @@ namespace Xv2CoreLib.BCS
                 int PhysicsObjectCount = (part.Physics_Objects != null) ? part.Physics_Objects.Count() : 0;
                 int Unk3Count = (part.Unk_3 != null) ? part.Unk_3.Count() : 0;
 
+                //Create values
+                BitArray _i_28 = new BitArray(new bool[] { part.Hide_FaceBase, part.Hide_Forehead, part.Hide_Eye, part.Hide_Nose, part.Hide_Ear, part.Hide_Hair, part.Hide_Bust, part.Hide_Pants, part.Hide_Rist, part.Hide_Boots, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false }); //32 bools = 32 bits
+                BitArray _i_32 = new BitArray(new bool[] { part.HideMat_FaceBase, part.HideMat_Forehead, part.HideMat_Eye, part.HideMat_Nose, part.HideMat_Ear, part.HideMat_Hair, part.HideMat_Bust, part.HideMat_Pants, part.HideMat_Rist, part.HideMat_Boots, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false }); //32 bools = 32 bits
+                
+
+                //Write bytes
                 bytes.AddRange(BitConverter.GetBytes(part.I_00));
                 bytes.AddRange(BitConverter.GetBytes(part.I_02));
                 bytes.AddRange(BitConverter.GetBytes(part.I_04));
@@ -335,8 +342,8 @@ namespace Xv2CoreLib.BCS
                 bytes.AddRange(BitConverter.GetBytes((short)ColorSelectorsCount));
                 bytes.AddRange(new byte[4]);
                 bytes.AddRange(BitConverter.GetBytes(part.I_24));
-                bytes.AddRange(BitConverter.GetBytes(part.I_28));
-                bytes.AddRange(BitConverter.GetBytes(part.I_32));
+                bytes.AddRange(Utils.ConvertToByteArray(_i_28, 4));
+                bytes.AddRange(Utils.ConvertToByteArray(_i_32, 4));
                 bytes.AddRange(BitConverter.GetBytes(part.F_36));
                 bytes.AddRange(BitConverter.GetBytes(part.F_40));
                 bytes.AddRange(new byte[8]);
@@ -411,13 +418,17 @@ namespace Xv2CoreLib.BCS
                 {
                     int physicsObjectStartOffset = bytes.Count();
 
+                    //Create values
+                    BitArray _i_28 = new BitArray(new bool[] { physicsObjects[i].Hide_FaceBase, physicsObjects[i].Hide_Forehead, physicsObjects[i].Hide_Eye, physicsObjects[i].Hide_Nose, physicsObjects[i].Hide_Ear, physicsObjects[i].Hide_Hair, physicsObjects[i].Hide_Bust, physicsObjects[i].Hide_Pants, physicsObjects[i].Hide_Rist, physicsObjects[i].Hide_Boots, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false }); //32 bools = 32 bits
+                    BitArray _i_32 = new BitArray(new bool[] { physicsObjects[i].HideMat_FaceBase, physicsObjects[i].HideMat_Forehead, physicsObjects[i].HideMat_Eye, physicsObjects[i].HideMat_Nose, physicsObjects[i].HideMat_Ear, physicsObjects[i].HideMat_Hair, physicsObjects[i].HideMat_Bust, physicsObjects[i].HideMat_Pants, physicsObjects[i].HideMat_Rist, physicsObjects[i].HideMat_Boots, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false }); //32 bools = 32 bits
+
                     bytes.AddRange(BitConverter.GetBytes(physicsObjects[i].I_00));
                     bytes.AddRange(BitConverter.GetBytes(physicsObjects[i].I_02));
                     bytes.AddRange(BitConverter.GetBytes(physicsObjects[i].I_04));
                     bytes.AddRange(new byte[18]);
                     bytes.AddRange(BitConverter.GetBytes(physicsObjects[i].I_24));
-                    bytes.AddRange(BitConverter.GetBytes(physicsObjects[i].I_28));
-                    bytes.AddRange(BitConverter.GetBytes(physicsObjects[i].I_32));
+                    bytes.AddRange(Utils.ConvertToByteArray(_i_28, 4));
+                    bytes.AddRange(Utils.ConvertToByteArray(_i_32, 4));
                     if (physicsObjects[i].Str_36.Length > 4)
                     {
                         Console.WriteLine(String.Format("\"{0}\" exceeds the maximum allowed length of 4 for the paramater \"Name\"", physicsObjects[i].Str_36));
@@ -429,42 +440,42 @@ namespace Xv2CoreLib.BCS
                     {
                         Offset = bytes.Count(),
                         RelativeOffset = physicsObjectStartOffset,
-                        StringToWrite = physicsObjects[i].Str_40[0]
+                        StringToWrite = physicsObjects[i].Files_EMD
                     });
                     bytes.AddRange(new byte[4]);
                     stringInfo.Add(new StringWriter.StringInfo()
                     {
                         Offset = bytes.Count(),
                         RelativeOffset = physicsObjectStartOffset,
-                        StringToWrite = physicsObjects[i].Str_40[1]
+                        StringToWrite = physicsObjects[i].Files_EMM
                     });
                     bytes.AddRange(new byte[4]);
                     stringInfo.Add(new StringWriter.StringInfo()
                     {
                         Offset = bytes.Count(),
                         RelativeOffset = physicsObjectStartOffset,
-                        StringToWrite = physicsObjects[i].Str_40[2]
+                        StringToWrite = physicsObjects[i].Files_EMB
                     });
                     bytes.AddRange(new byte[4]);
                     stringInfo.Add(new StringWriter.StringInfo()
                     {
                         Offset = bytes.Count(),
                         RelativeOffset = physicsObjectStartOffset,
-                        StringToWrite = physicsObjects[i].Str_40[3]
+                        StringToWrite = physicsObjects[i].Files_EAN
                     });
                     bytes.AddRange(new byte[4]);
                     stringInfo.Add(new StringWriter.StringInfo()
                     {
                         Offset = bytes.Count(),
                         RelativeOffset = physicsObjectStartOffset,
-                        StringToWrite = physicsObjects[i].Str_40[4]
+                        StringToWrite = physicsObjects[i].BoneToAttach
                     });
                     bytes.AddRange(new byte[4]);
                     stringInfo.Add(new StringWriter.StringInfo()
                     {
                         Offset = bytes.Count(),
                         RelativeOffset = physicsObjectStartOffset,
-                        StringToWrite = physicsObjects[i].Str_40[5]
+                        StringToWrite = physicsObjects[i].Files_SCD
                     });
                     bytes.AddRange(new byte[12]);
 

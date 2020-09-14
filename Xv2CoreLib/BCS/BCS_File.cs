@@ -161,18 +161,78 @@ namespace Xv2CoreLib.BCS
         [YAXAttributeFor("Texture")]
         [YAXSerializeAs("value")]
         public short I_04 { get; set; }
-        [YAXAttributeFor("I_16")]
+        [YAXAttributeFor("Shader")]
         [YAXSerializeAs("value")]
         public short I_16 { get; set; }
         [YAXAttributeFor("I_24")]
         [YAXSerializeAs("value")]
-        public int I_24 { get; set; }
-        [YAXAttributeFor("I_28")]
-        [YAXSerializeAs("value")]
-        public int I_28 { get; set; }
-        [YAXAttributeFor("I_32")]
-        [YAXSerializeAs("value")]
-        public int I_32 { get; set; }
+        [YAXHexValue]
+        public uint I_24 { get; set; }
+
+        //Flags
+        [YAXAttributeFor("HideParts")]
+        [YAXSerializeAs("FaceBase")]
+        public bool Hide_FaceBase { get; set; }
+        [YAXAttributeFor("HideParts")]
+        [YAXSerializeAs("Forehead")]
+        public bool Hide_Forehead { get; set; }
+        [YAXAttributeFor("HideParts")]
+        [YAXSerializeAs("Eye")]
+        public bool Hide_Eye { get; set; }
+        [YAXAttributeFor("HideParts")]
+        [YAXSerializeAs("Nose")]
+        public bool Hide_Nose { get; set; }
+        [YAXAttributeFor("HideParts")]
+        [YAXSerializeAs("Ear")]
+        public bool Hide_Ear { get; set; }
+        [YAXAttributeFor("HideParts")]
+        [YAXSerializeAs("Hair")]
+        public bool Hide_Hair { get; set; }
+        [YAXAttributeFor("HideParts")]
+        [YAXSerializeAs("Bust")]
+        public bool Hide_Bust { get; set; }
+        [YAXAttributeFor("HideParts")]
+        [YAXSerializeAs("Pants")]
+        public bool Hide_Pants { get; set; }
+        [YAXAttributeFor("HideParts")]
+        [YAXSerializeAs("Rist")]
+        public bool Hide_Rist { get; set; }
+        [YAXAttributeFor("HideParts")]
+        [YAXSerializeAs("Boots")]
+        public bool Hide_Boots { get; set; }
+
+        [YAXAttributeFor("HideMats")]
+        [YAXSerializeAs("FaceBase")]
+        public bool HideMat_FaceBase { get; set; }
+        [YAXAttributeFor("HideMats")]
+        [YAXSerializeAs("Forehead")]
+        public bool HideMat_Forehead { get; set; }
+        [YAXAttributeFor("HideMats")]
+        [YAXSerializeAs("Eye")]
+        public bool HideMat_Eye { get; set; }
+        [YAXAttributeFor("HideMats")]
+        [YAXSerializeAs("Nose")]
+        public bool HideMat_Nose { get; set; }
+        [YAXAttributeFor("HideMats")]
+        [YAXSerializeAs("Ear")]
+        public bool HideMat_Ear { get; set; }
+        [YAXAttributeFor("HideMats")]
+        [YAXSerializeAs("Hair")]
+        public bool HideMat_Hair { get; set; }
+        [YAXAttributeFor("HideMats")]
+        [YAXSerializeAs("Bust")]
+        public bool HideMat_Bust { get; set; }
+        [YAXAttributeFor("HideMats")]
+        [YAXSerializeAs("Pants")]
+        public bool HideMat_Pants { get; set; }
+        [YAXAttributeFor("HideMats")]
+        [YAXSerializeAs("Rist")]
+        public bool HideMat_Rist { get; set; }
+        [YAXAttributeFor("HideMats")]
+        [YAXSerializeAs("Boots")]
+        public bool HideMat_Boots { get; set; }
+
+        
         [YAXAttributeFor("F_36")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
@@ -282,26 +342,101 @@ namespace Xv2CoreLib.BCS
         public short I_04 { get; set; }
         [YAXAttributeFor("I_24")]
         [YAXSerializeAs("value")]
-        public int I_24 { get; set; }
-        [YAXAttributeFor("I_28")]
-        [YAXSerializeAs("value")]
-        public int I_28 { get; set; }
-        [YAXAttributeFor("I_32")]
-        [YAXSerializeAs("value")]
-        public int I_32 { get; set; }
+        [YAXHexValue]
+        public uint I_24 { get; set; }
+
+
+        //Flags
+        [YAXAttributeFor("HideParts")]
+        [YAXSerializeAs("FaceBase")]
+        public bool Hide_FaceBase { get; set; }
+        [YAXAttributeFor("HideParts")]
+        [YAXSerializeAs("Forehead")]
+        public bool Hide_Forehead { get; set; }
+        [YAXAttributeFor("HideParts")]
+        [YAXSerializeAs("Eye")]
+        public bool Hide_Eye { get; set; }
+        [YAXAttributeFor("HideParts")]
+        [YAXSerializeAs("Nose")]
+        public bool Hide_Nose { get; set; }
+        [YAXAttributeFor("HideParts")]
+        [YAXSerializeAs("Ear")]
+        public bool Hide_Ear { get; set; }
+        [YAXAttributeFor("HideParts")]
+        [YAXSerializeAs("Hair")]
+        public bool Hide_Hair { get; set; }
+        [YAXAttributeFor("HideParts")]
+        [YAXSerializeAs("Bust")]
+        public bool Hide_Bust { get; set; }
+        [YAXAttributeFor("HideParts")]
+        [YAXSerializeAs("Pants")]
+        public bool Hide_Pants { get; set; }
+        [YAXAttributeFor("HideParts")]
+        [YAXSerializeAs("Rist")]
+        public bool Hide_Rist { get; set; }
+        [YAXAttributeFor("HideParts")]
+        [YAXSerializeAs("Boots")]
+        public bool Hide_Boots { get; set; }
+
+        [YAXAttributeFor("HideMats")]
+        [YAXSerializeAs("FaceBase")]
+        public bool HideMat_FaceBase { get; set; }
+        [YAXAttributeFor("HideMats")]
+        [YAXSerializeAs("Forehead")]
+        public bool HideMat_Forehead { get; set; }
+        [YAXAttributeFor("HideMats")]
+        [YAXSerializeAs("Eye")]
+        public bool HideMat_Eye { get; set; }
+        [YAXAttributeFor("HideMats")]
+        [YAXSerializeAs("Nose")]
+        public bool HideMat_Nose { get; set; }
+        [YAXAttributeFor("HideMats")]
+        [YAXSerializeAs("Ear")]
+        public bool HideMat_Ear { get; set; }
+        [YAXAttributeFor("HideMats")]
+        [YAXSerializeAs("Hair")]
+        public bool HideMat_Hair { get; set; }
+        [YAXAttributeFor("HideMats")]
+        [YAXSerializeAs("Bust")]
+        public bool HideMat_Bust { get; set; }
+        [YAXAttributeFor("HideMats")]
+        [YAXSerializeAs("Pants")]
+        public bool HideMat_Pants { get; set; }
+        [YAXAttributeFor("HideMats")]
+        [YAXSerializeAs("Rist")]
+        public bool HideMat_Rist { get; set; }
+        [YAXAttributeFor("HideMats")]
+        [YAXSerializeAs("Boots")]
+        public bool HideMat_Boots { get; set; }
+
         [YAXAttributeFor("Name")]
         [YAXSerializeAs("value")]
         public string Str_36 { get; set; }
 
         //Str
-        [YAXAttributeFor("Files")]
+        [YAXAttributeFor("BoneToAttach")]
         [YAXSerializeAs("value")]
-        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public string[] Str_40 { get; set; } //Size 6
+        public string BoneToAttach { get; set; }
+
+        [YAXAttributeFor("Files")]
+        [YAXSerializeAs("EMD")]
+        public string Files_EMD { get; set; }
+        [YAXAttributeFor("Files")]
+        [YAXSerializeAs("EMM")]
+        public string Files_EMM { get; set; }
+        [YAXAttributeFor("Files")]
+        [YAXSerializeAs("EMB")]
+        public string Files_EMB { get; set; }
+        [YAXAttributeFor("Files")]
+        [YAXSerializeAs("EAN")]
+        public string Files_EAN { get; set; }
+        [YAXAttributeFor("Files")]
+        [YAXSerializeAs("SCD")]
+        public string Files_SCD { get; set; }
 
         public string GetModelPath(PartType partType)
         {
-            return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.emd", Str_36, Str_40[0]));
+            return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.emd", Str_36, Files_EMD));
         }
 
 

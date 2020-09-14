@@ -827,8 +827,26 @@ namespace LB_Mod_Installer.Installer
                 {
                     for(int i = 0; i < section.IDs.Count; i++)
                     {
-                        EmbEntry original = (cpkBinFile != null) ? cpkBinFile.GetEntry(int.Parse(section.IDs[i])) : null;
-                        binaryFile.RemoveEntry(section.IDs[i], original);
+                        int idNum;
+
+                        if (int.TryParse(section.IDs[i], out idNum))
+                        {
+                            //ID is number (index)
+                            EmbEntry original = (cpkBinFile != null) ? cpkBinFile.GetEntry(idNum) : null;
+                            binaryFile.RemoveEntry(section.IDs[i], original);
+                        }
+                        else
+                        {
+                            //ID is string (name)
+                            EmbEntry original = (cpkBinFile != null) ? cpkBinFile.GetEntry(section.IDs[i]) : null;
+                            var existingEntry = binaryFile.Entry.FirstOrDefault(x => x.Name == section.IDs[i]);
+
+                            if(existingEntry != null)
+                            {
+                                binaryFile.RemoveEntry(binaryFile.Entry.IndexOf(existingEntry).ToString(), original);
+                            }
+                        }
+                        
                     }
 
                     binaryFile.TrimNullEntries();

@@ -240,7 +240,7 @@ namespace Xv2CoreLib
         {
             ASCII,
             UTF8,
-            Unicode //Currently unsuported here
+            Unicode 
         }
         
         /// <summary>
@@ -312,7 +312,7 @@ namespace Xv2CoreLib
 
             if (useNullTerminator)
             {
-                maxSize = GetStringSize(bytes, index);
+                maxSize = GetStringSize(bytes, index, (encodingType == EncodingType.Unicode));
 
                 if (maxSize > desiredSize)
                 {
@@ -337,16 +337,30 @@ namespace Xv2CoreLib
             }
             else
             {
-                throw new Exception("GetString: Unsupported EncodingType = " + encodingType);
+                string value = Encoding.Unicode.GetString(bytes, index, maxSize);
+                return (string.IsNullOrWhiteSpace(value) && useNullText) ? "NULL" : value;
+                //throw new Exception("GetString: Unsupported EncodingType = " + encodingType);
             }
         }
         
-        private static int GetStringSize(byte[] bytes, int index)
+        private static int GetStringSize(byte[] bytes, int index, bool unicode = false)
         {
             for(int i = index; i < bytes.Length; i++)
             {
                 if (bytes[i] == 0)
-                    return i - index;
+                {
+                    if(unicode)
+                    {
+                        if(i + 1 <= bytes.Length)
+                        {
+                            if (bytes[i + 1] == 0) return (i - index) + 1;
+                        }
+                    }
+                    else if (!unicode)
+                    {
+                        return i - index;
+                    }
+                }
             }
 
             throw new InvalidDataException(String.Format("GetStringSize: Could not find the null terminator byte.\nIndex = {0}\nPosition = {1}", index, bytes.Length - 1));
@@ -361,6 +375,13 @@ namespace Xv2CoreLib
             }
 
             throw new InvalidDataException(String.Format("GetStringSize: Could not find the null terminator byte.\nIndex = {0}\nPosition = {1}", index, bytes.Count - 1));
+        }
+
+        public static int GetPaddedUnicodeStringByteSize(string unicodeString, int blockSize)
+        {
+            int size = unicodeString.Length * 2;
+            size += 1; //Null terminator
+            return Utils.CalculatePadding(size, blockSize) + size;
         }
     }
     
@@ -1395,7 +1416,7 @@ namespace Xv2CoreLib
             {
                 for (int i = 0; i < _strings.Count(); i++)
                 {
-                    if (_strings[i].StringToWrite != "NULL")
+                    if (_strings[i].StringToWrite != "NULL" && !string.IsNullOrWhiteSpace(_strings[i].StringToWrite))
                     {
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - _strings[i].RelativeOffset), _strings[i].Offset);
                         bytes.AddRange(Encoding.ASCII.GetBytes(_strings[i].StringToWrite));

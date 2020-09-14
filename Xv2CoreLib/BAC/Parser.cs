@@ -223,6 +223,9 @@ namespace Xv2CoreLib.BAC
                             case 26:
                                 bacFile.BacEntries[i].Type26 = BAC_Type26.Read(rawBytes, bytes, thisTypeOffset, thisTypeCount);
                                 break;
+                            case 27:
+                                bacFile.BacEntries[i].Type27 = BAC_Type27.Read(rawBytes, bytes, thisTypeOffset, thisTypeCount);
+                                break;
                             default:
                                 throw new InvalidDataException(String.Format("Parse failed. Unknown BacType encountered ({0})\nOffset: {1}\nCount: {2}.", thisType, thisTypeOffset, thisTypeCount));
                         }

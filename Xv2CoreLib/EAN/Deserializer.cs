@@ -72,12 +72,11 @@ namespace Xv2CoreLib.EAN
             {
                 if(eanFile.Animations[i].Nodes != null)
                 {
-                    for(int a = 0; a < eanFile.Animations[i].Nodes.Count; a++)
+                    for (int a = eanFile.Animations[i].Nodes.Count - 1; i >= 0; i--)
                     {
-                        if(eanFile.Skeleton.Exists(eanFile.Animations[i].Nodes[a].BoneName) == false)
+                        if(!nonHierarchalBones.Any(x => x.Name == eanFile.Animations[i].Nodes[a].BoneName))
                         {
                             eanFile.Animations[i].Nodes.RemoveAt(a);
-                            a = 0;
                         }
                     }
                 }

@@ -504,6 +504,9 @@ namespace Xv2CoreLib.EMB_CLASS
         {
             for (int i = Entry.Count - 1; i >= 0; i--)
             {
+                if (!Entry[i].Name.Contains("dummy_"))
+                    break;
+
                 if(Entry[i].Data == null)
                 {
                     Entry.RemoveAt(i);

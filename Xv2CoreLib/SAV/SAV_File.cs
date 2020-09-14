@@ -599,6 +599,8 @@ namespace Xv2CoreLib.SAV
                         return "1.14";
                     case 17:
                         return "1.14.1";
+                    case 18:
+                        return "1.15";
                     default:
                         return String.Format("Unknown ({0})", Version);
 
@@ -633,6 +635,7 @@ namespace Xv2CoreLib.SAV
                     case 15:
                     case 16:
                     case 17:
+                    case 18:
                         return null;
                     default:
                         return "This save version is not supported. It is recommened to update the application (if one is available).";
@@ -665,6 +668,7 @@ namespace Xv2CoreLib.SAV
                     case 15:
                     case 16:
                     case 17:
+                    case 18:
                         return Brushes.Blue;
                     default:
                         return Brushes.Red;

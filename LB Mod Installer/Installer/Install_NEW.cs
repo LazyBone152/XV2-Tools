@@ -339,8 +339,21 @@ namespace LB_Mod_Installer.Installer
                     if(file.FullName.Length > jungleDir.Length + 1)
                     {
                         //string filePath = file.FullName.Remove(0, jungleDir.Length + 1);
-                        string filePath = Utils.PathRemoveRoot(file.FullName);
-                        if(isDirCopy) filePath = Utils.PathRemoveRoot(filePath);
+                        string filePath = Utils.SanitizePath(file.FullName);
+
+                        if (isDirCopy)
+                        {
+                            string sanitizedDir = Utils.SanitizePath(jungleDir);
+                            int rootCount = sanitizedDir.Split('/').Count();
+
+                            for (int i = 0; i < rootCount; i++)
+                                filePath = Utils.PathRemoveRoot(filePath);
+                        }
+                        else
+                        {
+                            //Just one root level for JUNGLE1/2
+                            filePath = Utils.PathRemoveRoot(file.FullName);
+                        }
 
                         if (!IsJungleFileBlacklisted(filePath))
                         {
@@ -723,7 +736,11 @@ namespace LB_Mod_Installer.Installer
                     foreach (var entry in xmlFile.Entry)
                     {
                         int idx = binaryFile.AddEntry(entry, entry.Index, xmlFile.installMode);
-                        GeneralInfo.Tracker.AddID(installPath, Sections.EMB_Entry, idx.ToString());
+
+                        if(xmlFile.installMode == InstallMode.MatchIndex)
+                            GeneralInfo.Tracker.AddID(installPath, Sections.EMB_Entry, idx.ToString());
+                        else if (xmlFile.installMode == InstallMode.MatchName)
+                            GeneralInfo.Tracker.AddID(installPath, Sections.EMB_Entry, entry.Name);
                     }
                 }
             }

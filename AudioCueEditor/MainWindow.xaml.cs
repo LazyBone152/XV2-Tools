@@ -247,7 +247,6 @@ namespace AudioCueEditor
             {
                 task = Task.Run(() =>
                 {
-                    throw new Exception();
                     UndoManager.Instance.AddUndo(new CompositeUndo(AcbFile.AcbFile.CleanUpTables(), "Clean Up"));
                     AcbFile.AcbFile.Save(xv2Utils.GetPathWithoutExtension(path));
 
