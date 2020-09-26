@@ -183,12 +183,14 @@ namespace Xv2CoreLib.EEPK
                     eepkFile.Effects[i].EffectParts[a].POSITION_X = BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 40);
                     eepkFile.Effects[i].EffectParts[a].POSITION_Y = BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 44);
                     eepkFile.Effects[i].EffectParts[a].POSITION_Z = BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 48);
-                    eepkFile.Effects[i].EffectParts[a].F_52 = BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 52);
-                    eepkFile.Effects[i].EffectParts[a].F_56 = BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 56);
-                    eepkFile.Effects[i].EffectParts[a].F_60 = BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 60);
-                    eepkFile.Effects[i].EffectParts[a].F_64 = BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 64);
-                    eepkFile.Effects[i].EffectParts[a].F_68 = BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 68);
-                    eepkFile.Effects[i].EffectParts[a].F_72 = BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 72);
+
+                    eepkFile.Effects[i].EffectParts[a].F_52 = (float)Utils.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 52));
+                    eepkFile.Effects[i].EffectParts[a].F_56 = (float)Utils.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 56));
+                    eepkFile.Effects[i].EffectParts[a].F_60 = (float)Utils.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 60));
+                    eepkFile.Effects[i].EffectParts[a].F_64 = (float)Utils.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 64));
+                    eepkFile.Effects[i].EffectParts[a].F_68 = (float)Utils.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 68));
+                    eepkFile.Effects[i].EffectParts[a].F_72 = (float)Utils.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 72));
+
                     eepkFile.Effects[i].EffectParts[a].SIZE_1 = BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 76);
                     eepkFile.Effects[i].EffectParts[a].SIZE_2 = BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 80);
                     eepkFile.Effects[i].EffectParts[a].F_84 = BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 84);
@@ -205,9 +207,7 @@ namespace Xv2CoreLib.EEPK
                         }
                         catch
                         {
-                            Console.WriteLine("Load of file failed on a ESK string for Effect " + i + "\nTried getting string at offset " + effectOffsets[i] + effectInfoOffsets[i] + addedOffset + eskOffset);
-                            Console.ReadKey();
-                            Environment.Exit(0);
+                            throw new ArgumentOutOfRangeException("Unable to get string!");
                         }
                         
                     }

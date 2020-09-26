@@ -701,11 +701,11 @@ namespace Xv2CoreLib.EEPK
         [YAXAttributeFor("Orientation_Y")]
         [YAXSerializeAs("Min")]
         [YAXFormat("0.0#######")]
-        public float F_60 { get; set; } //assumption
+        public float F_60 { get; set; } 
         [YAXAttributeFor("Orientation_Y")]
         [YAXSerializeAs("Max")]
         [YAXFormat("0.0#######")]
-        public float F_64 { get; set; } //I_64 (Has an effect on scaling/Size on Electric Sparks)
+        public float F_64 { get; set; } 
         [YAXAttributeFor("Orientation_Z")]
         [YAXSerializeAs("Min")]
         [YAXFormat("0.0#######")]

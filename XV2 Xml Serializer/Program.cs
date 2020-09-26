@@ -17,7 +17,7 @@ namespace XV2_Xml_Serializer
         static void Main(string[] args)
         {
             //for debugging only
-            //args = new string[1] { @"HUM - Copy.bcs.xml" };
+            //args = new string[1] { @"special_event_voice - Copy.sev" };
 
 #if DEBUG
             DEBUG_MODE = true;

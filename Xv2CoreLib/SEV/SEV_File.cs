@@ -13,7 +13,10 @@ namespace Xv2CoreLib.SEV
     public class SEV_File
     {
         private const uint SEV_SIGNATURE = 1447383843;
-
+        private const int SEV_ENTRY_SIZE = 20;
+        private const int SEV_CHARA_EVENT_SIZE = 16;
+        private const int SEV_EVENT_SIZE = 12;
+        private const int SEV_EVENT_ENTRY_SIZE = 36;
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "SevEntry")]
         public List<SEV_Entry> Entries { get; set; } = new List<SEV_Entry>();
@@ -52,28 +55,29 @@ namespace Xv2CoreLib.SEV
 
             //Find offsets to each section
             int sevEntryStart = 16;
-            int charEventStart = sevEntryStart + (16 * count);
+            int charEventStart = sevEntryStart + (SEV_ENTRY_SIZE * count);
 
             int totalCharEvents = 0;
             int totalEvents = 0;
 
             for (int i = 0; i < count; i++)
-                totalCharEvents += BitConverter.ToInt32(bytes, sevEntryStart + (16 * i) + 8);
+                totalCharEvents += BitConverter.ToInt32(bytes, sevEntryStart + (SEV_ENTRY_SIZE * i) + 12);
             
             for (int i = 0; i < totalCharEvents; i++)
-                totalEvents += BitConverter.ToInt32(bytes, charEventStart + (16 * i) + 8);
+                totalEvents += BitConverter.ToInt32(bytes, charEventStart + (SEV_CHARA_EVENT_SIZE * i) + 8);
 
-            int eventStart = charEventStart + (16 * totalCharEvents);
-            int eventEntryStart = eventStart + (12 * totalEvents);
+            int eventStart = charEventStart + (SEV_CHARA_EVENT_SIZE * totalCharEvents);
+            int eventEntryStart = eventStart + (SEV_EVENT_SIZE * totalEvents);
 
 
             //Parse the data
             for (int i = 0; i < count; i++)
             {
                 SEV_Entry sevEntry = new SEV_Entry();
-                sevEntry.CharaID = BitConverter.ToInt32(bytes, sevEntryStart + (16 * i) + 0);
-                sevEntry.CostumeID = BitConverter.ToInt32(bytes, sevEntryStart + (16 * i) + 4);
-                int charEventCount = BitConverter.ToInt32(bytes, sevEntryStart + (16 * i) + 8);
+                sevEntry.CharaID = BitConverter.ToInt32(bytes, sevEntryStart + (SEV_ENTRY_SIZE * i) + 0);
+                sevEntry.CostumeID = BitConverter.ToInt32(bytes, sevEntryStart + (SEV_ENTRY_SIZE * i) + 4);
+                sevEntry.I_08 = BitConverter.ToUInt32(bytes, sevEntryStart + (SEV_ENTRY_SIZE * i) + 8);
+                int charEventCount = BitConverter.ToInt32(bytes, sevEntryStart + (SEV_ENTRY_SIZE * i) + 12);
                 
                 for(int a = 0; a < charEventCount; a++)
                 {
@@ -101,15 +105,15 @@ namespace Xv2CoreLib.SEV
                             eventEntry.I_28 = BitConverter.ToInt32(bytes, eventEntryStart + 28);
                             eventEntry.I_32 = BitConverter.ToInt32(bytes, eventEntryStart + 32);
 
-                            eventEntryStart += 36;
+                            eventEntryStart += SEV_EVENT_ENTRY_SIZE;
                             _event.EventEntries.Add(eventEntry);
                         }
 
-                        eventStart += 12;
+                        eventStart += SEV_EVENT_SIZE;
                         charEvent.Events.Add(_event);
                     }
 
-                    charEventStart += 16;
+                    charEventStart += SEV_CHARA_EVENT_SIZE;
                     sevEntry.Events.Add(charEvent);
                 }
 
@@ -143,8 +147,6 @@ namespace Xv2CoreLib.SEV
 
         public byte[] Write()
         {
-            SortEntries();
-
             List<byte> bytes = new List<byte>();
             List<byte> charEventBytes = new List<byte>();
             List<byte> eventBytes = new List<byte>();
@@ -164,6 +166,7 @@ namespace Xv2CoreLib.SEV
 
                 bytes.AddRange(BitConverter.GetBytes(sevEntry.CharaID));
                 bytes.AddRange(BitConverter.GetBytes(sevEntry.CostumeID));
+                bytes.AddRange(BitConverter.GetBytes(sevEntry.I_08));
                 bytes.AddRange(BitConverter.GetBytes(sevEntry.Events.Count));
                 bytes.AddRange(BitConverter.GetBytes((uint)0));
 
@@ -236,6 +239,10 @@ namespace Xv2CoreLib.SEV
         [YAXAttributeForClass]
         [YAXSerializeAs("CostumeID")]
         public string I_04 { get; set; } //4 (int32)
+        [YAXAttributeForClass]
+        [YAXSerializeAs("I_08")]
+        [YAXHexValue]
+        public uint I_08 { get; set; } //8 (int32)
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "CharEvent")]
         [BindingSubList]

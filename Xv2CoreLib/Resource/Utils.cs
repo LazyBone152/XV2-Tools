@@ -399,7 +399,7 @@ namespace Xv2CoreLib
 
         public static double ConvertDegreesToRadians(double degrees)
         {
-            return (Math.PI / 180) * Math.PI;
+            return (Math.PI / 180) * degrees;
         }
 
         public static string GetPathWithoutExtension(string path)
