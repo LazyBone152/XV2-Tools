@@ -28,8 +28,8 @@ namespace Xv2CoreLib.SEV
             {
                 Entries.Sort((x, y) => x.SortID - y.SortID);
 
-                foreach(var entry in Entries.Where(x => x.Events != null))
-                    entry.Events.Sort((x, y) => x.SortID - y.SortID);
+                foreach(var entry in Entries.Where(x => x.SubEntries != null))
+                    entry.SubEntries.Sort((x, y) => x.SortID - y.SortID);
             }
         }
 
@@ -114,7 +114,7 @@ namespace Xv2CoreLib.SEV
                     }
 
                     charEventStart += SEV_CHARA_EVENT_SIZE;
-                    sevEntry.Events.Add(charEvent);
+                    sevEntry.SubEntries.Add(charEvent);
                 }
 
                 sev.Entries.Add(sevEntry);
@@ -162,15 +162,15 @@ namespace Xv2CoreLib.SEV
             //Entries
             foreach(var sevEntry in Entries)
             {
-                if (sevEntry.Events == null) sevEntry.Events = new List<SEV_CharEvent>();
+                if (sevEntry.SubEntries == null) sevEntry.SubEntries = new List<SEV_CharEvent>();
 
                 bytes.AddRange(BitConverter.GetBytes(sevEntry.CharaID));
                 bytes.AddRange(BitConverter.GetBytes(sevEntry.CostumeID));
                 bytes.AddRange(BitConverter.GetBytes(sevEntry.I_08));
-                bytes.AddRange(BitConverter.GetBytes(sevEntry.Events.Count));
+                bytes.AddRange(BitConverter.GetBytes(sevEntry.SubEntries.Count));
                 bytes.AddRange(BitConverter.GetBytes((uint)0));
 
-                foreach(var charEvent in sevEntry.Events)
+                foreach(var charEvent in sevEntry.SubEntries)
                 {
                     if (charEvent.Events == null) charEvent.Events = new List<SEV_Event>();
 
@@ -218,7 +218,7 @@ namespace Xv2CoreLib.SEV
     }
 
     [YAXSerializeAs("SevEntry")]
-    public class SEV_Entry : IInstallable
+    public class SEV_Entry : IInstallable_2<SEV_CharEvent>, IInstallable
     {
         #region NonSerialized
         [YAXDontSerialize]
@@ -230,7 +230,23 @@ namespace Xv2CoreLib.SEV
         [YAXDontSerialize]
         public int SortID { get { return CharaID; } }
         [YAXDontSerialize]
-        public string Index { get { return I_00; } set { I_00 = value; } }
+        public string Index
+        {
+            get
+            {
+                return $"{I_00}_{I_04}";
+            }
+            set
+            {
+                string[] split = value.Split('_');
+
+                if(split.Length == 2)
+                {
+                    I_00 = split[0];
+                    I_04 = split[1];
+                }
+            }
+        }
         #endregion
 
         [YAXAttributeForClass]
@@ -246,7 +262,7 @@ namespace Xv2CoreLib.SEV
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "CharEvent")]
         [BindingSubList]
-        public List<SEV_CharEvent> Events { get; set; } = new List<SEV_CharEvent>();
+        public List<SEV_CharEvent> SubEntries { get; set; } = new List<SEV_CharEvent>();
         
     }
 
@@ -264,7 +280,23 @@ namespace Xv2CoreLib.SEV
         [YAXDontSerialize]
         public int SortID { get { return CharaID; } }
         [YAXDontSerialize]
-        public string Index { get { return I_00; } set { I_00 = value; } }
+        public string Index
+        {
+            get
+            {
+                return $"{I_00}_{I_04}";
+            }
+            set
+            {
+                string[] split = value.Split('_');
+
+                if (split.Length == 2)
+                {
+                    I_00 = split[0];
+                    I_04 = split[1];
+                }
+            }
+        }
         #endregion
 
         [YAXAttributeForClass]

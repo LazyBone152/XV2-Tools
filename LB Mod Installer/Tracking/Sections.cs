@@ -5,7 +5,6 @@
     /// </summary>
     public static class Sections
     {
-
         public const string MSG_Entries = "MSG_Entries";
         public const string IDB_Entries = "IDB_Entries";
         public const string CUS_Skillsets = "CUS_Skillsets";
@@ -27,7 +26,7 @@
         public const string CNS_Entries = "CNS_Entries";
         public const string CSO_Entries = "CSO_Entries";
         public const string EAN_Entries = "EAN_Animations";
-        public const string ERS_Entries = "ERS_Entry_";
+        public const string ERS_Entries = "ERS_Entry";
         public const string EEPK_Effect = "EEPK_Effect";
         public const string PSC_Spec_Entry = "PSC_Entry";
         public const string AUR_Aura = "AUR_Aura";
@@ -50,8 +49,13 @@
         public const string ACB_Cue = "ACB_Cue";
         public const string PAL_Entry = "PAL_Entry";
 
+        public const string TTB_Entry = "TTB_Entry";
+        public const string TTC_Entry = "TTC_Entry";
+        public const string SEV_Entry = "SEV_Entry";
+        public const string HCI_Entry = "HCI_Entry";
+        public const string CML_Entry = "CML_Entry";
+
         public static string GetBcsPartColor(string id) { return string.Format("{0}{1}", BCS_PartColors, id); }
-        public static string GetErsEntry(string id) { return string.Format("{0}{1}", ERS_Entries, id); }
         public static string GetPscEntry(string charaID) { return string.Format("{0}_{1}", PSC_Spec_Entry, charaID); }
     }
 }

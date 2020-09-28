@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace Xv2CoreLib.TTB
@@ -111,7 +109,7 @@ namespace Xv2CoreLib.TTB
                     if (name5 != -1 && name5 < stringSize)
                         _event.Voice5 = StringEx.GetString(bytes, name5 + 16, false);
 
-                    entry.Events.Add(_event);
+                    entry.SubEntries.Add(_event);
                     eventDataStart += 116;
                 }
 
@@ -168,20 +166,22 @@ namespace Xv2CoreLib.TTB
 
             foreach (var entry in Entries)
             {
-                if (entry.Events == null) entry.Events = new List<TTB_Event>();
+                if (entry.SubEntries == null) entry.SubEntries = new List<TTB_Event>();
 
-                ttbEntryBytes.AddRange(BitConverter.GetBytes(entry.Events.Count));
+                ttbEntryBytes.AddRange(BitConverter.GetBytes(entry.SubEntries.Count));
                 ttbEntryBytes.AddRange(BitConverter.GetBytes(dataStartOffsetCalc));
                 ttbEntryBytes.AddRange(BitConverter.GetBytes(currentIdx));
                 ttbEntryBytes.AddRange(BitConverter.GetBytes(entry.CmsID));
 
-                currentIdx += entry.Events.Count;
+                currentIdx += entry.SubEntries.Count;
             }
 
             //Events
             foreach(var entry in Entries)
             {
-                foreach(var _event in entry.Events)
+                entry.SubEntries.Sort((x, y) => x.SortID - y.SortID);
+
+                foreach (var _event in entry.SubEntries)
                 {
                     ttbEntryBytes.AddRange(BitConverter.GetBytes(_event.SortID));
                     ttbEntryBytes.AddRange(BitConverter.GetBytes(_event.Cms_Id1));
@@ -260,7 +260,7 @@ namespace Xv2CoreLib.TTB
     }
 
     [YAXSerializeAs("Entry")]
-    public class TTB_Entry : IInstallable
+    public class TTB_Entry : IInstallable_2<TTB_Event>, IInstallable
     {
         #region NonSerialized
         [YAXDontSerialize]
@@ -277,8 +277,9 @@ namespace Xv2CoreLib.TTB
         [YAXSerializeAs("Cms_Id")]
         public string I_12 { get; set; } //12
 
+        [BindingSubList]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Event")]
-        public List<TTB_Event> Events { get; set; } = new List<TTB_Event>();
+        public List<TTB_Event> SubEntries { get; set; } = new List<TTB_Event>();
     }
 
     [YAXSerializeAs("Event")]

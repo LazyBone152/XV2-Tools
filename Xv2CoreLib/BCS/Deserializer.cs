@@ -346,11 +346,12 @@ namespace Xv2CoreLib.BCS
                 bytes.AddRange(Utils.ConvertToByteArray(_i_32, 4));
                 bytes.AddRange(BitConverter.GetBytes(part.F_36));
                 bytes.AddRange(BitConverter.GetBytes(part.F_40));
-                bytes.AddRange(new byte[8]);
+                bytes.AddRange(BitConverter.GetBytes(part.I_44));
+                bytes.AddRange(BitConverter.GetBytes(part.I_48));
+
                 if (part.Str_52.Length > 4)
                 {
-                    Console.WriteLine(String.Format("\"{0}\" exceeds the maximum allowed length of 4 for the paramater \"Name\"", part.Str_52));
-                    Utils.WaitForInputThenQuit();
+                    throw new InvalidDataException(String.Format("\"{0}\" exceeds the maximum allowed length of 4 for the paramater \"Name\"", part.Str_52));
                 }
                 bytes.AddRange(Encoding.ASCII.GetBytes(part.Str_52));
                 bytes.AddRange(new byte[4 - part.Str_52.Length]);

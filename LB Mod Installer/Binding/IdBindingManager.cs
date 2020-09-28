@@ -1,13 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Xv2CoreLib.CUS;
-using Xv2CoreLib.CMS;
-using Xv2CoreLib;
-using System.Reflection;
+﻿using LB_Mod_Installer.Installer;
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using Xv2CoreLib;
 using Xv2CoreLib.BCS;
-using LB_Mod_Installer.Installer;
+using Xv2CoreLib.CMS;
+using Xv2CoreLib.CUS;
 
 namespace LB_Mod_Installer.Binding
 {
@@ -126,7 +127,8 @@ namespace LB_Mod_Installer.Binding
         DefaultValue,
         X2MSkillID1,
         X2MSkillID2,
-        AutoPartSet
+        AutoPartSet,
+        Format
     }
 
     public enum ErrorHandling
@@ -181,7 +183,32 @@ namespace LB_Mod_Installer.Binding
         }
 
         //Binding
-        private string ParseBinding<T>(string binding, string comment, string section, string filePath, IEnumerable<T> entries1, IEnumerable<T> entries2, bool allowAutoId = true, ushort maxId = ushort.MaxValue, List<string> usedIds = null) where T : IInstallable
+        private string ProcessStringBinding<T>(string str, string comment, string filePath, IEnumerable<T> entries1, IEnumerable<T> entries2, bool allowAutoId = true, ushort maxId = ushort.MaxValue, List<string> usedIds = null) where T : IInstallable
+        {
+            //New and improved binding processing method.
+            //Now supports multiple bindings within a single string
+
+            while (HasBinding(str))
+            {
+                int startPos = str.IndexOf('{');
+                int endPos = str.IndexOf('}');
+
+                string startStr = str.Substring(0, startPos);
+                string endStr = str.Substring(endPos);
+                string binding = str.Substring(startPos, endPos - startPos);
+
+                binding = ParseBinding(binding, comment, filePath, entries1, entries2, allowAutoId, maxId, usedIds);
+
+                if (IsBinding(binding))
+                    throw new InvalidDataException("ProcessStringBinding: unexpected result. Binding was not successfuly parsed.");
+
+                str = $"{startStr}{binding}{endStr}";
+            }
+
+            return str;
+        }
+
+        private string ParseBinding<T>(string binding, string comment, string filePath, IEnumerable<T> entries1, IEnumerable<T> entries2, bool allowAutoId = true, ushort maxId = ushort.MaxValue, List<string> usedIds = null) where T : IInstallable
         {
             if (IsBinding(binding))
             {
@@ -192,10 +219,15 @@ namespace LB_Mod_Installer.Binding
                 List<BindingValue> bindings = ProcessBinding(binding, comment, originalBinding);
                 bindings = ValidateBindings(bindings, comment, originalBinding);
 
+                string formating = "0";
+
                 foreach (var b in bindings)
                 {
                     switch (b.Function)
                     {
+                        case Function.Format:
+                            formating = b.GetArgument1();
+                            break;
                         case Function.SetAlias:
                             Aliases.Add(new AliasValue() { ID = ID, Alias = b.GetArgument1() });
                             break;
@@ -298,7 +330,7 @@ namespace LB_Mod_Installer.Binding
                     ID = defaultValue;
                 }
 
-                return ID.ToString();
+                return ApplyFormatting(ID, formating);
             }
             else
             {
@@ -379,6 +411,9 @@ namespace LB_Mod_Installer.Binding
                     case "autopartset":
                         bindings.Add(new BindingValue() { Function = Function.AutoPartSet, Arguments = arguments });
                         break;
+                    case "format":
+                        bindings.Add(new BindingValue() { Function = Function.Format, Arguments = arguments });
+                        break;
                     default:
                         throw new FormatException(String.Format("Invalid ID Binding Function (Function = {0}, Argument = {1})\nFull binding: {2}", function, argument, originalBinding));
                 }
@@ -396,20 +431,38 @@ namespace LB_Mod_Installer.Binding
             if (binding[0] == '{' || binding[binding.Length - 1] == '}') return true;
             return false;
         }
-        
+
+        private bool HasBinding(string binding)
+        {
+            if (string.IsNullOrWhiteSpace(binding)) return false;
+            return (binding.Contains('{') && binding.Contains('}'));
+        }
+
         private List<BindingValue> ValidateBindings(List<BindingValue> bindings, string comment, string originalBinding)
         {
             //Ensures the bindings are valid, and orders them correctly so the alias function comes last (if present)
-            //Entries must be ordered like this: Error > ID > Alias
+            //Entries must be ordered like this: Error > ID > Format > Alias
+
+            //Move Format
+            for (int i = 0; i < bindings.Count; i++)
+            {
+                if (bindings[i].Function == Function.Format)
+                {
+                    var function = bindings[i];
+                    bindings.RemoveAt(i);
+                    bindings.Add(function);
+                    break;
+                }
+            }
 
             //Move Alias
-            for(int i = 0; i < bindings.Count; i++)
+            for (int i = 0; i < bindings.Count; i++)
             {
-                if(bindings[i].Function == Function.SetAlias)
+                if (bindings[i].Function == Function.SetAlias)
                 {
-                    var alias = bindings[i];
+                    var function = bindings[i];
                     bindings.RemoveAt(i);
-                    bindings.Add(alias);
+                    bindings.Add(function);
                     break;
                 }
             }
@@ -489,7 +542,6 @@ namespace LB_Mod_Installer.Binding
 
             return bindings;
         }
-
 
         //Function Helpers
         private int GetAliasId(string alias, string comment)
@@ -683,6 +735,37 @@ namespace LB_Mod_Installer.Binding
             return false;
         }
         
+        private string ApplyFormatting(int value, string formatting)
+        {
+            switch (formatting)
+            {
+                case "0":
+                    return value.ToString();
+                case "1":
+                    return value.ToString("D1");
+                case "2":
+                    return value.ToString("D2");
+                case "3":
+                    return value.ToString("D3");
+                case "4":
+                    return value.ToString("D4");
+                case "5":
+                    return value.ToString("D5");
+                case "6":
+                    return value.ToString("D6");
+                case "7":
+                    return value.ToString("D7");
+                case "8":
+                    return value.ToString("D8");
+                case "9":
+                    return value.ToString("D9");
+                case "10":
+                    return value.ToString("D10");
+                default:
+                    throw new Exception("ApplyFormatting: Invalid formating. Please use a number between 1 and 10.");
+            }
+        }
+
         //Class parsing
         /// <summary>
         /// Parse the bindings on all string properties.
@@ -691,9 +774,9 @@ namespace LB_Mod_Installer.Binding
         /// <param name="installList">The entries that are being installed (that have the bindings).</param>
         /// <param name="binaryList">The entries that are in the binary list (that we are going to install into).</param>
         /// <param name="filePath">The file path. Used for tracking.</param>
-        /// <param name="section">The section of the file. Used for tracking.</param>
         /// <param name="usedIDs">(Optional) A list of all IDs that are used. This overwrites the default behaviour of checking the Index property on installList and binaryList entries when calculating AutoIDs.</param>
-        public void ParseProperties<T>(IList<T> installList, IList<T> binaryList, string filePath, string section, List<string> usedIDs = null) where T : IInstallable
+        /// 
+        public void ParseProperties<T>(IList<T> installList, IList<T> binaryList, string filePath, List<string> usedIDs = null) where T : IInstallable
         {
             //A bit messy for now... clean it up later
             if (installList == null) return;
@@ -720,11 +803,11 @@ namespace LB_Mod_Installer.Binding
                                 if (attr.Length > 0)
                                 {
                                     //Has BindingAutoId attribute.
-                                    prop.SetValue(installEntry, ParseBinding((string)value, string.Format("{0}", prop.Name), section, filePath, installList, binaryList, true, attr[0].MaxId, usedIDs).ToString());
+                                    prop.SetValue(installEntry, ProcessStringBinding((string)value, string.Format("{0}", prop.Name), filePath, installList, binaryList, true, attr[0].MaxId, usedIDs).ToString());
                                 }
                                 else
                                 {
-                                    prop.SetValue(installEntry, ParseBinding<T>((string)value, string.Format("{0}", prop.Name), section, filePath, null, null, false, ushort.MaxValue, usedIDs).ToString());
+                                    prop.SetValue(installEntry, ProcessStringBinding<T>((string)value, string.Format("{0}", prop.Name), filePath, null, null, false, ushort.MaxValue, usedIDs).ToString());
                                 }
                             }
                         }
@@ -740,7 +823,7 @@ namespace LB_Mod_Installer.Binding
                             //This property needs to have its props parsed.
                             object objectToParse = prop.GetValue(installEntry);
 
-                            ParseProperties_RecursiveSingle<T>(objectToParse, section, filePath);
+                            ParseProperties_RecursiveSingle<T>(objectToParse, filePath);
                         }
 
                         if(bindingSubListAtr.Length > 0)
@@ -748,7 +831,7 @@ namespace LB_Mod_Installer.Binding
                             object objectToParse = prop.GetValue(installEntry);
 
                             if(objectToParse is IEnumerable list)
-                                ParseProperties_RecursiveList<T>(list, section, filePath);
+                                ParseProperties_RecursiveList<T>(list, filePath);
                         }
                     }
                 }
@@ -757,16 +840,16 @@ namespace LB_Mod_Installer.Binding
             RemoveNullTokenEntries(installList);
         }
 
-        private void ParseProperties_RecursiveList<T>(IEnumerable list, string section, string filePath) where T : IInstallable
+        private void ParseProperties_RecursiveList<T>(IEnumerable list, string filePath) where T : IInstallable
         {
             foreach(var obj in list)
             {
                 if(obj != null)
-                    ParseProperties_RecursiveSingle<T>(obj, section, filePath);
+                    ParseProperties_RecursiveSingle<T>(obj, filePath);
             }
         }
 
-        private void ParseProperties_RecursiveSingle<T>(object obj, string section, string filePath) where T : IInstallable
+        private void ParseProperties_RecursiveSingle<T>(object obj, string filePath) where T : IInstallable
         {
             //This property needs to have its props parsed.
             PropertyInfo[] childProps = obj.GetType().GetProperties();
@@ -778,7 +861,7 @@ namespace LB_Mod_Installer.Binding
                     if(childProp.PropertyType == typeof(string))
                     {
                         object value = childProp.GetValue(obj);
-                        childProp.SetValue(obj, ParseBinding<T>((string)value, string.Format("{0}", childProp.Name), section, filePath, null, null, false, ushort.MaxValue).ToString());
+                        childProp.SetValue(obj, ProcessStringBinding<T>((string)value, string.Format("{0}", childProp.Name), filePath, null, null, false, ushort.MaxValue).ToString());
                     }
                     else if(childProp.PropertyType.IsClass)
                     {
@@ -788,12 +871,12 @@ namespace LB_Mod_Installer.Binding
 
                         if(bindingSubClassAtr.Length > 0 && value != null)
                         {
-                            ParseProperties_RecursiveSingle<T>(value, section, filePath);
+                            ParseProperties_RecursiveSingle<T>(value, filePath);
                         }
                         if (bindingSubListAtr.Length > 0 && value != null)
                         {
                             if(value is IEnumerable list)
-                                ParseProperties_RecursiveList<T>(list, section, filePath);
+                                ParseProperties_RecursiveList<T>(list, filePath);
                         }
                     }
                 }

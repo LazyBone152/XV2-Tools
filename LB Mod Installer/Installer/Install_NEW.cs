@@ -41,6 +41,11 @@ using Xv2CoreLib.OBL;
 using Xv2CoreLib.ACB_NEW;
 using Xv2CoreLib.PAL;
 using LB_Mod_Installer.Installer.Music;
+using Xv2CoreLib.TTB;
+using Xv2CoreLib.TTC;
+using Xv2CoreLib.SEV;
+using Xv2CoreLib.HCI;
+using Xv2CoreLib.CML;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -86,8 +91,6 @@ namespace LB_Mod_Installer.Installer
         internal FileCacheManager fileManager;
         internal MsgComponentInstall msgComponentInstall;
         internal IdBindingManager bindingManager;
-
-        List<string> lightEmaFixed = new List<string>(); //Keep track of all files that have been fixed so we dont waste time on them
 
         private bool useJungle1 = false;
         private bool useJungle2 = false;
@@ -316,6 +319,21 @@ namespace LB_Mod_Installer.Installer
                 case ".pal":
                     Install_PAL(xmlPath, installPath);
                     break;
+                case ".ttb":
+                    Install_TTB(xmlPath, installPath);
+                    break;
+                case ".ttc":
+                    Install_TTC(xmlPath, installPath);
+                    break;
+                case ".sev":
+                    Install_SEV(xmlPath, installPath);
+                    break;
+                case ".hci":
+                    Install_HCI(xmlPath, installPath);
+                    break;
+                case ".cml":
+                    Install_CML(xmlPath, installPath);
+                    break;
                 default:
                     throw new InvalidDataException(string.Format("The filetype of \"{0}\" is not supported.", xmlPath));
             }
@@ -417,7 +435,7 @@ namespace LB_Mod_Installer.Installer
                 IDB_File binaryFile = (IDB_File)GetParsedFile<IDB_File>(installPath);
 
                 //Parse bindings
-                bindingManager.ParseProperties(xmlFile.Entries, binaryFile.Entries, installPath, Sections.IDB_Entries);
+                bindingManager.ParseProperties(xmlFile.Entries, binaryFile.Entries, installPath);
 
                 //MsgComponent Code
                 foreach(var idbEntry in xmlFile.Entries)
@@ -448,12 +466,12 @@ namespace LB_Mod_Installer.Installer
                 CUS_File binaryFile = (CUS_File)GetParsedFile<CUS_File>(installPath);
 
                 //Parse bindings
-                bindingManager.ParseProperties(xmlFile.Skillsets, binaryFile.Skillsets, installPath, Sections.CUS_Skillsets);
-                bindingManager.ParseProperties(xmlFile.SuperSkills, binaryFile.SuperSkills, installPath, Sections.CUS_SuperSkills);
-                bindingManager.ParseProperties(xmlFile.UltimateSkills, binaryFile.UltimateSkills, installPath, Sections.CUS_UltimateSkills);
-                bindingManager.ParseProperties(xmlFile.EvasiveSkills, binaryFile.EvasiveSkills, installPath, Sections.CUS_EvasiveSkills);
-                bindingManager.ParseProperties(xmlFile.BlastSkills, binaryFile.BlastSkills, installPath, Sections.CUS_BlastSkills);
-                bindingManager.ParseProperties(xmlFile.AwokenSkills, binaryFile.AwokenSkills, installPath, Sections.CUS_AwokenSkills);
+                bindingManager.ParseProperties(xmlFile.Skillsets, binaryFile.Skillsets, installPath);
+                bindingManager.ParseProperties(xmlFile.SuperSkills, binaryFile.SuperSkills, installPath);
+                bindingManager.ParseProperties(xmlFile.UltimateSkills, binaryFile.UltimateSkills, installPath);
+                bindingManager.ParseProperties(xmlFile.EvasiveSkills, binaryFile.EvasiveSkills, installPath);
+                bindingManager.ParseProperties(xmlFile.BlastSkills, binaryFile.BlastSkills, installPath);
+                bindingManager.ParseProperties(xmlFile.AwokenSkills, binaryFile.AwokenSkills, installPath);
 
                 //Install entries
                 InstallEntries(xmlFile.Skillsets, binaryFile.Skillsets, installPath, Sections.CUS_Skillsets);
@@ -497,8 +515,8 @@ namespace LB_Mod_Installer.Installer
                     binaryFile.Bodies = new List<Body>();
 
                 //Parse bindings
-                bindingManager.ParseProperties(xmlFile.PartSets, binaryFile.PartSets, installPath, Sections.BCS_PartSets);
-                bindingManager.ParseProperties(xmlFile.Bodies, binaryFile.Bodies, installPath, Sections.BCS_Bodies);
+                bindingManager.ParseProperties(xmlFile.PartSets, binaryFile.PartSets, installPath);
+                bindingManager.ParseProperties(xmlFile.Bodies, binaryFile.Bodies, installPath);
 
                 //Install entries
                 InstallEntries(xmlFile.PartSets, binaryFile.PartSets, installPath, Sections.BCS_PartSets);
@@ -510,7 +528,7 @@ namespace LB_Mod_Installer.Installer
                     for (int i = 0; i < xmlFile.Part_Colors.Count; i++)
                     {
                         PartColor binPartColor = binaryFile.GetPartColors(xmlFile.Part_Colors[i].Index, xmlFile.Part_Colors[i].Str_00);
-                        bindingManager.ParseProperties(xmlFile.Part_Colors[i]._Colors, binPartColor._Colors, installPath, Sections.GetBcsPartColor(xmlFile.Part_Colors[i].Index));
+                        bindingManager.ParseProperties(xmlFile.Part_Colors[i]._Colors, binPartColor._Colors, installPath);
 
                         if(xmlFile.Part_Colors[i]._Colors != null)
                         {
@@ -541,30 +559,16 @@ namespace LB_Mod_Installer.Installer
                 ERS_File xmlFile = zipManager.DeserializeXmlFromArchive<ERS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
                 ERS_File binaryFile = (ERS_File)GetParsedFile<ERS_File>(installPath);
 
-                //Install ErsEntries
-                if (xmlFile.Entries != null)
-                {
-                    for (int i = 0; i < xmlFile.Entries.Count; i++)
-                    {
-                        var binEntry = binaryFile.GetMainEntry(xmlFile.Entries[i].Index);
+                //Parse bindings
+                bindingManager.ParseProperties(xmlFile.Entries, binaryFile.Entries, installPath);
 
-                        bindingManager.ParseProperties(xmlFile.Entries[i].SubEntries, binEntry.SubEntries, installPath, Sections.GetErsEntry(xmlFile.Entries[i].Index));
+                InstallSubEntries<ERS_MainTableEntry, ERS_MainTable>(xmlFile.Entries, binaryFile.Entries, installPath, Sections.ERS_Entries);
 
-                        if (xmlFile.Entries[i].SubEntries != null)
-                        {
-                            foreach (var subentry in xmlFile.Entries[i].SubEntries)
-                            {
-                                GeneralInfo.Tracker.AddID(installPath, Sections.GetErsEntry(xmlFile.Entries[i].Index), subentry.Index);
-                                binEntry.AddEntry(subentry);
-                            }
-                        }
-                    }
-                }
             }
 #if !DEBUG
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} install phase ({1}).", ErrorCode.ERS, xmlPath);
+                string error = string.Format("Failed at ERS install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
@@ -580,7 +584,7 @@ namespace LB_Mod_Installer.Installer
                 CMS_File binaryFile = (CMS_File)GetParsedFile<CMS_File>(installPath);
 
                 //Parse bindings
-                bindingManager.ParseProperties(xmlFile.CMS_Entries, binaryFile.CMS_Entries, installPath, Sections.CMS_Entries);
+                bindingManager.ParseProperties(xmlFile.CMS_Entries, binaryFile.CMS_Entries, installPath);
 
                 //MsgComponent Code
                 foreach (var msgEntry in xmlFile.CMS_Entries)
@@ -595,7 +599,7 @@ namespace LB_Mod_Installer.Installer
 #if !DEBUG
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} install phase ({1}).", ErrorCode.CMS, xmlPath);
+                string error = string.Format("Failed at CMS install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
@@ -618,7 +622,7 @@ namespace LB_Mod_Installer.Installer
                 }
 
                 //Parse bindings
-                bindingManager.ParseProperties(xmlFile.BacEntries, binaryFile.BacEntries, installPath, Sections.BAC_Entries);
+                bindingManager.ParseProperties(xmlFile.BacEntries, binaryFile.BacEntries, installPath);
 
                 //Install entries
                 if(xmlFile.BacEntries != null)
@@ -633,7 +637,7 @@ namespace LB_Mod_Installer.Installer
 #if !DEBUG
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} install phase ({1}).", ErrorCode.BAC, xmlPath);
+                string error = string.Format("Failed at BAC install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
@@ -655,7 +659,7 @@ namespace LB_Mod_Installer.Installer
                     foreach(var pscEntry in config.PscEntries)
                     {
                         var binaryPscConfig = binaryConfig.GetPscEntry(pscEntry.Index);
-                        bindingManager.ParseProperties(pscEntry.PscSpecEntries, binaryPscConfig.PscSpecEntries, installPath, Sections.GetPscEntry(pscEntry.Index));
+                        bindingManager.ParseProperties(pscEntry.PscSpecEntries, binaryPscConfig.PscSpecEntries, installPath);
                         InstallEntries(pscEntry.PscSpecEntries, binaryPscConfig.PscSpecEntries, installPath, Sections.GetPscEntry(pscEntry.Index));
                     }
                 }
@@ -678,12 +682,6 @@ namespace LB_Mod_Installer.Installer
                 //Allows the eepk installer to reuse textures and assets by matching names.
                 EepkToolInterlop.TextureImportMatchNames = true;
                 EepkToolInterlop.AssetReuseMatchName = true;
-
-                //Use LightEmaFix if needed
-                //if (GeneralInfo.UseLightEmaFix)
-                //{
-                //    Patch_EepkEmaFix(installPath);
-                //}
 
                 //Load files
                 EffectContainerFile installFile;
@@ -725,7 +723,7 @@ namespace LB_Mod_Installer.Installer
                 EMB_File binaryFile = (EMB_File)GetParsedFile<EMB_File>(installPath);
 
                 //Parse bindings
-                bindingManager.ParseProperties(xmlFile.Entry, binaryFile.Entry, installPath, Sections.EMB_Entry);
+                bindingManager.ParseProperties(xmlFile.Entry, binaryFile.Entry, installPath);
 
                 //Install entries
                 if (xmlFile.Entry != null)
@@ -793,7 +791,7 @@ namespace LB_Mod_Installer.Installer
                 binaryFile.ConvertToXv2();
 
                 //Parse bindings
-                bindingManager.ParseProperties(xmlFile.BDM_Entries, binaryFile.BDM_Entries, installPath, Sections.BDM_Entries);
+                bindingManager.ParseProperties(xmlFile.BDM_Entries, binaryFile.BDM_Entries, installPath);
 
                 //Install entries
                 InstallEntries(xmlFile.BDM_Entries, binaryFile.BDM_Entries, installPath, Sections.BDM_Entries);
@@ -817,7 +815,7 @@ namespace LB_Mod_Installer.Installer
                 BEV_File binaryFile = (BEV_File)GetParsedFile<BEV_File>(installPath);
 
                 //Parse bindings
-                bindingManager.ParseProperties(xmlFile.Entries, binaryFile.Entries, installPath, Sections.BEV_Entries);
+                bindingManager.ParseProperties(xmlFile.Entries, binaryFile.Entries, installPath);
 
                 //Install entries
                 InstallEntries(xmlFile.Entries, binaryFile.Entries, installPath, Sections.BEV_Entries);
@@ -841,7 +839,7 @@ namespace LB_Mod_Installer.Installer
                 BPE_File binaryFile = (BPE_File)GetParsedFile<BPE_File>(installPath);
 
                 //Parse bindings
-                bindingManager.ParseProperties(xmlFile.Entries, binaryFile.Entries, installPath, Sections.BPE_Entries);
+                bindingManager.ParseProperties(xmlFile.Entries, binaryFile.Entries, installPath);
 
                 //Install entries
                 InstallEntries(xmlFile.Entries, binaryFile.Entries, installPath, Sections.BPE_Entries);
@@ -872,7 +870,7 @@ namespace LB_Mod_Installer.Installer
                 }
 
                 //Parse bindings
-                bindingManager.ParseProperties(xmlFile.BSA_Entries, binaryFile.BSA_Entries, installPath, Sections.BSA_Entries);
+                bindingManager.ParseProperties(xmlFile.BSA_Entries, binaryFile.BSA_Entries, installPath);
 
                 //Install entries
                 InstallEntries(xmlFile.BSA_Entries, binaryFile.BSA_Entries, installPath, Sections.BSA_Entries);
@@ -896,7 +894,7 @@ namespace LB_Mod_Installer.Installer
                 CNC_File binaryFile = (CNC_File)GetParsedFile<CNC_File>(installPath);
 
                 //Parse bindings
-                bindingManager.ParseProperties(xmlFile.CncEntries, binaryFile.CncEntries, installPath, Sections.CNC_Entries);
+                bindingManager.ParseProperties(xmlFile.CncEntries, binaryFile.CncEntries, installPath);
 
                 //Install entries
                 InstallEntries(xmlFile.CncEntries, binaryFile.CncEntries, installPath, Sections.CNC_Entries);
@@ -920,7 +918,7 @@ namespace LB_Mod_Installer.Installer
                 CNS_File binaryFile = (CNS_File)GetParsedFile<CNS_File>(installPath);
 
                 //Parse bindings
-                bindingManager.ParseProperties(xmlFile.CnsEntries, binaryFile.CnsEntries, installPath, Sections.CNS_Entries);
+                bindingManager.ParseProperties(xmlFile.CnsEntries, binaryFile.CnsEntries, installPath);
 
                 //Install entries
                 InstallEntries(xmlFile.CnsEntries, binaryFile.CnsEntries, installPath, Sections.CNS_Entries);
@@ -944,7 +942,7 @@ namespace LB_Mod_Installer.Installer
                 CSO_File binaryFile = (CSO_File)GetParsedFile<CSO_File>(installPath);
 
                 //Parse bindings
-                bindingManager.ParseProperties(xmlFile.CsoEntries, binaryFile.CsoEntries, installPath, Sections.CSO_Entries);
+                bindingManager.ParseProperties(xmlFile.CsoEntries, binaryFile.CsoEntries, installPath);
 
                 //Install entries
                 InstallEntries(xmlFile.CsoEntries, binaryFile.CsoEntries, installPath, Sections.CSO_Entries);
@@ -968,7 +966,7 @@ namespace LB_Mod_Installer.Installer
                 EAN_File binaryFile = (EAN_File)GetParsedFile<EAN_File>(installPath);
 
                 //Parse bindings
-                bindingManager.ParseProperties(xmlFile.Animations, binaryFile.Animations, installPath, Sections.EAN_Entries);
+                bindingManager.ParseProperties(xmlFile.Animations, binaryFile.Animations, installPath);
 
                 //Install entries
                 InstallEntries(xmlFile.Animations, binaryFile.Animations, installPath, Sections.EAN_Entries);
@@ -992,7 +990,7 @@ namespace LB_Mod_Installer.Installer
                 MSG_File binaryFile = (MSG_File)GetParsedFile<MSG_File>(installPath);
 
                 //Parse bindings
-                bindingManager.ParseProperties(xmlFile.MSG_Entries, binaryFile.MSG_Entries, installPath, Sections.MSG_Entries);
+                bindingManager.ParseProperties(xmlFile.MSG_Entries, binaryFile.MSG_Entries, installPath);
 
                 //Install entries
                 InstallEntries(xmlFile.MSG_Entries, binaryFile.MSG_Entries, installPath, Sections.MSG_Entries);
@@ -1016,8 +1014,8 @@ namespace LB_Mod_Installer.Installer
                 AUR_File binaryFile = (AUR_File)GetParsedFile<AUR_File>(installPath);
 
                 //Parse bindings
-                bindingManager.ParseProperties(xmlFile.Auras, binaryFile.Auras, installPath, Sections.AUR_Aura);
-                bindingManager.ParseProperties(xmlFile.CharacterAuras, binaryFile.CharacterAuras, installPath, Sections.AUR_Chara);
+                bindingManager.ParseProperties(xmlFile.Auras, binaryFile.Auras, installPath);
+                bindingManager.ParseProperties(xmlFile.CharacterAuras, binaryFile.CharacterAuras, installPath);
 
                 //Install entries
                 InstallEntries(xmlFile.Auras, binaryFile.Auras, installPath, Sections.AUR_Aura);
@@ -1042,7 +1040,7 @@ namespace LB_Mod_Installer.Installer
                 PUP_File binaryFile = (PUP_File)GetParsedFile<PUP_File>(installPath);
 
                 //Parse bindings
-                bindingManager.ParseProperties(xmlFile.PupEntries, binaryFile.PupEntries, installPath, Sections.PUP_Entry);
+                bindingManager.ParseProperties(xmlFile.PupEntries, binaryFile.PupEntries, installPath);
 
                 //Install entries
                 InstallEntries(xmlFile.PupEntries, binaryFile.PupEntries, installPath, Sections.PUP_Entry);
@@ -1066,11 +1064,11 @@ namespace LB_Mod_Installer.Installer
                 TSD_File binaryFile = (TSD_File)GetParsedFile<TSD_File>(installPath);
 
                 //Parse bindings
-                bindingManager.ParseProperties(xmlFile.Globals, binaryFile.Globals, installPath, Sections.TSD_Global);
-                bindingManager.ParseProperties(xmlFile.Constants, binaryFile.Constants, installPath, Sections.TSD_Constant);
-                bindingManager.ParseProperties(xmlFile.Events, binaryFile.Events, installPath, Sections.TSD_Event);
-                bindingManager.ParseProperties(xmlFile.Zones, binaryFile.Zones, installPath, Sections.TSD_Zone);
-                bindingManager.ParseProperties(xmlFile.Triggers, binaryFile.Triggers, installPath, Sections.TSD_Trigger);
+                bindingManager.ParseProperties(xmlFile.Globals, binaryFile.Globals, installPath);
+                bindingManager.ParseProperties(xmlFile.Constants, binaryFile.Constants, installPath);
+                bindingManager.ParseProperties(xmlFile.Events, binaryFile.Events, installPath);
+                bindingManager.ParseProperties(xmlFile.Zones, binaryFile.Zones, installPath);
+                bindingManager.ParseProperties(xmlFile.Triggers, binaryFile.Triggers, installPath);
 
                 //Install entries
                 InstallEntries(xmlFile.Triggers, binaryFile.Triggers, installPath, Sections.TSD_Trigger);
@@ -1102,10 +1100,10 @@ namespace LB_Mod_Installer.Installer
                 usedIds.AddRange(binaryFile.GetAllUsedIDs());
 
                 //Parse bindings
-                bindingManager.ParseProperties(xmlFile.Actions, binaryFile.Actions, installPath, Sections.TNL_Action);
-                bindingManager.ParseProperties(xmlFile.Characters, binaryFile.Characters, installPath, Sections.TNL_Character, usedIds);
-                bindingManager.ParseProperties(xmlFile.Teachers, binaryFile.Teachers, installPath, Sections.TNL_Teacher, usedIds);
-                bindingManager.ParseProperties(xmlFile.Objects, binaryFile.Objects, installPath, Sections.TNL_Object, usedIds);
+                bindingManager.ParseProperties(xmlFile.Actions, binaryFile.Actions, installPath);
+                bindingManager.ParseProperties(xmlFile.Characters, binaryFile.Characters, installPath, usedIds);
+                bindingManager.ParseProperties(xmlFile.Teachers, binaryFile.Teachers, installPath, usedIds);
+                bindingManager.ParseProperties(xmlFile.Objects, binaryFile.Objects, installPath, usedIds);
 
                 //Install entries
                 InstallEntries(xmlFile.Characters, binaryFile.Characters, installPath, Sections.TNL_Character);
@@ -1147,10 +1145,10 @@ namespace LB_Mod_Installer.Installer
                 usedCharacterIds.AddRange(binaryFile.GetAllUsedCharacterIds());
 
                 //Parse bindings
-                bindingManager.ParseProperties(xmlFile.Collections, binaryFile.Collections, installPath, Sections.QXD_Collection, usedColIds);
-                bindingManager.ParseProperties(xmlFile.Quests, binaryFile.Quests, installPath, Sections.QXD_Quest);
-                bindingManager.ParseProperties(xmlFile.Characters1, binaryFile.Characters1, installPath, Sections.QXD_Character1, usedCharacterIds);
-                bindingManager.ParseProperties(xmlFile.Characters2, binaryFile.Characters2, installPath, Sections.QXD_Character2, usedCharacterIds);
+                bindingManager.ParseProperties(xmlFile.Collections, binaryFile.Collections, installPath, usedColIds);
+                bindingManager.ParseProperties(xmlFile.Quests, binaryFile.Quests, installPath);
+                bindingManager.ParseProperties(xmlFile.Characters1, binaryFile.Characters1, installPath, usedCharacterIds);
+                bindingManager.ParseProperties(xmlFile.Characters2, binaryFile.Characters2, installPath, usedCharacterIds);
 
                 //Install entries
                 InstallEntries(xmlFile.Quests, binaryFile.Quests, installPath, Sections.QXD_Quest);
@@ -1177,7 +1175,7 @@ namespace LB_Mod_Installer.Installer
                 PAL_File binaryFile = (PAL_File)GetParsedFile<PAL_File>(installPath);
 
                 //Parse bindings
-                bindingManager.ParseProperties(xmlFile.PalEntries, binaryFile.PalEntries, installPath, Sections.PAL_Entry);
+                bindingManager.ParseProperties(xmlFile.PalEntries, binaryFile.PalEntries, installPath);
 
                 //Install entries
                 InstallEntries(xmlFile.PalEntries, binaryFile.PalEntries, installPath, Sections.PAL_Entry);
@@ -1186,6 +1184,130 @@ namespace LB_Mod_Installer.Installer
             catch (Exception ex)
             {
                 string error = string.Format("Failed at PAL install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
+        private void Install_TTB(string xmlPath, string installPath)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                TTB_File xmlFile = zipManager.DeserializeXmlFromArchive<TTB_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                TTB_File binaryFile = (TTB_File)GetParsedFile<TTB_File>(installPath);
+
+                //Parse bindings
+                bindingManager.ParseProperties(xmlFile.Entries, binaryFile.Entries, installPath);
+
+                //Install entries
+                InstallSubEntries<TTB_Event, TTB_Entry>(xmlFile.Entries, binaryFile.Entries, installPath, Sections.TTB_Entry);
+
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at TTB install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
+        private void Install_TTC(string xmlPath, string installPath)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                TTC_File xmlFile = zipManager.DeserializeXmlFromArchive<TTC_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                TTC_File binaryFile = (TTC_File)GetParsedFile<TTC_File>(installPath);
+
+                //Parse bindings
+                bindingManager.ParseProperties(xmlFile.Entries, binaryFile.Entries, installPath);
+
+                //Install entries
+                InstallEntries(xmlFile.Entries, binaryFile.Entries, installPath, Sections.TTC_Entry);
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at TTC install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
+        private void Install_SEV(string xmlPath, string installPath)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                SEV_File xmlFile = zipManager.DeserializeXmlFromArchive<SEV_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                SEV_File binaryFile = (SEV_File)GetParsedFile<SEV_File>(installPath);
+
+                //Parse bindings
+                bindingManager.ParseProperties(xmlFile.Entries, binaryFile.Entries, installPath);
+
+                //Install entries
+                InstallSubEntries<SEV_CharEvent, SEV_Entry>(xmlFile.Entries, binaryFile.Entries, installPath, Sections.SEV_Entry);
+
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at SEV install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
+        private void Install_HCI(string xmlPath, string installPath)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                HCI_File xmlFile = zipManager.DeserializeXmlFromArchive<HCI_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                HCI_File binaryFile = (HCI_File)GetParsedFile<HCI_File>(installPath);
+
+                //Parse bindings
+                bindingManager.ParseProperties(xmlFile.Entries, binaryFile.Entries, installPath);
+
+                //Install entries
+                InstallEntries<HCI_Entry>(xmlFile.Entries, binaryFile.Entries, installPath, Sections.HCI_Entry);
+
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at HCI install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
+        private void Install_CML(string xmlPath, string installPath)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                CML_File xmlFile = zipManager.DeserializeXmlFromArchive<CML_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                CML_File binaryFile = (CML_File)GetParsedFile<CML_File>(installPath);
+
+                //Parse bindings
+                bindingManager.ParseProperties(xmlFile.Entries, binaryFile.Entries, installPath);
+
+                //Install entries
+                InstallEntries(xmlFile.Entries, binaryFile.Entries, installPath, Sections.CML_Entry);
+
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at CML install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
@@ -1213,16 +1335,7 @@ namespace LB_Mod_Installer.Installer
                 GeneralInfo.Tracker.AddID(path, section, entryToInstall.Index);
 
                 //Find index
-                int index = -1;
-
-                for(int i = 0; i < destEntries.Count; i++)
-                {
-                    if(destEntries[i].Index == entryToInstall.Index)
-                    {
-                        index = i;
-                        break;
-                    }
-                }
+                int index = destEntries.IndexOf(destEntries.FirstOrDefault(x => x.Index == entryToInstall.Index));
 
                 //Install entry
                 if (index != -1)
@@ -1238,6 +1351,32 @@ namespace LB_Mod_Installer.Installer
             }
         }
 
+        private void InstallSubEntries<T, M>(IList<M> installEntries, IList<M> destEntries, string path, string section) where T : IInstallable, new() where M : IInstallable_2<T>, new()
+        {
+            if (installEntries == null) return;
+            if (destEntries == null) throw new InvalidOperationException(string.Format("InstallSubEntries: destEntries was null. Cannot install entries. ({0})", path));
+
+            foreach (var entryToInstall in installEntries) 
+            {
+                //Get index
+                int index = destEntries.IndexOf(destEntries.FirstOrDefault(x => x.Index == entryToInstall.Index));
+
+                //Create root entry if required
+                if(index == -1)
+                {
+                    destEntries.Add(new M() { Index = entryToInstall.Index, SubEntries = new List<T>() });
+                    index = destEntries.Count - 1;
+                }
+
+                //Install entries
+                if (entryToInstall.SubEntries == null) continue;
+
+                if (destEntries[index].SubEntries == null)
+                    destEntries[index].SubEntries = new List<T>();
+
+                InstallEntries<T>(entryToInstall.SubEntries, destEntries[index].SubEntries, path, $"{section}/{entryToInstall.Index}");
+            }
+        }
 
         //MSG Component Writers
         private IDB_Entry IdbMsgWriter(IDB_Entry IdbEntry, string filePath)
@@ -1318,37 +1457,6 @@ namespace LB_Mod_Installer.Installer
             return CmsEntry;
         }
 
-
-        //"Patches"
-        /// <summary>
-        /// Fix corrupted light.emas by restoring them from the CPK. Needed to fix damage done due to a bug with version 3.0 of the installer.
-        /// </summary>
-        private void Patch_EepkEmaFix(string path)
-        {
-            if (!GeneralInfo.isInstalled) return; //Only patch files if in update mode.
-            if (lightEmaFixed.Contains(path)) return; //File already patched.
-
-            lightEmaFixed.Add(path);
-            //Load files
-            EffectContainerFile binaryFile = (EffectContainerFile)GetParsedFile<EffectContainerFile>(path);
-            EffectContainerFile cpkFile = (EffectContainerFile)GetParsedFile<EffectContainerFile>(path, true);
-
-            if (binaryFile == null || cpkFile == null) return;
-
-            foreach(var ema in binaryFile.LightEma.Assets)
-            {
-                if(ema.Files.Count > 0)
-                {
-                    var assetFromCpk = cpkFile.LightEma.GetAsset(ema.FileNamesPreview);
-
-                    if (assetFromCpk != null)
-                    {
-                        ema.Files[0].EmaFile = assetFromCpk.Files[0].EmaFile;
-                    }
-                }
-            }
-                
-        }
 
 
         //File Handling. Methods for getting files from the game and parsing them.
@@ -1453,6 +1561,16 @@ namespace LB_Mod_Installer.Installer
                     return PAL_File.Parse(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".acb":
                     return ACB_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk), fileIO.GetFileFromGame(string.Format("{0}/{1}.awb", Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path)), false, onlyFromCpk));
+                case ".ttb":
+                    return TTB_File.Parse(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".ttc":
+                    return TTC_File.Parse(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".sev":
+                    return SEV_File.Parse(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".hci":
+                    return HCI_File.Parse(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".cml":
+                    return CML_File.Parse(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 default:
                     throw new InvalidDataException(String.Format("GetParsedFileFromGame: The filetype of \"{0}\" is not supported.", path));
             }
@@ -1510,6 +1628,16 @@ namespace LB_Mod_Installer.Installer
                     return ((OBL_File)data).SaveToBytes();
                 case ".pal":
                     return ((PAL_File)data).SaveToBytes();
+                case ".ttb":
+                    return ((TTB_File)data).SaveToBytes();
+                case ".ttc":
+                    return ((TTC_File)data).SaveToBytes();
+                case ".sev":
+                    return ((SEV_File)data).SaveToBytes();
+                case ".hci":
+                    return ((HCI_File)data).SaveToBytes();
+                case ".cml":
+                    return ((CML_File)data).SaveToBytes();
                 default:
                     throw new InvalidDataException(String.Format("GetBytesFromParsedFile: The filetype of \"{0}\" is not supported.", path));
             }

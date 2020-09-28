@@ -4114,10 +4114,9 @@ namespace Xv2CoreLib.BAC
         public string Type { get { return "BAC_Type27"; } }
 
 
-        [YAXAttributeFor("I_08")]
+        [YAXAttributeFor("SkillID")]
         [YAXSerializeAs("value")]
-        [YAXHexValue]
-        public ushort I_08 { get; set; }
+        public string I_08 { get; set; } //uint16
         [YAXAttributeFor("I_10")]
         [YAXSerializeAs("value")]
         [YAXHexValue]
@@ -4130,21 +4129,17 @@ namespace Xv2CoreLib.BAC
         [YAXSerializeAs("value")]
         [YAXHexValue]
         public ushort I_14 { get; set; }
-        [YAXAttributeFor("I_16")]
+        [YAXAttributeFor("SkillType")]
         [YAXSerializeAs("value")]
-        [YAXHexValue]
         public ushort I_16 { get; set; }
-        [YAXAttributeFor("I_18")]
+        [YAXAttributeFor("EffectID")]
         [YAXSerializeAs("value")]
-        [YAXHexValue]
         public ushort I_18 { get; set; }
-        [YAXAttributeFor("I_20")]
+        [YAXAttributeFor("FunctionDuration")]
         [YAXSerializeAs("value")]
-        [YAXHexValue]
         public ushort I_20 { get; set; }
-        [YAXAttributeFor("I_22")]
+        [YAXAttributeFor("Function")]
         [YAXSerializeAs("value")]
-        [YAXHexValue]
         public ushort I_22 { get; set; }
 
         public static List<BAC_Type27> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
@@ -4159,7 +4154,7 @@ namespace Xv2CoreLib.BAC
                     Duration = BitConverter.ToInt16(rawBytes, offset + 2),
                     I_04 = BitConverter.ToInt16(rawBytes, offset + 4),
                     Flags = BitConverter.ToInt16(rawBytes, offset + 6),
-                    I_08 = BitConverter.ToUInt16(rawBytes, offset + 8),
+                    I_08 = BitConverter.ToUInt16(rawBytes, offset + 8).ToString(),
                     I_10 = BitConverter.ToUInt16(rawBytes, offset + 10),
                     I_12 = BitConverter.ToUInt16(rawBytes, offset + 12),
                     I_14 = BitConverter.ToUInt16(rawBytes, offset + 14),
@@ -4185,7 +4180,7 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.Duration));
                 bytes.AddRange(BitConverter.GetBytes(type.I_04));
                 bytes.AddRange(BitConverter.GetBytes(type.Flags));
-                bytes.AddRange(BitConverter.GetBytes(type.I_08));
+                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(type.I_08)));
                 bytes.AddRange(BitConverter.GetBytes(type.I_10));
                 bytes.AddRange(BitConverter.GetBytes(type.I_12));
                 bytes.AddRange(BitConverter.GetBytes(type.I_14));

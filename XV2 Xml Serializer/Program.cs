@@ -35,7 +35,7 @@ namespace XV2_Xml_Serializer
             }
             
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
-            
+
             for (int i = 0; i < args.Count(); i++)
             {
                 fileLocation = args[i];

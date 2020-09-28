@@ -128,11 +128,13 @@ namespace Xv2CoreLib.ERS
     }
 
     [YAXSerializeAs("Entry")]
-    public class ERS_MainTable
+    public class ERS_MainTable : IInstallable_2<ERS_MainTableEntry>, IInstallable
     {
         #region WrappedProperties
         [YAXDontSerialize]
         public ushort ID { get { return ushort.Parse(Index); } set { Index = value.ToString(); } }
+        [YAXDontSerialize]
+        public int SortID { get { return ID; } }
         #endregion
 
         [YAXAttributeForClass]
@@ -143,8 +145,10 @@ namespace Xv2CoreLib.ERS
         [YAXDontSerializeIfNull]
         public List<string> Dummy { get; set; }
         //Count/size will be list.count
+
+        [BindingSubList]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "SubEntry")]
-        public List<ERS_MainTableEntry> SubEntries {get; set;}
+        public List<ERS_MainTableEntry> SubEntries { get; set; }
 
         public int offset;
 

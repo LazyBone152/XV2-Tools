@@ -33,6 +33,11 @@ using Xv2CoreLib.TNL;
 using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.QXD;
 using Xv2CoreLib.PAL;
+using Xv2CoreLib.TTB;
+using Xv2CoreLib.TTC;
+using Xv2CoreLib.SEV;
+using Xv2CoreLib.HCI;
+using Xv2CoreLib.CML;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -43,7 +48,6 @@ namespace LB_Mod_Installer.Installer
         public FileCacheManager fileManager { get; private set; }
         private Mod currentMod = GeneralInfo.Tracker.GetCurrentMod();
 
-        private bool jungleDeleteStarted = false;
 
         public Uninstall(MainWindow _parent, Xv2FileIO _fileIO, FileCacheManager _fileManager)
         {
@@ -237,6 +241,21 @@ namespace LB_Mod_Installer.Installer
                 case ".pal":
                     Uninstall_PAL(path, file);
                     break;
+                case ".ttb":
+                    Uninstall_TTB(path, file);
+                    break;
+                case ".ttc":
+                    Uninstall_TTC(path, file);
+                    break;
+                case ".sev":
+                    Uninstall_SEV(path, file);
+                    break;
+                case ".hci":
+                    Uninstall_HCI(path, file);
+                    break;
+                case ".cml":
+                    Uninstall_CML(path, file);
+                    break;
                 default:
                     throw new Exception(string.Format("The filetype of \"{0}\" is unsupported. Uninstall failed.\n\nThis mod was likely installed by a newer version of the installer.", path));
             }
@@ -371,19 +390,11 @@ namespace LB_Mod_Installer.Installer
                 ERS_File binaryFile = (ERS_File)GetParsedFile<ERS_File>(path, false);
                 ERS_File cpkBinFile = (ERS_File)GetParsedFile<ERS_File>(path, true);
 
-                foreach(var section in file.Sections)
-                {
-                    string id = section.FileSection.Split('_')[2];
-                    var binaryEntry = binaryFile.GetMainEntry(id);
-                    var ogEntry = cpkBinFile.GetMainEntry(id);
-
-                    if (binaryEntry != null)
-                        UninstallEntries(binaryEntry.SubEntries, (ogEntry != null) ? ogEntry.SubEntries : null, section.IDs);
-                }
+                UninstallSubEntries<ERS_MainTableEntry, ERS_MainTable>(binaryFile.Entries, (cpkBinFile != null) ? cpkBinFile.Entries : null, file, false);
             }
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} uninstall phase ({1}).", ErrorCode.ERS, path);
+                string error = string.Format("Failed at ERS uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }
@@ -922,14 +933,108 @@ namespace LB_Mod_Installer.Installer
             }
         }
 
+        private void Uninstall_TTB(string path, _File file)
+        {
+            try
+            {
+                TTB_File binaryFile = (TTB_File)GetParsedFile<TTB_File>(path, false);
+                TTB_File cpkBinFile = (TTB_File)GetParsedFile<TTB_File>(path, true);
 
+                UninstallSubEntries<TTB_Event, TTB_Entry>(binaryFile.Entries, (cpkBinFile != null) ? cpkBinFile.Entries : null, file, true);
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at TTB uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
+
+        private void Uninstall_TTC(string path, _File file)
+        {
+            try
+            {
+                TTC_File binaryFile = (TTC_File)GetParsedFile<TTC_File>(path, false);
+                TTC_File cpkBinFile = (TTC_File)GetParsedFile<TTC_File>(path, true);
+
+                Section section = file.GetSection(Sections.TTC_Entry);
+
+                if (section != null)
+                {
+                    UninstallEntries(binaryFile.Entries, (cpkBinFile != null) ? cpkBinFile.Entries : null, section.IDs);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at TTC uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
+
+        private void Uninstall_SEV(string path, _File file)
+        {
+            try
+            {
+                SEV_File binaryFile = (SEV_File)GetParsedFile<SEV_File>(path, false);
+                SEV_File cpkBinFile = (SEV_File)GetParsedFile<SEV_File>(path, true);
+
+                UninstallSubEntries<SEV_CharEvent, SEV_Entry>(binaryFile.Entries, (cpkBinFile != null) ? cpkBinFile.Entries : null, file, true);
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at SEV uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
+        
+        private void Uninstall_HCI(string path, _File file)
+        {
+            try
+            {
+                HCI_File binaryFile = (HCI_File)GetParsedFile<HCI_File>(path, false);
+                HCI_File cpkBinFile = (HCI_File)GetParsedFile<HCI_File>(path, true);
+
+                Section section = file.GetSection(Sections.HCI_Entry);
+
+                if (section != null)
+                {
+                    UninstallEntries(binaryFile.Entries, (cpkBinFile != null) ? cpkBinFile.Entries : null, section.IDs);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at HCI uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
+
+        private void Uninstall_CML(string path, _File file)
+        {
+            try
+            {
+                CML_File binaryFile = (CML_File)GetParsedFile<CML_File>(path, false);
+                CML_File cpkBinFile = (CML_File)GetParsedFile<CML_File>(path, true);
+
+                Section section = file.GetSection(Sections.CML_Entry);
+
+                if (section != null)
+                {
+                    UninstallEntries(binaryFile.Entries, (cpkBinFile != null) ? cpkBinFile.Entries : null, section.IDs);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at CML uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
 
         //Generic uninstallers
         private void UninstallEntries<T>(IList<T> entries, IList<T> ogEntries, List<string> ids) where T : IInstallable
         {
             if (entries == null) return;
-
-            List<T> entriesToRemove = new List<T>();
 
             for (int i = entries.Count - 1; i >= 0; i--)
             {
@@ -937,14 +1042,51 @@ namespace LB_Mod_Installer.Installer
                 {
                     T newEntry = GetOriginalEntry<T>(ogEntries, entries[i].Index);
 
-                    entries.RemoveAt(i);
-
-                    if(newEntry != null)
+                    if (newEntry != null)
                     {
-                        entries.Add(newEntry);
+                        entries[i] = newEntry;
+                    }
+                    else
+                    {
+                        entries.RemoveAt(i);
                     }
                 }
             }
+        }
+
+        private void UninstallSubEntries<T, M>(IList<M> entries, IList<M> ogEntries, _File file, bool removeRootIfNoChildren) where T : IInstallable where M : class, IInstallable_2<T>
+        {
+            if (entries == null) return;
+
+            List<string> roots = new List<string>();
+            
+            foreach(var section in file.Sections)
+            {
+                var splitName = section.FileSection.Split('/');
+                string rootId = splitName[splitName.Length - 1];
+
+                M rootEntry = GetOriginalEntry2<T,M>(entries, rootId, true);
+                M originalRootEntry = GetOriginalEntry2<T, M>(ogEntries, rootId);
+
+                if(rootEntry != null)
+                {
+                    if (!roots.Contains(rootId))
+                        roots.Add(rootId);
+
+                    UninstallEntries(rootEntry.SubEntries, (originalRootEntry != null) ? originalRootEntry.SubEntries : null, section.IDs);
+                }
+            }
+
+            //Remove root entries
+            if (removeRootIfNoChildren)
+            {
+                for (int i = entries.Count - 1; i >= 0; i--)
+                {
+                    if (roots.Contains(entries[i].Index) && Utils.IsListNullOrEmpty(entries[i].SubEntries))
+                        entries.Remove(entries[i]);
+                }
+            }
+
         }
 
         private T GetOriginalEntry<T>(IList<T> ogEntries, string id) where T :IInstallable
@@ -961,6 +1103,19 @@ namespace LB_Mod_Installer.Installer
             }
         }
 
+        private M GetOriginalEntry2<T, M>(IList<M> ogEntries, string id, bool returnNull = false) where T : IInstallable where M : class, IInstallable_2<T>
+        {
+            if (ogEntries == null) return (returnNull) ? null : default(M);
+
+            if (ogEntries.Any(e => e.Index == id))
+            {
+                return ogEntries.FirstOrDefault(e => e.Index == id);
+            }
+            else
+            {
+                return (returnNull) ? null : default(M);
+            }
+        }
 
         //MsgComponent
         private void Uninstall_MsgComponent(string path, _File file)

@@ -422,6 +422,7 @@ namespace Xv2CoreLib.TTC
         [YAXSerializeAs("Cms_ID")]
         public string I_12 { get; set; }
 
+        [BindingSubList]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "EventList")]
         public List<TTC_EventList> EventLists { get; set; } = new List<TTC_EventList>();
     }

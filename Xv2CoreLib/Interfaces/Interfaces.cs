@@ -23,6 +23,14 @@ namespace Xv2CoreLib
         string Index { get; }
     }
 
+    public interface IInstallable_2<T> where T : IInstallable
+    {
+        int SortID { get; }
+        string Index { get; set; }
+
+        List<T> SubEntries { get; set; }
+    }
+
     public interface ISorting
     {
         void SortEntries();
