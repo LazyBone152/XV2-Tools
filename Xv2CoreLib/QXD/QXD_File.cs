@@ -167,6 +167,7 @@ namespace Xv2CoreLib.QXD
 
         [YAXAttributeForClass]
         [YAXSerializeAs("Name")]
+        [BindingString]
         public string Name { get; set; }
         [YAXSerializeAs("ID")]
         [YAXAttributeForClass]
@@ -564,7 +565,27 @@ namespace Xv2CoreLib.QXD
         [YAXDontSerialize]
         public int SortID { get { return int.Parse(I_00); } }
         [YAXDontSerialize]
-        public string Index { get { return string.Format("{0}_{1}_{2}_{3}_{4}_{5}", I_00, (ushort)I_02, I_04, I_06, I_08, I_10); } }
+        public string Index 
+        { 
+            get 
+            { 
+                return string.Format("{0}_{1}_{2}_{3}_{4}_{5}", I_00, (ushort)I_02, I_04, I_06, I_08, I_10);
+            }
+            set
+            {
+                string[] split = value.Split('_');
+
+                if (split.Length == 6)
+                {
+                    I_00 = split[0];
+                    I_02 = (QxdItemType)ushort.Parse(split[1]);
+                    I_04 = split[2];
+                    I_06 = ushort.Parse(split[3]);
+                    I_08 = ushort.Parse(split[4]);
+                    I_10 = split[5];
+                }
+            }
+        }
 
 
         [YAXAttributeForClass]

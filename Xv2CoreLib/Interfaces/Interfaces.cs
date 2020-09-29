@@ -20,14 +20,11 @@ namespace Xv2CoreLib
     public interface IInstallable
     {
         int SortID { get; }
-        string Index { get; }
+        string Index { get; set; }
     }
 
     public interface IInstallable_2<T> where T : IInstallable
     {
-        int SortID { get; }
-        string Index { get; set; }
-
         List<T> SubEntries { get; set; }
     }
 
@@ -64,6 +61,14 @@ namespace Xv2CoreLib
 
     }
 
+    /// <summary>
+    /// Marks this property as a string value type, allowing non-numeric characters and multiple bindings within.\n
+    /// Any string not marked with this will be treated as an int by the binding manager.
+    /// </summary>
+    public class BindingString : Attribute
+    {
+
+    }
 
 
 }

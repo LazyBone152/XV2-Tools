@@ -168,7 +168,23 @@ namespace Xv2CoreLib.CML
         [YAXDontSerialize]
         public int SortID { get { return CharaId; } }
         [YAXDontSerialize]
-        public string Index { get { return $"{I_00}_{Costume}"; } }
+        public string Index 
+        { 
+            get
+            { 
+                return $"{I_00}_{Costume}";
+            }
+            set
+            {
+                string[] split = value.Split('_');
+
+                if (split.Length == 2)
+                {
+                    I_00 = split[0];
+                    Costume = ushort.Parse(split[1]);
+                }
+            }
+        }
         #endregion
 
         [YAXAttributeForClass]

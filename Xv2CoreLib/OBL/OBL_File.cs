@@ -184,7 +184,23 @@ namespace Xv2CoreLib.OBL
         [YAXDontSerialize]
         public int SortID { get { return 0; } } //No sorting needed, but IInstallable requires this
         [YAXDontSerialize]
-        public string Index { get { return $"{I_04}_{I_08}"; } }
+        public string Index 
+        { 
+            get 
+            { 
+                return $"{I_04}_{I_08}";
+            }
+            set
+            {
+                string[] split = value.Split('_');
+
+                if (split.Length == 2)
+                {
+                    I_04 = int.Parse(split[0]);
+                    I_08 = int.Parse(split[1]);
+                }
+            }
+        }
         #endregion
 
         [YAXAttributeForClass]

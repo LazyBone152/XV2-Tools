@@ -138,6 +138,17 @@ namespace Xv2CoreLib.CNC
             {
                 return string.Format("{0}_{1}_{2}", I_00, I_02, I_04);
             }
+            set
+            {
+                string[] split = value.Split('_');
+
+                if (split.Length == 3)
+                {
+                    I_00 = split[0];
+                    I_02 = ushort.Parse(split[1]);
+                    I_04 = ushort.Parse(split[2]);
+                }
+            }
         }
 
         [YAXAttributeForClass]

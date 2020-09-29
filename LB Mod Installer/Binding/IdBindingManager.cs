@@ -199,8 +199,8 @@ namespace LB_Mod_Installer.Binding
 
                 binding = ParseBinding(binding, comment, filePath, entries1, entries2, allowAutoId, maxId, usedIds);
 
-                if (IsBinding(binding))
-                    throw new InvalidDataException("ProcessStringBinding: unexpected result. Binding was not successfuly parsed.");
+                if (HasBinding(binding))
+                    throw new InvalidDataException($"ProcessStringBinding: unexpected result. Binding was not successfuly parsed (binding={binding}).");
 
                 str = $"{startStr}{binding}{endStr}";
             }
@@ -441,19 +441,7 @@ namespace LB_Mod_Installer.Binding
         private List<BindingValue> ValidateBindings(List<BindingValue> bindings, string comment, string originalBinding)
         {
             //Ensures the bindings are valid, and orders them correctly so the alias function comes last (if present)
-            //Entries must be ordered like this: Error > ID > Format > Alias
-
-            //Move Format
-            for (int i = 0; i < bindings.Count; i++)
-            {
-                if (bindings[i].Function == Function.Format)
-                {
-                    var function = bindings[i];
-                    bindings.RemoveAt(i);
-                    bindings.Add(function);
-                    break;
-                }
-            }
+            //Entries must be ordered like this: Error > ID  > Alias
 
             //Move Alias
             for (int i = 0; i < bindings.Count; i++)
@@ -778,7 +766,6 @@ namespace LB_Mod_Installer.Binding
         /// 
         public void ParseProperties<T>(IList<T> installList, IList<T> binaryList, string filePath, List<string> usedIDs = null) where T : IInstallable
         {
-            //A bit messy for now... clean it up later
             if (installList == null) return;
 
             //Safeguard against there not being an existing binary file (very unlikely...)
@@ -787,69 +774,23 @@ namespace LB_Mod_Installer.Binding
             //Parse every single string on classes that implement IInstallable
             foreach (var installEntry in installList)
             {
-                PropertyInfo[] properties = installEntry.GetType().GetProperties();
-
-                foreach(var prop in properties)
-                {
-                    if(prop.PropertyType == typeof(string))
-                    {
-                        if(prop.GetSetMethod() != null && prop.GetGetMethod() != null)
-                        {
-                            var attr = (BindingAutoId[])prop.GetCustomAttributes(typeof(BindingAutoId), false);
-                            object value = prop.GetValue(installEntry);
-
-                            if(value != null)
-                            {
-                                if (attr.Length > 0)
-                                {
-                                    //Has BindingAutoId attribute.
-                                    prop.SetValue(installEntry, ProcessStringBinding((string)value, string.Format("{0}", prop.Name), filePath, installList, binaryList, true, attr[0].MaxId, usedIDs).ToString());
-                                }
-                                else
-                                {
-                                    prop.SetValue(installEntry, ProcessStringBinding<T>((string)value, string.Format("{0}", prop.Name), filePath, null, null, false, ushort.MaxValue, usedIDs).ToString());
-                                }
-                            }
-                        }
-                    }
-                    else if(prop.GetSetMethod() != null && prop.GetGetMethod() != null)
-                    {
-                        //If the prop has the BindingSubClass attribute, we will parse it aswell.
-                        var bindingSubClassAtr = (BindingSubClass[])prop.GetCustomAttributes(typeof(BindingSubClass), false);
-                        var bindingSubListAtr = (BindingSubList[])prop.GetCustomAttributes(typeof(BindingSubList), false);
-
-                        if (bindingSubClassAtr.Length > 0)
-                        {
-                            //This property needs to have its props parsed.
-                            object objectToParse = prop.GetValue(installEntry);
-
-                            ParseProperties_RecursiveSingle<T>(objectToParse, filePath);
-                        }
-
-                        if(bindingSubListAtr.Length > 0)
-                        {
-                            object objectToParse = prop.GetValue(installEntry);
-
-                            if(objectToParse is IEnumerable list)
-                                ParseProperties_RecursiveList<T>(list, filePath);
-                        }
-                    }
-                }
+                ParseProperties_RecursiveSingle(installEntry, filePath, installList, binaryList, usedIDs, true);
             }
 
             RemoveNullTokenEntries(installList);
         }
 
-        private void ParseProperties_RecursiveList<T>(IEnumerable list, string filePath) where T : IInstallable
+
+        private void ParseProperties_RecursiveList<T>(IEnumerable list, string filePath, IList<T> installList, IList<T> binaryList, List<string> usedIDs = null) where T : IInstallable
         {
             foreach(var obj in list)
             {
                 if(obj != null)
-                    ParseProperties_RecursiveSingle<T>(obj, filePath);
+                    ParseProperties_RecursiveSingle<T>(obj, filePath, installList, binaryList, usedIDs);
             }
         }
 
-        private void ParseProperties_RecursiveSingle<T>(object obj, string filePath) where T : IInstallable
+        private void ParseProperties_RecursiveSingle<T>(object obj, string filePath, IList<T> installList, IList<T> binaryList, List<string> usedIDs = null, bool allowAutoId = false) where T : IInstallable
         {
             //This property needs to have its props parsed.
             PropertyInfo[] childProps = obj.GetType().GetProperties();
@@ -860,8 +801,28 @@ namespace LB_Mod_Installer.Binding
                 {
                     if(childProp.PropertyType == typeof(string))
                     {
+                        var autoIdAttr = (BindingAutoId[])childProp.GetCustomAttributes(typeof(BindingAutoId), false);
+                        var stringBindingAttr = (BindingAutoId[])childProp.GetCustomAttributes(typeof(BindingString), false);
                         object value = childProp.GetValue(obj);
-                        childProp.SetValue(obj, ProcessStringBinding<T>((string)value, string.Format("{0}", childProp.Name), filePath, null, null, false, ushort.MaxValue).ToString());
+
+                        if (value != null)
+                        {
+                            if (stringBindingAttr.Length > 0)
+                            {
+                                //Has BindingString attribute.
+                                childProp.SetValue(obj, ProcessStringBinding((string)value, string.Format("{0}", childProp.Name), filePath, installList, binaryList, true, autoIdAttr[0].MaxId, usedIDs).ToString());
+                            }
+                            else if (autoIdAttr.Length > 0)
+                            {
+                                //Has BindingAutoId attribute.
+                                if(allowAutoId)
+                                    childProp.SetValue(obj, ParseBinding((string)value, string.Format("{0}", childProp.Name), filePath, installList, binaryList, true, autoIdAttr[0].MaxId, usedIDs).ToString());
+                            }
+                            else
+                            {
+                                childProp.SetValue(obj, ParseBinding<T>((string)value, string.Format("{0}", childProp.Name), filePath, null, null, false, ushort.MaxValue, usedIDs).ToString());
+                            }
+                        }
                     }
                     else if(childProp.PropertyType.IsClass)
                     {
@@ -871,12 +832,12 @@ namespace LB_Mod_Installer.Binding
 
                         if(bindingSubClassAtr.Length > 0 && value != null)
                         {
-                            ParseProperties_RecursiveSingle<T>(value, filePath);
+                            ParseProperties_RecursiveSingle<T>(value, filePath, installList, binaryList, usedIDs);
                         }
                         if (bindingSubListAtr.Length > 0 && value != null)
                         {
                             if(value is IEnumerable list)
-                                ParseProperties_RecursiveList<T>(list, filePath);
+                                ParseProperties_RecursiveList<T>(list, filePath, installList, binaryList, usedIDs);
                         }
                     }
                 }

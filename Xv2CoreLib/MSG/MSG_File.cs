@@ -424,6 +424,7 @@ namespace Xv2CoreLib.MSG
         public string Index { get; set; } //int32
         [YAXSerializeAs("name")]
         [YAXAttributeForClass]
+        [BindingString]
         public string Name { get; set; }
         [YAXAttributeForClass]
         public int I_12 { get; set; }
@@ -445,6 +446,7 @@ namespace Xv2CoreLib.MSG
     {
         [YAXAttributeForClass]
         [YAXSerializeAs("Text")]
+        [BindingString]
         public string Text { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("NumVars")]

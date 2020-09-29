@@ -550,30 +550,6 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_ERS(string xmlPath, string installPath)
-        {
-#if !DEBUG
-            try
-#endif
-            {
-                ERS_File xmlFile = zipManager.DeserializeXmlFromArchive<ERS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
-                ERS_File binaryFile = (ERS_File)GetParsedFile<ERS_File>(installPath);
-
-                //Parse bindings
-                bindingManager.ParseProperties(xmlFile.Entries, binaryFile.Entries, installPath);
-
-                InstallSubEntries<ERS_MainTableEntry, ERS_MainTable>(xmlFile.Entries, binaryFile.Entries, installPath, Sections.ERS_Entries);
-
-            }
-#if !DEBUG
-            catch (Exception ex)
-            {
-                string error = string.Format("Failed at ERS install phase ({0}).", xmlPath);
-                throw new Exception(error, ex);
-            }
-#endif
-        }
-
         private void Install_CMS(string xmlPath, string installPath)
         {
 #if !DEBUG
@@ -1198,9 +1174,6 @@ namespace LB_Mod_Installer.Installer
                 TTB_File xmlFile = zipManager.DeserializeXmlFromArchive<TTB_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
                 TTB_File binaryFile = (TTB_File)GetParsedFile<TTB_File>(installPath);
 
-                //Parse bindings
-                bindingManager.ParseProperties(xmlFile.Entries, binaryFile.Entries, installPath);
-
                 //Install entries
                 InstallSubEntries<TTB_Event, TTB_Entry>(xmlFile.Entries, binaryFile.Entries, installPath, Sections.TTB_Entry);
 
@@ -1223,9 +1196,6 @@ namespace LB_Mod_Installer.Installer
                 TTC_File xmlFile = zipManager.DeserializeXmlFromArchive<TTC_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
                 TTC_File binaryFile = (TTC_File)GetParsedFile<TTC_File>(installPath);
 
-                //Parse bindings
-                bindingManager.ParseProperties(xmlFile.Entries, binaryFile.Entries, installPath);
-
                 //Install entries
                 InstallEntries(xmlFile.Entries, binaryFile.Entries, installPath, Sections.TTC_Entry);
             }
@@ -1246,9 +1216,6 @@ namespace LB_Mod_Installer.Installer
             {
                 SEV_File xmlFile = zipManager.DeserializeXmlFromArchive<SEV_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
                 SEV_File binaryFile = (SEV_File)GetParsedFile<SEV_File>(installPath);
-
-                //Parse bindings
-                bindingManager.ParseProperties(xmlFile.Entries, binaryFile.Entries, installPath);
 
                 //Install entries
                 InstallSubEntries<SEV_CharEvent, SEV_Entry>(xmlFile.Entries, binaryFile.Entries, installPath, Sections.SEV_Entry);
@@ -1272,9 +1239,6 @@ namespace LB_Mod_Installer.Installer
                 HCI_File xmlFile = zipManager.DeserializeXmlFromArchive<HCI_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
                 HCI_File binaryFile = (HCI_File)GetParsedFile<HCI_File>(installPath);
 
-                //Parse bindings
-                bindingManager.ParseProperties(xmlFile.Entries, binaryFile.Entries, installPath);
-
                 //Install entries
                 InstallEntries<HCI_Entry>(xmlFile.Entries, binaryFile.Entries, installPath, Sections.HCI_Entry);
 
@@ -1297,9 +1261,6 @@ namespace LB_Mod_Installer.Installer
                 CML_File xmlFile = zipManager.DeserializeXmlFromArchive<CML_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
                 CML_File binaryFile = (CML_File)GetParsedFile<CML_File>(installPath);
 
-                //Parse bindings
-                bindingManager.ParseProperties(xmlFile.Entries, binaryFile.Entries, installPath);
-
                 //Install entries
                 InstallEntries(xmlFile.Entries, binaryFile.Entries, installPath, Sections.CML_Entry);
 
@@ -1308,6 +1269,27 @@ namespace LB_Mod_Installer.Installer
             catch (Exception ex)
             {
                 string error = string.Format("Failed at CML install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
+        private void Install_ERS(string xmlPath, string installPath)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                ERS_File xmlFile = zipManager.DeserializeXmlFromArchive<ERS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                ERS_File binaryFile = (ERS_File)GetParsedFile<ERS_File>(installPath);
+
+                InstallSubEntries<ERS_MainTableEntry, ERS_MainTable>(xmlFile.Entries, binaryFile.Entries, installPath, Sections.ERS_Entries);
+
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at ERS install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
@@ -1351,10 +1333,13 @@ namespace LB_Mod_Installer.Installer
             }
         }
 
-        private void InstallSubEntries<T, M>(IList<M> installEntries, IList<M> destEntries, string path, string section) where T : IInstallable, new() where M : IInstallable_2<T>, new()
+        private void InstallSubEntries<T, M>(IList<M> installEntries, IList<M> destEntries, string path, string section) where T : IInstallable, new() where M : IInstallable_2<T>, IInstallable, new()
         {
             if (installEntries == null) return;
             if (destEntries == null) throw new InvalidOperationException(string.Format("InstallSubEntries: destEntries was null. Cannot install entries. ({0})", path));
+
+            //Initial binding pass (This wont parse the AutoID bindings on SubEntries, as we need to resolve the root ID first)
+            bindingManager.ParseProperties(installEntries, destEntries, path);
 
             foreach (var entryToInstall in installEntries) 
             {
@@ -1367,6 +1352,9 @@ namespace LB_Mod_Installer.Installer
                     destEntries.Add(new M() { Index = entryToInstall.Index, SubEntries = new List<T>() });
                     index = destEntries.Count - 1;
                 }
+
+                //Second binding pass
+                bindingManager.ParseProperties(entryToInstall.SubEntries, destEntries[index].SubEntries, path);
 
                 //Install entries
                 if (entryToInstall.SubEntries == null) continue;

@@ -127,7 +127,26 @@ namespace Xv2CoreLib.HCI
         [YAXDontSerialize]
         public int SortID { get { return CharId; } }
         [YAXDontSerialize]
-        public string Index { get { return $"{I_00}_{Costume}_{State1}_{State2}"; } }
+        public string Index 
+        { 
+            get 
+            { 
+                return $"{I_00}_{Costume}_{State1}_{State2}";
+            }
+            set
+            {
+                string[] split = value.Split('_');
+
+                if (split.Length == 4)
+                {
+                    I_00 = split[0];
+                    Costume = ushort.Parse(split[1]);
+                    State1 = ushort.Parse(split[2]);
+                    State2 = ushort.Parse(split[3]);
+                }
+            }
+        }
+
         #endregion
 
         [YAXAttributeForClass]

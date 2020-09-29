@@ -121,7 +121,7 @@ namespace Xv2CoreLib.PAL
         [YAXDontSerialize]
         public int SortID { get { return int.Parse(I_00); } }
         [YAXDontSerialize]
-        public string Index { get { return I_00; } }
+        public string Index { get { return I_00; } set { I_00 = value; } }
         #endregion
 
         [YAXAttributeForClass]

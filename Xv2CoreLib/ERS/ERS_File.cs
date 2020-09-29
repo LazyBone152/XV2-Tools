@@ -188,6 +188,7 @@ namespace Xv2CoreLib.ERS
         public string Str_04 { get; set; }
         [YAXAttributeFor("File")]
         [YAXSerializeAs("string")]
+        [BindingString]
         public string FILE_PATH { get; set; }
 
         public int offset;

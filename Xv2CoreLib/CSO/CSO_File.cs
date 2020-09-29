@@ -60,6 +60,16 @@ namespace Xv2CoreLib.CSO
             {
                 return string.Format("{0}_{1}", I_00, I_04);
             }
+            set
+            {
+                string[] split = value.Split('_');
+
+                if (split.Length == 2)
+                {
+                    I_00 = split[0];
+                    I_04 = uint.Parse(split[1]);
+                }
+            }
         }
         [YAXDontSerialize]
         public int SortID
@@ -96,15 +106,19 @@ namespace Xv2CoreLib.CSO
         public uint I_04 { get; set; }
         [YAXAttributeFor("SE")]
         [YAXSerializeAs("Path")]
+        [BindingString]
         public string Str_08 { get; set; }
         [YAXAttributeFor("VOX")]
         [YAXSerializeAs("Path")]
+        [BindingString]
         public string Str_12 { get; set; }
         [YAXAttributeFor("AMK")]
         [YAXSerializeAs("Path")]
+        [BindingString]
         public string Str_16 { get; set; }
         [YAXAttributeFor("Skills")]
         [YAXSerializeAs("Path")]
+        [BindingString]
         public string Str_20 { get; set; }
         //64 bits padding at end
     }

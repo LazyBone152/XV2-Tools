@@ -253,15 +253,19 @@ namespace Xv2CoreLib.BCS
         //Str
         [YAXAttributeFor("Files")]
         [YAXSerializeAs("EMD")]
+        [BindingString]
         public string Str_56 { get; set; }
         [YAXAttributeFor("Files")]
         [YAXSerializeAs("EMM")]
+        [BindingString]
         public string Str_60 { get; set; }
         [YAXAttributeFor("Files")]
         [YAXSerializeAs("EMB")]
+        [BindingString]
         public string Str_64 { get; set; }
         [YAXAttributeFor("Files")]
         [YAXSerializeAs("EAN")]
+        [BindingString]
         public string Str_68 { get; set; }
 
         [YAXDontSerializeIfNull]
@@ -416,22 +420,28 @@ namespace Xv2CoreLib.BCS
         //Str
         [YAXAttributeFor("BoneToAttach")]
         [YAXSerializeAs("value")]
+        [BindingString]
         public string BoneToAttach { get; set; }
 
         [YAXAttributeFor("Files")]
         [YAXSerializeAs("EMD")]
+        [BindingString]
         public string Files_EMD { get; set; }
         [YAXAttributeFor("Files")]
         [YAXSerializeAs("EMM")]
+        [BindingString]
         public string Files_EMM { get; set; }
         [YAXAttributeFor("Files")]
         [YAXSerializeAs("EMB")]
+        [BindingString]
         public string Files_EMB { get; set; }
         [YAXAttributeFor("Files")]
         [YAXSerializeAs("EAN")]
+        [BindingString]
         public string Files_EAN { get; set; }
         [YAXAttributeFor("Files")]
         [YAXSerializeAs("SCD")]
+        [BindingString]
         public string Files_SCD { get; set; }
 
         public string GetModelPath(PartType partType)

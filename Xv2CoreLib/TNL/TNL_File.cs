@@ -62,7 +62,23 @@ namespace Xv2CoreLib.TNL
         [YAXDontSerialize]
         public int SortID { get { return int.Parse(Index); } }
         [YAXDontSerialize]
-        public string Index { get { return string.Format("{0}_{1}", I32_1, I8_1); } }
+        public string Index 
+        { 
+            get 
+            { 
+                return string.Format("{0}_{1}", I32_1, I8_1);
+            }
+            set
+            {
+                string[] split = value.Split('_');
+
+                if (split.Length == 2)
+                {
+                    I32_1 = split[0];
+                    I8_1 = byte.Parse(split[1]);
+                }
+            }
+        }
 
         [YAXAttributeForClass]
         [YAXSerializeAs("ID")]
@@ -109,7 +125,23 @@ namespace Xv2CoreLib.TNL
         [YAXDontSerialize]
         public int SortID { get { return int.Parse(Index); } }
         [YAXDontSerialize]
-        public string Index { get { return string.Format("{0}_{1}", I32_1, I8_1); } }
+        public string Index 
+        { 
+            get
+            { 
+                return string.Format("{0}_{1}", I32_1, I8_1);
+            }
+            set
+            {
+                string[] split = value.Split('_');
+
+                if (split.Length == 2)
+                {
+                    I32_1 = split[0];
+                    I8_1 = byte.Parse(split[1]);
+                }
+            }
+        }
 
         [YAXAttributeForClass]
         [YAXSerializeAs("ID")]

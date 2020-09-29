@@ -216,6 +216,17 @@ namespace Xv2CoreLib.CUS
             {
                 return String.Format("{0}_{1}_{2}",I_00, I_04, I_26);
             }
+            set
+            {
+                string[] split = value.Split('_');
+
+                if (split.Length == 3)
+                {
+                    I_00 = split[0];
+                    I_04 = int.Parse(split[1]);
+                    I_26 = ushort.Parse(split[2]);
+                }
+            }
         }
 
         [YAXAttributeForClass]
@@ -383,24 +394,31 @@ namespace Xv2CoreLib.CUS
         public ushort I_18 { get; set; }
         [YAXAttributeFor("EAN")]
         [YAXSerializeAs("Path")]
+        [BindingString]
         public string Str_20 { get; set; }
         [YAXAttributeFor("CAM_EAN")]
         [YAXSerializeAs("Path")]
+        [BindingString]
         public string Str_24 { get; set; }
         [YAXAttributeFor("EEPK")]
         [YAXSerializeAs("Path")]
+        [BindingString]
         public string Str_28 { get; set; }
         [YAXAttributeFor("ACB_SE")]
         [YAXSerializeAs("Path")]
+        [BindingString]
         public string Str_32 { get; set; }
         [YAXAttributeFor("ACB_VOX")]
         [YAXSerializeAs("Path")]
+        [BindingString]
         public string Str_36 { get; set; }
         [YAXAttributeFor("AFTER_BAC")]
         [YAXSerializeAs("Path")]
+        [BindingString]
         public string Str_40 { get; set; }
         [YAXAttributeFor("AFTER_BCM")]
         [YAXSerializeAs("Path")]
+        [BindingString]
         public string Str_44 { get; set; }
         [YAXAttributeFor("I_48")]
         [YAXSerializeAs("value")]

@@ -1054,7 +1054,7 @@ namespace LB_Mod_Installer.Installer
             }
         }
 
-        private void UninstallSubEntries<T, M>(IList<M> entries, IList<M> ogEntries, _File file, bool removeRootIfNoChildren) where T : IInstallable where M : class, IInstallable_2<T>
+        private void UninstallSubEntries<T, M>(IList<M> entries, IList<M> ogEntries, _File file, bool removeRootIfNoChildren) where T : IInstallable where M : class, IInstallable_2<T>, IInstallable
         {
             if (entries == null) return;
 
@@ -1103,7 +1103,7 @@ namespace LB_Mod_Installer.Installer
             }
         }
 
-        private M GetOriginalEntry2<T, M>(IList<M> ogEntries, string id, bool returnNull = false) where T : IInstallable where M : class, IInstallable_2<T>
+        private M GetOriginalEntry2<T, M>(IList<M> ogEntries, string id, bool returnNull = false) where T : IInstallable where M : class, IInstallable_2<T>, IInstallable
         {
             if (ogEntries == null) return (returnNull) ? null : default(M);
 
