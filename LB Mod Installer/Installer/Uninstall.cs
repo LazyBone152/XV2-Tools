@@ -441,6 +441,9 @@ namespace LB_Mod_Installer.Installer
                             {
                                 newEntry = BAC_Entry.Empty();
                                 newEntry.Index = binaryFile.BacEntries[i].Index;
+
+                                //needed when Reinstalling, as the Sort ID will be duplicated and Exception raised
+                                newEntry.SortID = -1;
                             }
 
                             binaryFile.BacEntries.RemoveAt(i);

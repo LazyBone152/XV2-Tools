@@ -24,10 +24,8 @@ namespace Xv2CoreLib.EAN
             saveLocation = String.Format("{0}/{1}", Path.GetDirectoryName(location), Path.GetFileNameWithoutExtension(location));
             YAXSerializer serializer = new YAXSerializer(typeof(EAN_File), YAXSerializationOptions.DontSerializeNullObjects);
             eanFile = (EAN_File)serializer.DeserializeFromFile(location);
-            
             eanFile.ValidateAnimationIndexes();
             eanFile.SortEntries();
-
             nonHierarchalBones = eanFile.Skeleton.GetNonHierarchalBoneList();
             ValidateAnimationBones();
             Write();
@@ -54,7 +52,9 @@ namespace Xv2CoreLib.EAN
             eanFile.ValidateAnimationIndexes();
             eanFile.SortEntries();
             nonHierarchalBones = eanFile.Skeleton.GetNonHierarchalBoneList();
+           
             ValidateAnimationBones();
+           
             Write();
         }
 
@@ -72,16 +72,17 @@ namespace Xv2CoreLib.EAN
             {
                 if(eanFile.Animations[i].Nodes != null)
                 {
-                    for (int a = eanFile.Animations[i].Nodes.Count - 1; i >= 0; i--)
+                    for (int a = eanFile.Animations[i].Nodes.Count - 1; a >= 0; a--)
                     {
                         if(!nonHierarchalBones.Any(x => x.Name == eanFile.Animations[i].Nodes[a].BoneName))
                         {
                             eanFile.Animations[i].Nodes.RemoveAt(a);
+                           
                         }
                     }
                 }
             }
-
+      
         }
         
         private void Write()
