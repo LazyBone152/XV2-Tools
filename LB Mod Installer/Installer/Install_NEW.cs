@@ -189,6 +189,9 @@ namespace LB_Mod_Installer.Installer
             //Files. 
             foreach (var File in Files)
             {
+                //Process bindings in InstallPath
+                File.InstallPath = bindingManager.ParseInstallPath(File.InstallPath, File.SourcePath);
+
                 //Is directory
                 if (File.SourcePath.EndsWith("/") || File.SourcePath.EndsWith(@"\"))
                 {

@@ -440,6 +440,7 @@ namespace Xv2CoreLib.TTC
         public string TypeStr { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Event")]
+        [BindingSubList]
         public List<TTC_Event> Events { get; set; } = new List<TTC_Event>();
     }
 
@@ -462,6 +463,7 @@ namespace Xv2CoreLib.TTC
         public int Transformation { get; set; } //8
         [YAXAttributeFor("Name")]
         [YAXSerializeAs("value")]
+        [BindingString]
         public string Name { get; set; } //20
 
 

@@ -429,6 +429,7 @@ namespace Xv2CoreLib.MSG
         [YAXAttributeForClass]
         public int I_12 { get; set; }
 
+        [BindingSubList]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Line")]
         public List<Msg_Line> Msg_Content { get; set; }
 

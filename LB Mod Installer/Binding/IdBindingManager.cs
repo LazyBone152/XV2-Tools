@@ -169,21 +169,113 @@ namespace LB_Mod_Installer.Binding
 
         Install_NEW install;
         List<int> usedPartSets = new List<int>();
-
-        //Alias
         private List<AliasValue> Aliases = new List<AliasValue>();
-
-        //X2M
         private X2MHelper _X2MHelper = new X2MHelper();
-
 
         public IdBindingManager(Install_NEW install)
         {
             this.install = install;
         }
 
-        //Binding
-        private string ProcessStringBinding<T>(string str, string comment, string filePath, IEnumerable<T> entries1, IEnumerable<T> entries2, bool allowAutoId = true, ushort maxId = ushort.MaxValue, List<string> usedIds = null) where T : IInstallable
+
+        #region Parse
+        public string ParseInstallPath(string installPath, string sourcePath)
+        {
+            return ParseStringBinding<IInstallable>(installPath, $"Binding for FilePath entry. SourcePath is \"{sourcePath}\".", GeneralInfo.InstallerXml, null, null, false);
+        }
+
+        /// <summary>
+        /// Parse the bindings on all string properties.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="installList">The entries that are being installed (that have the bindings).</param>
+        /// <param name="binaryList">The entries that are in the binary list (that we are going to install into).</param>
+        /// <param name="filePath">The file path. Used for tracking.</param>
+        /// <param name="usedIDs">(Optional) A list of all IDs that are used. This overwrites the default behaviour of checking the Index property on installList and binaryList entries when calculating AutoIDs.</param>
+        /// 
+        public void ParseProperties<T>(IList<T> installList, IList<T> binaryList, string filePath, List<string> usedIDs = null) where T : IInstallable
+        {
+            if (installList == null) return;
+
+            //Safeguard against there not being an existing binary file (very unlikely...)
+            if (binaryList == null) binaryList = new List<T>();
+
+            //Parse every single string on classes that implement IInstallable
+            foreach (var installEntry in installList)
+            {
+                ParseProperties_RecursiveSingle(installEntry, filePath, installList, binaryList, usedIDs, true);
+            }
+
+            RemoveNullTokenEntries(installList);
+        }
+
+        private void ParseProperties_RecursiveList<T>(IEnumerable list, string filePath, IList<T> installList, IList<T> binaryList, List<string> usedIDs = null) where T : IInstallable
+        {
+            foreach (var obj in list)
+            {
+                if (obj != null)
+                    ParseProperties_RecursiveSingle<T>(obj, filePath, installList, binaryList, usedIDs);
+            }
+        }
+
+        private void ParseProperties_RecursiveSingle<T>(object obj, string filePath, IList<T> installList, IList<T> binaryList, List<string> usedIDs = null, bool allowAutoId = false) where T : IInstallable
+        {
+            //This property needs to have its props parsed.
+            PropertyInfo[] childProps = obj.GetType().GetProperties();
+
+            foreach (var childProp in childProps)
+            {
+                if (childProp.GetSetMethod() != null && childProp.GetGetMethod() != null)
+                {
+                    if (childProp.PropertyType == typeof(string))
+                    {
+                        var autoIdAttr = (BindingAutoId[])childProp.GetCustomAttributes(typeof(BindingAutoId), false);
+                        var stringBindingAttr = (BindingString[])childProp.GetCustomAttributes(typeof(BindingString), false);
+                        object value = childProp.GetValue(obj);
+
+                        if (value != null)
+                        {
+                            if (stringBindingAttr.Length > 0)
+                            {
+                                //Has BindingString attribute.
+                                childProp.SetValue(obj, ParseStringBinding((string)value, string.Format("{0}", childProp.Name), filePath, installList, binaryList, false, ushort.MaxValue, usedIDs).ToString());
+                            }
+                            else if (autoIdAttr.Length > 0)
+                            {
+                                //Has BindingAutoId attribute.
+                                if (allowAutoId)
+                                    childProp.SetValue(obj, ParseBinding((string)value, string.Format("{0}", childProp.Name), filePath, installList, binaryList, true, autoIdAttr[0].MaxId, usedIDs).ToString());
+                            }
+                            else
+                            {
+                                childProp.SetValue(obj, ParseBinding<T>((string)value, string.Format("{0}", childProp.Name), filePath, null, null, false, ushort.MaxValue, usedIDs).ToString());
+                            }
+                        }
+                    }
+                    else if (childProp.PropertyType.IsClass)
+                    {
+                        object value = childProp.GetValue(obj);
+                        var bindingSubClassAtr = (BindingSubClass[])childProp.GetCustomAttributes(typeof(BindingSubClass), false);
+                        var bindingSubListAtr = (BindingSubList[])childProp.GetCustomAttributes(typeof(BindingSubList), false);
+
+                        if (bindingSubClassAtr.Length > 0 && value != null)
+                        {
+                            ParseProperties_RecursiveSingle<T>(value, filePath, installList, binaryList, usedIDs);
+                        }
+                        if (bindingSubListAtr.Length > 0 && value != null)
+                        {
+                            if (value is IEnumerable list)
+                                ParseProperties_RecursiveList<T>(list, filePath, installList, binaryList, usedIDs);
+                        }
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+        #region Binding
+        private string ParseStringBinding<T>(string str, string comment, string filePath, IEnumerable<T> entries1, IEnumerable<T> entries2, bool allowAutoId = true, ushort maxId = ushort.MaxValue, List<string> usedIds = null) where T : IInstallable
         {
             //New and improved binding processing method.
             //Now supports multiple bindings within a single string
@@ -194,8 +286,8 @@ namespace LB_Mod_Installer.Binding
                 int endPos = str.IndexOf('}');
 
                 string startStr = str.Substring(0, startPos);
-                string endStr = str.Substring(endPos);
-                string binding = str.Substring(startPos, endPos - startPos);
+                string endStr = str.Substring(endPos + 1);
+                string binding = str.Substring(startPos, endPos - startPos + 1);
 
                 binding = ParseBinding(binding, comment, filePath, entries1, entries2, allowAutoId, maxId, usedIds);
 
@@ -472,6 +564,7 @@ namespace LB_Mod_Installer.Binding
             bool hasAliasBinding = false;
             bool hasErrorBinding = false;
             bool hasDefaultValueBinding = false;
+            bool hasFormatBinding = false;
 
             for (int i = 0; i < bindings.Count; i++)
             {
@@ -488,6 +581,10 @@ namespace LB_Mod_Installer.Binding
                     case Function.DefaultValue:
                         if (hasDefaultValueBinding) throw new Exception(String.Format("More than one instance of {0} found. Binding parse failed.\n({1})", Function.DefaultValue, comment));
                         hasDefaultValueBinding = true;
+                        break;
+                    case Function.Format:
+                        if (hasFormatBinding) throw new Exception(String.Format("More than one instance of {0} found. Binding parse failed.\n({1})", Function.Format, comment));
+                        hasFormatBinding = true;
                         break;
                     default:
                         if (hasIdBinding) throw new Exception(String.Format("More than one instance of an ID binding found within the same binding. Binding parse failed.\n({0})", comment));
@@ -531,7 +628,9 @@ namespace LB_Mod_Installer.Binding
             return bindings;
         }
 
-        //Function Helpers
+        #endregion
+
+        #region Function Helpers
         private int GetAliasId(string alias, string comment)
         {
             foreach(var a in Aliases)
@@ -754,96 +853,10 @@ namespace LB_Mod_Installer.Binding
             }
         }
 
-        //Class parsing
-        /// <summary>
-        /// Parse the bindings on all string properties.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="installList">The entries that are being installed (that have the bindings).</param>
-        /// <param name="binaryList">The entries that are in the binary list (that we are going to install into).</param>
-        /// <param name="filePath">The file path. Used for tracking.</param>
-        /// <param name="usedIDs">(Optional) A list of all IDs that are used. This overwrites the default behaviour of checking the Index property on installList and binaryList entries when calculating AutoIDs.</param>
-        /// 
-        public void ParseProperties<T>(IList<T> installList, IList<T> binaryList, string filePath, List<string> usedIDs = null) where T : IInstallable
-        {
-            if (installList == null) return;
 
-            //Safeguard against there not being an existing binary file (very unlikely...)
-            if (binaryList == null) binaryList = new List<T>();
+        #endregion
 
-            //Parse every single string on classes that implement IInstallable
-            foreach (var installEntry in installList)
-            {
-                ParseProperties_RecursiveSingle(installEntry, filePath, installList, binaryList, usedIDs, true);
-            }
-
-            RemoveNullTokenEntries(installList);
-        }
-
-
-        private void ParseProperties_RecursiveList<T>(IEnumerable list, string filePath, IList<T> installList, IList<T> binaryList, List<string> usedIDs = null) where T : IInstallable
-        {
-            foreach(var obj in list)
-            {
-                if(obj != null)
-                    ParseProperties_RecursiveSingle<T>(obj, filePath, installList, binaryList, usedIDs);
-            }
-        }
-
-        private void ParseProperties_RecursiveSingle<T>(object obj, string filePath, IList<T> installList, IList<T> binaryList, List<string> usedIDs = null, bool allowAutoId = false) where T : IInstallable
-        {
-            //This property needs to have its props parsed.
-            PropertyInfo[] childProps = obj.GetType().GetProperties();
-
-            foreach (var childProp in childProps)
-            {
-                if (childProp.GetSetMethod() != null && childProp.GetGetMethod() != null)
-                {
-                    if(childProp.PropertyType == typeof(string))
-                    {
-                        var autoIdAttr = (BindingAutoId[])childProp.GetCustomAttributes(typeof(BindingAutoId), false);
-                        var stringBindingAttr = (BindingAutoId[])childProp.GetCustomAttributes(typeof(BindingString), false);
-                        object value = childProp.GetValue(obj);
-
-                        if (value != null)
-                        {
-                            if (stringBindingAttr.Length > 0)
-                            {
-                                //Has BindingString attribute.
-                                childProp.SetValue(obj, ProcessStringBinding((string)value, string.Format("{0}", childProp.Name), filePath, installList, binaryList, true, autoIdAttr[0].MaxId, usedIDs).ToString());
-                            }
-                            else if (autoIdAttr.Length > 0)
-                            {
-                                //Has BindingAutoId attribute.
-                                if(allowAutoId)
-                                    childProp.SetValue(obj, ParseBinding((string)value, string.Format("{0}", childProp.Name), filePath, installList, binaryList, true, autoIdAttr[0].MaxId, usedIDs).ToString());
-                            }
-                            else
-                            {
-                                childProp.SetValue(obj, ParseBinding<T>((string)value, string.Format("{0}", childProp.Name), filePath, null, null, false, ushort.MaxValue, usedIDs).ToString());
-                            }
-                        }
-                    }
-                    else if(childProp.PropertyType.IsClass)
-                    {
-                        object value = childProp.GetValue(obj);
-                        var bindingSubClassAtr = (BindingSubClass[])childProp.GetCustomAttributes(typeof(BindingSubClass), false);
-                        var bindingSubListAtr = (BindingSubList[])childProp.GetCustomAttributes(typeof(BindingSubList), false);
-
-                        if(bindingSubClassAtr.Length > 0 && value != null)
-                        {
-                            ParseProperties_RecursiveSingle<T>(value, filePath, installList, binaryList, usedIDs);
-                        }
-                        if (bindingSubListAtr.Length > 0 && value != null)
-                        {
-                            if(value is IEnumerable list)
-                                ParseProperties_RecursiveList<T>(list, filePath, installList, binaryList, usedIDs);
-                        }
-                    }
-                }
-            }
-        }
-
+        #region Misc
 
         /// <summary>
         /// Removes all entries that has a NullToken (caused by a failed AutoID or X2M binding).
@@ -852,19 +865,19 @@ namespace LB_Mod_Installer.Binding
         {
             List<T> toDelete = new List<T>();
 
-            foreach(var e in installList)
+            foreach (var e in installList)
             {
                 if (HasNullToken(e)) toDelete.Add(e);
             }
 
-            foreach(var e in toDelete)
+            foreach (var e in toDelete)
             {
                 installList.Remove(e);
             }
 
             //installList.RemoveAll(e => HasNullToken(e));
         }
-        
+
         private bool HasNullToken<T>(T entry) where T : IInstallable
         {
             PropertyInfo[] properties = entry.GetType().GetProperties();
@@ -873,7 +886,7 @@ namespace LB_Mod_Installer.Binding
             {
                 if (prop.PropertyType == typeof(string))
                 {
-                    if((string)prop.GetValue(entry) == NullTokenStr)
+                    if ((string)prop.GetValue(entry) == NullTokenStr)
                     {
                         return true;
                     }
@@ -882,7 +895,8 @@ namespace LB_Mod_Installer.Binding
 
             return false;
         }
-        
+
+        #endregion
 
     }
 

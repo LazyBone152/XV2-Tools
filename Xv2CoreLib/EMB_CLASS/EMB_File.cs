@@ -26,6 +26,9 @@ namespace Xv2CoreLib.EMB_CLASS
         MatchName
     }
 
+    [YAXComment("InstallMode values (used by LB Mod Installer):" +
+        "\nMatchIndex: install entry into this index" +
+        "\nMatchName: if entry with same name exists, overwrite it, else add as new")]
     [Serializable]
     public class EMB_File : INotifyPropertyChanged
     {
@@ -42,7 +45,6 @@ namespace Xv2CoreLib.EMB_CLASS
 
 
         public const int MAX_EFFECT_TEXTURES = 128;
-        [YAXComment("InstallMode values (used by LB Mod Installer):\nMatchIndex\nMatchName")]
 
         [YAXAttributeForClass]
         [YAXSerializeAs("I_08")]
