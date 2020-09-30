@@ -105,6 +105,10 @@ namespace Xv2CoreLib.IDB
                     return "proper_noun_battle_name_";
                 case "extra_item.idb":
                     return "proper_noun_extra_name_";
+                case "gallery_item.idb":
+                    return "proper_noun_gallery_illust_name_";
+                case "pet_item.idb":
+                    return "proper_noun_float_pet_name_";
                 default:
                     throw new Exception(String.Format("IDB \"{0}\" has no name msg file.", idbName));
             }
@@ -130,11 +134,14 @@ namespace Xv2CoreLib.IDB
                     return "proper_noun_battle_info_";
                 case "extra_item.idb":
                     return "proper_noun_extra_info_";
+                case "gallery_item.idb":
+                    return "proper_noun_gallery_illust_info_";
+                case "pet_item.idb":
+                    return "proper_noun_float_pet_info_";
                 default:
                     throw new Exception(String.Format("IDB \"{0}\" has no info msg file.", idbName));
             }
         }
-
         public static string LimitBurstMsgFile(string idbName)
         {
             switch (idbName)

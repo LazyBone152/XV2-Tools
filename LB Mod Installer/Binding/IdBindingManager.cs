@@ -128,7 +128,8 @@ namespace LB_Mod_Installer.Binding
         X2MSkillID1,
         X2MSkillID2,
         AutoPartSet,
-        Format
+        Format, 
+        Increment
     }
 
     public enum ErrorHandling
@@ -306,12 +307,13 @@ namespace LB_Mod_Installer.Binding
             {
                 string originalBinding = binding;
                 int ID = -1;
-                ErrorHandling errorHandler = ErrorHandling.Stop;
                 int defaultValue = 0;
                 List<BindingValue> bindings = ProcessBinding(binding, comment, originalBinding);
                 bindings = ValidateBindings(bindings, comment, originalBinding);
 
+                ErrorHandling errorHandler = ErrorHandling.Stop;
                 string formating = "0";
+                int increment = 0;
 
                 foreach (var b in bindings)
                 {
@@ -321,7 +323,7 @@ namespace LB_Mod_Installer.Binding
                             formating = b.GetArgument1();
                             break;
                         case Function.SetAlias:
-                            Aliases.Add(new AliasValue() { ID = ID, Alias = b.GetArgument1() });
+                            Aliases.Add(new AliasValue() { ID = ID + increment, Alias = b.GetArgument1() });
                             break;
                         case Function.AliasLink:
                             ID = GetAliasId(b.GetArgument1(), comment);
@@ -408,6 +410,13 @@ namespace LB_Mod_Installer.Binding
                                 ID = nextId;
                             }
                             break;
+                        case Function.Increment:
+                            if (!b.HasArgument()) throw new Exception($"No argument found on Increment binding!");
+
+                            if(!int.TryParse(b.GetArgument1(), out increment))
+                                throw new Exception($"Error while parsing the argument on Increment binding. (Binding: {binding})");
+                            
+                            break;
                     }
                 }
 
@@ -422,7 +431,7 @@ namespace LB_Mod_Installer.Binding
                     ID = defaultValue;
                 }
 
-                return ApplyFormatting(ID, formating);
+                return ApplyFormatting(ID + increment, formating);
             }
             else
             {
@@ -506,6 +515,9 @@ namespace LB_Mod_Installer.Binding
                     case "format":
                         bindings.Add(new BindingValue() { Function = Function.Format, Arguments = arguments });
                         break;
+                    case "increment":
+                        bindings.Add(new BindingValue() { Function = Function.Increment, Arguments = arguments });
+                        break;
                     default:
                         throw new FormatException(String.Format("Invalid ID Binding Function (Function = {0}, Argument = {1})\nFull binding: {2}", function, argument, originalBinding));
                 }
@@ -514,50 +526,16 @@ namespace LB_Mod_Installer.Binding
             }
 
             return bindings;
-        } 
-
-        private bool IsBinding(string binding)
-        {
-            if (string.IsNullOrWhiteSpace(binding)) return false;
-            binding = binding.Trim();
-            if (binding[0] == '{' || binding[binding.Length - 1] == '}') return true;
-            return false;
-        }
-
-        private bool HasBinding(string binding)
-        {
-            if (string.IsNullOrWhiteSpace(binding)) return false;
-            return (binding.Contains('{') && binding.Contains('}'));
         }
 
         private List<BindingValue> ValidateBindings(List<BindingValue> bindings, string comment, string originalBinding)
         {
             //Ensures the bindings are valid, and orders them correctly so the alias function comes last (if present)
-            //Entries must be ordered like this: Error > ID  > Alias
 
-            //Move Alias
-            for (int i = 0; i < bindings.Count; i++)
-            {
-                if (bindings[i].Function == Function.SetAlias)
-                {
-                    var function = bindings[i];
-                    bindings.RemoveAt(i);
-                    bindings.Add(function);
-                    break;
-                }
-            }
-
-            //Move Error
-            for (int i = 0; i < bindings.Count; i++)
-            {
-                if (bindings[i].Function == Function.Error)
-                {
-                    var error = bindings[i];
-                    bindings.RemoveAt(i);
-                    bindings.Insert(0, error);
-                    break;
-                }
-            }
+            //Entries must be ordered like this: Error > ID > Increment > Alias
+            MoveFunctionToStart(bindings, Function.Error);
+            MoveFunctionToLast(bindings, Function.Increment);
+            MoveFunctionToLast(bindings, Function.SetAlias);
 
             //Validate functions
             bool hasIdBinding = false;
@@ -565,6 +543,7 @@ namespace LB_Mod_Installer.Binding
             bool hasErrorBinding = false;
             bool hasDefaultValueBinding = false;
             bool hasFormatBinding = false;
+            bool hasIncrementBinding = false;
 
             for (int i = 0; i < bindings.Count; i++)
             {
@@ -585,6 +564,10 @@ namespace LB_Mod_Installer.Binding
                     case Function.Format:
                         if (hasFormatBinding) throw new Exception(String.Format("More than one instance of {0} found. Binding parse failed.\n({1})", Function.Format, comment));
                         hasFormatBinding = true;
+                        break;
+                    case Function.Increment:
+                        if (hasIncrementBinding) throw new Exception(String.Format("More than one instance of {0} found. Binding parse failed.\n({1})", Function.Increment, comment));
+                        hasIncrementBinding = true;
                         break;
                     default:
                         if (hasIdBinding) throw new Exception(String.Format("More than one instance of an ID binding found within the same binding. Binding parse failed.\n({0})", comment));
@@ -627,6 +610,51 @@ namespace LB_Mod_Installer.Binding
 
             return bindings;
         }
+
+
+        //Helpers
+        private bool IsBinding(string binding)
+        {
+            if (string.IsNullOrWhiteSpace(binding)) return false;
+            binding = binding.Trim();
+            if (binding[0] == '{' || binding[binding.Length - 1] == '}') return true;
+            return false;
+        }
+
+        private bool HasBinding(string binding)
+        {
+            if (string.IsNullOrWhiteSpace(binding)) return false;
+            return (binding.Contains('{') && binding.Contains('}'));
+        }
+
+        private void MoveFunctionToLast(List<BindingValue> bindings, Function func)
+        {
+            for (int i = 0; i < bindings.Count; i++)
+            {
+                if (bindings[i].Function == func)
+                {
+                    var function = bindings[i];
+                    bindings.RemoveAt(i);
+                    bindings.Add(function);
+                    break;
+                }
+            }
+        }
+
+        private void MoveFunctionToStart(List<BindingValue> bindings, Function func)
+        {
+            for (int i = 0; i < bindings.Count; i++)
+            {
+                if (bindings[i].Function == func)
+                {
+                    var error = bindings[i];
+                    bindings.RemoveAt(i);
+                    bindings.Insert(0, error);
+                    break;
+                }
+            }
+        }
+
 
         #endregion
 

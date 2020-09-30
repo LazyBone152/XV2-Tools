@@ -143,6 +143,14 @@ namespace LB_Mod_Installer.Installer
                     return String.Format("extra_item_eff_{0}", int.Parse(args).ToString("D3"));
                 case "proper_noun_talisman_info_olt_":
                     return String.Format("talisman_olt_{0}", int.Parse(args).ToString("D3"));
+                case "proper_noun_gallery_illust_name_":
+                    return String.Format("gallery_illust_{0}", int.Parse(args).ToString("D3"));
+                case "proper_noun_gallery_illust_info_":
+                    return String.Format("gallery_illust_eff_{0}", int.Parse(args).ToString("D3"));
+                case "proper_noun_float_pet_name_":
+                    return String.Format("float_pet_{0}", int.Parse(args).ToString("D3"));
+                case "proper_noun_float_pet_info_":
+                    return String.Format("float_pet_eff_{0}", int.Parse(args).ToString("D3"));
                 case "quest_btlhud_": //In this case, we are just adding Limit Burst msg data
                     return String.Format("BHD_OLT_000_{0}", int.Parse(args).ToString("D2"));
                 case "proper_noun_character_name_":
