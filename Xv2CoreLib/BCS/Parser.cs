@@ -174,10 +174,10 @@ namespace Xv2CoreLib.BCS
                 int i_28 = BitConverter.ToInt32(rawBytes, offset + 28);
                 int i_32 = BitConverter.ToInt32(rawBytes, offset + 32);
 
-                if (i_28 > 0x200)
+                if (i_28 > 0x3FF)
                     throw new InvalidDataException($"Unexpected I_28 value: {i_28}.");
 
-                if (i_32 > 0x200)
+                if (i_32 > 0x3FF)
                     throw new InvalidDataException($"Unexpected I_32 value: {i_32}.");
 
                 return new Part()
