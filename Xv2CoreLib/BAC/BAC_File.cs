@@ -636,7 +636,7 @@ namespace Xv2CoreLib.BAC
                 Type25 = new List<BAC_Type25>();
             if (Type26 == null)
                 Type26 = new List<BAC_Type26>();
-            if (Type26 == null)
+            if (Type27 == null)
                 Type27 = new List<BAC_Type27>();
         }
 

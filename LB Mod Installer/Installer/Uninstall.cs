@@ -429,25 +429,13 @@ namespace LB_Mod_Installer.Installer
 
                 Section section = file.GetSection(Sections.BAC_Entries);
 
+                UninstallEntries(binaryFile.BacEntries, cpkBinFile.BacEntries, section.IDs);
+
                 if (section != null)
                 {
-                    for (int i = binaryFile.BacEntries.Count - 1; i >= 0; i--)
-                    {
-                        if (section.IDs.Contains(binaryFile.BacEntries[i].Index))
-                        {
-                            BAC_Entry newEntry = GetOriginalEntry((cpkBinFile != null) ? cpkBinFile.BacEntries : null, binaryFile.BacEntries[i].Index);
-                            
-                            if (newEntry == null)
-                            {
-                                newEntry = BAC_Entry.Empty();
-                                newEntry.Index = binaryFile.BacEntries[i].Index;
-                            }
-
-                            binaryFile.BacEntries.RemoveAt(i);
-                            binaryFile.BacEntries.Add(newEntry);
-                        }
-                    }
+                    UninstallEntries(binaryFile.BacEntries, cpkBinFile.BacEntries, section.IDs);
                 }
+
             }
             catch (Exception ex)
             {
