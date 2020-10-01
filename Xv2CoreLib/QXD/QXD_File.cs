@@ -54,7 +54,7 @@ namespace Xv2CoreLib.QXD
         ITEM_ACCESSORY = 4,
         ITEM_SUPERSOUL = 5,
         ITEM_MATERIAL = 6, // material_item.idb
-                               // There may be a 7 referenced only in collections (would it be extra_item.idb?)
+        ITEM_EXTRA = 7,
         ITEM_BATTLE = 8, // battle_item.idb
         ITEM_COLLECTION = 10, // Qxd collection
         ITEM_TTL_OBJECT = 100,

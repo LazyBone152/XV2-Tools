@@ -604,14 +604,8 @@ namespace LB_Mod_Installer.Installer
                 bindingManager.ParseProperties(xmlFile.BacEntries, binaryFile.BacEntries, installPath);
 
                 //Install entries
-                if(xmlFile.BacEntries != null)
-                {
-                    foreach (var entry in xmlFile.BacEntries)
-                    {
-                        GeneralInfo.Tracker.AddID(installPath, Sections.BAC_Entries, entry.Index);
-                        binaryFile.AddEntry(entry, int.Parse(entry.Index));
-                    }
-                }
+                InstallEntries(xmlFile.BacEntries, binaryFile.BacEntries, installPath, Sections.BAC_Entries);
+
             }
 #if !DEBUG
             catch (Exception ex)

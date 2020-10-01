@@ -169,6 +169,8 @@ namespace Xv2CoreLib.SAV
         public const int HC_FIGURE_INVENTORY_COUNT = 256;
         public const int HC_DECK = 517304;
 
+        //Partner
+        public const int PARTNER_KEY_FLAGS = 506772;
     }
 
     public static class FigureGrowth
@@ -557,7 +559,7 @@ namespace Xv2CoreLib.SAV
         public static int SAV_SIGNATURE = 1447121699;
         public const ulong VERSION_XOR = 0x7468656265636F6E;
 
-#region VersionUiProperties
+        #region VersionUiProperties
         [YAXDontSerialize]
         public string VersionString
         {
@@ -601,6 +603,8 @@ namespace Xv2CoreLib.SAV
                         return "1.14.1";
                     case 18:
                         return "1.15";
+                    case 19:
+                        return "1.15.01";
                     default:
                         return String.Format("Unknown ({0})", Version);
 
@@ -636,6 +640,7 @@ namespace Xv2CoreLib.SAV
                     case 16:
                     case 17:
                     case 18:
+                    case 19:
                         return null;
                     default:
                         return "This save version is not supported. It is recommened to update the application (if one is available).";
@@ -669,6 +674,7 @@ namespace Xv2CoreLib.SAV
                     case 16:
                     case 17:
                     case 18:
+                    case 19:
                         return Brushes.Blue;
                     default:
                         return Brushes.Red;
@@ -715,10 +721,19 @@ namespace Xv2CoreLib.SAV
                 return false;
             }
         }
+        [YAXDontSerialize]
+        public bool DLC11
+        {
+            get
+            {
+                if (Version >= 18) return true;
+                return false;
+            }
+        }
 
-#endregion
+        #endregion
 
-#region FileInfo
+        #region FileInfo
         //Bytes
         [YAXAttributeForClass]
         public bool IsEncrypted { get; set; }
@@ -1048,6 +1063,12 @@ namespace Xv2CoreLib.SAV
             }
         }
         
+        public void ValidatePartnerKeyFlags()
+        {
+            //Set the flags if the keys are currently in the inventory
+
+
+        }
     }
 
     #region CaC

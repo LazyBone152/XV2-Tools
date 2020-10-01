@@ -431,26 +431,9 @@ namespace LB_Mod_Installer.Installer
 
                 if (section != null)
                 {
-                    for (int i = binaryFile.BacEntries.Count - 1; i >= 0; i--)
-                    {
-                        if (section.IDs.Contains(binaryFile.BacEntries[i].Index))
-                        {
-                            BAC_Entry newEntry = GetOriginalEntry((cpkBinFile != null) ? cpkBinFile.BacEntries : null, binaryFile.BacEntries[i].Index);
-                            
-                            if (newEntry == null)
-                            {
-                                newEntry = BAC_Entry.Empty();
-                                newEntry.Index = binaryFile.BacEntries[i].Index;
-
-                                //needed when Reinstalling, as the Sort ID will be duplicated and Exception raised
-                                newEntry.SortID = -1;
-                            }
-
-                            binaryFile.BacEntries.RemoveAt(i);
-                            binaryFile.BacEntries.Add(newEntry);
-                        }
-                    }
+                    UninstallEntries(binaryFile.BacEntries, (cpkBinFile != null) ? cpkBinFile.BacEntries : null, section.IDs);
                 }
+
             }
             catch (Exception ex)
             {
