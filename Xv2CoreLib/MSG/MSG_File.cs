@@ -266,6 +266,45 @@ namespace Xv2CoreLib.MSG
             
         }
 
+        /// <summary>
+        /// Synchronize msgFiles by copying over missing msg Entries.
+        /// </summary>
+        /// <param name="msgFiles"></param>
+        public static void SynchronizeMsgFiles(IEnumerable<MSG_File> msgFiles)
+        {
+            foreach (var msgFile in msgFiles)
+            {
+                foreach (var msgFile2 in msgFiles)
+                {
+                    msgFile.AddIfMissing(msgFile2.MSG_Entries);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Add MSG_Entries if they do not already exist (ID match).
+        /// </summary>
+        /// <param name="msgEntries">The entries to add.</param>
+        public void AddIfMissing(List<MSG_Entry> msgEntries)
+        {
+            foreach (var msgEntry in msgEntries)
+            {
+                if (MSG_Entries.FindIndex(m => m.Index == msgEntry.Index) == -1)
+                {
+                    MSG_Entries.Add(msgEntry);
+                }
+            }
+        }
+
+        public int AddEntry(string name, string message)
+        {
+            int id = GetLowestUnusedID();
+            MSG_Entries.Add(new MSG_Entry() { Name = name, Index = id.ToString(), Msg_Content = new List<Msg_Line>() { new Msg_Line() { Text = message } } });
+            return id;
+        }
+
+
+        #region Get
         public string GetCharacterName(string shortName)
         {
             string tempName = String.Format("chara_{0}_000", shortName);
@@ -374,43 +413,41 @@ namespace Xv2CoreLib.MSG
             return names.ToArray();
         }
 
-        /// <summary>
-        /// Synchronize msgFiles by copying over missing msg Entries.
-        /// </summary>
-        /// <param name="msgFiles"></param>
-        public static void SynchronizeMsgFiles(IEnumerable<MSG_File> msgFiles)
+        public string GetArtworkName(int idbId)
         {
-            foreach(var msgFile in msgFiles)
+            string tempName = String.Format("gallery_illust_{0}", idbId.ToString("D4"));
+            string tempName2 = String.Format("gallery_illust_{0}", idbId.ToString("D3"));
+
+            foreach (var entry in MSG_Entries)
             {
-                foreach(var msgFile2 in msgFiles)
+                if (entry.Name == tempName || entry.Name == tempName2)
                 {
-                    msgFile.AddIfMissing(msgFile2.MSG_Entries);
+                    return WebUtility.HtmlDecode(entry.Msg_Content[0].Text);
                 }
             }
-        }
 
-        /// <summary>
-        /// Add MSG_Entries if they do not already exist (ID match).
-        /// </summary>
-        /// <param name="msgEntries">The entries to add.</param>
-        public void AddIfMissing(List<MSG_Entry> msgEntries)
+            return null;
+        }
+        
+        public string GetPetName(int idbId)
         {
-            foreach(var msgEntry in msgEntries)
+            string tempName = String.Format("float_pet_{0}", idbId.ToString("D4"));
+            string tempName2 = String.Format("float_pet_{0}", idbId.ToString("D3"));
+
+            foreach (var entry in MSG_Entries)
             {
-                if(MSG_Entries.FindIndex(m => m.Index == msgEntry.Index) == -1)
+                if (entry.Name == tempName || entry.Name == tempName2)
                 {
-                    MSG_Entries.Add(msgEntry);
+                    return WebUtility.HtmlDecode(entry.Msg_Content[0].Text);
                 }
             }
-        }
 
-        public int AddEntry(string name, string message)
-        {
-            int id = GetLowestUnusedID();
-            MSG_Entries.Add(new MSG_Entry() { Name = name, Index = id.ToString(), Msg_Content = new List<Msg_Line>() { new Msg_Line() { Text = message } } });
-            return id;
+            return null;
         }
-    }
+        
+        #endregion
+
+ }
 
     [YAXSerializeAs("MsgEntry")]
     public class MSG_Entry : IInstallable
