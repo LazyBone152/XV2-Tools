@@ -429,11 +429,9 @@ namespace LB_Mod_Installer.Installer
 
                 Section section = file.GetSection(Sections.BAC_Entries);
 
-                UninstallEntries(binaryFile.BacEntries, cpkBinFile.BacEntries, section.IDs);
-
                 if (section != null)
                 {
-                    UninstallEntries(binaryFile.BacEntries, cpkBinFile.BacEntries, section.IDs);
+                    UninstallEntries(binaryFile.BacEntries, (cpkBinFile != null) ? cpkBinFile.BacEntries : null, section.IDs);
                 }
 
             }
