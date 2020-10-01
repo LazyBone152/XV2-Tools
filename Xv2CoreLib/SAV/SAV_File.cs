@@ -963,8 +963,10 @@ namespace Xv2CoreLib.SAV
             if(DLC5 && FileBytes.Count != Offsets.DECRYPTED_SAVE_SIZE_V10) throw new InvalidDataException(String.Format("Invalid BaseFile bytes array size. Expected {1} but found {0}. Save failed.", FileBytes.Count, Offsets.DECRYPTED_SAVE_SIZE_V10));
             if(!DLC5 && FileBytes.Count != Offsets.DECRYPTED_SAVE_SIZE_V1) throw new InvalidDataException(String.Format("Invalid BaseFile bytes array size. Expected {1} but found {0}. Save failed.", FileBytes.Count, Offsets.DECRYPTED_SAVE_SIZE_V1));
 
-
             List<byte> bytes = FileBytes;
+
+            //Validate
+            bytes = ValidatePartnerKeyFlags(bytes);
 
             //Header
             bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(SteamID ^ VERSION_XOR), 8);
@@ -1063,11 +1065,43 @@ namespace Xv2CoreLib.SAV
             }
         }
         
-        public void ValidatePartnerKeyFlags()
+        public List<byte> ValidatePartnerKeyFlags(List<byte> bytes)
         {
             //Set the flags if the keys are currently in the inventory
+            BitArray flag = new BitArray(bytes.GetRange(Offsets.PARTNER_KEY_FLAGS, 4).ToArray());
 
+            if (Inventory.ImportantItems.Any(x => x.I_00 == 13))
+                flag[0] = true;
 
+            if (Inventory.ImportantItems.Any(x => x.I_00 == 14))
+                flag[1] = true;
+
+            if (Inventory.ImportantItems.Any(x => x.I_00 == 15))
+                flag[2] = true;
+
+            if (Inventory.ImportantItems.Any(x => x.I_00 == 16))
+                flag[3] = true;
+
+            if (Inventory.ImportantItems.Any(x => x.I_00 == 17))
+                flag[4] = true;
+
+            if (Inventory.ImportantItems.Any(x => x.I_00 == 18))
+                flag[5] = true;
+
+            if (Inventory.ImportantItems.Any(x => x.I_00 == 19))
+                flag[6] = true;
+
+            if (Inventory.ImportantItems.Any(x => x.I_00 == 20))
+                flag[7] = true;
+
+            if (Inventory.ImportantItems.Any(x => x.I_00 == 21))
+                flag[8] = true;
+
+            if (Inventory.ImportantItems.Any(x => x.I_00 == 22))
+                flag[9] = true;
+
+            int num = Utils.ConvertToInt(flag);
+            return Utils.ReplaceRange(bytes, BitConverter.GetBytes(num), Offsets.PARTNER_KEY_FLAGS);
         }
     }
 
