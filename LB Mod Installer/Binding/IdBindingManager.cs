@@ -129,7 +129,8 @@ namespace LB_Mod_Installer.Binding
         X2MSkillID2,
         AutoPartSet,
         Format, 
-        Increment
+        Increment,
+        X2MSkillPath
     }
 
     public enum ErrorHandling
@@ -306,8 +307,10 @@ namespace LB_Mod_Installer.Binding
             if (IsBinding(binding))
             {
                 string originalBinding = binding;
+                string Path = String.Empty;
                 int ID = -1;
                 int defaultValue = 0;
+          
                 List<BindingValue> bindings = ProcessBinding(binding, comment, originalBinding);
                 bindings = ValidateBindings(bindings, comment, originalBinding);
 
@@ -417,6 +420,21 @@ namespace LB_Mod_Installer.Binding
                                 throw new Exception($"Error while parsing the argument on Increment binding. (Binding: {binding})");
                             
                             break;
+                        case Function.X2MSkillPath:
+
+                            {
+                                CusSkillType skillType = GetSkillType(b.GetArgument2());
+                                string x2mSkillPath = _X2MHelper.GetX2MSkillPath(b.GetArgument1(), skillType);
+
+                                if (x2mSkillPath == NullTokenStr && errorHandler == ErrorHandling.Stop)
+                                {
+                                    GeneralInfo.SpecialFailState = GeneralInfo.SpecialFailStates.X2MNotFound;
+                                    throw new Exception(String.Format("Required X2M skill not found. Install failed. \nBinding: {1}\n({0})", comment, binding, filePath));
+                                }
+
+                                Path = x2mSkillPath;
+                                break;
+                            }
                     }
                 }
 
@@ -430,8 +448,11 @@ namespace LB_Mod_Installer.Binding
                 {
                     ID = defaultValue;
                 }
-
-                return ApplyFormatting(ID + increment, formating);
+                // Path wasn't used
+                if (Path == String.Empty)
+                    return ApplyFormatting(ID + increment, formating);
+                else  //a special case for returning a Path to use in installPath
+                    return Path;
             }
             else
             {
@@ -518,6 +539,10 @@ namespace LB_Mod_Installer.Binding
                     case "increment":
                         bindings.Add(new BindingValue() { Function = Function.Increment, Arguments = arguments });
                         break;
+                    case "x2mskillpath":
+                        bindings.Add(new BindingValue() { Function = Function.X2MSkillPath, Arguments = arguments });
+                        break;
+
                     default:
                         throw new FormatException(String.Format("Invalid ID Binding Function (Function = {0}, Argument = {1})\nFull binding: {2}", function, argument, originalBinding));
                 }
@@ -599,6 +624,7 @@ namespace LB_Mod_Installer.Binding
                     case Function.SkillID2:
                     case Function.X2MSkillID1:
                     case Function.X2MSkillID2:
+                    case Function.X2MSkillPath:
                         if (bindings[i].Arguments.Length < 2)
                         {
                             throw new Exception(String.Format("The {0} binding function takes 2 string arguments, but only {1} were found. \n({2})", bindings[i].Function, bindings[i].Arguments.Length, comment));
