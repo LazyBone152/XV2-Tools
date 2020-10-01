@@ -4117,28 +4117,28 @@ namespace Xv2CoreLib.BAC
         [YAXAttributeFor("SkillID")]
         [YAXSerializeAs("value")]
         public string I_08 { get; set; } //uint16
-        [YAXAttributeFor("I_10")]
+        [YAXAttributeFor("SkillType")]
         [YAXSerializeAs("value")]
         [YAXHexValue]
         public ushort I_10 { get; set; }
-        [YAXAttributeFor("I_12")]
+        [YAXAttributeFor("EffectID")]
         [YAXSerializeAs("value")]
         [YAXHexValue]
         public ushort I_12 { get; set; }
-        [YAXAttributeFor("I_14")]
+        [YAXAttributeFor("FunctionDuration")]
         [YAXSerializeAs("value")]
         [YAXHexValue]
         public ushort I_14 { get; set; }
-        [YAXAttributeFor("SkillType")]
+        [YAXAttributeFor("Function")]
         [YAXSerializeAs("value")]
         public ushort I_16 { get; set; }
-        [YAXAttributeFor("EffectID")]
+        [YAXAttributeFor("I_18")]
         [YAXSerializeAs("value")]
         public ushort I_18 { get; set; }
-        [YAXAttributeFor("FunctionDuration")]
+        [YAXAttributeFor("I_20")]
         [YAXSerializeAs("value")]
         public ushort I_20 { get; set; }
-        [YAXAttributeFor("Function")]
+        [YAXAttributeFor("I_22")]
         [YAXSerializeAs("value")]
         public ushort I_22 { get; set; }
 
