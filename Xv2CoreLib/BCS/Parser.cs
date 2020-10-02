@@ -68,7 +68,9 @@ namespace Xv2CoreLib.BCS
             int skeleton1Offset = BitConverter.ToInt32(rawBytes, 40);
 
             //Header
-            bcsFile.I_44 = BitConverter.ToInt32(rawBytes, 44);
+            byte[] _I_44 = rawBytes.GetRange(44, 4);
+            bcsFile.Race = _I_44[0];
+            bcsFile.Sex = Convert.ToBoolean(_I_44[1]);
             bcsFile.F_48 = BitConverter_Ex.ToFloat32Array(rawBytes, 48, 7);
 
             //PartSets

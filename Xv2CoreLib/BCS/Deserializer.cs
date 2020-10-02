@@ -76,12 +76,13 @@ namespace Xv2CoreLib.BCS
             
             //Header
             int I_18 = (bcsFile.SkeletonData2 != null) ? 1 : 0;
+            byte[] _i_44 = { bcsFile.Race, Convert.ToByte(bcsFile.Sex), 0, 0 };
             bytes.AddRange(BitConverter.GetBytes((short)PartSetCount));
             bytes.AddRange(BitConverter.GetBytes((short)PartColorCount));
             bytes.AddRange(BitConverter.GetBytes((short)BodyCount));
             bytes.AddRange(BitConverter.GetBytes((short)I_18));
             bytes.AddRange(new byte[24]);
-            bytes.AddRange(BitConverter.GetBytes(bcsFile.I_44));
+            bytes.AddRange(_i_44);
             Assertion.AssertArraySize(bcsFile.F_48, 7, "BCS", "F_48");
             bytes.AddRange(BitConverter_Ex.GetBytes(bcsFile.F_48));
 

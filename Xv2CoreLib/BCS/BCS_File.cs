@@ -25,9 +25,13 @@ namespace Xv2CoreLib.BCS
     [YAXSerializeAs("BCS")]
     public class BCS_File : ISorting
     {
-        [YAXAttributeFor("I_44")]
+        [YAXAttributeFor("Race")]
         [YAXSerializeAs("value")]
-        public int I_44 { get; set; }
+        [YAXFormat("X02")]
+        public byte Race { get; set; }
+        [YAXAttributeFor("Female")]
+        [YAXSerializeAs("value")]
+        public bool Sex { get; set; }
         [YAXAttributeFor("F_48")]
         [YAXSerializeAs("values")]
         [YAXFormat("0.0###########")]
