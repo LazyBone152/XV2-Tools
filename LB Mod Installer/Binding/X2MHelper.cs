@@ -47,7 +47,7 @@ namespace LB_Mod_Installer.Binding
 
             return IdBindingManager.NullTokenInt;
         }
-
+        
         public string GetX2MSkillShortName(string guid, IdBindingManager.CusSkillType skillType)
         {
             object[] ret = FindX2MSkill(guid, skillType);
@@ -60,6 +60,21 @@ namespace LB_Mod_Installer.Binding
             return null;
         }
 
+        public string GetX2MSkillPath(string guid, IdBindingManager.CusSkillType skillType)
+        {
+            //added 2 extra params to the returned object
+            object[] ret = FindX2MSkill(guid, skillType);
+
+            if (ret != null)
+            {
+                //hardcoded to .bac, it should be the only file that would need such function binding
+                return string.Format(@"skill/{0}/{1}/{1}.bac", (string)ret[3], (string)ret[4]);
+
+
+            }
+
+            return null;
+        }
         private object[] FindX2MSkill(string guid, IdBindingManager.CusSkillType skillType)
         {
             try
@@ -69,6 +84,10 @@ namespace LB_Mod_Installer.Binding
                 int ID1 = -1;
                 int ID2 = -1;
                 string ShortName = String.Empty;
+
+                //for GetX2MSkillPath
+                string FolderName = String.Empty;
+                string SkillType = String.Empty;
 
                 //Determine the directory to look in
                 string directory = String.Empty;
@@ -110,7 +129,10 @@ namespace LB_Mod_Installer.Binding
                         if (guid == iniGuid)
                         {
                             //Skill found
-                            string name = new DirectoryInfo(d).Name;
+                             string name = new DirectoryInfo(d).Name;
+                            
+                            //Get folder name to return for GetX2MSkillPath
+                            FolderName = name;
 
                             //Getting IDs
                             ID2 = int.Parse(name.Split('_')[0]);
@@ -120,18 +142,23 @@ namespace LB_Mod_Installer.Binding
                             {
                                 case IdBindingManager.CusSkillType.Super:
                                     ID1 = ID2;
+                                    SkillType = "SPA";
                                     break;
                                 case IdBindingManager.CusSkillType.Ultimate:
                                     ID1 = ID2 + 5000;
+                                    SkillType = "ULT";
                                     break;
                                 case IdBindingManager.CusSkillType.Evasive:
                                     ID1 = ID2 + 10000;
+                                    SkillType = "ESC";
                                     break;
                                 case IdBindingManager.CusSkillType.Blast:
                                     ID1 = ID2 + 20000;
+                                    SkillType = "BLT";
                                     break;
                                 case IdBindingManager.CusSkillType.Awoken:
                                     ID1 = ID2 + 25000;
+                                    SkillType = "MET";
                                     break;
                             }
 
@@ -145,7 +172,7 @@ namespace LB_Mod_Installer.Binding
                 //Return
                 if (foundSkill)
                 {
-                    return new object[3] { ID1, ID2, ShortName };
+                    return new object[5] { ID1, ID2, ShortName , SkillType, FolderName };
                 }
                 else
                 {

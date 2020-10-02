@@ -355,7 +355,7 @@ namespace Xv2CoreLib.BAC
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BAC_Type26")]
         public List<BAC_Type26> Type26 { get; set; }
         [YAXDontSerializeIfNull]
-        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BAC_Type27")]
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "EffectPropertyControl")]
         public List<BAC_Type27> Type27 { get; set; }
 
         [YAXDontSerializeIfNull]
@@ -636,7 +636,7 @@ namespace Xv2CoreLib.BAC
                 Type25 = new List<BAC_Type25>();
             if (Type26 == null)
                 Type26 = new List<BAC_Type26>();
-            if (Type26 == null)
+            if (Type27 == null)
                 Type27 = new List<BAC_Type27>();
         }
 
@@ -4106,40 +4106,40 @@ namespace Xv2CoreLib.BAC
         }
     }
 
-    [YAXSerializeAs("BAC_Type27")]
+    [YAXSerializeAs("EffectPropertyControl")]
     [Serializable]
     public class BAC_Type27 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type { get { return "BAC_Type27"; } }
+        public string Type { get { return "EffectPropertyControl"; } }
 
 
         [YAXAttributeFor("SkillID")]
         [YAXSerializeAs("value")]
         public string I_08 { get; set; } //uint16
-        [YAXAttributeFor("I_10")]
-        [YAXSerializeAs("value")]
-        [YAXHexValue]
-        public ushort I_10 { get; set; }
-        [YAXAttributeFor("I_12")]
-        [YAXSerializeAs("value")]
-        [YAXHexValue]
-        public ushort I_12 { get; set; }
-        [YAXAttributeFor("I_14")]
-        [YAXSerializeAs("value")]
-        [YAXHexValue]
-        public ushort I_14 { get; set; }
         [YAXAttributeFor("SkillType")]
         [YAXSerializeAs("value")]
-        public ushort I_16 { get; set; }
+        public ushort I_10 { get; set; }
         [YAXAttributeFor("EffectID")]
         [YAXSerializeAs("value")]
-        public ushort I_18 { get; set; }
+        public ushort I_12 { get; set; }
         [YAXAttributeFor("FunctionDuration")]
         [YAXSerializeAs("value")]
-        public ushort I_20 { get; set; }
+        public ushort I_14 { get; set; }
         [YAXAttributeFor("Function")]
         [YAXSerializeAs("value")]
+        public ushort I_16 { get; set; }
+        [YAXAttributeFor("I_18")]
+        [YAXSerializeAs("value")]
+        [YAXHexValue]
+        public ushort I_18 { get; set; }
+        [YAXAttributeFor("I_20")]
+        [YAXSerializeAs("value")]
+        [YAXHexValue]
+        public ushort I_20 { get; set; }
+        [YAXAttributeFor("I_22")]
+        [YAXSerializeAs("value")]
+        [YAXHexValue]
         public ushort I_22 { get; set; }
 
         public static List<BAC_Type27> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)

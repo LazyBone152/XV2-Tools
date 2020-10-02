@@ -16,6 +16,7 @@ using System.Windows.Media;
 
 #if SaveEditor
 using LB_Save_Editor;
+using LB_Save_Editor.ID;
 #endif
 
 namespace Xv2CoreLib.SAV
@@ -168,6 +169,13 @@ namespace Xv2CoreLib.SAV
         public const int HC_FIGURE_INVENTORY = 507064;
         public const int HC_FIGURE_INVENTORY_COUNT = 256;
         public const int HC_DECK = 517304;
+
+        //New stuff in 1.15
+        public const int PARTNER_KEY_FLAGS = 506772; //These need to be set or else the keys dont work
+        public const int MASCOT_FLAGS_OFFSET = 204;
+        public const int MASCOT_COUNT = 64; //64 bytes (512 bits)
+        public const int ARTWORK_FLAGS_OFFSET = 506228;
+        public const int ARTWORK_COUNT = 64; //64 bytes (assumption)
 
     }
 
@@ -557,7 +565,7 @@ namespace Xv2CoreLib.SAV
         public static int SAV_SIGNATURE = 1447121699;
         public const ulong VERSION_XOR = 0x7468656265636F6E;
 
-#region VersionUiProperties
+        #region VersionUiProperties
         [YAXDontSerialize]
         public string VersionString
         {
@@ -601,6 +609,8 @@ namespace Xv2CoreLib.SAV
                         return "1.14.1";
                     case 18:
                         return "1.15";
+                    case 19:
+                        return "1.15.01";
                     default:
                         return String.Format("Unknown ({0})", Version);
 
@@ -635,7 +645,9 @@ namespace Xv2CoreLib.SAV
                     case 15:
                     case 16:
                     case 17:
+                        return "The following data can't be edited on this save version:\n-Artwork\n-Mascots";
                     case 18:
+                    case 19:
                         return null;
                     default:
                         return "This save version is not supported. It is recommened to update the application (if one is available).";
@@ -662,13 +674,14 @@ namespace Xv2CoreLib.SAV
                     case 10:
                     case 11:
                     case 12:
-                        return Brushes.Red;
                     case 13:
                     case 14:
                     case 15:
                     case 16:
                     case 17:
+                        return Brushes.OrangeRed;
                     case 18:
+                    case 19:
                         return Brushes.Blue;
                     default:
                         return Brushes.Red;
@@ -715,10 +728,19 @@ namespace Xv2CoreLib.SAV
                 return false;
             }
         }
+        [YAXDontSerialize]
+        public bool DLC11
+        {
+            get
+            {
+                if (Version >= 18) return true;
+                return false;
+            }
+        }
 
-#endregion
+        #endregion
 
-#region FileInfo
+        #region FileInfo
         //Bytes
         [YAXAttributeForClass]
         public bool IsEncrypted { get; set; }
@@ -791,6 +813,84 @@ namespace Xv2CoreLib.SAV
         public HeroColosseumGlobal HeroColosseum { get; set; }
         public Xv1Hero Xv1Hero { get; set; }
         public List<MentorCustomizationUnlockFlag> MentorCustomizationUnlockFlags { get; set; }
+
+
+        public ObservableCollection<MascotFlag> MascotFlags { get; set; }
+        public ObservableCollection<ArtworkFlag> ArtworkFlags { get; set; }
+
+        #region View
+        private ListCollectionView _mascotView = null;
+        [YAXDontSerialize]
+        public ListCollectionView ViewMascotFlags
+        {
+            get
+            {
+                if (MascotFlags == null) return null;
+                if (_mascotView != null)
+                {
+                    return _mascotView;
+                }
+                _mascotView = new ListCollectionView(MascotFlags);
+                _mascotView.Filter = new Predicate<object>(MascotContains);
+                return _mascotView;
+            }
+            set
+            {
+                if (value != _mascotView)
+                {
+                    _mascotView = value;
+                    NotifyPropertyChanged(nameof(ViewMascotFlags));
+                }
+            }
+        }
+
+        private ListCollectionView _artworkView = null;
+        [YAXDontSerialize]
+        public ListCollectionView ViewArtworkFlags
+        {
+            get
+            {
+                if (ArtworkFlags == null) return null;
+                if (_artworkView != null)
+                {
+                    return _artworkView;
+                }
+                _artworkView = new ListCollectionView(ArtworkFlags);
+                _artworkView.Filter = new Predicate<object>(ArtworkContains);
+                return _artworkView;
+            }
+            set
+            {
+                if (value != _artworkView)
+                {
+                    _artworkView = value;
+                    NotifyPropertyChanged(nameof(ViewArtworkFlags));
+                }
+            }
+        }
+
+        private bool ArtworkContains(object obj)
+        {
+            ArtworkFlag item = obj as ArtworkFlag;
+
+            if (item != null)
+            {
+                return item.HasName;
+            }
+            return false;
+        }
+
+        private bool MascotContains(object obj)
+        {
+            MascotFlag item = obj as MascotFlag;
+
+            if (item != null)
+            {
+                return item.HasName;
+            }
+            return false;
+        }
+        #endregion
 
         public static SAV_File Load(string path, bool saveXml = true)
         {
@@ -938,6 +1038,13 @@ namespace Xv2CoreLib.SAV
                 savFile.MentorCustomizationUnlockFlags = MentorCustomizationUnlockFlag.Read(bytes);
             }
 
+            //1.15 stuff
+            if (savFile.DLC11)
+            {
+                savFile.MascotFlags = MascotFlag.LoadAll(bytes);
+                savFile.ArtworkFlags = ArtworkFlag.LoadAll(bytes);
+            }
+
             savFile.Xv1Hero = Xv1Hero.Read(rawBytes, bytes);
 
             return savFile;
@@ -948,8 +1055,10 @@ namespace Xv2CoreLib.SAV
             if(DLC5 && FileBytes.Count != Offsets.DECRYPTED_SAVE_SIZE_V10) throw new InvalidDataException(String.Format("Invalid BaseFile bytes array size. Expected {1} but found {0}. Save failed.", FileBytes.Count, Offsets.DECRYPTED_SAVE_SIZE_V10));
             if(!DLC5 && FileBytes.Count != Offsets.DECRYPTED_SAVE_SIZE_V1) throw new InvalidDataException(String.Format("Invalid BaseFile bytes array size. Expected {1} but found {0}. Save failed.", FileBytes.Count, Offsets.DECRYPTED_SAVE_SIZE_V1));
 
-
             List<byte> bytes = FileBytes;
+
+            //Validate
+            bytes = ValidatePartnerKeyFlags(bytes);
 
             //Header
             bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(SteamID ^ VERSION_XOR), 8);
@@ -983,6 +1092,13 @@ namespace Xv2CoreLib.SAV
             {
                 bytes = MentorCustomizationUnlockFlag.Write(MentorCustomizationUnlockFlags, bytes);
             }
+
+            //1.15 stuff
+            if (DLC11 && ArtworkFlags != null)
+                ArtworkFlag.Write(bytes, ArtworkFlags);
+
+            if (DLC11 && MascotFlags != null)
+                MascotFlag.Write(bytes, MascotFlags);
 
             return bytes;
         }
@@ -1048,6 +1164,44 @@ namespace Xv2CoreLib.SAV
             }
         }
         
+        public List<byte> ValidatePartnerKeyFlags(List<byte> bytes)
+        {
+            //Set the flags if the keys are currently in the inventory
+            BitArray flag = new BitArray(bytes.GetRange(Offsets.PARTNER_KEY_FLAGS, 4).ToArray());
+
+            if (Inventory.ImportantItems.Any(x => x.I_00 == 13))
+                flag[0] = true;
+
+            if (Inventory.ImportantItems.Any(x => x.I_00 == 14))
+                flag[1] = true;
+
+            if (Inventory.ImportantItems.Any(x => x.I_00 == 15))
+                flag[2] = true;
+
+            if (Inventory.ImportantItems.Any(x => x.I_00 == 16))
+                flag[3] = true;
+
+            if (Inventory.ImportantItems.Any(x => x.I_00 == 17))
+                flag[4] = true;
+
+            if (Inventory.ImportantItems.Any(x => x.I_00 == 18))
+                flag[5] = true;
+
+            if (Inventory.ImportantItems.Any(x => x.I_00 == 19))
+                flag[6] = true;
+
+            if (Inventory.ImportantItems.Any(x => x.I_00 == 20))
+                flag[7] = true;
+
+            if (Inventory.ImportantItems.Any(x => x.I_00 == 21))
+                flag[8] = true;
+
+            if (Inventory.ImportantItems.Any(x => x.I_00 == 22))
+                flag[9] = true;
+
+            int num = Utils.ConvertToInt(flag);
+            return Utils.ReplaceRange(bytes, BitConverter.GetBytes(num), Offsets.PARTNER_KEY_FLAGS);
+        }
     }
 
     #region CaC
@@ -7746,10 +7900,10 @@ namespace Xv2CoreLib.SAV
 
     public class SystemFlag
     {
-#if SaveEditor
+        #if SaveEditor
         [YAXDontSerialize]
         public LB_Save_Editor.ID.SysFlag FlagData { get; set; }
-#endif
+        #endif
 
         [YAXAttributeForClass]
         public int Index { get; set; }
@@ -8645,4 +8799,165 @@ namespace Xv2CoreLib.SAV
 
     }
 
+    //New 1.15 stuff:
+    public class MascotFlag : INotifyPropertyChanged
+    {
+        #region NotifyPropChanged
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+        #endregion
+
+        #region View
+        [YAXDontSerialize]
+        public int DisplayID { get { return Index + 1; } }
+        [YAXDontSerialize]
+        public string Name { get; set; }
+        [YAXDontSerialize]
+        public bool HasName { get { return !string.IsNullOrEmpty(Name); } }
+        #endregion
+
+        [YAXAttributeForClass]
+        public int Index { get; set; }
+        [YAXAttributeForClass]
+        public bool Acquired
+        {
+            get
+            {
+                return this._acquired;
+            }
+
+            set
+            {
+                if (value != this._acquired)
+                {
+                    this._acquired = value;
+                    NotifyPropertyChanged(nameof(Acquired));
+                }
+            }
+        }
+
+        private bool _acquired = false;
+
+        public static ObservableCollection<MascotFlag> LoadAll(List<byte> bytes)
+        {
+            ObservableCollection<MascotFlag> flags = new ObservableCollection<MascotFlag>();
+            BitArray bits = new BitArray(bytes.GetRange(Offsets.MASCOT_FLAGS_OFFSET, Offsets.MASCOT_COUNT).ToArray());
+
+            for (int i = 0; i < bits.Count; i++)
+                flags.Add(new MascotFlag() { Index = i, Acquired = bits[i] });
+
+            return flags;
+        }
+
+        public static List<byte> Write(List<byte> bytes, ObservableCollection<MascotFlag> mascotFlags)
+        {
+            int offset = Offsets.MASCOT_FLAGS_OFFSET;
+
+            //Create bool list
+            List<bool> flags = new List<bool>();
+
+            foreach (var flag in mascotFlags)
+            {
+                flags.Add(flag.Acquired);
+            }
+
+            BitArray bitFlags = new BitArray(flags.ToArray());
+            byte[] flagBytes = Utils.ConvertToByteArray(bitFlags, Offsets.MASCOT_COUNT);
+
+            if (flagBytes.Length != Offsets.MASCOT_COUNT) throw new InvalidDataException("MascotFlags Collection is an invalid size.");
+
+            bytes = Utils.ReplaceRange(bytes, flagBytes, offset);
+
+            return bytes;
+        }
+    }
+
+    public class ArtworkFlag : INotifyPropertyChanged
+    {
+        #region NotifyPropChanged
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+        #endregion
+
+        #region View
+        [YAXDontSerialize]
+        public int DisplayID { get { return Index + 1; } }
+        [YAXDontSerialize]
+        public string Name { get; set; }
+        [YAXDontSerialize]
+        public bool HasName { get { return !string.IsNullOrEmpty(Name); } }
+        #endregion
+
+        [YAXAttributeForClass]
+        public int Index { get; set; }
+        [YAXAttributeForClass]
+        public bool Acquired
+        {
+            get
+            {
+                return this._acquired;
+            }
+
+            set
+            {
+                if (value != this._acquired)
+                {
+                    this._acquired = value;
+                    NotifyPropertyChanged(nameof(Acquired));
+                }
+            }
+        }
+
+        private bool _acquired = false;
+
+        public static ObservableCollection<ArtworkFlag> LoadAll(List<byte> bytes)
+        {
+            ObservableCollection<ArtworkFlag> flags = new ObservableCollection<ArtworkFlag>();
+            BitArray bits = new BitArray(bytes.GetRange(Offsets.ARTWORK_FLAGS_OFFSET, Offsets.ARTWORK_COUNT).ToArray());
+
+            for (int i = 0; i < bits.Count; i++)
+                flags.Add(new ArtworkFlag() { Index = i, Acquired = bits[i] });
+
+            return flags;
+        }
+
+        public static List<byte> Write(List<byte> bytes, ObservableCollection<ArtworkFlag> artworkFlags)
+        {
+            int offset = Offsets.ARTWORK_FLAGS_OFFSET;
+
+            //Create bool list
+            List<bool> flags = new List<bool>();
+
+            foreach (var flag in artworkFlags)
+            {
+                flags.Add(flag.Acquired);
+            }
+
+            BitArray bitFlags = new BitArray(flags.ToArray());
+            byte[] flagBytes = Utils.ConvertToByteArray(bitFlags, Offsets.ARTWORK_COUNT);
+
+            if (flagBytes.Length != Offsets.ARTWORK_COUNT) throw new InvalidDataException("ArtworkFlags Collection is an invalid size.");
+
+            bytes = Utils.ReplaceRange(bytes, flagBytes, offset);
+
+            return bytes;
+        }
+
+    }
 }
