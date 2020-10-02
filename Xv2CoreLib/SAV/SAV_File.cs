@@ -13,10 +13,10 @@ using System.Windows.Data;
 using System.Collections;
 using System.Collections.Specialized;
 using System.Windows.Media;
-using LB_Save_Editor.ID;
 
 #if SaveEditor
 using LB_Save_Editor;
+using LB_Save_Editor.ID;
 #endif
 
 namespace Xv2CoreLib.SAV

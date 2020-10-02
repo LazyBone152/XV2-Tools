@@ -355,7 +355,7 @@ namespace Xv2CoreLib.BAC
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BAC_Type26")]
         public List<BAC_Type26> Type26 { get; set; }
         [YAXDontSerializeIfNull]
-        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BAC_Type27")]
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "EffectPropertyControl")]
         public List<BAC_Type27> Type27 { get; set; }
 
         [YAXDontSerializeIfNull]
@@ -4106,12 +4106,12 @@ namespace Xv2CoreLib.BAC
         }
     }
 
-    [YAXSerializeAs("BAC_Type27")]
+    [YAXSerializeAs("EffectPropertyControl")]
     [Serializable]
     public class BAC_Type27 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type { get { return "BAC_Type27"; } }
+        public string Type { get { return "EffectPropertyControl"; } }
 
 
         [YAXAttributeFor("SkillID")]
