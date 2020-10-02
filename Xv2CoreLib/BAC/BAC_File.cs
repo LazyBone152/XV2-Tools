@@ -4119,27 +4119,27 @@ namespace Xv2CoreLib.BAC
         public string I_08 { get; set; } //uint16
         [YAXAttributeFor("SkillType")]
         [YAXSerializeAs("value")]
-        [YAXHexValue]
         public ushort I_10 { get; set; }
         [YAXAttributeFor("EffectID")]
         [YAXSerializeAs("value")]
-        [YAXHexValue]
         public ushort I_12 { get; set; }
         [YAXAttributeFor("FunctionDuration")]
         [YAXSerializeAs("value")]
-        [YAXHexValue]
         public ushort I_14 { get; set; }
         [YAXAttributeFor("Function")]
         [YAXSerializeAs("value")]
         public ushort I_16 { get; set; }
         [YAXAttributeFor("I_18")]
         [YAXSerializeAs("value")]
+        [YAXHexValue]
         public ushort I_18 { get; set; }
         [YAXAttributeFor("I_20")]
         [YAXSerializeAs("value")]
+        [YAXHexValue]
         public ushort I_20 { get; set; }
         [YAXAttributeFor("I_22")]
         [YAXSerializeAs("value")]
+        [YAXHexValue]
         public ushort I_22 { get; set; }
 
         public static List<BAC_Type27> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
