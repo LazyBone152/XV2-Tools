@@ -1,0 +1,17 @@
+﻿<Window 
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" x:Class="EEPK_Organiser.Forms.ETR.Scale"
+        xmlns:local="clr-namespace:EEPK_Organiser.Forms.ETR"
+        mc:Ignorable="d"
+        Title="Scale" Height="155.42" Width="377.193" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" WindowStyle="ToolWindow" >
+    <Grid>
+        <Button Click="Button_OK_Click" Content="Ok" HorizontalAlignment="Left" Margin="89,91,0,0" VerticalAlignment="Top" Width="75"/>
+        <Button Click="Button_Cancel_Click" Content="Cancel" HorizontalAlignment="Left" Margin="196,91,0,0" VerticalAlignment="Top" Width="75"/>
+        <xctk:SingleUpDown Value="{Binding scaleFactor}" Minimum="-10" Maximum="10" Margin="132,37,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="182" />
+        <Label Content="Scale Factor" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="54,34,0,0" VerticalAlignment="Top" Width="73" Height="23"/>
+
+    </Grid>
+</Window>

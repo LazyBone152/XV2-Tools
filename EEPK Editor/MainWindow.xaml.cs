@@ -80,8 +80,23 @@ namespace EEPK_Organiser
                 return effectContainerFile.CanSave;
             }
         }
+        private bool _isNotTBIND;
+        public bool isNotTBIND
+        {
+            get
+            {
+                return _isNotTBIND;
+            }
 
-
+            set
+            {
+                if (value != this._isNotTBIND)
+                {
+                    _isNotTBIND = value;
+                    NotifyPropertyChanged("isNotTBIND");
+                }
+            }
+        }
         //Effect View
         private bool editModeCancelling = false;
         
@@ -2156,6 +2171,30 @@ namespace EEPK_Organiser
 
         }
 
+        private void TBIND_AssetContainer_Scale(object sender, RoutedEventArgs e)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                var asset = tbindDataGrid.SelectedItem as Asset;
+
+                if (asset != null)
+                {
+                    Forms.ETR.Scale scaleForm = new Forms.ETR.Scale(asset, this);
+                    scaleForm.ShowDialog();
+                }
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+#endif
+
+        }
+
         //Asset Containers: CBIND
         private void CBIND_AssetContainer_AddAsset_Click(object sender, RoutedEventArgs e)
         {
@@ -4145,6 +4184,8 @@ namespace EEPK_Organiser
                 {
                     var selectedEffectPart = listBox.SelectedItem as EffectPart;
 
+                  
+              
                     if (selectedEffectPart != null)
                     {
                         var parentEffect = effectContainerFile.GetEffectAssociatedWithEffectPart(selectedEffectPart);
@@ -4152,10 +4193,10 @@ namespace EEPK_Organiser
                         if (parentEffect != null)
                         {
                             effectDataGrid.SelectedItem = parentEffect;
+                            isNotTBIND = (selectedEffectPart.AssetRef.assetType != AssetType.TBIND);
                         }
                     }
                 }
-
             }
             catch (Exception ex)
             {
@@ -4604,6 +4645,7 @@ namespace EEPK_Organiser
                 MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        
+
+      
     }
 }

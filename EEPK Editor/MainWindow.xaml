@@ -412,9 +412,9 @@
                                 <Label Content="Position Z" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="10,213,0,0" VerticalAlignment="Top" Width="106"/>
                                 <TextBox x:Name="floatTextBox3" Text="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.POSITION_Z, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" HorizontalAlignment="Left" Height="23" Margin="116,217,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="120"/>
                                 <Label Content="Scale (Min)" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="10,241,0,0" VerticalAlignment="Top" Width="106"/>
-                                <TextBox x:Name="floatTextBox4" Text="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.SIZE_1, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" HorizontalAlignment="Left" Height="23" Margin="116,245,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="120"/>
+                                <TextBox x:Name="floatTextBox4" Text="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.SIZE_1, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" HorizontalAlignment="Left" Height="23" Margin="116,245,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="120" IsEnabled="{Binding isNotTBIND, UpdateSourceTrigger=PropertyChanged}"/>
                                 <Label Content="Scale (Max)" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="10,269,0,0" VerticalAlignment="Top" Width="106"/>
-                                <TextBox x:Name="floatTextBox5" Text="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.SIZE_2, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" HorizontalAlignment="Left" Height="23" Margin="116,273,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="120"/>
+                                <TextBox x:Name="floatTextBox5" Text="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.SIZE_2, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" HorizontalAlignment="Left" Height="23" Margin="116,273,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="120" IsEnabled="{Binding isNotTBIND,  UpdateSourceTrigger=PropertyChanged}"/>
                                 <Label Content="Orientation X (Min)" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="0,297,0,0" VerticalAlignment="Top" Width="116"/>
                                 <TextBox  x:Name="floatTextBox6" Text="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.F_52, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" HorizontalAlignment="Left" Height="23" Margin="116,301,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="120"/>
                                 <Label Content="Orientation Y (Min)" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="0,325,0,0" VerticalAlignment="Top" Width="116"/>
@@ -655,6 +655,7 @@
                                             <MenuItem Header="Duplicate" Click="TBIND_AssetContainer_Duplicate_Click"/>
                                             <MenuItem Header="Used By?" Click="TBIND_AssetContainer_UsedBy_Click"/>
                                             <Separator/>
+                                            <MenuItem Header="Scale" Click="TBIND_AssetContainer_Scale"/>
                                             <MenuItem Header="Hue Adjustment" Click="TBIND_AssetContainer_Recolor"/>
                                         </ContextMenu>
                                     </DataGrid.ContextMenu>

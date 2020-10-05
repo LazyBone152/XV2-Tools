@@ -33,12 +33,34 @@ namespace Xv2CoreLib.ETR
             
             int section1Count = BitConverter.ToInt16(bytes, 12);
             int section2Count = BitConverter.ToInt16(bytes, 14);
+
+            //number of Extrude Points (LineShape)
+            int section3Count = 0;
+
             int section1Offset = BitConverter.ToInt32(bytes, 16);
             int section2Offset = BitConverter.ToInt32(bytes, 20);
 
-            for(int i = 0; i < section1Count; i++)
+            
+            int section3Offset = 0;
+
+            for (int i = 0; i < section1Count; i++)
             {
                 ETR_MainEntry newEntry = new ETR_MainEntry();
+
+
+                //+16 is to skip the 4 floats for EndPoint that come BEFORE Extrude Points
+                //XenoXMLConverter output has it come after 
+                section3Offset = BitConverter.ToInt32(bytes, section1Offset + 116) + section1Offset + 16;
+
+
+             
+                section3Count = BitConverter.ToInt32(bytes, section1Offset + 156);
+
+                //actual number of Extrude Points = number of Extrude Points in binary file + 1
+                section3Count += section3Count >= 1 ? 1 : 0;
+             
+
+
 
                 newEntry.I_108 = BitConverter.ToUInt16(bytes, section1Offset + 108);
                 newEntry.Color1_R = BitConverter.ToSingle(bytes, section1Offset + 120);
@@ -49,6 +71,17 @@ namespace Xv2CoreLib.ETR
                 newEntry.Color2_G = BitConverter.ToSingle(bytes, section1Offset + 140);
                 newEntry.Color2_B = BitConverter.ToSingle(bytes, section1Offset + 144);
                 newEntry.Color2_A = BitConverter.ToSingle(bytes, section1Offset + 148);
+
+              
+                for(int j = 0; j < section3Count; j++)
+                {
+                    float X = BitConverter.ToSingle(bytes, section3Offset);
+                    float Y = BitConverter.ToSingle(bytes, section3Offset + 4);
+
+                    newEntry.ExtrudePoints.Add(new Point(X, Y));
+
+                    section3Offset += 8;
+                }
 
                 //Parse main entry
                 etrFile.ETR_Entries.Add(newEntry);
@@ -72,10 +105,18 @@ namespace Xv2CoreLib.ETR
         {
             int section1Count = BitConverter.ToInt16(Bytes, 12);
             int section2Count = BitConverter.ToInt16(Bytes, 14);
+            int section3Count = 0;
             int section1Offset = BitConverter.ToInt32(Bytes, 16);
             int section2Offset = BitConverter.ToInt32(Bytes, 20);
+            int section3Offset = 0;
 
-            if(section1Count != ETR_Entries.Count)
+
+
+
+
+
+
+            if (section1Count != ETR_Entries.Count)
             {
                 throw new InvalidDataException("Etr save fail: number of section1 entries in binary file is not equal to the ones in code.");
             }
@@ -91,6 +132,18 @@ namespace Xv2CoreLib.ETR
                 Bytes[section1Offset + 108] = emmIndex[0];
                 Bytes[section1Offset + 109] = emmIndex[1];
 
+                section3Offset = BitConverter.ToInt32(Bytes, section1Offset + 116) + section1Offset + 16;
+                section3Count = BitConverter.ToInt32(Bytes, section1Offset + 156);
+
+
+
+                section3Count += section3Count >= 1 ? 1 : 0;
+
+                if (section3Count != ETR_Entries[i].ExtrudePoints.Count)
+                {
+                    throw new InvalidDataException($"Etr save fail: number of extrude points for part index {i} in binary file is not equal to the ones in code.");
+                }
+
                 //Colors
                 Bytes = Utils.ReplaceRange(Bytes, BitConverter.GetBytes(ETR_Entries[i].Color1_R), section1Offset + 120);
                 Bytes = Utils.ReplaceRange(Bytes, BitConverter.GetBytes(ETR_Entries[i].Color1_G), section1Offset + 124);
@@ -100,6 +153,16 @@ namespace Xv2CoreLib.ETR
                 Bytes = Utils.ReplaceRange(Bytes, BitConverter.GetBytes(ETR_Entries[i].Color2_G), section1Offset + 140);
                 Bytes = Utils.ReplaceRange(Bytes, BitConverter.GetBytes(ETR_Entries[i].Color2_B), section1Offset + 144);
                 Bytes = Utils.ReplaceRange(Bytes, BitConverter.GetBytes(ETR_Entries[i].Color2_A), section1Offset + 148);
+
+
+
+                for(int j = 0; j < ETR_Entries[i].ExtrudePoints.Count; j++)
+                {
+                    Bytes = Utils.ReplaceRange(Bytes, BitConverter.GetBytes(ETR_Entries[i].ExtrudePoints[j].X), section3Offset);
+                    Bytes = Utils.ReplaceRange(Bytes, BitConverter.GetBytes(ETR_Entries[i].ExtrudePoints[j].Y), section3Offset + 4);
+
+                    section3Offset += 8;
+                }
 
                 section1Offset += 176;
             }
@@ -230,6 +293,19 @@ namespace Xv2CoreLib.ETR
             }
 
         }
+
+        //scales all the Extrude Points found in all Parts
+        public void ScaleETRParts(float scaleFactor)
+        {
+            foreach (var etrEntry in ETR_Entries)
+            {
+                foreach (var point in etrEntry.ExtrudePoints)
+                {
+                    point.X *= scaleFactor;
+                    point.Y *= scaleFactor;
+                }
+            }
+        }
     }
 
     [Serializable]
@@ -237,6 +313,7 @@ namespace Xv2CoreLib.ETR
     {
         public EMM.Material MaterialRef { get; set; }
 
+        public List<Point> ExtrudePoints { get; set; }
         public ushort I_108 { get; set; } //EMM Index
         
 
@@ -249,17 +326,35 @@ namespace Xv2CoreLib.ETR
         public float Color2_G { get; set; }
         public float Color2_B { get; set; }
         public float Color2_A { get; set; }
+        public ETR_MainEntry()
+        {
+            ExtrudePoints = new List<Point>();
+        }
     }
 
     [Serializable]
     public class ETR_TextureEntry
     {
+
         public EMB_CLASS.EmbEntry TextureRef { get; set; }
 
         public byte I_01 { get; set; } = byte.MaxValue; //EMB Index
         
     }
+    [Serializable]
+    public class Point
+    {
+        public float X { get; set; }
+        public float Y { get; set; }
 
-    
+        public Point(float _x, float _y)
+        {
+            X = _x;
+            Y = _y;
+        }
+      
+    }
+
+
 
 }
