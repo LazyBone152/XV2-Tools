@@ -32,7 +32,7 @@ namespace EEPK_Organiser.Forms
         private EMB_File EmbFile = null;
         private EMM_File EmmFile = null;
 
-        public RenameForm(string originalName, string extension, string _windowTitle, object containerObject, object parent = null, Mode _mode = Mode.Asset, int _stringSize = -1)
+        public RenameForm(string originalName, string extension, string _windowTitle, object containerObject, Window parent = null, Mode _mode = Mode.Asset, int _stringSize = -1)
         {
             switch (_mode)
             {
@@ -53,7 +53,7 @@ namespace EEPK_Organiser.Forms
             InitializeComponent();
             Title = _windowTitle;
             DataContext = this;
-            Owner = Application.Current.MainWindow;
+            Owner = parent;
             textBox.Focus();
             OriginalName = NameValue + Extension;
             CurrentMode = _mode;

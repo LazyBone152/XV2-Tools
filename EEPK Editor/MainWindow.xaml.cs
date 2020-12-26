@@ -30,6 +30,7 @@ using EEPK_Organiser.Misc;
 using MahApps.Metro.Controls;
 using xv2 = Xv2CoreLib.Xenoverse2;
 using MahApps.Metro.Controls.Dialogs;
+using MahApps.Metro;
 
 namespace EEPK_Organiser
 {
@@ -143,10 +144,10 @@ namespace EEPK_Organiser
             //Init UI
             InitializeComponent();
             DataContext = this;
+            InitWindowsTheme();
 
             if(GeneralInfo.AppSettings.ValidGameDir)
                 AsyncInit();
-
 
             //Check for updates silently
 #if !DEBUG
@@ -157,6 +158,40 @@ namespace EEPK_Organiser
             
 #endif
 
+        }
+
+        private void InitWindowsTheme()
+        {
+            bool darkMode = false;
+
+            switch (GeneralInfo.AppSettings.GetCurrentTheme())
+            {
+                case Settings.AppTheme.Light:
+                    darkMode = false;
+                    break;
+                case Settings.AppTheme.Dark:
+                    darkMode = true;
+                    break;
+                case Settings.AppTheme.WindowsDefault:
+                    {
+                        //Check registry for the users Light/Dark mode preferences (Windows 10 only)
+                        var registryValue = Registry.GetValue(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "AppsUseLightTheme", "1");
+
+                        if (registryValue != null)
+                            if (registryValue.ToString() == "0")
+                                darkMode = true;
+                    }
+                    break;
+            }
+
+            if (darkMode)
+            {
+                ThemeManager.ChangeAppStyle(Application.Current, ThemeManager.GetAccent("Emerald"), ThemeManager.GetAppTheme("BaseDark"));
+            }
+            else
+            {
+                ThemeManager.ChangeAppStyle(Application.Current, ThemeManager.GetAccent("Blue"), ThemeManager.GetAppTheme("BaseLight"));
+            }
         }
 
         public async Task AsyncInit()
@@ -365,6 +400,7 @@ namespace EEPK_Organiser
             Forms.Settings settingsForm = new Forms.Settings(GeneralInfo.AppSettings, this);
             settingsForm.ShowDialog();
             GeneralInfo.AppSettings.SaveSettings();
+            InitWindowsTheme();
             
             if(GeneralInfo.AppSettings.GameDirectory != originalGameDir && GeneralInfo.AppSettings.ValidGameDir)
             {
@@ -406,12 +442,9 @@ namespace EEPK_Organiser
         {
             MessageBox.Show(String.Format("{0} is a tool for editing Dragon Ball Xenoverse 2 EEPKs and its " +
                 "associated effect files.\n\n" +
-                "Future feature plans:\n" +
-                "ETR Editor (trail-like effects)\n" +
-                "ECF Editor (shading effects)\n" +
-                "LIGHT.EMA Editor (light effects)\n\n" +
                 "Frameworks/Libraries used:\n" +
                 "WPF (UI)\n" +
+                "MahApps (UI)\n" +
                 "AForge.NET (image processing)\n" +
                 "CSharpImageLibrary (dds loading)\n" +
                 "YAXLib (xml)", GeneralInfo.AppName, GeneralInfo.CurrentVersionString), "About", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -476,7 +509,9 @@ namespace EEPK_Organiser
 #endif
             {
                 Forms.RecolorAll recolor = new Forms.RecolorAll(effectContainerFile, this);
-                recolor.ShowDialog();
+
+                if(recolor.Initialize())
+                    recolor.ShowDialog();
             }
 #if !DEBUG
             catch (Exception ex)

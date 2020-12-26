@@ -22,12 +22,12 @@ namespace EEPK_Organiser.Forms
     {
         public string Description { get; set; }
 
-        public LogForm(string _description, string _logText, string _windowName, object _owner = null, bool showInTaskBar = false)
+        public LogForm(string _description, string _logText, string _windowName, Window _owner = null, bool showInTaskBar = false)
         {
             Description = _description;
             InitializeComponent();
             DataContext = this;
-            Owner = Application.Current.MainWindow;
+            Owner = _owner;
             Title = _windowName;
             richTextBox.AppendText(_logText);
             ShowInTaskbar = showInTaskBar;

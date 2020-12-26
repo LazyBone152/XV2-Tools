@@ -96,12 +96,12 @@ namespace EEPK_Organiser.Forms
             }
         }
 
-        public TextureEditHueChange(EmbEntry _texture, object parent)
+        public TextureEditHueChange(EmbEntry _texture, Window parent)
         {
             CurrentTexture = _texture;
             InitializeComponent();
             DataContext = this;
-            Owner = Application.Current.MainWindow;
+            Owner = parent;
 
             OriginalTextureBackup = CurrentTexture.DdsImage;
             stopwatch.Start();
@@ -217,7 +217,7 @@ namespace EEPK_Organiser.Forms
             ProcessImage();
         }
 
-        private void IntegerUpDown_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        private void IntegerUpDown_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double?> e)
         {
             ProcessImage();
         }

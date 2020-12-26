@@ -10,7 +10,7 @@
     <Grid>
         <Controls:MetroTabControl x:Name="tabControl" HorizontalAlignment="Left" Height="374" VerticalAlignment="Top" Width="480" Margin="22,10,0,0">
             <Controls:MetroTabItem Header="EMO" x:Name="emoTab" Controls:ControlsHelper.HeaderFontSize="14">
-                <Grid Background="#FFFFFFFF">
+                <Grid Background="Transparent">
                     <DataGrid x:Name="emoGrid" ItemsSource="{Binding effectContainerFile.Emo.Assets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" HorizontalAlignment="Left" Height="346" VerticalAlignment="Top" Width="474" Margin="0,0,-0.109,-0.4">
                         <DataGrid.Resources>
                             <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="CornflowerBlue"/>
@@ -24,7 +24,7 @@
                 </Grid>
             </Controls:MetroTabItem>
             <Controls:MetroTabItem Header="PBIND"  x:Name="pbindTab" Controls:ControlsHelper.HeaderFontSize="14">
-                <Grid Background="#FFFFFFFF">
+                <Grid Background="Transparent">
                     <DataGrid x:Name="pbindGrid" ItemsSource="{Binding effectContainerFile.Pbind.Assets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" HorizontalAlignment="Left" Height="346" VerticalAlignment="Top" Width="474" Margin="0,0,-0.109,-0.4">
                         <DataGrid.Resources>
                             <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="CornflowerBlue"/>
@@ -38,7 +38,7 @@
                 </Grid>
             </Controls:MetroTabItem>
             <Controls:MetroTabItem Header="TBIND"  x:Name="tbindTab" Controls:ControlsHelper.HeaderFontSize="14">
-                <Grid Background="#FFFFFFFF">
+                <Grid Background="Transparent">
                     <DataGrid  x:Name="tbindGrid" ItemsSource="{Binding effectContainerFile.Tbind.Assets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" HorizontalAlignment="Left" Height="346" VerticalAlignment="Top" Width="474" Margin="0,0,-0.109,-0.4">
                         <DataGrid.Resources>
                             <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="CornflowerBlue"/>
@@ -52,7 +52,7 @@
                 </Grid>
             </Controls:MetroTabItem>
             <Controls:MetroTabItem Header="LIGHT.EMA" x:Name="lightEmaTab" Controls:ControlsHelper.HeaderFontSize="14">
-                <Grid Background="#FFFFFFFF">
+                <Grid Background="Transparent">
                     <DataGrid x:Name="lightEmaGrid" ItemsSource="{Binding effectContainerFile.LightEma.Assets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" HorizontalAlignment="Left" Height="346" VerticalAlignment="Top" Width="474" Margin="0,0,-0.109,-0.4">
                         <DataGrid.Resources>
                             <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="CornflowerBlue"/>
@@ -66,7 +66,7 @@
                 </Grid>
             </Controls:MetroTabItem>
             <Controls:MetroTabItem Header="CBIND"  x:Name="cbindTab" Controls:ControlsHelper.HeaderFontSize="14">
-                <Grid Background="#FFFFFFFF">
+                <Grid Background="Transparent">
                     <DataGrid x:Name="cbindGrid" ItemsSource="{Binding effectContainerFile.Cbind.Assets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" HorizontalAlignment="Left" Height="346" VerticalAlignment="Top" Width="474" Margin="0,0,-0.109,-0.4">
                         <DataGrid.Resources>
                             <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="CornflowerBlue"/>
@@ -80,7 +80,7 @@
                 </Grid>
             </Controls:MetroTabItem>
             <Controls:MetroTabItem Header="Search..." Controls:ControlsHelper.HeaderFontSize="14">
-                <Grid Background="#FFFFFFFF">
+                <Grid Background="Transparent">
                     <DataGrid x:Name="searchGrid" ItemsSource="{Binding ViewMergedAsserList}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" HorizontalAlignment="Left" Height="300" VerticalAlignment="Top" Width="474" Margin="0,46,-0.109,-0.4">
                         <DataGrid.Resources>
                             <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="CornflowerBlue"/>
@@ -91,9 +91,9 @@
                         </DataGrid.Columns>
 
                     </DataGrid>
-                    <Label Content="Search Parameter" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="63,8,0,0" VerticalAlignment="Top" Width="107"/>
+                    <Label Content="Search Parameter" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="68,9,0,0" VerticalAlignment="Top" Width="107"/>
                     <TextBox KeyDown="SearchBox_KeyDown" Text="{Binding SearchParameter, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="175,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
-                    <Button Click="Button_Search_Click" Content="Search" HorizontalAlignment="Left" Margin="300,11,0,0" VerticalAlignment="Top" Width="75"/>
+                    <Button Click="Button_Search_Click" Content="Search" HorizontalAlignment="Left" Margin="300,9,0,0" VerticalAlignment="Top" Width="75"/>
                 </Grid>
             </Controls:MetroTabItem>
         </Controls:MetroTabControl>

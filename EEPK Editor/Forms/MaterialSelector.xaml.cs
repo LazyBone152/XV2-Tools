@@ -39,12 +39,12 @@ namespace EEPK_Organiser.Forms
         }
         public Material SelectedMaterial { get; private set; }
 
-        public MaterialSelector(EMM_File _emmFile, object parent, Material initialSelection)
+        public MaterialSelector(EMM_File _emmFile, Window parent, Material initialSelection)
         {
             emmFile = _emmFile;
             InitializeComponent();
             DataContext = this;
-            Owner = Application.Current.MainWindow;
+            Owner = parent;
             listBox_Materials.SelectedItem = initialSelection;
             listBox_Materials.ScrollIntoView(initialSelection);
         }

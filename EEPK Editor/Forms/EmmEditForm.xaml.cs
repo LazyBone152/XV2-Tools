@@ -399,7 +399,9 @@ namespace EEPK_Organiser.Forms
                 if (material != null)
                 {
                     RecolorAll recolor = new RecolorAll(material, this);
-                    recolor.ShowDialog();
+
+                    if(recolor.Initialize())
+                        recolor.ShowDialog();
                 }
             }
 #if !DEBUG

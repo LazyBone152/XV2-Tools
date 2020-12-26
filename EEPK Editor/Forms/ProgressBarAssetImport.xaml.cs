@@ -34,13 +34,13 @@ namespace EEPK_Organiser.Forms
         public AssetType type { get; set; }
         public Exception exception = null;
 
-        public ProgressBarAssetImport(AssetContainerTool _mainContainerFile, List<Asset> _selectedAssets, AssetType _type, object parent)
+        public ProgressBarAssetImport(AssetContainerTool _mainContainerFile, List<Asset> _selectedAssets, AssetType _type, Window parent)
         {
             container = _mainContainerFile;
             SelectedAssets = _selectedAssets;
             type = _type;
             InitializeComponent();
-            Owner = Application.Current.MainWindow;
+            Owner = parent;
             InitProgressBar();
             DataContext = this;
         }

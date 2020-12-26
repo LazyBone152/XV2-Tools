@@ -29,7 +29,7 @@ namespace EEPK_Organiser.Forms
         public GameEntity SelectedEntity { get; set; }
         public bool OnlyLoadFromCPK { get; set; }
 
-        public EntitySelector(LoadFromGameHelper _gameInterface, EntityType _entityType, object parent)
+        public EntitySelector(LoadFromGameHelper _gameInterface, EntityType _entityType, Window parent)
         {
             switch (_entityType)
             {
@@ -63,7 +63,7 @@ namespace EEPK_Organiser.Forms
 
             InitializeComponent();
             DataContext = this;
-            Owner = Application.Current.MainWindow;
+            Owner = parent;
 
             switch (_entityType)
             {

@@ -13,7 +13,7 @@
             <converters:VisibilityToNullableBooleanConverter x:Key="visibilityConverter"/>
 
             <BitmapImage x:Key="expand" UriSource="Resources/icons8-expand-arrow-50.png" />
-            <BitmapImage x:Key="gridlines" UriSource="Resources/GridLines2.png" />
+            <BitmapImage x:Key="gridlines" UriSource="Resources/transparent_checkerboard.png" />
             <BitmapImage x:Key="question" UriSource="Resources/icons8-question-mark-64.png" />
             <BitmapImage x:Key="information" UriSource="Resources/icons8-info-512.png" />
             <!-- EMP Editor -->

@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Title="Update available" Height="256.364" Width="400" ResizeMode="NoResize" ShowInTaskbar="False" WindowStartupLocation="CenterOwner" WindowStyle="ToolWindow">
     <Grid>
-        <RichTextBox x:Name="changelog" IsReadOnly="True" HorizontalAlignment="Left" Height="85" Margin="65,85,0,0" VerticalAlignment="Top" Width="270" Background="#FFF2F2F2">
+        <RichTextBox x:Name="changelog" IsReadOnly="True" HorizontalAlignment="Left" Height="85" Margin="65,85,0,0" VerticalAlignment="Top" Width="270">
             <FlowDocument>
                 <Paragraph>
                     <Run Text=""/>

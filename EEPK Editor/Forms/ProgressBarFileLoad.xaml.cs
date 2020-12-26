@@ -19,13 +19,13 @@ namespace EEPK_Organiser.Forms
         private bool onlyFromCpk = false;
         public Exception exception = null;
 
-        public ProgressBarFileLoad(string eepkFilePath, object parent, Xv2FileIO _fileIO, bool _onlyFromCpk = false)
+        public ProgressBarFileLoad(string eepkFilePath, Window parent, Xv2FileIO _fileIO, bool _onlyFromCpk = false)
         {
             fileIO = _fileIO;
             onlyFromCpk = _onlyFromCpk;
             FilePath = eepkFilePath;
             InitializeComponent();
-            Owner = Application.Current.MainWindow;
+            Owner = parent;
         }
 
         private void Load()

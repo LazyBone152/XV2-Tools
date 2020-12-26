@@ -10,6 +10,13 @@ using System.Windows;
 
 namespace EEPK_Organiser.Settings
 {
+    public enum AppTheme
+    {
+        Light,
+        Dark,
+        WindowsDefault
+    }
+
     [YAXSerializeAs("Settings")]
     public class AppSettings : INotifyPropertyChanged
     {
@@ -22,12 +29,31 @@ namespace EEPK_Organiser.Settings
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
-        
+
+        [YAXDontSerialize]
+        public bool ValidGameDir
+        {
+            get
+            {
+                return (File.Exists(String.Format("{0}/bin/DBXV2.exe", GameDirectory)));
+            }
+        }
+
+        #region Values
+        private bool _assetReuseNameMatch = false;
+        private bool _textureReuse_Identical = true;
+        private bool _textureReuse_NameMatch = false;
+        private bool _fileCleanUp_Delete = false;
+        private bool _fileCleanUp_Prompt = true;
+        private bool _fileCleanUp_Ignore = false;
+        private string _gameDir = null;
+        private bool _autoContainerRename = true;
+        private int _fileCacheLimit = 7;
+        private AppTheme _currentTheme = AppTheme.WindowsDefault;
+        #endregion
+
         public bool UpdateNotifications { get; set; } = true;
         public bool LoadTextures { get; set; } = true;
-
-        //Asset Reuse
-        private bool _assetReuseNameMatch = false;
         public bool AssetReuse_NameMatch
         {
             get
@@ -43,10 +69,6 @@ namespace EEPK_Organiser.Settings
                 }
             }
         }
-
-        //TextureReuse
-        private bool _textureReuse_Identical = true;
-        private bool _textureReuse_NameMatch = false;
         public bool TextureReuse_Identical
         {
             get
@@ -77,11 +99,6 @@ namespace EEPK_Organiser.Settings
                 }
             }
         }
-
-        //FileCleanUp
-        private bool _fileCleanUp_Delete = false;
-        private bool _fileCleanUp_Prompt = true;
-        private bool _fileCleanUp_Ignore = false;
         public bool FileCleanUp_Delete
         {
             get
@@ -127,9 +144,6 @@ namespace EEPK_Organiser.Settings
                 }
             }
         }
-        
-        //Game Directory
-        private string _gameDir = null;
         public string GameDirectory
         {
             get
@@ -145,9 +159,6 @@ namespace EEPK_Organiser.Settings
                 }
             }
         }
-
-        //Automatic container rename based on eepk name
-        private bool _autoContainerRename = true;
         public bool AutoContainerRename
         {
             get
@@ -163,9 +174,6 @@ namespace EEPK_Organiser.Settings
                 }
             }
         }
-
-        //File cache
-        private int _fileCacheLimit = 7;
         public int FileCacheLimit
         {
             get
@@ -181,15 +189,49 @@ namespace EEPK_Organiser.Settings
                 }
             }
         }
-
-        [YAXDontSerialize]
-        public bool ValidGameDir
+        public bool UseLightTheme
         {
             get
             {
-                return (File.Exists(String.Format("{0}/bin/DBXV2.exe", GameDirectory)));
+                return _currentTheme == AppTheme.Light;
+            }
+            set
+            {
+                if (value)
+                    _currentTheme = AppTheme.Light;
+
+                NotifyPropertyChanged(nameof(UseLightTheme));
             }
         }
+        public bool UseDarkTheme
+        {
+            get
+            {
+                return _currentTheme == AppTheme.Dark;
+            }
+            set
+            {
+                if (value)
+                    _currentTheme = AppTheme.Dark;
+
+                NotifyPropertyChanged(nameof(UseDarkTheme));
+            }
+        }
+        public bool UseWindowsTheme
+        {
+            get
+            {
+                return _currentTheme == AppTheme.WindowsDefault;
+            }
+            set
+            {
+                if (value)
+                    _currentTheme = AppTheme.WindowsDefault;
+
+                NotifyPropertyChanged(nameof(UseWindowsTheme));
+            }
+        }
+
 
         public static AppSettings LoadSettings()
         {
@@ -293,6 +335,10 @@ namespace EEPK_Organiser.Settings
             return null;
         }
 
+        public AppTheme GetCurrentTheme()
+        {
+            return _currentTheme;
+        }
 
     }
 

@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:EEPK_Organiser.Forms"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
@@ -11,7 +10,7 @@
     <Grid>
         <Controls:MetroTabControl HorizontalAlignment="Left" Height="273" VerticalAlignment="Top" Width="495" Margin="0,0,-0.164,0">
             <Controls:MetroTabItem Header="General" Controls:ControlsHelper.HeaderFontSize="14">
-                <Grid Background="#FFFFFFFF">
+                <Grid Background="Transparent">
                     <GroupBox Header="File Clean Up" ToolTip="Controls how the editor should handle left over asset files that are no longer used." HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="242">
                         <StackPanel>
                             <RadioButton IsChecked="{Binding settings.FileCleanUp_Delete, UpdateSourceTrigger=PropertyChanged}" ToolTip="Always delete asset files when they are no longer used in the editor." GroupName="FileCleanUp" Content="Always delete"/>
@@ -22,13 +21,20 @@
                     </GroupBox>
                     <CheckBox IsChecked="{Binding settings.UpdateNotifications, UpdateSourceTrigger=PropertyChanged}" Content="Check for updates on start-up" HorizontalAlignment="Left" Margin="10,105,0,0" VerticalAlignment="Top" Width="290"/>
                     <CheckBox IsChecked="{Binding settings.AutoContainerRename, UpdateSourceTrigger=PropertyChanged}" Content="Auto-rename containers to match eepk name" ToolTip="Containers (pbind.emb, ptcl.emb/emb etc) will be renamed to always match the eepk." HorizontalAlignment="Left" Margin="10,126,0,0" VerticalAlignment="Top" Width="290"/>
-                    <xctk:IntegerUpDown Value="{Binding settings.FileCacheLimit, UpdateSourceTrigger=PropertyChanged}" DisplayDefaultValueOnEmptyText="True" Minimum="0" Maximum="25" Margin="109,146,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="68" />
-                    <Label Content="EEPK Cache Limit" ToolTip="How many EEPKs loaded via Import Effect/Import Asset that are cached. This decreases the load time when accessing the same EEPK multiple times and reduces the chance of duplicate assets." HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="0,142,0,0" VerticalAlignment="Top" Width="109"/>
+                    <Controls:NumericUpDown Value="{Binding settings.FileCacheLimit, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="25" Margin="109,146,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="68" />
+                    <Label Content="EEPK Cache Limit" ToolTip="How many EEPKs loaded via Import Effect/Import Asset that are cached. This decreases the load time when accessing the same EEPK multiple times and reduces the chance of duplicate assets." HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="0,146,0,0" VerticalAlignment="Top" Width="109"/>
+                    <GroupBox Header="Theme" HorizontalAlignment="Left" Height="90" Margin="266,10,0,0" VerticalAlignment="Top" Width="219">
+                        <StackPanel>
+                            <RadioButton IsChecked="{Binding settings.UseLightTheme, UpdateSourceTrigger=PropertyChanged}" GroupName="Theme" Content="Light"/>
+                            <RadioButton IsChecked="{Binding settings.UseDarkTheme, UpdateSourceTrigger=PropertyChanged}" GroupName="Theme" Content="Dark"/>
+                            <RadioButton IsChecked="{Binding settings.UseWindowsTheme, UpdateSourceTrigger=PropertyChanged}" GroupName="Theme" Content="Windows Default"/>
+                        </StackPanel>
+                    </GroupBox>
 
                 </Grid>
             </Controls:MetroTabItem>
             <Controls:MetroTabItem Header="Texture" Controls:ControlsHelper.HeaderFontSize="14">
-                <Grid Background="#FFFFFFFF">
+                <Grid Background="Transparent">
                     <GroupBox Header="Texture Reuse" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="242">
                         <StackPanel>
                             <RadioButton IsChecked="{Binding settings.TextureReuse_Identical, UpdateSourceTrigger=PropertyChanged}" ToolTip="Tries to reuse existing textures when importing PBIND/TBIND assets only if an identical one is already present.&#x0a;&#x0a;Note: you may get some duplicate textures when using this option as some textures may just be slightly different enough from each other to not be &quot;identical&quot;, despite appearing the same visually." GroupName="TextureReuse" Content="Only when 100% identical (Default)"/>
@@ -41,13 +47,13 @@
                 </Grid>
             </Controls:MetroTabItem>
             <Controls:MetroTabItem Header="Asset" Controls:ControlsHelper.HeaderFontSize="14">
-                <Grid Background="#FFFFFFFF">
+                <Grid Background="Transparent">
                     <CheckBox ToolTip="When importing assets any existing asset with the same name will be re-used rather than adding a new (and likely duplicate) asset entry." IsChecked="{Binding settings.AssetReuse_NameMatch, UpdateSourceTrigger=PropertyChanged}" Content="Reuse Assets (Name Match)" HorizontalAlignment="Left" Margin="10,20,0,0" VerticalAlignment="Top" Width="242"/>
 
                 </Grid>
             </Controls:MetroTabItem>
             <Controls:MetroTabItem Header="Game Directory" Controls:ControlsHelper.HeaderFontSize="14">
-                <Grid Background="#FFFFFFFF">
+                <Grid Background="Transparent">
                     <TextBox HorizontalAlignment="Left" Height="23" Margin="20,41,0,0" TextWrapping="NoWrap" IsReadOnly="True" Text="{Binding settings.GameDirectory, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top" Width="375"/>
                     <Button Click="Browse_Click" Content="Browse" HorizontalAlignment="Left" Margin="400,41,0,0" VerticalAlignment="Top" Width="75"/>
 

@@ -595,6 +595,17 @@ namespace EEPK_Organiser.Forms
                 e.Handled = true;
             }
         }
-        
+
+        private void ToggleGrid_Button_Click(object sender, RoutedEventArgs e)
+        {
+            if(grid.Opacity >= 0.5)
+            {
+                grid.Opacity = 0.0;
+            }
+            else
+            {
+                grid.Opacity = 0.5;
+            }
+        }
     }
 }

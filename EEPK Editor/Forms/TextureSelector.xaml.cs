@@ -39,12 +39,12 @@ namespace EEPK_Organiser.Forms
         }
         public EmbEntry SelectedTexture { get; private set; }
 
-        public TextureSelector(EMB_File _embFile, object parent, EmbEntry initialSelection)
+        public TextureSelector(EMB_File _embFile, Window parent, EmbEntry initialSelection)
         {
             embFile = _embFile;
             InitializeComponent();
             DataContext = this;
-            Owner = Application.Current.MainWindow;
+            Owner = parent;
             listBox_Textures.SelectedItem = initialSelection;
             listBox_Textures.ScrollIntoView(initialSelection);
         }

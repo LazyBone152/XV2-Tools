@@ -32,7 +32,7 @@
 
 
             <Controls:MetroTabItem Header="EFFECT" Controls:ControlsHelper.HeaderFontSize="20">
-                <Grid Background="#FFFFFFFF">
+                <Grid Background="Transparent">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="60"/>
                         <ColumnDefinition Width="0.77*"/>
@@ -84,7 +84,7 @@
 
 
                         <DataGrid.ContextMenu>
-                            <ContextMenu>
+                            <ContextMenu FontSize="12">
                                 <MenuItem Header="New EffectPart" Click="Effect_AddEffectPart_Click"/>
                                 <MenuItem Header="Paste EffectPart" Click="EffectPart_Paste_Click"/>
                                 <Separator/>
@@ -150,12 +150,12 @@
                     </DataGrid>
 
                     <ScrollViewer Grid.Column="2" Margin="5, 0">
-                        <Grid Background="#FFFFFFFF">
+                        <Grid Background="Transparent">
                             <StackPanel>
                                 <Expander Header="General" IsExpanded="True">
                                     <StackPanel>
                                         <WrapPanel>
-                                            <Grid Margin="3,3,0,0" Width="330">
+                                            <Grid Margin="3,3,0,0" Width="350">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="125"/>
                                                     <ColumnDefinition Width="*"/>
@@ -549,7 +549,7 @@
             </Controls:MetroTabItem>
 
             <Controls:MetroTabItem Header="PBIND" Controls:ControlsHelper.HeaderFontSize="20">
-                <Grid Background="#FFFFFFFF">
+                <Grid Background="Transparent">
 
                     <DataGrid MouseDoubleClick="PBIND_MouseDoubleClick" PreviewKeyDown="PbindDataGrid_Hotkeys_PreviewKeyDown" SelectionMode="Extended" x:Name="pbindDataGrid" RowDetailsVisibilityMode="Collapsed" ItemsSource="{Binding effectContainerFile.Pbind.ViewAssets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False">
                         <DataGrid.Resources>
@@ -561,7 +561,7 @@
                         </DataGrid.Resources>
 
                         <DataGrid.ContextMenu>
-                            <ContextMenu>
+                            <ContextMenu FontSize="12">
                                 <MenuItem Header="Rename" Click="PBIND_AssetContainer_RenameAsset_Click"/>
                                 <MenuItem Header="Paste Over (Replace)" Click="PBIND_AssetContainer_Replace_Click"/>
                                 <MenuItem Header="Merge" Click="PBIND_AssetContainer_Merge_Click"/>
@@ -626,7 +626,7 @@
                 </Grid>
             </Controls:MetroTabItem>
             <Controls:MetroTabItem Header="TBIND" Controls:ControlsHelper.HeaderFontSize="20">
-                <Grid Background="#FFFFFFFF">
+                <Grid Background="Transparent">
 
                     <DataGrid PreviewKeyDown="TbindDataGrid_Hotkeys_PreviewKeyDown" SelectionMode="Extended" x:Name="tbindDataGrid" RowDetailsVisibilityMode="Collapsed" ItemsSource="{Binding effectContainerFile.Tbind.ViewAssets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False">
                         <DataGrid.Resources>
@@ -637,7 +637,7 @@
 
                         </DataGrid.Resources>
                         <DataGrid.ContextMenu>
-                            <ContextMenu>
+                            <ContextMenu FontSize="12">
                                 <MenuItem Header="Rename" Click="TBIND_AssetContainer_RenameAsset_Click"/>
                                 <MenuItem Header="Paste Over (Replace)" Click="TBIND_AssetContainer_Replace_Click"/>
                                 <MenuItem Header="Merge" Click="TBIND_AssetContainer_Merge_Click"/>
@@ -701,7 +701,7 @@
                 </Grid>
             </Controls:MetroTabItem>
             <Controls:MetroTabItem Header="CBIND" Controls:ControlsHelper.HeaderFontSize="20">
-                <Grid Background="#FFFFFFFF">
+                <Grid Background="Transparent">
 
                     <DataGrid PreviewKeyDown="CbindDataGrid_Hotkeys_PreviewKeyDown" SelectionMode="Extended" x:Name="cbindDataGrid" RowDetailsVisibilityMode="Collapsed" ItemsSource="{Binding effectContainerFile.Cbind.ViewAssets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False">
                         <DataGrid.Resources>
@@ -713,7 +713,7 @@
                         </DataGrid.Resources>
 
                         <DataGrid.ContextMenu>
-                            <ContextMenu>
+                            <ContextMenu FontSize="12">
                                 <MenuItem Header="Rename" Click="CBIND_AssetContainer_RenameAsset_Click"/>
                                 <MenuItem Header="Paste Over (Replace)" Click="CBIND_AssetContainer_Replace_Click"/>
                                 <MenuItem Header="Merge" Click="CBIND_AssetContainer_Merge_Click"/>
@@ -777,7 +777,7 @@
                 </Grid>
             </Controls:MetroTabItem>
             <Controls:MetroTabItem Header="EMO" Controls:ControlsHelper.HeaderFontSize="20">
-                <Grid Background="#FFFFFFFF">
+                <Grid Background="Transparent">
 
                     <DataGrid PreviewKeyDown="EmoDataGrid_Hotkeys_PreviewKeyDown" SelectionMode="Extended" x:Name="emoDataGrid" RowDetailsVisibilityMode="Collapsed" ItemsSource="{Binding effectContainerFile.Emo.ViewAssets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False">
                         <DataGrid.Resources>
@@ -823,7 +823,7 @@
                         </DataGrid.Resources>
 
                         <DataGrid.ContextMenu>
-                            <ContextMenu>
+                            <ContextMenu FontSize="12">
                                 <MenuItem Header="Add File" Click="EMO_AssetContainer_AddFile_Click"/>
                                 <MenuItem Header="Paste Over (Replace)" Click="EMO_AssetContainer_Replace_Click"/>
                                 <MenuItem Header="Merge" Click="EMO_AssetContainer_Merge_Click"/>
@@ -921,7 +921,7 @@
             </Controls:MetroTabItem>
 
             <Controls:MetroTabItem Header="LIGHT" Controls:ControlsHelper.HeaderFontSize="20">
-                <Grid Background="#FFFFFFFF">
+                <Grid Background="Transparent">
 
                     <DataGrid PreviewKeyDown="LightEmaDataGrid_Hotkeys_PreviewKeyDown" SelectionMode="Extended" x:Name="lightDataGrid" RowDetailsVisibilityMode="Collapsed" ItemsSource="{Binding effectContainerFile.LightEma.ViewAssets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False">
                         <DataGrid.Resources>
@@ -932,7 +932,7 @@
 
                         </DataGrid.Resources>
                         <DataGrid.ContextMenu>
-                            <ContextMenu>
+                            <ContextMenu FontSize="12">
                                 <MenuItem Header="Rename" Click="LIGHT_AssetContainer_RenameAsset_Click"/>
                                 <MenuItem Header="Paste Over (Replace)" Click="LIGHT_AssetContainer_Replace_Click"/>
                                 <MenuItem Header="Merge" Click="LIGHT_AssetContainer_Merge_Click"/>

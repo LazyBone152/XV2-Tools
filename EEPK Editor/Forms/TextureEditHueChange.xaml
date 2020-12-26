@@ -3,24 +3,23 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:EEPK_Organiser.Forms"
-             xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
-        Title="Hue" Height="167.709" Width="400" ShowInTaskbar="True" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" WindowStyle="ToolWindow" Closing="Window_Closing">
+        Title="Hue" Height="167.709" Width="431.778" ShowInTaskbar="True" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" WindowStyle="ToolWindow" Closing="Window_Closing">
     <Grid>
         <Slider ValueChanged="Slider_ValueChanged" Value="{Binding HueValue, UpdateSourceTrigger=PropertyChanged}" Minimum="-180" Maximum="180" HorizontalAlignment="Left" Margin="88,18,0,0" VerticalAlignment="Top" Width="197"/>
-        <xctk:IntegerUpDown ValueChanged="IntegerUpDown_ValueChanged" Value="{Binding HueValue, UpdateSourceTrigger=PropertyChanged}" DisplayDefaultValueOnEmptyText="True" DefaultValue="0" Minimum="-180" Maximum="180" Margin="290,16,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="68" />
+        <Controls:NumericUpDown StringFormat="0.00" ValueChanged="IntegerUpDown_ValueChanged" Value="{Binding HueValue, UpdateSourceTrigger=PropertyChanged}" Minimum="-180" Maximum="180" Margin="290,16,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="101" />
         <Label Content="Hue" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="8,12,0,0" VerticalAlignment="Top" Width="75"/>
-        <Button Click="Ok_Click" Content="OK" HorizontalAlignment="Left" Margin="108,108,0,0" VerticalAlignment="Top" Width="75"/>
-        <Button Click="Cancel_Click" Content="Cancel" HorizontalAlignment="Left" Margin="199,108,0,0" VerticalAlignment="Top" Width="75"/>
+        <Button Click="Ok_Click" Content="OK" HorizontalAlignment="Left" Margin="136,107,0,0" VerticalAlignment="Top" Width="75"/>
+        <Button Click="Cancel_Click" Content="Cancel" HorizontalAlignment="Left" Margin="227,107,0,0" VerticalAlignment="Top" Width="75"/>
         <Slider IsEnabled="{Binding IsSupportedFormat}" ValueChanged="Slider_ValueChanged" Value="{Binding SaturationValue, UpdateSourceTrigger=PropertyChanged}" Minimum="-1" Maximum="1" HorizontalAlignment="Left" Margin="88,48,0,0" VerticalAlignment="Top" Width="197"/>
-        <xctk:DoubleUpDown IsEnabled="{Binding IsSupportedFormat}" ValueChanged="IntegerUpDown_ValueChanged" Value="{Binding SaturationValue, UpdateSourceTrigger=PropertyChanged}" DisplayDefaultValueOnEmptyText="True" DefaultValue="0" Minimum="-1" Maximum="1" Margin="290,46,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="68" Increment="0.01"/>
+        <Controls:NumericUpDown StringFormat="0.00" IsEnabled="{Binding IsSupportedFormat}" ValueChanged="IntegerUpDown_ValueChanged" Value="{Binding SaturationValue, UpdateSourceTrigger=PropertyChanged}" Minimum="-1" Maximum="1" Margin="290,46,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="101" Interval="0.01"/>
         <Label Content="Saturation*" FontWeight="SemiBold" ToolTip="This option is experimental and may not work perfectly.&#x0d;&#x0a;This option is unsupported on some texture formats (it will become grayed out)." HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="8,42,0,0" VerticalAlignment="Top" Width="75"/>
         <Slider IsEnabled="{Binding IsSupportedFormat}" ValueChanged="Slider_ValueChanged" Value="{Binding LightnessValue, UpdateSourceTrigger=PropertyChanged}" Minimum="-1" Maximum="1" HorizontalAlignment="Left" Margin="88,78,0,0" VerticalAlignment="Top" Width="197"/>
-        <xctk:DoubleUpDown IsEnabled="{Binding IsSupportedFormat}" ValueChanged="IntegerUpDown_ValueChanged" Value="{Binding LightnessValue, UpdateSourceTrigger=PropertyChanged}" DisplayDefaultValueOnEmptyText="True" DefaultValue="0" Minimum="-1" Maximum="1" Margin="290,76,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="68" Increment="0.01"/>
+        <Controls:NumericUpDown IsEnabled="{Binding IsSupportedFormat}" ValueChanged="IntegerUpDown_ValueChanged" Value="{Binding LightnessValue, UpdateSourceTrigger=PropertyChanged}" Minimum="-1" Maximum="1" Margin="290,76,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="101" Interval="0.01" StringFormat="0.00"/>
         <Label Content="Lightness*" FontWeight="SemiBold" ToolTip="This option is experimental and may not work perfectly.&#x0d;&#x0a;This option is unsupported on some texture formats (it will become grayed out)." HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="8,72,0,0" VerticalAlignment="Top" Width="75"/>
-        <Button IsEnabled="{Binding IsSupportedFormat}" HorizontalAlignment="Left" Margin="363,46,0,0" VerticalAlignment="Top" Width="21" Height="20" Foreground="Black" Style="{StaticResource ButtonNoGlow}" Click="Button_UndoSaturationChange_Click">
+        <Button IsEnabled="{Binding IsSupportedFormat}" HorizontalAlignment="Left" Margin="396,46,0,0" VerticalAlignment="Top" Width="21" Height="20" Foreground="Black" Style="{StaticResource ButtonNoGlow}" Click="Button_UndoSaturationChange_Click">
             <Button.Background>
                 <ImageBrush ImageSource="{StaticResource undo}" Stretch="Uniform">
                     <ImageBrush.RelativeTransform>
@@ -34,7 +33,7 @@
                 </ImageBrush>
             </Button.Background>
         </Button>
-        <Button IsEnabled="{Binding IsSupportedFormat}" HorizontalAlignment="Left" Margin="363,76,0,0" VerticalAlignment="Top" Width="21" Height="20" Foreground="Black" Style="{StaticResource ButtonNoGlow}" Click="Button_UndoLightnessChange_Click">
+        <Button IsEnabled="{Binding IsSupportedFormat}" HorizontalAlignment="Left" Margin="396,76,0,0" VerticalAlignment="Top" Width="21" Height="20" Foreground="Black" Style="{StaticResource ButtonNoGlow}" Click="Button_UndoLightnessChange_Click">
             <Button.Background>
                 <ImageBrush ImageSource="{StaticResource undo}" Stretch="Uniform">
                     <ImageBrush.RelativeTransform>
@@ -48,7 +47,7 @@
                 </ImageBrush>
             </Button.Background>
         </Button>
-        <Button HorizontalAlignment="Left" Margin="363,16,0,0" VerticalAlignment="Top" Width="21" Height="20" Foreground="Black" Style="{StaticResource ButtonNoGlow}" Click="Button_UndoHueChange_Click">
+        <Button HorizontalAlignment="Left" Margin="396,16,0,0" VerticalAlignment="Top" Width="21" Height="20" Foreground="Black" Style="{StaticResource ButtonNoGlow}" Click="Button_UndoHueChange_Click">
             <Button.Background>
                 <ImageBrush ImageSource="{StaticResource undo}" Stretch="Uniform">
                     <ImageBrush.RelativeTransform>

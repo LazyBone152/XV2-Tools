@@ -82,12 +82,16 @@
                 <DataGridTemplateColumn Header="Preview">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Image Source="{Binding DdsImage}" Height="32" Width="32" Canvas.Left="8" Canvas.Top="8"/>
+                            <Grid Background="#1c1c1c">
+                                <Image Source="{Binding DdsImage}" Height="32" Width="32" Canvas.Left="8" Canvas.Top="8"/>
+                            </Grid>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
-                            <Image Source="{Binding DdsImage}" Height="32" Width="32" Canvas.Left="8" Canvas.Top="8"/>
+                            <Grid Background="#1c1c1c">
+                                <Image Source="{Binding DdsImage}" Height="32" Width="32" Canvas.Left="8" Canvas.Top="8"/>
+                            </Grid>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
@@ -111,21 +115,24 @@
         </DataGrid>
 
         <GroupBox Header="Preview" HorizontalAlignment="Left" Height="300" Margin="269,13,0,0" VerticalAlignment="Top" Width="360">
-            <Grid>
-                <Grid.Background>
-                    <ImageBrush ImageSource="{StaticResource gridlines}" Stretch="UniformToFill"/>
-                </Grid.Background>
-                <utils:ZoomBorder x:Name="border" ClipToBounds="True" Background="Transparent">
-                    <Image x:Name="image_Preview" Source="{Binding SelectedItem.DdsImage,ElementName=listBox_Textures}" Stretch="Uniform"/>
-                </utils:ZoomBorder>
+            <Grid Background="#1c1c1c">
+                <Grid>
+                    <Grid.Background>
+                        <ImageBrush x:Name="grid" ImageSource="{StaticResource gridlines}" Stretch="UniformToFill" Opacity="0.0"/>
+                    </Grid.Background>
+                    <utils:ZoomBorder x:Name="border" ClipToBounds="True" Background="Transparent">
+                        <Image x:Name="image_Preview" Source="{Binding SelectedItem.DdsImage,ElementName=listBox_Textures}" Stretch="Uniform"/>
+                    </utils:ZoomBorder>
 
+                </Grid>
             </Grid>
         </GroupBox>
-        <GroupBox Header="EMB Options" HorizontalAlignment="Left" Height="84" Margin="10,433,0,0" VerticalAlignment="Top" Width="609">
+        <GroupBox Header="Options" HorizontalAlignment="Left" Height="84" Margin="10,433,0,0" VerticalAlignment="Top" Width="609">
             <Grid>
                 <Button Click="EmbOptions_AddTexture_Click" ToolTip="Add one or more textures. Currently only DDS files can be imported." Content="Add Textures" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="100"/>
                 <Button IsEnabled="{Binding IsForContainer}" Click="EmbOptions_RemoveUnusuedTextures_Click" ToolTip="Removes all textures that are not currently used by any assets." Content="Delete Unused" HorizontalAlignment="Left" Margin="244,10,0,0" VerticalAlignment="Top" Width="100"/>
                 <Button IsEnabled="{Binding IsForContainer}" Click="EmbOptions_RemoveDuplicates_Click" ToolTip="Merges duplicated textures." Content="Merge Duplicates" HorizontalAlignment="Left" Margin="127,10,0,0" VerticalAlignment="Top" Width="100"/>
+                <Button Click="ToggleGrid_Button_Click" Content="Toggle Grid" HorizontalAlignment="Left" Margin="360,11,0,0" VerticalAlignment="Top" Width="100"/>
 
             </Grid>
         </GroupBox>

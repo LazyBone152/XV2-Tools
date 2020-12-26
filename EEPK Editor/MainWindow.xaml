@@ -31,11 +31,11 @@
 
     <Grid AllowDrop="True" Drop="Grid_FilesDrop">
         <Grid.RowDefinitions>
-            <RowDefinition Height="30"/>
+            <RowDefinition Height="35"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="25"/>
         </Grid.RowDefinitions>
-        <Menu Grid.Row="0" Margin="0, 2" HorizontalAlignment="Left">
+        <Menu Grid.Row="0" Margin="0, 2" HorizontalAlignment="Left" FontSize="12">
             <MenuItem Header="File">
                 <MenuItem Header="New" Click="Menu_New_Click"/>
                 <MenuItem Header="Open" Click="Menu_Open_Click"/>

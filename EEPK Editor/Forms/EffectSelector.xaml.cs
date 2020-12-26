@@ -65,14 +65,14 @@ namespace EEPK_Organiser.Forms
         private bool editModeCancelling = false;
         private Mode currentMode;
 
-        public EffectSelector(IList<Effect> effects, EffectContainerFile mainContainerFile, object parent, Mode mode = Mode.ImportEffect)
+        public EffectSelector(IList<Effect> effects, EffectContainerFile mainContainerFile, Window parent, Mode mode = Mode.ImportEffect)
         {
             currentMode = mode;
             Effects = effects;
             MainContainerFile = mainContainerFile;
             InitializeComponent();
             DataContext = this;
-            Owner = Application.Current.MainWindow;
+            Owner = parent;
 
             switch (currentMode)
             {

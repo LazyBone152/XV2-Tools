@@ -113,13 +113,14 @@ namespace EEPK_Organiser.Forms
         /// <summary>
         /// Hue shift a asset.
         /// </summary>
-        public RecolorAll(AssetType _assetType, Asset _asset, object parent)
+        public RecolorAll(AssetType _assetType, Asset _asset, Window parent)
         {
             currentMode = Mode.Asset;
             assetType = _assetType;
             asset = _asset;
 
             InitializeComponent();
+            Owner = parent;
             DataContext = this;
         }
 
@@ -127,54 +128,49 @@ namespace EEPK_Organiser.Forms
         /// Hue shift a material.
         /// </summary>
         /// <param name="_material"></param>
-        public RecolorAll(Material _material, object parent)
+        public RecolorAll(Material _material, Window parent)
         {
             currentMode = Mode.Material;
             material = _material;
 
             InitializeComponent();
+            Owner = parent;
             DataContext = this;
         }
 
         /// <summary>
         /// Hue shift all assets, materials and textures in a EffectContainerFile.
         /// </summary>
-        public RecolorAll(EffectContainerFile _effectContainerFile, object parent)
+        public RecolorAll(EffectContainerFile _effectContainerFile, Window parent)
         {
             currentMode = Mode.Global;
             effectContainerFile = _effectContainerFile;
             InitializeComponent();
+            Owner = parent;
             DataContext = this;
         }
 
         /// <summary>
         /// Hue shift a ParticleEffect.
         /// </summary>
-        public RecolorAll(ParticleEffect _particleEffect, object parent)
+        public RecolorAll(ParticleEffect _particleEffect, Window parent)
         {
             currentMode = Mode.ParticleEffect;
             particleEffect = _particleEffect;
 
             InitializeComponent();
+            Owner = parent;
             DataContext = this;
         }
 
-
-
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        public bool Initialize()
         {
-            if(((currentMode == Mode.Asset && assetType == AssetType.EMO) || currentMode == Mode.Global) && !GeneralInfo.LoadTextures)
+            if (((currentMode == Mode.Asset && assetType == AssetType.EMO) || currentMode == Mode.Global) && !GeneralInfo.LoadTextures)
             {
-                Close();
                 MessageBox.Show("This option is not available while textures are turned off. Enable Load Textures in the settings to use this option.", "Not Available", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
+                return false;
             }
 
-            SetInitialColor();
-        }
-
-        private void SetInitialColor()
-        {
             List<RgbColor> colors = null;
 
             if(currentMode == Mode.Asset)
@@ -197,9 +193,8 @@ namespace EEPK_Organiser.Forms
 
             if(colors.Count == 0)
             {
-                //Close();
                 MessageBox.Show("No color information was found on this asset so it cannot be hue shifted.\n\nThe most likely cause of this is that all color sources for this asset were either all white (1,1,1) or all black (0,0,0).", "No color information", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
+                return false;
             }
 
             rgbColor = ColorEx.GetAverageColor(colors);
@@ -212,6 +207,8 @@ namespace EEPK_Organiser.Forms
             initialLightness = hslColor.Lightness;
 
             ValueChanged();
+
+            return true;
         }
 
         private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -219,7 +216,7 @@ namespace EEPK_Organiser.Forms
             ValueChanged();
         }
 
-        private void IntegerUpDown_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        private void IntegerUpDown_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double?> e)
         {
             ValueChanged();
         }
@@ -366,5 +363,6 @@ namespace EEPK_Organiser.Forms
             hslColor.Lightness = initialLightness;
             ValueChanged();
         }
+
     }
 }

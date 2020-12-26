@@ -700,7 +700,9 @@ namespace EEPK_Organiser.Forms.EMP
                 if (_particleEffect == null) return;
 
                 Forms.RecolorAll recolor = new Forms.RecolorAll(_particleEffect, this);
-                recolor.ShowDialog();
+
+                if(recolor.Initialize())
+                    recolor.ShowDialog();
             }
 #if !DEBUG
             catch (Exception ex)
@@ -1207,21 +1209,6 @@ namespace EEPK_Organiser.Forms.EMP
             }
         }
 
-        //Tool
-        private void Tool_RecolorMultiSelect(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                Forms.EMP.RecolorAll recolorForm = new Forms.EMP.RecolorAll(empFile);
-                recolorForm.ShowDialog();
-                recolorForm = null;
-            }
-            catch (Exception ex)
-            {
-                mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
 
         private void ComboBox_Type0_Parameter_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

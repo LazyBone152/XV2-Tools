@@ -197,7 +197,7 @@ namespace EEPK_Organiser.View
                 if (File.Exists(path) && !string.IsNullOrWhiteSpace(path))
                 {
 
-                    Forms.ProgressBarFileLoad progressBarForm = new Forms.ProgressBarFileLoad(path, this, null);
+                    Forms.ProgressBarFileLoad progressBarForm = new Forms.ProgressBarFileLoad(path, App.Current.MainWindow, null);
                     progressBarForm.ShowDialog();
 
                     if (progressBarForm.exception != null)
@@ -240,12 +240,12 @@ namespace EEPK_Organiser.View
             {
                 if (!GeneralInfo.AppSettings.ValidGameDir) throw new Exception("Game directory is not valid. Please set the game directory in the settings menu (File > Settings).");
 
-                Forms.EntitySelector entitySelector = new Forms.EntitySelector(loadHelper, type, this);
+                Forms.EntitySelector entitySelector = new Forms.EntitySelector(loadHelper, type, App.Current.MainWindow);
                 entitySelector.ShowDialog();
 
                 if (entitySelector.SelectedEntity != null)
                 {
-                    Forms.ProgressBarFileLoad progressBarForm = new Forms.ProgressBarFileLoad(entitySelector.SelectedEntity.EepkPath, this, Xenoverse2.Instance.GetFileIO(), entitySelector.OnlyLoadFromCPK);
+                    Forms.ProgressBarFileLoad progressBarForm = new Forms.ProgressBarFileLoad(entitySelector.SelectedEntity.EepkPath, App.Current.MainWindow, Xenoverse2.Instance.GetFileIO(), entitySelector.OnlyLoadFromCPK);
                     progressBarForm.ShowDialog();
 
                     if (progressBarForm.exception != null)
@@ -933,7 +933,9 @@ namespace EEPK_Organiser.View
                 if (asset != null)
                 {
                     Forms.RecolorAll recolor = new Forms.RecolorAll(AssetType.EMO, asset, Application.Current.MainWindow);
-                    recolor.ShowDialog();
+
+                    if(recolor.Initialize())
+                        recolor.ShowDialog();
                 }
             }
 #if !DEBUG
@@ -1323,7 +1325,9 @@ namespace EEPK_Organiser.View
                 if (asset != null)
                 {
                     Forms.RecolorAll recolor = new Forms.RecolorAll(AssetType.PBIND, asset, Application.Current.MainWindow);
-                    recolor.ShowDialog();
+
+                    if(recolor.Initialize())
+                        recolor.ShowDialog();
                 }
             }
 #if !DEBUG
@@ -1663,7 +1667,9 @@ namespace EEPK_Organiser.View
                 if (asset != null)
                 {
                     Forms.RecolorAll recolor = new Forms.RecolorAll(AssetType.TBIND, asset, Application.Current.MainWindow);
-                    recolor.ShowDialog();
+
+                    if(recolor.Initialize())
+                        recolor.ShowDialog();
                 }
             }
 #if !DEBUG
@@ -2022,7 +2028,9 @@ namespace EEPK_Organiser.View
                 if (asset != null)
                 {
                     Forms.RecolorAll recolor = new Forms.RecolorAll(AssetType.CBIND, asset, Application.Current.MainWindow);
-                    recolor.ShowDialog();
+
+                    if(recolor.Initialize())
+                        recolor.ShowDialog();
                 }
             }
 #if !DEBUG
@@ -2384,7 +2392,9 @@ namespace EEPK_Organiser.View
                 if (asset != null)
                 {
                     Forms.RecolorAll recolor = new Forms.RecolorAll(AssetType.LIGHT, asset, Application.Current.MainWindow);
-                    recolor.ShowDialog();
+
+                    if(recolor.Initialize())
+                        recolor.ShowDialog();
                 }
             }
 #if !DEBUG
@@ -2416,7 +2426,7 @@ namespace EEPK_Organiser.View
 
                 if (assetSelector.SelectedAssets != null)
                 {
-                    Forms.ProgressBarAssetImport assetImportForm = new Forms.ProgressBarAssetImport(container, assetSelector.SelectedAssets, type, this);
+                    Forms.ProgressBarAssetImport assetImportForm = new Forms.ProgressBarAssetImport(container, assetSelector.SelectedAssets, type, App.Current.MainWindow);
                     assetImportForm.ShowDialog();
 
                     if (assetImportForm.exception != null)
@@ -2621,12 +2631,12 @@ namespace EEPK_Organiser.View
 
             if (showExt)
             {
-                Forms.LogForm logForm = new Forms.LogForm("The following effects use this asset:", str.ToString(), String.Format("{0}: Used By", asset.FileNamesPreviewWithExtension), this, true);
+                Forms.LogForm logForm = new Forms.LogForm("The following effects use this asset:", str.ToString(), String.Format("{0}: Used By", asset.FileNamesPreviewWithExtension), App.Current.MainWindow, true);
                 logForm.Show();
             }
             else
             {
-                Forms.LogForm logForm = new Forms.LogForm("The following effects use this asset:", str.ToString(), String.Format("{0}: Used By", asset.FileNamesPreview), this, true);
+                Forms.LogForm logForm = new Forms.LogForm("The following effects use this asset:", str.ToString(), String.Format("{0}: Used By", asset.FileNamesPreview), App.Current.MainWindow, true);
                 logForm.Show();
             }
 
@@ -2635,7 +2645,7 @@ namespace EEPK_Organiser.View
 
         private void AssetContainer_RenameFile(EffectFile effectFile, AssetContainerTool container)
         {
-            Forms.RenameForm renameForm = new Forms.RenameForm(effectFile.FileName, effectFile.Extension, String.Format("Renaming {0}", effectFile.FullFileName), container, this);
+            Forms.RenameForm renameForm = new Forms.RenameForm(effectFile.FileName, effectFile.Extension, String.Format("Renaming {0}", effectFile.FullFileName), container, App.Current.MainWindow);
             renameForm.ShowDialog();
 
             if (renameForm.WasNameChanged)
@@ -3764,7 +3774,7 @@ namespace EEPK_Organiser.View
                 //if selEffects is null, then pass in all the effects.
                 IList<Effect> effects = (selEffects != null) ? selEffects : effectContainerFile.Effects;
 
-                Forms.EffectSelector effectSelector = new Forms.EffectSelector(effects, effectContainerFile, this, Forms.EffectSelector.Mode.ExportEffect);
+                Forms.EffectSelector effectSelector = new Forms.EffectSelector(effects, effectContainerFile, App.Current.MainWindow, Forms.EffectSelector.Mode.ExportEffect);
                 effectSelector.ShowDialog();
 
                 if (effectSelector.SelectedEffects != null)
