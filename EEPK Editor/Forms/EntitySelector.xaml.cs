@@ -1,15 +1,15 @@
-﻿using EEPK_Organiser.GameInterface;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
 using System;
+using MahApps.Metro.Controls;
 
 namespace EEPK_Organiser.Forms
 {
     /// <summary>
     /// Interaction logic for EntitySelector.xaml
     /// </summary>
-    public partial class EntitySelector : Window
+    public partial class EntitySelector : MetroWindow
     {
         public enum EntityType
         {
@@ -29,7 +29,7 @@ namespace EEPK_Organiser.Forms
         public GameEntity SelectedEntity { get; set; }
         public bool OnlyLoadFromCPK { get; set; }
 
-        public EntitySelector(GameInterface.GameInterface _gameInterface, EntityType _entityType, Window parent)
+        public EntitySelector(LoadFromGameHelper _gameInterface, EntityType _entityType, object parent)
         {
             switch (_entityType)
             {
@@ -63,7 +63,7 @@ namespace EEPK_Organiser.Forms
 
             InitializeComponent();
             DataContext = this;
-            Owner = parent;
+            Owner = Application.Current.MainWindow;
 
             switch (_entityType)
             {

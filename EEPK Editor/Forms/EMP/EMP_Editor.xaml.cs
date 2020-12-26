@@ -11,13 +11,15 @@ using Xv2CoreLib.EMP;
 using EEPK_Organiser.Misc;
 using System.Collections.Generic;
 using System.Linq;
+using EEPK_Organiser.View;
+using MahApps.Metro.Controls;
 
 namespace EEPK_Organiser.Forms.EMP
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class EMP_Editor : Window, INotifyPropertyChanged
+    public partial class EMP_Editor : MetroWindow, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -49,9 +51,9 @@ namespace EEPK_Organiser.Forms.EMP
 
         private Xv2CoreLib.EMB_CLASS.EMB_File textureContainer { get; set; }
         private EMM_File materialFile { get; set; }
-        private MainWindow mainWindow = null;
+        private EepkEditor mainWindow = null;
 
-        public EMP_Editor(EMP_File _empFile, string empName, Xv2CoreLib.EMB_CLASS.EMB_File _textureContainer, EMM_File _materialFile, MainWindow _mainWindow)
+        public EMP_Editor(EMP_File _empFile, string empName, Xv2CoreLib.EMB_CLASS.EMB_File _textureContainer, EMM_File _materialFile, EepkEditor _mainWindow)
         {
             if (_empFile == null)
                 throw new InvalidDataException("_empFile was null. Cannot open EMP Editor.");

@@ -10,18 +10,16 @@ using Xv2CoreLib.ERS;
 using Xv2CoreLib.Resource;
 using System.Collections.ObjectModel;
 using System.IO;
+using Xv2CoreLib;
 
-namespace EEPK_Organiser.GameInterface
+namespace EEPK_Organiser
 {
-    public class GameInterface
+    public class LoadFromGameHelper
     {
         private const string ERS_PATH = "vfx/vfx_spec.ers";
         private const string CUS_PATH = "system/custom_skill.cus";
         private const string CMS_PATH = "system/char_model_spec.cms";
         private const string CHARACTER_MSG_PATH = "msg/proper_noun_character_name_en.msg";
-
-
-        public Xv2FileIO fileIO = null;
 
         public ObservableCollection<GameEntity> characters { get; set; }
         public ObservableCollection<GameEntity> superSkills { get; set; }
@@ -32,13 +30,11 @@ namespace EEPK_Organiser.GameInterface
         public ObservableCollection<GameEntity> cmn { get; set; }
         public ObservableCollection<GameEntity> demo { get; set; }
 
-        public GameInterface(Xv2FileIO _fileIO)
+        public LoadFromGameHelper()
         {
-            fileIO = _fileIO;
-
-            CUS_File cusFile = CUS_File.Load(fileIO.GetFileFromGame(CUS_PATH));
-            CMS_File cmsFile = CMS_File.Load(fileIO.GetFileFromGame(CMS_PATH));
-            ERS_File ersFile = ERS_File.Load(fileIO.GetFileFromGame(ERS_PATH));
+            CUS_File cusFile = (CUS_File)Xenoverse2.Instance.GetParsedFileFromGame(CUS_PATH);
+            CMS_File cmsFile = (CMS_File)Xenoverse2.Instance.GetParsedFileFromGame(CMS_PATH);
+            ERS_File ersFile = (ERS_File)Xenoverse2.Instance.GetParsedFileFromGame(ERS_PATH);
 
             characters = LoadCharacterNames(cmsFile, ersFile);
             superSkills = LoadSkillNames(CUS_File.SkillType.Super, cusFile, cmsFile);
@@ -53,8 +49,8 @@ namespace EEPK_Organiser.GameInterface
         private ObservableCollection<GameEntity> LoadCharacterNames(CMS_File cmsFile, ERS_File ersFile)
         {
             ObservableCollection<GameEntity> entities = new ObservableCollection<GameEntity>();
-            
-            MSG_File characterMsgFile = MSG_File.Load(fileIO.GetFileFromGame(CHARACTER_MSG_PATH));
+
+            MSG_File characterMsgFile = (MSG_File)Xenoverse2.Instance.GetParsedFileFromGame(CHARACTER_MSG_PATH);
 
             foreach(var ersEntry in ersFile.GetSubentryList(2))
             {
@@ -88,7 +84,7 @@ namespace EEPK_Organiser.GameInterface
         {
             ObservableCollection<GameEntity> entities = new ObservableCollection<GameEntity>();
             
-            MSG_File nameMsgFile = (skillType != CUS_File.SkillType.Blast) ? MSG_File.Load(fileIO.GetFileFromGame(string.Format("{0}en.msg", cusFile.GetNameMsgPath(skillType)))) : null;
+            MSG_File nameMsgFile = (skillType != CUS_File.SkillType.Blast) ? (MSG_File)Xenoverse2.Instance.GetParsedFileFromGame(string.Format("{0}en.msg", cusFile.GetNameMsgPath(skillType))) : null;
             string skillDir;
 
             List<Skill> skills;

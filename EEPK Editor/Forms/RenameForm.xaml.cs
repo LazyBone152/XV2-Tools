@@ -1,16 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MahApps.Metro.Controls;
+using System;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.EMM;
@@ -20,7 +11,7 @@ namespace EEPK_Organiser.Forms
     /// <summary>
     /// Interaction logic for RenameForm.xaml
     /// </summary>
-    public partial class RenameForm : Window
+    public partial class RenameForm : MetroWindow
     {
         public enum Mode
         {
@@ -41,7 +32,7 @@ namespace EEPK_Organiser.Forms
         private EMB_File EmbFile = null;
         private EMM_File EmmFile = null;
 
-        public RenameForm(string originalName, string extension, string _windowTitle, object containerObject, Window parent = null, Mode _mode = Mode.Asset, int _stringSize = -1)
+        public RenameForm(string originalName, string extension, string _windowTitle, object containerObject, object parent = null, Mode _mode = Mode.Asset, int _stringSize = -1)
         {
             switch (_mode)
             {
@@ -62,7 +53,7 @@ namespace EEPK_Organiser.Forms
             InitializeComponent();
             Title = _windowTitle;
             DataContext = this;
-            Owner = parent;
+            Owner = Application.Current.MainWindow;
             textBox.Focus();
             OriginalName = NameValue + Extension;
             CurrentMode = _mode;

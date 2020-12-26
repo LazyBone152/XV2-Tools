@@ -1,33 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MahApps.Metro.Controls;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace EEPK_Organiser.Forms
 {
     /// <summary>
     /// Interaction logic for LogForm.xaml
     /// </summary>
-    public partial class LogPrompt : Window
+    public partial class LogPrompt : MetroWindow
     {
         public string Description { get; set; }
         public MessageBoxResult Result { get; set; } = MessageBoxResult.No;
 
-        public LogPrompt(string _description, string _logText, string _windowName, Window _owner = null, bool showInTaskBar = false)
+        public LogPrompt(string _description, string _logText, string _windowName, object _owner = null, bool showInTaskBar = false)
         {
             Description = _description;
             InitializeComponent();
             DataContext = this;
-            Owner = _owner;
+            Owner = Application.Current.MainWindow;
             Title = _windowName;
             richTextBox.AppendText(_logText);
             ShowInTaskbar = showInTaskBar;

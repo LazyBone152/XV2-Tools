@@ -7,6 +7,9 @@ using YAXLib;
 using System.Globalization;
 using System.Threading;
 using Xv2CoreLib;
+using System.Diagnostics;
+using Xv2CoreLib.CPK;
+using System.Threading.Tasks;
 
 namespace XV2_Xml_Serializer
 {
@@ -18,6 +21,7 @@ namespace XV2_Xml_Serializer
         {
             //for debugging only
             //args = new string[1] { @"special_event_voice - Copy.sev" };
+
 
 #if DEBUG
             DEBUG_MODE = true;

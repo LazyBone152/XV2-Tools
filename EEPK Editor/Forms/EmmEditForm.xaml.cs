@@ -1,4 +1,6 @@
-﻿using System;
+﻿using EEPK_Organiser.View;
+using MahApps.Metro.Controls;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -23,7 +25,7 @@ namespace EEPK_Organiser.Forms
     /// <summary>
     /// Interaction logic for EmmEditForm.xaml
     /// </summary>
-    public partial class EmmEditForm : Window, INotifyPropertyChanged
+    public partial class EmmEditForm : MetroWindow, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -39,7 +41,7 @@ namespace EEPK_Organiser.Forms
         public EMM_File EmmFile { get; set; }
         public AssetContainerTool container { get; set; }
         public bool IsForContainer { get; set; }
-        public MainWindow parentWindow = null;
+        public EepkEditor parent = null;
 
         //View
         public string MaterialCount
@@ -68,7 +70,7 @@ namespace EEPK_Organiser.Forms
         }
 
 
-        public EmmEditForm(EMM_File _emmFile, AssetContainerTool _container, AssetType _assetType, Window parent, bool isForContainer = true, string windowTitle = null)
+        public EmmEditForm(EMM_File _emmFile, AssetContainerTool _container, AssetType _assetType, EepkEditor parent, bool isForContainer = true, string windowTitle = null)
         {
             IsForContainer = isForContainer;
             EmmFile = _emmFile;
@@ -77,7 +79,7 @@ namespace EEPK_Organiser.Forms
             InitializeComponent();
             DataContext = this;
             //Owner = parent;
-            parentWindow = (MainWindow)parent;
+            this.parent = parent;
 
             if(windowTitle != null)
             {
@@ -225,16 +227,16 @@ namespace EEPK_Organiser.Forms
         //Logic
         private int Emm_Options_MergeDuplicateMaterials()
         {
-            if (!IsForContainer || parentWindow == null) return 0;
+            if (!IsForContainer || parent == null) return 0;
 
-            return parentWindow.effectContainerFile.MergeDuplicateMaterials(assetType);
+            return parent.effectContainerFile.MergeDuplicateMaterials(assetType);
         }
 
         private int Emm_Options_RemoveUnusedMaterials()
         {
-            if (!IsForContainer || parentWindow == null) return 0;
+            if (!IsForContainer || parent == null) return 0;
 
-            return parentWindow.effectContainerFile.RemoveUnusedMaterials(assetType);
+            return parent.effectContainerFile.RemoveUnusedMaterials(assetType);
         }
 
         private void RenameFile_PopUp(Material material)

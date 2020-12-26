@@ -1,34 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using EEPK_Organiser.Settings;
+using MahApps.Metro.Controls;
 
 namespace EEPK_Organiser.Forms
 {
     /// <summary>
     /// Interaction logic for Settings.xaml
     /// </summary>
-    public partial class Settings : Window
+    public partial class Settings : MetroWindow
     {
 
         public AppSettings settings { get; set; }
 
-        public Settings(AppSettings _settings, Window parent)
+        public Settings(AppSettings _settings, object parent)
         {
             settings = _settings;
             InitializeComponent();
-            Owner = parent;
+            Owner = Application.Current.MainWindow;
             DataContext = this;
         }
 

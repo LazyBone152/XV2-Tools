@@ -61,7 +61,25 @@ namespace Xv2CoreLib.IDB
 
         public void SortEntries()
         {
-            Entries = Sorting.SortEntries(Entries);
+            //Split entries by I_08 (Type), Sort them and then rejoin
+            int split = Entries.Max(x => x.I_08) + 1;
+            List<List<IDB_Entry>> splitEntries = new List<List<IDB_Entry>>();
+
+            for(int i = 0; i < split; i++)
+            {
+                splitEntries.Add(Entries.FindAll(x => x.I_08 == (ushort)i));
+                
+                if(splitEntries[i] != null)
+                    splitEntries[i].Sort((x, y) => x.SortID - y.SortID);
+            }
+
+            Entries.Clear();
+
+            for (int i = 0; i < split; i++)
+            {
+                if(splitEntries[i] != null)
+                    Entries.AddRange(splitEntries[i]);
+            }
         }
 
         public bool DoesSkillExist(string id, IDB_Type skillType)
@@ -142,6 +160,7 @@ namespace Xv2CoreLib.IDB
                     throw new Exception(String.Format("IDB \"{0}\" has no info msg file.", idbName));
             }
         }
+        
         public static string LimitBurstMsgFile(string idbName)
         {
             switch (idbName)

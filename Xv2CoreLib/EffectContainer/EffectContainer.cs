@@ -295,6 +295,11 @@ namespace Xv2CoreLib.EffectContainer
             return false;
         }
 
+        public void NewEffectFilter(string newFilter)
+        {
+            EffectSearchFilter = newFilter;
+        }
+
         public void UpdateEffectFilter()
         {
             if (_viewEffects == null)
@@ -2729,6 +2734,11 @@ namespace Xv2CoreLib.EffectContainer
             }
 
             return false;
+        }
+
+        public void NewAssetFilter(string newFilter)
+        {
+            AssetSearchFilter = newFilter;
         }
 
         public void UpdateAssetFilter()

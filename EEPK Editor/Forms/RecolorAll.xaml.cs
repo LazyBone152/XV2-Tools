@@ -1,17 +1,9 @@
-﻿using System;
+﻿using MahApps.Metro.Controls;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using Xv2CoreLib.EEPK;
 using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.EMB_CLASS;
@@ -24,7 +16,7 @@ namespace EEPK_Organiser.Forms
     /// <summary>
     /// Interaction logic for RecolorAll.xaml
     /// </summary>
-    public partial class RecolorAll : Window, INotifyPropertyChanged
+    public partial class RecolorAll : MetroWindow, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -121,7 +113,7 @@ namespace EEPK_Organiser.Forms
         /// <summary>
         /// Hue shift a asset.
         /// </summary>
-        public RecolorAll(AssetType _assetType, Asset _asset, Window parent)
+        public RecolorAll(AssetType _assetType, Asset _asset, object parent)
         {
             currentMode = Mode.Asset;
             assetType = _assetType;
@@ -129,46 +121,42 @@ namespace EEPK_Organiser.Forms
 
             InitializeComponent();
             DataContext = this;
-            Owner = parent;
         }
 
         /// <summary>
         /// Hue shift a material.
         /// </summary>
         /// <param name="_material"></param>
-        public RecolorAll(Material _material, Window parent)
+        public RecolorAll(Material _material, object parent)
         {
             currentMode = Mode.Material;
             material = _material;
 
             InitializeComponent();
             DataContext = this;
-            Owner = parent;
         }
 
         /// <summary>
         /// Hue shift all assets, materials and textures in a EffectContainerFile.
         /// </summary>
-        public RecolorAll(EffectContainerFile _effectContainerFile, Window parent)
+        public RecolorAll(EffectContainerFile _effectContainerFile, object parent)
         {
             currentMode = Mode.Global;
             effectContainerFile = _effectContainerFile;
             InitializeComponent();
             DataContext = this;
-            Owner = parent;
         }
 
         /// <summary>
         /// Hue shift a ParticleEffect.
         /// </summary>
-        public RecolorAll(ParticleEffect _particleEffect, Window parent)
+        public RecolorAll(ParticleEffect _particleEffect, object parent)
         {
             currentMode = Mode.ParticleEffect;
             particleEffect = _particleEffect;
 
             InitializeComponent();
             DataContext = this;
-            Owner = parent;
         }
 
 
@@ -209,7 +197,7 @@ namespace EEPK_Organiser.Forms
 
             if(colors.Count == 0)
             {
-                Close();
+                //Close();
                 MessageBox.Show("No color information was found on this asset so it cannot be hue shifted.\n\nThe most likely cause of this is that all color sources for this asset were either all white (1,1,1) or all black (0,0,0).", "No color information", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }

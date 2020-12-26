@@ -1,16 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using MahApps.Metro.Controls;
+using System;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.Resource;
 
@@ -19,7 +10,7 @@ namespace EEPK_Organiser.Forms
     /// <summary>
     /// Interaction logic for ProgressBarFileLoad.xaml
     /// </summary>
-    public partial class ProgressBarFileLoad : Window
+    public partial class ProgressBarFileLoad : MetroWindow
     {
 
         public EffectContainerFile effectContainerFile { get; set; }
@@ -28,13 +19,13 @@ namespace EEPK_Organiser.Forms
         private bool onlyFromCpk = false;
         public Exception exception = null;
 
-        public ProgressBarFileLoad(string eepkFilePath, Window parent, Xv2FileIO _fileIO = null, bool _onlyFromCpk = false)
+        public ProgressBarFileLoad(string eepkFilePath, object parent, Xv2FileIO _fileIO, bool _onlyFromCpk = false)
         {
             fileIO = _fileIO;
             onlyFromCpk = _onlyFromCpk;
             FilePath = eepkFilePath;
             InitializeComponent();
-            Owner = parent;
+            Owner = Application.Current.MainWindow;
         }
 
         private void Load()

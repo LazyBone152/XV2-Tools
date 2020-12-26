@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using CriPakTools;
@@ -75,7 +77,7 @@ namespace Xv2CoreLib.CPK
                     if (File.Exists(GetFullCpkPath(s)))
                     {
                         var cpk = new CriPakTools.CPK(new Tools());
-                        cpk.ReadCPK(GetFullCpkPath(s)); //Crash here
+                        cpk.ReadCPK(GetFullCpkPath(s)); 
                         CpkFiles.Add(cpk);
                         binaryReader.Add(new BinaryReader(File.OpenRead(GetFullCpkPath(s))));
                     }
@@ -310,5 +312,182 @@ namespace Xv2CoreLib.CPK
         }
 
         #endregion
+    }
+
+    public class CPK_MultiThreadedExtractor : INotifyPropertyChanged
+    {
+        #region INotPropChanged
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+        #endregion
+
+        #region UI Props
+        private int _numExtracted = 0;
+        private int _numFiles = 0;
+        private int _threadsComplete = 0;
+        private int _numThreads = 0;
+        public int NumExtracted
+        {
+            get
+            {
+                return _numExtracted;
+            }
+            set
+            {
+                if(_numExtracted != value)
+                {
+                    _numExtracted = value;
+                    NotifyPropertyChanged(nameof(NumExtracted));
+                }
+            }
+        }
+        public int NumFiles
+        {
+            get
+            {
+                return _numFiles;
+            }
+            set
+            {
+                if (_numFiles != value)
+                {
+                    _numFiles = value;
+                    NotifyPropertyChanged(nameof(NumFiles));
+                }
+            }
+        }
+        public int ThreadsComplete
+        {
+            get
+            {
+                return _threadsComplete;
+            }
+            set
+            {
+                if (_threadsComplete != value)
+                {
+                    _threadsComplete = value;
+                    NotifyPropertyChanged(nameof(ThreadsComplete));
+                }
+            }
+        }
+        public int NumThreads
+        {
+            get
+            {
+                return _numThreads;
+            }
+            set
+            {
+                if (_numThreads != value)
+                {
+                    _numThreads = value;
+                    NotifyPropertyChanged(nameof(NumThreads));
+                }
+            }
+        }
+        
+        #endregion
+
+        CriPakTools.CPK cpk;
+        List<BinaryReader> binaryReaders = new List<BinaryReader>();
+        string outputDir;
+
+        public bool isFinished = false;
+
+        public CPK_MultiThreadedExtractor(string cpkPath, string outputDir, int numThreads = -1)
+        {
+            cpk = new CriPakTools.CPK(new Tools());
+            cpk.ReadCPK(cpkPath);
+            this.outputDir = outputDir;
+            this.NumThreads = (numThreads != -1) ? numThreads : Environment.ProcessorCount;
+            this.NumFiles = cpk.FileTable.Count;
+
+            for (int i = 0; i < NumThreads; i++)
+                binaryReaders.Add(new BinaryReader(File.OpenRead(cpkPath)));
+        }
+
+        public void Start()
+        {
+            Task.Run(() => InternalStart());
+        }
+
+        private void InternalStart()
+        {
+            int splitWorkload = cpk.FileTable.Count / NumThreads;
+            List<Task> tasks = new List<Task>();
+
+            for (int a = 0; a < NumThreads; a++) 
+            {
+                 int workload = splitWorkload;
+
+                if(a == NumThreads - 1)
+                {
+                    //Recalculate workload for last thread to include ALL remaining files (the initial / will exclude some when FileTable.Count is odd)
+                    workload = cpk.FileTable.Count - (splitWorkload * (NumThreads - 1));
+                }
+
+                //Console.WriteLine($"Thread {a + 1}: Idx = {splitWorkload * a}, Count = {workload}");
+
+                int temp = a;
+                tasks.Add(Task.Run(() => ExtractFiles(splitWorkload * temp, workload, binaryReaders[temp], temp)));
+            }
+
+            //Console.Read();
+
+            //Wait for all threads to finish execution
+            Task.WaitAll(tasks.ToArray());
+
+            //Error checking
+            //if (NumExtracted != NumFiles)
+            //    throw new Exception("NumExtracted != NumFiles");
+
+            isFinished = true;
+        }
+
+        private async Task ExtractFiles(int tableIdx, int count, BinaryReader binaryReader, int idx)
+        {
+            Thread.CurrentThread.Name = $"CPK Extract Thread {idx}";
+
+            for(int i = tableIdx; i < tableIdx + count; i++)
+            {
+                if (cpk.FileTable[i].FileType == "FILE" && (string)cpk.FileTable[i].FileName != null)
+                {
+                    FileEntry e = cpk.FileTable[i];
+
+                    binaryReader.BaseStream.Seek((long)e.FileOffset, SeekOrigin.Begin);
+                    string isComp = Encoding.ASCII.GetString(binaryReader.ReadBytes(8));
+                    binaryReader.BaseStream.Seek((long)e.FileOffset, SeekOrigin.Begin);
+
+                    byte[] chunk = binaryReader.ReadBytes(Int32.Parse(e.FileSize.ToString()));
+
+                    if (isComp == "CRILAYLA")
+                    {
+                        int size = Int32.Parse((e.ExtractSize ?? e.FileSize).ToString());
+                        chunk = cpk.DecompressCRILAYLA(chunk, size);
+                    }
+
+                    string savePath = $"{outputDir}/{e.DirName}/{e.FileName}";
+                    string dir = Path.GetDirectoryName(savePath);
+
+                    if (!Directory.Exists(dir))
+                        Directory.CreateDirectory(dir);
+
+                    File.WriteAllBytes(savePath, chunk);
+                }
+
+                //Interlocked.Increment(ref _numExtracted);
+            }
+
+            //Interlocked.Increment(ref _threadsComplete);
+        }
+
     }
 }

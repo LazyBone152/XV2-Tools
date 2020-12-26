@@ -1,9 +1,10 @@
-﻿<Window x:Class="EEPK_Organiser.Forms.ProgressBarAssetImport"
+﻿<Controls:MetroWindow x:Class="EEPK_Organiser.Forms.ProgressBarAssetImport"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EEPK_Organiser.Forms"
+        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
         Title="Import Asset(s)" Height="120" Width="300" ContentRendered="Window_ContentRendered" ResizeMode="NoResize" ShowInTaskbar="False" WindowStartupLocation="CenterOwner" WindowStyle="ToolWindow">
     <Grid>
@@ -11,4 +12,4 @@
         <TextBlock Text="{Binding ProgressUpdate}"  HorizontalAlignment="Left" Margin="18,17,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="250"/>
 
     </Grid>
-</Window>
+</Controls:MetroWindow>

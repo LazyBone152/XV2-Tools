@@ -1,4 +1,6 @@
-﻿using System;
+﻿using EEPK_Organiser.View;
+using MahApps.Metro.Controls;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -21,7 +23,7 @@ namespace EEPK_Organiser.Forms
     /// <summary>
     /// Interaction logic for AssetSelector.xaml
     /// </summary>
-    public partial class AssetSelector : Window, INotifyPropertyChanged
+    public partial class AssetSelector : MetroWindow, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -71,14 +73,14 @@ namespace EEPK_Organiser.Forms
         public ObservableCollection<Asset> MergedAssetList = null;
         public ListCollectionView ViewMergedAsserList { get; set; }
 
-        public AssetSelector(EffectContainerFile _effectFile, bool multiSelect, bool _constrained = false, Xv2CoreLib.EEPK.AssetType _constrainedAssetType = Xv2CoreLib.EEPK.AssetType.EMO, Window parent = null, Asset initialSelection = null)
+        public AssetSelector(EffectContainerFile _effectFile, bool multiSelect, bool _constrained = false, Xv2CoreLib.EEPK.AssetType _constrainedAssetType = Xv2CoreLib.EEPK.AssetType.EMO, EepkEditor parent = null, Asset initialSelection = null)
         {
             MultiSelectMode = multiSelect;
             effectContainerFile = _effectFile;
             ConstrainedAssetType = _constrainedAssetType;
             Constrained = _constrained;
             InitializeComponent();
-            Owner = parent;
+            Owner = Application.Current.MainWindow;
             DataContext = this;
             InitializeTabs(initialSelection);
             InitializeSearchTab();

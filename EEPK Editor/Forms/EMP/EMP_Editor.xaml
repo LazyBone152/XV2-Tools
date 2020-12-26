@@ -1,4 +1,4 @@
-﻿<Window x:Class="EEPK_Organiser.Forms.EMP.EMP_Editor"
+﻿<Controls:MetroWindow x:Class="EEPK_Organiser.Forms.EMP.EMP_Editor"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -10,6 +10,7 @@
         xmlns:emp="clr-namespace:Xv2CoreLib.EMP;assembly=Xv2CoreLib"
         xmlns:empAnim="clr-namespace:Xv2CoreLib.EMP;assembly=Xv2CoreLib"
         xmlns:utils="clr-namespace:EEPK_Organiser.Utils"
+        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
         Title="EMP Editor" Height="565.065" Width="1110" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen" AllowDrop="True" WindowStyle="ThreeDBorderWindow">
     <Window.Resources>
@@ -20,8 +21,8 @@
     </Window.Resources>
     <Grid>
 
-        <TabControl x:Name="mainTabControl" HorizontalAlignment="Left" Height="505" VerticalAlignment="Top" Width="1095">
-            <TabItem Header="Particle Effects">
+        <Controls:MetroTabControl x:Name="mainTabControl" HorizontalAlignment="Left" Height="505" VerticalAlignment="Top" Width="1095">
+            <Controls:MetroTabItem Header="Particle Effects" Controls:ControlsHelper.HeaderFontSize="16">
                 <Grid Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Margin="0,0,-6.836,-0.055">
                     <TreeView x:Name="empTree" ItemsSource="{Binding empFile.ParticleEffects}" HorizontalAlignment="Left" Height="430" Margin="41,15,0,0" VerticalAlignment="Top" Width="282" SelectedItemChanged="empTree_SelectedItemChanged" PreviewKeyDown="empTree_KeyDown">
 
@@ -60,8 +61,8 @@
                         </TreeView.ItemTemplate>
                     </TreeView>
 
-                    <TabControl x:Name="tabControl_ParticleEffect" HorizontalAlignment="Left" Height="444" Margin="335,10,0,-0.182" VerticalAlignment="Top" Width="753">
-                        <TabItem Header="General">
+                    <Controls:MetroTabControl x:Name="tabControl_ParticleEffect" HorizontalAlignment="Left" Height="444" Margin="335,10,0,-0.182" VerticalAlignment="Top" Width="753">
+                        <Controls:MetroTabItem Header="General" Controls:ControlsHelper.HeaderFontSize="16">
                             <Grid Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Margin="0,0,0.055,0">
                                 <TextBox x:Name="general_Name" Text="{Binding SelectedItem.Name, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="134,57,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="253"/>
                                 <Label Content="Name" HorizontalAlignment="Left" Margin="30,55,0,0" VerticalAlignment="Top" Width="104" HorizontalContentAlignment="Right" ToolTip="The name of the Particle Effect. Has a maximum allowed length of 32 characters."/>
@@ -144,8 +145,8 @@
                                 <Label Content="I__136" HorizontalAlignment="Left" Margin="322,362,0,0" VerticalAlignment="Top" Width="55" HorizontalContentAlignment="Right"/>
                             </Grid>
 
-                        </TabItem>
-                        <TabItem x:Name="tab_TexturePart" Header="Texture Part">
+                        </Controls:MetroTabItem>
+                        <Controls:MetroTabItem x:Name="tab_TexturePart" Header="Texture Part" Controls:ControlsHelper.HeaderFontSize="16">
                             <TabControl>
                                 <TabItem Header="Color/Material">
                                     <Grid x:Name="grid_TexturePart" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Margin="0,0,-0.055,0">
@@ -288,8 +289,8 @@
                                     </Grid>
                                 </TabItem>
                             </TabControl>
-                        </TabItem>
-                        <TabItem x:Name="Tab_VerticalDistribution" Header="Vertical Distribution">
+                        </Controls:MetroTabItem>
+                        <Controls:MetroTabItem x:Name="Tab_VerticalDistribution" Header="Vertical Distribution" Controls:ControlsHelper.HeaderFontSize="16">
                             <Grid x:Name="grid_VerticalDistribution" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
                                 <TextBox x:Name="verticalDistibution_F_00" Text="{Binding SelectedItem.FloatPart_00_01.F_00, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,44,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="Position Offset Y" HorizontalAlignment="Left" Margin="12,42,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
@@ -309,8 +310,8 @@
                                 <Label Content="F__28" HorizontalAlignment="Left" Margin="62,162,0,0" VerticalAlignment="Top" Width="104" HorizontalContentAlignment="Right"/>
 
                             </Grid>
-                        </TabItem>
-                        <TabItem x:Name="Tab_SphericalDistribution" Header="SphericalDistribution">
+                        </Controls:MetroTabItem>
+                        <Controls:MetroTabItem x:Name="Tab_SphericalDistribution" Header="SphericalDistribution" Controls:ControlsHelper.HeaderFontSize="16">
                             <Grid x:Name="grid_SphericalDistribution" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
                                 <TextBox x:Name="sphericalDistibution_F_00" Text="{Binding SelectedItem.FloatPart_01_01.F_16, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,44,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="Sphere Radius" HorizontalAlignment="Left" Margin="12,42,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right" ToolTip="SphereRadius_ForRandomPositionOnSphere"/>
@@ -322,8 +323,8 @@
                                 <Label Content="Variance" HorizontalAlignment="Left" Margin="280,72,0,0" VerticalAlignment="Top" Width="104" HorizontalContentAlignment="Right"/>
 
                             </Grid>
-                        </TabItem>
-                        <TabItem x:Name="Tab_ShapePerimeterDistribution" Header="ShapePerimeterDistribution">
+                        </Controls:MetroTabItem>
+                        <Controls:MetroTabItem x:Name="Tab_ShapePerimeterDistribution" Header="ShapePerimeterDistribution" Controls:ControlsHelper.HeaderFontSize="16">
                             <Grid x:Name="grid_ShapePerimeterDistribution" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
                                 <TextBox x:Name="shapePerimeterDistibution_F_00" Text="{Binding SelectedItem.FloatPart_02_01.F_00, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,44,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="Position Offset Y" HorizontalAlignment="Left" Margin="12,42,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
@@ -351,8 +352,8 @@
                                 <Label Content="F__44" HorizontalAlignment="Left" Margin="12,249,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
 
                             </Grid>
-                        </TabItem>
-                        <TabItem x:Name="Tab_ShapeAreaDistribution" Header="ShapeAreaDistribution">
+                        </Controls:MetroTabItem>
+                        <Controls:MetroTabItem x:Name="Tab_ShapeAreaDistribution" Header="ShapeAreaDistribution" Controls:ControlsHelper.HeaderFontSize="16">
                             <Grid x:Name="grid_ShapeAreaDistribution" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
                                 <TextBox x:Name="shapeAreaDistibution_F_00" Text="{Binding SelectedItem.FloatPart_03_01.F_00, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,44,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="Position Offset Y" HorizontalAlignment="Left" Margin="12,42,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
@@ -380,8 +381,8 @@
                                 <Label Content="F__44" HorizontalAlignment="Left" Margin="12,249,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
 
                             </Grid>
-                        </TabItem>
-                        <TabItem x:Name="Tab_AutoOriented" Header="AutoOriented">
+                        </Controls:MetroTabItem>
+                        <Controls:MetroTabItem x:Name="Tab_AutoOriented" Header="AutoOriented" Controls:ControlsHelper.HeaderFontSize="16">
                             <Grid x:Name="grid_AutoOriented" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
                                 <TextBox x:Name="autoOriented_F_00" Text="{Binding SelectedItem.FloatPart_00_02.F_16, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,44,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="Rotation" HorizontalAlignment="Left" Margin="12,42,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right" ToolTip="SphereRadius_ForRandomPositionOnSphere"/>
@@ -393,8 +394,8 @@
                                 <Label Content="Variance" HorizontalAlignment="Left" Margin="280,72,0,0" VerticalAlignment="Top" Width="104" HorizontalContentAlignment="Right"/>
 
                             </Grid>
-                        </TabItem>
-                        <TabItem x:Name="Tab_Default" Header="Default">
+                        </Controls:MetroTabItem>
+                        <Controls:MetroTabItem x:Name="Tab_Default" Header="Default" Controls:ControlsHelper.HeaderFontSize="16">
                             <Grid x:Name="grid_Default" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
                                 <TextBox x:Name="default_F_00" Text="{Binding SelectedItem.FloatPart_02_02.F_00, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,44,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="Angle Rotation" HorizontalAlignment="Left" Margin="12,42,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
@@ -419,8 +420,8 @@
                                 </GroupBox>
 
                             </Grid>
-                        </TabItem>
-                        <TabItem x:Name="Tab_ConeExtrude" Header="ConeExtrude">
+                        </Controls:MetroTabItem>
+                        <Controls:MetroTabItem x:Name="Tab_ConeExtrude" Header="ConeExtrude" Controls:ControlsHelper.HeaderFontSize="16">
                             <Grid x:Name="grid_ConeExtrude">
                                 <TextBox x:Name="coneExtrude_I_00" Text="{Binding SelectedItem.Type_Struct3.I_00, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,44,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="Duration" HorizontalAlignment="Left" Margin="12,42,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
@@ -442,8 +443,8 @@
                                 </DataGrid>
 
                             </Grid>
-                        </TabItem>
-                        <TabItem x:Name="Tab_Mesh" Header="Mesh">
+                        </Controls:MetroTabItem>
+                        <Controls:MetroTabItem x:Name="Tab_Mesh" Header="Mesh" Controls:ControlsHelper.HeaderFontSize="16">
                             <Grid x:Name="grid_Mesh" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
                                 <TextBox x:Name="mesh_F_00" Text="{Binding SelectedItem.Type_Model.F_00, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,44,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="Angle Rotation" HorizontalAlignment="Left" Margin="12,42,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
@@ -474,8 +475,8 @@
                                 <Label Content="I__44" HorizontalAlignment="Left" Margin="12,163,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
 
                             </Grid>
-                        </TabItem>
-                        <TabItem x:Name="Tab_ShapeDraw" Header="ShapeDraw">
+                        </Controls:MetroTabItem>
+                        <Controls:MetroTabItem x:Name="Tab_ShapeDraw" Header="ShapeDraw" Controls:ControlsHelper.HeaderFontSize="16">
                             <Grid x:Name="grid_ShapeDraw" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
                                 <TextBox x:Name="shapeDraw_F_00" Text="{Binding SelectedItem.Type_Struct5.F_00, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,44,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="Rotation" HorizontalAlignment="Left" Margin="12,42,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right" ToolTip="SphereRadius_ForRandomPositionOnSphere"/>
@@ -503,8 +504,8 @@
                                 </DataGrid>
 
                             </Grid>
-                        </TabItem>
-                        <TabItem x:Name="Tab_Animaions" Header="Animations">
+                        </Controls:MetroTabItem>
+                        <Controls:MetroTabItem x:Name="Tab_Animaions" Header="Animations" Controls:ControlsHelper.HeaderFontSize="16">
                             <Grid>
 
 
@@ -546,8 +547,8 @@
 
                                 </GroupBox>
                             </Grid>
-                        </TabItem>
-                        <TabItem x:Name="Tab_AnimationsGroup" Header="Animations (group)">
+                        </Controls:MetroTabItem>
+                        <Controls:MetroTabItem x:Name="Tab_AnimationsGroup" Header="Animations (group)" Controls:ControlsHelper.HeaderFontSize="16">
                             <Grid>
                                 <Grid Margin="0,67,0.055,0.345" IsEnabled="{Binding SelectedItem, ElementName=comboBox_Type1_Header, Converter={StaticResource NullToFalse}}">
 
@@ -609,8 +610,8 @@
 
                                 </Grid>
                             </Grid>
-                        </TabItem>
-                    </TabControl>
+                        </Controls:MetroTabItem>
+                    </Controls:MetroTabControl>
                     <Button HorizontalAlignment="Left" Margin="10,19,0,0" VerticalAlignment="Top" Width="26" Height="25" Foreground="Black" Style="{StaticResource ButtonNoGlow}" Click="AddParticleEffect_Click" ToolTip="Add a new Particle Effect">
                         <Button.Background>
                             <ImageBrush ImageSource="{StaticResource plus}" Stretch="Uniform">
@@ -656,8 +657,8 @@
 
 
                 </Grid>
-            </TabItem>
-            <TabItem Header="Textures">
+            </Controls:MetroTabItem>
+            <Controls:MetroTabItem Header="Textures" Controls:ControlsHelper.HeaderFontSize="16">
                 <Grid Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
                     <ListBox PreviewKeyDown="ListBox_Textures_PreviewKeyDown" x:Name="listBox_Textures" ItemsSource="{Binding empFile.Textures}" HorizontalAlignment="Left" Height="424" Margin="48,10,0,0" VerticalAlignment="Top" Width="252" SelectionMode="Extended">
                         <ListBox.Resources>
@@ -821,7 +822,7 @@
                         </Button.Background>
                     </Button>
                 </Grid>
-            </TabItem>
-        </TabControl>
+            </Controls:MetroTabItem>
+        </Controls:MetroTabControl>
     </Grid>
-</Window>
+</Controls:MetroWindow>

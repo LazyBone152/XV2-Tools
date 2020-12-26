@@ -18,13 +18,15 @@ using Microsoft.Win32;
 using System.IO;
 using System.ComponentModel;
 using EEPK_Organiser.Misc;
+using EEPK_Organiser.View;
+using MahApps.Metro.Controls;
 
 namespace EEPK_Organiser.Forms
 {
     /// <summary>
     /// Interaction logic for EmbEditForm.xaml
     /// </summary>
-    public partial class EmbEditForm : Window, INotifyPropertyChanged
+    public partial class EmbEditForm : MetroWindow, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -40,7 +42,7 @@ namespace EEPK_Organiser.Forms
         public EMB_File EmbFile { get; set; }
         private AssetContainerTool container { get; set; }
         public bool IsForContainer { get; set; }
-        private MainWindow parent = null;
+        private EepkEditor parent = null;
 
         //View
         public string TextureCount
@@ -67,7 +69,7 @@ namespace EEPK_Organiser.Forms
             }
         }
 
-        public EmbEditForm(EMB_File _embFile, AssetContainerTool _container, AssetType _assetType, MainWindow _parent, bool isForContainer = true, string windowTitle = null)
+        public EmbEditForm(EMB_File _embFile, AssetContainerTool _container, AssetType _assetType, EepkEditor _parent, bool isForContainer = true, string windowTitle = null)
         {
             IsForContainer = isForContainer;
             EmbFile = _embFile;

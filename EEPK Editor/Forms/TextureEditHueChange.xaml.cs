@@ -1,29 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using Xv2CoreLib.EMB_CLASS;
 using System.Drawing;
-using AForge.Imaging;
 using System.ComponentModel;
 using System.Diagnostics;
 using AForge;
+using MahApps.Metro.Controls;
 
 namespace EEPK_Organiser.Forms
 {
     /// <summary>
     /// Interaction logic for TextureEditHueChange.xaml
     /// </summary>
-    public partial class TextureEditHueChange : Window, INotifyPropertyChanged
+    public partial class TextureEditHueChange : MetroWindow, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -105,12 +96,12 @@ namespace EEPK_Organiser.Forms
             }
         }
 
-        public TextureEditHueChange(EmbEntry _texture, Window parent)
+        public TextureEditHueChange(EmbEntry _texture, object parent)
         {
             CurrentTexture = _texture;
             InitializeComponent();
             DataContext = this;
-            Owner = parent;
+            Owner = Application.Current.MainWindow;
 
             OriginalTextureBackup = CurrentTexture.DdsImage;
             stopwatch.Start();

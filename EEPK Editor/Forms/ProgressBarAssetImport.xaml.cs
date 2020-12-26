@@ -1,17 +1,9 @@
-﻿using System;
+﻿using MahApps.Metro.Controls;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using Xv2CoreLib.EEPK;
 using Xv2CoreLib.EffectContainer;
 
@@ -20,7 +12,7 @@ namespace EEPK_Organiser.Forms
     /// <summary>
     /// Interaction logic for ProgressBarFileLoad.xaml
     /// </summary>
-    public partial class ProgressBarAssetImport : Window, INotifyPropertyChanged
+    public partial class ProgressBarAssetImport : MetroWindow, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -42,13 +34,13 @@ namespace EEPK_Organiser.Forms
         public AssetType type { get; set; }
         public Exception exception = null;
 
-        public ProgressBarAssetImport(AssetContainerTool _mainContainerFile, List<Asset> _selectedAssets, AssetType _type, Window parent)
+        public ProgressBarAssetImport(AssetContainerTool _mainContainerFile, List<Asset> _selectedAssets, AssetType _type, object parent)
         {
             container = _mainContainerFile;
             SelectedAssets = _selectedAssets;
             type = _type;
             InitializeComponent();
-            Owner = parent;
+            Owner = Application.Current.MainWindow;
             InitProgressBar();
             DataContext = this;
         }

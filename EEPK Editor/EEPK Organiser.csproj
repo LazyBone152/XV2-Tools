@@ -6,6 +6,12 @@
     <PackageReference Include="Legacy2CPSWorkaround" Version="1.0.0">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="MahApps.Metro">
+      <Version>1.6.5</Version>
+    </PackageReference>
+    <PackageReference Include="MahApps.Metro.IconPacks">
+      <Version>3.0.1</Version>
+    </PackageReference>
     <PackageReference Include="System.Numerics.Vectors">
       <Version>4.3.0</Version>
     </PackageReference>
@@ -209,10 +215,14 @@
     <Compile Include="Utils\CacheManager.cs" />
     <Compile Include="Utils\DataGridSelectedItemsBinding.cs" />
     <Compile Include="Utils\DataGridSelectedItemsBinding2.cs" />
-    <Compile Include="GameInterface\GameInterface.cs" />
+    <Compile Include="Misc\LoadFromGameHelper.cs" />
     <Compile Include="Utils\FileAssociation.cs" />
+    <Compile Include="Utils\LeftClickContextMenu.cs" />
     <Compile Include="Utils\ListBoxSelectedItemsBinding.cs" />
     <Compile Include="Controls\ZoomBorder.cs" />
+    <Compile Include="View\EepkEditor.xaml.cs">
+      <DependentUpon>EepkEditor.xaml</DependentUpon>
+    </Compile>
     <Page Include="Forms\AssetSelector.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -318,6 +328,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="View\EepkEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using EEPK_Organiser.View;
+using MahApps.Metro.Controls;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -21,7 +23,7 @@ namespace EEPK_Organiser.Forms
     /// <summary>
     /// Interaction logic for EffectSelector.xaml
     /// </summary>
-    public partial class EffectSelector : Window, INotifyPropertyChanged
+    public partial class EffectSelector : MetroWindow, INotifyPropertyChanged
     {
         public enum Mode
         {
@@ -63,14 +65,14 @@ namespace EEPK_Organiser.Forms
         private bool editModeCancelling = false;
         private Mode currentMode;
 
-        public EffectSelector(IList<Effect> effects, EffectContainerFile mainContainerFile, Window parent, Mode mode = Mode.ImportEffect)
+        public EffectSelector(IList<Effect> effects, EffectContainerFile mainContainerFile, object parent, Mode mode = Mode.ImportEffect)
         {
             currentMode = mode;
             Effects = effects;
             MainContainerFile = mainContainerFile;
             InitializeComponent();
             DataContext = this;
-            Owner = parent;
+            Owner = Application.Current.MainWindow;
 
             switch (currentMode)
             {
