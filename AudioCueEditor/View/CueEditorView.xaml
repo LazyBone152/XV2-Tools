@@ -80,7 +80,7 @@
             </DataGrid.Resources>
 
             <DataGrid.ContextMenu>
-                <ContextMenu>
+                <ContextMenu FontSize="12">
                     <MenuItem Header="Add Track" Command="{Binding AddTrackToCueCommand}"/>
                     <MenuItem Header="Add Action" Command="{Binding AddActionToCueCommand}"/>
                     <Separator/>

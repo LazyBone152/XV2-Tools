@@ -206,7 +206,12 @@
     <Compile Include="Audio\VGAudio.Cli\ConvertStream.cs" />
     <Compile Include="Audio\WavStream.cs" />
     <Compile Include="Converters\VisibilityToNullableBoolean.cs" />
+    <Compile Include="Forms\Settings.xaml.cs">
+      <DependentUpon>Settings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GeneralInfo.cs" />
     <Compile Include="LB Mod Installer\Installer\InstallerXml.cs" />
+    <Compile Include="Settings\Settings.cs" />
     <Compile Include="Utils\DataGridSelectedItemsBinding.cs" />
     <Compile Include="Utils\DataGridSelectedItemsBinding2.cs" />
     <Compile Include="Utils\FileAssociation.cs" />
@@ -594,6 +599,10 @@
     <Compile Include="View\VolumeControl.xaml.cs">
       <DependentUpon>VolumeControl.xaml</DependentUpon>
     </Compile>
+    <Page Include="Forms\Settings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

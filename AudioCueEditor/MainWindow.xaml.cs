@@ -99,25 +99,44 @@ namespace AudioCueEditor
             ToolTipService.ShowDurationProperty.OverrideMetadata(
             typeof(DependencyObject), new FrameworkPropertyMetadata(Int32.MaxValue));
 
+            //Load settings
+            GeneralInfo.AppSettings = Settings.AppSettings.LoadSettings();
+
             InitializeComponent();
             DataContext = this;
             InitWindowsTheme();
             LoadOnStartUp();
+
+
         }
 
         private void InitWindowsTheme()
         {
-            //Check registry for the users Light/Dark mode preferences (Windows 10 only)
-            var registryValue = Registry.GetValue(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "AppsUseLightTheme", "1");
             bool darkMode = false;
 
-            if (registryValue != null)
-                if (registryValue.ToString() == "0")
-                    darkMode = true;
-
-            if(darkMode)
+            switch (GeneralInfo.AppSettings.GetCurrentTheme())
             {
-                ThemeManager.ChangeAppStyle(Application.Current, ThemeManager.GetAccent("Emerald"), ThemeManager.GetAppTheme("BaseDark")); 
+                case Settings.AppTheme.Light:
+                    darkMode = false;
+                    break;
+                case Settings.AppTheme.Dark:
+                    darkMode = true;
+                    break;
+                case Settings.AppTheme.WindowsDefault:
+                    {
+                        //Check registry for the users Light/Dark mode preferences (Windows 10 only)
+                        var registryValue = Registry.GetValue(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "AppsUseLightTheme", "1");
+
+                        if (registryValue != null)
+                            if (registryValue.ToString() == "0")
+                                darkMode = true;
+                    }
+                    break;
+            }
+
+            if (darkMode)
+            {
+                ThemeManager.ChangeAppStyle(Application.Current, ThemeManager.GetAccent("Emerald"), ThemeManager.GetAppTheme("BaseDark"));
             }
             else
             {
@@ -267,6 +286,25 @@ namespace AudioCueEditor
                 await controller.CloseAsync();
             }
 
+        }
+
+        public RelayCommand SettingsCommand => new RelayCommand(OpenSettings);
+        private async void OpenSettings()
+        {
+            if(GeneralInfo.AppSettings != null)
+            {
+                string originalGameDir = GeneralInfo.AppSettings.GameDirectory;
+
+                Forms.Settings settingsForm = new Forms.Settings(GeneralInfo.AppSettings);
+                settingsForm.ShowDialog();
+                GeneralInfo.AppSettings.SaveSettings();
+                InitWindowsTheme();
+
+                if (GeneralInfo.AppSettings.GameDirectory != originalGameDir && GeneralInfo.AppSettings.ValidGameDir)
+                {
+                    //placeholder for whenever loading from game is added
+                }
+            }
         }
 
         public RelayCommand ExitCommand => new RelayCommand(Exit);

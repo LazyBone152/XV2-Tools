@@ -13,7 +13,7 @@
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:undoRedo="clr-namespace:Xv2CoreLib.Resource.UndoRedo;assembly=Xv2CoreLib"
-        Title="Audio Cue Editor" TitleCaps="False" MinWidth="790" MinHeight="460" Height="600" Width="900" WindowStartupLocation="CenterScreen">
+        Title="ACE" TitleCaps="False" MinWidth="790" MinHeight="460" Height="600" Width="900" WindowStartupLocation="CenterScreen">
     <Window.InputBindings>
         <KeyBinding Key="Z" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=UndoCommand}"/>
         <KeyBinding Key="Y" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=RedoCommand}"/>
@@ -24,12 +24,14 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="25"/>
         </Grid.RowDefinitions>
-        <Menu Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Top">
+        <Menu Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0, 2" FontSize="12">
             <MenuItem Header="File">
                 <MenuItem Header="New" Command="{Binding NewAcbCommand}"/>
                 <MenuItem Header="Open" Command="{Binding LoadAcbCommand}"/>
                 <MenuItem Header="Save" Command="{Binding SaveAcbCommand}"/>
                 <MenuItem Header="Save As.." Command="{Binding SaveAsAcbCommand}"/>
+                <Separator/>
+                <MenuItem Header="Settings" Command="{Binding SettingsCommand}"/>
                 <Separator/>
                 <MenuItem Header="Exit" Command="{Binding ExitCommand}"/>
             </MenuItem>
