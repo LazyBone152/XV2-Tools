@@ -66,7 +66,7 @@ namespace Xv2CoreLib.IDB
 
                     idbFile.Entries.Add(new IDB_Entry()
                     {
-                        Index = BitConverter.ToUInt16(rawBytes, offset + 0).ToString(),
+                        I_00 = BitConverter.ToUInt16(rawBytes, offset + 0).ToString(),
                         I_02 = BitConverter.ToUInt16(rawBytes, offset + 2),
                         I_04 = BitConverter.ToUInt16(rawBytes, offset + 4),
                         I_06 = BitConverter.ToUInt16(rawBytes, offset + 6),

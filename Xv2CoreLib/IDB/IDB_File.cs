@@ -195,9 +195,9 @@ namespace Xv2CoreLib.IDB
 
         #region WrapperProperties
         [YAXDontSerialize]
-        public int SortID { get { return int.Parse(Index); } }
+        public int SortID { get { return int.Parse(I_00); } }
         [YAXDontSerialize]
-        public ushort ID { get { return ushort.Parse(Index); } set { Index = value.ToString(); } }
+        public ushort ID { get { return ushort.Parse(Index); } set { I_00 = value.ToString(); } }
         [YAXDontSerialize]
         public ushort NameMsgID { get { return I_04; } set { I_04 = value; } }
         [YAXDontSerialize]
@@ -210,11 +210,13 @@ namespace Xv2CoreLib.IDB
         #endregion
 
 
-        //Index is not really an "Index" it is the ID, but the interface needs a "Index" to work
+        [YAXDontSerialize]
+        public string Index { get { return $"{I_00}_{I_08}"; } set { I_00 = value.Split('_')[0]; I_08 = ushort.Parse(value.Split('_')[1]); } }
+
         [YAXAttributeForClass]
         [YAXSerializeAs("ID")]
         [BindingAutoId]
-        public string Index { get; set; } //ushort
+        public string I_00 { get; set; } //ushort
         [YAXAttributeFor("Stars")]
         [YAXSerializeAs("value")]
         public ushort I_02 { get; set; }

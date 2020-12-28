@@ -57,7 +57,7 @@ namespace Xv2CoreLib.IDB
             
             for (int i = 0; i < count; i++)
             {
-                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(idbFile.Entries[i].Index)));
+                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(idbFile.Entries[i].I_00)));
                 bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_02));
                 bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_04));
                 bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_06));
