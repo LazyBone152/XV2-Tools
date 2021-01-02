@@ -89,11 +89,12 @@ namespace Xv2CoreLib.EMP
                 LinkTextureRefs(empFile.ParticleEffects); //Link the texture refs to the generated texture IDs
             }
 
-
             //Count
             int particleEffectCount = (empFile.ParticleEffects != null) ? empFile.ParticleEffects.Count() : 0;
             int textureEntryCount = (empFile.Textures != null) ? empFile.Textures.Count() : 0;
 
+            //Create copy of empFile and work of that, so the original isn't altered
+            empFile = empFile.Copy();
 
             //Header
             bytes.AddRange(BitConverter.GetBytes(EMP_File.EMP_SIGNATURE));

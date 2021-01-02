@@ -1339,10 +1339,14 @@ namespace Xv2CoreLib.EMP
                 }
             }
 
-            if(Type_0 != null)
+            if (Type_0 != null)
             {
                 InitColor1Animations();
                 InitColor2Animations();
+
+                //todo: implement this
+                //Type0 r = Type_0.FirstOrDefault(x => x.SelectedParameter == Type0.Parameter.Color1);
+
             }
 
             if(ChildParticleEffects != null)
@@ -3317,6 +3321,7 @@ namespace Xv2CoreLib.EMP
             sortedList.Sort((x, y) => x.Index - y.Index);
             Keyframes = new ObservableCollection<Type0_Keyframe>(sortedList);
         }
+    
     }
 
     [Serializable]
