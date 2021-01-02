@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using Xv2CoreLib.EffectContainer;
+using Xv2CoreLib.Resource.UndoRedo;
 
 namespace Xv2CoreLib.EMB_CLASS
 {
@@ -17,22 +18,24 @@ namespace Xv2CoreLib.EMB_CLASS
         
         //AFORGE Extensions
 
-        public static void ChangeHue(this EMB_File embFile, double hue, double saturation, double lightness)
+        public static void ChangeHue(this EMB_File embFile, double hue, double saturation, double lightness, List<IUndoRedo> undos = null)
         {
             if (embFile.Entry == null) return;
 
             foreach(var entry in embFile.Entry)
             {
-                entry.ChangeHue(hue, saturation, lightness);
+                entry.ChangeHue(hue, saturation, lightness, undos);
             }
         }
 
         //Make this an extension method so there's not an AForge dependence wherever EMB is used
-        public static void ChangeHue(this EmbEntry entry, double hue, double _saturation, double lightness)
+        public static void ChangeHue(this EmbEntry entry, double hue, double _saturation, double lightness, List<IUndoRedo> undos = null)
         {
+
             float brightness = (float)lightness / 5f;
             float saturation = (float)_saturation;
 
+            WriteableBitmap oldBitmap = entry.DdsImage;
             Bitmap bitmap = (Bitmap)entry.DdsImage;
 
             // Apply filters
@@ -75,6 +78,9 @@ namespace Xv2CoreLib.EMB_CLASS
             //Convert back to WPF Bitmap
             entry.DdsImage = (WriteableBitmap)bitmap;
             entry.wasEdited = true;
+
+            if(undos != null)
+                undos.Add(new UndoableProperty<EmbEntry>(nameof(EmbEntry.DdsImage), entry, oldBitmap, entry.DdsImage));
         }
     }
 }

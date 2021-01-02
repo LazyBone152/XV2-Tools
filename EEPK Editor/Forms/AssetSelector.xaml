@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:EEPK_Organiser.Forms"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
-        Title="Asset Selector" Height="489.71" Width="531.652" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" WindowStyle="ToolWindow">
+        Title="Asset Selector" Height="489.71" Width="531.652" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" WindowStyle="ToolWindow" PreviewKeyUp="MetroWindow_PreviewKeyDown">
     <Grid>
         <Controls:MetroTabControl x:Name="tabControl" HorizontalAlignment="Left" Height="374" VerticalAlignment="Top" Width="480" Margin="22,10,0,0">
             <Controls:MetroTabItem Header="EMO" x:Name="emoTab" Controls:ControlsHelper.HeaderFontSize="14">

@@ -31,6 +31,7 @@ using MahApps.Metro.Controls;
 using xv2 = Xv2CoreLib.Xenoverse2;
 using MahApps.Metro.Controls.Dialogs;
 using MahApps.Metro;
+using Xv2CoreLib.Resource.UndoRedo;
 
 namespace EEPK_Organiser
 {
@@ -245,6 +246,9 @@ namespace EEPK_Organiser
                 }
             }
 
+            //Clear Undo stack
+            UndoManager.Instance.Clear();
+
             //Load the eepk + assets
             EffectContainerFile file = null;
 
@@ -433,9 +437,9 @@ namespace EEPK_Organiser
                 "Ctrl + M = Merge\n" +
                 "Shift + ? = Used By?\n" +
                 "Ctrl + Alt + V = Paste As Child (EMP Editor)\n" +
-                "Ctrl + A = Add File (EMO Asset Tab)\n" +
-                "Ctrl + H = Hue Adjustment (Texture Viewer)\n",
-                "Shortcut Keys", MessageBoxButton.OK, MessageBoxImage.Information);
+                "Ctrl + A = Add File (EMO Tab)\n" +
+                "Ctrl + H = Hue Adjustment\n",
+                "Hotkeys", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void HelpMenu_About_Click(object sender, RoutedEventArgs e)
@@ -667,6 +671,9 @@ namespace EEPK_Organiser
 
             if (effectFile != null)
             {
+                //Clear undo stack
+                UndoManager.Instance.Clear();
+
                 effectContainerFile = effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
@@ -682,6 +689,9 @@ namespace EEPK_Organiser
 
             if(effectFile != null)
             {
+                //Clear undo stack
+                UndoManager.Instance.Clear();
+
                 effectContainerFile = effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
@@ -696,6 +706,9 @@ namespace EEPK_Organiser
 
             if (effectFile != null)
             {
+                //Clear undo stack
+                UndoManager.Instance.Clear();
+
                 effectContainerFile = effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
@@ -710,6 +723,9 @@ namespace EEPK_Organiser
 
             if (effectFile != null)
             {
+                //Clear undo stack
+                UndoManager.Instance.Clear();
+
                 effectContainerFile = effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
@@ -724,6 +740,9 @@ namespace EEPK_Organiser
 
             if (effectFile != null)
             {
+                //Clear undo stack
+                UndoManager.Instance.Clear();
+
                 effectContainerFile = effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
@@ -738,6 +757,9 @@ namespace EEPK_Organiser
 
             if (effectFile != null)
             {
+                //Clear undo stack
+                UndoManager.Instance.Clear();
+
                 effectContainerFile = effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
@@ -752,6 +774,9 @@ namespace EEPK_Organiser
 
             if (effectFile != null)
             {
+                //Clear undo stack
+                UndoManager.Instance.Clear();
+
                 effectContainerFile = effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
@@ -766,6 +791,9 @@ namespace EEPK_Organiser
 
             if (effectFile != null)
             {
+                //Clear undo stack
+                UndoManager.Instance.Clear();
+
                 effectContainerFile = effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
@@ -866,5 +894,333 @@ namespace EEPK_Organiser
 
         }
 
+
+        //"Import" relay events
+        #region Import_relay_Events
+        private void EffectOptions_ImportEffectsFromFile_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.EffectOptions_ImportEffectsFromFile_Click(sender, e);
+        }
+
+        private void EffectOptions_ImportEffectsFromCMN_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.EffectOptions_ImportEffectsFromCMN_Click(sender, e);
+        }
+
+        private void EffectOptions_ImportEffectsFromCharacter_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.EffectOptions_ImportEffectsFromCharacter_Click(sender, e);
+        }
+
+        private void EffectOptions_ImportEffectsFromSuper_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.EffectOptions_ImportEffectsFromSuper_Click(sender, e);
+        }
+
+        private void EffectOptions_ImportEffectsFromUltimate_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.EffectOptions_ImportEffectsFromUltimate_Click(sender, e);
+        }
+
+        private void EffectOptions_ImportEffectsFromEvasive_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.EffectOptions_ImportEffectsFromEvasive_Click(sender, e);
+        }
+
+        private void EffectOptions_ImportEffectsFromAwoken_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.EffectOptions_ImportEffectsFromAwoken_Click(sender, e);
+        }
+
+        private void EffectOptions_ImportEffectsFromBlast_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.EffectOptions_ImportEffectsFromBlast_Click(sender, e);
+        }
+
+        private void EffectOptions_ImportEffectsFromDemo_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.EffectOptions_ImportEffectsFromDemo_Click(sender, e);
+        }
+
+        private void EffectOptions_ImportEffectsFromCache_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.EffectOptions_ImportEffectsFromCache_Click(sender, e);
+        }
+
+
+        private void PBIND_AssetContainer_AddAsset_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.PBIND_AssetContainer_AddAsset_Click(sender, e);
+        }
+
+        private void PBIND_ImportAsset_MenuItem_CreateNewEmp_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.PBIND_ImportAsset_MenuItem_CreateNewEmp_Click(sender, e);
+        }
+
+        private void PBIND_ImportAsset_MenuItem_FromCMN_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.PBIND_ImportAsset_MenuItem_FromCMN_Click(sender, e);
+        }
+
+        private void PBIND_ImportAsset_MenuItem_FromCharacter_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.PBIND_ImportAsset_MenuItem_FromCharacter_Click(sender, e);
+        }
+
+        private void PBIND_ImportAsset_MenuItem_FromSuper_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.PBIND_ImportAsset_MenuItem_FromSuper_Click(sender, e);
+        }
+
+        private void PBIND_ImportAsset_MenuItem_FromUltimate_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.PBIND_ImportAsset_MenuItem_FromUltimate_Click(sender, e);
+        }
+
+        private void PBIND_ImportAsset_MenuItem_FromEvasive_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.PBIND_ImportAsset_MenuItem_FromEvasive_Click(sender, e);
+        }
+
+        private void PBIND_ImportAsset_MenuItem_FromBlast_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.PBIND_ImportAsset_MenuItem_FromBlast_Click(sender, e);
+        }
+
+        private void PBIND_ImportAsset_MenuItem_FromAwoken_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.PBIND_ImportAsset_MenuItem_FromAwoken_Click(sender, e);
+        }
+
+        private void PBIND_ImportAsset_MenuItem_FromDemo_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.PBIND_ImportAsset_MenuItem_FromDemo_Click(sender, e);
+        }
+
+        private void PBIND_ImportAsset_MenuItem_FromCachedFiles_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.PBIND_ImportAsset_MenuItem_FromCachedFiles_Click(sender, e);
+        }
+
+
+        private void TBIND_AssetContainer_AddAsset_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.TBIND_AssetContainer_AddAsset_Click(sender, e);
+        }
+
+        private void TBIND_ImportAsset_MenuItem_FromCMN_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.TBIND_ImportAsset_MenuItem_FromCMN_Click(sender, e);
+        }
+
+        private void TBIND_ImportAsset_MenuItem_FromCharacter_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.TBIND_ImportAsset_MenuItem_FromCharacter_Click(sender, e);
+        }
+
+        private void TBIND_ImportAsset_MenuItem_FromSuper_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.TBIND_ImportAsset_MenuItem_FromSuper_Click(sender, e);
+        }
+
+        private void TBIND_ImportAsset_MenuItem_FromUltimate_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.TBIND_ImportAsset_MenuItem_FromUltimate_Click(sender, e);
+        }
+
+        private void TBIND_ImportAsset_MenuItem_FromEvasive_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.TBIND_ImportAsset_MenuItem_FromEvasive_Click(sender, e);
+        }
+
+        private void TBIND_ImportAsset_MenuItem_FromBlast_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.TBIND_ImportAsset_MenuItem_FromBlast_Click(sender, e);
+        }
+
+        private void TBIND_ImportAsset_MenuItem_FromAwoken_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.TBIND_ImportAsset_MenuItem_FromAwoken_Click(sender, e);
+        }
+
+        private void TBIND_ImportAsset_MenuItem_FromDemo_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.TBIND_ImportAsset_MenuItem_FromDemo_Click(sender, e);
+        }
+
+        private void TBIND_ImportAsset_MenuItem_FromCachedFiles_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.TBIND_ImportAsset_MenuItem_FromCachedFiles_Click(sender, e);
+        }
+
+
+        private void CBIND_AssetContainer_AddAsset_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.CBIND_AssetContainer_AddAsset_Click(sender, e);
+        }
+
+        public void CBIND_ImportAsset_MenuItem_LoadEcf_Click(object sender, RoutedEventArgs e)
+        {
+            CBIND_ImportAsset_MenuItem_LoadEcf_Click(sender, e);
+        }
+
+        private void CBIND_ImportAsset_MenuItem_FromCMN_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.CBIND_ImportAsset_MenuItem_FromCMN_Click(sender, e);
+        }
+
+        private void CBIND_ImportAsset_MenuItem_FromCharacter_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.CBIND_ImportAsset_MenuItem_FromCharacter_Click(sender, e);
+        }
+
+        private void CBIND_ImportAsset_MenuItem_FromSuper_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.CBIND_ImportAsset_MenuItem_FromSuper_Click(sender, e);
+        }
+
+        private void CBIND_ImportAsset_MenuItem_FromUltimate_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.CBIND_ImportAsset_MenuItem_FromUltimate_Click(sender, e);
+        }
+
+        private void CBIND_ImportAsset_MenuItem_FromEvasive_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.CBIND_ImportAsset_MenuItem_FromEvasive_Click(sender, e);
+        }
+
+        private void CBIND_ImportAsset_MenuItem_FromBlast_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.CBIND_ImportAsset_MenuItem_FromBlast_Click(sender, e);
+        }
+
+        private void CBIND_ImportAsset_MenuItem_FromAwoken_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.CBIND_ImportAsset_MenuItem_FromAwoken_Click(sender, e);
+        }
+
+        private void CBIND_ImportAsset_MenuItem_FromDemo_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.CBIND_ImportAsset_MenuItem_FromDemo_Click(sender, e);
+        }
+
+        private void CBIND_ImportAsset_MenuItem_FromCachedFiles_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.CBIND_ImportAsset_MenuItem_FromCachedFiles_Click(sender, e);
+        }
+
+
+        private void EMO_ImportAsset_MenuItem_LoadEmoFiles_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.EMO_ImportAsset_MenuItem_LoadEmoFiles_Click(sender, e);
+        }
+
+        private void EMO_AssetContainer_AddAsset_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.EMO_AssetContainer_AddAsset_Click(sender, e);
+        }
+
+        private void EMO_ImportAsset_MenuItem_FromCMN_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.EMO_ImportAsset_MenuItem_FromCMN_Click(sender, e);
+        }
+
+        private void EMO_ImportAsset_MenuItem_FromCharacter_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.EMO_ImportAsset_MenuItem_FromCharacter_Click(sender, e);
+        }
+
+        private void EMO_ImportAsset_MenuItem_FromSuper_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.EMO_ImportAsset_MenuItem_FromSuper_Click(sender, e);
+        }
+
+        private void EMO_ImportAsset_MenuItem_FromUltimate_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.EMO_ImportAsset_MenuItem_FromUltimate_Click(sender, e);
+        }
+
+        private void EMO_ImportAsset_MenuItem_FromEvasive_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.EMO_ImportAsset_MenuItem_FromEvasive_Click(sender, e);
+        }
+
+        private void EMO_ImportAsset_MenuItem_FromBlast_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.EMO_ImportAsset_MenuItem_FromBlast_Click(sender, e);
+        }
+
+        private void EMO_ImportAsset_MenuItem_FromAwoken_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.EMO_ImportAsset_MenuItem_FromAwoken_Click(sender, e);
+        }
+
+        private void EMO_ImportAsset_MenuItem_FromDemo_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.EMO_ImportAsset_MenuItem_FromDemo_Click(sender, e);
+        }
+
+        private void EMO_ImportAsset_MenuItem_FromCachedFiles_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.EMO_ImportAsset_MenuItem_FromCachedFiles_Click(sender, e);
+        }
+
+
+        private void LIGHT_ImportAsset_MenuItem_LoadLightEma_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.LIGHT_ImportAsset_MenuItem_LoadLightEma_Click(sender, e);
+        }
+
+        private void LIGHT_AssetContainer_AddAsset_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.LIGHT_AssetContainer_AddAsset_Click(sender, e);
+        }
+
+        private void LIGHT_ImportAsset_MenuItem_FromCMN_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.LIGHT_ImportAsset_MenuItem_FromCMN_Click(sender, e);
+        }
+
+        private void LIGHT_ImportAsset_MenuItem_FromCharacter_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.LIGHT_ImportAsset_MenuItem_FromCharacter_Click(sender, e);
+        }
+
+        private void LIGHT_ImportAsset_MenuItem_FromSuper_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.LIGHT_ImportAsset_MenuItem_FromSuper_Click(sender, e);
+        }
+
+        private void LIGHT_ImportAsset_MenuItem_FromUltimate_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.LIGHT_ImportAsset_MenuItem_FromUltimate_Click(sender, e);
+        }
+
+        private void LIGHT_ImportAsset_MenuItem_FromEvasive_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.LIGHT_ImportAsset_MenuItem_FromEvasive_Click(sender, e);
+        }
+
+        private void LIGHT_ImportAsset_MenuItem_FromBlast_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.LIGHT_ImportAsset_MenuItem_FromBlast_Click(sender, e);
+        }
+
+        private void LIGHT_ImportAsset_MenuItem_FromAwoken_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.LIGHT_ImportAsset_MenuItem_FromAwoken_Click(sender, e);
+        }
+
+        private void LIGHT_ImportAsset_MenuItem_FromDemo_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.LIGHT_ImportAsset_MenuItem_FromDemo_Click(sender, e);
+        }
+
+        private void LIGHT_ImportAsset_MenuItem_FromCachedFiles_Click(object sender, RoutedEventArgs e)
+        {
+            eepkEditor.LIGHT_ImportAsset_MenuItem_FromCachedFiles_Click(sender, e);
+        }
+        #endregion
     }
 }

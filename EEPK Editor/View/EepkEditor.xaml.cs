@@ -3,30 +3,29 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using System.IO;
+using System.Collections.ObjectModel;
+using System.Runtime.ExceptionServices;
+using Microsoft.Win32;
+using Xv2CoreLib;
 using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.EEPK;
-using System.IO;
+using Xv2CoreLib.ECF;
+using Xv2CoreLib.EMA;
 using Xv2CoreLib.EMP;
 using Xv2CoreLib.EMM;
 using Xv2CoreLib.EMB_CLASS;
-using System.Collections.ObjectModel;
-using EEPK_Organiser.Misc;
-using Xv2CoreLib.ECF;
-using Xv2CoreLib.EMA;
-using System.Runtime.ExceptionServices;
+using Xv2CoreLib.Resource.UndoRedo;
 using EEPK_Organiser.Utils;
-using Microsoft.Win32;
-using Xv2CoreLib;
+using EEPK_Organiser.Misc;
+using MahApps.Metro.Controls;
+using System.Threading.Tasks;
+using MahApps.Metro.Controls.Dialogs;
+using EEPK_Organiser.ViewModel;
+using GalaSoft.MvvmLight.CommandWpf;
 
 namespace EEPK_Organiser.View
 {
@@ -78,6 +77,16 @@ namespace EEPK_Organiser.View
             {
                 if (effectContainerFile == null) return false;
                 return true;
+            }
+        }
+
+        //ViewModel
+        private EffectPartViewModel _effectPartViewModel = null;
+        public EffectPartViewModel effectPartViewModel
+        {
+            get
+            {
+                return _effectPartViewModel;
             }
         }
 
@@ -314,9 +323,11 @@ namespace EEPK_Organiser.View
                     SearchFilter = effectContainerFile.LightEma.AssetSearchFilter;
                     break;
             }
+
+            e.Handled = true;
         }
 
-        //Asset Containers: EMO
+        #region EMO
         private void EMO_AssetContainer_Merge_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -478,9 +489,9 @@ namespace EEPK_Organiser.View
 
                     if (selectedFile != null)
                     {
-                        AssetContainer_RenameFile(selectedFile, effectContainerFile.Emo);
-
                         var parentAsset = effectContainerFile.Emo.GetAssetByFileInstance(selectedFile);
+
+                        AssetContainer_RenameFile(selectedFile, parentAsset, effectContainerFile.Emo);
 
                         if (parentAsset != null)
                         {
@@ -607,7 +618,7 @@ namespace EEPK_Organiser.View
             }
         }
 
-        private void EMO_AssetContainer_AddAsset_Click(object sender, RoutedEventArgs e)
+        public void EMO_AssetContainer_AddAsset_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -683,7 +694,7 @@ namespace EEPK_Organiser.View
             }
         }
 
-        private void EMO_ImportAsset_MenuItem_FromCachedFiles_Click(object sender, RoutedEventArgs e)
+        public void EMO_ImportAsset_MenuItem_FromCachedFiles_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -710,56 +721,56 @@ namespace EEPK_Organiser.View
             }
         }
 
-        private void EMO_ImportAsset_MenuItem_FromCMN_Click(object sender, RoutedEventArgs e)
+        public void EMO_ImportAsset_MenuItem_FromCMN_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.CMN);
             ImportEmoAssets(effectFile);
         }
 
-        private void EMO_ImportAsset_MenuItem_FromCharacter_Click(object sender, RoutedEventArgs e)
+        public void EMO_ImportAsset_MenuItem_FromCharacter_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.Character);
             ImportEmoAssets(effectFile);
         }
 
-        private void EMO_ImportAsset_MenuItem_FromSuper_Click(object sender, RoutedEventArgs e)
+        public void EMO_ImportAsset_MenuItem_FromSuper_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.SuperSkill);
             ImportEmoAssets(effectFile);
         }
 
-        private void EMO_ImportAsset_MenuItem_FromUltimate_Click(object sender, RoutedEventArgs e)
+        public void EMO_ImportAsset_MenuItem_FromUltimate_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.UltimateSkill);
             ImportEmoAssets(effectFile);
         }
 
-        private void EMO_ImportAsset_MenuItem_FromEvasive_Click(object sender, RoutedEventArgs e)
+        public void EMO_ImportAsset_MenuItem_FromEvasive_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.EvasiveSkill);
             ImportEmoAssets(effectFile);
         }
 
-        private void EMO_ImportAsset_MenuItem_FromBlast_Click(object sender, RoutedEventArgs e)
+        public void EMO_ImportAsset_MenuItem_FromBlast_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.BlastSkill);
             ImportEmoAssets(effectFile);
         }
 
-        private void EMO_ImportAsset_MenuItem_FromAwoken_Click(object sender, RoutedEventArgs e)
+        public void EMO_ImportAsset_MenuItem_FromAwoken_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.AwokenSkill);
             ImportEmoAssets(effectFile);
         }
 
-        private void EMO_ImportAsset_MenuItem_FromDemo_Click(object sender, RoutedEventArgs e)
+        public void EMO_ImportAsset_MenuItem_FromDemo_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.Demo);
@@ -782,7 +793,7 @@ namespace EEPK_Organiser.View
             }
         }
 
-        private void EMO_ImportAsset_MenuItem_LoadEmoFiles_Click(object sender, RoutedEventArgs e)
+        public void EMO_ImportAsset_MenuItem_LoadEmoFiles_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -948,8 +959,10 @@ namespace EEPK_Organiser.View
 
         }
 
-        //Asset Containers: PBIND
-        private void PBIND_AssetContainer_AddAsset_Click(object sender, RoutedEventArgs e)
+        #endregion
+
+        #region PBIND
+        public void PBIND_AssetContainer_AddAsset_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -1060,7 +1073,7 @@ namespace EEPK_Organiser.View
 
                 if (asset != null)
                 {
-                    AssetContainer_RenameFile(asset.Files[0], effectContainerFile.Pbind);
+                    AssetContainer_RenameFile(asset.Files[0], asset, effectContainerFile.Pbind);
                     asset.RefreshNamePreview();
                 }
             }
@@ -1148,7 +1161,7 @@ namespace EEPK_Organiser.View
             return form;
         }
 
-        private void PBIND_ImportAsset_MenuItem_FromCachedFiles_Click(object sender, RoutedEventArgs e)
+        public void PBIND_ImportAsset_MenuItem_FromCachedFiles_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -1175,56 +1188,56 @@ namespace EEPK_Organiser.View
             }
         }
 
-        private void PBIND_ImportAsset_MenuItem_FromCMN_Click(object sender, RoutedEventArgs e)
+        public void PBIND_ImportAsset_MenuItem_FromCMN_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.CMN);
             ImportPbindAssets(effectFile);
         }
 
-        private void PBIND_ImportAsset_MenuItem_FromCharacter_Click(object sender, RoutedEventArgs e)
+        public void PBIND_ImportAsset_MenuItem_FromCharacter_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.Character);
             ImportPbindAssets(effectFile);
         }
 
-        private void PBIND_ImportAsset_MenuItem_FromSuper_Click(object sender, RoutedEventArgs e)
+        public void PBIND_ImportAsset_MenuItem_FromSuper_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.SuperSkill);
             ImportPbindAssets(effectFile);
         }
 
-        private void PBIND_ImportAsset_MenuItem_FromUltimate_Click(object sender, RoutedEventArgs e)
+        public void PBIND_ImportAsset_MenuItem_FromUltimate_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.UltimateSkill);
             ImportPbindAssets(effectFile);
         }
 
-        private void PBIND_ImportAsset_MenuItem_FromEvasive_Click(object sender, RoutedEventArgs e)
+        public void PBIND_ImportAsset_MenuItem_FromEvasive_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.EvasiveSkill);
             ImportPbindAssets(effectFile);
         }
 
-        private void PBIND_ImportAsset_MenuItem_FromBlast_Click(object sender, RoutedEventArgs e)
+        public void PBIND_ImportAsset_MenuItem_FromBlast_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.BlastSkill);
             ImportPbindAssets(effectFile);
         }
 
-        private void PBIND_ImportAsset_MenuItem_FromAwoken_Click(object sender, RoutedEventArgs e)
+        public void PBIND_ImportAsset_MenuItem_FromAwoken_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.AwokenSkill);
             ImportPbindAssets(effectFile);
         }
 
-        private void PBIND_ImportAsset_MenuItem_FromDemo_Click(object sender, RoutedEventArgs e)
+        public void PBIND_ImportAsset_MenuItem_FromDemo_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.Demo);
@@ -1247,7 +1260,7 @@ namespace EEPK_Organiser.View
             }
         }
 
-        private void PBIND_ImportAsset_MenuItem_CreateNewEmp_Click(object sender, RoutedEventArgs e)
+        public void PBIND_ImportAsset_MenuItem_CreateNewEmp_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -1255,6 +1268,12 @@ namespace EEPK_Organiser.View
                 effectContainerFile.Pbind.RefreshAssetCount();
                 pbindDataGrid.SelectedItem = asset;
                 pbindDataGrid.ScrollIntoView(asset);
+
+                //Undos
+                List<IUndoRedo> undos = new List<IUndoRedo>();
+                undos.Add(new UndoableListAdd<Asset>(effectContainerFile.Pbind.Assets, asset));
+                undos.Add(new UndoActionDelegate(effectContainerFile.Pbind, nameof(effectContainerFile.Pbind.UpdateAssetFilter), true));
+                UndoManager.Instance.AddUndo(new CompositeUndo(undos, "New EMP"));
             }
             catch (Exception ex)
             {
@@ -1340,8 +1359,10 @@ namespace EEPK_Organiser.View
 
         }
 
-        //Asset Containers: TBIND
-        private void TBIND_AssetContainer_AddAsset_Click(object sender, RoutedEventArgs e)
+        #endregion
+
+        #region TBIND
+        public void TBIND_AssetContainer_AddAsset_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -1452,7 +1473,7 @@ namespace EEPK_Organiser.View
 
                 if (asset != null)
                 {
-                    AssetContainer_RenameFile(asset.Files[0], effectContainerFile.Tbind);
+                    AssetContainer_RenameFile(asset.Files[0], asset, effectContainerFile.Tbind);
                     asset.RefreshNamePreview();
                 }
             }
@@ -1511,7 +1532,7 @@ namespace EEPK_Organiser.View
             return form;
         }
 
-        private void TBIND_ImportAsset_MenuItem_FromCachedFiles_Click(object sender, RoutedEventArgs e)
+        public void TBIND_ImportAsset_MenuItem_FromCachedFiles_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -1538,56 +1559,56 @@ namespace EEPK_Organiser.View
             }
         }
 
-        private void TBIND_ImportAsset_MenuItem_FromCMN_Click(object sender, RoutedEventArgs e)
+        public void TBIND_ImportAsset_MenuItem_FromCMN_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.CMN);
             ImportTbindAssets(effectFile);
         }
 
-        private void TBIND_ImportAsset_MenuItem_FromCharacter_Click(object sender, RoutedEventArgs e)
+        public void TBIND_ImportAsset_MenuItem_FromCharacter_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.Character);
             ImportTbindAssets(effectFile);
         }
 
-        private void TBIND_ImportAsset_MenuItem_FromSuper_Click(object sender, RoutedEventArgs e)
+        public void TBIND_ImportAsset_MenuItem_FromSuper_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.SuperSkill);
             ImportTbindAssets(effectFile);
         }
 
-        private void TBIND_ImportAsset_MenuItem_FromUltimate_Click(object sender, RoutedEventArgs e)
+        public void TBIND_ImportAsset_MenuItem_FromUltimate_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.UltimateSkill);
             ImportTbindAssets(effectFile);
         }
 
-        private void TBIND_ImportAsset_MenuItem_FromEvasive_Click(object sender, RoutedEventArgs e)
+        public void TBIND_ImportAsset_MenuItem_FromEvasive_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.EvasiveSkill);
             ImportTbindAssets(effectFile);
         }
 
-        private void TBIND_ImportAsset_MenuItem_FromBlast_Click(object sender, RoutedEventArgs e)
+        public void TBIND_ImportAsset_MenuItem_FromBlast_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.BlastSkill);
             ImportTbindAssets(effectFile);
         }
 
-        private void TBIND_ImportAsset_MenuItem_FromAwoken_Click(object sender, RoutedEventArgs e)
+        public void TBIND_ImportAsset_MenuItem_FromAwoken_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.AwokenSkill);
             ImportTbindAssets(effectFile);
         }
 
-        private void TBIND_ImportAsset_MenuItem_FromDemo_Click(object sender, RoutedEventArgs e)
+        public void TBIND_ImportAsset_MenuItem_FromDemo_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.Demo);
@@ -1682,8 +1703,33 @@ namespace EEPK_Organiser.View
 
         }
 
-        //Asset Containers: CBIND
-        private void CBIND_AssetContainer_AddAsset_Click(object sender, RoutedEventArgs e)
+        private void TBIND_AssetContainer_Scale(object sender, RoutedEventArgs e)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                var asset = tbindDataGrid.SelectedItem as Asset;
+
+                if (asset != null)
+                {
+                    Forms.EtrScale scaleForm = new Forms.EtrScale(asset, App.Current.MainWindow);
+                    scaleForm.ShowDialog();
+                }
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+#endif
+        }
+
+        #endregion
+
+        #region CBIND
+        public void CBIND_AssetContainer_AddAsset_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -1794,7 +1840,7 @@ namespace EEPK_Organiser.View
 
                 if (asset != null)
                 {
-                    AssetContainer_RenameFile(asset.Files[0], effectContainerFile.Cbind);
+                    AssetContainer_RenameFile(asset.Files[0], asset, effectContainerFile.Cbind);
                     asset.RefreshNamePreview();
                 }
             }
@@ -1805,7 +1851,7 @@ namespace EEPK_Organiser.View
             }
         }
 
-        private void CBIND_ImportAsset_MenuItem_FromCachedFiles_Click(object sender, RoutedEventArgs e)
+        public void CBIND_ImportAsset_MenuItem_FromCachedFiles_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -1832,56 +1878,56 @@ namespace EEPK_Organiser.View
             }
         }
 
-        private void CBIND_ImportAsset_MenuItem_FromCMN_Click(object sender, RoutedEventArgs e)
+        public void CBIND_ImportAsset_MenuItem_FromCMN_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.CMN);
             ImportCbindAssets(effectFile);
         }
 
-        private void CBIND_ImportAsset_MenuItem_FromCharacter_Click(object sender, RoutedEventArgs e)
+        public void CBIND_ImportAsset_MenuItem_FromCharacter_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.Character);
             ImportCbindAssets(effectFile);
         }
 
-        private void CBIND_ImportAsset_MenuItem_FromSuper_Click(object sender, RoutedEventArgs e)
+        public void CBIND_ImportAsset_MenuItem_FromSuper_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.SuperSkill);
             ImportCbindAssets(effectFile);
         }
 
-        private void CBIND_ImportAsset_MenuItem_FromUltimate_Click(object sender, RoutedEventArgs e)
+        public void CBIND_ImportAsset_MenuItem_FromUltimate_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.UltimateSkill);
             ImportCbindAssets(effectFile);
         }
 
-        private void CBIND_ImportAsset_MenuItem_FromEvasive_Click(object sender, RoutedEventArgs e)
+        public void CBIND_ImportAsset_MenuItem_FromEvasive_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.EvasiveSkill);
             ImportCbindAssets(effectFile);
         }
 
-        private void CBIND_ImportAsset_MenuItem_FromBlast_Click(object sender, RoutedEventArgs e)
+        public void CBIND_ImportAsset_MenuItem_FromBlast_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.BlastSkill);
             ImportCbindAssets(effectFile);
         }
 
-        private void CBIND_ImportAsset_MenuItem_FromAwoken_Click(object sender, RoutedEventArgs e)
+        public void CBIND_ImportAsset_MenuItem_FromAwoken_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.AwokenSkill);
             ImportCbindAssets(effectFile);
         }
 
-        private void CBIND_ImportAsset_MenuItem_FromDemo_Click(object sender, RoutedEventArgs e)
+        public void CBIND_ImportAsset_MenuItem_FromDemo_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.Demo);
@@ -1904,7 +1950,7 @@ namespace EEPK_Organiser.View
             }
         }
 
-        private void CBIND_ImportAsset_MenuItem_LoadEcf_Click(object sender, RoutedEventArgs e)
+        public void CBIND_ImportAsset_MenuItem_LoadEcf_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -2043,8 +2089,10 @@ namespace EEPK_Organiser.View
 
         }
 
-        //Asset Containers: LIGHT.EMA
-        private void LIGHT_AssetContainer_AddAsset_Click(object sender, RoutedEventArgs e)
+        #endregion
+
+        #region LIGHT
+        public void LIGHT_AssetContainer_AddAsset_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -2156,7 +2204,7 @@ namespace EEPK_Organiser.View
 
                 if (asset != null)
                 {
-                    AssetContainer_RenameFile(asset.Files[0], effectContainerFile.LightEma);
+                    AssetContainer_RenameFile(asset.Files[0], asset, effectContainerFile.LightEma);
                     asset.RefreshNamePreview();
                 }
             }
@@ -2167,7 +2215,7 @@ namespace EEPK_Organiser.View
             }
         }
 
-        private void LIGHT_ImportAsset_MenuItem_FromCachedFiles_Click(object sender, RoutedEventArgs e)
+        public void LIGHT_ImportAsset_MenuItem_FromCachedFiles_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -2194,56 +2242,56 @@ namespace EEPK_Organiser.View
             }
         }
 
-        private void LIGHT_ImportAsset_MenuItem_FromCMN_Click(object sender, RoutedEventArgs e)
+        public void LIGHT_ImportAsset_MenuItem_FromCMN_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.CMN);
             ImportLightAssets(effectFile);
         }
 
-        private void LIGHT_ImportAsset_MenuItem_FromCharacter_Click(object sender, RoutedEventArgs e)
+        public void LIGHT_ImportAsset_MenuItem_FromCharacter_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.Character);
             ImportLightAssets(effectFile);
         }
 
-        private void LIGHT_ImportAsset_MenuItem_FromSuper_Click(object sender, RoutedEventArgs e)
+        public void LIGHT_ImportAsset_MenuItem_FromSuper_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.SuperSkill);
             ImportLightAssets(effectFile);
         }
 
-        private void LIGHT_ImportAsset_MenuItem_FromUltimate_Click(object sender, RoutedEventArgs e)
+        public void LIGHT_ImportAsset_MenuItem_FromUltimate_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.UltimateSkill);
             ImportLightAssets(effectFile);
         }
 
-        private void LIGHT_ImportAsset_MenuItem_FromEvasive_Click(object sender, RoutedEventArgs e)
+        public void LIGHT_ImportAsset_MenuItem_FromEvasive_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.EvasiveSkill);
             ImportLightAssets(effectFile);
         }
 
-        private void LIGHT_ImportAsset_MenuItem_FromBlast_Click(object sender, RoutedEventArgs e)
+        public void LIGHT_ImportAsset_MenuItem_FromBlast_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.BlastSkill);
             ImportLightAssets(effectFile);
         }
 
-        private void LIGHT_ImportAsset_MenuItem_FromAwoken_Click(object sender, RoutedEventArgs e)
+        public void LIGHT_ImportAsset_MenuItem_FromAwoken_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.AwokenSkill);
             ImportLightAssets(effectFile);
         }
 
-        private void LIGHT_ImportAsset_MenuItem_FromDemo_Click(object sender, RoutedEventArgs e)
+        public void LIGHT_ImportAsset_MenuItem_FromDemo_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.Demo);
@@ -2266,7 +2314,7 @@ namespace EEPK_Organiser.View
             }
         }
 
-        private void LIGHT_ImportAsset_MenuItem_LoadLightEma_Click(object sender, RoutedEventArgs e)
+        public void LIGHT_ImportAsset_MenuItem_LoadLightEma_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -2407,14 +2455,17 @@ namespace EEPK_Organiser.View
 
         }
 
-        //Asset Containers: General
-        private void AssetContainer_ImportAssets(AssetContainerTool container, AssetType type, EffectContainerFile importFile = null)
+        #endregion
+
+        #region Asset_Containers_General
+        private async Task AssetContainer_ImportAssets(AssetContainerTool container, AssetType type, EffectContainerFile importFile = null)
         {
             if (importFile == null)
             {
                 importFile = LoadEffectContainerFile();
             }
 
+            List<IUndoRedo> undos = new List<IUndoRedo>();
             int renameCount = 0;
             int alreadyExistCount = 0;
             int addedCount = 0;
@@ -2426,17 +2477,85 @@ namespace EEPK_Organiser.View
 
                 if (assetSelector.SelectedAssets != null)
                 {
-                    Forms.ProgressBarAssetImport assetImportForm = new Forms.ProgressBarAssetImport(container, assetSelector.SelectedAssets, type, App.Current.MainWindow);
-                    assetImportForm.ShowDialog();
+                    var controller = await ((MetroWindow)App.Current.MainWindow).ShowProgressAsync($"Initializing...", $"", false, new MetroDialogSettings() { AnimateHide = false, AnimateShow = false, DialogTitleFontSize = 15, DialogMessageFontSize = 12 });
+                    controller.Minimum = 0;
+                    controller.Maximum = assetSelector.SelectedAssets.Count;
+                    controller.SetMessage(String.Format("Importing assets: 0 of {0}.", assetSelector.SelectedAssets.Count));
 
-                    if (assetImportForm.exception != null)
+                    try
                     {
-                        ExceptionDispatchInfo.Capture(assetImportForm.exception).Throw();
+                        await Task.Run(() =>
+                        {
+                            foreach (var newAsset in assetSelector.SelectedAssets)
+                            {
+                                Asset existingAsset = container.AssetExists(newAsset);
+
+                                if (existingAsset == null)
+                                {
+                                    //First, regenerate the names
+                                    foreach (var newFile in newAsset.Files)
+                                    {
+                                        newFile.SetName(container.GetUnusedName(newFile.FullFileName));
+
+                                        if (newFile.FullFileName != newFile.OriginalFileName)
+                                        {
+                                            renameCount++;
+                                        }
+
+                                        try
+                                        {
+                                            Dispatcher.Invoke((() =>
+                                            {
+                                                switch (type)
+                                                {
+                                                    case AssetType.PBIND:
+                                                        container.AddPbindDependencies(newFile.EmpFile, undos);
+                                                        break;
+                                                    case AssetType.TBIND:
+                                                        container.AddTbindDependencies(newFile.EtrFile, undos);
+                                                        break;
+                                                }
+                                            }));
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            //There was an overflow of textures
+                                            //Since we haven't added the new asset to the main list yet we dont need to revert anything.
+                                            throw new InvalidOperationException(String.Format("{0}\n\nThe asset was not imported.", ex.Message));
+                                        }
+                                    }
+
+                                    newAsset.RefreshNamePreview();
+
+                                    Dispatcher.Invoke((() =>
+                                    {
+                                        container.AddAsset(newAsset);
+                                    }));
+                                    undos.Add(new UndoableListAdd<Asset>(container.Assets, newAsset));
+
+                                    controller.SetProgress(addedCount);
+                                    controller.SetMessage(String.Format("Importing assets: {0} of {1}.", addedCount, assetSelector.SelectedAssets.Count));
+                                    
+                                    addedCount++;
+                                }
+                                else
+                                {
+                                    alreadyExistCount++;
+                                }
+                            }
+
+
+                        });
+
+
+                        await controller.CloseAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        await controller.CloseAsync();
+                        ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
                     }
 
-                    renameCount = assetImportForm.renameCount;
-                    alreadyExistCount = assetImportForm.alreadyExistCount;
-                    addedCount = assetImportForm.addedCount;
                 }
 
                 if (alreadyExistCount > 0)
@@ -2456,6 +2575,13 @@ namespace EEPK_Organiser.View
                 {
                     MessageBox.Show("Operation aborted.", "Add Asset(s)", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
+
+                //Add Undos
+                if(addedCount > 0)
+                {
+                    undos.Add(new UndoActionDelegate(container, nameof(container.UpdateAssetFilter), true));
+                    UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Import Asset"));
+                }
             }
 
             container.RefreshAssetCount();
@@ -2463,9 +2589,8 @@ namespace EEPK_Organiser.View
 
         private void AssetContainer_PasteOverReplaceAsset(Asset asset, AssetContainerTool container, AssetType type)
         {
-            //Changed to work via pasting from clipboard, rather than loading a eepk
-
             var newAsset = (List<Asset>)Clipboard.GetData(string.Format("{0}{1}", ClipboardDataTypes.Asset, type.ToString()));
+
             if (newAsset == null)
             {
                 MessageBox.Show("No asset was found in the clipboard. Cannot continue paste operation.", "Replace", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -2477,6 +2602,8 @@ namespace EEPK_Organiser.View
                 return;
             }
 
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
             if (newAsset.Count == 1)
             {
                 //back up of original asset data, so it can be restored in the event of an error
@@ -2485,17 +2612,19 @@ namespace EEPK_Organiser.View
 
                 foreach (var file in selectedAsset[0].Files)
                 {
-                    file.SetName(container.GetUnusedName(file.FullFileName));
+                    string newName = container.GetUnusedName(file.FullFileName);
+                    undos.Add(new UndoableProperty<EffectFile>(nameof(file.FileName), file, file.FileName, Path.GetFileNameWithoutExtension(newName)));
+                    file.SetName(newName);
 
                     try
                     {
                         switch (type)
                         {
                             case AssetType.PBIND:
-                                container.AddPbindDependencies(file.EmpFile);
+                                container.AddPbindDependencies(file.EmpFile, undos);
                                 break;
                             case AssetType.TBIND:
-                                container.AddTbindDependencies(file.EtrFile);
+                                container.AddTbindDependencies(file.EtrFile, undos);
                                 break;
                         }
                     }
@@ -2507,10 +2636,15 @@ namespace EEPK_Organiser.View
                     }
                 }
 
+                undos.Add(new UndoableProperty<Asset>(nameof(asset.Files), asset, asset.Files, selectedAsset[0].Files));
+                undos.Add(new UndoActionDelegate(asset, nameof(asset.RefreshNamePreview), true));
+
                 asset.Files = selectedAsset[0].Files;
                 asset.RefreshNamePreview();
 
                 effectContainerFile.AssetRefDetailsRefresh(asset);
+
+                UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Paste Over"));
             }
         }
 
@@ -2519,17 +2653,24 @@ namespace EEPK_Organiser.View
 
             if (primeAsset != null && selectedAssets.Count > 0)
             {
+                List<IUndoRedo> undos = new List<IUndoRedo>();
+
                 int count = selectedAssets.Count + 1;
 
                 if (MessageBox.Show(string.Format("All currently selected assets will be MERGED into {0}.\n\nAll other selected assets will be deleted, with all references to them changed to {0}.\n\nDo you wish to continue?", primeAsset.FileNamesPreview), string.Format("Merge ({0} assets)", count), MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
                 {
                     foreach (var assetToRemove in selectedAssets)
                     {
-                        effectContainerFile.AssetRefRefactor(assetToRemove, primeAsset);
+                        effectContainerFile.AssetRefRefactor(assetToRemove, primeAsset, undos);
+                        undos.Add(new UndoableListRemove<Asset>(container.Assets, assetToRemove));
                         container.Assets.Remove(assetToRemove);
                     }
                 }
+
                 container.RefreshAssetCount();
+
+                undos.Add(new UndoActionDelegate(container, nameof(container.RefreshAssetCount), true));
+                UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Merge"));
             }
             else
             {
@@ -2539,11 +2680,14 @@ namespace EEPK_Organiser.View
 
         private void AssetContainer_DeleteAsset(List<Asset> assets, AssetContainerTool container)
         {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
             if (MessageBox.Show(String.Format("{0} asset(s) will be deleted. Any EffectParts that are linked to them will also be deleted.\n\nDo you want to continue?", assets.Count), "Delete Asset(s)", MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
             {
                 foreach (var asset in assets)
                 {
-                    effectContainerFile.AssetRefRefactor(asset, null); //Remove references to this asset
+                    effectContainerFile.AssetRefRefactor(asset, null, undos); //Remove references to this asset
+                    undos.Add(new UndoableListRemove<Asset>(container.Assets, asset));
                     container.Assets.Remove(asset);
 
                     if (asset.assetType == AssetType.PBIND)
@@ -2551,7 +2695,11 @@ namespace EEPK_Organiser.View
                         CloseEmpForm(asset.Files[0].EmpFile);
                     }
                 }
+
                 container.RefreshAssetCount();
+
+                undos.Add(new UndoActionDelegate(container, nameof(container.RefreshAssetCount), true));
+                UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Delete Asset"));
             }
         }
 
@@ -2567,6 +2715,8 @@ namespace EEPK_Organiser.View
         {
             List<Asset> assets = (List<Asset>)Clipboard.GetData(String.Format("{0}{1}", ClipboardDataTypes.Asset, type.ToString()));
 
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
             if (assets != null)
             {
                 int alreadyExistCount = 0;
@@ -2577,7 +2727,7 @@ namespace EEPK_Organiser.View
                     if (container.AssetExists(asset) == null)
                     {
                         copied++;
-                        container.AddAsset(asset);
+                        container.AddAsset(asset, undos);
                     }
                     else
                     {
@@ -2595,11 +2745,16 @@ namespace EEPK_Organiser.View
                 }
 
                 container.RefreshAssetCount();
+
+                undos.Add(new UndoActionDelegate(container, nameof(container.RefreshAssetCount), true));
+                UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Paste"));
             }
         }
 
         private void AssetContainer_DuplicateAsset(List<Asset> assets, AssetContainerTool container, AssetType assetType)
         {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
             foreach (var asset in assets)
             {
                 Asset newAsset = asset.Clone();
@@ -2612,8 +2767,14 @@ namespace EEPK_Organiser.View
                 }
 
                 container.Assets.Add(newAsset);
+
+                undos.Add(new UndoableListAdd<Asset>(container.Assets, newAsset));
             }
+
             container.RefreshAssetCount();
+
+            undos.Add(new UndoActionDelegate(container, nameof(container.RefreshAssetCount), true));
+            UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Duplicate Asset"));
         }
 
         private void AssetContainer_UsedBy(Asset asset, bool showExt)
@@ -2643,13 +2804,18 @@ namespace EEPK_Organiser.View
 
         }
 
-        private void AssetContainer_RenameFile(EffectFile effectFile, AssetContainerTool container)
+        private void AssetContainer_RenameFile(EffectFile effectFile, Asset asset, AssetContainerTool container)
         {
             Forms.RenameForm renameForm = new Forms.RenameForm(effectFile.FileName, effectFile.Extension, String.Format("Renaming {0}", effectFile.FullFileName), container, App.Current.MainWindow);
             renameForm.ShowDialog();
 
             if (renameForm.WasNameChanged)
             {
+                List<IUndoRedo> undos = new List<IUndoRedo>();
+                undos.Add(new UndoableProperty<EffectFile>(nameof(effectFile.FileName), effectFile, effectFile.FileName, renameForm.NameValue));
+                undos.Add(new UndoActionDelegate(asset, nameof(asset.RefreshNamePreview), true));
+                UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Rename Asset"));
+
                 effectFile.FileName = renameForm.NameValue;
 
                 effectContainerFile.AssetRefDetailsRefresh(container.GetAssetByFileInstance(effectFile));
@@ -2658,10 +2824,13 @@ namespace EEPK_Organiser.View
 
         private void AssetContainer_RemoveUnusedAssets(AssetType type)
         {
-            int amountRemoved = effectContainerFile.RemoveUnusedAssets(type);
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            int amountRemoved = effectContainerFile.RemoveUnusedAssets(type, undos);
 
             if (amountRemoved > 0)
             {
+                UndoManager.Instance.AddUndo(new CompositeUndo(undos, $"Remove Unusued ({type})"));
                 MessageBox.Show(String.Format("{0} unused assets were removed.", amountRemoved), "Remove Unused", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else
@@ -2670,101 +2839,1074 @@ namespace EEPK_Organiser.View
             }
         }
 
-        //Hotkeys
+        private void RefreshCounts()
+        {
+            effectContainerFile.Emo.RefreshAssetCount();
+            effectContainerFile.Pbind.RefreshAssetCount();
+            effectContainerFile.Tbind.RefreshAssetCount();
+            effectContainerFile.Cbind.RefreshAssetCount();
+            effectContainerFile.LightEma.RefreshAssetCount();
+        }
+
+        #endregion
+
+
+        #region EFFECT
+        private void Effect_EffectIdChange_ValueChanged(object sender, DataGridCellEditEndingEventArgs e)
+        {
+            if ((string)e.Column.Header == "Name")
+            {
+                //We only want to do validation for the Effect ID
+                return;
+            }
+
+            if (editModeCancelling)
+            {
+                return;
+            }
+
+            var selectedEffect = effectDataGrid.SelectedItem as Effect;
+
+            if (selectedEffect != null)
+            {
+                string value = ((TextBox)e.EditingElement).Text;
+                ushort ret = 0;
+
+                if (!ushort.TryParse(value, out ret))
+                {
+                    //Value contained invalid text
+                    e.Cancel = true;
+                    try
+                    {
+                        MessageBox.Show(string.Format("The entered Effect ID contained invalid characters. Please enter a number between {0} and {1}.", ushort.MinValue, ushort.MaxValue), "Invalid ID", MessageBoxButton.OK, MessageBoxImage.Error);
+                        editModeCancelling = true;
+                        (sender as DataGrid).CancelEdit();
+                    }
+                    finally
+                    {
+                        editModeCancelling = false;
+                    }
+                }
+                else
+                {
+                    //Value is a valid number.
+
+                    //Now check if it is used by another Effect
+                    if (effectContainerFile.EffectIdUsedByOtherEffects(ret, selectedEffect))
+                    {
+                        e.Cancel = true;
+                        try
+                        {
+                            MessageBox.Show(string.Format("The entered Effect ID is already taken.", ushort.MinValue, ushort.MaxValue), "Invalid ID", MessageBoxButton.OK, MessageBoxImage.Error);
+                            editModeCancelling = true;
+                            (sender as DataGrid).CancelEdit();
+                        }
+                        finally
+                        {
+                            editModeCancelling = false;
+                        }
+                    }
+                }
+            }
+        }
+
+        public RelayCommand Effect_AddEffectPart_Command => new RelayCommand(Effect_AddEffectPart, IsEffectSelected);
+        private void Effect_AddEffectPart()
+        {
+            try
+            {
+                var selectedEffect = effectDataGrid.SelectedItem as Effect;
+
+                if (selectedEffect != null)
+                {
+                    if (selectedEffect.EffectParts == null)
+                        selectedEffect.EffectParts = new System.Collections.ObjectModel.ObservableCollection<EffectPart>();
+
+                    var newEffectPart = EffectPart.NewEffectPart();
+                    selectedEffect.EffectParts.Add(newEffectPart);
+
+                    UndoManager.Instance.AddUndo(new UndoableListAdd<EffectPart>(selectedEffect.EffectParts, newEffectPart, "New EffectPart"));
+                }
+            }
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An unknown error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        public RelayCommand Effect_Copy_Command => new RelayCommand(Effect_Copy, IsEffectSelected);
+        private void Effect_Copy()
+        {
+            try
+            {
+                var selectedEffects = effectDataGrid.SelectedItems.Cast<Effect>().ToList();
+
+                if (selectedEffects.Count > 0)
+                {
+                    effectContainerFile.SaveDds();
+                    Clipboard.SetData(ClipboardDataTypes.Effect, selectedEffects);
+                }
+            }
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An unknown error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        public RelayCommand Effect_Paste_Command => new RelayCommand(Effect_Paste, CanPasteEffect);
+        private void Effect_Paste()
+        {
+            try
+            {
+                List<Effect> effects = (List<Effect>)Clipboard.GetData(ClipboardDataTypes.Effect);
+
+                if (effects != null)
+                {
+                    //Add effects
+                    EffectOptions_ImportEffects(new ObservableCollection<Effect>(effects));
+
+                }
+            }
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        public RelayCommand Effect_DeleteEffect_Command => new RelayCommand(Effect_DeleteEffect, IsEffectSelected);
+        private void Effect_DeleteEffect()
+        {
+            try
+            {
+                var selectedEffects = effectDataGrid.SelectedItems.Cast<Effect>().ToList();
+
+                if (selectedEffects.Count > 0)
+                {
+                    List<IUndoRedo> undos = new List<IUndoRedo>();
+
+                    foreach (var _effect in selectedEffects)
+                    {
+                        undos.Add(new UndoableListRemove<Effect>(effectContainerFile.Effects, _effect));
+                        effectContainerFile.Effects.Remove(_effect);
+                    }
+
+                    UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Delete Effects"));
+                }
+            }
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An unknown error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        public RelayCommand Effect_Duplicate_Command => new RelayCommand(Effect_Duplicate, IsEffectSelected);
+        private void Effect_Duplicate()
+        {
+            try
+            {
+                var selectedEffect = effectDataGrid.SelectedItem as Effect;
+
+                if (selectedEffect != null)
+                {
+                    var copiedEffect = selectedEffect.Clone();
+                    copiedEffect.IndexNum = effectContainerFile.GetUnusedEffectId(copiedEffect.IndexNum);
+                    effectContainerFile.Effects.Add(copiedEffect);
+                    effectDataGrid.SelectedItem = copiedEffect;
+                    effectDataGrid.Items.SortDescriptions.Add(new SortDescription("Index", ListSortDirection.Ascending));
+                    effectDataGrid.ScrollIntoView(copiedEffect);
+
+                    UndoManager.Instance.AddUndo(new UndoableListAdd<Effect>(effectContainerFile.Effects, copiedEffect, "Duplicate Effect"));
+                }
+            }
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An unknown error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        public RelayCommand EffectPart_Paste_Command => new RelayCommand(EffectPart_Paste, CanPasteEffectPart);
+        private void EffectPart_Paste()
+        {
+            try
+            {
+                if (effectContainerFile.SelectedEffect != null)
+                {
+                    ObservableCollection<EffectPart> effectParts = (ObservableCollection<EffectPart>)Clipboard.GetData(ClipboardDataTypes.EffectPart);
+
+                    if (effectParts != null)
+                    {
+                        List<IUndoRedo> undos = new List<IUndoRedo>();
+
+                        foreach (var effectPart in effectParts)
+                        {
+                            if (effectPart.AssetRef != null)
+                                effectPart.AssetRef = effectContainerFile.AddAsset(effectPart.AssetRef, effectPart.I_02, undos);
+
+                            var newEffectPart = effectPart.Clone();
+                            effectContainerFile.SelectedEffect.EffectParts.Add(newEffectPart);
+                            effectContainerFile.RefreshAssetCounts();
+
+                            undos.Add(new UndoableListAdd<EffectPart>(effectContainerFile.SelectedEffect.EffectParts, newEffectPart));
+                        }
+
+                        undos.Add(new UndoActionDelegate(effectContainerFile, nameof(effectContainerFile.RefreshAssetCounts), true));
+                        UndoManager.Instance.AddUndo(new CompositeUndo(undos, (effectParts.Count > 1) ?  "Paste EffectParts" : "Paste EffectPart"));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An unknown error occured while pasting the EffectParts.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        public RelayCommand EffectPart_Copy_Command => new RelayCommand(EffectPart_Copy, IsEffectPartSelected);
+        private void EffectPart_Copy()
+        {
+            try
+            {
+                if (effectContainerFile.SelectedEffect != null)
+                {
+                    if (effectContainerFile.SelectedEffect.SelectedEffectParts != null)
+                    {
+                        effectContainerFile.SaveDds();
+                        Clipboard.SetData(ClipboardDataTypes.EffectPart, effectContainerFile.SelectedEffect.SelectedEffectParts);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured while copying the EffectParts.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        public RelayCommand EffectPart_Delete_Command => new RelayCommand(EffectPart_Delete, IsEffectPartSelected);
+        private void EffectPart_Delete()
+        {
+            try
+            {
+                var selectedEffect = effectContainerFile.SelectedEffect;
+
+                if (selectedEffect != null)
+                {
+                    if (selectedEffect.SelectedEffectParts != null)
+                    {
+                        List<EffectPart> effectPartsToRemove = selectedEffect.SelectedEffectParts.ToList();
+                        List<IUndoRedo> undos = new List<IUndoRedo>();
+
+                        foreach (var effectPart in effectPartsToRemove)
+                        {
+                            undos.Add(new UndoableListRemove<EffectPart>(selectedEffect.EffectParts, effectPart));
+                            selectedEffect.EffectParts.Remove(effectPart);
+                        }
+
+                        UndoManager.Instance.AddUndo(new CompositeUndo(undos, (selectedEffect.SelectedEffectParts.Count > 1) ? "Delete EffectParts" : "Delete EffectPart"));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        public RelayCommand EffectPart_Duplicate_Command => new RelayCommand(EffectPart_Duplicate, IsEffectPartSelected);
+        private void EffectPart_Duplicate()
+        {
+            try
+            {
+                var selectedEffect = effectContainerFile.SelectedEffect;
+
+                if (selectedEffect != null)
+                {
+                    if (selectedEffect.SelectedEffectParts != null)
+                    {
+                        foreach (var effectPart in selectedEffect.SelectedEffectParts)
+                        {
+                            selectedEffect.EffectParts.Add(effectPart.Clone());
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured while duplicating the EffectParts.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        public RelayCommand EffectPart_GoToAsset_Command => new RelayCommand(EffectPart_GoToAsset, CanGoToAsset);
+        private void EffectPart_GoToAsset()
+        {
+            try
+            {
+                var selectedEffectPart = effectContainerFile.GetSelectedEffectParts();
+
+                if (selectedEffectPart != null)
+                {
+                    if (selectedEffectPart.Count > 0)
+                    {
+                        switch (selectedEffectPart[0].I_02)
+                        {
+                            case AssetType.PBIND:
+                                tabControl.SelectedIndex = (int)Tabs.Pbind;
+                                pbindDataGrid.SelectedItem = selectedEffectPart[0].AssetRef;
+                                pbindDataGrid.ScrollIntoView(selectedEffectPart[0].AssetRef);
+                                break;
+                            case AssetType.TBIND:
+                                tabControl.SelectedIndex = (int)Tabs.Tbind;
+                                tbindDataGrid.SelectedItem = selectedEffectPart[0].AssetRef;
+                                tbindDataGrid.ScrollIntoView(selectedEffectPart[0].AssetRef);
+                                break;
+                            case AssetType.CBIND:
+                                tabControl.SelectedIndex = (int)Tabs.Cbind;
+                                cbindDataGrid.SelectedItem = selectedEffectPart[0].AssetRef;
+                                cbindDataGrid.ScrollIntoView(selectedEffectPart[0].AssetRef);
+                                break;
+                            case AssetType.EMO:
+                                tabControl.SelectedIndex = (int)Tabs.Emo;
+                                emoDataGrid.SelectedItem = selectedEffectPart[0].AssetRef;
+                                emoDataGrid.ScrollIntoView(selectedEffectPart[0].AssetRef);
+                                break;
+                            case AssetType.LIGHT:
+                                tabControl.SelectedIndex = (int)Tabs.Light;
+                                lightDataGrid.SelectedItem = selectedEffectPart[0].AssetRef;
+                                lightDataGrid.ScrollIntoView(selectedEffectPart[0].AssetRef);
+                                break;
+                        }
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        public RelayCommand EffectPart_ChangeAsset_Command => new RelayCommand(EffectPart_ChangeAsset, IsEffectPartSelected);
+        private void EffectPart_ChangeAsset()
+        {
+            if (effectContainerFile.SelectedEffect != null)
+            {
+                if (effectContainerFile.SelectedEffect.SelectedEffectPart != null)
+                {
+                    Forms.AssetSelector assetSel = new Forms.AssetSelector(effectContainerFile, false, false, effectContainerFile.SelectedEffect.SelectedEffectPart.I_02, this, effectContainerFile.SelectedEffect.SelectedEffectPart.AssetRef);
+                    assetSel.ShowDialog();
+
+                    if (assetSel.SelectedAsset != null)
+                    {
+                        List<IUndoRedo> undos = new List<IUndoRedo>();
+                        undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.I_02), effectContainerFile.SelectedEffect.SelectedEffectPart, effectContainerFile.SelectedEffect.SelectedEffectPart.I_02, assetSel.SelectedAssetType));
+                        undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.AssetRef), effectContainerFile.SelectedEffect.SelectedEffectPart, effectContainerFile.SelectedEffect.SelectedEffectPart.AssetRef, assetSel.SelectedAsset));
+                        UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Change Asset"));
+
+                        effectContainerFile.SelectedEffect.SelectedEffectPart.I_02 = assetSel.SelectedAssetType;
+                        effectContainerFile.SelectedEffect.SelectedEffectPart.AssetRef = assetSel.SelectedAsset;
+
+                        if (effectPartViewModel != null)
+                            effectPartViewModel.UpdateProperties();
+                    }
+                }
+            }
+        }
+
+        public RelayCommand EffectPart_PasteValues_Command => new RelayCommand(EffectPart_PasteValues, CanPasteEffectPartValues);
+        private void EffectPart_PasteValues()
+        {
+            try
+            {
+                if (effectContainerFile.SelectedEffect == null) return;
+                if (effectContainerFile.SelectedEffect.SelectedEffectPart == null) return;
+
+                ObservableCollection<EffectPart> effectParts = (ObservableCollection<EffectPart>)Clipboard.GetData(ClipboardDataTypes.EffectPart);
+
+                if (effectParts == null) return;
+                if (effectParts.Count != 1) return;
+
+                List<IUndoRedo> undos = new List<IUndoRedo>();
+
+                effectParts[0].AssetRef = effectContainerFile.AddAsset(effectParts[0].AssetRef, effectParts[0].I_02, undos);
+                effectContainerFile.SelectedEffect.SelectedEffectPart.CopyValues(effectParts[0], undos);
+
+                UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Paste Values"));
+
+                if (_effectPartViewModel != null)
+                    _effectPartViewModel.UpdateProperties();
+            }
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured while copying the EffectParts.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void EffectPart_DoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if(CanGoToAsset())
+                EffectPart_GoToAsset();
+        }
+
+        public RelayCommand Effect_Export_Command => new RelayCommand(Effect_Export, IsEffectSelected);
+        private void Effect_Export()
+        {
+            try
+            {
+                var selectedEffects = effectDataGrid.SelectedItems.Cast<Effect>().ToList();
+
+                if (selectedEffects.Count > 0)
+                {
+                    ExportVfxPackage(selectedEffects);
+                }
+            }
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An unknown error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        //Relay EffectPart Events (ContextMenu cannot be binded because WPF is stupid and today I do not feel like banging my head against the wall trying to figure it out, so events must be used)
+        private void EffectPart_Paste_Click(object sender, RoutedEventArgs e)
+        {
+            EffectPart_Paste();
+        }
+
+        private void EffectPart_PasteValues_Click(object sender, RoutedEventArgs e)
+        {
+            EffectPart_PasteValues();
+        }
+
+        private void EffectPart_Copy_Click(object sender, RoutedEventArgs e)
+        {
+            EffectPart_Copy();
+        }
+
+        private void EffectPart_Delete_Click(object sender, RoutedEventArgs e)
+        {
+            EffectPart_Delete();
+        }
+
+        private void EffectPart_Duplicate_Click(object sender, RoutedEventArgs e)
+        {
+            EffectPart_Duplicate();
+        }
+
+        private void EffectPart_GoToAsset_Click(object sender, RoutedEventArgs e)
+        {
+            EffectPart_GoToAsset();
+        }
+
+        private void EffectPart_ChangeAsset_Click(object sender, RoutedEventArgs e)
+        {
+            EffectPart_ChangeAsset();
+        }
+
+        //Effect Options
+        public RelayCommand EffectOptions_AddEffect_Command => new RelayCommand(EffectOptions_AddEffect);
+        private void EffectOptions_AddEffect()
+        {
+            try
+            {
+                Effect newEffect = new Effect();
+                newEffect.EffectParts = new ObservableCollection<EffectPart>();
+                newEffect.IndexNum = effectContainerFile.GetUnusedEffectId(0);
+                effectContainerFile.Effects.Add(newEffect);
+                effectDataGrid.SelectedItem = newEffect;
+                effectDataGrid.Items.SortDescriptions.Add(new SortDescription("Index", ListSortDirection.Ascending));
+                effectDataGrid.ScrollIntoView(newEffect);
+
+                effectContainerFile.UpdateEffectFilter();
+
+                //Undo
+                List<IUndoRedo> undos = new List<IUndoRedo>();
+                undos.Add(new UndoableListAdd<Effect>(effectContainerFile.Effects, newEffect));
+                undos.Add(new UndoActionDelegate(effectContainerFile, nameof(effectContainerFile.UpdateEffectFilter), true));
+                UndoManager.Instance.AddUndo(new CompositeUndo(undos, "New Effect"));
+            }
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+        }
+
+        public void EffectOptions_ImportEffectsFromFile_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var importEffectFile = LoadEffectContainerFile();
+                if (importEffectFile != null)
+                    EffectOptions_ImportEffects(importEffectFile.Effects);
+            }
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        public void EffectOptions_ImportEffectsFromCharacter_Click(object sender, RoutedEventArgs e)
+        {
+            if (!GameDirectoryCheck()) return;
+            try
+            {
+                var importEffectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.Character);
+                if (importEffectFile != null)
+                    EffectOptions_ImportEffects(importEffectFile.Effects);
+            }
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        public void EffectOptions_ImportEffectsFromSuper_Click(object sender, RoutedEventArgs e)
+        {
+            if (!GameDirectoryCheck()) return;
+            try
+            {
+                var importEffectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.SuperSkill);
+                if (importEffectFile != null)
+                    EffectOptions_ImportEffects(importEffectFile.Effects);
+            }
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        public void EffectOptions_ImportEffectsFromUltimate_Click(object sender, RoutedEventArgs e)
+        {
+            if (!GameDirectoryCheck()) return;
+            try
+            {
+                var importEffectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.UltimateSkill);
+                if (importEffectFile != null)
+                    EffectOptions_ImportEffects(importEffectFile.Effects);
+            }
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        public void EffectOptions_ImportEffectsFromEvasive_Click(object sender, RoutedEventArgs e)
+        {
+            if (!GameDirectoryCheck()) return;
+            try
+            {
+                var importEffectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.EvasiveSkill);
+                if (importEffectFile != null)
+                    EffectOptions_ImportEffects(importEffectFile.Effects);
+            }
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        public void EffectOptions_ImportEffectsFromBlast_Click(object sender, RoutedEventArgs e)
+        {
+            if (!GameDirectoryCheck()) return;
+            try
+            {
+                var importEffectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.BlastSkill);
+                if (importEffectFile != null)
+                    EffectOptions_ImportEffects(importEffectFile.Effects);
+            }
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        public void EffectOptions_ImportEffectsFromAwoken_Click(object sender, RoutedEventArgs e)
+        {
+            if (!GameDirectoryCheck()) return;
+            try
+            {
+                var importEffectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.AwokenSkill);
+                if (importEffectFile != null)
+                    EffectOptions_ImportEffects(importEffectFile.Effects);
+            }
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        public void EffectOptions_ImportEffectsFromCMN_Click(object sender, RoutedEventArgs e)
+        {
+            if (!GameDirectoryCheck()) return;
+            try
+            {
+                var importEffectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.CMN);
+                if (importEffectFile != null)
+                    EffectOptions_ImportEffects(importEffectFile.Effects);
+            }
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        public void EffectOptions_ImportEffectsFromDemo_Click(object sender, RoutedEventArgs e)
+        {
+            if (!GameDirectoryCheck()) return;
+            try
+            {
+                var importEffectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.Demo);
+                if (importEffectFile != null)
+                    EffectOptions_ImportEffects(importEffectFile.Effects);
+            }
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        public void EffectOptions_ImportEffectsFromCache_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                MenuItem selectedMenuItem = e.OriginalSource as MenuItem;
+
+                if (selectedMenuItem != null)
+                {
+                    CachedFile cachedFile = selectedMenuItem.DataContext as CachedFile;
+
+                    if (cachedFile != null)
+                    {
+                        if (cachedFile.effectContainerFile != null)
+                            EffectOptions_ImportEffects(cachedFile.effectContainerFile.Effects);
+                    }
+                    else
+                    {
+                        MessageBox.Show("There are no cached files.", "From Cached Files", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void EffectOptions_ImportEffects(ObservableCollection<Effect> effects)
+        {
+            if (effects != null)
+            {
+                Forms.EffectSelector effectSelector = new Forms.EffectSelector(effects, effectContainerFile, Application.Current.MainWindow);
+                effectSelector.ShowDialog();
+                List<IUndoRedo> undos = new List<IUndoRedo>();
+
+                if (effectSelector.SelectedEffects != null)
+                {
+                    foreach (var effect in effectSelector.SelectedEffects)
+                    {
+                        var newEffect = effect.Clone();
+                        newEffect.IndexNum = effect.ImportIdIncrease;
+                        undos.AddRange(effectContainerFile.AddEffect(newEffect, true));
+                        undos.Add(new UndoableListAdd<Effect>(effectContainerFile.Effects, newEffect));
+                    }
+
+                    //Update UI
+                    if (effectSelector.SelectedEffects.Count > 0)
+                    {
+                        RefreshCounts();
+                        effectDataGrid.SelectedItem = effectSelector.SelectedEffects[0];
+                        effectDataGrid.ScrollIntoView(effectSelector.SelectedEffects);
+                        effectContainerFile.UpdateEffectFilter();
+                        undos.Add(new UndoActionDelegate(effectContainerFile, nameof(effectContainerFile.UpdateAllFilters), true));
+                    }
+
+                    UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Import Effects"));
+                }
+            }
+
+            try
+            {
+                effectDataGrid.Items.SortDescriptions.Add(new SortDescription("Index", ListSortDirection.Ascending));
+            }
+            catch
+            {
+
+            }
+        }
+
+        private void ListBox_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            //Force select the parent effect when right-clicking an effect part.
+            ForceSelectEffect(sender as ListBox);
+        }
+
+        private void ListBox_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            //Force select the parent effect when left-clicking.
+            //When Left Ctrl + Left Clicking the selection event gets passed to the parent datagrid, which unselects/selects the effect, so this is needed
+            ForceSelectEffect(sender as ListBox);
+        }
+
+        private void ForceSelectEffect(ListBox sender)
+        {
+            //This may not be required anymore. Need to test. For now just leave disable the function with a return.
+            return; 
+            try
+            {
+                ListBox listBox = sender;
+
+                if (listBox != null)
+                {
+                    var selectedEffectPart = listBox.SelectedItem as EffectPart;
+
+                    if (selectedEffectPart != null)
+                    {
+                        var parentEffect = effectContainerFile.GetEffectAssociatedWithEffectPart(selectedEffectPart);
+
+                        if (parentEffect != null)
+                        {
+                            effectDataGrid.SelectedItem = parentEffect;
+                        }
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("ListBox_MouseRightButtonUp: Failed to force select parent effect.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void EffectOptions_ImportEffects_FileDrop(object sender, DragEventArgs e)
+        {
+            try
+            {
+                if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                {
+                    string[] droppedFilePaths = e.Data.GetData(DataFormats.FileDrop, true) as string[];
+
+                    if (droppedFilePaths.Length == 1)
+                    {
+                        switch (System.IO.Path.GetExtension(droppedFilePaths[0]))
+                        {
+                            case EffectContainerFile.ZipExtension:
+                            case ".eepk":
+                                var importEffectFile = LoadEffectContainerFile(droppedFilePaths[0]);
+                                if (importEffectFile != null)
+                                    EffectOptions_ImportEffects(importEffectFile.Effects);
+
+                                e.Handled = true;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(Application.Current.MainWindow, String.Format("The dropped file could not be opened.\n\nThe reason given by the system: {0}", ex.Message), "File Drop", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+        }
+
+
+        //CanExecutes
+        public bool CanGoToAsset()
+        {
+            if (IsEffectPartSelected())
+            {
+                return effectContainerFile.SelectedEffect.SelectedEffectPart.AssetRef != null;
+            }
+            return false;
+        }
+
+        public bool IsEffectPartSelected()
+        {
+            return effectContainerFile?.SelectedEffect?.SelectedEffectPart != null;
+        }
+
+        public bool IsEffectSelected()
+        {
+            return effectDataGrid.SelectedItem is Xv2CoreLib.EEPK.Effect;
+        }
+
+        public bool CanPasteEffect()
+        {
+            return Clipboard.ContainsData(ClipboardDataTypes.Effect);
+        }
+
+        public bool CanPasteEffectPart()
+        {
+            return Clipboard.ContainsData(ClipboardDataTypes.EffectPart);
+        }
+        public bool CanPasteEffectPartValues()
+        {
+            return (IsEffectPartSelected()) ? Clipboard.ContainsData(ClipboardDataTypes.EffectPart) : false;
+        }
+        #endregion
+
+
+
+        //Window Finding
+        public Window GetActiveForm<T>() where T : Window
+        {
+            foreach (var window in App.Current.Windows)
+            {
+                if (window is T)
+                {
+                    return (Window)window;
+                }
+            }
+
+            return null;
+        }
+
+        public Forms.EmbEditForm GetActiveEmbForm(EMB_File _embFile)
+        {
+            foreach (var window in App.Current.Windows)
+            {
+                if (window is Forms.EmbEditForm)
+                {
+                    Forms.EmbEditForm _form = (Forms.EmbEditForm)window;
+
+                    if (_form.EmbFile == _embFile)
+                        return _form;
+                }
+            }
+
+            return null;
+        }
+
+        public Forms.EmmEditForm GetActiveEmmForm(EMM_File _emmFile)
+        {
+            foreach (var window in App.Current.Windows)
+            {
+                if (window is Forms.EmmEditForm)
+                {
+                    Forms.EmmEditForm _form = (Forms.EmmEditForm)window;
+
+                    if (_form.EmmFile == _emmFile)
+                        return _form;
+                }
+            }
+
+            return null;
+        }
+
+        public Forms.EMP.EMP_Editor GetActiveEmpForm(EMP_File _empFile)
+        {
+            foreach (var window in App.Current.Windows)
+            {
+                if (window is Forms.EMP.EMP_Editor)
+                {
+                    Forms.EMP.EMP_Editor _form = (Forms.EMP.EMP_Editor)window;
+
+                    if (_form.empFile == _empFile)
+                        return _form;
+                }
+            }
+
+            return null;
+        }
+
+        public void CloseEmpForm(EMP_File empFile)
+        {
+            var form = GetActiveEmpForm(empFile);
+
+            if (form != null)
+                form.Close();
+        }
+
+        public bool GameDirectoryCheck()
+        {
+            if (!GeneralInfo.AppSettings.ValidGameDir)
+            {
+                MessageBox.Show("Please set the game directory in the settings menu to use this option (File > Settings > Game Directory).", "Invalid Game Directory", MessageBoxButton.OK, MessageBoxImage.Information);
+                return false;
+            }
+            return true;
+        }
+
+        //Export
+        public void ExportVfxPackage(IList<Effect> selEffects = null)
+        {
+            if (effectContainerFile == null) return;
+
+            try
+            {
+                //if selEffects is null, then pass in all the effects.
+                IList<Effect> effects = (selEffects != null) ? selEffects : effectContainerFile.Effects;
+
+                Forms.EffectSelector effectSelector = new Forms.EffectSelector(effects, effectContainerFile, App.Current.MainWindow, Forms.EffectSelector.Mode.ExportEffect);
+                effectSelector.ShowDialog();
+
+                if (effectSelector.SelectedEffects != null)
+                {
+                    EffectContainerFile vfxPackage = EffectContainerFile.New();
+                    vfxPackage.saveFormat = SaveFormat.ZIP;
+
+                    foreach (var effect in effectSelector.SelectedEffects)
+                    {
+                        var newEffect = effect.Clone();
+                        newEffect.IndexNum = effect.ImportIdIncrease;
+                        vfxPackage.AddEffect(newEffect);
+                    }
+
+                    //Get path to save to
+                    SaveFileDialog saveDialog = new SaveFileDialog();
+                    saveDialog.Title = "Export to .vfxpackage";
+                    saveDialog.Filter = string.Format("{1} File |*{0}", EffectContainerFile.ZipExtension, EffectContainerFile.ZipExtension.ToUpper().Remove(0, 1));
+                    saveDialog.AddExtension = true;
+
+                    if (saveDialog.ShowDialog() == true)
+                    {
+                        vfxPackage.Directory = string.Format("{0}/{1}", System.IO.Path.GetDirectoryName(saveDialog.FileName), System.IO.Path.GetFileNameWithoutExtension(saveDialog.FileName));
+                        vfxPackage.Name = System.IO.Path.GetFileNameWithoutExtension(saveDialog.FileName);
+                        vfxPackage.SaveVfx2();
+
+                        MessageBox.Show("Export successful.", "Export", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void MenuItem_MouseMove(object sender, MouseEventArgs e)
+        {
+            MenuItem menuItem = (MenuItem)sender;
+            menuItem.IsSubmenuOpen = true;
+        }
+
+        //Filtering
+        private void Search_Click(object sender, RoutedEventArgs e)
+        {
+            if (effectContainerFile == null) return;
+
+            switch ((Tabs)tabControl.SelectedIndex)
+            {
+                case Tabs.Effect:
+                    effectContainerFile.NewEffectFilter(SearchFilter);
+                    effectContainerFile.UpdateEffectFilter();
+                    break;
+                case Tabs.Pbind:
+                    effectContainerFile.Pbind.NewAssetFilter(SearchFilter);
+                    effectContainerFile.Pbind.UpdateAssetFilter();
+                    break;
+                case Tabs.Tbind:
+                    effectContainerFile.Tbind.NewAssetFilter(SearchFilter);
+                    effectContainerFile.Tbind.UpdateAssetFilter();
+                    break;
+                case Tabs.Cbind:
+                    effectContainerFile.Cbind.NewAssetFilter(SearchFilter);
+                    effectContainerFile.Cbind.UpdateAssetFilter();
+                    break;
+                case Tabs.Emo:
+                    effectContainerFile.Emo.NewAssetFilter(SearchFilter);
+                    effectContainerFile.Emo.UpdateAssetFilter();
+                    break;
+                case Tabs.Light:
+                    effectContainerFile.LightEma.NewAssetFilter(SearchFilter);
+                    effectContainerFile.LightEma.UpdateAssetFilter();
+                    break;
+            }
+        }
+
+        private void Search_Clear(object sender, RoutedEventArgs e)
+        {
+            if (effectContainerFile == null) return;
+
+            SearchFilter = string.Empty;
+
+            switch ((Tabs)tabControl.SelectedIndex)
+            {
+                case Tabs.Effect:
+                    effectContainerFile.EffectSearchFilter = string.Empty;
+                    effectContainerFile.UpdateEffectFilter();
+                    break;
+                case Tabs.Pbind:
+                    effectContainerFile.Pbind.AssetSearchFilter = string.Empty;
+                    effectContainerFile.Pbind.UpdateAssetFilter();
+                    break;
+                case Tabs.Tbind:
+                    effectContainerFile.Tbind.AssetSearchFilter = string.Empty;
+                    effectContainerFile.Tbind.UpdateAssetFilter();
+                    break;
+                case Tabs.Cbind:
+                    effectContainerFile.Cbind.AssetSearchFilter = string.Empty;
+                    effectContainerFile.Cbind.UpdateAssetFilter();
+                    break;
+                case Tabs.Emo:
+                    effectContainerFile.Emo.AssetSearchFilter = string.Empty;
+                    effectContainerFile.Emo.UpdateAssetFilter();
+                    break;
+                case Tabs.Light:
+                    effectContainerFile.LightEma.AssetSearchFilter = string.Empty;
+                    effectContainerFile.LightEma.UpdateAssetFilter();
+                    break;
+            }
+
+        }
+
+
+        private void effectPart_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            CreateEffectPartViewModel();
+        }
+
+        private void CreateEffectPartViewModel()
+        {
+            if(effectContainerFile?.SelectedEffect?.SelectedEffectPart != null)
+            {
+                if (effectPartViewModel != null) effectPartViewModel.Dispose();
+
+                _effectPartViewModel = new EffectPartViewModel(effectContainerFile?.SelectedEffect?.SelectedEffectPart);
+            }
+            else if (effectPartViewModel != null)
+            {
+                effectPartViewModel.Dispose();
+                _effectPartViewModel = null;
+            }
+
+            NotifyPropertyChanged(nameof(effectPartViewModel));
+        }
+
+
+
+
+        //Hotkeys (to be replaced with commands)
         private void Search_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
                 Search_Click(null, null);
-            }
-        }
-
-        private void EffectDataGrid_Hotkeys_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            if (Keyboard.IsKeyDown(Key.C) && Keyboard.IsKeyDown(Key.LeftCtrl))
-            {
-                //Copy
-
-                if (e.OriginalSource is ListBoxItem)
-                {
-                    EffectPart_Copy_Click(null, null);
-                }
-                else if (e.OriginalSource is DataGridCell)
-                {
-                    Effect_Copy_Click(null, null);
-                }
-                e.Handled = true;
-            }
-            else if (Keyboard.IsKeyDown(Key.Delete) && Keyboard.IsKeyDown(Key.LeftCtrl))
-            {
-                //Delete
-
-                if (e.OriginalSource is ListBoxItem)
-                {
-                    EffectPart_Delete_Click(null, null);
-                }
-                else if (e.OriginalSource is DataGridCell)
-                {
-                    Effect_DeleteEffect_Click(null, null);
-                }
-
-                e.Handled = true;
-            }
-            else if (Keyboard.IsKeyDown(Key.V) && Keyboard.IsKeyDown(Key.LeftCtrl))
-            {
-                //Paste
-
-                if (Clipboard.ContainsData(ClipboardDataTypes.EffectPart))
-                {
-                    EffectPart_Paste_Click(null, null);
-                }
-                else if (Clipboard.ContainsData(ClipboardDataTypes.Effect))
-                {
-                    Effect_Paste_Click(null, null);
-                }
-
-                e.Handled = true;
-            }
-            else if (Keyboard.IsKeyDown(Key.V) && Keyboard.IsKeyDown(Key.LeftShift))
-            {
-                //Paste Values
-
-                if (Clipboard.ContainsData(ClipboardDataTypes.EffectPart))
-                {
-                    EffectPart_PasteValues_Click(null, null);
-                }
-
-                e.Handled = true;
-            }
-            else if (Keyboard.IsKeyDown(Key.D) && Keyboard.IsKeyDown(Key.LeftCtrl))
-            {
-                //Duplicate
-
-                if (e.OriginalSource is ListBoxItem)
-                {
-                    EffectPart_Duplicate_Click(null, null);
-                }
-                else if (e.OriginalSource is DataGridCell)
-                {
-                    Effect_Duplicate_Click(null, null);
-                }
-
-                e.Handled = true;
-            }
-            else if (Keyboard.IsKeyDown(Key.N) && Keyboard.IsKeyDown(Key.LeftCtrl))
-            {
-                //Duplicate
-
-                if (e.OriginalSource is ListBoxItem)
-                {
-                    Effect_AddEffectPart_Click(null, null);
-                }
-                else if (e.OriginalSource is DataGridCell)
-                {
-                    EffectOptions_AddEffect_Click(null, null);
-                }
-
-                e.Handled = true;
             }
         }
 
@@ -2986,908 +4128,6 @@ namespace EEPK_Organiser.View
                 LIGHT_AssetContainer_Duplicate_Click(null, null);
                 e.Handled = true;
             }
-        }
-
-        //Effects
-        private void Effect_EffectIdChange_ValueChanged(object sender, DataGridCellEditEndingEventArgs e)
-        {
-            if ((string)e.Column.Header == "Name")
-            {
-                //We only want to do validation for the Effect ID
-                return;
-            }
-
-            if (editModeCancelling)
-            {
-                return;
-            }
-
-            var selectedEffect = effectDataGrid.SelectedItem as Effect;
-
-            if (selectedEffect != null)
-            {
-                string value = ((TextBox)e.EditingElement).Text;
-                ushort ret = 0;
-
-                if (!ushort.TryParse(value, out ret))
-                {
-                    //Value contained invalid text
-                    e.Cancel = true;
-                    try
-                    {
-                        MessageBox.Show(string.Format("The entered Effect ID contained invalid characters. Please enter a number between {0} and {1}.", ushort.MinValue, ushort.MaxValue), "Invalid ID", MessageBoxButton.OK, MessageBoxImage.Error);
-                        editModeCancelling = true;
-                        (sender as DataGrid).CancelEdit();
-                    }
-                    finally
-                    {
-                        editModeCancelling = false;
-                    }
-                }
-                else
-                {
-                    //Value is a valid number.
-
-                    //Now check if it is used by another Effect
-                    if (effectContainerFile.EffectIdUsedByOtherEffects(ret, selectedEffect))
-                    {
-                        e.Cancel = true;
-                        try
-                        {
-                            MessageBox.Show(string.Format("The entered Effect ID is already taken.", ushort.MinValue, ushort.MaxValue), "Invalid ID", MessageBoxButton.OK, MessageBoxImage.Error);
-                            editModeCancelling = true;
-                            (sender as DataGrid).CancelEdit();
-                        }
-                        finally
-                        {
-                            editModeCancelling = false;
-                        }
-                    }
-                }
-            }
-        }
-
-        private void Effect_AddEffectPart_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                var selectedEffect = effectDataGrid.SelectedItem as Effect;
-
-                if (selectedEffect != null)
-                {
-                    if (selectedEffect.EffectParts == null)
-                        selectedEffect.EffectParts = new System.Collections.ObjectModel.ObservableCollection<EffectPart>();
-
-                    selectedEffect.EffectParts.Add(EffectPart.NewEffectPart());
-                }
-            }
-            catch (Exception ex)
-            {
-                SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An unknown error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void Effect_Copy_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                var selectedEffects = effectDataGrid.SelectedItems.Cast<Effect>().ToList();
-
-                if (selectedEffects.Count > 0)
-                {
-                    effectContainerFile.SaveDds();
-                    Clipboard.SetData(ClipboardDataTypes.Effect, selectedEffects);
-                }
-            }
-            catch (Exception ex)
-            {
-                SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An unknown error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void Effect_Paste_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                List<Effect> effects = (List<Effect>)Clipboard.GetData(ClipboardDataTypes.Effect);
-
-                if (effects != null)
-                {
-                    //Add effects
-                    EffectOptions_ImportEffects(new ObservableCollection<Effect>(effects));
-
-                }
-            }
-            catch (Exception ex)
-            {
-                SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void Effect_DeleteEffect_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                var selectedEffects = effectDataGrid.SelectedItems.Cast<Effect>().ToList();
-
-                if (selectedEffects.Count > 0)
-                {
-                    foreach (var _effect in selectedEffects)
-                    {
-                        effectContainerFile.Effects.Remove(_effect);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An unknown error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void Effect_Duplicate_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                var selectedEffect = effectDataGrid.SelectedItem as Effect;
-
-                if (selectedEffect != null)
-                {
-                    var copiedEffect = selectedEffect.Clone();
-                    copiedEffect.IndexNum = effectContainerFile.GetUnusedEffectId(copiedEffect.IndexNum);
-                    effectContainerFile.Effects.Add(copiedEffect);
-                    effectDataGrid.SelectedItem = copiedEffect;
-                    effectDataGrid.Items.SortDescriptions.Add(new SortDescription("Index", ListSortDirection.Ascending));
-                    effectDataGrid.ScrollIntoView(copiedEffect);
-                }
-            }
-            catch (Exception ex)
-            {
-                SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An unknown error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void EffectPart_Paste_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (effectContainerFile.SelectedEffect != null)
-                {
-                    ObservableCollection<EffectPart> effectParts = (ObservableCollection<EffectPart>)Clipboard.GetData(ClipboardDataTypes.EffectPart);
-
-                    if (effectParts != null)
-                    {
-                        foreach (var effectPart in effectParts)
-                        {
-                            if (effectPart.AssetRef != null)
-                                effectPart.AssetRef = effectContainerFile.AddAsset(effectPart.AssetRef, effectPart.I_02);
-
-                            effectContainerFile.SelectedEffect.EffectParts.Add(effectPart.Clone());
-                            effectContainerFile.RefreshAssetCounts();
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An unknown error occured while pasting the EffectParts.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void EffectPart_Copy_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (effectContainerFile.SelectedEffect != null)
-                {
-                    if (effectContainerFile.SelectedEffect.SelectedEffectParts != null)
-                    {
-                        effectContainerFile.SaveDds();
-                        Clipboard.SetData(ClipboardDataTypes.EffectPart, effectContainerFile.SelectedEffect.SelectedEffectParts);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured while copying the EffectParts.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void EffectPart_Delete_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                var selectedEffect = effectContainerFile.SelectedEffect;
-
-                if (selectedEffect != null)
-                {
-                    if (selectedEffect.SelectedEffectParts != null)
-                    {
-                        List<EffectPart> effectPartsToRemove = selectedEffect.SelectedEffectParts.ToList();
-
-                        foreach (var effectPart in effectPartsToRemove)
-                        {
-                            selectedEffect.EffectParts.Remove(effectPart);
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void EffectPart_Duplicate_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                var selectedEffect = effectContainerFile.SelectedEffect;
-
-                if (selectedEffect != null)
-                {
-                    if (selectedEffect.SelectedEffectParts != null)
-                    {
-                        foreach (var effectPart in selectedEffect.SelectedEffectParts)
-                        {
-                            selectedEffect.EffectParts.Add(effectPart.Clone());
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured while duplicating the EffectParts.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void EffectPart_GoToAsset_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                var selectedEffectPart = effectContainerFile.GetSelectedEffectParts();
-
-                if (selectedEffectPart != null)
-                {
-                    if (selectedEffectPart.Count > 0)
-                    {
-                        switch (selectedEffectPart[0].I_02)
-                        {
-                            case AssetType.PBIND:
-                                tabControl.SelectedIndex = (int)Tabs.Pbind;
-                                pbindDataGrid.SelectedItem = selectedEffectPart[0].AssetRef;
-                                pbindDataGrid.ScrollIntoView(selectedEffectPart[0].AssetRef);
-                                break;
-                            case AssetType.TBIND:
-                                tabControl.SelectedIndex = (int)Tabs.Tbind;
-                                tbindDataGrid.SelectedItem = selectedEffectPart[0].AssetRef;
-                                tbindDataGrid.ScrollIntoView(selectedEffectPart[0].AssetRef);
-                                break;
-                            case AssetType.CBIND:
-                                tabControl.SelectedIndex = (int)Tabs.Cbind;
-                                cbindDataGrid.SelectedItem = selectedEffectPart[0].AssetRef;
-                                cbindDataGrid.ScrollIntoView(selectedEffectPart[0].AssetRef);
-                                break;
-                            case AssetType.EMO:
-                                tabControl.SelectedIndex = (int)Tabs.Emo;
-                                emoDataGrid.SelectedItem = selectedEffectPart[0].AssetRef;
-                                emoDataGrid.ScrollIntoView(selectedEffectPart[0].AssetRef);
-                                break;
-                            case AssetType.LIGHT:
-                                tabControl.SelectedIndex = (int)Tabs.Light;
-                                lightDataGrid.SelectedItem = selectedEffectPart[0].AssetRef;
-                                lightDataGrid.ScrollIntoView(selectedEffectPart[0].AssetRef);
-                                break;
-                        }
-                    }
-                }
-
-            }
-            catch (Exception ex)
-            {
-                SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void EffectPart_ChangeAssetContextMenu_Click(object sender, RoutedEventArgs e)
-        {
-            EffectPart_ChangeAsset_Click(null, null);
-        }
-
-        private void EffectPart_PasteValues_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (effectContainerFile.SelectedEffect == null) return;
-                if (effectContainerFile.SelectedEffect.SelectedEffectPart == null) return;
-
-                ObservableCollection<EffectPart> effectParts = (ObservableCollection<EffectPart>)Clipboard.GetData(ClipboardDataTypes.EffectPart);
-
-                if (effectParts == null) return;
-                if (effectParts.Count != 1) return;
-
-                effectParts[0].AssetRef = effectContainerFile.AddAsset(effectParts[0].AssetRef, effectParts[0].I_02);
-                effectContainerFile.SelectedEffect.SelectedEffectPart.CopyValues(effectParts[0]);
-            }
-            catch (Exception ex)
-            {
-                SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured while copying the EffectParts.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void EffectPart_DoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            EffectPart_GoToAsset_Click(null, null);
-        }
-
-        private void Effect_Export(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                var selectedEffects = effectDataGrid.SelectedItems.Cast<Effect>().ToList();
-
-                if (selectedEffects.Count > 0)
-                {
-                    ExportVfxPackage(selectedEffects);
-                }
-            }
-            catch (Exception ex)
-            {
-                SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An unknown error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        //Effect Options
-        private void EffectOptions_AddEffect_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                Effect newEffect = new Effect();
-                newEffect.EffectParts = new ObservableCollection<EffectPart>();
-                newEffect.IndexNum = effectContainerFile.GetUnusedEffectId(0);
-                effectContainerFile.Effects.Add(newEffect);
-                effectDataGrid.SelectedItem = newEffect;
-                effectDataGrid.Items.SortDescriptions.Add(new SortDescription("Index", ListSortDirection.Ascending));
-                effectDataGrid.ScrollIntoView(newEffect);
-
-                effectContainerFile.UpdateEffectFilter();
-            }
-            catch (Exception ex)
-            {
-                SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-
-        }
-
-        private void EffectOptions_ImportEffectsFromFile_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                var importEffectFile = LoadEffectContainerFile();
-                if (importEffectFile != null)
-                    EffectOptions_ImportEffects(importEffectFile.Effects);
-            }
-            catch (Exception ex)
-            {
-                SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void EffectOptions_ImportEffectsFromCharacter_Click(object sender, RoutedEventArgs e)
-        {
-            if (!GameDirectoryCheck()) return;
-            try
-            {
-                var importEffectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.Character);
-                if (importEffectFile != null)
-                    EffectOptions_ImportEffects(importEffectFile.Effects);
-            }
-            catch (Exception ex)
-            {
-                SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void EffectOptions_ImportEffectsFromSuper_Click(object sender, RoutedEventArgs e)
-        {
-            if (!GameDirectoryCheck()) return;
-            try
-            {
-                var importEffectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.SuperSkill);
-                if (importEffectFile != null)
-                    EffectOptions_ImportEffects(importEffectFile.Effects);
-            }
-            catch (Exception ex)
-            {
-                SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void EffectOptions_ImportEffectsFromUltimate_Click(object sender, RoutedEventArgs e)
-        {
-            if (!GameDirectoryCheck()) return;
-            try
-            {
-                var importEffectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.UltimateSkill);
-                if (importEffectFile != null)
-                    EffectOptions_ImportEffects(importEffectFile.Effects);
-            }
-            catch (Exception ex)
-            {
-                SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void EffectOptions_ImportEffectsFromEvasive_Click(object sender, RoutedEventArgs e)
-        {
-            if (!GameDirectoryCheck()) return;
-            try
-            {
-                var importEffectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.EvasiveSkill);
-                if (importEffectFile != null)
-                    EffectOptions_ImportEffects(importEffectFile.Effects);
-            }
-            catch (Exception ex)
-            {
-                SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void EffectOptions_ImportEffectsFromBlast_Click(object sender, RoutedEventArgs e)
-        {
-            if (!GameDirectoryCheck()) return;
-            try
-            {
-                var importEffectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.BlastSkill);
-                if (importEffectFile != null)
-                    EffectOptions_ImportEffects(importEffectFile.Effects);
-            }
-            catch (Exception ex)
-            {
-                SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void EffectOptions_ImportEffectsFromAwoken_Click(object sender, RoutedEventArgs e)
-        {
-            if (!GameDirectoryCheck()) return;
-            try
-            {
-                var importEffectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.AwokenSkill);
-                if (importEffectFile != null)
-                    EffectOptions_ImportEffects(importEffectFile.Effects);
-            }
-            catch (Exception ex)
-            {
-                SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void EffectOptions_ImportEffectsFromCMN_Click(object sender, RoutedEventArgs e)
-        {
-            if (!GameDirectoryCheck()) return;
-            try
-            {
-                var importEffectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.CMN);
-                if (importEffectFile != null)
-                    EffectOptions_ImportEffects(importEffectFile.Effects);
-            }
-            catch (Exception ex)
-            {
-                SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void EffectOptions_ImportEffectsFromDemo_Click(object sender, RoutedEventArgs e)
-        {
-            if (!GameDirectoryCheck()) return;
-            try
-            {
-                var importEffectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.Demo);
-                if (importEffectFile != null)
-                    EffectOptions_ImportEffects(importEffectFile.Effects);
-            }
-            catch (Exception ex)
-            {
-                SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void EffectOptions_ImportEffectsFromCache_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                MenuItem selectedMenuItem = e.OriginalSource as MenuItem;
-
-                if (selectedMenuItem != null)
-                {
-                    CachedFile cachedFile = selectedMenuItem.DataContext as CachedFile;
-
-                    if (cachedFile != null)
-                    {
-                        if (cachedFile.effectContainerFile != null)
-                            EffectOptions_ImportEffects(cachedFile.effectContainerFile.Effects);
-                    }
-                    else
-                    {
-                        MessageBox.Show("There are no cached files.", "From Cached Files", MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void EffectOptions_ImportEffects(ObservableCollection<Effect> effects)
-        {
-            if (effects != null)
-            {
-                Forms.EffectSelector effectSelector = new Forms.EffectSelector(effects, effectContainerFile, Application.Current.MainWindow);
-                effectSelector.ShowDialog();
-
-                if (effectSelector.SelectedEffects != null)
-                {
-                    foreach (var effect in effectSelector.SelectedEffects)
-                    {
-                        var newEffect = effect.Clone();
-                        newEffect.IndexNum = effect.ImportIdIncrease;
-                        effectContainerFile.AddEffect(newEffect, true);
-                    }
-
-                    //Update UI
-                    if (effectSelector.SelectedEffects.Count > 0)
-                    {
-                        RefreshCounts();
-                        effectDataGrid.SelectedItem = effectSelector.SelectedEffects[0];
-                        effectDataGrid.ScrollIntoView(effectSelector.SelectedEffects);
-                        effectContainerFile.UpdateEffectFilter();
-                    }
-                }
-            }
-
-            try
-            {
-                effectDataGrid.Items.SortDescriptions.Add(new SortDescription("Index", ListSortDirection.Ascending));
-            }
-            catch
-            {
-
-            }
-        }
-
-        private void ListBox_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            //Force select the parent effect when right-clicking an effect part.
-            ForceSelectEffect(sender as ListBox);
-        }
-
-        private void ListBox_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            //Force select the parent effect when left-clicking.
-            //When Left Ctrl + Left Clicking the selection event gets passed to the parent datagrid, which unselects/selects the effect, so this is needed
-            ForceSelectEffect(sender as ListBox);
-        }
-
-        private void ForceSelectEffect(ListBox sender)
-        {
-            try
-            {
-                ListBox listBox = sender;
-
-                if (listBox != null)
-                {
-                    var selectedEffectPart = listBox.SelectedItem as EffectPart;
-
-                    if (selectedEffectPart != null)
-                    {
-                        var parentEffect = effectContainerFile.GetEffectAssociatedWithEffectPart(selectedEffectPart);
-
-                        if (parentEffect != null)
-                        {
-                            effectDataGrid.SelectedItem = parentEffect;
-                        }
-                    }
-                }
-
-            }
-            catch (Exception ex)
-            {
-                SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("ListBox_MouseRightButtonUp: Failed to force select parent effect.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void EffectOptions_ImportEffects_FileDrop(object sender, DragEventArgs e)
-        {
-            try
-            {
-                if (e.Data.GetDataPresent(DataFormats.FileDrop))
-                {
-                    string[] droppedFilePaths = e.Data.GetData(DataFormats.FileDrop, true) as string[];
-
-                    if (droppedFilePaths.Length == 1)
-                    {
-                        switch (System.IO.Path.GetExtension(droppedFilePaths[0]))
-                        {
-                            case EffectContainerFile.ZipExtension:
-                            case ".eepk":
-                                var importEffectFile = LoadEffectContainerFile(droppedFilePaths[0]);
-                                if (importEffectFile != null)
-                                    EffectOptions_ImportEffects(importEffectFile.Effects);
-
-                                e.Handled = true;
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(Application.Current.MainWindow, String.Format("The dropped file could not be opened.\n\nThe reason given by the system: {0}", ex.Message), "File Drop", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-
-        }
-
-        private void RefreshCounts()
-        {
-            effectContainerFile.Emo.RefreshAssetCount();
-            effectContainerFile.Pbind.RefreshAssetCount();
-            effectContainerFile.Tbind.RefreshAssetCount();
-            effectContainerFile.Cbind.RefreshAssetCount();
-            effectContainerFile.LightEma.RefreshAssetCount();
-        }
-
-        //EffectPart Details
-        private void EffectPart_ChangeAsset_Click(object sender, RoutedEventArgs e)
-        {
-            if (effectContainerFile.SelectedEffect != null)
-            {
-                if (effectContainerFile.SelectedEffect.SelectedEffectPart != null)
-                {
-                    Forms.AssetSelector assetSel = new Forms.AssetSelector(effectContainerFile, false, false, effectContainerFile.SelectedEffect.SelectedEffectPart.I_02, this, effectContainerFile.SelectedEffect.SelectedEffectPart.AssetRef);
-                    assetSel.ShowDialog();
-
-                    if (assetSel.SelectedAsset != null)
-                    {
-                        effectContainerFile.SelectedEffect.SelectedEffectPart.I_02 = assetSel.SelectedAssetType;
-                        effectContainerFile.SelectedEffect.SelectedEffectPart.AssetRef = assetSel.SelectedAsset;
-                    }
-                }
-            }
-        }
-
-        
-
-        //Window Finding
-        public Window GetActiveForm<T>() where T : Window
-        {
-            foreach (var window in App.Current.Windows)
-            {
-                if (window is T)
-                {
-                    return (Window)window;
-                }
-            }
-
-            return null;
-        }
-
-        public Forms.EmbEditForm GetActiveEmbForm(EMB_File _embFile)
-        {
-            foreach (var window in App.Current.Windows)
-            {
-                if (window is Forms.EmbEditForm)
-                {
-                    Forms.EmbEditForm _form = (Forms.EmbEditForm)window;
-
-                    if (_form.EmbFile == _embFile)
-                        return _form;
-                }
-            }
-
-            return null;
-        }
-
-        public Forms.EmmEditForm GetActiveEmmForm(EMM_File _emmFile)
-        {
-            foreach (var window in App.Current.Windows)
-            {
-                if (window is Forms.EmmEditForm)
-                {
-                    Forms.EmmEditForm _form = (Forms.EmmEditForm)window;
-
-                    if (_form.EmmFile == _emmFile)
-                        return _form;
-                }
-            }
-
-            return null;
-        }
-
-        public Forms.EMP.EMP_Editor GetActiveEmpForm(EMP_File _empFile)
-        {
-            foreach (var window in App.Current.Windows)
-            {
-                if (window is Forms.EMP.EMP_Editor)
-                {
-                    Forms.EMP.EMP_Editor _form = (Forms.EMP.EMP_Editor)window;
-
-                    if (_form.empFile == _empFile)
-                        return _form;
-                }
-            }
-
-            return null;
-        }
-
-        public void CloseEmpForm(EMP_File empFile)
-        {
-            var form = GetActiveEmpForm(empFile);
-
-            if (form != null)
-                form.Close();
-        }
-
-        public bool GameDirectoryCheck()
-        {
-            if (!GeneralInfo.AppSettings.ValidGameDir)
-            {
-                MessageBox.Show("Please set the game directory in the settings menu to use this option (File > Settings > Game Directory).", "Invalid Game Directory", MessageBoxButton.OK, MessageBoxImage.Information);
-                return false;
-            }
-            return true;
-        }
-
-        //Export
-        public void ExportVfxPackage(IList<Effect> selEffects = null)
-        {
-            if (effectContainerFile == null) return;
-
-            try
-            {
-                //if selEffects is null, then pass in all the effects.
-                IList<Effect> effects = (selEffects != null) ? selEffects : effectContainerFile.Effects;
-
-                Forms.EffectSelector effectSelector = new Forms.EffectSelector(effects, effectContainerFile, App.Current.MainWindow, Forms.EffectSelector.Mode.ExportEffect);
-                effectSelector.ShowDialog();
-
-                if (effectSelector.SelectedEffects != null)
-                {
-                    EffectContainerFile vfxPackage = EffectContainerFile.New();
-                    vfxPackage.saveFormat = SaveFormat.ZIP;
-
-                    foreach (var effect in effectSelector.SelectedEffects)
-                    {
-                        var newEffect = effect.Clone();
-                        newEffect.IndexNum = effect.ImportIdIncrease;
-                        vfxPackage.AddEffect(newEffect);
-                    }
-
-                    //Get path to save to
-                    SaveFileDialog saveDialog = new SaveFileDialog();
-                    saveDialog.Title = "Export to .vfxpackage";
-                    saveDialog.Filter = string.Format("{1} File |*{0}", EffectContainerFile.ZipExtension, EffectContainerFile.ZipExtension.ToUpper().Remove(0, 1));
-                    saveDialog.AddExtension = true;
-
-                    if (saveDialog.ShowDialog() == true)
-                    {
-                        vfxPackage.Directory = string.Format("{0}/{1}", System.IO.Path.GetDirectoryName(saveDialog.FileName), System.IO.Path.GetFileNameWithoutExtension(saveDialog.FileName));
-                        vfxPackage.Name = System.IO.Path.GetFileNameWithoutExtension(saveDialog.FileName);
-                        vfxPackage.SaveVfx2();
-
-                        MessageBox.Show("Export successful.", "Export", MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
-
-                }
-
-            }
-            catch (Exception ex)
-            {
-                SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void MenuItem_MouseMove(object sender, MouseEventArgs e)
-        {
-            MenuItem menuItem = (MenuItem)sender;
-            menuItem.IsSubmenuOpen = true;
-        }
-
-        //Filtering
-        private void Search_Click(object sender, RoutedEventArgs e)
-        {
-            if (effectContainerFile == null) return;
-
-            switch ((Tabs)tabControl.SelectedIndex)
-            {
-                case Tabs.Effect:
-                    effectContainerFile.NewEffectFilter(SearchFilter);
-                    effectContainerFile.UpdateEffectFilter();
-                    break;
-                case Tabs.Pbind:
-                    effectContainerFile.Pbind.NewAssetFilter(SearchFilter);
-                    effectContainerFile.Pbind.UpdateAssetFilter();
-                    break;
-                case Tabs.Tbind:
-                    effectContainerFile.Tbind.NewAssetFilter(SearchFilter);
-                    effectContainerFile.Tbind.UpdateAssetFilter();
-                    break;
-                case Tabs.Cbind:
-                    effectContainerFile.Cbind.NewAssetFilter(SearchFilter);
-                    effectContainerFile.Cbind.UpdateAssetFilter();
-                    break;
-                case Tabs.Emo:
-                    effectContainerFile.Emo.NewAssetFilter(SearchFilter);
-                    effectContainerFile.Emo.UpdateAssetFilter();
-                    break;
-                case Tabs.Light:
-                    effectContainerFile.LightEma.NewAssetFilter(SearchFilter);
-                    effectContainerFile.LightEma.UpdateAssetFilter();
-                    break;
-            }
-        }
-
-        private void Search_Clear(object sender, RoutedEventArgs e)
-        {
-            if (effectContainerFile == null) return;
-
-            SearchFilter = string.Empty;
-
-            switch ((Tabs)tabControl.SelectedIndex)
-            {
-                case Tabs.Effect:
-                    effectContainerFile.EffectSearchFilter = string.Empty;
-                    effectContainerFile.UpdateEffectFilter();
-                    break;
-                case Tabs.Pbind:
-                    effectContainerFile.Pbind.AssetSearchFilter = string.Empty;
-                    effectContainerFile.Pbind.UpdateAssetFilter();
-                    break;
-                case Tabs.Tbind:
-                    effectContainerFile.Tbind.AssetSearchFilter = string.Empty;
-                    effectContainerFile.Tbind.UpdateAssetFilter();
-                    break;
-                case Tabs.Cbind:
-                    effectContainerFile.Cbind.AssetSearchFilter = string.Empty;
-                    effectContainerFile.Cbind.UpdateAssetFilter();
-                    break;
-                case Tabs.Emo:
-                    effectContainerFile.Emo.AssetSearchFilter = string.Empty;
-                    effectContainerFile.Emo.UpdateAssetFilter();
-                    break;
-                case Tabs.Light:
-                    effectContainerFile.LightEma.AssetSearchFilter = string.Empty;
-                    effectContainerFile.LightEma.UpdateAssetFilter();
-                    break;
-            }
-
         }
 
     }

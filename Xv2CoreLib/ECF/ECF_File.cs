@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xv2CoreLib.HslColor;
+using Xv2CoreLib.Resource.UndoRedo;
 using YAXLib;
 
 namespace Xv2CoreLib.ECF
@@ -48,13 +49,13 @@ namespace Xv2CoreLib.ECF
             return colors;
         }
 
-        public void ChangeHue(double hue, double saturation, double lightness)
+        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos)
         {
             if (Entries == null) return;
 
             foreach (var entry in Entries)
             {
-                entry.ChangeHue(hue, saturation, lightness);
+                entry.ChangeHue(hue, saturation, lightness, undos);
             }
         }
     }
@@ -287,7 +288,7 @@ namespace Xv2CoreLib.ECF
             return null;
         }
 
-        public void ChangeHue(double hue, double saturation, double lightness)
+        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos)
         {
             //Diffuse Color
             if (F_00 != 0 || F_04 != 0 || F_08 != 0)
@@ -299,6 +300,11 @@ namespace Xv2CoreLib.ECF
                     newCol1.ChangeSaturation(saturation);
                     newCol1.ChangeLightness(lightness);
                     RgbColor convertedColor = newCol1.ToRgb();
+
+                    undos.Add(new UndoableProperty<ECF_Entry>(nameof(F_00), this, F_00, (float)convertedColor.R));
+                    undos.Add(new UndoableProperty<ECF_Entry>(nameof(F_04), this, F_04, (float)convertedColor.G));
+                    undos.Add(new UndoableProperty<ECF_Entry>(nameof(F_08), this, F_08, (float)convertedColor.B));
+
                     F_00 = (float)convertedColor.R;
                     F_04 = (float)convertedColor.G;
                     F_08 = (float)convertedColor.B;
@@ -315,6 +321,11 @@ namespace Xv2CoreLib.ECF
                     newCol1.ChangeSaturation(saturation);
                     newCol1.ChangeLightness(lightness);
                     RgbColor convertedColor = newCol1.ToRgb();
+
+                    undos.Add(new UndoableProperty<ECF_Entry>(nameof(F_16), this, F_16, (float)convertedColor.R));
+                    undos.Add(new UndoableProperty<ECF_Entry>(nameof(F_20), this, F_20, (float)convertedColor.G));
+                    undos.Add(new UndoableProperty<ECF_Entry>(nameof(F_24), this, F_24, (float)convertedColor.B));
+
                     F_16 = (float)convertedColor.R;
                     F_20 = (float)convertedColor.G;
                     F_24 = (float)convertedColor.B;
@@ -331,6 +342,11 @@ namespace Xv2CoreLib.ECF
                     newCol1.ChangeSaturation(saturation);
                     newCol1.ChangeLightness(lightness);
                     RgbColor convertedColor = newCol1.ToRgb();
+
+                    undos.Add(new UndoableProperty<ECF_Entry>(nameof(F_32), this, F_32, (float)convertedColor.R));
+                    undos.Add(new UndoableProperty<ECF_Entry>(nameof(F_36), this, F_36, (float)convertedColor.G));
+                    undos.Add(new UndoableProperty<ECF_Entry>(nameof(F_40), this, F_40, (float)convertedColor.B));
+
                     F_32 = (float)convertedColor.R;
                     F_36 = (float)convertedColor.G;
                     F_40 = (float)convertedColor.B;
@@ -339,13 +355,13 @@ namespace Xv2CoreLib.ECF
 
             if(Type0 != null)
             {
-                ChangeHueForAnimations(hue, saturation, lightness, ECF.Type0.Parameter.DiffuseColor);
-                ChangeHueForAnimations(hue, saturation, lightness, ECF.Type0.Parameter.SpecularColor);
-                ChangeHueForAnimations(hue, saturation, lightness, ECF.Type0.Parameter.AmbientColor);
+                ChangeHueForAnimations(hue, saturation, lightness, ECF.Type0.Parameter.DiffuseColor, undos);
+                ChangeHueForAnimations(hue, saturation, lightness, ECF.Type0.Parameter.SpecularColor, undos);
+                ChangeHueForAnimations(hue, saturation, lightness, ECF.Type0.Parameter.AmbientColor, undos);
             }
         }
 
-        private void ChangeHueForAnimations(double hue, double saturation, double lightness, Type0.Parameter parameter)
+        private void ChangeHueForAnimations(double hue, double saturation, double lightness, Type0.Parameter parameter, List<IUndoRedo> undos)
         {
             Type0 r = Type0.FirstOrDefault(e => e.I_01_a == ECF.Type0.Component.R && e.I_00 == parameter);
             Type0 g = Type0.FirstOrDefault(e => e.I_01_a == ECF.Type0.Component.G && e.I_00 == parameter);
@@ -365,9 +381,9 @@ namespace Xv2CoreLib.ECF
                     color.ChangeLightness(lightness);
                     RgbColor convertedColor = color.ToRgb();
 
-                    r_frame.Float = (float)convertedColor.R;
-                    g.SetValue(r_frame.Index, (float)convertedColor.G);
-                    b.SetValue(r_frame.Index, (float)convertedColor.B);
+                    r.SetValue(r_frame.Index, (float)convertedColor.R, undos);
+                    g.SetValue(r_frame.Index, (float)convertedColor.G, undos);
+                    b.SetValue(r_frame.Index, (float)convertedColor.B, undos);
                 }
             }
 
@@ -503,13 +519,18 @@ namespace Xv2CoreLib.ECF
             return CalculateKeyframeValue(time);
         }
 
-        public void SetValue(int time, float value)
+        public void SetValue(int time, float value, List<IUndoRedo> undos = null)
         {
             foreach (var keyframe in Keyframes)
             {
                 if (keyframe.Index == time)
                 {
+                    float oldValue = keyframe.Float;
                     keyframe.Float = value;
+
+                    if (undos != null)
+                        undos.Add(new UndoableProperty<Type0_Keyframe>(nameof(keyframe.Float), keyframe, oldValue, keyframe.Float));
+
                     return;
                 }
             }

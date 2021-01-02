@@ -73,6 +73,11 @@ namespace Xv2CoreLib.Resource.UndoRedo
             NotifyPropertyChanged("RedoDescription");
         }
 
+        public void AddCompositeUndo(List<IUndoRedo> undos, string message)
+        {
+            AddUndo(new CompositeUndo(undos, message));
+        }
+
 #if NvvmLight
         public RelayCommand RedoCommand => new RelayCommand(Redo, CanRedo);
 

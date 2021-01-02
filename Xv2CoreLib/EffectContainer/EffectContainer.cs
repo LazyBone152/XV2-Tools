@@ -308,6 +308,16 @@ namespace Xv2CoreLib.EffectContainer
             _viewEffects.Filter = new Predicate<object>(EffectFilterCheck);
             NotifyPropertyChanged("ViewEffects");
         }
+        
+        public void UpdateAllFilters()
+        {
+            UpdateEffectFilter();
+            Pbind.UpdateAssetFilter();
+            Tbind.UpdateAssetFilter();
+            Cbind.UpdateAssetFilter();
+            LightEma.UpdateAssetFilter();
+            Emo.UpdateAssetFilter();
+        }
         #endregion
 
         #region UndoableFunctions
@@ -318,9 +328,16 @@ namespace Xv2CoreLib.EffectContainer
         public void UndoableAddEffects(IList<Effect> effects, bool wasForPaste = false)
         {
             var undos = AddEffects(effects);
+            undos.Add(new UndoActionDelegate(this, nameof(UpdateEffectFilter), true));
             UndoManager.Instance.AddUndo(new CompositeUndo(undos, (wasForPaste) ? "Paste Effects" : "Add Effects"));
         }
         
+        public void UndoableAddAsset(Asset assetToAdd, AssetType type)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+            AddAsset(assetToAdd, type, undos);
+            UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Add Asset"));
+        }
 
         #endregion
 
@@ -349,11 +366,10 @@ namespace Xv2CoreLib.EffectContainer
         /// </summary>
         public Asset AddAsset(Asset assetToAdd, AssetType type)
         {
-            var undos = new List<IUndoRedo>();
-            return AddAsset(assetToAdd, type, undos);
+            return AddAsset(assetToAdd, type, new List<IUndoRedo>());
         }
         
-        private Asset AddAsset(Asset assetToAdd, AssetType type, List<IUndoRedo> undos)
+        public Asset AddAsset(Asset assetToAdd, AssetType type, List<IUndoRedo> undos)
         {
             Asset existingAsset = AssetExists(assetToAdd, type);
             if (existingAsset == null)
@@ -1899,8 +1915,10 @@ namespace Xv2CoreLib.EffectContainer
         /// </summary>
         /// <param name="oldAsset"></param>
         /// <param name="newAsset"></param>
-        public void AssetRefRefactor(Asset oldAsset, Asset newAsset)
+        public void AssetRefRefactor(Asset oldAsset, Asset newAsset, List<IUndoRedo> undos = null)
         {
+            if (undos == null) undos = new List<IUndoRedo>();
+
             foreach (var effect in Effects)
             {
                 start:
@@ -1912,11 +1930,13 @@ namespace Xv2CoreLib.EffectContainer
                         //Else we update AssetRef with newAsset (for Asset Replace)
                         if (newAsset == null)
                         {
+                            undos.Add(new UndoableListRemove<EffectPart>(effect.EffectParts, effect.EffectParts[i]));
                             effect.EffectParts.RemoveAt(i);
                             goto start;
                         }
                         else
                         {
+                            undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.AssetRef), effect.EffectParts[i], effect.EffectParts[i].AssetRef, newAsset));
                             effect.EffectParts[i].AssetRef = newAsset;
                         }
                     }
@@ -2221,7 +2241,7 @@ namespace Xv2CoreLib.EffectContainer
         /// </summary>
         /// <param name="type">PBIND or TBIND.</param>
         /// <returns>The amount of textures that were removed.</returns>
-        public int RemoveUnusedAssets(AssetType type)
+        public int RemoveUnusedAssets(AssetType type, List<IUndoRedo> undos)
         {
             int removed = 0;
             AssetContainerTool container = GetAssetContainer(type);
@@ -2230,6 +2250,7 @@ namespace Xv2CoreLib.EffectContainer
             {
                 if (!IsAssetUsed(container.Assets[i]))
                 {
+                    undos.Add(new UndoableListRemove<Asset>(container.Assets, container.Assets[i]));
                     container.Assets.RemoveAt(i);
                     removed++;
                 }
@@ -2243,9 +2264,10 @@ namespace Xv2CoreLib.EffectContainer
         /// </summary>
         /// <param name="type">PBIND or TBIND.</param>
         /// <returns>The amount of textures that were removed.</returns>
-        public int RemoveUnusedTextures(AssetType type)
+        public int RemoveUnusedTextures(AssetType type, List<IUndoRedo> undos = null)
         {
             if (type != AssetType.PBIND && type != AssetType.TBIND) throw new InvalidOperationException(String.Format("RemoveUnusedTextures: Method was called with type parameter = {0}, which is invalid (expecting either PBIND or TBIND).", type));
+            if (undos == null) undos = new List<IUndoRedo>();
 
             int removed = 0;
             AssetContainerTool container = GetAssetContainer(type);
@@ -2254,6 +2276,7 @@ namespace Xv2CoreLib.EffectContainer
             {
                 if (!container.IsTextureUsed(container.File3_Ref.Entry[i]))
                 {
+                    undos.Add(new UndoableListRemove<EmbEntry>(container.File3_Ref.Entry, container.File3_Ref.Entry[i]));
                     container.File3_Ref.Entry.RemoveAt(i);
                     removed++;
                 }
@@ -2267,10 +2290,11 @@ namespace Xv2CoreLib.EffectContainer
         /// </summary>
         /// <param name="type">PBIND or TBIND.</param>
         /// <returns>The amount of merged textures.</returns>
-        public int MergeDuplicateTextures(AssetType type)
+        public int MergeDuplicateTextures(AssetType type, List<IUndoRedo> undos = null)
         {
             if (type != AssetType.PBIND && type != AssetType.TBIND) throw new InvalidOperationException(String.Format("MergeDuplicateTextures: Method was called with type parameter = {0}, which is invalid (expecting either PBIND or TBIND).", type));
-            
+            if (undos == null) undos = new List<IUndoRedo>();
+
             AssetContainerTool container = GetAssetContainer(type);
 
             int duplicateCount = 0;
@@ -2295,9 +2319,10 @@ namespace Xv2CoreLib.EffectContainer
                 {
                     foreach (var duplicate in Duplicates)
                     {
-                        container.RefactorTextureRef(duplicate, texture1);
+                        container.RefactorTextureRef(duplicate, texture1, undos);
 
                         //Delete the duplicate
+                        undos.Add(new UndoableListRemove<EmbEntry>(container.File3_Ref.Entry, duplicate));
                         container.File3_Ref.Entry.Remove(duplicate);
                     }
                     goto restart;
@@ -2313,9 +2338,10 @@ namespace Xv2CoreLib.EffectContainer
         /// </summary>
         /// <param name="type">PBIND or TBIND</param>
         /// <returns>The amount of materials that were removed.</returns>
-        public int RemoveUnusedMaterials(AssetType type)
+        public int RemoveUnusedMaterials(AssetType type, List<IUndoRedo> undos = null)
         {
             if (type != AssetType.PBIND && type != AssetType.TBIND) throw new InvalidOperationException(String.Format("RemoveUnusedMaterials: Method was called with type parameter = {0}, which is invalid (expecting either PBIND or TBIND).", type));
+            if (undos == null) undos = new List<IUndoRedo>();
 
             int removed = 0;
             AssetContainerTool container = GetAssetContainer(type);
@@ -2324,6 +2350,7 @@ namespace Xv2CoreLib.EffectContainer
             {
                 if (!container.IsMaterialUsed(container.File2_Ref.Materials[i]))
                 {
+                    undos.Add(new UndoableListRemove<Material>(container.File2_Ref.Materials, container.File2_Ref.Materials[i]));
                     container.File2_Ref.Materials.RemoveAt(i);
                     removed++;
                 }
@@ -2337,9 +2364,10 @@ namespace Xv2CoreLib.EffectContainer
         /// </summary>
         /// <param name="type">PBIND or TBIND.</param>
         /// <returns>The amount of merged materials.</returns>
-        public int MergeDuplicateMaterials(AssetType type)
+        public int MergeDuplicateMaterials(AssetType type, List<IUndoRedo> undos = null)
         {
             if (type != AssetType.PBIND && type != AssetType.TBIND) throw new InvalidOperationException(String.Format("MergeDuplicateMaterials: Method was called with type parameter = {0}, which is invalid (expecting either PBIND or TBIND).", type));
+            if (undos == null) undos = new List<IUndoRedo>();
 
             AssetContainerTool container = GetAssetContainer(type);
 
@@ -2365,9 +2393,10 @@ namespace Xv2CoreLib.EffectContainer
                 {
                     foreach (var duplicate in Duplicates)
                     {
-                        container.RefactorMaterialRef(duplicate, material1);
+                        container.RefactorMaterialRef(duplicate, material1, undos);
 
                         //Delete the duplicate
+                        undos.Add(new UndoableListRemove<Material>(container.File2_Ref.Materials, duplicate));
                         container.File2_Ref.Materials.Remove(duplicate);
                     }
                     goto restart;
@@ -2379,9 +2408,13 @@ namespace Xv2CoreLib.EffectContainer
             return duplicateCount;
         }
 
-        public void RemoveAsset(Asset asset, AssetType type)
+        public void RemoveAsset(Asset asset, AssetType type, List<IUndoRedo> undos = null)
         {
             AssetContainerTool container = GetAssetContainer(type);
+
+            if (undos != null && container.Assets.Contains(asset))
+                undos.Add(new UndoableListRemove<Asset>(container.Assets, asset));
+
             container.Assets.Remove(asset);
         }
         #endregion
@@ -2504,7 +2537,7 @@ namespace Xv2CoreLib.EffectContainer
         internal AssetType ContainerAssetType { get; set; }
 
         private bool _looseFilesValue = false;
-        public bool LooseFiles  //true = File1_Name is == NULL, meaning the assets are not stored in a emb (EMO and LIGHT.EMA will always be true)
+        public bool LooseFiles  //true = File1_Name is == NULL, meaning the assets are not stored in a emb (EMO will always be true)
         {
             get
             {
@@ -2515,8 +2548,25 @@ namespace Xv2CoreLib.EffectContainer
                 if (value != this._looseFilesValue)
                 {
                     this._looseFilesValue = value;
-                    NotifyPropertyChanged("LooseFiles");
+                    NotifyPropertyChanged(nameof(LooseFiles));
+                    NotifyPropertyChanged(nameof(UndoableLooseFiles));
                 }
+            }
+        }
+        public bool UndoableLooseFiles
+        {
+            get
+            {
+                return LooseFiles;
+            }
+            set
+            {
+                if(LooseFiles != value)
+                {
+                    UndoManager.Instance.AddUndo(new UndoableProperty<AssetContainerTool>(nameof(LooseFiles), this, LooseFiles, value, "Loose Files"));
+                    LooseFiles = value;
+                }
+
             }
         }
 
@@ -3332,27 +3382,35 @@ namespace Xv2CoreLib.EffectContainer
 
 
         #region Editor
-        public void DeleteTexture(EmbEntry embEntry)
+        public void DeleteTexture(EmbEntry embEntry, List<IUndoRedo> undos = null)
         {
             if (ContainerAssetType != AssetType.PBIND && ContainerAssetType != AssetType.TBIND)
                 throw new InvalidOperationException("DeleteTexture: AssetType is not PBIND or TBIND, cannot continue.");
 
+            if (undos != null && File3_Ref.Entry.Contains(embEntry))
+                undos.Add(new UndoableListRemove<EmbEntry>(File3_Ref.Entry, embEntry));
+
             File3_Ref.Entry.Remove(embEntry);
         }
 
-        public void DeleteMaterial(Material material)
+        public void DeleteMaterial(Material material, List<IUndoRedo> undos = null)
         {
             if (ContainerAssetType != AssetType.PBIND && ContainerAssetType != AssetType.TBIND)
                 throw new InvalidOperationException("DeleteMaterial: AssetType is not PBIND or TBIND, cannot continue.");
+
+            if (undos != null && File2_Ref.Materials.Contains(material))
+                undos.Add(new UndoableListRemove<Material>(File2_Ref.Materials, material));
 
             File2_Ref.Materials.Remove(material);
         }
         
         //Refactoring
-        public void RefactorTextureRef(EMB_CLASS.EmbEntry oldRef, EMB_CLASS.EmbEntry newRef)
+        public void RefactorTextureRef(EMB_CLASS.EmbEntry oldRef, EMB_CLASS.EmbEntry newRef, List<IUndoRedo> undos = null)
         {
             if (ContainerAssetType != AssetType.PBIND && ContainerAssetType != AssetType.TBIND)
                 throw new InvalidOperationException("RefactorTextureRef: AssetType is not PBIND or TBIND, cannot continue.");
+
+            if (undos == null) undos = new List<IUndoRedo>();
 
             foreach (var asset in Assets)
             {
@@ -3362,6 +3420,7 @@ namespace Xv2CoreLib.EffectContainer
                     {
                         if (texture.TextureRef == oldRef)
                         {
+                            undos.Add(new UndoableProperty<EMP_TextureDefinition>(nameof(EMP_TextureDefinition.TextureRef), texture, oldRef, newRef));
                             texture.TextureRef = newRef;
                         }
                     }
@@ -3372,6 +3431,7 @@ namespace Xv2CoreLib.EffectContainer
                     {
                         if (texture.TextureRef == oldRef)
                         {
+                            undos.Add(new UndoableProperty<ETR_TextureEntry>(nameof(ETR_TextureEntry.TextureRef), texture, oldRef, newRef));
                             texture.TextureRef = newRef;
                         }
                     }
@@ -3379,11 +3439,12 @@ namespace Xv2CoreLib.EffectContainer
             }
         }
         
-        public void RefactorMaterialRef(Material oldRef, Material newRef)
+        public void RefactorMaterialRef(Material oldRef, Material newRef, List<IUndoRedo> undos = null)
         {
             if (ContainerAssetType != AssetType.PBIND && ContainerAssetType != AssetType.TBIND)
                 throw new InvalidOperationException("RefactorMaterialRef: AssetType is not PBIND or TBIND, cannot continue.");
 
+            if (undos == null) undos = new List<IUndoRedo>();
 
             foreach (var asset in Assets)
             {
@@ -3395,13 +3456,14 @@ namespace Xv2CoreLib.EffectContainer
                         {
                             if (particleEffect.Type_Texture.MaterialRef == oldRef)
                             {
+                                undos.Add(new UndoableProperty<TexturePart>(nameof(particleEffect.Type_Texture.MaterialRef), particleEffect.Type_Texture, oldRef, newRef));
                                 particleEffect.Type_Texture.MaterialRef = newRef;
                             }
                         }
 
                         if(particleEffect.ChildParticleEffects != null)
                         {
-                            RefactorMaterialRef_Recursive(particleEffect.ChildParticleEffects, oldRef, newRef);
+                            RefactorMaterialRef_Recursive(particleEffect.ChildParticleEffects, oldRef, newRef, undos);
                         }
                     }
                 }
@@ -3411,6 +3473,7 @@ namespace Xv2CoreLib.EffectContainer
                     {
                         if (etrEntry.MaterialRef == oldRef)
                         {
+                            undos.Add(new UndoableProperty<ETR_MainEntry>(nameof(ETR_MainEntry.MaterialRef), etrEntry, oldRef, newRef));
                             etrEntry.MaterialRef = newRef;
                         }
                     }
@@ -3418,7 +3481,7 @@ namespace Xv2CoreLib.EffectContainer
             }
         }
 
-        private void RefactorMaterialRef_Recursive(ObservableCollection<ParticleEffect> childParticleEffects, Material oldRef, Material newRef)
+        private void RefactorMaterialRef_Recursive(ObservableCollection<ParticleEffect> childParticleEffects, Material oldRef, Material newRef, List<IUndoRedo> undos)
         {
             foreach (var particleEffect in childParticleEffects)
             {
@@ -3426,13 +3489,14 @@ namespace Xv2CoreLib.EffectContainer
                 {
                     if (particleEffect.Type_Texture.MaterialRef == oldRef)
                     {
+                        undos.Add(new UndoableProperty<TexturePart>(nameof(particleEffect.Type_Texture.MaterialRef), particleEffect.Type_Texture, oldRef, newRef));
                         particleEffect.Type_Texture.MaterialRef = newRef;
                     }
                 }
 
                 if (particleEffect.ChildParticleEffects != null)
                 {
-                    RefactorMaterialRef_Recursive(particleEffect.ChildParticleEffects, oldRef, newRef);
+                    RefactorMaterialRef_Recursive(particleEffect.ChildParticleEffects, oldRef, newRef, undos);
                 }
             }
 
@@ -3834,6 +3898,13 @@ namespace Xv2CoreLib.EffectContainer
                 return FileName + Extension;
             }
         }
+        public string EmoFullFileNamePreview //UI Preview
+        {
+            get
+            {
+                return $"------> [FILE] {FullFileName}";
+            }
+        }
 
         private string _fileName = null;
         public string FileName
@@ -3847,8 +3918,9 @@ namespace Xv2CoreLib.EffectContainer
                 if (value != this._fileName)
                 {
                     this._fileName = value;
-                    NotifyPropertyChanged("FileName");
-                    NotifyPropertyChanged("FullFileName");
+                    NotifyPropertyChanged(nameof(FileName));
+                    NotifyPropertyChanged(nameof(FullFileName));
+                    NotifyPropertyChanged(nameof(EmoFullFileNamePreview));
                 }
             }
         }

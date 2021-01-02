@@ -20,6 +20,7 @@ using System.ComponentModel;
 using EEPK_Organiser.Misc;
 using EEPK_Organiser.View;
 using MahApps.Metro.Controls;
+using Xv2CoreLib.Resource.UndoRedo;
 
 namespace EEPK_Organiser.Forms
 {
@@ -98,6 +99,8 @@ namespace EEPK_Organiser.Forms
         //EMB Options
         private void EmbOptions_AddTexture_Click(object sender, RoutedEventArgs e)
         {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
             //Validation
             if(EmbFile.Entry.Count >= EMB_File.MAX_EFFECT_TEXTURES)
             {
@@ -113,6 +116,7 @@ namespace EEPK_Organiser.Forms
             openFile.ShowDialog(this);
 
             int renameCount = 0;
+            int added = 0;
 
             foreach(var file in openFile.FileNames)
             {
@@ -136,13 +140,14 @@ namespace EEPK_Organiser.Forms
                     //Validat the emb again, so we dont go over the limit
                     if (EmbFile.Entry.Count >= EMB_File.MAX_EFFECT_TEXTURES && IsForContainer)
                     {
-                        MessageBox.Show(String.Format("The maximum allowed amount of textures has been reached. Cannot add anymore.", EMB_File.MAX_EFFECT_TEXTURES), "Error", MessageBoxButton.OK, MessageBoxImage.Stop);
+                        MessageBox.Show(String.Format("The maximum allowed amount of textures has been reached. Cannot add anymore.\n\n{1} of the selected textures were added before the limit was reached.", EMB_File.MAX_EFFECT_TEXTURES, added), "Error", MessageBoxButton.OK, MessageBoxImage.Stop);
                         return;
                     }
 
                     //Add the emb
+                    undos.Add(new UndoableListAdd<EmbEntry>(EmbFile.Entry, newEntry));
                     EmbFile.Entry.Add(newEntry);
-                    RefreshTextureCount();
+                    added++;
 
                     if (newEntry.Name != fileName)
                     {
@@ -151,6 +156,11 @@ namespace EEPK_Organiser.Forms
                 }
             }
 
+            undos.Add(new UndoActionDelegate(this, nameof(RefreshTextureCount), true));
+            RefreshTextureCount();
+
+            if(added > 0) 
+                UndoManager.Instance.AddUndo(new CompositeUndo(undos, added > 1 ? "Add Textures" : "Add Texture"));
 
             if (renameCount > 0)
             {
@@ -231,21 +241,28 @@ namespace EEPK_Organiser.Forms
 
                     if (File.Exists(openFile.FileName) && !String.IsNullOrWhiteSpace(openFile.FileName))
                     {
+                        List<IUndoRedo> undos = new List<IUndoRedo>();
+
                         byte[] bytes = File.ReadAllBytes(openFile.FileName);
                         string name = System.IO.Path.GetFileName(openFile.FileName);
 
                         if (name != texture.Name)
                         {
-                            texture.Name = container.File3_Ref.GetUnusedName(name);
+                            string newName = container.File3_Ref.GetUnusedName(name);
+                            undos.Add(new UndoableProperty<EmbEntry>(nameof(texture.Name), texture, texture.Name, newName));
+                            texture.Name = newName;
                         }
 
-                        texture.Data = bytes.ToList();
+                        var newData = bytes.ToList();
+                        undos.Add(new UndoableProperty<EmbEntry>(nameof(texture.Data), texture, texture.Data, newData));
+                        texture.Data = newData;
 
                         if (texture.Name != name)
                         {
                             MessageBox.Show(String.Format("The new texture was automatically renamed because \"{0}\" was already used.", name), "Rename", MessageBoxButton.OK, MessageBoxImage.Information);
                         }
 
+                        UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Replace Texture"));
                     }
 
                 }
@@ -262,12 +279,14 @@ namespace EEPK_Organiser.Forms
         {
             if (!IsForContainer)
             {
-                MessageBox.Show("Merge not available for non-container EMBs.", "Merge", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Merge is not available for non-container EMBs.", "Merge", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
             try
             {
+                List<IUndoRedo> undos = new List<IUndoRedo>();
+
                 var texture = listBox_Textures.SelectedItem as EmbEntry;
                 List<EmbEntry> selectedTextures = listBox_Textures.SelectedItems.Cast<EmbEntry>().ToList();
                 selectedTextures.Remove(texture);
@@ -281,15 +300,20 @@ namespace EEPK_Organiser.Forms
                     {
                         foreach (var textureToRemove in selectedTextures)
                         {
-                            container.RefactorTextureRef(textureToRemove, texture);
+                            container.RefactorTextureRef(textureToRemove, texture, undos);
+                            undos.Add(new UndoableListRemove<EmbEntry>(container.File3_Ref.Entry, textureToRemove));
                             container.File3_Ref.Entry.Remove(textureToRemove);
                         }
+
+                        undos.Add(new UndoActionDelegate(this, nameof(RefreshTextureCount), true));
+                        UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Texture Merge"));
                     }
                 }
                 else
                 {
                     MessageBox.Show("Cannot merge with less than 2 textures selected.\n\nTip: Use Left Ctrl + Left Mouse Click to multi-select.", "Merge", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
+
             }
             catch (Exception ex)
             {
@@ -305,6 +329,7 @@ namespace EEPK_Organiser.Forms
             {
                 bool textureInUse = false;
                 List<EmbEntry> selectedTextures = listBox_Textures.SelectedItems.Cast<EmbEntry>().ToList();
+                List<IUndoRedo> undos = new List<IUndoRedo>();
 
                 if (selectedTextures.Count > 0)
                 {
@@ -319,16 +344,18 @@ namespace EEPK_Organiser.Forms
                             }
                             else
                             {
-                                container.DeleteTexture(texture);
+                                container.DeleteTexture(texture, undos);
                             }
                         }
                         else
                         {
                             //Non Container Mode. Always allow deleting.
+                            undos.Add(new UndoableListRemove<EmbEntry>(EmbFile.Entry, texture));
                             EmbFile.Entry.Remove(texture);
                         }
                     }
 
+                    undos.Add(new UndoActionDelegate(this, nameof(RefreshTextureCount), true));
                     RefreshTextureCount();
 
                     if (textureInUse && selectedTextures.Count == 1)
@@ -339,6 +366,8 @@ namespace EEPK_Organiser.Forms
                     {
                         MessageBox.Show("One or more of the selected textures cannot be deleted because they are currently being used.", "Delete", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
+
+                    UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Texture Delete"));
                 }
 
             }
@@ -416,6 +445,7 @@ namespace EEPK_Organiser.Forms
             try
             {
                 List<EmbEntry> selectedTextures = listBox_Textures.SelectedItems.Cast<EmbEntry>().ToList();
+                List<IUndoRedo> undos = new List<IUndoRedo>();
 
                 foreach(var texture in selectedTextures)
                 {
@@ -427,12 +457,16 @@ namespace EEPK_Organiser.Forms
 
                     var newTexture = texture.Clone();
                     newTexture.Name = EmbFile.GetUnusedName(newTexture.Name);
+                    undos.Add(new UndoableListAdd<EmbEntry>(EmbFile.Entry, newTexture));
                     EmbFile.Add(newTexture);
-                    RefreshTextureCount();
                 }
 
                 if(selectedTextures.Count > 0)
                 {
+                    RefreshTextureCount();
+                    undos.Add(new UndoActionDelegate(this, nameof(RefreshTextureCount), true));
+                    UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Texture Duplicate"));
+
                     listBox_Textures.SelectedItem = EmbFile.Entry[EmbFile.Entry.Count - 1];
                     listBox_Textures.ScrollIntoView(EmbFile.Entry[EmbFile.Entry.Count - 1]);
                 }
@@ -472,6 +506,7 @@ namespace EEPK_Organiser.Forms
 
                 if (copiedTextures != null)
                 {
+                    List<IUndoRedo> undos = new List<IUndoRedo>();
 
                     foreach (var texture in copiedTextures)
                     {
@@ -485,12 +520,17 @@ namespace EEPK_Organiser.Forms
                         newTexture.Name = EmbFile.GetUnusedName(newTexture.Name);
                         EmbFile.Add(newTexture);
                         RefreshTextureCount();
+
+                        undos.Add(new UndoableListAdd<EmbEntry>(EmbFile.Entry, newTexture));
                     }
 
                     if (copiedTextures.Count > 0)
                     {
                         listBox_Textures.SelectedItem = EmbFile.Entry[EmbFile.Entry.Count - 1];
                         listBox_Textures.ScrollIntoView(EmbFile.Entry[EmbFile.Entry.Count - 1]);
+
+                        undos.Add(new UndoActionDelegate(this, nameof(RefreshTextureCount), true));
+                        UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Texture Paste"));
                     }
                 }
             }
@@ -504,12 +544,24 @@ namespace EEPK_Organiser.Forms
         //Options Logic
         private int Emb_Options_RemoveUnusedTextures()
         {
-            return parent.effectContainerFile.RemoveUnusedTextures(assetType);
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+            int removedCount = parent.effectContainerFile.RemoveUnusedTextures(assetType, undos);
+
+            undos.Add(new UndoActionDelegate(this, nameof(RefreshTextureCount), true));
+            UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Remove Unused (Texture)"));
+
+            return removedCount;
         }
 
         private int Emb_Options_MergeDuplicateTextures()
         {
-            return parent.effectContainerFile.MergeDuplicateTextures(assetType);
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+            int merged = parent.effectContainerFile.MergeDuplicateTextures(assetType, undos);
+
+            undos.Add(new UndoActionDelegate(this, nameof(RefreshTextureCount), true));
+            UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Merge Duplicates (Texture)"));
+
+            return merged;
         }
 
         private void RenameFile_PopUp(EmbEntry embEntry)
@@ -519,14 +571,15 @@ namespace EEPK_Organiser.Forms
 
             if (renameForm.WasNameChanged)
             {
+                UndoManager.Instance.AddUndo(new UndoableProperty<EmbEntry>(nameof(EmbEntry.Name), embEntry, embEntry.Name, renameForm.NameValue + ".dds", "EMB Rename"));
                 embEntry.Name = renameForm.NameValue + ".dds";
             }
         }
 
         //Misc
-        private void RefreshTextureCount()
+        public void RefreshTextureCount()
         {
-            NotifyPropertyChanged("TextureCount");
+            NotifyPropertyChanged(nameof(TextureCount));
         }
 
         //Search

@@ -66,6 +66,22 @@ namespace System
         {
             return (T)Copy((Object)original);
         }
+
+
+        //Notify
+        /// <summary>
+        /// Invokes NotifyPropertyChanged for all properties on this object. NOTE: Requires NotifyPropertyChanged to be public!
+        /// </summary>
+        public static void NotifyPropsChanged(this object instance)
+        {
+            foreach (var prop in instance.GetType().GetProperties())
+            {
+                MethodInfo function = instance.GetType().GetMethod("NotifyPropertyChanged");
+
+                if(function != null)
+                    function.Invoke(instance, new object[] { prop.Name });
+            }
+        }
     }
 
     public class ReferenceEqualityComparer : EqualityComparer<Object>

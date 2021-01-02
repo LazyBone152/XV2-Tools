@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xv2CoreLib.HslColor;
+using Xv2CoreLib.Resource.UndoRedo;
 using YAXLib;
 
 namespace Xv2CoreLib.EMA
@@ -367,13 +368,14 @@ namespace Xv2CoreLib.EMA
             return colors;
         }
 
-        public void ChangeHue(double hue, double saturation, double lightness)
+        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos = null)
         {
             if (Animations == null) return;
+            if (undos == null) undos = new List<IUndoRedo>();
 
             foreach (var anim in Animations)
             {
-                anim.ChangeHue(hue, saturation, lightness);
+                anim.ChangeHue(hue, saturation, lightness, undos);
             }
         }
 
@@ -650,7 +652,7 @@ namespace Xv2CoreLib.EMA
             return colors;
         }
 
-        public void ChangeHue(double hue, double saturation, double lightness)
+        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos)
         {
             var r_command = GetCommand("Color", "R");
             var g_command = GetCommand("Color", "G");
@@ -667,9 +669,9 @@ namespace Xv2CoreLib.EMA
                 hslColor.ChangeLightness(lightness);
                 var convertedColor = hslColor.ToRgb();
 
-                r.Value = (float)convertedColor.R;
-                g_command.SetValue(r.Time, (float)convertedColor.G);
-                b_command.SetValue(r.Time, (float)convertedColor.B);
+                r_command.SetValue(r.Time, (float)convertedColor.R, undos);
+                g_command.SetValue(r.Time, (float)convertedColor.G, undos);
+                b_command.SetValue(r.Time, (float)convertedColor.B, undos);
             }
 
         }
@@ -1044,13 +1046,18 @@ namespace Xv2CoreLib.EMA
             return CalculateKeyframeValue(time);
         }
 
-        public void SetValue(int time, float value)
+        public void SetValue(int time, float value, List<IUndoRedo> undos = null)
         {
             foreach (var keyframe in Keyframes)
             {
                 if (keyframe.Time == time)
                 {
+                    float oldValue = keyframe.Value;
                     keyframe.Value = value;
+
+                    if (undos != null)
+                        undos.Add(new UndoableProperty<EMA_Keyframe>(nameof(keyframe.Value), keyframe, oldValue, keyframe.Value));
+
                     return;
                 }
             }

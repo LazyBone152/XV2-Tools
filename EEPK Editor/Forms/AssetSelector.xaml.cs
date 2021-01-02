@@ -84,6 +84,7 @@ namespace EEPK_Organiser.Forms
             DataContext = this;
             InitializeTabs(initialSelection);
             InitializeSearchTab();
+
             if (MultiSelectMode)
             {
                 emoGrid.SelectionMode = DataGridSelectionMode.Extended;
@@ -104,8 +105,24 @@ namespace EEPK_Organiser.Forms
                 multiSelectTip.Visibility = Visibility.Hidden;
             }
 
+            //Events
+            emoGrid.PreviewKeyUp += MetroWindow_PreviewKeyDown;
+            pbindGrid.PreviewKeyUp += MetroWindow_PreviewKeyDown;
+            tbindGrid.PreviewKeyUp += MetroWindow_PreviewKeyDown;
+            cbindGrid.PreviewKeyUp += MetroWindow_PreviewKeyDown;
+            lightEmaGrid.PreviewKeyUp += MetroWindow_PreviewKeyDown;
+            searchGrid.PreviewKeyUp += MetroWindow_PreviewKeyDown;
+
+            emoGrid.MouseDoubleClick += EmoGrid_MouseDoubleClick;
+            pbindGrid.MouseDoubleClick += EmoGrid_MouseDoubleClick;
+            tbindGrid.MouseDoubleClick += EmoGrid_MouseDoubleClick;
+            cbindGrid.MouseDoubleClick += EmoGrid_MouseDoubleClick;
+            lightEmaGrid.MouseDoubleClick += EmoGrid_MouseDoubleClick;
+            searchGrid.MouseDoubleClick += EmoGrid_MouseDoubleClick;
+
 
         }
+
 
         private void InitializeTabs(Asset initialSel)
         {
@@ -122,22 +139,27 @@ namespace EEPK_Organiser.Forms
                     case Xv2CoreLib.EEPK.AssetType.EMO:
                         emoTab.IsEnabled = true;
                         emoTab.IsSelected = true;
+                        emoTab.Focus();
                         break;
                     case Xv2CoreLib.EEPK.AssetType.PBIND:
                         pbindTab.IsEnabled = true;
                         pbindTab.IsSelected = true;
+                        pbindGrid.Focus();
                         break;
                     case Xv2CoreLib.EEPK.AssetType.TBIND:
                         tbindTab.IsEnabled = true;
                         tbindTab.IsSelected = true;
+                        tbindGrid.Focus();
                         break;
                     case Xv2CoreLib.EEPK.AssetType.LIGHT:
                         lightEmaTab.IsEnabled = true;
                         lightEmaTab.IsSelected = true;
+                        lightEmaGrid.Focus();
                         break;
                     case Xv2CoreLib.EEPK.AssetType.CBIND:
                         cbindTab.IsEnabled = true;
                         cbindTab.IsSelected = true;
+                        cbindGrid.Focus();
                         break;
                 }
             }
@@ -364,6 +386,25 @@ namespace EEPK_Organiser.Forms
         {
             if(e.Key == Key.Enter)
                 UpdateAssetFilter();
+        }
+
+
+        private void MetroWindow_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if(e.Key == Key.Enter)
+            {
+                Button_OK_Click(null, null);
+                e.Handled = true;
+            }
+        }
+
+        private void EmoGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                Button_OK_Click(null, null);
+                e.Handled = true;
+            }
         }
     }
 }

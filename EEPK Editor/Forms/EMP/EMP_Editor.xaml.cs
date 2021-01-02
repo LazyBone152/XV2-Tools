@@ -13,6 +13,9 @@ using System.Collections.Generic;
 using System.Linq;
 using EEPK_Organiser.View;
 using MahApps.Metro.Controls;
+using Xv2CoreLib.Resource.UndoRedo;
+using Xv2CoreLib.EMB_CLASS;
+using GalaSoft.MvvmLight.CommandWpf;
 
 namespace EEPK_Organiser.Forms.EMP
 {
@@ -335,65 +338,16 @@ namespace EEPK_Organiser.Forms.EMP
         }
 
         //ParticleEffect (general)
-        private void empTree_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.C))
-            {
-                //Copy
-                Copy_Click(null, null);
-                e.Handled = true;
-            }
-            else if (Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.LeftAlt) && Keyboard.IsKeyDown(Key.V))
-            {
-                //Paste (Child)
-                PasteChild_Click(null, null);
-                e.Handled = true;
-            }
-            else if (Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.V))
-            {
-                //Paste
-                Paste_Click(null, null);
-                e.Handled = true;
-            }
-            else if (Keyboard.IsKeyDown(Key.LeftShift) && Keyboard.IsKeyDown(Key.V))
-            {
-                //Paste Values
-                PasteValues_Click(null, null);
-                e.Handled = true;
-            }
-            else if (Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.Up))
-            {
-                //Move Up
-                MoveUp_Click(null, null);
-                e.Handled = true;
-            }
-            else if (Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.Down))
-            {
-                //Move Down
-                MoveDown_Click(null, null);
-                e.Handled = true;
-            }
-            else if (Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.Delete))
-            {
-                //Remove
-                RemoveParticleEffect_Click(null, null);
-                e.Handled = true;
-            }
-            else if (Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.N))
-            {
-                //Add New
-                AddParticleEffect_Click(null, null);
-                e.Handled = true;
-            }
-        }
-
-        private void AddParticleEffect_Click(object sender, RoutedEventArgs e)
+        public RelayCommand AddParticleEffect_Command => new RelayCommand(AddParticleEffect);
+        private void AddParticleEffect()
         {
             if (empFile == null) return;
 
             try
             {
-                empFile.AddNew();
+                List<IUndoRedo> undos = new List<IUndoRedo>();
+                empFile.AddNew(-1, undos);
+                UndoManager.Instance.AddUndo(new CompositeUndo(undos, "New Particle Effect"));
             }
             catch (Exception ex)
             {
@@ -403,7 +357,8 @@ namespace EEPK_Organiser.Forms.EMP
 
         }
 
-        private void AddParticleEffectAsChild_Click(object sender, RoutedEventArgs e)
+        public RelayCommand AddParticleEffectAsChild_Command => new RelayCommand(AddParticleEffectAsChild, IsParticleSelected);
+        private void AddParticleEffectAsChild()
         {
             if (empFile == null) return;
 
@@ -411,7 +366,10 @@ namespace EEPK_Organiser.Forms.EMP
             {
                 ParticleEffect _particleEffect = empTree.SelectedItem as ParticleEffect;
                 if (_particleEffect == null) return;
-                _particleEffect.AddNew();
+
+                List<IUndoRedo> undos = new List<IUndoRedo>();
+                _particleEffect.AddNew(-1, undos);
+                UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Add Child Particle Effect"));
             }
             catch (Exception ex)
             {
@@ -420,14 +378,17 @@ namespace EEPK_Organiser.Forms.EMP
             }
         }
 
-        private void RemoveParticleEffect_Click(object sender, RoutedEventArgs e)
+        public RelayCommand RemoveParticleEffect_Command => new RelayCommand(RemoveParticleEffect, IsParticleSelected);
+        private void RemoveParticleEffect()
         {
-
             if (empFile == null) return;
             ParticleEffect _particleEffect = empTree.SelectedItem as ParticleEffect;
             if (_particleEffect == null) return;
-            //undoManager.CreateUndoPoint();
-            empFile.RemoveParticleEffect(_particleEffect);
+
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+            empFile.RemoveParticleEffect(_particleEffect, undos);
+
+            UndoManager.Instance.AddCompositeUndo(undos, "Remove Particle Effect");
 
             empTree.Focus();
 
@@ -443,8 +404,15 @@ namespace EEPK_Organiser.Forms.EMP
             }
         }
 
+
+        private bool IsParticleSelected()
+        {
+            return empTree.SelectedItem is ParticleEffect;
+        }
+
         //TreeView Context Menu
-        private void AddNewAbove_Click(object sender, RoutedEventArgs e)
+        public RelayCommand AddNewAbove_Command => new RelayCommand(AddNewAbove, IsParticleSelected);
+        private void AddNewAbove()
         {
             ParticleEffect _particleEffect = empTree.SelectedItem as ParticleEffect;
             if (_particleEffect == null) return;
@@ -452,13 +420,17 @@ namespace EEPK_Organiser.Forms.EMP
 
             if(parentList != null)
             {
+                var newEffect = ParticleEffect.GetNew();
+
                 int index = parentList.IndexOf(_particleEffect);
-                parentList.Insert(index, ParticleEffect.GetNew());
+                UndoManager.Instance.AddUndo(new UndoableListInsert<ParticleEffect>(parentList, index, newEffect));
+                parentList.Insert(index, newEffect);
             }
 
         }
 
-        private void AddNewBelow_Click(object sender, RoutedEventArgs e)
+        public RelayCommand AddNewBelow_Command => new RelayCommand(AddNewBelow, IsParticleSelected);
+        private void AddNewBelow()
         {
             ParticleEffect _particleEffect = empTree.SelectedItem as ParticleEffect;
             if (_particleEffect == null) return;
@@ -466,12 +438,16 @@ namespace EEPK_Organiser.Forms.EMP
 
             if (parentList != null)
             {
+                var newEffect = ParticleEffect.GetNew();
+
                 int index = parentList.IndexOf(_particleEffect);
-                parentList.Insert(index+1, ParticleEffect.GetNew());
+                UndoManager.Instance.AddUndo(new UndoableListInsert<ParticleEffect>(parentList, index+1, newEffect));
+                parentList.Insert(index+1, newEffect);
             }
         }
 
-        private void MoveUp_Click(object sender, RoutedEventArgs e)
+        public RelayCommand MoveUp_Command => new RelayCommand(MoveUp, IsParticleSelected);
+        private void MoveUp()
         {
             ParticleEffect _particleEffect = empTree.SelectedItem as ParticleEffect;
             if (_particleEffect == null) return;
@@ -483,8 +459,8 @@ namespace EEPK_Organiser.Forms.EMP
                 if (parentList != null)
                 {
                     int oldIndex = parentList.IndexOf(_particleEffect);
-                    //if (oldIndex <= parentList.Count - 1) return;
                     if (oldIndex == 0) return;
+                    UndoManager.Instance.AddUndo(new UndoableListMove<ParticleEffect>(parentList, oldIndex, oldIndex - 1));
                     parentList.Move(oldIndex, oldIndex - 1);
                 }
             }
@@ -495,7 +471,8 @@ namespace EEPK_Organiser.Forms.EMP
             }
         }
 
-        private void MoveDown_Click(object sender, RoutedEventArgs e)
+        public RelayCommand MoveDown_Command => new RelayCommand(MoveDown, IsParticleSelected);
+        private void MoveDown()
         {
             ParticleEffect _particleEffect = empTree.SelectedItem as ParticleEffect;
 
@@ -508,6 +485,7 @@ namespace EEPK_Organiser.Forms.EMP
                 {
                     int oldIndex = parentList.IndexOf(_particleEffect);
                     if (oldIndex >= parentList.Count - 1) return;
+                    UndoManager.Instance.AddUndo(new UndoableListMove<ParticleEffect>(parentList, oldIndex, oldIndex + 1));
                     parentList.Move(oldIndex, oldIndex + 1);
                 }
             }
@@ -517,8 +495,9 @@ namespace EEPK_Organiser.Forms.EMP
                 MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        
-        private void Copy_Click(object sender, RoutedEventArgs e)
+
+        public RelayCommand Copy_Command => new RelayCommand(Copy, IsParticleSelected);
+        private void Copy()
         {
             ParticleEffect _particleEffect = empTree.SelectedItem as ParticleEffect;
             if (_particleEffect == null) return;
@@ -535,19 +514,21 @@ namespace EEPK_Organiser.Forms.EMP
             }
         }
 
-        private void Paste_Click(object sender, RoutedEventArgs e)
+        public RelayCommand Paste_Command => new RelayCommand(Paste, CanPasteParticleEffect);
+        private void Paste()
         {
             try
             {
                 ParticleEffect particleEffect = (ParticleEffect)Clipboard.GetData(ClipboardDataTypes.EmpParticleEffect);
 
                 if (particleEffect == null) return;
+                List<IUndoRedo> undos = new List<IUndoRedo>();
 
                 //Import texture entries
                 ParticleEffect newParticleEffect = particleEffect;
 
-                ImportTextureEntries(newParticleEffect);
-                ImportMaterialEntries(newParticleEffect);
+                ImportTextureEntries(newParticleEffect, undos);
+                ImportMaterialEntries(newParticleEffect, undos);
 
                  //Paste particleEffect
                  ParticleEffect _particleEffect = empTree.SelectedItem as ParticleEffect;
@@ -555,16 +536,23 @@ namespace EEPK_Organiser.Forms.EMP
                 //If selectedParticleEffect is null, we paste it at the root level
                 if (_particleEffect == null)
                 {
+                    undos.Add(new UndoableListAdd<ParticleEffect>(empFile.ParticleEffects, newParticleEffect));
                     empFile.ParticleEffects.Add(newParticleEffect);
                 }
-
-                //Else we place it at the level of the selected particleEffect
-                ObservableCollection<ParticleEffect> parentList = empFile.GetParentList(_particleEffect);
-
-                if (parentList != null)
+                else
                 {
-                    parentList.Add(newParticleEffect);
+                    //Else we place it at the level of the selected particleEffect
+                    ObservableCollection<ParticleEffect> parentList = empFile.GetParentList(_particleEffect);
+
+                    if (parentList != null)
+                    {
+                        undos.Add(new UndoableListAdd<ParticleEffect>(parentList, newParticleEffect));
+                        parentList.Add(newParticleEffect);
+                    }
                 }
+
+                UndoManager.Instance.AddCompositeUndo(undos, "Paste Particle Effect");
+
             }
             catch (Exception ex)
             {
@@ -574,10 +562,12 @@ namespace EEPK_Organiser.Forms.EMP
             }
         }
 
-        private void PasteChild_Click(object sender, RoutedEventArgs e)
+        public RelayCommand PasteChild_Command => new RelayCommand(PasteChild, CanPasteParticleEffectAndIsSelected);
+        private void PasteChild()
         {
             ParticleEffect _particleEffect = empTree.SelectedItem as ParticleEffect;
             if (_particleEffect == null) return;
+            List<IUndoRedo> undos = new List<IUndoRedo>();
 
             try
             {
@@ -586,10 +576,13 @@ namespace EEPK_Organiser.Forms.EMP
                 if (particleEffect == null) return;
                 ParticleEffect newParticleEffect = particleEffect.Clone();
 
-                ImportTextureEntries(newParticleEffect);
-                ImportMaterialEntries(newParticleEffect);
+                ImportTextureEntries(newParticleEffect, undos);
+                ImportMaterialEntries(newParticleEffect, undos);
 
+                undos.Add(new UndoableListAdd<ParticleEffect>(_particleEffect.ChildParticleEffects, newParticleEffect));
                 _particleEffect.ChildParticleEffects.Add(newParticleEffect);
+
+                UndoManager.Instance.AddCompositeUndo(undos, "Paste Particle Effect");
             }
             catch (Exception ex)
             {
@@ -598,11 +591,13 @@ namespace EEPK_Organiser.Forms.EMP
             }
             
         }
-        
-        private void PasteValues_Click(object sender, RoutedEventArgs e)
+
+        public RelayCommand PasteValues_Command => new RelayCommand(PasteValues, CanPasteParticleEffectAndIsSelected);
+        private void PasteValues()
         {
             ParticleEffect selectedParticleEffect = empTree.SelectedItem as ParticleEffect;
             if (selectedParticleEffect == null) return;
+            List<IUndoRedo> undos = new List<IUndoRedo>();
 
             try
             {
@@ -610,10 +605,12 @@ namespace EEPK_Organiser.Forms.EMP
                 if (copiedParticleEffect == null) return;
 
                 //Ensure the materials and textures exist
-                ImportTextureEntries(copiedParticleEffect);
-                ImportMaterialEntries(copiedParticleEffect);
+                ImportTextureEntries(copiedParticleEffect, undos);
+                ImportMaterialEntries(copiedParticleEffect, undos);
 
-                selectedParticleEffect.CopyValues(copiedParticleEffect);
+                selectedParticleEffect.CopyValues(copiedParticleEffect, undos);
+
+                UndoManager.Instance.AddCompositeUndo(undos, "Paste Values");
             }
             catch (Exception ex)
             {
@@ -622,7 +619,7 @@ namespace EEPK_Organiser.Forms.EMP
             }
         }
 
-        private void ImportTextureEntries(ParticleEffect particleEffect)
+        private void ImportTextureEntries(ParticleEffect particleEffect, List<IUndoRedo> undos)
         {
             //Add referenced texture entries if they are not found
 
@@ -632,10 +629,12 @@ namespace EEPK_Organiser.Forms.EMP
 
                 if (newTex == null)
                 {
+                    undos.Add(new UndoableListAdd<EmbEntry>(textureContainer.Entry, texture.TextureRef.TextureRef));
                     texture.TextureRef.TextureRef = textureContainer.Add(texture.TextureRef.TextureRef);
 
                     //Add the texture
                     texture.TextureRef.EntryIndex = empFile.NextTextureId();
+                    undos.Add(new UndoableListAdd<EMP_TextureDefinition>(empFile.Textures, texture.TextureRef));
                     empFile.Textures.Add(texture.TextureRef);
                 }
                 else
@@ -650,12 +649,12 @@ namespace EEPK_Organiser.Forms.EMP
             {
                 foreach(var child in particleEffect.ChildParticleEffects)
                 {
-                    ImportTextureEntries(child);
+                    ImportTextureEntries(child, undos);
                 }
             }
         }
 
-        private void ImportMaterialEntries(ParticleEffect particleEffect)
+        private void ImportMaterialEntries(ParticleEffect particleEffect, List<IUndoRedo> undos)
         {
             //Add referenced material entries if they are not found
             if(particleEffect.Type_Texture.MaterialRef != null)
@@ -669,6 +668,7 @@ namespace EEPK_Organiser.Forms.EMP
                     {
                         //Material didn't exist so we have to add it
                         particleEffect.Type_Texture.MaterialRef.Str_00 = materialFile.GetUnusedName(particleEffect.Type_Texture.MaterialRef.Str_00);
+                        undos.Add(new UndoableListAdd<Material>(materialFile.Materials, particleEffect.Type_Texture.MaterialRef));
                         materialFile.Materials.Add(particleEffect.Type_Texture.MaterialRef);
                     }
                     else if(result != particleEffect.Type_Texture.MaterialRef)
@@ -685,12 +685,13 @@ namespace EEPK_Organiser.Forms.EMP
             {
                 foreach (var child in particleEffect.ChildParticleEffects)
                 {
-                    ImportMaterialEntries(child);
+                    ImportMaterialEntries(child, undos);
                 }
             }
         }
-        
-        private void HueAdjustment_Click(object sender, RoutedEventArgs e)
+
+        public RelayCommand HueAdjustment_Command => new RelayCommand(HueAdjustment, IsParticleSelected);
+        private void HueAdjustment()
         {
 #if !DEBUG
             try
@@ -713,6 +714,15 @@ namespace EEPK_Organiser.Forms.EMP
 #endif
         }
 
+        private bool CanPasteParticleEffect()
+        {
+            return Clipboard.ContainsData(ClipboardDataTypes.EmpParticleEffect);
+        }
+
+        private bool CanPasteParticleEffectAndIsSelected()
+        {
+            return IsParticleSelected() && CanPasteParticleEffect();
+        }
 
         //Animation Tab (Type 0)
         private void AddNewAnimationType0_Click(object sender, RoutedEventArgs e)
@@ -724,6 +734,8 @@ namespace EEPK_Organiser.Forms.EMP
                 var newAnimation = Type0.GetNew();
                 _particleEffect.Type_0.Add(newAnimation);
                 comboBox_Type0.SelectedItem = newAnimation;
+
+                UndoManager.Instance.AddUndo(new UndoableListAdd<Type0>(_particleEffect.Type_0, newAnimation, "New Animation"));
             }
             catch (Exception ex)
             {
@@ -740,12 +752,18 @@ namespace EEPK_Organiser.Forms.EMP
                 Type0 _type0 = comboBox_Type0.SelectedItem as Type0;
                 if (_particleEffect == null) return;
                 if (_type0 == null) return;
+
+                List<IUndoRedo> undos = new List<IUndoRedo>();
+
+                undos.Add(new UndoableListRemove<Type0>(_particleEffect.Type_0, _type0));
                 _particleEffect.Type_0.Remove(_type0);
 
                 if (_particleEffect.Type_0.Count > 0)
                 {
                     comboBox_Type0.SelectedIndex = 0;
                 }
+
+                UndoManager.Instance.AddCompositeUndo(undos, "Remove Animation");
             }
             catch (Exception ex)
             {
@@ -755,6 +773,47 @@ namespace EEPK_Organiser.Forms.EMP
 
         }
 
+
+
+        public RelayCommand AddType0KeyframeCommand => new RelayCommand(AddType0Keyframe, CanAddType0Keyframe);
+        private void AddType0Keyframe()
+        {
+            Type0 type0 = comboBox_Type0.SelectedItem as Type0;
+
+            if (type0 != null)
+            {
+                Type0_Keyframe keyframe = new Type0_Keyframe();
+                UndoManager.Instance.AddUndo(new UndoableListAdd<Type0_Keyframe>(type0.Keyframes, keyframe, "Add Keyframe"));
+                type0.Keyframes.Add(keyframe);
+            }
+        }
+
+        public RelayCommand RemoveType0KeyframeCommand => new RelayCommand(RemoveType0Keyframe, CanRemoveType0Keyframe);
+        private void RemoveType0Keyframe()
+        {
+            Type0 type0 = comboBox_Type0.SelectedItem as Type0;
+            Type0_Keyframe keyframe = dataGrid_type0_Keyframes.SelectedItem as Type0_Keyframe;
+
+            if (keyframe != null && type0 != null)
+            {
+                if (type0.Keyframes.Contains(keyframe))
+                {
+                    UndoManager.Instance.AddUndo(new UndoableListRemove<Type0_Keyframe>(type0.Keyframes, keyframe, "Remove Keyframe"));
+                    type0.Keyframes.Remove(keyframe);
+                }
+            }
+        }
+
+        private bool CanAddType0Keyframe()
+        {
+            return (comboBox_Type0.SelectedItem is Type0);
+        }
+
+        private bool CanRemoveType0Keyframe()
+        {
+            return (dataGrid_type0_Keyframes.SelectedItem is Type0_Keyframe) && (comboBox_Type0.SelectedItem is Type0);
+        }
+
         //Animation Tab (Type 1)
         private void AddType1Header_Click(object sender, RoutedEventArgs e)
         {
@@ -762,9 +821,12 @@ namespace EEPK_Organiser.Forms.EMP
             {
                 ParticleEffect _particleEffect = empTree.SelectedItem as ParticleEffect;
                 if (_particleEffect == null) return;
+
                 var newHeader = Type1_Header.GetNew();
                 _particleEffect.Type_1.Add(newHeader);
                 comboBox_Type1_Header.SelectedItem = newHeader;
+
+                UndoManager.Instance.AddUndo(new UndoableListAdd<Type1_Header>(_particleEffect.Type_1, newHeader, "New Anim Group"));
             }
             catch (Exception ex)
             {
@@ -781,6 +843,8 @@ namespace EEPK_Organiser.Forms.EMP
                 Type1_Header _type1_Header = comboBox_Type1_Header.SelectedItem as Type1_Header;
                 if (_particleEffect == null) return;
                 if (_type1_Header == null) return;
+
+                UndoManager.Instance.AddUndo(new UndoableListRemove<Type1_Header>(_particleEffect.Type_1, _type1_Header, "Remove Anim Group"));
                 _particleEffect.Type_1.Remove(_type1_Header);
 
                 if (_particleEffect.Type_1.Count > 0)
@@ -831,6 +895,8 @@ namespace EEPK_Organiser.Forms.EMP
                 var newAnimation = Type0.GetNew();
                 _type1_header.Entries.Add(newAnimation);
                 comboBox_Type1.SelectedItem = newAnimation;
+
+                UndoManager.Instance.AddUndo(new UndoableListAdd<Type0>(_type1_header.Entries, newAnimation, "New Animation"));
             }
             catch (Exception ex)
             {
@@ -849,7 +915,10 @@ namespace EEPK_Organiser.Forms.EMP
                 if (_particleEffect == null) return;
                 if (_type0 == null) return;
                 if (_type1_header == null) return;
+
+                UndoManager.Instance.AddUndo(new UndoableListRemove<Type0>(_type1_header.Entries, _type0, "Remove Animation"));
                 _type1_header.Entries.Remove(_type0);
+
 
                 if (_particleEffect.Type_1.Count > 0)
                 {
@@ -863,8 +932,47 @@ namespace EEPK_Organiser.Forms.EMP
             }
 
         }
-        
-        
+
+
+        public RelayCommand AddType1KeyframeCommand => new RelayCommand(AddType1Keyframe, CanAddType1Keyframe);
+        private void AddType1Keyframe()
+        {
+            Type0 type0 = comboBox_Type1.SelectedItem as Type0;
+
+            if (type0 != null)
+            {
+                Type0_Keyframe keyframe = new Type0_Keyframe();
+                UndoManager.Instance.AddUndo(new UndoableListAdd<Type0_Keyframe>(type0.Keyframes, keyframe, "Add Keyframe"));
+                type0.Keyframes.Add(keyframe);
+            }
+        }
+
+        public RelayCommand RemoveType1KeyframeCommand => new RelayCommand(RemoveType1Keyframe, CanRemoveType1Keyframe);
+        private void RemoveType1Keyframe()
+        {
+            Type0 type0 = comboBox_Type1.SelectedItem as Type0;
+            Type0_Keyframe keyframe = dataGrid_type1_Keyframes.SelectedItem as Type0_Keyframe;
+
+            if (keyframe != null && type0 != null)
+            {
+                if (type0.Keyframes.Contains(keyframe))
+                {
+                    UndoManager.Instance.AddUndo(new UndoableListRemove<Type0_Keyframe>(type0.Keyframes, keyframe, "Remove Keyframe"));
+                    type0.Keyframes.Remove(keyframe);
+                }
+            }
+        }
+
+        private bool CanAddType1Keyframe()
+        {
+            return (comboBox_Type1.SelectedItem is Type0);
+        }
+
+        private bool CanRemoveType1Keyframe()
+        {
+            return (dataGrid_type1_Keyframes.SelectedItem is Type0_Keyframe) && (comboBox_Type1.SelectedItem is Type0);
+        }
+
         //Other
         private void empTree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
@@ -903,11 +1011,11 @@ namespace EEPK_Organiser.Forms.EMP
             //System.Windows.MessageBox.Show(String.Format("R = {0}, G = {1}, B = {2}, A = {3}", ColorCanvas_Color1.R.ToString(), ColorCanvas_Color1.G.ToString(), ColorCanvas_Color1.B.ToString(), ColorCanvas_Color1.A.ToString()));
         }
 
-        
+
 
         //Texture Tab
-
-        private void Button_TextureRemove_Click(object sender, RoutedEventArgs e)
+        public RelayCommand TextureRemove_Command => new RelayCommand(TextureRemove, IsTextureSelected);
+        private void TextureRemove()
         {
             try
             {
@@ -915,6 +1023,7 @@ namespace EEPK_Organiser.Forms.EMP
 
                 List<EMP_TextureDefinition> selectedTextures = listBox_Textures.SelectedItems.Cast<EMP_TextureDefinition>().ToList();
                 if (selectedTextures == null) return;
+                List<IUndoRedo> undos = new List<IUndoRedo>();
 
                 List<TexturePart> textureInstances = new List<TexturePart>();
 
@@ -927,9 +1036,12 @@ namespace EEPK_Organiser.Forms.EMP
                 {
                     foreach(var texture in selectedTextures)
                     {
-                        empFile.RemoveTextureReferences(texture);
+                        empFile.RemoveTextureReferences(texture, undos);
+                        undos.Add(new UndoableListRemove<EMP_TextureDefinition>(empFile.Textures, texture));
                         empFile.Textures.Remove(texture);
                     }
+
+                    UndoManager.Instance.AddCompositeUndo(undos, selectedTextures.Count > 1 ? "Delete Textures (EMP)" : "Delete Texture (EMP)");
                 }
             }
             catch (Exception ex)
@@ -940,12 +1052,13 @@ namespace EEPK_Organiser.Forms.EMP
 
         }
 
-        private void Button_TextureAdd_Click(object sender, RoutedEventArgs e)
+        public RelayCommand TextureAdd_Command => new RelayCommand(TextureAdd);
+        private void TextureAdd()
         {
             try
             {
                 if (empFile == null) return;
-                if (empFile.Textures == null) empFile.Textures = new System.Collections.ObjectModel.ObservableCollection<EMP_TextureDefinition>();
+                if (empFile.Textures == null) empFile.Textures = new ObservableCollection<EMP_TextureDefinition>();
 
                 var newTexture = EMP_TextureDefinition.GetNew();
                 newTexture.EntryIndex = empFile.NextTextureId();
@@ -953,6 +1066,8 @@ namespace EEPK_Organiser.Forms.EMP
                 empFile.Textures.Add(newTexture);
                 listBox_Textures.SelectedItem = newTexture;
                 listBox_Textures.ScrollIntoView(newTexture);
+
+                UndoManager.Instance.AddUndo(new UndoableListAdd<EMP_TextureDefinition>(empFile.Textures, newTexture, "Add Texture (EMP)"));
             }
             catch (Exception ex)
             {
@@ -961,7 +1076,8 @@ namespace EEPK_Organiser.Forms.EMP
             }
         }
 
-        private void TextureTab_ChangeTexture_Click(object sender, RoutedEventArgs e)
+        public RelayCommand TextureTab_ChangeTexture_Command => new RelayCommand(TextureTab_ChangeTexture, IsTextureSelected);
+        private void TextureTab_ChangeTexture()
         {
             try
             {
@@ -975,6 +1091,8 @@ namespace EEPK_Organiser.Forms.EMP
 
                 if (textureSelector.SelectedTexture != null)
                 {
+                    List<IUndoRedo> undos = new List<IUndoRedo>();
+                    undos.Add(new UndoableProperty<EMP_TextureDefinition>(nameof(EMP_TextureDefinition.TextureRef), _selectedTextureEntry, _selectedTextureEntry.TextureRef, textureSelector.SelectedTexture));
                     _selectedTextureEntry.TextureRef = textureSelector.SelectedTexture;
 
                     //Get number of other Texture Entries that use the previous texture ref, and ask if user wants to change those as well
@@ -988,11 +1106,14 @@ namespace EEPK_Organiser.Forms.EMP
                             {
                                 foreach (var texture in textureEntriesThatUsedSameRef)
                                 {
+                                    undos.Add(new UndoableProperty<EMP_TextureDefinition>(nameof(EMP_TextureDefinition.TextureRef), texture, texture.TextureRef, textureSelector.SelectedTexture));
                                     texture.TextureRef = textureSelector.SelectedTexture;
                                 }
                             }
                         }
                     }
+
+                    UndoManager.Instance.AddCompositeUndo(undos, "Change Texture (EMP)");
                 }
 
             }
@@ -1003,7 +1124,8 @@ namespace EEPK_Organiser.Forms.EMP
             }
         }
 
-        private void TextureTab_GoToTexture_Click(object sender, RoutedEventArgs e)
+        public RelayCommand TextureTab_GoToTexture_Command => new RelayCommand(TextureTab_GoToTexture, IsTextureSelected);
+        private void TextureTab_GoToTexture()
         {
             try
             {
@@ -1026,7 +1148,8 @@ namespace EEPK_Organiser.Forms.EMP
             }
         }
 
-        private void TextureTab_RemoveTexture_Click(object sender, RoutedEventArgs e)
+        public RelayCommand TextureTab_RemoveTexture_Command => new RelayCommand(TextureTab_RemoveTexture, IsTextureSelected);
+        private void TextureTab_RemoveTexture()
         {
             try
             {
@@ -1034,6 +1157,7 @@ namespace EEPK_Organiser.Forms.EMP
 
                 if (texture != null)
                 {
+                    UndoManager.Instance.AddUndo(new UndoableProperty<EMP_TextureDefinition>(nameof(EMP_TextureDefinition.TextureRef), texture, texture.TextureRef, null, "Remove Texture (EMP)"));
                     texture.TextureRef = null;
                 }
             }
@@ -1043,7 +1167,12 @@ namespace EEPK_Organiser.Forms.EMP
                 MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        
+
+        private bool IsTextureSelected()
+        {
+            return listBox_Textures.SelectedItem is EMP_TextureDefinition;
+        }
+
         //Material
         private void Material_ChangeMaterial_Click(object sender, RoutedEventArgs e)
         {
@@ -1059,6 +1188,8 @@ namespace EEPK_Organiser.Forms.EMP
 
                 if (materialSelector.SelectedMaterial != null)
                 {
+                    List<IUndoRedo> undos = new List<IUndoRedo>();
+                    undos.Add(new UndoableProperty<TexturePart>(nameof(TexturePart.MaterialRef), particleEffect.Type_Texture, particleEffect.Type_Texture.MaterialRef, materialSelector.SelectedMaterial));
                     particleEffect.Type_Texture.MaterialRef = materialSelector.SelectedMaterial;
 
                     //Get number of other Material Entries that use the previous material ref, and ask if user wants to change those as well
@@ -1071,10 +1202,13 @@ namespace EEPK_Organiser.Forms.EMP
                         {
                             foreach (var texturePart in texturePartsThatUsedSameRef)
                             {
+                                undos.Add(new UndoableProperty<TexturePart>(nameof(TexturePart.MaterialRef), texturePart, texturePart.MaterialRef, materialSelector.SelectedMaterial));
                                 texturePart.MaterialRef = materialSelector.SelectedMaterial;
                             }
                         }
                     }
+
+                    UndoManager.Instance.AddCompositeUndo(undos, "Change Material");
                 }
             }
             catch (Exception ex)
@@ -1117,6 +1251,7 @@ namespace EEPK_Organiser.Forms.EMP
 
                 if (particleEffect != null)
                 {
+                    UndoManager.Instance.AddUndo(new UndoableProperty<TexturePart>(nameof(TexturePart.MaterialRef), particleEffect.Type_Texture, particleEffect.Type_Texture.MaterialRef, null, "Remove Material"));
                     particleEffect.Type_Texture.MaterialRef = null;
                 }
             }
@@ -1128,14 +1263,18 @@ namespace EEPK_Organiser.Forms.EMP
         }
 
         //TexturePart
-        private void TexturePart_AddTextureReference_Click(object sender, RoutedEventArgs e)
+        public RelayCommand TexturePart_AddTextureCommand => new RelayCommand(TexturePart_AddTextureReference);
+
+        private void TexturePart_AddTextureReference()
         {
             try
             {
                 var particleEffect = empTree.SelectedItem as ParticleEffect;
                 if (particleEffect == null) return;
 
-                particleEffect.Type_Texture.TextureEntryRef.Add(new TextureEntryRef());
+                var newTexture = new TextureEntryRef();
+                UndoManager.Instance.AddUndo(new UndoableListAdd<TextureEntryRef>(particleEffect.Type_Texture.TextureEntryRef, newTexture, "Add Texture Ref"));
+                particleEffect.Type_Texture.TextureEntryRef.Add(newTexture);
             }
             catch (Exception ex)
             {
@@ -1145,7 +1284,9 @@ namespace EEPK_Organiser.Forms.EMP
 
         }
 
-        private void TexturePart_RemoveTextureReference_Click(object sender, RoutedEventArgs e)
+        public RelayCommand TexturePart_RemoveTextureCommand => new RelayCommand(TexturePart_RemoveTextureReference, CanRemoveTextureRef);
+
+        private void TexturePart_RemoveTextureReference()
         {
             try
             {
@@ -1154,7 +1295,13 @@ namespace EEPK_Organiser.Forms.EMP
 
                 if (textureRefDataGrid.SelectedItem != null)
                 {
-                    particleEffect.Type_Texture.TextureEntryRef.Remove(textureRefDataGrid.SelectedItem as TextureEntryRef);
+                    var texture = textureRefDataGrid.SelectedItem as TextureEntryRef;
+
+                    if (texture != null)
+                    {
+                        UndoManager.Instance.AddUndo(new UndoableListRemove<TextureEntryRef>(particleEffect.Type_Texture.TextureEntryRef, texture, "Remove Texture Ref"));
+                        particleEffect.Type_Texture.TextureEntryRef.Remove(texture);
+                    }
                 }
             }
             catch (Exception ex)
@@ -1163,7 +1310,12 @@ namespace EEPK_Organiser.Forms.EMP
                 MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        
+
+        private bool CanRemoveTextureRef()
+        {
+            return (textureRefDataGrid.SelectedItem is TextureEntryRef);
+        }
+
 
         //Texture Tab > Type2 subdata
         private void button_TextureType2_AddKeyFrame_Click(object sender, RoutedEventArgs e)
@@ -1173,15 +1325,15 @@ namespace EEPK_Organiser.Forms.EMP
                 if (listBox_Textures.SelectedItem == null || comboBox_TextureType.SelectedIndex == -1) return;
 
                 EMP_TextureDefinition texture = listBox_Textures.SelectedItem as EMP_TextureDefinition;
-
-                texture.SubData2.Keyframes.Add(new SubData_2_Entry());
+                var newData = new SubData_2_Entry();
+                UndoManager.Instance.AddUndo(new UndoableListAdd<SubData_2_Entry>(texture.SubData2.Keyframes, newData, "New Spritesheet Keyframe"));
+                texture.SubData2.Keyframes.Add(newData);
             }
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
                 MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-
         }
 
         private void button_TextureType2_RemoveKeyframe_Click(object sender, RoutedEventArgs e)
@@ -1200,6 +1352,7 @@ namespace EEPK_Organiser.Forms.EMP
                     return;
                 }
 
+                UndoManager.Instance.AddUndo(new UndoableListRemove<SubData_2_Entry>(texture.SubData2.Keyframes, keyframe, "Remove Spritesheet Keyframe"));
                 texture.SubData2.Keyframes.Remove(keyframe);
             }
             catch (Exception ex)
@@ -1216,7 +1369,8 @@ namespace EEPK_Organiser.Forms.EMP
         }
 
         //Texture Context Menu
-        private void TextureContextMenu_Copy_Click(object sender, RoutedEventArgs e)
+        public RelayCommand TextureContextMenu_Copy_Command => new RelayCommand(TextureContextMenu_Copy, IsTextureSelected);
+        private void TextureContextMenu_Copy()
         {
             try
             {
@@ -1235,7 +1389,8 @@ namespace EEPK_Organiser.Forms.EMP
             }
         }
 
-        private void TextureContextMenu_Paste_Click(object sender, RoutedEventArgs e)
+        public RelayCommand TextureContextMenu_Paste_Command => new RelayCommand(TextureContextMenu_Paste, CanPasteEmpTexture);
+        private void TextureContextMenu_Paste()
         {
             try
             {
@@ -1250,24 +1405,30 @@ namespace EEPK_Organiser.Forms.EMP
 
         private void Texture_PasteTextures()
         {
-
             List<EMP_TextureDefinition> embEntry = (List<EMP_TextureDefinition>)Clipboard.GetData(ClipboardDataTypes.EmpTextureEntry);
 
             if(embEntry != null)
             {
-                foreach(var textureEntry in embEntry)
+                List<IUndoRedo> undos = new List<IUndoRedo>();
+
+                foreach (var textureEntry in embEntry)
                 {
                     var newTexture = textureEntry.Clone();
-
-                    newTexture.TextureRef = textureContainer.Add(newTexture.TextureRef);
+                    var newEmbEntry = textureContainer.Add(newTexture.TextureRef, undos);
+                    newTexture.TextureRef = newEmbEntry;
 
                     newTexture.EntryIndex = empFile.NextTextureId();
                     empFile.Textures.Add(newTexture);
+
+                    undos.Add(new UndoableListAdd<EMP_TextureDefinition>(empFile.Textures, newTexture));
                 }
+
+                UndoManager.Instance.AddCompositeUndo(undos, embEntry.Count > 1 ? "Paste Textures" : "Paste Texture");
             }
         }
 
-        private void TextureContextMenu_Duplicate_Click(object sender, RoutedEventArgs e)
+        public RelayCommand TextureContextMenu_Duplicate_Command => new RelayCommand(TextureContextMenu_Duplicate, IsTextureSelected);
+        private void TextureContextMenu_Duplicate()
         {
             try
             {
@@ -1277,6 +1438,7 @@ namespace EEPK_Organiser.Forms.EMP
                 {
                     var newTexture = selectedTexture.Clone();
                     newTexture.EntryIndex = empFile.NextTextureId();
+                    UndoManager.Instance.AddUndo(new UndoableListAdd<EMP_TextureDefinition>(empFile.Textures, newTexture, "Duplicate Texture (EMP)"));
                     empFile.Textures.Add(newTexture);
                 }
             }
@@ -1286,22 +1448,29 @@ namespace EEPK_Organiser.Forms.EMP
                 MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        
-        private void TextureContextMenu_PasteValues_Click(object sender, RoutedEventArgs e)
+
+        public RelayCommand TextureContextMenu_PasteValues_Command => new RelayCommand(TextureContextMenu_PasteValues, CanPasteEmpTexture);
+        private void TextureContextMenu_PasteValues()
         {
             try
             {
-
                 List<EMP_TextureDefinition> textures = (List<EMP_TextureDefinition>)Clipboard.GetData(ClipboardDataTypes.EmpTextureEntry);
 
                 if (textures != null && listBox_Textures.SelectedItem != null)
                 {
+                    List<IUndoRedo> undos = new List<IUndoRedo>();
+
                     if(textures.Count > 0)
                     {
                         var newTexture = textures[0].Clone();
-                        newTexture.TextureRef = textureContainer.Add(newTexture.TextureRef);
+                        newTexture.TextureRef = textureContainer.Add(newTexture.TextureRef, undos);
                         var selectedItem = listBox_Textures.SelectedItem as EMP_TextureDefinition;
-                        selectedItem.ReplaceValues(newTexture);
+
+                        if(selectedItem != null)
+                        {
+                            selectedItem.ReplaceValues(newTexture, undos);
+                            UndoManager.Instance.AddCompositeUndo(undos, "Paste Values (EMP)");
+                        }
                     }
                 }
             }
@@ -1311,12 +1480,13 @@ namespace EEPK_Organiser.Forms.EMP
                 MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        
-        private void TextureContextMenu_Delete_Click(object sender, RoutedEventArgs e)
+
+        public RelayCommand TextureContextMenu_Delete_Command => new RelayCommand(TextureContextMenu_Delete, IsTextureSelected);
+        private void TextureContextMenu_Delete()
         {
             try
             {
-                Button_TextureRemove_Click(null, null);
+                TextureRemove();
             }
             catch (Exception ex)
             {
@@ -1324,8 +1494,9 @@ namespace EEPK_Organiser.Forms.EMP
                 MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        
-        private void TextureContextMenu_Merge_Click(object sender, RoutedEventArgs e)
+
+        public RelayCommand TextureContextMenu_Merge_Command => new RelayCommand(TextureContextMenu_Merge, CanMergeEmpTextures);
+        private void TextureContextMenu_Merge()
         {
             try
             {
@@ -1333,19 +1504,24 @@ namespace EEPK_Organiser.Forms.EMP
                 {
                     var texture = listBox_Textures.SelectedItem as EMP_TextureDefinition;
                     List<EMP_TextureDefinition> selectedTextures = listBox_Textures.SelectedItems.Cast<EMP_TextureDefinition>().ToList();
+                    
                     selectedTextures.Remove(texture);
 
                     if (texture != null && selectedTextures.Count > 0)
                     {
+                        List<IUndoRedo> undos = new List<IUndoRedo>();
                         int count = selectedTextures.Count + 1;
 
                         if (MessageBox.Show(string.Format("All currently selected textures will be MERGED into {0}.\n\nAll other selected textures will be deleted, with all references to them changed to {0}.\n\nDo you wish to continue?", texture.ToolName), string.Format("Merge ({0} textures)", count), MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
                         {
                             foreach (var textureToRemove in selectedTextures)
                             {
-                                empFile.RefactorTextureRef(textureToRemove, texture);
+                                empFile.RefactorTextureRef(textureToRemove, texture, undos);
+                                undos.Add(new UndoableListRemove<EMP_TextureDefinition>(empFile.Textures, textureToRemove));
                                 empFile.Textures.Remove(textureToRemove);
                             }
+
+                            UndoManager.Instance.AddCompositeUndo(undos, "Merge Textures (EMP)");
                         }
                     }
                     else
@@ -1364,44 +1540,14 @@ namespace EEPK_Organiser.Forms.EMP
 
         }
 
-        private void ListBox_Textures_PreviewKeyDown(object sender, KeyEventArgs e)
+        private bool CanPasteEmpTexture()
         {
-            if (Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.V))
-            {
-                //Paste
-                TextureContextMenu_Paste_Click(null, null);
-                e.Handled = true;
-            }
-            else if (Keyboard.IsKeyDown(Key.LeftShift) && Keyboard.IsKeyDown(Key.V))
-            {
-                //Paste Values
-                TextureContextMenu_PasteValues_Click(null, null);
-                e.Handled = true;
-            }
-            else if (Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.C))
-            {
-                //Copy
-                TextureContextMenu_Copy_Click(null, null);
-                e.Handled = true;
-            }
-            else if (Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.D))
-            {
-                //Duplicate
-                TextureContextMenu_Duplicate_Click(null, null);
-                e.Handled = true;
-            }
-            else if (Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.Delete))
-            {
-                //Delete
-                Button_TextureRemove_Click(null, null);
-                e.Handled = true;
-            }
-            else if (Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.N))
-            {
-                //New
-                Button_TextureAdd_Click(null, null);
-                e.Handled = true;
-            }
+            return Clipboard.ContainsData(ClipboardDataTypes.EmpTextureEntry);
+        }
+
+        private bool CanMergeEmpTextures()
+        {
+            return listBox_Textures.SelectedItems.Count >= 2;
         }
 
         private void ComboBox_TextureType_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1428,7 +1574,6 @@ namespace EEPK_Organiser.Forms.EMP
 
             }
         }
-        
 
     }
 }

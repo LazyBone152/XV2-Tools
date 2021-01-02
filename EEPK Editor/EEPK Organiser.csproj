@@ -3,6 +3,12 @@
   <Import Project="..\packages\Costura.Fody.3.2.0\build\Costura.Fody.props" Condition="Exists('..\packages\Costura.Fody.3.2.0\build\Costura.Fody.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <ItemGroup>
+    <PackageReference Include="CommonServiceLocator">
+      <Version>2.0.2</Version>
+    </PackageReference>
+    <PackageReference Include="ControlzEx">
+      <Version>3.0.2.4</Version>
+    </PackageReference>
     <PackageReference Include="Legacy2CPSWorkaround" Version="1.0.0">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
@@ -11,6 +17,9 @@
     </PackageReference>
     <PackageReference Include="MahApps.Metro.IconPacks">
       <Version>3.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="MvvmLight">
+      <Version>5.4.1.1</Version>
     </PackageReference>
     <PackageReference Include="System.Numerics.Vectors">
       <Version>4.3.0</Version>
@@ -39,7 +48,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;UndoRedo</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;UndoRedo, NvvmLight</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <LangVersion>7.1</LangVersion>
@@ -69,9 +78,6 @@
     </Reference>
     <Reference Include="AForge.Math">
       <HintPath>..\DLLs\AForge.Math.dll</HintPath>
-    </Reference>
-    <Reference Include="ControlzEx, Version=3.0.2.4, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ControlzEx.3.0.2.4\lib\net462\ControlzEx.dll</HintPath>
     </Reference>
     <Reference Include="Costura, Version=3.2.0.0, Culture=neutral, PublicKeyToken=9919ef960d84173d, processorArchitecture=MSIL">
       <HintPath>..\packages\Costura.Fody.3.2.0\lib\net46\Costura.dll</HintPath>
@@ -104,17 +110,11 @@
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Numerics" />
-    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
-    </Reference>
     <Reference Include="System.Security" />
     <Reference Include="System.Threading.Tasks.Dataflow, Version=4.5.24.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Tpl.Dataflow.4.5.24\lib\portable-net45+win8+wpa81\System.Threading.Tasks.Dataflow.dll</HintPath>
     </Reference>
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\ControlzEx.3.0.2.4\lib\net462\System.Windows.Interactivity.dll</HintPath>
-    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -174,6 +174,9 @@
     <Compile Include="Forms\EntitySelector.xaml.cs">
       <DependentUpon>EntitySelector.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Forms\EtrScale.xaml.cs">
+      <DependentUpon>EtrScale.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Forms\LogPrompt.xaml.cs">
       <DependentUpon>LogPrompt.xaml</DependentUpon>
     </Compile>
@@ -213,6 +216,7 @@
     <Compile Include="Utils\LeftClickContextMenu.cs" />
     <Compile Include="Utils\ListBoxSelectedItemsBinding.cs" />
     <Compile Include="Controls\ZoomBorder.cs" />
+    <Compile Include="ViewModel\EffectPartViewModel.cs" />
     <Compile Include="View\EepkEditor.xaml.cs">
       <DependentUpon>EepkEditor.xaml</DependentUpon>
     </Compile>
@@ -237,6 +241,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Forms\EntitySelector.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Forms\EtrScale.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

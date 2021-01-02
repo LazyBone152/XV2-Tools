@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Windows;
 using System.Windows.Media;
 using Xv2CoreLib.EMM;
 using Xv2CoreLib.HslColor;
 using Xv2CoreLib.Resource;
+using Xv2CoreLib.Resource.UndoRedo;
 using YAXLib;
 
 namespace Xv2CoreLib.EMP
@@ -122,21 +124,21 @@ namespace Xv2CoreLib.EMP
         /// <summary>
         /// Parses all ParticleEffects and removes the specified Texture ref, if found.
         /// </summary>
-        public void RemoveTextureReferences(EMP_TextureDefinition textureRef)
+        public void RemoveTextureReferences(EMP_TextureDefinition textureRef, List<IUndoRedo> undos = null)
         {
             if (ParticleEffects != null)
             {
-                RemoveTextureReferences_Recursive(ParticleEffects, textureRef);
+                RemoveTextureReferences_Recursive(ParticleEffects, textureRef, undos);
             }
         }
 
-        private void RemoveTextureReferences_Recursive(ObservableCollection<ParticleEffect> children, EMP_TextureDefinition textureRef)
+        private void RemoveTextureReferences_Recursive(ObservableCollection<ParticleEffect> children, EMP_TextureDefinition textureRef, List<IUndoRedo> undos = null)
         {
             for (int i = 0; i < children.Count; i++)
             {
                 if (children[i].ChildParticleEffects != null)
                 {
-                    RemoveTextureReferences_Recursive(children[i].ChildParticleEffects, textureRef);
+                    RemoveTextureReferences_Recursive(children[i].ChildParticleEffects, textureRef, undos);
                 }
 
                 if (children[i].Type_Texture != null)
@@ -146,6 +148,9 @@ namespace Xv2CoreLib.EMP
                     {
                         if (e.TextureRef == textureRef)
                         {
+                            if (undos != null)
+                                undos.Add(new UndoableListRemove<TextureEntryRef>(children[i].Type_Texture.TextureEntryRef, e));
+
                             children[i].Type_Texture.TextureEntryRef.Remove(e);
                             goto startPoint;
                         }
@@ -154,21 +159,21 @@ namespace Xv2CoreLib.EMP
             }
         }
         
-        public void RefactorTextureRef(EMP_TextureDefinition oldTextureRef, EMP_TextureDefinition newTextureRef)
+        public void RefactorTextureRef(EMP_TextureDefinition oldTextureRef, EMP_TextureDefinition newTextureRef, List<IUndoRedo> undos)
         {
             if (ParticleEffects != null)
             {
-                RemoveTextureReferences_Recursive(ParticleEffects, oldTextureRef, newTextureRef);
+                RemoveTextureReferences_Recursive(ParticleEffects, oldTextureRef, newTextureRef, undos);
             }
         }
 
-        private void RemoveTextureReferences_Recursive(ObservableCollection<ParticleEffect> children, EMP_TextureDefinition oldTextureRef, EMP_TextureDefinition newTextureRef)
+        private void RemoveTextureReferences_Recursive(ObservableCollection<ParticleEffect> children, EMP_TextureDefinition oldTextureRef, EMP_TextureDefinition newTextureRef, List<IUndoRedo> undos)
         {
             for (int i = 0; i < children.Count; i++)
             {
                 if (children[i].ChildParticleEffects != null)
                 {
-                    RemoveTextureReferences_Recursive(children[i].ChildParticleEffects, oldTextureRef, newTextureRef);
+                    RemoveTextureReferences_Recursive(children[i].ChildParticleEffects, oldTextureRef, newTextureRef, undos);
                 }
 
                 if (children[i].Type_Texture != null)
@@ -177,6 +182,7 @@ namespace Xv2CoreLib.EMP
                     {
                         if (e.TextureRef == oldTextureRef)
                         {
+                            undos.Add(new UndoableProperty<TextureEntryRef>(nameof(e.TextureRef), e, e.TextureRef, newTextureRef));
                             e.TextureRef = newTextureRef;
                         }
                     }
@@ -190,29 +196,40 @@ namespace Xv2CoreLib.EMP
         /// Add a new ParticleEffect entry.
         /// </summary>
         /// <param name="index">Where in the collection to insert the new entry. The default value of -1 will result in it being added to the end, as will out of range values.</param>
-        public void AddNew(int index = -1)
+        public void AddNew(int index = -1, List<IUndoRedo> undos = null)
         {
             if (index < -1 || index > ParticleEffects.Count() - 1) index = -1;
 
+            var newEffect = ParticleEffect.GetNew();
+
             if (index == -1)
             {
-                ParticleEffects.Add(ParticleEffect.GetNew());
+                ParticleEffects.Add(newEffect);
+
+                if (undos != null)
+                    undos.Add(new UndoableListAdd<ParticleEffect>(ParticleEffects, newEffect));
             }
             else
             {
-                ParticleEffects.Insert(index, ParticleEffect.GetNew());
+                ParticleEffects.Insert(index, newEffect);
+
+                if (undos != null)
+                    undos.Add(new UndoableStateChange<ParticleEffect>(ParticleEffects, index, ParticleEffects[index], newEffect));
             }
         }
 
-        public bool RemoveParticleEffect(ParticleEffect effectToRemove)
+        public bool RemoveParticleEffect(ParticleEffect effectToRemove, List<IUndoRedo> undos = null)
         {
             bool result = false;
             for (int i = 0; i < ParticleEffects.Count; i++)
             {
-                result = RemoveInChildren(ParticleEffects[i].ChildParticleEffects, effectToRemove);
+                result = RemoveInChildren(ParticleEffects[i].ChildParticleEffects, effectToRemove, undos);
 
                 if (ParticleEffects[i] == effectToRemove)
                 {
+                    if(undos != null)
+                        undos.Add(new UndoableListRemove<ParticleEffect>(ParticleEffects, effectToRemove));
+
                     ParticleEffects.Remove(effectToRemove);
                     return true;
                 }
@@ -226,17 +243,20 @@ namespace Xv2CoreLib.EMP
             return result;
         }
 
-        private bool RemoveInChildren(ObservableCollection<ParticleEffect> children, ParticleEffect effectToRemove)
+        private bool RemoveInChildren(ObservableCollection<ParticleEffect> children, ParticleEffect effectToRemove, List<IUndoRedo> undos = null)
         {
             for (int i = 0; i < children.Count; i++)
             {
                 if (children[i].ChildParticleEffects.Count > 0)
                 {
-                    RemoveInChildren(children[i].ChildParticleEffects, effectToRemove);
+                    RemoveInChildren(children[i].ChildParticleEffects, effectToRemove, undos);
                 }
 
                 if (children[i] == effectToRemove)
                 {
+                    if (undos != null)
+                        undos.Add(new UndoableListRemove<ParticleEffect>(children, effectToRemove));
+
                     children.Remove(effectToRemove);
                     return true;
                 }
@@ -448,13 +468,14 @@ namespace Xv2CoreLib.EMP
             return colors;
         }
 
-        public void ChangeHue(double hue, double saturation, double lightness)
+        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos = null)
         {
             if (ParticleEffects == null) return;
+            if (undos == null) undos = new List<IUndoRedo>();
 
             foreach(var particleEffects in ParticleEffects)
             {
-                particleEffects.ChangeHue(hue, saturation, lightness);
+                particleEffects.ChangeHue(hue, saturation, lightness, undos);
             }
         }
     }
@@ -467,7 +488,7 @@ namespace Xv2CoreLib.EMP
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
         
-        private void NotifyPropertyChanged(String propertyName = "")
+        public void NotifyPropertyChanged(String propertyName = "")
         {
             if (PropertyChanged != null)
             {
@@ -1014,17 +1035,25 @@ namespace Xv2CoreLib.EMP
         /// Add a new ParticleEffect entry.
         /// </summary>
         /// <param name="index">Where in the collection to insert the new entry. The default value of -1 will result in it being added to the end.</param>
-        public void AddNew(int index = -1)
+        public void AddNew(int index = -1, List<IUndoRedo> undos = null)
         {
             if (index < -1 || index > ChildParticleEffects.Count() - 1) index = -1;
 
+            var newEffect = GetNew();
+
             if (index == -1)
             {
-                ChildParticleEffects.Add(GetNew());
+                ChildParticleEffects.Add(newEffect);
+
+                if (undos != null)
+                    undos.Add(new UndoableListAdd<ParticleEffect>(ChildParticleEffects, newEffect));
             }
             else
             {
-                ChildParticleEffects.Insert(index, GetNew());
+                ChildParticleEffects.Insert(index, newEffect);
+
+                if (undos != null)
+                    undos.Add(new UndoableStateChange<ParticleEffect>(ChildParticleEffects, index, ChildParticleEffects[index], newEffect));
             }
         }
 
@@ -1043,81 +1072,54 @@ namespace Xv2CoreLib.EMP
             return false;
         }
 
-        public void CopyValues(ParticleEffect particleEffect)
+        public void CopyValues(ParticleEffect particleEffect, List<IUndoRedo> undos = null)
         {
-            Component_Type = particleEffect.Component_Type;
-            I_44 = particleEffect.I_44;
-            I_45 = particleEffect.I_45;
-            I_46 = particleEffect.I_46;
-            I_47 = particleEffect.I_47;
-            I_48 = particleEffect.I_48;
-            I_50 = particleEffect.I_50;
-            I_52 = particleEffect.I_52;
-            this.F_100 = particleEffect.F_100;
-            this.F_104 = particleEffect.F_104;
-            this.F_108 = particleEffect.F_108;
-            this.F_112 = particleEffect.F_112;
-            this.F_116 = particleEffect.F_116;
-            this.F_120 = particleEffect.F_120;
-            this.F_124 = particleEffect.F_124;
-            this.F_128 = particleEffect.F_128;
-            this.F_132 = particleEffect.F_132;
-            this.F_64 = particleEffect.F_64;
-            this.F_68 = particleEffect.F_68;
-            this.F_72 = particleEffect.F_72;
-            this.F_76 = particleEffect.F_76;
-            this.F_80 = particleEffect.F_80;
-            this.F_84 = particleEffect.F_84;
-            this.F_88 = particleEffect.F_88;
-            this.F_92 = particleEffect.F_92;
-            this.F_96 = particleEffect.F_96;
-            this.I_136 = particleEffect.I_136;
-            this.I_32_0 = particleEffect.I_32_0;
-            this.I_32_1 = particleEffect.I_32_1;
-            this.I_32_2 = particleEffect.I_32_2;
-            this.I_32_3 = particleEffect.I_32_3;
-            this.I_32_4 = particleEffect.I_32_4;
-            this.I_32_5 = particleEffect.I_32_5;
-            this.I_32_6 = particleEffect.I_32_6;
-            this.I_32_7 = particleEffect.I_32_7;
-            this.I_33_0 = particleEffect.I_33_0;
-            this.I_33_1 = particleEffect.I_33_1;
-            this.I_33_2 = particleEffect.I_33_2;
-            this.I_33_3 = particleEffect.I_33_3;
-            this.I_33_4 = particleEffect.I_33_4;
-            this.I_33_5 = particleEffect.I_33_5;
-            this.I_33_6 = particleEffect.I_33_6;
-            this.I_33_7 = particleEffect.I_33_7;
-            this.I_34_0 = particleEffect.I_34_0;
-            this.I_34_1 = particleEffect.I_34_1;
-            this.I_34_2 = particleEffect.I_34_2;
-            this.I_34_3 = particleEffect.I_34_3;
-            this.I_34_4 = particleEffect.I_34_4;
-            this.I_34_5 = particleEffect.I_34_5;
-            this.I_34_6 = particleEffect.I_34_6;
-            this.I_34_7 = particleEffect.I_34_7;
-            this.I_35 = particleEffect.I_35;
-            this.I_38 = particleEffect.I_38;
-            this.I_40 = particleEffect.I_40;
-            this.I_42 = particleEffect.I_42;
-            this.I_54 = particleEffect.I_54;
-            this.I_56 = particleEffect.I_56;
-            this.I_58 = particleEffect.I_58;
-            this.I_60 = particleEffect.I_60;
-            this.I_62 = particleEffect.I_62;
-            this.Type_Model = particleEffect.Type_Model.Clone();
-            this.FloatPart_00_01 = particleEffect.FloatPart_00_01.Clone();
-            FloatPart_00_02 = particleEffect.FloatPart_00_02.Clone();
-            FloatPart_01_01 = particleEffect.FloatPart_01_01.Clone();
-            FloatPart_02_01 = particleEffect.FloatPart_02_01.Clone();
-            FloatPart_02_02 = particleEffect.FloatPart_02_02.Clone();
-            FloatPart_03_01 = particleEffect.FloatPart_03_01.Clone();
-            this.Type_Struct3 = particleEffect.Type_Struct3.Clone();
-            this.Type_Struct5 = particleEffect.Type_Struct5.Clone();
-            this.Type_Texture = particleEffect.Type_Texture.Clone();
+            if (undos == null) undos = new List<IUndoRedo>();
+
+            undos.AddRange(Utils.CopyValues(this, particleEffect));
+
+            var typeModel = particleEffect.Type_Model.Copy();
+            var floatPart00_01 = particleEffect.FloatPart_00_01.Copy();
+            var floatPart00_02 = particleEffect.FloatPart_00_02.Copy();
+            var floatPart01_01 = particleEffect.FloatPart_01_01.Copy();
+            var floatPart02_01 = particleEffect.FloatPart_02_01.Copy();
+            var floatPart02_02 = particleEffect.FloatPart_02_02.Copy();
+            var floatPart_03_01 = particleEffect.FloatPart_03_01.Copy();
+            var type_Struct3 = particleEffect.Type_Struct3.Copy();
+            var type_Struct5 = particleEffect.Type_Struct5.Copy();
+            var type_Texture = particleEffect.Type_Texture.Copy();
+            var type_0 = particleEffect.Type_0.Copy();
+            var type_1 = particleEffect.Type_1.Copy();
+
+            this.Type_Model = particleEffect.Type_Model.Copy();
+            this.FloatPart_00_01 = particleEffect.FloatPart_00_01.Copy();
+            FloatPart_00_02 = particleEffect.FloatPart_00_02.Copy();
+            FloatPart_01_01 = particleEffect.FloatPart_01_01.Copy();
+            FloatPart_02_01 = particleEffect.FloatPart_02_01.Copy();
+            FloatPart_02_02 = particleEffect.FloatPart_02_02.Copy();
+            FloatPart_03_01 = particleEffect.FloatPart_03_01.Copy();
+            this.Type_Struct3 = particleEffect.Type_Struct3.Copy();
+            this.Type_Struct5 = particleEffect.Type_Struct5.Copy();
+            this.Type_Texture = particleEffect.Type_Texture.Copy();
             this.Type_0 = particleEffect.Type_0.Copy();
             this.Type_1 = particleEffect.Type_1.Copy();
-            NotifyPropertyChanged();
+
+            undos.Add(new UndoableProperty<ParticleEffect>(nameof(Type_Model), this, typeModel, this.Type_Model));
+            undos.Add(new UndoableProperty<ParticleEffect>(nameof(FloatPart_00_01), this, floatPart00_01, this.FloatPart_00_01));
+            undos.Add(new UndoableProperty<ParticleEffect>(nameof(FloatPart_00_02), this, floatPart00_02, this.FloatPart_00_02));
+            undos.Add(new UndoableProperty<ParticleEffect>(nameof(FloatPart_01_01), this, floatPart01_01, this.FloatPart_01_01));
+            undos.Add(new UndoableProperty<ParticleEffect>(nameof(FloatPart_02_01), this, floatPart02_01, this.FloatPart_02_01));
+            undos.Add(new UndoableProperty<ParticleEffect>(nameof(FloatPart_02_02), this, floatPart02_02, this.FloatPart_02_02));
+            undos.Add(new UndoableProperty<ParticleEffect>(nameof(FloatPart_03_01), this, floatPart_03_01, this.FloatPart_03_01));
+            undos.Add(new UndoableProperty<ParticleEffect>(nameof(Type_Struct3), this, type_Struct3, this.Type_Struct3));
+            undos.Add(new UndoableProperty<ParticleEffect>(nameof(Type_Struct5), this, type_Struct5, this.Type_Struct5));
+            undos.Add(new UndoableProperty<ParticleEffect>(nameof(Type_Texture), this, type_Texture, this.Type_Texture));
+            undos.Add(new UndoableProperty<ParticleEffect>(nameof(Type_0), this, type_0, this.Type_0));
+            undos.Add(new UndoableProperty<ParticleEffect>(nameof(Type_1), this, type_1, this.Type_1));
+
+            undos.Add(new UndoActionPropNotify(this, true));
+
+            this.NotifyPropsChanged();
         }
 
 
@@ -1354,7 +1356,7 @@ namespace Xv2CoreLib.EMP
             return colors;
         }
 
-        public void ChangeHue(double hue, double saturation, double lightness)
+        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos)
         {
             if(Type_Texture != null)
             {
@@ -1371,6 +1373,11 @@ namespace Xv2CoreLib.EMP
                         newCol1.ChangeSaturation(saturation);
                         newCol1.ChangeLightness(lightness);
                         RgbColor convertedColor = newCol1.ToRgb();
+
+                        undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_48), Type_Texture, Type_Texture.F_48, (float)convertedColor.R));
+                        undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_52), Type_Texture, Type_Texture.F_52, (float)convertedColor.G));
+                        undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_56), Type_Texture, Type_Texture.F_56, (float)convertedColor.B));
+
                         Type_Texture.F_48 = (float)convertedColor.R;
                         Type_Texture.F_52 = (float)convertedColor.G;
                         Type_Texture.F_56 = (float)convertedColor.B;
@@ -1387,6 +1394,11 @@ namespace Xv2CoreLib.EMP
                         newCol2.ChangeSaturation(saturation);
                         newCol2.ChangeLightness(lightness);
                         RgbColor convertedColor = newCol2.ToRgb();
+
+                        undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_80), Type_Texture, Type_Texture.F_80, (float)convertedColor.R));
+                        undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_84), Type_Texture, Type_Texture.F_84, (float)convertedColor.G));
+                        undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_88), Type_Texture, Type_Texture.F_88, (float)convertedColor.B));
+
                         Type_Texture.F_80 = (float)convertedColor.R;
                         Type_Texture.F_84 = (float)convertedColor.G;
                         Type_Texture.F_88 = (float)convertedColor.B;
@@ -1401,27 +1413,32 @@ namespace Xv2CoreLib.EMP
                     newCol.ChangeSaturation(saturation);
                     newCol.ChangeLightness(lightness);
                     RgbColor convertedColor = newCol.ToRgb();
+
+                    undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_64), Type_Texture, Type_Texture.F_64, (float)convertedColor.R));
+                    undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_68), Type_Texture, Type_Texture.F_68, (float)convertedColor.G));
+                    undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_72), Type_Texture, Type_Texture.F_72, (float)convertedColor.B));
+
                     Type_Texture.F_64 = (float)convertedColor.R;
                     Type_Texture.F_68 = (float)convertedColor.G;
                     Type_Texture.F_72 = (float)convertedColor.B;
                 }
 
                 //Animations
-                ChangeHueForColor1Animations(hue, saturation, lightness);
-                ChangeHueForColor2Animations(hue, saturation, lightness);
+                ChangeHueForColor1Animations(hue, saturation, lightness, undos);
+                ChangeHueForColor2Animations(hue, saturation, lightness, undos);
 
                 //Children
                 if(ChildParticleEffects != null)
                 {
                     foreach(var child in ChildParticleEffects)
                     {
-                        child.ChangeHue(hue, saturation, lightness);
+                        child.ChangeHue(hue, saturation, lightness, undos);
                     }
                 }
             }
         }
 
-        private void ChangeHueForColor1Animations(double hue, double saturation, double lightness)
+        private void ChangeHueForColor1Animations(double hue, double saturation, double lightness, List<IUndoRedo> undos)
         {
             Type0 r = Type_0.FirstOrDefault(e => e.SelectedComponentColor1 == Type0.ComponentColor1.R && e.SelectedParameter == Type0.Parameter.Color1);
             Type0 g = Type_0.FirstOrDefault(e => e.SelectedComponentColor1 == Type0.ComponentColor1.G && e.SelectedParameter == Type0.Parameter.Color1);
@@ -1441,15 +1458,16 @@ namespace Xv2CoreLib.EMP
                     color.ChangeLightness(lightness);
                     RgbColor convertedColor = color.ToRgb();
 
-                    r_frame.Float = (float)convertedColor.R;
-                    g.SetValue(r_frame.Index, (float)convertedColor.G);
-                    b.SetValue(r_frame.Index, (float)convertedColor.B);
+                    r.SetValue(r_frame.Index, (float)convertedColor.R, undos);
+                    g.SetValue(r_frame.Index, (float)convertedColor.G, undos);
+                    b.SetValue(r_frame.Index, (float)convertedColor.B, undos);
+
                 }
             }
 
         }
 
-        private void ChangeHueForColor2Animations(double hue, double saturation, double lightness)
+        private void ChangeHueForColor2Animations(double hue, double saturation, double lightness, List<IUndoRedo> undos)
         {
             Type0 r = Type_0.FirstOrDefault(e => e.SelectedComponentColor2 == Type0.ComponentColor2.R && e.SelectedParameter == Type0.Parameter.Color2);
             Type0 g = Type_0.FirstOrDefault(e => e.SelectedComponentColor2 == Type0.ComponentColor2.G && e.SelectedParameter == Type0.Parameter.Color2);
@@ -1470,14 +1488,21 @@ namespace Xv2CoreLib.EMP
                     color.ChangeLightness(lightness);
                     RgbColor convertedColor = color.ToRgb();
 
-                    r_frame.Float = (float)convertedColor.R;
-                    g.SetValue(r_frame.Index, (float)convertedColor.G);
-                    b.SetValue(r_frame.Index, (float)convertedColor.B);
+                    r.SetValue(r_frame.Index, (float)convertedColor.R, undos);
+                    g.SetValue(r_frame.Index, (float)convertedColor.G, undos);
+                    b.SetValue(r_frame.Index, (float)convertedColor.B, undos);
                 }
             }
 
         }
 
+        public void NotifyPropsChanged_2()
+        {
+            foreach (var prop in GetType().GetProperties())
+            {
+                NotifyPropertyChanged(prop.Name);
+            }
+        }
 
     }
 
@@ -1513,7 +1538,7 @@ namespace Xv2CoreLib.EMP
             {
                 if (_materialRef != value)
                     _materialRef = value;
-                NotifyPropertyChanged("MaterialRef");
+                NotifyPropertyChanged(nameof(MaterialRef));
             }
         }
         private ObservableCollection<TextureEntryRef> _textureEntryRef = new ObservableCollection<TextureEntryRef>();
@@ -1528,7 +1553,7 @@ namespace Xv2CoreLib.EMP
             {
                 if (_textureEntryRef != value)
                     _textureEntryRef = value;
-                NotifyPropertyChanged("TextureEntryRef");
+                NotifyPropertyChanged(nameof(TextureEntryRef));
             }
         }
 
@@ -3205,13 +3230,18 @@ namespace Xv2CoreLib.EMP
             //return (Keyframes.Count > 0) ? Keyframes[0].Float : 0f;//Rework this to calculate the value
         }
 
-        public void SetValue(int time, float value)
+        public void SetValue(int time, float value, List<IUndoRedo> undos = null)
         {
-            foreach(var keyframe in Keyframes)
+            foreach (var keyframe in Keyframes)
             {
                 if (keyframe.Index == time)
                 {
+                    float oldValue = keyframe.Float;
                     keyframe.Float = value;
+
+                    if (undos != null)
+                        undos.Add(new UndoableProperty<Type0_Keyframe>(nameof(keyframe.Float), keyframe, oldValue, value));
+
                     return;
                 }
             }
@@ -3353,14 +3383,13 @@ namespace Xv2CoreLib.EMP
     [YAXSerializeAs("Texture")]
     public class EMP_TextureDefinition : INotifyPropertyChanged
     {
-
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
 
         // This method is called by the Set accessor of each property.
         // The CallerMemberName attribute that is applied to the optional propertyName
         // parameter causes the property name of the caller to be substituted as an argument.
-        private void NotifyPropertyChanged(String propertyName = "")
+        public void NotifyPropertyChanged(String propertyName = "")
         {
             if (PropertyChanged != null)
             {
@@ -3440,6 +3469,7 @@ namespace Xv2CoreLib.EMP
                 }
             }
         }
+        
         [YAXAttributeForClass]
         [YAXSerializeAs("TextureIndex")]
         public byte I_01 { get; set; } = byte.MaxValue;
@@ -3493,31 +3523,19 @@ namespace Xv2CoreLib.EMP
         }
 
 
-        public void ReplaceValues(EMP_TextureDefinition newValues)
+        public void ReplaceValues(EMP_TextureDefinition newValues, List<IUndoRedo> undos = null)
         {
+            if (undos == null) undos = new List<IUndoRedo>();
+
+            //Utils.CopyValues only copies primitives - this must be copied manually.
+            undos.Add(new UndoableProperty<EMP_TextureDefinition>(nameof(TextureRef), this, TextureRef, newValues.TextureRef));
             TextureRef = newValues.TextureRef;
-            TextureType = newValues.TextureType;
-            I_00 = newValues.I_00;
-            I_01 = newValues.I_01;
-            I_02 = newValues.I_02;
-            I_03 = newValues.I_03;
-            I_04 = newValues.I_04;
-            I_05 = newValues.I_05;
-            I_06_byte = newValues.I_06_byte;
-            I_07_byte = newValues.I_07_byte;
-            I_08 = newValues.I_08;
-            I_09 = newValues.I_09;
-            SubData2 = newValues.SubData2;
-            NotifyPropertyChanged("I_00");
-            NotifyPropertyChanged("I_01");
-            NotifyPropertyChanged("I_02");
-            NotifyPropertyChanged("I_03");
-            NotifyPropertyChanged("I_04");
-            NotifyPropertyChanged("I_05");
-            NotifyPropertyChanged("I_06_byte");
-            NotifyPropertyChanged("I_07_byte");
-            NotifyPropertyChanged("I_08");
-            NotifyPropertyChanged("I_09");
+
+            //Copy remaining values
+            undos.AddRange(Utils.CopyValues(this, newValues, nameof(EntryIndex)));
+
+            undos.Add(new UndoActionPropNotify(this, true));
+            this.NotifyPropsChanged();
         }
         
         [YAXDontSerialize]
@@ -3878,7 +3896,26 @@ namespace Xv2CoreLib.EMP
                 if (value != this._textureRef)
                 {
                     this._textureRef = value;
-                    NotifyPropertyChanged("TextureRef");
+                    NotifyPropertyChanged(nameof(TextureRef));
+                    NotifyPropertyChanged(nameof(UndoableTextureRef));
+                }
+            }
+        }
+    
+        public EMP_TextureDefinition UndoableTextureRef
+        {
+            get
+            {
+                return TextureRef;
+            }
+            set
+            {
+                if(TextureRef != value)
+                {
+                    UndoManager.Instance.AddUndo(new UndoableProperty<TextureEntryRef>(nameof(TextureRef), this, TextureRef, value, "Texture Ref"));
+                    TextureRef = value;
+                    NotifyPropertyChanged(nameof(TextureRef));
+                    NotifyPropertyChanged(nameof(UndoableTextureRef));
                 }
             }
         }

@@ -197,7 +197,7 @@ namespace Xv2CoreLib.IDB
         [YAXDontSerialize]
         public int SortID { get { return int.Parse(I_00); } }
         [YAXDontSerialize]
-        public ushort ID { get { return ushort.Parse(Index); } set { I_00 = value.ToString(); } }
+        public ushort ID { get { return ushort.Parse(I_00); } set { I_00 = value.ToString(); } }
         [YAXDontSerialize]
         public ushort NameMsgID { get { return I_04; } set { I_04 = value; } }
         [YAXDontSerialize]

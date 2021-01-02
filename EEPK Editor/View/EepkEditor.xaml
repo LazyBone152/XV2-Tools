@@ -9,7 +9,6 @@
              xmlns:utils="clr-namespace:EEPK_Organiser.Utils"
              xmlns:eepk="clr-namespace:Xv2CoreLib.EEPK;assembly=Xv2CoreLib"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
-             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              xmlns:Themes1="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
              xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              mc:Ignorable="d" 
@@ -39,7 +38,7 @@
                         <ColumnDefinition Width="*" MinWidth="255" MaxWidth="800"/>
                     </Grid.ColumnDefinitions>
 
-                    <DataGrid x:Name="effectDataGrid" Grid.Column="1" PreviewKeyDown="EffectDataGrid_Hotkeys_PreviewKeyDown" VirtualizingPanel.ScrollUnit="Pixel" ItemsSource="{Binding effectContainerFile.ViewEffects}" SelectedItem="{Binding effectContainerFile.SelectedEffect, UpdateSourceTrigger=PropertyChanged}" EnableRowVirtualization="True" EnableColumnVirtualization="True" SelectionMode="Extended" RowDetailsVisibilityMode="VisibleWhenSelected" CellEditEnding="Effect_EffectIdChange_ValueChanged" CanUserResizeRows="False" CanUserAddRows="False" AutoGenerateColumns="False" CanUserDeleteRows="False">
+                    <DataGrid x:Name="effectDataGrid" Grid.Column="1" Tag="{Binding DataContext, ElementName=rootGrid}" SelectionChanged="effectPart_SelectionChanged" VirtualizingPanel.ScrollUnit="Pixel" ItemsSource="{Binding effectContainerFile.ViewEffects}" SelectedItem="{Binding effectContainerFile.SelectedEffect, UpdateSourceTrigger=PropertyChanged}" EnableRowVirtualization="True" EnableColumnVirtualization="True" SelectionMode="Extended" RowDetailsVisibilityMode="VisibleWhenSelected" CellEditEnding="Effect_EffectIdChange_ValueChanged" CanUserResizeRows="False" CanUserAddRows="False" AutoGenerateColumns="False" CanUserDeleteRows="False">
                         <DataGrid.Resources>
                             <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="SteelBlue"/>
                             <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="SteelBlue"/>
@@ -82,18 +81,25 @@
 
                         </DataGrid.Resources>
 
+                        <DataGrid.InputBindings>
+                            <KeyBinding Key="Delete" Command="{Binding Effect_DeleteEffect_Command}"/>
+                            <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding EffectOptions_AddEffect_Command}"/>
+                            <KeyBinding Key="C" Modifiers="Ctrl" Command="{Binding Effect_Copy_Command}"/>
+                            <KeyBinding Key="V" Modifiers="Ctrl" Command="{Binding Effect_Paste_Command}"/>
+                            <KeyBinding Key="D" Modifiers="Ctrl" Command="{Binding Effect_Duplicate_Command}"/>
+                        </DataGrid.InputBindings>
 
                         <DataGrid.ContextMenu>
                             <ContextMenu FontSize="12">
-                                <MenuItem Header="New EffectPart" Click="Effect_AddEffectPart_Click"/>
-                                <MenuItem Header="Paste EffectPart" Click="EffectPart_Paste_Click"/>
+                                <MenuItem Header="New EffectPart" Command="{Binding PlacementTarget.Tag.Effect_AddEffectPart_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                <MenuItem Header="Paste EffectPart" Command="{Binding PlacementTarget.Tag.EffectPart_Paste_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                 <Separator/>
-                                <MenuItem Header="Copy" Click="Effect_Copy_Click"/>
-                                <MenuItem Header="Paste" Click="Effect_Paste_Click"/>
-                                <MenuItem Header="Delete" Click="Effect_DeleteEffect_Click"/>
-                                <MenuItem Header="Duplicate" Click="Effect_Duplicate_Click"/>
+                                <MenuItem Header="Copy" Command="{Binding PlacementTarget.Tag.Effect_Copy_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                <MenuItem Header="Paste" Command="{Binding PlacementTarget.Tag.Effect_Paste_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                <MenuItem Header="Delete" Command="{Binding PlacementTarget.Tag.Effect_DeleteEffect_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                <MenuItem Header="Duplicate" Command="{Binding PlacementTarget.Tag.Effect_Duplicate_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                 <Separator/>
-                                <MenuItem Header="Export" Click="Effect_Export"/>
+                                <MenuItem Header="Export" Command="{Binding PlacementTarget.Tag.Effect_Export_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                             </ContextMenu>
                         </DataGrid.ContextMenu>
                         <DataGrid.Columns>
@@ -104,10 +110,8 @@
 
                         <DataGrid.RowDetailsTemplate>
                             <DataTemplate>
-                                <ListBox MouseDoubleClick="EffectPart_DoubleClick" MouseLeftButtonUp="ListBox_MouseLeftButtonUp" MouseRightButtonUp="ListBox_MouseRightButtonUp" VirtualizingPanel.ScrollUnit="Pixel" ItemsSource="{Binding EffectParts}" SelectionMode="Extended" SelectedItem="{Binding SelectedEffectPart, UpdateSourceTrigger=PropertyChanged}" utils:AttachedProperties.SelectedItems="{Binding SelectedEffectParts}">
-                                    <ListBox.Resources>
-                                        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Black"/>
-                                    </ListBox.Resources>
+                                <ListBox Tag="{Binding DataContext, ElementName=rootGrid}" SelectionChanged="effectPart_SelectionChanged" MouseDoubleClick="EffectPart_DoubleClick" MouseLeftButtonUp="ListBox_MouseLeftButtonUp" MouseRightButtonUp="ListBox_MouseRightButtonUp" VirtualizingPanel.ScrollUnit="Pixel" ItemsSource="{Binding EffectParts}" SelectionMode="Extended" SelectedItem="{Binding SelectedEffectPart, UpdateSourceTrigger=PropertyChanged}" utils:AttachedProperties.SelectedItems="{Binding SelectedEffectParts}">
+                                    
 
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
@@ -119,16 +123,17 @@
                                             </Grid>
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
+
                                     <ListBox.ContextMenu>
-                                        <ContextMenu>
+                                        <ContextMenu Controls:ControlsHelper.HeaderFontSize="12">
                                             <MenuItem Header="Delete" Click="EffectPart_Delete_Click"/>
                                             <MenuItem Header="Duplicate" Click="EffectPart_Duplicate_Click"/>
                                             <MenuItem Header="Copy" Click="EffectPart_Copy_Click"/>
                                             <MenuItem Header="Paste" Click="EffectPart_Paste_Click"/>
-                                            <MenuItem Header="Paste Values" Click="EffectPart_PasteValues_Click"/>
+                                            <MenuItem Header="Paste Value" Click="EffectPart_PasteValues_Click"/>
                                             <Separator/>
                                             <MenuItem Header="Go To Asset" Click="EffectPart_GoToAsset_Click"/>
-                                            <MenuItem Header="Change Asset" Click="EffectPart_ChangeAssetContextMenu_Click"/>
+                                            <MenuItem Header="Change Asset" Click="EffectPart_ChangeAsset_Click"/>
                                         </ContextMenu>
                                     </ListBox.ContextMenu>
                                 </ListBox>
@@ -163,7 +168,7 @@
                                                 </Grid.ColumnDefinitions>
                                                 <Label Content="Asset"/>
                                                 <TextBox Grid.Column="1" IsEnabled="False" Text="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.AssetRefDetails, Mode=OneWay}" IsReadOnly="True"  TextWrapping="NoWrap" VerticalAlignment="Top"/>
-                                                <Button Grid.Column="2" Margin="5,0" Click="EffectPart_ChangeAsset_Click" Content="Change"/>
+                                                <Button Grid.Column="2" Margin="5,0" Command="{Binding EffectPart_ChangeAsset_Command}" Content="Change"/>
 
                                             </Grid>
                                         </WrapPanel>
@@ -175,7 +180,7 @@
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
                                                 <Label Content="Start Time"/>
-                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_28, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
+                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.StartTime, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
                                             </Grid>
                                             <Grid Margin="3,3,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
@@ -183,7 +188,7 @@
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
                                                 <Label Content="Attachment"/>
-                                                <ComboBox Grid.Column="1" SelectedItem="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_03, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={StaticResource ResourceKey=PlacementEnum}}" />
+                                                <ComboBox Grid.Column="1" SelectedItem="{Binding effectPartViewModel.Attachment, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={StaticResource ResourceKey=PlacementEnum}}"/>
                                             </Grid>
                                             <Grid Margin="3,3,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
@@ -191,7 +196,7 @@
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
                                                 <Label Content="Rotate Movement"/>
-                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_04, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
+                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.RotateOnMovement, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
                                             </Grid>
                                             <Grid Margin="3,3,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
@@ -199,7 +204,7 @@
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
                                                 <Label Content="Deactivation"/>
-                                                <ComboBox Grid.Column="1" SelectedItem="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_05, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={StaticResource ResourceKey=DeactivationModeEnum}}"/>
+                                                <ComboBox Grid.Column="1" SelectedItem="{Binding effectPartViewModel.Deactivation, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={StaticResource ResourceKey=DeactivationModeEnum}}"/>
                                             </Grid>
                                             <Grid Margin="3,3,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
@@ -207,7 +212,7 @@
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
                                                 <Label Content="Near Fade Distance"/>
-                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.F_84, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.05" Minimum="0"/>
+                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.F_84, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.05"/>
                                             </Grid>
                                             <Grid Margin="3,3,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
@@ -215,7 +220,7 @@
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
                                                 <Label Content="Far Fade Distance"/>
-                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.F_88, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.05"/>
+                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.F_88, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.05"/>
                                             </Grid>
                                             <Grid Margin="3,3,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
@@ -223,7 +228,7 @@
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
                                                 <Label Content="Avoid Sphere"/>
-                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.F_24, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.05" Minimum="0"/>
+                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.F_24, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.05"/>
                                             </Grid>
                                             <Grid Margin="3,3,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
@@ -231,23 +236,23 @@
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
                                                 <Label Content="Attach Bone"/>
-                                                <TextBox Grid.Column="1" Text="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.ESK, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" TextWrapping="NoWrap" />
+                                                <TextBox Grid.Column="1" Text="{Binding effectPartViewModel.ESK, UpdateSourceTrigger=LostFocus}" VerticalContentAlignment="Center" TextWrapping="NoWrap" />
                                             </Grid>
                                             <Grid Margin="3,3,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
-                                                <Label Content="Scale (Min)"/>
-                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.SIZE_1, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01" Minimum="0"/>
+                                                <Label Content="Scale (Min)" ToolTip="Scales the EffectPart. The actual scale will be randomly chosen between the Min and Max value.&#x0a;&#x0a;Not applicable for TBIND."/>
+                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.SIZE_1, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01" IsEnabled="{Binding effectPartViewModel.IsNotTBIND}"/>
                                             </Grid>
                                             <Grid Margin="3,3,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
-                                                <Label Content="Scale (Max)"/>
-                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.SIZE_2, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01" Minimum="0"/>
+                                                <Label Content="Scale (Max)" ToolTip="Scales the EffectPart. The actual scale will be randomly chosen between the Min and Max value.&#x0a;&#x0a;Not applicable for TBIND."/>
+                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.SIZE_2, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01" IsEnabled="{Binding effectPartViewModel.IsNotTBIND}"/>
                                             </Grid>
                                         </WrapPanel>
                                     </StackPanel>
@@ -261,7 +266,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="Position X"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.POSITION_X, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.POSITION_X, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
                                         </Grid>
                                         <Grid Margin="3,3,0,0" Width="250">
                                             <Grid.ColumnDefinitions>
@@ -269,7 +274,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="Position Y"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.POSITION_Y, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.POSITION_Y, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
                                         </Grid>
                                         <Grid Margin="3,3,0,0" Width="250">
                                             <Grid.ColumnDefinitions>
@@ -277,7 +282,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="Position Z"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.POSITION_Z, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.POSITION_Z, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
                                         </Grid>
                                         <Grid Margin="3,3,0,0" Width="250">
                                             <Grid.ColumnDefinitions>
@@ -285,7 +290,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="Rotation X (Min)"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.F_52, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.F_52, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
                                         </Grid>
                                         <Grid Margin="3,3,0,0" Width="250">
                                             <Grid.ColumnDefinitions>
@@ -293,7 +298,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="Rotation Y (Min)"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.F_60, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.F_60, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
                                         </Grid>
                                         <Grid Margin="3,3,0,0" Width="250">
                                             <Grid.ColumnDefinitions>
@@ -301,7 +306,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="Rotation Z (Min)"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.F_68, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.F_68, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
                                         </Grid>
                                         <Grid Margin="3,3,0,0" Width="250">
                                             <Grid.ColumnDefinitions>
@@ -309,7 +314,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="Rotation X (Max)"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.F_56, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.F_56, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
                                         </Grid>
                                         <Grid Margin="3,3,0,0" Width="250">
                                             <Grid.ColumnDefinitions>
@@ -317,7 +322,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="Rotation Y (Max)"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.F_64, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.F_64, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
                                         </Grid>
                                         <Grid Margin="3,3,0,0" Width="250">
                                             <Grid.ColumnDefinitions>
@@ -325,7 +330,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="Rotation Z (Max)"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.F_72, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.F_72, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
                                         </Grid>
                                     </WrapPanel>
                                 </Expander>
@@ -337,7 +342,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="EMA Index"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_30, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.I_30, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
                                         </Grid>
                                         <Grid Margin="3,3,0,0" Width="250">
                                             <Grid.ColumnDefinitions>
@@ -345,7 +350,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="Start Frame"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_92, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.I_92, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
                                         </Grid>
                                         <Grid Margin="3,3,0,0" Width="250">
                                             <Grid.ColumnDefinitions>
@@ -353,7 +358,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="End Frame"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_94, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.I_94, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
                                         </Grid>
                                         <Grid Margin="3,3,0,0" Width="250">
                                             <Grid.ColumnDefinitions>
@@ -361,7 +366,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="Enable Looping"/>
-                                            <CheckBox Grid.Column="1" IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_36_0, UpdateSourceTrigger=PropertyChanged}"/>
+                                            <CheckBox Grid.Column="1" IsChecked="{Binding effectPartViewModel.I_36_0, UpdateSourceTrigger=PropertyChanged}"/>
                                         </Grid>
                                     </WrapPanel>
                                 </Expander>
@@ -370,67 +375,67 @@
                                         <Grid Margin="3,3,0,0" Width="250">
                                             <GroupBox Header="Attach Flags" HorizontalAlignment="Left" Height="200" Width="250">
                                                 <StackPanel>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_32_0, UpdateSourceTrigger=PropertyChanged}" Content="MoveWithBone"/>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_32_1, UpdateSourceTrigger=PropertyChanged}" Content="RotateWithBone"/>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_32_2, UpdateSourceTrigger=PropertyChanged}" Content="InstantMoveAndRotate"/>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_32_3, UpdateSourceTrigger=PropertyChanged}" Content="OnGroundOnly"/>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_32_4, UpdateSourceTrigger=PropertyChanged}" Content="Unk4"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_32_0, UpdateSourceTrigger=PropertyChanged}" Content="MoveWithBone"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_32_1, UpdateSourceTrigger=PropertyChanged}" Content="RotateWithBone"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_32_2, UpdateSourceTrigger=PropertyChanged}" Content="InstantMoveAndRotate"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_32_3, UpdateSourceTrigger=PropertyChanged}" Content="OnGroundOnly"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_32_4, UpdateSourceTrigger=PropertyChanged}" Content="Unk4"/>
                                                 </StackPanel>
                                             </GroupBox>
                                         </Grid>
                                         <Grid Margin="3,3,0,0" Width="250">
                                             <GroupBox Header="Start Effect Position" HorizontalAlignment="Left" Height="200" Width="250">
                                                 <StackPanel>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_32_5, UpdateSourceTrigger=PropertyChanged}" Content="UseBoneDirection"/>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_32_6, UpdateSourceTrigger=PropertyChanged}" Content="UseBoneToCameraDirection"/>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_32_7, UpdateSourceTrigger=PropertyChanged}" Content="UseSceneCenterToBoneDirection"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_32_5, UpdateSourceTrigger=PropertyChanged}" Content="UseBoneDirection"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_32_6, UpdateSourceTrigger=PropertyChanged}" Content="UseBoneToCameraDirection"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_32_7, UpdateSourceTrigger=PropertyChanged}" Content="UseSceneCenterToBoneDirection"/>
                                                 </StackPanel>
                                             </GroupBox>
                                         </Grid>
                                         <Grid Margin="3,3,0,0" Width="250">
                                             <GroupBox Header="Flag 39" HorizontalAlignment="Left" Height="200" Width="250">
                                                 <StackPanel>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_39_0, UpdateSourceTrigger=PropertyChanged}" Content="NoGlare"/>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_39_1, UpdateSourceTrigger=PropertyChanged}" Content="Unk1"/>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_39_2, UpdateSourceTrigger=PropertyChanged}" Content="InverseTransparentDrawOrder"/>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_39_5, UpdateSourceTrigger=PropertyChanged}" Content="Unk5"/>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_39_6, UpdateSourceTrigger=PropertyChanged}" Content="Unk6"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_39_0, UpdateSourceTrigger=PropertyChanged}" Content="NoGlare"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_39_1, UpdateSourceTrigger=PropertyChanged}" Content="Unk1"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_39_2, UpdateSourceTrigger=PropertyChanged}" Content="InverseTransparentDrawOrder"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_39_5, UpdateSourceTrigger=PropertyChanged}" Content="Unk5"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_39_6, UpdateSourceTrigger=PropertyChanged}" Content="Unk6"/>
                                                 </StackPanel>
                                             </GroupBox>
                                         </Grid>
                                         <Grid Margin="3,3,0,0" Width="250">
                                             <GroupBox Header="Link Flags" HorizontalAlignment="Left" Height="200" Width="250">
                                                 <StackPanel>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_39_3, UpdateSourceTrigger=PropertyChanged}" Content="_RelativePositionZ_To_AbsolutePositionZ"/>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_39_4, UpdateSourceTrigger=PropertyChanged}" Content="_ScaleZ_To_BonePositionZ"/>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_39_7, UpdateSourceTrigger=PropertyChanged}" Content="_ObjectOrientation_To_XXXX"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_39_3, UpdateSourceTrigger=PropertyChanged}" Content="_RelativePositionZ_To_AbsolutePositionZ"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_39_4, UpdateSourceTrigger=PropertyChanged}" Content="_ScaleZ_To_BonePositionZ"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_39_7, UpdateSourceTrigger=PropertyChanged}" Content="_ObjectOrientation_To_XXXX"/>
                                                 </StackPanel>
                                             </GroupBox>
                                         </Grid>
                                         <Grid Margin="3,3,0,0" Width="250">
                                             <GroupBox Header="Flag 36" HorizontalAlignment="Left" Height="200" Width="250">
                                                 <StackPanel>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_36_1, UpdateSourceTrigger=PropertyChanged}" Content="Unk1"/>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_36_2, UpdateSourceTrigger=PropertyChanged}" Content="Unk2"/>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_36_3, UpdateSourceTrigger=PropertyChanged}" Content="Unk3"/>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_36_4, UpdateSourceTrigger=PropertyChanged}" Content="Unk4"/>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_36_5, UpdateSourceTrigger=PropertyChanged}" Content="Unk5"/>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_36_6, UpdateSourceTrigger=PropertyChanged}" Content="Unk6"/>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_36_7, UpdateSourceTrigger=PropertyChanged}" Content="Unk7"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_36_1, UpdateSourceTrigger=PropertyChanged}" Content="Unk1"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_36_2, UpdateSourceTrigger=PropertyChanged}" Content="Unk2"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_36_3, UpdateSourceTrigger=PropertyChanged}" Content="Unk3"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_36_4, UpdateSourceTrigger=PropertyChanged}" Content="Unk4"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_36_5, UpdateSourceTrigger=PropertyChanged}" Content="Unk5"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_36_6, UpdateSourceTrigger=PropertyChanged}" Content="Unk6"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_36_7, UpdateSourceTrigger=PropertyChanged}" Content="Unk7"/>
                                                 </StackPanel>
                                             </GroupBox>
                                         </Grid>
                                         <Grid Margin="3,3,0,0" Width="250">
                                             <GroupBox Header="Flag 37" HorizontalAlignment="Left" Height="200" Width="250">
                                                 <StackPanel>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_37_0, UpdateSourceTrigger=PropertyChanged}" Content="Unk0"/>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_37_1, UpdateSourceTrigger=PropertyChanged}" Content="Unk1"/>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_37_2, UpdateSourceTrigger=PropertyChanged}" Content="Unk2"/>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_37_3, UpdateSourceTrigger=PropertyChanged}" Content="Unk3"/>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_37_4, UpdateSourceTrigger=PropertyChanged}" Content="Unk4"/>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_37_5, UpdateSourceTrigger=PropertyChanged}" Content="Unk5"/>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_37_6, UpdateSourceTrigger=PropertyChanged}" Content="Unk6"/>
-                                                    <CheckBox IsChecked="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_37_7, UpdateSourceTrigger=PropertyChanged}" Content="Unk7"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_37_0, UpdateSourceTrigger=PropertyChanged}" Content="Unk0"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_37_1, UpdateSourceTrigger=PropertyChanged}" Content="Unk1"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_37_2, UpdateSourceTrigger=PropertyChanged}" Content="Unk2"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_37_3, UpdateSourceTrigger=PropertyChanged}" Content="Unk3"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_37_4, UpdateSourceTrigger=PropertyChanged}" Content="Unk4"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_37_5, UpdateSourceTrigger=PropertyChanged}" Content="Unk5"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_37_6, UpdateSourceTrigger=PropertyChanged}" Content="Unk6"/>
+                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_37_7, UpdateSourceTrigger=PropertyChanged}" Content="Unk7"/>
                                                 </StackPanel>
                                             </GroupBox>
                                         </Grid>
@@ -444,7 +449,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="I__06"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_06, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.I_06, UpdateSourceTrigger=PropertyChanged}" />
                                         </Grid>
                                         <Grid Margin="3,3,0,0" Width="250">
                                             <Grid.ColumnDefinitions>
@@ -452,7 +457,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="I__07"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_07, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.I_07, UpdateSourceTrigger=PropertyChanged}" />
                                         </Grid>
                                         <Grid Margin="3,3,0,0" Width="250">
                                             <Grid.ColumnDefinitions>
@@ -460,7 +465,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="I__08"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_08, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.I_08, UpdateSourceTrigger=PropertyChanged}" />
                                         </Grid>
                                         <Grid Margin="3,3,0,0" Width="250">
                                             <Grid.ColumnDefinitions>
@@ -468,7 +473,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="I__12"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_12, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.I_12, UpdateSourceTrigger=PropertyChanged}" />
                                         </Grid>
                                         <Grid Margin="3,3,0,0" Width="250">
                                             <Grid.ColumnDefinitions>
@@ -476,7 +481,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="I__16"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_16, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.I_16, UpdateSourceTrigger=PropertyChanged}" />
                                         </Grid>
                                         <Grid Margin="3,3,0,0" Width="250">
                                             <Grid.ColumnDefinitions>
@@ -484,7 +489,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="I__20"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_20, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.I_20, UpdateSourceTrigger=PropertyChanged}" />
                                         </Grid>
                                         <Grid Margin="3,3,0,0" Width="250">
                                             <Grid.ColumnDefinitions>
@@ -492,7 +497,7 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="I__34"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.I_34, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.I_34, UpdateSourceTrigger=PropertyChanged}" />
                                         </Grid>
                                     </WrapPanel>
                                 </Expander>
@@ -508,7 +513,7 @@
                             </Style>
                         </StackPanel.Resources>
                         <StackPanel VerticalAlignment="Center">
-                            <Button Click="EffectOptions_AddEffect_Click" HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Height="30">
+                            <Button Command="{Binding EffectOptions_AddEffect_Command}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Height="30">
                                 <iconPacks:PackIconMaterialLight Kind="Plus" />
                             </Button>
                             <TextBlock Text="New Effect" HorizontalAlignment="Center" FontSize="8"/>
@@ -591,7 +596,7 @@
                         <Grid>
                             <Button Click="PBIND_AssetContainer_EmmEdit_Click" Content="Materials" HorizontalAlignment="Left" Margin="10,42,0,0" VerticalAlignment="Top" Width="123"/>
                             <Button Click="PBIND_AssetContainer_EmbEdit_Click" Content="Textures" HorizontalAlignment="Left" Margin="10,74,0,0" VerticalAlignment="Top" Width="123"/>
-                            <CheckBox ToolTip="If true, all assets will be saved as loose files rather than in a EMB container." IsChecked="{Binding effectContainerFile.Pbind.LooseFiles, UpdateSourceTrigger=PropertyChanged}" Content="Loose Files" HorizontalAlignment="Left" Margin="10,138,0,0" VerticalAlignment="Top" Width="123"/>
+                            <CheckBox ToolTip="If true, all assets will be saved as loose files rather than in a EMB container." IsChecked="{Binding effectContainerFile.Pbind.UndoableLooseFiles, UpdateSourceTrigger=PropertyChanged}" Content="Loose Files" HorizontalAlignment="Left" Margin="10,138,0,0" VerticalAlignment="Top" Width="123"/>
                             <Button Click="PBIND_RemoveUnusedAssets_Click" Content="Remove Unused" HorizontalAlignment="Left" Margin="10,106,0,0" VerticalAlignment="Top" Width="123"/>
                             <Button Content="Import Asset(s)" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="123" utils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
                                 <Button.ContextMenu>
@@ -648,6 +653,7 @@
                                 <MenuItem Header="Used By?" Click="TBIND_AssetContainer_UsedBy_Click"/>
                                 <Separator/>
                                 <MenuItem Header="Hue Adjustment" Click="TBIND_AssetContainer_Recolor"/>
+                                <MenuItem Header="Extrude Scale" Click="TBIND_AssetContainer_Scale"/>
                             </ContextMenu>
                         </DataGrid.ContextMenu>
 
@@ -667,7 +673,7 @@
                         <Grid>
                             <Button Click="TBIND_AssetContainer_EmmEdit_Click" Content="Materials" HorizontalAlignment="Left" Margin="10,42,0,0" VerticalAlignment="Top" Width="123"/>
                             <Button Click="TBIND_AssetContainer_EmbEdit_Click" Content="Textures" HorizontalAlignment="Left" Margin="10,74,0,0" VerticalAlignment="Top" Width="123"/>
-                            <CheckBox ToolTip="If true, all assets will be saved as loose files rather than in a EMB container." IsChecked="{Binding effectContainerFile.Tbind.LooseFiles, UpdateSourceTrigger=PropertyChanged}" Content="Loose Files" HorizontalAlignment="Left" Margin="10,138,0,0" VerticalAlignment="Top" Width="123"/>
+                            <CheckBox ToolTip="If true, all assets will be saved as loose files rather than in a EMB container." IsChecked="{Binding effectContainerFile.Tbind.UndoableLooseFiles, UpdateSourceTrigger=PropertyChanged}" Content="Loose Files" HorizontalAlignment="Left" Margin="10,138,0,0" VerticalAlignment="Top" Width="123"/>
                             <Button Click="TBIND_RemoveUnusedAssets_Click" Content="Remove Unused" HorizontalAlignment="Left" Margin="10,106,0,0" VerticalAlignment="Top" Width="123"/>
                             <Button Content="Import Asset(s)" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="123" utils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
                                 <Button.ContextMenu>
@@ -742,7 +748,7 @@
                     <Label Content="{Binding effectContainerFile.Cbind.AssetCount}" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Margin="765,423,-0.327,-0.055" VerticalAlignment="Bottom" Width="177" Height="30"/>
                     <GroupBox Header="Options" HorizontalAlignment="Right" Height="137" Margin="0,10,10,0" VerticalAlignment="Top" Width="223">
                         <Grid>
-                            <CheckBox ToolTip="If true, all assets will be saved as loose files rather than in a EMB container." IsChecked="{Binding effectContainerFile.Cbind.LooseFiles, UpdateSourceTrigger=PropertyChanged}" Content="Loose Files" HorizontalAlignment="Left" Margin="10,74,0,0" VerticalAlignment="Top" Width="123"/>
+                            <CheckBox ToolTip="If true, all assets will be saved as loose files rather than in a EMB container." IsChecked="{Binding effectContainerFile.Cbind.UndoableLooseFiles, UpdateSourceTrigger=PropertyChanged}" Content="Loose Files" HorizontalAlignment="Left" Margin="10,74,0,0" VerticalAlignment="Top" Width="123"/>
                             <Button Click="CBIND_RemoveUnusedAssets_Click" Content="Remove Unused" HorizontalAlignment="Left" Margin="10,42,0,0" VerticalAlignment="Top" Width="123"/>
                             <Button Content="Import Asset(s)" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="123" utils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
                                 <Button.ContextMenu>
@@ -779,7 +785,7 @@
             <Controls:MetroTabItem Header="EMO" Controls:ControlsHelper.HeaderFontSize="20">
                 <Grid Background="Transparent">
 
-                    <DataGrid PreviewKeyDown="EmoDataGrid_Hotkeys_PreviewKeyDown" SelectionMode="Extended" x:Name="emoDataGrid" RowDetailsVisibilityMode="Collapsed" ItemsSource="{Binding effectContainerFile.Emo.ViewAssets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False">
+                    <DataGrid PreviewKeyDown="EmoDataGrid_Hotkeys_PreviewKeyDown" SelectionMode="Extended" x:Name="emoDataGrid" RowDetailsVisibilityMode="VisibleWhenSelected" ItemsSource="{Binding effectContainerFile.Emo.ViewAssets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False">
                         <DataGrid.Resources>
                             <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="SteelBlue"/>
                             <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="SteelBlue"/>
@@ -855,7 +861,7 @@
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*" />
                                                 </Grid.ColumnDefinitions>
-                                                <TextBlock Text="{Binding FullFileName}"/>
+                                                <TextBlock Text="{Binding EmoFullFileNamePreview}"/>
                                             </Grid>
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
@@ -875,9 +881,7 @@
                         <DataGrid.RowHeaderTemplate>
                             <DataTemplate>
                                 <Grid VerticalAlignment="Top">
-                                    <ToggleButton Width="12" Height="12"
-                                IsChecked="{Binding DetailsVisibility, Converter={StaticResource visibilityConverter}, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" BorderBrush="Transparent" Foreground="Transparent" Background="Transparent"
-                                >
+                                    <ToggleButton Width="12" Height="12" IsChecked="{Binding DetailsVisibility, Converter={StaticResource visibilityConverter}, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" BorderBrush="Transparent" Foreground="Transparent" Background="Transparent">
                                         <Image Source="{StaticResource expand}"/>
                                     </ToggleButton>
                                 </Grid>
@@ -961,7 +965,7 @@
                     <Label Content="{Binding effectContainerFile.LightEma.AssetCount}" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Margin="765,423,-0.327,-0.055" VerticalAlignment="Bottom" Width="177" Height="30"/>
                     <GroupBox Header="Options" HorizontalAlignment="Right" Height="137" Margin="0,10,10,0" VerticalAlignment="Top" Width="223">
                         <Grid>
-                            <CheckBox ToolTip="If true, all assets will be saved as loose files rather than in a EMB container." IsChecked="{Binding effectContainerFile.LightEma.LooseFiles, UpdateSourceTrigger=PropertyChanged}" Content="Loose Files" HorizontalAlignment="Left" Margin="10,74,0,0" VerticalAlignment="Top" Width="123"/>
+                            <CheckBox ToolTip="If true, all assets will be saved as loose files rather than in a EMB container." IsChecked="{Binding effectContainerFile.LightEma.UndoableLooseFiles, UpdateSourceTrigger=PropertyChanged}" Content="Loose Files" HorizontalAlignment="Left" Margin="10,74,0,0" VerticalAlignment="Top" Width="123"/>
                             <Button Click="LIGHT_RemoveUnusedAssets_Click" Content="Remove Unused" HorizontalAlignment="Left" Margin="10,42,0,0" VerticalAlignment="Top" Width="123"/>
                             <Button Content="Import Asset(s)" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="123" utils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
                                 <Button.ContextMenu>

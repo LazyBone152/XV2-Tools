@@ -10,6 +10,7 @@ using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.EMM;
 using Xv2CoreLib.EMP;
 using Xv2CoreLib.HslColor;
+using Xv2CoreLib.Resource.UndoRedo;
 
 namespace EEPK_Organiser.Forms
 {
@@ -232,26 +233,30 @@ namespace EEPK_Organiser.Forms
 
         private void Ok_Click(object sender, RoutedEventArgs e)
         {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
             hueChange = hslColor.Hue - initialHue;
             saturationChange = hslColor.Saturation - initialSaturation;
             lightnessChange = hslColor.Lightness - initialLightness;
 
             if (currentMode == Mode.Asset)
             {
-                ChangeHueForAsset(asset, hueChange, saturationChange, lightnessChange);
+                ChangeHueForAsset(asset, hueChange, saturationChange, lightnessChange, undos);
             }
             else if(currentMode == Mode.Material)
             {
-                material.ChangeHsl(hueChange, saturationChange, lightnessChange);
+                material.ChangeHsl(hueChange, saturationChange, lightnessChange, undos);
             }
             else if(currentMode == Mode.Global)
             {
-                ChangeHueForEverything(hueChange, _saturationChangeMulti, lightnessChange);
+                ChangeHueForEverything(hueChange, _saturationChangeMulti, lightnessChange, undos);
             }
             else if (currentMode == Mode.ParticleEffect)
             {
-                particleEffect.ChangeHue(hueChange, saturationChange, lightnessChange);
+                particleEffect.ChangeHue(hueChange, saturationChange, lightnessChange, undos);
             }
+
+            UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Hue Adjustment"));
 
             Close();
         }
@@ -262,21 +267,21 @@ namespace EEPK_Organiser.Forms
         }
         
 
-        private void ChangeHueForAsset(Asset _asset, double hueChange, double saturationChange, double lightnessChange)
+        private void ChangeHueForAsset(Asset _asset, double hueChange, double saturationChange, double lightnessChange, List<IUndoRedo> undos)
         {
             switch (_asset.assetType)
             {
                 case AssetType.PBIND:
-                    _asset.Files[0].EmpFile.ChangeHue(hueChange, saturationChange, lightnessChange);
+                    _asset.Files[0].EmpFile.ChangeHue(hueChange, saturationChange, lightnessChange, undos);
                     break;
                 case AssetType.TBIND:
-                    _asset.Files[0].EtrFile.ChangeHue(hueChange, saturationChange, lightnessChange);
+                    _asset.Files[0].EtrFile.ChangeHue(hueChange, saturationChange, lightnessChange, undos);
                     break;
                 case AssetType.CBIND:
-                    _asset.Files[0].EcfFile.ChangeHue(hueChange, saturationChange, lightnessChange);
+                    _asset.Files[0].EcfFile.ChangeHue(hueChange, saturationChange, lightnessChange, undos);
                     break;
                 case AssetType.LIGHT:
-                    _asset.Files[0].EmaFile.ChangeHue(hueChange, saturationChange, lightnessChange);
+                    _asset.Files[0].EmaFile.ChangeHue(hueChange, saturationChange, lightnessChange, undos);
                     break;
                 case AssetType.EMO:
                     foreach (var file in _asset.Files)
@@ -284,10 +289,10 @@ namespace EEPK_Organiser.Forms
                         switch (file.Extension)
                         {
                             case ".emb":
-                                file.EmbFile.ChangeHue(hueChange, saturationChange, lightnessChange); //No lightness change
+                                file.EmbFile.ChangeHue(hueChange, saturationChange, lightnessChange, undos); //No lightness change
                                 break;
                             case ".emm":
-                                file.EmmFile.ChangeHsl(hueChange, saturationChange, lightnessChange);
+                                file.EmmFile.ChangeHsl(hueChange, saturationChange, lightnessChange, undos);
                                 break;
                         }
                     }
@@ -325,24 +330,24 @@ namespace EEPK_Organiser.Forms
             return colors;
         }
 
-        private void ChangeHueForEverything(double hueChange, double saturationChange, double lightnessChange)
+        private void ChangeHueForEverything(double hueChange, double saturationChange, double lightnessChange, List<IUndoRedo> undos)
         {
-            ChangeHueForContainer(effectContainerFile.Pbind, hueChange, saturationChange, lightnessChange);
-            ChangeHueForContainer(effectContainerFile.Tbind, hueChange, saturationChange, lightnessChange);
-            ChangeHueForContainer(effectContainerFile.Cbind, hueChange, saturationChange, lightnessChange);
-            ChangeHueForContainer(effectContainerFile.Emo, hueChange, saturationChange, lightnessChange);
-            ChangeHueForContainer(effectContainerFile.LightEma, hueChange, saturationChange, lightnessChange);
-            effectContainerFile.Pbind.File3_Ref.ChangeHue(hueChange, saturationChange, lightnessChange);
-            effectContainerFile.Tbind.File3_Ref.ChangeHue(hueChange, saturationChange, lightnessChange);
-            effectContainerFile.Pbind.File2_Ref.ChangeHsl(hueChange, saturationChange, lightnessChange);
-            effectContainerFile.Tbind.File2_Ref.ChangeHsl(hueChange, saturationChange, lightnessChange);
+            ChangeHueForContainer(effectContainerFile.Pbind, hueChange, saturationChange, lightnessChange, undos);
+            ChangeHueForContainer(effectContainerFile.Tbind, hueChange, saturationChange, lightnessChange, undos);
+            ChangeHueForContainer(effectContainerFile.Cbind, hueChange, saturationChange, lightnessChange, undos);
+            ChangeHueForContainer(effectContainerFile.Emo, hueChange, saturationChange, lightnessChange, undos);
+            ChangeHueForContainer(effectContainerFile.LightEma, hueChange, saturationChange, lightnessChange, undos);
+            effectContainerFile.Pbind.File3_Ref.ChangeHue(hueChange, saturationChange, lightnessChange, undos);
+            effectContainerFile.Tbind.File3_Ref.ChangeHue(hueChange, saturationChange, lightnessChange, undos);
+            effectContainerFile.Pbind.File2_Ref.ChangeHsl(hueChange, saturationChange, lightnessChange, undos);
+            effectContainerFile.Tbind.File2_Ref.ChangeHsl(hueChange, saturationChange, lightnessChange, undos);
         }
 
-        private void ChangeHueForContainer(AssetContainerTool container, double hueChange, double saturationChange, double lightnessChange)
+        private void ChangeHueForContainer(AssetContainerTool container, double hueChange, double saturationChange, double lightnessChange, List<IUndoRedo> undos)
         {
             foreach(var _asset in container.Assets)
             {
-                ChangeHueForAsset(_asset, hueChange, saturationChange, lightnessChange);
+                ChangeHueForAsset(_asset, hueChange, saturationChange, lightnessChange, undos);
             }
         }
 

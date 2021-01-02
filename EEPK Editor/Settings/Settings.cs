@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using YAXLib;
 using System.IO;
 using System.Windows;
+using Xv2CoreLib.Resource.UndoRedo;
 
 namespace EEPK_Organiser.Settings
 {
@@ -48,7 +49,8 @@ namespace EEPK_Organiser.Settings
         private bool _fileCleanUp_Ignore = false;
         private string _gameDir = null;
         private bool _autoContainerRename = true;
-        private int _fileCacheLimit = 7;
+        private int _fileCacheLimit = 10;
+        private int _undoLimit = UndoManager.DefaultMaxCapacity;
         private AppTheme _currentTheme = AppTheme.WindowsDefault;
         #endregion
 
@@ -155,7 +157,7 @@ namespace EEPK_Organiser.Settings
                 if (value != this._gameDir)
                 {
                     this._gameDir = value;
-                    NotifyPropertyChanged("GameDirectory");
+                    NotifyPropertyChanged(nameof(GameDirectory));
                 }
             }
         }
@@ -231,6 +233,21 @@ namespace EEPK_Organiser.Settings
                 NotifyPropertyChanged(nameof(UseWindowsTheme));
             }
         }
+        public int UndoLimit
+        {
+            get
+            {
+                return this._undoLimit;
+            }
+            set
+            {
+                if (value != this._undoLimit)
+                {
+                    this._undoLimit = value;
+                    NotifyPropertyChanged(nameof(UndoLimit));
+                }
+            }
+        }
 
 
         public static AppSettings LoadSettings()
@@ -288,11 +305,17 @@ namespace EEPK_Organiser.Settings
 
         private void InitSettings()
         {
+            //Get game dir
             if(string.IsNullOrWhiteSpace(GameDirectory) || !ValidGameDir)
             {
                 GameDirectory = FindGameDirectory();
             }
-            
+
+            //Setup Undo
+            if (UndoLimit < 0) UndoLimit = 0;
+            if (UndoLimit > 5000) UndoLimit = 5000;
+
+            UndoManager.Instance.SetCapacity(UndoLimit);
         }
 
         private void ValidateSettings()

@@ -69,6 +69,4 @@ namespace Xv2CoreLib
     {
 
     }
-
-
 }

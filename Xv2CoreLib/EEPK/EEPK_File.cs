@@ -9,6 +9,7 @@ using System.IO;
 using Xv2CoreLib.EffectContainer;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
+using Xv2CoreLib.Resource.UndoRedo;
 
 namespace Xv2CoreLib.EEPK
 {
@@ -301,11 +302,14 @@ namespace Xv2CoreLib.EEPK
             }
         }
 
+        #region IInstallable
         [YAXDontSerialize]
         public int SortID { get { return IndexNum; } set { IndexNum = (ushort)value; } }
         [YAXDontSerialize]
         public string Index { get { return IndexNum.ToString(); } set { IndexNum = ushort.Parse(value); } }
+        #endregion
 
+        #region EepkOrganiser
         //Namelist
         private string _nameList = null;
         [YAXDontSerialize]
@@ -369,7 +373,7 @@ namespace Xv2CoreLib.EEPK
                 }
             }
         }
-
+        #endregion
 
         //Props
         [YAXSerializeAs("ID")]
@@ -440,7 +444,27 @@ namespace Xv2CoreLib.EEPK
                 }
             }
         }
-        
+
+        #region Undoable
+        [YAXDontSerialize]
+        public ushort UndoableId 
+        { 
+            get { return IndexNum; } 
+            set 
+            { 
+                if(value != IndexNum)
+                {
+                    UndoManager.Instance.AddUndo(new CompositeUndo(new List<IUndoRedo>() { new UndoableProperty<Effect>(nameof(IndexNum), this, IndexNum, value), new UndoActionDelegate(this, nameof(RefreshProperties), true) }, "Effect ID"));
+                    IndexNum = value;
+                }
+            }
+        }
+
+        public void RefreshProperties()
+        {
+            NotifyPropertyChanged(nameof(UndoableId));
+        }
+        #endregion
 
         public Effect Clone()
         {
@@ -488,12 +512,9 @@ namespace Xv2CoreLib.EEPK
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void NotifyPropertyChanged(String propertyName = "")
+        public void NotifyPropertyChanged(String propertyName = "")
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         [YAXDontSerialize]
@@ -745,7 +766,7 @@ namespace Xv2CoreLib.EEPK
         [YAXAttributeFor("BoneToAttach")]
         [YAXSerializeAs("name")]
         public string ESK { get; set; } //if NULL, then make it 4 zero bytes instead of an offset
-        
+
         public enum DeactivationMode : byte
         {
             Never = 0,
@@ -755,12 +776,13 @@ namespace Xv2CoreLib.EEPK
         
         public enum Attachment : byte
         {
-            External,
-            Unk1,
+            External = 0,
+            Unk1 = 1,
             Bone = 2,
             Camera = 3
         }
-        
+
+
         public EffectPart Clone()
         {
             return new EffectPart()
@@ -852,75 +874,15 @@ namespace Xv2CoreLib.EEPK
             }
         }
 
-        public void CopyValues(EffectPart effectPart)
+        public void CopyValues(EffectPart effectPart, List<IUndoRedo> undos)
         {
-            this.AssetRef = effectPart.AssetRef;
-            this.ESK = effectPart.ESK;
-            this.F_24 = effectPart.F_24;
-            this.F_52 = effectPart.F_52;
-            this.F_56 = effectPart.F_56;
-            this.F_60 = effectPart.F_60;
-            this.F_64 = effectPart.F_64;
-            this.F_68 = effectPart.F_68;
-            this.F_72 = effectPart.F_72;
-            this.F_84 = effectPart.F_84;
-            this.F_88 = effectPart.F_88;
-            this.I_00 = effectPart.I_00;
-            this.I_02 = effectPart.I_02;
-            this.I_03 = effectPart.I_03;
-            this.I_04 = effectPart.I_04;
-            this.I_05 = effectPart.I_05;
-            this.I_06 = effectPart.I_06;
-            this.I_07 = effectPart.I_07;
-            this.I_08 = effectPart.I_08;
-            this.I_12 = effectPart.I_12;
-            this.I_16 = effectPart.I_16;
-            this.I_20 = effectPart.I_20;
-            this.I_28 = effectPart.I_28;
-            this.I_30 = effectPart.I_30;
-            this.I_32_0 = effectPart.I_32_0;
-            this.I_32_1 = effectPart.I_32_1;
-            this.I_32_2 = effectPart.I_32_2;
-            this.I_32_3 = effectPart.I_32_3;
-            this.I_32_4 = effectPart.I_32_4;
-            this.I_32_5 = effectPart.I_32_5;
-            this.I_32_6 = effectPart.I_32_6;
-            this.I_32_7 = effectPart.I_32_7;
-            this.I_36_0 = effectPart.I_36_0;
-            this.I_36_1 = effectPart.I_36_1;
-            this.I_36_2 = effectPart.I_36_2;
-            this.I_36_3 = effectPart.I_36_3;
-            this.I_36_4 = effectPart.I_36_4;
-            this.I_36_5 = effectPart.I_36_5;
-            this.I_36_6 = effectPart.I_36_6;
-            this.I_36_7 = effectPart.I_36_7;
-            this.I_37_0 = effectPart.I_37_0;
-            this.I_37_1 = effectPart.I_37_1;
-            this.I_37_2 = effectPart.I_37_2;
-            this.I_37_3 = effectPart.I_37_3;
-            this.I_37_4 = effectPart.I_37_4;
-            this.I_37_5 = effectPart.I_37_5;
-            this.I_37_6 = effectPart.I_37_6;
-            this.I_37_7 = effectPart.I_37_7;
-            this.I_34 = effectPart.I_34;
-            this.I_38_a = effectPart.I_38_a;
-            this.I_38_b = effectPart.I_38_b;
-            this.I_39_0 = effectPart.I_39_0;
-            this.I_39_1 = effectPart.I_39_1;
-            this.I_39_2 = effectPart.I_39_2;
-            this.I_39_3 = effectPart.I_39_3;
-            this.I_39_4 = effectPart.I_39_4;
-            this.I_39_5 = effectPart.I_39_5;
-            this.I_39_6 = effectPart.I_39_6;
-            this.I_39_7 = effectPart.I_39_7;
-            this.I_92 = effectPart.I_92;
-            this.I_94 = effectPart.I_94;
-            this.POSITION_X = effectPart.POSITION_X;
-            this.POSITION_Y = effectPart.POSITION_Y;
-            this.POSITION_Z = effectPart.POSITION_Z;
-            this.SIZE_1 = effectPart.SIZE_1;
-            this.SIZE_2 = effectPart.SIZE_2;
-            NotifyPropertyChanged();
+            undos.Add(new UndoableProperty<EffectPart>(nameof(AssetRef), this, AssetRef, effectPart.AssetRef));
+            AssetRef = effectPart.AssetRef;
+
+            undos.AddRange(Utils.CopyValues(this, effectPart));
+
+            ObjectExtensions.NotifyPropsChanged(this);
+            undos.Add(new UndoActionPropNotify(this, true));
         }
     }
     

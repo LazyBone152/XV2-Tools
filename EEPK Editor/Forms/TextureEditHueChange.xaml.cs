@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using AForge;
 using MahApps.Metro.Controls;
+using Xv2CoreLib.Resource.UndoRedo;
 
 namespace EEPK_Organiser.Forms
 {
@@ -111,6 +112,7 @@ namespace EEPK_Organiser.Forms
         {
             cancelled = false;
             CurrentTexture.wasEdited = true;
+            UndoManager.Instance.AddUndo(new UndoableProperty<EmbEntry>(nameof(EmbEntry.DdsImage), CurrentTexture, OriginalTextureBackup, CurrentTexture.DdsImage, "Hue Adjustment"));
             Close();
         }
 

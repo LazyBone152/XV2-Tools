@@ -17,6 +17,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Microsoft.Win32;
+using Xv2CoreLib.Resource.UndoRedo;
 
 namespace Xv2CoreLib.EMB_CLASS
 {
@@ -327,7 +328,7 @@ namespace Xv2CoreLib.EMB_CLASS
         /// Add embEntry if new. If a similar one already exists then that will be returned.
         /// </summary>
         /// <returns></returns>
-        public EmbEntry Add(EmbEntry embEntry)
+        public EmbEntry Add(EmbEntry embEntry, List<IUndoRedo> undos = null)
         {
             foreach (var entry in Entry)
             {
@@ -344,6 +345,9 @@ namespace Xv2CoreLib.EMB_CLASS
             {
                 throw new Exception(String.Format("EMB_File.Add: Texture limit has been reached. Cannot add any more."));
             }
+
+            if (undos != null)
+                undos.Add(new UndoableListAdd<EmbEntry>(Entry, embEntry));
 
             Entry.Add(embEntry);
 
@@ -544,7 +548,7 @@ namespace Xv2CoreLib.EMB_CLASS
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void NotifyPropertyChanged(String propertyName = "")
+        public void NotifyPropertyChanged(String propertyName = "")
         {
             if (PropertyChanged != null)
             {

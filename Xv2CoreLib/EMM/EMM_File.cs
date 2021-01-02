@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using Xv2CoreLib.HslColor;
+using Xv2CoreLib.Resource.UndoRedo;
 using YAXLib;
 
 namespace Xv2CoreLib.EMM
@@ -311,13 +312,14 @@ namespace Xv2CoreLib.EMM
             return colors;
         }
 
-        public void ChangeHsl(double hue, double saturation, double lightness)
+        public void ChangeHsl(double hue, double saturation, double lightness, List<IUndoRedo> undos =null)
         {
             if (Materials == null) return;
+            if (undos == null) undos = new List<IUndoRedo>();
 
             foreach (var mat in Materials)
             {
-                mat.ChangeHsl(hue, saturation, lightness);
+                mat.ChangeHsl(hue, saturation, lightness, undos);
             }
         }
     }
@@ -360,12 +362,12 @@ namespace Xv2CoreLib.EMM
                 if(value.Length > 32)
                 {
                     _name = value.Remove(32, value.Length - 32);
-                    NotifyPropertyChanged("Str_00");
+                    NotifyPropertyChanged(nameof(Str_00));
                 }
                 else if (value != this._name)
                 {
                     this._name = value;
-                    NotifyPropertyChanged("Str_00");
+                    NotifyPropertyChanged(nameof(Str_00));
                 }
             }
         }
@@ -382,12 +384,14 @@ namespace Xv2CoreLib.EMM
                 if (value.Length > 32)
                 {
                     _shader = value.Remove(32, value.Length - 32);
-                    NotifyPropertyChanged("Str_32");
+                    NotifyPropertyChanged(nameof(Str_32));
+                    NotifyPropertyChanged(nameof(UndoableShader));
                 }
                 else if (value != this._shader)
                 {
                     this._shader = value;
-                    NotifyPropertyChanged("Str_32");
+                    NotifyPropertyChanged(nameof(Str_32));
+                    NotifyPropertyChanged(nameof(UndoableShader));
                 }
             }
         }
@@ -397,7 +401,7 @@ namespace Xv2CoreLib.EMM
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Parameter")]
         public ObservableCollection<Parameter> Parameters { get; set; }
 
-        //ViewModel
+        #region View
         [YAXDontSerialize]
         public ObservableCollection<Parameter> SelectedParameters { get; } = new ObservableCollection<Parameter>();
         private Parameter _selectedParameter = null;
@@ -413,11 +417,28 @@ namespace Xv2CoreLib.EMM
                 if (value != this._selectedParameter)
                 {
                     this._selectedParameter = value;
-                    NotifyPropertyChanged("SelectedParameter");
+                    NotifyPropertyChanged(nameof(SelectedParameter));
                 }
             }
         }
 
+        [YAXDontSerialize]
+        public string UndoableShader
+        {
+            get
+            {
+                return Str_32;
+            }
+            set
+            {
+                if(Str_32 != value)
+                {
+                    UndoManager.Instance.AddUndo(new UndoableProperty<Material>(nameof(Str_32), this, Str_32, value, "Shader"));
+                    Str_32 = value;
+                }
+            }
+        }
+        #endregion
 
 
         /// <summary>
@@ -592,7 +613,7 @@ namespace Xv2CoreLib.EMM
             return colors;
         }
 
-        public void ChangeHsl(double hue, double saturation = 0.0, double lightness = 0.0)
+        public void ChangeHsl(double hue, double saturation = 0.0, double lightness = 0.0, List<IUndoRedo> undos = null)
         {
             if (Parameters == null) return;
 
@@ -612,6 +633,10 @@ namespace Xv2CoreLib.EMM
                     hslColor.ChangeSaturation(saturation);
 
                     RgbColor newColor = hslColor.ToRgb();
+
+                    undos.Add(new UndoableProperty<Parameter>(nameof(Parameter.value), r, r.value, newColor.R.ToString()));
+                    undos.Add(new UndoableProperty<Parameter>(nameof(Parameter.value), g, g.value, newColor.G.ToString()));
+                    undos.Add(new UndoableProperty<Parameter>(nameof(Parameter.value), b, b.value, newColor.B.ToString()));
 
                     //Add new color to parameters, multiply by 10
                     r.value = (newColor.R).ToString();
@@ -672,12 +697,14 @@ namespace Xv2CoreLib.EMM
                 if (value.Length > 32)
                 {
                     _str_00 = value.Remove(32, value.Length - 32);
-                    NotifyPropertyChanged("Str_00");
+                    NotifyPropertyChanged(nameof(Str_00));
+                    NotifyPropertyChanged(nameof(UndoableName));
                 }
                 else if (value != this._str_00)
                 {
                     this._str_00 = value;
-                    NotifyPropertyChanged("Str_00");
+                    NotifyPropertyChanged(nameof(Str_00));
+                    NotifyPropertyChanged(nameof(UndoableName));
                 }
             }
         }
@@ -699,6 +726,7 @@ namespace Xv2CoreLib.EMM
                 {
                     this._value = value;
                     NotifyPropertyChanged("value");
+                    NotifyPropertyChanged(nameof(UndoableValue));
                 }
             }
         }
@@ -718,6 +746,66 @@ namespace Xv2CoreLib.EMM
             }
         }
 
+        #region View
+        [YAXDontSerialize]
+        public string UndoableName
+        {
+            get
+            {
+                return Str_00;
+            }
+            set
+            {
+                if (Str_00 != value)
+                {
+                    UndoManager.Instance.AddUndo(new UndoableProperty<Parameter>(nameof(Str_00), this, Str_00, value, "Name"));
+                    Str_00 = value;
+                }
+            }
+        }
+        [YAXDontSerialize]
+        public string UndoableType
+        {
+            get
+            {
+                return I_32;
+            }
+            set
+            {
+                if (I_32 != value)
+                {
+                    UndoManager.Instance.AddUndo(new CompositeUndo(new List<IUndoRedo>() { new UndoableProperty<Parameter>(nameof(I_32), this, I_32, value), new UndoActionDelegate(this, nameof(RefreshProperties), true) }, "Type"));
+                    I_32 = value;
+                }
+            }
+        }
+        [YAXDontSerialize]
+        public string UndoableValue
+        {
+            get
+            {
+                return value;
+            }
+            set
+            {
+                if (_value != value)
+                {
+                    UndoManager.Instance.AddUndo(new UndoableProperty<Parameter>("value", this, _value, value, "Value"));
+                    _value = value;
+                }
+            }
+        }
+        
+        public void RefreshProperties()
+        {
+            NotifyPropertyChanged(nameof(Str_00));
+            NotifyPropertyChanged(nameof(I_32));
+            NotifyPropertyChanged(nameof(value));
+            NotifyPropertyChanged(nameof(UndoableName));
+            NotifyPropertyChanged(nameof(UndoableType));
+            NotifyPropertyChanged(nameof(UndoableValue));
+        }
+        #endregion
 
         public bool Compare(Parameter parameter2)
         {

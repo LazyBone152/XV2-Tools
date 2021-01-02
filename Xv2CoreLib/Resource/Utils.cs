@@ -7,6 +7,9 @@ using System.Collections;
 using System.Globalization;
 using YAXLib;
 using System.Security.Cryptography;
+using Xv2CoreLib.Resource.UndoRedo;
+using System.Reflection;
+using System.ComponentModel;
 
 namespace Xv2CoreLib
 {
@@ -387,6 +390,31 @@ namespace Xv2CoreLib
     
     public static class Utils
     {
+
+        /// <summary>
+        /// Copies primitive values (including strings) from one object to another, and creates an undoable stack.
+        /// </summary>
+        public static List<IUndoRedo> CopyValues<T>(T instance, T copyFrom, params string[] exclusions)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            PropertyInfo[] properties = instance.GetType().GetProperties();
+
+            foreach(var prop in properties)
+            {
+                if ((prop.PropertyType == typeof(string) || prop.PropertyType.IsPrimitive || prop.PropertyType.IsValueType)
+                    && (prop.SetMethod != null && prop.GetMethod != null) && !exclusions.Contains(prop.Name))
+                {
+                    object oldValue = prop.GetValue(instance);
+                    object newValue = prop.GetValue(copyFrom);
+                    undos.Add(new UndoableProperty<T>(prop.Name, instance, oldValue, newValue));
+                    prop.SetValue(instance, newValue);
+                }
+            }
+
+            return undos;
+        }
+
         public static bool IsListNullOrEmpty(IList list)
         {
             if (list == null) return true;

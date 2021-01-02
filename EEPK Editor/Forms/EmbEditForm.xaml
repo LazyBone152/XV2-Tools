@@ -8,8 +8,13 @@
         xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
         xmlns:Themes1="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:undoRedo="clr-namespace:Xv2CoreLib.Resource.UndoRedo;assembly=Xv2CoreLib"
         mc:Ignorable="d"
         Title="Texture Viewer" Height="580" Width="650" ResizeMode="CanMinimize" WindowStartupLocation="CenterOwner" WindowStyle="ThreeDBorderWindow">
+    <Window.InputBindings>
+        <KeyBinding Key="Z" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=UndoCommand}"/>
+        <KeyBinding Key="Y" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=RedoCommand}"/>
+    </Window.InputBindings>
     <Window.Resources>
         <DataTemplate x:Key="PictureTemplate">
             <Canvas Width="190" Height="48">
@@ -115,7 +120,7 @@
         </DataGrid>
 
         <GroupBox Header="Preview" HorizontalAlignment="Left" Height="300" Margin="269,13,0,0" VerticalAlignment="Top" Width="360">
-            <Grid Background="#1c1c1c">
+            <Grid Background="#252525">
                 <Grid>
                     <Grid.Background>
                         <ImageBrush x:Name="grid" ImageSource="{StaticResource gridlines}" Stretch="UniformToFill" Opacity="0.0"/>

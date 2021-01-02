@@ -11,8 +11,13 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:Themes1="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:undoRedo="clr-namespace:Xv2CoreLib.Resource.UndoRedo;assembly=Xv2CoreLib"
         mc:Ignorable="d"
-        Title="{Binding Source={x:Static local:GeneralInfo.AppName}}" MinHeight="400" MinWidth="700" Height="640" Width="1100" ResizeMode="CanResizeWithGrip" Loaded="Window_Loaded">
+        Title="{Binding Source={x:Static local:GeneralInfo.AppName}}" MinHeight="400" MinWidth="760" Height="640" Width="1100" ResizeMode="CanResizeWithGrip" Loaded="Window_Loaded">
+    <Window.InputBindings>
+        <KeyBinding Key="Z" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=UndoCommand}"/>
+        <KeyBinding Key="Y" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=RedoCommand}"/>
+    </Window.InputBindings>
     <Window.Resources>
         <ObjectDataProvider x:Key="PlacementEnum" MethodName="GetValues"
                         ObjectType="{x:Type sys:Enum}">
@@ -35,7 +40,7 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="25"/>
         </Grid.RowDefinitions>
-        <Menu Grid.Row="0" Margin="0, 2" HorizontalAlignment="Left" FontSize="12">
+        <Menu Grid.Row="0" Margin="0, 2" HorizontalAlignment="Left" FontSize="12" FocusManager.IsFocusScope="False">
             <MenuItem Header="File">
                 <MenuItem Header="New" Click="Menu_New_Click"/>
                 <MenuItem Header="Open" Click="Menu_Open_Click"/>
@@ -61,6 +66,141 @@
                 <MenuItem Header="Settings" Click="Menu_Settings_Click"/>
                 <Separator/>
                 <MenuItem Header="Exit" Click="Menu_Exit_Click"/>
+            </MenuItem>
+            <MenuItem Header="Edit">
+                <MenuItem Header="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=UndoDescription}" Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=UndoCommand}"/>
+                <MenuItem Header="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=RedoDescription}" Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=RedoCommand}"/>
+            </MenuItem>
+            <MenuItem Header="Import" IsEnabled="{Binding IsFileLoaded}">
+                <MenuItem Header="Import Effect(s)" IsEnabled="{Binding IsFileLoaded}">
+                    <MenuItem Header="Load External EEPK" Click="EffectOptions_ImportEffectsFromFile_Click"/>
+                    <Separator/>
+                    <MenuItem Header="CMN" Click="EffectOptions_ImportEffectsFromCMN_Click"/>
+                    <MenuItem Header="Character" Click="EffectOptions_ImportEffectsFromCharacter_Click"/>
+                    <MenuItem Header="Super Skill" Click="EffectOptions_ImportEffectsFromSuper_Click"/>
+                    <MenuItem Header="Ultimate Skill" Click="EffectOptions_ImportEffectsFromUltimate_Click"/>
+                    <MenuItem Header="Evasive Skill" Click="EffectOptions_ImportEffectsFromEvasive_Click"/>
+                    <MenuItem Header="Blast Skill/Type" Click="EffectOptions_ImportEffectsFromBlast_Click"/>
+                    <MenuItem Header="Awoken Skill" Click="EffectOptions_ImportEffectsFromAwoken_Click"/>
+                    <MenuItem Header="Demo (Cutscene)" Click="EffectOptions_ImportEffectsFromDemo_Click"/>
+                    <Separator/>
+                    <MenuItem Header="From Cached Files" ItemsSource="{Binding cacheManager.CachedFiles, ElementName=eepkEditor}" Click="EffectOptions_ImportEffectsFromCache_Click">
+                        <MenuItem.ItemContainerStyle>
+                            <Style>
+                                <Setter Property="MenuItem.Header" Value="{Binding DisplayName}" />
+                            </Style>
+                        </MenuItem.ItemContainerStyle>
+                    </MenuItem>
+
+
+                </MenuItem>
+                <MenuItem Header="Import Asset(s)" IsEnabled="{Binding IsFileLoaded}">
+                    <MenuItem Header="PBIND" IsEnabled="{Binding IsFileLoaded}">
+                        <MenuItem Header="Load External EEPK" Click="PBIND_AssetContainer_AddAsset_Click"/>
+                        <MenuItem Header="Create New EMP" Click="PBIND_ImportAsset_MenuItem_CreateNewEmp_Click"/>
+                        <Separator/>
+                        <MenuItem Header="CMN" Click="PBIND_ImportAsset_MenuItem_FromCMN_Click"/>
+                        <MenuItem Header="Character" Click="PBIND_ImportAsset_MenuItem_FromCharacter_Click"/>
+                        <MenuItem Header="Super Skill" Click="PBIND_ImportAsset_MenuItem_FromSuper_Click"/>
+                        <MenuItem Header="Ultimate Skill" Click="PBIND_ImportAsset_MenuItem_FromUltimate_Click"/>
+                        <MenuItem Header="Evasive Skill" Click="PBIND_ImportAsset_MenuItem_FromEvasive_Click"/>
+                        <MenuItem Header="Blast Skill/Type" Click="PBIND_ImportAsset_MenuItem_FromBlast_Click"/>
+                        <MenuItem Header="Awoken Skill" Click="PBIND_ImportAsset_MenuItem_FromAwoken_Click"/>
+                        <MenuItem Header="Demo (Cutscene)" Click="PBIND_ImportAsset_MenuItem_FromDemo_Click"/>
+                        <Separator/>
+                        <MenuItem Header="From Cached Files" ItemsSource="{Binding cacheManager.CachedFiles, ElementName=eepkEditor}" Click="PBIND_ImportAsset_MenuItem_FromCachedFiles_Click">
+                            <MenuItem.ItemContainerStyle>
+                                <Style>
+                                    <Setter Property="MenuItem.Header" Value="{Binding DisplayName}" />
+                                </Style>
+                            </MenuItem.ItemContainerStyle>
+                        </MenuItem>
+                    </MenuItem>
+                    <MenuItem Header="TBIND" IsEnabled="{Binding IsFileLoaded}">
+                        <MenuItem Header="Load External EEPK" Click="TBIND_AssetContainer_AddAsset_Click"/>
+                        <Separator/>
+                        <MenuItem Header="CMN" Click="TBIND_ImportAsset_MenuItem_FromCMN_Click"/>
+                        <MenuItem Header="Character" Click="TBIND_ImportAsset_MenuItem_FromCharacter_Click"/>
+                        <MenuItem Header="Super Skill" Click="TBIND_ImportAsset_MenuItem_FromSuper_Click"/>
+                        <MenuItem Header="Ultimate Skill" Click="TBIND_ImportAsset_MenuItem_FromUltimate_Click"/>
+                        <MenuItem Header="Evasive Skill" Click="TBIND_ImportAsset_MenuItem_FromEvasive_Click"/>
+                        <MenuItem Header="Blast Skill/Type" Click="TBIND_ImportAsset_MenuItem_FromBlast_Click"/>
+                        <MenuItem Header="Awoken Skill" Click="TBIND_ImportAsset_MenuItem_FromAwoken_Click"/>
+                        <MenuItem Header="Demo (Cutscene)" Click="TBIND_ImportAsset_MenuItem_FromDemo_Click"/>
+                        <Separator/>
+                        <MenuItem Header="From Cached Files" ItemsSource="{Binding cacheManager.CachedFiles, ElementName=eepkEditor}" Click="TBIND_ImportAsset_MenuItem_FromCachedFiles_Click">
+                            <MenuItem.ItemContainerStyle>
+                                <Style>
+                                    <Setter Property="MenuItem.Header" Value="{Binding DisplayName}" />
+                                </Style>
+                            </MenuItem.ItemContainerStyle>
+                        </MenuItem>
+                    </MenuItem>
+                    <MenuItem Header="CBIND" IsEnabled="{Binding IsFileLoaded}">
+                        <MenuItem Header="Load External EEPK" Click="CBIND_AssetContainer_AddAsset_Click"/>
+                        <MenuItem Header="Load External ECF" Click="CBIND_ImportAsset_MenuItem_LoadEcf_Click"/>
+                        <Separator/>
+                        <MenuItem Header="CMN" Click="CBIND_ImportAsset_MenuItem_FromCMN_Click"/>
+                        <MenuItem Header="Character" Click="CBIND_ImportAsset_MenuItem_FromCharacter_Click"/>
+                        <MenuItem Header="Super Skill" Click="CBIND_ImportAsset_MenuItem_FromSuper_Click"/>
+                        <MenuItem Header="Ultimate Skill" Click="CBIND_ImportAsset_MenuItem_FromUltimate_Click"/>
+                        <MenuItem Header="Evasive Skill" Click="CBIND_ImportAsset_MenuItem_FromEvasive_Click"/>
+                        <MenuItem Header="Blast Skill/Type" Click="CBIND_ImportAsset_MenuItem_FromBlast_Click"/>
+                        <MenuItem Header="Awoken Skill" Click="CBIND_ImportAsset_MenuItem_FromAwoken_Click"/>
+                        <MenuItem Header="Demo (Cutscene)" Click="CBIND_ImportAsset_MenuItem_FromDemo_Click"/>
+                        <Separator/>
+                        <MenuItem Header="From Cached Files" ItemsSource="{Binding cacheManager.CachedFiles, ElementName=eepkEditor}" MouseMove="MenuItem_MouseMove" Click="CBIND_ImportAsset_MenuItem_FromCachedFiles_Click">
+                            <MenuItem.ItemContainerStyle>
+                                <Style>
+                                    <Setter Property="MenuItem.Header" Value="{Binding DisplayName}" />
+                                </Style>
+                            </MenuItem.ItemContainerStyle>
+                        </MenuItem>
+                    </MenuItem>
+                    <MenuItem Header="EMO" IsEnabled="{Binding IsFileLoaded}">
+                        <MenuItem Header="Load External EEPK" Click="EMO_AssetContainer_AddAsset_Click"/>
+                        <MenuItem Header="Load External EMO Files" Click="EMO_ImportAsset_MenuItem_LoadEmoFiles_Click"/>
+                        <Separator/>
+                        <MenuItem Header="CMN" Click="EMO_ImportAsset_MenuItem_FromCMN_Click"/>
+                        <MenuItem Header="Character" Click="EMO_ImportAsset_MenuItem_FromCharacter_Click"/>
+                        <MenuItem Header="Super Skill" Click="EMO_ImportAsset_MenuItem_FromSuper_Click"/>
+                        <MenuItem Header="Ultimate Skill" Click="EMO_ImportAsset_MenuItem_FromUltimate_Click"/>
+                        <MenuItem Header="Evasive Skill" Click="EMO_ImportAsset_MenuItem_FromEvasive_Click"/>
+                        <MenuItem Header="Blast Skill/Type" Click="EMO_ImportAsset_MenuItem_FromBlast_Click"/>
+                        <MenuItem Header="Awoken Skill" Click="EMO_ImportAsset_MenuItem_FromAwoken_Click"/>
+                        <MenuItem Header="Demo (Cutscene)" Click="EMO_ImportAsset_MenuItem_FromDemo_Click"/>
+                        <Separator/>
+                        <MenuItem Header="From Cached Files" ItemsSource="{Binding cacheManager.CachedFiles, ElementName=eepkEditor}" MouseMove="MenuItem_MouseMove" Click="EMO_ImportAsset_MenuItem_FromCachedFiles_Click">
+                            <MenuItem.ItemContainerStyle>
+                                <Style>
+                                    <Setter Property="MenuItem.Header" Value="{Binding DisplayName}" />
+                                </Style>
+                            </MenuItem.ItemContainerStyle>
+                        </MenuItem>
+                    </MenuItem>
+                    <MenuItem Header="LIGHT" IsEnabled="{Binding IsFileLoaded}">
+                        <MenuItem Header="Load External EEPK" Click="LIGHT_AssetContainer_AddAsset_Click"/>
+                        <MenuItem Header="Load External LIGHT.EMA" Click="LIGHT_ImportAsset_MenuItem_LoadLightEma_Click"/>
+                        <Separator/>
+                        <MenuItem Header="CMN" Click="LIGHT_ImportAsset_MenuItem_FromCMN_Click"/>
+                        <MenuItem Header="Character" Click="LIGHT_ImportAsset_MenuItem_FromCharacter_Click"/>
+                        <MenuItem Header="Super Skill" Click="LIGHT_ImportAsset_MenuItem_FromSuper_Click"/>
+                        <MenuItem Header="Ultimate Skill" Click="LIGHT_ImportAsset_MenuItem_FromUltimate_Click"/>
+                        <MenuItem Header="Evasive Skill" Click="LIGHT_ImportAsset_MenuItem_FromEvasive_Click"/>
+                        <MenuItem Header="Blast Skill/Type" Click="LIGHT_ImportAsset_MenuItem_FromBlast_Click"/>
+                        <MenuItem Header="Awoken Skill" Click="LIGHT_ImportAsset_MenuItem_FromAwoken_Click"/>
+                        <MenuItem Header="Demo (Cutscene)" Click="LIGHT_ImportAsset_MenuItem_FromDemo_Click"/>
+                        <Separator/>
+                        <MenuItem Header="From Cached Files" ItemsSource="{Binding cacheManager.CachedFiles, ElementName=eepkEditor}" MouseMove="MenuItem_MouseMove" Click="LIGHT_ImportAsset_MenuItem_FromCachedFiles_Click">
+                            <MenuItem.ItemContainerStyle>
+                                <Style>
+                                    <Setter Property="MenuItem.Header" Value="{Binding DisplayName}" />
+                                </Style>
+                            </MenuItem.ItemContainerStyle>
+                        </MenuItem>
+                    </MenuItem>
+
+                </MenuItem>
             </MenuItem>
             <MenuItem Header='Tool'>
                 <MenuItem Header="Associate EEPK Extension" Click="ToolMenu_AssociateEepkExt_Click"/>

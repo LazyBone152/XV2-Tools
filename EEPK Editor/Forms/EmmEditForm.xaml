@@ -8,8 +8,13 @@
         xmlns:emm="clr-namespace:Xv2CoreLib.EMM;assembly=Xv2CoreLib"
         xmlns:Themes1="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:undoRedo="clr-namespace:Xv2CoreLib.Resource.UndoRedo;assembly=Xv2CoreLib"
         mc:Ignorable="d"
         Title="Material Editor" MinHeight="400" MinWidth="600" Height="470" Width="800" ResizeMode="CanResizeWithGrip" WindowStartupLocation="CenterOwner">
+    <Window.InputBindings>
+        <KeyBinding Key="Z" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=UndoCommand}"/>
+        <KeyBinding Key="Y" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=RedoCommand}"/>
+    </Window.InputBindings>
     <Grid>
         <DataGrid x:Name="dataGrid" RowDetailsVisibilityMode="VisibleWhenSelected" SelectedItem="{Binding EmmFile.SelectedMaterial, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding EmmFile.ViewMaterials}" Margin="10,13,247.309,9.727" CanUserAddRows="False" CanUserDeleteRows="False" AutoGenerateColumns="False" CanUserResizeRows="False" VirtualizingPanel.ScrollUnit="Pixel" SelectionMode="Extended" HorizontalScrollBarVisibility="Disabled">
             <DataGrid.Resources>
@@ -32,9 +37,7 @@
                         </Setter.Value>
                     </Setter>
                 </Style>
-                <Style
-                       xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2" TargetType="{x:Type DataGridRowHeader}"
-                       >
+                <Style xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2" TargetType="{x:Type DataGridRowHeader}">
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="{x:Type DataGridRowHeader}">
@@ -85,12 +88,12 @@
                 <DataGridTemplateColumn Header="Shader" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBox Text="{Binding Str_32, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBox Text="{Binding UndoableShader, UpdateSourceTrigger=LostFocus}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
-                            <TextBox Text="{Binding Str_32, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBox Text="{Binding UndoableShader, UpdateSourceTrigger=LostFocus}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
@@ -99,7 +102,7 @@
 
             <DataGrid.RowDetailsTemplate>
                 <DataTemplate>
-                    <DataGrid VirtualizingPanel.ScrollUnit="Pixel" EnableColumnVirtualization="True" EnableRowVirtualization="True" ItemsSource="{Binding Parameters}" CanUserResizeRows="False" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="True">
+                    <DataGrid VirtualizingPanel.ScrollUnit="Pixel" EnableColumnVirtualization="True" EnableRowVirtualization="True" ItemsSource="{Binding Parameters}" CanUserResizeRows="False" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
                         <DataGrid.Columns>
                             <!-- Dummy column used for easy selection only. -->
                             <DataGridTextColumn Width="15" IsReadOnly="True"/>
@@ -107,24 +110,24 @@
                             <DataGridTemplateColumn Header="Name" MinWidth="80" Width="*">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBox Text="{Binding Str_00, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <TextBox Text="{Binding UndoableName, UpdateSourceTrigger=LostFocus}"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                                 <DataGridTemplateColumn.CellEditingTemplate>
                                     <DataTemplate>
-                                        <TextBox Text="{Binding Str_00, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <TextBox Text="{Binding UndoableName, UpdateSourceTrigger=LostFocus}"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellEditingTemplate>
                             </DataGridTemplateColumn>
                             <DataGridTemplateColumn Header="Value Type" Width="*">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <ComboBox SelectedValue="{Binding I_32, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Value" SelectedValuePath="Value" ItemsSource="{Binding Source={x:Static emm:EMM_File.EmmValueTypes}}" SelectionChanged="ValueType_SelectionChanged"/>
+                                        <ComboBox SelectedValue="{Binding UndoableType, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Value" SelectedValuePath="Value" ItemsSource="{Binding Source={x:Static emm:EMM_File.EmmValueTypes}}" SelectionChanged="ValueType_SelectionChanged"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                                 <DataGridTemplateColumn.CellEditingTemplate>
                                     <DataTemplate>
-                                        <ComboBox SelectedValue="{Binding I_32, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Value" SelectedValuePath="Value" ItemsSource="{Binding Source={x:Static emm:EMM_File.EmmValueTypes}}" SelectionChanged="ValueType_SelectionChanged"/>
+                                        <ComboBox SelectedValue="{Binding UndoableType, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="Value" SelectedValuePath="Value" ItemsSource="{Binding Source={x:Static emm:EMM_File.EmmValueTypes}}" SelectionChanged="ValueType_SelectionChanged"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellEditingTemplate>
 

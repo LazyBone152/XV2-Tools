@@ -24,42 +24,7 @@
 
 
 
-            <Style TargetType="{x:Type ListBoxItem}">
-                <Style.Resources>
-                    <!-- Use your own colors here if you want, or do it per class -->
-                    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF4691B4"/>
-                    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey }" Color="#FF4691B4"/>
-                </Style.Resources>
-
-                <Setter Property="Template">
-                    <!-- Revert the Template in Windows 10 to match the Windows 7 template that used "SystemColors.HighlightBrushKey" and such-->
-                    <Setter.Value>
-                        <ControlTemplate TargetType="{x:Type ListBoxItem}">
-                            <Border x:Name="Bd" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true">
-                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsSelected" Value="true">
-                                    <Setter Property="Background" TargetName="Bd" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
-                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}"/>
-                                </Trigger>
-                                <MultiTrigger>
-                                    <MultiTrigger.Conditions>
-                                        <Condition Property="IsSelected" Value="true"/>
-                                        <Condition Property="Selector.IsSelectionActive" Value="false"/>
-                                    </MultiTrigger.Conditions>
-                                    <Setter Property="Background" TargetName="Bd" Value="{DynamicResource {x:Static SystemColors.InactiveSelectionHighlightBrushKey}}"/>
-                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}"/>
-                                </MultiTrigger>
-                                <Trigger Property="IsEnabled" Value="false">
-                                    <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
+            
 
             <Style x:Key="ButtonNoGlow" TargetType="Button">
                 <Setter Property="OverridesDefaultStyle" Value="True" />

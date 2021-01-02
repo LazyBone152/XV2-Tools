@@ -21,7 +21,7 @@
                     </GroupBox>
                     <CheckBox IsChecked="{Binding settings.UpdateNotifications, UpdateSourceTrigger=PropertyChanged}" Content="Check for updates on start-up" HorizontalAlignment="Left" Margin="10,105,0,0" VerticalAlignment="Top" Width="290"/>
                     <CheckBox IsChecked="{Binding settings.AutoContainerRename, UpdateSourceTrigger=PropertyChanged}" Content="Auto-rename containers to match eepk name" ToolTip="Containers (pbind.emb, ptcl.emb/emb etc) will be renamed to always match the eepk." HorizontalAlignment="Left" Margin="10,126,0,0" VerticalAlignment="Top" Width="290"/>
-                    <Controls:NumericUpDown Value="{Binding settings.FileCacheLimit, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="25" Margin="109,146,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="68" />
+                    <Controls:NumericUpDown Value="{Binding settings.FileCacheLimit, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="25" Margin="109,146,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="108" />
                     <Label Content="EEPK Cache Limit" ToolTip="How many EEPKs loaded via Import Effect/Import Asset that are cached. This decreases the load time when accessing the same EEPK multiple times and reduces the chance of duplicate assets." HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="0,146,0,0" VerticalAlignment="Top" Width="109"/>
                     <GroupBox Header="Theme" HorizontalAlignment="Left" Height="90" Margin="266,10,0,0" VerticalAlignment="Top" Width="219">
                         <StackPanel>
@@ -30,6 +30,8 @@
                             <RadioButton IsChecked="{Binding settings.UseWindowsTheme, UpdateSourceTrigger=PropertyChanged}" GroupName="Theme" Content="Windows Default"/>
                         </StackPanel>
                     </GroupBox>
+                    <Controls:NumericUpDown Value="{Binding settings.UndoLimit, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="5000" Margin="109,177,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="108" />
+                    <Label Content="Undo Limit" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="0,177,0,0" VerticalAlignment="Top" Width="109"/>
 
                 </Grid>
             </Controls:MetroTabItem>

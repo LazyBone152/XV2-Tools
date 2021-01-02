@@ -18,7 +18,7 @@ using System.Windows.Threading;
 using Xv2CoreLib.EEPK;
 using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.EMM;
-
+using Xv2CoreLib.Resource.UndoRedo;
 
 namespace EEPK_Organiser.Forms
 {
@@ -94,6 +94,7 @@ namespace EEPK_Organiser.Forms
 
             dataGrid.EnableColumnVirtualization = true;
             dataGrid.EnableRowVirtualization = true;
+            dataGrid.SelectedItem = null;
         }
 
         private void ValueType_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -173,6 +174,11 @@ namespace EEPK_Organiser.Forms
                 RefreshMaterialCount();
                 dataGrid.SelectedItem = material;
                 dataGrid.ScrollIntoView(material);
+
+                List<IUndoRedo> undos = new List<IUndoRedo>();
+                undos.Add(new UndoableListAdd<Material>(EmmFile.Materials, material));
+                undos.Add(new UndoActionDelegate(this, nameof(RefreshMaterialCount), true));
+                UndoManager.Instance.AddUndo(new CompositeUndo(undos, "New Material"));
             }
             catch (Exception ex)
             {
@@ -229,14 +235,26 @@ namespace EEPK_Organiser.Forms
         {
             if (!IsForContainer || parent == null) return 0;
 
-            return parent.effectContainerFile.MergeDuplicateMaterials(assetType);
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+            int duplicates = parent.effectContainerFile.MergeDuplicateMaterials(assetType, undos);
+
+            undos.Add(new UndoActionDelegate(this, nameof(RefreshMaterialCount), true));
+            UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Merge Duplicates (Material)"));
+
+            return duplicates;
         }
 
         private int Emm_Options_RemoveUnusedMaterials()
         {
             if (!IsForContainer || parent == null) return 0;
 
-            return parent.effectContainerFile.RemoveUnusedMaterials(assetType);
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+            int removed = parent.effectContainerFile.RemoveUnusedMaterials(assetType, undos);
+
+            undos.Add(new UndoActionDelegate(this, nameof(RefreshMaterialCount), true));
+            UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Merge Duplicates (Material)"));
+
+            return removed;
         }
 
         private void RenameFile_PopUp(Material material)
@@ -246,6 +264,7 @@ namespace EEPK_Organiser.Forms
 
             if (renameForm.WasNameChanged)
             {
+                UndoManager.Instance.AddUndo(new UndoableProperty<Material>(nameof(material.Str_00), material, material.Str_00, renameForm.NameValue, "Rename (Material)"));
                 material.Str_00 = renameForm.NameValue;
             }
         }
@@ -258,7 +277,10 @@ namespace EEPK_Organiser.Forms
 
             if(material != null)
             {
-                material.Parameters.Add(Parameter.NewParameter());
+                Parameter newParam = Parameter.NewParameter();
+                material.Parameters.Add(newParam);
+
+                UndoManager.Instance.AddUndo(new UndoableListAdd<Parameter>(material.Parameters, newParam, "Add Parameter"));
             }
         }
 
@@ -283,15 +305,20 @@ namespace EEPK_Organiser.Forms
 
                 if (material != null && selectedMaterials.Count > 0)
                 {
+                    List<IUndoRedo> undos = new List<IUndoRedo>();
                     int count = selectedMaterials.Count + 1;
 
                     if (MessageBox.Show(string.Format("All currently selected materials will be MERGED into {0}.\n\nAll other selected materials will be deleted, with all references to them changed to {0}.\n\nDo you wish to continue?", material.Str_00), string.Format("Merge ({0} materials)", count), MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
                     {
                         foreach (var materialToRemove in selectedMaterials)
                         {
-                            container.RefactorMaterialRef(materialToRemove, material);
+                            container.RefactorMaterialRef(materialToRemove, material, undos);
+                            undos.Add(new UndoableListRemove<Material>(container.File2_Ref.Materials, materialToRemove));
                             container.File2_Ref.Materials.Remove(materialToRemove);
                         }
+
+                        undos.Add(new UndoActionDelegate(this, nameof(RefreshMaterialCount), true));
+                        UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Merge (Material)"));
                     }
                 }
                 else
@@ -310,7 +337,9 @@ namespace EEPK_Organiser.Forms
         private void ContextMenu_Delete_Click(object sender, RoutedEventArgs e)
         {
             bool materialInUse = false;
+            int removed = 0;
             List<Material> selectedMaterials = dataGrid.SelectedItems.Cast<Material>().ToList();
+            List<IUndoRedo> undos = new List<IUndoRedo>();
 
             if (selectedMaterials.Count > 0)
             {
@@ -322,11 +351,18 @@ namespace EEPK_Organiser.Forms
                     }
                     else
                     {
-                        container.DeleteMaterial(material);
+                        removed++;
+                        container.DeleteMaterial(material, undos);
                     }
                 }
 
-                RefreshMaterialCount();
+                if(removed > 0)
+                {
+                    undos.Add(new UndoActionDelegate(this, nameof(RefreshMaterialCount), true));
+                    RefreshMaterialCount();
+                    UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Delete Material"));
+                }
+
 
                 if (materialInUse && selectedMaterials.Count == 1)
                 {
@@ -375,10 +411,15 @@ namespace EEPK_Organiser.Forms
 
                     if (selectedParams.Count > 0 && parentMaterial != null)
                     {
+                        List<IUndoRedo> undos = new List<IUndoRedo>();
+
                         foreach(var param in selectedParams)
                         {
+                            undos.Add(new UndoableListRemove<Parameter>(parentMaterial.Parameters, param));
                             parentMaterial.Parameters.Remove(param);
                         }
+
+                        UndoManager.Instance.AddUndo(new CompositeUndo(undos, selectedParams.Count > 1 ? "Delete Parameters" : "Delete Parameter"));
                     }
                 }
             }
@@ -407,7 +448,7 @@ namespace EEPK_Organiser.Forms
 #if !DEBUG
             catch (Exception ex)
             {
-                parentWindow.SaveExceptionLog(ex.ToString());
+                parent.SaveExceptionLog(ex.ToString());
                 MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 #endif

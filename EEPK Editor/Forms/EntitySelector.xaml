@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:EEPK_Organiser.Forms"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
-        Title="Entity Select" Height="357.187" Width="300" ShowInTaskbar="True" ResizeMode="NoResize" WindowStartupLocation="CenterOwner">
+        Title="Entity Select" Height="361.432" Width="300" ShowInTaskbar="True" ResizeMode="NoResize" WindowStartupLocation="CenterOwner">
     <Grid>
         <ListBox x:Name="listBox" ItemsSource="{Binding Entities}" TextSearch.TextPath="Name" PreviewKeyDown="ListBox_PreviewKeyDown" MouseDoubleClick="ListBox_MouseDoubleClick" HorizontalAlignment="Left" Height="249" Margin="31,10,0,0" VerticalAlignment="Top" Width="230">
             <ListBox.Resources>
