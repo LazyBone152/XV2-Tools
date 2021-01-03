@@ -479,22 +479,39 @@ namespace Xv2CoreLib.EMP
             }
         }
     
-        public List<IUndoRedo> RemoveColorAnimations()
+        public List<IUndoRedo> RemoveColorAnimations(ObservableCollection<ParticleEffect> particleEffects = null, bool root = true)
         {
+            if (particleEffects == null && root) particleEffects = ParticleEffects;
+            if (particleEffects == null && !root) return new List<IUndoRedo>();
+
             List<IUndoRedo> undos = new List<IUndoRedo>();
 
-            foreach (var particleEffect in ParticleEffects)
-                particleEffect.RemoveColorAnimations(undos);
+            foreach (var particleEffect in particleEffects)
+            {
+                particleEffect.RemoveColorType0Animations(undos);
+                particleEffect.RemoveColorType1Animations(undos);
+
+                if (particleEffect.ChildParticleEffects != null)
+                    undos.AddRange(RemoveColorAnimations(particleEffect.ChildParticleEffects, false));
+            }
 
             return undos;
         }
 
-        public List<IUndoRedo> RemoveRandomColorRange()
+        public List<IUndoRedo> RemoveRandomColorRange(ObservableCollection<ParticleEffect> particleEffects = null, bool root = true)
         {
+            if (particleEffects == null && root) particleEffects = ParticleEffects;
+            if (particleEffects == null && !root) return new List<IUndoRedo>();
+
             List<IUndoRedo> undos = new List<IUndoRedo>();
 
-            foreach (var particleEffect in ParticleEffects)
+            foreach (var particleEffect in particleEffects)
+            {
                 particleEffect.RemoveColorRandomRange(undos);
+
+                if (particleEffect.ChildParticleEffects != null)
+                    undos.AddRange(RemoveRandomColorRange(particleEffect.ChildParticleEffects, false));
+            }
 
             return undos;
         }
@@ -1581,11 +1598,11 @@ namespace Xv2CoreLib.EMP
             }
         }
 
-        public void RemoveColorAnimations(List<IUndoRedo> undos)
+        public void RemoveColorType0Animations(List<IUndoRedo> undos)
         {
             if (Type_0 != null)
             {
-                for (int i = Type_1.Count - 1; i >= 0; i--)
+                for (int i = Type_0.Count - 1; i >= 0; i--)
                 {
                     if((Type_0[i].SelectedParameter == Type0.Parameter.Color1 || Type_0[i].SelectedParameter == Type0.Parameter.Color2))
                     {
@@ -1594,6 +1611,27 @@ namespace Xv2CoreLib.EMP
 
                         undos.Add(new UndoableListRemove<Type0>(Type_0, Type_0[i]));
                         Type_0.RemoveAt(i);
+                    }
+                }
+            }
+        }
+
+        public void RemoveColorType1Animations(List<IUndoRedo> undos)
+        {
+            if (Type_1 != null)
+            {
+                foreach(var type1 in Type_1)
+                {
+                    for (int i = type1.Entries.Count - 1; i >= 0; i--)
+                    {
+                        if ((type1.Entries[i].SelectedParameter == Type0.Parameter.Color1 || type1.Entries[i].SelectedParameter == Type0.Parameter.Color2))
+                        {
+                            if (type1.Entries[i].SelectedParameter == Type0.Parameter.Color1 && type1.Entries[i].SelectedComponentColor1 == Type0.ComponentColor1.A) continue;
+                            if (type1.Entries[i].SelectedParameter == Type0.Parameter.Color2 && type1.Entries[i].SelectedComponentColor2 == Type0.ComponentColor2.A) continue;
+
+                            undos.Add(new UndoableListRemove<Type0>(type1.Entries, type1.Entries[i]));
+                            type1.Entries.RemoveAt(i);
+                        }
                     }
                 }
             }
