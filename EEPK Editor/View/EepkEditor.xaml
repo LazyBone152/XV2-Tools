@@ -576,6 +576,9 @@
                                 <MenuItem Header="Duplicate" Click="PBIND_AssetContainer_Duplicate_Click"/>
                                 <MenuItem Header="Used By?" Click="PBIND_AssetContainer_UsedBy_Click"/>
                                 <Separator/>
+                                <MenuItem Header="Remove Color Animations" Click="PBIND_RemoveColorAnimations"/>
+                                <MenuItem Header="Remove Random Color Range" Click="PBIND_RemoveRandomColorRange"/>
+                                <Separator/>
                                 <MenuItem Header="Edit" Click="PBIND_AssetContainer_Edit_Click"/>
                                 <MenuItem Header="Hue Adjustment" Click="PBIND_AssetContainer_Recolor"/>
                             </ContextMenu>

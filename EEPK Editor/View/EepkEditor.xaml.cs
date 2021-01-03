@@ -1359,6 +1359,36 @@ namespace EEPK_Organiser.View
 
         }
 
+        private void PBIND_RemoveColorAnimations(object sender, RoutedEventArgs e)
+        {
+            List<Asset> selectedAssets = pbindDataGrid.SelectedItems.Cast<Asset>().ToList();
+
+            if (selectedAssets != null)
+            {
+                List<IUndoRedo> undos = new List<IUndoRedo>();
+
+                foreach (var asset in selectedAssets)
+                    undos.AddRange(asset.Files[0].EmpFile.RemoveColorAnimations());
+
+                UndoManager.Instance.AddCompositeUndo(undos, "Remove Color Animations (PBIND)");
+            }
+        }
+
+        private void PBIND_RemoveRandomColorRange(object sender, RoutedEventArgs e)
+        {
+            List<Asset> selectedAssets = pbindDataGrid.SelectedItems.Cast<Asset>().ToList();
+
+            if (selectedAssets != null)
+            {
+                List<IUndoRedo> undos = new List<IUndoRedo>();
+
+                foreach (var asset in selectedAssets)
+                    undos.AddRange(asset.Files[0].EmpFile.RemoveRandomColorRange());
+
+                UndoManager.Instance.AddCompositeUndo(undos, "Remove Random Color Range (PBIND)");
+            }
+        }
+
         #endregion
 
         #region TBIND

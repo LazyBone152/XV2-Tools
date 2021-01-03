@@ -478,6 +478,26 @@ namespace Xv2CoreLib.EMP
                 particleEffects.ChangeHue(hue, saturation, lightness, undos);
             }
         }
+    
+        public List<IUndoRedo> RemoveColorAnimations()
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            foreach (var particleEffect in ParticleEffects)
+                particleEffect.RemoveColorAnimations(undos);
+
+            return undos;
+        }
+
+        public List<IUndoRedo> RemoveRandomColorRange()
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            foreach (var particleEffect in ParticleEffects)
+                particleEffect.RemoveColorRandomRange(undos);
+
+            return undos;
+        }
     }
 
     //Section1/MainEntry
@@ -1344,8 +1364,49 @@ namespace Xv2CoreLib.EMP
                 InitColor1Animations();
                 InitColor2Animations();
 
-                //todo: implement this
-                //Type0 r = Type_0.FirstOrDefault(x => x.SelectedParameter == Type0.Parameter.Color1);
+                //Color 1
+                Type0 color1_R = Type_0.FirstOrDefault(x => x.SelectedParameter == Type0.Parameter.Color1 && x.SelectedComponentColor1 == Type0.ComponentColor1.R);
+                Type0 color1_G = Type_0.FirstOrDefault(x => x.SelectedParameter == Type0.Parameter.Color1 && x.SelectedComponentColor1 == Type0.ComponentColor1.G);
+                Type0 color1_B = Type_0.FirstOrDefault(x => x.SelectedParameter == Type0.Parameter.Color1 && x.SelectedComponentColor1 == Type0.ComponentColor1.B);
+
+                if(color1_R != null && color1_G != null && color1_B != null)
+                {
+                    foreach(var r_Keyframe in color1_R.Keyframes)
+                    {
+                        Type0_Keyframe g_Keyframe = color1_G.GetKeyframe(r_Keyframe.Index);
+                        Type0_Keyframe b_Keyframe = color1_B.GetKeyframe(r_Keyframe.Index);
+
+                        if(g_Keyframe != null && b_Keyframe != null)
+                        {
+                            var newColor = new RgbColor(r_Keyframe.Float, g_Keyframe.Float, b_Keyframe.Float);
+
+                            if(!newColor.IsWhiteOrBlack)
+                                colors.Add(newColor);
+                        }
+                    }
+                }
+
+                //Color 2
+                Type0 color2_R = Type_0.FirstOrDefault(x => x.SelectedParameter == Type0.Parameter.Color2 && x.SelectedComponentColor2 == Type0.ComponentColor2.R);
+                Type0 color2_G = Type_0.FirstOrDefault(x => x.SelectedParameter == Type0.Parameter.Color2 && x.SelectedComponentColor2 == Type0.ComponentColor2.G);
+                Type0 color2_B = Type_0.FirstOrDefault(x => x.SelectedParameter == Type0.Parameter.Color2 && x.SelectedComponentColor2 == Type0.ComponentColor2.B);
+
+                if (color2_R != null && color2_G != null && color2_B != null)
+                {
+                    foreach (var r_Keyframe in color2_R.Keyframes)
+                    {
+                        Type0_Keyframe g_Keyframe = color2_G.GetKeyframe(r_Keyframe.Index);
+                        Type0_Keyframe b_Keyframe = color2_B.GetKeyframe(r_Keyframe.Index);
+
+                        if (g_Keyframe != null && b_Keyframe != null)
+                        {
+                            var newColor = new RgbColor(r_Keyframe.Float, g_Keyframe.Float, b_Keyframe.Float);
+
+                            if (!newColor.IsWhiteOrBlack)
+                                colors.Add(newColor);
+                        }
+                    }
+                }
 
             }
 
@@ -1427,9 +1488,6 @@ namespace Xv2CoreLib.EMP
                     Type_Texture.F_72 = (float)convertedColor.B;
                 }
 
-                //Animations
-                ChangeHueForColor1Animations(hue, saturation, lightness, undos);
-                ChangeHueForColor2Animations(hue, saturation, lightness, undos);
 
                 //Children
                 if(ChildParticleEffects != null)
@@ -1439,6 +1497,12 @@ namespace Xv2CoreLib.EMP
                         child.ChangeHue(hue, saturation, lightness, undos);
                     }
                 }
+            }
+        
+            if(Type_0 != null)
+            {
+                ChangeHueForColor1Animations(hue, saturation, lightness, undos);
+                ChangeHueForColor2Animations(hue, saturation, lightness, undos);
             }
         }
 
@@ -1500,14 +1564,37 @@ namespace Xv2CoreLib.EMP
 
         }
 
-        public void NotifyPropsChanged_2()
+        public void RemoveColorRandomRange(List<IUndoRedo> undos)
         {
-            foreach (var prop in GetType().GetProperties())
+            if(Type_Texture != null)
             {
-                NotifyPropertyChanged(prop.Name);
+                if (Type_Texture.F_64 != 0 || Type_Texture.F_68 != 0 || Type_Texture.F_72 != 0)
+                {
+                    undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_64), Type_Texture, Type_Texture.F_64, 0f));
+                    undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_68), Type_Texture, Type_Texture.F_68, 0f));
+                    undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_72), Type_Texture, Type_Texture.F_72, 0f));
+
+                    Type_Texture.F_64 = 0f;
+                    Type_Texture.F_68 = 0f;
+                    Type_Texture.F_72 = 0f;
+                }
             }
         }
 
+        public void RemoveColorAnimations(List<IUndoRedo> undos)
+        {
+            if (Type_0 != null)
+            {
+                for (int i = Type_1.Count - 1; i >= 0; i--)
+                {
+                    if(Type_0[i].SelectedParameter == Type0.Parameter.Color1 || Type_0[i].SelectedParameter == Type0.Parameter.Color2)
+                    {
+                        undos.Add(new UndoableListRemove<Type0>(Type_0, Type_0[i]));
+                        Type_0.RemoveAt(i);
+                    }
+                }
+            }
+        }
     }
 
     //FLAG36/37 data

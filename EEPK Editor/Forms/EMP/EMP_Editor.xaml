@@ -569,7 +569,7 @@
                                         <Label Content="F__04" Margin="345,77,0,0" VerticalAlignment="Top" Width="73" HorizontalAlignment="Left" HorizontalContentAlignment="Right"/>
                                         <TextBox x:Name="animType0_I_00" Text="{Binding SelectedItem.I_08, ElementName=comboBox_Type0, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="418,24,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="97"/>
                                         <Label Content="Duration" Margin="345,22,0,0" VerticalAlignment="Top" Width="73" HorizontalAlignment="Left" HorizontalContentAlignment="Right"/>
-                                        <DataGrid x:Name="dataGrid_type0_Keyframes" HorizontalAlignment="Left" Height="176" Margin="208,137,0,0" VerticalAlignment="Top" Width="307" ItemsSource="{Binding SelectedItem.Keyframes, ElementName=comboBox_Type0}" AutoGenerateColumns="False" CanUserSortColumns="False" CanUserDeleteRows="False" CanUserAddRows="False">
+                                        <DataGrid x:Name="dataGrid_type0_Keyframes" HorizontalAlignment="Left" Height="176" Margin="208,137,0,0" VerticalAlignment="Top" Width="307" ItemsSource="{Binding SelectedItem.Keyframes, ElementName=comboBox_Type0}" AutoGenerateColumns="False" CanUserSortColumns="True" CanUserDeleteRows="False" CanUserAddRows="False">
                                             <DataGrid.InputBindings>
                                                 <KeyBinding Key="Delete" Command="{Binding RemoveType0KeyframeCommand}"/>
                                                 <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding AddType0KeyframeCommand}"/>
@@ -620,7 +620,7 @@
                                             <Label Content="F__04" Margin="358,55,0,0" VerticalAlignment="Top" Width="73" HorizontalAlignment="Left" HorizontalContentAlignment="Right"/>
                                             <TextBox x:Name="animType1_I_08"  Text="{Binding SelectedItem.I_08, ElementName=comboBox_Type1, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="431,2,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="97"/>
                                             <Label Content="Duration" Margin="358,0,0,0" VerticalAlignment="Top" Width="73" HorizontalAlignment="Left" HorizontalContentAlignment="Right"/>
-                                            <DataGrid x:Name="dataGrid_type1_Keyframes" HorizontalAlignment="Left" Height="118" Margin="221,115,0,0" VerticalAlignment="Top" Width="307" ItemsSource="{Binding SelectedItem.Keyframes, ElementName=comboBox_Type1}" AutoGenerateColumns="False" CanUserSortColumns="False" CanUserDeleteRows="False" CanUserAddRows="False">
+                                            <DataGrid x:Name="dataGrid_type1_Keyframes" HorizontalAlignment="Left" Height="118" Margin="221,115,0,0" VerticalAlignment="Top" Width="307" ItemsSource="{Binding SelectedItem.Keyframes, ElementName=comboBox_Type1}" AutoGenerateColumns="False" CanUserSortColumns="True" CanUserDeleteRows="False" CanUserAddRows="False">
                                                 <DataGrid.InputBindings>
                                                     <KeyBinding Key="Delete" Command="{Binding RemoveType1KeyframeCommand}"/>
                                                     <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding AddType1KeyframeCommand}"/>
