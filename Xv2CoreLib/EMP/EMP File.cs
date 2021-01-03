@@ -1587,8 +1587,11 @@ namespace Xv2CoreLib.EMP
             {
                 for (int i = Type_1.Count - 1; i >= 0; i--)
                 {
-                    if(Type_0[i].SelectedParameter == Type0.Parameter.Color1 || Type_0[i].SelectedParameter == Type0.Parameter.Color2)
+                    if((Type_0[i].SelectedParameter == Type0.Parameter.Color1 || Type_0[i].SelectedParameter == Type0.Parameter.Color2))
                     {
+                        if (Type_0[i].SelectedParameter == Type0.Parameter.Color1 && Type_0[i].SelectedComponentColor1 == Type0.ComponentColor1.A) continue;
+                        if (Type_0[i].SelectedParameter == Type0.Parameter.Color2 && Type_0[i].SelectedComponentColor2 == Type0.ComponentColor2.A) continue;
+
                         undos.Add(new UndoableListRemove<Type0>(Type_0, Type_0[i]));
                         Type_0.RemoveAt(i);
                     }
