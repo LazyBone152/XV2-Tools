@@ -94,7 +94,7 @@ namespace Xv2CoreLib.EMP
             int textureEntryCount = (empFile.Textures != null) ? empFile.Textures.Count() : 0;
 
             //Create copy of empFile and work of that, so the original isn't altered
-            empFile = empFile.Copy();
+            empFile = empFile.Clone();
 
             //Header
             bytes.AddRange(BitConverter.GetBytes(EMP_File.EMP_SIGNATURE));

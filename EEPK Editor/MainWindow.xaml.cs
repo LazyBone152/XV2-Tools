@@ -145,7 +145,7 @@ namespace EEPK_Organiser
             //Init UI
             InitializeComponent();
             DataContext = this;
-            InitWindowsTheme();
+            InitTheme();
 
             if(GeneralInfo.AppSettings.ValidGameDir)
                 AsyncInit();
@@ -161,37 +161,16 @@ namespace EEPK_Organiser
 
         }
 
-        private void InitWindowsTheme()
+        public void InitTheme()
         {
-            bool darkMode = false;
-
             switch (GeneralInfo.AppSettings.GetCurrentTheme())
             {
                 case Settings.AppTheme.Light:
-                    darkMode = false;
+                    ThemeManager.ChangeAppStyle(Application.Current, ThemeManager.GetAccent(GeneralInfo.AppSettings.CurrentLightAccent.ToString()), ThemeManager.GetAppTheme("BaseLight"));
                     break;
                 case Settings.AppTheme.Dark:
-                    darkMode = true;
+                    ThemeManager.ChangeAppStyle(Application.Current, ThemeManager.GetAccent(GeneralInfo.AppSettings.CurrentDarkAccent.ToString()), ThemeManager.GetAppTheme("BaseDark"));
                     break;
-                case Settings.AppTheme.WindowsDefault:
-                    {
-                        //Check registry for the users Light/Dark mode preferences (Windows 10 only)
-                        var registryValue = Registry.GetValue(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "AppsUseLightTheme", "1");
-
-                        if (registryValue != null)
-                            if (registryValue.ToString() == "0")
-                                darkMode = true;
-                    }
-                    break;
-            }
-
-            if (darkMode)
-            {
-                ThemeManager.ChangeAppStyle(Application.Current, ThemeManager.GetAccent("Emerald"), ThemeManager.GetAppTheme("BaseDark"));
-            }
-            else
-            {
-                ThemeManager.ChangeAppStyle(Application.Current, ThemeManager.GetAccent("Blue"), ThemeManager.GetAppTheme("BaseLight"));
             }
         }
 
@@ -211,6 +190,8 @@ namespace EEPK_Organiser
                     xv2.Instance.Init();
                 });
 
+                eepkEditor.loadHelper = null;
+                NotifyPropertyChanged(nameof(CanLoadFromGame));
                 await controller.CloseAsync();
             }
             catch (Exception ex)
@@ -404,12 +385,12 @@ namespace EEPK_Organiser
             Forms.Settings settingsForm = new Forms.Settings(GeneralInfo.AppSettings, this);
             settingsForm.ShowDialog();
             GeneralInfo.AppSettings.SaveSettings();
-            InitWindowsTheme();
+            InitTheme();
             
+            //Reload game cpk stuff if directory was changed
             if(GeneralInfo.AppSettings.GameDirectory != originalGameDir && GeneralInfo.AppSettings.ValidGameDir)
             {
-                eepkEditor.loadHelper = new LoadFromGameHelper();
-                NotifyPropertyChanged(nameof(CanLoadFromGame));
+                AsyncInit();
             }
 
         }

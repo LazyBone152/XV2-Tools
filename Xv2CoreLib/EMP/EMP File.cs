@@ -1505,21 +1505,22 @@ namespace Xv2CoreLib.EMP
                     Type_Texture.F_72 = (float)convertedColor.B;
                 }
 
-
-                //Children
-                if(ChildParticleEffects != null)
-                {
-                    foreach(var child in ChildParticleEffects)
-                    {
-                        child.ChangeHue(hue, saturation, lightness, undos);
-                    }
-                }
             }
         
             if(Type_0 != null)
             {
                 ChangeHueForColor1Animations(hue, saturation, lightness, undos);
                 ChangeHueForColor2Animations(hue, saturation, lightness, undos);
+            }
+
+
+            //Children
+            if (ChildParticleEffects != null)
+            {
+                foreach (var child in ChildParticleEffects)
+                {
+                    child.ChangeHue(hue, saturation, lightness, undos);
+                }
             }
         }
 
@@ -1546,7 +1547,6 @@ namespace Xv2CoreLib.EMP
                     r.SetValue(r_frame.Index, (float)convertedColor.R, undos);
                     g.SetValue(r_frame.Index, (float)convertedColor.G, undos);
                     b.SetValue(r_frame.Index, (float)convertedColor.B, undos);
-
                 }
             }
 

@@ -12,7 +12,7 @@
              xmlns:Themes1="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
              xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="1000">
+             d:DesignHeight="600" d:DesignWidth="1050">
     <UserControl.Resources>
         <ObjectDataProvider x:Key="PlacementEnum" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
             <ObjectDataProvider.MethodParameters>
@@ -34,8 +34,8 @@
                 <Grid Background="Transparent">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="60"/>
-                        <ColumnDefinition Width="0.77*"/>
-                        <ColumnDefinition Width="*" MinWidth="255" MaxWidth="800"/>
+                        <ColumnDefinition Width="0.45*"/>
+                        <ColumnDefinition Width="*" MinWidth="500" MaxWidth="800"/>
                     </Grid.ColumnDefinitions>
 
                     <DataGrid x:Name="effectDataGrid" Grid.Column="1" Tag="{Binding DataContext, ElementName=rootGrid}" SelectionChanged="effectPart_SelectionChanged" VirtualizingPanel.ScrollUnit="Pixel" ItemsSource="{Binding effectContainerFile.ViewEffects}" SelectedItem="{Binding effectContainerFile.SelectedEffect, UpdateSourceTrigger=PropertyChanged}" EnableRowVirtualization="True" EnableColumnVirtualization="True" SelectionMode="Extended" RowDetailsVisibilityMode="VisibleWhenSelected" CellEditEnding="Effect_EffectIdChange_ValueChanged" CanUserResizeRows="False" CanUserAddRows="False" AutoGenerateColumns="False" CanUserDeleteRows="False">
@@ -160,7 +160,7 @@
                                 <Expander Header="General" IsExpanded="True">
                                     <StackPanel>
                                         <WrapPanel>
-                                            <Grid Margin="3,3,0,0" Width="350">
+                                            <Grid Margin="3,3,0,0" Width="400">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="125"/>
                                                     <ColumnDefinition Width="*"/>
@@ -206,22 +206,7 @@
                                                 <Label Content="Deactivation"/>
                                                 <ComboBox Grid.Column="1" SelectedItem="{Binding effectPartViewModel.Deactivation, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={StaticResource ResourceKey=DeactivationModeEnum}}"/>
                                             </Grid>
-                                            <Grid Margin="3,3,0,0" Width="250">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <Label Content="Near Fade Distance"/>
-                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.F_84, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.05"/>
-                                            </Grid>
-                                            <Grid Margin="3,3,0,0" Width="250">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <Label Content="Far Fade Distance"/>
-                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.F_88, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.05"/>
-                                            </Grid>
+                                            
                                             <Grid Margin="3,3,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
@@ -238,6 +223,28 @@
                                                 <Label Content="Attach Bone"/>
                                                 <TextBox Grid.Column="1" Text="{Binding effectPartViewModel.ESK, UpdateSourceTrigger=LostFocus}" VerticalContentAlignment="Center" TextWrapping="NoWrap" />
                                             </Grid>
+                                            
+                                        </WrapPanel>
+
+                                        <WrapPanel>
+                                            <Grid Margin="3,3,0,0" Width="250">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="Near Fade Distance"/>
+                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.F_84, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.05"/>
+                                            </Grid>
+                                            <Grid Margin="3,3,0,0" Width="250">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="Far Fade Distance"/>
+                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.F_88, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.05"/>
+                                            </Grid>
+                                        </WrapPanel>
+                                        <WrapPanel>
                                             <Grid Margin="3,3,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
@@ -260,185 +267,167 @@
                                 </Expander>
                                 <Expander Header="Positioning" IsExpanded="True">
                                     <WrapPanel>
-                                        <Grid Margin="3,3,0,0" Width="250">
+                                        <Grid Margin="3,3,0,0" Width="900">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="104"/>
+                                                <ColumnDefinition Width="20"/>
+                                                <ColumnDefinition Width="111"/>
+
+                                                <ColumnDefinition Width="20"/>
+                                                <ColumnDefinition Width="112"/>
+
+                                                <ColumnDefinition Width="20"/>
+                                                <ColumnDefinition Width="112"/>
                                             </Grid.ColumnDefinitions>
-                                            <Label Content="Position X"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.POSITION_X, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
+                                            <Label Content="Position"/>
+                                            <Label Grid.Column="1" Content="X" HorizontalContentAlignment="Right"/>
+                                            <Controls:NumericUpDown Grid.Column="2" Value="{Binding effectPartViewModel.POSITION_X, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
+
+                                            <Label Grid.Column="3" Content="Y" HorizontalContentAlignment="Right"/>
+                                            <Controls:NumericUpDown Grid.Column="4" Value="{Binding effectPartViewModel.POSITION_Y, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
+
+                                            <Label Grid.Column="5" Content="Z" HorizontalContentAlignment="Right"/>
+                                            <Controls:NumericUpDown Grid.Column="6" Value="{Binding effectPartViewModel.POSITION_X, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
                                         </Grid>
-                                        <Grid Margin="3,3,0,0" Width="250">
+                                        <Grid Margin="3,3,0,0" Width="900">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="104"/>
+                                                <ColumnDefinition Width="20"/>
+                                                <ColumnDefinition Width="111"/>
+
+                                                <ColumnDefinition Width="20"/>
+                                                <ColumnDefinition Width="112"/>
+
+                                                <ColumnDefinition Width="20"/>
+                                                <ColumnDefinition Width="112"/>
                                             </Grid.ColumnDefinitions>
-                                            <Label Content="Position Y"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.POSITION_Y, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
+                                            <Label Content="Rotation (Min)"/>
+                                            <Label Grid.Column="1" Content="X" HorizontalContentAlignment="Right"/>
+                                            <Controls:NumericUpDown Grid.Column="2" Value="{Binding effectPartViewModel.F_52, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
+
+                                            <Label Grid.Column="3" Content="Y" HorizontalContentAlignment="Right"/>
+                                            <Controls:NumericUpDown Grid.Column="4" Value="{Binding effectPartViewModel.F_60, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
+
+                                            <Label Grid.Column="5" Content="Z" HorizontalContentAlignment="Right"/>
+                                            <Controls:NumericUpDown Grid.Column="6" Value="{Binding effectPartViewModel.F_68, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
                                         </Grid>
-                                        <Grid Margin="3,3,0,0" Width="250">
+                                        <Grid Margin="3,3,0,0" Width="900">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="104"/>
+                                                <ColumnDefinition Width="20"/>
+                                                <ColumnDefinition Width="111"/>
+
+                                                <ColumnDefinition Width="20"/>
+                                                <ColumnDefinition Width="112"/>
+
+                                                <ColumnDefinition Width="20"/>
+                                                <ColumnDefinition Width="112"/>
                                             </Grid.ColumnDefinitions>
-                                            <Label Content="Position Z"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.POSITION_Z, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
+                                            <Label Content="Rotation (Max)"/>
+                                            <Label Grid.Column="1" Content="X" HorizontalContentAlignment="Right"/>
+                                            <Controls:NumericUpDown Grid.Column="2" Value="{Binding effectPartViewModel.F_56, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
+
+                                            <Label Grid.Column="3" Content="Y" HorizontalContentAlignment="Right"/>
+                                            <Controls:NumericUpDown Grid.Column="4" Value="{Binding effectPartViewModel.F_64, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
+
+                                            <Label Grid.Column="5" Content="Z" HorizontalContentAlignment="Right"/>
+                                            <Controls:NumericUpDown Grid.Column="6" Value="{Binding effectPartViewModel.F_72, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
                                         </Grid>
-                                        <Grid Margin="3,3,0,0" Width="250">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Label Content="Rotation X (Min)"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.F_52, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
-                                        </Grid>
-                                        <Grid Margin="3,3,0,0" Width="250">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Label Content="Rotation Y (Min)"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.F_60, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
-                                        </Grid>
-                                        <Grid Margin="3,3,0,0" Width="250">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Label Content="Rotation Z (Min)"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.F_68, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
-                                        </Grid>
-                                        <Grid Margin="3,3,0,0" Width="250">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Label Content="Rotation X (Max)"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.F_56, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
-                                        </Grid>
-                                        <Grid Margin="3,3,0,0" Width="250">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Label Content="Rotation Y (Max)"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.F_64, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
-                                        </Grid>
-                                        <Grid Margin="3,3,0,0" Width="250">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Label Content="Rotation Z (Max)"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.F_72, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
-                                        </Grid>
+                                        
                                     </WrapPanel>
                                 </Expander>
                                 <Expander Header="EMA Animation">
-                                    <WrapPanel>
-                                        <Grid Margin="3,3,0,0" Width="250">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Label Content="EMA Index"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.I_30, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
-                                        </Grid>
-                                        <Grid Margin="3,3,0,0" Width="250">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Label Content="Start Frame"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.I_92, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
-                                        </Grid>
-                                        <Grid Margin="3,3,0,0" Width="250">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Label Content="End Frame"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.I_94, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
-                                        </Grid>
-                                        <Grid Margin="3,3,0,0" Width="250">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Label Content="Enable Looping"/>
-                                            <CheckBox Grid.Column="1" IsChecked="{Binding effectPartViewModel.I_36_0, UpdateSourceTrigger=PropertyChanged}"/>
-                                        </Grid>
-                                    </WrapPanel>
+                                    <StackPanel>
+                                        <WrapPanel>
+                                            <Grid Margin="3,3,0,0" Width="250">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="EMA Index"/>
+                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.I_30, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
+                                            </Grid>
+
+                                            <Grid Margin="3,3,0,0" Width="250">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="Enable Looping"/>
+                                                <CheckBox Grid.Column="1" IsChecked="{Binding effectPartViewModel.I_36_0, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </Grid>
+                                        </WrapPanel>
+                                        <WrapPanel>
+                                            <Grid Margin="3,3,0,0" Width="250">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="Start Frame"/>
+                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.I_92, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
+                                            </Grid>
+                                            <Grid Margin="3,3,0,0" Width="250">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="End Frame"/>
+                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.I_94, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
+                                            </Grid>
+                                        </WrapPanel>
+                                    </StackPanel>
                                 </Expander>
-                                <Expander Header="Flags">
+                                <Expander Header="Main Flags">
+                                    <StackPanel>
+                                        <Label Content="Attach" HorizontalContentAlignment="Center" VerticalContentAlignment="Top" FontSize="10" FontWeight="SemiBold"/>
+                                        <WrapPanel>
+                                            <CheckBox Width="160" Margin="3,1" Content="MoveWithBone" IsChecked="{Binding effectPartViewModel.I_32_0, UpdateSourceTrigger=PropertyChanged}"/>
+                                            <CheckBox Width="160" Margin="3,1" Content="RotateWithBone" IsChecked="{Binding effectPartViewModel.I_32_1, UpdateSourceTrigger=PropertyChanged}"/>
+                                            <CheckBox Width="160" Margin="3,1" Content="InstantMoveAndRotate" IsChecked="{Binding effectPartViewModel.I_32_2, UpdateSourceTrigger=PropertyChanged}"/>
+                                            <CheckBox Width="160" Margin="3,1" Content="OnGroundOnly" IsChecked="{Binding effectPartViewModel.I_32_3, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </WrapPanel>
+
+                                        <Label Content="Start Effect Position" Margin="0, 3" HorizontalContentAlignment="Center" VerticalContentAlignment="Top" FontSize="10" FontWeight="SemiBold"/>
+                                        <WrapPanel>
+                                            <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_32_5, UpdateSourceTrigger=PropertyChanged}" Content="BoneDirection"/>
+                                            <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_32_6, UpdateSourceTrigger=PropertyChanged}" Content="BoneToCameraDir"/>
+                                            <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_32_7, UpdateSourceTrigger=PropertyChanged}" Content="SceneCenterToBoneDir"/>
+                                        </WrapPanel>
+
+                                        <Label Content="Link Flags" Margin="0, 3" HorizontalContentAlignment="Center" VerticalContentAlignment="Top" FontSize="10" FontWeight="SemiBold"/>
+                                        <WrapPanel>
+                                            <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_39_3, UpdateSourceTrigger=PropertyChanged}" Content="_RelativePosZ_To_AbsPosZ"/>
+                                            <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_39_4, UpdateSourceTrigger=PropertyChanged}" Content="_ScaleZ_To_BonePosZ"/>
+                                            <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_39_7, UpdateSourceTrigger=PropertyChanged}" Content="_ObjectRotation_To_XXXX" ToolTip="Dont ask"/>
+                                        </WrapPanel>
+
+
+                                    </StackPanel>
+                                </Expander>
+                                <Expander Header="Unknown Flags">
                                     <WrapPanel>
-                                        <Grid Margin="3,3,0,0" Width="250">
-                                            <GroupBox Header="Attach Flags" HorizontalAlignment="Left" Height="200" Width="250">
-                                                <StackPanel>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_32_0, UpdateSourceTrigger=PropertyChanged}" Content="MoveWithBone"/>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_32_1, UpdateSourceTrigger=PropertyChanged}" Content="RotateWithBone"/>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_32_2, UpdateSourceTrigger=PropertyChanged}" Content="InstantMoveAndRotate"/>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_32_3, UpdateSourceTrigger=PropertyChanged}" Content="OnGroundOnly"/>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_32_4, UpdateSourceTrigger=PropertyChanged}" Content="Unk4"/>
-                                                </StackPanel>
-                                            </GroupBox>
-                                        </Grid>
-                                        <Grid Margin="3,3,0,0" Width="250">
-                                            <GroupBox Header="Start Effect Position" HorizontalAlignment="Left" Height="200" Width="250">
-                                                <StackPanel>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_32_5, UpdateSourceTrigger=PropertyChanged}" Content="UseBoneDirection"/>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_32_6, UpdateSourceTrigger=PropertyChanged}" Content="UseBoneToCameraDirection"/>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_32_7, UpdateSourceTrigger=PropertyChanged}" Content="UseSceneCenterToBoneDirection"/>
-                                                </StackPanel>
-                                            </GroupBox>
-                                        </Grid>
-                                        <Grid Margin="3,3,0,0" Width="250">
-                                            <GroupBox Header="Flag 39" HorizontalAlignment="Left" Height="200" Width="250">
-                                                <StackPanel>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_39_0, UpdateSourceTrigger=PropertyChanged}" Content="NoGlare"/>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_39_1, UpdateSourceTrigger=PropertyChanged}" Content="Unk1"/>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_39_2, UpdateSourceTrigger=PropertyChanged}" Content="InverseTransparentDrawOrder"/>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_39_5, UpdateSourceTrigger=PropertyChanged}" Content="Unk5"/>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_39_6, UpdateSourceTrigger=PropertyChanged}" Content="Unk6"/>
-                                                </StackPanel>
-                                            </GroupBox>
-                                        </Grid>
-                                        <Grid Margin="3,3,0,0" Width="250">
-                                            <GroupBox Header="Link Flags" HorizontalAlignment="Left" Height="200" Width="250">
-                                                <StackPanel>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_39_3, UpdateSourceTrigger=PropertyChanged}" Content="_RelativePositionZ_To_AbsolutePositionZ"/>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_39_4, UpdateSourceTrigger=PropertyChanged}" Content="_ScaleZ_To_BonePositionZ"/>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_39_7, UpdateSourceTrigger=PropertyChanged}" Content="_ObjectOrientation_To_XXXX"/>
-                                                </StackPanel>
-                                            </GroupBox>
-                                        </Grid>
-                                        <Grid Margin="3,3,0,0" Width="250">
-                                            <GroupBox Header="Flag 36" HorizontalAlignment="Left" Height="200" Width="250">
-                                                <StackPanel>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_36_1, UpdateSourceTrigger=PropertyChanged}" Content="Unk1"/>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_36_2, UpdateSourceTrigger=PropertyChanged}" Content="Unk2"/>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_36_3, UpdateSourceTrigger=PropertyChanged}" Content="Unk3"/>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_36_4, UpdateSourceTrigger=PropertyChanged}" Content="Unk4"/>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_36_5, UpdateSourceTrigger=PropertyChanged}" Content="Unk5"/>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_36_6, UpdateSourceTrigger=PropertyChanged}" Content="Unk6"/>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_36_7, UpdateSourceTrigger=PropertyChanged}" Content="Unk7"/>
-                                                </StackPanel>
-                                            </GroupBox>
-                                        </Grid>
-                                        <Grid Margin="3,3,0,0" Width="250">
-                                            <GroupBox Header="Flag 37" HorizontalAlignment="Left" Height="200" Width="250">
-                                                <StackPanel>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_37_0, UpdateSourceTrigger=PropertyChanged}" Content="Unk0"/>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_37_1, UpdateSourceTrigger=PropertyChanged}" Content="Unk1"/>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_37_2, UpdateSourceTrigger=PropertyChanged}" Content="Unk2"/>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_37_3, UpdateSourceTrigger=PropertyChanged}" Content="Unk3"/>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_37_4, UpdateSourceTrigger=PropertyChanged}" Content="Unk4"/>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_37_5, UpdateSourceTrigger=PropertyChanged}" Content="Unk5"/>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_37_6, UpdateSourceTrigger=PropertyChanged}" Content="Unk6"/>
-                                                    <CheckBox IsChecked="{Binding effectPartViewModel.I_37_7, UpdateSourceTrigger=PropertyChanged}" Content="Unk7"/>
-                                                </StackPanel>
-                                            </GroupBox>
-                                        </Grid>
+                                        <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_32_4, UpdateSourceTrigger=PropertyChanged}" Content="AttachFlag__Unk4"/>
+
+                                        <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_39_1, UpdateSourceTrigger=PropertyChanged}" Content="Flag__39__Unk1"/>
+                                        <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_39_5, UpdateSourceTrigger=PropertyChanged}" Content="Flag__39__Unk5"/>
+                                        <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_39_6, UpdateSourceTrigger=PropertyChanged}" Content="Flag__39__Unk6"/>
+
+                                        <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_36_1, UpdateSourceTrigger=PropertyChanged}" Content="Flag__36__Unk1"/>
+                                        <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_36_2, UpdateSourceTrigger=PropertyChanged}" Content="Flag__36__Unk2"/>
+                                        <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_36_3, UpdateSourceTrigger=PropertyChanged}" Content="Flag__36__Unk3"/>
+                                        <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_36_4, UpdateSourceTrigger=PropertyChanged}" Content="Flag__36__Unk4"/>
+                                        <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_36_5, UpdateSourceTrigger=PropertyChanged}" Content="Flag__36__Unk5"/>
+                                        <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_36_6, UpdateSourceTrigger=PropertyChanged}" Content="Flag__36__Unk6"/>
+                                        <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_36_7, UpdateSourceTrigger=PropertyChanged}" Content="Flag__36__Unk7"/>
+
+                                        <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_37_0, UpdateSourceTrigger=PropertyChanged}" Content="Flag__37__Unk0"/>
+                                        <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_37_1, UpdateSourceTrigger=PropertyChanged}" Content="Flag__37__Unk1"/>
+                                        <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_37_2, UpdateSourceTrigger=PropertyChanged}" Content="Flag__37__Unk2"/>
+                                        <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_37_3, UpdateSourceTrigger=PropertyChanged}" Content="Flag__37__Unk3"/>
+                                        <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_37_4, UpdateSourceTrigger=PropertyChanged}" Content="Flag__37__Unk4"/>
+                                        <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_37_5, UpdateSourceTrigger=PropertyChanged}" Content="Flag__37__Unk5"/>
+                                        <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_37_6, UpdateSourceTrigger=PropertyChanged}" Content="Flag__37__Unk6"/>
+                                        <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_37_7, UpdateSourceTrigger=PropertyChanged}" Content="Flag__37__Unk7"/>
                                     </WrapPanel>
                                 </Expander>
                                 <Expander Header="Unknown Values">

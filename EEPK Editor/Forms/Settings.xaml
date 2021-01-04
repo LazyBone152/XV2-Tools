@@ -4,11 +4,20 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EEPK_Organiser.Forms"
+        xmlns:settings="clr-namespace:EEPK_Organiser.Settings"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
-        Title="Settings" Height="300" Width="500" WindowStyle="ToolWindow" ShowInTaskbar="False" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Closing="Window_Closing">
-    <Grid>
-        <Controls:MetroTabControl HorizontalAlignment="Left" Height="273" VerticalAlignment="Top" Width="495" Margin="0,0,-0.164,0">
+        Title="Settings" Height="300" Width="532.444" WindowStyle="ToolWindow" ShowInTaskbar="False" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Closing="Window_Closing">
+    <Window.Resources>
+        <ObjectDataProvider x:Key="accents" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="settings:AppAccent"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </Window.Resources>
+    <Grid Margin="0, 2">
+        <Controls:MetroTabControl HorizontalAlignment="Left" Height="273" VerticalAlignment="Top" Width="527" Margin="0,0,0,-0.333">
             <Controls:MetroTabItem Header="General" Controls:ControlsHelper.HeaderFontSize="14">
                 <Grid Background="Transparent">
                     <GroupBox Header="File Clean Up" ToolTip="Controls how the editor should handle left over asset files that are no longer used." HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="242">
@@ -23,15 +32,25 @@
                     <CheckBox IsChecked="{Binding settings.AutoContainerRename, UpdateSourceTrigger=PropertyChanged}" Content="Auto-rename containers to match eepk name" ToolTip="Containers (pbind.emb, ptcl.emb/emb etc) will be renamed to always match the eepk." HorizontalAlignment="Left" Margin="10,126,0,0" VerticalAlignment="Top" Width="290"/>
                     <Controls:NumericUpDown Value="{Binding settings.FileCacheLimit, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="25" Margin="109,146,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="108" />
                     <Label Content="EEPK Cache Limit" ToolTip="How many EEPKs loaded via Import Effect/Import Asset that are cached. This decreases the load time when accessing the same EEPK multiple times and reduces the chance of duplicate assets." HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="0,146,0,0" VerticalAlignment="Top" Width="109"/>
-                    <GroupBox Header="Theme" HorizontalAlignment="Left" Height="90" Margin="266,10,0,0" VerticalAlignment="Top" Width="219">
+                    <GroupBox Header="Theme" HorizontalAlignment="Left" Margin="298,10,0,0" VerticalAlignment="Top" Width="219">
+
                         <StackPanel>
-                            <RadioButton IsChecked="{Binding settings.UseLightTheme, UpdateSourceTrigger=PropertyChanged}" GroupName="Theme" Content="Light"/>
-                            <RadioButton IsChecked="{Binding settings.UseDarkTheme, UpdateSourceTrigger=PropertyChanged}" GroupName="Theme" Content="Dark"/>
-                            <RadioButton IsChecked="{Binding settings.UseWindowsTheme, UpdateSourceTrigger=PropertyChanged}" GroupName="Theme" Content="Windows Default"/>
+                            <RadioButton IsChecked="{Binding settings.UseLightTheme, UpdateSourceTrigger=PropertyChanged}" GroupName="Theme" Content="Light" Checked="ThemeRadioButtons_CheckChanged" Unchecked="ThemeRadioButtons_CheckChanged"/>
+                            <RadioButton IsChecked="{Binding settings.UseDarkTheme, UpdateSourceTrigger=PropertyChanged}" GroupName="Theme" Content="Dark" Checked="ThemeRadioButtons_CheckChanged" Unchecked="ThemeRadioButtons_CheckChanged"/>
+
+                            <StackPanel Orientation="Horizontal" Margin="0, 3" Visibility="{Binding DarkAccentVisibility}">
+                                <Label Content="Accent" Width="50"/>
+                                <ComboBox Width="120" SelectedItem="{Binding settings.CurrentDarkAccent, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={StaticResource ResourceKey=accents}}" SelectionChanged="ThemeAccentComboBox_SelectionChanged"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0, 3" Visibility="{Binding LightAccentVisibility}">
+                                <Label Content="Accent" Width="50"/>
+                                <ComboBox Width="120" SelectedItem="{Binding settings.CurrentLightAccent, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={StaticResource ResourceKey=accents}}" SelectionChanged="ThemeAccentComboBox_SelectionChanged"/>
+                            </StackPanel>
                         </StackPanel>
                     </GroupBox>
                     <Controls:NumericUpDown Value="{Binding settings.UndoLimit, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="5000" Margin="109,177,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="108" />
                     <Label Content="Undo Limit" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="0,177,0,0" VerticalAlignment="Top" Width="109"/>
+                    
 
                 </Grid>
             </Controls:MetroTabItem>

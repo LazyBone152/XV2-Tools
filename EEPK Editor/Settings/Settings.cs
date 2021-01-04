@@ -8,15 +8,43 @@ using YAXLib;
 using System.IO;
 using System.Windows;
 using Xv2CoreLib.Resource.UndoRedo;
+using Microsoft.Win32;
 
 namespace EEPK_Organiser.Settings
 {
     public enum AppTheme
     {
         Light,
-        Dark,
-        WindowsDefault
+        Dark
     }
+
+    public enum AppAccent
+    {
+        Red,
+        Green,
+        Blue,
+        Purple,
+        Orange,
+        Lime,
+        Emerald,
+        Teal,
+        Cyan,
+        Cobalt,
+        Indigo,
+        Violet,
+        Pink,
+        Magenta,
+        Crimson,
+        Amber,
+        Yellow,
+        Brown,
+        Olive,
+        Steel,
+        Mauve,
+        Taupe,
+        Sienna
+    }
+
 
     [YAXSerializeAs("Settings")]
     public class AppSettings : INotifyPropertyChanged
@@ -51,7 +79,9 @@ namespace EEPK_Organiser.Settings
         private bool _autoContainerRename = true;
         private int _fileCacheLimit = 10;
         private int _undoLimit = UndoManager.DefaultMaxCapacity;
-        private AppTheme _currentTheme = AppTheme.WindowsDefault;
+        private AppTheme _currentTheme = AppTheme.Light;
+        private AppAccent _currentLightAccent = AppAccent.Blue;
+        private AppAccent _currentDarkAccent = AppAccent.Emerald;
         #endregion
 
         public bool UpdateNotifications { get; set; } = true;
@@ -219,20 +249,6 @@ namespace EEPK_Organiser.Settings
                 NotifyPropertyChanged(nameof(UseDarkTheme));
             }
         }
-        public bool UseWindowsTheme
-        {
-            get
-            {
-                return _currentTheme == AppTheme.WindowsDefault;
-            }
-            set
-            {
-                if (value)
-                    _currentTheme = AppTheme.WindowsDefault;
-
-                NotifyPropertyChanged(nameof(UseWindowsTheme));
-            }
-        }
         public int UndoLimit
         {
             get
@@ -248,6 +264,10 @@ namespace EEPK_Organiser.Settings
                 }
             }
         }
+        
+        public AppAccent CurrentLightAccent { get { return _currentLightAccent; } set { _currentLightAccent = value; NotifyPropertyChanged(nameof(CurrentLightAccent)); } }
+        public AppAccent CurrentDarkAccent { get { return _currentDarkAccent; } set { _currentDarkAccent = value; NotifyPropertyChanged(nameof(CurrentDarkAccent)); } }
+        public bool DefaultThemeSet { get; set; } 
 
 
         public static AppSettings LoadSettings()
@@ -316,6 +336,9 @@ namespace EEPK_Organiser.Settings
             if (UndoLimit > 5000) UndoLimit = 5000;
 
             UndoManager.Instance.SetCapacity(UndoLimit);
+
+            //Theme
+            InitTheme();
         }
 
         private void ValidateSettings()
@@ -361,6 +384,26 @@ namespace EEPK_Organiser.Settings
         public AppTheme GetCurrentTheme()
         {
             return _currentTheme;
+        }
+
+        public void InitTheme(bool forceSet = false)
+        {
+            if (!DefaultThemeSet || forceSet)
+            {
+                //Check registry for the users Light/Dark mode preferences (Windows 10 only)
+                var registryValue = Registry.GetValue(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "AppsUseLightTheme", "1");
+
+                if (registryValue != null)
+                    if (registryValue.ToString() == "0")
+                        _currentTheme = AppTheme.Dark;
+                    else
+                        _currentTheme = AppTheme.Light;
+
+                NotifyPropertyChanged(nameof(UseDarkTheme));
+                NotifyPropertyChanged(nameof(UseLightTheme));
+
+                DefaultThemeSet = true;
+            }
         }
 
     }
