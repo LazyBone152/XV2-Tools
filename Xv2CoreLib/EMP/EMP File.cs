@@ -468,14 +468,14 @@ namespace Xv2CoreLib.EMP
             return colors;
         }
 
-        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos = null)
+        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0)
         {
             if (ParticleEffects == null) return;
             if (undos == null) undos = new List<IUndoRedo>();
 
             foreach(var particleEffects in ParticleEffects)
             {
-                particleEffects.ChangeHue(hue, saturation, lightness, undos);
+                particleEffects.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
             }
         }
     
@@ -1438,7 +1438,7 @@ namespace Xv2CoreLib.EMP
             return colors;
         }
 
-        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos)
+        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet = false, int variance = 0)
         {
             if(Type_Texture != null)
             {
@@ -1451,10 +1451,20 @@ namespace Xv2CoreLib.EMP
                     if(col1.Value.R != 0 || col1.Value.G != 0 || col1.Value.B != 0)
                     {
                         HslColor.HslColor newCol1 = new RgbColor(col1.Value.R, col1.Value.G, col1.Value.B).ToHsl();
-                        newCol1.ChangeHue(hue);
-                        newCol1.ChangeSaturation(saturation);
-                        newCol1.ChangeLightness(lightness);
-                        RgbColor convertedColor = newCol1.ToRgb();
+                        RgbColor convertedColor;
+
+                        if (hueSet)
+                        {
+                            newCol1.SetHue(hue, variance);
+                        }
+                        else
+                        {
+                            newCol1.ChangeHue(hue);
+                            newCol1.ChangeSaturation(saturation);
+                            newCol1.ChangeLightness(lightness);
+                        }
+
+                        convertedColor = newCol1.ToRgb();
 
                         undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_48), Type_Texture, Type_Texture.F_48, (float)convertedColor.R));
                         undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_52), Type_Texture, Type_Texture.F_52, (float)convertedColor.G));
@@ -1472,10 +1482,20 @@ namespace Xv2CoreLib.EMP
                     if (col2.Value.R != 0 || col2.Value.G != 0 || col2.Value.B != 0)
                     {
                         HslColor.HslColor newCol2 = new RgbColor(col2.Value.R, col2.Value.G, col2.Value.B).ToHsl();
-                        newCol2.ChangeHue(hue);
-                        newCol2.ChangeSaturation(saturation);
-                        newCol2.ChangeLightness(lightness);
-                        RgbColor convertedColor = newCol2.ToRgb();
+                        RgbColor convertedColor;
+
+                        if (hueSet)
+                        {
+                            newCol2.SetHue(hue, variance);
+                        }
+                        else
+                        {
+                            newCol2.ChangeHue(hue);
+                            newCol2.ChangeSaturation(saturation);
+                            newCol2.ChangeLightness(lightness);
+                        }
+
+                        convertedColor = newCol2.ToRgb();
 
                         undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_80), Type_Texture, Type_Texture.F_80, (float)convertedColor.R));
                         undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_84), Type_Texture, Type_Texture.F_84, (float)convertedColor.G));
@@ -1490,11 +1510,22 @@ namespace Xv2CoreLib.EMP
                 //Random Range. Change it if any of the values aren't 0.
                 if(Type_Texture.F_64 != 0 || Type_Texture.F_68 != 0 || Type_Texture.F_72 != 0)
                 {
-                    HslColor.HslColor newCol = new RgbColor(Type_Texture.F_64, Type_Texture.F_68, Type_Texture.F_72).ToHsl();
-                    newCol.ChangeHue(hue);
-                    newCol.ChangeSaturation(saturation);
-                    newCol.ChangeLightness(lightness);
-                    RgbColor convertedColor = newCol.ToRgb();
+                    RgbColor convertedColor;
+
+                    if (hueSet)
+                    {
+                        //Remove random range in Hue Set mode
+                        convertedColor = new RgbColor(0f, 0f, 0f);
+                    }
+                    else
+                    {
+                        HslColor.HslColor newCol = new RgbColor(Type_Texture.F_64, Type_Texture.F_68, Type_Texture.F_72).ToHsl();
+                        newCol.ChangeHue(hue);
+                        newCol.ChangeSaturation(saturation);
+                        newCol.ChangeLightness(lightness);
+                        convertedColor = newCol.ToRgb();
+                    }
+
 
                     undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_64), Type_Texture, Type_Texture.F_64, (float)convertedColor.R));
                     undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_68), Type_Texture, Type_Texture.F_68, (float)convertedColor.G));
@@ -1509,8 +1540,8 @@ namespace Xv2CoreLib.EMP
         
             if(Type_0 != null)
             {
-                ChangeHueForColor1Animations(hue, saturation, lightness, undos);
-                ChangeHueForColor2Animations(hue, saturation, lightness, undos);
+                ChangeHueForColor1Animations(hue, saturation, lightness, undos, hueSet, variance);
+                ChangeHueForColor2Animations(hue, saturation, lightness, undos, hueSet, variance);
             }
 
 
@@ -1519,12 +1550,12 @@ namespace Xv2CoreLib.EMP
             {
                 foreach (var child in ChildParticleEffects)
                 {
-                    child.ChangeHue(hue, saturation, lightness, undos);
+                    child.ChangeHue(hue, saturation, lightness, undos, hueSet);
                 }
             }
         }
 
-        private void ChangeHueForColor1Animations(double hue, double saturation, double lightness, List<IUndoRedo> undos)
+        private void ChangeHueForColor1Animations(double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet = false, int variance = 0)
         {
             Type0 r = Type_0.FirstOrDefault(e => e.SelectedComponentColor1 == Type0.ComponentColor1.R && e.SelectedParameter == Type0.Parameter.Color1);
             Type0 g = Type_0.FirstOrDefault(e => e.SelectedComponentColor1 == Type0.ComponentColor1.G && e.SelectedParameter == Type0.Parameter.Color1);
@@ -1539,10 +1570,20 @@ namespace Xv2CoreLib.EMP
                 if (r_frame.Float != 0.0 || g_frame != 0.0 || b_frame != 0.0)
                 {
                     HslColor.HslColor color = new RgbColor(r_frame.Float, g_frame, b_frame).ToHsl();
-                    color.ChangeHue(hue);
-                    color.ChangeSaturation(saturation);
-                    color.ChangeLightness(lightness);
-                    RgbColor convertedColor = color.ToRgb();
+                    RgbColor convertedColor;
+
+                    if (hueSet)
+                    {
+                        color.SetHue(hue, variance);
+                    }
+                    else
+                    {
+                        color.ChangeHue(hue);
+                        color.ChangeSaturation(saturation);
+                        color.ChangeLightness(lightness);
+                    }
+
+                    convertedColor = color.ToRgb();
 
                     r.SetValue(r_frame.Index, (float)convertedColor.R, undos);
                     g.SetValue(r_frame.Index, (float)convertedColor.G, undos);
@@ -1552,7 +1593,7 @@ namespace Xv2CoreLib.EMP
 
         }
 
-        private void ChangeHueForColor2Animations(double hue, double saturation, double lightness, List<IUndoRedo> undos)
+        private void ChangeHueForColor2Animations(double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet = false, int variance = 0)
         {
             Type0 r = Type_0.FirstOrDefault(e => e.SelectedComponentColor2 == Type0.ComponentColor2.R && e.SelectedParameter == Type0.Parameter.Color2);
             Type0 g = Type_0.FirstOrDefault(e => e.SelectedComponentColor2 == Type0.ComponentColor2.G && e.SelectedParameter == Type0.Parameter.Color2);
@@ -1568,10 +1609,20 @@ namespace Xv2CoreLib.EMP
                 if (r_frame.Float != 0.0 || g_frame != 0.0 || b_frame != 0.0)
                 {
                     HslColor.HslColor color = new RgbColor(r_frame.Float, g_frame, b_frame).ToHsl();
-                    color.ChangeHue(hue);
-                    color.ChangeSaturation(saturation);
-                    color.ChangeLightness(lightness);
-                    RgbColor convertedColor = color.ToRgb();
+                    RgbColor convertedColor;
+
+                    if (hueSet)
+                    {
+                        color.SetHue(hue, variance);
+                    }
+                    else
+                    {
+                        color.ChangeHue(hue);
+                        color.ChangeSaturation(saturation);
+                        color.ChangeLightness(lightness);
+                    }
+
+                    convertedColor = color.ToRgb();
 
                     r.SetValue(r_frame.Index, (float)convertedColor.R, undos);
                     g.SetValue(r_frame.Index, (float)convertedColor.G, undos);

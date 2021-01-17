@@ -231,7 +231,7 @@ namespace Xv2CoreLib.ETR
             return colors;
         }
 
-        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos = null)
+        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0)
         {
             if (ETR_Entries == null) return;
             if (undos == null) undos = new List<IUndoRedo>();
@@ -247,10 +247,21 @@ namespace Xv2CoreLib.ETR
                     if (etrEntry.Color1_R != 1.0 || etrEntry.Color1_G != 1.0 || etrEntry.Color1_B != 1.0)
                     {
                         HslColor.HslColor newCol1 = new RgbColor(etrEntry.Color1_R, etrEntry.Color1_G, etrEntry.Color1_B).ToHsl();
-                        newCol1.ChangeHue(hue);
-                        newCol1.ChangeSaturation(saturation);
-                        newCol1.ChangeLightness(lightness);
-                        RgbColor convertedColor = newCol1.ToRgb();
+
+                        RgbColor convertedColor;
+
+                        if (hueSet)
+                        {
+                            newCol1.SetHue(hue, variance);
+                        }
+                        else
+                        {
+                            newCol1.ChangeHue(hue);
+                            newCol1.ChangeSaturation(saturation);
+                            newCol1.ChangeLightness(lightness);
+                        }
+
+                        convertedColor = newCol1.ToRgb();
 
                         undos.Add(new UndoableProperty<ETR_MainEntry>(nameof(etrEntry.Color1_R), etrEntry, etrEntry.Color1_R, (float)convertedColor.R));
                         undos.Add(new UndoableProperty<ETR_MainEntry>(nameof(etrEntry.Color1_G), etrEntry, etrEntry.Color1_G, (float)convertedColor.G));
@@ -268,10 +279,20 @@ namespace Xv2CoreLib.ETR
                     if (etrEntry.Color2_R != 1.0 || etrEntry.Color2_G != 1.0 || etrEntry.Color2_B != 1.0)
                     {
                         HslColor.HslColor newCol1 = new RgbColor(etrEntry.Color2_R, etrEntry.Color2_G, etrEntry.Color2_B).ToHsl();
-                        newCol1.ChangeHue(hue);
-                        newCol1.ChangeSaturation(saturation);
-                        newCol1.ChangeLightness(lightness);
-                        RgbColor convertedColor = newCol1.ToRgb();
+                        RgbColor convertedColor;
+
+                        if (hueSet)
+                        {
+                            newCol1.SetHue(hue, variance);
+                        }
+                        else
+                        {
+                            newCol1.ChangeHue(hue);
+                            newCol1.ChangeSaturation(saturation);
+                            newCol1.ChangeLightness(lightness);
+                        }
+
+                        convertedColor = newCol1.ToRgb();
 
                         undos.Add(new UndoableProperty<ETR_MainEntry>(nameof(etrEntry.Color2_R), etrEntry, etrEntry.Color2_R, (float)convertedColor.R));
                         undos.Add(new UndoableProperty<ETR_MainEntry>(nameof(etrEntry.Color2_G), etrEntry, etrEntry.Color2_G, (float)convertedColor.G));

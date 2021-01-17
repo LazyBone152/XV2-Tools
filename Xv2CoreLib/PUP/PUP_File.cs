@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace Xv2CoreLib.PUP
@@ -92,6 +90,8 @@ namespace Xv2CoreLib.PUP
             return bytes.ToArray();
         }
 
+
+        #region Helper
         public List<PUP_Entry> GetSequence(ushort id, ushort count)
         {
             List<PUP_Entry> entries = new List<PUP_Entry>();
@@ -117,6 +117,69 @@ namespace Xv2CoreLib.PUP
         {
             return PupEntries.FirstOrDefault(p => p.ID == id);
         }
+    
+        public int GetEntryId(PUP_Entry entry)
+        {
+            foreach(var _entry in PupEntries)
+            {
+                if (_entry.CompareEntry(entry)) return _entry.ID;
+            }
+
+            return -1;
+        }
+
+        public int CheckForSequence(IList<PUP_Entry> entries)
+        {
+            if(entries.Count > 0)
+            {
+                int id = GetEntryId(entries[0]);
+
+                if(id != -1)
+                {
+                    for (int i = 1; i < entries.Count; i++)
+                    {
+                        PUP_Entry existingEntry = GetEntry(id + i);
+
+                        if (existingEntry == null) return -1;
+                        if (!existingEntry.CompareEntry(entries[i])) return -1;
+                    }
+
+                    return id;
+                }
+            }
+
+            return -1;
+        }
+
+        public void AddEntry(PUP_Entry entry, int id)
+        {
+            //Remove existing
+            var existing = PupEntries.FirstOrDefault(x => x.ID == id);
+            if (existing != null) PupEntries.Remove(existing);
+
+            //Add
+            entry.ID = id;
+            PupEntries.Add(entry);
+        }
+        
+        public static void SetPupId(IList<PUP_Entry> entries, int id)
+        {
+            if (entries?.Count == 0) return;
+
+            for (int i = 0; i < entries.Count; i++)
+                entries[i].ID = id + i;
+        }
+
+        public int GetNewPupId(int count)
+        {
+            int min = 500;
+
+            while (PupEntries.Any(x => x.ID >= min && x.ID <= min + count))
+                min++;
+
+            return min;
+        }
+        #endregion
     }
 
     public class PUP_Entry : IInstallable
@@ -386,6 +449,11 @@ namespace Xv2CoreLib.PUP
             PUP_Entry newEntry = new PUP_Entry();
             newEntry.ID = id;
             return newEntry;
+        }
+    
+        public bool CompareEntry(PUP_Entry entry)
+        {
+            return this.Compare(entry, nameof(Index), nameof(SortID), nameof(ID));
         }
     }
 

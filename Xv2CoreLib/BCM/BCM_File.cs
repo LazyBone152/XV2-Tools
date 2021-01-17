@@ -289,7 +289,7 @@ namespace Xv2CoreLib.BCM
 
     [YAXSerializeAs("BCM")]
     [Serializable]
-    public class BCM_File
+    public class BCM_File : IIsNull
     {
         [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BCMEntry")]
@@ -368,6 +368,28 @@ namespace Xv2CoreLib.BCM
                 }
             }
         }
+    
+        public bool IsNull()
+        {
+            if (BCMEntries?.Count == 0) return true;
+
+            if(BCMEntries.Count == 1)
+            {
+                if (BCMEntries[0].BCMEntries?.Count == 0) return true;
+            }
+
+            return false;
+        
+        }
+
+        public static BCM_File DefaultBcmFile()
+        {
+            return new BCM_File()
+            {
+                BCMEntries = new List<BCM_Entry>()
+            };
+        }
+
     }
 
     [YAXSerializeAs("BCMEntry")]

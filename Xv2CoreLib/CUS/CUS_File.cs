@@ -203,6 +203,62 @@ namespace Xv2CoreLib.CUS
                     throw new Exception($"Invalid argument. SkillType = {type} is invalid.");
             }
         }
+
+
+        #region Helper
+
+        /// <summary>
+        /// Checks of a PUP entry range is used in the CUS.
+        /// </summary>
+        /// <param name="cusId1Exclusions">Exclude the specified CUS Skills from the check.</param>
+        /// <returns></returns>
+        public bool IsPupEntryUsed(int pupId, int pupCount, params int[] cusId1Exclusions)
+        {
+            if (IsPupEntryUsed(SuperSkills, pupId, pupCount, cusId1Exclusions)) return true;
+            if (IsPupEntryUsed(UltimateSkills, pupId, pupCount, cusId1Exclusions)) return true;
+            if (IsPupEntryUsed(EvasiveSkills, pupId, pupCount, cusId1Exclusions)) return true;
+            if (IsPupEntryUsed(BlastSkills, pupId, pupCount, cusId1Exclusions)) return true;
+            if (IsPupEntryUsed(AwokenSkills, pupId, pupCount, cusId1Exclusions)) return true;
+
+            return false;
+        }
+
+        private bool IsPupEntryUsed(List<Skill> skills, int pupId, int pupCount, params int[] cusId1Exclusions)
+        {
+            foreach(var skill in skills.Where(x => !cusId1Exclusions.Contains(x.ID1)))
+            {
+                if (skill.PUP == ushort.MaxValue) continue;
+                int min = skill.PUP;
+                int max = skill.NumTransformations;
+
+                for (int i = pupId; i <= pupId + pupCount; i++)
+                {
+                    if (i >= min && i <= max) return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static int ConvertToID1(int ID2, SkillType type)
+        {
+            switch (type) 
+            {
+                case SkillType.Ultimate:
+                    return ID2 + 5000;
+                case SkillType.Evasive:
+                    return ID2 + 10000;
+                case SkillType.Blast:
+                    return ID2 + 20000;
+                case SkillType.Awoken:
+                    return ID2 = 25000;
+                case SkillType.Super:
+                default:
+                    return ID2;
+            }
+
+        }
+        #endregion
     }
 
     public class Skillset : IInstallable

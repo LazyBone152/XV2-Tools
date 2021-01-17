@@ -32,6 +32,7 @@ using xv2 = Xv2CoreLib.Xenoverse2;
 using MahApps.Metro.Controls.Dialogs;
 using MahApps.Metro;
 using Xv2CoreLib.Resource.UndoRedo;
+using EEPK_Organiser.Forms.Recolor;
 
 namespace EEPK_Organiser
 {
@@ -140,7 +141,6 @@ namespace EEPK_Organiser
             //Load settings
             GeneralInfo.AppSettings = Settings.AppSettings.LoadSettings();
             GeneralInfo.UpdateEepkToolInterlop();
-
 
             //Init UI
             InitializeComponent();
@@ -496,6 +496,27 @@ namespace EEPK_Organiser
                 Forms.RecolorAll recolor = new Forms.RecolorAll(effectContainerFile, this);
 
                 if(recolor.Initialize())
+                    recolor.ShowDialog();
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+#endif
+
+        }
+
+        private void ToolMenu_HueSet_Click(object sender, RoutedEventArgs e)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                RecolorAll_HueSet recolor = new RecolorAll_HueSet(effectContainerFile, this);
+
+                if (recolor.Initialize())
                     recolor.ShowDialog();
             }
 #if !DEBUG

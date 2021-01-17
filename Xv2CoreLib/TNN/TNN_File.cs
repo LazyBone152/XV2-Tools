@@ -16,7 +16,7 @@ namespace Xv2CoreLib.TNN
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "TNN_Entry")]
         public List<TNN_Entry> Entries { get; set; } = new List<TNN_Entry>();
 
-        public List<string> Strings { get; set; } = new List<string>();
+        public List<TNN_String> Strings { get; set; } = new List<TNN_String>();
 
         #region LoadSave
         public static TNN_File Parse(string path, bool writeXml)
@@ -68,8 +68,7 @@ namespace Xv2CoreLib.TNN
             }
 
             //strings
-            List<string> strings = new List<string>();
-
+            int strId = 0;
             while(offset < bytes.Length)
             {
                 string str = StringEx.GetString(bytes, offset, false, StringEx.EncodingType.Unicode);
@@ -87,13 +86,13 @@ namespace Xv2CoreLib.TNN
                 }
 
                 offset += estSize;
-                strings.Add(str);
+                tnn.Strings.Add(new TNN_String() { ID = strId, StringValue = str });
+                strId++;
             }
 
-            tnn.Strings = strings;
             //Check
-            //if (strings.Count != (totalSub * 7) + numEntries)
-            //    throw new Exception("nope");
+            //if (tnn.Strings.Count != (totalSub * 9))
+            //  throw new Exception("nope");
 
             return tnn;
         }
@@ -124,4 +123,12 @@ namespace Xv2CoreLib.TNN
         public int I_08 { get; set; }
     }
 
+
+    public class TNN_String
+    {
+        [YAXAttributeForClass]
+        public int ID { get; set; }
+        [YAXAttributeForClass]
+        public string StringValue { get; set; }
+    }
 }

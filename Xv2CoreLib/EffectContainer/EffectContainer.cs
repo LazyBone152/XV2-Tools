@@ -1156,6 +1156,11 @@ namespace Xv2CoreLib.EffectContainer
             }
         }
         
+        public void ChangeFilePath(string fullPath)
+        {
+            Directory = Path.GetDirectoryName(fullPath);
+            Name = (Path.GetExtension(fullPath) == ".eepk") ? Path.GetFileNameWithoutExtension(fullPath) : fullPath;
+        }
         #endregion
 
         #region ExternalAssetFiles

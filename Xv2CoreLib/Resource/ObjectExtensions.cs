@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 using System.ArrayExtensions;
+using System.Linq;
 
 namespace System
 {
@@ -81,6 +82,20 @@ namespace System
                 if(function != null)
                     function.Invoke(instance, new object[] { prop.Name });
             }
+        }
+    
+        public static bool Compare(this object instance, object compareObj, params string[] exclusions)
+        {
+            foreach(var prop in instance.GetType().GetProperties())
+            {
+                if ((prop.PropertyType == typeof(string) || prop.PropertyType.IsPrimitive || prop.PropertyType.IsValueType)
+                    && (prop.SetMethod != null && prop.GetMethod != null) && !exclusions.Contains(prop.Name))
+                {
+                    if (prop.GetValue(instance) != prop.GetValue(compareObj)) return false;
+                }
+            }
+
+            return true;
         }
     }
 

@@ -13,7 +13,7 @@
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:undoRedo="clr-namespace:Xv2CoreLib.Resource.UndoRedo;assembly=Xv2CoreLib"
         mc:Ignorable="d"
-        Title="{Binding Source={x:Static local:GeneralInfo.AppName}}" MinHeight="400" MinWidth="850" Height="640" Width="1100" ResizeMode="CanResizeWithGrip" Loaded="Window_Loaded">
+        Title="{Binding Source={x:Static local:GeneralInfo.AppName}}" MinHeight="400" MinWidth="850" Height="640" Width="1100" ResizeMode="CanResizeWithGrip" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen">
     <Window.InputBindings>
         <KeyBinding Key="Z" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=UndoCommand}"/>
         <KeyBinding Key="Y" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=RedoCommand}"/>
@@ -209,6 +209,7 @@
                 <MenuItem IsEnabled="{Binding IsFileLoaded}" Header="Export Effects (VfxPackage)" Click="ToolMenu_ExportEffects_Click"/>
                 <Separator/>
                 <MenuItem IsEnabled="{Binding IsFileLoaded}" Header="Hue Adjustment" Click="ToolMenu_HueAdjustment_Click"/>
+                <MenuItem IsEnabled="{Binding IsFileLoaded}" Header="Hue Set" Click="ToolMenu_HueSet_Click"/>
 
             </MenuItem>
             <MenuItem x:Name="nameListMenuMain" Header="Name Lists" IsEnabled="{Binding IsFileLoaded}">

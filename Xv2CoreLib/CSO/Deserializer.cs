@@ -53,26 +53,37 @@ namespace Xv2CoreLib.CSO
                 bytes.AddRange(BitConverter.GetBytes(uint.Parse(csoFile.CsoEntries[i].I_00)));
                 bytes.AddRange(BitConverter.GetBytes(csoFile.CsoEntries[i].I_04));
 
-                if(!String.IsNullOrWhiteSpace(csoFile.CsoEntries[i].Str_08) && csoFile.CsoEntries[i].Str_08 != "NULL")
+                StringInfo.Add(new StringWriter.StringInfo() { Offset = bytes.Count(), RelativeOffset = 0, StringToWrite = csoFile.CsoEntries[i].Str_08 });
+                bytes.AddRange(new byte[4]);
+                StringInfo.Add(new StringWriter.StringInfo() { Offset = bytes.Count(), RelativeOffset = 0, StringToWrite = csoFile.CsoEntries[i].Str_12 });
+                bytes.AddRange(new byte[4]);
+                StringInfo.Add(new StringWriter.StringInfo() { Offset = bytes.Count(), RelativeOffset = 0, StringToWrite = csoFile.CsoEntries[i].Str_16 });
+                bytes.AddRange(new byte[4]);
+                StringInfo.Add(new StringWriter.StringInfo() { Offset = bytes.Count(), RelativeOffset = 0, StringToWrite = csoFile.CsoEntries[i].Str_20 });
+                bytes.AddRange(new byte[4]);
+
+                /*
+                if (!String.IsNullOrWhiteSpace(csoFile.CsoEntries[i].Str_08))
                 {
                     StringInfo.Add(new StringWriter.StringInfo() { Offset = bytes.Count(), RelativeOffset = 0, StringToWrite = csoFile.CsoEntries[i].Str_08 });
                 }
                 bytes.AddRange(new byte[4]);
-                if (!String.IsNullOrWhiteSpace(csoFile.CsoEntries[i].Str_08) && csoFile.CsoEntries[i].Str_12 != "NULL")
+                if (!String.IsNullOrWhiteSpace(csoFile.CsoEntries[i].Str_08))
                 {
                     StringInfo.Add(new StringWriter.StringInfo() { Offset = bytes.Count(), RelativeOffset = 0, StringToWrite = csoFile.CsoEntries[i].Str_12 });
                 }
                 bytes.AddRange(new byte[4]);
-                if (!String.IsNullOrWhiteSpace(csoFile.CsoEntries[i].Str_08) && csoFile.CsoEntries[i].Str_16 != "NULL")
+                if (!String.IsNullOrWhiteSpace(csoFile.CsoEntries[i].Str_08))
                 {
                     StringInfo.Add(new StringWriter.StringInfo() { Offset = bytes.Count(), RelativeOffset = 0, StringToWrite = csoFile.CsoEntries[i].Str_16 });
                 }
                 bytes.AddRange(new byte[4]);
-                if (!String.IsNullOrWhiteSpace(csoFile.CsoEntries[i].Str_08) && csoFile.CsoEntries[i].Str_20 != "NULL")
+                if (!String.IsNullOrWhiteSpace(csoFile.CsoEntries[i].Str_08))
                 {
                     StringInfo.Add(new StringWriter.StringInfo() { Offset = bytes.Count(), RelativeOffset = 0, StringToWrite = csoFile.CsoEntries[i].Str_20 });
                 }
                 bytes.AddRange(new byte[4]);
+                */
 
                 bytes.AddRange(new byte[8]);
             }

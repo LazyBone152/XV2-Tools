@@ -10,6 +10,7 @@ using System.Security.Cryptography;
 using Xv2CoreLib.Resource.UndoRedo;
 using System.Reflection;
 using System.ComponentModel;
+using Xv2CoreLib.ACB_NEW;
 
 namespace Xv2CoreLib
 {
@@ -138,65 +139,6 @@ namespace Xv2CoreLib
         }
     }
     
-    public static class Random
-    {
-        private static System.Random RandomGenerator;
-        private static readonly RNGCryptoServiceProvider _generator = new RNGCryptoServiceProvider();
-
-        private static int _getRandomInt(int minimumValue, int maximumValue)
-        {
-            byte[] randomNumber = new byte[1];
-
-            _generator.GetBytes(randomNumber);
-
-            double asciiValueOfRandomCharacter = Convert.ToDouble(randomNumber[0]);
-
-            // We are using Math.Max, and substracting 0.00000000001, 
-            // to ensure "multiplier" will always be between 0.0 and .99999999999
-            // Otherwise, it's possible for it to be "1", which causes problems in our rounding.
-            double multiplier = Math.Max(0, (asciiValueOfRandomCharacter / 255d) - 0.00000000001d);
-
-            // We need to add one to the range, to allow for the rounding done with Math.Floor
-            int range = maximumValue - minimumValue + 1;
-
-            double randomValueInRange = Math.Floor(multiplier * range);
-
-            return (int)(minimumValue + randomValueInRange);
-        }
-        
-        public static float Range(float min, float max)
-        {
-            start:
-            InitRandomGenerator();
-            var value = (float)(RandomGenerator.NextDouble() * (max - min) + min);
-            if (value < min || value > max) goto start;
-            return value;
-        }
-
-        public static double Range(double min, double max)
-        {
-            start:
-            InitRandomGenerator();
-            var value = RandomGenerator.NextDouble() * (max - min) + min;
-            if (value < min || value > max) goto start;
-            return value;
-        }
-
-        public static int Range(int min, int max)
-        {
-            start:
-            InitRandomGenerator();
-            var value = RandomGenerator.Next() * (max - min) + min;
-            if (value < min || value > max) goto start;
-            return value;
-        }
-
-        private static void InitRandomGenerator()
-        {
-            if (RandomGenerator == null) RandomGenerator = new System.Random(_getRandomInt(352, 242142142));
-        }
-    }
-
     public static class ArrayConvert
     {
         public static List<string> ConvertToStringList(List<int> list)
@@ -390,6 +332,16 @@ namespace Xv2CoreLib
     
     public static class Utils
     {
+
+        public static bool CompareSplitString(string originalString, char splitParam, int index, string compareParam)
+        {
+            var splitStr = originalString.Split(splitParam);
+
+            if (splitStr.Length >= index)
+                return splitStr[index] == compareParam;
+
+            return false;
+        }
 
         /// <summary>
         /// Copies primitive values (including strings) from one object to another, and creates an undoable stack.
@@ -1450,7 +1402,7 @@ namespace Xv2CoreLib
             {
                 for (int i = 0; i < _strings.Count(); i++)
                 {
-                    if (_strings[i].StringToWrite != "NULL" && !string.IsNullOrWhiteSpace(_strings[i].StringToWrite))
+                    if ((_strings[i].StringToWrite == "NULL" && string.IsNullOrWhiteSpace(_strings[i].StringToWrite)) == false)
                     {
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - _strings[i].RelativeOffset), _strings[i].Offset);
                         bytes.AddRange(Encoding.ASCII.GetBytes(_strings[i].StringToWrite));

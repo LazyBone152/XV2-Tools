@@ -132,6 +132,12 @@ namespace Xv2CoreLib.Resource.UndoRedo
         }
 
 
+#if DEBUG
+        //For debugging purposes
+        public LimitedStack<IUndoRedo> GetUndoStack() { return undoStack; }
+        public LimitedStack<IUndoRedo> GetRedoStack() { return redoStack; }
+#endif
+
     }
     
 }

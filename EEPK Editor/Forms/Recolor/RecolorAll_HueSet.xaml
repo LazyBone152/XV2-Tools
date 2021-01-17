@@ -1,0 +1,36 @@
+﻿<Controls:MetroWindow x:Class="EEPK_Organiser.Forms.Recolor.RecolorAll_HueSet"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EEPK_Organiser.Forms.Recolor"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        mc:Ignorable="d"
+        Title="Hue Set" Height="240.01" Width="425" ShowInTaskbar="True" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" WindowStyle="ToolWindow">
+    <Grid>
+        <StackPanel Margin="43,4,36,135.333" Orientation="Horizontal" >
+
+            <iconPacks:PackIconMaterialLight Kind="Information"  Margin="0, 5" Foreground="{DynamicResource AccentColorBrush}" Height="33" Width="33" />
+            <TextBlock Text="Sets the hue value to the desired amount, keeping the saturation and lightness values the same. This will result in everything being different shades of the same color." Foreground="{DynamicResource AccentColorBrush}" TextWrapping="Wrap" FontSize="9" Margin="5,5,0,0" Width="304"/>
+        </StackPanel>
+
+
+        <Slider ValueChanged="Slider_ValueChanged" Value="{Binding hslColor.Hue, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="360" HorizontalAlignment="Left" Margin="90,83,0,0" VerticalAlignment="Top" Width="197"/>
+        <Controls:NumericUpDown StringFormat="0.00" ValueChanged="IntegerUpDown_ValueChanged" Value="{Binding hslColor.Hue, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="360" Margin="292,77,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="92" />
+        <Button Click="Ok_Click" Content="OK" HorizontalAlignment="Left" Margin="131,175,0,0" VerticalAlignment="Top" Width="75"/>
+        <Button Click="Cancel_Click" Content="Cancel" HorizontalAlignment="Left" Margin="222,175,0,0" VerticalAlignment="Top" Width="75"/>
+        <Label Content="Hue" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="10,77,0,0" VerticalAlignment="Top" Width="75"/>
+        <Grid Background="{Binding preview}" HorizontalAlignment="Left" Height="19" Margin="99,58,0,0" VerticalAlignment="Top" Width="188" ToolTip="{Binding RgbPreviewTooltip, UpdateSourceTrigger=PropertyChanged}"/>
+        <Label Content="Preview" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="10,52,0,0" VerticalAlignment="Top" Width="75"/>
+        <Button HorizontalAlignment="Left" Margin="389,78,0,0" VerticalAlignment="Top" Width="21" Height="20"  Style="{StaticResource ButtonNoGlow}" Click="Button_UndoHueChange_Click" ToolTip="{Binding HueRevertTooltip, UpdateSourceTrigger=PropertyChanged}">
+            <iconPacks:PackIconMaterialDesign Kind="Undo"  Foreground="{DynamicResource AccentColorBrush}"/>
+        </Button>
+
+        <Label ToolTip="Add in a small random variance in the final hue. Each texture, particle, animation and so on will have a small hue difference. (Can go up to 180, but nest to keep to small values!)" Content="Variance" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="10,108,0,0" VerticalAlignment="Top" Width="75"/>
+        <Controls:NumericUpDown Value="{Binding Variance, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Margin="90,111,0,0" VerticalAlignment="Top" Width="107" Maximum="180"/>
+        <CheckBox ToolTip="Apply hue variance to textures when enabled." IsChecked="{Binding TextureVariance, UpdateSourceTrigger=PropertyChanged}" Content="Texture Variance" HorizontalAlignment="Left" Margin="202,115,0,0" VerticalAlignment="Top" Width="146"/>
+
+    </Grid>
+
+</Controls:MetroWindow>

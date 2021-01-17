@@ -186,13 +186,16 @@
     <Compile Include="Forms\ProgressBarFileLoad.xaml.cs">
       <DependentUpon>ProgressBarFileLoad.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Forms\RecolorAll.xaml.cs">
+    <Compile Include="Forms\Recolor\RecolorAll.xaml.cs">
       <DependentUpon>RecolorAll.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Recolor\RecolorAll_HueSet.xaml.cs">
+      <DependentUpon>RecolorAll_HueSet.xaml</DependentUpon>
     </Compile>
     <Compile Include="Forms\Settings.xaml.cs">
       <DependentUpon>Settings.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Forms\TextureEditHueChange.xaml.cs">
+    <Compile Include="Forms\Recolor\TextureEditHueChange.xaml.cs">
       <DependentUpon>TextureEditHueChange.xaml</DependentUpon>
     </Compile>
     <Compile Include="Forms\MaterialSelector.xaml.cs" />
@@ -264,7 +267,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Forms\RecolorAll.xaml">
+    <Page Include="Forms\Recolor\RecolorAll.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Forms\Recolor\RecolorAll_HueSet.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -276,7 +283,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Forms\TextureEditHueChange.xaml">
+    <Page Include="Forms\Recolor\TextureEditHueChange.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

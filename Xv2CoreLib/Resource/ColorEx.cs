@@ -82,6 +82,14 @@ namespace Xv2CoreLib.HslColor
         }
 
         /// <summary>
+        /// Sets the hue to the specified value.
+        /// </summary>
+        public void SetHue(double hue, int randomVariance = 0)
+        {
+            Hue = (randomVariance != 0) ? hue + (double)Random.Range(-randomVariance, randomVariance) : hue;
+        }
+
+        /// <summary>
         /// Change the hue.
         /// </summary>
         /// <param name="amount">The amount to change the hue by. Use a value between 0 and 360.</param>

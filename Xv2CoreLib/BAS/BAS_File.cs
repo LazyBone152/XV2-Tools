@@ -8,7 +8,7 @@ using YAXLib;
 namespace Xv2CoreLib.BAS
 {
     [YAXSerializeAs("BAS")]
-    public class BAS_File
+    public class BAS_File : IIsNull
     {
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BAS_Entry")]
         public List<BAS_Entry> Entries { get; set; }
@@ -32,6 +32,11 @@ namespace Xv2CoreLib.BAS
         public void Save(string path)
         {
             new Deserializer(this, path);
+        }
+
+        public bool IsNull()
+        {
+            return Entries?.Count == 0;
         }
     }
 

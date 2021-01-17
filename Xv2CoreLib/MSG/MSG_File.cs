@@ -322,27 +322,7 @@ namespace Xv2CoreLib.MSG
 
         public string GetSkillName(int skillID2, CUS.CUS_File.SkillType skillType)
         {
-            string name;
-
-            switch (skillType)
-            {
-                case CUS.CUS_File.SkillType.Super:
-                    name = String.Format("spe_skill_{0}", skillID2.ToString("D4"));
-                    break;
-                case CUS.CUS_File.SkillType.Ultimate:
-                    name = String.Format("ult_{0}", skillID2.ToString("D4"));
-                    break;
-                case CUS.CUS_File.SkillType.Evasive:
-                    name = String.Format("avoid_skill_{0}", skillID2.ToString("D4"));
-                    break;
-                case CUS.CUS_File.SkillType.Blast:
-                    throw new InvalidDataException("GetSkillName: Blast was passed in as skillType, but these skills dont have names.");
-                case CUS.CUS_File.SkillType.Awoken:
-                    name = String.Format("met_skill_{0}", skillID2.ToString("D4"));
-                    break;
-                default:
-                    throw new InvalidDataException("GetSkillName: Unknown skillType = " + skillType);
-            }
+            string name = GetMsgEntryName_SkillName(skillID2, skillType);
 
             foreach (var entry in MSG_Entries)
             {
@@ -357,27 +337,7 @@ namespace Xv2CoreLib.MSG
 
         public string GetSkillDesc(int skillID2, CUS.CUS_File.SkillType skillType)
         {
-            string name;
-
-            switch (skillType)
-            {
-                case CUS.CUS_File.SkillType.Super:
-                    name = String.Format("spe_skill_eff_{0}", skillID2.ToString("D4"));
-                    break;
-                case CUS.CUS_File.SkillType.Ultimate:
-                    name = String.Format("ult_eff_{0}", skillID2.ToString("D4"));
-                    break;
-                case CUS.CUS_File.SkillType.Evasive:
-                    name = String.Format("avoid_skill_eff_{0}", skillID2.ToString("D4"));
-                    break;
-                case CUS.CUS_File.SkillType.Blast:
-                    throw new InvalidDataException("GetSkillDesc: Blast was passed in as skillType, but these skills dont have descriptions.");
-                case CUS.CUS_File.SkillType.Awoken:
-                    name = String.Format("met_skill_eff_{0}", skillID2.ToString("D4"));
-                    break;
-                default:
-                    throw new InvalidDataException("GetSkillDesc: Unknown skillType = " + skillType);
-            }
+            string name = GetMsgEntryName_SkillDesc(skillID2, skillType);
 
             foreach (var entry in MSG_Entries)
             {
@@ -444,10 +404,130 @@ namespace Xv2CoreLib.MSG
 
             return null;
         }
-        
+
+
+        private static string GetMsgEntryName_SkillName(int skillID2, CUS.CUS_File.SkillType skillType)
+        {
+            string name;
+            switch (skillType)
+            {
+                case CUS.CUS_File.SkillType.Super:
+                    name = String.Format("spe_skill_{0}", skillID2.ToString("D4"));
+                    break;
+                case CUS.CUS_File.SkillType.Ultimate:
+                    name = String.Format("ult_{0}", skillID2.ToString("D4"));
+                    break;
+                case CUS.CUS_File.SkillType.Evasive:
+                    name = String.Format("avoid_skill_{0}", skillID2.ToString("D4"));
+                    break;
+                case CUS.CUS_File.SkillType.Blast:
+                    throw new InvalidDataException("GetSkillName: Blast was passed in as skillType, but these skills dont have names.");
+                case CUS.CUS_File.SkillType.Awoken:
+                    name = String.Format("met_skill_{0}", skillID2.ToString("D4"));
+                    break;
+                default:
+                    throw new InvalidDataException("GetSkillName: Unknown skillType = " + skillType);
+            }
+
+            return name;
+        }
+
+        private static string GetMsgEntryName_SkillDesc(int skillID2, CUS.CUS_File.SkillType skillType)
+        {
+            string name;
+            switch (skillType)
+            {
+                case CUS.CUS_File.SkillType.Super:
+                    name = String.Format("spe_skill_eff_{0}", skillID2.ToString("D4"));
+                    break;
+                case CUS.CUS_File.SkillType.Ultimate:
+                    name = String.Format("ult_eff_{0}", skillID2.ToString("D4"));
+                    break;
+                case CUS.CUS_File.SkillType.Evasive:
+                    name = String.Format("avoid_skill_eff_{0}", skillID2.ToString("D4"));
+                    break;
+                case CUS.CUS_File.SkillType.Blast:
+                    throw new InvalidDataException("GetSkillDesc: Blast was passed in as skillType, but these skills dont have descriptions.");
+                case CUS.CUS_File.SkillType.Awoken:
+                    name = String.Format("met_skill_eff_{0}", skillID2.ToString("D4"));
+                    break;
+                default:
+                    throw new InvalidDataException("GetSkillDesc: Unknown skillType = " + skillType);
+            }
+
+            return name;
+        }
         #endregion
 
- }
+        #region Set
+        public void SetSkillName(string name, int skillID2, CUS.CUS_File.SkillType skillType)
+        {
+            string msgEntryName = GetMsgEntryName_SkillName(skillID2, skillType);
+
+            var entry = MSG_Entries.FirstOrDefault(x => x.Name == msgEntryName);
+
+            if(entry != null)
+            {
+                entry.Msg_Content[0].Text = name;
+            }
+            else
+            {
+                AddEntry(msgEntryName, name);
+            }
+
+        }
+
+        public void SetSkillDesc(string desc, int skillID2, CUS.CUS_File.SkillType skillType)
+        {
+            string msgEntryName = GetMsgEntryName_SkillDesc(skillID2, skillType);
+
+            var entry = MSG_Entries.FirstOrDefault(x => x.Name == msgEntryName);
+
+            if (entry != null)
+            {
+                entry.Msg_Content[0].Text = desc;
+            }
+            else
+            {
+                AddEntry(msgEntryName, desc);
+            }
+
+        }
+
+        public void SetCharacterName(string name, string shortName)
+        {
+            string tempName = String.Format("chara_{0}_000", shortName);
+
+            var entry = MSG_Entries.FirstOrDefault(x => x.Name == tempName);
+
+            if (entry != null)
+            {
+                entry.Msg_Content[0].Text = name;
+            }
+            else
+            {
+                AddEntry(tempName, name);
+            }
+        }
+
+        public void SetAwokenStageName(string name, int skillID2, int stage)
+        {
+            string msgEntryName = String.Format("BHD_MET_{0}_{1}", skillID2.ToString("D4"), stage);
+
+            var entry = MSG_Entries.FirstOrDefault(x => x.Name == msgEntryName);
+
+            if (entry != null)
+            {
+                entry.Msg_Content[0].Text = name;
+            }
+            else
+            {
+                AddEntry(msgEntryName, name);
+            }
+        }
+        #endregion
+
+    }
 
     [YAXSerializeAs("MsgEntry")]
     public class MSG_Entry : IInstallable

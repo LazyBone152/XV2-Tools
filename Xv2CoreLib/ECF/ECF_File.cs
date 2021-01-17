@@ -49,13 +49,13 @@ namespace Xv2CoreLib.ECF
             return colors;
         }
 
-        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos)
+        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet = false, int variance = 0)
         {
             if (Entries == null) return;
 
             foreach (var entry in Entries)
             {
-                entry.ChangeHue(hue, saturation, lightness, undos);
+                entry.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
             }
         }
     }
@@ -288,7 +288,7 @@ namespace Xv2CoreLib.ECF
             return null;
         }
 
-        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos)
+        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet = false, int variance = 0)
         {
             //Diffuse Color
             if (F_00 != 0 || F_04 != 0 || F_08 != 0)
@@ -296,10 +296,20 @@ namespace Xv2CoreLib.ECF
                 if (F_00 != 1 || F_04 != 1 || F_08 != 1)
                 {
                     HslColor.HslColor newCol1 = new RgbColor(F_00, F_04, F_08).ToHsl();
-                    newCol1.ChangeHue(hue);
-                    newCol1.ChangeSaturation(saturation);
-                    newCol1.ChangeLightness(lightness);
-                    RgbColor convertedColor = newCol1.ToRgb();
+                    RgbColor convertedColor;
+
+                    if (hueSet)
+                    {
+                        newCol1.SetHue(hue, variance);
+                    }
+                    else
+                    {
+                        newCol1.ChangeHue(hue);
+                        newCol1.ChangeSaturation(saturation);
+                        newCol1.ChangeLightness(lightness);
+                    }
+
+                    convertedColor = newCol1.ToRgb();
 
                     undos.Add(new UndoableProperty<ECF_Entry>(nameof(F_00), this, F_00, (float)convertedColor.R));
                     undos.Add(new UndoableProperty<ECF_Entry>(nameof(F_04), this, F_04, (float)convertedColor.G));
@@ -317,10 +327,20 @@ namespace Xv2CoreLib.ECF
                 if (F_16 != 1 || F_20 != 1 || F_24 != 1)
                 {
                     HslColor.HslColor newCol1 = new RgbColor(F_16, F_20, F_24).ToHsl();
-                    newCol1.ChangeHue(hue);
-                    newCol1.ChangeSaturation(saturation);
-                    newCol1.ChangeLightness(lightness);
-                    RgbColor convertedColor = newCol1.ToRgb();
+                    RgbColor convertedColor;
+
+                    if (hueSet)
+                    {
+                        newCol1.SetHue(hue, variance);
+                    }
+                    else
+                    {
+                        newCol1.ChangeHue(hue);
+                        newCol1.ChangeSaturation(saturation);
+                        newCol1.ChangeLightness(lightness);
+                    }
+
+                    convertedColor = newCol1.ToRgb();
 
                     undos.Add(new UndoableProperty<ECF_Entry>(nameof(F_16), this, F_16, (float)convertedColor.R));
                     undos.Add(new UndoableProperty<ECF_Entry>(nameof(F_20), this, F_20, (float)convertedColor.G));
@@ -338,10 +358,20 @@ namespace Xv2CoreLib.ECF
                 if (F_32 != 1 || F_36 != 1 || F_40 != 1)
                 {
                     HslColor.HslColor newCol1 = new RgbColor(F_32, F_36, F_40).ToHsl();
-                    newCol1.ChangeHue(hue);
-                    newCol1.ChangeSaturation(saturation);
-                    newCol1.ChangeLightness(lightness);
-                    RgbColor convertedColor = newCol1.ToRgb();
+                    RgbColor convertedColor;
+
+                    if (hueSet)
+                    {
+                        newCol1.SetHue(hue, variance);
+                    }
+                    else
+                    {
+                        newCol1.ChangeHue(hue);
+                        newCol1.ChangeSaturation(saturation);
+                        newCol1.ChangeLightness(lightness);
+                    }
+
+                    convertedColor = newCol1.ToRgb();
 
                     undos.Add(new UndoableProperty<ECF_Entry>(nameof(F_32), this, F_32, (float)convertedColor.R));
                     undos.Add(new UndoableProperty<ECF_Entry>(nameof(F_36), this, F_36, (float)convertedColor.G));
@@ -355,13 +385,13 @@ namespace Xv2CoreLib.ECF
 
             if(Type0 != null)
             {
-                ChangeHueForAnimations(hue, saturation, lightness, ECF.Type0.Parameter.DiffuseColor, undos);
-                ChangeHueForAnimations(hue, saturation, lightness, ECF.Type0.Parameter.SpecularColor, undos);
-                ChangeHueForAnimations(hue, saturation, lightness, ECF.Type0.Parameter.AmbientColor, undos);
+                ChangeHueForAnimations(hue, saturation, lightness, ECF.Type0.Parameter.DiffuseColor, undos, hueSet, variance);
+                ChangeHueForAnimations(hue, saturation, lightness, ECF.Type0.Parameter.SpecularColor, undos, hueSet, variance);
+                ChangeHueForAnimations(hue, saturation, lightness, ECF.Type0.Parameter.AmbientColor, undos, hueSet, variance);
             }
         }
 
-        private void ChangeHueForAnimations(double hue, double saturation, double lightness, Type0.Parameter parameter, List<IUndoRedo> undos)
+        private void ChangeHueForAnimations(double hue, double saturation, double lightness, Type0.Parameter parameter, List<IUndoRedo> undos, bool hueSet = false, int variance = 0)
         {
             Type0 r = Type0.FirstOrDefault(e => e.I_01_a == ECF.Type0.Component.R && e.I_00 == parameter);
             Type0 g = Type0.FirstOrDefault(e => e.I_01_a == ECF.Type0.Component.G && e.I_00 == parameter);
@@ -376,10 +406,20 @@ namespace Xv2CoreLib.ECF
                 if (r_frame.Float != 0.0 || g_frame != 0.0 || b_frame != 0.0)
                 {
                     HslColor.HslColor color = new RgbColor(r_frame.Float, g_frame, b_frame).ToHsl();
-                    color.ChangeHue(hue);
-                    color.ChangeSaturation(saturation);
-                    color.ChangeLightness(lightness);
-                    RgbColor convertedColor = color.ToRgb();
+                    RgbColor convertedColor;
+
+                    if (hueSet)
+                    {
+                        color.SetHue(hue, variance);
+                    }
+                    else
+                    {
+                        color.ChangeHue(hue);
+                        color.ChangeSaturation(saturation);
+                        color.ChangeLightness(lightness);
+                    }
+
+                    convertedColor = color.ToRgb();
 
                     r.SetValue(r_frame.Index, (float)convertedColor.R, undos);
                     g.SetValue(r_frame.Index, (float)convertedColor.G, undos);

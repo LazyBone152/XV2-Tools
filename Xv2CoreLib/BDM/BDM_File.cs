@@ -472,6 +472,15 @@ namespace Xv2CoreLib.BDM
         {
             return (BDM_Entries.Count == 0);
         }
+    
+        public static BDM_File DefaultBdmFile()
+        {
+            return new BDM_File()
+            {
+                BDM_Type = BDM_Type.XV2_0,
+                BDM_Entries = new List<BDM_Entry>()
+            };
+        }
     }
 
     [Serializable]

@@ -312,14 +312,14 @@ namespace Xv2CoreLib.EMM
             return colors;
         }
 
-        public void ChangeHsl(double hue, double saturation, double lightness, List<IUndoRedo> undos =null)
+        public void ChangeHsl(double hue, double saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0)
         {
             if (Materials == null) return;
             if (undos == null) undos = new List<IUndoRedo>();
 
             foreach (var mat in Materials)
             {
-                mat.ChangeHsl(hue, saturation, lightness, undos);
+                mat.ChangeHsl(hue, saturation, lightness, undos, hueSet, variance);
             }
         }
     }
@@ -613,7 +613,7 @@ namespace Xv2CoreLib.EMM
             return colors;
         }
 
-        public void ChangeHsl(double hue, double saturation = 0.0, double lightness = 0.0, List<IUndoRedo> undos = null)
+        public void ChangeHsl(double hue, double saturation = 0.0, double lightness = 0.0, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0)
         {
             if (Parameters == null) return;
 
@@ -628,11 +628,20 @@ namespace Xv2CoreLib.EMM
                     //Create rgbColor, divide by 10
                     RgbColor rgbColor = new RgbColor(r.Float, g.Float, b.Float);
                     var hslColor = rgbColor.ToHsl();
-                    hslColor.ChangeHue(hue);
-                    hslColor.ChangeLightness(lightness);
-                    hslColor.ChangeSaturation(saturation);
+                    RgbColor newColor;
 
-                    RgbColor newColor = hslColor.ToRgb();
+                    if (hueSet)
+                    {
+                        hslColor.SetHue(hue, variance);
+                    }
+                    else
+                    {
+                        hslColor.ChangeHue(hue);
+                        hslColor.ChangeLightness(lightness);
+                        hslColor.ChangeSaturation(saturation);
+                    }
+
+                    newColor = hslColor.ToRgb();
 
                     undos.Add(new UndoableProperty<Parameter>(nameof(Parameter.value), r, r.value, newColor.R.ToString()));
                     undos.Add(new UndoableProperty<Parameter>(nameof(Parameter.value), g, g.value, newColor.G.ToString()));

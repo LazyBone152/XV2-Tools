@@ -277,6 +277,7 @@
     <Compile Include="QXD\QXD_File.cs" />
     <Compile Include="Resource\BinaryConverter.cs" />
     <Compile Include="Resource\ColorEx.cs" />
+    <Compile Include="Resource\Random.cs" />
     <Compile Include="Resource\UndoRedo\UndoableArrayChange.cs" />
     <Compile Include="Resource\UndoRedo\UndoableListInsert.cs" />
     <Compile Include="Resource\UndoRedo\UndoableListMove.cs" />

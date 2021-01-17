@@ -58,10 +58,10 @@ namespace Xv2CoreLib.CSO
                     {
                         I_00 = BitConverter.ToUInt32(rawBytes, offset + 0).ToString(),
                         I_04 = BitConverter.ToUInt32(rawBytes, offset + 4),
-                        Str_08 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 8)),
-                        Str_12 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 12)),
-                        Str_16 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 16)),
-                        Str_20 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 20))
+                        Str_08 = StringEx.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 8), false),
+                        Str_12 = StringEx.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 12), false),
+                        Str_16 = StringEx.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 16), false),
+                        Str_20 = StringEx.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 20), false)
                     });
                     offset += 32;
                 }
