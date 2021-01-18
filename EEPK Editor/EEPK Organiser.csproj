@@ -192,6 +192,9 @@
     <Compile Include="Forms\Recolor\RecolorAll_HueSet.xaml.cs">
       <DependentUpon>RecolorAll_HueSet.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Forms\Recolor\RecolorTexture_HueSet.xaml.cs">
+      <DependentUpon>RecolorTexture_HueSet.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Forms\Settings.xaml.cs">
       <DependentUpon>Settings.xaml</DependentUpon>
     </Compile>
@@ -272,6 +275,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Forms\Recolor\RecolorAll_HueSet.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Forms\Recolor\RecolorTexture_HueSet.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

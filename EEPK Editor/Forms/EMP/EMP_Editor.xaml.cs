@@ -16,6 +16,7 @@ using MahApps.Metro.Controls;
 using Xv2CoreLib.Resource.UndoRedo;
 using Xv2CoreLib.EMB_CLASS;
 using GalaSoft.MvvmLight.CommandWpf;
+using EEPK_Organiser.Forms.Recolor;
 
 namespace EEPK_Organiser.Forms.EMP
 {
@@ -703,6 +704,30 @@ namespace EEPK_Organiser.Forms.EMP
                 Forms.RecolorAll recolor = new Forms.RecolorAll(_particleEffect, this);
 
                 if(recolor.Initialize())
+                    recolor.ShowDialog();
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                mainWindow.SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+#endif
+        }
+
+        public RelayCommand HueSet_Command => new RelayCommand(HueSet, IsParticleSelected);
+        private void HueSet()
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                ParticleEffect _particleEffect = empTree.SelectedItem as ParticleEffect;
+                if (_particleEffect == null) return;
+
+                RecolorAll_HueSet recolor = new RecolorAll_HueSet(_particleEffect, this);
+
+                if (recolor.Initialize())
                     recolor.ShowDialog();
             }
 #if !DEBUG

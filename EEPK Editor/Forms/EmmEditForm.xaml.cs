@@ -1,4 +1,5 @@
-﻿using EEPK_Organiser.View;
+﻿using EEPK_Organiser.Forms.Recolor;
+using EEPK_Organiser.View;
 using MahApps.Metro.Controls;
 using System;
 using System.Collections.Generic;
@@ -442,6 +443,31 @@ namespace EEPK_Organiser.Forms
                     RecolorAll recolor = new RecolorAll(material, this);
 
                     if(recolor.Initialize())
+                        recolor.ShowDialog();
+                }
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                parent.SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+#endif
+        }
+
+        private void ContextMenu_HueSet_Click(object sender, RoutedEventArgs e)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                var material = dataGrid.SelectedItem as Material;
+
+                if (material != null)
+                {
+                    RecolorAll_HueSet recolor = new RecolorAll_HueSet(material, this);
+
+                    if (recolor.Initialize())
                         recolor.ShowDialog();
                 }
             }

@@ -3,9 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:EEPK_Organiser.Forms"
         xmlns:utils="clr-namespace:EEPK_Organiser.Utils"
-        xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
         xmlns:Themes1="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:undoRedo="clr-namespace:Xv2CoreLib.Resource.UndoRedo;assembly=Xv2CoreLib"
@@ -31,7 +29,7 @@
                         <MenuItem Header="Duplicate" Click="EmbContextMenu_Duplicate_Click"/>
                         <MenuItem IsEnabled="{Binding IsForContainer}" Header="Used By?" Click="EmbContextMenu_UsedBy_Click"/>
                         <Separator/>
-                        <MenuItem Header="Hue Adjustment" Click="EmbContextMenu_Edit_Click"/>
+                        <MenuItem Header="Hue Adjustment" Click="EmbContextMenu_HueAdjustment_Click"/>
                     </ContextMenu>
                 </Canvas.ContextMenu>
             </Canvas>
@@ -114,7 +112,8 @@
                     <MenuItem Header="Duplicate" Click="EmbContextMenu_Duplicate_Click"/>
                     <MenuItem IsEnabled="{Binding IsForContainer}" Header="Used By?" Click="EmbContextMenu_UsedBy_Click"/>
                     <Separator/>
-                    <MenuItem Header="Hue Adjustment" Click="EmbContextMenu_Edit_Click"/>
+                    <MenuItem Header="Hue Adjustment" Click="EmbContextMenu_HueAdjustment_Click"/>
+                    <MenuItem Header="Hue Set" Click="EmbContextMenu_HueSet_Click"/>
                 </ContextMenu>
             </DataGrid.ContextMenu>
         </DataGrid>

@@ -287,7 +287,7 @@
                                             <Controls:NumericUpDown Grid.Column="4" Value="{Binding effectPartViewModel.POSITION_Y, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
 
                                             <Label Grid.Column="5" Content="Z" HorizontalContentAlignment="Right"/>
-                                            <Controls:NumericUpDown Grid.Column="6" Value="{Binding effectPartViewModel.POSITION_X, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
+                                            <Controls:NumericUpDown Grid.Column="6" Value="{Binding effectPartViewModel.POSITION_Z, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
                                         </Grid>
                                         <Grid Margin="3,3,0,0" Width="900">
                                             <Grid.ColumnDefinitions>
@@ -570,6 +570,7 @@
                                 <Separator/>
                                 <MenuItem Header="Edit" Click="PBIND_AssetContainer_Edit_Click"/>
                                 <MenuItem Header="Hue Adjustment" Click="PBIND_AssetContainer_Recolor"/>
+                                <MenuItem Header="Hue Set" Click="PBIND_AssetContainer_RecolorHueSet"/>
                             </ContextMenu>
                         </DataGrid.ContextMenu>
                         <DataGrid.Columns>
@@ -645,6 +646,7 @@
                                 <MenuItem Header="Used By?" Click="TBIND_AssetContainer_UsedBy_Click"/>
                                 <Separator/>
                                 <MenuItem Header="Hue Adjustment" Click="TBIND_AssetContainer_Recolor"/>
+                                <MenuItem Header="Hue Set" Click="TBIND_AssetContainer_RecolorHueSet"/>
                                 <MenuItem Header="Extrude Scale" Click="TBIND_AssetContainer_Scale"/>
                             </ContextMenu>
                         </DataGrid.ContextMenu>
@@ -723,6 +725,7 @@
                                 <MenuItem Header="Used By?" Click="CBIND_AssetContainer_UsedBy_Click"/>
                                 <Separator/>
                                 <MenuItem Header="Hue Adjustment" Click="CBIND_AssetContainer_Recolor"/>
+                                <MenuItem Header="Hue Set" Click="CBIND_AssetContainer_RecolorHueSet"/>
                             </ContextMenu>
                         </DataGrid.ContextMenu>
 
@@ -798,9 +801,7 @@
                                     </Setter.Value>
                                 </Setter>
                             </Style>
-                            <Style
-                       xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero" TargetType="{x:Type DataGridRowHeader}"
-                       >
+                            <Style xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero" TargetType="{x:Type DataGridRowHeader}" >
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate TargetType="{x:Type DataGridRowHeader}">
@@ -832,6 +833,7 @@
                                 <MenuItem Header="Used By?" Click="EMO_AssetContainer_UsedBy_Click"/>
                                 <Separator/>
                                 <MenuItem Header="Hue Adjustment" Click="EMO_AssetContainer_Recolor"/>
+                                <MenuItem Header="Hue Set" Click="EMO_AssetContainer_RecolorHueSet"/>
                             </ContextMenu>
                         </DataGrid.ContextMenu>
 
@@ -940,6 +942,7 @@
                                 <MenuItem Header="Used By?" Click="LIGHT_AssetContainer_UsedBy_Click"/>
                                 <Separator/>
                                 <MenuItem Header="Hue Adjustment" Click="LIGHT_AssetContainer_Recolor"/>
+                                <MenuItem Header="Hue Set" Click="LIGHT_AssetContainer_RecolorHueSet"/>
                             </ContextMenu>
                         </DataGrid.ContextMenu>
 

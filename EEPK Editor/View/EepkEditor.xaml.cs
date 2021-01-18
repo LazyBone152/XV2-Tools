@@ -26,6 +26,7 @@ using System.Threading.Tasks;
 using MahApps.Metro.Controls.Dialogs;
 using EEPK_Organiser.ViewModel;
 using GalaSoft.MvvmLight.CommandWpf;
+using EEPK_Organiser.Forms.Recolor;
 
 namespace EEPK_Organiser.View
 {
@@ -959,6 +960,32 @@ namespace EEPK_Organiser.View
 
         }
 
+        private void EMO_AssetContainer_RecolorHueSet(object sender, RoutedEventArgs e)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                var asset = emoDataGrid.SelectedItem as Asset;
+
+                if (asset != null)
+                {
+                    RecolorAll_HueSet recolor = new RecolorAll_HueSet(AssetType.EMO, asset, Application.Current.MainWindow);
+
+                    if (recolor.Initialize())
+                        recolor.ShowDialog();
+                }
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+#endif
+
+        }
+
         #endregion
 
         #region PBIND
@@ -1359,6 +1386,32 @@ namespace EEPK_Organiser.View
 
         }
 
+        private void PBIND_AssetContainer_RecolorHueSet(object sender, RoutedEventArgs e)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                var asset = pbindDataGrid.SelectedItem as Asset;
+
+                if (asset != null)
+                {
+                    RecolorAll_HueSet recolor = new RecolorAll_HueSet(AssetType.PBIND, asset, Application.Current.MainWindow);
+
+                    if (recolor.Initialize())
+                        recolor.ShowDialog();
+                }
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+#endif
+
+        }
+
         private void PBIND_RemoveColorAnimations(object sender, RoutedEventArgs e)
         {
             List<Asset> selectedAssets = pbindDataGrid.SelectedItems.Cast<Asset>().ToList();
@@ -1733,6 +1786,31 @@ namespace EEPK_Organiser.View
 
         }
 
+        private void TBIND_AssetContainer_RecolorHueSet(object sender, RoutedEventArgs e)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                var asset = tbindDataGrid.SelectedItem as Asset;
+
+                if (asset != null)
+                {
+                    RecolorAll_HueSet recolor = new RecolorAll_HueSet(AssetType.TBIND, asset, Application.Current.MainWindow);
+
+                    if (recolor.Initialize())
+                        recolor.ShowDialog();
+                }
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+#endif
+
+        }
         private void TBIND_AssetContainer_Scale(object sender, RoutedEventArgs e)
         {
 #if !DEBUG
@@ -2119,6 +2197,31 @@ namespace EEPK_Organiser.View
 
         }
 
+        private void CBIND_AssetContainer_RecolorHueSet(object sender, RoutedEventArgs e)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                var asset = cbindDataGrid.SelectedItem as Asset;
+
+                if (asset != null)
+                {
+                    RecolorAll_HueSet recolor = new RecolorAll_HueSet(AssetType.CBIND, asset, Application.Current.MainWindow);
+
+                    if (recolor.Initialize())
+                        recolor.ShowDialog();
+                }
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+#endif
+
+        }
         #endregion
 
         #region LIGHT
@@ -2485,6 +2588,31 @@ namespace EEPK_Organiser.View
 
         }
 
+        private void LIGHT_AssetContainer_RecolorHueSet(object sender, RoutedEventArgs e)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                var asset = lightDataGrid.SelectedItem as Asset;
+
+                if (asset != null)
+                {
+                    RecolorAll_HueSet recolor = new RecolorAll_HueSet(AssetType.LIGHT, asset, Application.Current.MainWindow);
+
+                    if (recolor.Initialize())
+                        recolor.ShowDialog();
+                }
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+#endif
+
+        }
         #endregion
 
         #region Asset_Containers_General

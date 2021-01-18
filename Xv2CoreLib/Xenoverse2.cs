@@ -796,7 +796,7 @@ namespace Xv2CoreLib
                         {
                             string amkPath = Utils.ResolveRelativePath(string.Format("chara/{0}.amk", csoEntry.AmkPath));
                             AMK_File amkFile = (AMK_File)GetParsedFileFromGame(amkPath);
-                            amkFiles.Add(new Xv2File<AMK_File>(amkFile, amkPath, !Utils.CompareSplitString(csoEntry.AmkPath, '/', 0, cmsEntry.ShortName), null, null, 0, csoEntry.Costume.ToString()));
+                            amkFiles.Add(new Xv2File<AMK_File>(amkFile, amkPath, false, null, null, 0, csoEntry.Costume.ToString()));
                         }
                     }
                 }
@@ -958,7 +958,7 @@ namespace Xv2CoreLib
                     {
                         bool borrowed = !Utils.CompareSplitString(csoEntry.SePath, '_', 2, cmsEntry.ShortName);
                         moveFiles.SeAcbPath = $"sound/SE/Battle/Chara/{csoEntry.SePath}.acb";
-                        moveFiles.SeAcbFile.Add(new Xv2File<ACB_Wrapper>((ACB_Wrapper)GetParsedFileFromGame(moveFiles.SeAcbPath), fileIO.PathInGameDir(moveFiles.SeAcbPath), borrowed, null, null, MoveFileTypes.SE_ACB, csoEntry.Costume.ToString()));
+                        moveFiles.SeAcbFile.Add(new Xv2File<ACB_Wrapper>((ACB_Wrapper)GetParsedFileFromGame(moveFiles.SeAcbPath), fileIO.PathInGameDir(moveFiles.SeAcbPath), false, null, null, MoveFileTypes.SE_ACB, csoEntry.Costume.ToString()));
                     }
 
                     moveFiles.VoxAcbFile.Clear();
@@ -972,7 +972,7 @@ namespace Xv2CoreLib
                         moveFiles.VoxAcbPath.Add(acbPath);
 
                         if (loadFiles)
-                            moveFiles.VoxAcbFile.Add(new Xv2File<ACB_Wrapper>((ACB_Wrapper)GetParsedFileFromGame(acbPath), fileIO.PathInGameDir(acbPath), borrowed, null, null, MoveFileTypes.VOX_ACB, csoEntry.Costume.ToString()));
+                            moveFiles.VoxAcbFile.Add(new Xv2File<ACB_Wrapper>((ACB_Wrapper)GetParsedFileFromGame(acbPath), fileIO.PathInGameDir(acbPath), false, null, null, MoveFileTypes.VOX_ACB, csoEntry.Costume.ToString()));
                     }
 
                     //VOX, Eng
@@ -983,7 +983,7 @@ namespace Xv2CoreLib
                         moveFiles.VoxAcbPath.Add(acbPath);
 
                         if (loadFiles)
-                            moveFiles.VoxAcbFile.Add(new Xv2File<ACB_Wrapper>((ACB_Wrapper)GetParsedFileFromGame(acbPath), fileIO.PathInGameDir(acbPath), borrowed, null, "en", MoveFileTypes.VOX_ACB, csoEntry.Costume.ToString()));
+                            moveFiles.VoxAcbFile.Add(new Xv2File<ACB_Wrapper>((ACB_Wrapper)GetParsedFileFromGame(acbPath), fileIO.PathInGameDir(acbPath), false, null, "en", MoveFileTypes.VOX_ACB, csoEntry.Costume.ToString()));
                     }
                 }
             }
@@ -1051,6 +1051,23 @@ namespace Xv2CoreLib
 
             //Save files
             SaveSkills();
+        }
+
+        public void SaveCharacters()
+        {
+
+        }
+
+        public void SaveCharacter(Xv2Character chara)
+        {
+            //Refresh files
+            RefreshCharacters();
+
+            //Character files
+            chara.CalculateFilePaths();
+            InstallErsCharacterEntry(chara.CmsEntry.ShortName, chara.CmsEntry.ID, !chara.MovesetFiles.EepkFile.File.IsNull(), chara.MovesetFiles.EepkFile.Borrowed);
+
+
         }
 
         //Skill
@@ -1158,14 +1175,14 @@ namespace Xv2CoreLib
         }
         
         //Moveset/Character
-        public void InstallErsCharacterEntry(string charaShortName, int id, bool hasEepk)
+        public void InstallErsCharacterEntry(string charaShortName, int id, bool hasEepk, bool borrowed)
         {
             var ersEntries = ersFile.GetSubentryList(2);
 
             var entry = ersEntries.FirstOrDefault(x => x.ID == id);
             string path = $"chara/{charaShortName}/{charaShortName}.eepk";
 
-            if (hasEepk)
+            if (hasEepk && !borrowed)
             {
                 if (entry != null)
                 {
@@ -1193,9 +1210,9 @@ namespace Xv2CoreLib
                 csoFile.CsoEntries.Add(entry);
             }
 
-            entry.VoxPath = (hasVox) ? $"CAR_BTL_{charaShortName}_VOX" : "NULL";
-            entry.SePath = (hasSe) ? $"CAR_BTL_{charaShortName}_SE" : "NULL";
-            entry.AmkPath = (hasAmk) ? $"{charaShortName}/{charaShortName}" : "NULL";
+            entry.VoxPath = (hasVox) ? $"CAR_BTL_{charaShortName}_VOX" : string.Empty;
+            entry.SePath = (hasSe) ? $"CAR_BTL_{charaShortName}_SE" : string.Empty;
+            entry.AmkPath = (hasAmk) ? $"{charaShortName}/{charaShortName}" : string.Empty;
         }
 
         #endregion
@@ -2009,10 +2026,12 @@ namespace Xv2CoreLib
             }
         }
 
-        public ACB_Wrapper GetVoxFile(string chara, string language)
+        public ACB_Wrapper GetVoxFile(string chara, int costume, string language)
         {
-            var file = VoxAcbFile.FirstOrDefault(x => x.Arg0 == chara && x.Arg1 == language);
-            return (file != null) ? file.File : null;
+            var file = VoxAcbFile.FirstOrDefault(x => x.Arg0 == chara && x.Arg1 == language && x.Arg2 == costume.ToString());
+
+            if (file != null) return file.File;
+            return VoxAcbFile.FirstOrDefault(x => x.Arg0 == chara && x.Arg1 == language && x.IsDefault)?.File;
         }
 
         public ACB_Wrapper GetSeFile(int costume = -1)
@@ -2020,7 +2039,10 @@ namespace Xv2CoreLib
             if (SeAcbFile.Count > 0 && costume == -1)
                 return SeAcbFile[costume].File;
 
-            return SeAcbFile.FirstOrDefault(x => x.HasCostume(costume))?.File;
+            var file = SeAcbFile.FirstOrDefault(x => x.HasCostume(costume))?.File;
+
+            if (file != null) return file;
+            return SeAcbFile.FirstOrDefault(x => x.IsDefault)?.File;
         }
 
         private EAN_File GetDefaultEanFile()
@@ -2315,7 +2337,7 @@ namespace Xv2CoreLib
                 }
             }
         }
-        //Used to specify what costumes this file is for (se, vox, amk). Accepts multiple values seperated by "," or a single value of "ALL".
+        //Used to specify what costumes this file is for (se, vox, amk). Accepts multiple int values (greater than 0) seperated by "," or a single value of "0".
         public string Arg2
         {
             get
@@ -2532,7 +2554,8 @@ namespace Xv2CoreLib
         
         public bool HasCostume(int costume)
         {
-            return (GetArg2Values().Contains(costume) || Arg2.ToLower() == "all");
+            //return (GetArg2Values().Contains(costume) || Arg2 == "0");
+            return (GetArg2Values().Contains(costume));
         }
     }
 

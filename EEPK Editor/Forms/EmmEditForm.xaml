@@ -73,6 +73,7 @@
                                         <MenuItem IsEnabled="{Binding IsForContainer}" Header="Used By?" Click="ContextMenu_UsedBy_Click"/>
                                         <Separator/>
                                         <MenuItem Header="Hue Adjustment" Click="ContextMenu_HueAdjustment_Click"/>
+                                        <MenuItem Header="Hue Set" Click="ContextMenu_HueSet_Click"/>
                                     </ContextMenu>
                                 </TextBlock.ContextMenu>
                             </TextBlock>

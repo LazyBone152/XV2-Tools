@@ -76,6 +76,7 @@
                                             <MenuItem Header="Paste Values" Command="{Binding PlacementTarget.Tag.PasteValues_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                             <Separator/>
                                             <MenuItem Header="Hue Adjustment" Command="{Binding PlacementTarget.Tag.HueAdjustment_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                            <MenuItem Header="Hue Set" Command="{Binding PlacementTarget.Tag.HueSet_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                         </ContextMenu>
                                     </TextBlock.ContextMenu>
                                 </TextBlock>

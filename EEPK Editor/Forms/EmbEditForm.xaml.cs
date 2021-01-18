@@ -21,6 +21,7 @@ using EEPK_Organiser.Misc;
 using EEPK_Organiser.View;
 using MahApps.Metro.Controls;
 using Xv2CoreLib.Resource.UndoRedo;
+using EEPK_Organiser.Forms.Recolor;
 
 namespace EEPK_Organiser.Forms
 {
@@ -413,7 +414,7 @@ namespace EEPK_Organiser.Forms
             
         }
 
-        private void EmbContextMenu_Edit_Click(object sender, RoutedEventArgs e)
+        private void EmbContextMenu_HueAdjustment_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -437,7 +438,34 @@ namespace EEPK_Organiser.Forms
                 parent.SaveExceptionLog(ex.ToString());
                 MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            
+
+        }
+
+        private void EmbContextMenu_HueSet_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var selectedTexture = listBox_Textures.SelectedItem as EmbEntry;
+
+                if (selectedTexture != null)
+                {
+                    if (selectedTexture.DdsImage == null)
+                    {
+                        MessageBox.Show("Cannot edit because no texture was loaded.\n\nEither the texture loading failed or texture loading has been disabled in the settings.", "No Texture Loaded", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        var editForm = new RecolorTexture_HueSet(selectedTexture, this);
+                        editForm.ShowDialog();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                parent.SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
         }
 
         private void EmbContextMenu_Duplicate_Click(object sender, RoutedEventArgs e)
@@ -624,7 +652,7 @@ namespace EEPK_Organiser.Forms
             }
             else if (Keyboard.IsKeyDown(Key.H) && Keyboard.IsKeyDown(Key.LeftCtrl))
             {
-                EmbContextMenu_Edit_Click(null, null);
+                EmbContextMenu_HueAdjustment_Click(null, null);
                 e.Handled = true;
             }
             else if (Keyboard.IsKeyDown(Key.M) && Keyboard.IsKeyDown(Key.LeftCtrl) && IsForContainer)
