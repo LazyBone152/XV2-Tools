@@ -237,142 +237,142 @@ namespace Xv2CoreLib.BAC
         private int GetSubEntryCount(BAC_Entry bacEntry)
         {
             int count = 0;
-            if(bacEntry.Type0 != null)
+            if(bacEntry.Type0?.Count > 0)
             {
                 bacEntry.TypeDummy.Remove(0);
                 count++;
             }
-            if (bacEntry.Type1 != null)
+            if (bacEntry.Type1?.Count > 0)
             {
                 bacEntry.TypeDummy.Remove(1);
                 count++;
             }
-            if (bacEntry.Type2 != null)
+            if (bacEntry.Type2?.Count > 0)
             {
                 bacEntry.TypeDummy.Remove(2);
                 count++;
             }
-            if (bacEntry.Type3 != null)
+            if (bacEntry.Type3?.Count > 0)
             {
                 bacEntry.TypeDummy.Remove(3);
                 count++;
             }
-            if (bacEntry.Type4 != null)
+            if (bacEntry.Type4?.Count > 0)
             {
                 bacEntry.TypeDummy.Remove(4);
                 count++;
             }
-            if (bacEntry.Type5 != null)
+            if (bacEntry.Type5?.Count > 0)
             {
                 bacEntry.TypeDummy.Remove(5);
                 count++;
             }
-            if (bacEntry.Type6 != null)
+            if (bacEntry.Type6?.Count > 0)
             {
                 bacEntry.TypeDummy.Remove(6);
                 count++;
             }
-            if (bacEntry.Type7 != null)
+            if (bacEntry.Type7?.Count > 0)
             {
                 bacEntry.TypeDummy.Remove(7);
                 count++;
             }
-            if (bacEntry.Type8 != null)
+            if (bacEntry.Type8?.Count > 0)
             {
                 bacEntry.TypeDummy.Remove(8);
                 count++;
             }
-            if (bacEntry.Type9 != null)
+            if (bacEntry.Type9?.Count > 0)
             {
                 bacEntry.TypeDummy.Remove(9);
                 count++;
             }
-            if (bacEntry.Type10 != null)
+            if (bacEntry.Type10?.Count > 0)
             {
                 bacEntry.TypeDummy.Remove(10);
                 count++;
             }
-            if (bacEntry.Type11 != null)
+            if (bacEntry.Type11?.Count > 0)
             {
                 bacEntry.TypeDummy.Remove(11);
                 count++;
             }
-            if (bacEntry.Type12 != null)
+            if (bacEntry.Type12?.Count > 0)
             {
                 bacEntry.TypeDummy.Remove(12);
                 count++;
             }
-            if (bacEntry.Type13 != null)
+            if (bacEntry.Type13?.Count > 0)
             {
                 bacEntry.TypeDummy.Remove(13);
                 count++;
             }
-            if (bacEntry.Type14 != null)
+            if (bacEntry.Type14?.Count > 0)
             {
                 bacEntry.TypeDummy.Remove(14);
                 count++;
             }
-            if (bacEntry.Type15 != null)
+            if (bacEntry.Type15?.Count > 0)
             {
                 bacEntry.TypeDummy.Remove(15);
                 count++;
             }
-            if (bacEntry.Type16 != null)
+            if (bacEntry.Type16?.Count > 0)
             {
                 bacEntry.TypeDummy.Remove(16);
                 count++;
             }
-            if (bacEntry.Type17 != null)
+            if (bacEntry.Type17?.Count > 0)
             {
                 bacEntry.TypeDummy.Remove(17);
                 count++;
             }
-            if (bacEntry.Type18 != null)
+            if (bacEntry.Type18?.Count > 0)
             {
                 bacEntry.TypeDummy.Remove(18);
                 count++;
             }
-            if (bacEntry.Type19 != null)
+            if (bacEntry.Type19?.Count > 0)
             {
                 bacEntry.TypeDummy.Remove(19);
                 count++;
             }
-            if (bacEntry.Type20 != null)
+            if (bacEntry.Type20?.Count > 0)
             {
                 bacEntry.TypeDummy.Remove(20);
                 count++;
             }
-            if (bacEntry.Type21 != null)
+            if (bacEntry.Type21?.Count > 0)
             {
                 bacEntry.TypeDummy.Remove(21);
                 count++;
             }
-            if (bacEntry.Type22 != null)
+            if (bacEntry.Type22?.Count > 0)
             {
                 bacEntry.TypeDummy.Remove(22);
                 count++;
             }
-            if (bacEntry.Type23 != null)
+            if (bacEntry.Type23?.Count > 0)
             {
                 bacEntry.TypeDummy.Remove(23);
                 count++;
             }
-            if (bacEntry.Type24 != null)
+            if (bacEntry.Type24?.Count > 0)
             {
                 bacEntry.TypeDummy.Remove(24);
                 count++;
             }
-            if (bacEntry.Type25 != null)
+            if (bacEntry.Type25?.Count > 0)
             {
                 bacEntry.TypeDummy.Remove(25);
                 count++;
             }
-            if (bacEntry.Type26 != null)
+            if (bacEntry.Type26?.Count > 0)
             {
                 bacEntry.TypeDummy.Remove(26);
                 count++;
             }
-            if (bacEntry.Type27 != null)
+            if (bacEntry.Type27?.Count > 0)
             {
                 bacEntry.TypeDummy.Remove(27);
                 count++;
@@ -390,115 +390,115 @@ namespace Xv2CoreLib.BAC
         {
             List<int> types = new List<int>();
 
-            if(bacEntry.Type0 != null)
+            if(bacEntry.Type0?.Count > 0)
             {
                 types.Add(0);
             }
-            if (bacEntry.Type1 != null)
+            if (bacEntry.Type1?.Count > 0)
             {
                 types.Add(1);
             }
-            if (bacEntry.Type2 != null)
+            if (bacEntry.Type2?.Count > 0)
             {
                 types.Add(2);
             }
-            if (bacEntry.Type3 != null)
+            if (bacEntry.Type3?.Count > 0)
             {
                 types.Add(3);
             }
-            if (bacEntry.Type4 != null)
+            if (bacEntry.Type4?.Count > 0)
             {
                 types.Add(4);
             }
-            if (bacEntry.Type5 != null)
+            if (bacEntry.Type5?.Count > 0)
             {
                 types.Add(5);
             }
-            if (bacEntry.Type6 != null)
+            if (bacEntry.Type6?.Count > 0)
             {
                 types.Add(6);
             }
-            if (bacEntry.Type7 != null)
+            if (bacEntry.Type7?.Count > 0)
             {
                 types.Add(7);
             }
-            if (bacEntry.Type8 != null)
+            if (bacEntry.Type8?.Count > 0)
             {
                 types.Add(8);
             }
-            if (bacEntry.Type9 != null)
+            if (bacEntry.Type9?.Count > 0)
             {
                 types.Add(9);
             }
-            if (bacEntry.Type10 != null)
+            if (bacEntry.Type10?.Count > 0)
             {
                 types.Add(10);
             }
-            if (bacEntry.Type11 != null)
+            if (bacEntry.Type11?.Count > 0)
             {
                 types.Add(11);
             }
-            if (bacEntry.Type12 != null)
+            if (bacEntry.Type12?.Count > 0)
             {
                 types.Add(12);
             }
-            if (bacEntry.Type13 != null)
+            if (bacEntry.Type13?.Count > 0)
             {
                 types.Add(13);
             }
-            if (bacEntry.Type14 != null)
+            if (bacEntry.Type14?.Count > 0)
             {
                 types.Add(14);
             }
-            if (bacEntry.Type15 != null)
+            if (bacEntry.Type15?.Count > 0)
             {
                 types.Add(15);
             }
-            if (bacEntry.Type16 != null)
+            if (bacEntry.Type16?.Count > 0)
             {
                 types.Add(16);
             }
-            if (bacEntry.Type17 != null)
+            if (bacEntry.Type17?.Count > 0)
             {
                 types.Add(17);
             }
-            if (bacEntry.Type18 != null)
+            if (bacEntry.Type18?.Count > 0)
             {
                 types.Add(18);
             }
-            if (bacEntry.Type19 != null)
+            if (bacEntry.Type19?.Count > 0)
             {
                 types.Add(19);
             }
-            if (bacEntry.Type20 != null)
+            if (bacEntry.Type20?.Count > 0)
             {
                 types.Add(20);
             }
-            if (bacEntry.Type21 != null)
+            if (bacEntry.Type21?.Count > 0)
             {
                 types.Add(21);
             }
-            if (bacEntry.Type22 != null)
+            if (bacEntry.Type22?.Count > 0)
             {
                 types.Add(22);
             }
-            if (bacEntry.Type23 != null)
+            if (bacEntry.Type23?.Count > 0)
             {
                 types.Add(23);
             }
-            if (bacEntry.Type24 != null)
+            if (bacEntry.Type24?.Count > 0)
             {
                 types.Add(24);
             }
-            if (bacEntry.Type25 != null)
+            if (bacEntry.Type25?.Count > 0)
             {
                 types.Add(25);
             }
-            if (bacEntry.Type26 != null)
+            if (bacEntry.Type26?.Count > 0)
             {
                 types.Add(26);
             }
-            if (bacEntry.Type27 != null)
+            if (bacEntry.Type27?.Count > 0)
             {
                 types.Add(27);
             }
