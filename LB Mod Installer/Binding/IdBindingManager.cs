@@ -9,6 +9,7 @@ using Xv2CoreLib;
 using Xv2CoreLib.BCS;
 using Xv2CoreLib.CMS;
 using Xv2CoreLib.CUS;
+using YAXLib;
 
 namespace LB_Mod_Installer.Binding
 {
@@ -233,7 +234,11 @@ namespace LB_Mod_Installer.Binding
                     {
                         var autoIdAttr = (BindingAutoId[])childProp.GetCustomAttributes(typeof(BindingAutoId), false);
                         var stringBindingAttr = (BindingString[])childProp.GetCustomAttributes(typeof(BindingString), false);
+                        var yaxDontSerializeAttr = (YAXDontSerializeAttribute[])childProp.GetCustomAttributes(typeof(YAXDontSerializeAttribute), false);
                         object value = childProp.GetValue(obj);
+
+                        //Skip if property has YAXDontSerializeAttribute
+                        if (yaxDontSerializeAttr.Length > 0) continue;
 
                         if (value != null)
                         {
