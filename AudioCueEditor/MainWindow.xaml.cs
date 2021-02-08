@@ -133,7 +133,7 @@ namespace AudioCueEditor
             Update.APP_TAG = "ACE";
             Update.GITHUB_ACCOUNT = "LazyBone152";
             Update.GITHUB_REPO = "ACE";
-            Update.DEFAULT_APP_NAME = "AudioCueEditor.exe";
+            Update.DEFAULT_APP_NAME = "ACE.exe";
 
             //Check for update
             object[] ret = await Update.CheckForUpdate();
