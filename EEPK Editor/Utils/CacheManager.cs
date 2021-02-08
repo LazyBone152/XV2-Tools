@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xv2CoreLib.EffectContainer;
+using Xv2CoreLib.Resource.App;
 
 namespace EEPK_Organiser.Utils
 {
@@ -32,13 +33,13 @@ namespace EEPK_Organiser.Utils
                 }
             }
 
-            if (GeneralInfo.CacheFileLimit == 0)
+            if (SettingsManager.settings.FileCacheLimit == 0)
             {
                 return; //caching is disabled
             }
-            else if(GeneralInfo.CacheFileLimit > 0)
+            else if(SettingsManager.settings.FileCacheLimit > 0)
             {
-                if (CachedFiles.Count >= GeneralInfo.CacheFileLimit)
+                if (CachedFiles.Count >= SettingsManager.settings.FileCacheLimit)
                 {
                     CachedFiles.RemoveAt(0);
                     

@@ -24,6 +24,7 @@ namespace Xv2CoreLib.Resource.UndoRedo
         #endregion
 
         public const int DefaultMaxCapacity = 500;
+        public const int MaximumMaxCapacity = 5000;
         
 
         //Singleton

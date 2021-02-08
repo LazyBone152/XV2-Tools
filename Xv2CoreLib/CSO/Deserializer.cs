@@ -42,6 +42,9 @@ namespace Xv2CoreLib.CSO
 
         private void WriteFile()
         {
+            //Sort entries
+            csoFile.SortEntries();
+
             int count = (csoFile.CsoEntries != null) ? csoFile.CsoEntries.Count() : 0;
             int offset = (csoFile.CsoEntries != null) ? 16 : 0;
             bytes.AddRange(BitConverter.GetBytes((uint)count));

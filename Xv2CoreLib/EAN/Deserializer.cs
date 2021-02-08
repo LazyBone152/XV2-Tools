@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Xv2CoreLib.ESK;
+using Xv2CoreLib.Resource;
 using YAXLib;
 
 namespace Xv2CoreLib.EAN
@@ -87,7 +89,7 @@ namespace Xv2CoreLib.EAN
         
         private void Write()
         {
-            int AnimationCount = eanFile.AnimationCount();
+            int AnimationCount = eanFile.GetAnimationIndexCount();
 
             //Header
             int IsCamera = (eanFile.IsCamera == true) ? 1 : 0;
@@ -96,10 +98,11 @@ namespace Xv2CoreLib.EAN
             bytes.Add((byte)IsCamera);
             bytes.Add(eanFile.I_17);
             bytes.AddRange(BitConverter.GetBytes((short)AnimationCount));
-            bytes.AddRange(new byte[12]);
+            bytes.AddRange(BitConverter.GetBytes((int)32)); //Skeleton offset
+            bytes.AddRange(new byte[8]);
 
             //Skeleton
-            WriteSkeleton(eanFile.Skeleton, 20);
+            bytes.AddRange(eanFile.Skeleton.Write(false));
 
             //Animation
             if(AnimationCount > 0)
@@ -115,7 +118,7 @@ namespace Xv2CoreLib.EAN
 
                 for(int i = 0; i < AnimationCount; i++)
                 {
-                    int _idxOfAnimation = eanFile.IndexOfAnimation(i);
+                    int _idxOfAnimation = eanFile.IndexOf(i);
                     if (_idxOfAnimation != -1)
                     {
                         StartNewLine();
@@ -140,7 +143,7 @@ namespace Xv2CoreLib.EAN
                 //Name Strings
                 for(int i = 0; i < AnimationCount; i++)
                 {
-                    int _idxOfAnimation = eanFile.IndexOfAnimation(i);
+                    int _idxOfAnimation = eanFile.IndexOf(i);
                     if(_idxOfAnimation != -1)
                     {
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), NameTable[i]);
@@ -151,153 +154,12 @@ namespace Xv2CoreLib.EAN
             }
         }
 
-        private void WriteSkeleton(ESK_Skeleton skeleton, int offsetToReplace)
-        {
-            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), offsetToReplace);
-
-            int startOffset = bytes.Count();
-            int count = (nonHierarchalBones != null) ? nonHierarchalBones.Count() : 0;
-
-            bytes.AddRange(BitConverter.GetBytes((short)count));
-            bytes.AddRange(BitConverter.GetBytes(skeleton.I_02));
-            bytes.AddRange(new byte[24]);
-            bytes.AddRange(BitConverter_Ex.GetBytes(skeleton.I_28));
-
-            if (count > 0)
-            {
-                //Writing Index List
-                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - startOffset), startOffset + 4);
-
-                for (int i = 0; i < count; i++)
-                {
-                    bytes.AddRange(BitConverter.GetBytes(nonHierarchalBones[i].Index1));
-                    bytes.AddRange(BitConverter.GetBytes(nonHierarchalBones[i].Index2));
-                    bytes.AddRange(BitConverter.GetBytes(nonHierarchalBones[i].Index3));
-                    bytes.AddRange(BitConverter.GetBytes(nonHierarchalBones[i].Index4));
-                }
-
-                //Writing Name Table and List
-                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - startOffset), startOffset + 8);
-                List<Xv2CoreLib.StringWriter.StringInfo> stringInfo = new List<Xv2CoreLib.StringWriter.StringInfo>();
-
-                for (int i = 0; i < count; i++)
-                {
-                    stringInfo.Add(new Xv2CoreLib.StringWriter.StringInfo()
-                    {
-                        StringToWrite = nonHierarchalBones[i].Name,
-                        Offset = bytes.Count(),
-                        RelativeOffset = startOffset
-                    });
-                    bytes.AddRange(new byte[4]);
-                }
-
-                for (int i = 0; i < count; i++)
-                {
-                    bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - stringInfo[i].RelativeOffset), stringInfo[i].Offset);
-                    bytes.AddRange(Encoding.ASCII.GetBytes(stringInfo[i].StringToWrite));
-                    bytes.Add(0);
-                }
-
-                //Writing RelativeTransform
-                StartNewLine();
-                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - startOffset), startOffset + 12);
-
-                for (int i = 0; i < count; i++)
-                {
-                    bytes.AddRange(BitConverter.GetBytes(nonHierarchalBones[i].RelativeTransform.F_00));
-                    bytes.AddRange(BitConverter.GetBytes(nonHierarchalBones[i].RelativeTransform.F_04));
-                    bytes.AddRange(BitConverter.GetBytes(nonHierarchalBones[i].RelativeTransform.F_08));
-                    bytes.AddRange(BitConverter.GetBytes(nonHierarchalBones[i].RelativeTransform.F_12));
-                    bytes.AddRange(BitConverter.GetBytes(nonHierarchalBones[i].RelativeTransform.F_16));
-                    bytes.AddRange(BitConverter.GetBytes(nonHierarchalBones[i].RelativeTransform.F_20));
-                    bytes.AddRange(BitConverter.GetBytes(nonHierarchalBones[i].RelativeTransform.F_24));
-                    bytes.AddRange(BitConverter.GetBytes(nonHierarchalBones[i].RelativeTransform.F_28));
-                    bytes.AddRange(BitConverter.GetBytes(nonHierarchalBones[i].RelativeTransform.F_32));
-                    bytes.AddRange(BitConverter.GetBytes(nonHierarchalBones[i].RelativeTransform.F_36));
-                    bytes.AddRange(BitConverter.GetBytes(nonHierarchalBones[i].RelativeTransform.F_40));
-                    bytes.AddRange(BitConverter.GetBytes(nonHierarchalBones[i].RelativeTransform.F_44));
-                }
-
-                //Writing AbsoluteTransform (esk only)
-                //StartNewLine();
-                //bytes = CommonOperations.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - startOffset), startOffset + 16);
-
-               // for (int i = 0; i < count; i++)
-               // {
-               //     bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_00));
-                //    bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_04));
-                 //   bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_08));
-                //    bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_12));
-                 //   bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_16));
-                 //   bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_20));
-                 //   bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_24));
-                 //   bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_28));
-                 //   bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_32));
-                 //   bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_36));
-                 //   bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_40));
-                 //   bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_44));
-                 //   bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_48));
-                 //   bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_52));
-                 //   bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_56));
-                //    bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_60));
-                //}
-
-                //Writing Unk1
-                if (skeleton.Unk1 != null)
-                {
-                    bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - startOffset), startOffset + 20);
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_00));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_04));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_08));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_12));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_16));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_20));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_24));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_28));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_32));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_36));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_40));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_44));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_48));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_52));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_56));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_60));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_64));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_68));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_72));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_76));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_80));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_84));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_88));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_92));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_96));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_100));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_104));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_108));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_112));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_116));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Unk1.I_120));
-                }
-
-                //Writing Unk2
-                if (skeleton.UseUnk2 == true && count > 0)
-                {
-                    bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - startOffset), startOffset + 24);
-
-                    for (int i = 0; i < count; i++)
-                    {
-                        bytes.AddRange(BitConverter.GetBytes(281470681743360));
-                    }
-                }
-
-            }
-
-
-        }
-
         private void WriteAnimation(EAN_Animation animation, int offsetToReplace)
         {
             StartNewLine();
+
+            if (animation.FrameCount <= 0)
+                throw new InvalidDataException("EAN Save: FrameCount cannot be 0 or less!");
 
             bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), offsetToReplace);
             int startOffset = bytes.Count();
@@ -318,18 +180,18 @@ namespace Xv2CoreLib.EAN
             bytes.AddRange(new byte[2]);
             bytes.Add((byte)animation.I_02);
             bytes.Add((byte)animation.I_03);
-            bytes.AddRange(BitConverter.GetBytes(animation.I_04));
+            bytes.AddRange(BitConverter.GetBytes(animation.FrameCount));
             bytes.AddRange(BitConverter.GetBytes(nodeCount));
             bytes.AddRange(new byte[4]);
 
             //Nodes
             if(nodeCount > 0)
             {
-                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - startOffset), startOffset + 12);
+                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - startOffset), startOffset + 12);
                 List<int> NodeTable = new List<int>();
                 for (int i = 0; i < nodeCount; i++)
                 {
-                    NodeTable.Add(bytes.Count());
+                    NodeTable.Add(bytes.Count);
                     bytes.AddRange(new byte[4]);
                 }
 
@@ -337,14 +199,20 @@ namespace Xv2CoreLib.EAN
                 {
                     if(eanFile.Skeleton.Exists(animation.Nodes[i].BoneName))
                     {
-                        bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - startOffset), NodeTable[i]);
-                        int NodeOffset = bytes.Count();
+                        bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - startOffset), NodeTable[i]);
+                        int NodeOffset = bytes.Count;
                         List<int> AnimationComponentTable = new List<int>();
 
-                        int AnimationComponentCount = (animation.Nodes[i].AnimationComponents != null) ? animation.Nodes[i].AnimationComponents.Count() : 0;
+                        int AnimationComponentCount = (animation.Nodes[i].AnimationComponents != null) ? animation.Nodes[i].AnimationComponents.Count : 0;
                         bytes.AddRange(BitConverter.GetBytes(GetBoneIndex(animation.Nodes[i].BoneName, animation.Name)));
                         bytes.AddRange(BitConverter.GetBytes((short)AnimationComponentCount));
                         bytes.AddRange(BitConverter.GetBytes(8));
+
+                        //Get ESK data for this bone as it will be needed for calculating default keyframes
+                        ESK_RelativeTransform eskRelativeTransform = eanFile.Skeleton.GetBone(animation.Nodes[i].BoneName)?.RelativeTransform;
+
+                        if (eskRelativeTransform == null)
+                            throw new ArgumentNullException($"EAN Save: Could not find the RelativeTransform for bone {animation.Nodes[i].BoneName}");
 
                         //Table
                         for (int a = 0; a < AnimationComponentCount; a++)
@@ -356,51 +224,79 @@ namespace Xv2CoreLib.EAN
                         //Data
                         for (int a = 0; a < AnimationComponentCount; a++)
                         {
-                            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - NodeOffset), AnimationComponentTable[a]);
+                            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - NodeOffset), AnimationComponentTable[a]);
 
-                            int KeyframeOffset = bytes.Count();
-                            int KeyframeCount = (animation.Nodes[i].AnimationComponents[a].Keyframes != null) ? animation.Nodes[i].AnimationComponents[a].Keyframes.Count() : 0;
+                            int KeyframeOffset = bytes.Count;
 
+                            //Can happen if loaded from XML and no keyframes were declared.
+                            if (animation.Nodes[i].AnimationComponents[a].Keyframes == null)
+                                animation.Nodes[i].AnimationComponents[a].Keyframes = new AsyncObservableCollection<EAN_Keyframe>();
+
+                            //Handle first and last keyframe
+                            bool hasFirstKeyframe = animation.Nodes[i].AnimationComponents[a].Keyframes.Any(x => x.FrameIndex == 0);
+                            bool hasFinalKeyframe = animation.Nodes[i].AnimationComponents[a].Keyframes.Any(x => x.FrameIndex == animation.FrameCount - 1);
+                            int KeyframeCount = animation.Nodes[i].AnimationComponents[a].Keyframes.Count;
+
+                            //If no first or final keyframes were found, increment count to include them
+                            if (!hasFinalKeyframe) KeyframeCount++;
+                            if (!hasFirstKeyframe) KeyframeCount++;
+
+                            //Select default keyframe
+                            EAN_Keyframe defaultKeyframe = null;
+
+                            switch (animation.Nodes[i].AnimationComponents[a].I_00)
+                            {
+                                case EAN_AnimationComponent.ComponentType.Position:
+                                    defaultKeyframe = eskRelativeTransform.ToEanPosKeyframe();
+                                    break;
+                                case EAN_AnimationComponent.ComponentType.Rotation:
+                                    defaultKeyframe = eskRelativeTransform.ToEanRotKeyframe();
+                                    break;
+                                case EAN_AnimationComponent.ComponentType.Scale:
+                                    defaultKeyframe = eskRelativeTransform.ToEanScaleKeyframe();
+                                    break;
+                            }
+
+                            //Write
                             bytes.Add((byte)animation.Nodes[i].AnimationComponents[a].I_00);
                             bytes.Add(animation.Nodes[i].AnimationComponents[a].I_01);
                             bytes.AddRange(BitConverter.GetBytes(animation.Nodes[i].AnimationComponents[a].I_02));
                             bytes.AddRange(BitConverter.GetBytes(KeyframeCount));
                             bytes.AddRange(new byte[8]);
 
-                            //Sort Keyframes
-                            if (KeyframeCount > 0)
-                            {
-                                var sortedList = animation.Nodes[i].AnimationComponents[a].Keyframes.ToList();
-                                sortedList.Sort((x, y) => x.FrameIndex - y.FrameIndex);
-                                animation.Nodes[i].AnimationComponents[a].Keyframes = new ObservableCollection<EAN_Keyframe>(sortedList);
-                            }
+                            //Validate
+                            if(animation.Nodes[i].AnimationComponents[a].Keyframes.Any(x => x.FrameIndex > (animation.FrameCount - 1)))
+                                throw new Exception($"EAN Save: Keyframe FrameIndex must not exceed the animation duration. (Name: {animation.Name}, ID: {animation.ID_UShort}");
 
+                            //Write Keyframes
                             if (KeyframeCount > 0)
                             {
-                                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - KeyframeOffset), KeyframeOffset + 8);
+                                Sorting.SortEntries2(animation.Nodes[i].AnimationComponents[a].Keyframes);
+
+                                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - KeyframeOffset), KeyframeOffset + 8);
                                 switch (animation.I_02)
                                 {
                                     case EAN_Animation.IntPrecision._8Bit:
-                                        WriteKeyframeIndex_Int8(animation.Nodes[i].AnimationComponents[a].Keyframes);
+                                        WriteKeyframeIndex_Int8(animation.Nodes[i].AnimationComponents[a].Keyframes, hasFirstKeyframe, hasFinalKeyframe, animation.FrameCount - 1);
                                         break;
                                     case EAN_Animation.IntPrecision._16Bit:
-                                        WriteKeyframeIndex_Int16(animation.Nodes[i].AnimationComponents[a].Keyframes);
+                                        WriteKeyframeIndex_Int16(animation.Nodes[i].AnimationComponents[a].Keyframes, hasFirstKeyframe, hasFinalKeyframe, animation.FrameCount - 1);
                                         break;
                                 }
 
                                 StartNewLine();
-                                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - KeyframeOffset), KeyframeOffset + 12);
+                                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - KeyframeOffset), KeyframeOffset + 12);
                                 switch (animation.I_03)
                                 {
                                     case EAN_Animation.FloatPrecision._16Bit:
-                                        WriteKeyframeFloats_Float16(animation.Nodes[i].AnimationComponents[a].Keyframes);
+                                        WriteKeyframeFloats_Float16(animation.Nodes[i].AnimationComponents[a].Keyframes, hasFirstKeyframe, hasFinalKeyframe, defaultKeyframe);
                                         break;
                                     case EAN_Animation.FloatPrecision._32Bit:
-                                        WriteKeyframeFloats_Float32(animation.Nodes[i].AnimationComponents[a].Keyframes);
+                                        WriteKeyframeFloats_Float32(animation.Nodes[i].AnimationComponents[a].Keyframes, hasFirstKeyframe, hasFinalKeyframe, defaultKeyframe);
                                         break;
                                 }
-                            }
 
+                            }
 
                         }
                     }
@@ -412,9 +308,14 @@ namespace Xv2CoreLib.EAN
 
         }
 
-        private void WriteKeyframeIndex_Int8(ObservableCollection<EAN_Keyframe> keyframes)
+        private void WriteKeyframeIndex_Int8(ObservableCollection<EAN_Keyframe> keyframes, bool hasFirstKeyframe, bool hasFinalKeyframe, int endFrame)
         {
-            for(int i = 0; i < keyframes.Count(); i++)
+            if (!hasFirstKeyframe)
+            {
+                bytes.Add(Convert.ToByte(0));
+            }
+
+            for(int i = 0; i < keyframes.Count; i++)
             {
                 if(keyframes[i].FrameIndex > 255 || keyframes[i].FrameIndex < 0)
                 {
@@ -422,11 +323,21 @@ namespace Xv2CoreLib.EAN
                 }
                 bytes.Add(Convert.ToByte(keyframes[i].FrameIndex));
             }
+
+            if (!hasFinalKeyframe)
+            {
+                bytes.Add(Convert.ToByte((byte)endFrame));
+            }
         }
 
-        private void WriteKeyframeIndex_Int16(ObservableCollection<EAN_Keyframe> keyframes)
+        private void WriteKeyframeIndex_Int16(ObservableCollection<EAN_Keyframe> keyframes, bool hasFirstKeyframe, bool hasFinalKeyframe, int endFrame)
         {
-            for (int i = 0; i < keyframes.Count(); i++)
+            if (!hasFirstKeyframe)
+            {
+                bytes.AddRange(BitConverter.GetBytes((ushort)0));
+            }
+
+            for (int i = 0; i < keyframes.Count; i++)
             {
                 if (keyframes[i].FrameIndex > 65535 || keyframes[i].FrameIndex < 0)
                 {
@@ -434,38 +345,68 @@ namespace Xv2CoreLib.EAN
                 }
                 bytes.AddRange(BitConverter.GetBytes(keyframes[i].FrameIndex));
             }
+
+            if (!hasFinalKeyframe)
+            {
+                bytes.AddRange(BitConverter.GetBytes((ushort)endFrame));
+            }
         }
 
-        private void WriteKeyframeFloats_Float16(ObservableCollection<EAN_Keyframe> keyframes)
+        private void WriteKeyframeFloats_Float16(ObservableCollection<EAN_Keyframe> keyframes, bool hasFirstKeyframe, bool hasFinalKeyframe, EAN_Keyframe defaultKeyframe)
         {
-            for(int i = 0; i < keyframes.Count(); i++)
+            if (!hasFirstKeyframe)
             {
-                int size = bytes.Count();
+                EAN_Keyframe defaultFirstKeyframe = (keyframes.Count == 0) ? defaultKeyframe : keyframes[0];
+                bytes.AddRange(Half.GetBytes((Half)defaultFirstKeyframe.X));
+                bytes.AddRange(Half.GetBytes((Half)defaultFirstKeyframe.Y));
+                bytes.AddRange(Half.GetBytes((Half)defaultFirstKeyframe.Z));
+                bytes.AddRange(Half.GetBytes((Half)defaultFirstKeyframe.W));
+            }
+
+            for(int i = 0; i < keyframes.Count; i++)
+            {
                 bytes.AddRange(Half.GetBytes((Half)keyframes[i].X));
                 bytes.AddRange(Half.GetBytes((Half)keyframes[i].Y));
                 bytes.AddRange(Half.GetBytes((Half)keyframes[i].Z));
                 bytes.AddRange(Half.GetBytes((Half)keyframes[i].W));
-                if (size + 8 != bytes.Count())
-                {
-                    throw new Exception(String.Format("Assert Fail: Float16 struct is wrong size! (expected 8, was {0}).\nSave failed.", bytes.Count() - size));
-                }
+            }
+
+            if (!hasFinalKeyframe)
+            {
+                EAN_Keyframe defaultFinalKeyframe = (keyframes.Count == 0) ? defaultKeyframe : keyframes[keyframes.Count - 1];
+                bytes.AddRange(Half.GetBytes((Half)defaultFinalKeyframe.X));
+                bytes.AddRange(Half.GetBytes((Half)defaultFinalKeyframe.Y));
+                bytes.AddRange(Half.GetBytes((Half)defaultFinalKeyframe.Z));
+                bytes.AddRange(Half.GetBytes((Half)defaultFinalKeyframe.W));
             }
         }
 
-        private void WriteKeyframeFloats_Float32(ObservableCollection<EAN_Keyframe> keyframes)
+        private void WriteKeyframeFloats_Float32(ObservableCollection<EAN_Keyframe> keyframes, bool hasFirstKeyframe, bool hasFinalKeyframe, EAN_Keyframe defaultKeyframe)
         {
-            for (int i = 0; i < keyframes.Count(); i++)
+            if (!hasFirstKeyframe)
             {
-                int size = bytes.Count();
+                EAN_Keyframe defaultFirstKeyframe = (keyframes.Count == 0) ? defaultKeyframe : keyframes[0];
+                bytes.AddRange(BitConverter.GetBytes(defaultFirstKeyframe.X));
+                bytes.AddRange(BitConverter.GetBytes(defaultFirstKeyframe.Y));
+                bytes.AddRange(BitConverter.GetBytes(defaultFirstKeyframe.Z));
+                bytes.AddRange(BitConverter.GetBytes(defaultFirstKeyframe.W));
+            }
 
+            for (int i = 0; i < keyframes.Count; i++)
+            {
                 bytes.AddRange(BitConverter.GetBytes(keyframes[i].X));
                 bytes.AddRange(BitConverter.GetBytes(keyframes[i].Y));
                 bytes.AddRange(BitConverter.GetBytes(keyframes[i].Z));
                 bytes.AddRange(BitConverter.GetBytes(keyframes[i].W));
-                if (size + 16 != bytes.Count())
-                {
-                    throw new Exception(String.Format("Assert Fail: Float32 struct is wrong size! (expected 16, was {0}).\nSave failed.", bytes.Count() - size));
-                }
+            }
+
+            if (!hasFinalKeyframe)
+            {
+                EAN_Keyframe defaultFinalKeyframe = (keyframes.Count == 0) ? defaultKeyframe : keyframes[keyframes.Count - 1];
+                bytes.AddRange(BitConverter.GetBytes(defaultFinalKeyframe.X));
+                bytes.AddRange(BitConverter.GetBytes(defaultFinalKeyframe.Y));
+                bytes.AddRange(BitConverter.GetBytes(defaultFinalKeyframe.Z));
+                bytes.AddRange(BitConverter.GetBytes(defaultFinalKeyframe.W));
             }
         }
 
@@ -491,35 +432,6 @@ namespace Xv2CoreLib.EAN
             
             throw new Exception(String.Format("Could not find the bone \"{0}\", which is declared in the animation \"{1}\" in the skeleton!\nRebuild failed.", name, animationName));
             
-        }
-
-        private List<EAN_Keyframe> ModifyKeyframes(float x, float y, float z, float w, List<EAN_Keyframe> keyframes)
-        {
-            for(int i = 0; i < keyframes.Count(); i++)
-            {
-                float _x = Convert.ToSingle(keyframes[i].X) + x;
-                float _y = Convert.ToSingle(keyframes[i].Y) + y;
-                float _z = Convert.ToSingle(keyframes[i].Z) + z;
-                float _w = Convert.ToSingle(keyframes[i].W) + w;
-
-                keyframes[i].X = _x;
-                keyframes[i].Y = _y;
-                keyframes[i].Z = _z;
-                keyframes[i].W = _w;
-            }
-            return keyframes;
-        }
-
-        private List<EAN_Keyframe> ZeroKeyframes(List<EAN_Keyframe> keyframes)
-        {
-            for (int i = 0; i < keyframes.Count(); i++)
-            {
-                keyframes[i].X = 0f;
-                keyframes[i].Y = 0f;
-                keyframes[i].Z = 0f;
-                keyframes[i].W = 0f;
-            }
-            return keyframes;
         }
 
         

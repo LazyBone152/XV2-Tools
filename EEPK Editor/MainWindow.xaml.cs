@@ -1,38 +1,24 @@
 ﻿using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using Xv2CoreLib.EEPK;
 using Xv2CoreLib.EffectContainer;
-using Xv2CoreLib.EMA;
-using Xv2CoreLib.EMB_CLASS;
-using Xv2CoreLib.EMM;
-using Xv2CoreLib.EMP;
 using EEPK_Organiser.Utils;
-using Xv2CoreLib.ECF;
-using EEPK_Organiser.Misc;
 using MahApps.Metro.Controls;
 using xv2 = Xv2CoreLib.Xenoverse2;
 using MahApps.Metro.Controls.Dialogs;
 using MahApps.Metro;
 using Xv2CoreLib.Resource.UndoRedo;
 using EEPK_Organiser.Forms.Recolor;
+using AutoUpdater;
+using Xv2CoreLib.Resource.App;
+using System.Diagnostics;
 
 namespace EEPK_Organiser
 {
@@ -138,52 +124,59 @@ namespace EEPK_Organiser
             ToolTipService.ShowDurationProperty.OverrideMetadata(
             typeof(DependencyObject), new FrameworkPropertyMetadata(Int32.MaxValue));
 
-            //Load settings
-            GeneralInfo.AppSettings = Settings.AppSettings.LoadSettings();
-            GeneralInfo.UpdateEepkToolInterlop();
+            //Init settings
+            SettingsManager.Instance.CurrentApp = Xv2CoreLib.Resource.App.Application.EepkOrganiser;
+            SettingsManager.SettingsReloaded += SettingsManager_SettingsReloaded;
 
             //Init UI
             InitializeComponent();
             DataContext = this;
             InitTheme();
 
-            if(GeneralInfo.AppSettings.ValidGameDir)
-                AsyncInit();
+            //Update title
+            Title += $" ({SettingsManager.Instance.CurrentVersionString})";
 
-            //Check for updates silently
-#if !DEBUG
-            if (GeneralInfo.CheckForUpdatesOnStartUp)
+        }
+
+        private void SettingsManager_SettingsReloaded(object sender, EventArgs e)
+        {
+            InitTheme();
+
+            if(sender is Settings oldSettings)
             {
-                CheckForUpdate(false);
+                if(oldSettings.GameDirectory != SettingsManager.settings.GameDirectory && SettingsManager.settings.ValidGameDir)
+                {
+                    AsyncInit();
+                }
             }
-            
-#endif
-
         }
 
         public void InitTheme()
         {
-            switch (GeneralInfo.AppSettings.GetCurrentTheme())
+            Dispatcher.Invoke((() =>
             {
-                case Settings.AppTheme.Light:
-                    ThemeManager.ChangeAppStyle(Application.Current, ThemeManager.GetAccent(GeneralInfo.AppSettings.CurrentLightAccent.ToString()), ThemeManager.GetAppTheme("BaseLight"));
-                    break;
-                case Settings.AppTheme.Dark:
-                    ThemeManager.ChangeAppStyle(Application.Current, ThemeManager.GetAccent(GeneralInfo.AppSettings.CurrentDarkAccent.ToString()), ThemeManager.GetAppTheme("BaseDark"));
-                    break;
-            }
+                switch (SettingsManager.Instance.Settings.GetCurrentTheme())
+                {
+                    case Xv2CoreLib.Resource.App.AppTheme.Light:
+                        ThemeManager.ChangeAppStyle(System.Windows.Application.Current, ThemeManager.GetAccent(SettingsManager.Instance.Settings.CurrentLightAccent.ToString()), ThemeManager.GetAppTheme("BaseLight"));
+                        break;
+                    case Xv2CoreLib.Resource.App.AppTheme.Dark:
+                        ThemeManager.ChangeAppStyle(System.Windows.Application.Current, ThemeManager.GetAccent(SettingsManager.Instance.Settings.CurrentDarkAccent.ToString()), ThemeManager.GetAppTheme("BaseDark"));
+                        break;
+                }
+            }));
         }
 
         public async Task AsyncInit()
         {
-            var controller = await this.ShowProgressAsync($"Initializing...", $"", false, new MetroDialogSettings() { AnimateHide = false, AnimateShow = false, DialogTitleFontSize = 15, DialogMessageFontSize = 12 });
+            var controller = await this.ShowProgressAsync($"Initializing...", $"", false, App.DefaultDialogSettings);
             controller.SetIndeterminate();
 
             try
             {
                 await Task.Run(() =>
                 {
-                    xv2.GameDir = GeneralInfo.AppSettings.GameDirectory;
+                    xv2.GameDir = SettingsManager.Instance.Settings.GameDirectory;
                     xv2.Instance.loadCharacters = true;
                     xv2.Instance.loadSkills = true;
                     xv2.Instance.loadCmn = false;
@@ -255,8 +248,81 @@ namespace EEPK_Organiser
         {
             //Check startup args
             LoadOnStartUp();
+
+            //Async Tasks
+            AsyncStartUpTasks();
         }
 
+        private async void AsyncStartUpTasks()
+        {
+            if (SettingsManager.Instance.Settings.ValidGameDir)
+                AsyncInit();
+
+
+            //Check for updates silently
+#if !DEBUG
+            if (SettingsManager.Instance.Settings.UpdateNotifications)
+            {
+                CheckForUpdate(false);
+            }
+#endif
+
+        }
+
+        private async void CheckForUpdate(bool userInitiated)
+        {
+            //GitHub Settings
+            Update.APP_TAG = "EEPK";
+            Update.GITHUB_ACCOUNT = "LazyBone152";
+            Update.GITHUB_REPO = "EEPKOrganiser";
+            Update.DEFAULT_APP_NAME = "EEPK Organiser.exe";
+
+            //Check for update
+            object[] ret = await Update.CheckForUpdate();
+
+            //Return values
+            bool isUpdateAvailable = (bool)ret[0];
+            Version latestVersion = (Version)ret[1];
+
+            await Task.Delay(1000);
+
+            if (isUpdateAvailable)
+            {
+                var messageResult = await this.ShowMessageAsync("Update Available", $"An update is available ({latestVersion}). Do you want to download and install it?\n\nNote: All instances of the application will be closed and any unsaved work will be lost.", MessageDialogStyle.AffirmativeAndNegative, App.DefaultDialogSettings);
+
+                if(messageResult == MessageDialogResult.Affirmative)
+                {
+                    var controller = await this.ShowProgressAsync("Update Available", "Downloading...", false, App.DefaultDialogSettings);
+                    controller.SetIndeterminate();
+
+                    try
+                    {
+                        await Task.Run(() =>
+                        {
+                            Update.DownloadUpdate();
+                        });
+                    }
+                    finally
+                    {
+                        await controller.CloseAsync();
+                    }
+
+                    if (Update.IsDownloadSuccessful)
+                    {
+                        Update.UpdateApplication();
+                    }
+                    else
+                    {
+                        await this.ShowMessageAsync("Update Failed", Update.DownloadFailedText, MessageDialogStyle.AffirmativeAndNegative, App.DefaultDialogSettings);
+                    }
+
+                }
+            }
+            else if (userInitiated)
+            {
+                await this.ShowMessageAsync("Update", $"No update is available.", MessageDialogStyle.Affirmative, App.DefaultDialogSettings);
+            }
+        }
 
         private void LoadOnStartUp()
         {
@@ -327,7 +393,7 @@ namespace EEPK_Organiser
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("Save failed.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Open", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("Save failed.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Open", MessageBoxButton.OK, MessageBoxImage.Error);
 
             }
         }
@@ -374,21 +440,21 @@ namespace EEPK_Organiser
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("Save failed.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Open", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("Save failed.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Open", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         private void Menu_Settings_Click(object sender, RoutedEventArgs e)
         {
-            string originalGameDir = GeneralInfo.AppSettings.GameDirectory;
+            string originalGameDir = SettingsManager.Instance.Settings.GameDirectory;
 
-            Forms.Settings settingsForm = new Forms.Settings(GeneralInfo.AppSettings, this);
+            Forms.Settings settingsForm = new Forms.Settings(this);
             settingsForm.ShowDialog();
-            GeneralInfo.AppSettings.SaveSettings();
+            SettingsManager.Instance.SaveSettings();
             InitTheme();
             
             //Reload game cpk stuff if directory was changed
-            if(GeneralInfo.AppSettings.GameDirectory != originalGameDir && GeneralInfo.AppSettings.ValidGameDir)
+            if(SettingsManager.Instance.Settings.GameDirectory != originalGameDir && SettingsManager.Instance.Settings.ValidGameDir)
             {
                 AsyncInit();
             }
@@ -400,7 +466,7 @@ namespace EEPK_Organiser
             Environment.Exit(0);
         }
 
-        private void HelpMenu_CheckForUpdates_Click(object sender, RoutedEventArgs e)
+        private async void HelpMenu_CheckForUpdates_Click(object sender, RoutedEventArgs e)
         {
             CheckForUpdate(true);
         }
@@ -432,7 +498,7 @@ namespace EEPK_Organiser
                 "MahApps (UI)\n" +
                 "AForge.NET (image processing)\n" +
                 "CSharpImageLibrary (dds loading)\n" +
-                "YAXLib (xml)", GeneralInfo.AppName, GeneralInfo.CurrentVersionString), "About", MessageBoxButton.OK, MessageBoxImage.Information);
+                "YAXLib (xml)", "EEPK Organiser", SettingsManager.Instance.CurrentVersionString), "About", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         
         private void ToolMenu_AssociateEepkExt_Click(object sender, RoutedEventArgs e)
@@ -448,7 +514,7 @@ namespace EEPK_Organiser
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -465,7 +531,7 @@ namespace EEPK_Organiser
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
         
@@ -483,7 +549,7 @@ namespace EEPK_Organiser
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An unknown error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An unknown error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
         
@@ -502,7 +568,7 @@ namespace EEPK_Organiser
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 #endif
 
@@ -523,7 +589,7 @@ namespace EEPK_Organiser
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 #endif
 
@@ -538,9 +604,9 @@ namespace EEPK_Organiser
 
         private void FileCleanUp()
         {
-            if (effectContainerFile.LoadedExternalFilesNotSaved.Count > 0 && !GeneralInfo.FileCleanUp_Ignore)
+            if (effectContainerFile.LoadedExternalFilesNotSaved.Count > 0 && !SettingsManager.Instance.Settings.FileCleanUp_Ignore)
             {
-                if (GeneralInfo.FileCleanUp_Prompt)
+                if (SettingsManager.Instance.Settings.FileCleanUp_Prompt)
                 {
                     StringBuilder str = new StringBuilder();
 
@@ -561,7 +627,7 @@ namespace EEPK_Organiser
                         }
                     }
                 }
-                else if (GeneralInfo.FileCleanUp_Delete)
+                else if (SettingsManager.Instance.Settings.FileCleanUp_Delete)
                 {
                     foreach (var file in effectContainerFile.LoadedExternalFilesNotSaved)
                     {
@@ -572,56 +638,12 @@ namespace EEPK_Organiser
             }
         }
 
-        private async Task CheckForUpdate(bool userInitiated)
-        {
-            try
-            {
-                Update.UpdateManager updateManager = new Update.UpdateManager();
-                await Task.Run(new Action(updateManager.InitUpdateCheck));
-
-                if (updateManager.GotResponseFromServer)
-                {
-                    if (updateManager.UpdateAvailable)
-                    {
-                        Forms.UpdateForm updateForm = new Forms.UpdateForm(updateManager.updateInfo, this);
-
-                        if (userInitiated)
-                        {
-                            updateForm.ShowDialog();
-                        }
-                        else
-                        {
-                            updateForm.Show();
-                        }
-
-                        updateForm = null;
-                    }
-                    else if (userInitiated == true)
-                    {
-                        MessageBox.Show(this, String.Format("No updates available."), "Update", MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
-                }
-                else if (userInitiated == true)
-                {
-                    MessageBox.Show(this, String.Format("Communication with the server failed."), "Update", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                }
-                updateManager = null;
-            }
-            catch (Exception ex)
-            {
-                if (userInitiated == true)
-                {
-                    SaveExceptionLog(ex.ToString());
-                    MessageBox.Show(this, String.Format("Update check failed.\n\n{0}", ex.Message), "Update", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-        }
 
         public void SaveExceptionLog(string ex)
         {
             try
             {
-                File.WriteAllText(GeneralInfo.ERROR_LOG_PATH, ex);
+                File.WriteAllText(SettingsManager.Instance.GetErrorLogPath(), ex);
             }
             catch
             {
@@ -650,7 +672,7 @@ namespace EEPK_Organiser
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("Failed to apply the name list.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("Failed to apply the name list.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -863,10 +885,10 @@ namespace EEPK_Organiser
                             case ".emm":
                             case ".ema":
                             case ".emo":
-                                MessageBox.Show(Application.Current.MainWindow, String.Format("\"{0}\" files are not supported directly. Please load a .eepk.", System.IO.Path.GetExtension(droppedFilePaths[0])), "File Drop", MessageBoxButton.OK, MessageBoxImage.Error);
+                                MessageBox.Show(System.Windows.Application.Current.MainWindow, String.Format("\"{0}\" files are not supported directly. Please load a .eepk.", System.IO.Path.GetExtension(droppedFilePaths[0])), "File Drop", MessageBoxButton.OK, MessageBoxImage.Error);
                                 break;
                             default:
-                                MessageBox.Show(Application.Current.MainWindow, String.Format("The filetype of the dropped file ({0}) is not supported.", System.IO.Path.GetExtension(droppedFilePaths[0])), "File Drop", MessageBoxButton.OK, MessageBoxImage.Error);
+                                MessageBox.Show(System.Windows.Application.Current.MainWindow, String.Format("The filetype of the dropped file ({0}) is not supported.", System.IO.Path.GetExtension(droppedFilePaths[0])), "File Drop", MessageBoxButton.OK, MessageBoxImage.Error);
                                 break;
                         }
                     }
@@ -874,7 +896,7 @@ namespace EEPK_Organiser
             }
             catch (Exception ex)
             {
-                MessageBox.Show(Application.Current.MainWindow, String.Format("The dropped file could not be opened.\n\nThe reason given by the system: {0}", ex.Message), "File Drop", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(System.Windows.Application.Current.MainWindow, String.Format("The dropped file could not be opened.\n\nThe reason given by the system: {0}", ex.Message), "File Drop", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -1224,5 +1246,10 @@ namespace EEPK_Organiser
             eepkEditor.LIGHT_ImportAsset_MenuItem_FromCachedFiles_Click(sender, e);
         }
         #endregion
+
+        private void Help_GitHub(object sender, RoutedEventArgs e)
+        {
+            Process.Start("https://github.com/LazyBone152/EEPKOrganiser");
+        }
     }
 }

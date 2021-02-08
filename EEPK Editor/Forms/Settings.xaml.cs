@@ -2,8 +2,8 @@
 using System.ComponentModel;
 using System.IO;
 using System.Windows;
-using EEPK_Organiser.Settings;
 using MahApps.Metro.Controls;
+using Xv2CoreLib.Resource.App;
 
 namespace EEPK_Organiser.Forms
 {
@@ -25,18 +25,31 @@ namespace EEPK_Organiser.Forms
         #endregion
 
         private MainWindow _parent;
-        public AppSettings settings { get; set; }
+        public Xv2CoreLib.Resource.App.Settings settings { get; set; }
 
         public Visibility LightAccentVisibility { get { return (settings.GetCurrentTheme() == AppTheme.Light) ? Visibility.Visible : Visibility.Collapsed; } }
         public Visibility DarkAccentVisibility { get { return (settings.GetCurrentTheme() == AppTheme.Dark) ? Visibility.Visible : Visibility.Collapsed; } }
 
-        public Settings(AppSettings _settings, MainWindow parent)
+        public Settings(MainWindow parent)
         {
-            settings = _settings;
+            settings = SettingsManager.Instance.Settings;
             _parent = parent;
             InitializeComponent();
-            Owner = Application.Current.MainWindow;
+            Owner = System.Windows.Application.Current.MainWindow;
             DataContext = this;
+            SettingsManager.SettingsReloaded += SettingsManager_SettingsReloaded;
+        }
+
+        ~Settings()
+        {
+            SettingsManager.SettingsReloaded -= SettingsManager_SettingsReloaded;
+        }
+
+        private void SettingsManager_SettingsReloaded(object sender, EventArgs e)
+        {
+            settings = SettingsManager.Instance.Settings;
+            NotifyPropertyChanged(nameof(settings));
+            ThemeRadioButtons_CheckChanged(null, null);
         }
 
         private void Browse_Click(object sender, RoutedEventArgs e)

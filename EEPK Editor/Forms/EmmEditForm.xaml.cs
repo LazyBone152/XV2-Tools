@@ -19,6 +19,7 @@ using System.Windows.Threading;
 using Xv2CoreLib.EEPK;
 using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.EMM;
+using Xv2CoreLib.Resource.App;
 using Xv2CoreLib.Resource.UndoRedo;
 
 namespace EEPK_Organiser.Forms
@@ -450,7 +451,7 @@ namespace EEPK_Organiser.Forms
             catch (Exception ex)
             {
                 parent.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 #endif
         }
@@ -475,7 +476,7 @@ namespace EEPK_Organiser.Forms
             catch (Exception ex)
             {
                 parent.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 #endif
         }

@@ -6,7 +6,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 #if UndoRedo
@@ -43,6 +42,7 @@ namespace Xv2CoreLib.BAC
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BacEntry")]
         public ObservableCollection<BAC_Entry> BacEntries { get; set; } = new ObservableCollection<BAC_Entry>();
+
 
         public static BAC_File DefaultBacFile()
         {

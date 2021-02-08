@@ -30,6 +30,7 @@ using Xv2CoreLib.EEPK;
 using Xv2CoreLib.Resource.UndoRedo;
 using System.ComponentModel;
 using static Xv2CoreLib.CUS.CUS_File;
+using Xv2CoreLib.PSC;
 
 namespace Xv2CoreLib
 {
@@ -87,6 +88,7 @@ namespace Xv2CoreLib
         public const string CMS_PATH = "system/char_model_spec.cms";
         public const string PUP_PATH = "system/powerup_parameter.pup";
         public const string CSO_PATH = "system/chara_sound.cso";
+        public const string PSC_PATH = "system/parameter_spec_char.psc";
         public const string SKILL_IDB_PATH = "system/item/skill_item.idb";
         public const string TALISMAN_IDB_PATH = "system/item/talisman_item.idb";
         public const string CMN_BAC_PATH = "chara/CMN/CMN.bac";
@@ -121,6 +123,7 @@ namespace Xv2CoreLib
         private IDB_File skillIdbFile = null;
         private PUP_File pupFile = null;
         private CSO_File csoFile = null;
+        private PSC_File pscFile = null;
 
         //Cmn Files
         public EAN_File CmnEan = null;
@@ -219,6 +222,12 @@ namespace Xv2CoreLib
             {
                 csoFile = (CSO_File)GetParsedFileFromGame(CSO_PATH);
                 fileWatcher.FileLoadedOrSaved(fileIO.PathInGameDir(CSO_PATH));
+            }
+
+            if (fileWatcher.WasFileModified(fileIO.PathInGameDir(PSC_PATH)) || pscFile == null)
+            {
+                pscFile = (PSC_File)GetParsedFileFromGame(PSC_PATH);
+                fileWatcher.FileLoadedOrSaved(fileIO.PathInGameDir(PSC_PATH));
             }
 
             LoadMsgFiles(ref charaNameMsgFile, CHARACTER_MSG_PATH);
@@ -778,28 +787,13 @@ namespace Xv2CoreLib
             var csoEntries = csoFile.CsoEntries.Where(x => x.CharaID == cmsId).ToList();
             var ersEntry = ersFile.GetEntry(2, cmsId);
 
+            List<string> loadedFiles = new List<string>();
 
             if (loadFiles)
             {
                 //Load bcs
                 string bcsPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.bcs", cmsEntry.ShortName, cmsEntry.BcsPath));
                 BCS_File bcsFile = (BCS_File)GetParsedFileFromGame(bcsPath);
-
-                //Load amk
-                List<Xv2File<AMK_File>> amkFiles = new List<Xv2File<AMK_File>>();
-
-                if (csoEntries.Count > 0)
-                {
-                    foreach(var csoEntry in csoEntries)
-                    {
-                        if (csoEntry.AmkPath != "NULL" && !string.IsNullOrWhiteSpace(csoEntry.AmkPath))
-                        {
-                            string amkPath = Utils.ResolveRelativePath(string.Format("chara/{0}.amk", csoEntry.AmkPath));
-                            AMK_File amkFile = (AMK_File)GetParsedFileFromGame(amkPath);
-                            amkFiles.Add(new Xv2File<AMK_File>(amkFile, amkPath, false, null, null, 0, csoEntry.Costume.ToString()));
-                        }
-                    }
-                }
 
                 //Load fce ean
                 string fceEanPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.fce.ean", cmsEntry.ShortName, cmsEntry.FceEanPath));
@@ -809,6 +803,34 @@ namespace Xv2CoreLib
                 string baiPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.bai", cmsEntry.ShortName, cmsEntry.BaiPath));
                 BAI_File baiFile = (BAI_File)GetParsedFileFromGame(baiPath);
 
+                //Costumes
+                List<Xv2File<AMK_File>> amkFiles = new List<Xv2File<AMK_File>>();
+                ObservableCollection<Xv2CharaCostume> costumes = new ObservableCollection<Xv2CharaCostume>();
+
+                foreach(var csoEntry in csoEntries)
+                {
+                    Xv2CharaCostume costume = Xv2CharaCostume.GetAndAddCostume(costumes, (int)csoEntry.Costume);
+
+                    costume.CsoSkills = csoEntry.SkillCharaCode;
+
+                    //AMK
+                    string amkPath = Utils.ResolveRelativePath(string.Format("chara/{0}.amk", csoEntry.AmkPath));
+
+                    if (!string.IsNullOrWhiteSpace(csoEntry.AmkPath) && !loadedFiles.Contains(amkPath))
+                    {
+                        AMK_File amkFile = (AMK_File)GetParsedFileFromGame(amkPath);
+                        amkFiles.Add(new Xv2File<AMK_File>(amkFile, GetAbsolutePath(amkPath), !Utils.CompareSplitString(csoEntry.AmkPath, '/', 0, cmsEntry.ShortName), null, null, 0, csoEntry.Costume.ToString()));
+                        loadedFiles.Add(amkPath);
+                    }
+                    else
+                    {
+                        Xv2File<AMK_File>.AddCostume(amkFiles, GetAbsolutePath(amkPath), (int)csoEntry.Costume, string.Empty);
+                    }
+
+                    //ACBs loaded in GetCharacterMoveFiles()
+                }
+
+
                 Xv2Character chara = new Xv2Character()
                 {
                     CmsEntry = cmsEntry,
@@ -817,9 +839,10 @@ namespace Xv2CoreLib
                     Name = names,
                     BcsFile = new Xv2File<BCS_File>(bcsFile, fileIO.PathInGameDir(bcsPath), false, null, null),
                     AmkFile = amkFiles,
-                    FceEanFile = new Xv2File<EAN_File>(fceEan, fileIO.PathInGameDir(fceEanPath), cmsEntry.IsSelfReference(cmsEntry.FceEanPath)),
-                    BaiFile = new Xv2File<BAI_File>(baiFile, fileIO.PathInGameDir(baiPath), cmsEntry.IsSelfReference(cmsEntry.BaiPath)),
-                    MovesetFiles = GetCharacterMoveFiles(cmsEntry, ersEntry, csoEntries, loadFiles)
+                    FceEanFile = new Xv2File<EAN_File>(fceEan, fileIO.PathInGameDir(fceEanPath), !cmsEntry.IsSelfReference(cmsEntry.FceEanPath)),
+                    BaiFile = new Xv2File<BAI_File>(baiFile, fileIO.PathInGameDir(baiPath), !cmsEntry.IsSelfReference(cmsEntry.BaiPath)),
+                    MovesetFiles = GetCharacterMoveFiles(cmsEntry, ersEntry, csoEntries, loadFiles),
+                    Costumes = costumes
                 };
 
                 chara.CreateDefaultFiles();
@@ -892,6 +915,7 @@ namespace Xv2CoreLib
         
         private Xv2MoveFiles GetCharacterMoveFiles(CMS_Entry cmsEntry, ERS_MainTableEntry ersEntry, IList<CSO_Entry> csoEntries, bool loadFiles)
         {
+            List<string> loadedFiles = new List<string>();
             Xv2MoveFiles moveFiles = new Xv2MoveFiles();
 
             //Clear defaults out
@@ -942,48 +966,65 @@ namespace Xv2CoreLib
                 moveFiles.EepkPath = string.Format("vfx/{0}", ersEntry.FILE_PATH);
 
                 if(loadFiles)
-                moveFiles.EepkFile = new Xv2File<EffectContainerFile>((EffectContainerFile)GetParsedFileFromGame(moveFiles.EepkPath), fileIO.PathInGameDir(moveFiles.EepkPath), borrowed, null, null, MoveFileTypes.EEPK);
+                    moveFiles.EepkFile = new Xv2File<EffectContainerFile>((EffectContainerFile)GetParsedFileFromGame(moveFiles.EepkPath), fileIO.PathInGameDir(moveFiles.EepkPath), borrowed, null, null, MoveFileTypes.EEPK);
             }
 
             //ACBs
             if(csoEntries.Count > 0)
             {
-                moveFiles.VoxAcbFile.Clear();
-                moveFiles.SeAcbFile.Clear();
 
                 foreach (var csoEntry in csoEntries)
                 {
+                    moveFiles.SeAcbPath = $"sound/SE/Battle/Chara/{csoEntry.SePath}.acb";
+                    string acbPath = $"sound/VOX/Battle/Chara/{csoEntry.VoxPath}.acb";
+                    string acbEngPath = $"sound/VOX/Battle/Chara/en/{csoEntry.VoxPath}.acb";
+
                     //SE
-                    if (csoEntry.HasSePath)
+                    if (csoEntry.HasSePath && !loadedFiles.Contains(moveFiles.SeAcbPath))
                     {
                         bool borrowed = !Utils.CompareSplitString(csoEntry.SePath, '_', 2, cmsEntry.ShortName);
-                        moveFiles.SeAcbPath = $"sound/SE/Battle/Chara/{csoEntry.SePath}.acb";
-                        moveFiles.SeAcbFile.Add(new Xv2File<ACB_Wrapper>((ACB_Wrapper)GetParsedFileFromGame(moveFiles.SeAcbPath), fileIO.PathInGameDir(moveFiles.SeAcbPath), false, null, null, MoveFileTypes.SE_ACB, csoEntry.Costume.ToString()));
+
+                        if(loadFiles)
+                            moveFiles.SeAcbFile.Add(new Xv2File<ACB_Wrapper>((ACB_Wrapper)GetParsedFileFromGame(moveFiles.SeAcbPath), fileIO.PathInGameDir(moveFiles.SeAcbPath), borrowed, null, null, MoveFileTypes.SE_ACB, csoEntry.Costume.ToString()));
+
+                        loadedFiles.Add(moveFiles.SeAcbPath);
+                    }
+                    else
+                    {
+                        Xv2File<ACB_Wrapper>.AddCostume(moveFiles.SeAcbFile, GetAbsolutePath(moveFiles.SeAcbPath), (int)csoEntry.Costume, string.Empty);
                     }
 
-                    moveFiles.VoxAcbFile.Clear();
-
                     //VOX, Jap
-                    if (csoEntry.HasVoxPath)
+                    if (csoEntry.HasVoxPath && !loadedFiles.Contains(acbPath))
                     {
                         bool borrowed = !Utils.CompareSplitString(csoEntry.VoxPath, '_', 2, cmsEntry.ShortName);
 
-                        string acbPath = $"sound/VOX/Battle/Chara/{csoEntry.VoxPath}.acb";
                         moveFiles.VoxAcbPath.Add(acbPath);
 
                         if (loadFiles)
-                            moveFiles.VoxAcbFile.Add(new Xv2File<ACB_Wrapper>((ACB_Wrapper)GetParsedFileFromGame(acbPath), fileIO.PathInGameDir(acbPath), false, null, null, MoveFileTypes.VOX_ACB, csoEntry.Costume.ToString()));
+                            moveFiles.VoxAcbFile.Add(new Xv2File<ACB_Wrapper>((ACB_Wrapper)GetParsedFileFromGame(acbPath), fileIO.PathInGameDir(acbPath), borrowed, null, null, MoveFileTypes.VOX_ACB, csoEntry.Costume.ToString()));
+
+                        loadedFiles.Add(acbPath);
+                    }
+                    else
+                    {
+                        Xv2File<ACB_Wrapper>.AddCostume(moveFiles.VoxAcbFile, GetAbsolutePath(acbPath), (int)csoEntry.Costume, string.Empty);
                     }
 
                     //VOX, Eng
-                    if (csoEntry.HasVoxPath)
+                    if (csoEntry.HasVoxPath && !loadedFiles.Contains(acbEngPath))
                     {
                         bool borrowed = !Utils.CompareSplitString(csoEntry.VoxPath, '_', 2, cmsEntry.ShortName);
-                        string acbPath = $"sound/VOX/Battle/Chara/en/{csoEntry.VoxPath}.acb";
-                        moveFiles.VoxAcbPath.Add(acbPath);
+                        moveFiles.VoxAcbPath.Add(acbEngPath);
 
                         if (loadFiles)
-                            moveFiles.VoxAcbFile.Add(new Xv2File<ACB_Wrapper>((ACB_Wrapper)GetParsedFileFromGame(acbPath), fileIO.PathInGameDir(acbPath), false, null, "en", MoveFileTypes.VOX_ACB, csoEntry.Costume.ToString()));
+                            moveFiles.VoxAcbFile.Add(new Xv2File<ACB_Wrapper>((ACB_Wrapper)GetParsedFileFromGame(acbEngPath), fileIO.PathInGameDir(acbEngPath), borrowed, null, "en", MoveFileTypes.VOX_ACB, csoEntry.Costume.ToString()));
+
+                        loadedFiles.Add(acbEngPath);
+                    }
+                    else
+                    {
+                        Xv2File<ACB_Wrapper>.AddCostume(moveFiles.VoxAcbFile, GetAbsolutePath(acbEngPath), (int)csoEntry.Costume, "en");
                     }
                 }
             }
@@ -1055,10 +1096,14 @@ namespace Xv2CoreLib
 
         public void SaveCharacters()
         {
-
+            SaveFileToGame(CMS_PATH, cmsFile);
+            SaveFileToGame(ERS_PATH, ersFile);
+            SaveFileToGame(CSO_PATH, csoFile);
+            SaveFileToGame(PSC_PATH, pscFile);
+            SaveMsgFilesToGame(CHARACTER_MSG_PATH, charaNameMsgFile);
         }
 
-        public void SaveCharacter(Xv2Character chara)
+        public void SaveCharacter(Xv2Character chara, bool isMoveset)
         {
             //Refresh files
             RefreshCharacters();
@@ -1066,8 +1111,43 @@ namespace Xv2CoreLib
             //Character files
             chara.CalculateFilePaths();
             InstallErsCharacterEntry(chara.CmsEntry.ShortName, chara.CmsEntry.ID, !chara.MovesetFiles.EepkFile.File.IsNull(), chara.MovesetFiles.EepkFile.Borrowed);
+            InstallCmsEntry(chara.CmsEntry);
 
+            //Costumes
+            List<CSO_Entry> csoEntries = new List<CSO_Entry>();
 
+            foreach (var costume in chara.Costumes)
+            {
+                Xv2File<ACB_Wrapper> se = chara.MovesetFiles.SeAcbFile.FirstOrDefault(x => x.HasCostume(costume.CostumeId));
+                Xv2File<ACB_Wrapper> vox = chara.MovesetFiles.VoxAcbFile.FirstOrDefault(x => x.HasCostume(costume.CostumeId));
+                Xv2File<AMK_File> amk = chara.AmkFile.FirstOrDefault(x => x.HasCostume(costume.CostumeId));
+
+                //CSO Entry
+                CSO_Entry csoEntry = new CSO_Entry();
+
+                csoEntry.CharaID = chara.CmsEntry.ID;
+                csoEntry.Costume = (uint)costume.CostumeId;
+                csoEntry.SePath = (se != null) ? Path.GetFileNameWithoutExtension(se.Path) : null;
+                csoEntry.VoxPath = (vox != null) ? Path.GetFileNameWithoutExtension(vox.Path) : null;
+                csoEntry.AmkPath = (amk != null) ? string.Format("{0}/{1}", Path.GetFileName(Path.GetDirectoryName(amk.Path)), Path.GetFileNameWithoutExtension(amk.Path)) : null;
+                csoEntry.SkillCharaCode = costume.CsoSkills;
+
+                csoEntries.Add(csoEntry);
+            }
+
+            if (!isMoveset)
+            {
+                //Name
+                InstallCharacterName(chara.Name, chara.CmsEntry.ShortName);
+            }
+
+            //Install CSO Entries
+            csoFile.CsoEntries.RemoveAll(x => x.CharaID == chara.CmsEntry.ID);
+            csoFile.CsoEntries.AddRange(csoEntries);
+
+            //Save
+            chara.SaveFiles();
+            SaveCharacters();
         }
 
         //Skill
@@ -1200,19 +1280,28 @@ namespace Xv2CoreLib
             }
         }
 
-        public void InstallCsoEntry(string charaShortName, int id, int costume, bool hasVox, bool hasSe, bool hasAmk)
+        public void InstallCmsEntry(CMS_Entry cmsEntry)
         {
-            var entry = csoFile.CsoEntries.FirstOrDefault(x => x.CharaID == id && x.Costume == (uint)costume);
+            var existingIdx = cmsFile.CMS_Entries.IndexOf(cmsFile.CMS_Entries.FirstOrDefault(x => x.ID == cmsEntry.ID));
 
-            if(entry == null)
+            if (existingIdx != -1)
             {
-                entry = new CSO_Entry() { CharaID = id, SkillCharaCode = charaShortName, Costume = (uint)costume};
-                csoFile.CsoEntries.Add(entry);
+                cmsFile.CMS_Entries[existingIdx] = cmsEntry;
             }
+            else
+            {
+                cmsFile.CMS_Entries.Add(cmsEntry);
+            }
+        }
 
-            entry.VoxPath = (hasVox) ? $"CAR_BTL_{charaShortName}_VOX" : string.Empty;
-            entry.SePath = (hasSe) ? $"CAR_BTL_{charaShortName}_SE" : string.Empty;
-            entry.AmkPath = (hasAmk) ? $"{charaShortName}/{charaShortName}" : string.Empty;
+        public void InstallCharacterName(string[] names, string shortName)
+        {
+            if (names.Length != (int)Language.NumLanguages) throw new InvalidDataException($"Xenoverse2.InstallCharacterName: Invalid number of language entries.");
+
+            for (int i = 0; i < charaNameMsgFile.Length; i++)
+            {
+                charaNameMsgFile[i].SetCharacterName(names[i], shortName);
+            }
         }
 
         #endregion
@@ -1328,6 +1417,8 @@ namespace Xv2CoreLib
                     return EMD_File.Load(GetBytesFromGameWrapper(path, onlyFromCpk, raiseEx));
                 case ".msg":
                     return MSG_File.Load(GetBytesFromGameWrapper(path, onlyFromCpk, raiseEx));
+                case ".psc":
+                    return PSC_File.Load(GetBytesFromGameWrapper(path, onlyFromCpk, raiseEx));
                 case ".eepk":
                     return EffectContainerFile.Load(path, fileIO, onlyFromCpk);
                 case ".acb":
@@ -1358,6 +1449,8 @@ namespace Xv2CoreLib
 
         private void SaveFileToGame(string path, object file)
         {
+            Directory.CreateDirectory(Path.GetDirectoryName(GetAbsolutePath(path)));
+
             byte[] bytes = GetBytesFromParsedFile(path, file);
             File.WriteAllBytes(GetAbsolutePath(path), bytes);
             fileWatcher.FileLoadedOrSaved(path);
@@ -1399,6 +1492,8 @@ namespace Xv2CoreLib
                     return ((MSG_File)data).SaveToBytes();
                 case ".pup":
                     return ((PUP_File)data).SaveToBytes();
+                case ".psc":
+                    return ((PSC_File)data).SaveToBytes();
                 default:
                     throw new InvalidDataException(String.Format("Xenoverse2.GetBytesFromParsedFile: The filetype of \"{0}\" is not supported.", path));
             }
@@ -1716,6 +1811,7 @@ namespace Xv2CoreLib
     {
         public string[] Name = new string[(int)Xenoverse2.Language.NumLanguages];
 
+        public ObservableCollection<Xv2CharaCostume> Costumes { get; set; } = new ObservableCollection<Xv2CharaCostume>();
         public CMS_Entry CmsEntry = null;
         public List<CSO_Entry> CsoEntry = null;
         public ERS_MainTableEntry ErsEntry = null;
@@ -1739,7 +1835,7 @@ namespace Xv2CoreLib
                 MovesetFiles.BdmFile.File.Save(MovesetFiles.BdmFile.Path);
 
             if (BaiFile?.File?.IsNull() == false)
-                BaiFile.File.Save(MovesetFiles.BasFile.Path);
+                BaiFile.File.Save(BaiFile.Path);
 
             if (MovesetFiles.EanFile[0]?.File?.IsNull() == false)
                 MovesetFiles.EanFile[0].File.Save(MovesetFiles.EanFile[0].Path);
@@ -1770,49 +1866,49 @@ namespace Xv2CoreLib
         {
             string skillDir = $"chara/{CmsEntry.ShortName}";
 
-            if (!MovesetFiles.BacFile.Borrowed)
+            if (MovesetFiles.BacFile?.Borrowed == false)
             {
                 MovesetFiles.BacFile.Path = Xenoverse2.Instance.GetAbsolutePath(String.Format("{0}/{1}_PLAYER.bac", skillDir, CmsEntry.ShortName));
                 CmsEntry.BacPath = CmsEntry.ShortName;
             }
 
-            if (!MovesetFiles.BcmFile.Borrowed)
+            if (MovesetFiles.BcmFile?.Borrowed == false)
             {
                 MovesetFiles.BcmFile.Path = Xenoverse2.Instance.GetAbsolutePath(String.Format("{0}/{1}_PLAYER.bcm", skillDir, CmsEntry.ShortName));
                 CmsEntry.BcmPath = CmsEntry.ShortName;
             }
 
-            if (!MovesetFiles.BdmFile.Borrowed)
+            if (MovesetFiles.BdmFile?.Borrowed == false)
             {
                 MovesetFiles.BdmFile.Path = Xenoverse2.Instance.GetAbsolutePath(String.Format("{0}/{1}_PLAYER.bdm", skillDir, CmsEntry.ShortName));
                 CmsEntry.BdmPath = CmsEntry.ShortName;
             }
 
-            if (!MovesetFiles.EanFile[0].Borrowed)
+            if (MovesetFiles.EanFile[0]?.Borrowed == false)
             {
                 MovesetFiles.EanFile[0].Path = Xenoverse2.Instance.GetAbsolutePath(String.Format("{0}/{1}.ean", skillDir, CmsEntry.ShortName));
                 CmsEntry.EanPath = CmsEntry.ShortName;
             }
 
-            if (!MovesetFiles.CamEanFile[0].Borrowed)
+            if (!MovesetFiles.CamEanFile[0]?.Borrowed == false)
             {
                 MovesetFiles.CamEanFile[0].Path = Xenoverse2.Instance.GetAbsolutePath(String.Format("{0}/{1}.cam.ean", skillDir, CmsEntry.ShortName));
                 CmsEntry.CamEanPath = CmsEntry.ShortName;
             }
 
-            if (!BaiFile.Borrowed)
+            if (BaiFile?.Borrowed == false)
             {
                 BaiFile.Path = Xenoverse2.Instance.GetAbsolutePath(String.Format("{0}/{1}.bai", skillDir, CmsEntry.ShortName));
                 CmsEntry.BaiPath = CmsEntry.ShortName;
             }
 
-            if (!FceEanFile.Borrowed)
+            if (FceEanFile?.Borrowed == false)
             {
                 FceEanFile.Path = Xenoverse2.Instance.GetAbsolutePath(String.Format("{0}/{1}.fce.ean", skillDir, CmsEntry.ShortName));
                 CmsEntry.FceEanPath = CmsEntry.ShortName;
             }
 
-            if (!MovesetFiles.EepkFile.Borrowed)
+            if (MovesetFiles.EepkFile?.Borrowed == false)
             {
                 MovesetFiles.EepkFile.Path = Xenoverse2.Instance.GetAbsolutePath(String.Format("vfx/chara/{0}/{0}.eepk", CmsEntry.ShortName));
             }
@@ -1888,6 +1984,49 @@ namespace Xv2CoreLib
 
             if (AmkFile.Any(x => !x.IsDefault))
                 AmkFile.Add(new Xv2File<AMK_File>(new AMK_File(), null, false, null, null, Xenoverse2.MoveFileTypes.AMK, "0"));
+        }
+    
+    }
+
+    public class Xv2CharaCostume : INotifyPropertyChanged
+    {
+        #region NotifyPropertyChanged
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+        #endregion
+
+        public int CostumeId { get; set; }
+
+        //PSC
+        public bool PscEnabled { get; set; }
+        public PSC_SpecEntry PscEntry { get; set; } = new PSC_SpecEntry(); //needs to be implemented... currently not loaded
+
+        //CSO
+        public string CsoSkills { get; set; }
+
+        public Xv2CharaCostume (int id)
+        {
+            CostumeId = id;
+        }
+
+        public static Xv2CharaCostume GetAndAddCostume(IList<Xv2CharaCostume> costumes, int id)
+        {
+            var existing = costumes.FirstOrDefault(x => x.CostumeId == id);
+
+            if(existing == null)
+            {
+                existing = new Xv2CharaCostume(id);
+                costumes.Add(existing);
+            }
+
+            return existing;
         }
     }
 
@@ -2037,7 +2176,7 @@ namespace Xv2CoreLib
         public ACB_Wrapper GetSeFile(int costume = -1)
         {
             if (SeAcbFile.Count > 0 && costume == -1)
-                return SeAcbFile[costume].File;
+                return SeAcbFile[0].File;
 
             var file = SeAcbFile.FirstOrDefault(x => x.HasCostume(costume))?.File;
 
@@ -2540,8 +2679,6 @@ namespace Xv2CoreLib
 
             foreach(var value in values)
             {
-                if (value.ToLower() == "all") throw new InvalidDataException($"Xv2File.GetArg2Values: special token \"ALL\" is not valid when creating the value list.");
-
                 int intValue;
                 if(!int.TryParse(value, out intValue))
                     throw new InvalidDataException($"Xv2File.GetArg2Values: value of \"{value}\" could not be parsed.");
@@ -2556,6 +2693,28 @@ namespace Xv2CoreLib
         {
             //return (GetArg2Values().Contains(costume) || Arg2 == "0");
             return (GetArg2Values().Contains(costume));
+        }
+
+        public void AddCostume(int costume)
+        {
+            Arg2 += (string.IsNullOrWhiteSpace(Arg2)) ? costume.ToString() : $", {costume}";
+        }
+
+        /// <summary>
+        /// Add a costume to an existing loaded file. Intended for use with CSO files (AMK, SE, VOX)
+        /// </summary>
+        /// <returns></returns>
+        public static bool AddCostume(IList<Xv2File<T>> files, string absPath, int costume, string arg1)
+        {
+            var file = (string.IsNullOrWhiteSpace(arg1)) ? files.FirstOrDefault(x => Utils.ComparePaths(absPath, x.Path) && string.IsNullOrWhiteSpace(x.Arg1)) : files.FirstOrDefault(x => Utils.ComparePaths(absPath, x.Path) && x.Arg1 == arg1);
+
+            if(file != null)
+            {
+                file.AddCostume(costume);
+                return true;
+            }
+
+            return false;
         }
     }
 

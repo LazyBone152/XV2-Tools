@@ -29,6 +29,9 @@ using AudioCueEditor.Utils;
 using Xv2CoreLib.AFS2;
 using VGAudio.Cli;
 using System.Runtime.ExceptionServices;
+using Xv2CoreLib.Resource.App;
+using AutoUpdater;
+using System.Diagnostics;
 
 namespace AudioCueEditor
 {
@@ -100,50 +103,101 @@ namespace AudioCueEditor
             typeof(DependencyObject), new FrameworkPropertyMetadata(Int32.MaxValue));
 
             //Load settings
-            GeneralInfo.AppSettings = Settings.AppSettings.LoadSettings();
+            SettingsManager.Instance.CurrentApp = Xv2CoreLib.Resource.App.Application.Ace;
+            SettingsManager.SettingsReloaded += SettingsManager_SettingsReloaded;
 
             InitializeComponent();
             DataContext = this;
-            InitWindowsTheme();
+            InitTheme();
             LoadOnStartUp();
 
 
+            //Check for updates silently
+#if !DEBUG
+            if (SettingsManager.Instance.Settings.UpdateNotifications)
+            {
+                CheckForUpdate(false);
+            }
+#endif
+
         }
 
-        private void InitWindowsTheme()
+        private void SettingsManager_SettingsReloaded(object sender, EventArgs e)
         {
-            bool darkMode = false;
+            InitTheme();
+        }
 
-            switch (GeneralInfo.AppSettings.GetCurrentTheme())
+        private async void CheckForUpdate(bool userInitiated)
+        {
+            //GitHub Settings
+            Update.APP_TAG = "ACE";
+            Update.GITHUB_ACCOUNT = "LazyBone152";
+            Update.GITHUB_REPO = "ACE";
+            Update.DEFAULT_APP_NAME = "AudioCueEditor.exe";
+
+            //Check for update
+            object[] ret = await Update.CheckForUpdate();
+
+            //Return values
+            bool isUpdateAvailable = (bool)ret[0];
+            Version latestVersion = (Version)ret[1];
+
+            await Task.Delay(1000);
+
+            if (isUpdateAvailable)
             {
-                case Settings.AppTheme.Light:
-                    darkMode = false;
-                    break;
-                case Settings.AppTheme.Dark:
-                    darkMode = true;
-                    break;
-                case Settings.AppTheme.WindowsDefault:
+                var messageResult = await this.ShowMessageAsync("Update Available", $"An update is available ({latestVersion}). Do you want to download and install it?\n\nNote: All instances of the application will be closed and any unsaved work will be lost.", MessageDialogStyle.AffirmativeAndNegative, App.DefaultDialogSettings);
+
+                if (messageResult == MessageDialogResult.Affirmative)
+                {
+                    var controller = await this.ShowProgressAsync("Update Available", "Downloading...", false, App.DefaultDialogSettings);
+                    controller.SetIndeterminate();
+
+                    try
                     {
-                        //Check registry for the users Light/Dark mode preferences (Windows 10 only)
-                        var registryValue = Registry.GetValue(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "AppsUseLightTheme", "1");
-
-                        if (registryValue != null)
-                            if (registryValue.ToString() == "0")
-                                darkMode = true;
+                        await Task.Run(() =>
+                        {
+                            Update.DownloadUpdate();
+                        });
                     }
-                    break;
-            }
+                    finally
+                    {
+                        await controller.CloseAsync();
+                    }
 
-            if (darkMode)
-            {
-                ThemeManager.ChangeAppStyle(Application.Current, ThemeManager.GetAccent("Emerald"), ThemeManager.GetAppTheme("BaseDark"));
+                    if (Update.IsDownloadSuccessful)
+                    {
+                        Update.UpdateApplication();
+                    }
+                    else
+                    {
+                        await this.ShowMessageAsync("Update Failed", Update.DownloadFailedText, MessageDialogStyle.AffirmativeAndNegative, App.DefaultDialogSettings);
+                    }
+
+                }
             }
-            else
+            else if (userInitiated)
             {
-                ThemeManager.ChangeAppStyle(Application.Current, ThemeManager.GetAccent("Blue"), ThemeManager.GetAppTheme("BaseLight"));
+                await this.ShowMessageAsync("Update", $"No update is available.", MessageDialogStyle.Affirmative, App.DefaultDialogSettings);
             }
         }
 
+
+        public void InitTheme()
+        {
+            Dispatcher.Invoke((() =>
+            {
+                switch (SettingsManager.Instance.Settings.GetCurrentTheme())
+                {
+                    case Xv2CoreLib.Resource.App.AppTheme.Light:
+                        ThemeManager.ChangeAppStyle(System.Windows.Application.Current, ThemeManager.GetAccent(SettingsManager.Instance.Settings.CurrentLightAccent.ToString()), ThemeManager.GetAppTheme("BaseLight"));
+                        break;
+                    case Xv2CoreLib.Resource.App.AppTheme.Dark:
+                        ThemeManager.ChangeAppStyle(System.Windows.Application.Current, ThemeManager.GetAccent(SettingsManager.Instance.Settings.CurrentDarkAccent.ToString()), ThemeManager.GetAppTheme("BaseDark"));
+                        break;
+                }
+            }));
+        }
         private void LoadOnStartUp()
         {
             string[] args = Environment.GetCommandLineArgs();
@@ -203,7 +257,6 @@ namespace AudioCueEditor
                     AcbFile = new ACB_Wrapper(ACB_File.Load(path));
                 });
 
-                controller.CloseAsync();
                 UndoManager.Instance.Clear();
 
                 if (AcbFile != null)
@@ -221,10 +274,9 @@ namespace AudioCueEditor
                 }
                 
             }
-            catch (Exception ex)
+            finally
             {
                 controller.CloseAsync();
-                ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
             }
         }
 
@@ -291,20 +343,18 @@ namespace AudioCueEditor
         public RelayCommand SettingsCommand => new RelayCommand(OpenSettings);
         private async void OpenSettings()
         {
-            if(GeneralInfo.AppSettings != null)
+            string originalGameDir = SettingsManager.settings.GameDirectory;
+
+            Forms.Settings settingsForm = new Forms.Settings(this);
+            settingsForm.ShowDialog();
+            SettingsManager.Instance.SaveSettings();
+            InitTheme();
+
+            if (SettingsManager.settings.GameDirectory != originalGameDir && SettingsManager.settings.ValidGameDir)
             {
-                string originalGameDir = GeneralInfo.AppSettings.GameDirectory;
-
-                Forms.Settings settingsForm = new Forms.Settings(GeneralInfo.AppSettings);
-                settingsForm.ShowDialog();
-                GeneralInfo.AppSettings.SaveSettings();
-                InitWindowsTheme();
-
-                if (GeneralInfo.AppSettings.GameDirectory != originalGameDir && GeneralInfo.AppSettings.ValidGameDir)
-                {
-                    //placeholder for whenever loading from game is added
-                }
+                //placeholder for whenever loading from game is added
             }
+            
         }
 
         public RelayCommand ExitCommand => new RelayCommand(Exit);
@@ -454,6 +504,15 @@ namespace AudioCueEditor
                 await controller.CloseAsync();
             }
         }
-        
+
+        private void Help_CheckForUpdates(object sender, RoutedEventArgs e)
+        {
+            CheckForUpdate(true);
+        }
+
+        private void Help_GitHub(object sender, RoutedEventArgs e)
+        {
+            Process.Start($"https://github.com/LazyBone152/ACE");
+        }
     }
 }

@@ -22,6 +22,7 @@ using EEPK_Organiser.View;
 using MahApps.Metro.Controls;
 using Xv2CoreLib.Resource.UndoRedo;
 using EEPK_Organiser.Forms.Recolor;
+using Xv2CoreLib.Resource.App;
 
 namespace EEPK_Organiser.Forms
 {
@@ -271,7 +272,7 @@ namespace EEPK_Organiser.Forms
             catch (Exception ex)
             {
                 parent.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             
         }
@@ -375,7 +376,7 @@ namespace EEPK_Organiser.Forms
             catch (Exception ex)
             {
                 parent.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -409,7 +410,7 @@ namespace EEPK_Organiser.Forms
             catch (Exception ex)
             {
                 parent.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             
         }
@@ -436,7 +437,7 @@ namespace EEPK_Organiser.Forms
             catch (Exception ex)
             {
                 parent.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
         }
@@ -463,7 +464,7 @@ namespace EEPK_Organiser.Forms
             catch (Exception ex)
             {
                 parent.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
         }
@@ -503,7 +504,7 @@ namespace EEPK_Organiser.Forms
             catch (Exception ex)
             {
                 parent.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
         
@@ -522,7 +523,7 @@ namespace EEPK_Organiser.Forms
             catch (Exception ex)
             {
                 parent.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -565,7 +566,7 @@ namespace EEPK_Organiser.Forms
             catch (Exception ex)
             {
                 parent.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

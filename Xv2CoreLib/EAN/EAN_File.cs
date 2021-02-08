@@ -12,6 +12,10 @@ using System.Reflection;
 using System.Globalization;
 using Xv2CoreLib;
 using System.IO;
+using Xv2CoreLib.Resource.UndoRedo;
+using Xv2CoreLib.Resource;
+using System.Numerics;
+using Xv2CoreLib.ESK;
 
 namespace Xv2CoreLib.EAN
 {
@@ -27,6 +31,7 @@ namespace Xv2CoreLib.EAN
     [Serializable]
     public class EAN_File : INotifyPropertyChanged, ISorting, IIsNull
     {
+        #region INotifyPropertyChanged
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -40,6 +45,10 @@ namespace Xv2CoreLib.EAN
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
+        #endregion
+
+        public const float DefaultFoV = 39.97836f;
+
 
         [YAXAttributeForClass]
         public bool IsCamera { get; set; } //offset 16
@@ -49,8 +58,8 @@ namespace Xv2CoreLib.EAN
         public byte I_17 { get; set; }
 
         public ESK_Skeleton Skeleton { get; set; }
-        private ObservableCollection<EAN_Animation> AnimationsValue = null;
-        public ObservableCollection<EAN_Animation> Animations
+        private AsyncObservableCollection<EAN_Animation> AnimationsValue = null;
+        public AsyncObservableCollection<EAN_Animation> Animations
         {
             get
             {
@@ -67,16 +76,7 @@ namespace Xv2CoreLib.EAN
             }
         }
 
-        public byte[] SaveToBytes()
-        {
-            return new Deserializer(this).bytes.ToArray();
-        }
-
-        public void SortEntries()
-        {
-            Animations = Sorting.SortEntries(Animations);
-        }
-
+        #region Load/Save
         public static EAN_File Load(byte[] rawBytes)
         {
             return new Parser(rawBytes).eanFile;
@@ -95,15 +95,47 @@ namespace Xv2CoreLib.EAN
             }
             new Deserializer(this, path);
         }
+
+        public byte[] SaveToBytes()
+        {
+            return new Deserializer(this).bytes.ToArray();
+        }
         
+        public void SaveBinary(string path)
+        {
+            if (!Directory.Exists(Path.GetDirectoryName(path)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+            }
+            new Deserializer(this, path);
+        }
+
+
+        //Helpers
+        /// <summary>
+        /// Create ESK_RelativeTransform references on all nodes and components.
+        /// </summary>
+        public void LinkEskData()
+        {
+            foreach (var anim in Animations)
+            {
+                anim.LinkEskData(Skeleton);
+            }
+        }
+
+        public void SortEntries()
+        {
+            Animations = Sorting.SortEntries(Animations);
+        }
+
         public bool ValidateAnimationIndexes()
         {
             if (Animations == null) return true;
             List<int> UsedIndexes = new List<int>();
 
-            foreach(var anim in Animations)
+            foreach (var anim in Animations)
             {
-                if(UsedIndexes.IndexOf(anim.IndexNumeric) != -1)
+                if (UsedIndexes.IndexOf(anim.IndexNumeric) != -1)
                 {
                     throw new Exception(String.Format("Animation Index {0} was defined more than once. Animations cannot share the same Index!", anim.IndexNumeric));
                 }
@@ -113,44 +145,15 @@ namespace Xv2CoreLib.EAN
             return true;
         }
 
-        public int GetSortedIndexOfValue(int valueIndex)
-        {
-            //Assumes that no animation with an Index equal to valueIndex exists. (There should be 1, but it is irrelevant)
-            if (Animations == null) return -1;
-            
-            foreach(var anim in Animations)
-            {
-                if(anim.IndexNumeric > valueIndex)
-                {
-                    return Animations.IndexOf(anim);
-                }
-            }
+        #endregion
 
-            return Animations.Count - 1;
-        }
-
-        public int GetNextUnusedIndexValue()
-        {
-            if (Animations == null) return -1;
-
-            return Animations[Animations.Count - 1].IndexNumeric + 1;
-        }
-        
+        #region GetAnimation
         /// <summary>
         /// Returns the zero-index of the animation matching the parameter name. If none are found, -1 is returned.
         /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
         public int IndexOf(string name)
         {
-            for(int i = 0; i < Animations.Count; i++)
-            {
-                if(name == Animations[i].Name)
-                {
-                    return i;
-                }
-            }
-            return -1;
+            return Animations.IndexOf(Animations.FirstOrDefault(x => x.Name == name));
         }
 
         /// <summary>
@@ -160,18 +163,11 @@ namespace Xv2CoreLib.EAN
         /// <returns></returns>
         public int IndexOf(int id)
         {
-            for (int i = 0; i < Animations.Count; i++)
-            {
-                if (id == Animations[i].IndexNumeric)
-                {
-                    return i;
-                }
-            }
-            return -1;
+            return Animations.IndexOf(Animations.FirstOrDefault(x => x.IndexNumeric == id));
         }
 
         /// <summary>
-        /// Index of animation based on a split name (e.g. no chara code)
+        /// Index of animation based on a split name (first 4 characters removed). 
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
@@ -179,7 +175,7 @@ namespace Xv2CoreLib.EAN
         {
             for (int i = 0; i < Animations.Count; i++)
             {
-                if(Animations[i].Name. Length > 4)
+                if (Animations[i].Name.Length > 4)
                 {
                     if (name == Animations[i].Name.Remove(0, 4))
                     {
@@ -190,22 +186,88 @@ namespace Xv2CoreLib.EAN
             return -1;
         }
 
+        public EAN_Animation GetAnimation(int id, bool returnNull = false)
+        {
+            if (IndexOf(id) == -1 && !returnNull) throw new Exception("Could not find an animation with an ID matching " + id);
+            if (IndexOf(id) == -1 && returnNull) return null;
+            return Animations[IndexOf(id)];
+        }
+
+        /// <summary>
+        /// Looks for an animation and returns its ID.
+        /// </summary>
+        /// <returns></returns>
+        public int AnimationExists(EAN_Animation anim)
+        {
+            foreach (var _anim in Animations)
+            {
+                if (_anim.Compare(anim)) return _anim.IndexNumeric;
+            }
+
+            return -1;
+        }
+
+        public string NameOf(int id)
+        {
+            if (IndexOf(id) == -1) throw new Exception("Could not find an animation with an ID matching " + id);
+            return Animations[IndexOf(id)].Name;
+        }
+
+        #endregion
+
+        #region AddAnimation
+        public void AddEntry(int id, EAN_Animation entry)
+        {
+            entry.IndexNumeric = (ushort)id;
+
+            for (int i = 0; i < Animations.Count; i++)
+            {
+                if (Animations[i].IndexNumeric == id)
+                {
+                    Animations[i] = entry;
+                    return;
+                }
+            }
+
+            Animations.Add(entry);
+            entry.LinkEskData(Skeleton);
+        }
+
+        /// <summary>
+        /// Adds the animation and returns the auto-assigned id.
+        /// </summary>
+        /// <param name="anim"></param>
+        /// <returns></returns>
+        public int AddEntry(EAN_Animation anim)
+        {
+            anim.LinkEskData(Skeleton);
+
+            int newId = NextID();
+            anim.IndexNumeric = newId;
+            Animations.Add(anim);
+
+            return newId;
+        }
+
+        #endregion
+
+        #region Defaults
         public static EAN_File DefaultCamFile()
         {
             return new EAN_File()
             {
-                Animations = new ObservableCollection<EAN_Animation>(),
+                Animations = new AsyncObservableCollection<EAN_Animation>(),
                 IsCamera = true,
                 I_08 = 37508,
                 Skeleton = new ESK_Skeleton()
                 {
                     I_28 = new int[2] { 1900697063, 175112582 },
                     UseUnk2 = true,
-                    ESKBones = new ObservableCollection<ESK_Bone>()
+                    ESKBones = new AsyncObservableCollection<ESK_Bone>()
                     {
                         new ESK_Bone()
                         {
-                            Name = "Node",
+                            Name = EAN_Node.CAM_NODE,
                             RelativeTransform = new ESK_RelativeTransform()
                             {
                                 F_28 = 1f,
@@ -223,18 +285,20 @@ namespace Xv2CoreLib.EAN
         {
             return new EAN_File()
             {
-                Animations = new ObservableCollection<EAN_Animation>(),
+                Animations = new AsyncObservableCollection<EAN_Animation>(),
                 IsCamera = true,
                 I_08 = 37508,
                 Skeleton = skeleton.Copy()
             };
         }
 
+        #endregion
 
+        #region Helper
         public EAN_File Clone()
         {
-            ObservableCollection<EAN_Animation> anims = new ObservableCollection<EAN_Animation>();
-            foreach(var a in Animations)
+            AsyncObservableCollection<EAN_Animation> anims = new AsyncObservableCollection<EAN_Animation>();
+            foreach (var a in Animations)
             {
                 anims.Add(a.Clone());
             }
@@ -252,7 +316,7 @@ namespace Xv2CoreLib.EAN
         /// <summary>
         /// Gets the total number of animation indexes, including any null ones.
         /// </summary>
-        public int AnimationCount()
+        public int GetAnimationIndexCount()
         {
             if (Animations == null) return 0;
             if (Animations.Count == 0) return 0;
@@ -262,105 +326,26 @@ namespace Xv2CoreLib.EAN
             return Animations[idx].IndexNumeric + 1;
         }
 
-        public int IndexOfAnimation(int id)
-        {
-            if (Animations == null) return -1;
-
-            for(int i = 0; i < Animations.Count; i++)
-            {
-                if (Animations[i].IndexNumeric == id) return i;
-            }
-
-            return -1;
-        }
-
-        public void AddEntry(int id, EAN_Animation entry)
-        {
-            for(int i = 0; i < Animations.Count; i++)
-            {
-                if(Animations[i].IndexNumeric == id)
-                {
-                    Animations[i] = entry;
-                    return;
-                }
-            }
-
-            Animations.Add(entry);
-        }
-
-        /// <summary>
-        /// Adds the animation and returns the auto-assigned id.
-        /// </summary>
-        /// <param name="anim"></param>
-        /// <returns></returns>
-        public int AddEntry(EAN_Animation anim)
-        {
-            int newId = NextID();
-            anim.IndexNumeric = newId;
-            Animations.Add(anim);
-            return newId;
-        }
-
-        public void SaveBinary(string path)
-        {
-            if (!Directory.Exists(Path.GetDirectoryName(path)))
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(path));
-            }
-            new Deserializer(this, path);
-        }
-
         public int NextID(int mindID = 0)
         {
             int id = mindID;
 
-            while(IndexOf(id) != -1)
+            while (IndexOf(id) != -1)
             {
                 id++;
             }
 
             return id;
         }
-
-        public EAN_Animation GetAnimation(int id, bool returnNull = false)
-        {
-            if (IndexOf(id) == -1 && !returnNull) throw new Exception("Could not find an animation with an ID matching " + id);
-            if (IndexOf(id) == -1 && returnNull) return null;
-                return Animations[IndexOf(id)];
-        }
-
-        public string NameOf(int id)
-        {
-            if (IndexOf(id) == -1) throw new Exception("Could not find an animation with an ID matching " + id);
-            return Animations[IndexOf(id)].Name;
-        }
         
-        /// <summary>
-        /// Looks for an animation and returns its ID.
-        /// </summary>
-        /// <returns></returns>
-        public int AnimationExists(EAN_Animation anim)
-        {
-            foreach(var _anim in Animations)
-            {
-                if (_anim.Compare(anim)) return _anim.IndexNumeric;
-            }
-
-            return -1;
-        }
-
-        public void Normalize()
-        {
-            foreach(var anim in Animations)
-            {
-                anim.Normalize();
-            }
-        }
-
         public bool IsNull()
         {
             return (Animations.Count == 0);
         }
+
+        #endregion
+
+
     }
 
     [YAXSerializeAs("Animation")]
@@ -422,53 +407,11 @@ namespace Xv2CoreLib.EAN
         }
 
         [YAXDontSerialize]
-        public ushort Id_Short
+        public ushort ID_UShort
         {
             //For binding in WPF - cant be bothered doing a (int > ushort) value converter
             get { return ushort.Parse(Index); }
-            set { Index = Id_Short.ToString(); }
-        }
-        #endregion
-
-        private string _index = null;
-        [YAXAttributeForClass]
-        [BindingAutoId]
-        public string Index
-        {
-            get
-            {
-                return this._index;
-            }
-            set
-            {
-                if (value != this._index)
-                {
-                    this._index = value;
-                    NotifyPropertyChanged("Index");
-                    NotifyPropertyChanged("IndexNumeric");
-                    NotifyPropertyChanged("DisplayName");
-                }
-            }
-        }
-        
-        private string _NameValue = String.Empty;
-        [YAXAttributeForClass]
-        public string Name
-        {
-            get
-            {
-                return this._NameValue;
-            }
-
-            set
-            {
-                if (value != this._NameValue)
-                {
-                    this._NameValue = value;
-                    NotifyPropertyChanged("Name");
-                    NotifyPropertyChanged("DisplayName");
-                }
-            }
+            set { Index = ID_UShort.ToString(); }
         }
 
         [YAXDontSerialize]
@@ -483,14 +426,58 @@ namespace Xv2CoreLib.EAN
                 I_03 = (FloatPrecision)value;
             }
         }
+        #endregion
 
+        internal ESK_Skeleton eskSkeleton { get; set; }
 
-        [YAXAttributeForClass]
-        [YAXSerializeAs("FrameCount")]
+        //Values
+        private string _index = null;
+        private string _NameValue = String.Empty;
         private int _frameCountValue = 0;
+
+        //Properties
+        [YAXAttributeForClass]
+        [BindingAutoId]
+        public string Index
+        {
+            get
+            {
+                return this._index;
+            }
+            set
+            {
+                if (value != this._index)
+                {
+                    this._index = value;
+                    NotifyPropertyChanged(nameof(Index));
+                    NotifyPropertyChanged(nameof(IndexNumeric));
+                    NotifyPropertyChanged(nameof(DisplayName));
+                }
+            }
+        }
+        
+        [YAXAttributeForClass]
+        public string Name
+        {
+            get
+            {
+                return this._NameValue;
+            }
+
+            set
+            {
+                if (value != this._NameValue)
+                {
+                    this._NameValue = value;
+                    NotifyPropertyChanged(nameof(Name));
+                    NotifyPropertyChanged(nameof(DisplayName));
+                }
+            }
+        }
+
         [YAXAttributeForClass]
         [YAXSerializeAs("Duration")]
-        public int I_04
+        public int FrameCount
         {
             get
             {
@@ -501,7 +488,7 @@ namespace Xv2CoreLib.EAN
                 if (value != this._frameCountValue)
                 {
                     this._frameCountValue = value;
-                    NotifyPropertyChanged("I_04");
+                    NotifyPropertyChanged(nameof(FrameCount));
                 }
             }
         }
@@ -513,44 +500,46 @@ namespace Xv2CoreLib.EAN
         public FloatPrecision I_03 { get; set; } //int8
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "AnimationNode")]
-        public ObservableCollection<EAN_Node> Nodes { get; set; }
+        public AsyncObservableCollection<EAN_Node> Nodes { get; set; }
+
 
         #region KeyframeManipulation
-        public void RemoveKeyframe(int frame)
+        public List<IUndoRedo> RemoveKeyframe(int frame)
         {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
             foreach (var bone in Nodes)
             {
-                bone.RemoveKeyframe(frame);
+                bone.RemoveKeyframe(frame, undos);
             }
+
+            return undos;
         }
 
-        /// <summary>
-        /// (CAMERA ONLY) Adds a keyframe to the camera bone "Node". Animation must have all 3 components for it to work properly (use Normalize() first)
-        /// </summary>
-        public void AddKeyframe(int frame, float posX, float posY, float posZ, float posW, float rotX, float rotY, float rotZ, float rotW,
+        public List<IUndoRedo> AddKeyframe(string nodeName, int frame, float posX, float posY, float posZ, float posW, float rotX, float rotY, float rotZ, float rotW,
             float scaleX, float scaleY, float scaleZ, float scaleW)
         {
-            var node = GetNode("Node");
-            if (node == null) throw new InvalidDataException("EAN_Animation.AddKeyframe: \"Node\" not found. (this function is only intended for use on cameras)");
-            node.AddKeyframe(frame, posX, posY, posZ, posW, rotX, rotY, rotZ, rotW, scaleX, scaleY, scaleZ, scaleW);
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+            EAN_Node node = GetNode(nodeName, true, undos);
+
+            if (node == null) throw new InvalidDataException($"EAN_Animation.AddKeyframe: \"{nodeName}\" not found.");
+            node.AddKeyframe(frame, posX, posY, posZ, posW, rotX, rotY, rotZ, rotW, scaleX, scaleY, scaleZ, scaleW, undos);
+
+            return undos;
         }
         #endregion
 
-        #region Helpers
-        public int GetLastKeyframe()
+        #region Get
+        public EAN_Node GetNode(string BoneName, bool createNode, List<IUndoRedo> undos = null)
         {
-            int lastKeyframe = 0;
-            foreach (var e in Nodes)
+            EAN_Node node = GetNode(BoneName);
+
+            if (node == null && createNode)
             {
-                foreach (var a in e.AnimationComponents)
-                {
-                    if (a.Keyframes[a.Keyframes.Count() - 1].FrameIndex > lastKeyframe)
-                    {
-                        lastKeyframe = a.Keyframes[a.Keyframes.Count() - 1].FrameIndex;
-                    }
-                }
+                node = CreateNode(BoneName, undos);
             }
-            return lastKeyframe;
+
+            return node;
         }
 
         public EAN_Node GetNode(string BoneName)
@@ -559,7 +548,7 @@ namespace Xv2CoreLib.EAN
 
             for (int i = 0; i < Nodes.Count(); i++)
             {
-                if(BoneName == Nodes[i].BoneName)
+                if (BoneName == Nodes[i].BoneName)
                 {
                     return Nodes[i];
                 }
@@ -568,9 +557,50 @@ namespace Xv2CoreLib.EAN
             return null;
         }
 
+        public int GetLastKeyframe()
+        {
+            int max = 0;
+            foreach (var e in Nodes)
+            {
+                foreach (var a in e.AnimationComponents)
+                {
+                    int thisMax = a.Keyframes.Max(x => x.FrameIndex);
+                    if (thisMax > max) max = thisMax;
+                }
+            }
+            return max;
+        }
+
+        #endregion
+
+        #region Helpers
+
+        internal void LinkEskData(ESK_Skeleton skeleton)
+        {
+            if (skeleton == null) new ArgumentNullException("EAN_Animation.LinkEskData: skeleton was null.");
+
+            eskSkeleton = skeleton;
+            foreach (var node in Nodes)
+            {
+                node.LinkEskData(skeleton);
+            }
+        }
+
+        public EAN_Node CreateNode(string bone, List<IUndoRedo> undos = null)
+        {
+            if (undos == null) undos = new List<IUndoRedo>();
+
+            EAN_Node node = new EAN_Node();
+            node.AnimationComponents = new ObservableCollection<EAN_AnimationComponent>();
+            node.BoneName = bone;
+            node.EskRelativeTransform = eskSkeleton.GetBone(bone)?.RelativeTransform;
+
+            return node;
+        }
+
         public EAN_Animation Clone()
         {
-            ObservableCollection<EAN_Node> _Nodes = new ObservableCollection<EAN_Node>();
+            AsyncObservableCollection<EAN_Node> _Nodes = new AsyncObservableCollection<EAN_Node>();
             for(int i = 0; i < Nodes.Count; i++)
             {
                 _Nodes.Add(Nodes[i].Clone());
@@ -581,10 +611,30 @@ namespace Xv2CoreLib.EAN
                 IndexNumeric = IndexNumeric,
                 I_02 = I_02,
                 I_03 = I_03,
-                I_04 = I_04,
+                FrameCount = FrameCount,
                 Name = (string)Name.Clone(),
                 Nodes = _Nodes
             };
+        }
+        
+        public bool Compare(EAN_Animation anim)
+        {
+            if (anim.Name != Name) return false;
+            if (anim.FloatType != FloatType) return false;
+            if (anim.I_02 != I_02) return false;
+            if (anim.I_03 != I_03) return false;
+            if (anim.FrameCount != FrameCount) return false;
+            if (anim.Nodes == null && Nodes == null) return true;
+            if (anim.Nodes == null || Nodes == null) return false;
+
+            if (anim.Nodes.Count != Nodes.Count) return false;
+
+            for (int i = 0; i < Nodes.Count; i++)
+            {
+                if (!Nodes[i].Compare(anim.Nodes[i])) return false;
+            }
+
+            return true;
         }
 
         public void IncreaseFrameIndex(int amount)
@@ -595,99 +645,193 @@ namespace Xv2CoreLib.EAN
             }
         }
 
-        public void RecalculateFrameCount()
+        public List<IUndoRedo> RemoveDuplicateKeyframes()
         {
-            I_04 = GetLastKeyframe() + 1;
+            List<IUndoRedo> undos = new List<IUndoRedo>();
 
-            if(I_04 > 255)
+            foreach(var node in Nodes)
             {
-                I_02 = IntPrecision._16Bit;
+                undos.AddRange(node.RemoveDuplicateKeyframes());
             }
-            else
-            {
-                I_02 = IntPrecision._8Bit;
-            }
+
+            return undos;
         }
-        
-        public bool Compare(EAN_Animation anim)
-        {
-            if (anim.Name != Name) return false;
-            if (anim.FloatType != FloatType) return false;
-            if (anim.I_02 != I_02) return false;
-            if (anim.I_03 != I_03) return false;
-            if (anim.I_04 != I_04) return false;
-            if (anim.Nodes == null && Nodes == null) return true;
-            if (anim.Nodes == null || Nodes == null) return false;
+        #endregion
 
-            if (anim.Nodes.Count != Nodes.Count) return false;
-            
-            for(int i = 0; i < Nodes.Count; i++)
+        #region Init
+
+        /// <summary>
+        /// Returns a list of all bones that do not exist in the current skeleton.
+        /// </summary>
+        public List<string> GetInvalidBones(ESK_Skeleton skeleton)
+        {
+            List<string> bones = new List<string>();
+
+            foreach (var node in Nodes.Where(x => !skeleton.Exists(x.BoneName)))
             {
-                if (!Nodes[i].Compare(anim.Nodes[i])) return false;
+                bones.Add(node.BoneName);
             }
 
-            return true;
+            return bones;
         }
 
-        public void Normalize()
+        /// <summary>
+        /// Removes all invalidBones.
+        /// </summary>
+        /// <param name="invalidBones"></param>
+        public List<IUndoRedo> RemoveInvalidBones(List<string> invalidBones)
         {
-            foreach(var bone in Nodes)
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            for (int i = Nodes.Count - 1; i >= 0; i--)
             {
-                bone.NormalizeNode();
+                if (invalidBones.Contains(Nodes[i].BoneName))
+                {
+                    undos.Add(new UndoableListRemove<EAN_Node>(Nodes, Nodes[i]));
+                    Nodes.RemoveAt(i);
+                }
             }
+
+            return undos;
         }
-        
+
         #endregion
 
         #region Modifiers
-
-        public void ApplyNodeOffset(string bone, EAN_AnimationComponent.ComponentType componentType, float x, float y, float z, float w)
+        public List<IUndoRedo> ApplyNodeOffset(List<string> boneFilter, EAN_AnimationComponent.ComponentType componentType, float x, float y, float z, float w)
         {
-            var node = GetNode(bone);
-            
-            if (node != null)
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            foreach (var node in Nodes.Where(n => boneFilter.Contains(n.BoneName)))
             {
-                node.ApplyNodeOffset(componentType, x, y, z, w);
+                node.ApplyNodeOffset(componentType, x, y, z, w, undos);
             }
+
+            return undos;
         }
 
-        public void Cut(int startFrame, int endFrame, int smoothingFrames)
+        public List<IUndoRedo> RemoveKeyframes(List<string> boneFilter, int minFrame, int maxFrame)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            foreach (var node in Nodes.Where(x => boneFilter.Contains(x.BoneName)))
+            {
+                foreach (var component in node.AnimationComponents)
+                {
+                    for (int i = component.Keyframes.Count - 1; i >= 0; i--)
+                    {
+                        if (component.Keyframes[i].FrameIndex >= minFrame && component.Keyframes[i].FrameIndex <= maxFrame)
+                        {
+                            undos.Add(new UndoableListRemove<EAN_Keyframe>(component.Keyframes, component.Keyframes[i]));
+                            component.Keyframes.RemoveAt(i);
+                        }
+                    }
+                }
+            }
+
+            return undos;
+        }
+
+        public List<IUndoRedo> Cut(int startFrame, int endFrame, int smoothingFrames)
         {
             if (endFrame > GetLastKeyframe()) endFrame = GetLastKeyframe();
-            if(startFrame > GetLastKeyframe())
-            {
-                throw new InvalidOperationException("StartFrame cannot be greater than the total number of animation frames.");
-            }
-            if(endFrame <= startFrame)
-            {
-                throw new InvalidOperationException("EndFrame cannot be less than or equal to StartFrame.");
-            }
+            if(startFrame > GetLastKeyframe()) throw new InvalidOperationException("EAN_Animation.Cut: StartFrame cannot be greater than the total number of animation frames.");
+            if(endFrame <= startFrame) throw new InvalidOperationException("EAN_Animation.Cut: EndFrame cannot be less than or equal to StartFrame.");
+
+            List<IUndoRedo> undos = new List<IUndoRedo>();
 
             for (int i = 0; i < Nodes.Count; i++)
             {
-                Nodes[i].Cut(startFrame, endFrame, smoothingFrames);
+                Nodes[i].Cut(startFrame, endFrame, smoothingFrames, undos);
             }
+
+            return undos;
         }
 
-        public void Scale(int startFrame, int endFrame, float scaleFactor)
+        public List<IUndoRedo> RemoveNodes(IList<EAN_Node> nodes)
         {
-            if (endFrame > GetLastKeyframe()) endFrame = GetLastKeyframe();
-            if (startFrame > GetLastKeyframe())
-            {
-                throw new InvalidOperationException("StartFrame cannot be greater than the total number of animation frames.");
-            }
-            if (endFrame <= startFrame)
-            {
-                throw new InvalidOperationException("EndFrame cannot be less than or equal to StartFrame.");
-            }
-            if (Nodes == null) throw new Exception("Scale failed. Nodes was null.");
+            List<IUndoRedo> undos = new List<IUndoRedo>();
 
-            for(int i = 0; i < Nodes.Count; i++)
+            foreach(var node in nodes.Where(x => Nodes.Contains(x)))
             {
-                Nodes[i].Scale(startFrame, endFrame, scaleFactor);
+                undos.Add(new UndoableListRemove<EAN_Node>(Nodes, node));
+                Nodes.Remove(node);
             }
+
+            return undos;
         }
 
+        public List<IUndoRedo> PasteNodes(IList<EAN_Node> nodes)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            foreach(var node in nodes)
+            {
+                int idx = Nodes.IndexOf(Nodes.FirstOrDefault(x => x.BoneName == node.BoneName));
+
+                if(idx != -1)
+                {
+                    undos.Add(new UndoableStateChange<EAN_Node>(Nodes, idx, Nodes[idx], node));
+                    Nodes[idx] = node;
+                }
+                else
+                {
+                    Nodes.Add(node);
+                    undos.Add(new UndoableListAdd<EAN_Node>(Nodes, node));
+                }
+
+                node.LinkEskData(eskSkeleton);
+            }
+
+            return undos;
+        }
+
+        public List<IUndoRedo> RescaleAnimation(int newDuration)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            foreach(var node in Nodes)
+            {
+                undos.AddRange(node.RescaleNode(newDuration));
+            }
+
+            if(FrameCount != newDuration)
+            {
+                undos.AddRange(ChangeDuration(newDuration));
+            }
+
+            undos.AddRange(RemoveDuplicateKeyframes());
+
+            return undos;
+        }
+
+        /// <summary>
+        /// Changes the animations durations without rescaling the keyframes.
+        /// </summary>
+        /// <returns></returns>
+        public List<IUndoRedo> ChangeDuration(int newDuration)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            //With the changes to how first and final frames are handle when saving, adding them while editing is no longer necessary. So simply changing the FrameCount is sufficent.
+            undos.Add(new UndoableProperty<EAN_Animation>(nameof(FrameCount), this, FrameCount, newDuration));
+            FrameCount = newDuration;
+
+            if(newDuration > byte.MaxValue && I_02 != IntPrecision._16Bit)
+            {
+                undos.Add(new UndoableProperty<EAN_Animation>(nameof(I_02), this, I_02, IntPrecision._16Bit));
+                I_02 = IntPrecision._16Bit;
+            }
+            else if(I_02 != IntPrecision._8Bit)
+            {
+                undos.Add(new UndoableProperty<EAN_Animation>(nameof(I_02), this, I_02, IntPrecision._8Bit));
+                I_02 = IntPrecision._8Bit;
+            }
+
+            return undos;
+        }
+
+        //Old modifiers - to be reworked or removed
         public void Join(EAN_Animation secondAnimation, int smoothingFrames)
         {
             //This method is ported from LB Animation Tool and should be rewritten at some point.
@@ -825,6 +969,7 @@ namespace Xv2CoreLib.EAN
             }
         }
 
+        
         #endregion
 
     }
@@ -833,39 +978,42 @@ namespace Xv2CoreLib.EAN
     [Serializable]
     public class EAN_Node
     {
+        public const string CAM_NODE = "Node";
+
+        [YAXDontSerialize]
+        internal ESK_RelativeTransform EskRelativeTransform { get; set; }
+
+
         [YAXAttributeForClass]
-        public string BoneName { get; set; } //Find it in Skeleton data, if not found then show a error
+        public string BoneName { get; set; } 
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Keyframes")]
         public ObservableCollection<EAN_AnimationComponent> AnimationComponents { get; set; }
 
         #region KeyframeManipulation
         /// <summary>
-        /// Add a keyframe at the specified frame (will overwrite any existing keyframe). Node must have all 3 components for it to work properly (use Normalize() first).
+        /// Add a keyframe at the specified frame (will overwrite any existing keyframe).
         /// </summary>
         public void AddKeyframe(int frame, float posX, float posY, float posZ, float posW, float rotX, float rotY, float rotZ, float rotW,
-            float scaleX, float scaleY, float scaleZ, float scaleW)
+            float scaleX, float scaleY, float scaleZ, float scaleW, List<IUndoRedo> undos)
         {
-            var pos = GetComponent(EAN_AnimationComponent.ComponentType.Position);
-            if (pos == null) throw new InvalidDataException("EAN_Node.AddKeyframe: position component was null (Use Normalize() before calling this function!).");
-            pos.AddKeyframe(frame, posX, posY, posZ, posW);
+            var pos = GetComponent(EAN_AnimationComponent.ComponentType.Position, true, undos, BoneName == CAM_NODE);
+            pos.AddKeyframe(frame, posX, posY, posZ, posW, undos);
 
-            var rot = GetComponent(EAN_AnimationComponent.ComponentType.Rotation);
-            if (rot == null) throw new InvalidDataException("EAN_Node.AddKeyframe: rotation component was null (Use Normalize() before calling this function!).");
-            rot.AddKeyframe(frame, rotX, rotY, rotZ, rotW);
+            var rot = GetComponent(EAN_AnimationComponent.ComponentType.Rotation, true, undos, BoneName == CAM_NODE);
+            rot.AddKeyframe(frame, rotX, rotY, rotZ, rotW, undos);
 
-            var scale = GetComponent(EAN_AnimationComponent.ComponentType.Scale);
-            if (scale == null) throw new InvalidDataException("EAN_Node.AddKeyframe: scale component was null (Use Normalize() before calling this function!).");
-            scale.AddKeyframe(frame, scaleX, scaleY, scaleZ, scaleW);
+            var scale = GetComponent(EAN_AnimationComponent.ComponentType.Scale, true, undos, BoneName == CAM_NODE);
+            scale.AddKeyframe(frame, scaleX, scaleY, scaleZ, scaleW, undos);
 
 
         }
 
-        public void RemoveKeyframe(int keyframe)
+        public void RemoveKeyframe(int keyframe, List<IUndoRedo> undos = null)
         {
             foreach (var component in AnimationComponents)
             {
-                component.RemoveKeyframe(keyframe);
+                component.RemoveKeyframe(keyframe, undos);
             }
         }
 
@@ -887,15 +1035,70 @@ namespace Xv2CoreLib.EAN
 
         #endregion
 
-        #region Helper
-        public bool HasKeyframe(int frame)
+        #region Get
+        public EAN_Keyframe GetKeyframe(int frame, EAN_AnimationComponent.ComponentType type, bool createKeyframe, List<IUndoRedo> undos = null)
         {
-            foreach (var component in AnimationComponents)
+            var component = GetComponent(type, createKeyframe, undos);
+
+            return (component != null) ? component.GetKeyframe(frame, createKeyframe, undos) : null;
+        }
+
+        public EAN_AnimationComponent GetComponent(EAN_AnimationComponent.ComponentType _type, bool createComponent, List<IUndoRedo> undos = null, bool isCamera = false)
+        {
+            var component = GetComponent(_type);
+
+            if (component == null && createComponent)
             {
-                if (component.Keyframes.FirstOrDefault(e => e.FrameIndex == frame) != null) return true;
+                component = new EAN_AnimationComponent(_type, isCamera, EskRelativeTransform);
+                undos.Add(new UndoableListAdd<EAN_AnimationComponent>(AnimationComponents, component));
+                AnimationComponents.Add(component);
             }
 
-            return false;
+            return component;
+        }
+
+        public EAN_AnimationComponent GetComponent(EAN_AnimationComponent.ComponentType _type)
+        {
+            for (int i = 0; i < AnimationComponents.Count(); i++)
+            {
+                if (_type == AnimationComponents[i].I_00)
+                {
+                    return AnimationComponents[i];
+                }
+            }
+
+            return null;
+        }
+
+        public SerializedKeyframe GetSerializedKeyframe(int frame)
+        {
+            return new SerializedKeyframe(frame, GetKeyframeValues(frame));
+        }
+
+        /// <summary>
+        /// Get a list of all used keyframes for this Node.
+        /// </summary>
+        public List<ushort> GetAllKeyframes()
+        {
+            List<ushort> keyframes = new List<ushort>();
+
+            foreach (var component in AnimationComponents)
+            {
+                foreach (var keyframe in component.Keyframes)
+                {
+                    if (!keyframes.Contains(keyframe.FrameIndex))
+                        keyframes.Add(keyframe.FrameIndex);
+                }
+            }
+
+            keyframes.Sort();
+
+            return keyframes;
+        }
+
+        public List<int> GetAllKeyframesInt()
+        {
+            return ArrayConvert.ConvertToIntList(GetAllKeyframes());
         }
 
         public float[] GetKeyframeValues(int frame)
@@ -953,17 +1156,30 @@ namespace Xv2CoreLib.EAN
             return lastKeyframe;
         }
 
-        public EAN_AnimationComponent GetComponent(EAN_AnimationComponent.ComponentType _type)
+        #endregion
+
+        #region Helper
+        internal void LinkEskData(ESK_Skeleton skeleton)
         {
-            for (int i = 0; i < AnimationComponents.Count(); i++)
+            if (skeleton == null) new ArgumentNullException("EAN_Node.LinkEskData: skeleton was null.");
+
+            var esk = skeleton.GetBone(BoneName);
+            EskRelativeTransform = esk?.RelativeTransform;
+
+            foreach (var component in AnimationComponents)
             {
-                if (_type == AnimationComponents[i].I_00)
-                {
-                    return AnimationComponents[i];
-                }
+                component.EskRelativeTransform = esk?.RelativeTransform;
+            }
+        }
+
+        public bool HasKeyframe(int frame)
+        {
+            foreach (var component in AnimationComponents)
+            {
+                if (component.Keyframes.FirstOrDefault(e => e.FrameIndex == frame) != null) return true;
             }
 
-            return null;
+            return false;
         }
 
         public EAN_Node Clone()
@@ -1003,161 +1219,148 @@ namespace Xv2CoreLib.EAN
             }
         }
 
-
-        /// <summary>
-        /// Add Keyframes and AnimationComponents for everything and interpolate the values.
-        /// </summary>
-        public void NormalizeNode(bool camera = true)
+        public List<IUndoRedo> RemoveDuplicateKeyframes()
         {
-            List<ushort> usedKeyframes = new List<ushort>();
+            List<IUndoRedo> undos = new List<IUndoRedo>();
 
-            //Position
-            var pos = GetComponent(EAN_AnimationComponent.ComponentType.Position);
-
-            if (pos == null)
+            foreach(var component in AnimationComponents)
             {
-                pos = new EAN_AnimationComponent();
-                pos.I_00 = EAN_AnimationComponent.ComponentType.Position;
-                AnimationComponents.Add(pos);
-
-                //Set default values
-                pos.Keyframes.Add(new EAN_Keyframe() { FrameIndex = 0, });
-                pos.Keyframes.Add(new EAN_Keyframe() { FrameIndex = usedKeyframes.Max() });
-            }
-
-            foreach (var usedFrame in usedKeyframes)
-            {
-                if (pos.Keyframes.FirstOrDefault(k => k.FrameIndex == usedFrame) == null)
+                for (int i = component.Keyframes.Count - 1; i >= 0; i--)
                 {
-                    pos.Keyframes.Add(new EAN_Keyframe()
+                    if(component.Keyframes.Any(x => x.FrameIndex == component.Keyframes[i].FrameIndex && x != component.Keyframes[i]))
                     {
-                        FrameIndex = usedFrame,
-                        X = pos.GetKeyframeValue(usedFrame, Axis.X),
-                        Y = pos.GetKeyframeValue(usedFrame, Axis.Y),
-                        Z = pos.GetKeyframeValue(usedFrame, Axis.Z),
-                        W = pos.GetKeyframeValue(usedFrame, Axis.W)
-                    });
+                        undos.Add(new UndoableListRemove<EAN_Keyframe>(component.Keyframes, component.Keyframes[i]));
+                        component.Keyframes.RemoveAt(i);
+                    }
                 }
             }
 
-            //Rotation
-            var rot = GetComponent(EAN_AnimationComponent.ComponentType.Rotation);
+            return undos;
+        }
+        
+        public List<IUndoRedo> CreateAllComponents()
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+            int endFrame = GetLastKeyframe();
+
+            EAN_AnimationComponent pos = GetComponent(EAN_AnimationComponent.ComponentType.Position);
+            EAN_AnimationComponent rot = GetComponent(EAN_AnimationComponent.ComponentType.Rotation);
+            EAN_AnimationComponent scale = GetComponent(EAN_AnimationComponent.ComponentType.Scale);
+
+            if(pos == null)
+            {
+                pos = new EAN_AnimationComponent(EAN_AnimationComponent.ComponentType.Position, false, EskRelativeTransform);
+                undos.Add(new UndoableListAdd<EAN_AnimationComponent>(AnimationComponents, pos));
+                AnimationComponents.Add(pos);
+            }
 
             if (rot == null)
             {
-                rot = new EAN_AnimationComponent();
-                rot.I_00 = EAN_AnimationComponent.ComponentType.Rotation;
+                rot = new EAN_AnimationComponent(EAN_AnimationComponent.ComponentType.Rotation, false, EskRelativeTransform);
+                undos.Add(new UndoableListAdd<EAN_AnimationComponent>(AnimationComponents, rot));
                 AnimationComponents.Add(rot);
-
-                //Set default values
-                rot.Keyframes.Add(new EAN_Keyframe() { FrameIndex = 0, });
-                rot.Keyframes.Add(new EAN_Keyframe() { FrameIndex = usedKeyframes.Max() });
             }
-
-            foreach (var usedFrame in usedKeyframes)
-            {
-                if (rot.Keyframes.FirstOrDefault(k => k.FrameIndex == usedFrame) == null)
-                {
-                    rot.Keyframes.Add(new EAN_Keyframe()
-                    {
-                        FrameIndex = usedFrame,
-                        X = rot.GetKeyframeValue(usedFrame, Axis.X),
-                        Y = rot.GetKeyframeValue(usedFrame, Axis.Y),
-                        Z = rot.GetKeyframeValue(usedFrame, Axis.Z),
-                        W = rot.GetKeyframeValue(usedFrame, Axis.W)
-                    });
-                }
-            }
-
-            //Scale (or Camera)
-            var scale = GetComponent(EAN_AnimationComponent.ComponentType.Scale);
 
             if (scale == null)
             {
-                scale = new EAN_AnimationComponent();
-                scale.I_00 = EAN_AnimationComponent.ComponentType.Scale;
-                AnimationComponents.Add(rot);
-
-                if (camera)
-                {
-                    //Set default values
-                    scale.Keyframes.Add(new EAN_Keyframe() { FrameIndex = 0, Y = 0.785398f, W = 0f });
-                    scale.Keyframes.Add(new EAN_Keyframe() { FrameIndex = usedKeyframes.Max(), Y = 0.785398f, W = 0f });
-                }
-                else
-                {
-                    scale.Keyframes.Add(new EAN_Keyframe() { FrameIndex = 0, });
-                    scale.Keyframes.Add(new EAN_Keyframe() { FrameIndex = usedKeyframes.Max() });
-                }
+                scale = new EAN_AnimationComponent(EAN_AnimationComponent.ComponentType.Scale, false, EskRelativeTransform);
+                undos.Add(new UndoableListAdd<EAN_AnimationComponent>(AnimationComponents, scale));
+                AnimationComponents.Add(scale);
             }
 
-            foreach (var usedFrame in usedKeyframes)
-            {
-                if (scale.Keyframes.FirstOrDefault(k => k.FrameIndex == usedFrame) == null)
-                {
-                    scale.Keyframes.Add(new EAN_Keyframe()
-                    {
-                        FrameIndex = usedFrame,
-                        X = scale.GetKeyframeValue(usedFrame, Axis.X),
-                        Y = scale.GetKeyframeValue(usedFrame, Axis.Y),
-                        Z = scale.GetKeyframeValue(usedFrame, Axis.Z),
-                        W = scale.GetKeyframeValue(usedFrame, Axis.W)
-                    });
-                }
-            }
-
-
-        }
-
-        /// <summary>
-        /// Get a list of all used keyframes for this Node.
-        /// </summary>
-        public List<ushort> GetAllKeyframes()
-        {
-            List<ushort> keyframes = new List<ushort>();
-
-            foreach (var component in AnimationComponents)
-            {
-                foreach (var keyframe in component.Keyframes)
-                {
-                    if (!keyframes.Contains(keyframe.FrameIndex))
-                        keyframes.Add(keyframe.FrameIndex);
-                }
-            }
-
-            return keyframes;
+            return undos;
         }
 
         #endregion
 
         #region Modifiers
-        public void ApplyNodeOffset(EAN_AnimationComponent.ComponentType componentType, float x, float y, float z, float w)
+        public List<IUndoRedo> RescaleNode(int newDuration)
+        {
+            if (newDuration == 0) newDuration = 1;
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            foreach (var component in AnimationComponents)
+            {
+                float oldEndFrame = component.GetLastKeyframe();
+                if (oldEndFrame == (newDuration - 1)) continue;
+
+                foreach (var keyframe in component.Keyframes)
+                {
+                    ushort newFrameIndex = (ushort)(keyframe.FrameIndex * ((newDuration - 1) / oldEndFrame));
+
+                    undos.Add(new UndoableProperty<EAN_Keyframe>(nameof(EAN_Keyframe.FrameIndex), keyframe, keyframe.FrameIndex, newFrameIndex));
+                    keyframe.FrameIndex = newFrameIndex;
+                }
+            }
+
+            return undos;
+        }
+
+        public List<IUndoRedo> PasteKeyframes(List<SerializedKeyframe> keyframes)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            undos.AddRange(CreateAllComponents());
+            EAN_AnimationComponent pos = GetComponent(EAN_AnimationComponent.ComponentType.Position);
+            EAN_AnimationComponent rot = GetComponent(EAN_AnimationComponent.ComponentType.Rotation);
+            EAN_AnimationComponent scale = GetComponent(EAN_AnimationComponent.ComponentType.Scale);
+
+            foreach (var keyframe in keyframes)
+            {
+                undos.AddRange(pos.SetKeyframeValue(keyframe.Frame, keyframe.PosX, Axis.X));
+                undos.AddRange(pos.SetKeyframeValue(keyframe.Frame, keyframe.PosY, Axis.Y));
+                undos.AddRange(pos.SetKeyframeValue(keyframe.Frame, keyframe.PosZ, Axis.Z));
+                undos.AddRange(pos.SetKeyframeValue(keyframe.Frame, keyframe.PosW, Axis.W));
+
+                undos.AddRange(rot.SetKeyframeValue(keyframe.Frame, keyframe.RotX, Axis.X));
+                undos.AddRange(rot.SetKeyframeValue(keyframe.Frame, keyframe.RotY, Axis.Y));
+                undos.AddRange(rot.SetKeyframeValue(keyframe.Frame, keyframe.RotZ, Axis.Z));
+                undos.AddRange(rot.SetKeyframeValue(keyframe.Frame, keyframe.RotW, Axis.W));
+
+                undos.AddRange(scale.SetKeyframeValue(keyframe.Frame, keyframe.ScaleX, Axis.X));
+                undos.AddRange(scale.SetKeyframeValue(keyframe.Frame, keyframe.ScaleY, Axis.Y));
+                undos.AddRange(scale.SetKeyframeValue(keyframe.Frame, keyframe.ScaleZ, Axis.Z));
+                undos.AddRange(scale.SetKeyframeValue(keyframe.Frame, keyframe.ScaleW, Axis.W));
+            }
+
+            return undos;
+        }
+
+        public List<IUndoRedo> DeleteKeyframes(List<int> keyframes)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            EAN_AnimationComponent pos = GetComponent(EAN_AnimationComponent.ComponentType.Position);
+            EAN_AnimationComponent rot = GetComponent(EAN_AnimationComponent.ComponentType.Rotation);
+            EAN_AnimationComponent scale = GetComponent(EAN_AnimationComponent.ComponentType.Scale);
+
+            foreach (var keyframe in keyframes)
+            {
+                if (pos != null) pos.RemoveKeyframe(keyframe, undos);
+                if (rot != null) rot.RemoveKeyframe(keyframe, undos);
+                if (scale != null) scale.RemoveKeyframe(keyframe, undos);
+            }
+
+            return undos;
+        }
+
+        public void ApplyNodeOffset(EAN_AnimationComponent.ComponentType componentType, float x, float y, float z, float w, List<IUndoRedo> undos)
         {
             var _component = GetComponent(componentType);
             if (_component != null)
             {
-                _component.ApplyNodeOffset(x, y, z, w);
+                _component.ApplyNodeOffset(x, y, z, w, undos);
             }
         }
         
-        public void Cut(int startFrame, int endFrame, int smoothingFrames)
+        public void Cut(int startFrame, int endFrame, int smoothingFrames, List<IUndoRedo> undos)
         {
             for(int i = 0; i < AnimationComponents.Count; i++)
             {
-                AnimationComponents[i].Cut(startFrame, endFrame, smoothingFrames);
+                AnimationComponents[i].Cut(startFrame, endFrame, smoothingFrames, undos);
             }
         }
         
-        public void Scale(int startFrame, int endFrame, float scaleFactor)
-        {
-            if (AnimationComponents == null) throw new Exception("Scale failed. AnimationComponents was null.");
-
-            for(int i = 0; i < AnimationComponents.Count; i++)
-            {
-                AnimationComponents[i].Scale(startFrame, endFrame, scaleFactor);
-            }
-
-        }
 
         public void ApplyZeroAxis(EAN_AnimationComponent.ComponentType componentType, Axis axis)
         {
@@ -1182,6 +1385,9 @@ namespace Xv2CoreLib.EAN
             Scale = 2, //Or "Camera"
         }
 
+        [YAXDontSerialize]
+        internal ESK_RelativeTransform EskRelativeTransform { get; set; }
+
         [YAXAttributeForClass]
         [YAXSerializeAs("Type")]
         public ComponentType I_00 { get; set; } //int8
@@ -1191,15 +1397,32 @@ namespace Xv2CoreLib.EAN
         public short I_02 { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Keyframe")]
-        public ObservableCollection<EAN_Keyframe> Keyframes { get; set; } = new ObservableCollection<EAN_Keyframe>();
+        public AsyncObservableCollection<EAN_Keyframe> Keyframes { get; set; } = new AsyncObservableCollection<EAN_Keyframe>();
+
+        public EAN_AnimationComponent() { }
+
+        public EAN_AnimationComponent(ComponentType type, bool isCamera, ESK_RelativeTransform relativeTransform)
+        {
+            I_00 = type;
+            I_01 = (byte)((isCamera) ? 3 : 7);
+            EskRelativeTransform = relativeTransform;
+        }
 
         #region KeyframeManipulation
-        public void AddKeyframe(int frame, float x, float y, float z, float w)
+        public void AddKeyframe(int frame, float x, float y, float z, float w, List<IUndoRedo> undos = null)
         {
             var keyframe = Keyframes.FirstOrDefault(k => k.FrameIndex == (ushort)frame);
 
             if(keyframe != null)
             {
+                if(undos != null)
+                {
+                    undos.Add(new UndoableProperty<EAN_Keyframe>(nameof(keyframe.X), keyframe, keyframe.X, x));
+                    undos.Add(new UndoableProperty<EAN_Keyframe>(nameof(keyframe.Y), keyframe, keyframe.Y, y));
+                    undos.Add(new UndoableProperty<EAN_Keyframe>(nameof(keyframe.Z), keyframe, keyframe.Z, z));
+                    undos.Add(new UndoableProperty<EAN_Keyframe>(nameof(keyframe.W), keyframe, keyframe.W, w));
+                }
+
                 keyframe.X = x;
                 keyframe.Y = y;
                 keyframe.Z = z;
@@ -1207,14 +1430,19 @@ namespace Xv2CoreLib.EAN
             }
             else
             {
-                Keyframes.Add(new EAN_Keyframe()
+                EAN_Keyframe newKeyframe = new EAN_Keyframe()
                 {
                     FrameIndex = (ushort)frame,
                     X = x,
                     Y = y,
                     Z = z,
                     W = w
-                });
+                };
+
+                if (undos != null)
+                    undos.Add(new UndoableListAdd<EAN_Keyframe>(Keyframes, newKeyframe));
+
+                Keyframes.Add(newKeyframe);
             }
         }
 
@@ -1227,12 +1455,17 @@ namespace Xv2CoreLib.EAN
             return true;
         }
 
-        public void RemoveKeyframe(int frame)
+        public void RemoveKeyframe(int frame, List<IUndoRedo> undos = null)
         {
-            var keyframe = Keyframes.FirstOrDefault(k => k.FrameIndex == (ushort)frame);
+            EAN_Keyframe keyframe = GetKeyframe(frame);
 
             if (keyframe != null)
+            {
+                if (undos != null)
+                    undos.Add(new UndoableListRemove<EAN_Keyframe>(Keyframes, keyframe));
+
                 Keyframes.Remove(keyframe);
+            }
         }
 
         public EAN_Keyframe AddKeyframe(int frame)
@@ -1240,10 +1473,147 @@ namespace Xv2CoreLib.EAN
             AddKeyframe(frame, GetKeyframeValue(frame, Axis.X), GetKeyframeValue(frame, Axis.Y), GetKeyframeValue(frame, Axis.Z), GetKeyframeValue(frame, Axis.W));
             return Keyframes.FirstOrDefault(k => k.FrameIndex == (ushort)frame);
         }
+
+        public List<IUndoRedo> SetKeyframeValue(int frame, float value, Axis axis)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            EAN_Keyframe keyframe = GetKeyframe(frame);
+
+            if (keyframe == null)
+            {
+                keyframe = new EAN_Keyframe((ushort)frame, GetKeyframeValue(frame, Axis.X), GetKeyframeValue(frame, Axis.Y), GetKeyframeValue(frame, Axis.Z), GetKeyframeValue(frame, Axis.W));
+
+                Keyframes.Add(keyframe);
+                undos.Add(new UndoableListAdd<EAN_Keyframe>(Keyframes, keyframe));
+            }
+
+            switch (axis)
+            {
+                case Axis.X:
+                    undos.Add(new UndoableProperty<EAN_Keyframe>(nameof(EAN_Keyframe.X), keyframe, keyframe.X, value));
+                    keyframe.X = value;
+                    break;
+                case Axis.Y:
+                    undos.Add(new UndoableProperty<EAN_Keyframe>(nameof(EAN_Keyframe.Y), keyframe, keyframe.Y, value));
+                    keyframe.Y = value;
+                    break;
+                case Axis.Z:
+                    undos.Add(new UndoableProperty<EAN_Keyframe>(nameof(EAN_Keyframe.Z), keyframe, keyframe.Z, value));
+                    keyframe.Z = value;
+                    break;
+                case Axis.W:
+                    undos.Add(new UndoableProperty<EAN_Keyframe>(nameof(EAN_Keyframe.W), keyframe, keyframe.W, value));
+                    keyframe.W = value;
+                    break;
+            }
+
+            return undos;
+        }
+
         #endregion
 
-        #region Helper
+        #region Get
+        public EAN_Keyframe GetKeyframe(int frame, bool createKeyframe, List<IUndoRedo> undos = null)
+        {
+            EAN_Keyframe keyframe = GetKeyframe(frame);
 
+            if (keyframe == null && createKeyframe)
+            {
+                keyframe = new EAN_Keyframe((ushort)frame, GetKeyframeValue(frame, Axis.X), GetKeyframeValue(frame, Axis.Y), GetKeyframeValue(frame, Axis.Z), GetKeyframeValue(frame, Axis.W));
+                Keyframes.Add(keyframe);
+
+                if (undos != null)
+                {
+                    undos.Add(new UndoableListAdd<EAN_Keyframe>(Keyframes, keyframe));
+                }
+            }
+
+            return keyframe;
+        }
+
+        public EAN_Keyframe GetKeyframe(int frame)
+        {
+            foreach (var keyframe in Keyframes)
+            {
+                if (keyframe.FrameIndex == frame) return keyframe;
+            }
+
+            return null;
+        }
+
+        private EAN_Keyframe GetDefaultKeyframe(int frame = 0)
+        {
+            EAN_Keyframe keyframe = new EAN_Keyframe();
+            keyframe.FrameIndex = (ushort)frame;
+
+            if (I_00 == ComponentType.Scale && I_01 == 3)
+            {
+                //Camera
+                keyframe.Y = (float)Utils.ConvertDegreesToRadians(EAN_File.DefaultFoV);
+            }
+            else if (EskRelativeTransform == null)
+            {
+                //Camera Pos/Rot
+
+                if (I_00 == ComponentType.Rotation)
+                    keyframe.W = 1f;
+
+            }
+            else if (I_00 == ComponentType.Scale)
+            {
+                keyframe.X = EskRelativeTransform.F_32;
+                keyframe.Y = EskRelativeTransform.F_36;
+                keyframe.Z = EskRelativeTransform.F_40;
+                keyframe.W = EskRelativeTransform.F_44;
+            }
+            else if (I_00 == ComponentType.Position)
+            {
+                keyframe.X = EskRelativeTransform.F_00;
+                keyframe.Y = EskRelativeTransform.F_04;
+                keyframe.Z = EskRelativeTransform.F_08;
+                keyframe.W = EskRelativeTransform.F_12;
+            }
+            else if (I_00 == ComponentType.Rotation)
+            {
+                keyframe.X = EskRelativeTransform.F_16;
+                keyframe.Y = EskRelativeTransform.F_20;
+                keyframe.Z = EskRelativeTransform.F_24;
+                keyframe.W = EskRelativeTransform.F_28;
+            }
+
+            return keyframe;
+        }
+
+        /// <summary>
+        /// Gets the keyframed values if they exist. Returns a boolean indicating whether the frame had any keyframed values.
+        /// </summary>
+        public bool GetKeyframe(int frame, ref float x, ref float y, ref float z, ref float w)
+        {
+            x = GetKeyframeValue(frame, Axis.X);
+            y = GetKeyframeValue(frame, Axis.Y);
+            z = GetKeyframeValue(frame, Axis.Z);
+            w = GetKeyframeValue(frame, Axis.W);
+
+            foreach (var keyframe in Keyframes)
+            {
+                if (keyframe.FrameIndex == frame) return true;
+            }
+            return false;
+        }
+
+        public int GetLastKeyframe()
+        {
+            if (Keyframes.Count == 0) return 0;
+            return Keyframes.Max(k => k.FrameIndex);
+        }
+
+        #endregion
+
+        #region KeyframeInterpolation
+        /// <summary>
+        /// Get an interpolated keyframe value, from the specified floating-point frame. Allows time-scaled animations.
+        /// </summary>
         public float GetKeyframeValue(float frame, Axis axis)
         {
             bool isWhole = Math.Floor(frame) == frame;
@@ -1262,9 +1632,11 @@ namespace Xv2CoreLib.EAN
             return Utils.Lerp(beforeValue, afterValue, factor);
         }
 
+        /// <summary>
+        /// Get an interpolated keyframe value.
+        /// </summary>
         public float GetKeyframeValue(int frame, Axis axis)
         {
-            //todo: rework to use Lerp
             EAN_Keyframe existing = GetKeyframe(frame);
 
             if (existing != null)
@@ -1285,8 +1657,10 @@ namespace Xv2CoreLib.EAN
             }
 
             //No keyframe existed. Calculate the value.
-            EAN_Keyframe previousKeyframe = GetNearestKeyframeBefore(frame);
-            EAN_Keyframe nextKeyframe = GetNearestKeyframeAfter(frame);
+            int prevFrame = 0;
+            int nextFrame = 0;
+            EAN_Keyframe previousKeyframe = GetNearestKeyframeBefore(frame, ref prevFrame);
+            EAN_Keyframe nextKeyframe = GetNearestKeyframeAfter(frame, ref nextFrame);
 
             if (previousKeyframe != null && nextKeyframe == null)
             {
@@ -1328,27 +1702,97 @@ namespace Xv2CoreLib.EAN
             }
 
             //Frame difference between previous frame and the current frame (current frame is AFTER the frame we want)
-            int diff = nextKeyframe.FrameIndex - previousKeyframe.FrameIndex;
+            int diff = nextFrame - prevFrame;
 
             //Keyframe value difference
             float keyframe2 = currentKeyframeValue - previousKeyframeValue;
 
             //Difference between the frame we WANT and the previous frame
-            int diff2 = frame - previousKeyframe.FrameIndex;
+            int diff2 = frame - prevFrame;
 
             //Divide keyframe value difference by the keyframe time difference, and then multiply it by diff2, then add the previous keyframe value
             return (keyframe2 / diff) * diff2 + previousKeyframeValue;
         }
 
-        public int GetLastKeyframe()
+        /// <summary>
+        /// Get a non-persistent instance of the nearest keyframe BEFORE the specified frame. This instant MAY belong to another keyframe entirely, or not exist in Keyframes at all (if its a default keyframe generated because no keyframes currently exist) - so this method is ONLY intended for reading purposes! 
+        /// </summary>
+        /// <param name="frame">The specified frame.</param>
+        /// <param name="nearFrame">The frame the returned EAN_Keyframe belongs to (ignore FrameIndex on the keyframe) </param>
+        private EAN_Keyframe GetNearestKeyframeBefore(int frame, ref int nearFrame)
         {
-            if (Keyframes.Count == 0) return 0;
-            return Keyframes.Max(k => k.FrameIndex);
+            EAN_Keyframe nearest = null;
+
+            //First search for keyframe before frame
+            foreach(var keyframe in Keyframes.Where(x => x.FrameIndex < frame && (x.FrameIndex > nearest?.FrameIndex || nearest == null)))
+            {
+                nearest = keyframe;
+                nearFrame = keyframe.FrameIndex;
+            }
+
+            //If none found, search for one after
+            if (nearest == null)
+            {
+                foreach (var keyframe in Keyframes.Where(x => x.FrameIndex > frame && (x.FrameIndex < nearest?.FrameIndex || nearest == null)))
+                {
+                    nearest = keyframe;
+                    nearFrame = frame - 1;
+                }
+            }
+
+            //None found, so use default
+            if (nearest == null)
+            {
+                nearest = GetDefaultKeyframe();
+                nearFrame = frame - 1;
+            }
+
+            return nearest;
         }
+
+        /// <summary>
+        /// Get a non-persistent instance of the nearest keyframe AFTER the specified frame. This instant MAY belong to another keyframe entirely, or not exist in Keyframes at all (if its a default keyframe generated because no keyframes currently exist) - so this method is ONLY intended for reading purposes! 
+        /// </summary>
+        /// <param name="frame">The specified frame.</param>
+        /// <param name="nearFrame">The frame the returned EAN_Keyframe belongs to (ignore FrameIndex on the keyframe) </param>
+        private EAN_Keyframe GetNearestKeyframeAfter(int frame, ref int nearFrame)
+        {
+            EAN_Keyframe nearest = null;
+
+            //First search for keyframe after frame
+            foreach (var keyframe in Keyframes.Where(x => x.FrameIndex > frame && (x.FrameIndex < nearest?.FrameIndex || nearest == null)))
+            {
+                nearest = keyframe;
+                nearFrame = keyframe.FrameIndex;
+            }
+
+            //If none found, search for one before
+            if (nearest == null)
+            {
+                foreach (var keyframe in Keyframes.Where(x => x.FrameIndex < frame && (x.FrameIndex > nearest?.FrameIndex || nearest == null)))
+                {
+                    nearest = keyframe;
+                    nearFrame = frame + 1;
+                }
+            }
+
+            //None found, so use default
+            if (nearest == null)
+            {
+                nearest = GetDefaultKeyframe();
+                nearFrame = frame + 1;
+            }
+
+            return nearest;
+        }
+
+        #endregion
+
+        #region Helper
 
         public EAN_AnimationComponent Clone()
         {
-            ObservableCollection<EAN_Keyframe> _keyframes = new ObservableCollection<EAN_Keyframe>();
+            AsyncObservableCollection<EAN_Keyframe> _keyframes = new AsyncObservableCollection<EAN_Keyframe>();
 
             for (int i = 0; i < Keyframes.Count(); i++)
             {
@@ -1363,48 +1807,12 @@ namespace Xv2CoreLib.EAN
             };
         }
 
-        public void RemoveDuplicateKeyframes()
-        {
-            if (Keyframes == null) return;
-
-            List<int> usedKeyframes = new List<int>();
-            for (int i = 0; i < Keyframes.Count; i++)
-            {
-                if (usedKeyframes.Contains(Keyframes[i].FrameIndex))
-                {
-                    Keyframes.RemoveAt(i);
-                    i--;
-                }
-                else
-                {
-                    usedKeyframes.Add(Keyframes[i].FrameIndex);
-                }
-            }
-        }
-
         public void IncreaseFrameIndex(int amount)
         {
             for (int i = 0; i < Keyframes.Count; i++)
             {
                 Keyframes[i].FrameIndex += (ushort)amount;
             }
-        }
-
-        /// <summary>
-        /// Gets the keyframed values if they exist. Returns a boolean indicating whether the frame had any keyframed values.
-        /// </summary>
-        public bool GetKeyframe(int frame, ref float x, ref float y, ref float z, ref float w)
-        {
-            x = GetKeyframeValue(frame, Axis.X);
-            y = GetKeyframeValue(frame, Axis.Y);
-            z = GetKeyframeValue(frame, Axis.Z);
-            w = GetKeyframeValue(frame, Axis.W);
-
-            foreach (var keyframe in Keyframes)
-            {
-                if (keyframe.FrameIndex == frame) return true;
-            }
-            return false;
         }
 
         public bool Compare(EAN_AnimationComponent component)
@@ -1423,117 +1831,33 @@ namespace Xv2CoreLib.EAN
             return true;
         }
 
-        /// <summary>
-        /// Add two EAN_AnimationComponents together.
-        /// </summary>
-        /// <param name="component"></param>
-        public void Add(EAN_AnimationComponent component)
-        {
-            //Expand this entry if required
-            if (component.GetLastKeyframe() > GetLastKeyframe())
-            {
-                Keyframes.Add(new EAN_Keyframe()
-                {
-                    FrameIndex = (ushort)component.GetLastKeyframe()
-                });
-            }
-
-            foreach (var keyframe in Keyframes)
-            {
-                if (component.GetLastKeyframe() >= keyframe.FrameIndex)
-                {
-                    keyframe.X += component.GetKeyframeValue(keyframe.FrameIndex, Axis.X) * component.GetKeyframeValue(keyframe.FrameIndex, Axis.W);
-                    keyframe.Y += component.GetKeyframeValue(keyframe.FrameIndex, Axis.Y) * component.GetKeyframeValue(keyframe.FrameIndex, Axis.W);
-                    keyframe.Z += component.GetKeyframeValue(keyframe.FrameIndex, Axis.Z) * component.GetKeyframeValue(keyframe.FrameIndex, Axis.W);
-                    //keyframe.W += component.GetKeyframeValue(keyframe.FrameIndex, Axis.W);
-                }
-            }
-
-        }
-
-        public EAN_Keyframe GetKeyframe(int frame)
-        {
-            foreach (var keyframe in Keyframes)
-            {
-                if (keyframe.FrameIndex == frame) return keyframe;
-            }
-
-            return null;
-        }
-
-        private EAN_Keyframe GetNearestKeyframeBefore(int frame)
-        {
-            EAN_Keyframe nearest = GetKeyframe(0);
-
-            if (nearest == null)
-                nearest = GetDefaultKeyframe();
-
-            foreach (var keyframe in Keyframes)
-            {
-                if (keyframe.FrameIndex < frame && keyframe.FrameIndex > nearest.FrameIndex)
-                {
-                    nearest = keyframe;
-                }
-            }
-
-            return nearest;
-        }
-
-        private EAN_Keyframe GetNearestKeyframeAfter(int frame)
-        {
-            int lastKeyframe = GetLastKeyframe();
-
-            if (frame >= lastKeyframe) return null;
-            EAN_Keyframe nearest = GetKeyframe(GetLastKeyframe());
-
-            if (nearest == null)
-                nearest = GetDefaultKeyframe();
-
-            foreach (var keyframe in Keyframes)
-            {
-                if (keyframe.FrameIndex > frame && keyframe.FrameIndex < nearest.FrameIndex)
-                {
-                    nearest = keyframe;
-                }
-            }
-
-            return nearest;
-        }
-
-        private EAN_Keyframe GetDefaultKeyframe()
-        {
-            EAN_Keyframe keyframe = new EAN_Keyframe();
-
-            if(I_00 == ComponentType.Scale && I_01 == 3)
-            {
-                //Camera
-                keyframe.Y = 0.69775401155f; //Radians, for 39.97836 degree FOV
-            }
-            else
-            {
-                keyframe.W = 1f;
-            }
-
-            return keyframe;
-        }
-
         #endregion
 
-        #region Modifiers
-        public void ApplyNodeOffset(float x, float y, float z, float w)
+#region Modifiers
+        public void ApplyNodeOffset(float x, float y, float z, float w, List<IUndoRedo> undos)
         {
             if (Keyframes == null) throw new Exception(String.Format("Could not apply NodeOffset because Keyframes is null."));
 
             for (int i = 0; i < Keyframes.Count; i++)
             {
-                Keyframes[i].X += x;
-                Keyframes[i].Y += y;
-                Keyframes[i].Z += z;
-                Keyframes[i].W += w;
+                float newX = Keyframes[i].X + x;
+                float newY = Keyframes[i].Y + y;
+                float newZ = Keyframes[i].Z + z;
+                float newW = Keyframes[i].W + w;
+
+                undos.Add(new UndoableProperty<EAN_Keyframe>(nameof(EAN_Keyframe.X), Keyframes[i], Keyframes[i].X, newX));
+                undos.Add(new UndoableProperty<EAN_Keyframe>(nameof(EAN_Keyframe.Y), Keyframes[i], Keyframes[i].Y, newY));
+                undos.Add(new UndoableProperty<EAN_Keyframe>(nameof(EAN_Keyframe.Z), Keyframes[i], Keyframes[i].Z, newZ));
+                undos.Add(new UndoableProperty<EAN_Keyframe>(nameof(EAN_Keyframe.W), Keyframes[i], Keyframes[i].W, newW));
+
+                Keyframes[i].X = newX;
+                Keyframes[i].Y = newY;
+                Keyframes[i].Z = newZ;
+                Keyframes[i].W = newW;
             }
         }
 
-        public void Cut(int startFrame, int endFrame, int smoothingFrames)
+        public void Cut(int startFrame, int endFrame, int smoothingFrames, List<IUndoRedo> undos)
         {
             //Removing keyframes
             List<EAN_Keyframe> _keyframesToRemove = new List<EAN_Keyframe>();
@@ -1548,6 +1872,7 @@ namespace Xv2CoreLib.EAN
             
             foreach(var keyframe in _keyframesToRemove)
             {
+                undos.Add(new UndoableListRemove<EAN_Keyframe>(Keyframes, keyframe));
                 Keyframes.Remove(keyframe);
             }
 
@@ -1557,38 +1882,14 @@ namespace Xv2CoreLib.EAN
             {
                 if(Keyframes[i].FrameIndex > endFrame)
                 {
-                    Keyframes[i].FrameIndex -= (ushort)amountToDecreaseBy;
+                    ushort newFrame = (ushort)(Keyframes[i].FrameIndex - amountToDecreaseBy);
+                    undos.Add(new UndoableProperty<EAN_Keyframe>(nameof(EAN_Keyframe.FrameIndex), Keyframes[i], Keyframes[i].FrameIndex, newFrame));
+                    Keyframes[i].FrameIndex = newFrame;
                 }
             }
 
         }
 
-        public void Scale(int startFrame, int endFrame, float scaleFactor)
-        {
-            if (Keyframes == null) throw new Exception("Scale failed. Keyframes was null.");
-
-            for(int i = 0; i < Keyframes.Count; i++)
-            {
-                if(Keyframes[i].FrameIndex < startFrame)
-                {
-                    //Keyframes before the scaled range, so nothing really needs to be done here...
-                }
-                else if(Keyframes[i].FrameIndex >= startFrame && Keyframes[i].FrameIndex < endFrame || Keyframes[i].FrameIndex == endFrame)
-                {
-                    //Duration range to apply scaling effect to.
-                    float newFrameIndex = (Keyframes[i].FrameIndex - startFrame) * scaleFactor;
-                    Keyframes[i].FrameIndex = (ushort)((int)Math.Floor(newFrameIndex) + startFrame);
-                }
-                else if (Keyframes[i].FrameIndex > endFrame)
-                {
-                    //Keyframes that come after the scaled duration, so the frameIndex needs to be adjusted accordinly.
-                    float amountToInceaseBy = (endFrame - startFrame) * scaleFactor - (endFrame - startFrame);
-                    Keyframes[i].FrameIndex += (ushort)Math.Floor(amountToInceaseBy);
-                }
-            }
-            
-            RemoveDuplicateKeyframes(); //Remove any keyframes that now happen to have the same frameIndex, which can happen when shortening an animation. Neglecting to do this WILL result in a broken animation!
-        }
 
         public void ApplyZeroAxis(Axis axis)
         {
@@ -1614,9 +1915,9 @@ namespace Xv2CoreLib.EAN
             }
         }
 
-        #endregion
+#endregion
 
-        #region CameraShake
+#region CameraShake
         public void ApplyCameraShake(int startFrame, int duration, float threshold, bool cameraComponent)
         {
             //Create keyframes if needed. Do this BEFORE modifying any keyframes.
@@ -1649,14 +1950,19 @@ namespace Xv2CoreLib.EAN
 
         }
         
-        #endregion
+#endregion
 
     }
 
     [YAXSerializeAs("Keyframe")]
     [Serializable]
-    public class EAN_Keyframe
+    public class EAN_Keyframe : ISortable
     {
+        #region Sortable
+        [YAXDontSerialize]
+        public int SortID { get { return FrameIndex; } }
+        #endregion
+
         [YAXAttributeForClass]
         public ushort FrameIndex { get; set; }
         [YAXAttributeForClass]
@@ -1667,6 +1973,36 @@ namespace Xv2CoreLib.EAN
         public float Z { get; set; } = 0f;
         [YAXAttributeForClass]
         public float W { get; set; } = 1f;
+
+        public EAN_Keyframe() { }
+
+        public EAN_Keyframe(ushort frame, float x, float y, float z, float w)
+        {
+            FrameIndex = frame;
+            X = x;
+            Y = y;
+            Z = z;
+            W = w;
+        }
+
+        public void ScaleByWorld(List<IUndoRedo> undos = null)
+        {
+            if(W != 1f)
+            {
+                if(undos != null)
+                {
+                    undos.Add(new UndoableProperty<EAN_Keyframe>(nameof(X), this, X, (X * W)));
+                    undos.Add(new UndoableProperty<EAN_Keyframe>(nameof(Y), this, Y, (Y * W)));
+                    undos.Add(new UndoableProperty<EAN_Keyframe>(nameof(Z), this, Z, (Z * W)));
+                    undos.Add(new UndoableProperty<EAN_Keyframe>(nameof(W), this, W, 1f));
+                }
+
+                X *= W;
+                Y *= W;
+                Z *= W;
+                W = 1f;
+            }
+        }
 
         public EAN_Keyframe Clone()
         {
@@ -1690,78 +2026,29 @@ namespace Xv2CoreLib.EAN
 
             return true;
         }
-    }
 
-
-    #region CameraWrapper
-
-    [Serializable]
-    public class KeyframeListEntry : INotifyPropertyChanged
-    {
-        #region INotifyPropertyChanged
-        public event PropertyChangedEventHandler PropertyChanged;
-        
-        private void NotifyPropertyChanged(String propertyName = "")
+        #region Convert
+        internal Vector3 ToVector3()
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            return new Vector3(X, Y, Z) * W;
+        }
+
+        internal Quaternion ToQuaternion()
+        {
+            return new Quaternion(X, Y, Z, W);
+        }
+
+        internal static Matrix4x4 ToMatrix(Vector3 pos, Vector3 scale, Quaternion rotation)
+        {
+            Matrix4x4 matrix = Matrix4x4.Identity;
+
+            matrix *= Matrix4x4.CreateScale(scale);
+            matrix *= Matrix4x4.CreateFromQuaternion(rotation);
+            matrix *= Matrix4x4.CreateTranslation(pos);
+
+            return matrix;
         }
         #endregion
-
-        private int _frame = 0;
-        public int Frame
-        {
-            get
-            {
-                return _frame;
-            }
-            set
-            {
-                if(_frame != value)
-                {
-                    //Change the frame in the underlying data
-                    bool result = nodeRef.ChangeKeyframe(_frame, value);
-
-                    if (result)
-                    {
-                        //Change the property only IF the keyframe change was accepted.
-                        _frame = value;
-                    }
-
-                    NotifyPropertyChanged("Frame");
-                }
-            }
-        }
-
-        //Refs
-        EAN_Node nodeRef;
-
-        public KeyframeListEntry(int frame, EAN_Node node)
-        {
-            if (node == null) throw new InvalidDataException("KeyframeListEntry.nodeRef cannot be null.");
-            nodeRef = node;
-            _frame = frame;
-        }
-
-        public static ObservableCollection<KeyframeListEntry> GetKeyframeList(EAN_Node node)
-        {
-            if (node == null) return null;
-            ObservableCollection<KeyframeListEntry> keyframes = new ObservableCollection<KeyframeListEntry>();
-
-            foreach(var frames in node.GetAllKeyframes())
-            {
-                keyframes.Add(new KeyframeListEntry(frames, node));
-            }
-
-            return keyframes;
-        }
-
-        public SerializedKeyframe SerializeKeyframe()
-        {
-            return new SerializedKeyframe(Frame, nodeRef.GetKeyframeValues(Frame));
-        }
     }
 
     [Serializable]
@@ -1817,1047 +2104,6 @@ namespace Xv2CoreLib.EAN
         public float ScaleW { get; set; }
     }
 
-    #endregion
-
-
-
-
-    //Skeleton
-
-    [YAXSerializeAs("Skeleton")]
-    [Serializable]
-    public class ESK_Skeleton
-    {
-        [YAXAttributeForClass]
-        [YAXSerializeAs("Flag")]
-        public short I_02 { get; set; }
-        [YAXAttributeForClass]
-        [YAXSerializeAs("UseUnk2")]
-        public bool UseUnk2 { get; set; }
-        [YAXAttributeForClass]
-        [YAXSerializeAs("I_28")]
-        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public int[] I_28 { get; set; } // size 2
-
-        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Bone")]
-        [YAXDontSerializeIfNull]
-        public ObservableCollection<ESK_Bone> ESKBones { get; set; }
-        [YAXDontSerializeIfNull]
-        public ESK_Unk1 Unk1 { get; set; }
-
-        //Non-hierarchy list
-        List<ESK_BoneNonHierarchal> listBones = null;
-
-        public List<string> GetSelectedBones()
-        {
-            List<string> selectedBones = new List<string>();
-
-            for(int i = 0; i < ESKBones.Count; i++)
-            {
-                if (ESKBones[i].isSelected) selectedBones.Add(ESKBones[i].Name);
-
-                if(ESKBones[i].ESK_Bones != null)
-                {
-                    selectedBones.AddRange(GetSelectedBonesRecursive(ESKBones[i].ESK_Bones));
-                }
-            }
-
-            return selectedBones;
-        }
-
-        private List<string> GetSelectedBonesRecursive(ObservableCollection<ESK_Bone> eskBones)
-        {
-            List<string> selectedBones = new List<string>();
-
-            for (int i = 0; i < eskBones.Count; i++)
-            {
-                if (eskBones[i].isSelected) selectedBones.Add(eskBones[i].Name);
-
-                if (eskBones[i].ESK_Bones != null)
-                {
-                    selectedBones.AddRange(GetSelectedBonesRecursive(eskBones[i].ESK_Bones));
-                }
-            }
-
-            return selectedBones;
-        }
-
-        public void SetSelectionState(bool isSelected)
-        {
-            for(int i = 0; i < ESKBones.Count; i++)
-            {
-                ESKBones[i].isSelected = isSelected;
-
-                if(ESKBones[i].ESK_Bones != null)
-                {
-                    SetSelectionStateRecursive(isSelected, ESKBones[i].ESK_Bones);
-                }
-            }
-        }
-
-        private void SetSelectionStateRecursive(bool isSelected, ObservableCollection<ESK_Bone> eskBones)
-        {
-            for (int i = 0; i < eskBones.Count; i++)
-            {
-                eskBones[i].isSelected = isSelected;
-
-                if (eskBones[i].ESK_Bones != null)
-                {
-                    SetSelectionStateRecursive(isSelected, eskBones[i].ESK_Bones);
-                }
-            }
-        }
-
-        public bool Exists(string boneName)
-        {
-            for(int i = 0; i < ESKBones.Count; i++)
-            {
-                if(ESKBones[i].Name == boneName)
-                {
-                    return true;
-                }
-
-                if(ESKBones[i].ESK_Bones != null)
-                {
-                    bool result = ExistsRecursive(boneName, ESKBones[i].ESK_Bones);
-
-                    if(result == true)
-                    {
-                        return true;
-                    }
-                }
-                
-            }
-
-            return false;
-        }
-
-        private bool ExistsRecursive(string boneName, ObservableCollection<ESK_Bone> eskBones)
-        {
-            for (int i = 0; i < eskBones.Count; i++)
-            {
-                if (eskBones[i].Name == boneName)
-                {
-                    return true;
-                }
-
-                if (eskBones[i].ESK_Bones != null)
-                {
-                    bool result = ExistsRecursive(boneName, eskBones[i].ESK_Bones);
-
-                    if (result == true)
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        public void AddBones(List<ESK_BoneNonHierarchal> bonesToAdd)
-        {
-            foreach (var bone in bonesToAdd)
-            {
-                if(Exists(bone.Name) == false)
-                {
-                    ESK_Bone _eskBone = bone.GetAsEskBone();
-                    bool result = AddBone(bone.Index1_Name, _eskBone);
-
-                    if(result == false)
-                    {
-                        throw new Exception(String.Format("Failed to add bone. Parent = {0}, Name = {1}", bone.Index1_Name, bone.Name));
-                    }
-
-                }
-            }
-        }
-        
-        private bool AddBone(string parent, ESK_Bone boneToAdd)
-        {
-            string[] name = boneToAdd.Name.Split('_');
-            try
-            {
-                if (String.Format("{0}_{1}", name[1], name[2]) == "BAS_BONE") return true;
-            }
-            catch
-            {
-                //Most likely got an index out of range exception, which will happen a lot with the above code. In the event that this exception happens then the above code is not needed anyway, so do nothing here.
-            }
-
-            if (parent == String.Empty)
-            {
-                ESKBones.Add(boneToAdd.Clone());
-
-                listBones = GetNonHierarchalBoneList();
-                return true;
-            }
-
-            for (int i = 0; i < ESKBones.Count; i++)
-            {
-                if (ESKBones[i].Name == parent)
-                {
-                    ESKBones[i].ESK_Bones.Add(boneToAdd.Clone());
-
-                    listBones = GetNonHierarchalBoneList();
-                    return true;
-                }
-
-                if (ESKBones[i].ESK_Bones != null)
-                {
-                    bool result = AddBoneRecursive(parent, boneToAdd, ESKBones[i].ESK_Bones);
-
-                    if (result == true)
-                    {
-                        listBones = GetNonHierarchalBoneList();
-                        return true;
-                    }
-                }
-
-            }
-
-            return false;
-        }
-
-        private bool AddBoneRecursive(string parent, ESK_Bone boneToAdd, ObservableCollection<ESK_Bone> eskBones)
-        {
-
-            for (int i = 0; i < eskBones.Count; i++)
-            {
-                if (eskBones[i].Name == parent)
-                {
-                    if(eskBones[i].ESK_Bones == null)
-                    {
-                        eskBones[i].ESK_Bones = new ObservableCollection<ESK_Bone>();
-                    }
-
-                    eskBones[i].ESK_Bones.Add(boneToAdd.Clone());
-                    return true;
-                }
-
-                if (eskBones[i].ESK_Bones != null)
-                {
-                    bool result = AddBoneRecursive(parent, boneToAdd, eskBones[i].ESK_Bones);
-
-                    if (result == true) return true;
-                }
-
-            }
-
-            return false;
-
-        }
-
-        public static int IndexOf(string bone, List<ESK_BoneNonHierarchal> bones)
-        {
-            if (bones != null)
-            {
-                for (int i = 0; i < bones.Count; i++)
-                {
-                    if (bones[i].Name == bone)
-                    {
-                        return i;
-                    }
-                }
-            }
-
-            return -1;
-        }
-
-        public string NameOf(int index)
-        {
-            if (ESKBones == null) throw new Exception(String.Format("Could not get the name of the bone at index {0} because ESKBones is null.", index));
-            if (index > ESKBones.Count - 1) throw new Exception(String.Format("Could not get the name of the bone at index {0} because a bone does not exist there.", index));
-
-            if (index == -1)
-            {
-                return string.Empty;
-            }
-            else
-            {
-                return ESKBones[index].Name;
-            }
-        }
-
-        public string GetSibling(string bone)
-        {
-            for (int i = 0; i < ESKBones.Count; i++)
-            {
-                if (ESKBones[i].Name == bone)
-                {
-                    if (i != ESKBones.Count - 1)
-                    {
-                        return ESKBones[i + 1].Name;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-
-                if (ESKBones[i].ESK_Bones != null)
-                {
-                    string result = GetSiblingRecursive(bone, ESKBones[i].ESK_Bones);
-
-                    if (result != String.Empty)
-                    {
-                        return result;
-                    }
-                }
-            }
-
-            return String.Empty;
-        }
-
-        private string GetSiblingRecursive(string bone, ObservableCollection<ESK_Bone> eskBones)
-        {
-            for (int i = 0; i < eskBones.Count; i++)
-            {
-                if (eskBones[i].Name == bone)
-                {
-                    if (i != eskBones.Count - 1)
-                    {
-                        return eskBones[i + 1].Name;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-
-                if (eskBones[i].ESK_Bones != null)
-                {
-                    string result = GetSiblingRecursive(bone, eskBones[i].ESK_Bones);
-
-                    if (result != String.Empty)
-                    {
-                        return result;
-                    }
-                }
-            }
-
-            return String.Empty;
-        }
-
-        public string GetChild(string bone)
-        {
-            for (int i = 0; i < ESKBones.Count; i++)
-            {
-                if (ESKBones[i].Name == bone)
-                {
-                    if (ESKBones[i].ESK_Bones != null)
-                    {
-                        if (ESKBones[i].ESK_Bones.Count > 0)
-                        {
-                            return ESKBones[i].ESK_Bones[0].Name;
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-
-                if (ESKBones[i].ESK_Bones != null)
-                {
-                    string result = GetChildRecursive(bone, ESKBones[i].ESK_Bones);
-
-                    if (result != String.Empty)
-                    {
-                        return result;
-                    }
-                }
-            }
-
-            return String.Empty;
-        }
-
-        private string GetChildRecursive(string bone, ObservableCollection<ESK_Bone> eskBones)
-        {
-            for (int i = 0; i < eskBones.Count; i++)
-            {
-                if (eskBones[i].Name == bone)
-                {
-                    if (eskBones[i].ESK_Bones != null)
-                    {
-                        if (eskBones[i].ESK_Bones.Count > 0)
-                        {
-                            return eskBones[i].ESK_Bones[0].Name;
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-
-                if (eskBones[i].ESK_Bones != null)
-                {
-                    string result = GetChildRecursive(bone, eskBones[i].ESK_Bones);
-
-                    if (result != String.Empty)
-                    {
-                        return result;
-                    }
-                }
-            }
-
-            return String.Empty;
-        }
-
-        public string GetParent(string bone)
-        {
-            for (int i = 0; i < ESKBones.Count; i++)
-            {
-                if (ESKBones[i].Name == bone)
-                {
-                    break;
-                }
-
-                if (ESKBones[i].ESK_Bones != null)
-                {
-                    string result = GetParentRecursive(bone, ESKBones[i].Name, ESKBones[i].ESK_Bones);
-
-                    if (result != String.Empty)
-                    {
-                        return result;
-                    }
-                }
-            }
-
-            return String.Empty;
-        }
-
-        private string GetParentRecursive(string bone, string parentBone, ObservableCollection<ESK_Bone> eskBones)
-        {
-            for (int i = 0; i < eskBones.Count; i++)
-            {
-                if (eskBones[i].Name == bone)
-                {
-                    return parentBone;
-                }
-
-                if (eskBones[i].ESK_Bones != null)
-                {
-                    string result = GetParentRecursive(bone, eskBones[i].Name, eskBones[i].ESK_Bones);
-
-                    if (result != String.Empty)
-                    {
-                        return result;
-                    }
-                }
-            }
-
-            return String.Empty;
-        }
-
-        public ESK_Skeleton Clone()
-        {
-            ObservableCollection<ESK_Bone> bones = new ObservableCollection<ESK_Bone>();
-
-            foreach (var e in ESKBones)
-            {
-                bones.Add(e.CloneAll());
-            }
-
-            return new ESK_Skeleton()
-            {
-                I_02 = I_02,
-                I_28 = I_28,
-                Unk1 = Unk1,
-                UseUnk2 = UseUnk2,
-                ESKBones = bones
-            };
-        }
-
-        public List<ESK_BoneNonHierarchal> GetNonHierarchalBoneList()
-        {
-            List<ESK_BoneNonHierarchal> bones = new List<ESK_BoneNonHierarchal>();
-
-            //Generating the list
-            foreach (var bone in ESKBones)
-            {
-                bones.Add(new ESK_BoneNonHierarchal()
-                {
-                    RelativeTransform = (bone.RelativeTransform != null) ? bone.RelativeTransform.Clone() : new ESK_RelativeTransform(),
-                    Name = bone.Name,
-                    Index1_Name = GetParent(bone.Name),
-                    Index2_Name = GetChild(bone.Name),
-                    Index3_Name = GetSibling(bone.Name),
-                    Index4 = bone.Index4
-                });
-
-                if (bone.ESK_Bones != null)
-                {
-                    bones.AddRange(GetNonHierarchalBoneListRecursive(bone.ESK_Bones));
-                }
-
-            }
-
-            //Setting index numbers
-            for (int i = 0; i < bones.Count; i++)
-            {
-                bones[i].Index1 = (short)IndexOf(bones[i].Index1_Name, bones);
-                bones[i].Index2 = (short)IndexOf(bones[i].Index2_Name, bones);
-                bones[i].Index3 = (short)IndexOf(bones[i].Index3_Name, bones);
-            }
-
-            //Returning the list
-            return bones;
-        }
-
-        private List<ESK_BoneNonHierarchal> GetNonHierarchalBoneListRecursive(ObservableCollection<ESK_Bone> eskBones)
-        {
-            List<ESK_BoneNonHierarchal> bones = new List<ESK_BoneNonHierarchal>();
-
-            foreach (var bone in eskBones)
-            {
-                bones.Add(new ESK_BoneNonHierarchal()
-                {
-                    RelativeTransform = (bone.RelativeTransform != null) ? bone.RelativeTransform.Clone() : new ESK_RelativeTransform(),
-                    Name = bone.Name,
-                    Index1_Name = GetParent(bone.Name),
-                    Index2_Name = GetChild(bone.Name),
-                    Index3_Name = GetSibling(bone.Name),
-                    Index4 = bone.Index4
-                });
-
-                if (bone.ESK_Bones != null)
-                {
-                    bones.AddRange(GetNonHierarchalBoneListRecursive(bone.ESK_Bones));
-                }
-            }
-
-            return bones;
-        }
-
-        public ESK_Bone GetBone(string boneName)
-        {
-            if (listBones == null)
-                listBones = GetNonHierarchalBoneList();
-
-            for (int i = 0; i < listBones.Count; i++)
-                if (listBones[i].Name == boneName)
-                    return listBones[i].GetAsEskBone();
-
-            return null;
-        }
-
-
-
-    }
-
-    [YAXSerializeAs("Bone")]
-    [Serializable]
-    public class ESK_Bone : INotifyPropertyChanged
-    {
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        // This method is called by the Set accessor of each property.
-        // The CallerMemberName attribute that is applied to the optional propertyName
-        // parameter causes the property name of the caller to be substituted as an argument.
-        private void NotifyPropertyChanged(String propertyName = "")
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-
-        private bool isSelectedValue = true;
-        [YAXDontSerialize]
-        public bool isSelected
-        {
-            get
-            {
-                return this.isSelectedValue;
-            }
-
-            set
-            {
-                if (value != this.isSelectedValue)
-                {
-                    this.isSelectedValue = value;
-                    NotifyPropertyChanged("isSelected");
-                }
-            }
-        }
-
-        [YAXAttributeForClass]
-        public string Name { get; set; }
-        [YAXAttributeForClass]
-        [YAXSerializeAs("UnkIndex")]
-        public short Index4 { get; set; }
-
-        //Transforms
-        public ESK_RelativeTransform RelativeTransform { get; set; }
-
-        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Bone")]
-        public ObservableCollection<ESK_Bone> ESK_Bones { get; set; }
-
-        /// <summary>
-        /// Does not clone children ESK_Bones!!
-        /// </summary>
-        public ESK_Bone Clone()
-        {
-            return new ESK_Bone()
-            {
-                Name = (string)Name.Clone(),
-                Index4 = Index4,
-                RelativeTransform = RelativeTransform.Clone(),
-                ESK_Bones = new ObservableCollection<ESK_Bone>(),
-                isSelected = true
-            };
-        }
-
-        /// <summary>
-        /// Clones all children ESK_Bones as well.
-        /// </summary>
-        public ESK_Bone CloneAll()
-        {
-            return new ESK_Bone()
-            {
-                Name = (string)Name.Clone(),
-                Index4 = Index4,
-                RelativeTransform = RelativeTransform.Clone(),
-                ESK_Bones = CloneAllRecursive(ESK_Bones),
-                isSelected = true
-            };
-        }
-
-        private ObservableCollection<ESK_Bone> CloneAllRecursive(ObservableCollection<ESK_Bone> bones)
-        {
-            ObservableCollection<ESK_Bone> newBones = new ObservableCollection<ESK_Bone>();
-
-            if (ESK_Bones != null)
-            {
-                for (int i = 0; i < bones.Count; i++)
-                {
-                    newBones.Add(bones[i].CloneAll());
-                }
-            }
-            
-            return newBones;
-        }
-
-        public static ESK_Bone Read(List<byte> listBytes, byte[] bytes, int[] offsets)
-        {
-            int boneIndexOffset = offsets[0];
-            int nameOffset = offsets[1];
-            int skinningMatrixOffset = offsets[2];
-            int transformMatrixOffset = offsets[3];
-
-            return new ESK_Bone()
-            {
-                Index4 = BitConverter.ToInt16(bytes, boneIndexOffset + 6),
-                Name = Utils.GetString(listBytes, nameOffset),
-                RelativeTransform = ESK_RelativeTransform.Read(bytes, skinningMatrixOffset)
-            };
-        }
-
-    }
-
-    [YAXSerializeAs("RelativeTransform")]
-    [Serializable]
-    public class ESK_RelativeTransform
-    {
-        [YAXAttributeFor("Position")]
-        [YAXSerializeAs("X")]
-        [YAXFormat("0.0##########")]
-        public float F_00 { get; set; }
-        [YAXAttributeFor("Position")]
-        [YAXSerializeAs("Y")]
-        [YAXFormat("0.0##########")]
-        public float F_04 { get; set; }
-        [YAXAttributeFor("Position")]
-        [YAXSerializeAs("Z")]
-        [YAXFormat("0.0##########")]
-        public float F_08 { get; set; }
-        [YAXAttributeFor("Position")]
-        [YAXSerializeAs("W")]
-        [YAXFormat("0.0##########")]
-        public float F_12 { get; set; }
-        [YAXAttributeFor("Rotation")]
-        [YAXSerializeAs("X")]
-        [YAXFormat("0.0##########")]
-        public float F_16 { get; set; }
-        [YAXAttributeFor("Rotation")]
-        [YAXSerializeAs("Y")]
-        [YAXFormat("0.0##########")]
-        public float F_20 { get; set; }
-        [YAXAttributeFor("Rotation")]
-        [YAXSerializeAs("Z")]
-        [YAXFormat("0.0##########")]
-        public float F_24 { get; set; }
-        [YAXAttributeFor("Rotation")]
-        [YAXSerializeAs("W")]
-        [YAXFormat("0.0##########")]
-        public float F_28 { get; set; }
-        [YAXAttributeFor("Scale")]
-        [YAXSerializeAs("X")]
-        [YAXFormat("0.0##########")]
-        public float F_32 { get; set; }
-        [YAXAttributeFor("Scale")]
-        [YAXSerializeAs("Y")]
-        [YAXFormat("0.0##########")]
-        public float F_36 { get; set; }
-        [YAXAttributeFor("Scale")]
-        [YAXSerializeAs("Z")]
-        [YAXFormat("0.0##########")]
-        public float F_40 { get; set; }
-        [YAXAttributeFor("Scale")]
-        [YAXSerializeAs("W")]
-        [YAXFormat("0.0##########")]
-        public float F_44 { get; set; }
-
-        public ESK_RelativeTransform Clone()
-        {
-            return new ESK_RelativeTransform()
-            {
-                F_00 = F_00,
-                F_04 = F_04,
-                F_08 = F_08,
-                F_12 = F_12,
-                F_16 = F_16,
-                F_20 = F_20,
-                F_24 = F_24,
-                F_28 = F_28,
-                F_32 = F_32,
-                F_36 = F_36,
-                F_40 = F_40,
-                F_44 = F_44
-            };
-        }
-
-        public static ESK_RelativeTransform Read(byte[] bytes, int offset)
-        {
-            if (offset == 0) return null;
-
-            return new ESK_RelativeTransform()
-            {
-                F_00 = BitConverter.ToSingle(bytes, offset + 0),
-                F_04 = BitConverter.ToSingle(bytes, offset + 4),
-                F_08 = BitConverter.ToSingle(bytes, offset + 8),
-                F_12 = BitConverter.ToSingle(bytes, offset + 12),
-                F_16 = BitConverter.ToSingle(bytes, offset + 16),
-                F_20 = BitConverter.ToSingle(bytes, offset + 20),
-                F_24 = BitConverter.ToSingle(bytes, offset + 24),
-                F_28 = BitConverter.ToSingle(bytes, offset + 28),
-                F_32 = BitConverter.ToSingle(bytes, offset + 32),
-                F_36 = BitConverter.ToSingle(bytes, offset + 36),
-                F_40 = BitConverter.ToSingle(bytes, offset + 40),
-                F_44 = BitConverter.ToSingle(bytes, offset + 44)
-            };
-        }
-    }
-
-    [YAXSerializeAs("AbsoluteTransform")]
-    [Serializable]
-    public class ESK_AbsoluteTransform
-    {
-        [YAXAttributeFor("Line1")]
-        [YAXSerializeAs("X")]
-        [YAXFormat("0.0##########")]
-        public float F_00 { get; set; }
-        [YAXAttributeFor("Line1")]
-        [YAXSerializeAs("Y")]
-        [YAXFormat("0.0##########")]
-        public float F_04 { get; set; }
-        [YAXAttributeFor("Line1")]
-        [YAXSerializeAs("Z")]
-        [YAXFormat("0.0##########")]
-        public float F_08 { get; set; }
-        [YAXAttributeFor("Line1")]
-        [YAXSerializeAs("W")]
-        [YAXFormat("0.0##########")]
-        public float F_12 { get; set; }
-        [YAXAttributeFor("Line2")]
-        [YAXSerializeAs("X")]
-        [YAXFormat("0.0##########")]
-        public float F_16 { get; set; }
-        [YAXAttributeFor("Line2")]
-        [YAXSerializeAs("Y")]
-        [YAXFormat("0.0##########")]
-        public float F_20 { get; set; }
-        [YAXAttributeFor("Line2")]
-        [YAXSerializeAs("Z")]
-        [YAXFormat("0.0##########")]
-        public float F_24 { get; set; }
-        [YAXAttributeFor("Line2")]
-        [YAXSerializeAs("W")]
-        [YAXFormat("0.0##########")]
-        public float F_28 { get; set; }
-        [YAXAttributeFor("Line3")]
-        [YAXSerializeAs("X")]
-        [YAXFormat("0.0##########")]
-        public float F_32 { get; set; }
-        [YAXAttributeFor("Line3")]
-        [YAXSerializeAs("Y")]
-        [YAXFormat("0.0##########")]
-        public float F_36 { get; set; }
-        [YAXAttributeFor("Line3")]
-        [YAXSerializeAs("Z")]
-        [YAXFormat("0.0##########")]
-        public float F_40 { get; set; }
-        [YAXAttributeFor("Line3")]
-        [YAXSerializeAs("W")]
-        [YAXFormat("0.0##########")]
-        public float F_44 { get; set; }
-
-        [YAXAttributeFor("Line4")]
-        [YAXSerializeAs("X")]
-        [YAXFormat("0.0##########")]
-        public float F_48 { get; set; }
-        [YAXAttributeFor("Line4")]
-        [YAXSerializeAs("Y")]
-        [YAXFormat("0.0##########")]
-        public float F_52 { get; set; }
-        [YAXAttributeFor("Line4")]
-        [YAXSerializeAs("Z")]
-        [YAXFormat("0.0##########")]
-        public float F_56 { get; set; }
-        [YAXAttributeFor("Line4")]
-        [YAXSerializeAs("W")]
-        [YAXFormat("0.0##########")]
-        public float F_60 { get; set; }
-
-        public ESK_AbsoluteTransform Clone()
-        {
-            return new ESK_AbsoluteTransform()
-            {
-                F_00 = F_00,
-                F_04 = F_04,
-                F_08 = F_08,
-                F_12 = F_12,
-                F_16 = F_16,
-                F_20 = F_20,
-                F_24 = F_24,
-                F_28 = F_28,
-                F_32 = F_32,
-                F_36 = F_36,
-                F_40 = F_40,
-                F_44 = F_44,
-                F_48 = F_48,
-                F_52 = F_52,
-                F_56 = F_56,
-                F_60 = F_60
-            };
-        }
-
-        public static ESK_AbsoluteTransform Read(byte[] bytes, int offset)
-        {
-            if (offset == 0) return null;
-
-            return new ESK_AbsoluteTransform()
-            {
-                F_00 = BitConverter.ToSingle(bytes, offset + 0),
-                F_04 = BitConverter.ToSingle(bytes, offset + 4),
-                F_08 = BitConverter.ToSingle(bytes, offset + 8),
-                F_12 = BitConverter.ToSingle(bytes, offset + 12),
-                F_16 = BitConverter.ToSingle(bytes, offset + 16),
-                F_20 = BitConverter.ToSingle(bytes, offset + 20),
-                F_24 = BitConverter.ToSingle(bytes, offset + 24),
-                F_28 = BitConverter.ToSingle(bytes, offset + 28),
-                F_32 = BitConverter.ToSingle(bytes, offset + 32),
-                F_36 = BitConverter.ToSingle(bytes, offset + 36),
-                F_40 = BitConverter.ToSingle(bytes, offset + 40),
-                F_44 = BitConverter.ToSingle(bytes, offset + 44),
-                F_48 = BitConverter.ToSingle(bytes, offset + 48),
-                F_52 = BitConverter.ToSingle(bytes, offset + 52),
-                F_56 = BitConverter.ToSingle(bytes, offset + 56),
-                F_60 = BitConverter.ToSingle(bytes, offset + 60),
-            };
-        }
-
-    }
-
-    [YAXSerializeAs("Unk1")]
-    [Serializable]
-    public class ESK_Unk1
-    {
-        //All are Int32!
-        [YAXAttributeFor("I_00")]
-        [YAXSerializeAs("value")]
-        public int I_00 { get; set; }
-        [YAXAttributeFor("I_04")]
-        [YAXSerializeAs("value")]
-        public int I_04 { get; set; }
-        [YAXAttributeFor("I_08")]
-        [YAXSerializeAs("value")]
-        public int I_08 { get; set; }
-        [YAXAttributeFor("I_12")]
-        [YAXSerializeAs("value")]
-        public int I_12 { get; set; }
-        [YAXAttributeFor("I_16")]
-        [YAXSerializeAs("value")]
-        public int I_16 { get; set; }
-        [YAXAttributeFor("I_20")]
-        [YAXSerializeAs("value")]
-        public int I_20 { get; set; }
-        [YAXAttributeFor("I_24")]
-        [YAXSerializeAs("value")]
-        public int I_24 { get; set; }
-        [YAXAttributeFor("I_28")]
-        [YAXSerializeAs("value")]
-        public int I_28 { get; set; }
-        [YAXAttributeFor("I_32")]
-        [YAXSerializeAs("value")]
-        public int I_32 { get; set; }
-        [YAXAttributeFor("I_36")]
-        [YAXSerializeAs("value")]
-        public int I_36 { get; set; }
-        [YAXAttributeFor("I_40")]
-        [YAXSerializeAs("value")]
-        public int I_40 { get; set; }
-        [YAXAttributeFor("I_44")]
-        [YAXSerializeAs("value")]
-        public int I_44 { get; set; }
-        [YAXAttributeFor("I_48")]
-        [YAXSerializeAs("value")]
-        public int I_48 { get; set; }
-        [YAXAttributeFor("I_52")]
-        [YAXSerializeAs("value")]
-        public int I_52 { get; set; }
-        [YAXAttributeFor("I_56")]
-        [YAXSerializeAs("value")]
-        public int I_56 { get; set; }
-        [YAXAttributeFor("I_60")]
-        [YAXSerializeAs("value")]
-        public int I_60 { get; set; }
-        [YAXAttributeFor("I_64")]
-        [YAXSerializeAs("value")]
-        public int I_64 { get; set; }
-        [YAXAttributeFor("I_68")]
-        [YAXSerializeAs("value")]
-        public int I_68 { get; set; }
-        [YAXAttributeFor("I_72")]
-        [YAXSerializeAs("value")]
-        public int I_72 { get; set; }
-        [YAXAttributeFor("I_76")]
-        [YAXSerializeAs("value")]
-        public int I_76 { get; set; }
-        [YAXAttributeFor("I_80")]
-        [YAXSerializeAs("value")]
-        public int I_80 { get; set; }
-        [YAXAttributeFor("I_84")]
-        [YAXSerializeAs("value")]
-        public int I_84 { get; set; }
-        [YAXAttributeFor("I_88")]
-        [YAXSerializeAs("value")]
-        public int I_88 { get; set; }
-        [YAXAttributeFor("I_92")]
-        [YAXSerializeAs("value")]
-        public int I_92 { get; set; }
-        [YAXAttributeFor("I_96")]
-        [YAXSerializeAs("value")]
-        public int I_96 { get; set; }
-        [YAXAttributeFor("I_100")]
-        [YAXSerializeAs("value")]
-        public int I_100 { get; set; }
-        [YAXAttributeFor("I_104")]
-        [YAXSerializeAs("value")]
-        public int I_104 { get; set; }
-        [YAXAttributeFor("I_108")]
-        [YAXSerializeAs("value")]
-        public int I_108 { get; set; }
-        [YAXAttributeFor("I_112")]
-        [YAXSerializeAs("value")]
-        public int I_112 { get; set; }
-        [YAXAttributeFor("I_116")]
-        [YAXSerializeAs("value")]
-        public int I_116 { get; set; }
-        [YAXAttributeFor("I_120")]
-        [YAXSerializeAs("value")]
-        public int I_120 { get; set; }
-
-        public static ESK_Unk1 Read(byte[] bytes, int offset)
-        {
-            var unk1 = new ESK_Unk1();
-            try
-            {
-                unk1.I_00 = BitConverter.ToInt32(bytes, offset + 0);
-                unk1.I_04 = BitConverter.ToInt32(bytes, offset + 4);
-                unk1.I_08 = BitConverter.ToInt32(bytes, offset + 8);
-                unk1.I_12 = BitConverter.ToInt32(bytes, offset + 12);
-                unk1.I_16 = BitConverter.ToInt32(bytes, offset + 16);
-                unk1.I_20 = BitConverter.ToInt32(bytes, offset + 20);
-                unk1.I_24 = BitConverter.ToInt32(bytes, offset + 24);
-                unk1.I_28 = BitConverter.ToInt32(bytes, offset + 28);
-                unk1.I_32 = BitConverter.ToInt32(bytes, offset + 32);
-                unk1.I_36 = BitConverter.ToInt32(bytes, offset + 36);
-                unk1.I_40 = BitConverter.ToInt32(bytes, offset + 40);
-                unk1.I_44 = BitConverter.ToInt32(bytes, offset + 44);
-                unk1.I_48 = BitConverter.ToInt32(bytes, offset + 48);
-                unk1.I_52 = BitConverter.ToInt32(bytes, offset + 52);
-                unk1.I_56 = BitConverter.ToInt32(bytes, offset + 56);
-                unk1.I_60 = BitConverter.ToInt32(bytes, offset + 60);
-                unk1.I_64 = BitConverter.ToInt32(bytes, offset + 64);
-                unk1.I_68 = BitConverter.ToInt32(bytes, offset + 68);
-                unk1.I_72 = BitConverter.ToInt32(bytes, offset + 72);
-                unk1.I_76 = BitConverter.ToInt32(bytes, offset + 76);
-                unk1.I_80 = BitConverter.ToInt32(bytes, offset + 80);
-                unk1.I_84 = BitConverter.ToInt32(bytes, offset + 84);
-                unk1.I_88 = BitConverter.ToInt32(bytes, offset + 88);
-                unk1.I_92 = BitConverter.ToInt32(bytes, offset + 92);
-                unk1.I_96 = BitConverter.ToInt32(bytes, offset + 96);
-                unk1.I_100 = BitConverter.ToInt32(bytes, offset + 100);
-                unk1.I_104 = BitConverter.ToInt32(bytes, offset + 104);
-                unk1.I_108 = BitConverter.ToInt32(bytes, offset + 108);
-                unk1.I_112 = BitConverter.ToInt32(bytes, offset + 112);
-                unk1.I_116 = BitConverter.ToInt32(bytes, offset + 116);
-                unk1.I_120 = BitConverter.ToInt32(bytes, offset + 120);
-                return unk1;
-
-            }
-            catch
-            {
-                return unk1;
-            }
-        }
-
-    }
-
-
-    //Special, for rewriting binary file
-    [Serializable]
-    public class ESK_BoneNonHierarchal
-    {
-        public string Name { get; set; }
-        public short Index1 { get; set; }
-        public short Index2 { get; set; }
-        public short Index3 { get; set; }
-        public short Index4 { get; set; }
-
-
-        public string Index1_Name { get; set; }
-        public string Index2_Name { get; set; }
-        public string Index3_Name { get; set; }
-
-        //Transforms
-        public ESK_RelativeTransform RelativeTransform { get; set; }
-
-
-        public ESK_Bone GetAsEskBone()
-        {
-            return new ESK_Bone()
-            {
-                isSelected = true,
-                Index4 = Index4,
-                ESK_Bones = new ObservableCollection<ESK_Bone>(),
-                Name = (string)Name.Clone(),
-                RelativeTransform = RelativeTransform.Clone()
-            };
-        }
-
-    }
 
 
 

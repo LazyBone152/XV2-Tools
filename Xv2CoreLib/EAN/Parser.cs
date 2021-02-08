@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using YAXLib;
 using Xv2CoreLib;
+using Xv2CoreLib.Resource;
+using Xv2CoreLib.ESK;
 
 namespace Xv2CoreLib.EAN
 {
@@ -55,10 +57,10 @@ namespace Xv2CoreLib.EAN
             eanFile.I_17 = rawBytes[17];
 
             //Skeleton
-            ParseSkeleton(SkeletonOffset);
+            eanFile.Skeleton = ESK_Skeleton.Read(rawBytes, SkeletonOffset, false);
 
             //Animations
-            eanFile.Animations = new ObservableCollection<EAN_Animation>();
+            eanFile.Animations = new AsyncObservableCollection<EAN_Animation>();
             if (AnimationCount > 0)
             {
                 for(int i = 0; i < AnimationCount; i++)
@@ -72,6 +74,8 @@ namespace Xv2CoreLib.EAN
                 }
 
             }
+
+            eanFile.LinkEskData();
         }
 
         //Animations
@@ -90,11 +94,11 @@ namespace Xv2CoreLib.EAN
             ValidateFloatAndIntPrecision(indexSize, floatSize);
             animation.I_02 = (EAN_Animation.IntPrecision)indexSize;
             animation.I_03 = (EAN_Animation.FloatPrecision)floatSize;
-            animation.I_04 = BitConverter.ToInt32(rawBytes, offset + 4);
+            animation.FrameCount = BitConverter.ToInt32(rawBytes, offset + 4);
 
             if(nodeCount > 0)
             {
-                animation.Nodes = new ObservableCollection<EAN_Node>();
+                animation.Nodes = new AsyncObservableCollection<EAN_Node>();
                 for(int i = 0; i < nodeCount; i++)
                 {
                     int thisNodeOffset = BitConverter.ToInt32(rawBytes, nodeOffset) + offset;
@@ -148,9 +152,9 @@ namespace Xv2CoreLib.EAN
             }
         }
 
-        private ObservableCollection<EAN_Keyframe> ParseKeyframes(int indexOffset, int floatOffset, int count, int indexSize, int floatSize)
+        private AsyncObservableCollection<EAN_Keyframe> ParseKeyframes(int indexOffset, int floatOffset, int count, int indexSize, int floatSize)
         {
-            ObservableCollection<EAN_Keyframe> keyframes = new ObservableCollection<EAN_Keyframe>();
+            AsyncObservableCollection<EAN_Keyframe> keyframes = new AsyncObservableCollection<EAN_Keyframe>();
 
             for(int i = 0; i < count; i++)
             {
@@ -202,141 +206,6 @@ namespace Xv2CoreLib.EAN
                 throw new Exception(String.Format("Parse failed. The internal skeleton does not have a bone at index {0}, which the animation at index {1} is referencing!", boneIndex, animIndex));
             }
         }
-
-        //Skeleton
-
-        private void ParseSkeleton(int offset)
-        {
-            //Init
-            boneCount = BitConverter.ToInt16(rawBytes, offset);
-            int unk1Offset = BitConverter.ToInt32(rawBytes, offset + 20) + offset;
-            int unk2Offset = BitConverter.ToInt32(rawBytes, offset + 24) + offset;
-
-            //Skeleton init
-            eanFile.Skeleton = new ESK_Skeleton()
-            {
-                I_02 = BitConverter.ToInt16(rawBytes, offset + 2),
-                I_28 = BitConverter_Ex.ToInt32Array(rawBytes, offset + 28, 2),
-                Unk1 = ESK_Unk1.Read(rawBytes, unk1Offset),
-                UseUnk2 = (unk2Offset != 0) ? true : false,
-                ESKBones = new ObservableCollection<ESK_Bone>()
-            };
-
-            //Setting the offsets for the initial loop to use
-            int[] offsets = GetBoneOffset(0, offset);
-            int boneIndexOffset = offsets[0];
-            int nameOffset = offsets[1];
-            int skinningMatrixOffset = offsets[2];
-            int transformMatrixOffset = offsets[3];
-
-            while (true)
-            {
-                int idx = eanFile.Skeleton.ESKBones.Count;
-                eanFile.Skeleton.ESKBones.Add(ESK_Bone.Read(bytes, rawBytes, offsets));
-                if (BitConverter.ToInt16(rawBytes, boneIndexOffset + 2) != -1)
-                {
-                    eanFile.Skeleton.ESKBones[idx].ESK_Bones = ParseChildrenBones(BitConverter.ToInt16(rawBytes, boneIndexOffset + 2), offset);
-                }
-
-                //Loop management
-                if (BitConverter.ToInt16(rawBytes, boneIndexOffset + 4) != -1)
-                {
-                    //There is a sibling
-                    offsets = GetBoneOffset(BitConverter.ToInt16(rawBytes, boneIndexOffset + 4), offset);
-                    boneIndexOffset = offsets[0];
-                    nameOffset = offsets[1];
-                    skinningMatrixOffset = offsets[2];
-                    //transformMatrixOffset = offsets[3];
-                }
-                else
-                {
-                    //There is no sibling. End loop.
-                    break;
-                }
-            }
-
-        }
-
-
-        private ObservableCollection<ESK_Bone> ParseChildrenBones(int indexOfFirstSibling, int offset)
-        {
-            ObservableCollection<ESK_Bone> newBones = new ObservableCollection<ESK_Bone>();
-
-            int[] offsets = GetBoneOffset(indexOfFirstSibling, offset);
-            int boneIndexOffset = offsets[0];
-            int nameOffset = offsets[1];
-            int skinningMatrixOffset = offsets[2];
-            int transformMatrixOffset = offsets[3];
-
-            while (true)
-            {
-                int idx = newBones.Count;
-                newBones.Add(ESK_Bone.Read(bytes, rawBytes, offsets));
-                if (BitConverter.ToInt16(rawBytes, boneIndexOffset + 2) != -1)
-                {
-                    newBones[idx].ESK_Bones = ParseChildrenBones(BitConverter.ToInt16(rawBytes, boneIndexOffset + 2), offset);
-                }
-
-                //Loop management
-                if (BitConverter.ToInt16(rawBytes, boneIndexOffset + 4) != -1)
-                {
-                    //There is a sibling
-                    offsets = GetBoneOffset(BitConverter.ToInt16(rawBytes, boneIndexOffset + 4), offset);
-                    boneIndexOffset = offsets[0];
-                    nameOffset = offsets[1];
-                    skinningMatrixOffset = offsets[2];
-                    //transformMatrixOffset = offsets[3];
-                }
-                else
-                {
-                    //There is no sibling. End loop.
-                    break;
-                }
-            }
-
-            return newBones;
-        }
-
-        //Helper methods below
-
-        /// <summary>
-        /// Returns the offsets for the bone indexes[0], name[1], Skinning Matrix[2], and Transform Matrix[3], in that order.
-        /// </summary>
-        private int[] GetBoneOffset(int index, int SkeletonOffset)
-        {
-            if (BitConverter.ToInt16(rawBytes, SkeletonOffset + 0) - 1 < index)
-            {
-                throw new Exception("BoneIndex is greater than BoneCount.");
-            }
-
-            int boneIndexTableOffset = BitConverter.ToInt32(rawBytes, SkeletonOffset + 4) + SkeletonOffset;
-            int nameTableOffset = BitConverter.ToInt32(rawBytes, SkeletonOffset + 8) + SkeletonOffset;
-            int skinningMatrixTableOffset = BitConverter.ToInt32(rawBytes, SkeletonOffset + 12) + SkeletonOffset;
-            int transformMatrixTableOffset = BitConverter.ToInt32(rawBytes, SkeletonOffset + 16) + SkeletonOffset;
-
-            //Calc offsets
-            int boneIndex = (8 * index) + boneIndexTableOffset;
-            int nameTable = BitConverter.ToInt32(rawBytes, (4 * index) + nameTableOffset) + SkeletonOffset; //Points to the actual string, not the table
-            int skinningMatrix = (48 * index) + skinningMatrixTableOffset;
-            int transformMatrix = (64 * index) + transformMatrixTableOffset;
-
-            return new int[4] { boneIndex, nameTable, skinningMatrix, transformMatrix };
-        }
-
-
-        private void ValidateSkeletonUnk2(int offset, int count)
-        {
-
-            for (int i = 0; i < count; i++)
-            {
-                if (BitConverter.ToInt64(rawBytes, offset) != 281470681743360)
-                {
-                    throw new Exception("Parse failed. Skeleton Unk2 Mismatch!");
-                }
-                offset += 8;
-            }
-        }
-
 
     }
 

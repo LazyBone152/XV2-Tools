@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using Xv2CoreLib.EEPK;
 using Xv2CoreLib.EffectContainer;
+using Xv2CoreLib.Resource.App;
 
 namespace EEPK_Organiser.NameList
 {
@@ -42,6 +43,8 @@ namespace EEPK_Organiser.NameList
             }
         }
 
+        public string NameListDir { get { return SettingsManager.Instance.GetAbsPathInAppFolder("namelist"); } }
+
         public NameListManager()
         {
             LoadedNameLists = new ObservableCollection<NameListFile>();
@@ -55,9 +58,9 @@ namespace EEPK_Organiser.NameList
 
         private void LoadNameLists()
         {
-            if (Directory.Exists(GeneralInfo.NAMELIST_DIR_PATH))
+            if (Directory.Exists(NameListDir))
             {
-                string[] files = Directory.GetFiles(GeneralInfo.NAMELIST_DIR_PATH);
+                string[] files = Directory.GetFiles(NameListDir);
 
                 foreach (var file in files)
                 {
@@ -95,7 +98,7 @@ namespace EEPK_Organiser.NameList
             SaveFileDialog saveDialog = new SaveFileDialog();
             saveDialog.Title = "Save Name List";
             saveDialog.Filter = "XML file | *.xml";
-            saveDialog.InitialDirectory = Path.GetFullPath(GeneralInfo.NAMELIST_DIR_PATH);
+            saveDialog.InitialDirectory = Path.GetFullPath(NameListDir);
             saveDialog.AddExtension = true;
             saveDialog.ShowDialog();
 
@@ -123,7 +126,7 @@ namespace EEPK_Organiser.NameList
                 nameList.Save(saveDialog.FileName);
 
                 //Add Name List to current list
-                if(selectedDir == Path.GetFullPath(GeneralInfo.NAMELIST_DIR_PATH))
+                if(selectedDir == Path.GetFullPath(NameListDir))
                 {
                     NameListFile nameListFile = new NameListFile();
                     nameListFile.Name = Path.GetFileNameWithoutExtension(saveDialog.FileName);

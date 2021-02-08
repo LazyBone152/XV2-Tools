@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EEPK_Organiser.Forms"
-        xmlns:settings="clr-namespace:EEPK_Organiser.Settings"
+        xmlns:xv2App="clr-namespace:Xv2CoreLib.Resource.App;assembly=Xv2CoreLib"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
@@ -12,7 +12,7 @@
     <Window.Resources>
         <ObjectDataProvider x:Key="accents" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
             <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="settings:AppAccent"/>
+                <x:Type TypeName="xv2App:AppAccent"/>
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
     </Window.Resources>

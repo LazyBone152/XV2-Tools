@@ -13,7 +13,7 @@
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:undoRedo="clr-namespace:Xv2CoreLib.Resource.UndoRedo;assembly=Xv2CoreLib"
         mc:Ignorable="d"
-        Title="{Binding Source={x:Static local:GeneralInfo.AppName}}" MinHeight="400" MinWidth="850" Height="640" Width="1100" ResizeMode="CanResizeWithGrip" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen">
+        Title="EEPK Organiser" MinHeight="400" MinWidth="850" Height="640" Width="1100" ResizeMode="CanResizeWithGrip" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen">
     <Window.InputBindings>
         <KeyBinding Key="Z" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=UndoCommand}"/>
         <KeyBinding Key="Y" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=RedoCommand}"/>
@@ -226,7 +226,9 @@
 
             </MenuItem>
             <MenuItem Header="Help">
-                <MenuItem Header="Check for updates" Click="HelpMenu_CheckForUpdates_Click"/>
+                <MenuItem Header="Check For Updates" Click="HelpMenu_CheckForUpdates_Click"/>
+                <MenuItem Header="GitHub" Click="Help_GitHub"/>
+                <Separator/>
                 <MenuItem Header="Shortcut keys" Click="HelpMenu_ShortcutKeys_Click"/>
                 <MenuItem Header="About" Click="HelpMenu_About_Click"/>
             </MenuItem>

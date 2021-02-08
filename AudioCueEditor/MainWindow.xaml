@@ -53,6 +53,10 @@
                 </MenuItem>
                 <MenuItem Header="Randomize Cue IDs" Command="{Binding RandomizeCueIDsCommand}"/>
             </MenuItem>
+            <MenuItem Header="Help">
+                <MenuItem Header="Check For Updates" Click="Help_CheckForUpdates"/>
+                <MenuItem Header="GitHub" Click="Help_GitHub"/>
+            </MenuItem>
         </Menu>
         <view:CueEditorView Grid.Row="1" AcbFile="{Binding AcbFile}"/>
         <Grid Grid.Row="2" Background="{DynamicResource AccentColorBrush2}">

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MahApps.Metro.Controls.Dialogs;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -14,6 +15,8 @@ namespace AudioCueEditor
     /// </summary>
     public partial class App : Application
     {
+        public static MetroDialogSettings DefaultDialogSettings = new MetroDialogSettings() { AnimateHide = false, AnimateShow = false, DialogTitleFontSize = 16, DialogMessageFontSize = 12 };
+
         public static string ExePath { get { return System.Reflection.Assembly.GetEntryAssembly().Location; } }
         public static string ErrorLogPath { get { return $"{Path.GetDirectoryName(ExePath)}/ace_log.txt"; } }
 

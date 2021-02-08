@@ -164,6 +164,16 @@ namespace Xv2CoreLib
 
             return convertedList;
         }
+    
+        public static List<int> ConvertToIntList(List<ushort> list)
+        {
+            List<int> newList = new List<int>();
+
+            foreach (var value in list)
+                newList.Add((int)value);
+
+            return newList;
+        }
     }
 
     public static class Xv2ColorConverter
@@ -332,7 +342,24 @@ namespace Xv2CoreLib
     
     public static class Utils
     {
+        
 
+        public static bool IsFileWriteLocked(string path)
+        {
+            try
+            {
+                using (FileStream stream = new FileInfo(path).Open(FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                {
+                    stream.Close();
+                }
+            }
+            catch
+            {
+                return true;
+            }
+
+            return false;
+        }
         public static bool CompareSplitString(string originalString, char splitParam, int index, string compareParam)
         {
             var splitStr = originalString.Split(splitParam);
@@ -402,6 +429,11 @@ namespace Xv2CoreLib
             //string workingDir = Path.GetFullPath(Environment.CurrentDirectory);
             //newPath = newPath.Remove(0, workingDir.Length - 1);
             //return newPath;
+        }
+
+        public static bool ComparePaths(string path1, string path2)
+        {
+            return SanitizePath(path1) == SanitizePath(path2);
         }
 
         public static string SanitizePath(string path)
@@ -1402,7 +1434,7 @@ namespace Xv2CoreLib
             {
                 for (int i = 0; i < _strings.Count(); i++)
                 {
-                    if ((_strings[i].StringToWrite == "NULL" && string.IsNullOrWhiteSpace(_strings[i].StringToWrite)) == false)
+                    if ((_strings[i].StringToWrite == "NULL" || string.IsNullOrWhiteSpace(_strings[i].StringToWrite)) == false)
                     {
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - _strings[i].RelativeOffset), _strings[i].Offset);
                         bytes.AddRange(Encoding.ASCII.GetBytes(_strings[i].StringToWrite));

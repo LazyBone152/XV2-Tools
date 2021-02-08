@@ -1,24 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
+﻿using MahApps.Metro.Controls.Dialogs;
+using System;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
+using Xv2CoreLib.Resource.App;
 
 namespace EEPK_Organiser
 {
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
-    public partial class App : Application
+    public partial class App : System.Windows.Application
     {
+        public static MetroDialogSettings DefaultDialogSettings = new MetroDialogSettings() { AnimateHide = false, AnimateShow = false, DialogTitleFontSize = 16, DialogMessageFontSize = 12 };
+
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
 #if !DEBUG
             SaveExceptionLog(e.Exception.ToString());
-            MessageBox.Show(String.Format("An unhandled exception was raised during execution of the application. \n\nDetails: {0}\n\nA log containing details about the error was saved at \"{1}\".", e.Exception.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(String.Format("An exception was raised during execution of the application. \n\nDetails: {0}\n\nA log containing details about the error was saved at \"{1}\".", e.Exception.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             e.Handled = true;
 #endif
         }
@@ -27,7 +26,7 @@ namespace EEPK_Organiser
         {
             try
             {
-                File.WriteAllText(GeneralInfo.ERROR_LOG_PATH, ex);
+                File.WriteAllText(SettingsManager.Instance.GetErrorLogPath(), ex);
             }
             catch
             {

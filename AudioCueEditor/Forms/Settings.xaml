@@ -5,16 +5,38 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AudioCueEditor.Forms"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:xv2App="clr-namespace:Xv2CoreLib.Resource.App;assembly=Xv2CoreLib"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="Settings" Height="183.117" Width="284.416" WindowStyle="ToolWindow" ShowInTaskbar="False" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Closing="Window_Closing">
+        Title="Settings" Height="179" Width="504.444" WindowStyle="ToolWindow" ShowInTaskbar="False" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Closing="Window_Closing">
+    <Window.Resources>
+        <ObjectDataProvider x:Key="accents" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="xv2App:AppAccent"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </Window.Resources>
     <Grid>
-        <GroupBox Header="Theme" HorizontalAlignment="Left" Height="90" Margin="20,22,0,0" VerticalAlignment="Top" Width="219">
+        <GroupBox Header="Theme" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="219">
+
             <StackPanel>
-                <RadioButton IsChecked="{Binding settings.UseLightTheme, UpdateSourceTrigger=PropertyChanged}" GroupName="Theme" Content="Light"/>
-                <RadioButton IsChecked="{Binding settings.UseDarkTheme, UpdateSourceTrigger=PropertyChanged}" GroupName="Theme" Content="Dark"/>
-                <RadioButton IsChecked="{Binding settings.UseWindowsTheme, UpdateSourceTrigger=PropertyChanged}" GroupName="Theme" Content="Windows Default"/>
+                <RadioButton IsChecked="{Binding settings.UseLightTheme, UpdateSourceTrigger=PropertyChanged}" GroupName="Theme" Content="Light" Checked="ThemeRadioButtons_CheckChanged" Unchecked="ThemeRadioButtons_CheckChanged"/>
+                <RadioButton IsChecked="{Binding settings.UseDarkTheme, UpdateSourceTrigger=PropertyChanged}" GroupName="Theme" Content="Dark" Checked="ThemeRadioButtons_CheckChanged" Unchecked="ThemeRadioButtons_CheckChanged"/>
+
+                <StackPanel Orientation="Horizontal" Margin="0, 3" Visibility="{Binding DarkAccentVisibility}">
+                    <Label Content="Accent" Width="50"/>
+                    <ComboBox Width="120" SelectedItem="{Binding settings.CurrentDarkAccent, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={StaticResource ResourceKey=accents}}" SelectionChanged="ThemeAccentComboBox_SelectionChanged"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0, 3" Visibility="{Binding LightAccentVisibility}">
+                    <Label Content="Accent" Width="50"/>
+                    <ComboBox Width="120" SelectedItem="{Binding settings.CurrentLightAccent, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={StaticResource ResourceKey=accents}}" SelectionChanged="ThemeAccentComboBox_SelectionChanged"/>
+                </StackPanel>
             </StackPanel>
         </GroupBox>
+        <CheckBox IsChecked="{Binding settings.UpdateNotifications, UpdateSourceTrigger=PropertyChanged}" Content="Check for updates on start-up" HorizontalAlignment="Left" Margin="234,53,0,0" VerticalAlignment="Top" Width="272"/>
+
+        <Controls:NumericUpDown Value="{Binding settings.UndoLimit, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="5000" Margin="343,22,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="108" Height="26" />
+        <Label Content="Undo Limit" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="234,22,0,0" VerticalAlignment="Top" Width="109"/>
 
     </Grid>
 </Controls:MetroWindow>

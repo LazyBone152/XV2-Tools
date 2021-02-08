@@ -1,37 +1,69 @@
-﻿using AudioCueEditor.Settings;
-using MahApps.Metro.Controls;
+﻿using MahApps.Metro.Controls;
 using System;
-using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using Xv2CoreLib.Resource.App;
 
 namespace AudioCueEditor.Forms
 {
     /// <summary>
     /// Interaction logic for Settings.xaml
     /// </summary>
-    public partial class Settings : MetroWindow
+    public partial class Settings : MetroWindow, INotifyPropertyChanged
     {
-        public AppSettings settings { get; set; }
+        #region NotPropChanged
+        public event PropertyChangedEventHandler PropertyChanged;
 
-        public Settings(AppSettings _settings)
+        private void NotifyPropertyChanged(String propertyName = "")
         {
-            settings = _settings;
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+        #endregion
+
+        public Xv2CoreLib.Resource.App.Settings settings { get; set; }
+        private MainWindow _parent;
+
+        public Visibility LightAccentVisibility { get { return (settings.GetCurrentTheme() == AppTheme.Light) ? Visibility.Visible : Visibility.Collapsed; } }
+        public Visibility DarkAccentVisibility { get { return (settings.GetCurrentTheme() == AppTheme.Dark) ? Visibility.Visible : Visibility.Collapsed; } }
+
+        public Settings(MainWindow parent)
+        {
+            _parent = parent;
+            settings = SettingsManager.Instance.Settings;
             InitializeComponent();
-            Owner = Application.Current.MainWindow;
+            Owner = System.Windows.Application.Current.MainWindow;
             DataContext = this;
+            SettingsManager.SettingsReloaded += SettingsManager_SettingsReloaded;
         }
 
+        ~Settings()
+        {
+            SettingsManager.SettingsReloaded -= SettingsManager_SettingsReloaded;
+        }
+
+        private void SettingsManager_SettingsReloaded(object sender, EventArgs e)
+        {
+            settings = SettingsManager.Instance.Settings;
+            NotifyPropertyChanged(nameof(settings));
+            ThemeRadioButtons_CheckChanged(null, null);
+        }
+
+        private void ThemeRadioButtons_CheckChanged(object sender, RoutedEventArgs e)
+        {
+            NotifyPropertyChanged(nameof(LightAccentVisibility));
+            NotifyPropertyChanged(nameof(DarkAccentVisibility));
+
+            _parent.InitTheme();
+        }
+
+        private void ThemeAccentComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            _parent.InitTheme();
+        }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {

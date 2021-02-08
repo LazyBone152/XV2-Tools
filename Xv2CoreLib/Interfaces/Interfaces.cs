@@ -15,12 +15,20 @@ namespace Xv2CoreLib
     }
 
     /// <summary>
-    /// Provides a unique ID that can be used for installation/uninstallation purposes. This can be an int, string or multiple ints merged together.
+    /// Provides a unique ID that can be used for installation/uninstallation purposes. This can be an int, string or multiple ints merged together. 
     /// </summary>
     public interface IInstallable
     {
         int SortID { get; }
         string Index { get; set; }
+    }
+
+    /// <summary>
+    /// Alternative to IInstallable just for sorting.
+    /// </summary>
+    public interface ISortable
+    {
+        int SortID { get; }
     }
 
     public interface IInstallable_2<T> where T : IInstallable
@@ -69,4 +77,5 @@ namespace Xv2CoreLib
     {
 
     }
+
 }

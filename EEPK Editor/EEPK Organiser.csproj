@@ -79,6 +79,9 @@
     <Reference Include="AForge.Math">
       <HintPath>..\DLLs\AForge.Math.dll</HintPath>
     </Reference>
+    <Reference Include="AutoUpdater">
+      <HintPath>..\DLLs\AutoUpdater.dll</HintPath>
+    </Reference>
     <Reference Include="Costura, Version=3.2.0.0, Culture=neutral, PublicKeyToken=9919ef960d84173d, processorArchitecture=MSIL">
       <HintPath>..\packages\Costura.Fody.3.2.0\lib\net46\Costura.dll</HintPath>
     </Reference>
@@ -203,16 +206,10 @@
     </Compile>
     <Compile Include="Forms\MaterialSelector.xaml.cs" />
     <Compile Include="Forms\TextureSelector.xaml.cs" />
-    <Compile Include="Forms\Update.xaml.cs">
-      <DependentUpon>Update.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="GeneralInfo.cs" />
     <Compile Include="Misc\ClipboardDataTypes.cs" />
     <Compile Include="Misc\InputValidation.cs" />
     <Compile Include="Name\Namelist.cs" />
     <Compile Include="Name\NameListManager.cs" />
-    <Compile Include="Settings\Settings.cs" />
-    <Compile Include="Update\UpdateManager.cs" />
     <Compile Include="Utils\BindingProxy.cs" />
     <Compile Include="Utils\CacheManager.cs" />
     <Compile Include="Utils\DataGridSelectedItemsBinding.cs" />
@@ -299,10 +296,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Forms\TextureSelector.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Forms\Update.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

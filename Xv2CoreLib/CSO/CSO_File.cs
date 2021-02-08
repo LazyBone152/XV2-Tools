@@ -47,6 +47,22 @@ namespace Xv2CoreLib.CSO
 
             return null;
         }
+
+
+        public static CSO_Entry GetAndAddEntry(int id, int costume, IList<CSO_Entry> entries)
+        {
+            CSO_Entry entry = entries.FirstOrDefault(x => x.CharaID == id && x.Costume == costume);
+
+            if (entry == null)
+            {
+                entry = new CSO_Entry();
+                entry.CharaID = id;
+                entry.Costume = (uint)costume;
+                entries.Add(entry);
+            }
+
+            return entry;
+        }
     }
 
     [YAXSerializeAs("CsoEntry")]

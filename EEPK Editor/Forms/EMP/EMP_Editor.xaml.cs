@@ -17,6 +17,7 @@ using Xv2CoreLib.Resource.UndoRedo;
 using Xv2CoreLib.EMB_CLASS;
 using GalaSoft.MvvmLight.CommandWpf;
 using EEPK_Organiser.Forms.Recolor;
+using Xv2CoreLib.Resource.App;
 
 namespace EEPK_Organiser.Forms.EMP
 {
@@ -51,7 +52,7 @@ namespace EEPK_Organiser.Forms.EMP
                 }
             }
         }
-        
+
 
         private Xv2CoreLib.EMB_CLASS.EMB_File textureContainer { get; set; }
         private EMM_File materialFile { get; set; }
@@ -260,7 +261,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
         }
@@ -353,7 +354,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
         }
@@ -375,7 +376,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -419,7 +420,7 @@ namespace EEPK_Organiser.Forms.EMP
             if (_particleEffect == null) return;
             ObservableCollection<ParticleEffect> parentList = empFile.GetParentList(_particleEffect);
 
-            if(parentList != null)
+            if (parentList != null)
             {
                 var newEffect = ParticleEffect.GetNew();
 
@@ -442,8 +443,8 @@ namespace EEPK_Organiser.Forms.EMP
                 var newEffect = ParticleEffect.GetNew();
 
                 int index = parentList.IndexOf(_particleEffect);
-                UndoManager.Instance.AddUndo(new UndoableListInsert<ParticleEffect>(parentList, index+1, newEffect));
-                parentList.Insert(index+1, newEffect);
+                UndoManager.Instance.AddUndo(new UndoableListInsert<ParticleEffect>(parentList, index + 1, newEffect));
+                parentList.Insert(index + 1, newEffect);
             }
         }
 
@@ -468,7 +469,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -493,7 +494,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -511,7 +512,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -531,8 +532,8 @@ namespace EEPK_Organiser.Forms.EMP
                 ImportTextureEntries(newParticleEffect, undos);
                 ImportMaterialEntries(newParticleEffect, undos);
 
-                 //Paste particleEffect
-                 ParticleEffect _particleEffect = empTree.SelectedItem as ParticleEffect;
+                //Paste particleEffect
+                ParticleEffect _particleEffect = empTree.SelectedItem as ParticleEffect;
 
                 //If selectedParticleEffect is null, we paste it at the root level
                 if (_particleEffect == null)
@@ -558,7 +559,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 
             }
         }
@@ -588,9 +589,9 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            
+
         }
 
         public RelayCommand PasteValues_Command => new RelayCommand(PasteValues, CanPasteParticleEffectAndIsSelected);
@@ -616,7 +617,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -644,11 +645,11 @@ namespace EEPK_Organiser.Forms.EMP
                     texture.TextureRef = newTex;
                 }
             }
-            
+
             //Recursively call this method again if this ParticleEffect has children
-            if(particleEffect.ChildParticleEffects != null)
+            if (particleEffect.ChildParticleEffects != null)
             {
-                foreach(var child in particleEffect.ChildParticleEffects)
+                foreach (var child in particleEffect.ChildParticleEffects)
                 {
                     ImportTextureEntries(child, undos);
                 }
@@ -658,21 +659,21 @@ namespace EEPK_Organiser.Forms.EMP
         private void ImportMaterialEntries(ParticleEffect particleEffect, List<IUndoRedo> undos)
         {
             //Add referenced material entries if they are not found
-            if(particleEffect.Type_Texture.MaterialRef != null)
+            if (particleEffect.Type_Texture.MaterialRef != null)
             {
 
                 if (!materialFile.Materials.Contains(particleEffect.Type_Texture.MaterialRef))
                 {
                     var result = materialFile.Compare(particleEffect.Type_Texture.MaterialRef);
-                    
-                    if(result == null)
+
+                    if (result == null)
                     {
                         //Material didn't exist so we have to add it
                         particleEffect.Type_Texture.MaterialRef.Str_00 = materialFile.GetUnusedName(particleEffect.Type_Texture.MaterialRef.Str_00);
                         undos.Add(new UndoableListAdd<Material>(materialFile.Materials, particleEffect.Type_Texture.MaterialRef));
                         materialFile.Materials.Add(particleEffect.Type_Texture.MaterialRef);
                     }
-                    else if(result != particleEffect.Type_Texture.MaterialRef)
+                    else if (result != particleEffect.Type_Texture.MaterialRef)
                     {
                         //A identical material already existed but it was a different instance.
                         //Change the referenced material to this.
@@ -703,14 +704,14 @@ namespace EEPK_Organiser.Forms.EMP
 
                 Forms.RecolorAll recolor = new Forms.RecolorAll(_particleEffect, this);
 
-                if(recolor.Initialize())
+                if (recolor.Initialize())
                     recolor.ShowDialog();
             }
 #if !DEBUG
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 #endif
         }
@@ -734,7 +735,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 #endif
         }
@@ -765,7 +766,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -793,7 +794,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
         }
@@ -856,7 +857,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -880,7 +881,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -904,7 +905,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -926,7 +927,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -953,7 +954,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
         }
@@ -1025,10 +1026,10 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             //Reset selected items for ComboBoxes
-            
+
         }
 
         private void ColorCanvas_Color1_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
@@ -1052,14 +1053,14 @@ namespace EEPK_Organiser.Forms.EMP
 
                 List<TexturePart> textureInstances = new List<TexturePart>();
 
-                foreach(var texture in selectedTextures)
+                foreach (var texture in selectedTextures)
                 {
                     textureInstances.AddRange(empFile.GetTexturePartsThatUseEmbEntryRef(texture));
                 }
 
                 if (MessageBox.Show(String.Format("The selected texture(s) will be deleted and all references to them on {0} Particle Effects in this EMP will be removed.\n\nContinue?", textureInstances.Count, selectedTextures.Count), "Delete", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 {
-                    foreach(var texture in selectedTextures)
+                    foreach (var texture in selectedTextures)
                     {
                         empFile.RemoveTextureReferences(texture, undos);
                         undos.Add(new UndoableListRemove<EMP_TextureDefinition>(empFile.Textures, texture));
@@ -1072,7 +1073,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
         }
@@ -1097,7 +1098,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -1121,7 +1122,7 @@ namespace EEPK_Organiser.Forms.EMP
                     _selectedTextureEntry.TextureRef = textureSelector.SelectedTexture;
 
                     //Get number of other Texture Entries that use the previous texture ref, and ask if user wants to change those as well
-                    if(previousTextureRef != null)
+                    if (previousTextureRef != null)
                     {
                         var textureEntriesThatUsedSameRef = empFile.GetTextureEntriesThatUseRef(previousTextureRef);
 
@@ -1145,7 +1146,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -1158,7 +1159,7 @@ namespace EEPK_Organiser.Forms.EMP
 
                 if (texture != null)
                 {
-                    if(texture.TextureRef != null)
+                    if (texture.TextureRef != null)
                     {
                         EmbEditForm embForm = mainWindow.PBIND_OpenTextureViewer();
                         embForm.listBox_Textures.SelectedItem = texture.TextureRef;
@@ -1169,7 +1170,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -1189,7 +1190,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -1239,9 +1240,9 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            
+
 
         }
 
@@ -1253,7 +1254,7 @@ namespace EEPK_Organiser.Forms.EMP
 
                 if (particleEffect != null)
                 {
-                    if(particleEffect.Type_Texture.MaterialRef != null)
+                    if (particleEffect.Type_Texture.MaterialRef != null)
                     {
                         EmmEditForm emmForm = mainWindow.PBIND_OpenMaterialEditor();
                         emmForm.dataGrid.SelectedItem = particleEffect.Type_Texture.MaterialRef;
@@ -1264,7 +1265,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -1283,7 +1284,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -1304,7 +1305,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
         }
@@ -1332,7 +1333,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -1357,7 +1358,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -1371,7 +1372,7 @@ namespace EEPK_Organiser.Forms.EMP
                 EMP_TextureDefinition texture = listBox_Textures.SelectedItem as EMP_TextureDefinition;
                 SubData_2_Entry keyframe = dataGrid_ScrollKeyframes.SelectedItem as SubData_2_Entry;
 
-                if(texture.SubData2.Keyframes.Count == 1)
+                if (texture.SubData2.Keyframes.Count == 1)
                 {
                     MessageBox.Show("Cannot delete the last keyframe.", "Delete", MessageBoxButton.OK, MessageBoxImage.Stop);
                     return;
@@ -1383,7 +1384,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -1410,7 +1411,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -1424,7 +1425,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -1432,7 +1433,7 @@ namespace EEPK_Organiser.Forms.EMP
         {
             List<EMP_TextureDefinition> embEntry = (List<EMP_TextureDefinition>)Clipboard.GetData(ClipboardDataTypes.EmpTextureEntry);
 
-            if(embEntry != null)
+            if (embEntry != null)
             {
                 List<IUndoRedo> undos = new List<IUndoRedo>();
 
@@ -1470,7 +1471,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -1485,13 +1486,13 @@ namespace EEPK_Organiser.Forms.EMP
                 {
                     List<IUndoRedo> undos = new List<IUndoRedo>();
 
-                    if(textures.Count > 0)
+                    if (textures.Count > 0)
                     {
                         var newTexture = textures[0].Clone();
                         newTexture.TextureRef = textureContainer.Add(newTexture.TextureRef, undos);
                         var selectedItem = listBox_Textures.SelectedItem as EMP_TextureDefinition;
 
-                        if(selectedItem != null)
+                        if (selectedItem != null)
                         {
                             selectedItem.ReplaceValues(newTexture, undos);
                             UndoManager.Instance.AddCompositeUndo(undos, "Paste Values (EMP)");
@@ -1502,7 +1503,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -1516,7 +1517,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -1529,7 +1530,7 @@ namespace EEPK_Organiser.Forms.EMP
                 {
                     var texture = listBox_Textures.SelectedItem as EMP_TextureDefinition;
                     List<EMP_TextureDefinition> selectedTextures = listBox_Textures.SelectedItems.Cast<EMP_TextureDefinition>().ToList();
-                    
+
                     selectedTextures.Remove(texture);
 
                     if (texture != null && selectedTextures.Count > 0)
@@ -1560,7 +1561,7 @@ namespace EEPK_Organiser.Forms.EMP
             catch (Exception ex)
             {
                 mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, GeneralInfo.ERROR_LOG_PATH), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
         }

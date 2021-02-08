@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using Xv2CoreLib.Resource;
 
 namespace Xv2CoreLib
 {
@@ -73,8 +74,27 @@ namespace Xv2CoreLib
             }
         }
         
-        //NEW
+        //IInstallable
         public static ObservableCollection<T> SortEntries<T>(ObservableCollection<T> entries) where T : IInstallable, new()
+        {
+            //ObservableCollect doesn't have a Sort method, so we need to do our own (bad) one here.
+
+            if (entries != null)
+            {
+                var sortedEntries = SortEntries(entries.ToList());
+
+                //To preserve the original ObservableCollection object, copy the sorted entries back into it rather than creating a new one:
+                for (int i = 0; i < entries.Count; i++)
+                {
+                    entries[i] = sortedEntries[i];
+                }
+            }
+
+            return entries;
+
+        }
+
+        public static AsyncObservableCollection<T> SortEntries<T>(AsyncObservableCollection<T> entries) where T : IInstallable, new()
         {
             //ObservableCollect doesn't have a Sort method, so we need to do our own (bad) one here.
 
@@ -99,6 +119,51 @@ namespace Xv2CoreLib
             return entries;
         }
 
+        //ISortable
+        public static ObservableCollection<T> SortEntries2<T>(ObservableCollection<T> entries) where T : ISortable, new()
+        {
+            //ObservableCollect doesn't have a Sort method, so we need to do our own (bad) one here.
+
+            if (entries != null)
+            {
+                var sortedEntries = SortEntries2(entries.ToList());
+
+                //To preserve the original ObservableCollection object, copy the sorted entries back into it rather than creating a new one:
+                for (int i = 0; i < entries.Count; i++)
+                {
+                    entries[i] = sortedEntries[i];
+                }
+            }
+
+            return entries;
+
+        }
+
+        public static AsyncObservableCollection<T> SortEntries2<T>(AsyncObservableCollection<T> entries) where T : ISortable, new()
+        {
+            //ObservableCollect doesn't have a Sort method, so we need to do our own (bad) one here.
+
+            if (entries != null)
+            {
+                var sortedEntries = SortEntries2(entries.ToList());
+
+                //To preserve the original ObservableCollection object, copy the sorted entries back into it rather than creating a new one:
+                for (int i = 0; i < entries.Count; i++)
+                {
+                    entries[i] = sortedEntries[i];
+                }
+            }
+
+            return entries;
+
+        }
+
+        public static List<T> SortEntries2<T>(List<T> entries) where T : ISortable, new()
+        {
+            entries.Sort((x, y) => x.SortID - y.SortID);
+            return entries;
+        }
+
     }
-    
+
 }

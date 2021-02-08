@@ -10,6 +10,7 @@ using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.EMM;
 using Xv2CoreLib.EMP;
 using Xv2CoreLib.HslColor;
+using Xv2CoreLib.Resource.App;
 using Xv2CoreLib.Resource.UndoRedo;
 
 namespace EEPK_Organiser.Forms.Recolor
@@ -184,7 +185,7 @@ namespace EEPK_Organiser.Forms.Recolor
 
         public bool Initialize()
         {
-            if (((currentMode == Mode.Asset && assetType == AssetType.EMO) || currentMode == Mode.Global) && !GeneralInfo.LoadTextures)
+            if (((currentMode == Mode.Asset && assetType == AssetType.EMO) || currentMode == Mode.Global) && !SettingsManager.Instance.LoadTextures)
             {
                 MessageBox.Show("This option is not available while textures are turned off. Enable Load Textures in the settings to use this option.", "Not Available", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return false;

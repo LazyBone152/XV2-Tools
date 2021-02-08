@@ -56,6 +56,7 @@ namespace Xv2CoreLib.ACB_NEW
         public static Version _1_22_4_0 = new Version("1.22.4.0"); //Used in XV1, and a few old XV2 ACBs (leftovers from xv1)
         public static Version _1_22_0_0 = new Version("1.22.0.0"); //Not observed, just a guess
         public static Version _1_21_1_0 = new Version("1.21.1.0"); //Used in XV1, and a few old XV2 ACBs (leftovers from xv1)
+        public static Version _1_14_0_0 = new Version("1.14.0.0"); 
         public static Version _1_6_0_0 = new Version("1.6.0.0"); //Used in 1 file in XV1. Missing a lot of data.
         public static Version _0_81_1_0 = new Version("0.81.1.0"); //Used in MGS3 3D. Uses CPK AWB files instead of AFS2. (wont support)
         
@@ -202,9 +203,14 @@ namespace Xv2CoreLib.ACB_NEW
             acbFile.Type = utfFile.GetValue<byte>("Type", TypeFlag.UInt8, 0);
             acbFile.VersionString = utfFile.GetValue<string>("VersionString", TypeFlag.String, 0);
             acbFile.AcbVolume = utfFile.GetValue<float>("AcbVolume", TypeFlag.Single, 0);
-            acbFile.AcfReferenceTable = utfFile.GetColumnTable("AcfReferenceTable", true);
             acbFile.OutsideLinkTable = utfFile.GetColumnTable("OutsideLinkTable", true);
             acbFile.StreamAwbTocWork = utfFile.GetData("StreamAwbTocWork", 0);
+
+            if(acbFile.Version > ACB_File._1_14_0_0)
+            {
+                acbFile.AcfReferenceTable = utfFile.GetColumnTable("AcfReferenceTable", true);
+                acbFile.ActionTracks = ACB_Track.Load(utfFile.GetColumnTable("ActionTrackTable", false), acbFile.Version, acbFile.Name);
+            }
 
             if (acbFile.Version >= ACB_File._1_27_2_0)
             {
@@ -222,7 +228,6 @@ namespace Xv2CoreLib.ACB_NEW
             acbFile.Synths = ACB_Synth.Load(utfFile.GetColumnTable("SynthTable", false), acbFile.Version);
             acbFile.Sequences = ACB_Sequence.Load(utfFile.GetColumnTable("SequenceTable", false), acbFile.Version);
             acbFile.Tracks = ACB_Track.Load(utfFile.GetColumnTable("TrackTable", false), acbFile.Version, acbFile.Name);
-            acbFile.ActionTracks = ACB_Track.Load(utfFile.GetColumnTable("ActionTrackTable", false), acbFile.Version, acbFile.Name);
             acbFile.GlobalAisacReferences = ACB_GlobalAisacReference.Load(utfFile.GetColumnTable("GlobalAisacReferenceTable", false), acbFile.Version);
             acbFile.Waveforms = ACB_Waveform.Load(utfFile.GetColumnTable("WaveformTable", false), utfFile.GetColumnTable("WaveformExtensionDataTable", false), acbFile.Version);
             acbFile.Aisacs = ACB_Aisac.Load(utfFile.GetColumnTable("AisacTable", false), utfFile.GetColumnTable("AisacControlNameTable", false), acbFile.Version);
@@ -542,8 +547,12 @@ namespace Xv2CoreLib.ACB_NEW
             utfFile.AddValue("Name", TypeFlag.String, 0, name);
             utfFile.AddValue("CharacterEncodingType", TypeFlag.UInt8, 0, CharacterEncodingType.ToString());
             utfFile.AddData("EventTable", 0, null); //Not implemented
-            utfFile.AddData("ActionTrackTable", 0, (ActionTracks.Count > 0) ? actionTrackTable.Write() : null);
-            utfFile.AddData("AcfReferenceTable", 0, (AcfReferenceTable != null) ? AcfReferenceTable.Write() : null);
+
+            if(Version > _1_14_0_0)
+            {
+                utfFile.AddData("ActionTrackTable", 0, (ActionTracks.Count > 0) ? actionTrackTable.Write() : null);
+                utfFile.AddData("AcfReferenceTable", 0, (AcfReferenceTable != null) ? AcfReferenceTable.Write() : null);
+            }
 
             if(Version >= _1_22_0_0)
             {
@@ -2451,8 +2460,12 @@ namespace Xv2CoreLib.ACB_NEW
             utfFile.Columns.Add(new UTF_Column("ControlWorkArea2", TypeFlag.UInt16));
             utfFile.Columns.Add(new UTF_Column("TrackValues", TypeFlag.Data));
             utfFile.Columns.Add(new UTF_Column("ParameterPallet", TypeFlag.UInt16));
-            utfFile.Columns.Add(new UTF_Column("ActionTrackStartIndex", TypeFlag.UInt16));
-            utfFile.Columns.Add(new UTF_Column("NumActionTracks", TypeFlag.UInt16));
+
+            if(Version > _1_14_0_0)
+            {
+                utfFile.Columns.Add(new UTF_Column("ActionTrackStartIndex", TypeFlag.UInt16));
+                utfFile.Columns.Add(new UTF_Column("NumActionTracks", TypeFlag.UInt16));
+            }
 
             return utfFile;
         }
@@ -2470,8 +2483,13 @@ namespace Xv2CoreLib.ACB_NEW
             utfFile.Columns.Add(new UTF_Column("GlobalAisacStartIndex", TypeFlag.UInt16));
             utfFile.Columns.Add(new UTF_Column("GlobalAisacNumRefs", TypeFlag.UInt16));
             utfFile.Columns.Add(new UTF_Column("ParameterPallet", TypeFlag.UInt16));
-            utfFile.Columns.Add(new UTF_Column("ActionTrackStartIndex", TypeFlag.UInt16));
-            utfFile.Columns.Add(new UTF_Column("NumActionTracks", TypeFlag.UInt16));
+
+            if (Version > _1_14_0_0)
+            {
+                utfFile.Columns.Add(new UTF_Column("ActionTrackStartIndex", TypeFlag.UInt16));
+                utfFile.Columns.Add(new UTF_Column("NumActionTracks", TypeFlag.UInt16));
+            }
+
             utfFile.Columns.Add(new UTF_Column("TrackValues", TypeFlag.Data));
             utfFile.Columns.Add(new UTF_Column("Type", TypeFlag.UInt8));
             utfFile.Columns.Add(new UTF_Column("ControlWorkArea1", TypeFlag.UInt16));
@@ -2976,13 +2994,13 @@ namespace Xv2CoreLib.ACB_NEW
 
             for (int i = 0; i < table.DefaultRowCount; i++)
             {
-                rows.Add(Load(table, i));
+                rows.Add(Load(table, i, ParseVersion));
             }
 
             return rows;
         }
 
-        public static ACB_Synth Load(UTF_File synthTable, int index)
+        public static ACB_Synth Load(UTF_File synthTable, int index, Version ParseVersion)
         {
             ACB_Synth synth = new ACB_Synth();
             synth.Index = index;
@@ -3004,12 +3022,15 @@ namespace Xv2CoreLib.ACB_NEW
                 synth.GlobalAisacRefs.Add(new AcbTableReference(globalAisacStartIndex + i));
             }
 
-            int numActionTracks = synthTable.GetValue<ushort>("NumActionTracks", TypeFlag.UInt16, index);
-            int actionTracksStartIndex = synthTable.GetValue<ushort>("ActionTrackStartIndex", TypeFlag.UInt16, index);
-
-            for(int i = 0; i < numActionTracks; i++)
+            if(ParseVersion > ACB_File._1_14_0_0)
             {
-                synth.ActionTracks.Add(new AcbTableReference(actionTracksStartIndex + i));
+                int numActionTracks = synthTable.GetValue<ushort>("NumActionTracks", TypeFlag.UInt16, index);
+                int actionTracksStartIndex = synthTable.GetValue<ushort>("ActionTrackStartIndex", TypeFlag.UInt16, index);
+
+                for (int i = 0; i < numActionTracks; i++)
+                {
+                    synth.ActionTracks.Add(new AcbTableReference(actionTracksStartIndex + i));
+                }
             }
 
             //ReferenceItems
@@ -3052,8 +3073,12 @@ namespace Xv2CoreLib.ACB_NEW
             utfTable.AddValue("CommandIndex", TypeFlag.UInt16, index, CommandIndex.ToString());
             utfTable.AddValue("GlobalAisacStartIndex", TypeFlag.UInt16, index, globalAisacRefIndex.ToString());
             utfTable.AddValue("GlobalAisacNumRefs", TypeFlag.UInt16, index, GlobalAisacRefs.Count.ToString());
-            utfTable.AddValue("NumActionTracks", TypeFlag.UInt16, index, ActionTracks.Count.ToString());
-            utfTable.AddValue("ActionTrackStartIndex", TypeFlag.UInt16, index, actionTrackIndex.ToString());
+
+            if(ParseVersion > ACB_File._1_14_0_0)
+            {
+                utfTable.AddValue("ActionTrackStartIndex", TypeFlag.UInt16, index, actionTrackIndex.ToString());
+                utfTable.AddValue("NumActionTracks", TypeFlag.UInt16, index, ActionTracks.Count.ToString());
+            }
 
             if (ReferenceType != ReferenceType.Nothing)
             {
@@ -3170,13 +3195,13 @@ namespace Xv2CoreLib.ACB_NEW
 
             for (int i = 0; i < table.DefaultRowCount; i++)
             {
-                rows.Add(Load(table, i));
+                rows.Add(Load(table, i, ParseVersion));
             }
 
             return rows;
         }
 
-        public static ACB_Sequence Load(UTF_File sequenceTable, int index)
+        public static ACB_Sequence Load(UTF_File sequenceTable, int index, Version ParseVersion)
         {
             ACB_Sequence sequence = new ACB_Sequence();
             sequence.Index = index;
@@ -3199,12 +3224,15 @@ namespace Xv2CoreLib.ACB_NEW
                 sequence.GlobalAisacRefs.Add(new AcbTableReference(globalAisacStartIndex + i));
             }
 
-            int numActionTracks = sequenceTable.GetValue<ushort>("NumActionTracks", TypeFlag.UInt16, index);
-            int actionTracksStartIndex = sequenceTable.GetValue<ushort>("ActionTrackStartIndex", TypeFlag.UInt16, index);
-
-            for (int i = 0; i < numActionTracks; i++)
+            if(ParseVersion > ACB_File._1_14_0_0)
             {
-                sequence.ActionTracks.Add(new AcbTableReference(actionTracksStartIndex + i));
+                int numActionTracks = sequenceTable.GetValue<ushort>("NumActionTracks", TypeFlag.UInt16, index);
+                int actionTracksStartIndex = sequenceTable.GetValue<ushort>("ActionTrackStartIndex", TypeFlag.UInt16, index);
+
+                for (int i = 0; i < numActionTracks; i++)
+                {
+                    sequence.ActionTracks.Add(new AcbTableReference(actionTracksStartIndex + i));
+                }
             }
 
             //Tracks
@@ -3287,8 +3315,12 @@ namespace Xv2CoreLib.ACB_NEW
             
             utfTable.AddValue("GlobalAisacNumRefs", TypeFlag.UInt16, index, GlobalAisacRefs.Count.ToString());
             utfTable.AddValue("GlobalAisacStartIndex", TypeFlag.UInt16, index, globalAisacRefIndex.ToString());
-            utfTable.AddValue("NumActionTracks", TypeFlag.UInt16, index, ActionTracks.Count.ToString());
-            utfTable.AddValue("ActionTrackStartIndex", TypeFlag.UInt16, index, actionTrackIndex.ToString());
+
+            if(ParseVersion > ACB_File._1_14_0_0)
+            {
+                utfTable.AddValue("ActionTrackStartIndex", TypeFlag.UInt16, index, actionTrackIndex.ToString());
+                utfTable.AddValue("NumActionTracks", TypeFlag.UInt16, index, ActionTracks.Count.ToString());
+            }
 
             if (trackIndexes.Count > 0)
             {

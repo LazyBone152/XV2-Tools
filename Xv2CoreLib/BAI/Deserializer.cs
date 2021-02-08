@@ -21,6 +21,8 @@ namespace Xv2CoreLib.BAI
             baiFile = (BAI_File)serializer.DeserializeFromFile(location);
             
             WriteBai();
+
+            Directory.CreateDirectory(Path.GetDirectoryName(saveLocation));
             File.WriteAllBytes(saveLocation, bytes.ToArray());
         }
 
@@ -34,6 +36,8 @@ namespace Xv2CoreLib.BAI
         {
             baiFile = _baiFile;
             WriteBai();
+
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
             File.WriteAllBytes(path, bytes.ToArray());
         }
 
