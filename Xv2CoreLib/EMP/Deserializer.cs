@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Xv2CoreLib.Resource;
 using YAXLib;
 
 namespace Xv2CoreLib.EMP
@@ -121,7 +122,7 @@ namespace Xv2CoreLib.EMP
 
         }
 
-        private void SortEntry(ObservableCollection<ParticleEffect> effectEntries)
+        private void SortEntry(IList<ParticleEffect> effectEntries)
         {
             for (int i = 0; i < effectEntries.Count(); i++)
             {
@@ -462,7 +463,7 @@ namespace Xv2CoreLib.EMP
 
         }
 
-        private void WriteType0(ObservableCollection<Type0> type0, int Type0_Offset, int mainEntryOffset, bool scale2)
+        private void WriteType0(IList<Type0> type0, int Type0_Offset, int mainEntryOffset, bool scale2)
         {
 
             bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - mainEntryOffset - 136), Type0_Offset);
@@ -483,9 +484,7 @@ namespace Xv2CoreLib.EMP
                 //Sort keyframes
                 if(type0[i].Keyframes != null)
                 {
-                    var sortedList = type0[i].Keyframes.ToList();
-                    sortedList.Sort((x, y) => x.Index - y.Index);
-                    type0[i].Keyframes = new ObservableCollection<Type0_Keyframe>(sortedList);
+                    type0[i].Keyframes = Sorting.SortEntries2(type0[i].Keyframes);
                 }
             }
 
@@ -555,7 +554,7 @@ namespace Xv2CoreLib.EMP
 
         }
 
-        private void WriteType1(ObservableCollection<Type1_Header> type1, int Type1_Offset, int mainEntryOffset, bool scale2)
+        private void WriteType1(IList<Type1_Header> type1, int Type1_Offset, int mainEntryOffset, bool scale2)
         {
             bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - mainEntryOffset), Type1_Offset);
 
@@ -659,7 +658,7 @@ namespace Xv2CoreLib.EMP
         }
 
         //Writers (Section 2)
-        private void WriteEmbEntries(ObservableCollection<EMP_TextureDefinition> embEntries)
+        private void WriteEmbEntries(IList<EMP_TextureDefinition> embEntries)
         {
             List<int> subData2Offsets_ToReplace = new List<int>();
 
@@ -1152,7 +1151,7 @@ namespace Xv2CoreLib.EMP
             }
         }
 
-        private void LinkTextureRefs(ObservableCollection<ParticleEffect> particleEffects)
+        private void LinkTextureRefs(IList<ParticleEffect> particleEffects)
         {
             //Regenerate particleEffect.Type_Texture.TextureIndex to match the reference Texture entries
 

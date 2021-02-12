@@ -10,6 +10,7 @@ using Xv2CoreLib.EffectContainer;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
 using Xv2CoreLib.Resource.UndoRedo;
+using Xv2CoreLib.Resource;
 
 namespace Xv2CoreLib.EEPK
 {
@@ -389,7 +390,7 @@ namespace Xv2CoreLib.EEPK
                 if (value != this._index)
                 {
                     this._index = value;
-                    NotifyPropertyChanged("IndexNum");
+                    NotifyPropertyChanged(nameof(IndexNum));
                 }
             }
         }
@@ -398,7 +399,7 @@ namespace Xv2CoreLib.EEPK
         public ushort I_02 { get; set; }
         [YAXSerializeAs("EffectParts")]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "EffectPart")]
-        public ObservableCollection<EffectPart> EffectParts
+        public AsyncObservableCollection<EffectPart> EffectParts
         {
             get
             {
@@ -409,11 +410,11 @@ namespace Xv2CoreLib.EEPK
                 if (value != this._effectParts)
                 {
                     this._effectParts = value;
-                    NotifyPropertyChanged("EffectParts");
+                    NotifyPropertyChanged(nameof(EffectParts));
                 }
             }
         }
-        private ObservableCollection<EffectPart> _effectParts = null;
+        private AsyncObservableCollection<EffectPart> _effectParts = null;
 
         //ViewModel
         [NonSerialized]
@@ -440,7 +441,7 @@ namespace Xv2CoreLib.EEPK
                 if (value != this._selectedEffectPart)
                 {
                     this._selectedEffectPart = value;
-                    NotifyPropertyChanged("SelectedEffectPart");
+                    NotifyPropertyChanged(nameof(SelectedEffectPart));
                 }
             }
         }
@@ -469,7 +470,7 @@ namespace Xv2CoreLib.EEPK
         public Effect Clone()
         {
             Effect newEffect = new Effect();
-            newEffect.EffectParts = new ObservableCollection<EffectPart>();
+            newEffect.EffectParts = AsyncObservableCollection<EffectPart>.Create();
             newEffect.IndexNum = IndexNum;
             newEffect.I_02 = I_02;
 

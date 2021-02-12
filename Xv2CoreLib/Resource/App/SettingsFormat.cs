@@ -21,7 +21,7 @@ namespace Xv2CoreLib.Resource.App
 
             foreach(var entry in Entries)
             {
-                strBuilder.AppendLine($"{entry.PropertyName}, {entry.ValueType}, {ValueToString(entry.ValueType, entry.Value)}");
+                strBuilder.AppendLine($"{entry.PropertyName}, {entry.TypeString}, {ValueToString(entry.ValueType, entry.Value)}");
             }
 
             return strBuilder.ToString();
@@ -48,9 +48,23 @@ namespace Xv2CoreLib.Resource.App
                         continue;
                     }
 
-                    var type = (SettingsFormatEntry.SettingsValueType)Enum.Parse(typeof(SettingsFormatEntry.SettingsValueType), split[1].Trim());
-                    SettingsFormatEntry entry = new SettingsFormatEntry(split[0].Trim(), type, ParseValue(type, split[2].Trim()));
-                    format.Entries.Add(entry);
+                    SettingsFormatEntry.SettingsValueType type;
+                    if(!Enum.TryParse(split[1].Trim(), out type))
+                    {
+                        type = SettingsFormatEntry.SettingsValueType.NotDefined;
+                    }
+
+                    if(type == SettingsFormatEntry.SettingsValueType.NotDefined)
+                    {
+                        SettingsFormatEntry entry = new SettingsFormatEntry(split[0].Trim(), split[1].Trim(), split[2].Trim());
+                        format.Entries.Add(entry);
+                    }
+                    else
+                    {
+                        SettingsFormatEntry entry = new SettingsFormatEntry(split[0].Trim(), type, ParseValue(type, split[2].Trim()));
+                        format.Entries.Add(entry);
+                    }
+                    
 
                     lineNum++;
                 }
@@ -89,6 +103,8 @@ namespace Xv2CoreLib.Resource.App
                     return Convert.ToString((ulong)value);
                 case SettingsFormatEntry.SettingsValueType.AppAccent:
                     return value.ToString();
+                case SettingsFormatEntry.SettingsValueType.NotDefined:
+                    return value.ToString();
                 default:
                     throw new InvalidOperationException("SettingsFormat.ValueToString: Unsupported value type.");
             }
@@ -124,6 +140,8 @@ namespace Xv2CoreLib.Resource.App
                     return Convert.ToUInt64(value);
                 case SettingsFormatEntry.SettingsValueType.AppAccent:
                     return Enum.Parse(typeof(AppAccent), value);
+                case SettingsFormatEntry.SettingsValueType.NotDefined:
+                    return value;
                 default:
                     throw new InvalidOperationException("SettingsFormat.ParseValue: Unsupported value type.");
             }
@@ -241,7 +259,7 @@ namespace Xv2CoreLib.Resource.App
                 return SettingsFormatEntry.SettingsValueType.AppAccent;
             }
 
-            throw new InvalidDataException("SettingsFormat.GetValueType: Unknown prop type.");
+            return SettingsFormatEntry.SettingsValueType.NotDefined;
         }
 
     }
@@ -262,20 +280,41 @@ namespace Xv2CoreLib.Resource.App
             Double,
             Bool,
             String,
-            AppAccent
+            AppAccent,
+            NotDefined
         }
 
         public string PropertyName;
         public SettingsValueType ValueType;
         public object Value;
+        private string _nonDefinedType;
+        public string TypeString
+        {
+            get
+            {
+                if (ValueType == SettingsValueType.NotDefined) return _nonDefinedType;
+                return ValueType.ToString();
+            }
+        }
 
         public SettingsFormatEntry(string propName, SettingsValueType valueType, object value)
         {
             PropertyName = propName;
             ValueType = valueType;
             Value = value;
+            _nonDefinedType = null;
         }
 
-        
+        public SettingsFormatEntry(string propName, string nonDefinedValueType, string value)
+        {
+            PropertyName = propName;
+            ValueType = SettingsValueType.NotDefined;
+            Value = value;
+            _nonDefinedType = nonDefinedValueType;
+        }
+
+
+
+
     }
 }

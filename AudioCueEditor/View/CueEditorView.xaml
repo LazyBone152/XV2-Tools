@@ -36,7 +36,7 @@
         </Grid.ColumnDefinitions>
         <Grid Grid.Column="1" HorizontalAlignment="Stretch" Background="{DynamicResource AccentColorBrush4}" Margin="0,0,0.236,0.564"/>
 
-        <DataGrid x:Name="dataGrid" Grid.Column="0" ItemsSource="{Binding AcbFile.Cues}" Drop="DataGrid_Drop" AllowDrop="True" VirtualizingPanel.ScrollUnit="Pixel" EnableRowVirtualization="True" EnableColumnVirtualization="True" SelectionMode="Extended" RowDetailsVisibilityMode="VisibleWhenSelected" Margin="10,64,6.927,10.327" CanUserResizeRows="False" CanUserAddRows="False" AutoGenerateColumns="False" CanUserDeleteRows="False">
+        <DataGrid x:Name="dataGrid" Grid.Column="0" ItemsSource="{Binding AcbFile.Cues.Binding}" Drop="DataGrid_Drop" AllowDrop="True" VirtualizingPanel.ScrollUnit="Pixel" EnableRowVirtualization="True" EnableColumnVirtualization="True" SelectionMode="Extended" RowDetailsVisibilityMode="VisibleWhenSelected" Margin="10,64,6.927,10.327" CanUserResizeRows="False" CanUserAddRows="False" AutoGenerateColumns="False" CanUserDeleteRows="False">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="SteelBlue"/>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="SteelBlue"/>
@@ -110,7 +110,7 @@
 
             <DataGrid.RowDetailsTemplate>
                 <DataTemplate>
-                    <ListBox MouseDoubleClick="TrackListBox_DoubleMouseClick" Drop="ListBox_Drop" AllowDrop="True" VirtualizingPanel.ScrollUnit="Pixel" ItemsSource="{Binding Tracks}" SelectionMode="Extended" SelectedItem="{Binding SelectedTrack, UpdateSourceTrigger=PropertyChanged}" utils:AttachedProperties.SelectedItems="{Binding SelectedTracks}">
+                    <ListBox MouseDoubleClick="TrackListBox_DoubleMouseClick" Drop="ListBox_Drop" AllowDrop="True" VirtualizingPanel.ScrollUnit="Pixel" ItemsSource="{Binding Tracks.Binding}" SelectionMode="Extended" SelectedItem="{Binding SelectedTrack, UpdateSourceTrigger=PropertyChanged}" utils:AttachedProperties.SelectedItems="{Binding SelectedTracks}">
                         <ListBox.Resources>
                             <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Black"/>
 
@@ -144,7 +144,7 @@
                             <KeyBinding Key="V" Modifiers="Ctrl" Command="{Binding PasteTrackCommand}"/>
                         </ListBox.InputBindings>
                         <ListBox.ContextMenu>
-                            <ContextMenu>
+                            <ContextMenu FontSize="12">
                                 <MenuItem Header="Play" Click="ListBoxEvent_PlaySelectedTrack"/>
                                 <Separator/>
                                 <MenuItem Header="Replace" Click="ListBoxEvent_ReplaceSelectedTrack"/>
@@ -262,7 +262,7 @@
 &#x0a;Switch: Unknown
 &#x0a;ComboSequential: Unknown" Visibility="{Binding SequenceCueVisibile}" Content="Type" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="7,11,0,0" VerticalAlignment="Top" Width="72"/>
 
-                            <DataGrid Visibility="{Binding SequenceCueVisibile}" ItemsSource="{Binding Path=SelectedItem.SequenceRef.Tracks, ElementName=dataGrid}" LoadingRow="SeqTrack_DataGrid_LoadingRow" HeadersVisibility="All" RowHeaderWidth="25" HorizontalAlignment="Left" Height="94" Margin="84,46,0,0" VerticalAlignment="Top" Width="173" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False">
+                            <DataGrid Visibility="{Binding SequenceCueVisibile}" ItemsSource="{Binding Path=SelectedItem.SequenceRef.Tracks.Binding, ElementName=dataGrid}" LoadingRow="SeqTrack_DataGrid_LoadingRow" HeadersVisibility="All" RowHeaderWidth="25" HorizontalAlignment="Left" Height="94" Margin="84,46,0,0" VerticalAlignment="Top" Width="173" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Weight" Width="*" Binding="{Binding UndoablePercentage}" IsReadOnly="False"/>
 
@@ -305,7 +305,7 @@
                                 <TextBox Text="{Binding Path=SelectedItem.SelectedTrack.TrackRef.UndoableTargetAcbName, ElementName=dataGrid}" HorizontalAlignment="Left" Height="23" Margin="78,39,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="124"/>
                                 <Label Content="Target ID" ToolTip="Usually this is the Cue ID that the Action is targeting. Depending on the above settings, the cue may be in another ACB file." HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="0,67,0,0" VerticalAlignment="Top" Width="78"/>
                                 <TextBox Text="{Binding Path=SelectedItem.SelectedTrack.UndoableTargetId, ElementName=dataGrid}" HorizontalAlignment="Left" Height="23" Margin="78,67,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="124"/>
-                                <ComboBox x:Name="actionComboBox" DisplayMemberPath="DisplayName" ItemsSource="{Binding Path=SelectedItem.SelectedTrack.TrackCommand.Commands, ElementName=dataGrid}" HorizontalAlignment="Left" Margin="64,117,0,0" VerticalAlignment="Top" Width="151" SelectionChanged="ActionComboBox_SelectionChanged"/>
+                                <ComboBox x:Name="actionComboBox" DisplayMemberPath="DisplayName" ItemsSource="{Binding Path=SelectedItem.SelectedTrack.TrackCommand.Commands.Binding, ElementName=dataGrid}" HorizontalAlignment="Left" Margin="64,117,0,0" VerticalAlignment="Top" Width="151" SelectionChanged="ActionComboBox_SelectionChanged"/>
                                 <Separator Background="{DynamicResource AccentColorBrush3}" HorizontalAlignment="Left" Height="15" Margin="10,102,0,0" VerticalAlignment="Top" Width="247"/>
                                 <Button Click="ActionCommandAdd_Proxy" Content="Add" HorizontalAlignment="Left" Margin="53,148,0,0" VerticalAlignment="Top" Width="75"/>
                                 <Button Click="ActionCommandRemove_Proxy" Content="Remove" HorizontalAlignment="Left" Margin="152,148,0,0" VerticalAlignment="Top" Width="75"/>

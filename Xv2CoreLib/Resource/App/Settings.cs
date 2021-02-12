@@ -264,6 +264,11 @@ namespace Xv2CoreLib.Resource.App
         {
             return $"{GetAppFolder()}/{relativePath}";
         }
+        
+        public static bool IsGameDirValid(string path)
+        {
+            return (File.Exists(String.Format("{0}/bin/DBXV2.exe", path)));
+        }
 #endregion
     
     }
@@ -290,7 +295,7 @@ namespace Xv2CoreLib.Resource.App
         {
             get
             {
-                return (File.Exists(String.Format("{0}/bin/DBXV2.exe", GameDirectory)));
+                return SettingsManager.IsGameDirValid(GameDirectory);
             }
         }
 

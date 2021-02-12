@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using YAXLib;
+using Xv2CoreLib.Resource;
 
 #if UndoRedo
 using Xv2CoreLib.Resource.UndoRedo;
@@ -41,7 +42,7 @@ namespace Xv2CoreLib.BAC
         public int[] I_80 { get; set; } = new int[4];// size 4
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BacEntry")]
-        public ObservableCollection<BAC_Entry> BacEntries { get; set; } = new ObservableCollection<BAC_Entry>();
+        public AsyncObservableCollection<BAC_Entry> BacEntries { get; set; } = AsyncObservableCollection<BAC_Entry>.Create();
 
 
         public static BAC_File DefaultBacFile()
@@ -365,14 +366,14 @@ namespace Xv2CoreLib.BAC
         public List<int> TypeDummy { get; set; }
 
         [YAXDontSerialize]
-        public ObservableCollection<IBacType> IBacTypes { get; set; } = new ObservableCollection<IBacType>();
+        public AsyncObservableCollection<IBacType> IBacTypes { get; set; } = AsyncObservableCollection<IBacType>.Create();
 
         #region IBacTypeMethods
         public void InitializeIBacTypes()
         {
             InitBacLists();
 
-            IBacTypes = new ObservableCollection<IBacType>();
+            IBacTypes = AsyncObservableCollection<IBacType>.Create();
 
             foreach (var bacEntry in Type0)
                 IBacTypes.Add(bacEntry);

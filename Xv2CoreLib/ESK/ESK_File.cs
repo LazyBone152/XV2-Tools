@@ -232,7 +232,7 @@ namespace Xv2CoreLib.ESK
                 I_28 = BitConverter_Ex.ToInt32Array(rawBytes, offset + 28, 2),
                 Unk1 = ESK_Unk1.Read(rawBytes, unk1Offset),
                 UseUnk2 = (unk2Offset != 0) ? true : false,
-                ESKBones = new AsyncObservableCollection<ESK_Bone>()
+                ESKBones = AsyncObservableCollection<ESK_Bone>.Create()
             };
 
             //Setting the offsets for the initial loop to use
@@ -277,7 +277,7 @@ namespace Xv2CoreLib.ESK
         //Helper
         private static AsyncObservableCollection<ESK_Bone> ParseChildrenBones(byte[] rawBytes, int indexOfFirstSibling, int offset, ESK_Bone parent, ref int _index, bool loadAbsTransform)
         {
-            AsyncObservableCollection<ESK_Bone> newBones = new AsyncObservableCollection<ESK_Bone>();
+            AsyncObservableCollection<ESK_Bone> newBones = AsyncObservableCollection<ESK_Bone>.Create();
 
             int[] offsets = GetBoneOffset(rawBytes, indexOfFirstSibling, offset);
             int boneIndexOffset = offsets[0];
@@ -393,7 +393,7 @@ namespace Xv2CoreLib.ESK
             return false;
         }
 
-        private bool AddBoneRecursive(string parent, ESK_Bone boneToAdd, ObservableCollection<ESK_Bone> eskBones)
+        private bool AddBoneRecursive(string parent, ESK_Bone boneToAdd, AsyncObservableCollection<ESK_Bone> eskBones)
         {
 
             for (int i = 0; i < eskBones.Count; i++)
@@ -493,7 +493,7 @@ namespace Xv2CoreLib.ESK
             return String.Empty;
         }
 
-        private string GetSiblingRecursive(string bone, ObservableCollection<ESK_Bone> eskBones)
+        private string GetSiblingRecursive(string bone, AsyncObservableCollection<ESK_Bone> eskBones)
         {
             for (int i = 0; i < eskBones.Count; i++)
             {
@@ -560,7 +560,7 @@ namespace Xv2CoreLib.ESK
             return String.Empty;
         }
 
-        private string GetChildRecursive(string bone, ObservableCollection<ESK_Bone> eskBones)
+        private string GetChildRecursive(string bone, AsyncObservableCollection<ESK_Bone> eskBones)
         {
             for (int i = 0; i < eskBones.Count; i++)
             {
@@ -620,7 +620,7 @@ namespace Xv2CoreLib.ESK
             return String.Empty;
         }
 
-        private string GetParentRecursive(string bone, string parentBone, ObservableCollection<ESK_Bone> eskBones)
+        private string GetParentRecursive(string bone, string parentBone, AsyncObservableCollection<ESK_Bone> eskBones)
         {
             for (int i = 0; i < eskBones.Count; i++)
             {
@@ -680,7 +680,7 @@ namespace Xv2CoreLib.ESK
             return bones;
         }
 
-        private List<ESK_BoneNonHierarchal> GetNonHierarchalBoneListRecursive(ObservableCollection<ESK_Bone> eskBones)
+        private List<ESK_BoneNonHierarchal> GetNonHierarchalBoneListRecursive(AsyncObservableCollection<ESK_Bone> eskBones)
         {
             List<ESK_BoneNonHierarchal> bones = new List<ESK_BoneNonHierarchal>();
 
@@ -733,7 +733,7 @@ namespace Xv2CoreLib.ESK
             return false;
         }
 
-        private bool ExistsRecursive(string boneName, ObservableCollection<ESK_Bone> eskBones)
+        private bool ExistsRecursive(string boneName, AsyncObservableCollection<ESK_Bone> eskBones)
         {
             for (int i = 0; i < eskBones.Count; i++)
             {
@@ -758,7 +758,7 @@ namespace Xv2CoreLib.ESK
         
         public ESK_Skeleton Clone()
         {
-            AsyncObservableCollection<ESK_Bone> bones = new AsyncObservableCollection<ESK_Bone>();
+            AsyncObservableCollection<ESK_Bone> bones = AsyncObservableCollection<ESK_Bone>.Create();
 
             foreach (var e in ESKBones)
             {
@@ -1356,7 +1356,7 @@ namespace Xv2CoreLib.ESK
             {
                 isSelected = true,
                 Index4 = Index4,
-                ESK_Bones = new AsyncObservableCollection<ESK_Bone>(),
+                ESK_Bones = AsyncObservableCollection<ESK_Bone>.Create(),
                 Name = (string)Name.Clone(),
                 RelativeTransform = RelativeTransform.Clone(),
                 AbsoluteTransform = AbsoluteTransform?.Clone()

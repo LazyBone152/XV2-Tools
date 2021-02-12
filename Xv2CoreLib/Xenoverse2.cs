@@ -1790,13 +1790,13 @@ namespace Xv2CoreLib
             if (Files.BasFile == null)
                 Files.BasFile = new Xv2File<BAS_File>(new BAS_File(), null, false, null, null, Xenoverse2.MoveFileTypes.BAS);
 
-            if (Files.EanFile.Any(x => !x.IsDefault) && Xenoverse2.Instance.CmnEan != null)
+            if (Files.EanFile.FirstOrDefault(x => x.IsDefault) == null && Xenoverse2.Instance.CmnEan != null)
                 Files.EanFile.Add(new Xv2File<EAN_File>(EAN_File.DefaultFile(Xenoverse2.Instance.CmnEan.Skeleton), null, false, null, null, Xenoverse2.MoveFileTypes.EAN));
 
-            if (Files.CamEanFile.Any(x => !x.IsDefault))
+            if (Files.CamEanFile.FirstOrDefault(x => x.IsDefault) == null)
                 Files.CamEanFile.Add(new Xv2File<EAN_File>(EAN_File.DefaultCamFile(), null, false, null, null, Xenoverse2.MoveFileTypes.CAM_EAN));
 
-            if (Files.SeAcbFile.Any(x => !x.IsDefault))
+            if (Files.SeAcbFile.FirstOrDefault(x => x.IsDefault) == null)
                 Files.SeAcbFile.Add(new Xv2File<ACB_Wrapper>(ACB_Wrapper.NewXv2Acb(), null, false, null, null, Xenoverse2.MoveFileTypes.SE_ACB, "0"));
 
             if (Files.AfterBacFile == null)

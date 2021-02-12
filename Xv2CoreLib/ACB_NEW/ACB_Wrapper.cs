@@ -11,6 +11,7 @@ using Xv2CoreLib.AFS2;
 using Xv2CoreLib.HCA;
 using Xv2CoreLib.Resource.UndoRedo;
 using System.IO;
+using Xv2CoreLib.Resource;
 
 #if NvvmLight
 using GalaSoft.MvvmLight.CommandWpf;
@@ -76,7 +77,7 @@ namespace Xv2CoreLib.ACB_NEW
 
 
         public ACB_File AcbFile { get; set; }
-        public ObservableCollection<Cue_Wrapper> Cues { get; set; } = new ObservableCollection<Cue_Wrapper>();
+        public AsyncObservableCollection<Cue_Wrapper> Cues { get; set; } = AsyncObservableCollection<Cue_Wrapper>.Create();
         
         
 
@@ -501,7 +502,7 @@ namespace Xv2CoreLib.ACB_NEW
 
         public ACB_Wrapper WrapperRoot;
         public ACB_Cue CueRef { get; set; }
-        public ObservableCollection<Track_Wrapper> Tracks { get; set; } = new ObservableCollection<Track_Wrapper>();
+        public AsyncObservableCollection<Track_Wrapper> Tracks { get; set; } = AsyncObservableCollection<Track_Wrapper>.Create();
 
         //Wrapped Values
         public ACB_Sequence SequenceRef
@@ -578,8 +579,8 @@ namespace Xv2CoreLib.ACB_NEW
 
         #region ViewBinding
         [NonSerialized]
-        private ObservableCollection<Track_Wrapper> _selectedTracks = new ObservableCollection<Track_Wrapper>();
-        public ObservableCollection<Track_Wrapper> SelectedTracks
+        private AsyncObservableCollection<Track_Wrapper> _selectedTracks = AsyncObservableCollection<Track_Wrapper>.Create();
+        public AsyncObservableCollection<Track_Wrapper> SelectedTracks
         {
             get
             {

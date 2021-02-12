@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Xv2CoreLib.Resource;
 using YAXLib;
 
 namespace Xv2CoreLib.BAC_XV1
@@ -42,7 +43,7 @@ namespace Xv2CoreLib.BAC_XV1
                 I_20 = I_20,
                 I_80 = I_80,
                 F_32 = F_32,
-                BacEntries = new System.Collections.ObjectModel.ObservableCollection<BAC.BAC_Entry>(xv2BacEntries)
+                BacEntries = AsyncObservableCollection<BAC.BAC_Entry>.Create(xv2BacEntries)
             };
 
         }

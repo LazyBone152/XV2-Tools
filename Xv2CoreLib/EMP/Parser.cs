@@ -7,6 +7,7 @@ using System.IO;
 using YAXLib;
 using System.Collections;
 using System.Collections.ObjectModel;
+using Xv2CoreLib.Resource;
 
 namespace Xv2CoreLib.EMP
 {
@@ -66,14 +67,14 @@ namespace Xv2CoreLib.EMP
         {
             empFile.Version = (VersionEnum)BitConverter.ToUInt16(rawBytes, 8);
 
-            empFile.ParticleEffects = new ObservableCollection<ParticleEffect>();
+            empFile.ParticleEffects = AsyncObservableCollection<ParticleEffect>.Create();
             if (totalMainEntries > 0)
             {
                 int finalParticleEffectEnd = (textureEntryOffset != 0) ? textureEntryOffset : bytes.Count - 1;
                 empFile.ParticleEffects = SortEffect(mainEntryOffset, finalParticleEffectEnd);
             }
 
-            empFile.Textures = new ObservableCollection<EMP_TextureDefinition>();
+            empFile.Textures = AsyncObservableCollection<EMP_TextureDefinition>.Create();
             if (totalTextureEntries > 0)
             {
                 for (int i = 0; i < totalTextureEntries; i++)
@@ -99,10 +100,10 @@ namespace Xv2CoreLib.EMP
         }
         
 
-        private ObservableCollection<ParticleEffect> SortEffect(int entryOffset, int nextParticleEffectOffset_Abs)
+        private AsyncObservableCollection<ParticleEffect> SortEffect(int entryOffset, int nextParticleEffectOffset_Abs)
         {
 
-            ObservableCollection<ParticleEffect> effectEntries = new ObservableCollection<ParticleEffect>();
+            AsyncObservableCollection<ParticleEffect> effectEntries = AsyncObservableCollection<ParticleEffect>.Create();
 
             int i = 0;
             while (true)
@@ -224,7 +225,7 @@ namespace Xv2CoreLib.EMP
                 //Type0
                 if (Type0_Count > 0)
                 {
-                    newEffect.Type_0 = new ObservableCollection<Type0>();
+                    newEffect.Type_0 = AsyncObservableCollection<Type0>.Create();
 
                     for (int a = 0; a < Type0_Count; a++)
                     {
@@ -249,7 +250,7 @@ namespace Xv2CoreLib.EMP
                 //Type1
                 if (Type1_Count > 0)
                 {
-                    newEffect.Type_1 = new ObservableCollection<Type1_Header>();
+                    newEffect.Type_1 = AsyncObservableCollection<Type1_Header>.Create();
 
                     for (int a = 0; a < Type1_Count; a++)
                     {
@@ -259,7 +260,7 @@ namespace Xv2CoreLib.EMP
                         newEffect.Type_1.Add(new Type1_Header());
                         newEffect.Type_1[a].I_00 = rawBytes[Type1_Offset];
                         newEffect.Type_1[a].I_01 = rawBytes[Type1_Offset + 1];
-                        newEffect.Type_1[a].Entries = new ObservableCollection<Type0>();
+                        newEffect.Type_1[a].Entries = AsyncObservableCollection<Type0>.Create();
 
                         for (int d = 0; d < entryCount; d++)
                         {
@@ -365,40 +366,40 @@ namespace Xv2CoreLib.EMP
                 case 0:
                     if (empFile.Version == VersionEnum.SDBH)
                     {
+                        var keyframes = AsyncObservableCollection<SubData_2_Entry>.Create();
+                        keyframes.Add(new SubData_2_Entry()
+                        {
+                            I_00 = -1,
+                            F_04 = BitConverter.ToSingle(rawBytes, textureOffset + 12),
+                            F_08 = BitConverter.ToSingle(rawBytes, textureOffset + 16),
+                            F_12 = BitConverter.ToSingle(rawBytes, textureOffset + 20),
+                            F_16 = BitConverter.ToSingle(rawBytes, textureOffset + 24),
+                            F_20 = BitConverter.ToSingle(rawBytes, textureOffset + 28).ToString("0.0#######"),
+                            F_24 = BitConverter.ToSingle(rawBytes, textureOffset + 32).ToString("0.0#######")
+                        });
+
                         embEntry.SubData2 = new ScrollAnimation()
                         {
                             useSpeedInsteadOfKeyFrames = false,
-                            Keyframes = new ObservableCollection<SubData_2_Entry>()
-                            {
-                                new SubData_2_Entry()
-                                {
-                                    I_00 = -1,
-                                    F_04 = BitConverter.ToSingle(rawBytes, textureOffset + 12),
-                                    F_08 = BitConverter.ToSingle(rawBytes, textureOffset + 16),
-                                    F_12 = BitConverter.ToSingle(rawBytes, textureOffset + 20),
-                                    F_16 = BitConverter.ToSingle(rawBytes, textureOffset + 24),
-                                    F_20 = BitConverter.ToSingle(rawBytes, textureOffset + 28).ToString("0.0#######"),
-                                    F_24 = BitConverter.ToSingle(rawBytes, textureOffset + 32).ToString("0.0#######")
-                                }
-                            }
+                            Keyframes = keyframes
                         };
                     }
                     else
                     {
+                        var keyframes = AsyncObservableCollection<SubData_2_Entry>.Create();
+                        keyframes.Add(new SubData_2_Entry()
+                        {
+                            I_00 = -1,
+                            F_04 = BitConverter.ToSingle(rawBytes, textureOffset + 12),
+                            F_08 = BitConverter.ToSingle(rawBytes, textureOffset + 16),
+                            F_12 = BitConverter.ToSingle(rawBytes, textureOffset + 20),
+                            F_16 = BitConverter.ToSingle(rawBytes, textureOffset + 24),
+                        });
+
                         embEntry.SubData2 = new ScrollAnimation()
                         {
                             useSpeedInsteadOfKeyFrames = false,
-                            Keyframes = new ObservableCollection<SubData_2_Entry>()
-                        {
-                            new SubData_2_Entry()
-                            {
-                                I_00 = -1,
-                                F_04 = BitConverter.ToSingle(rawBytes, textureOffset + 12),
-                                F_08 = BitConverter.ToSingle(rawBytes, textureOffset + 16),
-                                F_12 = BitConverter.ToSingle(rawBytes, textureOffset + 20),
-                                F_16 = BitConverter.ToSingle(rawBytes, textureOffset + 24),
-                            }
-                        }
+                            Keyframes = keyframes
                         };
                     }
                     break;
@@ -414,7 +415,7 @@ namespace Xv2CoreLib.EMP
                     embEntry.SubData2 = new ScrollAnimation()
                     {
                         useSpeedInsteadOfKeyFrames = false,
-                        Keyframes = new ObservableCollection<SubData_2_Entry>()
+                        Keyframes = AsyncObservableCollection<SubData_2_Entry>.Create()
                     };
                     int count = BitConverter.ToInt16(rawBytes, textureOffset + 22);
                     int subEntryOffset = BitConverter.ToInt32(rawBytes, textureOffset + 24) + textureOffset + 12;
@@ -474,7 +475,7 @@ namespace Xv2CoreLib.EMP
 
 
         //Type Parsers
-        private ObservableCollection<TKeyframeType> ParseKeyframes<TKeyframeType>(int keyframeCount, int keyframeListOffset) where TKeyframeType : IKeyframe, new()
+        private AsyncObservableCollection<TKeyframeType> ParseKeyframes<TKeyframeType>(int keyframeCount, int keyframeListOffset) where TKeyframeType : IKeyframe, new()
         {
             int floatOffset = 0;
 
@@ -488,7 +489,7 @@ namespace Xv2CoreLib.EMP
             fCount = fCount * 2;
             floatOffset = (int)fCount + keyframeListOffset;
 
-            ObservableCollection<TKeyframeType> keyframes = new ObservableCollection<TKeyframeType>();
+            AsyncObservableCollection<TKeyframeType> keyframes = AsyncObservableCollection<TKeyframeType>.Create();
 
             for (int i = 0; i < keyframeCount; i++)
             {
@@ -545,7 +546,7 @@ namespace Xv2CoreLib.EMP
             if (TexturePointer != 0)
             {
                 int _tempOffset = _textureEntryOffset;
-                newTexture.TextureIndex = new ObservableCollection<int>();
+                newTexture.TextureIndex = AsyncObservableCollection<int>.Create();
 
                 for (int e = 0; e < BitConverter.ToInt16(rawBytes, TextureOffset + 18); e++)
                 {
@@ -598,7 +599,7 @@ namespace Xv2CoreLib.EMP
                 I_04 = BitConverter.ToUInt16(rawBytes, StructOffset + 4),
                 I_08 = BitConverter.ToUInt16(rawBytes, StructOffset + 8),
                 I_10 = BitConverter.ToUInt16(rawBytes, StructOffset + 10),
-                FloatList = new ObservableCollection<Struct3_Entries>()
+                FloatList = AsyncObservableCollection<Struct3_Entries>.Create()
             };
 
             int count = BitConverter.ToInt16(rawBytes, StructOffset + 6) + 1;
@@ -637,7 +638,7 @@ namespace Xv2CoreLib.EMP
             _struct5.I_28 = BitConverter.ToUInt16(rawBytes, StructOffset + 12);
             _struct5.I_30 = BitConverter.ToUInt16(rawBytes, StructOffset + 14);
 
-            _struct5.FloatList = new ObservableCollection<Struct5_Entries>();
+            _struct5.FloatList = AsyncObservableCollection<Struct5_Entries>.Create();
 
             int count = BitConverter.ToInt16(rawBytes, StructOffset + 0) + 1;
             int listOffset = BitConverter.ToInt32(rawBytes, StructOffset + 4) + mainEntryOffset;
@@ -864,7 +865,7 @@ namespace Xv2CoreLib.EMP
             }
         }
 
-        private void LinkTextureEntries_Recursive(ObservableCollection<ParticleEffect> particleEffects, int id, TextureEntryRef textureRef)
+        private void LinkTextureEntries_Recursive(IList<ParticleEffect> particleEffects, int id, TextureEntryRef textureRef)
         {
             foreach(var particleEffect in particleEffects)
             {

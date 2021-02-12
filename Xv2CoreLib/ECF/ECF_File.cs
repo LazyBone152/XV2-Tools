@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xv2CoreLib.HslColor;
+using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
 using YAXLib;
 
@@ -464,7 +465,7 @@ namespace Xv2CoreLib.ECF
         [YAXSerializeAs("Duration")]
         public ushort I_04 { get; set; }
         
-        public ObservableCollection<Type0_Keyframe> Keyframes { get; set; }
+        public AsyncObservableCollection<Type0_Keyframe> Keyframes { get; set; }
 
         public enum Parameter
         {
@@ -507,21 +508,21 @@ namespace Xv2CoreLib.ECF
 
         public static Type0 GetNew(float value = 0f)
         {
+            var keyframes = AsyncObservableCollection<Type0_Keyframe>.Create();
+            keyframes.Add(new Type0_Keyframe()
+            {
+                Index = 0,
+                Float = value
+            });
+            keyframes.Add(new Type0_Keyframe()
+            {
+                Index = 100,
+                Float = value
+            });
+
             return new Type0()
             {
-                Keyframes = new ObservableCollection<Type0_Keyframe>()
-                {
-                    new Type0_Keyframe()
-                    {
-                        Index = 0,
-                        Float = value
-                    },
-                    new Type0_Keyframe()
-                    {
-                        Index = 100,
-                        Float = value
-                    }
-                }
+                Keyframes = keyframes
             };
         }
 
@@ -638,9 +639,7 @@ namespace Xv2CoreLib.ECF
 
         public void SortKeyframes()
         {
-            var sortedList = Keyframes.ToList();
-            sortedList.Sort((x, y) => x.Index - y.Index);
-            Keyframes = new ObservableCollection<Type0_Keyframe>(sortedList);
+            Sorting.SortEntries2(Keyframes);
         }
 
     }
@@ -648,8 +647,11 @@ namespace Xv2CoreLib.ECF
 
     [Serializable]
     [YAXSerializeAs("Keyframe")]
-    public class Type0_Keyframe
+    public class Type0_Keyframe : ISortable
     {
+        [YAXDontSerialize]
+        public int SortID { get { return Index; } }
+
         [YAXAttributeForClass]
         public ushort Index { get; set; }
         [YAXAttributeForClass]

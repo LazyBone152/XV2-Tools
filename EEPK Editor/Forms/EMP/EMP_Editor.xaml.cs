@@ -18,6 +18,7 @@ using Xv2CoreLib.EMB_CLASS;
 using GalaSoft.MvvmLight.CommandWpf;
 using EEPK_Organiser.Forms.Recolor;
 using Xv2CoreLib.Resource.App;
+using Xv2CoreLib.Resource;
 
 namespace EEPK_Organiser.Forms.EMP
 {
@@ -418,7 +419,7 @@ namespace EEPK_Organiser.Forms.EMP
         {
             ParticleEffect _particleEffect = empTree.SelectedItem as ParticleEffect;
             if (_particleEffect == null) return;
-            ObservableCollection<ParticleEffect> parentList = empFile.GetParentList(_particleEffect);
+            AsyncObservableCollection<ParticleEffect> parentList = empFile.GetParentList(_particleEffect);
 
             if (parentList != null)
             {
@@ -436,7 +437,7 @@ namespace EEPK_Organiser.Forms.EMP
         {
             ParticleEffect _particleEffect = empTree.SelectedItem as ParticleEffect;
             if (_particleEffect == null) return;
-            ObservableCollection<ParticleEffect> parentList = empFile.GetParentList(_particleEffect);
+            AsyncObservableCollection<ParticleEffect> parentList = empFile.GetParentList(_particleEffect);
 
             if (parentList != null)
             {
@@ -456,7 +457,7 @@ namespace EEPK_Organiser.Forms.EMP
 
             try
             {
-                ObservableCollection<ParticleEffect> parentList = empFile.GetParentList(_particleEffect);
+                AsyncObservableCollection<ParticleEffect> parentList = empFile.GetParentList(_particleEffect);
 
                 if (parentList != null)
                 {
@@ -481,7 +482,7 @@ namespace EEPK_Organiser.Forms.EMP
             try
             {
                 if (_particleEffect == null) return;
-                ObservableCollection<ParticleEffect> parentList = empFile.GetParentList(_particleEffect);
+                AsyncObservableCollection<ParticleEffect> parentList = empFile.GetParentList(_particleEffect);
 
                 if (parentList != null)
                 {
@@ -544,7 +545,7 @@ namespace EEPK_Organiser.Forms.EMP
                 else
                 {
                     //Else we place it at the level of the selected particleEffect
-                    ObservableCollection<ParticleEffect> parentList = empFile.GetParentList(_particleEffect);
+                    AsyncObservableCollection<ParticleEffect> parentList = empFile.GetParentList(_particleEffect);
 
                     if (parentList != null)
                     {
@@ -999,6 +1000,58 @@ namespace EEPK_Organiser.Forms.EMP
             return (dataGrid_type1_Keyframes.SelectedItem is Type0_Keyframe) && (comboBox_Type1.SelectedItem is Type0);
         }
 
+        //Struct3 (Cone Extrude)
+        public RelayCommand AddConeExtrude_Command => new RelayCommand(AddConeExtrudeEntry);
+        private void AddConeExtrudeEntry()
+        {
+            if (empFile == null) return;
+
+            if(empTree.SelectedItem is ParticleEffect particleEffect)
+            {
+                Struct3_Entries entry = new Struct3_Entries();
+                particleEffect.Type_Struct3.FloatList.Add(entry);
+                UndoManager.Instance.AddUndo(new UndoableListAdd<Struct3_Entries>(particleEffect.Type_Struct3.FloatList, entry, "Add ConeExtrude Entry"));
+            }
+        }
+
+        public RelayCommand RemoveConeExtrude_Command => new RelayCommand(RemoveConeExtrudeEntry);
+        private void RemoveConeExtrudeEntry()
+        {
+            if (empFile == null) return;
+
+            if (dataGrid_coneExtrude.SelectedItem is Struct3_Entries selectedEntry && empTree.SelectedItem is ParticleEffect particleEffect)
+            {
+                UndoManager.Instance.AddUndo(new UndoableListRemove<Struct3_Entries>(particleEffect.Type_Struct3.FloatList, selectedEntry, "Remove ConeExtrude Entry"));
+                particleEffect.Type_Struct3.FloatList.Remove(selectedEntry);
+            }
+        }
+
+        //Shape Draw
+        public RelayCommand AddShapeDraw_Command => new RelayCommand(AddShapeDrawEntry);
+        private void AddShapeDrawEntry()
+        {
+            if (empFile == null) return;
+
+            if (empTree.SelectedItem is ParticleEffect particleEffect)
+            {
+                Struct5_Entries entry = new Struct5_Entries();
+                particleEffect.Type_Struct5.FloatList.Add(entry);
+                UndoManager.Instance.AddUndo(new UndoableListAdd<Struct5_Entries>(particleEffect.Type_Struct5.FloatList, entry, "Add ShapeDraw Entry"));
+            }
+        }
+
+        public RelayCommand RemoveShapeDraw_Command => new RelayCommand(RemoveShapeDrawEntry);
+        private void RemoveShapeDrawEntry()
+        {
+            if (empFile == null) return;
+
+            if (dataGrid_ShapeDraw.SelectedItem is Struct5_Entries selectedEntry && empTree.SelectedItem is ParticleEffect particleEffect)
+            {
+                UndoManager.Instance.AddUndo(new UndoableListRemove<Struct5_Entries>(particleEffect.Type_Struct5.FloatList, selectedEntry, "Remove ShapeDraw Entry"));
+                particleEffect.Type_Struct5.FloatList.Remove(selectedEntry);
+            }
+        }
+
         //Other
         private void empTree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
@@ -1084,7 +1137,7 @@ namespace EEPK_Organiser.Forms.EMP
             try
             {
                 if (empFile == null) return;
-                if (empFile.Textures == null) empFile.Textures = new ObservableCollection<EMP_TextureDefinition>();
+                if (empFile.Textures == null) empFile.Textures = AsyncObservableCollection<EMP_TextureDefinition>.Create();
 
                 var newTexture = EMP_TextureDefinition.GetNew();
                 newTexture.EntryIndex = empFile.NextTextureId();
@@ -1586,7 +1639,8 @@ namespace EEPK_Organiser.Forms.EMP
                 {
                     if (selectedTexture.SubData2.Keyframes == null)
                     {
-                        selectedTexture.SubData2.Keyframes = new ObservableCollection<SubData_2_Entry>() { new SubData_2_Entry() };
+                        selectedTexture.SubData2.Keyframes = AsyncObservableCollection<SubData_2_Entry>.Create();
+                        selectedTexture.SubData2.Keyframes.Add(new SubData_2_Entry());
                     }
 
                     if (selectedTexture.SubData2.Keyframes.Count == 0)

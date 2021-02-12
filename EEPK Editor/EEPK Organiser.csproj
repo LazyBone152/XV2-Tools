@@ -183,12 +183,6 @@
     <Compile Include="Forms\LogPrompt.xaml.cs">
       <DependentUpon>LogPrompt.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Forms\ProgressBarAssetImport.xaml.cs">
-      <DependentUpon>ProgressBarAssetImport.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\ProgressBarFileLoad.xaml.cs">
-      <DependentUpon>ProgressBarFileLoad.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Forms\Recolor\RecolorAll.xaml.cs">
       <DependentUpon>RecolorAll.xaml</DependentUpon>
     </Compile>
@@ -256,14 +250,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Forms\LogForm.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Forms\ProgressBarAssetImport.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Forms\ProgressBarFileLoad.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

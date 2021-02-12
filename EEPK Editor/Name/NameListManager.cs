@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using Xv2CoreLib.EEPK;
 using Xv2CoreLib.EffectContainer;
+using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.App;
 
 namespace EEPK_Organiser.NameList
@@ -76,7 +77,7 @@ namespace EEPK_Organiser.NameList
             }
         }
 
-        public void ApplyNameList(ObservableCollection<Effect> effects, NameList _namelist)
+        public void ApplyNameList(IList<Effect> effects, NameList _namelist)
         {
 
             foreach(var effect in effects)
@@ -85,7 +86,7 @@ namespace EEPK_Organiser.NameList
             }
         }
 
-        public void ClearNameList(ObservableCollection<Effect> effects)
+        public void ClearNameList(IList<Effect> effects)
         {
             foreach (var effect in effects)
             {
@@ -93,7 +94,7 @@ namespace EEPK_Organiser.NameList
             }
         }
 
-        public void SaveNameList(ObservableCollection<Effect> effects)
+        public void SaveNameList(IList<Effect> effects)
         {
             SaveFileDialog saveDialog = new SaveFileDialog();
             saveDialog.Title = "Save Name List";

@@ -39,9 +39,9 @@ namespace Xv2CoreLib.EMP
         public VersionEnum Version { get; set; } = VersionEnum.DBXV2;
 
         [YAXDontSerializeIfNull]
-        public ObservableCollection<ParticleEffect> ParticleEffects { get; set; } = new ObservableCollection<ParticleEffect>();
+        public AsyncObservableCollection<ParticleEffect> ParticleEffects { get; set; } = AsyncObservableCollection<ParticleEffect>.Create();
         [YAXDontSerializeIfNull]
-        public ObservableCollection<EMP_TextureDefinition> Textures { get; set; } = new ObservableCollection<EMP_TextureDefinition>();
+        public AsyncObservableCollection<EMP_TextureDefinition> Textures { get; set; } = AsyncObservableCollection<EMP_TextureDefinition>.Create();
 
         public byte[] SaveToBytes(ParserMode _parserMode)
         {
@@ -98,7 +98,7 @@ namespace Xv2CoreLib.EMP
             }
         }
 
-        private void RemoveTextureReferences_Recursive(ObservableCollection<ParticleEffect> children, int ID)
+        private void RemoveTextureReferences_Recursive(AsyncObservableCollection<ParticleEffect> children, int ID)
         {
             for (int i = 0; i < children.Count; i++)
             {
@@ -132,7 +132,7 @@ namespace Xv2CoreLib.EMP
             }
         }
 
-        private void RemoveTextureReferences_Recursive(ObservableCollection<ParticleEffect> children, EMP_TextureDefinition textureRef, List<IUndoRedo> undos = null)
+        private void RemoveTextureReferences_Recursive(AsyncObservableCollection<ParticleEffect> children, EMP_TextureDefinition textureRef, List<IUndoRedo> undos = null)
         {
             for (int i = 0; i < children.Count; i++)
             {
@@ -167,7 +167,7 @@ namespace Xv2CoreLib.EMP
             }
         }
 
-        private void RemoveTextureReferences_Recursive(ObservableCollection<ParticleEffect> children, EMP_TextureDefinition oldTextureRef, EMP_TextureDefinition newTextureRef, List<IUndoRedo> undos)
+        private void RemoveTextureReferences_Recursive(AsyncObservableCollection<ParticleEffect> children, EMP_TextureDefinition oldTextureRef, EMP_TextureDefinition newTextureRef, List<IUndoRedo> undos)
         {
             for (int i = 0; i < children.Count; i++)
             {
@@ -243,7 +243,7 @@ namespace Xv2CoreLib.EMP
             return result;
         }
 
-        private bool RemoveInChildren(ObservableCollection<ParticleEffect> children, ParticleEffect effectToRemove, List<IUndoRedo> undos = null)
+        private bool RemoveInChildren(AsyncObservableCollection<ParticleEffect> children, ParticleEffect effectToRemove, List<IUndoRedo> undos = null)
         {
             for (int i = 0; i < children.Count; i++)
             {
@@ -266,11 +266,11 @@ namespace Xv2CoreLib.EMP
             return false;
         }
 
-        public ObservableCollection<ParticleEffect> GetParentList(ParticleEffect particleEffect)
+        public AsyncObservableCollection<ParticleEffect> GetParentList(ParticleEffect particleEffect)
         {
             foreach (var e in ParticleEffects)
             {
-                ObservableCollection<ParticleEffect> result = null;
+                AsyncObservableCollection<ParticleEffect> result = null;
 
                 if (e.ChildParticleEffects.Count > 0)
                 {
@@ -290,9 +290,9 @@ namespace Xv2CoreLib.EMP
             return null;
         }
 
-        private ObservableCollection<ParticleEffect> GetParentList_Recursive(ObservableCollection<ParticleEffect> children, ParticleEffect particleEffect)
+        private AsyncObservableCollection<ParticleEffect> GetParentList_Recursive(AsyncObservableCollection<ParticleEffect> children, ParticleEffect particleEffect)
         {
-            ObservableCollection<ParticleEffect> result = null;
+            AsyncObservableCollection<ParticleEffect> result = null;
 
             for (int i = 0; i < children.Count; i++)
             {
@@ -319,8 +319,8 @@ namespace Xv2CoreLib.EMP
         
         public EMP_File Clone()
         {
-            ObservableCollection<ParticleEffect> _ParticleEffects = new ObservableCollection<ParticleEffect>();
-            ObservableCollection<EMP_TextureDefinition> _Textures = new ObservableCollection<EMP_TextureDefinition>();
+            AsyncObservableCollection<ParticleEffect> _ParticleEffects = AsyncObservableCollection<ParticleEffect>.Create();
+            AsyncObservableCollection<EMP_TextureDefinition> _Textures = AsyncObservableCollection<EMP_TextureDefinition>.Create();
             foreach (var e in ParticleEffects)
             {
                 _ParticleEffects.Add(e.Clone());
@@ -373,7 +373,7 @@ namespace Xv2CoreLib.EMP
             return textureParts;
         }
 
-        private List<TexturePart> GetTexturePartsThatUseMaterialRef_Recursive(Material materialRef, List<TexturePart> textureParts, ObservableCollection<ParticleEffect> particleEffects)
+        private List<TexturePart> GetTexturePartsThatUseMaterialRef_Recursive(Material materialRef, List<TexturePart> textureParts, AsyncObservableCollection<ParticleEffect> particleEffects)
         {
             foreach (var particleEffect in particleEffects)
             {
@@ -417,7 +417,7 @@ namespace Xv2CoreLib.EMP
             return textureParts;
         }
 
-        private List<TexturePart> GetTexturePartsThatUseEmbEntryRef_Recursive(EMP_TextureDefinition embEntryRef, List<TexturePart> textureParts, ObservableCollection<ParticleEffect> particleEffects)
+        private List<TexturePart> GetTexturePartsThatUseEmbEntryRef_Recursive(EMP_TextureDefinition embEntryRef, List<TexturePart> textureParts, AsyncObservableCollection<ParticleEffect> particleEffects)
         {
             foreach (var particleEffect in particleEffects)
             {
@@ -479,7 +479,7 @@ namespace Xv2CoreLib.EMP
             }
         }
     
-        public List<IUndoRedo> RemoveColorAnimations(ObservableCollection<ParticleEffect> particleEffects = null, bool root = true)
+        public List<IUndoRedo> RemoveColorAnimations(AsyncObservableCollection<ParticleEffect> particleEffects = null, bool root = true)
         {
             if (particleEffects == null && root) particleEffects = ParticleEffects;
             if (particleEffects == null && !root) return new List<IUndoRedo>();
@@ -498,7 +498,7 @@ namespace Xv2CoreLib.EMP
             return undos;
         }
 
-        public List<IUndoRedo> RemoveRandomColorRange(ObservableCollection<ParticleEffect> particleEffects = null, bool root = true)
+        public List<IUndoRedo> RemoveRandomColorRange(AsyncObservableCollection<ParticleEffect> particleEffects = null, bool root = true)
         {
             if (particleEffects == null && root) particleEffects = ParticleEffects;
             if (particleEffects == null && !root) return new List<IUndoRedo>();
@@ -823,15 +823,15 @@ namespace Xv2CoreLib.EMP
 
         [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Animation")]
-        public ObservableCollection<Type0> Type_0 { get; set; }
+        public AsyncObservableCollection<Type0> Type_0 { get; set; }
         [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Animation_SubGroup")]
-        public ObservableCollection<Type1_Header> Type_1 { get; set; }
+        public AsyncObservableCollection<Type1_Header> Type_1 { get; set; }
 
         //SubEntry
         [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.Recursive, EachElementName = "ParticleEffect")]
-        public ObservableCollection<ParticleEffect> ChildParticleEffects { get; set; }
+        public AsyncObservableCollection<ParticleEffect> ChildParticleEffects { get; set; }
 
         public enum AutoOrientationType
         {
@@ -933,9 +933,9 @@ namespace Xv2CoreLib.EMP
 
         public ParticleEffect Clone(bool ignoreChildren = false)
         {
-            ObservableCollection<Type0> _type0 = new ObservableCollection<Type0>();
-            ObservableCollection<Type1_Header> _type1 = new ObservableCollection<Type1_Header>();
-            ObservableCollection<ParticleEffect> _children = new ObservableCollection<ParticleEffect>();
+            AsyncObservableCollection<Type0> _type0 = AsyncObservableCollection<Type0>.Create();
+            AsyncObservableCollection<Type1_Header> _type1 = AsyncObservableCollection<Type1_Header>.Create();
+            AsyncObservableCollection<ParticleEffect> _children = AsyncObservableCollection<ParticleEffect>.Create();
             foreach (var e in Type_0)
             {
                 _type0.Add(e.Clone());
@@ -1040,7 +1040,7 @@ namespace Xv2CoreLib.EMP
                 {
                     Name = "New ParticleEffect",
                     Component_Type = ComponentType.None,
-                    ChildParticleEffects = new ObservableCollection<ParticleEffect>(),
+                    ChildParticleEffects = AsyncObservableCollection<ParticleEffect>.Create(),
                     Type_Texture = TexturePart.GetNew(),
                     FloatPart_00_01 = FloatPart_0_1.GetNew(),
                     FloatPart_00_02 = FloatPart_0_2.GetNew(),
@@ -1052,8 +1052,8 @@ namespace Xv2CoreLib.EMP
                     Type_Struct3 = Struct3.GetNew(),
                     Type_Struct5 = Struct5.GetNew(),
                     I_35 = AutoOrientationType.Camera,
-                    Type_0 = new ObservableCollection<Type0>(),
-                    Type_1 = new ObservableCollection<Type1_Header>()
+                    Type_0 = AsyncObservableCollection<Type0>.Create(),
+                    Type_1 = AsyncObservableCollection<Type1_Header>.Create()
                 };
             }
             else
@@ -1724,9 +1724,9 @@ namespace Xv2CoreLib.EMP
                 NotifyPropertyChanged(nameof(MaterialRef));
             }
         }
-        private ObservableCollection<TextureEntryRef> _textureEntryRef = new ObservableCollection<TextureEntryRef>();
+        private AsyncObservableCollection<TextureEntryRef> _textureEntryRef = AsyncObservableCollection<TextureEntryRef>.Create();
         [YAXDontSerialize]
-        public ObservableCollection<TextureEntryRef> TextureEntryRef
+        public AsyncObservableCollection<TextureEntryRef> TextureEntryRef
         {
             get
             {
@@ -1787,7 +1787,7 @@ namespace Xv2CoreLib.EMP
         [YAXAttributeForClass]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
         [YAXSerializeAs("Texture_ID")]
-        public ObservableCollection<int> TextureIndex { get; set; } //XML Mode (TextureEntryRef for Tool mode)
+        public AsyncObservableCollection<int> TextureIndex { get; set; } //XML Mode (TextureEntryRef for Tool mode)
 
         [YAXAttributeFor("I_00")]
         [YAXSerializeAs("int8")]
@@ -2114,8 +2114,8 @@ namespace Xv2CoreLib.EMP
 
         public TexturePart Clone()
         {
-            ObservableCollection<int> newTexList = new ObservableCollection<int>();
-            ObservableCollection<TextureEntryRef> textureRefs = new ObservableCollection<TextureEntryRef>();
+            AsyncObservableCollection<int> newTexList = AsyncObservableCollection<int>.Create();
+            AsyncObservableCollection<TextureEntryRef> textureRefs = AsyncObservableCollection<TextureEntryRef>.Create();
 
             for (int i = 0; i < TextureIndex.Count; i++)
             {
@@ -2172,7 +2172,7 @@ namespace Xv2CoreLib.EMP
         {
             return new TexturePart()
             {
-                TextureIndex = new ObservableCollection<int>()
+                TextureIndex = AsyncObservableCollection<int>.Create()
             };
         }
         
@@ -2587,11 +2587,11 @@ namespace Xv2CoreLib.EMP
         public UInt16 I_10 { get; set; }
         [YAXCollection(YAXCollectionSerializationTypes.Recursive, EachElementName = "Point")]
         [YAXSerializeAs("Points")]
-        public ObservableCollection<Struct3_Entries> FloatList { get; set; }
+        public AsyncObservableCollection<Struct3_Entries> FloatList { get; set; }
 
         public Struct3 Clone()
         {
-            ObservableCollection<Struct3_Entries> subEntries = new ObservableCollection<Struct3_Entries>();
+            AsyncObservableCollection<Struct3_Entries> subEntries = AsyncObservableCollection<Struct3_Entries>.Create();
 
             foreach (var e in FloatList)
             {
@@ -2619,7 +2619,7 @@ namespace Xv2CoreLib.EMP
         {
             return new Struct3()
             {
-                FloatList = new ObservableCollection<Struct3_Entries>()
+                FloatList = AsyncObservableCollection<Struct3_Entries>.Create()
             };
         }
     }
@@ -2686,7 +2686,7 @@ namespace Xv2CoreLib.EMP
 
         [YAXCollection(YAXCollectionSerializationTypes.Recursive, EachElementName = "Point")]
         [YAXSerializeAs("BaseLine")]
-        public ObservableCollection<Struct5_Entries> FloatList { get; set; }
+        public AsyncObservableCollection<Struct5_Entries> FloatList { get; set; }
 
         public enum AutoOrientation
         {
@@ -2707,7 +2707,7 @@ namespace Xv2CoreLib.EMP
 
         public Struct5 Clone()
         {
-            ObservableCollection<Struct5_Entries> subEntries = new ObservableCollection<Struct5_Entries>();
+            AsyncObservableCollection<Struct5_Entries> subEntries = AsyncObservableCollection<Struct5_Entries>.Create();
 
             foreach (var e in FloatList)
             {
@@ -2738,7 +2738,7 @@ namespace Xv2CoreLib.EMP
             return new Struct5()
             {
                 I_18 = AutoOrientation.Camera,
-                FloatList = new ObservableCollection<Struct5_Entries>()
+                FloatList = AsyncObservableCollection<Struct5_Entries>.Create()
             };
         }
     }
@@ -3100,10 +3100,10 @@ namespace Xv2CoreLib.EMP
         public short I_08 { get; set; }
 
         [YAXDontSerialize]
-        private ObservableCollection<Type0_Keyframe> _keyframes = null;
+        private AsyncObservableCollection<Type0_Keyframe> _keyframes = null;
 
         [YAXCollection(YAXCollectionSerializationTypes.Recursive, EachElementName = "Keyframe")]
-        public ObservableCollection<Type0_Keyframe> Keyframes
+        public AsyncObservableCollection<Type0_Keyframe> Keyframes
         {
             get
             {
@@ -3114,7 +3114,7 @@ namespace Xv2CoreLib.EMP
                 if (value != this._keyframes)
                 {
                     this._keyframes = value;
-                    NotifyPropertyChanged("Keyframes");
+                    NotifyPropertyChanged(nameof(Keyframes));
                 }
             }
         }
@@ -3326,7 +3326,7 @@ namespace Xv2CoreLib.EMP
 
         public Type0 Clone()
         {
-            ObservableCollection<Type0_Keyframe> _keyframes = new ObservableCollection<Type0_Keyframe>();
+            AsyncObservableCollection<Type0_Keyframe> _keyframes = AsyncObservableCollection<Type0_Keyframe>.Create();
 
             foreach (var k in Keyframes)
             {
@@ -3356,23 +3356,23 @@ namespace Xv2CoreLib.EMP
 
         public static Type0 GetNew(float value = 0f)
         {
+            var keyframes = AsyncObservableCollection<Type0_Keyframe>.Create();
+            keyframes.Add(new Type0_Keyframe()
+            {
+                Index = 0,
+                Float = value
+            });
+            keyframes.Add(new Type0_Keyframe()
+            {
+                Index = 100,
+                Float = value
+            });
+
             return new Type0()
             {
                 I_01_b = true,
                 I_08 = 101,
-                Keyframes = new ObservableCollection<Type0_Keyframe>()
-                {
-                    new Type0_Keyframe()
-                    {
-                        Index = 0,
-                        Float = value
-                    },
-                    new Type0_Keyframe()
-                    {
-                        Index = 100,
-                        Float = value
-                    }
-                }
+                Keyframes = keyframes
             };
         }
         
@@ -3496,17 +3496,18 @@ namespace Xv2CoreLib.EMP
 
         public void SortKeyframes()
         {
-            var sortedList = Keyframes.ToList();
-            sortedList.Sort((x, y) => x.Index - y.Index);
-            Keyframes = new ObservableCollection<Type0_Keyframe>(sortedList);
+            Sorting.SortEntries2(Keyframes);
         }
     
     }
 
     [Serializable]
     [YAXSerializeAs("Keyframe")]
-    public class Type0_Keyframe : IKeyframe
+    public class Type0_Keyframe : IKeyframe, ISortable
     {
+        [YAXDontSerialize]
+        public int SortID { get { return Index; } }
+
         [YAXAttributeForClass]
         public short Index { get; set; }
         [YAXAttributeForClass]
@@ -3534,11 +3535,11 @@ namespace Xv2CoreLib.EMP
         [YAXAttributeForClass]
         public byte I_01 { get; set; }
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Animation")]
-        public ObservableCollection<Type0> Entries { get; set; }
+        public AsyncObservableCollection<Type0> Entries { get; set; }
 
         public Type1_Header Clone()
         {
-            ObservableCollection<Type0> _Entries = new ObservableCollection<Type0>();
+            AsyncObservableCollection<Type0> _Entries = AsyncObservableCollection<Type0>.Create();
             foreach (var e in Entries)
             {
                 _Entries.Add(e.Clone());
@@ -3556,7 +3557,7 @@ namespace Xv2CoreLib.EMP
         {
             return new Type1_Header()
             {
-                Entries = new ObservableCollection<Type0>()
+                Entries = AsyncObservableCollection<Type0>.Create()
             };
         }
     }
@@ -3816,6 +3817,9 @@ namespace Xv2CoreLib.EMP
 
         public static EMP_TextureDefinition GetNew()
         {
+            var keyframes = AsyncObservableCollection<SubData_2_Entry>.Create();
+            keyframes.Add(new SubData_2_Entry());
+
             return new EMP_TextureDefinition()
             {
                 EntryIndex = byte.MaxValue,
@@ -3824,10 +3828,7 @@ namespace Xv2CoreLib.EMP
                 I_07_byte = TextureRepitition.Wrap,
                 SubData2 = new ScrollAnimation()
                 {
-                    Keyframes = new ObservableCollection<SubData_2_Entry>()
-                    {
-                        new SubData_2_Entry()
-                    },
+                    Keyframes = keyframes,
                     useSpeedInsteadOfKeyFrames = false
                 }
             };
@@ -3902,9 +3903,9 @@ namespace Xv2CoreLib.EMP
         [YAXFormat("0.0###########")]
         public float ScrollSpeed_V { get; set; }
 
-        private ObservableCollection<SubData_2_Entry> _keyframes = null;
+        private AsyncObservableCollection<SubData_2_Entry> _keyframes = null;
         [YAXCollection(YAXCollectionSerializationTypes.Recursive, EachElementName = "Keyframe")]
-        public ObservableCollection<SubData_2_Entry> Keyframes
+        public AsyncObservableCollection<SubData_2_Entry> Keyframes
         {
             get
             {
@@ -3916,14 +3917,14 @@ namespace Xv2CoreLib.EMP
                 if (value != this._keyframes)
                 {
                     this._keyframes = value;
-                    NotifyPropertyChanged("Keyframes");
+                    NotifyPropertyChanged(nameof(Keyframes));
                 }
             }
         }
 
         public ScrollAnimation Clone()
         {
-            ObservableCollection<SubData_2_Entry> _Keyframes = new ObservableCollection<SubData_2_Entry>();
+            AsyncObservableCollection<SubData_2_Entry> _Keyframes = AsyncObservableCollection<SubData_2_Entry>.Create();
 
             if(Keyframes != null)
             {

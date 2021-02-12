@@ -318,7 +318,6 @@
     <Compile Include="TTB\TTB_File.cs" />
     <Compile Include="TTC\TTC_File.cs" />
     <Compile Include="UTF\UTF_File.cs" />
-    <Compile Include="X2M\Skill.cs" />
     <Compile Include="Xenoverse2.cs" />
   </ItemGroup>
   <ItemGroup>

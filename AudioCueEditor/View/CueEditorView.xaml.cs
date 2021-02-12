@@ -52,7 +52,7 @@ namespace AudioCueEditor.View
             set
             {
                 SetValue(AcbFileProperty, value);
-                NotifyPropertyChanged("AcbFile");
+                NotifyPropertyChanged(nameof(AcbFile));
             }
         }
 

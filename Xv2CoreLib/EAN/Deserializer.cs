@@ -230,7 +230,7 @@ namespace Xv2CoreLib.EAN
 
                             //Can happen if loaded from XML and no keyframes were declared.
                             if (animation.Nodes[i].AnimationComponents[a].Keyframes == null)
-                                animation.Nodes[i].AnimationComponents[a].Keyframes = new AsyncObservableCollection<EAN_Keyframe>();
+                                animation.Nodes[i].AnimationComponents[a].Keyframes = AsyncObservableCollection<EAN_Keyframe>.Create();
 
                             //Handle first and last keyframe
                             bool hasFirstKeyframe = animation.Nodes[i].AnimationComponents[a].Keyframes.Any(x => x.FrameIndex == 0);
@@ -308,7 +308,7 @@ namespace Xv2CoreLib.EAN
 
         }
 
-        private void WriteKeyframeIndex_Int8(ObservableCollection<EAN_Keyframe> keyframes, bool hasFirstKeyframe, bool hasFinalKeyframe, int endFrame)
+        private void WriteKeyframeIndex_Int8(IList<EAN_Keyframe> keyframes, bool hasFirstKeyframe, bool hasFinalKeyframe, int endFrame)
         {
             if (!hasFirstKeyframe)
             {
@@ -330,7 +330,7 @@ namespace Xv2CoreLib.EAN
             }
         }
 
-        private void WriteKeyframeIndex_Int16(ObservableCollection<EAN_Keyframe> keyframes, bool hasFirstKeyframe, bool hasFinalKeyframe, int endFrame)
+        private void WriteKeyframeIndex_Int16(IList<EAN_Keyframe> keyframes, bool hasFirstKeyframe, bool hasFinalKeyframe, int endFrame)
         {
             if (!hasFirstKeyframe)
             {
@@ -352,7 +352,7 @@ namespace Xv2CoreLib.EAN
             }
         }
 
-        private void WriteKeyframeFloats_Float16(ObservableCollection<EAN_Keyframe> keyframes, bool hasFirstKeyframe, bool hasFinalKeyframe, EAN_Keyframe defaultKeyframe)
+        private void WriteKeyframeFloats_Float16(IList<EAN_Keyframe> keyframes, bool hasFirstKeyframe, bool hasFinalKeyframe, EAN_Keyframe defaultKeyframe)
         {
             if (!hasFirstKeyframe)
             {
@@ -381,7 +381,7 @@ namespace Xv2CoreLib.EAN
             }
         }
 
-        private void WriteKeyframeFloats_Float32(ObservableCollection<EAN_Keyframe> keyframes, bool hasFirstKeyframe, bool hasFinalKeyframe, EAN_Keyframe defaultKeyframe)
+        private void WriteKeyframeFloats_Float32(IList<EAN_Keyframe> keyframes, bool hasFirstKeyframe, bool hasFinalKeyframe, EAN_Keyframe defaultKeyframe)
         {
             if (!hasFirstKeyframe)
             {

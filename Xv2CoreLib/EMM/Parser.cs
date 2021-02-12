@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Xv2CoreLib.Resource;
 using YAXLib;
 
 namespace Xv2CoreLib.EMM
@@ -93,7 +94,7 @@ namespace Xv2CoreLib.EMM
             int unkCount = bytes.Count() - unkOffset;
 
 
-            emmFile.Materials = new ObservableCollection<Material>();
+            emmFile.Materials = AsyncObservableCollection<Material>.Create();
 
             if (count > 0)
             {
@@ -162,11 +163,11 @@ namespace Xv2CoreLib.EMM
             }
         }
 
-        private ObservableCollection<Parameter> ParseParameters(int offset, int count)
+        private AsyncObservableCollection<Parameter> ParseParameters(int offset, int count)
         {
             if(count > 0)
             {
-                ObservableCollection<Parameter> paramaters = new ObservableCollection<Parameter>();
+                AsyncObservableCollection<Parameter> paramaters = AsyncObservableCollection<Parameter>.Create();
 
                 for(int i = 0; i < count; i++)
                 {
@@ -183,7 +184,7 @@ namespace Xv2CoreLib.EMM
             }
             else
             {
-                return new ObservableCollection<Parameter>();
+                return AsyncObservableCollection<Parameter>.Create();
             }
             
         }

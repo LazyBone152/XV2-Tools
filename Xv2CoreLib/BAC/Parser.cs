@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Xv2CoreLib.Resource;
 using YAXLib;
 
 namespace Xv2CoreLib.BAC
@@ -118,7 +119,7 @@ namespace Xv2CoreLib.BAC
             bacFile.I_20 = BitConverter_Ex.ToInt32Array(rawBytes, 20, 3);
             bacFile.F_32 = BitConverter_Ex.ToFloat32Array(rawBytes, 32, 12);
             bacFile.I_80 = BitConverter_Ex.ToInt32Array(rawBytes, 80, 4);
-            bacFile.BacEntries = new System.Collections.ObjectModel.ObservableCollection<BAC_Entry>();
+            bacFile.BacEntries = AsyncObservableCollection<BAC_Entry>.Create();
             
             for (int i = 0; i < count; i++)
             {

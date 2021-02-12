@@ -103,7 +103,7 @@
 
             <DataGrid.RowDetailsTemplate>
                 <DataTemplate>
-                    <DataGrid BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" VirtualizingPanel.ScrollUnit="Pixel" EnableColumnVirtualization="True" EnableRowVirtualization="True" ItemsSource="{Binding Parameters}" CanUserResizeRows="False" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
+                    <DataGrid BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" VirtualizingPanel.ScrollUnit="Pixel" EnableColumnVirtualization="True" EnableRowVirtualization="True" ItemsSource="{Binding Parameters.Binding}" CanUserResizeRows="False" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
                         <DataGrid.Columns>
                             <!-- Dummy column used for easy selection only. -->
                             <DataGridTextColumn Width="15" IsReadOnly="True"/>

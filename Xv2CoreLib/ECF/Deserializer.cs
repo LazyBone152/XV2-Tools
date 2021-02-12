@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Xv2CoreLib.Resource;
 using YAXLib;
 
 namespace Xv2CoreLib.ECF
@@ -120,9 +121,7 @@ namespace Xv2CoreLib.ECF
                             //Sort keyframes
                             if (e.Keyframes != null)
                             {
-                                var sortedList = e.Keyframes.ToList();
-                                sortedList.Sort((x, y) => x.Index - y.Index);
-                                e.Keyframes = new ObservableCollection<Type0_Keyframe>(sortedList);
+                                e.Keyframes = Sorting.SortEntries2(e.Keyframes);
                             }
                         }
 
@@ -165,7 +164,7 @@ namespace Xv2CoreLib.ECF
             }
         }
 
-        private int WriteKeyframe(ObservableCollection<Type0_Keyframe> keyframes)
+        private int WriteKeyframe(IList<Type0_Keyframe> keyframes)
         {
             
             //Determines the size of the keyframe list (adds padding if its not in 32 bit blocks)

@@ -9,6 +9,7 @@ using YAXLib;
 using System.Xml;
 using System.Collections;
 using System.Collections.ObjectModel;
+using Xv2CoreLib.Resource;
 
 namespace Xv2CoreLib.EEPK
 {
@@ -117,7 +118,7 @@ namespace Xv2CoreLib.EEPK
                 effectInfoOffsets.Add(BitConverter.ToInt32(rawBytes, effectOffsets[i] + 12));
 
                 eepkFile.Effects.Add(new Effect());
-                eepkFile.Effects[i].EffectParts = new ObservableCollection<EffectPart>();
+                eepkFile.Effects[i].EffectParts = AsyncObservableCollection<EffectPart>.Create();
                 eepkFile.Effects[i].IndexNum = effectIds[i];
                 eepkFile.Effects[i].I_02 = BitConverter.ToUInt16(rawBytes, effectOffsets[i] + 2);
 

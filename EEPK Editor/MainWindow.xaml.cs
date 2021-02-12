@@ -196,7 +196,7 @@ namespace EEPK_Organiser
             NotifyPropertyChanged(nameof(CanLoadFromGame));
         }
 
-        private void Load(string path = null)
+        private async void Load(string path = null)
         {
             //If a file is already loaded then ask for confirmation
             if (effectContainerFile != null)
@@ -228,11 +228,11 @@ namespace EEPK_Organiser
 
             if (path == null)
             {
-                file = eepkEditor.LoadEffectContainerFile(false);
+                file = await eepkEditor.LoadEffectContainerFile(false);
             }
             else
             {
-                file = eepkEditor.LoadEffectContainerFile(path, false);
+                file = await eepkEditor.LoadEffectContainerFile(path, false);
             }
 
             if (file != null)
@@ -687,7 +687,7 @@ namespace EEPK_Organiser
         }
 
         //Load From Game
-        private void MenuItem_LoadFromGame_CMN_Click(object sender, RoutedEventArgs e)
+        private async void MenuItem_LoadFromGame_CMN_Click(object sender, RoutedEventArgs e)
         {
             if (!eepkEditor.GameDirectoryCheck()) return;
 
@@ -698,13 +698,13 @@ namespace EEPK_Organiser
                 //Clear undo stack
                 UndoManager.Instance.Clear();
 
-                effectContainerFile = effectFile;
+                effectContainerFile = await effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
             }
         }
 
-        private void MenuItem_LoadFromGame_Character_Click(object sender, RoutedEventArgs e)
+        private async void MenuItem_LoadFromGame_Character_Click(object sender, RoutedEventArgs e)
         {
             
             if (!eepkEditor.GameDirectoryCheck()) return;
@@ -716,13 +716,13 @@ namespace EEPK_Organiser
                 //Clear undo stack
                 UndoManager.Instance.Clear();
 
-                effectContainerFile = effectFile;
+                effectContainerFile = await effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
             }
         }
 
-        private void MenuItem_LoadFromGame_SuperSkill_Click(object sender, RoutedEventArgs e)
+        private async void MenuItem_LoadFromGame_SuperSkill_Click(object sender, RoutedEventArgs e)
         {
             if (!eepkEditor.GameDirectoryCheck()) return;
 
@@ -733,13 +733,13 @@ namespace EEPK_Organiser
                 //Clear undo stack
                 UndoManager.Instance.Clear();
 
-                effectContainerFile = effectFile;
+                effectContainerFile = await effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
             }
         }
 
-        private void MenuItem_LoadFromGame_UltimateSkill_Click(object sender, RoutedEventArgs e)
+        private async void MenuItem_LoadFromGame_UltimateSkill_Click(object sender, RoutedEventArgs e)
         {
             if (!eepkEditor.GameDirectoryCheck()) return;
 
@@ -750,13 +750,13 @@ namespace EEPK_Organiser
                 //Clear undo stack
                 UndoManager.Instance.Clear();
 
-                effectContainerFile = effectFile;
+                effectContainerFile = await effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
             }
         }
 
-        private void MenuItem_LoadFromGame_EvasiveSkill_Click(object sender, RoutedEventArgs e)
+        private async void MenuItem_LoadFromGame_EvasiveSkill_Click(object sender, RoutedEventArgs e)
         {
             if (!eepkEditor.GameDirectoryCheck()) return;
 
@@ -767,13 +767,13 @@ namespace EEPK_Organiser
                 //Clear undo stack
                 UndoManager.Instance.Clear();
 
-                effectContainerFile = effectFile;
+                effectContainerFile = await effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
             }
         }
 
-        private void MenuItem_LoadFromGame_BlastSkill_Click(object sender, RoutedEventArgs e)
+        private async void MenuItem_LoadFromGame_BlastSkill_Click(object sender, RoutedEventArgs e)
         {
             if (!eepkEditor.GameDirectoryCheck()) return;
 
@@ -784,13 +784,13 @@ namespace EEPK_Organiser
                 //Clear undo stack
                 UndoManager.Instance.Clear();
 
-                effectContainerFile = effectFile;
+                effectContainerFile = await effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
             }
         }
 
-        private void MenuItem_LoadFromGame_AwokenSkill_Click(object sender, RoutedEventArgs e)
+        private async void MenuItem_LoadFromGame_AwokenSkill_Click(object sender, RoutedEventArgs e)
         {
             if (!eepkEditor.GameDirectoryCheck()) return;
 
@@ -801,13 +801,13 @@ namespace EEPK_Organiser
                 //Clear undo stack
                 UndoManager.Instance.Clear();
 
-                effectContainerFile = effectFile;
+                effectContainerFile = await effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
             }
         }
 
-        private void MenuItem_LoadFromGame_Demo_Click(object sender, RoutedEventArgs e)
+        private async void MenuItem_LoadFromGame_Demo_Click(object sender, RoutedEventArgs e)
         {
             if (!eepkEditor.GameDirectoryCheck()) return;
 
@@ -818,7 +818,7 @@ namespace EEPK_Organiser
                 //Clear undo stack
                 UndoManager.Instance.Clear();
 
-                effectContainerFile = effectFile;
+                effectContainerFile = await effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
             }

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
 
 namespace Xv2CoreLib.Resource.UndoRedo
 {
@@ -15,6 +10,8 @@ namespace Xv2CoreLib.Resource.UndoRedo
         private int oldIdx;
         private int newIdx;
         private ObservableCollection<T> observableList;
+        private AsyncObservableCollection<T> asyncObservableList;
+        private bool isAsync = false;
 
         public UndoableListMove(ObservableCollection<T> _list, int _oldIdx, int _newIdx, string message = null)
         {
@@ -24,17 +21,41 @@ namespace Xv2CoreLib.Resource.UndoRedo
             Message = message;
         }
 
+        public UndoableListMove(AsyncObservableCollection<T> _list, int _oldIdx, int _newIdx, string message = null)
+        {
+            oldIdx = _oldIdx;
+            newIdx = _newIdx;
+            asyncObservableList = _list;
+            Message = message;
+            isAsync = true;
+        }
 
         public void Undo()
         {
-            if (newIdx >= 0 && oldIdx >= 0 && newIdx <= observableList.Count - 1 && oldIdx <= observableList.Count - 1)
-                observableList.Move(newIdx, oldIdx);
+            if (isAsync)
+            {
+                if (newIdx >= 0 && oldIdx >= 0 && newIdx <= asyncObservableList.Count - 1 && oldIdx <= asyncObservableList.Count - 1)
+                    asyncObservableList.Move(newIdx, oldIdx);
+            }
+            else
+            {
+                if (newIdx >= 0 && oldIdx >= 0 && newIdx <= observableList.Count - 1 && oldIdx <= observableList.Count - 1)
+                    observableList.Move(newIdx, oldIdx);
+            }
         }
 
         public void Redo()
         {
-            if (newIdx >= 0 && oldIdx >= 0 && newIdx <= observableList.Count - 1 && oldIdx <= observableList.Count - 1)
-                observableList.Move(oldIdx, newIdx);
+            if (isAsync)
+            {
+                if (newIdx >= 0 && oldIdx >= 0 && newIdx <= asyncObservableList.Count - 1 && oldIdx <= asyncObservableList.Count - 1)
+                    asyncObservableList.Move(oldIdx, newIdx);
+            }
+            else
+            {
+                if (newIdx >= 0 && oldIdx >= 0 && newIdx <= observableList.Count - 1 && oldIdx <= observableList.Count - 1)
+                    observableList.Move(oldIdx, newIdx);
+            }
         }
     }
 }

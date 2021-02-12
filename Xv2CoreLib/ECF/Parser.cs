@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Xv2CoreLib.Resource;
 using YAXLib;
 using static Xv2CoreLib.ECF.ECF_Entry;
 
@@ -144,9 +145,9 @@ namespace Xv2CoreLib.ECF
 
         }
 
-        private ObservableCollection<Type0_Keyframe> ParseKeyframes(int keyframeCount, int keyframeListOffset, int floatOffset)
+        private AsyncObservableCollection<Type0_Keyframe> ParseKeyframes(int keyframeCount, int keyframeListOffset, int floatOffset)
         {
-            ObservableCollection<Type0_Keyframe> keyframes = new ObservableCollection<Type0_Keyframe>();
+            AsyncObservableCollection<Type0_Keyframe> keyframes = AsyncObservableCollection<Type0_Keyframe>.Create();
 
             for (int i = 0; i < keyframeCount; i++)
             {

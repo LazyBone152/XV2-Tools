@@ -18,6 +18,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using Microsoft.Win32;
 using Xv2CoreLib.Resource.UndoRedo;
+using Xv2CoreLib.Resource;
 
 namespace Xv2CoreLib.EMB_CLASS
 {
@@ -60,7 +61,7 @@ namespace Xv2CoreLib.EMB_CLASS
         public InstallMode installMode { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "EmbEntry")]
-        public ObservableCollection<EmbEntry> Entry { get; set; } = new ObservableCollection<EmbEntry>();
+        public AsyncObservableCollection<EmbEntry> Entry { get; set; } = AsyncObservableCollection<EmbEntry>.Create();
 
         //Filters
         [YAXDontSerialize]
@@ -94,7 +95,7 @@ namespace Xv2CoreLib.EMB_CLASS
                 {
                     return _viewTextures;
                 }
-                _viewTextures = new ListCollectionView(Entry);
+                _viewTextures = new ListCollectionView(Entry.Binding);
                 _viewTextures.Filter = new Predicate<object>(TextureFilterCheck);
                 return _viewTextures;
             }
@@ -124,7 +125,7 @@ namespace Xv2CoreLib.EMB_CLASS
         public void UpdateTextureFilter()
         {
             if (_viewTextures == null)
-                _viewTextures = new ListCollectionView(Entry);
+                _viewTextures = new ListCollectionView(Entry.Binding);
 
             _viewTextures.Filter = new Predicate<object>(TextureFilterCheck);
             NotifyPropertyChanged("ViewTextures");
@@ -160,12 +161,12 @@ namespace Xv2CoreLib.EMB_CLASS
             {
                 if (returnEmptyIfNotValid)
                 {
-                    return new Xv2CoreLib.EMB_CLASS.EMB_File()
+                    return new EMB_File()
                     {
                         I_08 = 37568,
                         I_10 = 0,
                         UseFileNames = true,
-                        Entry = new ObservableCollection<EmbEntry>()
+                        Entry = AsyncObservableCollection<EmbEntry>.Create()
                     };
                 }
                 else
@@ -214,7 +215,7 @@ namespace Xv2CoreLib.EMB_CLASS
                     I_08 = 1,
                     I_10 = 1,
                     UseFileNames = true,
-                    Entry = new ObservableCollection<EmbEntry>()
+                    Entry = AsyncObservableCollection<EmbEntry>.Create()
                 };
             }
             else
@@ -224,7 +225,7 @@ namespace Xv2CoreLib.EMB_CLASS
                     I_08 = 37568,
                     I_10 = 0,
                     UseFileNames = true,
-                    Entry = new ObservableCollection<EmbEntry>()
+                    Entry = AsyncObservableCollection<EmbEntry>.Create()
                 };
             }
             
@@ -530,7 +531,7 @@ namespace Xv2CoreLib.EMB_CLASS
 
         public List<RgbColor> GetUsedColors()
         {
-            if (Entry == null) Entry = new ObservableCollection<EmbEntry>();
+            if (Entry == null) Entry = AsyncObservableCollection<EmbEntry>.Create();
             List<RgbColor> colors = new List<RgbColor>();
 
             foreach(var entry in Entry)

@@ -254,29 +254,29 @@ namespace Xv2CoreLib.EAN
         #region Defaults
         public static EAN_File DefaultCamFile()
         {
+            var eskBones = AsyncObservableCollection<ESK_Bone>.Create();
+            eskBones.Add(new ESK_Bone()
+            {
+                Name = EAN_Node.CAM_NODE,
+                RelativeTransform = new ESK_RelativeTransform()
+                {
+                    F_28 = 1f,
+                    F_32 = 1f,
+                    F_36 = 1f,
+                    F_40 = 1f
+                }
+            });
+
             return new EAN_File()
             {
-                Animations = new AsyncObservableCollection<EAN_Animation>(),
+                Animations = AsyncObservableCollection<EAN_Animation>.Create(),
                 IsCamera = true,
                 I_08 = 37508,
                 Skeleton = new ESK_Skeleton()
                 {
                     I_28 = new int[2] { 1900697063, 175112582 },
                     UseUnk2 = true,
-                    ESKBones = new AsyncObservableCollection<ESK_Bone>()
-                    {
-                        new ESK_Bone()
-                        {
-                            Name = EAN_Node.CAM_NODE,
-                            RelativeTransform = new ESK_RelativeTransform()
-                            {
-                                F_28 = 1f,
-                                F_32 = 1f,
-                                F_36 = 1f,
-                                F_40 = 1f
-                            }
-                        }
-                    }
+                    ESKBones = eskBones
                 }
             };
         }
@@ -285,7 +285,7 @@ namespace Xv2CoreLib.EAN
         {
             return new EAN_File()
             {
-                Animations = new AsyncObservableCollection<EAN_Animation>(),
+                Animations = AsyncObservableCollection<EAN_Animation>.Create(),
                 IsCamera = true,
                 I_08 = 37508,
                 Skeleton = skeleton.Copy()
@@ -297,7 +297,7 @@ namespace Xv2CoreLib.EAN
         #region Helper
         public EAN_File Clone()
         {
-            AsyncObservableCollection<EAN_Animation> anims = new AsyncObservableCollection<EAN_Animation>();
+            AsyncObservableCollection<EAN_Animation> anims = AsyncObservableCollection<EAN_Animation>.Create();
             foreach (var a in Animations)
             {
                 anims.Add(a.Clone());
@@ -591,7 +591,7 @@ namespace Xv2CoreLib.EAN
             if (undos == null) undos = new List<IUndoRedo>();
 
             EAN_Node node = new EAN_Node();
-            node.AnimationComponents = new ObservableCollection<EAN_AnimationComponent>();
+            node.AnimationComponents = AsyncObservableCollection<EAN_AnimationComponent>.Create();
             node.BoneName = bone;
             node.EskRelativeTransform = eskSkeleton.GetBone(bone)?.RelativeTransform;
 
@@ -600,7 +600,7 @@ namespace Xv2CoreLib.EAN
 
         public EAN_Animation Clone()
         {
-            AsyncObservableCollection<EAN_Node> _Nodes = new AsyncObservableCollection<EAN_Node>();
+            AsyncObservableCollection<EAN_Node> _Nodes = AsyncObservableCollection<EAN_Node>.Create();
             for(int i = 0; i < Nodes.Count; i++)
             {
                 _Nodes.Add(Nodes[i].Clone());
@@ -988,7 +988,7 @@ namespace Xv2CoreLib.EAN
         public string BoneName { get; set; } 
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Keyframes")]
-        public ObservableCollection<EAN_AnimationComponent> AnimationComponents { get; set; }
+        public AsyncObservableCollection<EAN_AnimationComponent> AnimationComponents { get; set; }
 
         #region KeyframeManipulation
         /// <summary>
@@ -1184,7 +1184,7 @@ namespace Xv2CoreLib.EAN
 
         public EAN_Node Clone()
         {
-            ObservableCollection<EAN_AnimationComponent> _AnimationComponent = new ObservableCollection<EAN_AnimationComponent>();
+            AsyncObservableCollection<EAN_AnimationComponent> _AnimationComponent = AsyncObservableCollection<EAN_AnimationComponent>.Create();
             for (int i = 0; i < AnimationComponents.Count; i++)
             {
                 _AnimationComponent.Add(AnimationComponents[i].Clone());
@@ -1397,7 +1397,7 @@ namespace Xv2CoreLib.EAN
         public short I_02 { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Keyframe")]
-        public AsyncObservableCollection<EAN_Keyframe> Keyframes { get; set; } = new AsyncObservableCollection<EAN_Keyframe>();
+        public AsyncObservableCollection<EAN_Keyframe> Keyframes { get; set; } = AsyncObservableCollection<EAN_Keyframe>.Create();
 
         public EAN_AnimationComponent() { }
 
@@ -1792,7 +1792,7 @@ namespace Xv2CoreLib.EAN
 
         public EAN_AnimationComponent Clone()
         {
-            AsyncObservableCollection<EAN_Keyframe> _keyframes = new AsyncObservableCollection<EAN_Keyframe>();
+            AsyncObservableCollection<EAN_Keyframe> _keyframes = AsyncObservableCollection<EAN_Keyframe>.Create();
 
             for (int i = 0; i < Keyframes.Count(); i++)
             {

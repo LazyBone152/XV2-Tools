@@ -29,6 +29,7 @@ using GalaSoft.MvvmLight.CommandWpf;
 using EEPK_Organiser.Forms.Recolor;
 using Xv2CoreLib.Resource.App;
 using Application = System.Windows.Application;
+using Xv2CoreLib.Resource;
 
 namespace EEPK_Organiser.View
 {
@@ -190,7 +191,7 @@ namespace EEPK_Organiser.View
 
 
         //Loading
-        public EffectContainerFile LoadEffectContainerFile(bool cacheFile = true)
+        public async Task<EffectContainerFile> LoadEffectContainerFile(bool cacheFile = true)
         {
             OpenFileDialog openFile = new OpenFileDialog();
             openFile.Title = "Open EEPK file...";
@@ -199,42 +200,31 @@ namespace EEPK_Organiser.View
             openFile.Filter = string.Format("EEPK File | *.eepk; |{1} File |*{0};", EffectContainerFile.ZipExtension, EffectContainerFile.ZipExtension.ToUpper().Remove(0, 1));
             openFile.ShowDialog();
 
-            return LoadEffectContainerFile(openFile.FileName, cacheFile);
+            return await LoadEffectContainerFile(openFile.FileName, cacheFile);
         }
 
-        public EffectContainerFile LoadEffectContainerFile(string path, bool cacheFile = true)
+        public async Task<EffectContainerFile> LoadEffectContainerFile(string path, bool cacheFile = true)
         {
             try
             {
                 if (File.Exists(path) && !string.IsNullOrWhiteSpace(path))
                 {
-
-                    Forms.ProgressBarFileLoad progressBarForm = new Forms.ProgressBarFileLoad(path, App.Current.MainWindow, null);
-                    progressBarForm.ShowDialog();
-
-                    if (progressBarForm.exception != null)
-                    {
-                        ExceptionDispatchInfo.Capture(progressBarForm.exception).Throw();
-                    }
-                    if (progressBarForm.effectContainerFile == null)
-                    {
-                        throw new FileLoadException("The file load was interupted.");
-                    }
+                    var loadedFile = await LoadFileAsync(path, false, false);
 
                     //Apply namelist
-                    nameListManager.EepkLoaded(progressBarForm.effectContainerFile);
+                    nameListManager.EepkLoaded(loadedFile);
 
                     //Cache the file
                     if (cacheFile)
                     {
-                        cacheManager.CacheFile(path, progressBarForm.effectContainerFile, "File");
+                        cacheManager.CacheFile(path, loadedFile, "File");
                     }
                     else
                     {
                         cacheManager.RemoveCachedFile(path);
                     }
 
-                    return progressBarForm.effectContainerFile;
+                    return loadedFile;
                 }
             }
             catch (Exception ex)
@@ -246,7 +236,7 @@ namespace EEPK_Organiser.View
             return null;
         }
 
-        public EffectContainerFile LoadEepkFromGame(Forms.EntitySelector.EntityType type, bool cacheFile = true)
+        public async Task<EffectContainerFile> LoadEepkFromGame(Forms.EntitySelector.EntityType type, bool cacheFile = true)
         {
             if (!SettingsManager.settings.ValidGameDir) throw new Exception("Game directory is not valid. Please set the game directory in the settings menu (File > Settings).");
 
@@ -255,40 +245,67 @@ namespace EEPK_Organiser.View
 
             if (entitySelector.SelectedEntity != null)
             {
-                Forms.ProgressBarFileLoad progressBarForm = new Forms.ProgressBarFileLoad(entitySelector.SelectedEntity.EepkPath, App.Current.MainWindow, Xenoverse2.Instance.GetFileIO(), entitySelector.OnlyLoadFromCPK);
-                progressBarForm.ShowDialog();
-
-                if (progressBarForm.exception != null)
-                {
-                    ExceptionDispatchInfo.Capture(progressBarForm.exception).Throw();
-                }
-                if (progressBarForm.effectContainerFile == null)
-                {
-                    throw new FileLoadException("The file load was interupted.");
-                }
+                var loadedFile = await LoadFileAsync(entitySelector.SelectedEntity.EepkPath, true, entitySelector.OnlyLoadFromCPK);
 
                 //Apply namelist
-                nameListManager.EepkLoaded(progressBarForm.effectContainerFile);
+                nameListManager.EepkLoaded(loadedFile);
 
                 //Cache the file
                 if (cacheFile)
                 {
-                    cacheManager.CacheFile(entitySelector.SelectedEntity.EepkPath, progressBarForm.effectContainerFile, type.ToString());
+                    cacheManager.CacheFile(entitySelector.SelectedEntity.EepkPath, loadedFile, type.ToString());
                 }
                 else
                 {
                     cacheManager.RemoveCachedFile(entitySelector.SelectedEntity.EepkPath);
                 }
 
-                progressBarForm.effectContainerFile.LoadedExternalFiles.Clear();
-                progressBarForm.effectContainerFile.Directory = string.Format("{0}/data/{1}", SettingsManager.settings.GameDirectory, progressBarForm.effectContainerFile.Directory);
+                loadedFile.LoadedExternalFiles.Clear();
+                loadedFile.Directory = string.Format("{0}/data/{1}", SettingsManager.settings.GameDirectory, loadedFile.Directory);
 
-                return progressBarForm.effectContainerFile;
+                return loadedFile;
             }
 
             return null;
         }
 
+        private async Task<EffectContainerFile> LoadFileAsync(string path, bool fromGame, bool onlyFromCpk)
+        {
+            var controller = await ((MetroWindow)App.Current.MainWindow).ShowProgressAsync($"Loading...", $"", false, new MetroDialogSettings() { DialogTitleFontSize = 16, DialogMessageFontSize = 12, AnimateHide = false, AnimateShow = false });
+            controller.SetIndeterminate();
+
+            EffectContainerFile loadedFile = null;
+
+            try
+            {
+                await Task.Run(() =>
+                {
+                    if (!fromGame)
+                    {
+                        //Load files directly
+                        if (Path.GetExtension(path) == ".eepk")
+                        {
+                            loadedFile = EffectContainerFile.Load(path);
+                        }
+                        else if (Path.GetExtension(path) == EffectContainerFile.ZipExtension)
+                        {
+                            loadedFile = EffectContainerFile.LoadVfx2(path);
+                        }
+                    }
+                    else
+                    {
+                        //Load from game
+                        loadedFile = EffectContainerFile.Load(path, Xenoverse2.Instance.GetFileIO(), onlyFromCpk);
+                    }
+                });
+            }
+            finally
+            {
+                await controller.CloseAsync();
+            }
+
+            return loadedFile;
+        }
 
 
         //Main TabControl
@@ -715,59 +732,59 @@ namespace EEPK_Organiser.View
             }
         }
 
-        public void EMO_ImportAsset_MenuItem_FromCMN_Click(object sender, RoutedEventArgs e)
+        public async void EMO_ImportAsset_MenuItem_FromCMN_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.CMN);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.CMN);
             ImportEmoAssets(effectFile);
         }
 
-        public void EMO_ImportAsset_MenuItem_FromCharacter_Click(object sender, RoutedEventArgs e)
+        public async void EMO_ImportAsset_MenuItem_FromCharacter_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.Character);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.Character);
             ImportEmoAssets(effectFile);
         }
 
-        public void EMO_ImportAsset_MenuItem_FromSuper_Click(object sender, RoutedEventArgs e)
+        public async void EMO_ImportAsset_MenuItem_FromSuper_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.SuperSkill);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.SuperSkill);
             ImportEmoAssets(effectFile);
         }
 
-        public void EMO_ImportAsset_MenuItem_FromUltimate_Click(object sender, RoutedEventArgs e)
+        public async void EMO_ImportAsset_MenuItem_FromUltimate_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.UltimateSkill);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.UltimateSkill);
             ImportEmoAssets(effectFile);
         }
 
-        public void EMO_ImportAsset_MenuItem_FromEvasive_Click(object sender, RoutedEventArgs e)
+        public async void EMO_ImportAsset_MenuItem_FromEvasive_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.EvasiveSkill);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.EvasiveSkill);
             ImportEmoAssets(effectFile);
         }
 
-        public void EMO_ImportAsset_MenuItem_FromBlast_Click(object sender, RoutedEventArgs e)
+        public async void EMO_ImportAsset_MenuItem_FromBlast_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.BlastSkill);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.BlastSkill);
             ImportEmoAssets(effectFile);
         }
 
-        public void EMO_ImportAsset_MenuItem_FromAwoken_Click(object sender, RoutedEventArgs e)
+        public async void EMO_ImportAsset_MenuItem_FromAwoken_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.AwokenSkill);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.AwokenSkill);
             ImportEmoAssets(effectFile);
         }
 
-        public void EMO_ImportAsset_MenuItem_FromDemo_Click(object sender, RoutedEventArgs e)
+        public async void EMO_ImportAsset_MenuItem_FromDemo_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.Demo);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.Demo);
             ImportEmoAssets(effectFile);
         }
 
@@ -808,7 +825,7 @@ namespace EEPK_Organiser.View
                     Asset asset = new Asset()
                     {
                         assetType = AssetType.EMO,
-                        Files = new ObservableCollection<EffectFile>()
+                        Files = AsyncObservableCollection<EffectFile>.Create()
                     };
 
                     foreach (var file in openFile.FileNames)
@@ -1208,59 +1225,59 @@ namespace EEPK_Organiser.View
             }
         }
 
-        public void PBIND_ImportAsset_MenuItem_FromCMN_Click(object sender, RoutedEventArgs e)
+        public async void PBIND_ImportAsset_MenuItem_FromCMN_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.CMN);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.CMN);
             ImportPbindAssets(effectFile);
         }
 
-        public void PBIND_ImportAsset_MenuItem_FromCharacter_Click(object sender, RoutedEventArgs e)
+        public async void PBIND_ImportAsset_MenuItem_FromCharacter_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.Character);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.Character);
             ImportPbindAssets(effectFile);
         }
 
-        public void PBIND_ImportAsset_MenuItem_FromSuper_Click(object sender, RoutedEventArgs e)
+        public async void PBIND_ImportAsset_MenuItem_FromSuper_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.SuperSkill);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.SuperSkill);
             ImportPbindAssets(effectFile);
         }
 
-        public void PBIND_ImportAsset_MenuItem_FromUltimate_Click(object sender, RoutedEventArgs e)
+        public async void PBIND_ImportAsset_MenuItem_FromUltimate_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.UltimateSkill);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.UltimateSkill);
             ImportPbindAssets(effectFile);
         }
 
-        public void PBIND_ImportAsset_MenuItem_FromEvasive_Click(object sender, RoutedEventArgs e)
+        public async void PBIND_ImportAsset_MenuItem_FromEvasive_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.EvasiveSkill);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.EvasiveSkill);
             ImportPbindAssets(effectFile);
         }
 
-        public void PBIND_ImportAsset_MenuItem_FromBlast_Click(object sender, RoutedEventArgs e)
+        public async void PBIND_ImportAsset_MenuItem_FromBlast_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.BlastSkill);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.BlastSkill);
             ImportPbindAssets(effectFile);
         }
 
-        public void PBIND_ImportAsset_MenuItem_FromAwoken_Click(object sender, RoutedEventArgs e)
+        public async void PBIND_ImportAsset_MenuItem_FromAwoken_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.AwokenSkill);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.AwokenSkill);
             ImportPbindAssets(effectFile);
         }
 
-        public void PBIND_ImportAsset_MenuItem_FromDemo_Click(object sender, RoutedEventArgs e)
+        public async void PBIND_ImportAsset_MenuItem_FromDemo_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.Demo);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.Demo);
             ImportPbindAssets(effectFile);
         }
 
@@ -1635,59 +1652,59 @@ namespace EEPK_Organiser.View
             }
         }
 
-        public void TBIND_ImportAsset_MenuItem_FromCMN_Click(object sender, RoutedEventArgs e)
+        public async void TBIND_ImportAsset_MenuItem_FromCMN_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.CMN);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.CMN);
             ImportTbindAssets(effectFile);
         }
 
-        public void TBIND_ImportAsset_MenuItem_FromCharacter_Click(object sender, RoutedEventArgs e)
+        public async void TBIND_ImportAsset_MenuItem_FromCharacter_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.Character);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.Character);
             ImportTbindAssets(effectFile);
         }
 
-        public void TBIND_ImportAsset_MenuItem_FromSuper_Click(object sender, RoutedEventArgs e)
+        public async void TBIND_ImportAsset_MenuItem_FromSuper_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.SuperSkill);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.SuperSkill);
             ImportTbindAssets(effectFile);
         }
 
-        public void TBIND_ImportAsset_MenuItem_FromUltimate_Click(object sender, RoutedEventArgs e)
+        public async void TBIND_ImportAsset_MenuItem_FromUltimate_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.UltimateSkill);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.UltimateSkill);
             ImportTbindAssets(effectFile);
         }
 
-        public void TBIND_ImportAsset_MenuItem_FromEvasive_Click(object sender, RoutedEventArgs e)
+        public async void TBIND_ImportAsset_MenuItem_FromEvasive_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.EvasiveSkill);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.EvasiveSkill);
             ImportTbindAssets(effectFile);
         }
 
-        public void TBIND_ImportAsset_MenuItem_FromBlast_Click(object sender, RoutedEventArgs e)
+        public async void TBIND_ImportAsset_MenuItem_FromBlast_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.BlastSkill);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.BlastSkill);
             ImportTbindAssets(effectFile);
         }
 
-        public void TBIND_ImportAsset_MenuItem_FromAwoken_Click(object sender, RoutedEventArgs e)
+        public async void TBIND_ImportAsset_MenuItem_FromAwoken_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.AwokenSkill);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.AwokenSkill);
             ImportTbindAssets(effectFile);
         }
 
-        public void TBIND_ImportAsset_MenuItem_FromDemo_Click(object sender, RoutedEventArgs e)
+        public async void TBIND_ImportAsset_MenuItem_FromDemo_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.Demo);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.Demo);
             ImportTbindAssets(effectFile);
         }
 
@@ -1979,59 +1996,59 @@ namespace EEPK_Organiser.View
             }
         }
 
-        public void CBIND_ImportAsset_MenuItem_FromCMN_Click(object sender, RoutedEventArgs e)
+        public async void CBIND_ImportAsset_MenuItem_FromCMN_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.CMN);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.CMN);
             ImportCbindAssets(effectFile);
         }
 
-        public void CBIND_ImportAsset_MenuItem_FromCharacter_Click(object sender, RoutedEventArgs e)
+        public async void CBIND_ImportAsset_MenuItem_FromCharacter_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.Character);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.Character);
             ImportCbindAssets(effectFile);
         }
 
-        public void CBIND_ImportAsset_MenuItem_FromSuper_Click(object sender, RoutedEventArgs e)
+        public async void CBIND_ImportAsset_MenuItem_FromSuper_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.SuperSkill);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.SuperSkill);
             ImportCbindAssets(effectFile);
         }
 
-        public void CBIND_ImportAsset_MenuItem_FromUltimate_Click(object sender, RoutedEventArgs e)
+        public async void CBIND_ImportAsset_MenuItem_FromUltimate_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.UltimateSkill);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.UltimateSkill);
             ImportCbindAssets(effectFile);
         }
 
-        public void CBIND_ImportAsset_MenuItem_FromEvasive_Click(object sender, RoutedEventArgs e)
+        public async void CBIND_ImportAsset_MenuItem_FromEvasive_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.EvasiveSkill);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.EvasiveSkill);
             ImportCbindAssets(effectFile);
         }
 
-        public void CBIND_ImportAsset_MenuItem_FromBlast_Click(object sender, RoutedEventArgs e)
+        public async void CBIND_ImportAsset_MenuItem_FromBlast_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.BlastSkill);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.BlastSkill);
             ImportCbindAssets(effectFile);
         }
 
-        public void CBIND_ImportAsset_MenuItem_FromAwoken_Click(object sender, RoutedEventArgs e)
+        public async void CBIND_ImportAsset_MenuItem_FromAwoken_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.AwokenSkill);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.AwokenSkill);
             ImportCbindAssets(effectFile);
         }
 
-        public void CBIND_ImportAsset_MenuItem_FromDemo_Click(object sender, RoutedEventArgs e)
+        public async void CBIND_ImportAsset_MenuItem_FromDemo_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.Demo);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.Demo);
             ImportCbindAssets(effectFile);
         }
 
@@ -2063,11 +2080,11 @@ namespace EEPK_Organiser.View
                 if (!string.IsNullOrWhiteSpace(openFile.FileName) && File.Exists(openFile.FileName))
                 {
                     string newName = effectContainerFile.Cbind.GetUnusedName(System.IO.Path.GetFileName(openFile.FileName));
-
+                    
                     Asset asset = new Asset()
                     {
                         assetType = AssetType.CBIND,
-                        Files = new ObservableCollection<EffectFile>()
+                        Files = new AsyncObservableCollection<EffectFile>()
                         {
                             new EffectFile()
                             {
@@ -2368,59 +2385,59 @@ namespace EEPK_Organiser.View
             }
         }
 
-        public void LIGHT_ImportAsset_MenuItem_FromCMN_Click(object sender, RoutedEventArgs e)
+        public async void LIGHT_ImportAsset_MenuItem_FromCMN_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.CMN);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.CMN);
             ImportLightAssets(effectFile);
         }
 
-        public void LIGHT_ImportAsset_MenuItem_FromCharacter_Click(object sender, RoutedEventArgs e)
+        public async void LIGHT_ImportAsset_MenuItem_FromCharacter_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.Character);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.Character);
             ImportLightAssets(effectFile);
         }
 
-        public void LIGHT_ImportAsset_MenuItem_FromSuper_Click(object sender, RoutedEventArgs e)
+        public async void LIGHT_ImportAsset_MenuItem_FromSuper_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.SuperSkill);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.SuperSkill);
             ImportLightAssets(effectFile);
         }
 
-        public void LIGHT_ImportAsset_MenuItem_FromUltimate_Click(object sender, RoutedEventArgs e)
+        public async void LIGHT_ImportAsset_MenuItem_FromUltimate_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.UltimateSkill);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.UltimateSkill);
             ImportLightAssets(effectFile);
         }
 
-        public void LIGHT_ImportAsset_MenuItem_FromEvasive_Click(object sender, RoutedEventArgs e)
+        public async void LIGHT_ImportAsset_MenuItem_FromEvasive_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.EvasiveSkill);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.EvasiveSkill);
             ImportLightAssets(effectFile);
         }
 
-        public void LIGHT_ImportAsset_MenuItem_FromBlast_Click(object sender, RoutedEventArgs e)
+        public async void LIGHT_ImportAsset_MenuItem_FromBlast_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.BlastSkill);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.BlastSkill);
             ImportLightAssets(effectFile);
         }
 
-        public void LIGHT_ImportAsset_MenuItem_FromAwoken_Click(object sender, RoutedEventArgs e)
+        public async void LIGHT_ImportAsset_MenuItem_FromAwoken_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.AwokenSkill);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.AwokenSkill);
             ImportLightAssets(effectFile);
         }
 
-        public void LIGHT_ImportAsset_MenuItem_FromDemo_Click(object sender, RoutedEventArgs e)
+        public async void LIGHT_ImportAsset_MenuItem_FromDemo_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
-            var effectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.Demo);
+            var effectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.Demo);
             ImportLightAssets(effectFile);
         }
 
@@ -2456,7 +2473,7 @@ namespace EEPK_Organiser.View
                     Asset asset = new Asset()
                     {
                         assetType = AssetType.LIGHT,
-                        Files = new ObservableCollection<EffectFile>()
+                        Files = new AsyncObservableCollection<EffectFile>()
                         {
                             new EffectFile()
                             {
@@ -2613,7 +2630,7 @@ namespace EEPK_Organiser.View
         {
             if (importFile == null)
             {
-                importFile = LoadEffectContainerFile();
+                importFile = await LoadEffectContainerFile();
             }
 
             List<IUndoRedo> undos = new List<IUndoRedo>();
@@ -3071,7 +3088,7 @@ namespace EEPK_Organiser.View
                 if (selectedEffect != null)
                 {
                     if (selectedEffect.EffectParts == null)
-                        selectedEffect.EffectParts = new System.Collections.ObjectModel.ObservableCollection<EffectPart>();
+                        selectedEffect.EffectParts = new AsyncObservableCollection<EffectPart>();
 
                     var newEffectPart = EffectPart.NewEffectPart();
                     selectedEffect.EffectParts.Add(newEffectPart);
@@ -3116,7 +3133,7 @@ namespace EEPK_Organiser.View
                 if (effects != null)
                 {
                     //Add effects
-                    EffectOptions_ImportEffects(new ObservableCollection<Effect>(effects));
+                    EffectOptions_ImportEffects(new AsyncObservableCollection<Effect>(effects));
 
                 }
             }
@@ -3282,7 +3299,9 @@ namespace EEPK_Organiser.View
                     {
                         foreach (var effectPart in selectedEffect.SelectedEffectParts)
                         {
-                            selectedEffect.EffectParts.Add(effectPart.Clone());
+                            var clone = effectPart.Clone();
+                            selectedEffect.EffectParts.Add(clone);
+                            UndoManager.Instance.AddUndo(new UndoableListAdd<EffectPart>(selectedEffect.EffectParts, clone, "Duplicate"));
                         }
                     }
                 }
@@ -3469,7 +3488,7 @@ namespace EEPK_Organiser.View
             try
             {
                 Effect newEffect = new Effect();
-                newEffect.EffectParts = new ObservableCollection<EffectPart>();
+                newEffect.EffectParts = new AsyncObservableCollection<EffectPart>();
                 newEffect.IndexNum = effectContainerFile.GetUnusedEffectId(0);
                 effectContainerFile.Effects.Add(newEffect);
                 effectDataGrid.SelectedItem = newEffect;
@@ -3492,11 +3511,11 @@ namespace EEPK_Organiser.View
 
         }
 
-        public void EffectOptions_ImportEffectsFromFile_Click(object sender, RoutedEventArgs e)
+        public async void EffectOptions_ImportEffectsFromFile_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                var importEffectFile = LoadEffectContainerFile();
+                var importEffectFile = await LoadEffectContainerFile();
                 if (importEffectFile != null)
                     EffectOptions_ImportEffects(importEffectFile.Effects);
             }
@@ -3507,12 +3526,12 @@ namespace EEPK_Organiser.View
             }
         }
 
-        public void EffectOptions_ImportEffectsFromCharacter_Click(object sender, RoutedEventArgs e)
+        public async void EffectOptions_ImportEffectsFromCharacter_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             try
             {
-                var importEffectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.Character);
+                var importEffectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.Character);
                 if (importEffectFile != null)
                     EffectOptions_ImportEffects(importEffectFile.Effects);
             }
@@ -3523,12 +3542,12 @@ namespace EEPK_Organiser.View
             }
         }
 
-        public void EffectOptions_ImportEffectsFromSuper_Click(object sender, RoutedEventArgs e)
+        public async void EffectOptions_ImportEffectsFromSuper_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             try
             {
-                var importEffectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.SuperSkill);
+                var importEffectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.SuperSkill);
                 if (importEffectFile != null)
                     EffectOptions_ImportEffects(importEffectFile.Effects);
             }
@@ -3539,12 +3558,12 @@ namespace EEPK_Organiser.View
             }
         }
 
-        public void EffectOptions_ImportEffectsFromUltimate_Click(object sender, RoutedEventArgs e)
+        public async void EffectOptions_ImportEffectsFromUltimate_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             try
             {
-                var importEffectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.UltimateSkill);
+                var importEffectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.UltimateSkill);
                 if (importEffectFile != null)
                     EffectOptions_ImportEffects(importEffectFile.Effects);
             }
@@ -3555,12 +3574,12 @@ namespace EEPK_Organiser.View
             }
         }
 
-        public void EffectOptions_ImportEffectsFromEvasive_Click(object sender, RoutedEventArgs e)
+        public async void EffectOptions_ImportEffectsFromEvasive_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             try
             {
-                var importEffectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.EvasiveSkill);
+                var importEffectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.EvasiveSkill);
                 if (importEffectFile != null)
                     EffectOptions_ImportEffects(importEffectFile.Effects);
             }
@@ -3571,12 +3590,12 @@ namespace EEPK_Organiser.View
             }
         }
 
-        public void EffectOptions_ImportEffectsFromBlast_Click(object sender, RoutedEventArgs e)
+        public async void EffectOptions_ImportEffectsFromBlast_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             try
             {
-                var importEffectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.BlastSkill);
+                var importEffectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.BlastSkill);
                 if (importEffectFile != null)
                     EffectOptions_ImportEffects(importEffectFile.Effects);
             }
@@ -3587,12 +3606,12 @@ namespace EEPK_Organiser.View
             }
         }
 
-        public void EffectOptions_ImportEffectsFromAwoken_Click(object sender, RoutedEventArgs e)
+        public async void EffectOptions_ImportEffectsFromAwoken_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             try
             {
-                var importEffectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.AwokenSkill);
+                var importEffectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.AwokenSkill);
                 if (importEffectFile != null)
                     EffectOptions_ImportEffects(importEffectFile.Effects);
             }
@@ -3603,12 +3622,12 @@ namespace EEPK_Organiser.View
             }
         }
 
-        public void EffectOptions_ImportEffectsFromCMN_Click(object sender, RoutedEventArgs e)
+        public async void EffectOptions_ImportEffectsFromCMN_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             try
             {
-                var importEffectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.CMN);
+                var importEffectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.CMN);
                 if (importEffectFile != null)
                     EffectOptions_ImportEffects(importEffectFile.Effects);
             }
@@ -3619,12 +3638,12 @@ namespace EEPK_Organiser.View
             }
         }
 
-        public void EffectOptions_ImportEffectsFromDemo_Click(object sender, RoutedEventArgs e)
+        public async void EffectOptions_ImportEffectsFromDemo_Click(object sender, RoutedEventArgs e)
         {
             if (!GameDirectoryCheck()) return;
             try
             {
-                var importEffectFile = LoadEepkFromGame(Forms.EntitySelector.EntityType.Demo);
+                var importEffectFile = await LoadEepkFromGame(Forms.EntitySelector.EntityType.Demo);
                 if (importEffectFile != null)
                     EffectOptions_ImportEffects(importEffectFile.Effects);
             }
@@ -3663,7 +3682,7 @@ namespace EEPK_Organiser.View
             }
         }
 
-        private void EffectOptions_ImportEffects(ObservableCollection<Effect> effects)
+        private void EffectOptions_ImportEffects(AsyncObservableCollection<Effect> effects)
         {
             if (effects != null)
             {
@@ -3749,7 +3768,7 @@ namespace EEPK_Organiser.View
             }
         }
 
-        private void EffectOptions_ImportEffects_FileDrop(object sender, DragEventArgs e)
+        private async void EffectOptions_ImportEffects_FileDrop(object sender, DragEventArgs e)
         {
             try
             {
@@ -3759,11 +3778,11 @@ namespace EEPK_Organiser.View
 
                     if (droppedFilePaths.Length == 1)
                     {
-                        switch (System.IO.Path.GetExtension(droppedFilePaths[0]))
+                        switch (Path.GetExtension(droppedFilePaths[0]))
                         {
                             case EffectContainerFile.ZipExtension:
                             case ".eepk":
-                                var importEffectFile = LoadEffectContainerFile(droppedFilePaths[0]);
+                                var importEffectFile = await LoadEffectContainerFile(droppedFilePaths[0]);
                                 if (importEffectFile != null)
                                     EffectOptions_ImportEffects(importEffectFile.Effects);
 

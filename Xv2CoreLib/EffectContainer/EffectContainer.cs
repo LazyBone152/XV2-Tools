@@ -17,6 +17,7 @@ using Xv2CoreLib.EMA;
 using System.IO.Compression;
 using Xv2CoreLib.HslColor;
 using Xv2CoreLib.Resource.UndoRedo;
+using Xv2CoreLib.Resource;
 
 namespace Xv2CoreLib.EffectContainer
 {
@@ -197,7 +198,7 @@ namespace Xv2CoreLib.EffectContainer
         public AssetContainerTool LightEma { get; set; }
 
         //Effects
-        public ObservableCollection<Effect> Effects { get; set; }
+        public AsyncObservableCollection<Effect> Effects { get; set; }
 
         #region UiProperties
         //SelectedEffect
@@ -248,7 +249,7 @@ namespace Xv2CoreLib.EffectContainer
                 {
                     return _viewEffects;
                 }
-                _viewEffects = new ListCollectionView(Effects);
+                _viewEffects = new ListCollectionView(Effects.Binding);
                 _viewEffects.Filter = new Predicate<object>(EffectFilterCheck);
                 return _viewEffects;
             }
@@ -303,7 +304,7 @@ namespace Xv2CoreLib.EffectContainer
         public void UpdateEffectFilter()
         {
             if (_viewEffects == null)
-                _viewEffects = new ListCollectionView(Effects);
+                _viewEffects = new ListCollectionView(Effects.Binding);
 
             _viewEffects.Filter = new Predicate<object>(EffectFilterCheck);
             NotifyPropertyChanged("ViewEffects");
@@ -459,7 +460,7 @@ namespace Xv2CoreLib.EffectContainer
             newFile.Cbind = newFile.GetDefaultContainer(AssetType.CBIND);
             newFile.Emo = newFile.GetDefaultContainer(AssetType.EMO);
             newFile.LightEma = newFile.GetDefaultContainer(AssetType.LIGHT);
-            newFile.Effects = new ObservableCollection<Effect>();
+            newFile.Effects = AsyncObservableCollection<Effect>.Create();
             newFile.Version = VersionEnum.DBXV2;
 
             return newFile;
@@ -1276,7 +1277,7 @@ namespace Xv2CoreLib.EffectContainer
             }
         }
 
-        private void PbindLinkTextureAndMaterial_Recursive(ObservableCollection<ParticleEffect> childrenParticleEffects)
+        private void PbindLinkTextureAndMaterial_Recursive(IList<ParticleEffect> childrenParticleEffects)
         {
             foreach (var empEntry in childrenParticleEffects)
             {
@@ -1403,7 +1404,7 @@ namespace Xv2CoreLib.EffectContainer
             }
         }
 
-        private void PbindSetTextureAndMaterialIndex_Recursive(ObservableCollection<ParticleEffect> childrenParticleEffects)
+        private void PbindSetTextureAndMaterialIndex_Recursive(IList<ParticleEffect> childrenParticleEffects)
         {
             foreach (var empEntry in childrenParticleEffects)
             {
@@ -1573,7 +1574,7 @@ namespace Xv2CoreLib.EffectContainer
         {
             EffectContainerFile effectContainer = new EffectContainerFile();
             effectContainer.Version = (VersionEnum)eepkFile.I_08;
-            effectContainer.Effects = new ObservableCollection<Effect>(eepkFile.Effects);
+            effectContainer.Effects = new AsyncObservableCollection<Effect>(eepkFile.Effects);
 
             foreach(var container in eepkFile.Assets)
             {
@@ -1592,11 +1593,11 @@ namespace Xv2CoreLib.EffectContainer
                 assetContainer.File1_Name = container.FILES[0];
                 assetContainer.File2_Name = container.FILES[1];
                 assetContainer.File3_Name = container.FILES[2];
-                assetContainer.Assets = new ObservableCollection<Asset>();
+                assetContainer.Assets = AsyncObservableCollection<Asset>.Create();
 
                 foreach(var assets in container.AssetEntries)
                 {
-                    ObservableCollection<EffectFile> files = new ObservableCollection<EffectFile>();
+                    AsyncObservableCollection<EffectFile> files = AsyncObservableCollection<EffectFile>.Create();
 
                     foreach(Asset_File filename in assets.FILES)
                     {
@@ -1796,7 +1797,7 @@ namespace Xv2CoreLib.EffectContainer
                         File1_Name = String.Format("{0}.pbind.emb", GetDefaultEepkName()),
                         File2_Name = String.Format("{0}.ptcl.emm", GetDefaultEepkName()),
                         File3_Name = String.Format("{0}.ptcl.emb", GetDefaultEepkName()),
-                        Assets = new ObservableCollection<Asset>(),
+                        Assets = AsyncObservableCollection<Asset>.Create(),
                         ContainerAssetType = AssetType.PBIND
                     };
                 case AssetType.TBIND:
@@ -1809,7 +1810,7 @@ namespace Xv2CoreLib.EffectContainer
                         File1_Name = String.Format("{0}.tbind.emb", GetDefaultEepkName()),
                         File2_Name = String.Format("{0}.trc.emm", GetDefaultEepkName()),
                         File3_Name = String.Format("{0}.trc.emb", GetDefaultEepkName()),
-                        Assets = new ObservableCollection<Asset>(),
+                        Assets = AsyncObservableCollection<Asset>.Create(),
                         ContainerAssetType = AssetType.TBIND
                     };
                 case AssetType.CBIND:
@@ -1820,7 +1821,7 @@ namespace Xv2CoreLib.EffectContainer
                         File1_Name = String.Format("{0}.cbind.emb", GetDefaultEepkName()),
                         File2_Name = "NULL",
                         File3_Name = "NULL",
-                        Assets = new ObservableCollection<Asset>(),
+                        Assets = AsyncObservableCollection<Asset>.Create(),
                         ContainerAssetType = AssetType.CBIND
                     };
                 case AssetType.EMO:
@@ -1830,7 +1831,7 @@ namespace Xv2CoreLib.EffectContainer
                         File1_Name = "NULL",
                         File2_Name = "NULL",
                         File3_Name = "NULL",
-                        Assets = new ObservableCollection<Asset>(),
+                        Assets = AsyncObservableCollection<Asset>.Create(),
                         ContainerAssetType = AssetType.EMO
                     };
                 case AssetType.LIGHT:
@@ -1840,7 +1841,7 @@ namespace Xv2CoreLib.EffectContainer
                         File1_Name = "NULL",
                         File2_Name = "NULL",
                         File3_Name = "NULL",
-                        Assets = new ObservableCollection<Asset>(),
+                        Assets = AsyncObservableCollection<Asset>.Create(),
                         ContainerAssetType = AssetType.LIGHT
                     };
                 default:
@@ -2223,7 +2224,7 @@ namespace Xv2CoreLib.EffectContainer
             }
         }
 
-        private void SDBH_PbindLinkTextureAndMaterial_Recursive(ObservableCollection<ParticleEffect> childrenParticleEffects, EMM_File emmFile)
+        private void SDBH_PbindLinkTextureAndMaterial_Recursive(AsyncObservableCollection<ParticleEffect> childrenParticleEffects, EMM_File emmFile)
         {
             foreach (var empEntry in childrenParticleEffects)
             {
@@ -2450,7 +2451,7 @@ namespace Xv2CoreLib.EffectContainer
             }
         }
 
-        public void InstallEffects(ObservableCollection<Effect> effects)
+        public void InstallEffects(IList<Effect> effects)
         {
             //Remove effects (clears out potential duplicate and unneeded data)
             foreach(var effect in effects)
@@ -2700,8 +2701,8 @@ namespace Xv2CoreLib.EffectContainer
         public EMM_File File2_Ref = null;
         public EMB_File File3_Ref = null;
 
-        private ObservableCollection<Asset> _assetsValue = null;
-        public ObservableCollection<Asset> Assets
+        private AsyncObservableCollection<Asset> _assetsValue = null;
+        public AsyncObservableCollection<Asset> Assets
         {
             get
             {
@@ -2712,7 +2713,7 @@ namespace Xv2CoreLib.EffectContainer
                 if (value != this._assetsValue)
                 {
                     this._assetsValue = value;
-                    NotifyPropertyChanged("Assets");
+                    NotifyPropertyChanged(nameof(Assets));
                 }
             }
         }
@@ -2756,7 +2757,7 @@ namespace Xv2CoreLib.EffectContainer
                 {
                     return _viewAssets;
                 }
-                _viewAssets = new ListCollectionView(Assets);
+                _viewAssets = new ListCollectionView(Assets.Binding);
                 _viewAssets.GroupDescriptions.Add(new PropertyGroupDescription("SubType"));
                 _viewAssets.Filter = new Predicate<object>(AssetFilterCheck);
                 return _viewAssets;
@@ -2799,7 +2800,7 @@ namespace Xv2CoreLib.EffectContainer
         public void UpdateAssetFilter()
         {
             if(_viewAssets == null)
-                _viewAssets = new ListCollectionView(Assets);
+                _viewAssets = new ListCollectionView(Assets.Binding);
             
             _viewAssets.Filter = new Predicate<object>(AssetFilterCheck);
             NotifyPropertyChanged("ViewAssets");
@@ -2990,7 +2991,7 @@ namespace Xv2CoreLib.EffectContainer
             return materialUsedBy;
         }
 
-        private void MaterialUsedBy_Recursive(ObservableCollection<ParticleEffect> childParticleEffects, Material material, List<string> textureUsedBy, string fileName)
+        private void MaterialUsedBy_Recursive(IList<ParticleEffect> childParticleEffects, Material material, List<string> textureUsedBy, string fileName)
         {
             foreach (var particle in childParticleEffects)
             {
@@ -3086,7 +3087,7 @@ namespace Xv2CoreLib.EffectContainer
             return false;
         }
 
-        private bool IsMaterialUsed_Recursive(ObservableCollection<ParticleEffect> childParticleEffects, Material material)
+        private bool IsMaterialUsed_Recursive(IList<ParticleEffect> childParticleEffects, Material material)
         {
             foreach (var mat in childParticleEffects)
             {
@@ -3290,7 +3291,7 @@ namespace Xv2CoreLib.EffectContainer
 
         }
 
-        private void AddPbindDependencies_Recursive(ObservableCollection<ParticleEffect> childrenParticleEffects, List<IUndoRedo> undos)
+        private void AddPbindDependencies_Recursive(IList<ParticleEffect> childrenParticleEffects, List<IUndoRedo> undos)
         {
             foreach (var particleEffect in childrenParticleEffects)
             {
@@ -3486,7 +3487,7 @@ namespace Xv2CoreLib.EffectContainer
             }
         }
 
-        private void RefactorMaterialRef_Recursive(ObservableCollection<ParticleEffect> childParticleEffects, Material oldRef, Material newRef, List<IUndoRedo> undos)
+        private void RefactorMaterialRef_Recursive(IList<ParticleEffect> childParticleEffects, Material oldRef, Material newRef, List<IUndoRedo> undos)
         {
             foreach (var particleEffect in childParticleEffects)
             {
@@ -3588,13 +3589,13 @@ namespace Xv2CoreLib.EffectContainer
                 if (value != this._I_00_value)
                 {
                     this._I_00_value = value;
-                    NotifyPropertyChanged("I_00");
+                    NotifyPropertyChanged(nameof(I_00));
                 }
             }
         }
 
-        private ObservableCollection<EffectFile> _filesValue = null;
-        public ObservableCollection<EffectFile> Files
+        private AsyncObservableCollection<EffectFile> _filesValue = null;
+        public AsyncObservableCollection<EffectFile> Files
         {
             get
             {
@@ -3605,8 +3606,8 @@ namespace Xv2CoreLib.EffectContainer
                 if (value != this._filesValue)
                 {
                     this._filesValue = value;
-                    NotifyPropertyChanged("Files");
-                    NotifyPropertyChanged("FileNamesPreview");
+                    NotifyPropertyChanged(nameof(Files));
+                    NotifyPropertyChanged(nameof(FileNamesPreview));
                 }
             }
         }
@@ -3744,7 +3745,7 @@ namespace Xv2CoreLib.EffectContainer
         {
             Asset newAsset = new Asset();
             newAsset.I_00 = I_00;
-            newAsset.Files = new ObservableCollection<EffectFile>();
+            newAsset.Files = AsyncObservableCollection<EffectFile>.Create();
 
             foreach(var file in Files)
             {
@@ -3800,7 +3801,7 @@ namespace Xv2CoreLib.EffectContainer
         public static Asset Create(object data, string name, EffectFile.FileType fileType, AssetType assetType)
         {
             Asset asset = new Asset();
-            asset.Files = new ObservableCollection<EffectFile>();
+            asset.Files = AsyncObservableCollection<EffectFile>.Create();
             asset.assetType = assetType;
             asset.AddFile(data, name, fileType);
             return asset;
@@ -4070,7 +4071,7 @@ namespace Xv2CoreLib.EffectContainer
             }
         }
 
-        private static void CopyEmpRef_Recursive(ObservableCollection<ParticleEffect> oldFile, ObservableCollection<ParticleEffect> newFile)
+        private static void CopyEmpRef_Recursive(AsyncObservableCollection<ParticleEffect> oldFile, AsyncObservableCollection<ParticleEffect> newFile)
         {
             if (oldFile.Count != newFile.Count)
                 throw new InvalidDataException("CopyEmpRef_Recursive: oldFile and newFile ParticleEffect count is out of sync.");

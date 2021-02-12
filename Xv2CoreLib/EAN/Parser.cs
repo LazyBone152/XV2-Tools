@@ -60,7 +60,7 @@ namespace Xv2CoreLib.EAN
             eanFile.Skeleton = ESK_Skeleton.Read(rawBytes, SkeletonOffset, false);
 
             //Animations
-            eanFile.Animations = new AsyncObservableCollection<EAN_Animation>();
+            eanFile.Animations = AsyncObservableCollection<EAN_Animation>.Create();
             if (AnimationCount > 0)
             {
                 for(int i = 0; i < AnimationCount; i++)
@@ -98,7 +98,7 @@ namespace Xv2CoreLib.EAN
 
             if(nodeCount > 0)
             {
-                animation.Nodes = new AsyncObservableCollection<EAN_Node>();
+                animation.Nodes = AsyncObservableCollection<EAN_Node>.Create();
                 for(int i = 0; i < nodeCount; i++)
                 {
                     int thisNodeOffset = BitConverter.ToInt32(rawBytes, nodeOffset) + offset;
@@ -108,7 +108,7 @@ namespace Xv2CoreLib.EAN
 
                     if(keyframedAnimationsCount > 0)
                     {
-                        animation.Nodes[i].AnimationComponents = new ObservableCollection<EAN_AnimationComponent>();
+                        animation.Nodes[i].AnimationComponents = AsyncObservableCollection<EAN_AnimationComponent>.Create();
                         for(int a = 0; a < keyframedAnimationsCount; a++)
                         {
                             int thisKeyframedAnimationsOffset = BitConverter.ToInt32(rawBytes, keyframedAnimationsOffset) + thisNodeOffset;
@@ -154,7 +154,7 @@ namespace Xv2CoreLib.EAN
 
         private AsyncObservableCollection<EAN_Keyframe> ParseKeyframes(int indexOffset, int floatOffset, int count, int indexSize, int floatSize)
         {
-            AsyncObservableCollection<EAN_Keyframe> keyframes = new AsyncObservableCollection<EAN_Keyframe>();
+            AsyncObservableCollection<EAN_Keyframe> keyframes = AsyncObservableCollection<EAN_Keyframe>.Create();
 
             for(int i = 0; i < count; i++)
             {

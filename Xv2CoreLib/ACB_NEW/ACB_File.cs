@@ -341,7 +341,7 @@ namespace Xv2CoreLib.ACB_NEW
 
                 foreach(var commandGroup in commandTable.CommandGroups)
                 {
-                    if (commandGroup.Commands == null) commandGroup.Commands = new ObservableCollection<ACB_Command>();
+                    if (commandGroup.Commands == null) commandGroup.Commands = AsyncObservableCollection<ACB_Command>.Create();
                 }
             }
 
@@ -1769,9 +1769,9 @@ namespace Xv2CoreLib.ACB_NEW
                 {
                     InstanceGuidRefactor_Reflection(prop.GetValue(entry) as List<AcbTableReference>, oldGuid, newGuid);
                 }
-                else if (prop.PropertyType == typeof(ObservableCollection<ACB_SequenceTrack>))
+                else if (prop.PropertyType == typeof(AsyncObservableCollection<ACB_SequenceTrack>))
                 {
-                    InstanceGuidRefactor_Reflection(prop.GetValue(entry) as ObservableCollection<ACB_SequenceTrack>, oldGuid, newGuid);
+                    InstanceGuidRefactor_Reflection(prop.GetValue(entry) as AsyncObservableCollection<ACB_SequenceTrack>, oldGuid, newGuid);
                 }
             }
             
@@ -2660,9 +2660,9 @@ namespace Xv2CoreLib.ACB_NEW
                 {
                     if (IsTableUsed_Reflection(prop.GetValue(entry) as List<AcbTableReference>, tableGuid)) return true;
                 }
-                else if (prop.PropertyType == typeof(ObservableCollection<ACB_SequenceTrack>))
+                else if (prop.PropertyType == typeof(AsyncObservableCollection<ACB_SequenceTrack>))
                 {
-                    if (IsTableUsed_Reflection(prop.GetValue(entry) as ObservableCollection<ACB_SequenceTrack>, tableGuid)) return true;
+                    if (IsTableUsed_Reflection(prop.GetValue(entry) as AsyncObservableCollection<ACB_SequenceTrack>, tableGuid)) return true;
                 }
             }
 
@@ -3135,7 +3135,7 @@ namespace Xv2CoreLib.ACB_NEW
                     SequenceType oldValue = Type;
                     Type = value;
                     UndoManager.Instance.AddUndo(new UndoableProperty<ACB_Sequence>("Type", this, oldValue, value, "Sequence Type"));
-                    NotifyPropertyChanged("UndoableSequenceType");
+                    NotifyPropertyChanged(nameof(UndoableSequenceType));
                 }
             }
         }
@@ -3148,7 +3148,7 @@ namespace Xv2CoreLib.ACB_NEW
         private SequenceType _sequenceType = SequenceType.Polyphonic;
         [YAXAttributeFor("Type")]
         [YAXSerializeAs("value")]
-        public SequenceType Type { get { return _sequenceType; } set { _sequenceType = value; NotifyPropertyChanged("UndoableSequenceType"); } }
+        public SequenceType Type { get { return _sequenceType; } set { _sequenceType = value; NotifyPropertyChanged(nameof(UndoableSequenceType)); } }
         [YAXAttributeFor("PlaybackRatio")]
         [YAXSerializeAs("value")]
         public ushort PlaybackRatio { get; set; } = 100;
@@ -3158,7 +3158,7 @@ namespace Xv2CoreLib.ACB_NEW
 
         //Tracks
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Track")]
-        public ObservableCollection<ACB_SequenceTrack> Tracks { get; set; } = new ObservableCollection<ACB_SequenceTrack>();
+        public AsyncObservableCollection<ACB_SequenceTrack> Tracks { get; set; } = new AsyncObservableCollection<ACB_SequenceTrack>();
 
         //CommandIndex
         [YAXSerializeAs("CommandIndex")]
@@ -3181,7 +3181,7 @@ namespace Xv2CoreLib.ACB_NEW
         
         public void Initialize()
         {
-            if (Tracks == null) Tracks = new ObservableCollection<ACB_SequenceTrack>();
+            if (Tracks == null) Tracks = AsyncObservableCollection<ACB_SequenceTrack>.Create();
             if (ActionTracks == null) ActionTracks = new List<AcbTableReference>();
             if (CommandIndex == null) CommandIndex = new AcbTableReference();
             if (LocalAisac == null) LocalAisac = new List<AcbTableReference>();
@@ -3238,7 +3238,7 @@ namespace Xv2CoreLib.ACB_NEW
             //Tracks
             var trackValues = BigEndianConverter.ToUInt16Array(sequenceTable.GetData("TrackValues", index)).ToList();
             var tracks = BigEndianConverter.ToUInt16Array(sequenceTable.GetData("TrackIndex", index)).ToList();
-            sequence.Tracks = new ObservableCollection<ACB_SequenceTrack>();
+            sequence.Tracks = AsyncObservableCollection<ACB_SequenceTrack>.Create();
             
             //Add TrackValues to match Tracks, if they were not in the acb file (needed for non-Random/RandomNoRepeat types, as they dont have or need the values)
             while (trackValues.Count < tracks.Count)
@@ -4550,7 +4550,7 @@ namespace Xv2CoreLib.ACB_NEW
         public int Index { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Command")]
-        public ObservableCollection<ACB_Command> Commands { get; set; } = new ObservableCollection<ACB_Command>();
+        public AsyncObservableCollection<ACB_Command> Commands { get; set; } = AsyncObservableCollection<ACB_Command>.Create();
 
         public static ACB_CommandGroup Load(UTF_File commandTable, int index, bool loadUnknownCommands)
         {
@@ -4821,7 +4821,7 @@ namespace Xv2CoreLib.ACB_NEW
 
     public interface ITrack
     {
-        ObservableCollection<ACB_SequenceTrack> Tracks { get; set; }
+        AsyncObservableCollection<ACB_SequenceTrack> Tracks { get; set; }
     }
 
     public interface IAutoModulationIndex

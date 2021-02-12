@@ -36,7 +36,7 @@
             <Controls:MetroTabItem Header="Particle Effects" Controls:ControlsHelper.HeaderFontSize="16">
                 <Grid Margin="0,0,-6.836,-0.055">
 
-                    <TreeView x:Name="empTree" ItemsSource="{Binding empFile.ParticleEffects}" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" HorizontalAlignment="Left" Height="487" Margin="41,15,0,0" VerticalAlignment="Top" Width="282" SelectedItemChanged="empTree_SelectedItemChanged">
+                    <TreeView x:Name="empTree" ItemsSource="{Binding empFile.ParticleEffects.Binding}" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" HorizontalAlignment="Left" Height="487" Margin="41,15,0,0" VerticalAlignment="Top" Width="282" SelectedItemChanged="empTree_SelectedItemChanged">
                         <TreeView.InputBindings>
                             <KeyBinding Key="Delete" Command="{Binding RemoveParticleEffect_Command}"/>
                             <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding AddParticleEffect_Command}"/>
@@ -195,7 +195,7 @@
                                         <Label Content="Material" HorizontalAlignment="Left" Margin="8,7,0,0" VerticalAlignment="Top" Width="64" HorizontalContentAlignment="Right"/>
                                         <GroupBox Header="Textures" ToolTip="The textures assigned to this Particle Effect." HorizontalAlignment="Left" Height="164" Margin="492,10,-9.636,0" VerticalAlignment="Top" Width="242">
                                             <Grid Margin="0,0,0.333,-5">
-                                                <DataGrid x:Name="textureRefDataGrid" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" HorizontalAlignment="Left" Height="121" Margin="35,2,0,0" VerticalAlignment="Top" Width="185" AutoGenerateColumns="False" ItemsSource="{Binding SelectedItem.Type_Texture.TextureEntryRef, ElementName=empTree}" CanUserDeleteRows="False" CanUserAddRows="False">
+                                                <DataGrid x:Name="textureRefDataGrid" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" HorizontalAlignment="Left" Height="121" Margin="35,2,0,0" VerticalAlignment="Top" Width="185" AutoGenerateColumns="False" ItemsSource="{Binding SelectedItem.Type_Texture.TextureEntryRef.Binding, ElementName=empTree}" CanUserDeleteRows="False" CanUserAddRows="False">
                                                     <DataGrid.Resources>
                                                         <utils:BindingProxy x:Key="proxy" Data="{Binding}" />
                                                     </DataGrid.Resources>
@@ -467,7 +467,7 @@
                                 <Label Content="I__08" HorizontalAlignment="Left" Margin="12,103,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
                                 <TextBox x:Name="coneExtrude_I_10" Text="{Binding SelectedItem.Type_Struct3.I_10, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,135,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="I__10" HorizontalAlignment="Left" Margin="12,133,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
-                                <DataGrid x:Name="dataGrid_coneExtrude" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" HorizontalAlignment="Left" Height="194" Margin="96,191,0,0" VerticalAlignment="Top" Width="609" ItemsSource="{Binding SelectedItem.Type_Struct3.FloatList, ElementName=empTree}" AutoGenerateColumns="False" CanUserSortColumns="False">
+                                <DataGrid x:Name="dataGrid_coneExtrude" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" HorizontalAlignment="Left" Height="194" Margin="96,191,0,0" VerticalAlignment="Top" Width="609" ItemsSource="{Binding SelectedItem.Type_Struct3.FloatList.Binding, ElementName=empTree}" AutoGenerateColumns="False" CanUserSortColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Binding="{Binding F_00, UpdateSourceTrigger=PropertyChanged}" Header="WorldScaleFactor" Width="*"/>
                                         <DataGridTextColumn Binding="{Binding F_04, UpdateSourceTrigger=PropertyChanged}" Header="WorldScaleAdd" Width="*"/>
@@ -475,6 +475,12 @@
                                         <DataGridTextColumn Binding="{Binding F_12, UpdateSourceTrigger=PropertyChanged}" Header="WorldOffsetFactorb" Width="*"/>
                                     </DataGrid.Columns>
                                 </DataGrid>
+                                <Button HorizontalAlignment="Left" Margin="65,219,0,0" VerticalAlignment="Top" Width="26" Height="25" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Command="{Binding AddConeExtrude_Command}" ToolTip="Add a new Cone Extrude entry">
+                                    <iconPacks:PackIconMaterialLight Kind="Plus" />
+                                </Button>
+                                <Button HorizontalAlignment="Left" Margin="65,249,0,0" VerticalAlignment="Top" Width="26" Height="25" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Command="{Binding RemoveConeExtrude_Command}" ToolTip="Remove the selected Cone Extrude entry">
+                                    <iconPacks:PackIconMaterialLight Kind="Delete" />
+                                </Button>
 
                             </Grid>
                         </Controls:MetroTabItem>
@@ -530,12 +536,18 @@
                                 <Label Content="I__28" HorizontalAlignment="Left" Margin="12,193,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
                                 <TextBox x:Name="shapeDraw_I_30" Text="{Binding SelectedItem.Type_Struct5.I_30, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,227,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="I__30" HorizontalAlignment="Left" Margin="12,223,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
-                                <DataGrid x:Name="dataGrid_ShapeDraw" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" HorizontalAlignment="Left" Height="328" Margin="521,42,0,0" VerticalAlignment="Top" Width="207" ItemsSource="{Binding SelectedItem.Type_Struct5.FloatList, ElementName=empTree}" AutoGenerateColumns="False" CanUserSortColumns="False">
+                                <DataGrid x:Name="dataGrid_ShapeDraw" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" HorizontalAlignment="Left" Height="328" Margin="521,42,0,0" VerticalAlignment="Top" Width="207" ItemsSource="{Binding SelectedItem.Type_Struct5.FloatList.Binding, ElementName=empTree}" AutoGenerateColumns="False" CanUserSortColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Binding="{Binding F_00, UpdateSourceTrigger=PropertyChanged}" Header="X" Width="*"/>
                                         <DataGridTextColumn Binding="{Binding F_04, UpdateSourceTrigger=PropertyChanged}" Header="Y" Width="*"/>
                                     </DataGrid.Columns>
                                 </DataGrid>
+                                <Button HorizontalAlignment="Left" Margin="490,72,0,0" VerticalAlignment="Top" Width="26" Height="25" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Command="{Binding AddShapeDraw_Command}" ToolTip="Add a new Shape Draw entry">
+                                    <iconPacks:PackIconMaterialLight Kind="Plus" />
+                                </Button>
+                                <Button HorizontalAlignment="Left" Margin="490,102,0,0" VerticalAlignment="Top" Width="26" Height="25" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Command="{Binding RemoveShapeDraw_Command}" ToolTip="Remove the selected Shape Draw entry">
+                                    <iconPacks:PackIconMaterialLight Kind="Delete" />
+                                </Button>
 
                             </Grid>
                         </Controls:MetroTabItem>
@@ -543,7 +555,7 @@
                             <Grid>
 
 
-                                <ComboBox x:Name="comboBox_Type0" Height="22" ItemsSource="{Binding SelectedItem.Type_0, ElementName=empTree}" HorizontalAlignment="Left" Margin="215,22,0,0" VerticalAlignment="Top" Width="120">
+                                <ComboBox x:Name="comboBox_Type0" Height="22" ItemsSource="{Binding SelectedItem.Type_0.Binding, ElementName=empTree}" HorizontalAlignment="Left" Margin="215,22,0,0" VerticalAlignment="Top" Width="120">
                                     <ComboBox.Resources>
                                         <DataTemplate DataType="{x:Type emp:Type0}">
                                             <TextBlock Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
@@ -570,7 +582,7 @@
                                         <Label Content="F__04" Margin="345,77,0,0" VerticalAlignment="Top" Width="73" HorizontalAlignment="Left" HorizontalContentAlignment="Right"/>
                                         <TextBox x:Name="animType0_I_00" Text="{Binding SelectedItem.I_08, ElementName=comboBox_Type0, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="418,24,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="97"/>
                                         <Label Content="Duration" Margin="345,22,0,0" VerticalAlignment="Top" Width="73" HorizontalAlignment="Left" HorizontalContentAlignment="Right"/>
-                                        <DataGrid x:Name="dataGrid_type0_Keyframes" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" HorizontalAlignment="Left" Height="176" Margin="208,137,0,0" VerticalAlignment="Top" Width="307" ItemsSource="{Binding SelectedItem.Keyframes, ElementName=comboBox_Type0}" AutoGenerateColumns="False" CanUserSortColumns="True" CanUserDeleteRows="False" CanUserAddRows="False">
+                                        <DataGrid x:Name="dataGrid_type0_Keyframes" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" HorizontalAlignment="Left" Height="176" Margin="208,137,0,0" VerticalAlignment="Top" Width="307" ItemsSource="{Binding SelectedItem.Keyframes.Binding, ElementName=comboBox_Type0}" AutoGenerateColumns="False" CanUserSortColumns="True" CanUserDeleteRows="False" CanUserAddRows="False">
                                             <DataGrid.InputBindings>
                                                 <KeyBinding Key="Delete" Command="{Binding RemoveType0KeyframeCommand}"/>
                                                 <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding AddType0KeyframeCommand}"/>
@@ -621,7 +633,7 @@
                                             <Label Content="F__04" Margin="358,55,0,0" VerticalAlignment="Top" Width="73" HorizontalAlignment="Left" HorizontalContentAlignment="Right"/>
                                             <TextBox x:Name="animType1_I_08"  Text="{Binding SelectedItem.I_08, ElementName=comboBox_Type1, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="431,2,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="97"/>
                                             <Label Content="Duration" Margin="358,0,0,0" VerticalAlignment="Top" Width="73" HorizontalAlignment="Left" HorizontalContentAlignment="Right"/>
-                                            <DataGrid x:Name="dataGrid_type1_Keyframes" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" HorizontalAlignment="Left" Height="118" Margin="221,115,0,0" VerticalAlignment="Top" Width="307" ItemsSource="{Binding SelectedItem.Keyframes, ElementName=comboBox_Type1}" AutoGenerateColumns="False" CanUserSortColumns="True" CanUserDeleteRows="False" CanUserAddRows="False">
+                                            <DataGrid x:Name="dataGrid_type1_Keyframes" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" HorizontalAlignment="Left" Height="118" Margin="221,115,0,0" VerticalAlignment="Top" Width="307" ItemsSource="{Binding SelectedItem.Keyframes.Binding, ElementName=comboBox_Type1}" AutoGenerateColumns="False" CanUserSortColumns="True" CanUserDeleteRows="False" CanUserAddRows="False">
                                                 <DataGrid.InputBindings>
                                                     <KeyBinding Key="Delete" Command="{Binding RemoveType1KeyframeCommand}"/>
                                                     <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding AddType1KeyframeCommand}"/>
@@ -648,7 +660,7 @@
 
                                     </GroupBox>
 
-                                    <ComboBox x:Name="comboBox_Type1" Height="22" ItemsSource="{Binding SelectedItem.Entries, ElementName=comboBox_Type1_Header}" HorizontalAlignment="Left" Margin="212,22,0,0" VerticalAlignment="Top" Width="120">
+                                    <ComboBox x:Name="comboBox_Type1" Height="22" ItemsSource="{Binding SelectedItem.Entries.Binding, ElementName=comboBox_Type1_Header}" HorizontalAlignment="Left" Margin="212,22,0,0" VerticalAlignment="Top" Width="120">
                                         <ComboBox.Resources>
                                             <DataTemplate DataType="{x:Type emp:Type0}">
                                                 <TextBlock Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
@@ -658,7 +670,7 @@
                                     <Button Content="Add" HorizontalAlignment="Left" Margin="349,22,0,0" VerticalAlignment="Top" Width="75" Click="AddNewAnimationType1_Click"/>
                                     <Button Content="Remove" HorizontalAlignment="Left" Margin="439,22,0,0" VerticalAlignment="Top" Width="75" Click="RemoveAnimationType1_Click"/>
                                 </Grid>
-                                <ComboBox x:Name="comboBox_Type1_Header" Height="22" ItemsSource="{Binding SelectedItem.Type_1, ElementName=empTree}" HorizontalAlignment="Left" Margin="216,10,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="comboBox_Type1_Header_SelectionChanged">
+                                <ComboBox x:Name="comboBox_Type1_Header" Height="22" ItemsSource="{Binding SelectedItem.Type_1.Binding, ElementName=empTree}" HorizontalAlignment="Left" Margin="216,10,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="comboBox_Type1_Header_SelectionChanged">
                                     <ComboBox.Resources>
                                         <DataTemplate DataType="{x:Type empAnim:Type1_Header}">
                                             <TextBlock Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
@@ -694,7 +706,7 @@
             </Controls:MetroTabItem>
             <Controls:MetroTabItem Header="Textures" Controls:ControlsHelper.HeaderFontSize="16">
                 <Grid>
-                    <ListBox Tag="{Binding DataContext, ElementName=empEditorWindow}" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" x:Name="listBox_Textures" ItemsSource="{Binding empFile.Textures}" HorizontalAlignment="Left" Height="482" Margin="48,10,0,0" VerticalAlignment="Top" Width="252" SelectionMode="Extended">
+                    <ListBox Tag="{Binding DataContext, ElementName=empEditorWindow}" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" x:Name="listBox_Textures" ItemsSource="{Binding empFile.Textures.Binding}" HorizontalAlignment="Left" Height="482" Margin="48,10,0,0" VerticalAlignment="Top" Width="252" SelectionMode="Extended">
                         <ListBox.Resources>
                             <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Black"/>
 
@@ -776,7 +788,7 @@
 
                                     </Grid>
                                     <Grid x:Name="grid_TextureType2" HorizontalAlignment="Left" Height="146" Width="345" VerticalAlignment="Top" Visibility="{Binding ElementName=listBox_Textures, Path=SelectedItem.IsType2Visible}">
-                                        <DataGrid x:Name="dataGrid_ScrollKeyframes" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" FontSize="10" HorizontalAlignment="Left" Height="126" Margin="26,10,0,0" VerticalAlignment="Top" Width="300" ItemsSource="{Binding SelectedItem.SubData2.Keyframes, ElementName=listBox_Textures}" AutoGenerateColumns="False" CanUserSortColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
+                                        <DataGrid x:Name="dataGrid_ScrollKeyframes" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" FontSize="10" HorizontalAlignment="Left" Height="126" Margin="26,10,0,0" VerticalAlignment="Top" Width="300" ItemsSource="{Binding SelectedItem.SubData2.Keyframes.Binding, ElementName=listBox_Textures}" AutoGenerateColumns="False" CanUserSortColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
                                             <DataGrid.Columns>
                                                 <DataGridTextColumn Binding="{Binding I_00, UpdateSourceTrigger=PropertyChanged}" Header="Time" Width="*" />
                                                 <DataGridTextColumn Binding="{Binding F_04, UpdateSourceTrigger=PropertyChanged}" Header="Scroll X" Width="*" />

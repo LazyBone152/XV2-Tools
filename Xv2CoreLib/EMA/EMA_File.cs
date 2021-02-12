@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xv2CoreLib.HslColor;
+using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
 using YAXLib;
 
@@ -88,7 +89,7 @@ namespace Xv2CoreLib.EMA
         public Skeleton skeleton { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Animation")]
-        public ObservableCollection<EMA_Animation> Animations { get; set; }
+        public AsyncObservableCollection<EMA_Animation> Animations { get; set; }
 
         public static EMA_File Serialize(string path, bool writeXml)
         {
@@ -134,7 +135,7 @@ namespace Xv2CoreLib.EMA
             }
 
             //Parse animations
-            emaFile.Animations = new ObservableCollection<EMA_Animation>();
+            emaFile.Animations = AsyncObservableCollection<EMA_Animation>.Create();
 
             for(int i = 0; i < animationCount; i++)
             {
@@ -229,9 +230,7 @@ namespace Xv2CoreLib.EMA
                     //Sort keyframes
                     if(anim.Commands[i].KeyframeCount > 0)
                     {
-                        var sortedList = anim.Commands[i].Keyframes.ToList();
-                        sortedList.Sort((x, y) => x.Time - y.Time);
-                        anim.Commands[i].Keyframes = new ObservableCollection<EMA_Keyframe>(sortedList);
+                        anim.Commands[i].SortKeyframes();
                     }
 
                     //Write Time
@@ -358,7 +357,7 @@ namespace Xv2CoreLib.EMA
         public List<RgbColor> GetUsedColors()
         {
             List<RgbColor> colors = new List<RgbColor>();
-            if (Animations == null) Animations = new ObservableCollection<EMA_Animation>();
+            if (Animations == null) Animations = AsyncObservableCollection<EMA_Animation>.Create();
 
             foreach(var anim in Animations)
             {
@@ -421,7 +420,7 @@ namespace Xv2CoreLib.EMA
         public ValueType I_10 { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Command")]
-        public ObservableCollection<EMA_Command> Commands { get; set; }
+        public AsyncObservableCollection<EMA_Command> Commands { get; set; }
 
         public static EMA_Animation Read(byte[] rawBytes, List<byte> bytes, int offset, int index, EMA_File emaFile)
         {
@@ -430,7 +429,7 @@ namespace Xv2CoreLib.EMA
             animation.I_00 = BitConverter.ToUInt16(rawBytes, offset + 0);
             animation.I_08 = (EmaType)BitConverter.ToUInt16(rawBytes, offset + 8);
             animation.I_10 = (ValueType)BitConverter.ToUInt16(rawBytes, offset + 10);
-            animation.Commands = new ObservableCollection<EMA_Command>();
+            animation.Commands = AsyncObservableCollection<EMA_Command>.Create();
 
             int commandCount = BitConverter.ToUInt16(rawBytes, offset + 2);
             int valueCount = BitConverter.ToInt32(rawBytes, offset + 4);
@@ -621,7 +620,7 @@ namespace Xv2CoreLib.EMA
 
         public EMA_Command GetCommand(string parameter, string component)
         {
-            if (Commands == null) Commands = new ObservableCollection<EMA_Command>();
+            if (Commands == null) Commands = AsyncObservableCollection<EMA_Command>.Create();
 
             foreach(var command in Commands)
             {
@@ -754,13 +753,13 @@ namespace Xv2CoreLib.EMA
         [YAXSerializeAs("Unk5")]
         public bool I_03_a4 { get; set; }
         
-        public ObservableCollection<EMA_Keyframe> Keyframes { get; set; }
+        public AsyncObservableCollection<EMA_Keyframe> Keyframes { get; set; }
 
         public static EMA_Command GetNewLight()
         {
             return new EMA_Command()
             {
-                Keyframes = new ObservableCollection<EMA_Keyframe>(),
+                Keyframes = AsyncObservableCollection<EMA_Keyframe>.Create(),
                 emaType = EmaType.light,
                 I_02 = 2, //Color
             };
@@ -794,7 +793,7 @@ namespace Xv2CoreLib.EMA
             command.I_03_a = Int4Converter.GetByte(Utils.ConvertToByte(flags_a), 0);
 
 
-            command.Keyframes = new ObservableCollection<EMA_Keyframe>();
+            command.Keyframes = AsyncObservableCollection<EMA_Keyframe>.Create();
 
             ushort keyframeCount = BitConverter.ToUInt16(rawBytes, offset + 4);
             ushort indexOffset = BitConverter.ToUInt16(rawBytes, offset + 6);
@@ -1134,20 +1133,20 @@ namespace Xv2CoreLib.EMA
             return null;
         }
 
-
         public void SortKeyframes()
         {
-            var sortedList = Keyframes.ToList();
-            sortedList.Sort((x, y) => x.Time - y.Time);
-            Keyframes = new ObservableCollection<EMA_Keyframe>(sortedList);
+            Keyframes = Sorting.SortEntries2(Keyframes);
         }
 
     }
 
     [Serializable]
     [YAXSerializeAs("Keyframe")]
-    public class EMA_Keyframe
+    public class EMA_Keyframe : ISortable
     {
+        [YAXDontSerialize]
+        public int SortID { get { return Time; } }
+
         [YAXAttributeForClass]
         [YAXSerializeAs("Time")]
         public ushort Time { get; set; }

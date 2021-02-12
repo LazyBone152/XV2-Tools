@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using Xv2CoreLib.Resource;
 using YAXLib;
 
 namespace Xv2CoreLib.BSA
@@ -233,13 +234,13 @@ namespace Xv2CoreLib.BSA
 
         #region IBsaTypes
         [YAXDontSerialize]
-        public ObservableCollection<IBsaType> IBsaTypes { get; set; }
+        public AsyncObservableCollection<IBsaType> IBsaTypes { get; set; }
 
         public void InitializeIBsaTypes()
         {
             InitBsaLists();
 
-            IBsaTypes = new ObservableCollection<IBsaType>();
+            IBsaTypes = AsyncObservableCollection<IBsaType>.Create();
 
             foreach (var bsaEntry in Type0)
                 IBsaTypes.Add(bsaEntry);

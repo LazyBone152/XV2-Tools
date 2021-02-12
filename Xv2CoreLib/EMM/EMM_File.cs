@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using Xv2CoreLib.HslColor;
+using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
 using YAXLib;
 
@@ -43,7 +44,7 @@ namespace Xv2CoreLib.EMM
         [YAXSerializeAs("Version")]
         public UInt32 I_08 { get; set; }
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Material")]
-        public ObservableCollection<Material> Materials { get; set; } = new ObservableCollection<Material>();
+        public AsyncObservableCollection<Material> Materials { get; set; } = new AsyncObservableCollection<Material>();
         [YAXSerializeAs("UnknownData")]
         [YAXDontSerializeIfNull]
         public UnknownData Unknown_Data { get; set; }
@@ -98,7 +99,7 @@ namespace Xv2CoreLib.EMM
                 {
                     return _viewMaterials;
                 }
-                _viewMaterials = new ListCollectionView(Materials);
+                _viewMaterials = new ListCollectionView(Materials.Binding);
                 _viewMaterials.Filter = new Predicate<object>(MaterialFilterCheck);
                 return _viewMaterials;
             }
@@ -128,7 +129,7 @@ namespace Xv2CoreLib.EMM
         public void UpdateMaterialFilter()
         {
             if (_viewMaterials == null)
-                _viewMaterials = new ListCollectionView(Materials);
+                _viewMaterials = new ListCollectionView(Materials.Binding);
 
             _viewMaterials.Filter = new Predicate<object>(MaterialFilterCheck);
             NotifyPropertyChanged("ViewMaterials");
@@ -166,10 +167,10 @@ namespace Xv2CoreLib.EMM
             {
                 if (returnEmptyIfNotValid)
                 {
-                    return new Xv2CoreLib.EMM.EMM_File()
+                    return new EMM_File()
                     {
                         I_08 = 0,
-                        Materials = new ObservableCollection<Material>()
+                        Materials = AsyncObservableCollection<Material>.Create()
                     };
                 }
                 else
@@ -204,7 +205,7 @@ namespace Xv2CoreLib.EMM
             return new EMM_File()
             {
                 I_08 = 16,
-                Materials = new ObservableCollection<Material>(),
+                Materials = AsyncObservableCollection<Material>.Create(),
                 Unknown_Data = new UnknownData()
             };
         }
@@ -399,11 +400,11 @@ namespace Xv2CoreLib.EMM
         [YAXSerializeAs("value")]
         public UInt16 I_66 { get; set; }
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Parameter")]
-        public ObservableCollection<Parameter> Parameters { get; set; }
+        public AsyncObservableCollection<Parameter> Parameters { get; set; }
 
         #region View
         [YAXDontSerialize]
-        public ObservableCollection<Parameter> SelectedParameters { get; } = new ObservableCollection<Parameter>();
+        public AsyncObservableCollection<Parameter> SelectedParameters { get; } = AsyncObservableCollection<Parameter>.Create();
         private Parameter _selectedParameter = null;
         [YAXDontSerialize]
         public Parameter SelectedParameter
@@ -503,11 +504,14 @@ namespace Xv2CoreLib.EMM
 
         public static Material NewMaterial()
         {
+            var param = AsyncObservableCollection<Parameter>.Create();
+            param.Add(Parameter.NewParameter());
+
             return new Material()
             {
                 Str_00 = "NewMaterial",
                 Str_32 = "ParticleDecal",
-                Parameters = new ObservableCollection<Parameter>() { Parameter.NewParameter() }
+                Parameters = param
             };
         }
 
@@ -518,7 +522,7 @@ namespace Xv2CoreLib.EMM
             newMaterial.Str_32 = Str_32;
             newMaterial.LocalCopy = true;
             newMaterial.I_66 = I_66;
-            newMaterial.Parameters = new ObservableCollection<Parameter>();
+            newMaterial.Parameters = AsyncObservableCollection<Parameter>.Create();
 
             foreach(var param in Parameters)
             {
@@ -530,7 +534,7 @@ namespace Xv2CoreLib.EMM
 
         public Parameter GetParameter(string parameterName)
         {
-            if (Parameters == null) Parameters = new ObservableCollection<Parameter>();
+            if (Parameters == null) Parameters = AsyncObservableCollection<Parameter>.Create();
 
             foreach(var parameter in Parameters)
             {

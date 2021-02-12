@@ -8,6 +8,7 @@ using System.Xml.Serialization;
 using YAXLib;
 using Xv2CoreLib;
 using System.Collections.ObjectModel;
+using Xv2CoreLib.Resource;
 
 namespace Xv2CoreLib.EMB_CLASS
 {
@@ -20,7 +21,7 @@ namespace Xv2CoreLib.EMB_CLASS
         byte[] rawBytes;
         List<byte> bytes;
 
-        public EMB_File embFile { get; private set; } = new EMB_File() {Entry = new ObservableCollection<EmbEntry>() };
+        public EMB_File embFile { get; private set; } = new EMB_File() {Entry = AsyncObservableCollection<EmbEntry>.Create() };
 
         //header info
         int totalEntries;
