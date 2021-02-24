@@ -24,7 +24,9 @@ namespace Xv2CoreLib.BSA
     public enum AcbType
     {
         Common_SE = 0,
+        Chara_SE = 1,
         Skill_SE = 3
+        //Chara_VOX = 2 and Skill_VOX = 4?
     }
     
     public enum Switch

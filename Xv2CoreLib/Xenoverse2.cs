@@ -2037,11 +2037,11 @@ namespace Xv2CoreLib
         public Xv2File<BAC_File> BacFile { get; set; } = null;
         public Xv2File<BCM_File> BcmFile { get; set; } = null;
         public Xv2File<BDM_File> BdmFile { get; set; } = null;
-        public ObservableCollection<Xv2File<EAN_File>> EanFile { get; set; } = new ObservableCollection<Xv2File<EAN_File>>();
-        public ObservableCollection<Xv2File<EAN_File>> CamEanFile { get; set; } = new ObservableCollection<Xv2File<EAN_File>>();
+        public AsyncObservableCollection<Xv2File<EAN_File>> EanFile { get; set; } = new AsyncObservableCollection<Xv2File<EAN_File>>();
+        public AsyncObservableCollection<Xv2File<EAN_File>> CamEanFile { get; set; } = new AsyncObservableCollection<Xv2File<EAN_File>>();
         public Xv2File<EffectContainerFile> EepkFile { get; set; } = null;
-        public ObservableCollection<Xv2File<ACB_Wrapper>> SeAcbFile { get; set; } = new ObservableCollection<Xv2File<ACB_Wrapper>>();
-        public ObservableCollection<Xv2File<ACB_Wrapper>> VoxAcbFile { get; set; } = new ObservableCollection<Xv2File<ACB_Wrapper>>();
+        public AsyncObservableCollection<Xv2File<ACB_Wrapper>> SeAcbFile { get; set; } = new AsyncObservableCollection<Xv2File<ACB_Wrapper>>();
+        public AsyncObservableCollection<Xv2File<ACB_Wrapper>> VoxAcbFile { get; set; } = new AsyncObservableCollection<Xv2File<ACB_Wrapper>>();
 
         //Skill
         public Xv2File<BSA_File> BsaFile { get; set; } = null;

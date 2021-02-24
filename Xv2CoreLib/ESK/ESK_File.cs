@@ -12,6 +12,7 @@ using YAXLib;
 
 namespace Xv2CoreLib.ESK
 {
+    [Serializable]
     public class ESK_File
     {
         [YAXAttributeForClass]
@@ -46,6 +47,7 @@ namespace Xv2CoreLib.ESK
 
 
     [YAXSerializeAs("Skeleton")]
+    [Serializable]
     public class ESK_Skeleton
     {
         [YAXAttributeForClass]
@@ -781,6 +783,7 @@ namespace Xv2CoreLib.ESK
     }
 
     [YAXSerializeAs("Bone")]
+    [Serializable]
     public class ESK_Bone : INotifyPropertyChanged
     {
         #region NotifyPropertyChanged
@@ -926,6 +929,7 @@ namespace Xv2CoreLib.ESK
     }
 
     [YAXSerializeAs("RelativeTransform")]
+    [Serializable]
     public class ESK_RelativeTransform
     {
         [YAXAttributeFor("Position")]
@@ -1050,6 +1054,7 @@ namespace Xv2CoreLib.ESK
     }
 
     [YAXSerializeAs("AbsoluteTransform")]
+    [Serializable]
     public class ESK_AbsoluteTransform
     {
         [YAXAttributeFor("Line1")]
@@ -1169,6 +1174,7 @@ namespace Xv2CoreLib.ESK
     }
     
     [YAXSerializeAs("Unk1")]
+    [Serializable]
     public class ESK_Unk1
     {
         //All are Int32!
@@ -1315,6 +1321,7 @@ namespace Xv2CoreLib.ESK
 
 
     //Special, for rewriting binary file
+    [Serializable]
     public class ESK_BoneNonHierarchal
     {
         public string Name { get; set; }
