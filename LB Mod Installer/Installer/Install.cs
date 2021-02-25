@@ -1,15 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.ExceptionServices;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using LB_Mod_Installer.Binding;
 using Xv2CoreLib;
@@ -46,6 +40,7 @@ using Xv2CoreLib.TTC;
 using Xv2CoreLib.SEV;
 using Xv2CoreLib.HCI;
 using Xv2CoreLib.CML;
+using Xv2CoreLib.Eternity;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -77,7 +72,7 @@ namespace LB_Mod_Installer.Installer
         TDB
     }
 
-    public class Install_NEW
+    public class Install
     {
         private const string JUNGLE1 = "JUNGLE1";
         private const string JUNGLE2 = "JUNGLE2";
@@ -98,7 +93,7 @@ namespace LB_Mod_Installer.Installer
         private bool startedSaving = false; //If false and a error happens we dont need to restore files
 
 
-        public Install_NEW(InstallerXml _installerXml, ZipReader _zipManager, MainWindow parent, Xv2FileIO fileIO, FileCacheManager _fileManager)
+        public Install(InstallerXml _installerXml, ZipReader _zipManager, MainWindow parent, Xv2FileIO fileIO, FileCacheManager _fileManager)
         {
             Files = _installerXml.GetInstallFiles();
             installerXml = _installerXml;
@@ -120,7 +115,7 @@ namespace LB_Mod_Installer.Installer
                 Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
                 JungleCheck();
                 SetProgressBarSteps(); 
-                Install();
+                StartInstall();
 
                 //Finalize
                 SaveFiles();
@@ -184,7 +179,7 @@ namespace LB_Mod_Installer.Installer
             }
         }
 
-        private void Install()
+        private void StartInstall()
         {
             //Files. 
             foreach (var File in Files)
@@ -336,6 +331,9 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".cml":
                     Install_CML(xmlPath, installPath);
+                    break;
+                case ".x2s":
+                    Install_CharaSlots(xmlPath);
                     break;
                 default:
                     throw new InvalidDataException(string.Format("The filetype of \"{0}\" is not supported.", xmlPath));
@@ -741,6 +739,41 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
+        private void Install_CharaSlots(string xmlPath)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                CharaSlotsFile xmlFile = zipManager.DeserializeXmlFromArchive<CharaSlotsFile>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                CharaSlotsFile slotsFile = (CharaSlotsFile)GetParsedFile<CharaSlotsFile>(CharaSlotsFile.FILE_NAME_BIN, false, false);
+
+                if(slotsFile == null)
+                {
+                    throw new FileNotFoundException($"Could not find {CharaSlotsFile.FILE_NAME_BIN}. This file must exist before install - to create it simply run xv2ins.exe once (the X2M installer).");
+                }
+
+                List<string> installIDs = new List<string>();
+                bool success = slotsFile.InstallEntries(xmlFile.CharaSlots, installIDs);
+
+                if (!success)
+                {
+                    throw new Exception("Attempted to install a slot that already existed.");
+                }
+
+                foreach(var id in installIDs)
+                {
+                    GeneralInfo.Tracker.AddID(CharaSlotsFile.FILE_NAME_BIN, Sections.CharaSlotEntry, id);
+                }
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at CharaSlots install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
 
         //Copy-paste generic install methods
         private void Install_BDM(string xmlPath, string installPath)
@@ -1492,6 +1525,12 @@ namespace LB_Mod_Installer.Installer
                 return null;
             }
 
+            //Special case: slots file
+            if(path == CharaSlotsFile.FILE_NAME_BIN)
+            {
+                return CharaSlotsFile.Load(fileIO.GetFileFromGame(path, false, false));
+            }
+
             switch (Path.GetExtension(path))
             {
                 case ".bac":
@@ -1623,6 +1662,8 @@ namespace LB_Mod_Installer.Installer
                     return ((HCI_File)data).SaveToBytes();
                 case ".cml":
                     return ((CML_File)data).SaveToBytes();
+                case ".x2s":
+                    return ((CharaSlotsFile)data).SaveToBytes();
                 default:
                     throw new InvalidDataException(String.Format("GetBytesFromParsedFile: The filetype of \"{0}\" is not supported.", path));
             }

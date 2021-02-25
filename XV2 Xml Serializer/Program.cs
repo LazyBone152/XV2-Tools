@@ -10,20 +10,20 @@ using Xv2CoreLib;
 using System.Diagnostics;
 using Xv2CoreLib.CPK;
 using System.Threading.Tasks;
+using Xv2CoreLib.Eternity;
 
 namespace XV2_Xml_Serializer
 {
     class Program
     {
-        private static bool DEBUG_MODE = false; //controls whether the debug parsers are used
+        private static bool DEBUG_MODE = false; 
 
         static void Main(string[] args)
         {
-            //for debugging only
-            //args = new string[1] { @"special_event_voice - Copy.sev" };
-
-
 #if DEBUG
+            //for debugging only
+            //args = new string[1] { @"XV2P_SLOTS.x2s" };
+
             DEBUG_MODE = true;
 #endif
 
@@ -62,6 +62,17 @@ namespace XV2_Xml_Serializer
 #endif
                     {
                         
+                        if(Path.GetFileName(fileLocation) == CharaSlotsFile.FILE_NAME_BIN)
+                        {
+                            CharaSlotsFile.CreateXml(fileLocation);
+                            continue;
+                        }
+                        if (Path.GetFileName(fileLocation) == CharaSlotsFile.FILE_NAME_XML)
+                        {
+                            CharaSlotsFile.ConvertFromXml(fileLocation);
+                            continue;
+                        }
+
 
                         if (!LoadBinaryInitial_Debug(fileLocation))
                         {

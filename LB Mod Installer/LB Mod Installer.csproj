@@ -139,7 +139,7 @@
     <Compile Include="Binding\IdBindingManager.cs" />
     <Compile Include="Binding\X2MHelper.cs" />
     <Compile Include="File\FileCacheManager.cs" />
-    <Compile Include="Installer\Install_NEW.cs" />
+    <Compile Include="Installer\Install.cs" />
     <Compile Include="Installer\MsgComponentInstall.cs" />
     <Compile Include="Installer\Music\MusicInstaller.cs" />
     <Compile Include="Installer\Music\MusicUninstaller.cs" />

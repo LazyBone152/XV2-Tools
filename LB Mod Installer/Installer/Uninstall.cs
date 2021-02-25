@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using System.IO;
+using System.Windows;
+using System.Threading;
+using System.Globalization;
 using Xv2CoreLib;
 using Xv2CoreLib.BAC;
 using Xv2CoreLib.BCS;
@@ -21,10 +24,6 @@ using Xv2CoreLib.IDB;
 using Xv2CoreLib.MSG;
 using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.Resource;
-using System.IO;
-using System.Windows;
-using System.Threading;
-using System.Globalization;
 using Xv2CoreLib.PSC;
 using Xv2CoreLib.PUP;
 using Xv2CoreLib.AUR;
@@ -38,6 +37,7 @@ using Xv2CoreLib.TTC;
 using Xv2CoreLib.SEV;
 using Xv2CoreLib.HCI;
 using Xv2CoreLib.CML;
+using Xv2CoreLib.Eternity;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -160,6 +160,11 @@ namespace LB_Mod_Installer.Installer
             if (path == Music.MusicInstaller.DIRECT_INSTALL_TYPE || path == Music.MusicInstaller.OPTION_INSTALL_TYPE)
             {
                 Uninstall_BGM_ACB(path, file);
+                return;
+            }
+            if(path == CharaSlotsFile.FILE_NAME_BIN)
+            {
+                Uninstall_CharaSlots(file);
                 return;
             }
 
@@ -1017,6 +1022,28 @@ namespace LB_Mod_Installer.Installer
             }
         }
 
+        private void Uninstall_CharaSlots(_File file)
+        {
+            try
+            {
+                CharaSlotsFile charaSlotsFile = (CharaSlotsFile)GetParsedFile<CharaSlotsFile>(CharaSlotsFile.FILE_NAME_BIN, false, false);
+                if (charaSlotsFile == null) return;
+
+                Section section = file.GetSection(Sections.CharaSlotEntry);
+
+                if (section != null)
+                {
+                    charaSlotsFile.UninstallEntries(section.IDs);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at CharaSlots uninstall phase ({0}).", CharaSlotsFile.FILE_NAME_BIN);
+                throw new Exception(error, ex);
+            }
+        }
+
         //Generic uninstallers
         private void UninstallEntries<T>(IList<T> entries, IList<T> ogEntries, List<string> ids) where T : IInstallable
         {
@@ -1124,7 +1151,7 @@ namespace LB_Mod_Installer.Installer
         {
             if (fromCpk)
             {
-                return Install_NEW.GetParsedFileFromGame(path, FileIO, fromCpk, raiseEx);
+                return Install.GetParsedFileFromGame(path, FileIO, fromCpk, raiseEx);
             }
 
             var cachedFile = fileManager.GetParsedFile<T>(path);
@@ -1137,7 +1164,7 @@ namespace LB_Mod_Installer.Installer
             else
             {
                 //File is not cached. So parse it, add it and then return it.
-                var file = Install_NEW.GetParsedFileFromGame(path, FileIO, fromCpk, raiseEx);
+                var file = Install.GetParsedFileFromGame(path, FileIO, fromCpk, raiseEx);
                 if(file != null)
                     fileManager.AddParsedFile(path, file);
                 return file;

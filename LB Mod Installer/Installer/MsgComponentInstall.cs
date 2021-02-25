@@ -18,9 +18,9 @@ namespace LB_Mod_Installer.Installer
             CMS
         }
 
-        public Install_NEW install = null;
+        public Install install = null;
 
-        public MsgComponentInstall(Install_NEW _install)
+        public MsgComponentInstall(Install _install)
         {
             install = _install;
         }

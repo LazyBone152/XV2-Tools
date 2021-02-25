@@ -756,7 +756,7 @@ namespace LB_Mod_Installer
                 }
 
                 //Install logic
-                var installer = new Install_NEW(InstallerInfo, zipManager, this, FileIO, fileManager);
+                var installer = new Install(InstallerInfo, zipManager, this, FileIO, fileManager);
                 //installer.Start();
                 await Task.Run(new Action(installer.Start));
 

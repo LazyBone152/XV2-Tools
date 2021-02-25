@@ -170,12 +170,12 @@ namespace LB_Mod_Installer.Binding
             Awoken
         }
 
-        Install_NEW install;
+        Install install;
         List<int> usedPartSets = new List<int>();
         private List<AliasValue> Aliases = new List<AliasValue>();
         private X2MHelper _X2MHelper = new X2MHelper();
 
-        public IdBindingManager(Install_NEW install)
+        public IdBindingManager(Install install)
         {
             this.install = install;
         }

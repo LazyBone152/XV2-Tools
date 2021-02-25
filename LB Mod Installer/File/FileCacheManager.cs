@@ -274,7 +274,7 @@ namespace LB_Mod_Installer.Installer
         {
             if (FileType == CachedFileType.Parsed)
             {
-                return Install_NEW.GetBytesFromParsedFile(Path, Data);
+                return Install.GetBytesFromParsedFile(Path, Data);
             }
             else
             {

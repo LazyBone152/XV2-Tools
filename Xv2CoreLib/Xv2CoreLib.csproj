@@ -218,6 +218,7 @@
     <Compile Include="ESK\Deserializer.cs" />
     <Compile Include="ESK\ESK_File.cs" />
     <Compile Include="ESK\Parser.cs" />
+    <Compile Include="Eternity\CharaSlotsFile.cs" />
     <Compile Include="ETR\ETR_File.cs" />
     <Compile Include="FPF\FPF_File.cs" />
     <Compile Include="HCA\HcaMetadata.cs" />

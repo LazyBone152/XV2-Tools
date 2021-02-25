@@ -17,7 +17,7 @@ namespace LB_Mod_Installer.Installer.Music
         internal const string OPTION_INSTALL_TYPE = "BGM_OPTION";
         internal const string DIRECT_INSTALL_TYPE = "BGM_DIRECT";
 
-        private Install_NEW install;
+        private Install install;
 
         private ACB_File musicPackage;
         private ACB_File bgmAcb;
@@ -26,7 +26,7 @@ namespace LB_Mod_Installer.Installer.Music
 
         private int currentCueId = 500;
 
-        public MusicInstaller(Install_NEW _install, string musicPackagePath)
+        public MusicInstaller(Install _install, string musicPackagePath)
         {
             install = _install;
             musicPackage = ACB_File.Load(install.zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(musicPackagePath)), null, false, true);
