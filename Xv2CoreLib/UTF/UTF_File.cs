@@ -526,6 +526,10 @@ namespace Xv2CoreLib.UTF
             List<StringWriteObject> stringWriter = new List<StringWriteObject>();
             List<DataWriteObject> dataWriter = new List<DataWriteObject>();
 
+            //Validate
+            if(!usePadding)
+                utfFile.CompressRows();
+
             //Header (size 8)
             bytes.AddRange(BigEndianConverter.GetBytes(UTF_SIGNATURE));
             bytes.AddRange(new byte[4]); //Table size, fill this in later
@@ -824,20 +828,19 @@ namespace Xv2CoreLib.UTF
 
             foreach(var column in Columns)
             {
-
                 if(column.StorageFlag == StorageFlag.PerRow && column.Rows == null)
                 {
                     throw new InvalidDataException(String.Format("Invalid rows at column ({0}). StorageType is set to PerRow, but no rows were found!", column.Name));
                 }
                 else if (column.StorageFlag == StorageFlag.PerRow)
                 {
-                    if(column.Rows.Count() != rowCount && rowCount != -1)
+                    if(column.Rows.Count != rowCount && rowCount != -1)
                     {
-                        throw new InvalidDataException(String.Format("Invalid rows at column ({0}). Expected {2} rows, but found {1}.", column.Name, column.Rows.Count(), rowCount));
+                        throw new InvalidDataException(String.Format("Invalid rows at column ({0}). Expected {2} rows, but found {1}.", column.Name, column.Rows.Count, rowCount));
                     }
                     else
                     {
-                        rowCount = column.Rows.Count();
+                        rowCount = column.Rows.Count;
                     }
                 }
             }
@@ -849,6 +852,64 @@ namespace Xv2CoreLib.UTF
             return rowCount;
         }
         
+        public bool IsValid()
+        {
+            try
+            {
+                if (Columns == null) return false;
+
+                RowCount();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private void CompressRows()
+        {
+            //If all rows are the same value, make it a constant
+
+            foreach(var column in Columns)
+            {
+                if(column.Rows?.Count > 0)
+                {
+                    if (column.StorageFlag == StorageFlag.PerRow)
+                    {
+                        if (column.Rows[0].Afs2File != null || column.Rows[0].UtfTable != null) continue;
+
+                        //Special case. Due to a bug with some old UTF code, compressing this column will break old versions of the installer that attempt to load it. (This is because that old code expected it to be PerRow)
+                        if (column.Name == "AisacControlId") continue; 
+
+                        if (!string.IsNullOrWhiteSpace(column.Rows[0].Value))
+                        {
+                            if (column.Rows.All(x => x.Value == column.Rows[0].Value))
+                            {
+                                column.StorageFlag = StorageFlag.Constant;
+                                column.Constant = column.Rows[0].Value;
+                                column.Rows.Clear();
+                            }
+                        }
+
+                        //Removed for EAT Compatibility
+                        /*
+                        else if (column.Rows[0].Bytes != null)
+                        {
+                            if (column.Rows.All(x => x.Bytes == column.Rows[0].Bytes))
+                            {
+                                column.StorageFlag = StorageFlag.Constant;
+                                column.Bytes = column.Rows[0].Bytes;
+                                column.Rows.Clear();
+                            }
+                        }
+                        */
+                    }
+                }
+            }
+
+        }
+
         public static void ValidateRowLengths(int[] rowLengths)
         {
             int length = rowLengths[0];
@@ -1452,6 +1513,9 @@ namespace Xv2CoreLib.UTF
             return -1;
         }
 
+        /// <summary>
+        /// Get index of the row that contains the specified value. If constant, then it will just return 0 if the value matches. If value not found, returns -1.
+        /// </summary>
         public int IndexOfRow(string columnName, string value)
         {
             if (String.IsNullOrWhiteSpace(value)) return -1; //Cannot compare null values
@@ -1459,14 +1523,16 @@ namespace Xv2CoreLib.UTF
             var childColumn = GetColumn(columnName);
             if (childColumn == null) throw new Exception(String.Format("The column named \"{0}\" does not exist.", columnName));
 
-            if (childColumn.StorageFlag != StorageFlag.PerRow)
+            if (childColumn.StorageFlag == StorageFlag.Constant)
             {
-                throw new Exception(String.Format("Column \"{0}\" is not of StorageType PerRow.", columnName));
+                return (childColumn.Constant == value) ?  0 : -1;
             }
-
-            for (int i = 0; i < childColumn.NumOfRows; i++)
+            else
             {
-                if (childColumn.Rows[i].Value == value) return childColumn.Rows[i].RowIndex;
+                for (int i = 0; i < childColumn.NumOfRows; i++)
+                {
+                    if (childColumn.Rows[i].Value == value) return childColumn.Rows[i].RowIndex;
+                }
             }
 
             return -1;
@@ -1514,12 +1580,13 @@ namespace Xv2CoreLib.UTF
     {
         public UTF_Column() { }
 
-        public UTF_Column(string name, TypeFlag type)
+        public UTF_Column(string name, TypeFlag type, StorageFlag storage = StorageFlag.PerRow, string defaultConstantValue = null)
         {
             Name = name;
-            StorageFlag = StorageFlag.PerRow;
+            StorageFlag = storage;
             TypeFlag = type;
             Rows = new List<UTF_Row>();
+            Constant = defaultConstantValue;
         }
 
         [YAXAttributeForClass]

@@ -800,14 +800,19 @@ namespace Xv2CoreLib.BAC
 
         public bool IsBacEntryEmpty()
         {
-            if (Type0 != null || Type1 != null || Type2 != null || Type3 != null || Type4 != null || Type5 != null || Type6 != null ||
-                Type7 != null || Type8 != null || Type9 != null || Type10 != null || Type11 != null || Type12 != null || Type13 != null ||
-                Type14 != null || Type15 != null || Type16 != null || Type17 != null || Type18 != null || Type19 != null || Type20 != null ||
-                Type21 != null || Type22 != null || Type23 != null || Type24 != null || Type25 != null || Type26 != null || Type27 != null)
+            if (Type0?.Count != 0 || Type1?.Count != 0 || Type2?.Count != 0 || Type3?.Count != 0 || Type4?.Count != 0 || Type5?.Count != 0 || Type6?.Count != 0 ||
+                Type7?.Count != 0 || Type8?.Count != 0 || Type9?.Count != 0 || Type10?.Count != 0 || Type11?.Count != 0 || Type12?.Count != 0 || Type13?.Count != 0 ||
+                Type14?.Count != 0 || Type15?.Count != 0 || Type16?.Count != 0 || Type17?.Count != 0 || Type18?.Count != 0 || Type19?.Count != 0 || Type20?.Count != 0 ||
+                Type21?.Count != 0 || Type22?.Count != 0 || Type23?.Count != 0 || Type24?.Count != 0 || Type25?.Count != 0 || Type26?.Count != 0 || Type27?.Count != 0)
             {
                 return false;
             }
             return true;
+        }
+
+        public bool IsIBacEntryEmpty()
+        {
+            return (IBacTypes?.Count == 0);
         }
 
 
@@ -960,6 +965,7 @@ namespace Xv2CoreLib.BAC
         {
             Common = 0,
             Character = 5,
+            CommonTail = 9,
             FaceA = 10,
             FaceB = 11,
             Skill = 65534

@@ -67,7 +67,7 @@ namespace Xv2CoreLib.ESK
         public ESK_Unk1 Unk1 { get; set; }
 
         //Non-hierarchy list - Save it here for better performance when using GetBone. (mostly for XenoKit, since it needs to use this method several dozen times each frame)
-        private List<ESK_BoneNonHierarchal> listBones = null;
+        public List<ESK_BoneNonHierarchal> listBones = null;
 
         #region Load/Save
         public byte[] Write(bool writeAbsTransform)
@@ -713,51 +713,17 @@ namespace Xv2CoreLib.ESK
         #region Helper
         public bool Exists(string boneName)
         {
-            for (int i = 0; i < ESKBones.Count; i++)
+            if (listBones == null)
+                listBones = GetNonHierarchalBoneList();
+
+            foreach(var bone in listBones)
             {
-                if (ESKBones[i].Name == boneName)
-                {
-                    return true;
-                }
-
-                if (ESKBones[i].ESK_Bones != null)
-                {
-                    bool result = ExistsRecursive(boneName, ESKBones[i].ESK_Bones);
-
-                    if (result == true)
-                    {
-                        return true;
-                    }
-                }
-
+                if (bone.Name == boneName) return true;
             }
 
             return false;
         }
 
-        private bool ExistsRecursive(string boneName, AsyncObservableCollection<ESK_Bone> eskBones)
-        {
-            for (int i = 0; i < eskBones.Count; i++)
-            {
-                if (eskBones[i].Name == boneName)
-                {
-                    return true;
-                }
-
-                if (eskBones[i].ESK_Bones != null)
-                {
-                    bool result = ExistsRecursive(boneName, eskBones[i].ESK_Bones);
-
-                    if (result == true)
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-        
         public ESK_Skeleton Clone()
         {
             AsyncObservableCollection<ESK_Bone> bones = AsyncObservableCollection<ESK_Bone>.Create();

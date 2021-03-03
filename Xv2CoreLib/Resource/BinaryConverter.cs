@@ -181,6 +181,20 @@ namespace Xv2CoreLib.Resource
             return bytes.ToArray();
         }
 
+        public static byte[] GetBytes(uint[] intArray)
+        {
+            List<byte> bytes = new List<byte>();
+
+            foreach (ushort i in intArray)
+            {
+                var valueBytes = BitConverter.GetBytes(i);
+
+                bytes.AddRange(new byte[4] { valueBytes[3], valueBytes[2], valueBytes[1], valueBytes[0] });
+            }
+
+            return bytes.ToArray();
+        }
+
         private static byte[] CopyBytes(byte[] bytes, int offset, int count)
         {
             byte[] newBytes = new byte[count];

@@ -1,16 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using YAXLib;
-using System.Resources;
-using System.Reflection;
-using System.Globalization;
-using Xv2CoreLib;
 using System.IO;
 using Xv2CoreLib.Resource.UndoRedo;
 using Xv2CoreLib.Resource;
@@ -48,7 +40,6 @@ namespace Xv2CoreLib.EAN
         #endregion
 
         public const float DefaultFoV = 39.97836f;
-
 
         [YAXAttributeForClass]
         public bool IsCamera { get; set; } //offset 16
@@ -288,7 +279,7 @@ namespace Xv2CoreLib.EAN
                 Animations = AsyncObservableCollection<EAN_Animation>.Create(),
                 IsCamera = true,
                 I_08 = 37508,
-                Skeleton = skeleton.Copy()
+                Skeleton = skeleton.Clone()
             };
         }
 
@@ -590,10 +581,16 @@ namespace Xv2CoreLib.EAN
         {
             if (undos == null) undos = new List<IUndoRedo>();
 
+            EAN_Node existing = Nodes.FirstOrDefault(x => x.BoneName == bone);
+            if (existing != null) return existing;
+
             EAN_Node node = new EAN_Node();
             node.AnimationComponents = AsyncObservableCollection<EAN_AnimationComponent>.Create();
             node.BoneName = bone;
             node.EskRelativeTransform = eskSkeleton.GetBone(bone)?.RelativeTransform;
+
+            Nodes.Add(node);
+            undos.Add(new UndoableListAdd<EAN_Node>(Nodes, node));
 
             return node;
         }

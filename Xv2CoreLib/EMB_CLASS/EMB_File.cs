@@ -618,6 +618,7 @@ namespace Xv2CoreLib.EMB_CLASS
             }
         }
 
+        #region DDS
         //DDS loading & handling
         public ImageEngineFormat ImageFormat = ImageEngineFormat.DDS_DXT5;
         [NonSerialized]
@@ -632,7 +633,7 @@ namespace Xv2CoreLib.EMB_CLASS
         private bool ddsIsLoading = false;
         [NonSerialized]
         public bool loadDdsFail = false;
-        [NonSerialized] //WriteableBitmap cannot be serialized, and so the related bools should be ignored as well. (DdsImage doesn't need to be copied, anyway... it will just be reloaded from Data)
+        [NonSerialized] 
         private WriteableBitmap _ddsImage = null;
         [YAXDontSerialize]
         public WriteableBitmap DdsImage
@@ -650,7 +651,7 @@ namespace Xv2CoreLib.EMB_CLASS
                 if (value != this._ddsImage)
                 {
                     this._ddsImage = value;
-                    NotifyPropertyChanged("DdsImage");
+                    NotifyPropertyChanged(nameof(DdsImage));
                 }
             }
         }
@@ -704,6 +705,8 @@ namespace Xv2CoreLib.EMB_CLASS
                 }
             }
         }
+
+        #endregion
 
         public bool Compare(EmbEntry embEntry2, bool ignoreName = false)
         {

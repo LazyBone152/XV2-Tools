@@ -43,7 +43,7 @@ namespace EEPK_Organiser.Forms
 
         private EffectContainerFile MainContainerFile { get; set; }
         public List<Effect> SelectedEffects = null;
-        public IList<Effect> Effects { get; set; }
+        public List<Effect> Effects { get; set; }
 
         private ushort _idIncreaseValue = 0;
         public ushort IdIncreaseValue
@@ -68,7 +68,7 @@ namespace EEPK_Organiser.Forms
         public EffectSelector(IList<Effect> effects, EffectContainerFile mainContainerFile, Window parent, Mode mode = Mode.ImportEffect)
         {
             currentMode = mode;
-            Effects = effects;
+            Effects = new List<Effect>(effects);
             MainContainerFile = mainContainerFile;
             InitializeComponent();
             DataContext = this;

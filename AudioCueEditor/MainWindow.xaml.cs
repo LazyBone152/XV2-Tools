@@ -309,7 +309,7 @@ namespace AudioCueEditor
 
         private async void Save(string path)
         {
-            var controller = await this.ShowProgressAsync($"Saving \"{System.IO.Path.GetFileName(path)}\"...", $"", false, new MetroDialogSettings() { AnimateHide = false, AnimateShow = false, DialogTitleFontSize = 15, DialogMessageFontSize = 12 });
+            var controller = await this.ShowProgressAsync($"Saving \"{System.IO.Path.GetFileName(path)}\"...", $"", false, App.DefaultDialogSettings);
             controller.SetIndeterminate();
 
             Task task = null;
@@ -318,9 +318,7 @@ namespace AudioCueEditor
             {
                 task = Task.Run(() =>
                 {
-                    UndoManager.Instance.AddUndo(new CompositeUndo(AcbFile.AcbFile.CleanUpTables(), "Clean Up"));
                     AcbFile.AcbFile.Save(xv2Utils.GetPathWithoutExtension(path));
-
                 });
 
                 await task;

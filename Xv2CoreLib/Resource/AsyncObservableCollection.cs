@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Threading;
+using YAXLib;
 
 namespace Xv2CoreLib.Resource
 {
@@ -22,6 +23,7 @@ namespace Xv2CoreLib.Resource
         /// <summary>
         /// The underlying ObservableCollection. Bind this in XAML, or access it somewhere in code that will run on the UI thread.
         /// </summary>
+        [YAXDontSerialize]
         public ROACollection<T> Binding
         {
             get
@@ -36,8 +38,10 @@ namespace Xv2CoreLib.Resource
                 return _observableList;
             }
         }
-
+        
+        [YAXDontSerialize]
         public int Count => list.Count;
+        [YAXDontSerialize]
         public bool IsReadOnly => false;
 
         [field: NonSerialized]

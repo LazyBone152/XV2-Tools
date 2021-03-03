@@ -71,7 +71,8 @@ namespace Xv2CoreLib
             AFTER_BCM,
             BAI,
             AMK,
-            FCE_EAN
+            FCE_EAN,
+            TAL_EAN //CMN
         }
 
         public static readonly string[] LanguageSuffix = new string[12] { "en.msg", "es.msg", "ca.msg", "fr.msg", "de.msg", "it.msg", "pt.msg", "pl.msg", "ru.msg", "tw.msg", "zh.msg", "kr.msg" };
@@ -99,6 +100,7 @@ namespace Xv2CoreLib
         public const string CMN_SHOT_BDM_PATH = "skill/CMN/CMN_PLAYER.shot.bdm";
         public const string CMN_SE_ACB_PATH = "sound/SE/Battle/Common/CAR_BTL_CMN.acb";
         public const string CMN_EEPK_PATH = "vfx/cmn/BTL_CMN.eepk";
+        public const string CMN_TAL_EAN = "chara/CMN/CMN.tal.ean";
 
         public const string CHARACTER_MSG_PATH = "msg/proper_noun_character_name_";
         public const string SUPER_SKILL_MSG_PATH = "msg/proper_noun_skill_spa_name_";
@@ -380,7 +382,7 @@ namespace Xv2CoreLib
                 moveFiles.BacPath = String.Format("{0}/{1}/{1}.bac", skillDir, folderName);
 
                 if(loadSkillFiles)
-                    moveFiles.BacFile = new Xv2File<BAC_File>((BAC_File)GetParsedFileFromGame(moveFiles.BacPath), fileIO.PathInGameDir(moveFiles.BacPath), false, null, null, MoveFileTypes.BAC);
+                    moveFiles.BacFile = new Xv2File<BAC_File>((BAC_File)GetParsedFileFromGame(moveFiles.BacPath), fileIO.PathInGameDir(moveFiles.BacPath), false, null, false, MoveFileTypes.BAC);
             }
 
             //BCM
@@ -389,7 +391,7 @@ namespace Xv2CoreLib
                 moveFiles.BcmPath = String.Format("{0}/{1}/{1}_PLAYER.bcm", skillDir, folderName);
 
                 if(loadSkillFiles)
-                    moveFiles.BcmFile = new Xv2File<BCM_File>((BCM_File)GetParsedFileFromGame(moveFiles.BcmPath), fileIO.PathInGameDir(moveFiles.BcmPath), false, null, null, MoveFileTypes.BCM);
+                    moveFiles.BcmFile = new Xv2File<BCM_File>((BCM_File)GetParsedFileFromGame(moveFiles.BcmPath), fileIO.PathInGameDir(moveFiles.BcmPath), false, null, false, MoveFileTypes.BCM);
             }
 
             //BDM
@@ -398,7 +400,7 @@ namespace Xv2CoreLib
                 moveFiles.BdmPath = String.Format("{0}/{1}/{1}_PLAYER.bdm", skillDir, folderName);
 
                 if(loadSkillFiles)
-                    moveFiles.BdmFile = new Xv2File<BDM_File>((BDM_File)GetParsedFileFromGame(moveFiles.BdmPath), fileIO.PathInGameDir(moveFiles.BdmPath), false, null, null, MoveFileTypes.BDM); 
+                    moveFiles.BdmFile = new Xv2File<BDM_File>((BDM_File)GetParsedFileFromGame(moveFiles.BdmPath), fileIO.PathInGameDir(moveFiles.BdmPath), false, null, false, MoveFileTypes.BDM); 
             }
 
             //BSA + shot.BDM
@@ -409,8 +411,8 @@ namespace Xv2CoreLib
 
                 if (loadSkillFiles)
                 {
-                    moveFiles.ShotBdmFile = new Xv2File<BDM_File>((BDM_File)GetParsedFileFromGame(moveFiles.ShotBdmPath), fileIO.PathInGameDir(moveFiles.ShotBdmPath), false, null, null, MoveFileTypes.SHOT_BDM);
-                    moveFiles.BsaFile = new Xv2File<BSA_File>((BSA_File)GetParsedFileFromGame(moveFiles.BsaPath), fileIO.PathInGameDir(moveFiles.BsaPath), false, null, null, MoveFileTypes.BSA);
+                    moveFiles.ShotBdmFile = new Xv2File<BDM_File>((BDM_File)GetParsedFileFromGame(moveFiles.ShotBdmPath), fileIO.PathInGameDir(moveFiles.ShotBdmPath), false, null, false, MoveFileTypes.SHOT_BDM);
+                    moveFiles.BsaFile = new Xv2File<BSA_File>((BSA_File)GetParsedFileFromGame(moveFiles.BsaPath), fileIO.PathInGameDir(moveFiles.BsaPath), false, null, false, MoveFileTypes.BSA);
                 }
             }
 
@@ -420,7 +422,7 @@ namespace Xv2CoreLib
                 moveFiles.BasPath = String.Format("{0}/{1}/{1}.bas", skillDir, folderName);
 
                 if(loadSkillFiles)
-                    moveFiles.BasFile = new Xv2File<BAS_File>((BAS_File)GetParsedFileFromGame(moveFiles.BasPath), fileIO.PathInGameDir(moveFiles.BasPath), false, null, null, MoveFileTypes.BAS);
+                    moveFiles.BasFile = new Xv2File<BAS_File>((BAS_File)GetParsedFileFromGame(moveFiles.BasPath), fileIO.PathInGameDir(moveFiles.BasPath), false, null, false, MoveFileTypes.BAS);
             }
 
             //EEPK
@@ -431,7 +433,7 @@ namespace Xv2CoreLib
                     moveFiles.EepkPath = String.Format("{0}/{1}/{1}.eepk", skillDir, folderName);
 
                     if(loadSkillFiles)
-                        moveFiles.EepkFile = new Xv2File<EffectContainerFile>((EffectContainerFile)GetParsedFileFromGame(moveFiles.EepkPath), fileIO.PathInGameDir(moveFiles.EepkPath), false, null, null, MoveFileTypes.EEPK);
+                        moveFiles.EepkFile = new Xv2File<EffectContainerFile>((EffectContainerFile)GetParsedFileFromGame(moveFiles.EepkPath), fileIO.PathInGameDir(moveFiles.EepkPath), false, null, false, MoveFileTypes.EEPK);
                 }
                 else
                 {
@@ -439,7 +441,7 @@ namespace Xv2CoreLib
                     moveFiles.EepkPath = String.Format("skill/{0}/{1}.eepk", cusEntry.Str_28, Path.GetFileName(cusEntry.Str_28));
 
                     if(loadSkillFiles)
-                        moveFiles.EepkFile = new Xv2File<EffectContainerFile>((EffectContainerFile)GetParsedFileFromGame(moveFiles.EepkPath), fileIO.PathInGameDir(moveFiles.EepkPath), true, null, null, MoveFileTypes.EEPK);
+                        moveFiles.EepkFile = new Xv2File<EffectContainerFile>((EffectContainerFile)GetParsedFileFromGame(moveFiles.EepkPath), fileIO.PathInGameDir(moveFiles.EepkPath), true, null, false, MoveFileTypes.EEPK);
                 }
             }
 
@@ -476,7 +478,7 @@ namespace Xv2CoreLib
                     moveFiles.VoxAcbPath.Add(file);
 
                     if(loadSkillFiles)
-                        moveFiles.AddVoxAcbFile((ACB_Wrapper)GetParsedFileFromGame(file), charaSuffix, null, fileIO.PathInGameDir(file));
+                        moveFiles.AddVoxAcbFile((ACB_Wrapper)GetParsedFileFromGame(file), charaSuffix, false, fileIO.PathInGameDir(file), cusEntry.HasVoxAcbPath, false);
                 }
 
                 //English
@@ -489,7 +491,7 @@ namespace Xv2CoreLib
                     moveFiles.VoxAcbPath.Add(file);
 
                     if(loadSkillFiles)
-                        moveFiles.AddVoxAcbFile((ACB_Wrapper)GetParsedFileFromGame(file), charaSuffix, "en", fileIO.PathInGameDir(file));
+                        moveFiles.AddVoxAcbFile((ACB_Wrapper)GetParsedFileFromGame(file), charaSuffix, true, fileIO.PathInGameDir(file), cusEntry.HasVoxAcbPath, false);
                 }
             }
 
@@ -507,7 +509,7 @@ namespace Xv2CoreLib
                     moveFiles.EanPaths.Add(file);
 
                     if(loadSkillFiles)
-                        moveFiles.AddEanFile((EAN_File)GetParsedFileFromGame(file), charaSuffix, fileIO.PathInGameDir(file));
+                        moveFiles.AddEanFile((EAN_File)GetParsedFileFromGame(file), charaSuffix, fileIO.PathInGameDir(file), cusEntry.HasEanPath, string.IsNullOrWhiteSpace(charaSuffix));
                 }
 
                 //Create default EAN if none was loaded (duplicate chara-unique one)
@@ -530,7 +532,7 @@ namespace Xv2CoreLib
                     moveFiles.CamPaths.Add(file);
 
                     if(loadSkillFiles)
-                        moveFiles.AddCamEanFile((EAN_File)GetParsedFileFromGame(file), charaSuffix, fileIO.PathInGameDir(file));
+                        moveFiles.AddCamEanFile((EAN_File)GetParsedFileFromGame(file), charaSuffix, fileIO.PathInGameDir(file), cusEntry.HasCamEanPath, string.IsNullOrWhiteSpace(charaSuffix));
                 }
 
                 //Create default CAM.EAN if none was loaded (duplicate chara-unique one)
@@ -546,14 +548,14 @@ namespace Xv2CoreLib
                     moveFiles.AfterBacPath = String.Format("{0}/{1}/{1}_AFTER.bac", skillDir, folderName);
 
                     if(loadSkillFiles)
-                        moveFiles.AfterBacFile = new Xv2File<BAC_File>((BAC_File)GetParsedFileFromGame(moveFiles.AfterBacPath), fileIO.PathInGameDir(moveFiles.AfterBacPath), false, null, null, MoveFileTypes.BAC);
+                        moveFiles.AfterBacFile = new Xv2File<BAC_File>((BAC_File)GetParsedFileFromGame(moveFiles.AfterBacPath), fileIO.PathInGameDir(moveFiles.AfterBacPath), false, null, false, MoveFileTypes.BAC);
                 }
                 else
                 {
                     moveFiles.AfterBacPath = String.Format("skill/{0}/{1}.bac", cusEntry.AfterBacPath, Path.GetFileName(cusEntry.AfterBacPath));
 
                     if(loadSkillFiles)
-                        moveFiles.AfterBacFile = new Xv2File<BAC_File>((BAC_File)GetParsedFileFromGame(moveFiles.AfterBacPath), fileIO.PathInGameDir(moveFiles.AfterBacPath), true, null, null, MoveFileTypes.BAC);
+                        moveFiles.AfterBacFile = new Xv2File<BAC_File>((BAC_File)GetParsedFileFromGame(moveFiles.AfterBacPath), fileIO.PathInGameDir(moveFiles.AfterBacPath), true, null, false, MoveFileTypes.BAC);
                 }
             }
 
@@ -565,14 +567,14 @@ namespace Xv2CoreLib
                     moveFiles.AfterBcmPath = String.Format("{0}/{1}/{1}_AFTER_PLAYER.bcm", skillDir, folderName);
 
                     if(loadSkillFiles)
-                        moveFiles.AfterBcmFile = new Xv2File<BCM_File>((BCM_File)GetParsedFileFromGame(moveFiles.AfterBcmPath), fileIO.PathInGameDir(moveFiles.AfterBcmPath), false, null, null, MoveFileTypes.BCM);
+                        moveFiles.AfterBcmFile = new Xv2File<BCM_File>((BCM_File)GetParsedFileFromGame(moveFiles.AfterBcmPath), fileIO.PathInGameDir(moveFiles.AfterBcmPath), false, null, false, MoveFileTypes.BCM);
                 }
                 else
                 {
                     moveFiles.AfterBcmPath = String.Format("skill/{0}/{1}.bcm", cusEntry.AfterBcmPath, Path.GetFileName(cusEntry.AfterBcmPath));
 
                     if(loadSkillFiles)
-                        moveFiles.AfterBcmFile = new Xv2File<BCM_File>((BCM_File)GetParsedFileFromGame(moveFiles.AfterBcmPath), fileIO.PathInGameDir(moveFiles.AfterBcmPath), true, null, null, MoveFileTypes.BCM);
+                        moveFiles.AfterBcmFile = new Xv2File<BCM_File>((BCM_File)GetParsedFileFromGame(moveFiles.AfterBcmPath), fileIO.PathInGameDir(moveFiles.AfterBcmPath), true, null, false, MoveFileTypes.BCM);
                 }
             }
 
@@ -795,10 +797,6 @@ namespace Xv2CoreLib
                 string bcsPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.bcs", cmsEntry.ShortName, cmsEntry.BcsPath));
                 BCS_File bcsFile = (BCS_File)GetParsedFileFromGame(bcsPath);
 
-                //Load fce ean
-                string fceEanPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.fce.ean", cmsEntry.ShortName, cmsEntry.FceEanPath));
-                EAN_File fceEan = (EAN_File)GetParsedFileFromGame(fceEanPath);
-
                 //Load bai file
                 string baiPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.bai", cmsEntry.ShortName, cmsEntry.BaiPath));
                 BAI_File baiFile = (BAI_File)GetParsedFileFromGame(baiPath);
@@ -819,12 +817,12 @@ namespace Xv2CoreLib
                     if (!string.IsNullOrWhiteSpace(csoEntry.AmkPath) && !loadedFiles.Contains(amkPath))
                     {
                         AMK_File amkFile = (AMK_File)GetParsedFileFromGame(amkPath);
-                        amkFiles.Add(new Xv2File<AMK_File>(amkFile, GetAbsolutePath(amkPath), !Utils.CompareSplitString(csoEntry.AmkPath, '/', 0, cmsEntry.ShortName), null, null, 0, csoEntry.Costume.ToString()));
+                        amkFiles.Add(new Xv2File<AMK_File>(amkFile, GetAbsolutePath(amkPath), !Utils.CompareSplitString(csoEntry.AmkPath, '/', 0, cmsEntry.ShortName), null, false, 0, csoEntry.Costume.ToString()));
                         loadedFiles.Add(amkPath);
                     }
                     else
                     {
-                        Xv2File<AMK_File>.AddCostume(amkFiles, GetAbsolutePath(amkPath), (int)csoEntry.Costume, string.Empty);
+                        Xv2File<AMK_File>.AddCostume(amkFiles, GetAbsolutePath(amkPath), (int)csoEntry.Costume, false);
                     }
 
                     //ACBs loaded in GetCharacterMoveFiles()
@@ -837,9 +835,8 @@ namespace Xv2CoreLib
                     CsoEntry = csoEntries,
                     ErsEntry = ersEntry,
                     Name = names,
-                    BcsFile = new Xv2File<BCS_File>(bcsFile, fileIO.PathInGameDir(bcsPath), false, null, null),
+                    BcsFile = new Xv2File<BCS_File>(bcsFile, fileIO.PathInGameDir(bcsPath), false, null, false),
                     AmkFile = amkFiles,
-                    FceEanFile = new Xv2File<EAN_File>(fceEan, fileIO.PathInGameDir(fceEanPath), !cmsEntry.IsSelfReference(cmsEntry.FceEanPath)),
                     BaiFile = new Xv2File<BAI_File>(baiFile, fileIO.PathInGameDir(baiPath), !cmsEntry.IsSelfReference(cmsEntry.BaiPath)),
                     MovesetFiles = GetCharacterMoveFiles(cmsEntry, ersEntry, csoEntries, loadFiles),
                     Costumes = costumes
@@ -926,13 +923,13 @@ namespace Xv2CoreLib
             moveFiles.BacPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}_PLAYER.bac", cmsEntry.ShortName, cmsEntry.BacPath));
 
             if(loadFiles)
-                moveFiles.BacFile = new Xv2File<BAC_File>((BAC_File)GetParsedFileFromGame(moveFiles.BacPath), fileIO.PathInGameDir(moveFiles.BacPath), !cmsEntry.IsSelfReference(cmsEntry.BacPath), null, null, MoveFileTypes.BAC);
+                moveFiles.BacFile = new Xv2File<BAC_File>((BAC_File)GetParsedFileFromGame(moveFiles.BacPath), fileIO.PathInGameDir(moveFiles.BacPath), !cmsEntry.IsSelfReference(cmsEntry.BacPath), null, false, MoveFileTypes.BAC);
 
             //BCM
             moveFiles.BcmPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}_PLAYER.bcm", cmsEntry.ShortName, cmsEntry.BcmPath));
 
             if(loadFiles)
-                moveFiles.BcmFile = new Xv2File<BCM_File>((BCM_File)GetParsedFileFromGame(moveFiles.BcmPath), fileIO.PathInGameDir(moveFiles.BcmPath), !cmsEntry.IsSelfReference(cmsEntry.BcmPath), null, null, MoveFileTypes.BCM);
+                moveFiles.BcmFile = new Xv2File<BCM_File>((BCM_File)GetParsedFileFromGame(moveFiles.BcmPath), fileIO.PathInGameDir(moveFiles.BcmPath), !cmsEntry.IsSelfReference(cmsEntry.BcmPath), null, false, MoveFileTypes.BCM);
 
             //EAN
             string eanPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.ean", cmsEntry.ShortName, cmsEntry.EanPath));
@@ -940,7 +937,7 @@ namespace Xv2CoreLib
             moveFiles.EanFile.Clear();
 
             if(loadFiles)
-                moveFiles.EanFile.Add(new Xv2File<EAN_File>((EAN_File)GetParsedFileFromGame(eanPath), fileIO.PathInGameDir(eanPath), !cmsEntry.IsSelfReference(cmsEntry.EanPath), null, null, MoveFileTypes.EAN));
+                moveFiles.EanFile.Add(new Xv2File<EAN_File>((EAN_File)GetParsedFileFromGame(eanPath), fileIO.PathInGameDir(eanPath), !cmsEntry.IsSelfReference(cmsEntry.EanPath), null, false, MoveFileTypes.EAN));
 
             //CAM
             string camEanPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.cam.ean", cmsEntry.ShortName, cmsEntry.CamEanPath));
@@ -948,7 +945,7 @@ namespace Xv2CoreLib
             moveFiles.CamEanFile.Clear();
 
             if(loadFiles)
-                moveFiles.CamEanFile.Add(new Xv2File<EAN_File>((EAN_File)GetParsedFileFromGame(camEanPath), fileIO.PathInGameDir(camEanPath), !cmsEntry.IsSelfReference(cmsEntry.CamEanPath), null, null, MoveFileTypes.CAM_EAN));
+                moveFiles.CamEanFile.Add(new Xv2File<EAN_File>((EAN_File)GetParsedFileFromGame(camEanPath), fileIO.PathInGameDir(camEanPath), !cmsEntry.IsSelfReference(cmsEntry.CamEanPath), null, false, MoveFileTypes.CAM_EAN));
 
             //BDM
             if(cmsEntry.BdmPath != "NULL")
@@ -956,7 +953,7 @@ namespace Xv2CoreLib
                 moveFiles.BdmPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}_PLAYER.bdm", cmsEntry.ShortName, cmsEntry.BdmPath));
 
                 if(loadFiles)
-                    moveFiles.BdmFile = new Xv2File<BDM_File>((BDM_File)GetParsedFileFromGame(moveFiles.BdmPath), fileIO.PathInGameDir(moveFiles.BdmPath), !cmsEntry.IsSelfReference(cmsEntry.BdmPath), null, null, MoveFileTypes.BDM);
+                    moveFiles.BdmFile = new Xv2File<BDM_File>((BDM_File)GetParsedFileFromGame(moveFiles.BdmPath), fileIO.PathInGameDir(moveFiles.BdmPath), !cmsEntry.IsSelfReference(cmsEntry.BdmPath), null, false, MoveFileTypes.BDM);
 
             }
             //EEPK
@@ -966,7 +963,7 @@ namespace Xv2CoreLib
                 moveFiles.EepkPath = string.Format("vfx/{0}", ersEntry.FILE_PATH);
 
                 if(loadFiles)
-                    moveFiles.EepkFile = new Xv2File<EffectContainerFile>((EffectContainerFile)GetParsedFileFromGame(moveFiles.EepkPath), fileIO.PathInGameDir(moveFiles.EepkPath), borrowed, null, null, MoveFileTypes.EEPK);
+                    moveFiles.EepkFile = new Xv2File<EffectContainerFile>((EffectContainerFile)GetParsedFileFromGame(moveFiles.EepkPath), fileIO.PathInGameDir(moveFiles.EepkPath), borrowed, null, false, MoveFileTypes.EEPK);
             }
 
             //ACBs
@@ -985,13 +982,13 @@ namespace Xv2CoreLib
                         bool borrowed = !Utils.CompareSplitString(csoEntry.SePath, '_', 2, cmsEntry.ShortName);
 
                         if(loadFiles)
-                            moveFiles.SeAcbFile.Add(new Xv2File<ACB_Wrapper>((ACB_Wrapper)GetParsedFileFromGame(moveFiles.SeAcbPath), fileIO.PathInGameDir(moveFiles.SeAcbPath), borrowed, null, null, MoveFileTypes.SE_ACB, csoEntry.Costume.ToString()));
+                            moveFiles.SeAcbFile.Add(new Xv2File<ACB_Wrapper>((ACB_Wrapper)GetParsedFileFromGame(moveFiles.SeAcbPath), fileIO.PathInGameDir(moveFiles.SeAcbPath), borrowed, null, false, MoveFileTypes.SE_ACB, csoEntry.Costume.ToString()));
 
                         loadedFiles.Add(moveFiles.SeAcbPath);
                     }
                     else
                     {
-                        Xv2File<ACB_Wrapper>.AddCostume(moveFiles.SeAcbFile, GetAbsolutePath(moveFiles.SeAcbPath), (int)csoEntry.Costume, string.Empty);
+                        Xv2File<ACB_Wrapper>.AddCostume(moveFiles.SeAcbFile, GetAbsolutePath(moveFiles.SeAcbPath), (int)csoEntry.Costume, false);
                     }
 
                     //VOX, Jap
@@ -1002,13 +999,13 @@ namespace Xv2CoreLib
                         moveFiles.VoxAcbPath.Add(acbPath);
 
                         if (loadFiles)
-                            moveFiles.VoxAcbFile.Add(new Xv2File<ACB_Wrapper>((ACB_Wrapper)GetParsedFileFromGame(acbPath), fileIO.PathInGameDir(acbPath), borrowed, null, null, MoveFileTypes.VOX_ACB, csoEntry.Costume.ToString()));
+                            moveFiles.VoxAcbFile.Add(new Xv2File<ACB_Wrapper>((ACB_Wrapper)GetParsedFileFromGame(acbPath), fileIO.PathInGameDir(acbPath), borrowed, null, false, MoveFileTypes.VOX_ACB, csoEntry.Costume.ToString(), csoEntry.Costume == 0));
 
                         loadedFiles.Add(acbPath);
                     }
                     else
                     {
-                        Xv2File<ACB_Wrapper>.AddCostume(moveFiles.VoxAcbFile, GetAbsolutePath(acbPath), (int)csoEntry.Costume, string.Empty);
+                        Xv2File<ACB_Wrapper>.AddCostume(moveFiles.VoxAcbFile, GetAbsolutePath(acbPath), (int)csoEntry.Costume, false);
                     }
 
                     //VOX, Eng
@@ -1018,17 +1015,21 @@ namespace Xv2CoreLib
                         moveFiles.VoxAcbPath.Add(acbEngPath);
 
                         if (loadFiles)
-                            moveFiles.VoxAcbFile.Add(new Xv2File<ACB_Wrapper>((ACB_Wrapper)GetParsedFileFromGame(acbEngPath), fileIO.PathInGameDir(acbEngPath), borrowed, null, "en", MoveFileTypes.VOX_ACB, csoEntry.Costume.ToString()));
+                            moveFiles.VoxAcbFile.Add(new Xv2File<ACB_Wrapper>((ACB_Wrapper)GetParsedFileFromGame(acbEngPath), fileIO.PathInGameDir(acbEngPath), borrowed, null, true, MoveFileTypes.VOX_ACB, csoEntry.Costume.ToString(), csoEntry.Costume == 0));
 
                         loadedFiles.Add(acbEngPath);
                     }
                     else
                     {
-                        Xv2File<ACB_Wrapper>.AddCostume(moveFiles.VoxAcbFile, GetAbsolutePath(acbEngPath), (int)csoEntry.Costume, "en");
+                        Xv2File<ACB_Wrapper>.AddCostume(moveFiles.VoxAcbFile, GetAbsolutePath(acbEngPath), (int)csoEntry.Costume, true);
                     }
                 }
             }
 
+            //Load fce ean
+            string fceEanPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.fce.ean", cmsEntry.ShortName, cmsEntry.FceEanPath));
+            moveFiles.EanPaths.Add(fceEanPath);
+            moveFiles.EanFile.Add(new Xv2File<EAN_File>((EAN_File)GetParsedFileFromGame(fceEanPath), fileIO.PathInGameDir(fceEanPath), !cmsEntry.IsSelfReference(cmsEntry.FceEanPath), null, false, MoveFileTypes.FCE_EAN));
 
             return moveFiles;
         }
@@ -1634,12 +1635,12 @@ namespace Xv2CoreLib
                 {
                     if (vox.IsEnglish)
                     {
-                        vox.Path = Xenoverse2.Instance.GetAbsolutePath(string.Format(@"sound/VOX/Battle/Skill/en/CAR_BTL_{2}{1}_{0}_{3}_VOX", CusEntry.ShortName, CusEntry.ID2.ToString("D3"), Xenoverse2.Instance.GetAcbSkillTypeLetter(skillType), vox.Arg0));
+                        vox.Path = Xenoverse2.Instance.GetAbsolutePath(string.Format(@"sound/VOX/Battle/Skill/en/CAR_BTL_{2}{1}_{0}_{3}_VOX", CusEntry.ShortName, CusEntry.ID2.ToString("D3"), Xenoverse2.Instance.GetAcbSkillTypeLetter(skillType), vox.CharaCode));
                     }
                     else
                     {
                         //Japanese
-                        vox.Path = Xenoverse2.Instance.GetAbsolutePath(string.Format(@"sound/VOX/Battle/Skill/CAR_BTL_{2}{1}_{0}_{3}_VOX", CusEntry.ShortName, CusEntry.ID2.ToString("D3"), Xenoverse2.Instance.GetAcbSkillTypeLetter(skillType), vox.Arg0));
+                        vox.Path = Xenoverse2.Instance.GetAbsolutePath(string.Format(@"sound/VOX/Battle/Skill/CAR_BTL_{2}{1}_{0}_{3}_VOX", CusEntry.ShortName, CusEntry.ID2.ToString("D3"), Xenoverse2.Instance.GetAcbSkillTypeLetter(skillType), vox.CharaCode));
                     }
                 }
             }
@@ -1655,7 +1656,7 @@ namespace Xv2CoreLib
                     else
                     {
                         //Chara specific eans
-                        ean.Path = Xenoverse2.Instance.GetAbsolutePath(string.Format("{0}/{1}/{1}_{2}.ean", skillDir, folderName, ean.Arg0));
+                        ean.Path = Xenoverse2.Instance.GetAbsolutePath(string.Format("{0}/{1}/{1}_{2}.ean", skillDir, folderName, ean.CharaCode));
                     }
                 }
             }
@@ -1671,7 +1672,7 @@ namespace Xv2CoreLib
                     else
                     {
                         //Chara specific eans
-                        ean.Path = Xenoverse2.Instance.GetAbsolutePath(string.Format("{0}/{1}/{1}_{2}.cam.ean", skillDir, folderName, ean.Arg0));
+                        ean.Path = Xenoverse2.Instance.GetAbsolutePath(string.Format("{0}/{1}/{1}_{2}.cam.ean", skillDir, folderName, ean.CharaCode));
                     }
                 }
             }
@@ -1770,40 +1771,40 @@ namespace Xv2CoreLib
             if (Files == null) throw new NullReferenceException("Xv2Skill.CreateDefaultFiles: Files was null.");
 
             if (Files.BacFile == null)
-                Files.BacFile = new Xv2File<BAC_File>(BAC_File.DefaultBacFile(), null, false, null, null, Xenoverse2.MoveFileTypes.BAC);
+                Files.BacFile = new Xv2File<BAC_File>(BAC_File.DefaultBacFile(), null, false, null, false, Xenoverse2.MoveFileTypes.BAC);
 
             if (Files.BcmFile == null)
-                Files.BcmFile = new Xv2File<BCM_File>(BCM_File.DefaultBcmFile(), null, false, null, null, Xenoverse2.MoveFileTypes.BCM);
+                Files.BcmFile = new Xv2File<BCM_File>(BCM_File.DefaultBcmFile(), null, false, null, false, Xenoverse2.MoveFileTypes.BCM);
 
             if (Files.BsaFile == null)
-                Files.BsaFile = new Xv2File<BSA_File>(new BSA_File(), null, false, null, null, Xenoverse2.MoveFileTypes.BSA);
+                Files.BsaFile = new Xv2File<BSA_File>(new BSA_File(), null, false, null, false, Xenoverse2.MoveFileTypes.BSA);
 
             if (Files.BdmFile == null)
-                Files.BdmFile = new Xv2File<BDM_File>(BDM_File.DefaultBdmFile(), null, false, null, null, Xenoverse2.MoveFileTypes.BDM);
+                Files.BdmFile = new Xv2File<BDM_File>(BDM_File.DefaultBdmFile(), null, false, null, false, Xenoverse2.MoveFileTypes.BDM);
 
             if (Files.ShotBdmFile == null)
-                Files.ShotBdmFile = new Xv2File<BDM_File>(BDM_File.DefaultBdmFile(), null, false, null, null, Xenoverse2.MoveFileTypes.SHOT_BDM);
+                Files.ShotBdmFile = new Xv2File<BDM_File>(BDM_File.DefaultBdmFile(), null, false, null, false, Xenoverse2.MoveFileTypes.SHOT_BDM);
 
             if (Files.EepkFile == null)
-                Files.EepkFile = new Xv2File<EffectContainerFile>(EffectContainerFile.New(), null, false, null, null, Xenoverse2.MoveFileTypes.EEPK);
+                Files.EepkFile = new Xv2File<EffectContainerFile>(EffectContainerFile.New(), null, false, null, false, Xenoverse2.MoveFileTypes.EEPK);
 
             if (Files.BasFile == null)
-                Files.BasFile = new Xv2File<BAS_File>(new BAS_File(), null, false, null, null, Xenoverse2.MoveFileTypes.BAS);
+                Files.BasFile = new Xv2File<BAS_File>(new BAS_File(), null, false, null, false, Xenoverse2.MoveFileTypes.BAS);
 
             if (Files.EanFile.FirstOrDefault(x => x.IsDefault) == null && Xenoverse2.Instance.CmnEan != null)
-                Files.EanFile.Add(new Xv2File<EAN_File>(EAN_File.DefaultFile(Xenoverse2.Instance.CmnEan.Skeleton), null, false, null, null, Xenoverse2.MoveFileTypes.EAN));
+                Files.EanFile.Add(new Xv2File<EAN_File>(EAN_File.DefaultFile(Xenoverse2.Instance.CmnEan.Skeleton), null, false, null, false, Xenoverse2.MoveFileTypes.EAN));
 
             if (Files.CamEanFile.FirstOrDefault(x => x.IsDefault) == null)
-                Files.CamEanFile.Add(new Xv2File<EAN_File>(EAN_File.DefaultCamFile(), null, false, null, null, Xenoverse2.MoveFileTypes.CAM_EAN));
+                Files.CamEanFile.Add(new Xv2File<EAN_File>(EAN_File.DefaultCamFile(), null, false, null, false, Xenoverse2.MoveFileTypes.CAM_EAN));
 
             if (Files.SeAcbFile.FirstOrDefault(x => x.IsDefault) == null)
-                Files.SeAcbFile.Add(new Xv2File<ACB_Wrapper>(ACB_Wrapper.NewXv2Acb(), null, false, null, null, Xenoverse2.MoveFileTypes.SE_ACB, "0"));
+                Files.SeAcbFile.Add(new Xv2File<ACB_Wrapper>(ACB_Wrapper.NewXv2Acb(), null, false, null, false, Xenoverse2.MoveFileTypes.SE_ACB, "0"));
 
             if (Files.AfterBacFile == null)
-                Files.AfterBacFile = new Xv2File<BAC_File>(BAC_File.DefaultBacFile(), null, false, null, null, Xenoverse2.MoveFileTypes.AFTER_BAC);
+                Files.AfterBacFile = new Xv2File<BAC_File>(BAC_File.DefaultBacFile(), null, false, null, false, Xenoverse2.MoveFileTypes.AFTER_BAC);
 
             if (Files.AfterBcmFile == null)
-                Files.AfterBcmFile = new Xv2File<BCM_File>(BCM_File.DefaultBcmFile(), null, false, null, null, Xenoverse2.MoveFileTypes.AFTER_BCM);
+                Files.AfterBcmFile = new Xv2File<BCM_File>(BCM_File.DefaultBcmFile(), null, false, null, false, Xenoverse2.MoveFileTypes.AFTER_BCM);
         }
     }
 
@@ -1818,7 +1819,6 @@ namespace Xv2CoreLib
         public Xv2File<BCS_File> BcsFile = null;
         public Xv2File<BAI_File> BaiFile = null;
         public List<Xv2File<AMK_File>> AmkFile = null;
-        public Xv2File<EAN_File> FceEanFile = null;
 
         public Xv2MoveFiles MovesetFiles = null;
 
@@ -1837,8 +1837,10 @@ namespace Xv2CoreLib
             if (BaiFile?.File?.IsNull() == false)
                 BaiFile.File.Save(BaiFile.Path);
 
-            if (MovesetFiles.EanFile[0]?.File?.IsNull() == false)
-                MovesetFiles.EanFile[0].File.Save(MovesetFiles.EanFile[0].Path);
+            foreach(var ean in MovesetFiles.EanFile)
+            {
+                ean.File.Save(ean.Path);
+            }
 
             if (MovesetFiles.CamEanFile[0]?.File?.IsNull() == false)
                 MovesetFiles.CamEanFile[0].File.Save(MovesetFiles.CamEanFile[0].Path);
@@ -1884,12 +1886,6 @@ namespace Xv2CoreLib
                 CmsEntry.BdmPath = CmsEntry.ShortName;
             }
 
-            if (MovesetFiles.EanFile[0]?.Borrowed == false)
-            {
-                MovesetFiles.EanFile[0].Path = Xenoverse2.Instance.GetAbsolutePath(String.Format("{0}/{1}.ean", skillDir, CmsEntry.ShortName));
-                CmsEntry.EanPath = CmsEntry.ShortName;
-            }
-
             if (!MovesetFiles.CamEanFile[0]?.Borrowed == false)
             {
                 MovesetFiles.CamEanFile[0].Path = Xenoverse2.Instance.GetAbsolutePath(String.Format("{0}/{1}.cam.ean", skillDir, CmsEntry.ShortName));
@@ -1900,12 +1896,6 @@ namespace Xv2CoreLib
             {
                 BaiFile.Path = Xenoverse2.Instance.GetAbsolutePath(String.Format("{0}/{1}.bai", skillDir, CmsEntry.ShortName));
                 CmsEntry.BaiPath = CmsEntry.ShortName;
-            }
-
-            if (FceEanFile?.Borrowed == false)
-            {
-                FceEanFile.Path = Xenoverse2.Instance.GetAbsolutePath(String.Format("{0}/{1}.fce.ean", skillDir, CmsEntry.ShortName));
-                CmsEntry.FceEanPath = CmsEntry.ShortName;
             }
 
             if (MovesetFiles.EepkFile?.Borrowed == false)
@@ -1946,6 +1936,22 @@ namespace Xv2CoreLib
                     MovesetFiles.VoxAcbFile[i].Path = Xenoverse2.Instance.GetAbsolutePath(String.Format("sound/VOX/Battle/chara/CAR_BTL_{0}{1}_VOX.acb", CmsEntry.ShortName, (i > 0) ? i.ToString() : string.Empty));
                 }
             }
+
+            //EANs
+            var mainEan = MovesetFiles.EanFile.FirstOrDefault(x => x.IsDefault && x.FileType == Xenoverse2.MoveFileTypes.EAN);
+            var fceEan = MovesetFiles.EanFile.FirstOrDefault(x => x.FileType == Xenoverse2.MoveFileTypes.FCE_EAN);
+
+            if (mainEan?.Borrowed == false)
+            {
+                mainEan.Path = Xenoverse2.Instance.GetAbsolutePath(String.Format("{0}/{1}.ean", skillDir, CmsEntry.ShortName));
+                CmsEntry.EanPath = CmsEntry.ShortName;
+            }
+
+            if (fceEan?.Borrowed == false)
+            {
+                fceEan.Path = Xenoverse2.Instance.GetAbsolutePath(String.Format("{0}/{1}.fce.ean", skillDir, CmsEntry.ShortName));
+                CmsEntry.FceEanPath = CmsEntry.ShortName;
+            }
         }
     
         public void CreateDefaultFiles()
@@ -1953,37 +1959,37 @@ namespace Xv2CoreLib
             if (MovesetFiles == null) throw new NullReferenceException("Xv2Skill.Xv2Character: MovesetFiles was null.");
 
             if (MovesetFiles.BacFile == null)
-                MovesetFiles.BacFile = new Xv2File<BAC_File>(BAC_File.DefaultBacFile(), null, false, null, null, Xenoverse2.MoveFileTypes.BAC);
+                MovesetFiles.BacFile = new Xv2File<BAC_File>(BAC_File.DefaultBacFile(), null, false, null, false, Xenoverse2.MoveFileTypes.BAC);
 
             if (MovesetFiles.BcmFile == null)
-                MovesetFiles.BcmFile = new Xv2File<BCM_File>(BCM_File.DefaultBcmFile(), null, false, null, null, Xenoverse2.MoveFileTypes.BCM);
+                MovesetFiles.BcmFile = new Xv2File<BCM_File>(BCM_File.DefaultBcmFile(), null, false, null, false, Xenoverse2.MoveFileTypes.BCM);
 
             if (MovesetFiles.BdmFile == null)
-                MovesetFiles.BdmFile = new Xv2File<BDM_File>(BDM_File.DefaultBdmFile(), null, false, null, null, Xenoverse2.MoveFileTypes.BDM);
+                MovesetFiles.BdmFile = new Xv2File<BDM_File>(BDM_File.DefaultBdmFile(), null, false, null, false, Xenoverse2.MoveFileTypes.BDM);
 
             if (MovesetFiles.EepkFile == null)
-                MovesetFiles.EepkFile = new Xv2File<EffectContainerFile>(EffectContainerFile.New(), null, false, null, null, Xenoverse2.MoveFileTypes.EEPK);
+                MovesetFiles.EepkFile = new Xv2File<EffectContainerFile>(EffectContainerFile.New(), null, false, null, false, Xenoverse2.MoveFileTypes.EEPK);
 
             if (BaiFile == null)
-                BaiFile = new Xv2File<BAI_File>(new BAI_File(), null, false, null, null, Xenoverse2.MoveFileTypes.BAI);
+                BaiFile = new Xv2File<BAI_File>(new BAI_File(), null, false, null, false, Xenoverse2.MoveFileTypes.BAI);
 
             if (MovesetFiles.EanFile.Any(x => !x.IsDefault) && Xenoverse2.Instance.CmnEan != null)
-                MovesetFiles.EanFile.Add(new Xv2File<EAN_File>(EAN_File.DefaultFile(Xenoverse2.Instance.CmnEan.Skeleton), null, false, null, null, Xenoverse2.MoveFileTypes.EAN));
+                MovesetFiles.EanFile.Add(new Xv2File<EAN_File>(EAN_File.DefaultFile(Xenoverse2.Instance.CmnEan.Skeleton), null, false, null, false, Xenoverse2.MoveFileTypes.EAN));
 
             if (MovesetFiles.CamEanFile.Any(x => !x.IsDefault))
-                MovesetFiles.CamEanFile.Add(new Xv2File<EAN_File>(EAN_File.DefaultCamFile(), null, false, null, null, Xenoverse2.MoveFileTypes.CAM_EAN));
+                MovesetFiles.CamEanFile.Add(new Xv2File<EAN_File>(EAN_File.DefaultCamFile(), null, false, null, false, Xenoverse2.MoveFileTypes.CAM_EAN));
 
             if (MovesetFiles.VoxAcbFile.Any(x => !x.IsDefault && x.IsEnglish))
-                MovesetFiles.VoxAcbFile.Add(new Xv2File<ACB_Wrapper>(ACB_Wrapper.NewXv2Acb(), null, false, null, "en", Xenoverse2.MoveFileTypes.VOX_ACB, "0"));
+                MovesetFiles.VoxAcbFile.Add(new Xv2File<ACB_Wrapper>(ACB_Wrapper.NewXv2Acb(), null, false, null, true, Xenoverse2.MoveFileTypes.VOX_ACB, "0"));
 
             if (MovesetFiles.VoxAcbFile.Any(x => !x.IsDefault && !x.IsEnglish))
-                MovesetFiles.VoxAcbFile.Add(new Xv2File<ACB_Wrapper>(ACB_Wrapper.NewXv2Acb(), null, false, null, null, Xenoverse2.MoveFileTypes.VOX_ACB, "0"));
+                MovesetFiles.VoxAcbFile.Add(new Xv2File<ACB_Wrapper>(ACB_Wrapper.NewXv2Acb(), null, false, null, false, Xenoverse2.MoveFileTypes.VOX_ACB, "0"));
 
             if (MovesetFiles.SeAcbFile.Any(x => !x.IsDefault))
-                MovesetFiles.SeAcbFile.Add(new Xv2File<ACB_Wrapper>(ACB_Wrapper.NewXv2Acb(), null, false, null, null, Xenoverse2.MoveFileTypes.SE_ACB, "0"));
+                MovesetFiles.SeAcbFile.Add(new Xv2File<ACB_Wrapper>(ACB_Wrapper.NewXv2Acb(), null, false, null, false, Xenoverse2.MoveFileTypes.SE_ACB, "0"));
 
             if (AmkFile.Any(x => !x.IsDefault))
-                AmkFile.Add(new Xv2File<AMK_File>(new AMK_File(), null, false, null, null, Xenoverse2.MoveFileTypes.AMK, "0"));
+                AmkFile.Add(new Xv2File<AMK_File>(new AMK_File(), null, false, null, false, Xenoverse2.MoveFileTypes.AMK, "0"));
         }
     
     }
@@ -2102,37 +2108,37 @@ namespace Xv2CoreLib
         #endregion
 
         #region Add
-        public void AddCamEanFile(EAN_File file, string chara, string path, bool borrowed = false)
+        public void AddCamEanFile(EAN_File file, string chara, string path, bool borrowed = false, bool isDefault = false)
         {
-            int index = CamEanFile.IndexOf(CamEanFile.FirstOrDefault(x => x.Arg0 == chara));
+            int index = CamEanFile.IndexOf(CamEanFile.FirstOrDefault(x => x.CharaCode == chara));
             if (index != -1)
-                CamEanFile[index] = new Xv2File<EAN_File>(file, path, borrowed, chara, null, Xenoverse2.MoveFileTypes.CAM_EAN);
+                CamEanFile[index] = new Xv2File<EAN_File>(file, path, borrowed, chara, false, Xenoverse2.MoveFileTypes.CAM_EAN, null, isDefault);
             else
-                CamEanFile.Add(new Xv2File<EAN_File>(file, path, borrowed, chara, null, Xenoverse2.MoveFileTypes.CAM_EAN));
+                CamEanFile.Add(new Xv2File<EAN_File>(file, path, borrowed, chara, false, Xenoverse2.MoveFileTypes.CAM_EAN, null, isDefault));
         }
 
-        public void AddEanFile(EAN_File file, string chara, string path, bool borrowed = false)
+        public void AddEanFile(EAN_File file, string chara, string path, bool borrowed = false, bool isDefault = false)
         {
-            int index = EanFile.IndexOf(EanFile.FirstOrDefault(x => x.Arg0 == chara));
+            int index = EanFile.IndexOf(EanFile.FirstOrDefault(x => x.CharaCode == chara));
             if (index != -1)
-                EanFile[index] = new Xv2File<EAN_File>(file, path, borrowed, chara, null, Xenoverse2.MoveFileTypes.EAN);
+                EanFile[index] = new Xv2File<EAN_File>(file, path, borrowed, chara, false, Xenoverse2.MoveFileTypes.EAN, null, isDefault);
             else
-                EanFile.Add(new Xv2File<EAN_File>(file, path, borrowed, chara, null, Xenoverse2.MoveFileTypes.EAN));
+                EanFile.Add(new Xv2File<EAN_File>(file, path, borrowed, chara, false, Xenoverse2.MoveFileTypes.EAN, null, isDefault));
         }
         
-        public void AddVoxAcbFile(ACB_Wrapper file, string chara, string language, string path, bool borrowed = false)
+        public void AddVoxAcbFile(ACB_Wrapper file, string chara, bool isEnglish, string path, bool borrowed = false, bool isDefault = false)
         {
-            int index = VoxAcbFile.IndexOf(VoxAcbFile.FirstOrDefault(x => x.Arg0 == chara && x.Arg1 == language));
+            int index = VoxAcbFile.IndexOf(VoxAcbFile.FirstOrDefault(x => x.CharaCode == chara && x.IsEnglish == isEnglish));
             if (index != -1)
-                VoxAcbFile[index] = new Xv2File<ACB_Wrapper>(file, path, borrowed, chara, language, Xenoverse2.MoveFileTypes.VOX_ACB);
+                VoxAcbFile[index] = new Xv2File<ACB_Wrapper>(file, path, borrowed, chara, isEnglish, Xenoverse2.MoveFileTypes.VOX_ACB, null, isDefault);
             else
-                VoxAcbFile.Add(new Xv2File<ACB_Wrapper>(file, path, borrowed, chara, language, Xenoverse2.MoveFileTypes.VOX_ACB));
+                VoxAcbFile.Add(new Xv2File<ACB_Wrapper>(file, path, borrowed, chara, isEnglish, Xenoverse2.MoveFileTypes.VOX_ACB, null, isDefault));
         }
 
         public void AddSeAcbFile(ACB_Wrapper file, int costume, string path, bool borrowed = false)
         {
-            var entry = new Xv2File<ACB_Wrapper>(file, path, borrowed, null, null, Xenoverse2.MoveFileTypes.SE_ACB);
-            entry.Arg2 = costume.ToString();
+            var entry = new Xv2File<ACB_Wrapper>(file, path, borrowed, null, false, Xenoverse2.MoveFileTypes.SE_ACB);
+            entry.CostumesString = costume.ToString();
             SeAcbFile.Add(entry);
         }
 
@@ -2143,7 +2149,7 @@ namespace Xv2CoreLib
         {
             if (charaUnique)
             {
-                var file = CamEanFile.FirstOrDefault(x => x.Arg0 == chara);
+                var file = CamEanFile.FirstOrDefault(x => x.CharaCode == chara);
                 return (file != null) ? file.File : GetDefaultCamEanFile();
             }
             else
@@ -2156,7 +2162,7 @@ namespace Xv2CoreLib
         {
             if (charaUnique)
             {
-                var file = EanFile.FirstOrDefault(x => x.Arg0 == chara);
+                var file = EanFile.FirstOrDefault(x => x.CharaCode == chara);
                 return (file != null) ? file.File : GetDefaultEanFile();
             }
             else
@@ -2165,12 +2171,22 @@ namespace Xv2CoreLib
             }
         }
 
-        public ACB_Wrapper GetVoxFile(string chara, int costume, string language)
+        public EAN_File GetFaceEanFile()
         {
-            var file = VoxAcbFile.FirstOrDefault(x => x.Arg0 == chara && x.Arg1 == language && x.Arg2 == costume.ToString());
+            return EanFile.FirstOrDefault(x => x.FileType == Xenoverse2.MoveFileTypes.FCE_EAN)?.File;
+        }
+
+        public EAN_File GetTailEanFile()
+        {
+            return EanFile.FirstOrDefault(x => x.FileType == Xenoverse2.MoveFileTypes.TAL_EAN)?.File;
+        }
+
+        public ACB_Wrapper GetVoxFile(string chara, int costume, bool isEnglish)
+        {
+            var file = VoxAcbFile.FirstOrDefault(x => x.CharaCode == chara && x.IsEnglish == isEnglish && x.HasCostume(costume));
 
             if (file != null) return file.File;
-            return VoxAcbFile.FirstOrDefault(x => x.Arg0 == chara && x.Arg1 == language && x.IsDefault)?.File;
+            return VoxAcbFile.FirstOrDefault(x => x.CharaCode == chara && x.IsEnglish == isEnglish && x.IsDefault)?.File;
         }
 
         public ACB_Wrapper GetSeFile(int costume = -1)
@@ -2187,14 +2203,14 @@ namespace Xv2CoreLib
         private EAN_File GetDefaultEanFile()
         {
             foreach (var ean in EanFile)
-                if (string.IsNullOrWhiteSpace(ean.Arg0)) return ean.File;
+                if (string.IsNullOrWhiteSpace(ean.CharaCode)) return ean.File;
             return null;
         }
 
         private EAN_File GetDefaultCamEanFile()
         {
             foreach (var ean in CamEanFile)
-                if (string.IsNullOrWhiteSpace(ean.Arg0)) return ean.File;
+                if (string.IsNullOrWhiteSpace(ean.CharaCode)) return ean.File;
             return null;
         }
         
@@ -2347,7 +2363,7 @@ namespace Xv2CoreLib
         
         public bool CanRemoveFile(object file)
         {
-            return (bool)file.GetType().GetMethod("IsOptionalFile").Invoke(file, null);
+            return (bool)file.GetType().GetMethod("IsOptionalFile")?.Invoke(file, null);
         }
 
         public List<IUndoRedo> RemoveFile(object xv2FileObject)
@@ -2408,23 +2424,26 @@ namespace Xv2CoreLib
         public Xenoverse2.MoveFileTypes FileType { get; set; }
         public string BorrowString { get { return (Borrowed) ? "Yes" : "No"; } }
         public string PathString { get { return (Borrowed) ? Path : "Calculated on save"; } }
-        public string EanDisplayName { get { return (string.IsNullOrWhiteSpace(Arg0)) ? "Main" : Arg0; } }
-        
-        public string Arg0_Wrapper
+        public string EanDisplayName
         {
             get
             {
-                if (string.IsNullOrWhiteSpace(Arg0)) return "Default";
-                return Arg0;
-            }
-            set
-            {
-                if (!string.IsNullOrWhiteSpace(Arg0))
-                    Arg0 = value;
+                switch (FileType)
+                {
+                    case Xenoverse2.MoveFileTypes.TAL_EAN:
+                        return "Tail";
+                    case Xenoverse2.MoveFileTypes.FCE_EAN:
+                        return "Face";
+                    case Xenoverse2.MoveFileTypes.EAN:
+                    case Xenoverse2.MoveFileTypes.CAM_EAN:
+                    case Xenoverse2.MoveFileTypes.VOX_ACB:
+                        return (IsDefault) ? "Main" : CharaCode;
+                    default:
+                        return "invalid";
+                }
             }
         }
         
-
         //Data
         public T File { get; set; } = null;
         /// <summary>
@@ -2436,138 +2455,145 @@ namespace Xv2CoreLib
         /// </summary>
         public bool Borrowed { get; set; } = false;
 
+        #region Args
         //Arguments
-        private string _arg0 = string.Empty;
-        private string _arg1 = string.Empty;
-        private string _arg2 = string.Empty;
+        private string _charaCode = string.Empty;
+        private bool _isEnglish = false;
+        private string _costumes = string.Empty;
 
-        //Used to specify character code for vox acb and ean files, if any
-        public string Arg0
+        /// <summary>
+        /// Used to specify character code for VOX ACB and EAN files.
+        /// </summary>
+        public string CharaCode
         {
             get
             {
-                return _arg0;
+                return _charaCode;
             }
             set
             {
-                if(_arg0 != value)
+                if(_charaCode != value)
                 {
-                    _arg0 = value;
-                    NotifyPropertyChanged(nameof(Arg0));
+                    _charaCode = value;
+                    NotifyPropertyChanged(nameof(CharaCode));
                     NotifyPropertyChanged(nameof(EanDisplayName));
-                    NotifyPropertyChanged(nameof(UndoableArg0));
+                    NotifyPropertyChanged(nameof(UndoableCharaCode));
                 }
             }
         }
-        //Used to specify language of vox acb files (en = english, else jap)
-        public string Arg1
+        /// <summary>
+        /// Applicable to ACB files only. Determines if the ACB file is for English or Japanese.
+        /// </summary>
+        public bool IsEnglish
+        {
+            get { return _isEnglish; }
+            set
+            {
+                if(value != _isEnglish)
+                {
+                    _isEnglish = value;
+                    NotifyPropertyChanged(nameof(IsEnglish));
+                }
+            }
+        }
+        /// <summary>
+        /// Used to specify what costumes this file is for (se, vox, amk). Accepts multiple int values (greater than 0) seperated by "," or a single value of "0".
+        /// </summary>
+        public string CostumesString
         {
             get
             {
-                return _arg1;
+                return _costumes;
             }
             set
             {
-                if (_arg1 != value)
+                if (_costumes != value)
                 {
-                    _arg1 = value;
-                    NotifyPropertyChanged(nameof(Arg1));
-                    NotifyPropertyChanged(nameof(UndoableArg1));
+                    _costumes = value;
+                    NotifyPropertyChanged(nameof(CostumesString));
+                    NotifyPropertyChanged(nameof(UndoableCostumes));
                 }
             }
         }
-        //Used to specify what costumes this file is for (se, vox, amk). Accepts multiple int values (greater than 0) seperated by "," or a single value of "0".
-        public string Arg2
-        {
-            get
-            {
-                return _arg2;
-            }
-            set
-            {
-                if (_arg2 != value)
-                {
-                    _arg2 = value;
-                    NotifyPropertyChanged(nameof(Arg2));
-                    NotifyPropertyChanged(nameof(UndoableArg2));
-                }
-            }
-        }
+        /// <summary>
+        /// Is this file a default file? (Default files are always on a move and cannot be deleted).
+        /// </summary>
+        public bool IsDefault { get; private set; }
 
         //Helpers
-        public bool IsEnglish { get { return (Arg1 == "en"); } set { Arg1 = (value) ? "en" : ""; } }
-        public bool IsDefault { get { return string.IsNullOrWhiteSpace(Arg0) || Arg2 == "0"; } }
+        //public bool IsDefault { get { return string.IsNullOrWhiteSpace(CharaCode) || CostumesString == "0"; } }
         public bool IsNotDefault { get { return !IsDefault; } }
 
         //Undo/Redo
-        public string UndoableArg0
+        public string UndoableCharaCode
         {
             get
             {
-                return Arg0;
+                return CharaCode;
             }
             set
             {
-                if(Arg0 != value && !string.IsNullOrEmpty(value))
+                if(CharaCode != value && !string.IsNullOrEmpty(value))
                 {
-                    UndoManager.Instance.AddUndo(new UndoableProperty<Xv2File<T>>(nameof(Arg0), this, Arg0, value, "Arg0"));
-                    Arg0 = value;
+                    UndoManager.Instance.AddUndo(new UndoableProperty<Xv2File<T>>(nameof(CharaCode), this, CharaCode, value, "CharaCode"));
+                    CharaCode = value;
 
-                    NotifyPropertyChanged(nameof(UndoableArg0));
+                    NotifyPropertyChanged(nameof(UndoableCharaCode));
                 }
                 else
                 {
                     //Value cannot be set to null/empty
-                    Arg0 = _arg0;
-                    NotifyPropertyChanged(nameof(UndoableArg0));
+                    CharaCode = _charaCode;
+                    NotifyPropertyChanged(nameof(UndoableCharaCode));
                 }
             }
         }
-        public string UndoableArg1
+        public bool UndoableIsEnglish
         {
             get
             {
-                return Arg1;
+                return IsEnglish;
             }
             set
             {
-                if (Arg1 != value)
+                if (IsEnglish != value)
                 {
-                    UndoManager.Instance.AddUndo(new UndoableProperty<Xv2File<T>>(nameof(Arg1), this, Arg1, value, "Arg1"));
-                    Arg1 = value;
+                    UndoManager.Instance.AddUndo(new UndoableProperty<Xv2File<T>>(nameof(IsEnglish), this, IsEnglish, value, "IsEnlgish"));
+                    IsEnglish = value;
 
-                    NotifyPropertyChanged(nameof(UndoableArg1));
+                    NotifyPropertyChanged(nameof(UndoableIsEnglish));
                 }
             }
         }
-        public string UndoableArg2
+        public string UndoableCostumes
         {
             get
             {
-                return Arg2;
+                return CostumesString;
             }
             set
             {
-                if (Arg2 != value)
+                if (CostumesString != value)
                 {
-                    UndoManager.Instance.AddUndo(new UndoableProperty<Xv2File<T>>(nameof(Arg2), this, Arg2, value, "Arg2"));
-                    Arg2 = value;
+                    UndoManager.Instance.AddUndo(new UndoableProperty<Xv2File<T>>(nameof(CostumesString), this, CostumesString, value, "Costumes"));
+                    CostumesString = value;
 
-                    NotifyPropertyChanged(nameof(UndoableArg2));
+                    NotifyPropertyChanged(nameof(UndoableCostumes));
                 }
             }
         }
 
-
-        public Xv2File(T file, string path, bool borrowed, string arg0 = null, string arg1 = null, Xenoverse2.MoveFileTypes fileType = 0, string arg2 = null)
+        #endregion
+        public Xv2File(T file, string path, bool borrowed, string charaCode = null, bool isEnglish = false, Xenoverse2.MoveFileTypes fileType = 0, string costumes = null, bool isDefault = true)
         {
             File = file;
             Path = path;
             Borrowed = borrowed;
-            Arg0 = arg0;
-            Arg1 = arg1;
-            Arg2 = arg2;
+            CharaCode = charaCode;
+            IsEnglish = isEnglish;
+            CostumesString = costumes;
             FileType = fileType;
+            IsDefault = isDefault;
         }
 
         public List<IUndoRedo> ReplaceFile(string path)
@@ -2664,17 +2690,20 @@ namespace Xv2CoreLib
             NotifyPropertyChanged(nameof(FileType));
             NotifyPropertyChanged(nameof(BorrowString));
             NotifyPropertyChanged(nameof(PathString));
-            NotifyPropertyChanged(nameof(Arg0));
-            NotifyPropertyChanged(nameof(Arg1));
+            NotifyPropertyChanged(nameof(CharaCode));
+            NotifyPropertyChanged(nameof(IsEnglish));
             NotifyPropertyChanged(nameof(EanDisplayName));
             NotifyPropertyChanged(nameof(IsEnglish));
-            NotifyPropertyChanged(nameof(Arg0_Wrapper));
             NotifyPropertyChanged(nameof(File));
         }
     
-        public List<int> GetArg2Values()
+        /// <summary>
+        /// Gets a read-only List of all costumes specified in CostumesString.
+        /// </summary>
+        /// <returns></returns>
+        public List<int> GetCostumes()
         {
-            string[] values = Arg2.Trim().Split(',');
+            string[] values = CostumesString.Trim().Split(',');
             List<int> intValues = new List<int>();
 
             foreach(var value in values)
@@ -2692,21 +2721,21 @@ namespace Xv2CoreLib
         public bool HasCostume(int costume)
         {
             //return (GetArg2Values().Contains(costume) || Arg2 == "0");
-            return (GetArg2Values().Contains(costume));
+            return (GetCostumes().Contains(costume));
         }
 
         public void AddCostume(int costume)
         {
-            Arg2 += (string.IsNullOrWhiteSpace(Arg2)) ? costume.ToString() : $", {costume}";
+            CostumesString += (string.IsNullOrWhiteSpace(CostumesString)) ? costume.ToString() : $", {costume}";
         }
 
         /// <summary>
         /// Add a costume to an existing loaded file. Intended for use with CSO files (AMK, SE, VOX)
         /// </summary>
         /// <returns></returns>
-        public static bool AddCostume(IList<Xv2File<T>> files, string absPath, int costume, string arg1)
+        public static bool AddCostume(IList<Xv2File<T>> files, string absPath, int costume, bool isEnglish)
         {
-            var file = (string.IsNullOrWhiteSpace(arg1)) ? files.FirstOrDefault(x => Utils.ComparePaths(absPath, x.Path) && string.IsNullOrWhiteSpace(x.Arg1)) : files.FirstOrDefault(x => Utils.ComparePaths(absPath, x.Path) && x.Arg1 == arg1);
+            var file = files.FirstOrDefault(x => Utils.ComparePaths(absPath, x.Path) && x.IsEnglish == isEnglish);
 
             if(file != null)
             {

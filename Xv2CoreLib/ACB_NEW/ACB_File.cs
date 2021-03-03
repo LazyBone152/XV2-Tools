@@ -35,6 +35,7 @@ namespace Xv2CoreLib.ACB_NEW
     [Serializable]
     public class ACB_File
     {
+        #region Constants
         public const string MUSIC_PACKAGE_EXTENSION = ".musicpackage";
 
         //Clipboard Constants
@@ -56,19 +57,27 @@ namespace Xv2CoreLib.ACB_NEW
         public static Version _1_22_4_0 = new Version("1.22.4.0"); //Used in XV1, and a few old XV2 ACBs (leftovers from xv1)
         public static Version _1_22_0_0 = new Version("1.22.0.0"); //Not observed, just a guess
         public static Version _1_21_1_0 = new Version("1.21.1.0"); //Used in XV1, and a few old XV2 ACBs (leftovers from xv1)
-        public static Version _1_14_0_0 = new Version("1.14.0.0"); 
+        public static Version _1_14_0_0 = new Version("1.14.0.0");
         public static Version _1_6_0_0 = new Version("1.6.0.0"); //Used in 1 file in XV1. Missing a lot of data.
         public static Version _0_81_1_0 = new Version("0.81.1.0"); //Used in MGS3 3D. Uses CPK AWB files instead of AFS2. (wont support)
-        
+        #endregion
+
         [YAXDontSerialize]
         public bool TableValidationFailed { get; private set; }
         [YAXDontSerialize]
         public bool ExternalAwbError { get; private set; }
 
+        #region SaveSettings
         [YAXDontSerialize]
         public SaveFormat SaveFormat { get; set; } = SaveFormat.Default;
         [YAXDontSerialize]
         public MusicPackageType MusicPackageType { get; set; } = MusicPackageType.NewOption;
+        /// <summary>
+        /// Save the ACB in a way that Eternity Audio Tool and associated tools can still load it, ommiting some features.
+        /// </summary>
+        [YAXDontSerialize]
+        public bool EternityCompatibility = true;
+        #endregion
 
         [YAXAttributeFor("Name")]
         [YAXSerializeAs("value")]
@@ -182,9 +191,10 @@ namespace Xv2CoreLib.ACB_NEW
             return Load(UTF_File.LoadUtfTable(acbBytes, acbBytes.Length), awbBytes, loadUnknownCommands, isMusicPackage);
         }
 
-        public static ACB_File Load(UTF_File utfFile, byte[] awbBytes, bool loadUnknownCommands = false, bool isMusicPackage = false)
+        public static ACB_File Load(UTF_File utfFile, byte[] awbBytes, bool loadUnknownCommands = false, bool isMusicPackage = false, bool eternityCompatibility = true)
         {
             ACB_File acbFile = new ACB_File();
+            acbFile.EternityCompatibility = eternityCompatibility;
             acbFile.ValidateTables(utfFile);
 
             acbFile.Version = BigEndianConverter.UIntToVersion(utfFile.GetValue<uint>("Version", TypeFlag.UInt32, 0), true);
@@ -384,9 +394,16 @@ namespace Xv2CoreLib.ACB_NEW
         /// </summary>
         /// <param name="path">The save location, minus the extension.</param>
         /// <param name="fullRebuild">Determines if table indexes will be dynamicly re-linked upon saving, using the TableGuid/InstanceGuid linkage.\n\nRecommended: Disabled for XMLs, enabled for all other uses.</param>
-        /// <returns> Undos steps for the table clean up (only relevant if fullRebuild is true)</returns>
         public void Save(string path, bool fullRebuild = true)
         {
+            List<IUndoRedo> undos = null;
+
+            //Clean tables up
+            if (fullRebuild)
+            {
+                undos = CleanUpTables();
+            }
+
             SortCues();
             TrimSequenceTrackPercentages();
             if (fullRebuild)
@@ -423,6 +440,12 @@ namespace Xv2CoreLib.ACB_NEW
             if (awbBytes != null)
                 File.WriteAllBytes(path + ".awb", awbBytes);
             
+
+            if(undos != null)
+            {
+                CompositeUndo undo = new CompositeUndo(undos, "");
+                undo.Undo();
+            }
         }
 
         public void SaveToClipboard()
@@ -469,7 +492,7 @@ namespace Xv2CoreLib.ACB_NEW
             ACB_GlobalAisacReference.WriteToTable(GlobalAisacReferences, Version, globalAisacRefTable);
             ACB_Synth.WriteToTable(Synths, Version, synthTable);
             ACB_Sequence.WriteToTable(Sequences, Version, sequenceTable);
-            ACB_Waveform.WriteToTable(Waveforms, Version, waveformTable, waveformExtensionTable);
+            ACB_Waveform.WriteToTable(Waveforms, Version, waveformTable, waveformExtensionTable, EternityCompatibility);
             ACB_Track.WriteToTable(Tracks, Version, trackTable, Name);
             ACB_Track.WriteToTable(ActionTracks, Version, actionTrackTable, Name);
             ACB_Graph.WriteToTable(Graphs, Version, graphTable);
@@ -556,7 +579,7 @@ namespace Xv2CoreLib.ACB_NEW
 
             if(Version >= _1_22_0_0)
             {
-                utfFile.AddData("WaveformExtensionDataTable", 0, (Waveforms.Any(x => x.LoopFlag)) ? waveformExtensionTable.Write() : null);
+                utfFile.AddData("WaveformExtensionDataTable", 0, (waveformExtensionTable.IsValid() &&!EternityCompatibility) ? waveformExtensionTable.Write() : null);
             }
             else
             {
@@ -664,6 +687,7 @@ namespace Xv2CoreLib.ACB_NEW
             newCue.Name = name;
             newCue.ReferenceType = type;
             newCue.ReferenceIndex = new AcbTableReference(ushort.MaxValue);
+            newCue.HeaderVisibility = 1;
 
             if (type == ReferenceType.Sequence)
             {
@@ -1829,25 +1853,31 @@ namespace Xv2CoreLib.ACB_NEW
             //We must loop over them all multiple times to ensure every unused table is caught, as some unusued tables that get removed later on may reference an earlier one
             for (int i = 0; i < 11; i++)
             {
-                undos.AddRange(CleanUpTable(Sequences));
-                undos.AddRange(CleanUpTable(Synths));
-                undos.AddRange(CleanUpTable(Waveforms));
-                undos.AddRange(CleanUpTable(Tracks));
-                undos.AddRange(CleanUpTable(ActionTracks));
-                undos.AddRange(CleanUpTable(Aisacs));
-                undos.AddRange(CleanUpTable(GlobalAisacReferences));
-                undos.AddRange(CleanUpTable(Graphs));
-                undos.AddRange(CleanUpTable(AutoModulations));
+                bool deleted = false;
+
+                undos.AddRange(CleanUpTable(Sequences, ref deleted));
+                undos.AddRange(CleanUpTable(Synths, ref deleted));
+                undos.AddRange(CleanUpTable(Waveforms, ref deleted));
+                undos.AddRange(CleanUpTable(Tracks, ref deleted));
+                undos.AddRange(CleanUpTable(ActionTracks, ref deleted));
+                undos.AddRange(CleanUpTable(Aisacs, ref deleted));
+                undos.AddRange(CleanUpTable(GlobalAisacReferences, ref deleted));
+                undos.AddRange(CleanUpTable(Graphs, ref deleted));
+                undos.AddRange(CleanUpTable(AutoModulations, ref deleted));
                 //StringValues dont get deleted (some commands require them and they are small and harmless by themselves)
 
                 foreach (var commandTable in CommandTables.CommandTables)
-                    undos.AddRange(CleanUpTable(commandTable.CommandGroups));
+                    undos.AddRange(CleanUpTable(commandTable.CommandGroups, ref deleted));
+
+                //If no table was deleted in this loop, end here
+                if (!deleted)
+                    break;
             }
             
             return undos;
         }
 
-        private List<IUndoRedo> CleanUpTable<T>(IList<T> entries) where T : AcbTableBase
+        private List<IUndoRedo> CleanUpTable<T>(IList<T> entries, ref bool deleted) where T : AcbTableBase
         {
             List<IUndoRedo> undos = new List<IUndoRedo>();
 
@@ -1858,6 +1888,7 @@ namespace Xv2CoreLib.ACB_NEW
                     T original = entries[i];
                     entries.Remove(entries[i]);
                     undos.Add(new UndoableListRemove<T>(entries, original, i));
+                    deleted = true;
                 }
             }
 
@@ -2369,9 +2400,20 @@ namespace Xv2CoreLib.ACB_NEW
             utfFile.Columns.Add(new UTF_Column("NumSamples", TypeFlag.UInt32));
 
             if (Version >= _1_22_0_0)
-                utfFile.Columns.Add(new UTF_Column("ExtensionData", TypeFlag.UInt16));
+            {
+                if (EternityCompatibility)
+                {
+                    utfFile.Columns.Add(new UTF_Column("ExtensionData", TypeFlag.UInt16, StorageFlag.Constant, ushort.MaxValue.ToString()));
+                }
+                else
+                {
+                    utfFile.Columns.Add(new UTF_Column("ExtensionData", TypeFlag.UInt16));
+                }
+            }
             else
+            {
                 utfFile.Columns.Add(new UTF_Column("ExtensionData", TypeFlag.Data));
+            }
 
             if (Version >= _1_27_2_0)
             {
@@ -3813,8 +3855,13 @@ namespace Xv2CoreLib.ACB_NEW
                 if(extensionIndex != ushort.MaxValue)
                 {
                     waveform.LoopFlag = true;
-                    waveform.LoopStart = waveformExtensionTable.GetValue<uint>("LoopStart", TypeFlag.UInt32, extensionIndex);
-                    waveform.LoopEnd = waveformExtensionTable.GetValue<uint>("LoopEnd", TypeFlag.UInt32, extensionIndex);
+
+                    if(waveformExtensionTable != null)
+                    {
+                        waveform.LoopStart = waveformExtensionTable.GetValue<uint>("LoopStart", TypeFlag.UInt32, extensionIndex);
+                        waveform.LoopEnd = waveformExtensionTable.GetValue<uint>("LoopEnd", TypeFlag.UInt32, extensionIndex);
+                    }
+                    
                 }
                 else
                 {
@@ -3842,15 +3889,15 @@ namespace Xv2CoreLib.ACB_NEW
             return waveform;
         }
 
-        public static void WriteToTable(IList<ACB_Waveform> entries, Version ParseVersion, UTF_File utfTable, UTF_File waveformExtensionTable)
+        public static void WriteToTable(IList<ACB_Waveform> entries, Version ParseVersion, UTF_File utfTable, UTF_File waveformExtensionTable, bool eternityCompat)
         {
             for (int i = 0; i < entries.Count; i++)
             {
-                entries[i].WriteToTable(utfTable, i, ParseVersion, waveformExtensionTable);
+                entries[i].WriteToTable(utfTable, i, ParseVersion, waveformExtensionTable, eternityCompat);
             }
         }
 
-        public void WriteToTable(UTF_File utfTable, int index, Version ParseVersion, UTF_File waveformExtensionTable)
+        public void WriteToTable(UTF_File utfTable, int index, Version ParseVersion, UTF_File waveformExtensionTable, bool eternityCompat)
         {
             utfTable.AddValue("EncodeType", TypeFlag.UInt8, index, ((byte)EncodeType).ToString());
             utfTable.AddValue("Streaming", TypeFlag.UInt8, index, Convert.ToByte(Streaming).ToString());
@@ -3886,26 +3933,30 @@ namespace Xv2CoreLib.ACB_NEW
 
             //ExtensionData
             ushort extensionIndex = ushort.MaxValue;
-            byte[] loopBytes = null;
+            byte[] loopBytes = null; 
 
             if (LoopFlag)
             {
                 if (ParseVersion >= ACB_File._1_22_4_0)
                 {
-                    int newIdx = waveformExtensionTable.RowCount();
-                    waveformExtensionTable.AddValue("LoopStart", TypeFlag.UInt32, newIdx, LoopStart.ToString());
-                    waveformExtensionTable.AddValue("LoopEnd", TypeFlag.UInt32, newIdx, LoopEnd.ToString());
-                    extensionIndex = (ushort)newIdx;
+                    if (!eternityCompat && LoopEnd != 0)
+                    {
+                        int newIdx = waveformExtensionTable.RowCount();
+                        waveformExtensionTable.AddValue("LoopStart", TypeFlag.UInt32, newIdx, LoopStart.ToString());
+                        waveformExtensionTable.AddValue("LoopEnd", TypeFlag.UInt32, newIdx, LoopEnd.ToString());
+                        extensionIndex = (ushort)newIdx;
+                    }
                 }
                 else
                 {
-                    loopBytes = BigEndianConverter.GetBytes(new ushort[2] { (ushort)LoopStart, (ushort)LoopEnd });
+                    loopBytes = BigEndianConverter.GetBytes(new uint[2] { LoopStart, LoopEnd });
                 }
             }
 
             if (ParseVersion >= ACB_File._1_22_4_0)
             {
-                utfTable.AddValue("ExtensionData", TypeFlag.UInt16, index, extensionIndex.ToString());
+                if(!eternityCompat)
+                    utfTable.AddValue("ExtensionData", TypeFlag.UInt16, index, extensionIndex.ToString());
             }
             else
             {
@@ -3977,13 +4028,13 @@ namespace Xv2CoreLib.ACB_NEW
 
             for (int i = 0; i < table.DefaultRowCount; i++)
             {
-                rows.Add(Load(table, i, aisacNameTable));
+                rows.Add(Load(table, i, aisacNameTable, ParseVersion));
             }
 
             return rows;
         }
 
-        public static ACB_Aisac Load(UTF_File aisacTable, int index, UTF_File aisacNameTable)
+        public static ACB_Aisac Load(UTF_File aisacTable, int index, UTF_File aisacNameTable, Version version)
         {
             ACB_Aisac aisac = new ACB_Aisac();
             aisac.Index = index;
@@ -3994,7 +4045,17 @@ namespace Xv2CoreLib.ACB_NEW
             aisac.DefaultControlFlag = aisacTable.GetValue<byte>("DefaultControlFlag", TypeFlag.UInt8, index);
             aisac.DefaultControl = aisacTable.GetValue<float>("DefaultControl", TypeFlag.Single, index);
             aisac.GraphBitFlag = aisacTable.GetValue<byte>("GraphBitFlag", TypeFlag.UInt8, index);
-            aisac.AutoModulationIndex.TableIndex = aisacTable.GetValue<ushort>("AutoModulationIndex", TypeFlag.UInt16, index);
+
+            if(version <= ACB_File._1_14_0_0)
+            {
+                //typo in an earlier acb version
+                aisac.AutoModulationIndex.TableIndex = aisacTable.GetValue<ushort>("AudoModulationIndex", TypeFlag.UInt16, index);
+            }
+            else
+            {
+                aisac.AutoModulationIndex.TableIndex = aisacTable.GetValue<ushort>("AutoModulationIndex", TypeFlag.UInt16, index);
+            }
+
             aisac.GraphIndexes = AcbTableReference.FromArray(BigEndianConverter.ToUInt16Array(aisacTable.GetData("GraphIndexes", index)));
 
             //Get ControlName if it is defined
@@ -4028,7 +4089,15 @@ namespace Xv2CoreLib.ACB_NEW
             utfTable.AddValue("DefaultControlFlag", TypeFlag.UInt8, index, DefaultControlFlag.ToString());
             utfTable.AddValue("DefaultControl", TypeFlag.Single, index, DefaultControl.ToString());
             utfTable.AddValue("GraphBitFlag", TypeFlag.UInt8, index, GraphBitFlag.ToString());
-            utfTable.AddValue("AutoModulationIndex", TypeFlag.UInt16, index, AutoModulationIndex.ToString());
+
+            if(ParseVersion <= ACB_File._1_14_0_0)
+            {
+                utfTable.AddValue("AudoModulationIndex", TypeFlag.UInt16, index, AutoModulationIndex.ToString());
+            }
+            else
+            {
+                utfTable.AddValue("AutoModulationIndex", TypeFlag.UInt16, index, AutoModulationIndex.ToString());
+            }
 
             if (GraphIndexes != null)
             {

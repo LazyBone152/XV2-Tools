@@ -92,7 +92,7 @@ namespace Xv2CoreLib.AUR
             {
                 aurFile.CharacterAuras.Add(new AUR_Character()
                 {
-                    Index = BitConverter.ToInt32(bytes, charaOffset + (16 * i) + 0).ToString(),
+                    CharaID = BitConverter.ToInt32(bytes, charaOffset + (16 * i) + 0).ToString(),
                     I_04 = BitConverter.ToInt32(bytes, charaOffset + (16 * i) + 4),
                     I_08 = BitConverter.ToInt32(bytes, charaOffset + (16 * i) + 8),
                     I_12 = Convert.ToBoolean(BitConverter.ToInt32(bytes, charaOffset + (16 * i) + 12)),
@@ -178,7 +178,7 @@ namespace Xv2CoreLib.AUR
 
             for(int i = 0; i < characterCount; i++)
             {
-                bytes.AddRange(BitConverter.GetBytes(int.Parse(CharacterAuras[i].Index)));
+                bytes.AddRange(BitConverter.GetBytes(int.Parse(CharacterAuras[i].CharaID)));
                 bytes.AddRange(BitConverter.GetBytes(CharacterAuras[i].I_04));
                 bytes.AddRange(BitConverter.GetBytes(CharacterAuras[i].I_08));
                 bytes.AddRange(BitConverter.GetBytes(Convert.ToInt32(CharacterAuras[i].I_12)));
@@ -256,12 +256,28 @@ namespace Xv2CoreLib.AUR
     [YAXSerializeAs("CharacterAura")]
     public class AUR_Character : IInstallable
     {
+        #region IInstallable
         [YAXDontSerialize]
-        public int SortID { get { return int.Parse(Index); } }
+        public int SortID { get { return int.Parse(CharaID); } }
+        [YAXDontSerialize]
+        public string Index 
+        {
+            get { return $"{CharaID}_{I_04}"; }
+            set
+            {
+                string[] values = value.Split('_');
+                if(values.Length == 2)
+                {
+                    CharaID = values[0];
+                    I_04 = int.Parse(values[1]);
+                }
+            }
+        }
+        #endregion
 
         [YAXAttributeForClass]
         [YAXSerializeAs("Chara_ID")]
-        public string Index { get; set; } //Int32, offset 0
+        public string CharaID { get; set; } //Int32, offset 0
         [YAXAttributeForClass]
         [YAXSerializeAs("Costume")]
         public int I_04 { get; set; }

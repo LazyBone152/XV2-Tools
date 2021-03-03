@@ -514,7 +514,16 @@ namespace Xv2CoreLib.Resource.App
             }
         }
 
-#endregion
+        #endregion
+
+        #region XenoKit
+        public bool XenoKit_HideEmptyBacEntries { get; set; } = true;
+        public bool XenoKit_EnableCameraAnimations { get; set; } = true;
+        public bool XenoKit_EnableVisualSkeleton { get; set; } = true;
+        public bool XenoKit_AutoPlay { get; set; } = true;
+        public bool XenoKit_Loop { get; set; } = false;
+
+        #endregion
 
         public static Settings Load(string path)
         {
