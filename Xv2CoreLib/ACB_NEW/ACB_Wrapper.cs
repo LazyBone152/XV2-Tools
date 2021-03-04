@@ -672,18 +672,30 @@ namespace Xv2CoreLib.ACB_NEW
 
                     }
                 }
+            }
+            else if(CueRef.ReferenceType == ReferenceType.Synth)
+            {
+                ACB_Synth synth = WrapperRoot.AcbFile.GetTable(CueRef.ReferenceIndex.TableGuid, WrapperRoot.AcbFile.Synths, true);
 
+                foreach(var refItem in synth.ReferenceItems)
+                {
+                    List<ACB_Waveform> waveforms = WrapperRoot.AcbFile.GetWaveformsFromReferenceItem(refItem);
+
+                    foreach (var waveform in waveforms)
+                    {
+                        Tracks.Add(new Track_Wrapper(waveform, WrapperRoot, this, null, refItem));
+                    }
+                }
             }
             else
             {
-                //For Waveform and Synth types. Just link the waveform object.
+                //Just link the waveform object.
                 List<ACB_Waveform> waveforms = WrapperRoot.AcbFile.GetWaveformsFromCue(CueRef);
                 foreach (var waveform in waveforms)
                 {
                     Tracks.Add(new Track_Wrapper(waveform, WrapperRoot, this));
                 }
             }
-            
 
             //ActionTracks
             switch (CueRef.ReferenceType)
@@ -695,7 +707,6 @@ namespace Xv2CoreLib.ACB_NEW
                     InitSynth();
                     break;
             }
-            
         }
 
         private void InitSynth()
@@ -853,8 +864,18 @@ namespace Xv2CoreLib.ACB_NEW
                 }
                 else if (CueRef.ReferenceType == ReferenceType.Synth)
                 {
-                    undos.Add(new UndoableProperty<AcbTableReference>("TableGuid", SynthRef.ReferenceIndex, SynthRef.ReferenceIndex.TableGuid, Guid.Empty));
-                    SynthRef.ReferenceIndex.TableGuid = Guid.Empty;
+                    if(SynthRef.ReferenceItems.Count > 1)
+                    {
+                        //Just delete it
+                        undos.Add(new UndoableListRemove<ACB_ReferenceItem>(SynthRef.ReferenceItems, track.refItemsRef));
+                        SynthRef.ReferenceItems.Remove(track.refItemsRef);
+                    }
+                    else
+                    {
+                        //Last ReferenceItem on Synth. In this case, nullify it.
+                        undos.Add(new UndoableProperty<AcbTableReference>("TableGuid", track.refItemsRef.ReferenceIndex, track.refItemsRef.ReferenceIndex.TableGuid, Guid.Empty));
+                        track.refItemsRef.ReferenceIndex.TableGuid = Guid.Empty;
+                    }
                 }
                 else if (CueRef.ReferenceType == ReferenceType.Waveform)
                 {
@@ -993,6 +1014,7 @@ namespace Xv2CoreLib.ACB_NEW
 
         public ACB_Wrapper WrapperRoot;
         public Cue_Wrapper CueWrapper;
+        public ACB_ReferenceItem refItemsRef = null;
 
         public TrackType Type;
         public ActionTrackType ActionTrackType;
@@ -1073,13 +1095,14 @@ namespace Xv2CoreLib.ACB_NEW
         /// <summary>
         /// Wrapper for a Track.
         /// </summary>
-        public Track_Wrapper(ACB_Waveform waveform, ACB_Wrapper root, Cue_Wrapper _cueWrapper, ACB_Track track = null)
+        public Track_Wrapper(ACB_Waveform waveform, ACB_Wrapper root, Cue_Wrapper _cueWrapper, ACB_Track track = null, ACB_ReferenceItem refItems = null)
         {
             TrackRef = track;
             CueWrapper = _cueWrapper;
             WaveformWrapper = new Waveform_Wrapper(waveform, root);
             WrapperRoot = root;
             Type = TrackType.Track;
+            refItemsRef = refItems;
         }
 
         /// <summary>
@@ -1093,6 +1116,7 @@ namespace Xv2CoreLib.ACB_NEW
             Type = TrackType.ActionTrack;
             ActionTrackType = actionType;
         }
+
 
         #region UndoableOperations
         public void UndoableReplaceTrack(byte[] hca, bool streaming)
@@ -1212,6 +1236,8 @@ namespace Xv2CoreLib.ACB_NEW
             if (volumeCommand == null) return 0f;
             return (volumeCommand.CommandType == CommandType.VolumeRandomization2) ? volumeCommand.Param2 / 100f : volumeCommand.Param1 / 100f;
         }
+   
+        
     }
 
     public class Waveform_Wrapper : INotifyPropertyChanged

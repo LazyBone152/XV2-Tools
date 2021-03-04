@@ -808,6 +808,8 @@ namespace Xv2CoreLib.UTF
 
         public byte[] Write(bool usePadding = false)
         {
+            //if (!IsValid()) return null;
+
             return WriteUtfTable(this, usePadding);
         }
 
