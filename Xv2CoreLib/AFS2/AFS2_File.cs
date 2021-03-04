@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xv2CoreLib.HCA;
 using YAXLib;
 using Xv2CoreLib.Resource.UndoRedo;

@@ -1800,6 +1800,10 @@ namespace Xv2CoreLib.ACB_NEW
                 {
                     InstanceGuidRefactor_Reflection(prop.GetValue(entry) as AsyncObservableCollection<ACB_SequenceTrack>, oldGuid, newGuid);
                 }
+                else if (prop.PropertyType == typeof(List<ACB_ReferenceItem>))
+                {
+                    InstanceGuidRefactor_Reflection(prop.GetValue(entry) as List<ACB_ReferenceItem>, oldGuid, newGuid);
+                }
             }
             
         }
@@ -2747,7 +2751,7 @@ namespace Xv2CoreLib.ACB_NEW
 
             return result;
         }
-        
+
 
         //GetWaveformFromCue
         public List<ACB_Waveform> GetWaveformsFromCue(ACB_Cue cue)
