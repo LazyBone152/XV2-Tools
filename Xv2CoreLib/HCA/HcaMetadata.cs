@@ -74,7 +74,7 @@ namespace Xv2CoreLib.HCA
                 //Load fmt
                 if (hcaBytes.Length > fmtOffset + 16 && fmtOffset != -1)
                 {
-                    Channels = hcaBytes[8 + 4];
+                    Channels = hcaBytes[fmtOffset + 4];
                     SampleRate = BigEndianConverter.ReadUInt16(hcaBytes, fmtOffset + 6);
                     BlockCount = BigEndianConverter.ReadInt32(hcaBytes, fmtOffset + 8);
                 }

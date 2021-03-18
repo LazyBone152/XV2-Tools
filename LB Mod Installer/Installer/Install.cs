@@ -34,7 +34,7 @@ using Xv2CoreLib.QXD;
 using Xv2CoreLib.OBL;
 using Xv2CoreLib.ACB_NEW;
 using Xv2CoreLib.PAL;
-using LB_Mod_Installer.Installer.Music;
+using LB_Mod_Installer.Installer.ACB;
 using Xv2CoreLib.TTB;
 using Xv2CoreLib.TTC;
 using Xv2CoreLib.SEV;
@@ -44,34 +44,6 @@ using Xv2CoreLib.Eternity;
 
 namespace LB_Mod_Installer.Installer
 {
-    public enum ErrorCode
-    {
-        IDB,
-        BAC,
-        BCS,
-        BDM,
-        BEV,
-        BPE,
-        BSA,
-        CMS,
-        CNC,
-        CNS,
-        CSO,
-        CUS,
-        EAN,
-        ERS,
-        MSG,
-        EMB,
-        EEPK,
-        TSD,
-        TNL,
-        AUR,
-        PSC,
-        PUP,
-        QXD,
-        TDB
-    }
-
     public class Install
     {
         private const string JUNGLE1 = "JUNGLE1";
@@ -184,36 +156,30 @@ namespace LB_Mod_Installer.Installer
             //Files. 
             foreach (var File in Files)
             {
+                FileType type = File.GetFileType();
+
                 //Process bindings in InstallPath
                 File.InstallPath = bindingManager.ParseInstallPath(File.InstallPath, File.SourcePath);
 
-                //Is directory
-                if (File.SourcePath.EndsWith("/") || File.SourcePath.EndsWith(@"\"))
+                switch (type)
                 {
-                    UpdateProgessBarText($"_Copying {File.SourcePath}...");
-                    ProcessJungle($"{JUNGLE3}/{File.SourcePath}", true, File.InstallPath, true);
-                    continue;
-                }
-
-                //Is file
-                switch (Path.GetExtension(File.SourcePath))
-                {
-                    case ".xml":
-                        //Install XML
+                    case FileType.Binary:
+                    case FileType.XML:
+                        //Install XML or Binary
                         UpdateProgessBarText(String.Format("_Installing \"{0}\"...", Path.GetFileName(File.InstallPath)));
-                        ResolveFileType(File.SourcePath, File.InstallPath);
+                        ResolveFileType(File.SourcePath, File.InstallPath, type == FileType.XML);
                         break;
-                    case EffectContainerFile.ZipExtension:
+                    case FileType.VfxPackage:
                         //Install effects
                         UpdateProgessBarText(String.Format("_Installing \"{0}\"...", Path.GetFileName(File.InstallPath)));
                         Install_EEPK(File.SourcePath, File.InstallPath);
                         break;
-                    case ACB_File.MUSIC_PACKAGE_EXTENSION:
-                        //Install new BGM tracks
-                        UpdateProgessBarText("_Installing Music...");
-                        Install_BGM_ACB(File.SourcePath);
+                    case FileType.MusicPackage:
+                        //Install new BGM or CSS tracks
+                        UpdateProgessBarText("_Installing Audio...");
+                        Install_ACB(File.SourcePath);
                         break;
-                    default:
+                    case FileType.CopyFile:
                         //Binary file. Copy to dir.
                         UpdateProgessBarText(String.Format("_Copying \"{0}\"...", Path.GetFileNameWithoutExtension(File.SourcePath)));
 
@@ -221,6 +187,13 @@ namespace LB_Mod_Installer.Installer
                         {
                             fileManager.AddStreamFile(File.InstallPath, zipManager.GetZipEntry(string.Format("data/{0}", File.SourcePath)), File.AllowOverwrite());
                         }
+                        break;
+                    case FileType.CopyDir:
+                        UpdateProgessBarText($"_Copying {File.SourcePath}...");
+                        ProcessJungle($"{JUNGLE3}/{File.SourcePath}", true, File.InstallPath, true);
+                        break;
+                    default:
+                        MessageBox.Show($"Unknown File.Type: {type}");
                         break;
                 }
             }
@@ -241,7 +214,7 @@ namespace LB_Mod_Installer.Installer
 
         }
         
-        private void ResolveFileType(string xmlPath, string installPath)
+        private void ResolveFileType(string xmlPath, string installPath, bool isXml)
         {
             switch (Path.GetExtension(Path.GetFileNameWithoutExtension(xmlPath)))
             {
@@ -249,88 +222,88 @@ namespace LB_Mod_Installer.Installer
                     MessageBox.Show(string.Format("The old eepk.xml installer is no longer supported.\n\nPlease use the export functionality of EEPK Organiser (v0.4 and greater)."), "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                     break;
                 case ".idb":
-                    Install_IDB(xmlPath, installPath);
+                    Install_IDB(xmlPath, installPath, isXml);
                     break;
                 case ".cus":
-                    Install_CUS(xmlPath, installPath);
+                    Install_CUS(xmlPath, installPath, isXml);
                     break;
                 case ".bcs":
-                    Install_BCS(xmlPath, installPath);
+                    Install_BCS(xmlPath, installPath, isXml);
                     break;
                 case ".ers":
-                    Install_ERS(xmlPath, installPath);
+                    Install_ERS(xmlPath, installPath, isXml);
                     break;
                 case ".cms":
-                    Install_CMS(xmlPath, installPath);
+                    Install_CMS(xmlPath, installPath, isXml);
                     break;
                 case ".bac":
-                    Install_BAC(xmlPath, installPath);
+                    Install_BAC(xmlPath, installPath, isXml);
                     break;
                 case ".bdm":
-                    Install_BDM(xmlPath, installPath);
+                    Install_BDM(xmlPath, installPath, isXml);
                     break;
                 case ".bev":
-                    Install_BEV(xmlPath, installPath);
+                    Install_BEV(xmlPath, installPath, isXml);
                     break;
                 case ".bpe":
-                    Install_BPE(xmlPath, installPath);
+                    Install_BPE(xmlPath, installPath, isXml);
                     break;
                 case ".bsa":
-                    Install_BSA(xmlPath, installPath);
+                    Install_BSA(xmlPath, installPath, isXml);
                     break;
                 case ".cnc":
-                    Install_CNC(xmlPath, installPath);
+                    Install_CNC(xmlPath, installPath, isXml);
                     break;
                 case ".cns":
-                    Install_CNS(xmlPath, installPath);
+                    Install_CNS(xmlPath, installPath, isXml);
                     break;
                 case ".cso":
-                    Install_CSO(xmlPath, installPath);
+                    Install_CSO(xmlPath, installPath, isXml);
                     break;
                 case ".ean":
-                    Install_EAN(xmlPath, installPath);
+                    Install_EAN(xmlPath, installPath, isXml);
                     break;
                 case ".msg":
-                    Install_MSG(xmlPath, installPath);
+                    Install_MSG(xmlPath, installPath, isXml);
                     break;
                 case ".psc":
-                    Install_PSC(xmlPath, installPath);
+                    Install_PSC(xmlPath, installPath, isXml);
                     break;
                 case ".aur":
-                    Install_AUR(xmlPath, installPath);
+                    Install_AUR(xmlPath, installPath, isXml);
                     break;
                 case ".pup":
-                    Install_PUP(xmlPath, installPath);
+                    Install_PUP(xmlPath, installPath, isXml);
                     break;
                 case ".tsd":
-                    Install_TSD(xmlPath, installPath);
+                    Install_TSD(xmlPath, installPath, isXml);
                     break;
                 case ".tnl":
-                    Install_TNL(xmlPath, installPath);
+                    Install_TNL(xmlPath, installPath, isXml);
                     break;
                 case ".emb":
-                    Install_EMB(xmlPath, installPath);
+                    Install_EMB(xmlPath, installPath, isXml);
                     break;
                 case ".qxd":
-                    Install_QXD(xmlPath, installPath);
+                    Install_QXD(xmlPath, installPath, isXml);
                     break;
                 case ".pal":
-                    Install_PAL(xmlPath, installPath);
+                    Install_PAL(xmlPath, installPath, isXml);
                     break;
                 case ".ttb":
-                    Install_TTB(xmlPath, installPath);
+                    Install_TTB(xmlPath, installPath, isXml);
                     break;
                 case ".ttc":
-                    Install_TTC(xmlPath, installPath);
+                    Install_TTC(xmlPath, installPath, isXml);
                     break;
                 case ".sev":
-                    Install_SEV(xmlPath, installPath);
+                    Install_SEV(xmlPath, installPath, isXml);
                     break;
                 case ".hci":
-                    Install_HCI(xmlPath, installPath);
+                    Install_HCI(xmlPath, installPath, isXml);
                     break;
                 case ".cml":
-                    Install_CML(xmlPath, installPath);
+                    Install_CML(xmlPath, installPath, isXml);
                     break;
                 case ".x2s":
                     Install_CharaSlots(xmlPath);
@@ -426,13 +399,13 @@ namespace LB_Mod_Installer.Installer
         }
 
         //File Install Methods
-        private void Install_IDB(string xmlPath, string installPath)
+        private void Install_IDB(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
 #endif
             {
-                IDB_File xmlFile = zipManager.DeserializeXmlFromArchive<IDB_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                IDB_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<IDB_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : IDB_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 IDB_File binaryFile = (IDB_File)GetParsedFile<IDB_File>(installPath);
 
                 //Parse bindings
@@ -451,19 +424,19 @@ namespace LB_Mod_Installer.Installer
 #if !DEBUG
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} install phase ({1}).", ErrorCode.IDB, xmlPath);
+                string error = string.Format("Failed at IDB install phase ({0}).",  xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
         }
 
-        private void Install_CUS(string xmlPath, string installPath)
+        private void Install_CUS(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
 #endif
             {
-                CUS_File xmlFile = zipManager.DeserializeXmlFromArchive<CUS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                CUS_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<CUS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : CUS_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 CUS_File binaryFile = (CUS_File)GetParsedFile<CUS_File>(installPath);
 
                 //Parse bindings
@@ -485,19 +458,19 @@ namespace LB_Mod_Installer.Installer
 #if !DEBUG
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} install phase ({1}).", ErrorCode.CUS, xmlPath);
+                string error = string.Format("Failed at CUS install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
         }
 
-        private void Install_BCS(string xmlPath, string installPath)
+        private void Install_BCS(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
 #endif
             {
-                BCS_File xmlFile = zipManager.DeserializeXmlFromArchive<BCS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                BCS_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<BCS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : BCS_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 BCS_File binaryFile = (BCS_File)GetParsedFile<BCS_File>(installPath);
 
                 if (binaryFile == null)
@@ -545,19 +518,19 @@ namespace LB_Mod_Installer.Installer
 #if !DEBUG
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} install phase ({1}).", ErrorCode.BCS, xmlPath);
+                string error = string.Format("Failed at BCS install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
         }
 
-        private void Install_CMS(string xmlPath, string installPath)
+        private void Install_CMS(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
 #endif
             {
-                CMS_File xmlFile = zipManager.DeserializeXmlFromArchive<CMS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                CMS_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<CMS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : CMS_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 CMS_File binaryFile = (CMS_File)GetParsedFile<CMS_File>(installPath);
 
                 //Parse bindings
@@ -582,12 +555,15 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_BAC(string xmlPath, string installPath)
+        private void Install_BAC(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
 #endif
             {
+                if (isXml)
+                    throw new Exception("Type.Binary not possible for bac files. You must use XML.");
+
                 BAC_File xmlFile = zipManager.DeserializeXmlFromArchive<BAC_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
                 BAC_File binaryFile = (BAC_File)GetParsedFile<BAC_File>(installPath);
 
@@ -614,13 +590,13 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_PSC(string xmlPath, string installPath)
+        private void Install_PSC(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
 #endif
             {
-                PSC_File xmlFile = zipManager.DeserializeXmlFromArchive<PSC_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                PSC_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<PSC_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : PSC_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 PSC_File binaryFile = (PSC_File)GetParsedFile<PSC_File>(installPath);
 
                 foreach(var config in xmlFile.Configurations)
@@ -638,7 +614,7 @@ namespace LB_Mod_Installer.Installer
 #if !DEBUG
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} install phase ({1}).", ErrorCode.PSC, xmlPath);
+                string error = string.Format("Failed at PSC install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
@@ -678,19 +654,19 @@ namespace LB_Mod_Installer.Installer
 #if !DEBUG
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} install phase ({1}).", ErrorCode.EEPK, xmlPath);
+                string error = string.Format("Failed at EEPK install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
         }
 
-        private void Install_EMB(string xmlPath, string installPath)
+        private void Install_EMB(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
 #endif
             {
-                EMB_File xmlFile = zipManager.DeserializeXmlFromArchive<EMB_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                EMB_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<EMB_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : EMB_File.LoadEmb(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 EMB_File binaryFile = (EMB_File)GetParsedFile<EMB_File>(installPath);
 
                 //Parse bindings
@@ -716,19 +692,19 @@ namespace LB_Mod_Installer.Installer
 #if !DEBUG
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} install phase ({1}).", ErrorCode.EMB, xmlPath);
+                string error = string.Format("Failed at EMB install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
         }
 
-        private void Install_BGM_ACB(string xmlPath)
+        private void Install_ACB(string xmlPath)
         {
 #if !DEBUG
             try
 #endif
             {
-                new MusicInstaller(this, xmlPath);
+                new AcbInstaller(this, xmlPath);
             }
 #if !DEBUG
             catch (Exception ex)
@@ -753,6 +729,9 @@ namespace LB_Mod_Installer.Installer
                     throw new FileNotFoundException($"Could not find {CharaSlotsFile.FILE_NAME_BIN}. This file must exist before install - to create it simply run xv2ins.exe once (the X2M installer).");
                 }
 
+                //Parse bindings
+                bindingManager.ParseProperties(xmlFile.CharaSlots, null, xmlPath);
+
                 List<string> installIDs = new List<string>();
                 bool success = slotsFile.InstallEntries(xmlFile.CharaSlots, installIDs);
 
@@ -776,13 +755,13 @@ namespace LB_Mod_Installer.Installer
         }
 
         //Copy-paste generic install methods
-        private void Install_BDM(string xmlPath, string installPath)
+        private void Install_BDM(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
 #endif
             {
-                BDM_File xmlFile = zipManager.DeserializeXmlFromArchive<BDM_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                BDM_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<BDM_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : BDM_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 BDM_File binaryFile = (BDM_File)GetParsedFile<BDM_File>(installPath);
 
                 if (binaryFile == null)
@@ -805,19 +784,19 @@ namespace LB_Mod_Installer.Installer
 #if !DEBUG
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} install phase ({1}).", ErrorCode.BDM, xmlPath);
+                string error = string.Format("Failed at BDM install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
         }
 
-        private void Install_BEV(string xmlPath, string installPath)
+        private void Install_BEV(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
 #endif
             {
-                BEV_File xmlFile = zipManager.DeserializeXmlFromArchive<BEV_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                BEV_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<BEV_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : BEV_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 BEV_File binaryFile = (BEV_File)GetParsedFile<BEV_File>(installPath);
 
                 //Parse bindings
@@ -829,19 +808,19 @@ namespace LB_Mod_Installer.Installer
 #if !DEBUG
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} install phase ({1}).", ErrorCode.BEV, xmlPath);
+                string error = string.Format("Failed at BEV install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
         }
 
-        private void Install_BPE(string xmlPath, string installPath)
+        private void Install_BPE(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
 #endif
             {
-                BPE_File xmlFile = zipManager.DeserializeXmlFromArchive<BPE_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                BPE_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<BPE_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : BPE_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 BPE_File binaryFile = (BPE_File)GetParsedFile<BPE_File>(installPath);
 
                 //Parse bindings
@@ -853,19 +832,19 @@ namespace LB_Mod_Installer.Installer
 #if !DEBUG
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} install phase ({1}).", ErrorCode.BPE, xmlPath);
+                string error = string.Format("Failed at BPE install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
         }
 
-        private void Install_BSA(string xmlPath, string installPath)
+        private void Install_BSA(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
 #endif
             {
-                BSA_File xmlFile = zipManager.DeserializeXmlFromArchive<BSA_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                BSA_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<BSA_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : BSA_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 BSA_File binaryFile = (BSA_File)GetParsedFile<BSA_File>(installPath);
 
                 if (binaryFile == null)
@@ -884,19 +863,19 @@ namespace LB_Mod_Installer.Installer
 #if !DEBUG
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} install phase ({1}).", ErrorCode.BSA, xmlPath);
+                string error = string.Format("Failed at BSA install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
         }
 
-        private void Install_CNC(string xmlPath, string installPath)
+        private void Install_CNC(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
 #endif
             {
-                CNC_File xmlFile = zipManager.DeserializeXmlFromArchive<CNC_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                CNC_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<CNC_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : CNC_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 CNC_File binaryFile = (CNC_File)GetParsedFile<CNC_File>(installPath);
 
                 //Parse bindings
@@ -908,19 +887,19 @@ namespace LB_Mod_Installer.Installer
 #if !DEBUG
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} install phase ({1}).", ErrorCode.CNC, xmlPath);
+                string error = string.Format("Failed at CNC install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
         }
 
-        private void Install_CNS(string xmlPath, string installPath)
+        private void Install_CNS(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
 #endif
             {
-                CNS_File xmlFile = zipManager.DeserializeXmlFromArchive<CNS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                CNS_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<CNS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : CNS_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 CNS_File binaryFile = (CNS_File)GetParsedFile<CNS_File>(installPath);
 
                 //Parse bindings
@@ -932,19 +911,19 @@ namespace LB_Mod_Installer.Installer
 #if !DEBUG
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} install phase ({1}).", ErrorCode.CNS, xmlPath);
+                string error = string.Format("Failed at CNS install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
         }
 
-        private void Install_CSO(string xmlPath, string installPath)
+        private void Install_CSO(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
 #endif
             {
-                CSO_File xmlFile = zipManager.DeserializeXmlFromArchive<CSO_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                CSO_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<CSO_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : CSO_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 CSO_File binaryFile = (CSO_File)GetParsedFile<CSO_File>(installPath);
 
                 //Parse bindings
@@ -956,19 +935,19 @@ namespace LB_Mod_Installer.Installer
 #if !DEBUG
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} install phase ({1}).", ErrorCode.CSO, xmlPath);
+                string error = string.Format("Failed at CSO install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
         }
 
-        private void Install_EAN(string xmlPath, string installPath)
+        private void Install_EAN(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
 #endif
             {
-                EAN_File xmlFile = zipManager.DeserializeXmlFromArchive<EAN_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                EAN_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<EAN_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : EAN_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 EAN_File binaryFile = (EAN_File)GetParsedFile<EAN_File>(installPath);
 
                 //Parse bindings
@@ -980,19 +959,19 @@ namespace LB_Mod_Installer.Installer
 #if !DEBUG
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} install phase ({1}).", ErrorCode.EAN, xmlPath);
+                string error = string.Format("Failed at EAN install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
         }
 
-        private void Install_MSG(string xmlPath, string installPath)
+        private void Install_MSG(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
 #endif
             {
-                MSG_File xmlFile = zipManager.DeserializeXmlFromArchive<MSG_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                MSG_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<MSG_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : MSG_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 MSG_File binaryFile = (MSG_File)GetParsedFile<MSG_File>(installPath);
 
                 //Parse bindings
@@ -1004,19 +983,19 @@ namespace LB_Mod_Installer.Installer
 #if !DEBUG
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} install phase ({1}).", ErrorCode.MSG, xmlPath);
+                string error = string.Format("Failed at MSG install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
         }
 
-        private void Install_AUR(string xmlPath, string installPath)
+        private void Install_AUR(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
 #endif
             {
-                AUR_File xmlFile = zipManager.DeserializeXmlFromArchive<AUR_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                AUR_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<AUR_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : AUR_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 AUR_File binaryFile = (AUR_File)GetParsedFile<AUR_File>(installPath);
 
                 //Parse bindings
@@ -1030,19 +1009,19 @@ namespace LB_Mod_Installer.Installer
 #if !DEBUG
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} install phase ({1}).", ErrorCode.AUR, xmlPath);
+                string error = string.Format("Failed at AUR install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
         }
 
-        private void Install_PUP(string xmlPath, string installPath)
+        private void Install_PUP(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
 #endif
             {
-                PUP_File xmlFile = zipManager.DeserializeXmlFromArchive<PUP_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                PUP_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<PUP_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : PUP_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 PUP_File binaryFile = (PUP_File)GetParsedFile<PUP_File>(installPath);
 
                 //Parse bindings
@@ -1054,19 +1033,19 @@ namespace LB_Mod_Installer.Installer
 #if !DEBUG
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} install phase ({1}).", ErrorCode.PUP, xmlPath);
+                string error = string.Format("Failed at PUP install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
         }
 
-        private void Install_TSD(string xmlPath, string installPath)
+        private void Install_TSD(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
 #endif
             {
-                TSD_File xmlFile = zipManager.DeserializeXmlFromArchive<TSD_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                TSD_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<TSD_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : TSD_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 TSD_File binaryFile = (TSD_File)GetParsedFile<TSD_File>(installPath);
 
                 //Parse bindings
@@ -1086,19 +1065,19 @@ namespace LB_Mod_Installer.Installer
 #if !DEBUG
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} install phase ({1}).", ErrorCode.TSD, xmlPath);
+                string error = string.Format("Failed at TSD install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
         }
 
-        private void Install_TNL(string xmlPath, string installPath)
+        private void Install_TNL(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
 #endif
             {
-                TNL_File xmlFile = zipManager.DeserializeXmlFromArchive<TNL_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                TNL_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<TNL_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : TNL_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 TNL_File binaryFile = (TNL_File)GetParsedFile<TNL_File>(installPath);
 
                 //Character and Masters share the same IDs, so we must merge the Index list and pass it to ParseProperties, rather than have it check the lists directly.
@@ -1120,19 +1099,19 @@ namespace LB_Mod_Installer.Installer
 #if !DEBUG
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} install phase ({1}).", ErrorCode.TNL, xmlPath);
+                string error = string.Format("Failed at TNL install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
         }
 
-        private void Install_QXD(string xmlPath, string installPath)
+        private void Install_QXD(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
 #endif
             {
-                QXD_File xmlFile = zipManager.DeserializeXmlFromArchive<QXD_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                QXD_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<QXD_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : QXD_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 QXD_File binaryFile = (QXD_File)GetParsedFile<QXD_File>(installPath);
 
                 //Init if needed
@@ -1165,19 +1144,19 @@ namespace LB_Mod_Installer.Installer
 #if !DEBUG
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} install phase ({1}).", ErrorCode.QXD, xmlPath);
+                string error = string.Format("Failed at QXD install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
         }
 
-        private void Install_PAL(string xmlPath, string installPath)
+        private void Install_PAL(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
 #endif
             {
-                PAL_File xmlFile = zipManager.DeserializeXmlFromArchive<PAL_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                PAL_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<PAL_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : PAL_File.Parse(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 PAL_File binaryFile = (PAL_File)GetParsedFile<PAL_File>(installPath);
 
                 //Parse bindings
@@ -1195,13 +1174,13 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_TTB(string xmlPath, string installPath)
+        private void Install_TTB(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
 #endif
             {
-                TTB_File xmlFile = zipManager.DeserializeXmlFromArchive<TTB_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                TTB_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<TTB_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : TTB_File.Parse(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 TTB_File binaryFile = (TTB_File)GetParsedFile<TTB_File>(installPath);
 
                 //Install entries
@@ -1217,13 +1196,13 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_TTC(string xmlPath, string installPath)
+        private void Install_TTC(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
 #endif
             {
-                TTC_File xmlFile = zipManager.DeserializeXmlFromArchive<TTC_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                TTC_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<TTC_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : TTC_File.Parse(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 TTC_File binaryFile = (TTC_File)GetParsedFile<TTC_File>(installPath);
 
                 //Install entries
@@ -1238,13 +1217,13 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_SEV(string xmlPath, string installPath)
+        private void Install_SEV(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
 #endif
             {
-                SEV_File xmlFile = zipManager.DeserializeXmlFromArchive<SEV_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                SEV_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<SEV_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : SEV_File.Parse(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 SEV_File binaryFile = (SEV_File)GetParsedFile<SEV_File>(installPath);
 
                 //Install entries
@@ -1260,13 +1239,13 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_HCI(string xmlPath, string installPath)
+        private void Install_HCI(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
 #endif
             {
-                HCI_File xmlFile = zipManager.DeserializeXmlFromArchive<HCI_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                HCI_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<HCI_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : HCI_File.Parse(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 HCI_File binaryFile = (HCI_File)GetParsedFile<HCI_File>(installPath);
 
                 //Install entries
@@ -1282,13 +1261,13 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_CML(string xmlPath, string installPath)
+        private void Install_CML(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
 #endif
             {
-                CML_File xmlFile = zipManager.DeserializeXmlFromArchive<CML_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                CML_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<CML_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : CML_File.Parse(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 CML_File binaryFile = (CML_File)GetParsedFile<CML_File>(installPath);
 
                 //Install entries
@@ -1304,13 +1283,13 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_ERS(string xmlPath, string installPath)
+        private void Install_ERS(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
 #endif
             {
-                ERS_File xmlFile = zipManager.DeserializeXmlFromArchive<ERS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                ERS_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<ERS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : ERS_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 ERS_File binaryFile = (ERS_File)GetParsedFile<ERS_File>(installPath);
 
                 InstallSubEntries<ERS_MainTableEntry, ERS_MainTable>(xmlFile.Entries, binaryFile.Entries, installPath, Sections.ERS_Entries);
@@ -1682,7 +1661,7 @@ namespace LB_Mod_Installer.Installer
         
         private void UpdateProgessBarText(string text, bool advanceProgress = true)
         {
-            Parent.Dispatcher.Invoke((Action)(() =>
+            Parent.Dispatcher.BeginInvoke((Action)(() =>
             {
                 if(advanceProgress)
                     Parent.ProgressBar_Main.Value++;

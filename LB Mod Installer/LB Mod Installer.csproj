@@ -141,8 +141,8 @@
     <Compile Include="File\FileCacheManager.cs" />
     <Compile Include="Installer\Install.cs" />
     <Compile Include="Installer\MsgComponentInstall.cs" />
-    <Compile Include="Installer\Music\MusicInstaller.cs" />
-    <Compile Include="Installer\Music\MusicUninstaller.cs" />
+    <Compile Include="Installer\ACB\AcbInstaller.cs" />
+    <Compile Include="Installer\ACB\AcbUninstaller.cs" />
     <Compile Include="Installer\Uninstall.cs" />
     <Compile Include="Tracking\GameDir.cs" />
     <Compile Include="Tracking\Sections.cs" />

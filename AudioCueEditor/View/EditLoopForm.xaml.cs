@@ -87,7 +87,7 @@ namespace AudioCueEditor.View
 
             if(awbEntry != null)
             {
-                HcaMetadata metadata = awbEntry.HcaInfo;
+                HcaMetadata metadata = new HcaMetadata(awbEntry.bytes);
                 LoopEnabled = metadata.HasLoopData;
                 LoopStartMs = metadata.LoopStartMs;
                 LoopEndMs = metadata.LoopEndMs;

@@ -196,7 +196,7 @@ namespace LB_Mod_Installer.Binding
         /// <param name="filePath">The file path. Used for tracking.</param>
         /// <param name="usedIDs">(Optional) A list of all IDs that are used. This overwrites the default behaviour of checking the Index property on installList and binaryList entries when calculating AutoIDs.</param>
         /// 
-        public void ParseProperties<T>(IList<T> installList, IList<T> binaryList, string filePath, List<string> usedIDs = null) where T : IInstallable
+        public void ParseProperties<T>(IList<T> installList, IList<T> binaryList, string filePath, List<string> usedIDs = null)
         {
             if (installList == null) return;
 
@@ -212,7 +212,7 @@ namespace LB_Mod_Installer.Binding
             RemoveNullTokenEntries(installList);
         }
 
-        private void ParseProperties_RecursiveList<T>(IEnumerable list, string filePath, IList<T> installList, IList<T> binaryList, List<string> usedIDs = null) where T : IInstallable
+        private void ParseProperties_RecursiveList<T>(IEnumerable list, string filePath, IList<T> installList, IList<T> binaryList, List<string> usedIDs = null)
         {
             foreach (var obj in list)
             {
@@ -221,7 +221,7 @@ namespace LB_Mod_Installer.Binding
             }
         }
 
-        private void ParseProperties_RecursiveSingle<T>(object obj, string filePath, IList<T> installList, IList<T> binaryList, List<string> usedIDs = null, bool allowAutoId = false) where T : IInstallable
+        private void ParseProperties_RecursiveSingle<T>(object obj, string filePath, IList<T> installList, IList<T> binaryList, List<string> usedIDs = null, bool allowAutoId = false)
         {
             //This property needs to have its props parsed.
             PropertyInfo[] childProps = obj.GetType().GetProperties();
@@ -282,7 +282,7 @@ namespace LB_Mod_Installer.Binding
         #endregion
 
         #region Binding
-        private string ParseStringBinding<T>(string str, string comment, string filePath, IEnumerable<T> entries1, IEnumerable<T> entries2, bool allowAutoId = true, ushort maxId = ushort.MaxValue, List<string> usedIds = null) where T : IInstallable
+        private string ParseStringBinding<T>(string str, string comment, string filePath, IEnumerable<T> entries1, IEnumerable<T> entries2, bool allowAutoId = true, ushort maxId = ushort.MaxValue, List<string> usedIds = null)
         {
             //New and improved binding processing method.
             //Now supports multiple bindings within a single string
@@ -307,7 +307,7 @@ namespace LB_Mod_Installer.Binding
             return str;
         }
 
-        private string ParseBinding<T>(string binding, string comment, string filePath, IEnumerable<T> entries1, IEnumerable<T> entries2, bool allowAutoId = true, ushort maxId = ushort.MaxValue, List<string> usedIds = null) where T : IInstallable
+        private string ParseBinding<T>(string binding, string comment, string filePath, IEnumerable<T> entries1, IEnumerable<T> entries2, bool allowAutoId = true, ushort maxId = ushort.MaxValue, List<string> usedIds = null)
         {
             if (IsBinding(binding))
             {
@@ -331,7 +331,7 @@ namespace LB_Mod_Installer.Binding
                             formating = b.GetArgument1();
                             break;
                         case Function.SetAlias:
-                            Aliases.Add(new AliasValue() { ID = ID + increment, Alias = b.GetArgument1() });
+                            AddAlias(ID + increment, b.GetArgument1());
                             break;
                         case Function.AliasLink:
                             ID = GetAliasId(b.GetArgument1(), comment);
@@ -464,6 +464,11 @@ namespace LB_Mod_Installer.Binding
                 //Not a binding.
                 return binding;
             }
+        }
+
+        public void AddAlias(int ID, string alias)
+        {
+            Aliases.Add(new AliasValue() { ID = ID, Alias = alias.ToLower() });
         }
 
         private List<BindingValue> ProcessBinding(string binding, string comment, string originalBinding)
@@ -697,14 +702,14 @@ namespace LB_Mod_Installer.Binding
                 if (a.Alias == alias) return a.ID;
             }
 
-            throw new Exception(String.Format("Could not find the alias: {0}. Binding parse failed. ({1})", alias, comment));
+            throw new Exception(String.Format("Could not find the alias: {0}. Binding parse failed. ({1})\n\nThis is most likely caused by using a binding that relies on something to be installed before it. To fix this issue, you can simply add a DoLast=\"True\" tag onto the File entry which will cause the file to be installed last.", alias, comment));
         }
 
         /// <summary>
         /// Tries to find a unused ID betwen min and max within the two specified lists. Returns the NullToken if an ID cannot be allocated.
         /// </summary>
         /// <returns></returns>
-        public int GetUnusedIndex<T>(IEnumerable<T> entries1, IEnumerable<T> entries2, int minIndex = 0, int maxIndex = -1, List<string> usedIds = null) where T : IInstallable
+        public int GetUnusedIndex<T>(IEnumerable<T> entries1, IEnumerable<T> entries2, int minIndex = 0, int maxIndex = -1, List<string> usedIds = null)
         {
             //todo: review this code
             if (maxIndex == -1) maxIndex = UInt16.MaxValue - 1;
@@ -730,7 +735,8 @@ namespace LB_Mod_Installer.Binding
                     {
                         try
                         {
-                            UsedIndexes.Add(e.SortID);
+                            if(e is IInstallable installable)
+                                UsedIndexes.Add(installable.SortID);
                         }
                         catch
                         {
@@ -745,7 +751,8 @@ namespace LB_Mod_Installer.Binding
                     {
                         try
                         {
-                            UsedIndexes.Add(e.SortID);
+                            if (e is IInstallable installable)
+                                UsedIndexes.Add(installable.SortID);
                         }
                         catch
                         {
@@ -920,7 +927,7 @@ namespace LB_Mod_Installer.Binding
         /// <summary>
         /// Removes all entries that has a NullToken (caused by a failed AutoID or X2M binding).
         /// </summary>
-        private void RemoveNullTokenEntries<T>(IList<T> installList) where T : IInstallable
+        private void RemoveNullTokenEntries<T>(IList<T> installList)
         {
             List<T> toDelete = new List<T>();
 
@@ -937,7 +944,7 @@ namespace LB_Mod_Installer.Binding
             //installList.RemoveAll(e => HasNullToken(e));
         }
 
-        private bool HasNullToken<T>(T entry) where T : IInstallable
+        private bool HasNullToken<T>(T entry)
         {
             PropertyInfo[] properties = entry.GetType().GetProperties();
 

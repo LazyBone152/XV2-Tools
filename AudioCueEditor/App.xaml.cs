@@ -15,15 +15,13 @@ namespace AudioCueEditor
     /// </summary>
     public partial class App : Application
     {
-        public static MetroDialogSettings DefaultDialogSettings = new MetroDialogSettings() { AnimateHide = false, AnimateShow = false, DialogTitleFontSize = 16, DialogMessageFontSize = 12 };
-
         public static string ExePath { get { return System.Reflection.Assembly.GetEntryAssembly().Location; } }
         public static string ErrorLogPath { get { return $"{Path.GetDirectoryName(ExePath)}/ace_log.txt"; } }
 
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
 #if !DEBUG
-            MessageBox.Show(String.Format("An unhandled exception was raised during execution of the application. \n\nDetails: {0}\n\nA log containing details about the error was saved at \"{1}\".", e.Exception.Message, ErrorLogPath), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(String.Format("Something went wrong. \n\nDetails: {0}\n\nA log containing details about the error was saved at \"{1}\".\n\nConsider opening an issue on GitHub (post both the log + acb/awb) if the issue persists.", e.Exception.Message, ErrorLogPath), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             SaveExceptionLog(e.Exception.ToString());
             e.Handled = true;
 #endif

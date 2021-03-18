@@ -156,7 +156,7 @@
                                 <MenuItem Header="Copy" Command="{Binding CopyTrackCommand}"/>
                                 <MenuItem Header="Paste" Command="{Binding PasteTrackCommand}"/>
                                 <MenuItem Header="Delete" Command="{Binding DeleteTrackCommand}"/>
-                                
+
                             </ContextMenu>
                         </ListBox.ContextMenu>
                     </ListBox>
@@ -246,11 +246,12 @@
 
         <Grid Grid.Column="2">
 
+
             <ScrollViewer Margin="0,65,-0.255,10.327">
                 <StackPanel>
 
                     <Expander Header="Sequence" IsExpanded="True">
-                        <Grid Height="150">
+                        <Grid IsEnabled="{Binding AcbFile.AcbFile.IsSequenceDataAllowed}" Height="150">
                             <Label Visibility="{Binding SequenceCueNotVisibile}" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Margin="0,63,0.182,60" Content="&lt;Select a Sequence type Cue to edit its details>" VerticalAlignment="Stretch" Width="266"/>
 
                             <ComboBox Visibility="{Binding SequenceCueVisibile}" SelectedItem="{Binding Path=SelectedItem.SequenceRef.UndoableSequenceType, ElementName=dataGrid}" ItemsSource="{Binding Source={StaticResource SeqTypeEnum}}" HorizontalAlignment="Left" Margin="84,10,0,0" VerticalAlignment="Top" Width="173"/>
@@ -294,7 +295,7 @@
                         </Grid>
                     </Expander>
                     <Expander Header="Action" IsExpanded="True">
-                        <Grid>
+                        <Grid IsEnabled="{Binding AcbFile.AcbFile.AreActionsAllowed}">
                             <Grid Height="225" Visibility="{Binding ActionVisibile}">
                                 <ComboBox SelectedIndex="{Binding Path=SelectedItem.SelectedTrack.TrackRef.UndoableTargetType, ElementName=dataGrid}" HorizontalAlignment="Left" Margin="78,10,0,0" VerticalAlignment="Top" Width="179">
                                     <ComboBoxItem Content="Any ACB"/>
@@ -324,6 +325,7 @@
                 </StackPanel>
 
             </ScrollViewer>
+            <Label Content="{Binding AcbFile.AcbFile._versionStrProp}" ToolTip="{Binding AcbFile.AcbFile.VersionToolTip}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-24,0,0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" Width="111" Height="25"/>
         </Grid>
         <Label Content="{Binding audioPlayer.PlaybackTime}" HorizontalContentAlignment="Right" HorizontalAlignment="Stretch" Margin="380,17,9.927,0" VerticalAlignment="Top" Height="27"/>
 

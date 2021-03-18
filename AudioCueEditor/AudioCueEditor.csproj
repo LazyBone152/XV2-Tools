@@ -209,6 +209,7 @@
     <Compile Include="Audio\VGAudio.Cli\ConvertStream.cs" />
     <Compile Include="Audio\WavStream.cs" />
     <Compile Include="Converters\VisibilityToNullableBoolean.cs" />
+    <Compile Include="DialogSettings.cs" />
     <Compile Include="Forms\Settings.xaml.cs">
       <DependentUpon>Settings.xaml</DependentUpon>
     </Compile>

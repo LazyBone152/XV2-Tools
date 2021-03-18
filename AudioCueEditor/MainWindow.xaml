@@ -44,14 +44,17 @@
                 <MenuItem Header="Extract All (wav)" Command="{Binding ExtractAllTracksWavCommand}"/>
                 <Separator/>
                 <MenuItem Header="Associate ACB Extension" Command="{Binding SetAcbFileAssociationCommand}"/>
-                <MenuItem Header="Associate MusicPackage Extension" Command="{Binding SetMusicPackageAssociationCommand}"/>
                 <Separator/>
-                <MenuItem Header="Create Music Installer" Command="{Binding CreateMusicInstallerCommand}"/>
-                <MenuItem Header="MusicPackage Type">
-                    <MenuItem Header="New Option" IsCheckable="True" IsChecked="{Binding AcbFile.MusicPackage_IsNewOptions, UpdateSourceTrigger=PropertyChanged}"/>
-                    <MenuItem Header="Direct" IsCheckable="True" IsChecked="{Binding AcbFile.MusicPackage_IsDirect, UpdateSourceTrigger=PropertyChanged}"/>
+                <MenuItem Header="DBXV2 Installer">
+                    <MenuItem Header="Associate MusicPackage Extension" Command="{Binding SetMusicPackageAssociationCommand}"/>
+                    <MenuItem Header="Create Music Installer" Command="{Binding CreateMusicInstallerCommand}"/>
+                    <MenuItem Header="MusicPackage Type">
+                        <MenuItem Header="New Option" IsCheckable="True" IsChecked="{Binding AcbFile.MusicPackage_IsNewOptions, UpdateSourceTrigger=PropertyChanged}"/>
+                        <MenuItem Header="Direct" IsCheckable="True" IsChecked="{Binding AcbFile.MusicPackage_IsDirect, UpdateSourceTrigger=PropertyChanged}"/>
+                        <MenuItem Header="CSS Voice" IsCheckable="True" IsChecked="{Binding AcbFile.MusicPackage_IsCss, UpdateSourceTrigger=PropertyChanged}"/>
+                    </MenuItem>
+                    <MenuItem Header="Randomize Cue IDs" Command="{Binding RandomizeCueIDsCommand}"/>
                 </MenuItem>
-                <MenuItem Header="Randomize Cue IDs" Command="{Binding RandomizeCueIDsCommand}"/>
             </MenuItem>
             <MenuItem Header="Help">
                 <MenuItem Header="Check For Updates" Click="Help_CheckForUpdates"/>

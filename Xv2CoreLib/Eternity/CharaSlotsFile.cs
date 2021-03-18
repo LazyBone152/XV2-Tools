@@ -282,6 +282,30 @@ namespace Xv2CoreLib.Eternity
                 PresetBinding = value.ToString();
             }
         }
+        [YAXDontSerialize]
+        public int CssVoice1
+        {
+            get
+            {
+                return int.Parse(CssVoice1Binding);
+            }
+            set
+            {
+                CssVoice1Binding = value.ToString();
+            }
+        }
+        [YAXDontSerialize]
+        public int CssVoice2
+        {
+            get
+            {
+                return int.Parse(CssVoice2Binding);
+            }
+            set
+            {
+                CssVoice2Binding = value.ToString();
+            }
+        }
 
 
         //Serialized values
@@ -298,9 +322,11 @@ namespace Xv2CoreLib.Eternity
         [YAXAttributeForClass]
         public bool flag_gk2 { get; set; }
         [YAXAttributeForClass]
-        public int CssVoice1 { get; set; }
+        [YAXSerializeAs("CssVoice1")]
+        public string CssVoice1Binding { get; set; }
         [YAXAttributeForClass]
-        public int CssVoice2 { get; set; }
+        [YAXSerializeAs("CssVoice2")]
+        public string CssVoice2Binding { get; set; }
         [YAXAttributeForClass]
         public CstDlcVer DLC { get; set; }
     }

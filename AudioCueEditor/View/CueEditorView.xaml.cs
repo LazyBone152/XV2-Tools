@@ -180,7 +180,7 @@ namespace AudioCueEditor.View
             if (form.Finished)
             {
                 if (form.AddTrack)
-                    AcbFile.UndoableAddCue(form.CueName, form.ReferenceType, form.HcaBytes, form.Streaming, form.Loop, form.Is3DSound);
+                    AcbFile.UndoableAddCue(form.CueName, form.ReferenceType, form.TrackBytes, form.Streaming, form.Loop, form.Is3DSound, form.EncodeType);
                 else
                     AcbFile.UndoableAddCue(form.CueName, form.ReferenceType, form.Is3DSound);
             }
@@ -279,19 +279,28 @@ namespace AudioCueEditor.View
                     {
                         audioPlayer.Stop();
 
-                        switch (track.WaveformWrapper.WaveformRef.EncodeType)
+                        await Task.Run(()=> 
                         {
-                            case EncodeType.HCA:
-                            case EncodeType.HCA_ALT:
-                                await audioPlayer.AsyncSetHcaAudio(afs2Entry.bytes);
-                                break;
-                            case EncodeType.ADX:
-                                audioPlayer.SetAudio(ADX.Decode(afs2Entry.bytes));
-                                break;
-                            case EncodeType.ATRAC9:
-                                audioPlayer.SetAudio(AT9.Decode(afs2Entry.bytes));
-                                break;
-                        }
+                            switch (track.WaveformWrapper.WaveformRef.EncodeType)
+                            {
+                                case EncodeType.HCA:
+                                case EncodeType.HCA_ALT:
+                                    audioPlayer.SetAudio(HCA.Decode(afs2Entry.bytes));
+                                    break;
+                                case EncodeType.ADX:
+                                    audioPlayer.SetAudio(ADX.Decode(afs2Entry.bytes));
+                                    break;
+                                case EncodeType.ATRAC9:
+                                    audioPlayer.SetAudio(AT9.Decode(afs2Entry.bytes));
+                                    break;
+                                case EncodeType.BCWAV:
+                                    audioPlayer.SetAudio(BC_WAV.Decode(afs2Entry.bytes));
+                                    break;
+                                case EncodeType.DSP:
+                                    audioPlayer.SetAudio(DSP.Decode(afs2Entry.bytes));
+                                    break;
+                            }
+                        });
 
                         //Set volume
                         float cueBaseVolume = cue.GetBaseVolume();
@@ -332,7 +341,7 @@ namespace AudioCueEditor.View
 
                 if (trackForm.Finished)
                 {
-                    track.UndoableReplaceTrack(trackForm.HcaBytes, trackForm.Streaming);
+                    track.UndoableReplaceTrack(trackForm.TrackBytes, trackForm.Streaming, trackForm.EncodeType);
                 }
             }
         }
@@ -368,11 +377,11 @@ namespace AudioCueEditor.View
 
             if (trackForm.Finished)
             {
-                cue.UndoableAddTrackToCue(trackForm.HcaBytes, trackForm.Streaming, trackForm.Loop);
+                cue.UndoableAddTrackToCue(trackForm.TrackBytes, trackForm.Streaming, trackForm.Loop, trackForm.EncodeType);
             }
         }
 
-        public RelayCommand AddActionToCueCommand => new RelayCommand(AddActionToCue, IsCueSelected);
+        public RelayCommand AddActionToCueCommand => new RelayCommand(AddActionToCue, CanAddActionToCue);
         private async void AddActionToCue()
         {
             GetSelectedCue().UndoableAddActionToCue();
@@ -382,6 +391,12 @@ namespace AudioCueEditor.View
         private async void EditLoopOnSelectedTrack()
         {
             var track = GetSelectedTrack(TrackType.Track);
+
+            if(track.WaveformWrapper.WaveformRef.EncodeType != EncodeType.HCA && track.WaveformWrapper.WaveformRef.EncodeType != EncodeType.HCA_ALT)
+            {
+                await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, $"Unsupported operation", $"Edit Loop is only possible on HCA encoded tracks.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                return;
+            }
 
             if (track != null)
             {
@@ -422,7 +437,7 @@ namespace AudioCueEditor.View
             {
                 if (cue.SequenceRef == null)
                 {
-                    await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, $"Unsupported operation", $"Edit Volume is not available on this cue type. Only Sequence type cues are supported.", MessageDialogStyle.Affirmative);
+                    await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, $"Unsupported operation", $"Edit Volume is not available on this cue type. Only Sequence type cues are supported.", MessageDialogStyle.Affirmative, DialogSettings.Default);
                     return;
                 }
                 var trackForm = new VolumeControl(Application.Current.MainWindow, cue);
@@ -430,7 +445,7 @@ namespace AudioCueEditor.View
             }
         }
 
-        public RelayCommand EditCueLimitCommand => new RelayCommand(EditCueLimit, IsCueSelected);
+        public RelayCommand EditCueLimitCommand => new RelayCommand(EditCueLimit, CanSetCueLimit);
         private async void EditCueLimit()
         {
             var cue = GetSelectedCue();
@@ -439,7 +454,7 @@ namespace AudioCueEditor.View
             {
                 if (cue.SequenceRef == null)
                 {
-                    await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, $"Unsupported operation", $"Edit Cue Limit is not available on this cue type. Only Sequence type cues are supported.", MessageDialogStyle.Affirmative);
+                    await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, $"Unsupported operation", $"Edit Cue Limit is not available on this cue type. Only Sequence type cues are supported.", MessageDialogStyle.Affirmative, DialogSettings.Default);
                     return;
                 }
                 var trackForm = new EditCueLimit(Application.Current.MainWindow, cue);
@@ -452,7 +467,7 @@ namespace AudioCueEditor.View
         {
             var cue = GetSelectedCue();
             start:
-            var result = await DialogCoordinator.Instance.ShowInputAsync(Application.Current.MainWindow, "Change Cue ID", "Enter a new ID for the cue:", new MetroDialogSettings() { DefaultText = cue.CueRef.ID.ToString(), AnimateShow = false, AnimateHide = false });
+            var result = await DialogCoordinator.Instance.ShowInputAsync(Application.Current.MainWindow, "Change Cue ID", "Enter a new ID for the cue:", DialogSettings.Default);
 
             if (string.IsNullOrWhiteSpace(result))
             {
@@ -462,13 +477,13 @@ namespace AudioCueEditor.View
             uint num;
             if (!uint.TryParse(result, out num))
             {
-                await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, "Invalid Characters", "The entered ID contains invalid characters.", MessageDialogStyle.Affirmative, new MetroDialogSettings() { AnimateShow = false, AnimateHide = false });
+                await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, "Invalid Characters", "The entered ID contains invalid characters.", MessageDialogStyle.Affirmative, DialogSettings.Default);
                 goto start;
             }
 
             if (AcbFile.Cues.FirstOrDefault(a => a.CueRef.ID == num && a != cue) != null)
             {
-                await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, "ID Already Used", "The entered ID is already used by another cue. Please enter a unique one.", MessageDialogStyle.Affirmative, new MetroDialogSettings() { AnimateShow = false, AnimateHide = false });
+                await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, "ID Already Used", "The entered ID is already used by another cue. Please enter a unique one.", MessageDialogStyle.Affirmative, DialogSettings.Default);
                 goto start;
             }
             else
@@ -484,6 +499,11 @@ namespace AudioCueEditor.View
             AcbFile.UndoableDeleteCues(selectedCues);
         }
 
+        private bool CanSetCueLimit()
+        {
+            if (AcbFile?.AcbFile?.AreCueLimitsAllowed == false) return false;
+            return IsCueSelected();
+        }
 
         private bool IsTrackSelected()
         {
@@ -497,6 +517,12 @@ namespace AudioCueEditor.View
             return false;
         }
         
+        private bool CanAddActionToCue()
+        {
+            if (AcbFile?.AcbFile?.AreActionsAllowed == false) return false;
+            return IsCueSelected();
+        }
+
         //Helper
         private Track_Wrapper GetSelectedTrack(TrackType type)
         {
@@ -516,15 +542,15 @@ namespace AudioCueEditor.View
             return dataGrid.SelectedItem as Cue_Wrapper;
         }
 
-        public void ExtractTrack(AFS2_AudioFile entry, string name, FileType format)
+        public void ExtractTrack(AFS2_Entry entry, string name, FileType format)
         {
             SaveFileDialog saveDialog = new SaveFileDialog();
             saveDialog.Title = "Extract track...";
 
-            if (format != FileType.Hca && format != FileType.Adx && format != FileType.Wave)
+            if (format != FileType.Hca && format != FileType.Adx && format != FileType.Wave && format != FileType.Dsp)
                 saveDialog.Filter = "Binary file |*.bin;";
             else
-                saveDialog.Filter = "WAV |*.wav; |HCA |*.hca; |ADX |*.adx;";
+                saveDialog.Filter = "WAV |*.wav; |HCA |*.hca; |ADX |*.adx; |Nintendo DSP |*.dsp;";
 
             saveDialog.AddExtension = true;
             saveDialog.FileName = name;
@@ -544,6 +570,9 @@ namespace AudioCueEditor.View
                         break;
                     case ".atrac9":
                         outputType = FileType.Atrac9;
+                        break;
+                    case ".dsp":
+                        outputType = FileType.Dsp;
                         break;
                     case ".wav":
                         outputType = FileType.Wave;
@@ -598,7 +627,7 @@ namespace AudioCueEditor.View
             {
                 if (track.TrackRef == null)
                 {
-                    await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, $"Unsupported operation", $"Edit Volume is not available on this cue type. Only Sequence type cues are supported.", MessageDialogStyle.Affirmative);
+                    await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, $"Unsupported operation", $"Edit Volume is not available on this cue type. Only Sequence type cues are supported.", MessageDialogStyle.Affirmative, DialogSettings.Default);
                     return;
                 }
                 var trackForm = new VolumeControl(Application.Current.MainWindow, track);
@@ -663,7 +692,7 @@ namespace AudioCueEditor.View
                                 if (form.Finished)
                                 {
                                     if (form.AddTrack)
-                                        AcbFile.UndoableAddCue(form.CueName, form.ReferenceType, form.HcaBytes, form.Streaming, form.Loop, false);
+                                        AcbFile.UndoableAddCue(form.CueName, form.ReferenceType, form.TrackBytes, form.Streaming, form.Loop, false, form.EncodeType);
                                     else
                                         AcbFile.UndoableAddCue(form.CueName, form.ReferenceType, false);
                                 }
@@ -710,7 +739,7 @@ namespace AudioCueEditor.View
 
                                 if (trackForm.Finished)
                                 {
-                                    cue.UndoableAddTrackToCue(trackForm.HcaBytes, trackForm.Streaming, trackForm.Loop);
+                                    cue.UndoableAddTrackToCue(trackForm.TrackBytes, trackForm.Streaming, trackForm.Loop, EncodeType.HCA);
                                 }
                                 break;
                             default:

@@ -119,6 +119,7 @@
     <Compile Include="ACB\ACB_File.cs" />
     <Compile Include="ACB_NEW\ACB_File.cs" />
     <Compile Include="ACB_NEW\ACB_Wrapper.cs" />
+    <Compile Include="ACB_NEW\TrackMetadata.cs" />
     <Compile Include="AFS2\AFS2_File.cs" />
     <Compile Include="AGD\AGD_File.cs" />
     <Compile Include="AIG\AIG_File.cs" />
@@ -168,6 +169,7 @@
     <Compile Include="CMS\Parser.cs" />
     <Compile Include="CNC\CNC_File.cs" />
     <Compile Include="CNS\CNS_File.cs" />
+    <Compile Include="CPK\AWB_CPK.cs" />
     <Compile Include="CPK\CPK_Reader.cs" />
     <Compile Include="CPK\CriPakTools\CPK.cs" />
     <Compile Include="CPK\CriPakTools\Endian.cs" />

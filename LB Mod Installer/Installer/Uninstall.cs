@@ -157,9 +157,9 @@ namespace LB_Mod_Installer.Installer
         private void ResolveFileType(string path, _File file)
         {
             //Special cases
-            if (path == Music.MusicInstaller.DIRECT_INSTALL_TYPE || path == Music.MusicInstaller.OPTION_INSTALL_TYPE)
+            if (path == ACB.AcbInstaller.DIRECT_INSTALL_TYPE || path == ACB.AcbInstaller.OPTION_INSTALL_TYPE || Path.GetExtension(path) == ".acb")
             {
-                Uninstall_BGM_ACB(path, file);
+                Uninstall_ACB(path, file);
                 return;
             }
             if(path == CharaSlotsFile.FILE_NAME_BIN)
@@ -310,7 +310,7 @@ namespace LB_Mod_Installer.Installer
             }
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} uninstall phase ({1}).", ErrorCode.IDB, path);
+                string error = string.Format("Failed at IDB uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }
@@ -345,7 +345,7 @@ namespace LB_Mod_Installer.Installer
             }
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} uninstall phase ({1}).", ErrorCode.CUS, path);
+                string error = string.Format("Failed at CUS uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }
@@ -383,7 +383,7 @@ namespace LB_Mod_Installer.Installer
             }
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} uninstall phase ({1}).", ErrorCode.BCS, path);
+                string error = string.Format("Failed at BCS uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }
@@ -420,7 +420,7 @@ namespace LB_Mod_Installer.Installer
             }
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} uninstall phase ({1}).", ErrorCode.CMS, path);
+                string error = string.Format("Failed at CMS uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }
@@ -442,7 +442,7 @@ namespace LB_Mod_Installer.Installer
             }
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} uninstall phase ({1}).", ErrorCode.BAC, path);
+                string error = string.Format("Failed at BAC uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }
@@ -468,7 +468,7 @@ namespace LB_Mod_Installer.Installer
             }
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} uninstall phase ({1}).", ErrorCode.BDM, path);
+                string error = string.Format("Failed at BDM uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }
@@ -489,7 +489,7 @@ namespace LB_Mod_Installer.Installer
             }
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} uninstall phase ({1}).", ErrorCode.BEV, path);
+                string error = string.Format("Failed at BEV uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }
@@ -510,7 +510,7 @@ namespace LB_Mod_Installer.Installer
             }
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} uninstall phase ({1}).", ErrorCode.BPE, path);
+                string error = string.Format("Failed at BPE uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }
@@ -531,7 +531,7 @@ namespace LB_Mod_Installer.Installer
             }
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} uninstall phase ({1}).", ErrorCode.BSA, path);
+                string error = string.Format("Failed at BSA uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }
@@ -552,7 +552,7 @@ namespace LB_Mod_Installer.Installer
             }
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} uninstall phase ({1}).", ErrorCode.CNC, path);
+                string error = string.Format("Failed at CNC uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }
@@ -573,7 +573,7 @@ namespace LB_Mod_Installer.Installer
             }
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} uninstall phase ({1}).", ErrorCode.CNS, path);
+                string error = string.Format("Failed at CNS uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }
@@ -594,7 +594,7 @@ namespace LB_Mod_Installer.Installer
             }
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} uninstall phase ({1}).", ErrorCode.CSO, path);
+                string error = string.Format("Failed at CSO uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }
@@ -615,7 +615,7 @@ namespace LB_Mod_Installer.Installer
             }
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} uninstall phase ({1}).", ErrorCode.EAN, path);
+                string error = string.Format("Failed at EAN uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }
@@ -636,7 +636,7 @@ namespace LB_Mod_Installer.Installer
             }
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} uninstall phase ({1}).", ErrorCode.MSG, path);
+                string error = string.Format("Failed at MSG uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }
@@ -663,7 +663,7 @@ namespace LB_Mod_Installer.Installer
 #if !DEBUG
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} uninstall phase ({1}).", ErrorCode.EEPK, path);
+                string error = string.Format("Failed at EEPK uninstall phase ({0}).",  path);
                 throw new Exception(error, ex);
             }
 #endif
@@ -703,7 +703,7 @@ namespace LB_Mod_Installer.Installer
             }
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} uninstall phase ({1}).", ErrorCode.PSC, path);
+                string error = string.Format("Failed at PSC uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }
@@ -724,7 +724,7 @@ namespace LB_Mod_Installer.Installer
             }
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} uninstall phase ({1}).", ErrorCode.PUP, path);
+                string error = string.Format("Failed at PUP uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }
@@ -750,7 +750,7 @@ namespace LB_Mod_Installer.Installer
             }
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} uninstall phase ({1}).", ErrorCode.AUR, path);
+                string error = string.Format("Failed at AUR uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }
@@ -782,7 +782,7 @@ namespace LB_Mod_Installer.Installer
             }
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} uninstall phase ({1}).", ErrorCode.TSD, path);
+                string error = string.Format("Failed at TSD uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }
@@ -811,7 +811,7 @@ namespace LB_Mod_Installer.Installer
             }
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} uninstall phase ({1}).", ErrorCode.TNL, path);
+                string error = string.Format("Failed at TNL uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }
@@ -856,7 +856,7 @@ namespace LB_Mod_Installer.Installer
             }
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} uninstall phase ({1}).", ErrorCode.EMB, path);
+                string error = string.Format("Failed at EMB uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }
@@ -885,20 +885,20 @@ namespace LB_Mod_Installer.Installer
             }
             catch (Exception ex)
             {
-                string error = string.Format("Failed at {0} uninstall phase ({1}).", ErrorCode.QXD, path);
+                string error = string.Format("Failed at QXD uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }
 
-        private void Uninstall_BGM_ACB(string path, _File file)
+        private void Uninstall_ACB(string path, _File file)
         {
             try
             {
-                new Music.MusicUninstaller(this, file);
+                new ACB.AcbUninstaller(this, file);
             }
             catch (Exception ex)
             {
-                string error = string.Format("Failed at BGM ACB uninstall phase ({0}).", path);
+                string error = string.Format("Failed at ACB uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using YAXLib;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.AFS2;
+using Xv2CoreLib.CPK;
 
 namespace Xv2CoreLib.UTF
 {
@@ -359,6 +360,10 @@ namespace Xv2CoreLib.UTF
                     }
 
                 }
+                else if(Column.StorageFlag == StorageFlag.Zero)
+                {
+                    //Zero means nothing?
+                }
                 else
                 {
                     throw new Exception(String.Format("Unknow StorageFlag: {0}", Column.StorageFlag));
@@ -450,11 +455,6 @@ namespace Xv2CoreLib.UTF
                 //Parse the data
                 if(dataInfo[i].dataIsNull == false)
                 {
-                    //if (!Directory.Exists("extracted"))
-                    //{
-                    //    Directory.CreateDirectory("extracted");
-                    //}
-                    //File.WriteAllBytes(String.Format("extracted/{0}", dataInfo[i].Name), bytes.GetRange(dataInfo[i].Offset, dataInfo[i].Length).ToArray());
 
                     if (BigEndianConverter.ReadUInt32(rawBytes, dataInfo[i].Offset) == UTF_SIGNATURE)
                     {
@@ -480,6 +480,18 @@ namespace Xv2CoreLib.UTF
                             utfFile.Columns[dataInfo[i].ColumnIndex].Afs2File = AFS2_File.LoadAfs2File(rawBytes, dataInfo[i].Offset, dataInfo[i].Length);
                         }
                     }
+                    else if (BitConverter.ToInt32(rawBytes, dataInfo[i].Offset) == AWB_CPK.CPK_SIGNATURE && utfFile.Columns[dataInfo[i].ColumnIndex].Name == "AwbFile")
+                    {
+                        //Data is CPK file (awb) on column "AwbFile"
+                        if (utfFile.Columns[dataInfo[i].ColumnIndex].StorageFlag == StorageFlag.PerRow)
+                        {
+                            utfFile.Columns[dataInfo[i].ColumnIndex].Rows[dataInfo[i].RowIndex].CpkFile = AWB_CPK.Load(rawBytes, dataInfo[i].Offset, dataInfo[i].Length);
+                        }
+                        else
+                        {
+                            utfFile.Columns[dataInfo[i].ColumnIndex].CpkFile = AWB_CPK.Load(rawBytes, dataInfo[i].Offset, dataInfo[i].Length);
+                        }
+                    }
                     else
                     {
                         //Data is of unknown type
@@ -498,7 +510,7 @@ namespace Xv2CoreLib.UTF
 
             if(rowPosition != RowLength)
             {
-                throw new Exception("rowPosition is out of sync. \nParse failed.");
+                //throw new Exception("rowPosition is out of sync. \nParse failed.");
             }
 
             utfFile.DataInfos = dataInfo;
@@ -815,6 +827,7 @@ namespace Xv2CoreLib.UTF
 
         public static bool IsUtfTableOrAfs2(byte[] rawBytes, int offset)
         {
+            if (offset > rawBytes.Length - 4) return false;
             if (BigEndianConverter.ReadUInt32(rawBytes, offset) == UTF_SIGNATURE || BigEndianConverter.ReadUInt32(rawBytes, offset) == AFS2_SIGNATURE) return true;
             return false;
         }
@@ -971,19 +984,25 @@ namespace Xv2CoreLib.UTF
             return false;
         }
 
-        public bool ColumnTableExists(string name)
+        public bool ColumnTableExists(string name, bool requireRows = false)
         {
             if (Columns == null) return false;
 
             foreach (var column in Columns)
             {
-                if (column.Name == name && column.UtfTable != null) return true;
+                if (column.Name == name && column.UtfTable != null)
+                {
+                    return (requireRows) ? (column.UtfTable.RowCount() != 0) : true;
+                }
                 if(column.Name == name)
                 {
                     if (column.Rows == null) return false;
                     if (column.Rows.Count > 0)
                     {
-                        if (column.Rows[0].UtfTable != null) return true;
+                        if (column.Rows[0].UtfTable != null)
+                        {
+                            return (requireRows) ? (column.Rows[0].UtfTable.RowCount() != 0) : true;
+                        }
                     }
                 }
             }
@@ -991,6 +1010,12 @@ namespace Xv2CoreLib.UTF
             return false;
         }
 
+        public bool ColumnHasValue(string columnName)
+        {
+            var column = GetColumn(columnName);
+            if (column == null) return false;
+            return column.StorageFlag == StorageFlag.Constant || column.StorageFlag == StorageFlag.PerRow;
+        }
 
         public UTF_Column GetColumn(string name)
         {
@@ -1050,6 +1075,31 @@ namespace Xv2CoreLib.UTF
 
             if (raiseExceptionIfNotFound)
                 throw new Exception(string.Format("GetColumnAfs2File: Could not column \"{0}\".", name));
+
+            return null;
+        }
+
+        public AWB_CPK GetColumnCpkFile(string name, bool raiseExceptionIfNotFound = false)
+        {
+            if (Columns == null) return null;
+
+            foreach (var column in Columns)
+            {
+                if (column.Name == name)
+                {
+                    if (column.StorageFlag == StorageFlag.Constant)
+                    {
+                        return column.CpkFile;
+                    }
+                    else
+                    {
+                        if (column.NumOfRows != 0) return column.Rows[0].CpkFile;
+                    }
+                }
+            }
+
+            if (raiseExceptionIfNotFound)
+                throw new Exception(string.Format("GetColumnCpkFile: Could not column \"{0}\".", name));
 
             return null;
         }
@@ -1608,6 +1658,8 @@ namespace Xv2CoreLib.UTF
         [YAXDontSerializeIfNull]
         public AFS2_File Afs2File { get; set; }
         [YAXDontSerializeIfNull]
+        public AWB_CPK CpkFile { get; set; }
+        [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]
         [YAXAttributeFor("Constant")]
         public byte[] Bytes { get; set; }
@@ -1830,6 +1882,8 @@ namespace Xv2CoreLib.UTF
         public UTF_File UtfTable { get; set; }
         [YAXDontSerializeIfNull]
         public AFS2_File Afs2File { get; set; }
+        [YAXDontSerializeIfNull]
+        public AWB_CPK CpkFile { get; set; }
         [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]
         [YAXAttributeFor("Data")]

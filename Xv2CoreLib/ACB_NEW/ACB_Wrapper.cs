@@ -44,14 +44,15 @@ namespace Xv2CoreLib.ACB_NEW
         {
             get
             {
-                return AcbFile.MusicPackageType == MusicPackageType.NewOption;
+                return AcbFile.MusicPackageType == MusicPackageType.BGM_NewOption;
             }
             set
             {
                 var oldValue = AcbFile.MusicPackageType;
-                AcbFile.MusicPackageType = (value) ? MusicPackageType.NewOption : MusicPackageType.Direct;
+                AcbFile.MusicPackageType = (value) ? MusicPackageType.BGM_NewOption : MusicPackageType.BGM_Direct;
                 NotifyPropertyChanged(nameof(MusicPackage_IsNewOptions));
                 NotifyPropertyChanged(nameof(MusicPackage_IsDirect));
+                NotifyPropertyChanged(nameof(MusicPackage_IsCss));
 
                 if (oldValue != AcbFile.MusicPackageType)
                     UndoManager.Instance.AddUndo(new UndoableProperty<ACB_File>(nameof(AcbFile.MusicPackageType), AcbFile, oldValue, AcbFile.MusicPackageType, "MusicPackage Type"));
@@ -61,20 +62,44 @@ namespace Xv2CoreLib.ACB_NEW
         {
             get
             {
-                return AcbFile.MusicPackageType == MusicPackageType.Direct;
+                return AcbFile.MusicPackageType == MusicPackageType.BGM_Direct;
             }
             set
             {
                 var oldValue = AcbFile.MusicPackageType;
-                AcbFile.MusicPackageType = (value) ? MusicPackageType.Direct : MusicPackageType.NewOption;
+                AcbFile.MusicPackageType = (value) ? MusicPackageType.BGM_Direct : MusicPackageType.BGM_NewOption;
                 NotifyPropertyChanged(nameof(MusicPackage_IsNewOptions));
                 NotifyPropertyChanged(nameof(MusicPackage_IsDirect));
+                NotifyPropertyChanged(nameof(MusicPackage_IsCss));
 
                 if (oldValue != AcbFile.MusicPackageType)
                     UndoManager.Instance.AddUndo(new UndoableProperty<ACB_File>(nameof(AcbFile.MusicPackageType), AcbFile, oldValue, AcbFile.MusicPackageType, "MusicPackage Type"));
             }
         }
+        public bool MusicPackage_IsCss
+        {
+            get
+            {
+                return AcbFile.MusicPackageType == MusicPackageType.CSS_Voice;
+            }
+            set
+            {
+                var oldValue = AcbFile.MusicPackageType;
 
+                if (value)
+                {
+                    AcbFile.MusicPackageType = MusicPackageType.CSS_Voice;
+
+                    NotifyPropertyChanged(nameof(MusicPackage_IsNewOptions));
+                    NotifyPropertyChanged(nameof(MusicPackage_IsDirect));
+                    NotifyPropertyChanged(nameof(MusicPackage_IsCss));
+
+                    if (oldValue != AcbFile.MusicPackageType)
+                        UndoManager.Instance.AddUndo(new UndoableProperty<ACB_File>(nameof(AcbFile.MusicPackageType), AcbFile, oldValue, AcbFile.MusicPackageType, "MusicPackage Type"));
+                }
+
+            }
+        }
 
         public ACB_File AcbFile { get; set; }
         public AsyncObservableCollection<Cue_Wrapper> Cues { get; set; } = AsyncObservableCollection<Cue_Wrapper>.Create();
@@ -107,125 +132,6 @@ namespace Xv2CoreLib.ACB_NEW
                 cue.UpdateProperties();
         }
 
-        /*
-#region RefactorFunctions
-        public void RefactorCueId(uint oldCueId, uint newCueId, bool addUndo)
-        {
-            foreach(var cue in AcbFile.Cues.Where(x => x.ID == oldCueId))
-            {
-                cue.ID = newCueId;
-                if(addUndo)
-                    UndoManager.Instance.AddToUndoComposition(new UndoableProperty<ACB_Cue>("ID", cue, oldCueId, newCueId));
-            }
-
-            foreach(var action in AcbFile.ActionTracks.Where(x => x.TargetSelf && x.TargetType == 1 && x.TargetId == oldCueId))
-            {
-                action.TargetId = newCueId;
-                if(addUndo)
-                    UndoManager.Instance.AddToUndoComposition(new UndoableProperty<ACB_Track>("TargetId", action, oldCueId, newCueId));
-            }
-        }
-
-        public void RefactorSequenceIndex(int oldIndex, int newIndex, bool addUndo)
-        {
-            RefactoReferenceItemIndex(ReferenceType.Sequence, oldIndex, newIndex, addUndo);
-        }
-
-        public void RefactorSynthIndex(int oldIndex, int newIndex, bool addUndo)
-        {
-            RefactoReferenceItemIndex(ReferenceType.Synth, oldIndex, newIndex, addUndo);
-        }
-
-        public void RefactorWaveformIndex(int oldIndex, int newIndex, bool addUndo)
-        {
-            RefactoReferenceItemIndex(ReferenceType.Waveform, oldIndex, newIndex, addUndo);
-        }
-
-        public void RefactorTrackIndex(int oldIndex, int newIndex, bool addUndo)
-        {
-            foreach(var table in AcbFile.Sequences)
-            {
-                foreach(var track in table.Tracks.Where(x => x.Index == (ushort)oldIndex))
-                {
-                    track.Index = (ushort)newIndex;
-                    if(addUndo)
-                        UndoManager.Instance.AddToUndoComposition(new UndoableProperty<ACB_SequenceTrack>("Index", track, (ushort)oldIndex, (ushort)newIndex));
-                }
-            }
-        }
-
-        public void RefactorActionTrackIndex(int oldIndex, int newIndex, bool addUndo)
-        {
-            foreach (var table in AcbFile.Sequences)
-            {
-                for(int i = 0; i < table.ActionTracks.Count; i++)
-                {
-                    if(table.ActionTracks[i] == (ushort)oldIndex)
-                    {
-                        table.ActionTracks[i] = (ushort)newIndex;
-                        if (addUndo)
-                            UndoManager.Instance.AddToUndoComposition(new UndoableStateChange<ushort>(table.ActionTracks, i, (ushort)oldIndex, (ushort)newIndex, null));
-
-                    }
-                }
-            }
-
-            foreach (var table in AcbFile.Synths)
-            {
-                for (int i = 0; i < table.ActionTracks.Count; i++)
-                {
-                    if (table.ActionTracks[i] == (ushort)oldIndex)
-                    {
-                        table.ActionTracks[i] = (ushort)newIndex;
-                        if (addUndo)
-                            UndoManager.Instance.AddToUndoComposition(new UndoableStateChange<ushort>(table.ActionTracks, i, (ushort)oldIndex, (ushort)newIndex, null));
-
-                    }
-                }
-            }
-        }
-
-        private void RefactoReferenceItemIndex(ReferenceType type, int oldIndex, int newIndex, bool addUndo)
-        {
-            foreach (var table in AcbFile.Cues.Where(x => x.ReferenceType == type && x.ReferenceIndex.TableIndex == (ushort)oldIndex))
-            {
-                table.ReferenceIndex.TableIndex = (ushort)newIndex;
-                if (addUndo)
-                    UndoManager.Instance.AddToUndoComposition(new UndoableProperty<ACB_Cue>("ReferenceIndex", table, (ushort)oldIndex, (ushort)newIndex));
-            }
-
-            foreach (var table in AcbFile.Synths.Where(x => x.ReferenceType == type && x.ReferenceIndex.TableIndex == (ushort)oldIndex))
-            {
-                table.ReferenceIndex.TableIndex = (ushort)newIndex;
-                if (addUndo)
-                    UndoManager.Instance.AddToUndoComposition(new UndoableProperty<ACB_Synth>("ReferenceIndex", table, (ushort)oldIndex, (ushort)newIndex));
-            }
-
-            RefactorCommandTableReferenceItems(type, oldIndex, newIndex, addUndo);
-        }
-
-        private void RefactorCommandTableReferenceItems(ReferenceType type, int oldId, int newId, bool addUndo)
-        {
-            foreach (var command in AcbFile.CommandTables.CommandTables)
-            {
-                foreach (var cmdGroup in command.CommandGroups)
-                {
-                    foreach (var seqCmd in cmdGroup.Commands.Where(x => x.CommandType == CommandType.ReferenceItem))
-                    {
-                        if (seqCmd.Param1 == (ushort)type && seqCmd.Param2 == (ushort)oldId)
-                        {
-                            seqCmd.Param2 = (ushort)newId;
-                            if (addUndo)
-                                UndoManager.Instance.AddToUndoComposition(new UndoableProperty<ACB_Command>("Param2", seqCmd, (ushort)oldId, (ushort)newId));
-
-                        }
-                    }
-                }
-            }
-        }
-#endregion
-        */
-
         #region UndoableOperations
         public int UndoableAddCue(string name, ReferenceType type, bool is3Dsound)
         {
@@ -235,9 +141,9 @@ namespace Xv2CoreLib.ACB_NEW
             return cueId;
         }
 
-        public int UndoableAddCue(string name, ReferenceType type, byte[] hca, bool streaming, bool loop, bool is3Dsound)
+        public int UndoableAddCue(string name, ReferenceType type, byte[] trackBytes, bool streaming, bool loop, bool is3Dsound, EncodeType encodeType)
         {
-            List<IUndoRedo> undos = AddCue(name, type, hca, streaming, loop, is3Dsound, out int cueId);
+            List<IUndoRedo> undos = AddCue(name, type, trackBytes, streaming, loop, is3Dsound, encodeType, out int cueId);
             UndoManager.Instance.AddUndo(new CompositeUndo(undos, $"Add Cue: {name}"));
 
             return cueId;
@@ -301,12 +207,12 @@ namespace Xv2CoreLib.ACB_NEW
             return undos;
         }
 
-        public List<IUndoRedo> AddCue(string name, ReferenceType type, byte[] hca, bool streaming, bool loop, bool is3Dsound, out int cueId)
+        public List<IUndoRedo> AddCue(string name, ReferenceType type, byte[] trackBytes, bool streaming, bool loop, bool is3Dsound, EncodeType encodeType, out int cueId)
         {
             List<IUndoRedo> undos = new List<IUndoRedo>();
 
             ACB_Cue acbCue;
-            undos.AddRange(AcbFile.AddCue(name, type, hca, streaming, loop, out acbCue));
+            undos.AddRange(AcbFile.AddCue(name, type, trackBytes, streaming, loop, encodeType, out acbCue));
 
             if (is3Dsound)
                 AcbFile.Add3dDefToCue(acbCue);
@@ -334,7 +240,7 @@ namespace Xv2CoreLib.ACB_NEW
         /// <param name="afs2Entry">The afs2Entry to add. (ID will be automatically generated and returned)</param>
         /// <param name="useExisting">If an identical afs2Entry exists, then reuse that.</param>
         /// <returns>The Awb ID assigned to the entry.</returns>
-        public ushort AddAwbEntry(AFS2_AudioFile afs2Entry, bool useExisting = true)
+        public ushort AddAwbEntry(AFS2_Entry afs2Entry, bool useExisting = true)
         {
             return AcbFile.AudioTracks.AddEntry(afs2Entry, useExisting);
         }
@@ -406,7 +312,7 @@ namespace Xv2CoreLib.ACB_NEW
 
             if(track != null && cue != null)
             {
-                undos.AddRange(AcbFile.AddTrackToCue(cue.CueRef, track.HcaBytes, track.Streaming, track.Loop));
+                undos.AddRange(AcbFile.AddTrackToCue(cue.CueRef, track.TrackBytes, track.Streaming, track.Loop, track.encodeType));
             }
 
             cue.Refresh();
@@ -819,9 +725,9 @@ namespace Xv2CoreLib.ACB_NEW
             UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Cue Limit"));
         }
 
-        public void UndoableAddTrackToCue(byte[] hca, bool streaming, bool loop)
+        public void UndoableAddTrackToCue(byte[] trackBytes, bool streaming, bool loop, EncodeType encodeType)
         {
-            List<IUndoRedo> undos = AddTrackToCue(hca, streaming, loop);
+            List<IUndoRedo> undos = AddTrackToCue(trackBytes, streaming, loop, encodeType);
             UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Add Track"));
         }
 
@@ -889,10 +795,10 @@ namespace Xv2CoreLib.ACB_NEW
             UndoManager.Instance.AddUndo(new CompositeUndo(undos, (track.Type == TrackType.Track) ? "Delete Track" : "Delete Action"));
         }
 
-        public List<IUndoRedo> AddTrackToCue(byte[] hca, bool streaming, bool loop)
+        public List<IUndoRedo> AddTrackToCue(byte[] trackBytes, bool streaming, bool loop, EncodeType encodeType)
         {
             List<IUndoRedo> undos = new List<IUndoRedo>();
-            undos.AddRange(WrapperRoot.AcbFile.AddTrackToCue(CueRef, hca, streaming, loop));
+            undos.AddRange(WrapperRoot.AcbFile.AddTrackToCue(CueRef, trackBytes, streaming, loop, encodeType));
             undos.Add(new UndoActionDelegate(this, "Refresh", true));
             Refresh();
             return undos;
@@ -1119,10 +1025,10 @@ namespace Xv2CoreLib.ACB_NEW
 
 
         #region UndoableOperations
-        public void UndoableReplaceTrack(byte[] hca, bool streaming)
+        public void UndoableReplaceTrack(byte[] trackBytes, bool streaming, EncodeType encodeType)
         {
             if (WaveformWrapper == null) return;
-            List<IUndoRedo> undos = WrapperRoot.AcbFile.ReplaceTrackOnWaveform(WaveformWrapper.WaveformRef, hca, streaming);
+            List<IUndoRedo> undos = WrapperRoot.AcbFile.ReplaceTrackOnWaveform(WaveformWrapper.WaveformRef, trackBytes, streaming, encodeType);
             undos.AddRange(WrapperRoot.AcbFile.UpdateCueLength(CueWrapper.CueRef));
             UpdateProperties();
             undos.Add(new UndoActionDelegate(this, "UpdateProperties", true));
@@ -1257,7 +1163,7 @@ namespace Xv2CoreLib.ACB_NEW
         public ACB_Waveform WaveformRef { get; set; }
 
         //Wrapper values
-        public AFS2_AudioFile AwbEntry
+        public AFS2_Entry AwbEntry
         {
             get
             {
@@ -1274,11 +1180,11 @@ namespace Xv2CoreLib.ACB_NEW
                 }
             }
         }
-        public HcaMetadata HcaMeta
+        public TrackMetadata HcaMeta
         {
             get
             {
-                if(AwbEntry == null) return new HcaMetadata();
+                if(AwbEntry == null) return new TrackMetadata();
                 return AwbEntry.HcaInfo;
             }
         }
@@ -1320,15 +1226,17 @@ namespace Xv2CoreLib.ACB_NEW
     [Serializable]
     public class CopiedTrack
     {
-        public byte[] HcaBytes { get; set; }
+        public byte[] TrackBytes { get; set; }
         public bool Streaming { get; set; }
         public bool Loop { get; set; }
+        public EncodeType encodeType { get; set; }
 
-        public CopiedTrack(ACB_Waveform waveform, AFS2_AudioFile awbEntry)
+        public CopiedTrack(ACB_Waveform waveform, AFS2_Entry awbEntry)
         {
-            HcaBytes = awbEntry?.bytes;
+            TrackBytes = awbEntry?.bytes;
             Streaming = (bool)waveform?.Streaming;
             Loop = (bool)waveform?.LoopFlag;
+            encodeType = waveform.EncodeType;
         }
     }
 

@@ -22,10 +22,11 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
-            //args = new string[1] { @"XV2P_SLOTS.x2s" };
+            //args = new string[1] { @"" };
 
             DEBUG_MODE = true;
 #endif
+
 
             string fileLocation = null;
             
@@ -567,9 +568,9 @@ namespace XV2_Xml_Serializer
                 case ".tsr":
                     Xv2CoreLib.TSR.TSR_File.Parse(fileLocation, true);
                     return true;
-                case ".acb":
-                    Xv2CoreLib.ACB_NEW.ACB_File.Load(fileLocation, true);
-                    return true;
+                //case ".acb":
+                    //Xv2CoreLib.ACB_NEW.ACB_File.Load(fileLocation, true);
+                    //return true;
                 default:
                     return false;
             }
@@ -585,9 +586,9 @@ namespace XV2_Xml_Serializer
                 case ".bcm":
                     new Xv2CoreLib.BCM.Deserializer(fileLocation);
                     return true;
-                case ".acb":
-                    Xv2CoreLib.ACB_NEW.ACB_File.LoadXml(fileLocation, true);
-                    return true;
+                //case ".acb":
+                //    Xv2CoreLib.ACB_NEW.ACB_File.LoadXml(fileLocation, true);
+                 //   return true;
                 default:
                     return false;
             }
@@ -607,6 +608,7 @@ namespace XV2_Xml_Serializer
                 if (Path.GetExtension(s) != ".xml")
                 {
                     fileType = Path.GetExtension(s);
+                    break;
                 }
             }
 
@@ -1270,30 +1272,16 @@ namespace XV2_Xml_Serializer
                 {
                     Console.WriteLine(s);
 
-                    //try
+                    try
                     {
                         var acb = Xv2CoreLib.ACB_NEW.ACB_File.Load(s, false);
                         
 
-                        foreach (var commandGroup in acb.CommandTables.GetIterator())
-                        {
-                            foreach(var command in commandGroup.Commands)
-                            {
-                                if(command.CommandType == (Xv2CoreLib.ACB_NEW.CommandType)67)
-                                {
-                                    //if(!UsedValues.Contains(command.Param2.ToString()))
-                                     //   UsedValues.Add(command.Param2.ToString());
-                                    Console.WriteLine($"This (Param1: {command.Param1}, Param2: {command.Param2}, Param3: {command.Param3}): {commandGroup.Index}");
-                                    Console.ReadLine();
-                                }
-                            }
-                        }
-
                     }
-                    //catch (Exception ex)
+                    catch (Exception ex)
                     {
-                     //   Console.WriteLine(ex.Message);
-                     //   Console.ReadLine();
+                        Console.WriteLine(ex.Message);
+                        Console.ReadLine();
                     }
                 }
                 

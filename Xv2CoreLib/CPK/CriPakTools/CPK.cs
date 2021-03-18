@@ -595,7 +595,7 @@ namespace CriPakTools
             return result;
         }
 
-        public byte[] DecompressCRILAYLA(byte[] input, int USize)
+        public static byte[] DecompressCRILAYLA(byte[] input, int USize)
         {
             byte[] result;// = new byte[USize];
 
@@ -664,7 +664,7 @@ namespace CriPakTools
             return result;
         }
 
-        private ushort get_next_bits(byte[] input, ref int offset_p, ref byte bit_pool_p, ref int bits_left_p, int bit_count)
+        private static ushort get_next_bits(byte[] input, ref int offset_p, ref byte bit_pool_p, ref int bits_left_p, int bit_count)
         {
             ushort out_bits = 0;
             int num_bits_produced = 0;

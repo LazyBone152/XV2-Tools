@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -10,13 +9,6 @@ using CSharpImageLibrary;
 using Xv2CoreLib.EffectContainer;
 using System.Windows.Data;
 using Xv2CoreLib.HslColor;
-using System.Drawing;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
-using Microsoft.Win32;
 using Xv2CoreLib.Resource.UndoRedo;
 using Xv2CoreLib.Resource;
 
@@ -24,8 +16,8 @@ namespace Xv2CoreLib.EMB_CLASS
 {
     public enum InstallMode
     {
-        MatchIndex,
-        MatchName
+        MatchName,
+        MatchIndex
     }
 
     [YAXComment("InstallMode values (used by LB Mod Installer):" +
@@ -58,7 +50,7 @@ namespace Xv2CoreLib.EMB_CLASS
         public bool UseFileNames { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("InstallMode")]
-        public InstallMode installMode { get; set; }
+        public InstallMode installMode { get; set; } = InstallMode.MatchName;
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "EmbEntry")]
         public AsyncObservableCollection<EmbEntry> Entry { get; set; } = AsyncObservableCollection<EmbEntry>.Create();

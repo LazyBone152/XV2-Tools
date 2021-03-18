@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using CriPakTools;
+using _cpk = CriPakTools.CPK;
 
 namespace Xv2CoreLib.CPK
 {
@@ -132,7 +133,7 @@ namespace Xv2CoreLib.CPK
                         if (isComp == "CRILAYLA")
                         {
                             int size = Int32.Parse((e.ExtractSize ?? e.FileSize).ToString());
-                            chunk = cpk.DecompressCRILAYLA(chunk, size);
+                            chunk = _cpk.DecompressCRILAYLA(chunk, size);
                         }
                         File.WriteAllBytes(outputPath, chunk);
                         return true;
@@ -186,7 +187,7 @@ namespace Xv2CoreLib.CPK
                         if (isComp == "CRILAYLA")
                         {
                             int size = Int32.Parse((e.ExtractSize ?? e.FileSize).ToString());
-                            chunk = cpk.DecompressCRILAYLA(chunk, size);
+                            chunk = _cpk.DecompressCRILAYLA(chunk, size);
                         }
                         return chunk;
                     }
@@ -298,7 +299,7 @@ namespace Xv2CoreLib.CPK
                         if (isComp == "CRILAYLA")
                         {
                             int size = Int32.Parse((file.ExtractSize ?? file.FileSize).ToString());
-                            chunk = CpkFiles[i].DecompressCRILAYLA(chunk, size);
+                            chunk = _cpk.DecompressCRILAYLA(chunk, size);
                         }
 
                         if (!Directory.Exists(string.Format("{0}{1}{3}{1}", outputDir, Path.DirectorySeparatorChar, file.FileName, file.DirName)))
@@ -471,7 +472,7 @@ namespace Xv2CoreLib.CPK
                     if (isComp == "CRILAYLA")
                     {
                         int size = Int32.Parse((e.ExtractSize ?? e.FileSize).ToString());
-                        chunk = cpk.DecompressCRILAYLA(chunk, size);
+                        chunk = _cpk.DecompressCRILAYLA(chunk, size);
                     }
 
                     string savePath = $"{outputDir}/{e.DirName}/{e.FileName}";

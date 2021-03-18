@@ -146,11 +146,11 @@ namespace AudioCueEditor
 
             if (isUpdateAvailable)
             {
-                var messageResult = await this.ShowMessageAsync("Update Available", $"An update is available ({latestVersion}). Do you want to download and install it?\n\nNote: All instances of the application will be closed and any unsaved work will be lost.", MessageDialogStyle.AffirmativeAndNegative, App.DefaultDialogSettings);
+                var messageResult = await this.ShowMessageAsync("Update Available", $"An update is available ({latestVersion}). Do you want to download and install it?\n\nNote: All instances of the application will be closed and any unsaved work will be lost.", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.Default);
 
                 if (messageResult == MessageDialogResult.Affirmative)
                 {
-                    var controller = await this.ShowProgressAsync("Update Available", "Downloading...", false, App.DefaultDialogSettings);
+                    var controller = await this.ShowProgressAsync("Update Available", "Downloading...", false, DialogSettings.Default);
                     controller.SetIndeterminate();
 
                     try
@@ -171,14 +171,14 @@ namespace AudioCueEditor
                     }
                     else
                     {
-                        await this.ShowMessageAsync("Update Failed", Update.DownloadFailedText, MessageDialogStyle.AffirmativeAndNegative, App.DefaultDialogSettings);
+                        await this.ShowMessageAsync("Update Failed", Update.DownloadFailedText, MessageDialogStyle.AffirmativeAndNegative, DialogSettings.Default);
                     }
 
                 }
             }
             else if (userInitiated)
             {
-                await this.ShowMessageAsync("Update", $"No update is available.", MessageDialogStyle.Affirmative, App.DefaultDialogSettings);
+                await this.ShowMessageAsync("Update", $"No update is available.", MessageDialogStyle.Affirmative, DialogSettings.Default);
             }
         }
 
@@ -218,7 +218,7 @@ namespace AudioCueEditor
             if(AcbFile != null)
             {
                 //Confirm
-                var result = await this.ShowMessageAsync("Discard current file?", "An acb file is already open. Any unsaved changes will be lost if you continue.", MessageDialogStyle.AffirmativeAndNegative);
+                var result = await this.ShowMessageAsync("Discard current file?", "An acb file is already open. Any unsaved changes will be lost if you continue.", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.Default);
 
                 if (result != MessageDialogResult.Affirmative) return;
             }
@@ -247,7 +247,7 @@ namespace AudioCueEditor
 
         private async void LoadAcb(string path)
         {
-            var controller = await this.ShowProgressAsync($"Loading \"{System.IO.Path.GetFileName(path)}\"...", $"", false, new MetroDialogSettings() { AnimateHide = false, AnimateShow = false, DialogTitleFontSize = 15, DialogMessageFontSize = 12 });
+            var controller = await this.ShowProgressAsync($"Loading \"{System.IO.Path.GetFileName(path)}\"...", $"", false, DialogSettings.Default);
             controller.SetIndeterminate();
 
             try
@@ -265,11 +265,11 @@ namespace AudioCueEditor
 
                     if (AcbFile.AcbFile.TableValidationFailed)
                     {
-                        await this.ShowMessageAsync("Validation Failed", "This file contains unknown data that could not be loaded and was skipped. Continuing at this point may very likely result in this ACB becoming corrupt.\n\nYou've been warned!", MessageDialogStyle.Affirmative, new MetroDialogSettings() { AnimateShow = false, AnimateHide = false });
+                        await this.ShowMessageAsync("Validation Failed", "This file contains unknown data that could not be loaded and was skipped. Continuing at this point may very likely result in this ACB losing data or becoming corrupt.\n\nYou've been warned!", MessageDialogStyle.Affirmative, DialogSettings.Default);
                     }
                     if (AcbFile.AcbFile.ExternalAwbError)
                     {
-                        await this.ShowMessageAsync("Validation Failed", "There should be an external AWB file with this ACB, but none was found. Because of this some tracks could not be loaded.", MessageDialogStyle.Affirmative, new MetroDialogSettings() { AnimateShow = false, AnimateHide = false });
+                        await this.ShowMessageAsync("Validation Failed", "There should be an external AWB file with this ACB, but none was found. Because of this some tracks could not be loaded.", MessageDialogStyle.Affirmative, DialogSettings.Default);
                     }
                 }
                 
@@ -309,7 +309,7 @@ namespace AudioCueEditor
 
         private async void Save(string path)
         {
-            var controller = await this.ShowProgressAsync($"Saving \"{System.IO.Path.GetFileName(path)}\"...", $"", false, App.DefaultDialogSettings);
+            var controller = await this.ShowProgressAsync($"Saving \"{System.IO.Path.GetFileName(path)}\"...", $"", false, DialogSettings.Default);
             controller.SetIndeterminate();
 
             Task task = null;
@@ -322,14 +322,7 @@ namespace AudioCueEditor
                 });
 
                 await task;
-                await this.ShowMessageAsync("Save successful", "The acb file was successfully saved!", MessageDialogStyle.Affirmative);
-            }
-            catch
-            {
-                if(task.Exception != null)
-                {
-                    await this.ShowMessageAsync("Save failed", $"{task.Exception.ToString()}", MessageDialogStyle.Affirmative);
-                }
+                await this.ShowMessageAsync("Save successful", "The acb file was successfully saved!", MessageDialogStyle.Affirmative, DialogSettings.Default);
             }
             finally
             {
@@ -360,7 +353,7 @@ namespace AudioCueEditor
         {
             if(AcbFile != null)
             {
-                var result = await this.ShowMessageAsync("Exit?", "An ACB file is open. Any unsaved changes will be lost if you continue.", MessageDialogStyle.AffirmativeAndNegative);
+                var result = await this.ShowMessageAsync("Exit?", "An ACB file is open. Any unsaved changes will be lost if you continue.", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.Default);
 
                 if (result != MessageDialogResult.Affirmative) return;
             }
@@ -413,6 +406,12 @@ namespace AudioCueEditor
         public RelayCommand CreateMusicInstallerCommand => new RelayCommand(CreateMusicInstaller, IsAcbLoaded);
         private async void CreateMusicInstaller()
         {
+            if(AcbFile.AcbFile.MusicPackageType == MusicPackageType.CSS_Voice)
+            {
+                MessageBox.Show("This option is only for music installers.", "NO", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             var form = new View.CreateMusicInstaller(this, AcbFile.AcbFile);
             form.ShowDialog();
 
@@ -441,9 +440,9 @@ namespace AudioCueEditor
         private async Task ExtractAllTracks(string extractDirectory, bool convertToWav)
         {
             if (!IsAcbLoaded()) return;
-            List<AFS2_AudioFile> extractedAwbEntries = new List<AFS2_AudioFile>();
+            List<AFS2_Entry> extractedAwbEntries = new List<AFS2_Entry>();
 
-            var controller = await this.ShowProgressAsync("Extracting all tracks (this may take a while)", "", true, new MetroDialogSettings() { AnimateHide = false, AnimateShow = false, DialogTitleFontSize = 15, DialogMessageFontSize = 12 });
+            var controller = await this.ShowProgressAsync("Extracting all tracks (this may take a while)", "", true, DialogSettings.Default);
             controller.Maximum =  AcbFile.AcbFile.Cues.Count;
 
             try

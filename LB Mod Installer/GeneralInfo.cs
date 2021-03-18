@@ -213,14 +213,6 @@ namespace LB_Mod_Installer
                 return InstallerXmlInfo.VersionFormattedString;
             }
         }
-        public static bool UseLightEmaFix
-        {
-            get
-            {
-                if (InstallerXmlInfo == null) return false;
-                return InstallerXmlInfo.UseLightEmaFix;
-            }
-        }
 
         //Safe Tracker requests
         public static string InstalledModVersion

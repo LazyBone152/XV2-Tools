@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using YAXLib;
 
@@ -89,18 +87,7 @@ namespace LB_Mod_Installer.Installer
                 }
             }
         }
-        [YAXDontSerialize]
-        public bool UseLightEmaFix
-        {
-            get
-            {
-                return Xv2CoreLib.Utils.StringToBool(LightEmaFix);
-            }
-            set
-            {
-                LightEmaFix = Xv2CoreLib.Utils.BoolToString(value);
-            }
-        }
+        
 
         [YAXAttributeFor("Name")]
         [YAXSerializeAs("value")]
@@ -111,11 +98,6 @@ namespace LB_Mod_Installer.Installer
         [YAXAttributeFor("Version")]
         [YAXSerializeAs("value")]
         public string VersionString { get; set; }
-
-        [YAXAttributeFor("LightEmaFix")]
-        [YAXSerializeAs("value")]
-        [YAXDontSerializeIfNull]
-        public string LightEmaFix { get; set; }
 
         [YAXDontSerializeIfNull]
         public Overrides UiOverrides { get; set; } = new Overrides();
@@ -133,12 +115,32 @@ namespace LB_Mod_Installer.Installer
         public List<FilePath> GetInstallFiles()
         {
             List<FilePath> files = new List<FilePath>();
-            
+
+            //Get all entries without DoLast flag
+            GetOptionInstallFiles(files, false);
+
             if (InstallFiles != null)
             {
-                files.AddRange(InstallFiles);
+                files.AddRange(InstallFiles.Where(x => !x.GetDoLast()));
             }
 
+            //Get entries with DoLast flag
+            GetOptionInstallFiles(files, true);
+
+            if (InstallFiles != null)
+            {
+                files.AddRange(InstallFiles.Where(x => x.GetDoLast()));
+            }
+
+
+            //Remove all files with empty SourcePaths
+            files.RemoveAll(x => string.IsNullOrWhiteSpace(x.SourcePath));
+
+            return files;
+        }
+
+        private void GetOptionInstallFiles(List<FilePath> files, bool doLast)
+        {
             //Create a list of all files that are to be installed, based on what the user selected.
             for (int i = 0; i < InstallOptionSteps.Count; i++)
             {
@@ -150,7 +152,15 @@ namespace LB_Mod_Installer.Installer
                         if (InstallOptionSteps[i].OptionList != null && InstallOptionSteps[i].SelectedOptionBinding != -1)
                         {
                             if (InstallOptionSteps[i].OptionList[InstallOptionSteps[i].SelectedOptionBinding].Paths != null)
-                                files.AddRange(InstallOptionSteps[i].OptionList[InstallOptionSteps[i].SelectedOptionBinding].Paths);
+                            {
+                                foreach(var file in InstallOptionSteps[i].OptionList[InstallOptionSteps[i].SelectedOptionBinding].Paths)
+                                {
+                                    if(file.GetDoLast() == doLast)
+                                    {
+                                        files.Add(file);
+                                    }
+                                }
+                            }
                         }
                     }
                     else if (InstallOptionSteps[i].StepType == InstallStep.StepTypes.OptionsMultiSelect)
@@ -159,19 +169,20 @@ namespace LB_Mod_Installer.Installer
                         {
                             foreach (var option in InstallOptionSteps[i].OptionList.Where(x => x.IsSelected_OptionMultiSelect && x.Paths != null))
                             {
-                                files.AddRange(option.Paths);
+                                foreach (var file in option.Paths)
+                                {
+                                    if (file.GetDoLast() == doLast)
+                                    {
+                                        files.Add(file);
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
-
-            //Remove all files with empty SourcePaths
-            files.RemoveAll(x => string.IsNullOrWhiteSpace(x.SourcePath));
-
-            return files;
         }
-        
+
         public void Init()
         {
             if (InstallOptionSteps == null) InstallOptionSteps = new List<InstallStep>();
@@ -878,9 +889,17 @@ namespace LB_Mod_Installer.Installer
         [YAXSerializeAs("value")]
         [YAXDontSerializeIfNull]
         public string InstallPath { get; set; }
+
+        //optional:
         [YAXAttributeForClass]
         [YAXDontSerializeIfNull]
         public string Overwrite { get; set; }
+        [YAXAttributeForClass]
+        [YAXDontSerializeIfNull]
+        public string Type { get; set; }
+        [YAXAttributeForClass]
+        [YAXDontSerializeIfNull]
+        public string DoLast { get; set; }
 
         public bool AllowOverwrite()
         {
@@ -897,6 +916,63 @@ namespace LB_Mod_Installer.Installer
                 return false;
             }
         }
+    
+        public FileType GetFileType()
+        {
+            FileType type = ParseFileTypeValue();
+
+            //If SourcePath is for a special file type, then return that type.
+            if(Path.GetExtension(SourcePath) == Xv2CoreLib.EffectContainer.EffectContainerFile.ZipExtension)
+            {
+                return FileType.VfxPackage;
+            }
+            else if (Path.GetExtension(SourcePath) == Xv2CoreLib.ACB_NEW.ACB_File.MUSIC_PACKAGE_EXTENSION)
+            {
+                return FileType.MusicPackage;
+            }
+
+            if (type == FileType.Default)
+            {
+                //Simulates the original behavior before FileType was added. Will infer type from SourcePath.
+
+                if (SourcePath.EndsWith("/") || SourcePath.EndsWith(@"\")) return FileType.CopyDir;
+                return (Path.GetExtension(SourcePath) != ".xml") ? FileType.CopyFile : FileType.XML;
+            }
+            else
+            {
+                return type;
+            }
+        }
+
+        private FileType ParseFileTypeValue()
+        {
+            if (string.IsNullOrWhiteSpace(Type)) return FileType.Default;
+
+            FileType type;
+            
+            if(!Enum.TryParse(Type, out type))
+            {
+                return FileType.Default;
+            }
+
+            return type;
+        }
+        
+        public bool GetDoLast()
+        {
+            if (String.IsNullOrWhiteSpace(DoLast)) return false;
+            return (DoLast.ToLower() == "true");
+        }
     }
 
+    public enum FileType
+    {
+        Default = 0,
+        XML,
+        Binary,
+        CopyFile,
+        CopyDir,
+        VfxPackage,
+        MusicPackage
+    }
 }

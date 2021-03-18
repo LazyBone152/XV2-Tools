@@ -47,7 +47,25 @@ namespace AudioCueEditor.View
             ReferenceType.Sequence
         };
 
-        
+
+        public List<EncodeType> EncodeTypes { get; private set; } = Helper.SupportedEncodeTypes;
+
+        private EncodeType _encodeType = EncodeType.HCA;
+        public EncodeType EncodeType
+        {
+            get
+            {
+                return _encodeType;
+            }
+            set
+            {
+                if (_encodeType != value)
+                {
+                    _encodeType = value;
+                    NotifyPropertyChanged(nameof(EncodeType));
+                }
+            }
+        }
 
         private string _name = null;
         private ReferenceType _referenceType = ReferenceType.Sequence;
@@ -167,7 +185,7 @@ namespace AudioCueEditor.View
             }
         }
 
-        public byte[] HcaBytes { get; private set; }
+        public byte[] TrackBytes { get; private set; }
         private bool ConversionSuccessful = false;
         private Exception ConvertException = null;
 
@@ -213,10 +231,10 @@ namespace AudioCueEditor.View
 
                     Task.Run(new Action(LoadAndConvertAudioFile));
                     Hide();
-                    var controller = await ((MetroWindow)Owner).ShowProgressAsync("Encoding", "Encoding audio file...", true, new MetroDialogSettings() { AnimateHide = false, AnimateShow = false });
+                    var controller = await ((MetroWindow)Owner).ShowProgressAsync("Encoding", "Encoding audio file...", true, DialogSettings.Default);
                     controller.SetIndeterminate();
 
-                    while (HcaBytes == null && !ConversionSuccessful && ConvertException == null)
+                    while (TrackBytes == null && !ConversionSuccessful && ConvertException == null)
                     {
                         if (controller.IsCanceled)
                         {
@@ -231,7 +249,7 @@ namespace AudioCueEditor.View
 
                     if (!ConversionSuccessful)
                     {
-                        await((MetroWindow)Owner).ShowMessageAsync("Encoding Error", string.Format("An exception occured during the encoding process:\n\n{0}", ConvertException?.Message), MessageDialogStyle.Affirmative, new MetroDialogSettings() { AnimateHide = false, AnimateShow = false });
+                        await((MetroWindow)Owner).ShowMessageAsync("Encoding Error", string.Format("An exception occured during the encoding process:\n\n{0}", ConvertException?.Message), MessageDialogStyle.Affirmative, DialogSettings.Default);
                         Close();
                     }
                     else
@@ -271,41 +289,8 @@ namespace AudioCueEditor.View
         {
             try
             {
-
-                if (File.Exists(AudioFilePath))
-                {
-                    byte[] bytes = File.ReadAllBytes(AudioFilePath);
-
-                    if (System.IO.Path.GetExtension(AudioFilePath).ToLower() == ".hca")
-                    {
-                        HcaBytes = bytes;
-                        ConversionSuccessful = true;
-                    }
-                    else if (System.IO.Path.GetExtension(AudioFilePath).ToLower() == ".wav")
-                    {
-                        var hcaBytes = HCA.Encode(bytes);
-                        hcaBytes = HCA.EncodeLoop(hcaBytes, Loop);
-
-                        HcaBytes = hcaBytes;
-                        ConversionSuccessful = true;
-                    }
-                    else if (System.IO.Path.GetExtension(AudioFilePath).ToLower() == ".mp3" ||
-                             System.IO.Path.GetExtension(AudioFilePath).ToLower() == ".wma" ||
-                             System.IO.Path.GetExtension(AudioFilePath).ToLower() == ".aac")
-                    {
-                        var wavBytes = Audio.CommonFormatsConverter.ConvertToWav(AudioFilePath);
-                        var hcaBytes = HCA.Encode(wavBytes);
-                        hcaBytes = HCA.EncodeLoop(hcaBytes, Loop);
-
-                        HcaBytes = hcaBytes;
-                        ConversionSuccessful = true;
-                    }
-                    else
-                    {
-                        ConversionSuccessful = false;
-                        throw new InvalidDataException($"The selected audio file is not a supported format ({System.IO.Path.GetExtension(AudioFilePath)}.");
-                    }
-                }
+                TrackBytes = Helper.LoadAndConvertFile(AudioFilePath, Helper.GetFileType(EncodeType), Loop);
+                ConversionSuccessful = true;
             }
             catch (Exception ex)
             {
