@@ -1297,6 +1297,15 @@ namespace Xv2CoreLib.TDB
         [YAXAttributeFor("I_140")]
         [YAXSerializeAs("value")]
         public int I_140 { get; set; }
+        [YAXAttributeFor("I_144")]
+        [YAXSerializeAs("value")]
+        public int I_144 { get; set; }
+        [YAXAttributeFor("I_148")]
+        [YAXSerializeAs("value")]
+        public int I_148 { get; set; }
+        [YAXAttributeFor("I_152")]
+        [YAXSerializeAs("value")]
+        public int I_152 { get; set; }
 
         public static List<TTL_skill_list> ReadAll(byte[] rawBytes, List<byte> bytes, int offset, int count)
         {
@@ -1305,7 +1314,7 @@ namespace Xv2CoreLib.TDB
             for (int i = 0; i < count; i++)
             {
                 enemyData.Add(Read(rawBytes, bytes, offset));
-                offset += 144;
+                offset += 156;
             }
 
             return enemyData;
@@ -1350,7 +1359,11 @@ namespace Xv2CoreLib.TDB
                 I_128 = BitConverter.ToInt32(rawBytes, offset + 128),
                 I_132 = BitConverter.ToInt32(rawBytes, offset + 132),
                 I_136 = BitConverter.ToInt32(rawBytes, offset + 136),
-                I_140 = BitConverter.ToInt32(rawBytes, offset + 140)
+                I_140 = BitConverter.ToInt32(rawBytes, offset + 140),
+                I_144 = BitConverter.ToInt32(rawBytes, offset + 144),
+                I_148 = BitConverter.ToInt32(rawBytes, offset + 148),
+                I_152 = BitConverter.ToInt32(rawBytes, offset + 152)
+
             };
         }
 
@@ -1404,8 +1417,11 @@ namespace Xv2CoreLib.TDB
             bytes.AddRange(BitConverter.GetBytes(I_132));
             bytes.AddRange(BitConverter.GetBytes(I_136));
             bytes.AddRange(BitConverter.GetBytes(I_140));
+            bytes.AddRange(BitConverter.GetBytes(I_144));
+            bytes.AddRange(BitConverter.GetBytes(I_148));
+            bytes.AddRange(BitConverter.GetBytes(I_152));
 
-            if (bytes.Count != 144) throw new Exception("TTL_skill_list is an invalid size.");
+            if (bytes.Count != 156) throw new Exception("TTL_skill_list is an invalid size.");
             return bytes;
         }
 
