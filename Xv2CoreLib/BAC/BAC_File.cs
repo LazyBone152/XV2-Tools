@@ -320,6 +320,7 @@ namespace Xv2CoreLib.BAC
         public List<BAC_Type14> Type14 { get; set; }
         [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "TransformControl")]
+        [BindingSubList]
         public List<BAC_Type15> Type15 { get; set; }
         [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "ScreenEffect")]
@@ -2922,16 +2923,16 @@ namespace Xv2CoreLib.BAC
         public ushort I_10 { get; set; }
         [YAXAttributeFor("Function")]
         [YAXSerializeAs("Parameter")]
-        [YAXFormat("0.0########")]
-        public float F_12 { get; set; }
+        //[YAXFormat("0.0########")]
+        public string F_12 { get; set; }
         [YAXAttributeFor("F_16")]
         [YAXSerializeAs("value")]
-        [YAXFormat("0.0########")]
-        public float F_16 { get; set; }
+        //[YAXFormat("0.0########")]
+        public string F_16 { get; set; }
         [YAXAttributeFor("F_20")]
         [YAXSerializeAs("value")]
-        [YAXFormat("0.0########")]
-        public float F_20 { get; set; }
+        //[YAXFormat("0.0########")]
+        public string F_20 { get; set; }
         [YAXAttributeFor("I_24")]
         [YAXSerializeAs("value")]
         public int I_24 { get; set; }
@@ -2941,11 +2942,11 @@ namespace Xv2CoreLib.BAC
 
         #region ParamProps
         [YAXDontSerialize]
-        public int Param1_Int { get { return (int)F_12; } set { F_12 = value; } }
+        public float Param1_Float { get { return float.Parse(F_12); } set { F_12 = value.ToString(); } }
         [YAXDontSerialize]
-        public int Param2_Int { get { return (int)F_16; } set { F_16 = value; } }
+        public float Param2_Float { get { return float.Parse(F_16); } set { F_16 = value.ToString(); } }
         [YAXDontSerialize]
-        public int Param3_Int { get { return (int)F_20; } set { F_20 = value; } }
+        public float Param3_Float { get { return float.Parse(F_20); } set { F_20 = value.ToString(); } }
 
         #endregion
 
@@ -2963,9 +2964,9 @@ namespace Xv2CoreLib.BAC
                     Flags = BitConverter.ToInt16(rawBytes, offset + 6),
                     I_08 = BitConverter.ToUInt16(rawBytes, offset + 8),
                     I_10 = BitConverter.ToUInt16(rawBytes, offset + 10),
-                    F_12 = BitConverter.ToSingle(rawBytes, offset + 12),
-                    F_16 = BitConverter.ToSingle(rawBytes, offset + 16),
-                    F_20 = BitConverter.ToSingle(rawBytes, offset + 20),
+                    Param1_Float = BitConverter.ToSingle(rawBytes, offset + 12),
+                    Param2_Float = BitConverter.ToSingle(rawBytes, offset + 16),
+                    Param3_Float = BitConverter.ToSingle(rawBytes, offset + 20),
                     I_24 = BitConverter.ToInt32(rawBytes, offset + 24),
                     I_28 = BitConverter.ToInt32(rawBytes, offset + 28)
                 });
@@ -2988,9 +2989,9 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.Flags));
                 bytes.AddRange(BitConverter.GetBytes(type.I_08));
                 bytes.AddRange(BitConverter.GetBytes(type.I_10));
-                bytes.AddRange(BitConverter.GetBytes(type.F_12));
-                bytes.AddRange(BitConverter.GetBytes(type.F_16));
-                bytes.AddRange(BitConverter.GetBytes(type.F_20));
+                bytes.AddRange(BitConverter.GetBytes(type.Param1_Float));
+                bytes.AddRange(BitConverter.GetBytes(type.Param2_Float));
+                bytes.AddRange(BitConverter.GetBytes(type.Param3_Float));
                 bytes.AddRange(BitConverter.GetBytes(type.I_24));
                 bytes.AddRange(BitConverter.GetBytes(type.I_28));
             }

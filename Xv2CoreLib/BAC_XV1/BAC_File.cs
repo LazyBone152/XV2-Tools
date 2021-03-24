@@ -392,8 +392,8 @@ namespace Xv2CoreLib.BAC_XV1
                     I_08 = (ushort)type.I_08,
                     I_04 = type.I_04,
                     Flags = type.I_06,
-                    F_12 = type.F_12,
-                    F_16 = type.F_12
+                    F_12 = type.F_12.ToString(),
+                    F_16 = type.F_12.ToString()
                 });
 
             }
