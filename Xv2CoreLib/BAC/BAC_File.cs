@@ -2942,11 +2942,11 @@ namespace Xv2CoreLib.BAC
 
         #region ParamProps
         [YAXDontSerialize]
-        public float Param1_Float { get { return float.Parse(F_12); } set { F_12 = value.ToString(); } }
+        public float Param1_Float { get { return float.Parse(F_12); } set { F_12 = value.ToString("0.0#########"); } }
         [YAXDontSerialize]
-        public float Param2_Float { get { return float.Parse(F_16); } set { F_16 = value.ToString(); } }
+        public float Param2_Float { get { return float.Parse(F_16); } set { F_16 = value.ToString("0.0#########"); } }
         [YAXDontSerialize]
-        public float Param3_Float { get { return float.Parse(F_20); } set { F_20 = value.ToString(); } }
+        public float Param3_Float { get { return float.Parse(F_20); } set { F_20 = value.ToString("0.0#########"); } }
 
         #endregion
 
