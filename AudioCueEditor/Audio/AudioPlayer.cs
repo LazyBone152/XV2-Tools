@@ -28,6 +28,8 @@ namespace AudioCueEditor.Audio
         private WaveOut wavePlayer = new WaveOut();
         private WavStream CurrentWav = null;
 
+        private bool Loop = false;
+
         public bool HasWave { get { return CurrentWav != null; } }
 
         #region PlaybackTimer
@@ -114,6 +116,16 @@ namespace AudioCueEditor.Audio
         public void SetVolume(float vol)
         {
             wavePlayer.Volume = vol;
+        }
+
+        public void SetLoop(float start, float end)
+        {
+            CurrentWav?.waveStream.SetLoop(start, end);
+        }
+
+        public void SetLoop()
+        {
+            CurrentWav?.waveStream.SetLoop();
         }
 
         //Helpers

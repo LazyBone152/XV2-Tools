@@ -120,6 +120,7 @@
     <Compile Include="ACB_NEW\ACB_File.cs" />
     <Compile Include="ACB_NEW\ACB_Wrapper.cs" />
     <Compile Include="ACB_NEW\TrackMetadata.cs" />
+    <Compile Include="ACB_NEW\FormatHelper.cs" />
     <Compile Include="AFS2\AFS2_File.cs" />
     <Compile Include="AGD\AGD_File.cs" />
     <Compile Include="AIG\AIG_File.cs" />
@@ -162,7 +163,6 @@
     <Compile Include="BSA_XV1\BSA_File.cs" />
     <Compile Include="BSA_XV1\Deserializer.cs" />
     <Compile Include="BSA_XV1\Parser.cs" />
-    <Compile Include="Class1.cs" />
     <Compile Include="CML\CML_File.cs" />
     <Compile Include="CMS\CMS_File.cs" />
     <Compile Include="CMS\Deserializer.cs" />
@@ -254,6 +254,11 @@
     <Compile Include="PFL\PFL_File.cs" />
     <Compile Include="PFP\PFP_File.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="PSA\PSA_File.cs" />
     <Compile Include="PSC\PSC_File.cs" />
     <Compile Include="PSL\PSL_File.cs" />
@@ -325,6 +330,10 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="costura32\AesCtrLibrary.dll" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -332,7 +341,9 @@
   <ItemGroup>
     <None Include="FodyWeavers.xml" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\AcbFormatHelper.xml" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Fody.3.3.2\build\Fody.targets" Condition="Exists('..\packages\Fody.3.3.2\build\Fody.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

@@ -74,5 +74,19 @@ namespace AudioCueEditor.Audio
 
             return sourceStream.Read(buffer, offset, count);
         }
+
+        public void SetLoop()
+        {
+            LoopStart = new TimeSpan();
+            LoopEnd = TotalTime;
+            EnableLooping = true;
+        }
+
+        public void SetLoop(float startMs, float endMs)
+        {
+            LoopStart = new TimeSpan(0, 0, 0, 0, (int)startMs);
+            LoopEnd = new TimeSpan(0, 0, 0, 0, (int)endMs);
+            EnableLooping = true;
+        }
     }
 }

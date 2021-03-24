@@ -22,6 +22,7 @@ using Microsoft.Win32;
 using GalaSoft.MvvmLight.CommandWpf;
 using MahApps.Metro.Controls.Dialogs;
 using Xv2CoreLib.Resource.UndoRedo;
+using Xv2CoreLib.HCA;
 
 namespace AudioCueEditor.View
 {
@@ -53,10 +54,11 @@ namespace AudioCueEditor.View
             {
                 SetValue(AcbFileProperty, value);
                 NotifyPropertyChanged(nameof(AcbFile));
+                NotifyPropertyChanged(nameof(IsSequenceTypeEnabled));
             }
         }
-
-        
+        public bool IsSequenceTypeEnabled { get { return (AcbFile != null) ? AcbFormatHelper.Instance.IsSequenceTypeEnabled(AcbFile.AcbFile.Version) : false; } }
+        public bool IsActionsEnabled { get { return (AcbFile != null) ? AcbFormatHelper.Instance.IsActionsEnabled(AcbFile.AcbFile.Version) : false; } }
 
         public AudioPlayer audioPlayer { get; set; } = new AudioPlayer();
 
@@ -266,6 +268,11 @@ namespace AudioCueEditor.View
         public RelayCommand PlaySelectedTrackCommand => new RelayCommand(PlaySelectedTrack, IsTrackSelected);
         private async void PlaySelectedTrack()
         {
+            PlayTrack(false);
+        }
+
+        private async void PlayTrack(bool loop)
+        {
             var track = GetSelectedTrack(TrackType.Track);
             var cue = GetSelectedCue();
 
@@ -279,7 +286,7 @@ namespace AudioCueEditor.View
                     {
                         audioPlayer.Stop();
 
-                        await Task.Run(()=> 
+                        await Task.Run(() =>
                         {
                             switch (track.WaveformWrapper.WaveformRef.EncodeType)
                             {
@@ -313,6 +320,28 @@ namespace AudioCueEditor.View
                         float finalVolume = ((trackVolume * cueVolume) > 1f) ? 1f : trackVolume * cueVolume;
 
                         audioPlayer.SetVolume(finalVolume);
+
+                        //Set loop
+                        if (loop)
+                        {
+                            if (track.WaveformWrapper.WaveformRef.EncodeType == EncodeType.HCA || track.WaveformWrapper.WaveformRef.EncodeType == EncodeType.HCA_ALT)
+                            {
+                                HcaMetadata meta = new HcaMetadata(afs2Entry.bytes);
+
+                                if (meta.HasLoopData)
+                                {
+                                    audioPlayer.SetLoop(meta.LoopStartMs, meta.LoopEndMs);
+                                }
+                                else
+                                {
+                                    audioPlayer.SetLoop();
+                                }
+                            }
+                            else
+                            {
+                                audioPlayer.SetLoop();
+                            }
+                        }
 
                         //Play
                         audioPlayer.Play();
@@ -501,7 +530,7 @@ namespace AudioCueEditor.View
 
         private bool CanSetCueLimit()
         {
-            if (AcbFile?.AcbFile?.AreCueLimitsAllowed == false) return false;
+            if (AcbFile == null) return false;
             return IsCueSelected();
         }
 
@@ -519,7 +548,8 @@ namespace AudioCueEditor.View
         
         private bool CanAddActionToCue()
         {
-            if (AcbFile?.AcbFile?.AreActionsAllowed == false) return false;
+            if (AcbFile == null) return false;
+            if (!AcbFormatHelper.Instance.IsActionsEnabled(AcbFile.AcbFile.Version)) return false;
             return IsCueSelected();
         }
 
@@ -598,9 +628,14 @@ namespace AudioCueEditor.View
         //Track Events (cant use commands on a DataTemplated listbox... so this is needed)
         private void ListBoxEvent_PlaySelectedTrack(object sender, RoutedEventArgs e)
         {
-            PlaySelectedTrack();
+            PlayTrack(false);
         }
-        
+
+        private void ListBoxEvent_PlaySelectedTrackLoop(object sender, RoutedEventArgs e)
+        {
+            PlayTrack(true);
+        }
+
         private void ListBoxEvent_ReplaceSelectedTrack(object sender, RoutedEventArgs e)
         {
             if (IsTrackSelected())

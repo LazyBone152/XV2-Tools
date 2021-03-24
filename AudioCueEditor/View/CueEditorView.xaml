@@ -146,6 +146,7 @@
                         <ListBox.ContextMenu>
                             <ContextMenu FontSize="12">
                                 <MenuItem Header="Play" Click="ListBoxEvent_PlaySelectedTrack"/>
+                                <MenuItem Header="Play (loop)" Click="ListBoxEvent_PlaySelectedTrackLoop"/>
                                 <Separator/>
                                 <MenuItem Header="Replace" Click="ListBoxEvent_ReplaceSelectedTrack"/>
                                 <MenuItem Header="Extract" Click="ListBoxEvent_ExtractSelectedTrack"/>
@@ -251,7 +252,7 @@
                 <StackPanel>
 
                     <Expander Header="Sequence" IsExpanded="True">
-                        <Grid IsEnabled="{Binding AcbFile.AcbFile.IsSequenceDataAllowed}" Height="150">
+                        <Grid IsEnabled="{Binding IsSequenceTypeEnabled}" Height="150">
                             <Label Visibility="{Binding SequenceCueNotVisibile}" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Margin="0,63,0.182,60" Content="&lt;Select a Sequence type Cue to edit its details>" VerticalAlignment="Stretch" Width="266"/>
 
                             <ComboBox Visibility="{Binding SequenceCueVisibile}" SelectedItem="{Binding Path=SelectedItem.SequenceRef.UndoableSequenceType, ElementName=dataGrid}" ItemsSource="{Binding Source={StaticResource SeqTypeEnum}}" HorizontalAlignment="Left" Margin="84,10,0,0" VerticalAlignment="Top" Width="173"/>
@@ -295,7 +296,7 @@
                         </Grid>
                     </Expander>
                     <Expander Header="Action" IsExpanded="True">
-                        <Grid IsEnabled="{Binding AcbFile.AcbFile.AreActionsAllowed}">
+                        <Grid IsEnabled="{Binding IsActionsEnabled}">
                             <Grid Height="225" Visibility="{Binding ActionVisibile}">
                                 <ComboBox SelectedIndex="{Binding Path=SelectedItem.SelectedTrack.TrackRef.UndoableTargetType, ElementName=dataGrid}" HorizontalAlignment="Left" Margin="78,10,0,0" VerticalAlignment="Top" Width="179">
                                     <ComboBoxItem Content="Any ACB"/>

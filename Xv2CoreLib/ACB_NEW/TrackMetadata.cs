@@ -20,7 +20,7 @@ namespace Xv2CoreLib.ACB_NEW
         public uint NumSamples { get; private set; }
 
         //Duration
-        public uint DurationSeconds { get { return NumSamples / SampleRate; } }
+        public uint DurationSeconds { get { return (NumSamples != 0 && SampleRate != 0) ? NumSamples / SampleRate : 0; } }
         public TimeSpan Duration { get { return new TimeSpan(0, 0, 0, (int)DurationSeconds); } }
 
         public TrackMetadata(byte[] bytes)
