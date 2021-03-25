@@ -929,7 +929,7 @@ namespace Xv2CoreLib.ACB_NEW
             waveform.Streaming = streaming;
             waveform.StreamAwbPortNo = (streaming) ? (ushort)0 : ushort.MaxValue;
             waveform.EncodeType = encodeType;
-            waveform.LoopFlag = loop;
+            waveform.LoopFlag = Convert.ToByte(loop);
             waveform.NumChannels = trackMetadata.Channels;
             waveform.SamplingRate = (ushort)trackMetadata.SampleRate;
             waveform.NumSamples = trackMetadata.NumSamples;
@@ -1090,7 +1090,7 @@ namespace Xv2CoreLib.ACB_NEW
             waveform.Streaming = streaming;
             waveform.StreamAwbPortNo = newStreamAwbPortNo;
             waveform.EncodeType = EncodeType.HCA;
-            waveform.LoopFlag = hasLoop;
+            waveform.LoopFlag = Convert.ToByte(hasLoop);
             waveform.LoopStart = loopStart;
             waveform.LoopEnd = loopEnd;
             waveform.NumChannels = trackMetadata.Channels;
@@ -1117,7 +1117,7 @@ namespace Xv2CoreLib.ACB_NEW
         //Loop
         public List<IUndoRedo> EditLoopOnWaveform(ACB_Waveform waveform, bool loop, int startMs, int endMs)
         {
-            if (waveform.EncodeType != EncodeType.HCA || waveform.EncodeType != EncodeType.HCA_ALT)
+            if (waveform.EncodeType != EncodeType.HCA && waveform.EncodeType != EncodeType.HCA_ALT)
                 throw new InvalidOperationException("Can only edit loop on HCA encoded tracks.");
 
             List<IUndoRedo> undos = new List<IUndoRedo>();
@@ -1141,7 +1141,7 @@ namespace Xv2CoreLib.ACB_NEW
             //Update waveform
             waveform.LoopStart = metadata.LoopStartSamples;
             waveform.LoopEnd = metadata.LoopEndSamples;
-            waveform.LoopFlag = metadata.HasLoopData;
+            waveform.LoopFlag = Convert.ToByte(metadata.HasLoopData);
 
             return undos;
         }
@@ -3968,7 +3968,7 @@ namespace Xv2CoreLib.ACB_NEW
         public byte NumChannels { get; set; }
         [YAXAttributeFor("LoopFlag")]
         [YAXSerializeAs("value")]
-        public bool LoopFlag { get; set; }
+        public byte LoopFlag { get; set; }// 0, 1, 2
         [YAXAttributeFor("SamplingRate")]
         [YAXSerializeAs("value")]
         public ushort SamplingRate { get; set; }
@@ -4011,7 +4011,7 @@ namespace Xv2CoreLib.ACB_NEW
             waveform.EncodeType = (EncodeType)waveformTable.GetValue<byte>("EncodeType", TypeFlag.UInt8, index);
             waveform.Streaming = Convert.ToBoolean(waveformTable.GetValue<byte>("Streaming", TypeFlag.UInt8, index));
             waveform.NumChannels = waveformTable.GetValue<byte>("NumChannels", TypeFlag.UInt8, index, tableHelper, ParseVersion);
-            waveform.LoopFlag = Convert.ToBoolean(waveformTable.GetValue<byte>("LoopFlag", TypeFlag.UInt8, index));
+            waveform.LoopFlag = waveformTable.GetValue<byte>("LoopFlag", TypeFlag.UInt8, index);
             waveform.SamplingRate = waveformTable.GetValue<ushort>("SamplingRate", TypeFlag.UInt16, index, tableHelper, ParseVersion);
             waveform.NumSamples = waveformTable.GetValue<uint>("NumSamples", TypeFlag.UInt32, index, tableHelper, ParseVersion);
             waveform.StreamAwbPortNo = waveformTable.GetValue<ushort>("StreamAwbPortNo", TypeFlag.UInt16, index, tableHelper, ParseVersion);
@@ -4033,7 +4033,7 @@ namespace Xv2CoreLib.ACB_NEW
 
                 if(extensionIndex != ushort.MaxValue)
                 {
-                    waveform.LoopFlag = true;
+                    //waveform.LoopFlag = true;
 
                     if(waveformExtensionTable != null)
                     {
@@ -4044,7 +4044,7 @@ namespace Xv2CoreLib.ACB_NEW
                 }
                 else
                 {
-                    waveform.LoopFlag = false;
+                    //waveform.LoopFlag = false;
                 }
             }
             else if (tableHelper.ColumnExists("ExtensionData", TypeFlag.Data, ParseVersion))
@@ -4055,13 +4055,13 @@ namespace Xv2CoreLib.ACB_NEW
 
                 if (loopData.Length == 2)
                 {
-                    waveform.LoopFlag = true;
+                    //waveform.LoopFlag = true;
                     waveform.LoopStart = loopData[0];
                     waveform.LoopEnd = loopData[1];
                 }
                 else
                 {
-                    waveform.LoopFlag = false;
+                    //waveform.LoopFlag = false;
                 }
             }
 
@@ -4116,7 +4116,7 @@ namespace Xv2CoreLib.ACB_NEW
             ushort extensionIndex = ushort.MaxValue;
             byte[] loopBytes = null; 
 
-            if (LoopFlag)
+            if (LoopFlag > 0)
             {
                 if (tableHelper.ColumnExists("ExtensionData", TypeFlag.UInt16, ParseVersion))
                 {
@@ -4130,7 +4130,7 @@ namespace Xv2CoreLib.ACB_NEW
                 }
                 else if (tableHelper.ColumnExists("ExtensionData", TypeFlag.Data, ParseVersion))
                 {
-                    loopBytes = BigEndianConverter.GetBytes(new uint[2] { LoopStart, LoopEnd });
+                    loopBytes = (eternityCompat) ? null : BigEndianConverter.GetBytes(new uint[2] { LoopStart, LoopEnd });
                 }
             }
 

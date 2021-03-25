@@ -63,6 +63,7 @@ namespace AudioCueEditor.View
                 {
                     _encodeType = value;
                     NotifyPropertyChanged(nameof(EncodeType));
+                    NotifyPropertyChanged(nameof(CanSetLoop));
                 }
             }
         }
@@ -114,6 +115,7 @@ namespace AudioCueEditor.View
                 {
                     _addTrack = value;
                     NotifyPropertyChanged("AddTrack");
+                    NotifyPropertyChanged(nameof(CanSetLoop));
                 }
             }
         }
@@ -167,6 +169,7 @@ namespace AudioCueEditor.View
                 }
             }
         }
+        public bool CanSetLoop { get { return EncodeType == EncodeType.HCA && AddTrack; } }
 
         private string _audioFilePath = null;
         public string AudioFilePath

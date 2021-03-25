@@ -1235,7 +1235,7 @@ namespace Xv2CoreLib.ACB_NEW
         {
             TrackBytes = awbEntry?.bytes;
             Streaming = (bool)waveform?.Streaming;
-            Loop = (bool)waveform?.LoopFlag;
+            Loop = (waveform?.LoopFlag == 0) ? false : true;
             encodeType = waveform.EncodeType;
         }
     }

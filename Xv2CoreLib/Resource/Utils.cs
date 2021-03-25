@@ -10,7 +10,6 @@ using System.Security.Cryptography;
 using Xv2CoreLib.Resource.UndoRedo;
 using System.Reflection;
 using System.ComponentModel;
-using Xv2CoreLib.ACB_NEW;
 
 namespace Xv2CoreLib
 {

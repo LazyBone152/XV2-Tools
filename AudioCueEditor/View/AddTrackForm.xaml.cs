@@ -88,10 +88,12 @@ namespace AudioCueEditor.View
                 if (_loop != value)
                 {
                     _loop = value;
-                    NotifyPropertyChanged("Loop");
+                    NotifyPropertyChanged(nameof(Loop));
+                    NotifyPropertyChanged(nameof(CanSetLoop));
                 }
             }
         }
+        public bool CanSetLoop { get { return EncodeType == EncodeType.HCA; } }
 
         private string _audioFilePath = null;
         public string AudioFilePath

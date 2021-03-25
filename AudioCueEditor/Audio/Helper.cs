@@ -45,11 +45,12 @@ namespace AudioCueEditor.Audio
         {
             using (var ms = new MemoryStream(bytes))
             {
-                var options = new Options()
-                {
-                    Loop = loop
-                };
-                return ConvertStream.ConvertFile(options, ms, encodeType, convertToType);
+                byte[] track = ConvertStream.ConvertFile(new Options(), ms, encodeType, convertToType);
+
+                if (convertToType == FileType.Hca && loop)
+                    track = HCA.EncodeLoop(track, loop);
+
+                return track;
             }
         }
 

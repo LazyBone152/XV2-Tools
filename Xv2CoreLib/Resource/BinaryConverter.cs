@@ -185,7 +185,7 @@ namespace Xv2CoreLib.Resource
         {
             List<byte> bytes = new List<byte>();
 
-            foreach (ushort i in intArray)
+            foreach (uint i in intArray)
             {
                 var valueBytes = BitConverter.GetBytes(i);
 

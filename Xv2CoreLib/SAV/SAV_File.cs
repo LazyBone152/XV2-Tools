@@ -611,6 +611,8 @@ namespace Xv2CoreLib.SAV
                         return "1.15";
                     case 19:
                         return "1.15.01";
+                    case 20:
+                        return "1.16";
                     default:
                         return String.Format("Unknown ({0})", Version);
 
@@ -648,6 +650,7 @@ namespace Xv2CoreLib.SAV
                         return "The following data can't be edited on this save version:\n-Artwork\n-Mascots";
                     case 18:
                     case 19:
+                    case 20:
                         return null;
                     default:
                         return "This save version is not supported. It is recommened to update the application (if one is available).";
@@ -682,6 +685,7 @@ namespace Xv2CoreLib.SAV
                         return Brushes.OrangeRed;
                     case 18:
                     case 19:
+                    case 20:
                         return Brushes.Blue;
                     default:
                         return Brushes.Red;

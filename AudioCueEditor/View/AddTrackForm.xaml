@@ -15,7 +15,7 @@
         </StackPanel>
         <Button Command="{Binding DoneCommand}" Content="Add" HorizontalAlignment="Left" Margin="150,131,0,0" VerticalAlignment="Top" Width="75"/>
         <CheckBox ToolTip="Streaming tracks will be stored in an external AWB and will only be loaded by the game when played (there may be a delay before playing starts, as they are not pre-loaded).&#x0a;&#x0a;This is ideally used for long tracks that are not played repeatedly, such as music. Sound effects or voicelines that need to play on demand should not be streamed." IsChecked="{Binding Streaming, UpdateSourceTrigger=PropertyChanged}" Content="Streaming" HorizontalAlignment="Left" Margin="127,51,0,0" VerticalAlignment="Top" Width="113"/>
-        <CheckBox ToolTip="Loop the track based on the loop metadata contained within the audio file. If none exists, the track will be looped from start to finish." IsChecked="{Binding Loop, UpdateSourceTrigger=PropertyChanged}" Content="Loop" HorizontalAlignment="Left" Margin="127,74,0,0" VerticalAlignment="Top" Width="113"/>
+        <CheckBox IsEnabled="{Binding CanSetLoop}" ToolTip="Loop track from start to end (HCA encode only)." IsChecked="{Binding Loop, UpdateSourceTrigger=PropertyChanged}" Content="Loop" HorizontalAlignment="Left" Margin="127,74,0,0" VerticalAlignment="Top" Width="113"/>
 
         <StackPanel IsEnabled="{Binding AddTrack, UpdateSourceTrigger=PropertyChanged}" Margin="42,95,9.667,40" Orientation="Horizontal">
             <Label Content="Encoding" VerticalAlignment="Center" Width="80"/>

@@ -55,6 +55,7 @@ namespace AudioCueEditor.View
                 SetValue(AcbFileProperty, value);
                 NotifyPropertyChanged(nameof(AcbFile));
                 NotifyPropertyChanged(nameof(IsSequenceTypeEnabled));
+                NotifyPropertyChanged(nameof(IsActionsEnabled));
             }
         }
         public bool IsSequenceTypeEnabled { get { return (AcbFile != null) ? AcbFormatHelper.Instance.IsSequenceTypeEnabled(AcbFile.AcbFile.Version) : false; } }
@@ -222,6 +223,9 @@ namespace AudioCueEditor.View
             NotifyPropertyChanged("TrackNotVisibile");
             NotifyPropertyChanged("TrackVisibile");
             NotifyPropertyChanged("SelectedCue");
+
+            NotifyPropertyChanged(nameof(IsSequenceTypeEnabled));
+            NotifyPropertyChanged(nameof(IsActionsEnabled));
         }
         
         //Actions
