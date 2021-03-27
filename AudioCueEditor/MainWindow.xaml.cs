@@ -425,6 +425,26 @@ namespace AudioCueEditor
             AcbFile.UndoableRandomizeCueIds();
         }
 
+        public RelayCommand FixSilentCuesCommand => new RelayCommand(FixSilentCues, CanFixSilentCues);
+        private async void FixSilentCues()
+        {
+            if (AcbFile != null)
+            {
+                //Confirm
+                var result = await this.ShowMessageAsync("Fix Silent Cues", "This tool is a fixer for old modded ACBs that have become broken with the 1.16 update of DBXV2, with all added tracks now being silent.\n\nFix the ACB?", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.Default);
+
+                if (result != MessageDialogResult.Affirmative) return;
+
+                var undos = AcbFile.AcbFile.AddVolumeBusToCues();
+                UndoManager.Instance.AddCompositeUndo(undos, "Fix Silent Cues");
+            }
+        }
+
+        private bool CanFixSilentCues()
+        {
+            if (!IsAcbLoaded()) return false;
+            return AcbFile.AcbFile.Version >= ACB_File.VolumeBusRequiredVersion;
+        }
 
         private bool IsAcbLoaded()
         {

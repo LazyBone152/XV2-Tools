@@ -68,6 +68,9 @@ namespace Xv2CoreLib.ACB_NEW
         public readonly static Version _1_0_0_0 = new Version("1.0.0.0");
         public readonly static Version _0_81_8_0 = new Version("0.81.8.0"); //Used in MGS3 3D. First acb version that has BlockSequenceTable and BlockTable.
         public readonly static Version _0_81_1_0 = new Version("0.81.1.0"); //Used in MGS3 3D. Uses CPK AWB files instead of AFS2.
+
+        //As of the DBXV2 1.16 update, any ACBs of this version or greater are silent without a "VolumeBus" command on the Sequence/Synth.
+        public readonly static Version VolumeBusRequiredVersion = new Version("1.24.0.0");
         #endregion
 
         [YAXDontSerialize]
@@ -390,15 +393,43 @@ namespace Xv2CoreLib.ACB_NEW
         {
             ACB_File acbFile = new ACB_File();
             acbFile.Version = _1_27_7_0;
+            //acbFile.Version = _1_22_4_0;
+            //acbFile.Version = new Version("1.24.1.0");
             acbFile.CommandTables = new ACB_CommandTables();
             acbFile.CommandTables.CommandTables = new List<ACB_CommandTable>() { new ACB_CommandTable() { Type = CommandTableType.SequenceCommand } };
             acbFile.SetCommandTableVersion();
             acbFile.VersionString = @"&#xA;ACB Format/PC Ver.1.27.07 Build:&#xA;";
-            acbFile.OutsideLinkTable = acbFile.CreateDefaultStringValueTable();
+            acbFile.StringValues = ACB_StringValue.DefaultStringTable();
             acbFile.AcfMd5Hash = new byte[] { 103, 60, 108, 22, 196, 140, 254, 73, 5, 182, 132, 96, 160, 88, 222, 176 };
             return acbFile;
         }
-        
+
+        public static ACB_File NewAcb(Version version, byte[] acfHash = null)
+        {
+            ACB_File acbFile = new ACB_File();
+            acbFile.Version = version;
+            acbFile.CommandTables = new ACB_CommandTables();
+            
+            if(AcbFormatHelper.Instance.AcbFormatHelperMain.Header.ColumnExists("CommandTable", TypeFlag.Data, version))
+            {
+                acbFile.CommandTables.CommandTables = new List<ACB_CommandTable>() { new ACB_CommandTable() { Type = CommandTableType.SequenceCommand } };
+            }
+            else
+            {
+                //Newer CommandTable configuration
+                acbFile.CommandTables.CommandTables = new List<ACB_CommandTable>() { new ACB_CommandTable() { Type = CommandTableType.SequenceCommand } };
+                acbFile.CommandTables.CommandTables = new List<ACB_CommandTable>() { new ACB_CommandTable() { Type = CommandTableType.SynthCommand } };
+                acbFile.CommandTables.CommandTables = new List<ACB_CommandTable>() { new ACB_CommandTable() { Type = CommandTableType.TrackCommand } };
+                acbFile.CommandTables.CommandTables = new List<ACB_CommandTable>() { new ACB_CommandTable() { Type = CommandTableType.TrackEvent } };
+            }
+
+            acbFile.SetCommandTableVersion();
+            acbFile.VersionString = $@"&#xA;ACB Format/PC Ver.{version.Major}.{version.Minor}.{version.Build.ToString("D2")} Build:&#xA;";
+            acbFile.StringValues = ACB_StringValue.DefaultStringTable();
+            acbFile.AcfMd5Hash = (acfHash != null) ? acfHash : new byte[] { 103, 60, 108, 22, 196, 140, 254, 73, 5, 182, 132, 96, 160, 88, 222, 176 }; //Default DBXV2 ACF
+            return acbFile;
+        }
+
         public static ACB_File LoadFromClipboard()
         {
             if (!Clipboard.ContainsData(CLIPBOARD_ACB_CUES)) return null;
@@ -698,7 +729,7 @@ namespace Xv2CoreLib.ACB_NEW
             else if(tableHelper.ColumnExists("StreamAwbHash", TypeFlag.Data, Version))
             {
                 //Just a byte array
-                utfFile.AddData("StreamAwbHash", 0, new byte[16]);
+                utfFile.AddData("StreamAwbHash", 0, (streamAwbHash != null) ? streamAwbHash : new byte[16]);
             }
             
 
@@ -792,6 +823,7 @@ namespace Xv2CoreLib.ACB_NEW
                 Sequences.Add(seq);
                 newCue.ReferenceIndex.TableGuid = seq.InstanceGuid;
                 undos.Add(new UndoableListAdd<ACB_Sequence>(Sequences, seq, ""));
+                undos.AddRange(AddVolumeBus(seq, CommandTableType.SequenceCommand));
             }
             else if (type == ReferenceType.Synth)
             {
@@ -800,6 +832,7 @@ namespace Xv2CoreLib.ACB_NEW
                 Synths.Add(synth);
                 newCue.ReferenceIndex.TableGuid = synth.InstanceGuid;
                 undos.Add(new UndoableListAdd<ACB_Synth>(Synths, synth, ""));
+                undos.AddRange(AddVolumeBus(synth, CommandTableType.SynthCommand));
             }
             //Dont add Waveform entry until a track is added
 
@@ -1145,6 +1178,96 @@ namespace Xv2CoreLib.ACB_NEW
 
             return undos;
         }
+        
+        //VolumeBus 
+        public List<IUndoRedo> AddVolumeBus(ICommandIndex commandIndex, CommandTableType commandType)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            if (Version < VolumeBusRequiredVersion) return undos; //VolumeBus not required
+
+            ACB_CommandGroup command = null;
+
+            if (!commandIndex.CommandIndex.IsNull)
+            {
+                command = CommandTables.GetCommand(commandIndex.CommandIndex.TableGuid, commandType);
+            }
+
+            if(command == null)
+            {
+                //No command on this Sequence/Synth. Need to create new one.
+                command = new ACB_CommandGroup();
+                undos.Add(new UndoableProperty<AcbTableReference>(nameof(AcbTableReference.TableGuid), commandIndex.CommandIndex, commandIndex.CommandIndex.TableGuid, command.InstanceGuid));
+                commandIndex.CommandIndex.TableGuid = command.InstanceGuid;
+                undos.AddRange(CommandTables.AddCommand(command, commandType));
+            }
+
+            //Check if volume bus command already exists, and end here if it does.
+            if (command.Commands.FirstOrDefault(x => x.CommandType == CommandType.VolumeBus) != null) return undos;
+
+            //Check if StringValueTable exists, and create if it needed.
+            if (StringValues == null || StringValues?.Count == 0)
+            {
+                var newStringValues = ACB_StringValue.DefaultStringTable();
+                undos.Add(new UndoableProperty<ACB_File>(nameof(StringValues), this, StringValues, newStringValues));
+                StringValues = ACB_StringValue.DefaultStringTable();
+            }
+
+            //Add the command
+            ACB_Command volumeBusCommand = new ACB_Command(CommandType.VolumeBus) { ReferenceIndex = new AcbTableReference(StringValues[0].InstanceGuid), Param2 = 10000 };
+
+            undos.Add(new UndoableListAdd<ACB_Command>(command.Commands, volumeBusCommand));
+            command.Commands.Add(volumeBusCommand);
+
+            return undos;
+        }
+        
+        /// <summary>
+        /// Adds a VolumeBus command to every valid cue (only if one doesn't already exist).
+        /// </summary>
+        public List<IUndoRedo> AddVolumeBusToCues()
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            foreach(var cue in Cues)
+            {
+                undos.AddRange(AddVolumeBusToCue(cue));
+            }
+
+            return undos;
+        }
+
+        public List<IUndoRedo> AddVolumeBusToCue(ACB_Cue cue)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            bool hasTracks = true;
+            ICommandIndex commandIndex = null;
+            CommandTableType commandType = CommandTableType.SequenceCommand;
+
+            switch (cue.ReferenceType)
+            {
+                case ReferenceType.Synth:
+                    ACB_Synth synth = GetSynth(cue.ReferenceIndex.TableGuid);
+                    commandIndex = synth;
+                    hasTracks = synth.ReferenceItems.Count > 0;
+                    commandType = CommandTableType.SynthCommand;
+                    break;
+                case ReferenceType.Sequence:
+                    ACB_Sequence sequence = GetSequence(cue.ReferenceIndex.TableGuid);
+                    commandIndex = sequence;
+                    hasTracks = sequence.Tracks.Count > 0;
+                    commandType = CommandTableType.SequenceCommand;
+                    break;
+            }
+
+            if (commandIndex != null && hasTracks)
+            {
+                undos.AddRange(AddVolumeBus(commandIndex, commandType));
+            }
+
+            return undos;
+        }
         #endregion
 
         #region MiscFunctions
@@ -1327,10 +1450,14 @@ namespace Xv2CoreLib.ACB_NEW
                 newCueId = -1;
                 return undos;
             }
+
+            //Add volumeBus command if required by version (bug-fix)
+            copyAcb.AddVolumeBusToCue(cue);
+
             cue = cue.Copy();
 
             //Calculate new cueID if needed
-            if(Cues.Any(x => x.ID == cue.ID))
+            if (Cues.Any(x => x.ID == cue.ID))
                 cue.ID = (uint)GetFreeCueId();
 
             //Copy referenced tables (if needed)
@@ -2945,7 +3072,7 @@ namespace Xv2CoreLib.ACB_NEW
             synth.CommandIndex.TableIndex = synthTable.GetValue<ushort>("CommandIndex", TypeFlag.UInt16, index);
 
 
-            if (tableHelper.ColumnExists("LocalAisacs", TypeFlag.UInt16, ParseVersion))
+            if (tableHelper.ColumnExists("LocalAisacs", TypeFlag.Data, ParseVersion))
             {
                 synth.LocalAisac = AcbTableReference.FromArray(BigEndianConverter.ToUInt16Array(synthTable.GetData("LocalAisacs", index)));
             }
@@ -4089,27 +4216,35 @@ namespace Xv2CoreLib.ACB_NEW
 
             if (tableHelper.ColumnExists("StreamAwbId", TypeFlag.UInt16, ParseVersion))
             {
+
                 if (Streaming)
                 {
                     utfTable.AddValue("StreamAwbId", TypeFlag.UInt16, index, AwbId.ToString());
                     utfTable.AddValue("MemoryAwbId", TypeFlag.UInt16, index, ushort.MaxValue.ToString());
-
-                    if(StreamAwbPortNo != ushort.MaxValue)
-                        utfTable.AddValue("StreamAwbPortNo", TypeFlag.UInt16, index, StreamAwbPortNo.ToString());
-                    else
-                        utfTable.AddValue("StreamAwbPortNo", TypeFlag.UInt16, index, "0");
                 }
                 else
                 {
                     utfTable.AddValue("StreamAwbId", TypeFlag.UInt16, index, ushort.MaxValue.ToString());
                     utfTable.AddValue("MemoryAwbId", TypeFlag.UInt16, index, AwbId.ToString());
-                    utfTable.AddValue("StreamAwbPortNo", TypeFlag.UInt16, index, ushort.MaxValue.ToString());
                 }
+
             }
             else
             {
                 //Older ACB ver. Just has a "Id" column.
                 utfTable.AddValue("Id", TypeFlag.UInt16, index, AwbId.ToString());
+            }
+
+            if(tableHelper.ColumnExists("StreamAwbPortNo", TypeFlag.UInt16, ParseVersion))
+            {
+                if(StreamAwbPortNo == ushort.MaxValue)
+                {
+                    utfTable.AddValue("StreamAwbPortNo", TypeFlag.UInt16, index, (Streaming) ? "0" : ushort.MaxValue.ToString());
+                }
+                else
+                {
+                    utfTable.AddValue("StreamAwbPortNo", TypeFlag.UInt16, index, (Streaming) ? StreamAwbPortNo.ToString() : ushort.MaxValue.ToString());
+                }
             }
 
             //ExtensionData
@@ -5094,6 +5229,7 @@ namespace Xv2CoreLib.ACB_NEW
 
         }
 
+
         public void FinalizeParameters()
         {
             if(ReferenceIndex != null)
@@ -5322,6 +5458,11 @@ namespace Xv2CoreLib.ACB_NEW
         public AcbTableReference()
         {
             TableIndex = ushort.MaxValue;
+        }
+        
+        public AcbTableReference(Guid guid)
+        {
+            TableGuid = guid;
         }
 
         public AcbTableReference(byte index)

@@ -377,6 +377,11 @@ namespace Xv2CoreLib.ACB_NEW
             return new ACB_Wrapper(ACB_File.NewXv2Acb());
         }
 
+        public static ACB_Wrapper NewAcb(Version version)
+        {
+            return new ACB_Wrapper(ACB_File.NewAcb(version));
+        }
+
         public bool IsNull()
         {
             return (Cues.Count == 0);

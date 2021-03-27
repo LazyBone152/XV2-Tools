@@ -45,6 +45,8 @@
                 <Separator/>
                 <MenuItem Header="Associate ACB Extension" Command="{Binding SetAcbFileAssociationCommand}"/>
                 <Separator/>
+                <MenuItem Header="Fix Silent Cues (DBXV2 1.16)" Command="{Binding FixSilentCuesCommand}"/>
+                <Separator/>
                 <MenuItem Header="DBXV2 Installer">
                     <MenuItem Header="Associate MusicPackage Extension" Command="{Binding SetMusicPackageAssociationCommand}"/>
                     <MenuItem Header="Create Music Installer" Command="{Binding CreateMusicInstallerCommand}"/>

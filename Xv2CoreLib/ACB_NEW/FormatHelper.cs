@@ -135,6 +135,7 @@ namespace Xv2CoreLib.ACB_NEW
 
     public class AcbFormatHelperMain
     {
+        public List<string> Versions { get; set; } = new List<string>();
         public AcbFormatHelperTable Header { get; private set; } = new AcbFormatHelperTable("Header");
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Column")]
         public List<AcbFormatHelperTable> Tables { get; set; } = new List<AcbFormatHelperTable>();
@@ -144,6 +145,7 @@ namespace Xv2CoreLib.ACB_NEW
         public void ParseFile(UTF_File acbFile, bool throwExIfNewColumn)
         {
             Version version = BigEndianConverter.UIntToVersion(acbFile.GetValue<uint>("Version", TypeFlag.UInt32, 0), true);
+            AddVersion(version.ToString());
 
             //Parse tables
             foreach (var column in acbFile.Columns)
@@ -163,7 +165,28 @@ namespace Xv2CoreLib.ACB_NEW
             {
                 var utfColumn = acbFile.GetColumn(table.Name);
 
-                if (utfColumn != null) continue;
+                if (utfColumn != null)
+                {
+                    byte[] columnData = (utfColumn.StorageFlag == StorageFlag.PerRow) ? utfColumn.Rows[0].Bytes : utfColumn.Bytes;
+                    UTF_File columnTable = (utfColumn.StorageFlag == StorageFlag.PerRow) ? utfColumn.Rows[0].UtfTable : utfColumn.UtfTable;
+
+                    if (columnTable == null && columnData == null) continue; //Table does not exist, but there is also no other data... skip
+                    if (columnTable != null) continue; //Table exists
+
+                    //Handle StreamAwbHash table. This can be a UtfTable or a Byte array depending on ACB version, or if a stream AWB is present (can be null 16 bytes if there is no external AWB, even on newer versions with UtfTable)
+                    if(columnTable == null && columnData != null && table.Name == "StreamAwbHash")
+                    {
+                        bool valid = true;
+
+                        foreach(var _byte in columnData)
+                        {
+                            if (_byte != 0)
+                                valid = false;
+                        }
+
+                        if (valid) continue;
+                    }
+                }
 
                 //Doesn't exist
                 table.SetDoesNotExist(version);
@@ -206,6 +229,14 @@ namespace Xv2CoreLib.ACB_NEW
             {
                 table.Columns.Sort((x, y) => x.Index - y.Index);
             }
+        }
+    
+        private void AddVersion(string version)
+        {
+            if (Versions == null) Versions = new List<string>();
+
+            if (!Versions.Contains(version))
+                Versions.Add(version);
         }
     }
 

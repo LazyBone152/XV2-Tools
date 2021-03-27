@@ -1,5 +1,24 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <AcbFormatHelperMain>
+  <Versions>
+    <String>0.81.1.0</String>
+    <String>0.81.8.0</String>
+    <String>1.3.0.0</String>
+    <String>1.6.0.0</String>
+    <String>1.12.0.0</String>
+    <String>1.14.0.0</String>
+    <String>1.16.1.0</String>
+    <String>1.21.1.0</String>
+    <String>1.22.4.0</String>
+    <String>1.23.1.0</String>
+    <String>1.26.0.0</String>
+    <String>1.27.2.0</String>
+    <String>1.27.7.0</String>
+    <String>1.28.2.0</String>
+    <String>1.29.0.0</String>
+    <String>1.29.2.0</String>
+    <String>1.30.0.0</String>
+  </Versions>
   <Header Name="Header" PrimaryLowestVersion="0.0.0.0" PrimaryHighestVersion="0.0.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0">
     <Column Name="FileIdentifier" ValueType="UInt32" Index="0" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
     <Column Name="Size" ValueType="UInt32" Index="1" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
@@ -40,20 +59,20 @@
     <Column Name="BlockTable" ValueType="Data" Index="33" PrimaryLowestVersion="0.81.8.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="0.81.1.0" SecondaryHighestVersion="0.0.0.0" />
     <Column Name="R26" ValueType="UInt8" Index="34" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.6.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="1.12.0.0" />
     <Column Name="Name" ValueType="String" Index="34" PrimaryLowestVersion="1.12.0.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="1.6.0.0" SecondaryHighestVersion="0.0.0.0" />
-    <Column Name="R25" ValueType="UInt8" Index="35" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.12.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="1.14.0.0" />
     <Column Name="CharacterEncodingType" ValueType="UInt8" Index="35" PrimaryLowestVersion="1.14.0.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="1.12.0.0" SecondaryHighestVersion="0.0.0.0" />
-    <Column Name="R24" ValueType="UInt8" Index="36" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.12.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="1.14.0.0" />
+    <Column Name="R25" ValueType="UInt8" Index="35" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.12.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="1.14.0.0" />
     <Column Name="EventTable" ValueType="Data" Index="36" PrimaryLowestVersion="1.14.0.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="1.12.0.0" SecondaryHighestVersion="0.0.0.0" />
+    <Column Name="R24" ValueType="UInt8" Index="36" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.12.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="1.14.0.0" />
     <Column Name="R23" ValueType="UInt8" Index="37" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.14.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="1.16.1.0" />
     <Column Name="ActionTrackTable" ValueType="Data" Index="37" PrimaryLowestVersion="1.16.1.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="1.14.0.0" SecondaryHighestVersion="0.0.0.0" />
     <Column Name="AcfReferenceTable" ValueType="Data" Index="38" PrimaryLowestVersion="1.16.1.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="1.14.0.0" SecondaryHighestVersion="0.0.0.0" />
     <Column Name="R22" ValueType="UInt8" Index="38" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.14.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="1.16.1.0" />
     <Column Name="R21" ValueType="UInt8" Index="39" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.21.1.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="1.22.4.0" />
     <Column Name="WaveformExtensionDataTable" ValueType="Data" Index="39" PrimaryLowestVersion="1.22.4.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="1.21.1.0" SecondaryHighestVersion="0.0.0.0" />
-    <Column Name="BeatSyncInfoTable" ValueType="Data" Index="40" PrimaryLowestVersion="1.23.1.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="1.22.4.0" SecondaryHighestVersion="0.0.0.0" />
     <Column Name="R20" ValueType="UInt8" Index="40" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.22.4.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="1.23.1.0" />
-    <Column Name="R19" ValueType="UInt8" Index="41" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.22.4.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="1.23.1.0" />
+    <Column Name="BeatSyncInfoTable" ValueType="Data" Index="40" PrimaryLowestVersion="1.23.1.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="1.22.4.0" SecondaryHighestVersion="0.0.0.0" />
     <Column Name="CuePriorityType" ValueType="UInt8" Index="41" PrimaryLowestVersion="1.23.1.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="1.22.4.0" SecondaryHighestVersion="0.0.0.0" />
+    <Column Name="R19" ValueType="UInt8" Index="41" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.22.4.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="1.23.1.0" />
     <Column Name="NumCueLimit" ValueType="UInt16" Index="42" PrimaryLowestVersion="1.23.1.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="1.22.4.0" SecondaryHighestVersion="0.0.0.0" />
     <Column Name="R18" ValueType="UInt8" Index="42" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.22.4.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="1.23.1.0" />
     <Column Name="TrackCommandTable" ValueType="Data" Index="43" PrimaryLowestVersion="1.29.0.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="1.28.2.0" SecondaryHighestVersion="0.0.0.0" />
@@ -62,8 +81,8 @@
     <Column Name="SynthCommandTable" ValueType="Data" Index="44" PrimaryLowestVersion="1.29.0.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="1.28.2.0" SecondaryHighestVersion="0.0.0.0" />
     <Column Name="R15" ValueType="UInt8" Index="45" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.28.2.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="1.29.0.0" />
     <Column Name="TrackEventTable" ValueType="Data" Index="45" PrimaryLowestVersion="1.29.0.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="1.28.2.0" SecondaryHighestVersion="0.0.0.0" />
-    <Column Name="SeqParameterPalletTable" ValueType="Data" Index="46" PrimaryLowestVersion="1.29.0.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="1.28.2.0" SecondaryHighestVersion="0.0.0.0" />
     <Column Name="R14" ValueType="UInt8" Index="46" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.28.2.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="1.29.0.0" />
+    <Column Name="SeqParameterPalletTable" ValueType="Data" Index="46" PrimaryLowestVersion="1.29.0.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="1.28.2.0" SecondaryHighestVersion="0.0.0.0" />
     <Column Name="TrackParameterPalletTable" ValueType="Data" Index="47" PrimaryLowestVersion="1.29.0.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="1.28.2.0" SecondaryHighestVersion="0.0.0.0" />
     <Column Name="R13" ValueType="UInt8" Index="47" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.28.2.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="1.29.0.0" />
     <Column Name="SynthParameterPalletTable" ValueType="Data" Index="48" PrimaryLowestVersion="1.29.0.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="1.28.2.0" SecondaryHighestVersion="0.0.0.0" />
@@ -169,14 +188,14 @@
     <Column Name="Name2" ValueType="String" Index="2" PrimaryLowestVersion="1.21.1.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
     <Column Name="Id" ValueType="UInt32" Index="3" PrimaryLowestVersion="1.21.1.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
   </Column>
-  <Column Name="StreamAwbHash" PrimaryLowestVersion="1.26.0.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0">
+  <Column Name="StreamAwbHash" PrimaryLowestVersion="1.26.0.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="1.23.1.0" SecondaryHighestVersion="0.0.0.0">
     <Column Name="Name" ValueType="String" Index="0" PrimaryLowestVersion="1.26.0.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
     <Column Name="Hash" ValueType="Data" Index="1" PrimaryLowestVersion="1.26.0.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
   </Column>
   <Column Name="StringValueTable" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0">
     <Column Name="StringValue" ValueType="String" Index="0" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
   </Column>
-  <Column Name="StreamAwbAfs2Header" PrimaryLowestVersion="1.26.0.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0">
+  <Column Name="StreamAwbAfs2Header" PrimaryLowestVersion="1.26.0.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="1.23.1.0" SecondaryHighestVersion="0.0.0.0">
     <Column Name="Header" ValueType="Data" Index="0" PrimaryLowestVersion="1.26.0.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
   </Column>
   <Column Name="GlobalAisacReferenceTable" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.27.7.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0">
@@ -191,8 +210,8 @@
     <Column Name="Type" ValueType="UInt8" Index="1" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.29.2.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
     <Column Name="ControlId" ValueType="UInt16" Index="2" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.29.2.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
     <Column Name="RandomRange" ValueType="Single" Index="3" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.29.2.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
-    <Column Name="AutoModulationIndex" ValueType="UInt16" Index="4" PrimaryLowestVersion="1.22.4.0" PrimaryHighestVersion="1.29.2.0" SecondaryLowestVersion="1.12.0.0" SecondaryHighestVersion="0.0.0.0" />
-    <Column Name="AudoModulationIndex" ValueType="UInt16" Index="4" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.12.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="1.22.4.0" />
+    <Column Name="AutoModulationIndex" ValueType="UInt16" Index="4" PrimaryLowestVersion="1.22.4.0" PrimaryHighestVersion="1.29.2.0" SecondaryLowestVersion="1.14.0.0" SecondaryHighestVersion="0.0.0.0" />
+    <Column Name="AudoModulationIndex" ValueType="UInt16" Index="4" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.14.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="1.22.4.0" />
     <Column Name="GraphIndexes" ValueType="Data" Index="5" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.29.2.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
     <Column Name="DefaultControlFlag" ValueType="UInt8" Index="6" PrimaryLowestVersion="1.6.0.0" PrimaryHighestVersion="1.29.2.0" SecondaryLowestVersion="1.3.0.0" SecondaryHighestVersion="0.0.0.0" />
     <Column Name="DefaultControl" ValueType="Single" Index="7" PrimaryLowestVersion="1.6.0.0" PrimaryHighestVersion="1.29.2.0" SecondaryLowestVersion="1.3.0.0" SecondaryHighestVersion="0.0.0.0" />
