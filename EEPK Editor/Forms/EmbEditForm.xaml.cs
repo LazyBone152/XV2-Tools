@@ -507,7 +507,45 @@ namespace EEPK_Organiser.Forms
                 MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        
+
+        private void EmbContextMenu_Extract_Click(object sender, RoutedEventArgs e)
+        {
+            List<EmbEntry> selectedTextures = listBox_Textures.SelectedItems.Cast<EmbEntry>().ToList();
+            if (selectedTextures.Count == 0) return;
+
+            string extractionPath = string.Empty;
+
+            if(selectedTextures.Count > 1)
+            {
+                //Select dir to dump textures
+                var _browser = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
+
+                if (_browser.ShowDialog() == false)
+                    return;
+
+                extractionPath = _browser.SelectedPath;
+            }
+            else
+            {
+                var _browser = new SaveFileDialog();
+                _browser.Filter = "DDS file |*.dds;";
+                _browser.FileName += $"{selectedTextures[0].Name}";
+
+                if (_browser.ShowDialog() == false)
+                    return;
+
+                extractionPath = _browser.FileName;
+            }
+
+            foreach(var texture in selectedTextures)
+            {
+                string path = (selectedTextures.Count == 1) ? extractionPath : $"{extractionPath}/{texture.Name}";
+                Directory.CreateDirectory(System.IO.Path.GetDirectoryName(path));
+                texture.SaveDds();
+                File.WriteAllBytes(path, texture.Data.ToArray());
+            }
+        }
+
         private void EmbContextMenu_Copy_Click(object sender, RoutedEventArgs e)
         {
             try

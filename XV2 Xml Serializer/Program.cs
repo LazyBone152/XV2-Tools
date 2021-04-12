@@ -22,7 +22,7 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
-            //args = new string[1] { @"" };
+            //args = new string[1] { @"lobby_preset_avatar_list.pal" };
 
             DEBUG_MODE = true;
 #endif
@@ -51,10 +51,10 @@ namespace XV2_Xml_Serializer
 
                 if (Directory.Exists(fileLocation))
                 {
-                    new Xv2CoreLib.EMB.XmlRepack(fileLocation);
+                    //new Xv2CoreLib.EMB.XmlRepack(fileLocation);
 
                     //Used for debugging
-                    //BulkParseInitial(fileLocation);
+                    BulkParseInitial(fileLocation);
                 }
                 else
                 {
@@ -814,6 +814,7 @@ namespace XV2_Xml_Serializer
         static void BulkParseEepk(string directory)
         {
             string[] files = Directory.GetFiles(directory);
+            List<string> bones = new List<string>();
 
             foreach (string s in files)
             {
@@ -822,20 +823,33 @@ namespace XV2_Xml_Serializer
                     Console.WriteLine(s);
                     var eepk = new Xv2CoreLib.EEPK.Parser(s, false).GetEepkFile();
                     
-                    if(eepk.Assets != null)
+                    if(eepk.Effects != null)
                     {
-                        foreach(var e in eepk.Assets)
+                        foreach(var effect in eepk.Effects)
                         {
-                            if(e.FILES[0] != "NULL" && e.I_16 == Xv2CoreLib.EEPK.AssetType.EMO)
+                            if(effect.EffectParts != null)
                             {
-                                Console.WriteLine("This");
-                                Console.Read();
+                                foreach (var effectPart in effect.EffectParts)
+                                {
+                                    string bone = $"\"{effectPart.ESK}\",";
+                                    if (!bones.Contains(bone))
+                                        bones.Add(bone);
+                                }
                             }
                         }
                     }
                     
                 }
             }
+
+            StringBuilder str = new StringBuilder();
+
+            foreach(var bone in bones)
+            {
+                str.AppendLine(bone);
+            }
+
+            File.WriteAllText("eepk_bones.txt", str.ToString());
 
         }
         

@@ -741,6 +741,37 @@ namespace EEPK_Organiser.Forms.EMP
 #endif
         }
 
+        public RelayCommand HideAll_Command => new RelayCommand(HideAll);
+        private void HideAll()
+        {
+            foreach(var particleEffect in empFile.ParticleEffects)
+            {
+                SetHideStatus(particleEffect, true);
+            }
+        }
+
+        public RelayCommand HideAllSelected_Command => new RelayCommand(HideAllSelected, IsParticleSelected);
+        private void HideAllSelected()
+        {
+            SetHideStatus(empTree.SelectedItem as ParticleEffect, true);
+        }
+
+        public RelayCommand ShowAll_Command => new RelayCommand(ShowAll);
+        private void ShowAll()
+        {
+            foreach (var particleEffect in empFile.ParticleEffects)
+            {
+                SetHideStatus(particleEffect, false);
+            }
+        }
+
+        public RelayCommand ShowAllSelected_Command => new RelayCommand(ShowAllSelected, IsParticleSelected);
+        private void ShowAllSelected()
+        {
+            SetHideStatus(empTree.SelectedItem as ParticleEffect, false);
+        }
+
+
         private bool CanPasteParticleEffect()
         {
             return Clipboard.ContainsData(ClipboardDataTypes.EmpParticleEffect);
@@ -1074,6 +1105,8 @@ namespace EEPK_Organiser.Forms.EMP
                             comboBox_Type1.SelectedIndex = 0;
                         }
                     }
+
+                    e.Handled = true;
                 }
             }
             catch (Exception ex)
@@ -1655,5 +1688,17 @@ namespace EEPK_Organiser.Forms.EMP
             }
         }
 
+        private void SetHideStatus(ParticleEffect particleEffect, bool hideStatus)
+        {
+            particleEffect.I_33_3 = hideStatus;
+
+            if(particleEffect.ChildParticleEffects != null)
+            {
+                foreach(var child in particleEffect.ChildParticleEffects)
+                {
+                    SetHideStatus(child, hideStatus);
+                }
+            }
+        }
     }
 }

@@ -2810,7 +2810,7 @@ namespace Xv2CoreLib.EffectContainer
         //Count Method
         public void RefreshAssetCount()
         {
-            NotifyPropertyChanged("AssetCount");
+            NotifyPropertyChanged(nameof(AssetCount));
         }
         #endregion
 

@@ -110,6 +110,7 @@
                     <MenuItem Header="Paste" Click="EmbContextMenu_Paste_Click"/>
                     <MenuItem Header="Delete" Click="EmbContextMenu_Delete_Click"/>
                     <MenuItem Header="Duplicate" Click="EmbContextMenu_Duplicate_Click"/>
+                    <MenuItem Header="Extract" Click="EmbContextMenu_Extract_Click"/>
                     <MenuItem IsEnabled="{Binding IsForContainer}" Header="Used By?" Click="EmbContextMenu_UsedBy_Click"/>
                     <Separator/>
                     <MenuItem Header="Hue Adjustment" Click="EmbContextMenu_HueAdjustment_Click"/>

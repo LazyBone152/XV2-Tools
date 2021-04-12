@@ -12,7 +12,7 @@
              xmlns:Themes1="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
              xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="1050">
+             d:DesignHeight="600" d:DesignWidth="1050" Dialog:DialogParticipation.Register="{Binding}">
     <UserControl.Resources>
         <ObjectDataProvider x:Key="PlacementEnum" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
             <ObjectDataProvider.MethodParameters>
@@ -110,7 +110,7 @@
 
                         <DataGrid.RowDetailsTemplate>
                             <DataTemplate>
-                                <ListBox Tag="{Binding DataContext, ElementName=rootGrid}" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" SelectionChanged="effectPart_SelectionChanged" MouseDoubleClick="EffectPart_DoubleClick" MouseLeftButtonUp="ListBox_MouseLeftButtonUp" MouseRightButtonUp="ListBox_MouseRightButtonUp" VirtualizingPanel.ScrollUnit="Pixel" ItemsSource="{Binding EffectParts.Binding}" SelectionMode="Extended" SelectedItem="{Binding SelectedEffectPart, UpdateSourceTrigger=PropertyChanged}" utils:AttachedProperties.SelectedItems="{Binding SelectedEffectParts}">
+                                <ListBox Tag="{Binding DataContext, ElementName=rootGrid}" BorderBrush="{DynamicResource AccentColorBrush2}" PreviewMouseWheel="ListBox_PreviewMouseWheel" BorderThickness="1" SelectionChanged="effectPart_SelectionChanged" MouseDoubleClick="EffectPart_DoubleClick" MouseLeftButtonUp="ListBox_MouseLeftButtonUp" MouseRightButtonUp="ListBox_MouseRightButtonUp" VirtualizingPanel.ScrollUnit="Pixel" ItemsSource="{Binding EffectParts.Binding}" SelectionMode="Extended" SelectedItem="{Binding SelectedEffectPart, UpdateSourceTrigger=PropertyChanged}" utils:AttachedProperties.SelectedItems="{Binding SelectedEffectParts}">
                                     
 
                                     <ListBox.ItemTemplate>
@@ -132,8 +132,10 @@
                                             <MenuItem Header="Paste" Click="EffectPart_Paste_Click"/>
                                             <MenuItem Header="Paste Value" Click="EffectPart_PasteValues_Click"/>
                                             <Separator/>
-                                            <MenuItem Header="Go To Asset" Click="EffectPart_GoToAsset_Click"/>
+                                            <MenuItem Header="Rescale" Click="EffectPart_Rescale_Click"/>
                                             <MenuItem Header="Change Asset" Click="EffectPart_ChangeAsset_Click"/>
+                                            <Separator/>
+                                            <MenuItem Header="Go To Asset" Click="EffectPart_GoToAsset_Click"/>
                                         </ContextMenu>
                                     </ListBox.ContextMenu>
                                 </ListBox>
@@ -157,7 +159,7 @@
                     <ScrollViewer Grid.Column="2" Margin="5, 0">
                         <Grid Background="Transparent">
                             <StackPanel>
-                                <Expander Header="General" IsExpanded="True">
+                                <Expander x:Name="effectPartGeneral" Header="General" IsExpanded="True" Expanded="effectPartTabs_ExpandedOrCollapsed" Collapsed="effectPartTabs_ExpandedOrCollapsed">
                                     <StackPanel>
                                         <WrapPanel>
                                             <Grid Margin="3,3,0,0" Width="400">
@@ -221,7 +223,7 @@
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
                                                 <Label Content="Attach Bone"/>
-                                                <TextBox Grid.Column="1" Text="{Binding effectPartViewModel.ESK, UpdateSourceTrigger=LostFocus}" VerticalContentAlignment="Center" TextWrapping="NoWrap" />
+                                                <ComboBox Grid.Column="1" IsEditable="True" Text="{Binding effectPartViewModel.ESK, UpdateSourceTrigger=LostFocus}" ItemsSource="{x:Static eepk:EffectPart.CommonBones}"/>
                                             </Grid>
                                             
                                         </WrapPanel>
@@ -265,7 +267,7 @@
                                     </StackPanel>
 
                                 </Expander>
-                                <Expander Header="Positioning" IsExpanded="True">
+                                <Expander x:Name="effectPartPos" Header="Positioning" IsExpanded="True" Expanded="effectPartTabs_ExpandedOrCollapsed" Collapsed="effectPartTabs_ExpandedOrCollapsed">
                                     <WrapPanel>
                                         <Grid Margin="3,3,0,0" Width="900">
                                             <Grid.ColumnDefinitions>
@@ -336,7 +338,7 @@
                                         
                                     </WrapPanel>
                                 </Expander>
-                                <Expander Header="EMA Animation">
+                                <Expander x:Name="effectPartAnimation" Header="EMA Animation" Expanded="effectPartTabs_ExpandedOrCollapsed" Collapsed="effectPartTabs_ExpandedOrCollapsed">
                                     <StackPanel>
                                         <WrapPanel>
                                             <Grid Margin="3,3,0,0" Width="250">
@@ -377,7 +379,7 @@
                                         </WrapPanel>
                                     </StackPanel>
                                 </Expander>
-                                <Expander Header="Main Flags">
+                                <Expander x:Name="effectPartFlags" Header="Main Flags" Expanded="effectPartTabs_ExpandedOrCollapsed" Collapsed="effectPartTabs_ExpandedOrCollapsed">
                                     <StackPanel>
                                         <Label Content="Attach" HorizontalContentAlignment="Center" VerticalContentAlignment="Top" FontSize="10" FontWeight="SemiBold"/>
                                         <WrapPanel>
@@ -401,10 +403,14 @@
                                             <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_39_7, UpdateSourceTrigger=PropertyChanged}" Content="_ObjectRotation_To_XXXX" ToolTip="Dont ask"/>
                                         </WrapPanel>
 
-
+                                        <Label Content="Other" Margin="0, 3" HorizontalContentAlignment="Center" VerticalContentAlignment="Top" FontSize="10" FontWeight="SemiBold"/>
+                                        <WrapPanel>
+                                            <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_39_0, UpdateSourceTrigger=PropertyChanged}" Content="_NoGlare"/>
+                                            <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_39_2, UpdateSourceTrigger=PropertyChanged}" Content="_InverseTransparenDrawOrder" ToolTip="InverseTransparentDrawOrder"/>
+                                        </WrapPanel>
                                     </StackPanel>
                                 </Expander>
-                                <Expander Header="Unknown Flags">
+                                <Expander x:Name="effectPartUnkFlags" Header="Unknown Flags" Expanded="effectPartTabs_ExpandedOrCollapsed" Collapsed="effectPartTabs_ExpandedOrCollapsed">
                                     <WrapPanel>
                                         <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_32_4, UpdateSourceTrigger=PropertyChanged}" Content="AttachFlag__Unk4"/>
 
@@ -430,7 +436,7 @@
                                         <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_37_7, UpdateSourceTrigger=PropertyChanged}" Content="Flag__37__Unk7"/>
                                     </WrapPanel>
                                 </Expander>
-                                <Expander Header="Unknown Values">
+                                <Expander x:Name="effectPartUnkValues" Header="Unknown Values" Expanded="effectPartTabs_ExpandedOrCollapsed" Collapsed="effectPartTabs_ExpandedOrCollapsed">
                                     <WrapPanel>
                                         <Grid Margin="3,3,0,0" Width="250">
                                             <Grid.ColumnDefinitions>

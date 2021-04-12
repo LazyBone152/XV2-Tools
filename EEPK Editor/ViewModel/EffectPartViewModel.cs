@@ -759,6 +759,9 @@ namespace EEPK_Organiser.ViewModel
         {
             get
             {
+                if (!EffectPart.CommonBones.Contains(effectPart.ESK))
+                    EffectPart.CommonBones.Add(effectPart.ESK);
+
                 return effectPart.ESK;
             }
             set

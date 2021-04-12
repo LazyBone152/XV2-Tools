@@ -17,7 +17,7 @@ namespace EEPK_Organiser
         {
 #if !DEBUG
             SaveExceptionLog(e.Exception.ToString());
-            MessageBox.Show(String.Format("An exception was raised during execution of the application. \n\nDetails: {0}\n\nA log containing details about the error was saved at \"{1}\".", e.Exception.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(String.Format("Something went wrong. \n\nDetails: {0}\n\nA log containing details about the error was saved at \"{1}\".", e.Exception.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             e.Handled = true;
 #endif
         }

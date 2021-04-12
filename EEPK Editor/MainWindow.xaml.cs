@@ -115,6 +115,8 @@ namespace EEPK_Organiser
             }
         }
         
+        public NameList.NameListManager nameListManager { get { return eepkEditor.nameListManager; } }
+
         public MainWindow()
         {
             //Allows decimal points to be typed in float values with UpdateSourceTrigger=PropertyChanged
@@ -136,6 +138,12 @@ namespace EEPK_Organiser
             //Update title
             Title += $" ({SettingsManager.Instance.CurrentVersionString})";
 
+            Closing += MainWindow_Closing;
+        }
+
+        private void MainWindow_Closing(object sender, CancelEventArgs e)
+        {
+            SettingsManager.Instance.SaveSettings();
         }
 
         private void SettingsManager_SettingsReloaded(object sender, EventArgs e)
@@ -691,14 +699,14 @@ namespace EEPK_Organiser
         {
             if (!eepkEditor.GameDirectoryCheck()) return;
 
-            var effectFile = eepkEditor.LoadEepkFromGame(Forms.EntitySelector.EntityType.CMN, false);
+            var effectFile = await eepkEditor.LoadEepkFromGame(Forms.EntitySelector.EntityType.CMN, false);
 
             if (effectFile != null)
             {
                 //Clear undo stack
                 UndoManager.Instance.Clear();
 
-                effectContainerFile = await effectFile;
+                effectContainerFile = effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
             }
@@ -709,14 +717,14 @@ namespace EEPK_Organiser
             
             if (!eepkEditor.GameDirectoryCheck()) return;
 
-            var effectFile = eepkEditor.LoadEepkFromGame(Forms.EntitySelector.EntityType.Character, false);
+            var effectFile = await eepkEditor.LoadEepkFromGame(Forms.EntitySelector.EntityType.Character, false);
 
             if(effectFile != null)
             {
                 //Clear undo stack
                 UndoManager.Instance.Clear();
 
-                effectContainerFile = await effectFile;
+                effectContainerFile = effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
             }
@@ -726,14 +734,14 @@ namespace EEPK_Organiser
         {
             if (!eepkEditor.GameDirectoryCheck()) return;
 
-            var effectFile = eepkEditor.LoadEepkFromGame(Forms.EntitySelector.EntityType.SuperSkill, false);
+            var effectFile = await eepkEditor.LoadEepkFromGame(Forms.EntitySelector.EntityType.SuperSkill, false);
 
             if (effectFile != null)
             {
                 //Clear undo stack
                 UndoManager.Instance.Clear();
 
-                effectContainerFile = await effectFile;
+                effectContainerFile = effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
             }
@@ -743,14 +751,14 @@ namespace EEPK_Organiser
         {
             if (!eepkEditor.GameDirectoryCheck()) return;
 
-            var effectFile = eepkEditor.LoadEepkFromGame(Forms.EntitySelector.EntityType.UltimateSkill, false);
+            var effectFile = await eepkEditor.LoadEepkFromGame(Forms.EntitySelector.EntityType.UltimateSkill, false);
 
             if (effectFile != null)
             {
                 //Clear undo stack
                 UndoManager.Instance.Clear();
 
-                effectContainerFile = await effectFile;
+                effectContainerFile = effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
             }
@@ -760,14 +768,14 @@ namespace EEPK_Organiser
         {
             if (!eepkEditor.GameDirectoryCheck()) return;
 
-            var effectFile = eepkEditor.LoadEepkFromGame(Forms.EntitySelector.EntityType.EvasiveSkill, false);
+            var effectFile = await eepkEditor.LoadEepkFromGame(Forms.EntitySelector.EntityType.EvasiveSkill, false);
 
             if (effectFile != null)
             {
                 //Clear undo stack
                 UndoManager.Instance.Clear();
 
-                effectContainerFile = await effectFile;
+                effectContainerFile = effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
             }
@@ -777,14 +785,14 @@ namespace EEPK_Organiser
         {
             if (!eepkEditor.GameDirectoryCheck()) return;
 
-            var effectFile = eepkEditor.LoadEepkFromGame(Forms.EntitySelector.EntityType.BlastSkill, false);
+            var effectFile = await eepkEditor.LoadEepkFromGame(Forms.EntitySelector.EntityType.BlastSkill, false);
 
             if (effectFile != null)
             {
                 //Clear undo stack
                 UndoManager.Instance.Clear();
 
-                effectContainerFile = await effectFile;
+                effectContainerFile = effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
             }
@@ -794,14 +802,14 @@ namespace EEPK_Organiser
         {
             if (!eepkEditor.GameDirectoryCheck()) return;
 
-            var effectFile = eepkEditor.LoadEepkFromGame(Forms.EntitySelector.EntityType.AwokenSkill, false);
+            var effectFile = await eepkEditor.LoadEepkFromGame(Forms.EntitySelector.EntityType.AwokenSkill, false);
 
             if (effectFile != null)
             {
                 //Clear undo stack
                 UndoManager.Instance.Clear();
 
-                effectContainerFile = await effectFile;
+                effectContainerFile = effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
             }
@@ -811,14 +819,14 @@ namespace EEPK_Organiser
         {
             if (!eepkEditor.GameDirectoryCheck()) return;
 
-            var effectFile = eepkEditor.LoadEepkFromGame(Forms.EntitySelector.EntityType.Demo, false);
+            var effectFile = await eepkEditor.LoadEepkFromGame(Forms.EntitySelector.EntityType.Demo, false);
 
             if (effectFile != null)
             {
                 //Clear undo stack
                 UndoManager.Instance.Clear();
 
-                effectContainerFile = await effectFile;
+                effectContainerFile = effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
             }

@@ -514,6 +514,14 @@ namespace Xv2CoreLib.Resource.App
             }
         }
 
+        //EffectPart Tabs
+        public bool EepkOrganiser_EffectPart_General_Expanded { get; set; } = true;
+        public bool EepkOrganiser_EffectPart_Position_Expanded { get; set; } = true;
+        public bool EepkOrganiser_EffectPart_Animation_Expanded { get; set; } = false;
+        public bool EepkOrganiser_EffectPart_Flags_Expanded { get; set; } = true;
+        public bool EepkOrganiser_EffectPart_UnkFlags_Expanded { get; set; }
+        public bool EepkOrganiser_EffectPart_UnkValues_Expanded { get; set; }
+
         #endregion
 
         #region XenoKit

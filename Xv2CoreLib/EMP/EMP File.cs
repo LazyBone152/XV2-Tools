@@ -3716,6 +3716,19 @@ namespace Xv2CoreLib.EMP
             undos.Add(new UndoableProperty<EMP_TextureDefinition>(nameof(TextureRef), this, TextureRef, newValues.TextureRef));
             TextureRef = newValues.TextureRef;
 
+            if(newValues.SubData2 != null && SubData2 != null)
+            {
+                undos.Add(new UndoableProperty<ScrollAnimation>(nameof(SubData2.ScrollSpeed_U), SubData2, SubData2.ScrollSpeed_U, newValues.SubData2.ScrollSpeed_U));
+                undos.Add(new UndoableProperty<ScrollAnimation>(nameof(SubData2.ScrollSpeed_V), SubData2, SubData2.ScrollSpeed_V, newValues.SubData2.ScrollSpeed_V));
+                undos.Add(new UndoableProperty<ScrollAnimation>(nameof(SubData2.Keyframes), SubData2, SubData2.Keyframes, newValues.SubData2.Keyframes));
+                undos.Add(new UndoableProperty<ScrollAnimation>(nameof(SubData2.useSpeedInsteadOfKeyFrames), SubData2, SubData2.useSpeedInsteadOfKeyFrames, newValues.SubData2.useSpeedInsteadOfKeyFrames));
+
+                SubData2.ScrollSpeed_U = newValues.SubData2.ScrollSpeed_U;
+                SubData2.ScrollSpeed_V = newValues.SubData2.ScrollSpeed_V;
+                SubData2.Keyframes = newValues.SubData2.Keyframes;
+                SubData2.useSpeedInsteadOfKeyFrames = newValues.SubData2.useSpeedInsteadOfKeyFrames;
+            }
+
             //Copy remaining values
             undos.AddRange(Utils.CopyValues(this, newValues, nameof(EntryIndex)));
 

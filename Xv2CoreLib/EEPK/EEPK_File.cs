@@ -182,9 +182,9 @@ namespace Xv2CoreLib.EEPK
         [YAXSerializeAs("value")]
         public string I_07 { get; set; } // int8
 
-        [YAXAttributeFor("I_08")]
+        [YAXAttributeFor("AssetLimit")]
         [YAXSerializeAs("value")]
-        public string I_08 { get; set; }  // int32
+        public string I_08 { get; set; }  // int32. This somehow limits the amount of assets, but not by the amount. Perhaps size?
         [YAXAttributeFor("I_12")]
         [YAXSerializeAs("value")]
         public string I_12 { get; set; }  // int32
@@ -250,7 +250,7 @@ namespace Xv2CoreLib.EEPK
                 I_05 = "0x0",
                 I_06 = "0x0",
                 I_07 = "0x0",
-                I_08 = "0x0",
+                I_08 = "0x9c40",
                 I_12 = "0x0",
                 AssetEntries = new List<Asset_Entry>(),
                 FILES = new string[3] { "NULL", "NULL", "NULL" }
@@ -510,6 +510,7 @@ namespace Xv2CoreLib.EEPK
     [Serializable]
     public class EffectPart : INotifyPropertyChanged
     {
+        #region INotifyPropChanged
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -517,6 +518,51 @@ namespace Xv2CoreLib.EEPK
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+        #endregion
+
+        #region EEPK_Organiser
+        [YAXDontSerialize]
+        public static List<string> CommonBones { get; private set; } = new List<string>()
+        {   
+            "b_C_Base",
+            "b_C_Pelvis",
+            "g_C_Pelvis",
+            "b_C_Head",
+            "g_C_Head",
+            "b_C_Neck1",
+            "b_C_Chest",
+            "b_C_Spine1",
+            "b_C_Spine2",
+            "b_L_Shoulder",
+            "b_L_Arm1",
+            "b_L_Arm2",
+            "b_L_Elbow",
+            "b_L_Hand",
+            "g_L_Hand",
+            "b_R_Shoulder",
+            "b_R_Arm1",
+            "b_R_Arm2",
+            "b_R_Elbow",
+            "b_R_Hand",
+            "g_R_Hand",
+            "b_L_Leg1",
+            "b_L_Leg2",
+            "b_L_Knee",
+            "b_L_Foot",
+            "g_L_Foot",
+            "b_L_Toe",
+            "b_R_Leg1",
+            "b_R_Leg2",
+            "b_R_Knee",
+            "b_R_Foot",
+            "g_R_Foot",
+            "b_R_Toe",
+            "g_x_LND",
+            "TRS",
+            "SCENE_ROOT",
+            "f_L_Eye",
+            "f_R_Eye",
+        };
 
         [YAXDontSerialize]
         public string AssetRefDetails
@@ -545,7 +591,9 @@ namespace Xv2CoreLib.EEPK
                 }
             }
         }
-        
+        #endregion
+
+
         [YAXAttributeForClass]
         [YAXSerializeAs("Container_Type")]
         public AssetType I_02 { get; set; } //int8
@@ -772,7 +820,7 @@ namespace Xv2CoreLib.EEPK
         {
             Never = 0,
             Always = 1,
-            AfterAnimationLoop = 2
+            AfterAnimLoop = 2
         }
         
         public enum Attachment : byte

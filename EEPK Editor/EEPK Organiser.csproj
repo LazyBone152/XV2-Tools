@@ -166,6 +166,7 @@
     <Compile Include="Converters\ColorFormatConverter.cs" />
     <Compile Include="Converters\FloatConverter.cs" />
     <Compile Include="Converters\NullToFalseConverter.cs" />
+    <Compile Include="DialogSettings.cs" />
     <Compile Include="Extensions\EMB\Extensions.cs" />
     <Compile Include="Forms\EffectSelector.xaml.cs">
       <DependentUpon>EffectSelector.xaml</DependentUpon>

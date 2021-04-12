@@ -30,6 +30,7 @@ using EEPK_Organiser.Forms.Recolor;
 using Xv2CoreLib.Resource.App;
 using Application = System.Windows.Application;
 using Xv2CoreLib.Resource;
+using System.Windows.Media;
 
 namespace EEPK_Organiser.View
 {
@@ -165,6 +166,7 @@ namespace EEPK_Organiser.View
             }
         }
 
+        private bool effectPartTabInitialize = false;
 
         public EepkEditor()
         {
@@ -174,7 +176,14 @@ namespace EEPK_Organiser.View
             //Load NameLists
             nameListManager = new NameList.NameListManager();
 
-
+            //Set tab status
+            effectPartGeneral.IsExpanded = SettingsManager.settings.EepkOrganiser_EffectPart_General_Expanded;
+            effectPartAnimation.IsExpanded = SettingsManager.settings.EepkOrganiser_EffectPart_Animation_Expanded;
+            effectPartPos.IsExpanded = SettingsManager.settings.EepkOrganiser_EffectPart_Position_Expanded;
+            effectPartFlags.IsExpanded = SettingsManager.settings.EepkOrganiser_EffectPart_Flags_Expanded;
+            effectPartUnkFlags.IsExpanded = SettingsManager.settings.EepkOrganiser_EffectPart_UnkFlags_Expanded;
+            effectPartUnkValues.IsExpanded = SettingsManager.settings.EepkOrganiser_EffectPart_UnkValues_Expanded;
+            effectPartTabInitialize = true;
         }
 
         public void SaveExceptionLog(string ex)
@@ -2672,18 +2681,15 @@ namespace EEPK_Organiser.View
 
                                         try
                                         {
-                                            Dispatcher.Invoke((() =>
+                                            switch (type)
                                             {
-                                                switch (type)
-                                                {
-                                                    case AssetType.PBIND:
-                                                        container.AddPbindDependencies(newFile.EmpFile, undos);
-                                                        break;
-                                                    case AssetType.TBIND:
-                                                        container.AddTbindDependencies(newFile.EtrFile, undos);
-                                                        break;
-                                                }
-                                            }));
+                                                case AssetType.PBIND:
+                                                    container.AddPbindDependencies(newFile.EmpFile, undos);
+                                                    break;
+                                                case AssetType.TBIND:
+                                                    container.AddTbindDependencies(newFile.EtrFile, undos);
+                                                    break;
+                                            }
                                         }
                                         catch (Exception ex)
                                         {
@@ -2695,10 +2701,7 @@ namespace EEPK_Organiser.View
 
                                     newAsset.RefreshNamePreview();
 
-                                    Dispatcher.Invoke((() =>
-                                    {
-                                        container.AddAsset(newAsset);
-                                    }));
+                                    container.AddAsset(newAsset);
                                     undos.Add(new UndoableListAdd<Asset>(container.Assets, newAsset));
 
                                     controller.SetProgress(addedCount);
@@ -3373,19 +3376,21 @@ namespace EEPK_Organiser.View
                     Forms.AssetSelector assetSel = new Forms.AssetSelector(effectContainerFile, false, false, effectContainerFile.SelectedEffect.SelectedEffectPart.I_02, this, effectContainerFile.SelectedEffect.SelectedEffectPart.AssetRef);
                     assetSel.ShowDialog();
 
-                    if (assetSel.SelectedAsset != null)
+                    List<IUndoRedo> undos = new List<IUndoRedo>();
+
+                    foreach (var effectPart in effectContainerFile.SelectedEffect.SelectedEffectParts)
                     {
-                        List<IUndoRedo> undos = new List<IUndoRedo>();
-                        undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.I_02), effectContainerFile.SelectedEffect.SelectedEffectPart, effectContainerFile.SelectedEffect.SelectedEffectPart.I_02, assetSel.SelectedAssetType));
-                        undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.AssetRef), effectContainerFile.SelectedEffect.SelectedEffectPart, effectContainerFile.SelectedEffect.SelectedEffectPart.AssetRef, assetSel.SelectedAsset));
-                        UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Change Asset"));
+                        undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.I_02), effectPart, effectPart.I_02, assetSel.SelectedAssetType));
+                        undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.AssetRef), effectPart, effectPart.AssetRef, assetSel.SelectedAsset));
 
-                        effectContainerFile.SelectedEffect.SelectedEffectPart.I_02 = assetSel.SelectedAssetType;
-                        effectContainerFile.SelectedEffect.SelectedEffectPart.AssetRef = assetSel.SelectedAsset;
-
-                        if (effectPartViewModel != null)
-                            effectPartViewModel.UpdateProperties();
+                        effectPart.I_02 = assetSel.SelectedAssetType;
+                        effectPart.AssetRef = assetSel.SelectedAsset;
                     }
+
+                    UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Change Asset(s)"));
+
+                    if (effectPartViewModel != null)
+                        effectPartViewModel.UpdateProperties();
                 }
             }
         }
@@ -3449,37 +3454,88 @@ namespace EEPK_Organiser.View
         private void EffectPart_Paste_Click(object sender, RoutedEventArgs e)
         {
             EffectPart_Paste();
+            e.Handled = true;
         }
 
         private void EffectPart_PasteValues_Click(object sender, RoutedEventArgs e)
         {
             EffectPart_PasteValues();
+            e.Handled = true;
         }
 
         private void EffectPart_Copy_Click(object sender, RoutedEventArgs e)
         {
             EffectPart_Copy();
+            e.Handled = true;
         }
 
         private void EffectPart_Delete_Click(object sender, RoutedEventArgs e)
         {
             EffectPart_Delete();
+            e.Handled = true;
         }
 
         private void EffectPart_Duplicate_Click(object sender, RoutedEventArgs e)
         {
             EffectPart_Duplicate();
+            e.Handled = true;
         }
 
         private void EffectPart_GoToAsset_Click(object sender, RoutedEventArgs e)
         {
             EffectPart_GoToAsset();
+            e.Handled = true;
         }
 
         private void EffectPart_ChangeAsset_Click(object sender, RoutedEventArgs e)
         {
             EffectPart_ChangeAsset();
+            e.Handled = true;
         }
+
+        private async void EffectPart_Rescale_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (effectContainerFile.SelectedEffect != null)
+                {
+                    if (effectContainerFile.SelectedEffect.SelectedEffectParts != null)
+                    {
+                        var result = await DialogCoordinator.Instance.ShowInputAsync(Application.Current.MainWindow, "Rescale Factor", "Rescale the Min and Max values on the selected EffectParts (does not edit the underlying assets at all). \n\nEnter the factor to rescale by:", DialogSettings.Default);
+
+                        if(!float.TryParse(result, out float scaleFactor))
+                        {
+                            await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, "Invalid Input", "Only numbers are valid.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                            return;
+                        }
+
+                        List<IUndoRedo> undos = new List<IUndoRedo>();
+
+                        foreach(var effectPart in effectContainerFile.SelectedEffect.SelectedEffectParts)
+                        {
+                            float size1 = effectPart.SIZE_1 * scaleFactor;
+                            float size2 = effectPart.SIZE_2 * scaleFactor;
+
+                            undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.SIZE_1), effectPart, effectPart.SIZE_1, size1));
+                            undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.SIZE_2), effectPart, effectPart.SIZE_2, size2));
+
+                            effectPart.SIZE_1 = size1;
+                            effectPart.SIZE_2 = size2;
+                        }
+
+                        UndoManager.Instance.AddCompositeUndo(undos, "Rescale EffectPart");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured while rescaling the EffectParts.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            e.Handled = true;
+        }
+
 
         //Effect Options
         public RelayCommand EffectOptions_AddEffect_Command => new RelayCommand(EffectOptions_AddEffect);
@@ -4300,5 +4356,37 @@ namespace EEPK_Organiser.View
             }
         }
 
+        private void ListBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (e.Handled)
+            {
+                return;
+            }
+            Control control = sender as Control;
+            if (control == null)
+            {
+                return;
+            }
+            e.Handled = true;
+            var wheelArgs = new MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta)
+            {
+                RoutedEvent = MouseWheelEvent,
+                Source = control
+            };
+            var parent = VisualTreeHelper.GetParent(control) as UIElement;
+            //var parent = control.Parent as UIElement;
+            parent?.RaiseEvent(wheelArgs);
+        }
+
+        private void effectPartTabs_ExpandedOrCollapsed(object sender, RoutedEventArgs e)
+        {
+            if (SettingsManager.settings == null || !effectPartTabInitialize) return;
+            SettingsManager.settings.EepkOrganiser_EffectPart_General_Expanded = effectPartGeneral.IsExpanded;
+            SettingsManager.settings.EepkOrganiser_EffectPart_Position_Expanded = effectPartPos.IsExpanded;
+            SettingsManager.settings.EepkOrganiser_EffectPart_Animation_Expanded = effectPartAnimation.IsExpanded;
+            SettingsManager.settings.EepkOrganiser_EffectPart_Flags_Expanded = effectPartFlags.IsExpanded;
+            SettingsManager.settings.EepkOrganiser_EffectPart_UnkFlags_Expanded = effectPartUnkFlags.IsExpanded;
+            SettingsManager.settings.EepkOrganiser_EffectPart_UnkValues_Expanded = effectPartUnkValues.IsExpanded;
+        }
     }
 }

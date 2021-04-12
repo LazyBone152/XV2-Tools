@@ -286,6 +286,22 @@ namespace EEPK_Organiser.Forms
             }
         }
 
+        private void ContextMenu_Duplicate_Click(object sender, RoutedEventArgs e)
+        {
+            List<Material> selectedMaterials = dataGrid.SelectedItems.Cast<Material>().ToList();
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            foreach(var mat in selectedMaterials)
+            {
+                Material newMaterial = mat.Copy();
+                undos.Add(new UndoableListAdd<Material>(EmmFile.Materials, newMaterial));
+                EmmFile.Materials.Add(newMaterial);
+            }
+
+            if(undos.Count > 0)
+                UndoManager.Instance.AddCompositeUndo(undos, "Duplicate Material(s)");
+        }
+
         private void ContextMenu_RenameMaterial_Click(object sender, RoutedEventArgs e)
         {
             var material = dataGrid.SelectedItem as Material;
@@ -503,6 +519,27 @@ namespace EEPK_Organiser.Forms
                 Filter_Search_Click(null, null);
             }
         }
-        
+
+        private void DataGrid_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (e.Handled)
+            {
+                return;
+            }
+            Control control = sender as Control;
+            if (control == null)
+            {
+                return;
+            }
+            e.Handled = true;
+            var wheelArgs = new MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta)
+            {
+                RoutedEvent = MouseWheelEvent,
+                Source = control
+            };
+            var parent = VisualTreeHelper.GetParent(control) as UIElement;
+            //var parent = control.Parent as UIElement;
+            parent?.RaiseEvent(wheelArgs);
+        }
     }
 }

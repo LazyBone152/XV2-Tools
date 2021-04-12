@@ -479,6 +479,22 @@ namespace Xv2CoreLib.PAL
         [YAXSerializeAs("value")]
         public string I_32 { get; set; } //ushort
 
+        public Stats()
+        {
+            //Set default stats
+            I_00 = 1;
+            I_14 = 100;
+            I_16 = ushort.MaxValue.ToString();
+            I_18 = ushort.MaxValue.ToString();
+            I_20 = ushort.MaxValue.ToString();
+            I_22 = ushort.MaxValue.ToString();
+            I_24 = ushort.MaxValue.ToString();
+            I_26 = ushort.MaxValue.ToString();
+            I_28 = ushort.MaxValue.ToString();
+            I_30 = ushort.MaxValue.ToString();
+            I_32 = ushort.MaxValue.ToString();
+        }
+
         public static List<Stats> ReadAll(byte[] bytes, int offset, int count)
         {
             List<Stats> entries = new List<Stats>();
@@ -491,26 +507,34 @@ namespace Xv2CoreLib.PAL
 
         public static Stats Read(byte[] bytes, int offset)
         {
-            return new Stats()
+            if(offset < bytes.Length)
             {
-                I_00 = BitConverter.ToUInt16(bytes, offset + 0),
-                I_02 = BitConverter.ToUInt16(bytes, offset + 2),
-                I_04 = BitConverter.ToUInt16(bytes, offset + 4),
-                I_06 = BitConverter.ToUInt16(bytes, offset + 6),
-                I_08 = BitConverter.ToUInt16(bytes, offset + 8),
-                I_10 = BitConverter.ToUInt16(bytes, offset + 10),
-                I_12 = BitConverter.ToUInt16(bytes, offset + 12),
-                I_14 = BitConverter.ToUInt16(bytes, offset + 14),
-                I_16 = BitConverter.ToUInt16(bytes, offset + 16).ToString(),
-                I_18 = BitConverter.ToUInt16(bytes, offset + 18).ToString(),
-                I_20 = BitConverter.ToUInt16(bytes, offset + 20).ToString(),
-                I_22 = BitConverter.ToUInt16(bytes, offset + 22).ToString(),
-                I_24 = BitConverter.ToUInt16(bytes, offset + 24).ToString(),
-                I_26 = BitConverter.ToUInt16(bytes, offset + 26).ToString(),
-                I_28 = BitConverter.ToUInt16(bytes, offset + 28).ToString(),
-                I_30 = BitConverter.ToUInt16(bytes, offset + 30).ToString(),
-                I_32 = BitConverter.ToUInt16(bytes, offset + 32).ToString()
-            };
+                return new Stats()
+                {
+                    I_00 = BitConverter.ToUInt16(bytes, offset + 0),
+                    I_02 = BitConverter.ToUInt16(bytes, offset + 2),
+                    I_04 = BitConverter.ToUInt16(bytes, offset + 4),
+                    I_06 = BitConverter.ToUInt16(bytes, offset + 6),
+                    I_08 = BitConverter.ToUInt16(bytes, offset + 8),
+                    I_10 = BitConverter.ToUInt16(bytes, offset + 10),
+                    I_12 = BitConverter.ToUInt16(bytes, offset + 12),
+                    I_14 = BitConverter.ToUInt16(bytes, offset + 14),
+                    I_16 = BitConverter.ToUInt16(bytes, offset + 16).ToString(),
+                    I_18 = BitConverter.ToUInt16(bytes, offset + 18).ToString(),
+                    I_20 = BitConverter.ToUInt16(bytes, offset + 20).ToString(),
+                    I_22 = BitConverter.ToUInt16(bytes, offset + 22).ToString(),
+                    I_24 = BitConverter.ToUInt16(bytes, offset + 24).ToString(),
+                    I_26 = BitConverter.ToUInt16(bytes, offset + 26).ToString(),
+                    I_28 = BitConverter.ToUInt16(bytes, offset + 28).ToString(),
+                    I_30 = BitConverter.ToUInt16(bytes, offset + 30).ToString(),
+                    I_32 = BitConverter.ToUInt16(bytes, offset + 32).ToString()
+                };
+            }
+            else
+            {
+                //Entry has no stats, since apparantly this is a thing now...
+                return new Stats();
+            }
         }
 
         public static byte[] WriteAll(IList<Stats> entries)

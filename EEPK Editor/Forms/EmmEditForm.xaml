@@ -67,6 +67,7 @@
                                 <TextBlock.ContextMenu>
                                     <ContextMenu>
                                         <MenuItem Header="Add Parameter" Click="ContextMenu_AddParameter_Click"/>
+                                        <MenuItem Header="Duplicate" Click="ContextMenu_Duplicate_Click"/>
                                         <MenuItem Header="Rename" Click="ContextMenu_RenameMaterial_Click"/>
                                         <MenuItem IsEnabled="{Binding IsForContainer}" Header="Merge" Click="ContextMenu_Merge_Click"/>
                                         <MenuItem Header="Delete" Click="ContextMenu_Delete_Click"/>
@@ -103,7 +104,7 @@
 
             <DataGrid.RowDetailsTemplate>
                 <DataTemplate>
-                    <DataGrid BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" VirtualizingPanel.ScrollUnit="Pixel" EnableColumnVirtualization="True" EnableRowVirtualization="True" ItemsSource="{Binding Parameters.Binding}" CanUserResizeRows="False" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
+                    <DataGrid PreviewMouseWheel="DataGrid_PreviewMouseWheel" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" VirtualizingPanel.ScrollUnit="Pixel" EnableColumnVirtualization="True" EnableRowVirtualization="True" ItemsSource="{Binding Parameters.Binding}" CanUserResizeRows="False" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
                         <DataGrid.Columns>
                             <!-- Dummy column used for easy selection only. -->
                             <DataGridTextColumn Width="15" IsReadOnly="True"/>

@@ -77,6 +77,11 @@
                                             <Separator/>
                                             <MenuItem Header="Hue Adjustment" Command="{Binding PlacementTarget.Tag.HueAdjustment_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                             <MenuItem Header="Hue Set" Command="{Binding PlacementTarget.Tag.HueSet_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                            <Separator/>
+                                            <MenuItem Header="Hide All" Command="{Binding PlacementTarget.Tag.HideAll_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                            <MenuItem Header="Show All" Command="{Binding PlacementTarget.Tag.ShowAll_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                            <MenuItem Header="Hide All Selected" Command="{Binding PlacementTarget.Tag.HideAllSelected_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                            <MenuItem Header="Show All Selected" Command="{Binding PlacementTarget.Tag.ShowAllSelected_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                         </ContextMenu>
                                     </TextBlock.ContextMenu>
                                 </TextBlock>
@@ -171,7 +176,7 @@
                         </Controls:MetroTabItem>
                         <Controls:MetroTabItem x:Name="tab_TexturePart" Header="Texture Part" Controls:ControlsHelper.HeaderFontSize="16">
                             <TabControl>
-                                <TabItem Header="Color/Material">
+                                <TabItem Header="Color/Material" Controls:ControlsHelper.HeaderFontSize="16">
                                     <Grid x:Name="grid_TexturePart" Margin="0,0,-0.055,0">
                                         <ex:ColorCanvas x:Name="ColorCanvas_Color1" Margin="10,83,0,0" SelectedColorChanged="ColorCanvas_Color1_SelectedColorChanged" HorizontalAlignment="Left" VerticalAlignment="Top" Width="236" Height="275" SelectedColor="{Binding SelectedItem.Type_Texture.Color1, ElementName=empTree}"/>
                                         <ex:ColorCanvas x:Name="ColorCanvas_Color2" Margin="251,83,0,0" Height="275" Width="236" HorizontalAlignment="Left" VerticalAlignment="Top" SelectedColor="{Binding SelectedItem.Type_Texture.Color2, ElementName=empTree}"/>
@@ -268,32 +273,32 @@
                                     </Grid>
 
                                 </TabItem>
-                                <TabItem Header="Other">
+                                <TabItem Header="Other" Controls:ControlsHelper.HeaderFontSize="16">
                                     <Grid>
-                                        <GroupBox Header="Scale2" HorizontalAlignment="Left" Height="73" Margin="516,121,0,0" VerticalAlignment="Top" Width="215">
+                                        <GroupBox Header="Scale2" HorizontalAlignment="Left" Height="83" Margin="516,121,0,0" VerticalAlignment="Top" Width="215">
                                             <Grid>
-                                                <TextBox x:Name="texturePart_F_32" Text="{Binding SelectedItem.Type_Texture.F_32, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="34,17,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="55"/>
-                                                <Label Content="X" HorizontalAlignment="Left" Margin="10,15,0,0" VerticalAlignment="Top" Width="19" HorizontalContentAlignment="Right"/>
-                                                <TextBox x:Name="texturePart_F_36" Text="{Binding SelectedItem.Type_Texture.F_40, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="118,17,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="55"/>
-                                                <Label Content="Y" HorizontalAlignment="Left" Margin="94,15,0,0" VerticalAlignment="Top" Width="19" HorizontalContentAlignment="Right"/>
+                                                <TextBox x:Name="texturePart_F_32" Text="{Binding SelectedItem.Type_Texture.F_32, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="34,12,0,-0.667" TextWrapping="Wrap" VerticalAlignment="Top" Width="55"/>
+                                                <Label Content="X" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="19" HorizontalContentAlignment="Right"/>
+                                                <TextBox x:Name="texturePart_F_36" Text="{Binding SelectedItem.Type_Texture.F_40, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="118,12,0,-0.667" TextWrapping="Wrap" VerticalAlignment="Top" Width="55"/>
+                                                <Label Content="Y" HorizontalAlignment="Left" Margin="94,10,0,0" VerticalAlignment="Top" Width="19" HorizontalContentAlignment="Right"/>
 
                                             </Grid>
                                         </GroupBox>
-                                        <GroupBox Header="Scale2 Random Range" HorizontalAlignment="Left" Height="73" Margin="516,209,0,0" VerticalAlignment="Top" Width="215">
+                                        <GroupBox Header="Scale2 Random Range" HorizontalAlignment="Left" Height="82" Margin="516,209,0,0" VerticalAlignment="Top" Width="215">
                                             <Grid>
-                                                <TextBox x:Name="texturePart_F_40" Text="{Binding SelectedItem.Type_Texture.F_36, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="34,17,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="55"/>
-                                                <Label Content="X" HorizontalAlignment="Left" Margin="10,15,0,0" VerticalAlignment="Top" Width="19" HorizontalContentAlignment="Right"/>
-                                                <TextBox x:Name="texturePart_F_44" Text="{Binding SelectedItem.Type_Texture.F_44, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="118,17,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="55"/>
-                                                <Label Content="Y" HorizontalAlignment="Left" Margin="94,15,0,0" VerticalAlignment="Top" Width="19" HorizontalContentAlignment="Right"/>
+                                                <TextBox x:Name="texturePart_F_40" Text="{Binding SelectedItem.Type_Texture.F_36, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="34,12,0,-0.667" TextWrapping="Wrap" VerticalAlignment="Top" Width="55"/>
+                                                <Label Content="X" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="19" HorizontalContentAlignment="Right"/>
+                                                <TextBox x:Name="texturePart_F_44" Text="{Binding SelectedItem.Type_Texture.F_44, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="118,12,0,-0.667" TextWrapping="Wrap" VerticalAlignment="Top" Width="55"/>
+                                                <Label Content="Y" HorizontalAlignment="Left" Margin="94,10,0,0" VerticalAlignment="Top" Width="19" HorizontalContentAlignment="Right"/>
 
                                             </Grid>
                                         </GroupBox>
-                                        <GroupBox Header="Scale1" HorizontalAlignment="Left" Height="101" Margin="516,15,0,0" VerticalAlignment="Top" Width="215">
+                                        <GroupBox Header="Scale1" HorizontalAlignment="Left" Height="106" Margin="516,10,0,0" VerticalAlignment="Top" Width="215">
                                             <Grid>
-                                                <TextBox x:Name="texturePart_F_24" Text="{Binding SelectedItem.Type_Texture.F_24, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="81,15,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="90"/>
-                                                <Label Content="Base" HorizontalAlignment="Left" Margin="10,15,0,0" VerticalAlignment="Top" Width="66" HorizontalContentAlignment="Right"/>
-                                                <TextBox x:Name="texturePart_F_28" Text="{Binding SelectedItem.Type_Texture.F_28, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="81,44,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="90"/>
-                                                <Label Content="Random" HorizontalAlignment="Left" Margin="10,42,0,0" VerticalAlignment="Top" Width="66" HorizontalContentAlignment="Right"/>
+                                                <TextBox x:Name="texturePart_F_24" Text="{Binding SelectedItem.Type_Texture.F_24, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="81,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="90"/>
+                                                <Label Content="Base" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="66" HorizontalContentAlignment="Right"/>
+                                                <TextBox x:Name="texturePart_F_28" Text="{Binding SelectedItem.Type_Texture.F_28, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="81,39,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="90"/>
+                                                <Label Content="Random" HorizontalAlignment="Left" Margin="10,37,0,0" VerticalAlignment="Top" Width="66" HorizontalContentAlignment="Right"/>
 
                                             </Grid>
                                         </GroupBox>
