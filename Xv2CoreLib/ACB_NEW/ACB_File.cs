@@ -236,6 +236,13 @@ namespace Xv2CoreLib.ACB_NEW
         public UTF_File AcfReferenceTable { get; set; } // No need to parse this
         public UTF_File SoundGeneratorTable { get; set; } // No need to parse this
 
+        #region Settings
+        public bool ReuseTrackCommand = false;
+        public bool ReuseSequenceCommand = false;
+        public bool AllowSharedAwbEntries = true;
+
+        #endregion
+
         #region LoadFunctions
         public static ACB_File Load(string path, bool writeXml = false)
         {
@@ -275,8 +282,12 @@ namespace Xv2CoreLib.ACB_NEW
 
         public static ACB_File Load(UTF_File utfFile, byte[] awbBytes, bool loadUnknownCommands = false, bool isMusicPackage = false, bool eternityCompatibility = true, bool altAwbPath = false)
         {
-            //Analyze the ACB version. This maps out what columns and tables exist in this ACB version, so that they can be read and saved properly.
-            AcbFormatHelper.Instance.ParseFile(utfFile);
+            if (!AcbFormatHelper.Instance.AcbFormatHelperMain.ForceLoad)
+            {
+                //Analyze the ACB version. This maps out what columns and tables exist in this ACB version, so that they can be read and saved properly.
+                AcbFormatHelper.Instance.ParseFile(utfFile);
+            }
+
             AcbFormatHelperTable header = AcbFormatHelper.Instance.AcbFormatHelperMain.Header;
 
             //Parse acb
@@ -302,11 +313,8 @@ namespace Xv2CoreLib.ACB_NEW
             acbFile.NumCueLimit = utfFile.GetValue<ushort>("NumCueLimit", TypeFlag.UInt16, 0, header, acbFile.Version);
             acbFile.CuePriorityType = utfFile.GetValue<byte>("CuePriorityType", TypeFlag.UInt8, 0, header, acbFile.Version);
 
-            if (header.ColumnExists("AcbGuid", TypeFlag.Data, acbFile.Version))
-                acbFile.GUID = new Guid(utfFile.GetData("AcbGuid", 0));
-
-            if (header.ColumnExists("OutsideLinkTable", TypeFlag.Data, acbFile.Version))
-                acbFile.OutsideLinkTable = utfFile.GetColumnTable("OutsideLinkTable", true);
+            acbFile.GUID = new Guid(utfFile.GetData("AcbGuid", 0, header, acbFile.Version));
+            acbFile.OutsideLinkTable = utfFile.GetColumnTable("OutsideLinkTable", true, header, acbFile.Version);
 
             //Tables
             acbFile.AcfReferenceTable = utfFile.GetColumnTable("AcfReferenceTable", true, header, acbFile.Version);
@@ -823,7 +831,22 @@ namespace Xv2CoreLib.ACB_NEW
                 Sequences.Add(seq);
                 newCue.ReferenceIndex.TableGuid = seq.InstanceGuid;
                 undos.Add(new UndoableListAdd<ACB_Sequence>(Sequences, seq, ""));
-                undos.AddRange(AddVolumeBus(seq, CommandTableType.SequenceCommand));
+
+                if (ReuseSequenceCommand)
+                {
+                    //Reuse an existing command
+                    var existingSequence = Sequences.FirstOrDefault(x => !x.CommandIndex.IsNull);
+
+                    if(existingSequence != null)
+                    {
+                        seq.CommandIndex = new AcbTableReference(existingSequence.CommandIndex.TableGuid);
+                    }
+                }
+                else
+                {
+                    //Add default volume bus command
+                    undos.AddRange(AddVolumeBus(seq, CommandTableType.SequenceCommand));
+                }
             }
             else if (type == ReferenceType.Synth)
             {
@@ -955,7 +978,7 @@ namespace Xv2CoreLib.ACB_NEW
 
             var waveform = new ACB_Waveform();
             var trackMetadata = new TrackMetadata(trackBytes);
-            undos.AddRange(AudioTracks.AddEntry(trackBytes, true, out ushort awbId));
+            undos.AddRange(AudioTracks.AddEntry(trackBytes, AllowSharedAwbEntries, out ushort awbId));
 
             //Create waveform
             waveform.AwbId = awbId;
@@ -1035,7 +1058,18 @@ namespace Xv2CoreLib.ACB_NEW
             ACB_Track track = new ACB_Track();
             newTrack.Index.TableGuid = track.InstanceGuid;
             newTrack.Percentage = (ushort)(100 / (sequence.Tracks.Count + 1));
-            
+
+            if (ReuseTrackCommand)
+            {
+                //Set CommandIndex to that of another Track in the ACB
+                var existingTrack = Tracks.FirstOrDefault(x => !x.CommandIndex.IsNull);
+
+                if(existingTrack != null)
+                {
+                    track.CommandIndex = new AcbTableReference(Tracks[0].CommandIndex.TableGuid);
+                }
+            }
+
             //Create command
             ACB_Command command = new ACB_Command();
             command.CommandType = CommandType.ReferenceItem;

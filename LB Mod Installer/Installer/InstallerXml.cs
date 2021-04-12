@@ -132,9 +132,11 @@ namespace LB_Mod_Installer.Installer
                 files.AddRange(InstallFiles.Where(x => x.GetDoLast()));
             }
 
-
             //Remove all files with empty SourcePaths
             files.RemoveAll(x => string.IsNullOrWhiteSpace(x.SourcePath));
+
+            //Remove files that have a invalid flag
+            files.RemoveAll(x => !FlagsIsSet(x.HasFlag));
 
             return files;
         }
@@ -145,7 +147,7 @@ namespace LB_Mod_Installer.Installer
             for (int i = 0; i < InstallOptionSteps.Count; i++)
             {
                 //Ignore all steps that require a flag that has not been set by previous steps.
-                if (FlagIsSet(InstallOptionSteps[i].HasFlag))
+                if (FlagsIsSet(InstallOptionSteps[i].HasFlag))
                 {
                     if (InstallOptionSteps[i].StepType == InstallStep.StepTypes.Options)
                     {
@@ -253,7 +255,7 @@ namespace LB_Mod_Installer.Installer
 
                     CurrentInstallStep++;
                 }
-                while (!FlagIsSet(InstallOptionSteps[CurrentInstallStep].HasFlag));
+                while (!FlagsIsSet(InstallOptionSteps[CurrentInstallStep].HasFlag));
 
                 //CurrentInstallStep++;
                 StepCountUpdate();
@@ -278,7 +280,7 @@ namespace LB_Mod_Installer.Installer
 
                     CurrentInstallStep--;
                 }
-                while (!FlagIsSet(InstallOptionSteps[CurrentInstallStep].HasFlag));
+                while (!FlagsIsSet(InstallOptionSteps[CurrentInstallStep].HasFlag));
 
                 StepCountUpdate();
                 return InstallOptionSteps[CurrentInstallStep];
@@ -298,6 +300,20 @@ namespace LB_Mod_Installer.Installer
             return GetPreviousInstallStep();
         }
 
+        private bool FlagsIsSet(string flags)
+        {
+            if (string.IsNullOrWhiteSpace(flags)) return true;
+
+            foreach(var flag in flags.Split(','))
+            {
+                if (!FlagIsSet(flag.Trim()))
+                    return false;
+            }
+
+            //Either all flags are true or there are none, so default to true anyway
+            return true;
+        }
+
         private bool FlagIsSet(string flag)
         {
             if (string.IsNullOrWhiteSpace(flag)) return true;
@@ -306,7 +322,7 @@ namespace LB_Mod_Installer.Installer
 
             for (int i = 0; i < value; i++)
             {
-                if (InstallOptionSteps[i].CheckForFlag(flag) && FlagIsSet(InstallOptionSteps[i].HasFlag))
+                if (InstallOptionSteps[i].CheckForFlag(flag) && FlagsIsSet(InstallOptionSteps[i].HasFlag))
                 {
                     return true;
                 }
@@ -321,7 +337,7 @@ namespace LB_Mod_Installer.Installer
 
             for(int i = 0; i < InstallOptionSteps.Count; i++)
             {
-                if (FlagIsSet(InstallOptionSteps[i].HasFlag))
+                if (FlagsIsSet(InstallOptionSteps[i].HasFlag))
                 {
                     value++;
                 }
@@ -336,7 +352,7 @@ namespace LB_Mod_Installer.Installer
 
             for (int i = 0; i < InstallOptionSteps.Count; i++)
             {
-                if (FlagIsSet(InstallOptionSteps[i].HasFlag))
+                if (FlagsIsSet(InstallOptionSteps[i].HasFlag))
                 {
                     value++;
                 }
@@ -774,6 +790,9 @@ namespace LB_Mod_Installer.Installer
         }
 
         //Flag
+        /// <summary>
+        /// Checks if a single flag has been set by this InstallStep.
+        /// </summary>
         public bool CheckForFlag(string flag)
         {
             if (string.IsNullOrWhiteSpace(flag)) return true;
@@ -782,8 +801,13 @@ namespace LB_Mod_Installer.Installer
             {
                 foreach(var option in OptionList)
                 {
-                    if (option.IsSelected_Option && StepType == StepTypes.Options && string.Equals(flag, option.SetFlag)) return true;
-                    if (option.IsSelected_OptionMultiSelect && StepType == StepTypes.OptionsMultiSelect && string.Equals(flag, option.SetFlag)) return true;
+                    if ((option.IsSelected_OptionMultiSelect && StepType == StepTypes.OptionsMultiSelect || option.IsSelected_Option && StepType == StepTypes.Options) && !string.IsNullOrWhiteSpace(option.SetFlag))
+                    {
+                        foreach(var setFlag in option.SetFlag.Split(','))
+                        {
+                            if (string.Equals(setFlag.Trim(), flag)) return true;
+                        }
+                    }
                 }
             }
 
@@ -882,6 +906,7 @@ namespace LB_Mod_Installer.Installer
     [YAXSerializeAs("File")]
     public class FilePath
     {
+
         [YAXAttributeFor("SourcePath")]
         [YAXSerializeAs("value")]
         public string SourcePath { get; set; }
@@ -891,6 +916,9 @@ namespace LB_Mod_Installer.Installer
         public string InstallPath { get; set; }
 
         //optional:
+        [YAXAttributeForClass]
+        [YAXDontSerializeIfNull]
+        public string HasFlag { get; set; }
         [YAXAttributeForClass]
         [YAXDontSerializeIfNull]
         public string Overwrite { get; set; }

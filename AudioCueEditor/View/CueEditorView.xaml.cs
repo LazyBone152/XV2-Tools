@@ -794,5 +794,28 @@ namespace AudioCueEditor.View
             }
             
         }
+
+
+        private void ListBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (e.Handled)
+            {
+                return;
+            }
+            Control control = sender as Control;
+            if (control == null)
+            {
+                return;
+            }
+            e.Handled = true;
+            var wheelArgs = new MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta)
+            {
+                RoutedEvent = MouseWheelEvent,
+                Source = control
+            };
+            var parent = VisualTreeHelper.GetParent(control) as UIElement;
+            //var parent = control.Parent as UIElement;
+            parent?.RaiseEvent(wheelArgs);
+        }
     }
 }

@@ -63,14 +63,36 @@ namespace Xv2CoreLib.Properties {
         /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
         ///&lt;AcbFormatHelperMain&gt;
-        ///  &lt;Header Name=&quot;Header&quot;&gt;
-        ///    &lt;Column Name=&quot;FileIdentifier&quot; ValueType=&quot;UInt32&quot; PrimaryLowestVersion=&quot;0.81.1.0&quot; PrimaryHighestVersion=&quot;1.30.0.0&quot; SecondaryLowestVersion=&quot;0.0.0.0&quot; SecondaryHighestVersion=&quot;0.0.0.0&quot; /&gt;
-        ///    &lt;Column Name=&quot;Size&quot; ValueType=&quot;UInt32&quot; PrimaryLowestVersion=&quot;0.81.1.0&quot; PrimaryHighestVersion=&quot;1.30.0.0&quot; SecondaryLowestVersion=&quot;0.0.0.0&quot; SecondaryHighestVersion=&quot;0.0.0.0&quot; /&gt;
-        ///    &lt;Column Name=&quot;Version&quot; ValueType=&quot;UInt32&quot; PrimaryLo [rest of string was truncated]&quot;;.
+        ///  &lt;Versions&gt;
+        ///    &lt;String&gt;0.81.1.0&lt;/String&gt;
+        ///    &lt;String&gt;0.81.8.0&lt;/String&gt;
+        ///    &lt;String&gt;1.3.0.0&lt;/String&gt;
+        ///    &lt;String&gt;1.6.0.0&lt;/String&gt;
+        ///    &lt;String&gt;1.12.0.0&lt;/String&gt;
+        ///    &lt;String&gt;1.14.0.0&lt;/String&gt;
+        ///    &lt;String&gt;1.16.1.0&lt;/String&gt;
+        ///    &lt;String&gt;1.21.1.0&lt;/String&gt;
+        ///    &lt;String&gt;1.22.4.0&lt;/String&gt;
+        ///    &lt;String&gt;1.23.1.0&lt;/String&gt;
+        ///    &lt;String&gt;1.26.0.0&lt;/String&gt;
+        ///    &lt;String&gt;1.27.2.0&lt;/String&gt;
+        ///    &lt;String&gt;1.27.7.0&lt;/String&gt;
+        ///    &lt;String&gt;1.28.2.0&lt;/String&gt;
+        ///    [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string AcbFormatHelper {
             get {
                 return ResourceManager.GetString("AcbFormatHelper", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] silence {
+            get {
+                object obj = ResourceManager.GetObject("silence", resourceCulture);
+                return ((byte[])(obj));
             }
         }
     }

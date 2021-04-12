@@ -96,7 +96,14 @@ namespace LB_Mod_Installer.Installer.ACB
                 ACB_Cue newEnCue;
                 ACB_Cue newJpnCue;
 
-                /*
+                //ACB settings
+                enCssFile.ReuseTrackCommand = true;
+                enCssFile.ReuseSequenceCommand = true;
+                enCssFile.AllowSharedAwbEntries = false;
+                jpnCssFile.ReuseTrackCommand = true;
+                jpnCssFile.ReuseSequenceCommand = true;
+                jpnCssFile.AllowSharedAwbEntries = false;
+
                 if (reusing)
                 {
                     newEnCue = enCssFile.GetCue(cueId);
@@ -105,28 +112,27 @@ namespace LB_Mod_Installer.Installer.ACB
                     newEnCue.Name = $"LB_NEW_VOICE_{cueId}";
                     newJpnCue.Name = $"LB_NEW_VOICE_{cueId}";
 
-                    enCssFile.ReplaceTrackOnCue(newEnCue, enHca, true);
-                    jpnCssFile.ReplaceTrackOnCue(newJpnCue, jpnHca, true);
+                    enCssFile.ReplaceTrackOnCue(enCssFile.GetCue(cueId), enHca, true, EncodeType.HCA);
+                    jpnCssFile.ReplaceTrackOnCue(jpnCssFile.GetCue(cueId), jpnHca, true, EncodeType.HCA);
                 }
                 else
-                */
                 {
+                    //Add cues
                     enCssFile.AddCue($"LB_NEW_VOICE_{cueId}", cueId, ReferenceType.Sequence, enHca, true, false, EncodeType.HCA, out newEnCue);
                     jpnCssFile.AddCue($"LB_NEW_VOICE_{cueId}", cueId, ReferenceType.Sequence, jpnHca, true, false, EncodeType.HCA, out newJpnCue);
                 }
-
+                
                 //Set binding
                 install.bindingManager.AddAlias(cueId, alias);
 
                 //Add tracker entries
-                GeneralInfo.Tracker.AddID(CSS_VOICE_EN_PATH, Sections.ACB_Cue, newEnCue.ID.ToString());
-                GeneralInfo.Tracker.AddID(CSS_VOICE_JPN_PATH, Sections.ACB_Cue, newJpnCue.ID.ToString());
+                GeneralInfo.Tracker.AddID(CSS_VOICE_EN_PATH, Sections.ACB_Cue, cueId.ToString());
+                GeneralInfo.Tracker.AddID(CSS_VOICE_JPN_PATH, Sections.ACB_Cue, cueId.ToString());
             }
         }
 
         private int AssignCommonCssCueId(out bool reusing)
         {
-            /*
              //For whatever reason XV2INS wants to overwrite tracks that are replaced, so best to always add new cues.
             ACB_Cue enFreeCue = enCssFile.GetCue("X2_FREE");
             ACB_Cue jpnFreeCue = jpnCssFile.GetCue("X2_FREE");
@@ -155,10 +161,9 @@ namespace LB_Mod_Installer.Installer.ACB
                 jpnCueId = jpnCssFile.GetFreeCueId();
                 reusing = false;
             }
-            */
 
-            int enCueId = enCssFile.GetFreeCueId();
-            int jpnCueId = jpnCssFile.GetFreeCueId();
+            //int enCueId = enCssFile.GetFreeCueId();
+            //int jpnCueId = jpnCssFile.GetFreeCueId();
 
             //Repair CSS ACB if out of sync
             if (enCueId != jpnCueId)
@@ -167,7 +172,7 @@ namespace LB_Mod_Installer.Installer.ACB
                 enCueId = enCssFile.GetFreeCueId();
             }
 
-            reusing = false;
+            //reusing = false;
 
             return enCueId;
         }

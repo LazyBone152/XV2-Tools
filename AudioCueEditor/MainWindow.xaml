@@ -28,6 +28,7 @@
             <MenuItem Header="File">
                 <MenuItem Header="New" Command="{Binding NewAcbCommand}"/>
                 <MenuItem Header="Open" Command="{Binding LoadAcbCommand}"/>
+                <MenuItem Header="Force Open" Command="{Binding ForceLoadAcbCommand}"/>
                 <MenuItem Header="Save" Command="{Binding SaveAcbCommand}"/>
                 <MenuItem Header="Save As.." Command="{Binding SaveAsAcbCommand}"/>
                 <Separator/>

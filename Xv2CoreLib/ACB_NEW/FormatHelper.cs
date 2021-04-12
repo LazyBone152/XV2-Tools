@@ -135,10 +135,23 @@ namespace Xv2CoreLib.ACB_NEW
 
     public class AcbFormatHelperMain
     {
+        //These tables will be excluded when parsing in the RELEASE build only. 
+        private static readonly List<string> ExcludedTables = new List<string>()
+        {
+            "OutsideLinkTable",  //Older builds of ACE accidently rebuilt this table as a StringValueTable, which causes an error when trying to parse it
+            "SoundGeneratorTable",
+
+        };
+
         public List<string> Versions { get; set; } = new List<string>();
         public AcbFormatHelperTable Header { get; private set; } = new AcbFormatHelperTable("Header");
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Column")]
         public List<AcbFormatHelperTable> Tables { get; set; } = new List<AcbFormatHelperTable>();
+
+        /// <summary>
+        /// Suppress most exceptions about missing columns while loading. For missing columns, default values are set instead.
+        /// </summary>
+        public bool ForceLoad = false;
 
         public AcbFormatHelperMain() { }
 
@@ -150,6 +163,10 @@ namespace Xv2CoreLib.ACB_NEW
             //Parse tables
             foreach (var column in acbFile.Columns)
             {
+#if !DEBUG
+                if (ExcludedTables.Contains(column.Name)) continue;
+#endif
+
                 var tableColumn = (column.Rows[0].UtfTable != null) ? column.Rows[0].UtfTable : column.UtfTable;
 
                 if (tableColumn != null)
@@ -163,6 +180,10 @@ namespace Xv2CoreLib.ACB_NEW
             //Check if they dont exist
             foreach (var table in Tables)
             {
+#if !DEBUG
+                if (ExcludedTables.Contains(table.Name)) continue;
+#endif
+
                 var utfColumn = acbFile.GetColumn(table.Name);
 
                 if (utfColumn != null)
@@ -244,7 +265,7 @@ namespace Xv2CoreLib.ACB_NEW
     public class AcbFormatHelperTable : AcbFormatVersions
     {
         [YAXAttributeForClass]
-        public string Name { get; set; } //parent column, not table name (except for Header).
+        public override string Name { get; set; } //parent column, not table name (except for Header).
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Column")]
         public List<AcbFormatHelperColumn> Columns { get; set; } = new List<AcbFormatHelperColumn>();
 
@@ -328,7 +349,7 @@ namespace Xv2CoreLib.ACB_NEW
     public class AcbFormatHelperColumn : AcbFormatVersions
     {
         [YAXAttributeForClass]
-        public string Name { get; private set; }
+        public override string Name { get; set; }
         [YAXAttributeForClass]
         public TypeFlag ValueType { get; private set; }
         [YAXAttributeForClass]
@@ -347,6 +368,7 @@ namespace Xv2CoreLib.ACB_NEW
 
     public class AcbFormatVersions
     {
+        public virtual string Name { get;  set; }
 
         //Where column/table absolutely exists 
         [YAXDontSerialize]
@@ -431,7 +453,7 @@ namespace Xv2CoreLib.ACB_NEW
             }
             else if (IsInPrimaryRange(version))
             {
-                throw new InvalidOperationException("AcbFormatVersions.SetDoesNotExist: Column already exists for the specified version...");
+                throw new InvalidOperationException($"AcbFormatVersions.SetDoesNotExist: Column ({Name}) already exists for the specified version ({version})...");
             }
         }
 

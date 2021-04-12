@@ -110,7 +110,7 @@
 
             <DataGrid.RowDetailsTemplate>
                 <DataTemplate>
-                    <ListBox MouseDoubleClick="TrackListBox_DoubleMouseClick" Drop="ListBox_Drop" AllowDrop="True" VirtualizingPanel.ScrollUnit="Pixel" ItemsSource="{Binding Tracks.Binding}" SelectionMode="Extended" SelectedItem="{Binding SelectedTrack, UpdateSourceTrigger=PropertyChanged}" utils:AttachedProperties.SelectedItems="{Binding SelectedTracks}">
+                    <ListBox PreviewMouseWheel="ListBox_PreviewMouseWheel" MouseDoubleClick="TrackListBox_DoubleMouseClick" Drop="ListBox_Drop" AllowDrop="True" VirtualizingPanel.ScrollUnit="Pixel" ItemsSource="{Binding Tracks.Binding}" SelectionMode="Extended" SelectedItem="{Binding SelectedTrack, UpdateSourceTrigger=PropertyChanged}" utils:AttachedProperties.SelectedItems="{Binding SelectedTracks}">
                         <ListBox.Resources>
                             <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Black"/>
 

@@ -60,6 +60,18 @@ namespace LB_Mod_Installer.Installer.ACB
                     {
                         //Mark cue as free, in same manner as xv2ins
                         cue.Name = "X2_FREE";
+
+                        var waveforms = acbFile.GetWaveformsFromCue(cue);
+
+                        if(waveforms.Count == 1)
+                        {
+                            var awbEntry = acbFile.GetAfs2Entry(waveforms[0].AwbId);
+
+                            if(awbEntry != null)
+                            {
+                                awbEntry.bytes = Properties.Resources.silence;
+                            }
+                        }
                     }
                 }
             }

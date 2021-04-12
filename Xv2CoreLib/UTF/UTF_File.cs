@@ -1628,40 +1628,80 @@ namespace Xv2CoreLib.UTF
         //AcbFormatHelperTable overloads. These functions will only get/set values if they are supposed to exist.
         public byte[] GetData(string columnName, string childColumnName, int rowIdx, AcbFormatHelperTable tableHelper, Version version)
         {
-            if (tableHelper.ColumnExists(columnName, TypeFlag.Data, version))
-                return GetData(columnName, childColumnName, rowIdx);
+            try
+            {
+                if (tableHelper.ColumnExists(columnName, TypeFlag.Data, version))
+                    return GetData(columnName, childColumnName, rowIdx);
+            }
+            catch (Exception ex)
+            {
+                if (!AcbFormatHelper.Instance.AcbFormatHelperMain.ForceLoad)
+                    throw ex;
+            }
 
             return null;
         }
 
         public byte[] GetData(string columnName, int rowIdx, AcbFormatHelperTable tableHelper, Version version)
         {
-            if (tableHelper.ColumnExists(columnName, TypeFlag.Data, version))
-                return GetData(columnName, rowIdx);
+            try
+            {
+                if (tableHelper.ColumnExists(columnName, TypeFlag.Data, version))
+                    return GetData(columnName, rowIdx);
+            }
+            catch (Exception ex)
+            {
+                if (!AcbFormatHelper.Instance.AcbFormatHelperMain.ForceLoad)
+                    throw ex;
+            }
 
             return null;
         }
 
         public T GetValue<T>(string columnName, TypeFlag type, int rowIdx, AcbFormatHelperTable tableHelper, Version version)
         {
-            if (tableHelper.ColumnExists(columnName, type, version))
-                return GetValue<T>(columnName, type, rowIdx);
+            try
+            {
+                if (tableHelper.ColumnExists(columnName, type, version))
+                    return GetValue<T>(columnName, type, rowIdx);
+            }
+            catch (Exception ex)
+            {
+                if (!AcbFormatHelper.Instance.AcbFormatHelperMain.ForceLoad)
+                    throw ex;
+            }
 
             return default(T);
         }
 
         public T GetValue<T>(string columnName, string childColumnName, TypeFlag type, int rowIdx, AcbFormatHelperTable tableHelper, Version version)
         {
-            if (tableHelper.ColumnExists(columnName, type, version))
-                return GetValue<T>(columnName, childColumnName, type, rowIdx);
+            try
+            {
+                if (tableHelper.ColumnExists(columnName, type, version))
+                    return GetValue<T>(columnName, childColumnName, type, rowIdx);
+            }
+            catch (Exception ex)
+            {
+                if (!AcbFormatHelper.Instance.AcbFormatHelperMain.ForceLoad)
+                    throw ex;
+            }
 
             return default(T);
         }
 
         public UTF_File GetColumnTable(string columnName, bool raiseExIfNotFound, AcbFormatHelperTable tableHelper, Version version)
         {
-            if (tableHelper.ColumnExists(columnName, TypeFlag.Data, version))
-                return GetColumnTable(columnName, raiseExIfNotFound);
+            try
+            {
+                if (tableHelper.ColumnExists(columnName, TypeFlag.Data, version))
+                    return GetColumnTable(columnName, raiseExIfNotFound);
+            }
+            catch (Exception ex)
+            {
+                if (!AcbFormatHelper.Instance.AcbFormatHelperMain.ForceLoad)
+                    throw ex;
+            }
 
             return null;
         }

@@ -86,10 +86,11 @@ namespace Xv2CoreLib.IDB
         {
             if (Entries == null) return false;
             int type = (int)skillType;
+            ushort skillId = ushort.Parse(id);
 
             foreach (var entry in Entries)
             {
-                if (entry.Index == id && entry.I_08 == type) return true;
+                if (entry.ID == skillId && entry.I_08 == type) return true;
             }
 
             return false;
