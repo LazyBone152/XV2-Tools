@@ -60,17 +60,25 @@ namespace LB_Mod_Installer.Binding
             return null;
         }
 
-        public string GetX2MSkillPath(string guid, IdBindingManager.CusSkillType skillType)
+        public string GetX2MSkillPath(string guid, IdBindingManager.CusSkillType skillType, IdBindingManager.SkillFileType skillFileType)
         {
             //added 2 extra params to the returned object
             object[] ret = FindX2MSkill(guid, skillType);
 
             if (ret != null)
             {
-                //hardcoded to .bac, it should be the only file that would need such function binding
-                return string.Format(@"skill/{0}/{1}/{1}.bac", (string)ret[3], (string)ret[4]);
 
+                switch (skillFileType)
+                {
+                    case IdBindingManager.SkillFileType.BAC:
+                        return string.Format(@"skill/{0}/{1}/{1}.bac", (string)ret[3], (string)ret[4]);
+                    case IdBindingManager.SkillFileType.BDM:
+                        return string.Format(@"skill/{0}/{1}/{1}.bdm", (string)ret[3], (string)ret[4]);
+                    case IdBindingManager.SkillFileType.ShotBDM:
+                        return string.Format(@"skill/{0}/{1}/{1}.shot.bdm", (string)ret[3], (string)ret[4]);
 
+                }
+                
             }
 
             return null;
