@@ -112,7 +112,7 @@ namespace Xv2CoreLib.TSD
                     I_20 = BitConverter.ToInt32(rawBytes, currentOffset + 20),
                     I_24 = BitConverter.ToInt32(rawBytes, currentOffset + 24).ToString(),
                     I_28 = BitConverter.ToInt32(rawBytes, currentOffset + 28),
-                    Condition = StringEx.GetString(rawBytes, currentOffset + 36, false, StringEx.EncodingType.ASCII, BitConverter.ToInt32(rawBytes, currentOffset + 32), false)
+                    Condition = StringEx.GetString(rawBytes, currentOffset + 36, false, StringEx.EncodingType.UTF8, BitConverter.ToInt32(rawBytes, currentOffset + 32), false)
                 });
 
                 currentOffset += 36 + BitConverter.ToInt32(rawBytes, currentOffset + 32);
@@ -133,18 +133,28 @@ namespace Xv2CoreLib.TSD
                 tsd_File.Events[_pos].I_04 = BitConverter.ToInt32(rawBytes, currentOffset + 4);
                 addedOffset += 12;
 
-                tsd_File.Events[_pos].Str1 = StringEx.GetString(rawBytes, currentOffset + addedOffset, false, StringEx.EncodingType.ASCII, BitConverter.ToInt32(rawBytes, currentOffset + addedOffset - 4), false);
-                addedOffset += tsd_File.Events[_pos].Str1.Length + 4;
-                tsd_File.Events[_pos].Str2 = StringEx.GetString(rawBytes, currentOffset + addedOffset, false, StringEx.EncodingType.ASCII, BitConverter.ToInt32(rawBytes, currentOffset + addedOffset - 4), false);
-                addedOffset += tsd_File.Events[_pos].Str2.Length + 4;
-                tsd_File.Events[_pos].Str3 = StringEx.GetString(rawBytes, currentOffset + addedOffset, false, StringEx.EncodingType.ASCII, BitConverter.ToInt32(rawBytes, currentOffset + addedOffset - 4), false);
-                addedOffset += tsd_File.Events[_pos].Str3.Length + 4;
-                tsd_File.Events[_pos].Str4 = StringEx.GetString(rawBytes, currentOffset + addedOffset, false, StringEx.EncodingType.ASCII, BitConverter.ToInt32(rawBytes, currentOffset + addedOffset - 4), false);
-                addedOffset += tsd_File.Events[_pos].Str4.Length + 4;
 
-                string args = StringEx.GetString(rawBytes, currentOffset + addedOffset, false, StringEx.EncodingType.ASCII, BitConverter.ToInt32(rawBytes, currentOffset + addedOffset - 4), false);
+                int stringSize = BitConverter.ToInt32(rawBytes, currentOffset + addedOffset - 4);
+
+                tsd_File.Events[_pos].Str1 = StringEx.GetString(rawBytes, currentOffset + addedOffset, false, StringEx.EncodingType.UTF8, BitConverter.ToInt32(rawBytes, currentOffset + addedOffset - 4), false);
+                addedOffset += stringSize + 4;
+
+                stringSize = BitConverter.ToInt32(rawBytes, currentOffset + addedOffset - 4);
+                tsd_File.Events[_pos].Str2 = StringEx.GetString(rawBytes, currentOffset + addedOffset, false, StringEx.EncodingType.UTF8, BitConverter.ToInt32(rawBytes, currentOffset + addedOffset - 4), false);
+                addedOffset += stringSize + 4;
+
+                stringSize = BitConverter.ToInt32(rawBytes, currentOffset + addedOffset - 4);
+                tsd_File.Events[_pos].Str3 = StringEx.GetString(rawBytes, currentOffset + addedOffset, false, StringEx.EncodingType.UTF8, BitConverter.ToInt32(rawBytes, currentOffset + addedOffset - 4), false);
+                addedOffset += stringSize + 4;
+
+                stringSize = BitConverter.ToInt32(rawBytes, currentOffset + addedOffset - 4);
+                tsd_File.Events[_pos].Str4 = StringEx.GetString(rawBytes, currentOffset + addedOffset, false, StringEx.EncodingType.UTF8, BitConverter.ToInt32(rawBytes, currentOffset + addedOffset - 4), false);
+                addedOffset += stringSize + 4;
+
+                stringSize = BitConverter.ToInt32(rawBytes, currentOffset + addedOffset - 4);
+                string args = StringEx.GetString(rawBytes, currentOffset + addedOffset, false, StringEx.EncodingType.UTF8, BitConverter.ToInt32(rawBytes, currentOffset + addedOffset - 4), false);
                 tsd_File.Events[_pos].Arguments = EventArguments.Read(args);
-                addedOffset += args.Length + 4;
+                addedOffset += stringSize + 4;
 
                 //Read TNL ID array
                 int count = BitConverter.ToInt32(rawBytes, currentOffset + addedOffset - 4);
@@ -190,7 +200,7 @@ namespace Xv2CoreLib.TSD
                 tsd_File.Zones.Add(new TSD_Zone());
                 tsd_File.Zones[_pos].Index = BitConverter.ToInt32(rawBytes, currentOffset).ToString();
                 tsd_File.Zones[_pos].I_04 = BitConverter.ToInt32(rawBytes, currentOffset + 4);
-                tsd_File.Zones[_pos].Str = StringEx.GetString(rawBytes, currentOffset + 12, false, StringEx.EncodingType.ASCII, BitConverter.ToInt32(rawBytes, currentOffset + 8), false);
+                tsd_File.Zones[_pos].Str = StringEx.GetString(rawBytes, currentOffset + 12, false, StringEx.EncodingType.UTF8, BitConverter.ToInt32(rawBytes, currentOffset + 8), false);
                 currentOffset += 12 + tsd_File.Zones[_pos].Str.Length;
             }
             return currentOffset;
@@ -222,7 +232,7 @@ namespace Xv2CoreLib.TSD
             int addedOffset = 4;
             T _section = new T();
 
-            _section.Index = StringEx.GetString(rawBytes, currentOffset + addedOffset, false, StringEx.EncodingType.ASCII, BitConverter.ToInt32(rawBytes, currentOffset), false);
+            _section.Index = StringEx.GetString(rawBytes, currentOffset + addedOffset, false, StringEx.EncodingType.UTF8, BitConverter.ToInt32(rawBytes, currentOffset), false);
 
             addedOffset += _section.Index.Length;
 
@@ -230,7 +240,7 @@ namespace Xv2CoreLib.TSD
 
             addedOffset += 8; //Unk_I and Flag Size
 
-            _section.Str = StringEx.GetString(rawBytes, currentOffset + addedOffset, false, StringEx.EncodingType.ASCII, BitConverter.ToInt32(rawBytes, currentOffset + addedOffset - 4), false);
+            _section.Str = StringEx.GetString(rawBytes, currentOffset + addedOffset, false, StringEx.EncodingType.UTF8, BitConverter.ToInt32(rawBytes, currentOffset + addedOffset - 4), false);
 
             addedOffset += _section.Str.Length;
             

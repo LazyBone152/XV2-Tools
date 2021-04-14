@@ -54,8 +54,8 @@ namespace Xv2CoreLib.TSD
                 
                 bytes.AddRange(BitConverter.GetBytes(int.Parse(tsd_File.Triggers[i].I_24)));
                 bytes.AddRange(BitConverter.GetBytes(tsd_File.Triggers[i].I_28));
-                bytes.AddRange(BitConverter.GetBytes(tsd_File.Triggers[i].Condition.Length));
-                bytes.AddRange(Encoding.ASCII.GetBytes(tsd_File.Triggers[i].Condition));
+                bytes.AddRange(BitConverter.GetBytes(Encoding.UTF8.GetByteCount(tsd_File.Triggers[i].Condition)));
+                bytes.AddRange(Encoding.UTF8.GetBytes(tsd_File.Triggers[i].Condition));
             }
 
 
@@ -68,18 +68,18 @@ namespace Xv2CoreLib.TSD
                 bytes.AddRange(BitConverter.GetBytes(int.Parse(tsd_File.Events[i].Index)));
                 bytes.AddRange(BitConverter.GetBytes(tsd_File.Events[i].I_04));
                 
-                bytes.AddRange(BitConverter.GetBytes(tsd_File.Events[i].Str1.Length));
-                bytes.AddRange(Encoding.ASCII.GetBytes(tsd_File.Events[i].Str1));
-                bytes.AddRange(BitConverter.GetBytes(tsd_File.Events[i].Str2.Length));
-                bytes.AddRange(Encoding.ASCII.GetBytes(tsd_File.Events[i].Str2));
-                bytes.AddRange(BitConverter.GetBytes(tsd_File.Events[i].Str3.Length));
-                bytes.AddRange(Encoding.ASCII.GetBytes(tsd_File.Events[i].Str3));
-                bytes.AddRange(BitConverter.GetBytes(tsd_File.Events[i].Str4.Length));
-                bytes.AddRange(Encoding.ASCII.GetBytes(tsd_File.Events[i].Str4));
+                bytes.AddRange(BitConverter.GetBytes(Encoding.UTF8.GetByteCount(tsd_File.Events[i].Str1)));
+                bytes.AddRange(Encoding.UTF8.GetBytes(tsd_File.Events[i].Str1));
+                bytes.AddRange(BitConverter.GetBytes(Encoding.UTF8.GetByteCount(tsd_File.Events[i].Str2)));
+                bytes.AddRange(Encoding.UTF8.GetBytes(tsd_File.Events[i].Str2));
+                bytes.AddRange(BitConverter.GetBytes(Encoding.UTF8.GetByteCount(tsd_File.Events[i].Str3)));
+                bytes.AddRange(Encoding.UTF8.GetBytes(tsd_File.Events[i].Str3));
+                bytes.AddRange(BitConverter.GetBytes(Encoding.UTF8.GetByteCount(tsd_File.Events[i].Str4)));
+                bytes.AddRange(Encoding.UTF8.GetBytes(tsd_File.Events[i].Str4));
 
                 string args = tsd_File.Events[i].Arguments.Write();
-                bytes.AddRange(BitConverter.GetBytes(args.Length));
-                bytes.AddRange(Encoding.ASCII.GetBytes(args));
+                bytes.AddRange(BitConverter.GetBytes(Encoding.UTF8.GetByteCount(args)));
+                bytes.AddRange(Encoding.UTF8.GetBytes(args));
 
                 bytes.AddRange(BitConverter.GetBytes(tsd_File.Events[i].TNL_IDs.Count()));
                 List<int> tnlIds = ArrayConvert.ConvertToInt32List(tsd_File.Events[i].TNL_IDs);
@@ -92,11 +92,11 @@ namespace Xv2CoreLib.TSD
             bytes.Add(3);
             for (int i = 0; i < tsd_File.Globals.Count(); i++)
             {
-                bytes.AddRange(BitConverter.GetBytes(tsd_File.Globals[i].Index.Length));
-                bytes.AddRange(Encoding.ASCII.GetBytes(tsd_File.Globals[i].Index));
+                bytes.AddRange(BitConverter.GetBytes(Encoding.UTF8.GetByteCount(tsd_File.Globals[i].Index)));
+                bytes.AddRange(Encoding.UTF8.GetBytes(tsd_File.Globals[i].Index));
                 bytes.AddRange(BitConverter.GetBytes(tsd_File.Globals[i].Type));
-                bytes.AddRange(BitConverter.GetBytes(tsd_File.Globals[i].Str.Length));
-                bytes.AddRange(Encoding.ASCII.GetBytes(tsd_File.Globals[i].Str));
+                bytes.AddRange(BitConverter.GetBytes(Encoding.UTF8.GetByteCount(tsd_File.Globals[i].Str)));
+                bytes.AddRange(Encoding.UTF8.GetBytes(tsd_File.Globals[i].Str));
             }
 
 
@@ -105,11 +105,11 @@ namespace Xv2CoreLib.TSD
             bytes.Add(4);
             for (int i = 0; i < tsd_File.Constants.Count(); i++)
             {
-                bytes.AddRange(BitConverter.GetBytes(tsd_File.Constants[i].Index.Length));
-                bytes.AddRange(Encoding.ASCII.GetBytes(tsd_File.Constants[i].Index));
+                bytes.AddRange(BitConverter.GetBytes(Encoding.UTF8.GetByteCount(tsd_File.Constants[i].Index)));
+                bytes.AddRange(Encoding.UTF8.GetBytes(tsd_File.Constants[i].Index));
                 bytes.AddRange(BitConverter.GetBytes(tsd_File.Constants[i].Type));
-                bytes.AddRange(BitConverter.GetBytes(tsd_File.Constants[i].Str.Length));
-                bytes.AddRange(Encoding.ASCII.GetBytes(tsd_File.Constants[i].Str));
+                bytes.AddRange(BitConverter.GetBytes(Encoding.UTF8.GetByteCount(tsd_File.Constants[i].Str)));
+                bytes.AddRange(Encoding.UTF8.GetBytes(tsd_File.Constants[i].Str));
             }
 
 
@@ -120,8 +120,8 @@ namespace Xv2CoreLib.TSD
             {
                 bytes.AddRange(BitConverter.GetBytes(int.Parse(tsd_File.Zones[i].Index)));
                 bytes.AddRange(BitConverter.GetBytes(tsd_File.Zones[i].I_04));
-                bytes.AddRange(BitConverter.GetBytes(tsd_File.Zones[i].Str.Length));
-                bytes.AddRange(Encoding.ASCII.GetBytes(tsd_File.Zones[i].Str));
+                bytes.AddRange(BitConverter.GetBytes(Encoding.UTF8.GetByteCount(tsd_File.Zones[i].Str)));
+                bytes.AddRange(Encoding.UTF8.GetBytes(tsd_File.Zones[i].Str));
             }
 
         }
