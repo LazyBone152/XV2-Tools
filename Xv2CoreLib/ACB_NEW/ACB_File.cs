@@ -3507,6 +3507,7 @@ namespace Xv2CoreLib.ACB_NEW
 
     }
 
+    [Serializable]
     public class ACB_SequenceBlock : AcbTableBase, ICommandIndex, ILocalAisac, ITrack, IGlobalAisacRef, IBlock
     {
         
@@ -3801,6 +3802,7 @@ namespace Xv2CoreLib.ACB_NEW
 
     }
 
+    [Serializable]
     public class ACB_Block : AcbTableBase, ITrack, ICommandIndex, IActionTrack, IBlock
     {
 
