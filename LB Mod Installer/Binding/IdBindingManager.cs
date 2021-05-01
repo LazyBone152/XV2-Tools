@@ -169,6 +169,12 @@ namespace LB_Mod_Installer.Binding
             Blast,
             Awoken
         }
+        public enum SkillFileType
+        {
+            BAC,
+            BDM,
+            ShotBDM
+        }
 
         Install install;
         List<int> usedPartSets = new List<int>();
@@ -429,7 +435,8 @@ namespace LB_Mod_Installer.Binding
 
                             {
                                 CusSkillType skillType = GetSkillType(b.GetArgument2());
-                                string x2mSkillPath = _X2MHelper.GetX2MSkillPath(b.GetArgument1(), skillType);
+                                SkillFileType skillFileType = GetSkillFileType(b.GetArgument3());
+                                string x2mSkillPath = _X2MHelper.GetX2MSkillPath(b.GetArgument1(), skillType, skillFileType);
 
                                 if (x2mSkillPath == NullTokenStr && errorHandler == ErrorHandling.Stop)
                                 {
@@ -637,7 +644,7 @@ namespace LB_Mod_Installer.Binding
                     case Function.X2MSkillPath:
                         if (bindings[i].Arguments.Length < 2)
                         {
-                            throw new Exception(String.Format("The {0} binding function takes 2 string arguments, but only {1} were found. \n({2})", bindings[i].Function, bindings[i].Arguments.Length, comment));
+                            throw new Exception(String.Format("The {0} binding function takes 2 string arguments minimum, but only {1} were found. \n({2})", bindings[i].Function, bindings[i].Arguments.Length, comment));
                         }
                         break;
                 }
@@ -806,7 +813,22 @@ namespace LB_Mod_Installer.Binding
                     return CusSkillType.Super;
             }
         }
-        
+
+        private SkillFileType GetSkillFileType(string argument)
+        {
+            switch (argument.ToLower())
+            {
+                case "bac":
+                    return SkillFileType.BAC;
+                case "bdm":
+                    return SkillFileType.BDM;
+                case "shotbdm":
+                    return SkillFileType.ShotBDM;
+                default:
+                    return SkillFileType.BAC;
+            }
+        }
+
         private int GetSkillId(CusIdType idType, CusSkillType skillType, string shortName)
         {
             CUS_File cusFile = (CUS_File)install.GetParsedFile<CUS_File>(CUS_PATH);
