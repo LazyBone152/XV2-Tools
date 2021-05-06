@@ -22,7 +22,7 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
-            //args = new string[1] { @"lobby_preset_avatar_list.pal" };
+            //args = new string[1] { @"lobby_event_manage - Copy.tsd.xml" };
 
             DEBUG_MODE = true;
 #endif

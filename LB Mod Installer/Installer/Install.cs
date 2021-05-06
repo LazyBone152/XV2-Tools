@@ -561,7 +561,7 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                if (isXml)
+                if (!isXml)
                     throw new Exception("Type.Binary not possible for bac files. You must use XML.");
 
                 BAC_File xmlFile = zipManager.DeserializeXmlFromArchive<BAC_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
