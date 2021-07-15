@@ -111,24 +111,34 @@ namespace Xv2CoreLib.TSD
 
         //Binding workaround for TNL_IDs (reflection binding isn't set up to work on lists yet, so we must do this. Allows for 10 bindings on TNL_IDs.)
         [YAXDontSerialize]
+        [BindingHidden]
         public string TNL_ID_0 { get { return GetTnlId(0); } set { SetTnlId(value, 0); } }
         [YAXDontSerialize]
+        [BindingHidden]
         public string TNL_ID_1 { get { return GetTnlId(1); } set { SetTnlId(value, 1); } }
         [YAXDontSerialize]
+        [BindingHidden]
         public string TNL_ID_2 { get { return GetTnlId(2); } set { SetTnlId(value, 2); } }
         [YAXDontSerialize]
+        [BindingHidden]
         public string TNL_ID_3 { get { return GetTnlId(3); } set { SetTnlId(value, 3); } }
         [YAXDontSerialize]
+        [BindingHidden]
         public string TNL_ID_4 { get { return GetTnlId(4); } set { SetTnlId(value, 4); } }
         [YAXDontSerialize]
+        [BindingHidden]
         public string TNL_ID_5 { get { return GetTnlId(5); } set { SetTnlId(value, 5); } }
         [YAXDontSerialize]
+        [BindingHidden]
         public string TNL_ID_6 { get { return GetTnlId(6); } set { SetTnlId(value, 6); } }
         [YAXDontSerialize]
+        [BindingHidden]
         public string TNL_ID_7 { get { return GetTnlId(7); } set { SetTnlId(value, 7); } }
         [YAXDontSerialize]
+        [BindingHidden]
         public string TNL_ID_8 { get { return GetTnlId(8); } set { SetTnlId(value, 8); } }
         [YAXDontSerialize]
+        [BindingHidden]
         public string TNL_ID_9 { get { return GetTnlId(9); } set { SetTnlId(value, 9); } }
 
         private void SetTnlId(string value, int index)

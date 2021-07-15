@@ -78,4 +78,12 @@ namespace Xv2CoreLib
 
     }
 
+    /// <summary>
+    /// Allows a property with YAXDontSerialize to be parsed as a binding.
+    /// </summary>
+    public class BindingHidden : Attribute
+    {
+
+    }
+
 }
