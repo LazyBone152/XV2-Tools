@@ -1399,7 +1399,7 @@ namespace Xv2CoreLib
                 case ".cus":
                     return CUS_File.Load(GetBytesFromGameWrapper(path, onlyFromCpk, raiseEx));
                 case ".ean":
-                    return EAN_File.Load(GetBytesFromGameWrapper(path, onlyFromCpk, raiseEx));
+                    return EAN_File.Load(GetBytesFromGameWrapper(path, onlyFromCpk, raiseEx), true);
                 case ".ers":
                     return ERS_File.Load(GetBytesFromGameWrapper(path, onlyFromCpk, raiseEx));
                 case ".idb":
@@ -2628,7 +2628,7 @@ namespace Xv2CoreLib
             }
             else if (File is EAN_File && System.IO.Path.GetExtension(path) == ".ean")
             {
-                newFile = EAN_File.Load(path);
+                newFile = EAN_File.Load(path, true);
             }
             else
             {

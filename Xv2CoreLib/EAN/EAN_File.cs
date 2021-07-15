@@ -68,14 +68,14 @@ namespace Xv2CoreLib.EAN
         }
 
         #region Load/Save
-        public static EAN_File Load(byte[] rawBytes)
+        public static EAN_File Load(byte[] rawBytes, bool linkEskToAnims = false)
         {
-            return new Parser(rawBytes).eanFile;
+            return new Parser(rawBytes, linkEskToAnims).eanFile;
         }
 
-        public static EAN_File Load(string path)
+        public static EAN_File Load(string path, bool linkEskToAnims = false)
         {
-            return new Parser(path, false).eanFile;
+            return new Parser(path, false, linkEskToAnims).eanFile;
         }
 
         public void Save(string path)

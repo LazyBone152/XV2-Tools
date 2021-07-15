@@ -22,7 +22,7 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
-            //args = new string[1] { @"lobby_event_manage - Copy.tsd.xml" };
+            //args = new string[1] { @"C:\Program Files (x86)\Steam\steamapps\common\DB Xenoverse 2\cpk\data\data\chara\CMN - Copy\CMN.ean.xml" };
 
             DEBUG_MODE = true;
 #endif
@@ -51,10 +51,10 @@ namespace XV2_Xml_Serializer
 
                 if (Directory.Exists(fileLocation))
                 {
-                    //new Xv2CoreLib.EMB.XmlRepack(fileLocation);
+                    new Xv2CoreLib.EMB.XmlRepack(fileLocation);
 
                     //Used for debugging
-                    BulkParseInitial(fileLocation);
+                    //BulkParseInitial(fileLocation);
                 }
                 else
                 {

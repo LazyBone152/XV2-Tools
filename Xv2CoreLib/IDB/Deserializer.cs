@@ -46,7 +46,18 @@ namespace Xv2CoreLib.IDB
 
         private void Validation()
         {
-            idbFile.SortEntries();
+            //Sorting logic:
+            //skill_item = separate by type, sort by SortID, rejoin
+            //Everything else = ignore type, just sort by SortID
+
+            if (Path.GetFileNameWithoutExtension(saveLocation) == "skill_item")
+            {
+                idbFile.SortEntries();
+            }
+            else
+            {
+                idbFile.Entries.Sort((x, y) => x.SortID - y.SortID);
+            }
         }
 
         private void Write()

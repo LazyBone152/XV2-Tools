@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace Xv2CoreLib.AUR
@@ -14,7 +13,9 @@ namespace Xv2CoreLib.AUR
         public const uint AUR_SIGNATURE = 0x52554123;
 
         public List<AUR_Type> AuraTypes { get; set; } = new List<AUR_Type>();
+        [BindingSubList]
         public List<AUR_Aura> Auras { get; set; } = new List<AUR_Aura>();
+        [BindingSubList]
         public List<AUR_Character> CharacterAuras { get; set; } = new List<AUR_Character>();
 
         public void SortEntries()
@@ -84,7 +85,9 @@ namespace Xv2CoreLib.AUR
                 }
 
                 auraOffset += 16;
-                aurFile.Auras.Add(aura);
+
+                if(effectCount > 0)
+                    aurFile.Auras.Add(aura);
             }
 
             //Characters
@@ -94,7 +97,7 @@ namespace Xv2CoreLib.AUR
                 {
                     CharaID = BitConverter.ToInt32(bytes, charaOffset + (16 * i) + 0).ToString(),
                     I_04 = BitConverter.ToInt32(bytes, charaOffset + (16 * i) + 4),
-                    I_08 = BitConverter.ToInt32(bytes, charaOffset + (16 * i) + 8),
+                    I_08 = BitConverter.ToInt32(bytes, charaOffset + (16 * i) + 8).ToString(),
                     I_12 = Convert.ToBoolean(BitConverter.ToInt32(bytes, charaOffset + (16 * i) + 12)),
                 });
             }
@@ -104,6 +107,7 @@ namespace Xv2CoreLib.AUR
 
         public byte[] SaveToBytes()
         {
+            PadWithNullEntries();
             SortEntries();
             List<byte> bytes = new List<byte>();
 
@@ -180,7 +184,7 @@ namespace Xv2CoreLib.AUR
             {
                 bytes.AddRange(BitConverter.GetBytes(int.Parse(CharacterAuras[i].CharaID)));
                 bytes.AddRange(BitConverter.GetBytes(CharacterAuras[i].I_04));
-                bytes.AddRange(BitConverter.GetBytes(CharacterAuras[i].I_08));
+                bytes.AddRange(BitConverter.GetBytes(int.Parse(CharacterAuras[i].I_08)));
                 bytes.AddRange(BitConverter.GetBytes(Convert.ToInt32(CharacterAuras[i].I_12)));
             }
 
@@ -212,6 +216,19 @@ namespace Xv2CoreLib.AUR
         private int GetAuraType(string typeName)
         {
             return (AuraTypes.Any(e => e.Type == typeName)) ? AuraTypes.FindIndex(e => e.Type == typeName) : -1;
+        }
+
+        public void PadWithNullEntries()
+        {
+            //Keeps all IDs consecutive by adding null entries (need for compatibility with eternity tools)
+
+            int maxId = Auras.Max(x => x.SortID);
+
+            for (int i = 0; i < maxId; i++)
+            {
+                if (!Auras.Any(x => x.SortID == i))
+                    Auras.Add(new AUR_Aura { Index = i.ToString(), AuraEffects = new List<AUR_Effect>() });
+            }
         }
     }
 
@@ -283,7 +300,7 @@ namespace Xv2CoreLib.AUR
         public int I_04 { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("Aura_ID")]
-        public int I_08 { get; set; }
+        public string I_08 { get; set; } //int32
         [YAXAttributeForClass]
         [YAXSerializeAs("Glare")]
         public bool I_12 { get; set; } //int32

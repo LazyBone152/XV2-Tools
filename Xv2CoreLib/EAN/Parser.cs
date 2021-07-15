@@ -19,22 +19,25 @@ namespace Xv2CoreLib.EAN
         byte[] rawBytes { get; set; }
         List<byte> bytes { get; set; }
         private int boneCount = 0;
+        private bool linkEsk = false;
 
 
-        public Parser(byte[] _rawBytes)
+        public Parser(byte[] _rawBytes, bool linkEsk = true)
         {
             rawBytes = _rawBytes;
             bytes = rawBytes.ToList();
             eanFile = new EAN_File();
+            this.linkEsk = linkEsk;
             Parse();
         }
 
-        public Parser(string location, bool writeXml = false)
+        public Parser(string location, bool writeXml = false, bool linkEsk = true)
         {
             saveLocation = location;
             rawBytes = File.ReadAllBytes(saveLocation);
             bytes = rawBytes.ToList();
             eanFile = new EAN_File();
+            this.linkEsk = linkEsk;
             Parse();
 
             if (writeXml)
@@ -75,7 +78,8 @@ namespace Xv2CoreLib.EAN
 
             }
 
-            eanFile.LinkEskData();
+            if(linkEsk)
+                eanFile.LinkEskData();
         }
 
         //Animations
