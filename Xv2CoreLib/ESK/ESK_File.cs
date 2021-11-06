@@ -835,8 +835,14 @@ namespace Xv2CoreLib.ESK
 
         private AsyncObservableCollection<ESK_Bone> CloneChildrenRecursive(AsyncObservableCollection<ESK_Bone> bones)
         {
-            //Not yet implmented. This will clone all children bones.
-            throw new NotImplementedException("CloneChildrenRecursive not implemnted!");
+            AsyncObservableCollection<ESK_Bone> newBones = new AsyncObservableCollection<ESK_Bone>();
+
+            foreach(var bone in bones)
+            {
+                newBones.Add(bone.Clone());
+            }
+
+            return newBones;
         }
 
         public static ESK_Bone Read(byte[] bytes, int[] offsets, int idx, ESK_Bone parent = null, bool loadAbsTransform = true)

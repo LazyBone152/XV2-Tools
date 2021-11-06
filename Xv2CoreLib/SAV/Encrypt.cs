@@ -10,6 +10,34 @@ namespace Xv2CoreLib.SAV
     {
 
         /// <summary>
+        /// Encrypts verion 21 of the save file.
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <returns></returns>
+        public static byte[] EncryptManaged_V21(byte[] bytes)
+        {
+            UIntPtr arraySize = (new UIntPtr((uint)Offsets.DECRYPTED_SAVE_SIZE_V21));
+            IntPtr retPtr = SaveEncrypt(bytes, arraySize);
+            byte[] newBytes = new byte[Offsets.ENCRYPTED_SAVE_SIZE_V21];
+            Marshal.Copy(retPtr, newBytes, 0, Offsets.ENCRYPTED_SAVE_SIZE_V21);
+            return newBytes;
+        }
+
+        /// <summary>
+        /// Decrypts verion 21 of the save file.
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <returns></returns>
+        public static byte[] DecryptManaged_V21(byte[] bytes)
+        {
+            UIntPtr arraySize = (new UIntPtr((uint)Offsets.ENCRYPTED_SAVE_SIZE_V21));
+            IntPtr retPtr = SaveDecrypt(bytes, arraySize);
+            byte[] newBytes = new byte[Offsets.DECRYPTED_SAVE_SIZE_V21];
+            Marshal.Copy(retPtr, newBytes, 0, Offsets.DECRYPTED_SAVE_SIZE_V21);
+            return newBytes;
+        }
+
+        /// <summary>
         /// Decrypts verion 10 of the save file.
         /// </summary>
         /// <param name="bytes"></param>

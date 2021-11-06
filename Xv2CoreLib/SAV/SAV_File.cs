@@ -35,6 +35,9 @@ namespace Xv2CoreLib.SAV
         public const int ENECRYPTED_SAVE_SIZE_V1 = 504896;
         public const int DECRYPTED_SAVE_SIZE_V10 = 722968;
         public const int ENECRYPTED_SAVE_SIZE_V10 = 723136;
+        public const int ENCRYPTED_SAVE_SIZE_V21 = 914080;
+        public const int DECRYPTED_SAVE_SIZE_V21 = 913912;
+
         public const int MENTOR_COUNT = 33; //Max possible of 40, but only 33 are used. (33 mentors + 1 thats unused but has data, but we will ignore that one)
         public const int MENTOR_CUSTOMIZATION_COUNT = 47; //There are only 47 slots
         public const int MENTOR_CUSTOMIZATION_FLAGS = 504756;
@@ -613,6 +616,10 @@ namespace Xv2CoreLib.SAV
                         return "1.15.01";
                     case 20:
                         return "1.16";
+                    case 21:
+                        return "1.16.01";
+                    case 22:
+                        return "1.17";
                     default:
                         return String.Format("Unknown ({0})", Version);
 
@@ -651,6 +658,8 @@ namespace Xv2CoreLib.SAV
                     case 18:
                     case 19:
                     case 20:
+                    case 21:
+                    case 22:
                         return null;
                     default:
                         return "This save version is not supported. It is recommened to update the application (if one is available).";
@@ -686,6 +695,8 @@ namespace Xv2CoreLib.SAV
                     case 18:
                     case 19:
                     case 20:
+                    case 21:
+                    case 22:
                         return Brushes.Blue;
                     default:
                         return Brushes.Red;
@@ -915,6 +926,10 @@ namespace Xv2CoreLib.SAV
                     encrypted = true;
                     rawBytes = Crypt.DecryptManaged_V10(rawBytes);
                     break;
+                case Offsets.ENCRYPTED_SAVE_SIZE_V21:
+                    encrypted = true;
+                    rawBytes = Crypt.DecryptManaged_V21(rawBytes);
+                    break;
                 case Offsets.XV1_SAVE_SIZE:
                     throw new InvalidDataException("DBXV1 saves are not supported.");
                 default:
@@ -954,6 +969,9 @@ namespace Xv2CoreLib.SAV
                         break;
                     case Offsets.DECRYPTED_SAVE_SIZE_V10:
                         rawBytes = Crypt.EncryptManaged_V10(rawBytes);
+                        break;
+                    case Offsets.DECRYPTED_SAVE_SIZE_V21:
+                        rawBytes = Crypt.EncryptManaged_V21(rawBytes);
                         break;
                     default:
                         throw new InvalidDataException("Invalid decrypted save size. Save failed.");
@@ -1056,8 +1074,9 @@ namespace Xv2CoreLib.SAV
 
         private List<byte> Write()
         {
-            if(DLC5 && FileBytes.Count != Offsets.DECRYPTED_SAVE_SIZE_V10) throw new InvalidDataException(String.Format("Invalid BaseFile bytes array size. Expected {1} but found {0}. Save failed.", FileBytes.Count, Offsets.DECRYPTED_SAVE_SIZE_V10));
-            if(!DLC5 && FileBytes.Count != Offsets.DECRYPTED_SAVE_SIZE_V1) throw new InvalidDataException(String.Format("Invalid BaseFile bytes array size. Expected {1} but found {0}. Save failed.", FileBytes.Count, Offsets.DECRYPTED_SAVE_SIZE_V1));
+            //if(Version >= 21 && FileBytes.Count != Offsets.DECRYPTED_SAVE_SIZE_V10) throw new InvalidDataException(String.Format("Invalid BaseFile bytes array size. Expected {1} but found {0}. Save failed.", FileBytes.Count, Offsets.DECRYPTED_SAVE_SIZE_V21));
+            if (Version >= 10 && Version <= 20 && FileBytes.Count != Offsets.DECRYPTED_SAVE_SIZE_V10) throw new InvalidDataException(String.Format("Invalid BaseFile bytes array size. Expected {1} but found {0}. Save failed.", FileBytes.Count, Offsets.DECRYPTED_SAVE_SIZE_V10));
+            if(Version < 10 && FileBytes.Count != Offsets.DECRYPTED_SAVE_SIZE_V1) throw new InvalidDataException(String.Format("Invalid BaseFile bytes array size. Expected {1} but found {0}. Save failed.", FileBytes.Count, Offsets.DECRYPTED_SAVE_SIZE_V1));
 
             List<byte> bytes = FileBytes;
 
@@ -1202,6 +1221,23 @@ namespace Xv2CoreLib.SAV
 
             if (Inventory.ImportantItems.Any(x => x.I_00 == 22))
                 flag[9] = true;
+
+            //Keys added in 1.17
+            if (Inventory.ImportantItems.Any(x => x.I_00 == 23))
+                flag[10] = true;
+
+            if (Inventory.ImportantItems.Any(x => x.I_00 == 24))
+                flag[11] = true;
+
+            if (Inventory.ImportantItems.Any(x => x.I_00 == 25))
+                flag[12] = true;
+
+            if (Inventory.ImportantItems.Any(x => x.I_00 == 26))
+                flag[13] = true;
+
+            if (Inventory.ImportantItems.Any(x => x.I_00 == 27))
+                flag[14] = true;
+
 
             int num = Utils.ConvertToInt(flag);
             return Utils.ReplaceRange(bytes, BitConverter.GetBytes(num), Offsets.PARTNER_KEY_FLAGS);
