@@ -38,9 +38,6 @@ namespace Xv2CoreLib.SAV
         public const int ENCRYPTED_SAVE_SIZE_V21 = 914080;
         public const int DECRYPTED_SAVE_SIZE_V21 = 913912;
 
-        public const int MENTOR_COUNT = 33; //Max possible of 40, but only 33 are used. (33 mentors + 1 thats unused but has data, but we will ignore that one)
-        public const int MENTOR_CUSTOMIZATION_COUNT = 47; //There are only 47 slots
-        public const int MENTOR_CUSTOMIZATION_FLAGS = 504756;
 
         //Equipment Flags
         public const int TOP_NEW_FLAG = 272;
@@ -136,11 +133,28 @@ namespace Xv2CoreLib.SAV
         public const int CAC_PRESET = 125184;
         public const int MENTOR_PROGRESS = 125956;
         public const int PLAYDATA = 126276;
-        public const int MENTOR_CUSTOMIZATION = 520096;
+
+        //Partner Customization
+        public const int MENTOR_CUSTOMIZATION = 520096; //47 entries, size 92
+        public const int MENTOR_CUSTOMIZATION2 = 524432; //10 entries, size 10
+        public const int MENTOR_CUSTOMIZATION3 = 757220; //54 entries, size 44
+
+        public const int MENTOR_COUNT = 33; //Max possible of 40, but only 33 are used. (33 mentors + 1 thats unused but has data, but we will ignore that one)
+        public const int MAX_CUSTOM_PARTNERS = 111;
+
+        public const int MENTOR_CUSTOMIZATION_COUNT = 47; //Original 47 slots
+        public const int MENTOR_CUSTOMIZATION_COUNT2 = 10; //Extended slots in 1.15
+        public const int MENTOR_CUSTOMIZATION_COUNT3 = 54; //Extended slots in 1.17
+
+        //Flags for customization unlocks. 28 bytes per partner.
+        public const int MENTOR_CUSTOMIZATION_FLAGS = 504756; // (0 - 46)
+        public const int MENTOR_CUSTOMIZATION_FLAGS2 = 506492; // (47 - 56)
+        public const int MENTOR_CUSTOMIZATION_FLAGS3 = 722972; // (57 - 110)
 
         //Sizes
         public const int CAC_SIZE = 50888;
         public const int CAC_DLC_SIZE = 25392;
+        public const int CAC_DLC2_SIZE = 19588; //New save data in 1.17
         public const int SYSTEM_FLAGS_COUNT = 1024;
 
         //Counts
@@ -174,11 +188,15 @@ namespace Xv2CoreLib.SAV
         public const int HC_DECK = 517304;
 
         //New stuff in 1.15
-        public const int PARTNER_KEY_FLAGS = 506772; //These need to be set or else the keys dont work
+        public const int PARTNER_KEY_FLAGS = 506772; //These need to be set or else the keys dont work (1 - 10)
         public const int MASCOT_FLAGS_OFFSET = 204;
         public const int MASCOT_COUNT = 64; //64 bytes (512 bits)
         public const int ARTWORK_FLAGS_OFFSET = 506228;
         public const int ARTWORK_COUNT = 64; //64 bytes (assumption)
+
+        //New stuff in 1.17
+        public const int PARTNER_KEY_FLAGS2 = 724484; //Like the previous keys, these need to be set if the keys are in the inventory. (11 - 15)
+
 
     }
 
@@ -828,6 +846,8 @@ namespace Xv2CoreLib.SAV
         public HeroColosseumGlobal HeroColosseum { get; set; }
         public Xv1Hero Xv1Hero { get; set; }
         public List<MentorCustomizationUnlockFlag> MentorCustomizationUnlockFlags { get; set; }
+        public List<MentorCustomizationUnlockFlag> MentorCustomizationUnlockFlags2 { get; set; }
+        public List<MentorCustomizationUnlockFlag> MentorCustomizationUnlockFlags3 { get; set; }
 
 
         public ObservableCollection<MascotFlag> MascotFlags { get; set; }
@@ -1057,7 +1077,17 @@ namespace Xv2CoreLib.SAV
             //Mentor Customization Flags
             if (savFile.DLC6)
             {
-                savFile.MentorCustomizationUnlockFlags = MentorCustomizationUnlockFlag.Read(bytes);
+                savFile.MentorCustomizationUnlockFlags = MentorCustomizationUnlockFlag.Read(bytes, Offsets.MENTOR_CUSTOMIZATION_FLAGS, Offsets.MENTOR_CUSTOMIZATION_COUNT);
+            }
+
+            if(savFile.Version >= 19)
+            {
+                savFile.MentorCustomizationUnlockFlags2 = MentorCustomizationUnlockFlag.Read(bytes, Offsets.MENTOR_CUSTOMIZATION_FLAGS2, Offsets.MENTOR_CUSTOMIZATION_COUNT2);
+            }
+
+            if (savFile.Version >= 22)
+            {
+                savFile.MentorCustomizationUnlockFlags3 = MentorCustomizationUnlockFlag.Read(bytes, Offsets.MENTOR_CUSTOMIZATION_FLAGS3, Offsets.MENTOR_CUSTOMIZATION_COUNT3);
             }
 
             //1.15 stuff
@@ -1074,7 +1104,7 @@ namespace Xv2CoreLib.SAV
 
         private List<byte> Write()
         {
-            //if(Version >= 21 && FileBytes.Count != Offsets.DECRYPTED_SAVE_SIZE_V10) throw new InvalidDataException(String.Format("Invalid BaseFile bytes array size. Expected {1} but found {0}. Save failed.", FileBytes.Count, Offsets.DECRYPTED_SAVE_SIZE_V21));
+            if(Version >= 21 && FileBytes.Count != Offsets.DECRYPTED_SAVE_SIZE_V21) throw new InvalidDataException(String.Format("Invalid BaseFile bytes array size. Expected {1} but found {0}. Save failed.", FileBytes.Count, Offsets.DECRYPTED_SAVE_SIZE_V21));
             if (Version >= 10 && Version <= 20 && FileBytes.Count != Offsets.DECRYPTED_SAVE_SIZE_V10) throw new InvalidDataException(String.Format("Invalid BaseFile bytes array size. Expected {1} but found {0}. Save failed.", FileBytes.Count, Offsets.DECRYPTED_SAVE_SIZE_V10));
             if(Version < 10 && FileBytes.Count != Offsets.DECRYPTED_SAVE_SIZE_V1) throw new InvalidDataException(String.Format("Invalid BaseFile bytes array size. Expected {1} but found {0}. Save failed.", FileBytes.Count, Offsets.DECRYPTED_SAVE_SIZE_V1));
 
@@ -1113,7 +1143,17 @@ namespace Xv2CoreLib.SAV
             //Mentor Customization Flags
             if (DLC6)
             {
-                bytes = MentorCustomizationUnlockFlag.Write(MentorCustomizationUnlockFlags, bytes);
+                bytes = MentorCustomizationUnlockFlag.Write(MentorCustomizationUnlockFlags, bytes, Offsets.MENTOR_CUSTOMIZATION_FLAGS, Offsets.MENTOR_CUSTOMIZATION_COUNT);
+            }
+
+            if(Version >= 19)
+            {
+                bytes = MentorCustomizationUnlockFlag.Write(MentorCustomizationUnlockFlags2, bytes, Offsets.MENTOR_CUSTOMIZATION_FLAGS2, Offsets.MENTOR_CUSTOMIZATION_COUNT2);
+            }
+
+            if (Version >= 22)
+            {
+                bytes = MentorCustomizationUnlockFlag.Write(MentorCustomizationUnlockFlags3, bytes, Offsets.MENTOR_CUSTOMIZATION_FLAGS3, Offsets.MENTOR_CUSTOMIZATION_COUNT3);
             }
 
             //1.15 stuff
@@ -1222,25 +1262,34 @@ namespace Xv2CoreLib.SAV
             if (Inventory.ImportantItems.Any(x => x.I_00 == 22))
                 flag[9] = true;
 
-            //Keys added in 1.17
-            if (Inventory.ImportantItems.Any(x => x.I_00 == 23))
-                flag[10] = true;
-
-            if (Inventory.ImportantItems.Any(x => x.I_00 == 24))
-                flag[11] = true;
-
-            if (Inventory.ImportantItems.Any(x => x.I_00 == 25))
-                flag[12] = true;
-
-            if (Inventory.ImportantItems.Any(x => x.I_00 == 26))
-                flag[13] = true;
-
-            if (Inventory.ImportantItems.Any(x => x.I_00 == 27))
-                flag[14] = true;
-
-
             int num = Utils.ConvertToInt(flag);
-            return Utils.ReplaceRange(bytes, BitConverter.GetBytes(num), Offsets.PARTNER_KEY_FLAGS);
+            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(num), Offsets.PARTNER_KEY_FLAGS);
+
+            //Keys added in 1.17
+            if (Version >= 21)
+            {
+                BitArray flag2 = new BitArray(bytes.GetRange(Offsets.PARTNER_KEY_FLAGS2, 4).ToArray());
+
+                if (Inventory.ImportantItems.Any(x => x.I_00 == 23))
+                    flag2[0] = true;
+
+                if (Inventory.ImportantItems.Any(x => x.I_00 == 24))
+                    flag2[1] = true;
+
+                if (Inventory.ImportantItems.Any(x => x.I_00 == 25))
+                    flag2[2] = true;
+
+                if (Inventory.ImportantItems.Any(x => x.I_00 == 26))
+                    flag2[3] = true;
+
+                if (Inventory.ImportantItems.Any(x => x.I_00 == 27))
+                    flag2[4] = true;
+
+                int num2 = Utils.ConvertToInt(flag2);
+                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(num2), Offsets.PARTNER_KEY_FLAGS2);
+            }
+
+            return bytes;
         }
     }
 
@@ -1453,7 +1502,7 @@ namespace Xv2CoreLib.SAV
 
             if (sav.DLC6)
             {
-                mentorCustomizations = MentorCustomization.ReadAll(rawBytes, idx);
+                mentorCustomizations = MentorCustomization.ReadAll(rawBytes, idx, sav.Version);
             }
 
             if (sav.DLC5)
@@ -1560,7 +1609,7 @@ namespace Xv2CoreLib.SAV
             bytes = Quests.Write(bytes, charaIdx, sav);
             if (sav.DLC6)
             {
-                bytes = MentorCustomization.WriteAll(bytes, MentorCustomizations, charaIdx);
+                bytes = MentorCustomization.WriteAll(bytes, MentorCustomizations, charaIdx, sav.Version);
             }
             if (sav.DLC5)
             {
@@ -5374,13 +5423,32 @@ namespace Xv2CoreLib.SAV
             }
         }
 
-        public static ObservableCollection<MentorCustomization> ReadAll(byte[] rawBytes, int cacIdx)
+        public static ObservableCollection<MentorCustomization> ReadAll(byte[] rawBytes, int cacIdx, int version)
         {
             ObservableCollection<MentorCustomization> mentors = new ObservableCollection<MentorCustomization>();
 
+            //Original partners
             for (int i = 0; i < Offsets.MENTOR_CUSTOMIZATION_COUNT; i++)
             {
                 mentors.Add(Read(rawBytes, i, cacIdx));
+            }
+            
+            //Partners added in 1.15
+            if(version  >= 19)
+            {
+                for (int i = 0; i < Offsets.MENTOR_CUSTOMIZATION_COUNT2; i++)
+                {
+                    mentors.Add(Read(rawBytes, i + Offsets.MENTOR_CUSTOMIZATION_COUNT, cacIdx));
+                }
+            }
+            
+            //Partners added in 1.17
+            if (version >= 22)
+            {
+                for (int i = 0; i < Offsets.MENTOR_CUSTOMIZATION_COUNT3; i++)
+                {
+                    mentors.Add(Read(rawBytes, i + Offsets.MENTOR_CUSTOMIZATION_COUNT + Offsets.MENTOR_CUSTOMIZATION_COUNT2, cacIdx));
+                }
             }
 
             return mentors;
@@ -5388,64 +5456,68 @@ namespace Xv2CoreLib.SAV
 
         public static MentorCustomization Read(byte[] rawBytes, int mentorIdx, int cacIdx)
         {
-            int offset = Offsets.MENTOR_CUSTOMIZATION + (92 * mentorIdx) + (Offsets.CAC_DLC_SIZE * cacIdx);
-            return new MentorCustomization()
+            int offset;
+
+            if(mentorIdx <= 46)
             {
-                Index = mentorIdx,
-                I_00 = BitConverter.ToUInt16(rawBytes, offset + 0),
-                I_02 = BitConverter.ToUInt16(rawBytes, offset + 2),
-                I_04 = BitConverter.ToUInt16(rawBytes, offset + 4),
-                I_06 = (MentorCustomizationFlags)BitConverter.ToUInt16(rawBytes, offset + 6),
-                I_08 = BitConverter.ToUInt16(rawBytes, offset + 8),
-                I_10 = BitConverter.ToUInt16(rawBytes, offset + 10),
-                I_12 = BitConverter.ToUInt16(rawBytes, offset + 12),
-                I_14 = BitConverter.ToUInt16(rawBytes, offset + 14),
-                I_16 = BitConverter.ToUInt16(rawBytes, offset + 16),
-                I_18 = BitConverter.ToUInt16(rawBytes, offset + 18),
-                I_20 = BitConverter.ToUInt16(rawBytes, offset + 20),
-                I_22 = BitConverter.ToUInt16(rawBytes, offset + 22),
-                I_24 = BitConverter.ToUInt16(rawBytes, offset + 24),
-                I_26 = BitConverter.ToUInt16(rawBytes, offset + 26),
-                I_28 = BitConverter.ToUInt16(rawBytes, offset + 28),
-                I_30 = BitConverter.ToUInt16(rawBytes, offset + 30),
-                I_32 = BitConverter.ToUInt16(rawBytes, offset + 32),
-                I_34 = BitConverter.ToUInt16(rawBytes, offset + 34),
-                I_36 = BitConverter.ToUInt16(rawBytes, offset + 36),
-                I_38 = BitConverter.ToUInt16(rawBytes, offset + 38),
-                I_40 = BitConverter.ToUInt16(rawBytes, offset + 40),
-                I_42 = BitConverter.ToUInt16(rawBytes, offset + 42),
-                I_44 = BitConverter.ToUInt16(rawBytes, offset + 44),
-                I_46 = BitConverter.ToUInt16(rawBytes, offset + 46),
-                I_48 = BitConverter.ToInt32(rawBytes, offset + 48),
-                I_52 = BitConverter.ToInt32(rawBytes, offset + 52),
-                I_56 = BitConverter.ToInt32(rawBytes, offset + 56),
-                I_60 = BitConverter.ToInt32(rawBytes, offset + 60),
-                I_64 = BitConverter.ToInt32(rawBytes, offset + 64),
-                I_68 = BitConverter.ToInt32(rawBytes, offset + 68),
-                I_72 = BitConverter.ToInt32(rawBytes, offset + 72),
-                I_76 = BitConverter.ToInt32(rawBytes, offset + 76),
-                I_80 = BitConverter.ToInt32(rawBytes, offset + 80),
-                I_84 = BitConverter.ToInt32(rawBytes, offset + 84),
-                I_88 = BitConverter.ToInt32(rawBytes, offset + 88),
-            };
+                offset = Offsets.MENTOR_CUSTOMIZATION + (92 * mentorIdx) + (Offsets.CAC_DLC_SIZE * cacIdx);
+                return Read_Large(rawBytes, offset, mentorIdx);
+            }
+            else if(mentorIdx >= 47 && mentorIdx <= 56)
+            {
+                offset = Offsets.MENTOR_CUSTOMIZATION2 + (44 * (mentorIdx - 47)) + (Offsets.CAC_DLC_SIZE * cacIdx);
+                return Read_Small(rawBytes, offset, mentorIdx);
+            }
+            else if(mentorIdx >= 57 && mentorIdx <= 110)
+            {
+                offset = Offsets.MENTOR_CUSTOMIZATION3 + (44 * (mentorIdx - 57)) + (Offsets.CAC_DLC2_SIZE * cacIdx);
+                return Read_Small(rawBytes, offset, mentorIdx);
+            }
+            else
+            {
+                throw new InvalidDataException("Invalid Partner ID - cannot go above 110!");
+            }
+
         }
 
-        public static List<byte> WriteAll(List<byte> bytes, ObservableCollection<MentorCustomization> mentors, int cacIdx)
+        public static List<byte> WriteAll(List<byte> bytes, ObservableCollection<MentorCustomization> mentors, int cacIdx, int version)
         {
-            int offset = Offsets.MENTOR_CUSTOMIZATION + (Offsets.CAC_DLC_SIZE * cacIdx);
-            if (mentors.Count != Offsets.MENTOR_CUSTOMIZATION_COUNT) throw new Exception("Invalid amount of MentorCustomizations.");
+            if (mentors.Count > Offsets.MAX_CUSTOM_PARTNERS) throw new Exception("Invalid amount of MentorCustomizations.");
 
-            for (int i = 0; i < mentors.Count; i++)
+            int offset1 = Offsets.MENTOR_CUSTOMIZATION + (Offsets.CAC_DLC_SIZE * cacIdx);
+            int offset2 = Offsets.MENTOR_CUSTOMIZATION2 + (Offsets.CAC_DLC_SIZE * cacIdx);
+            int offset3 = Offsets.MENTOR_CUSTOMIZATION3 + (Offsets.CAC_DLC2_SIZE * cacIdx);
+
+            foreach(var partner in mentors)
             {
-                var ret = mentors[i].Write();
-                bytes = Utils.ReplaceRange(bytes, ret.ToArray(), offset);
-                offset += 92;
+                if(partner.Index >= 0 && partner.Index <= 46)
+                {
+                    //Original partner list
+                    var ret = partner.Write_Large();
+                    bytes = Utils.ReplaceRange(bytes, ret.ToArray(), offset1);
+                    offset1 += 92;
+                }
+                else if (partner.Index >= 47 && partner.Index <= 56 && version >= 19)
+                {
+                    //Expanded partner list in 1.15 (10 partners)
+                    var ret = partner.Write_Small();
+                    bytes = Utils.ReplaceRange(bytes, ret.ToArray(), offset2);
+                    offset2 += 44;
+                }
+                else if (partner.Index >= 57 && partner.Index <= 110 && version >= 22)
+                {
+                    //Expanded partner list in 1.17 (54 partners)
+                    var ret = partner.Write_Small();
+                    bytes = Utils.ReplaceRange(bytes, ret.ToArray(), offset3);
+                    offset3 += 44;
+                }
+
             }
 
             return bytes;
         }
 
-        public List<byte> Write()
+        public List<byte> Write_Large()
         {
             List<byte> bytes = new List<byte>();
 
@@ -5488,8 +5560,121 @@ namespace Xv2CoreLib.SAV
             if (bytes.Count != 92) throw new Exception("MentorCustomization is the wrong size.");
             return bytes;
         }
+
+        public List<byte> Write_Small()
+        {
+            List<byte> bytes = new List<byte>();
+
+            bytes.AddRange(BitConverter.GetBytes(I_00));
+            bytes.AddRange(BitConverter.GetBytes(I_02));
+            bytes.AddRange(BitConverter.GetBytes(I_04));
+            bytes.AddRange(BitConverter.GetBytes((ushort)I_06));
+            bytes.AddRange(BitConverter.GetBytes(I_08));
+            bytes.AddRange(BitConverter.GetBytes(I_10));
+            bytes.AddRange(BitConverter.GetBytes(I_12));
+            bytes.AddRange(BitConverter.GetBytes(I_14));
+            bytes.AddRange(BitConverter.GetBytes(I_16));
+            bytes.AddRange(BitConverter.GetBytes(I_18));
+            bytes.AddRange(BitConverter.GetBytes(I_20));
+            bytes.AddRange(BitConverter.GetBytes(I_22));
+            bytes.AddRange(BitConverter.GetBytes(I_24));
+            bytes.AddRange(BitConverter.GetBytes(I_26));
+
+            //Skills
+            bytes.AddRange(BitConverter.GetBytes((ushort)I_48));
+            bytes.AddRange(BitConverter.GetBytes((ushort)I_52));
+            bytes.AddRange(BitConverter.GetBytes((ushort)I_56));
+            bytes.AddRange(BitConverter.GetBytes((ushort)I_60));
+            bytes.AddRange(BitConverter.GetBytes((ushort)I_64));
+            bytes.AddRange(BitConverter.GetBytes((ushort)I_68));
+            bytes.AddRange(BitConverter.GetBytes((ushort)I_72));
+            bytes.AddRange(BitConverter.GetBytes((ushort)I_76));
+
+            if (bytes.Count != 44) throw new Exception("MentorCustomization is the wrong size (small version).");
+            return bytes;
+        }
+
+
+        //New format in 1.15:
+        public static MentorCustomization Read_Large(byte[] rawBytes, int offset, int partnerIdx)
+        {
+            return new MentorCustomization()
+            {
+                Index = partnerIdx,
+                I_00 = BitConverter.ToUInt16(rawBytes, offset + 0),
+                I_02 = BitConverter.ToUInt16(rawBytes, offset + 2),
+                I_04 = BitConverter.ToUInt16(rawBytes, offset + 4),
+                I_06 = (MentorCustomizationFlags)BitConverter.ToUInt16(rawBytes, offset + 6),
+                I_08 = BitConverter.ToUInt16(rawBytes, offset + 8),
+                I_10 = BitConverter.ToUInt16(rawBytes, offset + 10),
+                I_12 = BitConverter.ToUInt16(rawBytes, offset + 12),
+                I_14 = BitConverter.ToUInt16(rawBytes, offset + 14),
+                I_16 = BitConverter.ToUInt16(rawBytes, offset + 16),
+                I_18 = BitConverter.ToUInt16(rawBytes, offset + 18),
+                I_20 = BitConverter.ToUInt16(rawBytes, offset + 20),
+                I_22 = BitConverter.ToUInt16(rawBytes, offset + 22),
+                I_24 = BitConverter.ToUInt16(rawBytes, offset + 24),
+                I_26 = BitConverter.ToUInt16(rawBytes, offset + 26),
+                I_28 = BitConverter.ToUInt16(rawBytes, offset + 28),
+                I_30 = BitConverter.ToUInt16(rawBytes, offset + 30),
+                I_32 = BitConverter.ToUInt16(rawBytes, offset + 32),
+                I_34 = BitConverter.ToUInt16(rawBytes, offset + 34),
+                I_36 = BitConverter.ToUInt16(rawBytes, offset + 36),
+                I_38 = BitConverter.ToUInt16(rawBytes, offset + 38),
+                I_40 = BitConverter.ToUInt16(rawBytes, offset + 40),
+                I_42 = BitConverter.ToUInt16(rawBytes, offset + 42),
+                I_44 = BitConverter.ToUInt16(rawBytes, offset + 44),
+                I_46 = BitConverter.ToUInt16(rawBytes, offset + 46),
+                I_48 = BitConverter.ToInt32(rawBytes, offset + 48),
+                I_52 = BitConverter.ToInt32(rawBytes, offset + 52),
+                I_56 = BitConverter.ToInt32(rawBytes, offset + 56),
+                I_60 = BitConverter.ToInt32(rawBytes, offset + 60),
+                I_64 = BitConverter.ToInt32(rawBytes, offset + 64),
+                I_68 = BitConverter.ToInt32(rawBytes, offset + 68),
+                I_72 = BitConverter.ToInt32(rawBytes, offset + 72),
+                I_76 = BitConverter.ToInt32(rawBytes, offset + 76),
+                I_80 = BitConverter.ToInt32(rawBytes, offset + 80),
+                I_84 = BitConverter.ToInt32(rawBytes, offset + 84),
+                I_88 = BitConverter.ToInt32(rawBytes, offset + 88),
+            };
+        }
+
+        public static MentorCustomization Read_Small(byte[] rawBytes, int offset, int partnerIdx)
+        {
+            return new MentorCustomization()
+            {
+                Index = partnerIdx,
+                I_00 = BitConverter.ToUInt16(rawBytes, offset + 0),
+                I_02 = BitConverter.ToUInt16(rawBytes, offset + 2),
+                I_04 = BitConverter.ToUInt16(rawBytes, offset + 4),
+                I_06 = (MentorCustomizationFlags)BitConverter.ToUInt16(rawBytes, offset + 6),
+                I_08 = BitConverter.ToUInt16(rawBytes, offset + 8),
+                I_10 = BitConverter.ToUInt16(rawBytes, offset + 10),
+                I_12 = BitConverter.ToUInt16(rawBytes, offset + 12),
+                I_14 = BitConverter.ToUInt16(rawBytes, offset + 14),
+                I_16 = BitConverter.ToUInt16(rawBytes, offset + 16),
+                I_18 = BitConverter.ToUInt16(rawBytes, offset + 18),
+                I_20 = BitConverter.ToUInt16(rawBytes, offset + 20),
+                I_22 = BitConverter.ToUInt16(rawBytes, offset + 22),
+                I_24 = BitConverter.ToUInt16(rawBytes, offset + 24),
+                I_26 = BitConverter.ToUInt16(rawBytes, offset + 26),
+
+                //Skills
+                I_48 = BitConverter.ToUInt16(rawBytes, offset + 28),
+                I_52 = BitConverter.ToUInt16(rawBytes, offset + 30),
+                I_56 = BitConverter.ToUInt16(rawBytes, offset + 32),
+                I_60 = BitConverter.ToUInt16(rawBytes, offset + 34),
+                I_64 = BitConverter.ToUInt16(rawBytes, offset + 36),
+                I_68 = BitConverter.ToUInt16(rawBytes, offset + 38),
+                I_72 = BitConverter.ToUInt16(rawBytes, offset + 40),
+                I_76 = BitConverter.ToUInt16(rawBytes, offset + 42)
+            };
+        }
+
+
+
     }
-    
+
     [YAXSerializeAs("Mentor")]
     public class MentorProgress : INotifyPropertyChanged
     {
@@ -5693,6 +5878,36 @@ namespace Xv2CoreLib.SAV
                     return 34;
                 case 46: //Fu
                     return 150;
+                case 47:
+                    return 2; //Goku SS4
+                case 48:
+                    return 17; //Vegeta SS4
+                case 49:
+                    return 26; //Trunks
+                case 50:
+                    return 141; //SSB Vegeto
+                case 51:
+                    return 154; //SSB Gogeta
+                case 52:
+                    return 139; //Goku Black Rose
+                case 53:
+                    return 148; //Android 17 (DB Super)
+                case 54:
+                    return 58; //Jenemba
+                case 55:
+                    return 147; //Tapion
+                case 56:
+                    return 155; //Broly (FSS)
+                case 57:
+                    return 4; //Goku GT
+                case 58:
+                    return 50; //Omega Shenron
+                case 59:
+                    return 144; //Super Buu
+                case 60:
+                    return 149; //Jiren
+                case 61:
+                    return 152; //Kefla
                 case 255:
                     return -2; //No mentor
                 default:
@@ -5725,7 +5940,7 @@ namespace Xv2CoreLib.SAV
         [YAXAttributeForClass]
         public bool Flag { get; set; }
 
-        public static List<byte> Write(List<MentorCustomizationUnlockFlag> mentorFlags, List<byte> bytes)
+        public static List<byte> Write(List<MentorCustomizationUnlockFlag> mentorFlags, List<byte> bytes, int offset, int count)
         {
             //Create bool list
             List<bool> flags = new List<bool>();
@@ -5736,18 +5951,18 @@ namespace Xv2CoreLib.SAV
             }
 
             BitArray bitFlags = new BitArray(flags.ToArray());
-            byte[] flagBytes = Utils.ConvertToByteArray(bitFlags, 28 * Offsets.MENTOR_CUSTOMIZATION_COUNT);
+            byte[] flagBytes = Utils.ConvertToByteArray(bitFlags, 28 * count);
 
-            if (flagBytes.Length != 28 * Offsets.MENTOR_CUSTOMIZATION_COUNT) throw new InvalidDataException("MentorCustomizationUnlockFlag Collection is an invalid size.");
+            if (flagBytes.Length != 28 * count) throw new InvalidDataException("MentorCustomizationUnlockFlag Collection is an invalid size.");
 
-            bytes = Utils.ReplaceRange(bytes, flagBytes, Offsets.MENTOR_CUSTOMIZATION_FLAGS);
+            bytes = Utils.ReplaceRange(bytes, flagBytes, offset);
             return bytes;
         }
 
-        public static List<MentorCustomizationUnlockFlag> Read(List<byte> bytes)
+        public static List<MentorCustomizationUnlockFlag> Read(List<byte> bytes, int offset, int count)
         {
             List<MentorCustomizationUnlockFlag> mentorFlags = new List<MentorCustomizationUnlockFlag>();
-            BitArray flags = new BitArray(bytes.GetRange(Offsets.MENTOR_CUSTOMIZATION_FLAGS, 28 * Offsets.MENTOR_CUSTOMIZATION_COUNT).ToArray());
+            BitArray flags = new BitArray(bytes.GetRange(offset, 28 * count).ToArray());
 
             int i = 0;
             foreach(bool flag in flags)
@@ -5762,7 +5977,7 @@ namespace Xv2CoreLib.SAV
 
             return mentorFlags;
         }
-        
+
     }
 
     public class HeroColosseum : INotifyPropertyChanged
