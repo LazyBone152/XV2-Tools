@@ -243,15 +243,15 @@ namespace Xv2CoreLib.BDM
                 bytes.AddRange(BitConverter.GetBytes((ushort)type0[properOrder[i]].I_12));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_14));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_16));
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_18));
+                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].Effect1_SkillID));
                 bytes.AddRange(BitConverter.GetBytes((ushort)type0[properOrder[i]].I_20));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_22));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_24));
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_26));
+                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].Effect2_SkillID));
                 bytes.AddRange(BitConverter.GetBytes((ushort)type0[properOrder[i]].I_28));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_30));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_32));
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_34));
+                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].Effect3_SkillID));
                 bytes.AddRange(BitConverter.GetBytes((ushort)type0[properOrder[i]].I_36));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_38));
                 bytes.AddRange(BitConverter.GetBytes(Convert.ToSingle(type0[properOrder[i]].F_40)));

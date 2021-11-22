@@ -184,11 +184,11 @@ namespace Xv2CoreLib.BDM
                             I_12 = (AcbType)subEntry.I_12,
                             I_14 = subEntry.I_14,
                             I_16 = subEntry.I_16,
-                            I_18 = subEntry.I_18,
+                            Effect1_SkillID = (ushort)subEntry.I_18,
                             I_20 = (EepkType)subEntry.I_20,
                             I_22 = subEntry.I_22,
                             I_24 = subEntry.I_24,
-                            I_26 = subEntry.I_26,
+                            Effect2_SkillID = (ushort)subEntry.I_26,
                             I_28 = (EepkType)subEntry.I_28,
                             I_32 = -1,
                             F_40 = subEntry.F_32,
@@ -258,11 +258,11 @@ namespace Xv2CoreLib.BDM
                             I_12 = (AcbType)subEntry.I_12,
                             I_14 = subEntry.I_14,
                             I_16 = subEntry.I_16,
-                            I_18 = subEntry.I_18,
+                            Effect1_SkillID = (ushort)subEntry.I_18,
                             I_20 = (EepkType)subEntry.I_20,
                             I_22 = subEntry.I_22,
                             I_24 = subEntry.I_24,
-                            I_26 = subEntry.I_26,
+                            Effect2_SkillID = (ushort)subEntry.I_26,
                             I_28 = (EepkType)subEntry.I_28,
                             I_32 = -1,
                             F_40 = subEntry.F_32,
@@ -354,11 +354,11 @@ namespace Xv2CoreLib.BDM
                             I_12 = (AcbType)subEntry.I_12,
                             I_14 = subEntry.I_14,
                             I_16 = (short)skillID1,
-                            I_18 = subEntry.I_18,
+                            Effect1_SkillID = (ushort)subEntry.I_18,
                             I_20 = (EepkType)subEntry.I_20,
                             I_22 = subEntry.I_22,
                             I_24 = (short)skillID2,
-                            I_26 = subEntry.I_26,
+                            Effect2_SkillID = (ushort)subEntry.I_26,
                             I_28 = (EepkType)subEntry.I_28,
                             I_32 = -1,
                             F_40 = subEntry.F_32,
@@ -580,21 +580,21 @@ namespace Xv2CoreLib.BDM
         [YAXDontSerialize]
         public ushort Effect1_ID { get { return (ushort)I_16; } set { I_16 = (short)value; } }
         [YAXDontSerialize]
-        public ushort Effect1_SkillID { get { return (ushort)I_18; } set { I_18 = (short)value; } }
+        public ushort Effect1_SkillID { get { return ushort.Parse(I_18); } set { I_18 = value.ToString(); } }
         [YAXDontSerialize]
         public EepkType Effect1_EepkType { get { return I_20; } set { I_20 = value; } }
 
         [YAXDontSerialize]
         public ushort Effect2_ID { get { return (ushort)I_24; } set { I_24 = (short)value; } }
         [YAXDontSerialize]
-        public ushort Effect2_SkillID { get { return (ushort)I_26; } set { I_26 = (short)value; } }
+        public ushort Effect2_SkillID { get { return ushort.Parse(I_26); } set { I_26 = value.ToString(); } }
         [YAXDontSerialize]
         public EepkType Effect2_EepkType { get { return I_28; } set { I_28 = value; } }
 
         [YAXDontSerialize]
         public ushort Effect3_ID { get { return (ushort)I_32; } set { I_32 = (short)value; } }
         [YAXDontSerialize]
-        public ushort Effect3_SkillID { get { return (ushort)I_34; } set { I_34 = (short)value; } }
+        public ushort Effect3_SkillID { get { return ushort.Parse(I_34); } set { I_34 = value.ToString(); } }
         [YAXDontSerialize]
         public EepkType Effect3_EepkType { get { return I_36; } set { I_36 = value; } }
 
@@ -630,7 +630,7 @@ namespace Xv2CoreLib.BDM
         public short I_16 { get; set; }
         [YAXAttributeFor("Effect_1")]
         [YAXSerializeAs("Skill_ID")]
-        public short I_18 { get; set; }
+        public string I_18 { get; set; }
         [YAXAttributeFor("Effect_1")]
         [YAXSerializeAs("EepkType")]
         public EepkType I_20 { get; set; }
@@ -639,7 +639,7 @@ namespace Xv2CoreLib.BDM
         public short I_24 { get; set; }
         [YAXAttributeFor("Effect_2")]
         [YAXSerializeAs("Skill_ID")]
-        public short I_26 { get; set; }
+        public string I_26 { get; set; }
         [YAXAttributeFor("Effect_2")]
         [YAXSerializeAs("EepkType")]
         public EepkType I_28 { get; set; }
@@ -648,7 +648,7 @@ namespace Xv2CoreLib.BDM
         public short I_32 { get; set; }
         [YAXAttributeFor("Effect_3")]
         [YAXSerializeAs("Skill_ID")]
-        public short I_34 { get; set; }
+        public string I_34 { get; set; }
         [YAXAttributeFor("Effect_3")]
         [YAXSerializeAs("EepkType")]
         public EepkType I_36 { get; set; }

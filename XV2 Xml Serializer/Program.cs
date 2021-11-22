@@ -22,7 +22,7 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
-            //args = new string[1] { @"C:\Program Files (x86)\Steam\steamapps\common\DB Xenoverse 2\cpk\data\data\chara\CMN - Copy\CMN.ean.xml" };
+            args = new string[1] { @"1171_THC_DCR.bsa" };
 
             DEBUG_MODE = true;
 #endif

@@ -1028,6 +1028,9 @@ namespace Xv2CoreLib.SAV
                     case Offsets.DECRYPTED_SAVE_SIZE_V10:
                         rawBytes = Crypt.EncryptManaged_V10(rawBytes);
                         break;
+                    case Offsets.DECRYPTED_SAVE_SIZE_V21:
+                        rawBytes = Crypt.EncryptManaged_V21(rawBytes);
+                        break;
                     default:
                         throw new InvalidDataException("Invalid decrypted save size. Save failed.");
                 }
@@ -1104,8 +1107,8 @@ namespace Xv2CoreLib.SAV
 
         private List<byte> Write()
         {
-            if(Version >= 21 && FileBytes.Count != Offsets.DECRYPTED_SAVE_SIZE_V21) throw new InvalidDataException(String.Format("Invalid BaseFile bytes array size. Expected {1} but found {0}. Save failed.", FileBytes.Count, Offsets.DECRYPTED_SAVE_SIZE_V21));
-            if (Version >= 10 && Version <= 20 && FileBytes.Count != Offsets.DECRYPTED_SAVE_SIZE_V10) throw new InvalidDataException(String.Format("Invalid BaseFile bytes array size. Expected {1} but found {0}. Save failed.", FileBytes.Count, Offsets.DECRYPTED_SAVE_SIZE_V10));
+            if(Version >= 22 && FileBytes.Count != Offsets.DECRYPTED_SAVE_SIZE_V21) throw new InvalidDataException(String.Format("Invalid BaseFile bytes array size. Expected {1} but found {0}. Save failed.", FileBytes.Count, Offsets.DECRYPTED_SAVE_SIZE_V21));
+            if (Version >= 10 && Version <= 21 && FileBytes.Count != Offsets.DECRYPTED_SAVE_SIZE_V10) throw new InvalidDataException(String.Format("Invalid BaseFile bytes array size. Expected {1} but found {0}. Save failed.", FileBytes.Count, Offsets.DECRYPTED_SAVE_SIZE_V10));
             if(Version < 10 && FileBytes.Count != Offsets.DECRYPTED_SAVE_SIZE_V1) throw new InvalidDataException(String.Format("Invalid BaseFile bytes array size. Expected {1} but found {0}. Save failed.", FileBytes.Count, Offsets.DECRYPTED_SAVE_SIZE_V1));
 
             List<byte> bytes = FileBytes;
@@ -1266,7 +1269,7 @@ namespace Xv2CoreLib.SAV
             bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(num), Offsets.PARTNER_KEY_FLAGS);
 
             //Keys added in 1.17
-            if (Version >= 21)
+            if (Version >= 22)
             {
                 BitArray flag2 = new BitArray(bytes.GetRange(Offsets.PARTNER_KEY_FLAGS2, 4).ToArray());
 

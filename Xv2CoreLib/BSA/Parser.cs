@@ -99,35 +99,48 @@ namespace Xv2CoreLib.BSA
                             int type = BitConverter.ToInt16(rawBytes, typesOffset + 0);
                             int hdrOffset = BitConverter.ToInt32(rawBytes, typesOffset + 8) + typesOffset;
                             int dataOffset = BitConverter.ToInt32(rawBytes, typesOffset + 12) + typesOffset;
+                            int typeCount = BitConverter.ToInt16(rawBytes, typesOffset + 6);
 
                             switch (type)
                             {
                                 case 0:
-                                    bsaFile.BSA_Entries[thisEntry].Type0 = ParseType0(hdrOffset, dataOffset, BitConverter.ToInt16(rawBytes, typesOffset + 6));
+                                    bsaFile.BSA_Entries[thisEntry].Type0 = ParseType0(hdrOffset, dataOffset, typeCount);
                                     break;
                                 case 1:
-                                    bsaFile.BSA_Entries[thisEntry].Type1 = ParseType1(hdrOffset, dataOffset, BitConverter.ToInt16(rawBytes, typesOffset + 6));
+                                    bsaFile.BSA_Entries[thisEntry].Type1 = ParseType1(hdrOffset, dataOffset, typeCount);
                                     break;
                                 case 2:
-                                    bsaFile.BSA_Entries[thisEntry].Type2 = ParseType2(hdrOffset, dataOffset, BitConverter.ToInt16(rawBytes, typesOffset + 6));
+                                    bsaFile.BSA_Entries[thisEntry].Type2 = ParseType2(hdrOffset, dataOffset, typeCount);
                                     break;
                                 case 3:
-                                    bsaFile.BSA_Entries[thisEntry].Type3 = ParseType3(hdrOffset, dataOffset, BitConverter.ToInt16(rawBytes, typesOffset + 6));
+                                    bsaFile.BSA_Entries[thisEntry].Type3 = ParseType3(hdrOffset, dataOffset, typeCount);
                                     break;
                                 case 4:
-                                    bsaFile.BSA_Entries[thisEntry].Type4 = ParseType4(hdrOffset, dataOffset, BitConverter.ToInt16(rawBytes, typesOffset + 6));
+                                    bsaFile.BSA_Entries[thisEntry].Type4 = ParseType4(hdrOffset, dataOffset, typeCount);
                                     break;
                                 case 6:
-                                    bsaFile.BSA_Entries[thisEntry].Type6 = ParseType6(hdrOffset, dataOffset, BitConverter.ToInt16(rawBytes, typesOffset + 6));
+                                    bsaFile.BSA_Entries[thisEntry].Type6 = ParseType6(hdrOffset, dataOffset, typeCount);
                                     break;
                                 case 7:
-                                    bsaFile.BSA_Entries[thisEntry].Type7 = ParseType7(hdrOffset, dataOffset, BitConverter.ToInt16(rawBytes, typesOffset + 6));
+                                    bsaFile.BSA_Entries[thisEntry].Type7 = ParseType7(hdrOffset, dataOffset, typeCount);
                                     break;
                                 case 8:
-                                    bsaFile.BSA_Entries[thisEntry].Type8 = ParseType8(hdrOffset, dataOffset, BitConverter.ToInt16(rawBytes, typesOffset + 6));
+                                    bsaFile.BSA_Entries[thisEntry].Type8 = ParseType8(hdrOffset, dataOffset, typeCount);
+                                    break;
+                                case 12:
+                                    bsaFile.BSA_Entries[thisEntry].Type12 = ParseType12(hdrOffset, dataOffset, typeCount);
                                     break;
                                 default:
-                                    Console.WriteLine(String.Format("Undefined BSA Type encountered: {0}, at offset: {1}", type, typesOffset));
+                                    //Attempt to estimate the unknown type size
+                                    int estSize = (a + 1 < typesCount) ? BitConverter.ToInt16(rawBytes, typesOffset + 6 + 16) : -1;
+
+                                    if(estSize == -1 && i + 1 < count)
+                                    {
+                                        //This is the final type for this BSA Entry. Seek to the next.
+                                        estSize = BitConverter.ToInt32(rawBytes, offset + 4) - dataOffset;
+                                    }
+
+                                    Console.WriteLine(String.Format("Undefined BSA Type encountered: {0}, at: def offset: {1}, data offset: {2}, count: {3}, estTypeSize: {4}", type, typesOffset, dataOffset, typeCount, estSize));
                                     Console.ReadLine();
                                     break;
                             }
@@ -492,6 +505,38 @@ namespace Xv2CoreLib.BSA
                 return null;
             }
         }
+
+        private List<BSA_Type12> ParseType12(int hdrOffset, int offset, int count)
+        {
+            if (count > 0)
+            {
+                List<BSA_Type12> Type = new List<BSA_Type12>();
+
+                for (int i = 0; i < count; i++)
+                {
+                    Type.Add(new BSA_Type12()
+                    {
+                        F_00 = BitConverter.ToSingle(rawBytes, offset + 0),
+                        I_04 = (EepkType)BitConverter.ToInt32(rawBytes, offset + 4),
+                        I_08 = BitConverter.ToInt32(rawBytes, offset + 8).ToString(),
+                        I_12 = BitConverter.ToInt32(rawBytes, offset + 12),
+                        F_16 = BitConverter.ToSingle(rawBytes, offset + 16),
+                        StartTime = BitConverter.ToUInt16(rawBytes, hdrOffset + 0),
+                        Duration = GetTypeDuration(BitConverter.ToUInt16(rawBytes, hdrOffset + 0), BitConverter.ToUInt16(rawBytes, hdrOffset + 2)),
+                    });
+                    hdrOffset += 4;
+                    offset += 20;
+                }
+
+                return Type;
+
+            }
+            else
+            {
+                return null;
+            }
+        }
+
 
         //Utility
         private ushort GetTypeDuration(ushort startTime, ushort endTime)

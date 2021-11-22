@@ -169,7 +169,7 @@ namespace Xv2CoreLib.BSA
         {
             if (BsaTypeCount(types) > 0)
             {
-                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - offsetToFill + 36), offsetToFill);
+                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - offsetToFill + 36), offsetToFill);
                 List<int> hdrOffset = new List<int>();
                 List<int> dataOffset = new List<int>();
                 List<int> typeList = new List<int>();
@@ -177,63 +177,70 @@ namespace Xv2CoreLib.BSA
                 //Type Headers
                 if(types.Type0 != null)
                 {
-                    var results = WriteTypeHeader(0, types.Type0.Count());
+                    var results = WriteTypeHeader(0, types.Type0.Count);
                     hdrOffset.Add(results[0]);
                     dataOffset.Add(results[1]);
                     typeList.Add(0);
                 }
                 if (types.Type1 != null)
                 {
-                    var results = WriteTypeHeader(1, types.Type1.Count());
+                    var results = WriteTypeHeader(1, types.Type1.Count);
                     hdrOffset.Add(results[0]);
                     dataOffset.Add(results[1]);
                     typeList.Add(1);
                 }
                 if (types.Type2 != null)
                 {
-                    var results = WriteTypeHeader(2, types.Type2.Count());
+                    var results = WriteTypeHeader(2, types.Type2.Count);
                     hdrOffset.Add(results[0]);
                     dataOffset.Add(results[1]);
                     typeList.Add(2);
                 }
                 if (types.Type3 != null)
                 {
-                    var results = WriteTypeHeader(3, types.Type3.Count());
+                    var results = WriteTypeHeader(3, types.Type3.Count);
                     hdrOffset.Add(results[0]);
                     dataOffset.Add(results[1]);
                     typeList.Add(3);
                 }
                 if (types.Type4 != null)
                 {
-                    var results = WriteTypeHeader(4, types.Type4.Count());
+                    var results = WriteTypeHeader(4, types.Type4.Count);
                     hdrOffset.Add(results[0]);
                     dataOffset.Add(results[1]);
                     typeList.Add(4);
                 }
                 if (types.Type6 != null)
                 {
-                    var results = WriteTypeHeader(6, types.Type6.Count());
+                    var results = WriteTypeHeader(6, types.Type6.Count);
                     hdrOffset.Add(results[0]);
                     dataOffset.Add(results[1]);
                     typeList.Add(6);
                 }
                 if (types.Type7 != null)
                 {
-                    var results = WriteTypeHeader(7, types.Type7.Count());
+                    var results = WriteTypeHeader(7, types.Type7.Count);
                     hdrOffset.Add(results[0]);
                     dataOffset.Add(results[1]);
                     typeList.Add(7);
                 }
                 if (types.Type8 != null)
                 {
-                    var results = WriteTypeHeader(8, types.Type8.Count());
+                    var results = WriteTypeHeader(8, types.Type8.Count);
                     hdrOffset.Add(results[0]);
                     dataOffset.Add(results[1]);
                     typeList.Add(8);
                 }
+                if (types.Type12 != null)
+                {
+                    var results = WriteTypeHeader(12, types.Type12.Count);
+                    hdrOffset.Add(results[0]);
+                    dataOffset.Add(results[1]);
+                    typeList.Add(12);
+                }
 
                 //Type Data
-                for(int i = 0; i < typeList.Count(); i++)
+                for (int i = 0; i < typeList.Count; i++)
                 {
                     switch (typeList[i])
                     {
@@ -260,6 +267,9 @@ namespace Xv2CoreLib.BSA
                             break;
                         case 8:
                             WriteType8(types.Type8, hdrOffset[i], dataOffset[i]);
+                            break;
+                        case 12:
+                            WriteType12(types.Type12, hdrOffset[i], dataOffset[i]);
                             break;
                     }
 
@@ -567,6 +577,36 @@ namespace Xv2CoreLib.BSA
 
         }
 
+        private void WriteType12(List<BSA_Type12> type, int hdrOffset, int dataOffset)
+        {
+            if (type != null)
+            {
+
+                //Hdr data
+                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - hdrOffset + 8), hdrOffset);
+
+                for (int i = 0; i < type.Count; i++)
+                {
+                    bytes.AddRange(BitConverter.GetBytes(type[i].StartTime));
+                    bytes.AddRange(BitConverter.GetBytes(GetTypeEndTime(type[i].StartTime, type[i].Duration)));
+                }
+
+                //Main Type Data
+                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - dataOffset + 12), dataOffset);
+
+                for (int i = 0; i < type.Count; i++)
+                {
+                    bytes.AddRange(BitConverter.GetBytes(type[i].F_00));
+                    bytes.AddRange(BitConverter.GetBytes((int)type[i].I_04));
+                    bytes.AddRange(BitConverter.GetBytes(int.Parse(type[i].I_08)));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_12));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].F_16));
+                }
+
+            }
+
+        }
+
 
         //Utility 
         private int BsaTypeCount(BSA_Entry bsaEntry)
@@ -601,6 +641,10 @@ namespace Xv2CoreLib.BSA
                 count++;
             }
             if (bsaEntry.Type8 != null)
+            {
+                count++;
+            }
+            if (bsaEntry.Type12 != null)
             {
                 count++;
             }

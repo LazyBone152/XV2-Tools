@@ -233,6 +233,10 @@ namespace Xv2CoreLib.BSA
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BSA_Type8")]
         [BindingSubList]
         public List<BSA_Type8> Type8 { get; set; }
+        [YAXDontSerializeIfNull]
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BSA_Type12")]
+        [BindingSubList]
+        public List<BSA_Type12> Type12 { get; set; }
 
         #region IBsaTypes
         [YAXDontSerialize]
@@ -259,6 +263,8 @@ namespace Xv2CoreLib.BSA
             foreach (var bsaEntry in Type7)
                 IBsaTypes.Add(bsaEntry);
             foreach (var bsaEntry in Type8)
+                IBsaTypes.Add(bsaEntry);
+            foreach (var bsaEntry in Type12)
                 IBsaTypes.Add(bsaEntry);
 
         }
@@ -301,6 +307,10 @@ namespace Xv2CoreLib.BSA
                 {
                     Type8.Add(type8);
                 }
+                else if (bsaEntry is BSA_Type12 type12)
+                {
+                    Type12.Add(type12);
+                }
             }
         }
         
@@ -322,6 +332,8 @@ namespace Xv2CoreLib.BSA
                 Type7 = new List<BSA_Type7>();
             if (Type8 == null)
                 Type8 = new List<BSA_Type8>();
+            if (Type12 == null)
+                Type12 = new List<BSA_Type12>();
         }
 
         private void ClearBsaLists()
@@ -336,6 +348,7 @@ namespace Xv2CoreLib.BSA
             Type6.Clear();
             Type7.Clear();
             Type8.Clear();
+            Type12.Clear();
         }
 
         #endregion
@@ -878,6 +891,36 @@ namespace Xv2CoreLib.BSA
         [YAXAttributeFor("I_20")]
         [YAXSerializeAs("value")]
         public int I_20 { get; set; }
+    }
+
+
+    [YAXSerializeAs("BSA_Type12")]
+    [Serializable]
+    public class BSA_Type12 : IBsaType
+    {
+        [YAXAttributeFor("Start_Time")]
+        [YAXSerializeAs("frames")]
+        public ushort StartTime { get; set; }
+        [YAXAttributeFor("Duration")]
+        [YAXSerializeAs("frames")]
+        public ushort Duration { get; set; }
+        [YAXAttributeFor("F_00")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0##########")]
+        public float F_00 { get; set; }
+        [YAXAttributeFor("EepkType")]
+        [YAXSerializeAs("value")]
+        public EepkType I_04 { get; set; }
+        [YAXAttributeFor("Skill_ID")]
+        [YAXSerializeAs("value")]
+        public string I_08 { get; set; } = "0"; //int32
+        [YAXAttributeFor("I_12")]
+        [YAXSerializeAs("value")]
+        public int I_12 { get; set; } //Effect ID or something?
+        [YAXAttributeFor("F_16")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0##########")]
+        public float F_16 { get; set; }
     }
 
     public interface IBsaType
