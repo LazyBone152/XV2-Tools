@@ -326,7 +326,6 @@ namespace Xv2CoreLib.TTB
         public int Order1 { get; set; } //76
         [YAXAttributeFor("Actor1")]
         [YAXSerializeAs("Voice")]
-        [BindingString]
         public string Voice1 { get; set; } //80
 
         [YAXAttributeFor("Actor2")]
@@ -343,7 +342,6 @@ namespace Xv2CoreLib.TTB
         public int Order2 { get; set; } //84
         [YAXAttributeFor("Actor2")]
         [YAXSerializeAs("Voice")]
-        [BindingString]
         public string Voice2 { get; set; } //88
 
         [YAXAttributeFor("Actor3")]
@@ -360,7 +358,6 @@ namespace Xv2CoreLib.TTB
         public int Order3 { get; set; } //92
         [YAXAttributeFor("Actor3")]
         [YAXSerializeAs("Voice")]
-        [BindingString]
         public string Voice3 { get; set; } //96
 
         [YAXAttributeFor("Actor4")]
@@ -377,7 +374,6 @@ namespace Xv2CoreLib.TTB
         public int Order4 { get; set; } //100
         [YAXAttributeFor("Actor4")]
         [YAXSerializeAs("Voice")]
-        [BindingString]
         public string Voice4 { get; set; } //104
 
         [YAXAttributeFor("Actor5")]
@@ -394,7 +390,6 @@ namespace Xv2CoreLib.TTB
         public int Order5 { get; set; } //108
         [YAXAttributeFor("Actor5")]
         [YAXSerializeAs("Voice")]
-        [BindingString]
         public string Voice5 { get; set; } //112
 
 

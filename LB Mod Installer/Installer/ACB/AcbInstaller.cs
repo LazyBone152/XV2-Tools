@@ -123,7 +123,7 @@ namespace LB_Mod_Installer.Installer.ACB
                 }
                 
                 //Set binding
-                install.bindingManager.AddAlias(cueId, alias);
+                Install.bindingManager.AddAlias(cueId, alias);
 
                 //Add tracker entries
                 GeneralInfo.Tracker.AddID(CSS_VOICE_EN_PATH, Sections.ACB_Cue, cueId.ToString());

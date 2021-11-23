@@ -542,6 +542,7 @@ namespace Xv2CoreLib.BDM
         [YAXDontSerializeIfNull]
         [YAXSerializeAs("BDM_Type0_Entries")]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "T0_SubEntry")]
+        [BindingSubList]
         public List<Type0SubEntry> Type0Entries { get; set; }
         [YAXDontSerializeIfNull]
         [YAXSerializeAs("BDM_Type1_Entries")]

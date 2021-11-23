@@ -122,19 +122,15 @@ namespace Xv2CoreLib.CSO
         public uint I_04 { get; set; }
         [YAXAttributeFor("SE")]
         [YAXSerializeAs("Path")]
-        [BindingString]
         public string Str_08 { get; set; }
         [YAXAttributeFor("VOX")]
         [YAXSerializeAs("Path")]
-        [BindingString]
         public string Str_12 { get; set; }
         [YAXAttributeFor("AMK")]
         [YAXSerializeAs("Path")]
-        [BindingString]
         public string Str_16 { get; set; }
         [YAXAttributeFor("Skills")]
         [YAXSerializeAs("Path")]
-        [BindingString]
         public string Str_20 { get; set; }
         //64 bits padding at end
     }

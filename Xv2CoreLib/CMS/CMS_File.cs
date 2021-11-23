@@ -117,39 +117,30 @@ namespace Xv2CoreLib.CMS
         public int I_28 { get; set; }
         [YAXAttributeFor("BCS")]
         [YAXSerializeAs("value")]
-        [BindingString]
         public string Str_32 { get; set; }
         [YAXAttributeFor("EAN")]
         [YAXSerializeAs("value")]
-        [BindingString]
         public string Str_36 { get; set; }
         [YAXAttributeFor("FCE_EAN")]
         [YAXSerializeAs("value")]
-        [BindingString]
         public string Str_44 { get; set; }
         [YAXAttributeFor("FCE")]
         [YAXSerializeAs("value")]
-        [BindingString]
         public string Str_48 { get; set; }
         [YAXAttributeFor("CAM_EAN")]
         [YAXSerializeAs("value")]
-        [BindingString]
         public string Str_56 { get; set; }
         [YAXAttributeFor("BAC")]
         [YAXSerializeAs("value")]
-        [BindingString]
         public string Str_60 { get; set; }
         [YAXAttributeFor("BCM")]
         [YAXSerializeAs("value")]
-        [BindingString]
         public string Str_64 { get; set; }
         [YAXAttributeFor("BAI")]
         [YAXSerializeAs("value")]
-        [BindingString]
         public string Str_68 { get; set; }
         [YAXAttributeFor("BDM")]
         [YAXSerializeAs("value")]
-        [BindingString]
         public string Str_80 { get; set; }
 
 

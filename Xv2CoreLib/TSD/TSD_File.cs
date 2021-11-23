@@ -63,7 +63,6 @@ namespace Xv2CoreLib.TSD
 
         [YAXSerializeAs("value")]
         [YAXAttributeFor("Conditions")]
-        [BindingString]
         public string Condition { get; set; }
     }
 
@@ -80,7 +79,6 @@ namespace Xv2CoreLib.TSD
         public string Index { get; set; } //Int32
         [YAXSerializeAs("Name")]
         [YAXAttributeForClass]
-        [BindingString]
         public string Str1 { get; set; }
 
         [YAXSerializeAs("value")]
@@ -88,15 +86,12 @@ namespace Xv2CoreLib.TSD
         public int I_04 { get; set; }
         [YAXSerializeAs("value")]
         [YAXAttributeFor("Path")]
-        [BindingString]
         public string Str2 { get; set; }
         [YAXSerializeAs("name")]
         [YAXAttributeFor("Script")]
-        [BindingString]
         public string Str3 { get; set; }
         [YAXSerializeAs("name")]
         [YAXAttributeFor("Function")]
-        [BindingString]
         public string Str4 { get; set; }
 
         [BindingSubClass]
@@ -107,50 +102,6 @@ namespace Xv2CoreLib.TSD
         [YAXAttributeFor("TNL_IDS")]
         public List<string> TNL_IDs { get; set; } // size = varaible
 
-
-
-        //Binding workaround for TNL_IDs (reflection binding isn't set up to work on lists yet, so we must do this. Allows for 10 bindings on TNL_IDs.)
-        [YAXDontSerialize]
-        [BindingHidden]
-        public string TNL_ID_0 { get { return GetTnlId(0); } set { SetTnlId(value, 0); } }
-        [YAXDontSerialize]
-        [BindingHidden]
-        public string TNL_ID_1 { get { return GetTnlId(1); } set { SetTnlId(value, 1); } }
-        [YAXDontSerialize]
-        [BindingHidden]
-        public string TNL_ID_2 { get { return GetTnlId(2); } set { SetTnlId(value, 2); } }
-        [YAXDontSerialize]
-        [BindingHidden]
-        public string TNL_ID_3 { get { return GetTnlId(3); } set { SetTnlId(value, 3); } }
-        [YAXDontSerialize]
-        [BindingHidden]
-        public string TNL_ID_4 { get { return GetTnlId(4); } set { SetTnlId(value, 4); } }
-        [YAXDontSerialize]
-        [BindingHidden]
-        public string TNL_ID_5 { get { return GetTnlId(5); } set { SetTnlId(value, 5); } }
-        [YAXDontSerialize]
-        [BindingHidden]
-        public string TNL_ID_6 { get { return GetTnlId(6); } set { SetTnlId(value, 6); } }
-        [YAXDontSerialize]
-        [BindingHidden]
-        public string TNL_ID_7 { get { return GetTnlId(7); } set { SetTnlId(value, 7); } }
-        [YAXDontSerialize]
-        [BindingHidden]
-        public string TNL_ID_8 { get { return GetTnlId(8); } set { SetTnlId(value, 8); } }
-        [YAXDontSerialize]
-        [BindingHidden]
-        public string TNL_ID_9 { get { return GetTnlId(9); } set { SetTnlId(value, 9); } }
-
-        private void SetTnlId(string value, int index)
-        {
-            if (TNL_IDs.Count >= index) TNL_IDs[index] = value;
-        }
-
-        private string GetTnlId(int index)
-        {
-            if (TNL_IDs.Count - 1>= index) return TNL_IDs[index];
-            return null;
-        }
 
     }
 
@@ -168,7 +119,6 @@ namespace Xv2CoreLib.TSD
         public int Type { get; set; }
         [YAXSerializeAs("Initial_Value")]
         [YAXAttributeForClass]
-        [BindingString]
         public string Str { get; set; }
     }
 
@@ -186,7 +136,6 @@ namespace Xv2CoreLib.TSD
         public int Type { get; set; }
         [YAXSerializeAs("Value")]
         [YAXAttributeForClass]
-        [BindingString]
         public string Str { get; set; }
     }
 
@@ -205,7 +154,6 @@ namespace Xv2CoreLib.TSD
         public int I_04 { get; set; }
         [YAXSerializeAs("Name")]
         [YAXAttributeForClass]
-        [BindingString]
         public string Str { get; set; }
     }
 
@@ -214,83 +162,63 @@ namespace Xv2CoreLib.TSD
     {
         [YAXAttributeFor("v0")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v0 { get; set; }
         [YAXAttributeFor("v1")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v1 { get; set; }
         [YAXAttributeFor("v2")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v2 { get; set; }
         [YAXAttributeFor("v3")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v3 { get; set; }
         [YAXAttributeFor("v4")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v4 { get; set; }
         [YAXAttributeFor("v5")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v5 { get; set; }
         [YAXAttributeFor("v6")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v6 { get; set; }
         [YAXAttributeFor("v7")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v7 { get; set; }
         [YAXAttributeFor("v8")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v8 { get; set; }
         [YAXAttributeFor("v9")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v9 { get; set; }
         [YAXAttributeFor("v10")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v10 { get; set; }
         [YAXAttributeFor("v11")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v11 { get; set; }
         [YAXAttributeFor("v12")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v12 { get; set; }
         [YAXAttributeFor("v13")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v13 { get; set; }
         [YAXAttributeFor("v14")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v14 { get; set; }
         [YAXAttributeFor("v15")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v15 { get; set; }
         [YAXAttributeFor("v16")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v16 { get; set; }
         [YAXAttributeFor("v17")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v17 { get; set; }
         [YAXAttributeFor("v18")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v18 { get; set; }
         [YAXAttributeFor("v19")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v19 { get; set; }
 
         public static EventArguments Read(string args)

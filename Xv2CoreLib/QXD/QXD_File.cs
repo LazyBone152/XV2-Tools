@@ -167,7 +167,6 @@ namespace Xv2CoreLib.QXD
 
         [YAXAttributeForClass]
         [YAXSerializeAs("Name")]
-        [BindingString]
         public string Name { get; set; }
         [YAXSerializeAs("ID")]
         [YAXAttributeForClass]

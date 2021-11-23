@@ -13,134 +13,6 @@ using YAXLib;
 
 namespace LB_Mod_Installer.Binding
 {
-
-    public struct AliasValue
-    {
-        public string Alias { get; set; }
-        public int ID { get; set; }
-    }
-
-    public struct BindingValue
-    {
-        public Function Function { get; set; }
-        public string[] Arguments { get; set; }
-
-        public string GetArgument1()
-        {
-            if(Arguments != null)
-            {
-                if(Arguments.Length > 0)
-                {
-                    return Arguments[0].ToLower().Trim();
-                }
-            }
-
-            return String.Empty;
-        }
-
-        public string GetArgument2()
-        {
-            if (Arguments != null)
-            {
-                if (Arguments.Length > 1)
-                {
-                    return Arguments[1].ToLower().Trim();
-                }
-            }
-
-            return String.Empty;
-        }
-
-        public string GetArgument3()
-        {
-            if (Arguments != null)
-            {
-                if (Arguments.Length > 2)
-                {
-                    return Arguments[2].ToLower().Trim();
-                }
-            }
-
-            return String.Empty;
-        }
-
-        public string GetArgument4()
-        {
-            if (Arguments != null)
-            {
-                if (Arguments.Length > 3)
-                {
-                    return Arguments[3].ToLower().Trim();
-                }
-            }
-
-            return String.Empty;
-        }
-
-        public bool HasArgument(int arg = 1)
-        {
-            if(Arguments != null)
-            {
-                if(Arguments.Length >= arg)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public ErrorHandling GetErrorHandlingType()
-        {
-            if(Function == Function.Error)
-            {
-                string args = GetArgument1().ToLower();
-                switch (args)
-                {
-                    case "skip":
-                        return ErrorHandling.Skip;
-                    case "stop":
-                        return ErrorHandling.Stop;
-                    case "usedefaultvalue":
-                    case "default":
-                    case "defaultvalue":
-                        return ErrorHandling.UseDefaultValue;
-                    default:
-                        throw new Exception(String.Format("{0} is not a valid Error argument.", args));
-                }
-
-            }
-            else
-            {
-                throw new Exception(String.Format("Function {0} cannot access the ErrorHandling type.", Function));
-            }
-        }
-    }
-
-    public enum Function
-    {
-        AutoID,
-        SetAlias,
-        AliasLink,
-        SkillID1,
-        SkillID2,
-        CharaID,
-        Error,
-        DefaultValue,
-        X2MSkillID1,
-        X2MSkillID2,
-        AutoPartSet,
-        Format, 
-        Increment,
-        X2MSkillPath
-    }
-
-    public enum ErrorHandling
-    {
-        Skip,
-        Stop,
-        UseDefaultValue
-    }
-
     public class IdBindingManager
     {
         public const int NullTokenInt = 1280070990;
@@ -188,9 +60,12 @@ namespace LB_Mod_Installer.Binding
 
 
         #region Parse
-        public string ParseInstallPath(string installPath, string sourcePath)
+        //Most bindings are now parsed via the ParseStrings method (after the XML is loaded, but before it is loaded into a class proper structure).
+        //ParseProperties is only used for AutoIDs (after the XML has been loaded into a class structure). 
+
+        public string ParseString(string str, string path, string attrName)
         {
-            return ParseStringBinding<IInstallable>(installPath, $"Binding for FilePath entry. SourcePath is \"{sourcePath}\".", GeneralInfo.InstallerXml, null, null, false);
+            return ParseStringBinding<IInstallable>(str, $"Binding for \"{attrName}\".", path, null, null, false);
         }
 
         /// <summary>
@@ -239,30 +114,19 @@ namespace LB_Mod_Installer.Binding
                     if (childProp.PropertyType == typeof(string))
                     {
                         var autoIdAttr = (BindingAutoId[])childProp.GetCustomAttributes(typeof(BindingAutoId), false);
-                        var stringBindingAttr = (BindingString[])childProp.GetCustomAttributes(typeof(BindingString), false);
-                        var bindingHiddenAttr = (BindingHidden[])childProp.GetCustomAttributes(typeof(BindingHidden), false);
                         var yaxDontSerializeAttr = (YAXDontSerializeAttribute[])childProp.GetCustomAttributes(typeof(YAXDontSerializeAttribute), false);
                         object value = childProp.GetValue(obj);
 
-                        //Skip if property has YAXDontSerializeAttribute and is not a hidden binding property
-                        if (yaxDontSerializeAttr.Length > 0 && bindingHiddenAttr.Length == 0) continue;
+                        //Skip if property has YAXDontSerializeAttribute 
+                        if (yaxDontSerializeAttr.Length > 0) continue;
 
                         if (value != null)
                         {
-                            if (stringBindingAttr.Length > 0)
-                            {
-                                //Has BindingString attribute.
-                                childProp.SetValue(obj, ParseStringBinding((string)value, string.Format("{0}", childProp.Name), filePath, installList, binaryList, false, ushort.MaxValue, usedIDs).ToString());
-                            }
-                            else if (autoIdAttr.Length > 0)
+                            if (autoIdAttr.Length > 0)
                             {
                                 //Has BindingAutoId attribute.
                                 if (allowAutoId)
                                     childProp.SetValue(obj, ParseBinding((string)value, string.Format("{0}", childProp.Name), filePath, installList, binaryList, true, autoIdAttr[0].MaxId, usedIDs).ToString());
-                            }
-                            else
-                            {
-                                childProp.SetValue(obj, ParseBinding<T>((string)value, string.Format("{0}", childProp.Name), filePath, null, null, false, ushort.MaxValue, usedIDs).ToString());
                             }
                         }
                     }
@@ -289,6 +153,7 @@ namespace LB_Mod_Installer.Binding
         #endregion
 
         #region Binding
+
         private string ParseStringBinding<T>(string str, string comment, string filePath, IEnumerable<T> entries1, IEnumerable<T> entries2, bool allowAutoId = true, ushort maxId = ushort.MaxValue, List<string> usedIds = null)
         {
             //New and improved binding processing method.
@@ -665,7 +530,7 @@ namespace LB_Mod_Installer.Binding
             return false;
         }
 
-        private bool HasBinding(string binding)
+        public bool HasBinding(string binding)
         {
             if (string.IsNullOrWhiteSpace(binding)) return false;
             return (binding.Contains('{') && binding.Contains('}'));
@@ -987,6 +852,134 @@ namespace LB_Mod_Installer.Binding
 
         #endregion
 
+    }
+
+
+    public struct AliasValue
+    {
+        public string Alias { get; set; }
+        public int ID { get; set; }
+    }
+
+    public struct BindingValue
+    {
+        public Function Function { get; set; }
+        public string[] Arguments { get; set; }
+
+        public string GetArgument1()
+        {
+            if (Arguments != null)
+            {
+                if (Arguments.Length > 0)
+                {
+                    return Arguments[0].ToLower().Trim();
+                }
+            }
+
+            return String.Empty;
+        }
+
+        public string GetArgument2()
+        {
+            if (Arguments != null)
+            {
+                if (Arguments.Length > 1)
+                {
+                    return Arguments[1].ToLower().Trim();
+                }
+            }
+
+            return String.Empty;
+        }
+
+        public string GetArgument3()
+        {
+            if (Arguments != null)
+            {
+                if (Arguments.Length > 2)
+                {
+                    return Arguments[2].ToLower().Trim();
+                }
+            }
+
+            return String.Empty;
+        }
+
+        public string GetArgument4()
+        {
+            if (Arguments != null)
+            {
+                if (Arguments.Length > 3)
+                {
+                    return Arguments[3].ToLower().Trim();
+                }
+            }
+
+            return String.Empty;
+        }
+
+        public bool HasArgument(int arg = 1)
+        {
+            if (Arguments != null)
+            {
+                if (Arguments.Length >= arg)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public ErrorHandling GetErrorHandlingType()
+        {
+            if (Function == Function.Error)
+            {
+                string args = GetArgument1().ToLower();
+                switch (args)
+                {
+                    case "skip":
+                        return ErrorHandling.Skip;
+                    case "stop":
+                        return ErrorHandling.Stop;
+                    case "usedefaultvalue":
+                    case "default":
+                    case "defaultvalue":
+                        return ErrorHandling.UseDefaultValue;
+                    default:
+                        throw new Exception(String.Format("{0} is not a valid Error argument.", args));
+                }
+
+            }
+            else
+            {
+                throw new Exception(String.Format("Function {0} cannot access the ErrorHandling type.", Function));
+            }
+        }
+    }
+
+    public enum Function
+    {
+        AutoID,
+        SetAlias,
+        AliasLink,
+        SkillID1,
+        SkillID2,
+        CharaID,
+        Error,
+        DefaultValue,
+        X2MSkillID1,
+        X2MSkillID2,
+        AutoPartSet,
+        Format,
+        Increment,
+        X2MSkillPath
+    }
+
+    public enum ErrorHandling
+    {
+        Skip,
+        Stop,
+        UseDefaultValue
     }
 
 

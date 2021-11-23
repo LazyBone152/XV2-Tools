@@ -104,14 +104,12 @@ namespace Xv2CoreLib.TNL
         public short I16_2 { get; set; } //Int16
         [YAXSerializeAs("value")]
         [YAXAttributeFor("LobbyName")]
-        [BindingString]
         public string Str2 { get; set; }
         [YAXSerializeAs("value")]
         [YAXAttributeFor("I32_2")]
         public string I32_2 { get; set; } //Int32
         [YAXSerializeAs("value")]
         [YAXAttributeFor("Position")]
-        [BindingString]
         public string Str3 { get; set; }
         [YAXSerializeAs("value")]
         [YAXAttributeFor("Zone")]
@@ -169,18 +167,15 @@ namespace Xv2CoreLib.TNL
         public short I16_2 { get; set; }
         [YAXSerializeAs("value")]
         [YAXAttributeFor("LobbyName")]
-        [BindingString]
         public string Str2 { get; set; }
         [YAXSerializeAs("value")]
         [YAXAttributeFor("I32_2")]
         public string I32_2 { get; set; }
         [YAXSerializeAs("value")]
         [YAXAttributeFor("Position")]
-        [BindingString]
         public string Str3 { get; set; }
         [YAXSerializeAs("value")]
         [YAXAttributeFor("Zone")]
-        [BindingString]
         public string Str4 { get; set; }
         [YAXSerializeAs("value")]
         [YAXAttributeFor("Action_ID")]
@@ -199,26 +194,21 @@ namespace Xv2CoreLib.TNL
         public string Index { get; set; } //Int32
         [YAXSerializeAs("value")]
         [YAXAttributeFor("LobbyName")]
-        [BindingString]
         public string Str1 { get; set; }
         [YAXSerializeAs("value")]
         [YAXAttributeFor("I32_2")]
         public string I32_2 { get; set; } //Int32
         [YAXSerializeAs("value")]
         [YAXAttributeFor("Position1")]
-        [BindingString]
         public string Str2 { get; set; }
         [YAXSerializeAs("value")]
         [YAXAttributeFor("Position2")]
-        [BindingString]
         public string Str3 { get; set; }
         [YAXSerializeAs("value")]
         [YAXAttributeFor("Str4")]
-        [BindingString]
         public string Str4 { get; set; } 
         [YAXSerializeAs("value")]
         [YAXAttributeFor("I32_3")]
-        [BindingString]
         public string I32_3 { get; set; } //Int32
         [YAXSerializeAs("value")]
         [YAXAttributeFor("I32_4")]
@@ -240,15 +230,12 @@ namespace Xv2CoreLib.TNL
         public string Index { get; set; } //int32
         [YAXSerializeAs("value")]
         [YAXAttributeFor("Path")]
-        [BindingString]
         public string Str1 { get; set; }
         [YAXSerializeAs("name")]
         [YAXAttributeFor("Script")]
-        [BindingString]
         public string Str2 { get; set; }
         [YAXSerializeAs("name")]
         [YAXAttributeFor("Function")]
-        [BindingString]
         public string Str3 { get; set; }
 
         [BindingSubClass]
@@ -260,83 +247,63 @@ namespace Xv2CoreLib.TNL
     {
         [YAXAttributeFor("v0")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v0 { get; set; }
         [YAXAttributeFor("v1")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v1 { get; set; }
         [YAXAttributeFor("v2")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v2 { get; set; }
         [YAXAttributeFor("v3")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v3 { get; set; }
         [YAXAttributeFor("v4")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v4 { get; set; }
         [YAXAttributeFor("v5")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v5 { get; set; }
         [YAXAttributeFor("v6")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v6 { get; set; }
         [YAXAttributeFor("v7")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v7 { get; set; }
         [YAXAttributeFor("v8")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v8 { get; set; }
         [YAXAttributeFor("v9")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v9 { get; set; }
         [YAXAttributeFor("v10")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v10 { get; set; }
         [YAXAttributeFor("v11")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v11 { get; set; }
         [YAXAttributeFor("v12")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v12 { get; set; }
         [YAXAttributeFor("v13")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v13 { get; set; }
         [YAXAttributeFor("v14")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v14 { get; set; }
         [YAXAttributeFor("v15")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v15 { get; set; }
         [YAXAttributeFor("v16")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v16 { get; set; }
         [YAXAttributeFor("v17")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v17 { get; set; }
         [YAXAttributeFor("v18")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v18 { get; set; }
         [YAXAttributeFor("v19")]
         [YAXSerializeAs("arg")]
-        [BindingString]
         public string v19 { get; set; }
 
         public static EventArguments Read(string args)

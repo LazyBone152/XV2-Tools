@@ -448,31 +448,24 @@ namespace Xv2CoreLib.CUS
         public ushort I_18 { get; set; }
         [YAXAttributeFor("EAN")]
         [YAXSerializeAs("Path")]
-        [BindingString]
         public string Str_20 { get; set; }
         [YAXAttributeFor("CAM_EAN")]
         [YAXSerializeAs("Path")]
-        [BindingString]
         public string Str_24 { get; set; }
         [YAXAttributeFor("EEPK")]
         [YAXSerializeAs("Path")]
-        [BindingString]
         public string Str_28 { get; set; }
         [YAXAttributeFor("ACB_SE")]
         [YAXSerializeAs("Path")]
-        [BindingString]
         public string Str_32 { get; set; }
         [YAXAttributeFor("ACB_VOX")]
         [YAXSerializeAs("Path")]
-        [BindingString]
         public string Str_36 { get; set; }
         [YAXAttributeFor("AFTER_BAC")]
         [YAXSerializeAs("Path")]
-        [BindingString]
         public string Str_40 { get; set; }
         [YAXAttributeFor("AFTER_BCM")]
         [YAXSerializeAs("Path")]
-        [BindingString]
         public string Str_44 { get; set; }
         [YAXAttributeFor("I_48")]
         [YAXSerializeAs("value")]

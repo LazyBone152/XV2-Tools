@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using System.Xml;
+using System.Xml.Linq;
 using YAXLib;
 
 namespace Xv2CoreLib.Resource
@@ -60,10 +57,18 @@ namespace Xv2CoreLib.Resource
 
         public T DeserializeXmlFromArchive<T>(string path) where T : new()
         {
-            XmlDocument xml = GetXmlDocumentFromArchive(path);
+            XDocument xml = GetXmlDocumentFromArchive(path);
 
-            if(xml != null)
+            return DeserializeXmlFromArchive<T>(xml);
+        }
+
+        public T DeserializeXmlFromArchive<T>(XDocument xml) where T : new()
+        {
+            if (xml != null)
             {
+                return (T)new YAXSerializer(typeof(T), YAXSerializationOptions.DontSerializeNullObjects).Deserialize(xml.Root);
+
+                /*
                 using (var stringWriter = new System.IO.StringWriter())
                 {
                     using (var xmlTextWriter = XmlWriter.Create(stringWriter))
@@ -74,21 +79,22 @@ namespace Xv2CoreLib.Resource
                         return (T)new YAXSerializer(typeof(T), YAXSerializationOptions.DontSerializeNullObjects).Deserialize(xmlStr);
                     }
                 }
+                */
             }
 
             return default(T);
         }
 
-        private XmlDocument GetXmlDocumentFromArchive(string path)
+        public XDocument GetXmlDocumentFromArchive(string path)
         {
             if (archive == null) throw new InvalidOperationException("installinfo is not loaded.");
-            XmlDocument xml = null;
+            XDocument xml = null;
 
             xml = GetXmlDocumentFromArchive(path, archive);
             return xml;
         }
 
-        private XmlDocument GetXmlDocumentFromArchive(string path, ZipArchive archive)
+        private XDocument GetXmlDocumentFromArchive(string path, ZipArchive archive)
         {
             if (archive == null) return null;
             
@@ -96,11 +102,11 @@ namespace Xv2CoreLib.Resource
 
             if(entry != null)
             {
-                XmlDocument xml = new XmlDocument();
+                XDocument xml;
 
                 using (Stream stream = entry.Open())
                 {
-                    xml.Load(stream);
+                    xml = XDocument.Load(stream);
                 }
 
                 return xml;

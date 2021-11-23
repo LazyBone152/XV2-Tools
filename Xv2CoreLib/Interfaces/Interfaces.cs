@@ -69,21 +69,6 @@ namespace Xv2CoreLib
 
     }
 
-    /// <summary>
-    /// Marks this property as a string value type, allowing non-numeric characters and multiple bindings within.\n
-    /// Any string not marked with this will be treated as an int by the binding manager.
-    /// </summary>
-    public class BindingString : Attribute
-    {
 
-    }
-
-    /// <summary>
-    /// Allows a property with YAXDontSerialize to be parsed as a binding.
-    /// </summary>
-    public class BindingHidden : Attribute
-    {
-
-    }
 
 }

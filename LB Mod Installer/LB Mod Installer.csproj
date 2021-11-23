@@ -138,6 +138,8 @@
     </ApplicationDefinition>
     <Compile Include="Binding\IdBindingManager.cs" />
     <Compile Include="Binding\X2MHelper.cs" />
+    <Compile Include="Binding\XML\XmlParser.cs" />
+    <Compile Include="Binding\XML\ZipReaderExtensions.cs" />
     <Compile Include="File\FileCacheManager.cs" />
     <Compile Include="Installer\Install.cs" />
     <Compile Include="Installer\MsgComponentInstall.cs" />
@@ -203,6 +205,7 @@
       <Name>Xv2CoreLib</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Fody.2.0.0\build\netstandard1.4\Fody.targets" Condition="Exists('..\packages\Fody.2.0.0\build\netstandard1.4\Fody.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

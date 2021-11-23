@@ -50,14 +50,16 @@ namespace LB_Mod_Installer.Installer
         private const string JUNGLE2 = "JUNGLE2";
         private const string JUNGLE3 = "JUNGLE3";
 
-        internal List<FilePath> Files;
-        internal InstallerXml installerXml;
-        internal ZipReader zipManager;
-        internal MainWindow Parent;
-        internal Xv2FileIO FileIO;
-        internal FileCacheManager fileManager;
-        internal MsgComponentInstall msgComponentInstall;
-        internal IdBindingManager bindingManager;
+        public List<FilePath> Files;
+        public InstallerXml installerXml;
+        public ZipReader zipManager;
+        public MainWindow Parent;
+        public Xv2FileIO FileIO;
+        public FileCacheManager fileManager;
+        public MsgComponentInstall msgComponentInstall;
+
+        //Needs to be static for Binding.Xml.XmlParser to access it. SHOULD be refactored entirely to be a singleton, but it relies on Install and i dont have time to untangle it all right now.
+        public static IdBindingManager bindingManager;
 
         private bool useJungle1 = false;
         private bool useJungle2 = false;
@@ -159,7 +161,7 @@ namespace LB_Mod_Installer.Installer
                 FileType type = File.GetFileType();
 
                 //Process bindings in InstallPath
-                File.InstallPath = bindingManager.ParseInstallPath(File.InstallPath, File.SourcePath);
+                File.InstallPath = bindingManager.ParseString(File.InstallPath, GeneralInfo.InstallerXml, "InstallPath");
 
                 switch (type)
                 {
@@ -405,7 +407,7 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                IDB_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<IDB_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : IDB_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                IDB_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<IDB_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : IDB_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 IDB_File binaryFile = (IDB_File)GetParsedFile<IDB_File>(installPath);
 
                 //Parse bindings
@@ -436,7 +438,7 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                CUS_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<CUS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : CUS_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                CUS_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<CUS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : CUS_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 CUS_File binaryFile = (CUS_File)GetParsedFile<CUS_File>(installPath);
 
                 //Parse bindings
@@ -470,13 +472,13 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                BCS_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<BCS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : BCS_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                BCS_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<BCS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : BCS_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 BCS_File binaryFile = (BCS_File)GetParsedFile<BCS_File>(installPath);
 
                 if (binaryFile == null)
                 {
                     //No matching file exists in the game, so use xml as base
-                    binaryFile = zipManager.DeserializeXmlFromArchive<BCS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                    binaryFile = zipManager.DeserializeXmlFromArchive_Ext<BCS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
                     fileManager.AddParsedFile(installPath, binaryFile);
                 }
 
@@ -530,7 +532,7 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                CMS_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<CMS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : CMS_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                CMS_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<CMS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : CMS_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 CMS_File binaryFile = (CMS_File)GetParsedFile<CMS_File>(installPath);
 
                 //Parse bindings
@@ -564,13 +566,13 @@ namespace LB_Mod_Installer.Installer
                 if (!isXml)
                     throw new Exception("Type.Binary not possible for bac files. You must use XML.");
 
-                BAC_File xmlFile = zipManager.DeserializeXmlFromArchive<BAC_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                BAC_File xmlFile = zipManager.DeserializeXmlFromArchive_Ext<BAC_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
                 BAC_File binaryFile = (BAC_File)GetParsedFile<BAC_File>(installPath);
 
                 if(binaryFile == null)
                 {
                     //No matching file exists in the game, so use xml as base
-                    binaryFile = zipManager.DeserializeXmlFromArchive<BAC_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                    binaryFile = zipManager.DeserializeXmlFromArchive_Ext<BAC_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
                     fileManager.AddParsedFile(installPath, binaryFile);
                 }
 
@@ -596,7 +598,7 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                PSC_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<PSC_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : PSC_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                PSC_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<PSC_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : PSC_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 PSC_File binaryFile = (PSC_File)GetParsedFile<PSC_File>(installPath);
 
                 foreach(var config in xmlFile.Configurations)
@@ -670,7 +672,7 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                EMB_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<EMB_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : EMB_File.LoadEmb(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                EMB_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<EMB_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : EMB_File.LoadEmb(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 EMB_File binaryFile = (EMB_File)GetParsedFile<EMB_File>(installPath);
 
                 //Parse bindings
@@ -725,7 +727,7 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                CharaSlotsFile xmlFile = zipManager.DeserializeXmlFromArchive<CharaSlotsFile>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                CharaSlotsFile xmlFile = zipManager.DeserializeXmlFromArchive_Ext<CharaSlotsFile>(GeneralInfo.GetPathInZipDataDir(xmlPath));
                 CharaSlotsFile slotsFile = (CharaSlotsFile)GetParsedFile<CharaSlotsFile>(CharaSlotsFile.FILE_NAME_BIN, false, false);
 
                 if(slotsFile == null)
@@ -765,13 +767,13 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                BDM_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<BDM_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : BDM_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                BDM_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<BDM_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : BDM_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 BDM_File binaryFile = (BDM_File)GetParsedFile<BDM_File>(installPath);
 
                 if (binaryFile == null)
                 {
                     //No matching file exists in the game, so use xml as base
-                    binaryFile = zipManager.DeserializeXmlFromArchive<BDM_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                    binaryFile = zipManager.DeserializeXmlFromArchive_Ext<BDM_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
                     fileManager.AddParsedFile(installPath, binaryFile);
                 }
 
@@ -800,7 +802,7 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                BEV_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<BEV_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : BEV_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                BEV_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<BEV_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : BEV_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 BEV_File binaryFile = (BEV_File)GetParsedFile<BEV_File>(installPath);
 
                 //Parse bindings
@@ -824,7 +826,7 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                BPE_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<BPE_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : BPE_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                BPE_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<BPE_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : BPE_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 BPE_File binaryFile = (BPE_File)GetParsedFile<BPE_File>(installPath);
 
                 //Parse bindings
@@ -848,13 +850,13 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                BSA_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<BSA_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : BSA_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                BSA_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<BSA_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : BSA_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 BSA_File binaryFile = (BSA_File)GetParsedFile<BSA_File>(installPath);
 
                 if (binaryFile == null)
                 {
                     //No matching file exists in the game, so use xml as base
-                    binaryFile = zipManager.DeserializeXmlFromArchive<BSA_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                    binaryFile = zipManager.DeserializeXmlFromArchive_Ext<BSA_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
                     fileManager.AddParsedFile(installPath, binaryFile);
                 }
 
@@ -879,7 +881,7 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                CNC_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<CNC_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : CNC_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                CNC_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<CNC_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : CNC_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 CNC_File binaryFile = (CNC_File)GetParsedFile<CNC_File>(installPath);
 
                 //Parse bindings
@@ -903,7 +905,7 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                CNS_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<CNS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : CNS_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                CNS_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<CNS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : CNS_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 CNS_File binaryFile = (CNS_File)GetParsedFile<CNS_File>(installPath);
 
                 //Parse bindings
@@ -927,7 +929,7 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                CSO_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<CSO_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : CSO_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                CSO_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<CSO_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : CSO_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 CSO_File binaryFile = (CSO_File)GetParsedFile<CSO_File>(installPath);
 
                 //Parse bindings
@@ -951,7 +953,7 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                EAN_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<EAN_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : EAN_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                EAN_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<EAN_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : EAN_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 EAN_File binaryFile = (EAN_File)GetParsedFile<EAN_File>(installPath);
 
                 //Parse bindings
@@ -975,7 +977,7 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                MSG_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<MSG_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : MSG_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                MSG_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<MSG_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : MSG_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 MSG_File binaryFile = (MSG_File)GetParsedFile<MSG_File>(installPath);
 
                 //Parse bindings
@@ -999,7 +1001,7 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                AUR_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<AUR_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : AUR_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                AUR_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<AUR_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : AUR_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 AUR_File binaryFile = (AUR_File)GetParsedFile<AUR_File>(installPath);
 
                 //Parse bindings
@@ -1025,7 +1027,7 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                PUP_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<PUP_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : PUP_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                PUP_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<PUP_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : PUP_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 PUP_File binaryFile = (PUP_File)GetParsedFile<PUP_File>(installPath);
 
                 //Parse bindings
@@ -1049,7 +1051,7 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                TSD_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<TSD_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : TSD_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                TSD_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<TSD_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : TSD_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 TSD_File binaryFile = (TSD_File)GetParsedFile<TSD_File>(installPath);
 
                 //Parse bindings
@@ -1081,7 +1083,7 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                TNL_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<TNL_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : TNL_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                TNL_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<TNL_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : TNL_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 TNL_File binaryFile = (TNL_File)GetParsedFile<TNL_File>(installPath);
 
                 //Character and Masters share the same IDs, so we must merge the Index list and pass it to ParseProperties, rather than have it check the lists directly.
@@ -1115,7 +1117,7 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                QXD_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<QXD_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : QXD_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                QXD_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<QXD_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : QXD_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 QXD_File binaryFile = (QXD_File)GetParsedFile<QXD_File>(installPath);
 
                 //Init if needed
@@ -1160,7 +1162,7 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                PAL_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<PAL_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : PAL_File.Parse(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                PAL_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<PAL_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : PAL_File.Parse(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 PAL_File binaryFile = (PAL_File)GetParsedFile<PAL_File>(installPath);
 
                 //Parse bindings
@@ -1184,7 +1186,7 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                TTB_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<TTB_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : TTB_File.Parse(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                TTB_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<TTB_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : TTB_File.Parse(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 TTB_File binaryFile = (TTB_File)GetParsedFile<TTB_File>(installPath);
 
                 //Install entries
@@ -1206,7 +1208,7 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                TTC_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<TTC_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : TTC_File.Parse(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                TTC_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<TTC_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : TTC_File.Parse(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 TTC_File binaryFile = (TTC_File)GetParsedFile<TTC_File>(installPath);
 
                 //Install entries
@@ -1227,7 +1229,7 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                SEV_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<SEV_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : SEV_File.Parse(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                SEV_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<SEV_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : SEV_File.Parse(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 SEV_File binaryFile = (SEV_File)GetParsedFile<SEV_File>(installPath);
 
                 //Install entries
@@ -1249,11 +1251,18 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                HCI_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<HCI_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : HCI_File.Parse(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                HCI_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<HCI_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : HCI_File.Parse(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 HCI_File binaryFile = (HCI_File)GetParsedFile<HCI_File>(installPath);
 
                 //Install entries
-                InstallEntries<HCI_Entry>(xmlFile.Entries, binaryFile.Entries, installPath, Sections.HCI_Entry);
+                foreach(var entry in xmlFile.Entries)
+                {
+                    GeneralInfo.Tracker.AddID(installPath, Sections.HCI_Entry, entry.Index);
+
+                    binaryFile.InstallEntry(entry);
+                }
+
+                //InstallEntries<HCI_Entry>(xmlFile.Entries, binaryFile.Entries, installPath, Sections.HCI_Entry);
 
             }
 #if !DEBUG
@@ -1271,7 +1280,7 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                CML_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<CML_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : CML_File.Parse(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                CML_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<CML_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : CML_File.Parse(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 CML_File binaryFile = (CML_File)GetParsedFile<CML_File>(installPath);
 
                 //Install entries
@@ -1293,7 +1302,7 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
-                ERS_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive<ERS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : ERS_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                ERS_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<ERS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : ERS_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 ERS_File binaryFile = (ERS_File)GetParsedFile<ERS_File>(installPath);
 
                 InstallSubEntries<ERS_MainTableEntry, ERS_MainTable>(xmlFile.Entries, binaryFile.Entries, installPath, Sections.ERS_Entries);

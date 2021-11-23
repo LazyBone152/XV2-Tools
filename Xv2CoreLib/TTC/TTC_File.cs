@@ -463,7 +463,6 @@ namespace Xv2CoreLib.TTC
         public int Transformation { get; set; } //8
         [YAXAttributeFor("Name")]
         [YAXSerializeAs("value")]
-        [BindingString]
         public string Name { get; set; } //20
 
 

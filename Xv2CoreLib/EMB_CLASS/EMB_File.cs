@@ -555,7 +555,6 @@ namespace Xv2CoreLib.EMB_CLASS
         private string _name = null;
         [YAXAttributeForClass]
         [YAXSerializeAs("Name")]
-        [BindingString]
         public string Name
         {
             get

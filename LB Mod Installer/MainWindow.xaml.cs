@@ -358,7 +358,7 @@ namespace LB_Mod_Installer
                     Environment.Exit(0);
                 }
 
-                InstallerInfo = zipManager.DeserializeXmlFromArchive<InstallerXml>(GeneralInfo.InstallerXml);
+                InstallerInfo = zipManager.DeserializeXmlFromArchive_Ext<InstallerXml>(GeneralInfo.InstallerXml);
                 InstallerInfo.Init();
                 GeneralInfo.InstallerXmlInfo = InstallerInfo;
             }

@@ -112,6 +112,31 @@ namespace Xv2CoreLib.HCI
 
         #endregion
 
+        public void InstallEntry(HCI_Entry entry)
+        {
+            //First check if an equal entry already exists
+            int existingIdx = Entries.IndexOf(Entries.FirstOrDefault(x => x.Index == entry.Index));
+
+            if(existingIdx != -1)
+            {
+                Entries[existingIdx] = entry;
+                return;
+            }
+
+            //Check if a character matching this ID is present with a default costume ID.
+            existingIdx = Entries.IndexOf(Entries.FirstOrDefault(x => x.CharId == entry.CharId && x.Costume == ushort.MaxValue));
+
+            if(existingIdx != -1)
+            {
+                //There is, so the entry should be installed before it
+                Entries.Insert(existingIdx, entry);
+            }
+            else
+            {
+                Entries.Add(entry);
+            }
+
+        }
     }
 
     [YAXSerializeAs("HciEntry")]
