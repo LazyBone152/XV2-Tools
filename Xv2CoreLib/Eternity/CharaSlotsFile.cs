@@ -125,8 +125,8 @@ namespace Xv2CoreLib.Eternity
                     strBuilder.Append("[");
 
                     strBuilder.Append(costume.CharaCode).Append(",");
-                    strBuilder.Append(costume.CostumeBinding).Append(",");
-                    strBuilder.Append(costume.PresetBinding).Append(",");
+                    strBuilder.Append(costume.Costume).Append(",");
+                    strBuilder.Append(costume.Preset).Append(",");
                     strBuilder.Append(costume.UnlockIndex).Append(",");
                     strBuilder.Append((costume.flag_gk2) ? 1 : 0).Append(",");
                     strBuilder.Append(costume.CssVoice1).Append(",");
@@ -241,6 +241,16 @@ namespace Xv2CoreLib.Eternity
             }
         }
         #endregion
+    
+        public bool SlotExists(string charCode, int costume)
+        {
+            foreach(var slot in CharaSlots)
+            {
+                if (slot.CostumeSlots.FirstOrDefault(x => x.CharaCode == charCode && x.Costume == costume) != null) return true;
+            }
+
+            return false;
+        }
     }
 
     public class CharaSlot
@@ -257,76 +267,27 @@ namespace Xv2CoreLib.Eternity
     public class CharaCostumeSlot
     {
         [YAXDontSerialize]
-        public string InstallID { get { return $"{CharaCode}_{CostumeBinding}_{PresetBinding}"; } }
-        [YAXDontSerialize]
-        public int Costume
-        {
-            get
-            {
-                return int.Parse(CostumeBinding);
-            }
-            set
-            {
-                CostumeBinding = value.ToString();
-            }
-        }
-        [YAXDontSerialize]
-        public int Preset
-        {
-            get
-            {
-                return int.Parse(PresetBinding);
-            }
-            set
-            {
-                PresetBinding = value.ToString();
-            }
-        }
-        [YAXDontSerialize]
-        public int CssVoice1
-        {
-            get
-            {
-                return int.Parse(CssVoice1Binding);
-            }
-            set
-            {
-                CssVoice1Binding = value.ToString();
-            }
-        }
-        [YAXDontSerialize]
-        public int CssVoice2
-        {
-            get
-            {
-                return int.Parse(CssVoice2Binding);
-            }
-            set
-            {
-                CssVoice2Binding = value.ToString();
-            }
-        }
-
-
+        public string InstallID { get { return $"{CharaCode}_{Costume}_{Preset}"; } }
+        
         //Serialized values
         [YAXAttributeForClass]
         public string CharaCode { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("Costume")]
-        public string CostumeBinding { get; set; }
+        public int Costume { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("Preset")]
-        public string PresetBinding { get; set; }
+        public int Preset { get; set; }
         [YAXAttributeForClass]
         public int UnlockIndex { get; set; }
         [YAXAttributeForClass]
         public bool flag_gk2 { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("CssVoice1")]
-        public string CssVoice1Binding { get; set; }
+        public int CssVoice1 { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("CssVoice2")]
-        public string CssVoice2Binding { get; set; }
+        public int CssVoice2 { get; set; }
         [YAXAttributeForClass]
         public CstDlcVer DLC { get; set; }
     }

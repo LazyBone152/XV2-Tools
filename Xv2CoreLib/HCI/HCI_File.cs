@@ -43,7 +43,7 @@ namespace Xv2CoreLib.HCI
             {
                 HCI_Entry entry = new HCI_Entry();
 
-                entry.CharId = BitConverter.ToUInt16(bytes, offset + 0);
+                entry.CharaID = BitConverter.ToUInt16(bytes, offset + 0);
                 entry.Costume = BitConverter.ToUInt16(bytes, offset + 2);
                 entry.State1 = BitConverter.ToUInt16(bytes, offset + 4);
                 entry.State2 = BitConverter.ToUInt16(bytes, offset + 6);
@@ -94,7 +94,7 @@ namespace Xv2CoreLib.HCI
             //Entries
             foreach(var entry in Entries)
             {
-                bytes.AddRange(BitConverter.GetBytes(entry.CharId));
+                bytes.AddRange(BitConverter.GetBytes(entry.CharaID));
                 bytes.AddRange(BitConverter.GetBytes(entry.Costume));
                 bytes.AddRange(BitConverter.GetBytes(entry.State1));
                 bytes.AddRange(BitConverter.GetBytes(entry.State2));
@@ -124,7 +124,7 @@ namespace Xv2CoreLib.HCI
             }
 
             //Check if a character matching this ID is present with a default costume ID.
-            existingIdx = Entries.IndexOf(Entries.FirstOrDefault(x => x.CharId == entry.CharId && x.Costume == ushort.MaxValue));
+            existingIdx = Entries.IndexOf(Entries.FirstOrDefault(x => x.CharaID == entry.CharaID && x.Costume == ushort.MaxValue));
 
             if(existingIdx != -1)
             {
@@ -143,20 +143,15 @@ namespace Xv2CoreLib.HCI
     public class HCI_Entry : IInstallable
     {
         #region NonSerialized
-        [YAXDontSerialize]
-        public ushort CharId { get { return ushort.Parse(I_00); } set { I_00 = value.ToString(); } }
-        [YAXDontSerialize]
-        public int EmbIndex { get { return int.Parse(I_08); } set { I_08 = value.ToString(); } }
-
         //interface
         [YAXDontSerialize]
-        public int SortID { get { return CharId; } }
+        public int SortID { get { return CharaID; } }
         [YAXDontSerialize]
         public string Index 
         { 
             get 
             { 
-                return $"{I_00}_{Costume}_{State1}_{State2}";
+                return $"{CharaID}_{Costume}_{State1}_{State2}";
             }
             set
             {
@@ -164,7 +159,7 @@ namespace Xv2CoreLib.HCI
 
                 if (split.Length == 4)
                 {
-                    I_00 = split[0];
+                    CharaID = ushort.Parse(split[0]);
                     Costume = ushort.Parse(split[1]);
                     State1 = ushort.Parse(split[2]);
                     State2 = ushort.Parse(split[3]);
@@ -176,7 +171,7 @@ namespace Xv2CoreLib.HCI
 
         [YAXAttributeForClass]
         [YAXSerializeAs("CharId")]
-        public string I_00 { get; set; } //0
+        public ushort CharaID { get; set; } //0
         [YAXAttributeForClass]
         [YAXSerializeAs("Costume")]
         public ushort Costume { get; set; } //2
@@ -188,7 +183,7 @@ namespace Xv2CoreLib.HCI
         public ushort State2 { get; set; } //6
         [YAXAttributeForClass]
         [YAXSerializeAs("EmbIndex")]
-        public string I_08 { get; set; } //8
+        public int EmbIndex { get; set; } //8 (int)
         [YAXAttributeForClass]
         [YAXSerializeAs("I_12")]
         public int I_12 { get; set; } //12

@@ -95,9 +95,9 @@ namespace Xv2CoreLib.AUR
             {
                 aurFile.CharacterAuras.Add(new AUR_Character()
                 {
-                    CharaID = BitConverter.ToInt32(bytes, charaOffset + (16 * i) + 0).ToString(),
-                    I_04 = BitConverter.ToInt32(bytes, charaOffset + (16 * i) + 4),
-                    I_08 = BitConverter.ToInt32(bytes, charaOffset + (16 * i) + 8).ToString(),
+                    CharaID = BitConverter.ToInt32(bytes, charaOffset + (16 * i) + 0),
+                    Costume = BitConverter.ToInt32(bytes, charaOffset + (16 * i) + 4),
+                    AuraID = BitConverter.ToInt32(bytes, charaOffset + (16 * i) + 8),
                     I_12 = Convert.ToBoolean(BitConverter.ToInt32(bytes, charaOffset + (16 * i) + 12)),
                 });
             }
@@ -182,9 +182,9 @@ namespace Xv2CoreLib.AUR
 
             for(int i = 0; i < characterCount; i++)
             {
-                bytes.AddRange(BitConverter.GetBytes(int.Parse(CharacterAuras[i].CharaID)));
-                bytes.AddRange(BitConverter.GetBytes(CharacterAuras[i].I_04));
-                bytes.AddRange(BitConverter.GetBytes(int.Parse(CharacterAuras[i].I_08)));
+                bytes.AddRange(BitConverter.GetBytes(CharacterAuras[i].CharaID));
+                bytes.AddRange(BitConverter.GetBytes(CharacterAuras[i].Costume));
+                bytes.AddRange(BitConverter.GetBytes(CharacterAuras[i].AuraID));
                 bytes.AddRange(BitConverter.GetBytes(Convert.ToInt32(CharacterAuras[i].I_12)));
             }
 
@@ -275,18 +275,18 @@ namespace Xv2CoreLib.AUR
     {
         #region IInstallable
         [YAXDontSerialize]
-        public int SortID { get { return int.Parse(CharaID); } }
+        public int SortID { get { return CharaID; } }
         [YAXDontSerialize]
         public string Index 
         {
-            get { return $"{CharaID}_{I_04}"; }
+            get { return $"{CharaID}_{Costume}"; }
             set
             {
                 string[] values = value.Split('_');
                 if(values.Length == 2)
                 {
-                    CharaID = values[0];
-                    I_04 = int.Parse(values[1]);
+                    CharaID = int.Parse(values[0]);
+                    Costume = int.Parse(values[1]);
                 }
             }
         }
@@ -294,15 +294,15 @@ namespace Xv2CoreLib.AUR
 
         [YAXAttributeForClass]
         [YAXSerializeAs("Chara_ID")]
-        public string CharaID { get; set; } //Int32, offset 0
+        public int CharaID { get; set; } //Int32, offset 0
         [YAXAttributeForClass]
         [YAXSerializeAs("Costume")]
-        public int I_04 { get; set; }
+        public int Costume { get; set; } //4
         [YAXAttributeForClass]
         [YAXSerializeAs("Aura_ID")]
-        public string I_08 { get; set; } //int32
+        public int AuraID { get; set; } //8, int32
         [YAXAttributeForClass]
         [YAXSerializeAs("Glare")]
-        public bool I_12 { get; set; } //int32
+        public bool I_12 { get; set; } //12, int32
     }
 }

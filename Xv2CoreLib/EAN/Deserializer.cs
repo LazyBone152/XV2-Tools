@@ -17,12 +17,10 @@ namespace Xv2CoreLib.EAN
         string saveLocation;
         EAN_File eanFile;
         public List<byte> bytes = new List<byte>() { 35, 69, 65, 78, 254, 255, 32, 0 };
-        private bool writeXmlMode { get; set; }
         List<ESK_BoneNonHierarchal> nonHierarchalBones = null;
 
         public Deserializer(string location)
         {
-            writeXmlMode = true;
             saveLocation = String.Format("{0}/{1}", Path.GetDirectoryName(location), Path.GetFileNameWithoutExtension(location));
             YAXSerializer serializer = new YAXSerializer(typeof(EAN_File), YAXSerializationOptions.DontSerializeNullObjects);
             eanFile = (EAN_File)serializer.DeserializeFromFile(location);
@@ -36,7 +34,6 @@ namespace Xv2CoreLib.EAN
 
         public Deserializer(EAN_File _eanFile, string location)
         {
-            writeXmlMode = false;
             saveLocation = location;
             eanFile = _eanFile;
             eanFile.ValidateAnimationIndexes();
@@ -49,7 +46,6 @@ namespace Xv2CoreLib.EAN
 
         public Deserializer(EAN_File _eanFile)
         {
-            writeXmlMode = false;
             eanFile = _eanFile;
             eanFile.ValidateAnimationIndexes();
             eanFile.SortEntries();
@@ -79,7 +75,6 @@ namespace Xv2CoreLib.EAN
                         if(!nonHierarchalBones.Any(x => x.Name == eanFile.Animations[i].Nodes[a].BoneName))
                         {
                             eanFile.Animations[i].Nodes.RemoveAt(a);
-                           
                         }
                     }
                 }
@@ -107,12 +102,12 @@ namespace Xv2CoreLib.EAN
             //Animation
             if(AnimationCount > 0)
             {
-                bytes = Xv2CoreLib.Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), 24);
+                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), 24);
                 List<int> AnimationTable = new List<int>();
 
                 for(int i = 0; i < AnimationCount; i++)
                 {
-                    AnimationTable.Add(bytes.Count());
+                    AnimationTable.Add(bytes.Count);
                     bytes.AddRange(new byte[4]);
                 }
 
@@ -130,7 +125,7 @@ namespace Xv2CoreLib.EAN
             //Animation Names
             if(AnimationCount > 0)
             {
-                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), 28);
+                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), 28);
                 List<int> NameTable = new List<int>();
 
                 //Name Table
@@ -146,7 +141,7 @@ namespace Xv2CoreLib.EAN
                     int _idxOfAnimation = eanFile.IndexOf(i);
                     if(_idxOfAnimation != -1)
                     {
-                        bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), NameTable[i]);
+                        bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), NameTable[i]);
                         bytes.AddRange(Encoding.ASCII.GetBytes(eanFile.Animations[_idxOfAnimation].Name));
                         bytes.Add(0);
                     }
@@ -161,14 +156,14 @@ namespace Xv2CoreLib.EAN
             if (animation.FrameCount <= 0)
                 throw new InvalidDataException("EAN Save: FrameCount cannot be 0 or less!");
 
-            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), offsetToReplace);
-            int startOffset = bytes.Count();
-            int nodeCount = (animation.Nodes != null) ? animation.Nodes.Count() : 0;
+            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), offsetToReplace);
+            int startOffset = bytes.Count;
+            int nodeCount = (animation.Nodes != null) ? animation.Nodes.Count : 0;
 
             if(nodeCount > 0)
             {
                 nodeCount = 0;
-                for(int i = 0; i < animation.Nodes.Count(); i++)
+                for(int i = 0; i < animation.Nodes.Count; i++)
                 {
                     if(eanFile.Skeleton.Exists(animation.Nodes[i].BoneName))
                     {

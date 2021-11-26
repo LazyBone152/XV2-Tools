@@ -136,7 +136,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Binding\IdBindingManager.cs" />
+    <Compile Include="Binding\BindingManager.cs" />
     <Compile Include="Binding\X2MHelper.cs" />
     <Compile Include="Binding\XML\XmlParser.cs" />
     <Compile Include="Binding\XML\ZipReaderExtensions.cs" />

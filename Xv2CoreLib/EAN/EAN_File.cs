@@ -312,9 +312,7 @@ namespace Xv2CoreLib.EAN
             if (Animations == null) return 0;
             if (Animations.Count == 0) return 0;
 
-            int idx = Animations.Count() - 1;
-
-            return Animations[idx].IndexNumeric + 1;
+            return Animations.Max(x => x.IndexNumeric) + 1;
         }
 
         public int NextID(int mindID = 0)

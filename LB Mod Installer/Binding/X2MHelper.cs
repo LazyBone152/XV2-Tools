@@ -1,11 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+using System.Xml.Linq;
 using IniParser;
+using LB_Mod_Installer.Installer;
+using Xv2CoreLib.CMS;
+using Xv2CoreLib.Resource;
 
 namespace LB_Mod_Installer.Binding
 {
@@ -19,12 +20,110 @@ namespace LB_Mod_Installer.Binding
             Blast,
             Awoken
         }
-        
-        public X2MHelper()
+
+        public enum X2MType
         {
+            NOT_FOUND,
+            REPLACER,
+            NEW_CHARACTER,
+            NEW_SKILL,
+            NEW_COSTUME,
+            NEW_STAGE,
+            NEW_QUEST
         }
 
-        public int GetX2MSkillID1(string guid, IdBindingManager.CusSkillType skillType)
+        private string XV2INS_INSTALLED_MODS 
+        { 
+            get
+            {
+                return $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}/XV2INS/Installed";
+            }
+        }
+        private const string X2M_XML = "x2m.xml";
+
+        private Install install;
+
+        public X2MHelper(Install install)
+        {
+            this.install = install;
+        }
+
+        public bool IsModInstalled(string guid)
+        {
+            return File.Exists($"{XV2INS_INSTALLED_MODS}/{guid.ToLower()}.x2d");
+        }
+
+        private XDocument GetInstalledModXml(string guid)
+        {
+            if (IsModInstalled(guid))
+            {
+                using (ZipReader x2m = new ZipReader(ZipFile.Open($"{XV2INS_INSTALLED_MODS}/{guid.ToLower()}.x2d", ZipArchiveMode.Read)))
+                {
+                    return x2m.GetXmlDocumentFromArchive(X2M_XML);
+                }
+            }
+
+            return null;
+        }
+
+        private X2MType GetX2MType(XDocument xml)
+        {
+            XAttribute atr = xml.Root.Attribute("type");
+
+            if(atr != null)
+            {
+                return (X2MType)Enum.Parse(typeof(X2MType), atr.Value);
+            }
+
+            return X2MType.NOT_FOUND;
+        }
+
+        #region Character
+        public string GetX2MCharaCode(string guid)
+        {
+            XDocument xml = GetInstalledModXml(guid);
+
+            if (xml != null)
+            {
+                X2MType type = GetX2MType(xml);
+
+                if (type == X2MType.NEW_CHARACTER)
+                {
+                    foreach (var attr in xml.Root.Descendants("ENTRY_NAME").Attributes())
+                    {
+                        if (attr.Name == "value")
+                            return attr.Value;
+                    }
+                }
+            }
+
+            return BindingManager.NullTokenStr;
+        }
+
+        public int GetX2MCharaID(string guid)
+        {
+            XDocument xml = GetInstalledModXml(guid);
+
+            if(xml != null)
+            {
+                string code = GetX2MCharaCode(guid);
+
+                if (code != BindingManager.NullTokenStr)
+                {
+                    CMS_File cms = (CMS_File)install.GetParsedFile<CMS_File>(BindingManager.CMS_PATH, false, true);
+
+                    CMS_Entry entry = cms.CMS_Entries.FirstOrDefault(x => x.ShortName == code);
+
+                    return (entry != null) ? entry.ID : BindingManager.NullTokenInt;
+                }
+            }
+
+            return BindingManager.NullTokenInt;
+        }
+        #endregion
+
+        #region Skill
+        public int GetX2MSkillID1(string guid, BindingManager.CusSkillType skillType)
         {
             object[] ret = FindX2MSkill(guid, skillType);
 
@@ -33,10 +132,10 @@ namespace LB_Mod_Installer.Binding
                 return (int)ret[0];
             }
 
-            return IdBindingManager.NullTokenInt;
+            return BindingManager.NullTokenInt;
         }
 
-        public int GetX2MSkillID2(string guid, IdBindingManager.CusSkillType skillType)
+        public int GetX2MSkillID2(string guid, BindingManager.CusSkillType skillType)
         {
             object[] ret = FindX2MSkill(guid, skillType);
 
@@ -45,10 +144,10 @@ namespace LB_Mod_Installer.Binding
                 return (int)ret[1];
             }
 
-            return IdBindingManager.NullTokenInt;
+            return BindingManager.NullTokenInt;
         }
         
-        public string GetX2MSkillShortName(string guid, IdBindingManager.CusSkillType skillType)
+        public string GetX2MSkillShortName(string guid, BindingManager.CusSkillType skillType)
         {
             object[] ret = FindX2MSkill(guid, skillType);
 
@@ -60,7 +159,7 @@ namespace LB_Mod_Installer.Binding
             return null;
         }
 
-        public string GetX2MSkillPath(string guid, IdBindingManager.CusSkillType skillType, IdBindingManager.SkillFileType skillFileType)
+        public string GetX2MSkillPath(string guid, BindingManager.CusSkillType skillType, BindingManager.SkillFileType skillFileType)
         {
             //added 2 extra params to the returned object
             object[] ret = FindX2MSkill(guid, skillType);
@@ -70,11 +169,11 @@ namespace LB_Mod_Installer.Binding
 
                 switch (skillFileType)
                 {
-                    case IdBindingManager.SkillFileType.BAC:
+                    case BindingManager.SkillFileType.BAC:
                         return string.Format(@"skill/{0}/{1}/{1}.bac", (string)ret[3], (string)ret[4]);
-                    case IdBindingManager.SkillFileType.BDM:
+                    case BindingManager.SkillFileType.BDM:
                         return string.Format(@"skill/{0}/{1}/{1}.bdm", (string)ret[3], (string)ret[4]);
-                    case IdBindingManager.SkillFileType.ShotBDM:
+                    case BindingManager.SkillFileType.ShotBDM:
                         return string.Format(@"skill/{0}/{1}/{1}.shot.bdm", (string)ret[3], (string)ret[4]);
 
                 }
@@ -83,7 +182,8 @@ namespace LB_Mod_Installer.Binding
 
             return null;
         }
-        private object[] FindX2MSkill(string guid, IdBindingManager.CusSkillType skillType)
+        
+        private object[] FindX2MSkill(string guid, BindingManager.CusSkillType skillType)
         {
             try
             {
@@ -102,19 +202,19 @@ namespace LB_Mod_Installer.Binding
 
                 switch (skillType)
                 {
-                    case IdBindingManager.CusSkillType.Super:
+                    case BindingManager.CusSkillType.Super:
                         directory = Path.GetFullPath(String.Format("{0}/skill/SPA", GeneralInfo.GameDataFolder));
                         break;
-                    case IdBindingManager.CusSkillType.Ultimate:
+                    case BindingManager.CusSkillType.Ultimate:
                         directory = Path.GetFullPath(String.Format("{0}/skill/ULT", GeneralInfo.GameDataFolder));
                         break;
-                    case IdBindingManager.CusSkillType.Evasive:
+                    case BindingManager.CusSkillType.Evasive:
                         directory = Path.GetFullPath(String.Format("{0}/skill/ESC", GeneralInfo.GameDataFolder));
                         break;
-                    case IdBindingManager.CusSkillType.Blast:
+                    case BindingManager.CusSkillType.Blast:
                         directory = Path.GetFullPath(String.Format("{0}/skill/BLT", GeneralInfo.GameDataFolder));
                         break;
-                    case IdBindingManager.CusSkillType.Awoken:
+                    case BindingManager.CusSkillType.Awoken:
                         directory = Path.GetFullPath(String.Format("{0}/skill/MET", GeneralInfo.GameDataFolder));
                         break;
                 }
@@ -148,23 +248,23 @@ namespace LB_Mod_Installer.Binding
 
                             switch (skillType)
                             {
-                                case IdBindingManager.CusSkillType.Super:
+                                case BindingManager.CusSkillType.Super:
                                     ID1 = ID2;
                                     SkillType = "SPA";
                                     break;
-                                case IdBindingManager.CusSkillType.Ultimate:
+                                case BindingManager.CusSkillType.Ultimate:
                                     ID1 = ID2 + 5000;
                                     SkillType = "ULT";
                                     break;
-                                case IdBindingManager.CusSkillType.Evasive:
+                                case BindingManager.CusSkillType.Evasive:
                                     ID1 = ID2 + 10000;
                                     SkillType = "ESC";
                                     break;
-                                case IdBindingManager.CusSkillType.Blast:
+                                case BindingManager.CusSkillType.Blast:
                                     ID1 = ID2 + 20000;
                                     SkillType = "BLT";
                                     break;
-                                case IdBindingManager.CusSkillType.Awoken:
+                                case BindingManager.CusSkillType.Awoken:
                                     ID1 = ID2 + 25000;
                                     SkillType = "MET";
                                     break;
@@ -192,5 +292,7 @@ namespace LB_Mod_Installer.Binding
                 return null;
             }
         }
+
+        #endregion
     }
 }

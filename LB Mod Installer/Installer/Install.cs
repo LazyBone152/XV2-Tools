@@ -59,7 +59,7 @@ namespace LB_Mod_Installer.Installer
         public MsgComponentInstall msgComponentInstall;
 
         //Needs to be static for Binding.Xml.XmlParser to access it. SHOULD be refactored entirely to be a singleton, but it relies on Install and i dont have time to untangle it all right now.
-        public static IdBindingManager bindingManager;
+        public static BindingManager bindingManager;
 
         private bool useJungle1 = false;
         private bool useJungle2 = false;
@@ -69,7 +69,6 @@ namespace LB_Mod_Installer.Installer
 
         public Install(InstallerXml _installerXml, ZipReader _zipManager, MainWindow parent, Xv2FileIO fileIO, FileCacheManager _fileManager)
         {
-            Files = _installerXml.GetInstallFiles();
             installerXml = _installerXml;
             zipManager = _zipManager;
             Parent = parent;
@@ -77,7 +76,7 @@ namespace LB_Mod_Installer.Installer
             msgComponentInstall = new MsgComponentInstall(this);
             fileManager = _fileManager;
 
-            bindingManager = new IdBindingManager(this);
+            bindingManager = new BindingManager(this);
         }
 
         public void Start()
@@ -86,9 +85,13 @@ namespace LB_Mod_Installer.Installer
             try
 #endif
             {
+                Files = installerXml.GetInstallFiles();
+
                 Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
                 JungleCheck();
-                SetProgressBarSteps(); 
+                SetProgressBarSteps();
+
+
                 StartInstall();
 
                 //Finalize
@@ -169,7 +172,7 @@ namespace LB_Mod_Installer.Installer
                     case FileType.XML:
                         //Install XML or Binary
                         UpdateProgessBarText(String.Format("_Installing \"{0}\"...", Path.GetFileName(File.InstallPath)));
-                        ResolveFileType(File.SourcePath, File.InstallPath, type == FileType.XML);
+                        ResolveFileType(File.SourcePath, File.InstallPath, type == FileType.XML, File.GetUseSkipBinding());
                         break;
                     case FileType.VfxPackage:
                         //Install effects
@@ -216,7 +219,7 @@ namespace LB_Mod_Installer.Installer
 
         }
         
-        private void ResolveFileType(string xmlPath, string installPath, bool isXml)
+        private void ResolveFileType(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
             switch (Path.GetExtension(Path.GetFileNameWithoutExtension(xmlPath)))
             {
@@ -224,88 +227,88 @@ namespace LB_Mod_Installer.Installer
                     MessageBox.Show(string.Format("The old eepk.xml installer is no longer supported.\n\nPlease use the export functionality of EEPK Organiser (v0.4 and greater)."), "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                     break;
                 case ".idb":
-                    Install_IDB(xmlPath, installPath, isXml);
+                    Install_IDB(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".cus":
-                    Install_CUS(xmlPath, installPath, isXml);
+                    Install_CUS(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".bcs":
-                    Install_BCS(xmlPath, installPath, isXml);
+                    Install_BCS(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".ers":
-                    Install_ERS(xmlPath, installPath, isXml);
+                    Install_ERS(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".cms":
-                    Install_CMS(xmlPath, installPath, isXml);
+                    Install_CMS(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".bac":
-                    Install_BAC(xmlPath, installPath, isXml);
+                    Install_BAC(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".bdm":
-                    Install_BDM(xmlPath, installPath, isXml);
+                    Install_BDM(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".bev":
-                    Install_BEV(xmlPath, installPath, isXml);
+                    Install_BEV(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".bpe":
-                    Install_BPE(xmlPath, installPath, isXml);
+                    Install_BPE(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".bsa":
-                    Install_BSA(xmlPath, installPath, isXml);
+                    Install_BSA(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".cnc":
-                    Install_CNC(xmlPath, installPath, isXml);
+                    Install_CNC(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".cns":
-                    Install_CNS(xmlPath, installPath, isXml);
+                    Install_CNS(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".cso":
-                    Install_CSO(xmlPath, installPath, isXml);
+                    Install_CSO(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".ean":
-                    Install_EAN(xmlPath, installPath, isXml);
+                    Install_EAN(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".msg":
-                    Install_MSG(xmlPath, installPath, isXml);
+                    Install_MSG(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".psc":
-                    Install_PSC(xmlPath, installPath, isXml);
+                    Install_PSC(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".aur":
-                    Install_AUR(xmlPath, installPath, isXml);
+                    Install_AUR(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".pup":
-                    Install_PUP(xmlPath, installPath, isXml);
+                    Install_PUP(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".tsd":
-                    Install_TSD(xmlPath, installPath, isXml);
+                    Install_TSD(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".tnl":
-                    Install_TNL(xmlPath, installPath, isXml);
+                    Install_TNL(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".emb":
                     Install_EMB(xmlPath, installPath, isXml);
                     break;
                 case ".qxd":
-                    Install_QXD(xmlPath, installPath, isXml);
+                    Install_QXD(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".pal":
-                    Install_PAL(xmlPath, installPath, isXml);
+                    Install_PAL(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".ttb":
-                    Install_TTB(xmlPath, installPath, isXml);
+                    Install_TTB(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".ttc":
-                    Install_TTC(xmlPath, installPath, isXml);
+                    Install_TTC(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".sev":
-                    Install_SEV(xmlPath, installPath, isXml);
+                    Install_SEV(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".hci":
                     Install_HCI(xmlPath, installPath, isXml);
                     break;
                 case ".cml":
-                    Install_CML(xmlPath, installPath, isXml);
+                    Install_CML(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".x2s":
                     Install_CharaSlots(xmlPath);
@@ -401,7 +404,7 @@ namespace LB_Mod_Installer.Installer
         }
 
         //File Install Methods
-        private void Install_IDB(string xmlPath, string installPath, bool isXml)
+        private void Install_IDB(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
             try
@@ -421,7 +424,7 @@ namespace LB_Mod_Installer.Installer
                 }
 
                 //Install entries
-                InstallEntries(xmlFile.Entries, binaryFile.Entries, installPath, Sections.IDB_Entries);
+                InstallEntries(xmlFile.Entries, binaryFile.Entries, installPath, Sections.IDB_Entries, useSkipBindings);
             }
 #if !DEBUG
             catch (Exception ex)
@@ -432,7 +435,7 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_CUS(string xmlPath, string installPath, bool isXml)
+        private void Install_CUS(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
             try
@@ -450,12 +453,12 @@ namespace LB_Mod_Installer.Installer
                 bindingManager.ParseProperties(xmlFile.AwokenSkills, binaryFile.AwokenSkills, installPath);
 
                 //Install entries
-                InstallEntries(xmlFile.Skillsets, binaryFile.Skillsets, installPath, Sections.CUS_Skillsets);
-                InstallEntries(xmlFile.SuperSkills, binaryFile.SuperSkills, installPath, Sections.CUS_SuperSkills);
-                InstallEntries(xmlFile.UltimateSkills, binaryFile.UltimateSkills, installPath, Sections.CUS_UltimateSkills);
-                InstallEntries(xmlFile.EvasiveSkills, binaryFile.EvasiveSkills, installPath, Sections.CUS_EvasiveSkills);
-                InstallEntries(xmlFile.BlastSkills, binaryFile.BlastSkills, installPath, Sections.CUS_BlastSkills);
-                InstallEntries(xmlFile.AwokenSkills, binaryFile.AwokenSkills, installPath, Sections.CUS_AwokenSkills);
+                InstallEntries(xmlFile.Skillsets, binaryFile.Skillsets, installPath, Sections.CUS_Skillsets, useSkipBindings);
+                InstallEntries(xmlFile.SuperSkills, binaryFile.SuperSkills, installPath, Sections.CUS_SuperSkills, useSkipBindings);
+                InstallEntries(xmlFile.UltimateSkills, binaryFile.UltimateSkills, installPath, Sections.CUS_UltimateSkills, useSkipBindings);
+                InstallEntries(xmlFile.EvasiveSkills, binaryFile.EvasiveSkills, installPath, Sections.CUS_EvasiveSkills, useSkipBindings);
+                InstallEntries(xmlFile.BlastSkills, binaryFile.BlastSkills, installPath, Sections.CUS_BlastSkills, useSkipBindings);
+                InstallEntries(xmlFile.AwokenSkills, binaryFile.AwokenSkills, installPath, Sections.CUS_AwokenSkills, useSkipBindings);
             }
 #if !DEBUG
             catch (Exception ex)
@@ -466,7 +469,7 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_BCS(string xmlPath, string installPath, bool isXml)
+        private void Install_BCS(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
             try
@@ -495,8 +498,8 @@ namespace LB_Mod_Installer.Installer
                 bindingManager.ParseProperties(xmlFile.Bodies, binaryFile.Bodies, installPath);
 
                 //Install entries
-                InstallEntries(xmlFile.PartSets, binaryFile.PartSets, installPath, Sections.BCS_PartSets);
-                InstallEntries(xmlFile.Bodies, binaryFile.Bodies, installPath, Sections.BCS_Bodies);
+                InstallEntries(xmlFile.PartSets, binaryFile.PartSets, installPath, Sections.BCS_PartSets, useSkipBindings);
+                InstallEntries(xmlFile.Bodies, binaryFile.Bodies, installPath, Sections.BCS_Bodies, useSkipBindings);
 
                 //Install PartColors
                 if(xmlFile.Part_Colors != null)
@@ -526,7 +529,7 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_CMS(string xmlPath, string installPath, bool isXml)
+        private void Install_CMS(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
             try
@@ -546,7 +549,7 @@ namespace LB_Mod_Installer.Installer
                 }
 
                 //Install entries
-                InstallEntries(xmlFile.CMS_Entries, binaryFile.CMS_Entries, installPath, Sections.CMS_Entries);
+                InstallEntries(xmlFile.CMS_Entries, binaryFile.CMS_Entries, installPath, Sections.CMS_Entries, useSkipBindings);
             }
 #if !DEBUG
             catch (Exception ex)
@@ -557,7 +560,7 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_BAC(string xmlPath, string installPath, bool isXml)
+        private void Install_BAC(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
             try
@@ -580,7 +583,7 @@ namespace LB_Mod_Installer.Installer
                 bindingManager.ParseProperties(xmlFile.BacEntries, binaryFile.BacEntries, installPath);
 
                 //Install entries
-                InstallEntries(xmlFile.BacEntries, binaryFile.BacEntries, installPath, Sections.BAC_Entries);
+                InstallEntries(xmlFile.BacEntries, binaryFile.BacEntries, installPath, Sections.BAC_Entries, useSkipBindings);
 
             }
 #if !DEBUG
@@ -592,7 +595,7 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_PSC(string xmlPath, string installPath, bool isXml)
+        private void Install_PSC(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
             try
@@ -609,7 +612,7 @@ namespace LB_Mod_Installer.Installer
                     {
                         var binaryPscConfig = binaryConfig.GetPscEntry(pscEntry.Index);
                         bindingManager.ParseProperties(pscEntry.PscSpecEntries, binaryPscConfig.PscSpecEntries, installPath);
-                        InstallEntries(pscEntry.PscSpecEntries, binaryPscConfig.PscSpecEntries, installPath, Sections.GetPscEntry(pscEntry.Index));
+                        InstallEntries(pscEntry.PscSpecEntries, binaryPscConfig.PscSpecEntries, installPath, Sections.GetPscEntry(pscEntry.Index), useSkipBindings);
                     }
                 }
             }
@@ -761,7 +764,7 @@ namespace LB_Mod_Installer.Installer
         }
 
         //Copy-paste generic install methods
-        private void Install_BDM(string xmlPath, string installPath, bool isXml)
+        private void Install_BDM(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
             try
@@ -785,7 +788,7 @@ namespace LB_Mod_Installer.Installer
                 bindingManager.ParseProperties(xmlFile.BDM_Entries, binaryFile.BDM_Entries, installPath);
 
                 //Install entries
-                InstallEntries(xmlFile.BDM_Entries, binaryFile.BDM_Entries, installPath, Sections.BDM_Entries);
+                InstallEntries(xmlFile.BDM_Entries, binaryFile.BDM_Entries, installPath, Sections.BDM_Entries, useSkipBindings);
             }
 #if !DEBUG
             catch (Exception ex)
@@ -796,7 +799,7 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_BEV(string xmlPath, string installPath, bool isXml)
+        private void Install_BEV(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
             try
@@ -809,7 +812,7 @@ namespace LB_Mod_Installer.Installer
                 bindingManager.ParseProperties(xmlFile.Entries, binaryFile.Entries, installPath);
 
                 //Install entries
-                InstallEntries(xmlFile.Entries, binaryFile.Entries, installPath, Sections.BEV_Entries);
+                InstallEntries(xmlFile.Entries, binaryFile.Entries, installPath, Sections.BEV_Entries, useSkipBindings);
             }
 #if !DEBUG
             catch (Exception ex)
@@ -820,7 +823,7 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_BPE(string xmlPath, string installPath, bool isXml)
+        private void Install_BPE(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
             try
@@ -833,7 +836,7 @@ namespace LB_Mod_Installer.Installer
                 bindingManager.ParseProperties(xmlFile.Entries, binaryFile.Entries, installPath);
 
                 //Install entries
-                InstallEntries(xmlFile.Entries, binaryFile.Entries, installPath, Sections.BPE_Entries);
+                InstallEntries(xmlFile.Entries, binaryFile.Entries, installPath, Sections.BPE_Entries, useSkipBindings);
             }
 #if !DEBUG
             catch (Exception ex)
@@ -844,7 +847,7 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_BSA(string xmlPath, string installPath, bool isXml)
+        private void Install_BSA(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
             try
@@ -864,7 +867,7 @@ namespace LB_Mod_Installer.Installer
                 bindingManager.ParseProperties(xmlFile.BSA_Entries, binaryFile.BSA_Entries, installPath);
 
                 //Install entries
-                InstallEntries(xmlFile.BSA_Entries, binaryFile.BSA_Entries, installPath, Sections.BSA_Entries);
+                InstallEntries(xmlFile.BSA_Entries, binaryFile.BSA_Entries, installPath, Sections.BSA_Entries, useSkipBindings);
             }
 #if !DEBUG
             catch (Exception ex)
@@ -875,7 +878,7 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_CNC(string xmlPath, string installPath, bool isXml)
+        private void Install_CNC(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
             try
@@ -888,7 +891,7 @@ namespace LB_Mod_Installer.Installer
                 bindingManager.ParseProperties(xmlFile.CncEntries, binaryFile.CncEntries, installPath);
 
                 //Install entries
-                InstallEntries(xmlFile.CncEntries, binaryFile.CncEntries, installPath, Sections.CNC_Entries);
+                InstallEntries(xmlFile.CncEntries, binaryFile.CncEntries, installPath, Sections.CNC_Entries, useSkipBindings);
             }
 #if !DEBUG
             catch (Exception ex)
@@ -899,7 +902,7 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_CNS(string xmlPath, string installPath, bool isXml)
+        private void Install_CNS(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
             try
@@ -912,7 +915,7 @@ namespace LB_Mod_Installer.Installer
                 bindingManager.ParseProperties(xmlFile.CnsEntries, binaryFile.CnsEntries, installPath);
 
                 //Install entries
-                InstallEntries(xmlFile.CnsEntries, binaryFile.CnsEntries, installPath, Sections.CNS_Entries);
+                InstallEntries(xmlFile.CnsEntries, binaryFile.CnsEntries, installPath, Sections.CNS_Entries, useSkipBindings);
             }
 #if !DEBUG
             catch (Exception ex)
@@ -923,7 +926,7 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_CSO(string xmlPath, string installPath, bool isXml)
+        private void Install_CSO(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
             try
@@ -936,7 +939,7 @@ namespace LB_Mod_Installer.Installer
                 bindingManager.ParseProperties(xmlFile.CsoEntries, binaryFile.CsoEntries, installPath);
 
                 //Install entries
-                InstallEntries(xmlFile.CsoEntries, binaryFile.CsoEntries, installPath, Sections.CSO_Entries);
+                InstallEntries(xmlFile.CsoEntries, binaryFile.CsoEntries, installPath, Sections.CSO_Entries, useSkipBindings);
             }
 #if !DEBUG
             catch (Exception ex)
@@ -947,7 +950,7 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_EAN(string xmlPath, string installPath, bool isXml)
+        private void Install_EAN(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
             try
@@ -960,7 +963,7 @@ namespace LB_Mod_Installer.Installer
                 bindingManager.ParseProperties(xmlFile.Animations, binaryFile.Animations, installPath);
 
                 //Install entries
-                InstallEntries(xmlFile.Animations, binaryFile.Animations, installPath, Sections.EAN_Entries);
+                InstallEntries(xmlFile.Animations, binaryFile.Animations, installPath, Sections.EAN_Entries, useSkipBindings);
             }
 #if !DEBUG
             catch (Exception ex)
@@ -971,7 +974,7 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_MSG(string xmlPath, string installPath, bool isXml)
+        private void Install_MSG(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
             try
@@ -984,7 +987,7 @@ namespace LB_Mod_Installer.Installer
                 bindingManager.ParseProperties(xmlFile.MSG_Entries, binaryFile.MSG_Entries, installPath);
 
                 //Install entries
-                InstallEntries(xmlFile.MSG_Entries, binaryFile.MSG_Entries, installPath, Sections.MSG_Entries);
+                InstallEntries(xmlFile.MSG_Entries, binaryFile.MSG_Entries, installPath, Sections.MSG_Entries, useSkipBindings);
             }
 #if !DEBUG
             catch (Exception ex)
@@ -995,7 +998,7 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_AUR(string xmlPath, string installPath, bool isXml)
+        private void Install_AUR(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
             try
@@ -1009,8 +1012,8 @@ namespace LB_Mod_Installer.Installer
                 bindingManager.ParseProperties(xmlFile.CharacterAuras, binaryFile.CharacterAuras, installPath);
 
                 //Install entries
-                InstallEntries(xmlFile.Auras, binaryFile.Auras, installPath, Sections.AUR_Aura);
-                InstallEntries(xmlFile.CharacterAuras, binaryFile.CharacterAuras, installPath, Sections.AUR_Chara);
+                InstallEntries(xmlFile.Auras, binaryFile.Auras, installPath, Sections.AUR_Aura, useSkipBindings);
+                InstallEntries(xmlFile.CharacterAuras, binaryFile.CharacterAuras, installPath, Sections.AUR_Chara, useSkipBindings);
             }
 #if !DEBUG
             catch (Exception ex)
@@ -1021,7 +1024,7 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_PUP(string xmlPath, string installPath, bool isXml)
+        private void Install_PUP(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
             try
@@ -1034,7 +1037,7 @@ namespace LB_Mod_Installer.Installer
                 bindingManager.ParseProperties(xmlFile.PupEntries, binaryFile.PupEntries, installPath);
 
                 //Install entries
-                InstallEntries(xmlFile.PupEntries, binaryFile.PupEntries, installPath, Sections.PUP_Entry);
+                InstallEntries(xmlFile.PupEntries, binaryFile.PupEntries, installPath, Sections.PUP_Entry, useSkipBindings);
             }
 #if !DEBUG
             catch (Exception ex)
@@ -1045,7 +1048,7 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_TSD(string xmlPath, string installPath, bool isXml)
+        private void Install_TSD(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
             try
@@ -1062,11 +1065,11 @@ namespace LB_Mod_Installer.Installer
                 bindingManager.ParseProperties(xmlFile.Triggers, binaryFile.Triggers, installPath);
 
                 //Install entries
-                InstallEntries(xmlFile.Triggers, binaryFile.Triggers, installPath, Sections.TSD_Trigger);
-                InstallEntries(xmlFile.Globals, binaryFile.Globals, installPath, Sections.TSD_Global);
-                InstallEntries(xmlFile.Constants, binaryFile.Constants, installPath, Sections.TSD_Constant);
-                InstallEntries(xmlFile.Events, binaryFile.Events, installPath, Sections.TSD_Event);
-                InstallEntries(xmlFile.Zones, binaryFile.Zones, installPath, Sections.TSD_Zone);
+                InstallEntries(xmlFile.Triggers, binaryFile.Triggers, installPath, Sections.TSD_Trigger, useSkipBindings);
+                InstallEntries(xmlFile.Globals, binaryFile.Globals, installPath, Sections.TSD_Global, useSkipBindings);
+                InstallEntries(xmlFile.Constants, binaryFile.Constants, installPath, Sections.TSD_Constant, useSkipBindings);
+                InstallEntries(xmlFile.Events, binaryFile.Events, installPath, Sections.TSD_Event, useSkipBindings);
+                InstallEntries(xmlFile.Zones, binaryFile.Zones, installPath, Sections.TSD_Zone, useSkipBindings);
             }
 #if !DEBUG
             catch (Exception ex)
@@ -1077,7 +1080,7 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_TNL(string xmlPath, string installPath, bool isXml)
+        private void Install_TNL(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
             try
@@ -1097,10 +1100,10 @@ namespace LB_Mod_Installer.Installer
                 bindingManager.ParseProperties(xmlFile.Objects, binaryFile.Objects, installPath, usedIds);
 
                 //Install entries
-                InstallEntries(xmlFile.Characters, binaryFile.Characters, installPath, Sections.TNL_Character);
-                InstallEntries(xmlFile.Teachers, binaryFile.Teachers, installPath, Sections.TNL_Teacher);
-                InstallEntries(xmlFile.Objects, binaryFile.Objects, installPath, Sections.TNL_Object);
-                InstallEntries(xmlFile.Actions, binaryFile.Actions, installPath, Sections.TNL_Action);
+                InstallEntries(xmlFile.Characters, binaryFile.Characters, installPath, Sections.TNL_Character, useSkipBindings);
+                InstallEntries(xmlFile.Teachers, binaryFile.Teachers, installPath, Sections.TNL_Teacher, useSkipBindings);
+                InstallEntries(xmlFile.Objects, binaryFile.Objects, installPath, Sections.TNL_Object, useSkipBindings);
+                InstallEntries(xmlFile.Actions, binaryFile.Actions, installPath, Sections.TNL_Action, useSkipBindings);
             }
 #if !DEBUG
             catch (Exception ex)
@@ -1111,7 +1114,7 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_QXD(string xmlPath, string installPath, bool isXml)
+        private void Install_QXD(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
             try
@@ -1142,10 +1145,10 @@ namespace LB_Mod_Installer.Installer
                 bindingManager.ParseProperties(xmlFile.Characters2, binaryFile.Characters2, installPath, usedCharacterIds);
 
                 //Install entries
-                InstallEntries(xmlFile.Quests, binaryFile.Quests, installPath, Sections.QXD_Quest);
-                InstallEntries(xmlFile.Characters1, binaryFile.Characters1, installPath, Sections.QXD_Character1);
-                InstallEntries(xmlFile.Characters2, binaryFile.Characters2, installPath, Sections.QXD_Character2);
-                InstallEntries(xmlFile.Collections, binaryFile.Collections, installPath, Sections.QXD_Collection);
+                InstallEntries(xmlFile.Quests, binaryFile.Quests, installPath, Sections.QXD_Quest, useSkipBindings);
+                InstallEntries(xmlFile.Characters1, binaryFile.Characters1, installPath, Sections.QXD_Character1, useSkipBindings);
+                InstallEntries(xmlFile.Characters2, binaryFile.Characters2, installPath, Sections.QXD_Character2, useSkipBindings);
+                InstallEntries(xmlFile.Collections, binaryFile.Collections, installPath, Sections.QXD_Collection, useSkipBindings);
             }
 #if !DEBUG
             catch (Exception ex)
@@ -1156,7 +1159,7 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_PAL(string xmlPath, string installPath, bool isXml)
+        private void Install_PAL(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
             try
@@ -1169,7 +1172,7 @@ namespace LB_Mod_Installer.Installer
                 bindingManager.ParseProperties(xmlFile.PalEntries, binaryFile.PalEntries, installPath);
 
                 //Install entries
-                InstallEntries(xmlFile.PalEntries, binaryFile.PalEntries, installPath, Sections.PAL_Entry);
+                InstallEntries(xmlFile.PalEntries, binaryFile.PalEntries, installPath, Sections.PAL_Entry, useSkipBindings);
             }
 #if !DEBUG
             catch (Exception ex)
@@ -1180,7 +1183,7 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_TTB(string xmlPath, string installPath, bool isXml)
+        private void Install_TTB(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
             try
@@ -1190,7 +1193,7 @@ namespace LB_Mod_Installer.Installer
                 TTB_File binaryFile = (TTB_File)GetParsedFile<TTB_File>(installPath);
 
                 //Install entries
-                InstallSubEntries<TTB_Event, TTB_Entry>(xmlFile.Entries, binaryFile.Entries, installPath, Sections.TTB_Entry);
+                InstallSubEntries<TTB_Event, TTB_Entry>(xmlFile.Entries, binaryFile.Entries, installPath, Sections.TTB_Entry, useSkipBindings);
 
             }
 #if !DEBUG
@@ -1202,7 +1205,7 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_TTC(string xmlPath, string installPath, bool isXml)
+        private void Install_TTC(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
             try
@@ -1212,7 +1215,7 @@ namespace LB_Mod_Installer.Installer
                 TTC_File binaryFile = (TTC_File)GetParsedFile<TTC_File>(installPath);
 
                 //Install entries
-                InstallEntries(xmlFile.Entries, binaryFile.Entries, installPath, Sections.TTC_Entry);
+                InstallEntries(xmlFile.Entries, binaryFile.Entries, installPath, Sections.TTC_Entry, useSkipBindings);
             }
 #if !DEBUG
             catch (Exception ex)
@@ -1223,7 +1226,7 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_SEV(string xmlPath, string installPath, bool isXml)
+        private void Install_SEV(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
             try
@@ -1233,7 +1236,7 @@ namespace LB_Mod_Installer.Installer
                 SEV_File binaryFile = (SEV_File)GetParsedFile<SEV_File>(installPath);
 
                 //Install entries
-                InstallSubEntries<SEV_CharEvent, SEV_Entry>(xmlFile.Entries, binaryFile.Entries, installPath, Sections.SEV_Entry);
+                InstallSubEntries<SEV_CharEvent, SEV_Entry>(xmlFile.Entries, binaryFile.Entries, installPath, Sections.SEV_Entry, useSkipBindings);
 
             }
 #if !DEBUG
@@ -1274,7 +1277,7 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_CML(string xmlPath, string installPath, bool isXml)
+        private void Install_CML(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
             try
@@ -1284,7 +1287,7 @@ namespace LB_Mod_Installer.Installer
                 CML_File binaryFile = (CML_File)GetParsedFile<CML_File>(installPath);
 
                 //Install entries
-                InstallEntries(xmlFile.Entries, binaryFile.Entries, installPath, Sections.CML_Entry);
+                InstallEntries(xmlFile.Entries, binaryFile.Entries, installPath, Sections.CML_Entry, useSkipBindings);
 
             }
 #if !DEBUG
@@ -1296,7 +1299,7 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_ERS(string xmlPath, string installPath, bool isXml)
+        private void Install_ERS(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
             try
@@ -1305,7 +1308,7 @@ namespace LB_Mod_Installer.Installer
                 ERS_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<ERS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : ERS_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 ERS_File binaryFile = (ERS_File)GetParsedFile<ERS_File>(installPath);
 
-                InstallSubEntries<ERS_MainTableEntry, ERS_MainTable>(xmlFile.Entries, binaryFile.Entries, installPath, Sections.ERS_Entries);
+                InstallSubEntries<ERS_MainTableEntry, ERS_MainTable>(xmlFile.Entries, binaryFile.Entries, installPath, Sections.ERS_Entries, useSkipBindings);
 
             }
 #if !DEBUG
@@ -1328,7 +1331,7 @@ namespace LB_Mod_Installer.Installer
         /// </summary>
         /// <param name="installEntries">The entries to install.</param>
         /// <param name="destEntries">The entries to install into.</param>
-        private void InstallEntries<T>(IList<T> installEntries, IList<T> destEntries, string path, string section) where T : IInstallable
+        private void InstallEntries<T>(IList<T> installEntries, IList<T> destEntries, string path, string section, bool useSkipBindings) where T : IInstallable
         {
             if (installEntries == null) return;
             if (destEntries == null) throw new InvalidOperationException(string.Format("InstallEntries: destEntries was null. Cannot install entries. ({0})", path));
@@ -1345,6 +1348,10 @@ namespace LB_Mod_Installer.Installer
                 if (index != -1)
                 {
                     //Entry with same index exists, so overwrite it.
+
+                    if(useSkipBindings)
+                        bindingManager.ProcessSkipBindings(entryToInstall, destEntries[index]);
+
                     destEntries[index] = entryToInstall;
                 }
                 else
@@ -1355,7 +1362,7 @@ namespace LB_Mod_Installer.Installer
             }
         }
 
-        private void InstallSubEntries<T, M>(IList<M> installEntries, IList<M> destEntries, string path, string section) where T : IInstallable, new() where M : IInstallable_2<T>, IInstallable, new()
+        private void InstallSubEntries<T, M>(IList<M> installEntries, IList<M> destEntries, string path, string section, bool useSkipBindings) where T : IInstallable, new() where M : IInstallable_2<T>, IInstallable, new()
         {
             if (installEntries == null) return;
             if (destEntries == null) throw new InvalidOperationException(string.Format("InstallSubEntries: destEntries was null. Cannot install entries. ({0})", path));
@@ -1384,7 +1391,7 @@ namespace LB_Mod_Installer.Installer
                 if (destEntries[index].SubEntries == null)
                     destEntries[index].SubEntries = new List<T>();
 
-                InstallEntries<T>(entryToInstall.SubEntries, destEntries[index].SubEntries, path, $"{section}/{entryToInstall.Index}");
+                InstallEntries<T>(entryToInstall.SubEntries, destEntries[index].SubEntries, path, $"{section}/{entryToInstall.Index}", useSkipBindings);
             }
         }
 

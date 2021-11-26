@@ -135,8 +135,8 @@ namespace LB_Mod_Installer.Installer
             //Remove all files with empty SourcePaths
             files.RemoveAll(x => string.IsNullOrWhiteSpace(x.SourcePath));
 
-            //Remove files that have a invalid flag
-            files.RemoveAll(x => !FlagsIsSet(x.HasFlag));
+            //Remove files that have a invalid flag or are otherwise disabled
+            files.RemoveAll(x => !FlagsIsSet(x.HasFlag) || !x.GetIsEnabled());
 
             return files;
         }
@@ -255,7 +255,7 @@ namespace LB_Mod_Installer.Installer
 
                     CurrentInstallStep++;
                 }
-                while (!FlagsIsSet(InstallOptionSteps[CurrentInstallStep].HasFlag));
+                while (!FlagsIsSet(InstallOptionSteps[CurrentInstallStep].HasFlag) || !InstallOptionSteps[CurrentInstallStep].GetIsEnabled());
 
                 //CurrentInstallStep++;
                 StepCountUpdate();
@@ -273,14 +273,14 @@ namespace LB_Mod_Installer.Installer
             {
                 do
                 {
+                    CurrentInstallStep--;
+
                     if (CurrentInstallStep < 0)
                     {
                         return null;
                     }
-
-                    CurrentInstallStep--;
                 }
-                while (!FlagsIsSet(InstallOptionSteps[CurrentInstallStep].HasFlag));
+                while (!FlagsIsSet(InstallOptionSteps[CurrentInstallStep].HasFlag) || !InstallOptionSteps[CurrentInstallStep].GetIsEnabled());
 
                 StepCountUpdate();
                 return InstallOptionSteps[CurrentInstallStep];
@@ -337,7 +337,7 @@ namespace LB_Mod_Installer.Installer
 
             for(int i = 0; i < InstallOptionSteps.Count; i++)
             {
-                if (FlagsIsSet(InstallOptionSteps[i].HasFlag))
+                if (FlagsIsSet(InstallOptionSteps[i].HasFlag) && InstallOptionSteps[i].GetIsEnabled())
                 {
                     value++;
                 }
@@ -352,7 +352,7 @@ namespace LB_Mod_Installer.Installer
 
             for (int i = 0; i < InstallOptionSteps.Count; i++)
             {
-                if (FlagsIsSet(InstallOptionSteps[i].HasFlag))
+                if (FlagsIsSet(InstallOptionSteps[i].HasFlag) && InstallOptionSteps[i].GetIsEnabled())
                 {
                     value++;
                 }
@@ -367,6 +367,7 @@ namespace LB_Mod_Installer.Installer
         {
             NotifyPropertyChanged("CurrentStepString");
         }
+    
     }
     
     public class Overrides
@@ -602,6 +603,9 @@ namespace LB_Mod_Installer.Installer
         [YAXAttributeForClass]
         [YAXDontSerializeIfNull]
         public string RequireSelection { get; set; }
+        [YAXAttributeForClass]
+        [YAXDontSerializeIfNull]
+        public string IsEnabled { get; set; }
 
         //Elements
         [YAXAttributeFor("Type")]
@@ -736,6 +740,14 @@ namespace LB_Mod_Installer.Installer
             }
 
             return brush;
+        }
+
+        public bool GetIsEnabled()
+        {
+            if (string.IsNullOrWhiteSpace(IsEnabled)) return true;
+            if (IsEnabled.ToLower() == "false") return false;
+
+            return true;
         }
 
         private Visibility GetVisibilityForOption(int index)
@@ -928,6 +940,12 @@ namespace LB_Mod_Installer.Installer
         [YAXAttributeForClass]
         [YAXDontSerializeIfNull]
         public string DoLast { get; set; }
+        [YAXAttributeForClass]
+        [YAXDontSerializeIfNull]
+        public string UseSkipBinding { get; set; }
+        [YAXAttributeForClass]
+        [YAXDontSerializeIfNull]
+        public string IsEnabled { get; set; }
 
         public bool AllowOverwrite()
         {
@@ -991,6 +1009,21 @@ namespace LB_Mod_Installer.Installer
             if (String.IsNullOrWhiteSpace(DoLast)) return false;
             return (DoLast.ToLower() == "true");
         }
+
+        public bool GetUseSkipBinding()
+        {
+            if (String.IsNullOrWhiteSpace(UseSkipBinding)) return false;
+            return (UseSkipBinding.ToLower() == "true");
+        }
+
+        public bool GetIsEnabled()
+        {
+            if (string.IsNullOrWhiteSpace(IsEnabled)) return true;
+            if (IsEnabled.ToLower() == "false") return false;
+
+            return true;
+        }
+
     }
 
     public enum FileType

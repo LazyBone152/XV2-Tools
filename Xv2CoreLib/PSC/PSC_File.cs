@@ -183,6 +183,34 @@ namespace Xv2CoreLib.PSC
                 throw new Exception(string.Format("No PSC_Configuration exists at index {0}", index));
         }
 
+
+        public bool CharacterExists(int charaId)
+        {
+            string charaIdStr = charaId.ToString();
+
+            foreach (var config in Configurations)
+            {
+                if (config.PscEntries.FirstOrDefault(x => x.Index == charaIdStr) != null) return true;
+            }
+
+            return false;
+        }
+
+        public bool CostumeExists(int charaId, int costume)
+        {
+            string charaIdStr = charaId.ToString();
+            string costumeStr = costume.ToString();
+
+            foreach(var config in Configurations)
+            {
+                if(config.PscEntries.FirstOrDefault(x => x.Index == charaIdStr) != null)
+                {
+                    return config.PscEntries.FirstOrDefault(x => x.Index == charaIdStr).PscSpecEntries.FirstOrDefault(a => a.Index == costumeStr) != null;
+                }
+            }
+
+            return false;
+        }
     }
 
     [YAXSerializeAs("Configuration")]

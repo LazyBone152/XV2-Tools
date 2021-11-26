@@ -134,7 +134,7 @@ namespace Xv2CoreLib.CUS
                     CharaSwapId = BitConverter.ToUInt16(rawBytes, offset + 60),
                     I_62 = BitConverter.ToInt16(rawBytes, offset + 62),
                     I_64 = BitConverter.ToUInt16(rawBytes, offset + 64),
-                    I_66 = BitConverter.ToUInt16(rawBytes, offset + 64)
+                    I_66 = BitConverter.ToUInt16(rawBytes, offset + 66)
                 });
                 offset += 68;
             }

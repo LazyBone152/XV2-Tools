@@ -79,6 +79,9 @@ namespace LB_Mod_Installer
         //File Manager
         private FileCacheManager fileManager = new FileCacheManager();
 
+        //Install
+        private Install installer;
+
         //UI Binding
         private InstallState _installState = InstallState.InstallSteps;
         public InstallState CurrentInstallState
@@ -312,6 +315,10 @@ namespace LB_Mod_Installer
                 //Init UI
                 StateInit();
                 UpdateUI();
+
+                //Init installer
+                installer = new Install(InstallerInfo, zipManager, this, FileIO, fileManager);
+                Installer.Install.bindingManager.ProcessInstallerXmlBindings(_installerXml);
             }
 #if !DEBUG
             catch (Exception ex)
@@ -755,8 +762,6 @@ namespace LB_Mod_Installer
                     //Do not uninstall jungle files. In the event of an error there would be no way to restore them.
                 }
 
-                //Install logic
-                var installer = new Install(InstallerInfo, zipManager, this, FileIO, fileManager);
                 //installer.Start();
                 await Task.Run(new Action(installer.Start));
 

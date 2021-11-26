@@ -48,6 +48,31 @@ namespace Xv2CoreLib.CMS
             }
             new Deserializer(this, path);
         }
+    
+        public string CharaIdToCharaCode(int charaId)
+        {
+            string charaIdStr = charaId.ToString();
+            CMS_Entry entry = CMS_Entries.FirstOrDefault(x => x.Index == charaIdStr);
+
+            if (entry != null)
+            {
+                return entry.ShortName;
+            }
+
+            return string.Empty;
+        }
+
+        public int CharaCodeToCharaId(string charaCode)
+        {
+            CMS_Entry entry = CMS_Entries.FirstOrDefault(x => x.ShortName == charaCode);
+
+            if (entry != null)
+            {
+                return entry.ID;
+            }
+
+            return -1;
+        }
     }
 
     [YAXSerializeAs("Entry")]
@@ -83,7 +108,6 @@ namespace Xv2CoreLib.CMS
 
         [YAXAttributeForClass]
         [YAXSerializeAs("ID")]
-        [BindingAutoId]
         public string Index { get; set; } //int32
         [YAXAttributeForClass]
         [YAXSerializeAs("ShortName")]
