@@ -1029,7 +1029,7 @@ namespace LB_Mod_Installer.Binding
                             foreach(var file in option.Paths)
                             {
                                 file.IsEnabled = ParseString(file.IsEnabled, GeneralInfo.InstallerXml, "IsEnabled");
-                                file.InstallPath = ParseString(file.InstallPath, GeneralInfo.InstallerXml, "InstallPath");
+                                //file.InstallPath = ParseString(file.InstallPath, GeneralInfo.InstallerXml, "InstallPath"); //We do this later, as the file is installed. This way we can access any aliases that have been set.
                             }
                         }
                     }
@@ -1039,7 +1039,7 @@ namespace LB_Mod_Installer.Binding
             foreach(var file in installerXml.InstallFiles)
             {
                 file.IsEnabled = ParseString(file.IsEnabled, GeneralInfo.InstallerXml, "IsEnabled");
-                file.InstallPath = ParseString(file.InstallPath, GeneralInfo.InstallerXml, "InstallPath");
+                //file.InstallPath = ParseString(file.InstallPath, GeneralInfo.InstallerXml, "InstallPath"); //We do this later, as the file is installed. This way we can access any aliases that have been set.
             }
         }
 
