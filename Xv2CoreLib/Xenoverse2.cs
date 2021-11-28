@@ -395,7 +395,7 @@ namespace Xv2CoreLib
             }
 
             //BDM
-            if (cusEntry.I_14.HasFlag(Skill.FilesLoadedFlags.Bdm))
+            if (cusEntry.FilesLoadedFlags1.HasFlag(Skill.FilesLoadedFlags.Bdm))
             {
                 moveFiles.BdmPath = String.Format("{0}/{1}/{1}_PLAYER.bdm", skillDir, folderName);
 
@@ -404,7 +404,7 @@ namespace Xv2CoreLib
             }
 
             //BSA + shot.BDM
-            if (cusEntry.I_14.HasFlag(Skill.FilesLoadedFlags.BsaAndShotBdm))
+            if (cusEntry.FilesLoadedFlags1.HasFlag(Skill.FilesLoadedFlags.BsaAndShotBdm))
             {
                 moveFiles.ShotBdmPath = String.Format("{0}/{1}/{1}_PLAYER.shot.bdm", skillDir, folderName);
                 moveFiles.BsaPath = String.Format("{0}/{1}/{1}.bsa", skillDir, folderName);
@@ -417,7 +417,7 @@ namespace Xv2CoreLib
             }
 
             //BAS
-            if (cusEntry.I_14.HasFlag(Skill.FilesLoadedFlags.Bas))
+            if (cusEntry.FilesLoadedFlags1.HasFlag(Skill.FilesLoadedFlags.Bas))
             {
                 moveFiles.BasPath = String.Format("{0}/{1}/{1}.bas", skillDir, folderName);
 
@@ -426,7 +426,7 @@ namespace Xv2CoreLib
             }
 
             //EEPK
-            if (cusEntry.I_14.HasFlag(Skill.FilesLoadedFlags.Eepk))
+            if (cusEntry.FilesLoadedFlags1.HasFlag(Skill.FilesLoadedFlags.Eepk))
             {
                 if (!cusEntry.HasEepkPath)
                 {
@@ -438,7 +438,7 @@ namespace Xv2CoreLib
                 else
                 {
                     //This skill uses another skills EEPK, so we dont have to calculate its folder name
-                    moveFiles.EepkPath = String.Format("skill/{0}/{1}.eepk", cusEntry.Str_28, Path.GetFileName(cusEntry.Str_28));
+                    moveFiles.EepkPath = String.Format("skill/{0}/{1}.eepk", cusEntry.EepkPath, Path.GetFileName(cusEntry.EepkPath));
 
                     if(loadSkillFiles)
                         moveFiles.EepkFile = new Xv2File<EffectContainerFile>((EffectContainerFile)GetParsedFileFromGame(moveFiles.EepkPath), fileIO.PathInGameDir(moveFiles.EepkPath), true, null, false, MoveFileTypes.EEPK);
@@ -446,7 +446,7 @@ namespace Xv2CoreLib
             }
 
             //SE ACB
-            if (cusEntry.I_14.HasFlag(Skill.FilesLoadedFlags.CharaSE))
+            if (cusEntry.FilesLoadedFlags1.HasFlag(Skill.FilesLoadedFlags.CharaSE))
             {
                 if (!cusEntry.HasSeAcbPath)
                 {
@@ -457,7 +457,7 @@ namespace Xv2CoreLib
                 }
                 else
                 {
-                    moveFiles.SeAcbPath = string.Format(@"sound/SE/Battle/Skill/{0}.acb", cusEntry.SeAcbPath);
+                    moveFiles.SeAcbPath = string.Format(@"sound/SE/Battle/Skill/{0}.acb", cusEntry.SePath);
 
                     if(loadSkillFiles)
                         moveFiles.AddSeAcbFile((ACB_Wrapper)GetParsedFileFromGame(moveFiles.SeAcbPath), -1, fileIO.PathInGameDir(moveFiles.SeAcbPath), true);
@@ -465,11 +465,11 @@ namespace Xv2CoreLib
             }
 
             //VOX ACB
-            if (cusEntry.I_14.HasFlag(Skill.FilesLoadedFlags.CharaVOX))
+            if (cusEntry.FilesLoadedFlags1.HasFlag(Skill.FilesLoadedFlags.CharaVOX))
             {
                 //Japanese
                 string[] files = fileIO.GetFilesInDirectory("sound/VOX/Battle/Skill", "acb");
-                string name = (!cusEntry.HasVoxAcbPath) ? string.Format(@"CAR_BTL_{2}{1}_{0}_", cusEntry.ShortName, cusEntry.ID2.ToString("D3"), GetAcbSkillTypeLetter(skillType)) : cusEntry.VoxAcbPath;
+                string name = (!cusEntry.HasVoxAcbPath) ? string.Format(@"CAR_BTL_{2}{1}_{0}_", cusEntry.ShortName, cusEntry.ID2.ToString("D3"), GetAcbSkillTypeLetter(skillType)) : cusEntry.VoxPath;
                 
                 foreach(var file in files.Where(f => f.Contains(name) && f.Contains("_VOX.acb")))
                 {
@@ -518,7 +518,7 @@ namespace Xv2CoreLib
             }
 
             //CAM
-            if (cusEntry.I_14.HasFlag(Skill.FilesLoadedFlags.CamEan))
+            if (cusEntry.FilesLoadedFlags1.HasFlag(Skill.FilesLoadedFlags.CamEan))
             {
                 string nameWithoutExt = (!cusEntry.HasCamEanPath) ? string.Format("{0}/{1}/{1}", skillDir, folderName) : Utils.ResolveRelativePath("skill/" + cusEntry.CamEanPath);
                 nameWithoutExt = Utils.SanitizePath(nameWithoutExt);
@@ -541,7 +541,7 @@ namespace Xv2CoreLib
             }
             
             //AFTER BAC
-            if (cusEntry.I_14.HasFlag(Skill.FilesLoadedFlags.AfterBac))
+            if (cusEntry.FilesLoadedFlags1.HasFlag(Skill.FilesLoadedFlags.AfterBac))
             {
                 if (!cusEntry.HasAfterBacPath)
                 {
@@ -560,7 +560,7 @@ namespace Xv2CoreLib
             }
 
             //AFTER BCM
-            if (cusEntry.I_14.HasFlag(Skill.FilesLoadedFlags.AfterBcm))
+            if (cusEntry.FilesLoadedFlags1.HasFlag(Skill.FilesLoadedFlags.AfterBcm))
             {
                 if (!cusEntry.HasAfterBacPath)
                 {
@@ -1070,7 +1070,7 @@ namespace Xv2CoreLib
             RefreshSkills();
 
             //Cus Entry
-            skill.CusEntry.ID1 = CUS_File.ConvertToID1(skill.CusEntry.ID2, skill.skillType);
+            skill.CusEntry.ID1 = (ushort)CUS_File.ConvertToID1(skill.CusEntry.ID2, skill.skillType);
             skill.CusEntry.PUP = (skill.PupEntries?.Count > 0) ? InstallPupEntries(skill.PupEntries, skill.CusEntry.ID1) : ushort.MaxValue;
             InstallSkillCusEntry(skill.CusEntry, skill.skillType);
 
@@ -1688,7 +1688,7 @@ namespace Xv2CoreLib
 
         public void UpdateCusFlags()
         {
-            Skill.FilesLoadedFlags flags1 = CusEntry.I_14;
+            Skill.FilesLoadedFlags flags1 = CusEntry.FilesLoadedFlags1;
             Skill.Type flags2 = CusEntry.FilesLoadedFlags2;
 
             //Remove flags for all file types
@@ -1759,7 +1759,7 @@ namespace Xv2CoreLib
             }
 
             //Update cus flags
-            CusEntry.I_14 = flags1;
+            CusEntry.FilesLoadedFlags1 = flags1;
             CusEntry.FilesLoadedFlags2 = flags2;
         }
 

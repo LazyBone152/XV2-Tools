@@ -117,14 +117,14 @@ namespace EEPK_Organiser
             
             foreach(var skill in skills)
             {
-                if (skill.I_14.HasFlag(Skill.FilesLoadedFlags.Eepk))
+                if (skill.FilesLoadedFlags1.HasFlag(Skill.FilesLoadedFlags.Eepk))
                 {
                     string eepkPath;
 
-                    if(skill.Str_28 == "NULL")
+                    if(skill.EepkPath == "NULL")
                     {
                         //Get skill folder and files name
-                        int skillID2 = int.Parse(skill.I_10);
+                        int skillID2 = skill.ID2;
                         int cmsId = (int)Math.Floor(skillID2 / 10f);
                         string charaShortName = cmsFile.GetEntry(cmsId.ToString()).Str_04;
 
@@ -134,13 +134,13 @@ namespace EEPK_Organiser
                             charaShortName = "CMN";
                         }
 
-                        string folderName = String.Format("{0}_{1}_{2}", skillID2.ToString("D3"), charaShortName, skill.Str_00);
+                        string folderName = String.Format("{0}_{1}_{2}", skillID2.ToString("D3"), charaShortName, skill.ShortName);
                         eepkPath = String.Format("{0}/{1}/{1}.eepk", skillDir, folderName);
                     }
                     else
                     {
                         //This skill uses another skills EEPK, so we dont have to calculate its folder name
-                        eepkPath = String.Format("skill/{0}/{1}.eepk", skill.Str_28, Path.GetFileName(skill.Str_28));
+                        eepkPath = String.Format("skill/{0}/{1}.eepk", skill.EepkPath, Path.GetFileName(skill.EepkPath));
                     }
 
                     //Get skill name
@@ -148,12 +148,12 @@ namespace EEPK_Organiser
 
                     if (skillType != CUS_File.SkillType.Blast)
                     {
-                        name = nameMsgFile.GetSkillName(int.Parse(skill.I_10), skillType);
+                        name = nameMsgFile.GetSkillName(skill.ID2, skillType);
                     }
 
                     if (string.IsNullOrWhiteSpace(name))
                     {
-                        name = string.Format("??? ({0} / {1})", skill.I_10, skill.Str_00);
+                        name = string.Format("??? ({0} / {1})", skill.ID2, skill.ShortName);
                     }
 
                     entities.Add(new GameEntity()

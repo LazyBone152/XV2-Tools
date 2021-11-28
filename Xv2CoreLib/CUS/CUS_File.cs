@@ -124,9 +124,9 @@ namespace Xv2CoreLib.CUS
 
             foreach(var e in SkillList)
             {
-                if(e.Str_00 == SkillID)
+                if(e.ShortName == SkillID)
                 {
-                    return e.Index.ToString();
+                    return e.ID1.ToString();
                 }
             }
 
@@ -152,7 +152,7 @@ namespace Xv2CoreLib.CUS
             new Deserializer(this, path);
         }
         
-        public bool SkillExists(string id1, SkillType type)
+        public bool SkillExists(int id1, SkillType type)
         {
             List<Skill> skills = null;
 
@@ -177,7 +177,7 @@ namespace Xv2CoreLib.CUS
 
             foreach(var skill in skills)
             {
-                if (skill.Index == id1) return true;
+                if (skill.ID1 == id1) return true;
             }
 
             return false;
@@ -294,31 +294,31 @@ namespace Xv2CoreLib.CUS
         public ushort I_26 { get; set; }
         [YAXAttributeFor("SuperSkill1")]
         [YAXSerializeAs("ID1")]
-        public string I_08 { get; set; } //uint16
+        public ushort I_08 { get; set; } //uint16
         [YAXAttributeFor("SuperSkill2")]
         [YAXSerializeAs("ID1")]
-        public string I_10 { get; set; } //uint16
+        public ushort I_10 { get; set; } //uint16
         [YAXAttributeFor("SuperSkill3")]
         [YAXSerializeAs("ID1")]
-        public string I_12 { get; set; } //uint16
+        public ushort I_12 { get; set; } //uint16
         [YAXAttributeFor("SuperSkill4")]
         [YAXSerializeAs("ID1")]
-        public string I_14 { get; set; } //uint16
+        public ushort I_14 { get; set; } //uint16
         [YAXAttributeFor("UltimateSkill1")]
         [YAXSerializeAs("ID1")]
-        public string I_16 { get; set; } //uint16
+        public ushort I_16 { get; set; } //uint16
         [YAXAttributeFor("UltimateSkill2")]
         [YAXSerializeAs("ID1")]
-        public string I_18 { get; set; } //uint16
+        public ushort I_18 { get; set; } //uint16
         [YAXAttributeFor("EvasiveSkill")]
         [YAXSerializeAs("ID1")]
-        public string I_20 { get; set; } //uint16
+        public ushort I_20 { get; set; } //uint16
         [YAXAttributeFor("BlastType")]
         [YAXSerializeAs("ID1")]
-        public string I_22 { get; set; } //uint16
+        public ushort I_22 { get; set; } //uint16
         [YAXAttributeFor("AwokenSkill")]
         [YAXSerializeAs("ID1")]
-        public string I_24 { get; set; } //uint16
+        public ushort I_24 { get; set; } //uint16
     }
 
     public class Skill : IInstallable
@@ -359,9 +359,14 @@ namespace Xv2CoreLib.CUS
 
         #region WrapperProperties
         [YAXDontSerialize]
-        public int SortID { get { return int.Parse(Index); } }
+        public int SortID { get { return ID1; } }
         [YAXDontSerialize]
-        public string ShortName { get { return Str_00; } set { Str_00 = value; } }
+        public string Index
+        {
+            get { return ID1.ToString(); }
+            set { ID1 = ushort.Parse(value); }
+        }
+        
         [YAXDontSerialize]
         public Type FilesLoadedFlags2
         {
@@ -377,60 +382,36 @@ namespace Xv2CoreLib.CUS
                 }
             }
         }
-        [YAXDontSerialize]
-        public int ID1 { get { return ushort.Parse(Index); } set { Index = value.ToString(); } }
-        [YAXDontSerialize]
-        public ushort ID2 { get { return ushort.Parse(I_10); } set { I_10 = value.ToString(); } }
-        [YAXDontSerialize]
-        public ushort PUP { get { return ushort.Parse(I_56); } set { I_56 = value.ToString(); } }
-        [YAXDontSerialize]
-        public ushort CharaSwapId { get { return ushort.Parse(I_60); } set { I_60 = value.ToString(); } }
-        [YAXDontSerialize]
-        public ushort NumTransformations { get { return I_64; } set { I_64 = value; } }
+        
 
-        //Paths
         [YAXDontSerialize]
-        public string EanPath { get { return Str_20; } set { Str_20 = value; } }
+        public bool HasEanPath { get { return !(EanPath == "NULL" || string.IsNullOrWhiteSpace(EanPath)); } }
         [YAXDontSerialize]
-        public string CamEanPath { get { return Str_24; } set { Str_24 = value; } }
+        public bool HasCamEanPath { get { return !(CamEanPath == "NULL" || string.IsNullOrWhiteSpace(CamEanPath)); } }
         [YAXDontSerialize]
-        public string EepkPath { get { return Str_28; } set { Str_28 = value; } }
+        public bool HasEepkPath { get { return !(EepkPath == "NULL" || string.IsNullOrWhiteSpace(EepkPath)); } }
         [YAXDontSerialize]
-        public string SeAcbPath { get { return Str_32; } set { Str_32 = value; } }
+        public bool HasSeAcbPath { get { return !(SePath == "NULL" || string.IsNullOrWhiteSpace(SePath)); } }
         [YAXDontSerialize]
-        public string VoxAcbPath { get { return Str_36; } set { Str_36 = value; } }
+        public bool HasVoxAcbPath { get { return !(VoxPath == "NULL" || string.IsNullOrWhiteSpace(VoxPath)); } }
         [YAXDontSerialize]
-        public string AfterBacPath { get { return Str_40; } set { Str_40 = value; } }
+        public bool HasAfterBacPath { get { return !(AfterBacPath == "NULL" || string.IsNullOrWhiteSpace(AfterBacPath)); } }
         [YAXDontSerialize]
-        public string AfterBcmPath { get { return Str_44; } set { Str_44 = value; } }
-        [YAXDontSerialize]
-        public bool HasEanPath { get { return !(Str_20 == "NULL" || string.IsNullOrWhiteSpace(Str_20)); } }
-        [YAXDontSerialize]
-        public bool HasCamEanPath { get { return !(Str_24 == "NULL" || string.IsNullOrWhiteSpace(Str_24)); } }
-        [YAXDontSerialize]
-        public bool HasEepkPath { get { return !(Str_28 == "NULL" || string.IsNullOrWhiteSpace(Str_28)); } }
-        [YAXDontSerialize]
-        public bool HasSeAcbPath { get { return !(Str_32 == "NULL" || string.IsNullOrWhiteSpace(Str_32)); } }
-        [YAXDontSerialize]
-        public bool HasVoxAcbPath { get { return !(Str_36 == "NULL" || string.IsNullOrWhiteSpace(Str_36)); } }
-        [YAXDontSerialize]
-        public bool HasAfterBacPath { get { return !(Str_40 == "NULL" || string.IsNullOrWhiteSpace(Str_40)); } }
-        [YAXDontSerialize]
-        public bool HasAfterBcmPath { get { return !(Str_44 == "NULL" || string.IsNullOrWhiteSpace(Str_44)); } }
+        public bool HasAfterBcmPath { get { return !(AfterBcmPath == "NULL" || string.IsNullOrWhiteSpace(AfterBcmPath)); } }
         #endregion
 
         [YAXAttributeForClass]
         [YAXSerializeAs("ShortName")]
-        public string Str_00 { get; set; }
+        public string ShortName { get; set; }
         [YAXAttributeFor("I_04")]
         [YAXSerializeAs("value")]
         public int I_04 { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("ID1")]
-        public string Index { get; set; } //uint16
+        public ushort ID1 { get; set; } //uint16
         [YAXAttributeForClass]
         [YAXSerializeAs("ID2")]
-        public string I_10 { get; set; } //uint16
+        public ushort ID2 { get; set; } //uint16
         [YAXAttributeFor("Race_Lock")]
         [YAXSerializeAs("value")]
         public byte I_12 { get; set; }
@@ -439,7 +420,7 @@ namespace Xv2CoreLib.CUS
         public byte I_13 { get; set; }
         [YAXAttributeFor("FilesLoaded")]
         [YAXSerializeAs("Flags")]
-        public FilesLoadedFlags I_14 { get; set; } //uint16
+        public FilesLoadedFlags FilesLoadedFlags1 { get; set; } //uint16
         [YAXAttributeFor("PartSet")]
         [YAXSerializeAs("value")]
         public short I_16 { get; set; }
@@ -448,25 +429,25 @@ namespace Xv2CoreLib.CUS
         public ushort I_18 { get; set; }
         [YAXAttributeFor("EAN")]
         [YAXSerializeAs("Path")]
-        public string Str_20 { get; set; }
+        public string EanPath { get; set; }
         [YAXAttributeFor("CAM_EAN")]
         [YAXSerializeAs("Path")]
-        public string Str_24 { get; set; }
+        public string CamEanPath { get; set; }
         [YAXAttributeFor("EEPK")]
         [YAXSerializeAs("Path")]
-        public string Str_28 { get; set; }
+        public string EepkPath { get; set; }
         [YAXAttributeFor("ACB_SE")]
         [YAXSerializeAs("Path")]
-        public string Str_32 { get; set; }
+        public string SePath { get; set; }
         [YAXAttributeFor("ACB_VOX")]
         [YAXSerializeAs("Path")]
-        public string Str_36 { get; set; }
+        public string VoxPath { get; set; }
         [YAXAttributeFor("AFTER_BAC")]
         [YAXSerializeAs("Path")]
-        public string Str_40 { get; set; }
+        public string AfterBacPath { get; set; }
         [YAXAttributeFor("AFTER_BCM")]
         [YAXSerializeAs("Path")]
-        public string Str_44 { get; set; }
+        public string AfterBcmPath { get; set; }
         [YAXAttributeFor("I_48")]
         [YAXSerializeAs("value")]
         public ushort I_48 { get; set; }
@@ -481,23 +462,24 @@ namespace Xv2CoreLib.CUS
         public ushort I_54 { get; set; }
         [YAXAttributeFor("PUP")]
         [YAXSerializeAs("ID")]
-        public string I_56 { get; set; } //ushort
+        public ushort PUP { get; set; } //ushort
         [YAXAttributeFor("CUS_Aura")]
         [YAXSerializeAs("value")]
         public short I_58 { get; set; }
         [YAXAttributeFor("TransformCharaSwap")]
         [YAXSerializeAs("Chara_ID")]
-        public string I_60 { get; set; } //ushort
+        public ushort CharaSwapId { get; set; } //ushort
         [YAXAttributeFor("Skillset_Change")]
         [YAXSerializeAs("ModelPreset")]
         public short I_62 { get; set; }
         [YAXAttributeFor("Num_Of_Transforms")]
         [YAXSerializeAs("value")]
-        public ushort I_64 { get; set; }
+        public ushort NumTransformations { get; set; }
         [YAXAttributeFor("I_66")]
         [YAXSerializeAs("value")]
         public ushort I_66 { get; set; }
 
+        [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "MsgComponent")]
         public List<MSG.Msg_Component> MsgComponents { get; set; }
     }

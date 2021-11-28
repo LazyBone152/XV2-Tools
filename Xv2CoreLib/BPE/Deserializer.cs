@@ -90,7 +90,7 @@ namespace Xv2CoreLib.BPE
                 for(int a = 0; a < bpeFile.Entries[i].SubEntries.Count(); a++)
                 {
                     TypeValidation(bpeFile.Entries[i].SubEntries[a], bpeFile.Entries[i]);
-                    bytes.AddRange(BitConverter.GetBytes(bpeFile.Entries[i].SubEntries[a].GetBpeType()));
+                    bytes.AddRange(BitConverter.GetBytes((int)bpeFile.Entries[i].SubEntries[a].BpeType));
                     bytes.AddRange(BitConverter.GetBytes(bpeFile.Entries[i].SubEntries[a].I_04));
                     bytes.AddRange(BitConverter.GetBytes(bpeFile.Entries[i].SubEntries[a].I_06));
                     bytes.AddRange(BitConverter.GetBytes(bpeFile.Entries[i].SubEntries[a].I_08));
@@ -103,14 +103,14 @@ namespace Xv2CoreLib.BPE
                     bytes.AddRange(BitConverter.GetBytes(bpeFile.Entries[i].SubEntries[a].F_32));
                     bytes.AddRange(BitConverter.GetBytes(bpeFile.Entries[i].SubEntries[a].I_36));
                     bytes.AddRange(BitConverter.GetBytes(bpeFile.Entries[i].SubEntries[a].I_40));
-                    bytes.AddRange(BitConverter.GetBytes((short)GetTypeCount(bpeFile.Entries[i].SubEntries[a].GetBpeType(), bpeFile.Entries[i].SubEntries[a])));
+                    bytes.AddRange(BitConverter.GetBytes((short)GetTypeCount((int)bpeFile.Entries[i].SubEntries[a].BpeType, bpeFile.Entries[i].SubEntries[a])));
                     TypeOffsets.Add(bytes.Count());
                     bytes.AddRange(new byte[4]);
                 }
 
                 for(int a = 0; a < bpeFile.Entries[i].SubEntries.Count(); a++)
                 {
-                    switch (bpeFile.Entries[i].SubEntries[a].GetBpeType())
+                    switch ((int)bpeFile.Entries[i].SubEntries[a].BpeType)
                     {
                         case 0:
                             WriteType0(bpeFile.Entries[i].SubEntries[a].Type0, TypeOffsets[a]);
@@ -327,25 +327,25 @@ namespace Xv2CoreLib.BPE
             switch (type)
             {
                 case 0:
-                    return subEntry.Type0.Count();
+                    return subEntry.Type0.Count;
                 case 1:
-                    return subEntry.Type1.Count();
+                    return subEntry.Type1.Count;
                 case 2:
-                    return subEntry.Type2.Count();
+                    return subEntry.Type2.Count;
                 case 3:
-                    return subEntry.Type3.Count();
+                    return subEntry.Type3.Count;
                 case 4:
-                    return subEntry.Type4.Count();
+                    return subEntry.Type4.Count;
                 case 5:
-                    return subEntry.Type5.Count();
+                    return subEntry.Type5.Count;
                 case 6:
-                    return subEntry.Type6.Count();
+                    return subEntry.Type6.Count;
                 case 7:
-                    return subEntry.Type7.Count();
+                    return subEntry.Type7.Count;
                 case 8:
-                    return subEntry.Type8.Count();
+                    return subEntry.Type8.Count;
                 case 9:
-                    return subEntry.Type9.Count();
+                    return subEntry.Type9.Count;
                 default:
                     return 0;
             }
@@ -353,77 +353,77 @@ namespace Xv2CoreLib.BPE
 
         private void TypeValidation(BPE_SubEntry subEntry, BPE_Entry entry)
         {
-            switch (subEntry.GetBpeType())
+            switch ((int)subEntry.BpeType)
             {
                 case 0:
                     if(subEntry.Type0 == null)
                     {
-                        TypeDoesntExist(entry, subEntry.I_00);
+                        TypeDoesntExist(entry, subEntry.BpeType);
                     }
                     break;
                 case 1:
                     if (subEntry.Type1 == null)
                     {
-                        TypeDoesntExist(entry, subEntry.I_00);
+                        TypeDoesntExist(entry, subEntry.BpeType);
                     }
                     break;
                 case 2:
                     if (subEntry.Type2 == null)
                     {
-                        TypeDoesntExist(entry, subEntry.I_00);
+                        TypeDoesntExist(entry, subEntry.BpeType);
                     }
                     break;
                 case 3:
                     if (subEntry.Type3 == null)
                     {
-                        TypeDoesntExist(entry, subEntry.I_00);
+                        TypeDoesntExist(entry, subEntry.BpeType);
                     }
                     break;
                 case 4:
                     if (subEntry.Type4 == null)
                     {
-                        TypeDoesntExist(entry, subEntry.I_00);
+                        TypeDoesntExist(entry, subEntry.BpeType);
                     }
                     break;
                 case 5:
                     if (subEntry.Type5 == null)
                     {
-                        TypeDoesntExist(entry, subEntry.I_00);
+                        TypeDoesntExist(entry, subEntry.BpeType);
                     }
                     break;
                 case 6:
                     if (subEntry.Type6 == null)
                     {
-                        TypeDoesntExist(entry, subEntry.I_00);
+                        TypeDoesntExist(entry, subEntry.BpeType);
                     }
                     break;
                 case 7:
                     if (subEntry.Type7 == null)
                     {
-                        TypeDoesntExist(entry, subEntry.I_00);
+                        TypeDoesntExist(entry, subEntry.BpeType);
                     }
                     break;
                 case 8:
                     if (subEntry.Type8 == null)
                     {
-                        TypeDoesntExist(entry, subEntry.I_00);
+                        TypeDoesntExist(entry, subEntry.BpeType);
                     }
                     break;
                 case 9:
                     if (subEntry.Type9 == null)
                     {
-                        TypeDoesntExist(entry, subEntry.I_00);
+                        TypeDoesntExist(entry, subEntry.BpeType);
                     }
                     break;
                 default:
-                    Console.WriteLine(String.Format("{0} is not a valid BPE_Type (BPE_Entry: Index = {1})", subEntry.I_00, entry.Index));
+                    Console.WriteLine(String.Format("{0} is not a valid BPE_Type (BPE_Entry: Index = {1})", subEntry.BpeType, entry.Index));
                     Utils.WaitForInputThenQuit();
                     break;
 
             }
         }
 
-        private void TypeDoesntExist(BPE_Entry entry, string type)
+        private void TypeDoesntExist(BPE_Entry entry, BpeType type)
         {
             Console.WriteLine(String.Format("BPE Type{0} was not found on BPE_Entry (index = {1})", type, entry.Index));
             Utils.WaitForInputThenQuit();

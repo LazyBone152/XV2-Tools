@@ -49,10 +49,10 @@ namespace Xv2CoreLib.TSD
                 bytes.AddRange(BitConverter.GetBytes(tsd_File.Triggers[i].I_04));
                 bytes.AddRange(BitConverter.GetBytes(tsd_File.Triggers[i].I_08));
                 bytes.AddRange(BitConverter.GetBytes(tsd_File.Triggers[i].I_12));
-                bytes.AddRange(BitConverter.GetBytes(int.Parse(tsd_File.Triggers[i].I_16)));
+                bytes.AddRange(BitConverter.GetBytes(tsd_File.Triggers[i].I_16));
                 bytes.AddRange(BitConverter.GetBytes(tsd_File.Triggers[i].I_20));
                 
-                bytes.AddRange(BitConverter.GetBytes(int.Parse(tsd_File.Triggers[i].I_24)));
+                bytes.AddRange(BitConverter.GetBytes(tsd_File.Triggers[i].I_24));
                 bytes.AddRange(BitConverter.GetBytes(tsd_File.Triggers[i].I_28));
                 bytes.AddRange(BitConverter.GetBytes(Encoding.UTF8.GetByteCount(tsd_File.Triggers[i].Condition)));
                 bytes.AddRange(Encoding.UTF8.GetBytes(tsd_File.Triggers[i].Condition));

@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 
@@ -221,10 +219,6 @@ namespace Xv2CoreLib.SEV
     public class SEV_Entry : IInstallable_2<SEV_CharEvent>, IInstallable
     {
         #region NonSerialized
-        [YAXDontSerialize]
-        public int CharaID { set { I_00 = value.ToString(); } get { return int.Parse(I_00); } }
-        [YAXDontSerialize]
-        public int CostumeID { set { I_04 = value.ToString(); } get { return int.Parse(I_04); } }
 
         //interface
         [YAXDontSerialize]
@@ -234,7 +228,7 @@ namespace Xv2CoreLib.SEV
         {
             get
             {
-                return $"{I_00}_{I_04}";
+                return $"{CharaID}_{CostumeID}";
             }
             set
             {
@@ -242,8 +236,8 @@ namespace Xv2CoreLib.SEV
 
                 if(split.Length == 2)
                 {
-                    I_00 = split[0];
-                    I_04 = split[1];
+                    CharaID = int.Parse(split[0]);
+                    CostumeID = int.Parse(split[1]);
                 }
             }
         }
@@ -251,10 +245,10 @@ namespace Xv2CoreLib.SEV
 
         [YAXAttributeForClass]
         [YAXSerializeAs("CharaID")]
-        public string I_00 { get; set; } //0 (int32)
+        public int CharaID { get; set; } //0 (int32)
         [YAXAttributeForClass]
         [YAXSerializeAs("CostumeID")]
-        public string I_04 { get; set; } //4 (int32)
+        public int CostumeID { get; set; } //4 (int32)
         [YAXAttributeForClass]
         [YAXSerializeAs("I_08")]
         [YAXHexValue]
@@ -271,10 +265,6 @@ namespace Xv2CoreLib.SEV
     {
 
         #region NonSerialized
-        [YAXDontSerialize]
-        public int CharaID { set { I_00 = value.ToString(); } get { return int.Parse(I_00); } }
-        [YAXDontSerialize]
-        public int CostumeID { set { I_04 = value.ToString(); } get { return int.Parse(I_04); } }
 
         //interface
         [YAXDontSerialize]
@@ -284,7 +274,7 @@ namespace Xv2CoreLib.SEV
         {
             get
             {
-                return $"{I_00}_{I_04}";
+                return $"{CharaID}_{CostumeID}";
             }
             set
             {
@@ -292,8 +282,8 @@ namespace Xv2CoreLib.SEV
 
                 if (split.Length == 2)
                 {
-                    I_00 = split[0];
-                    I_04 = split[1];
+                    CharaID = int.Parse(split[0]);
+                    CostumeID = int.Parse(split[1]);
                 }
             }
         }
@@ -301,10 +291,10 @@ namespace Xv2CoreLib.SEV
 
         [YAXAttributeForClass]
         [YAXSerializeAs("CharaID")]
-        public string I_00 { get; set; } //0 (int32)
+        public int CharaID { get; set; } //0 (int32)
         [YAXAttributeForClass]
         [YAXSerializeAs("CostumeID")]
-        public string I_04 { get; set; } //4 (int32)
+        public int CostumeID { get; set; } //4 (int32)
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Event")]
         public List<SEV_Event> Events { get; set; } = new List<SEV_Event>();

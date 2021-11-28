@@ -68,7 +68,8 @@ namespace Xv2CoreLib.BEV
         public int I_08 { get; set; }
         [YAXAttributeFor("I_12")]
         [YAXSerializeAs("value")]
-        public string I_12 { get; set; } //int32
+        [YAXHexValue]
+        public int I_12 { get; set; } //int32
         [YAXAttributeFor("I_24")]
         [YAXSerializeAs("value")]
         public int I_24 { get; set; }

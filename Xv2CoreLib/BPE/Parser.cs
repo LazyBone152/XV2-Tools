@@ -80,7 +80,7 @@ namespace Xv2CoreLib.BPE
                             {
                                 bpeFile.Entries[actualIndex].SubEntries.Add(new BPE_SubEntry()
                                 {
-                                    I_00 = BPE_SubEntry.GetBpeType(BitConverter.ToInt32(rawBytes, subEntryOffset + 0)),
+                                    BpeType = (BpeType)BitConverter.ToInt32(rawBytes, subEntryOffset + 0),
                                     I_04 = BitConverter.ToUInt16(rawBytes, subEntryOffset + 4),
                                     I_06 = BitConverter.ToUInt16(rawBytes, subEntryOffset + 6),
                                     I_08 = BitConverter.ToUInt16(rawBytes, subEntryOffset + 8),

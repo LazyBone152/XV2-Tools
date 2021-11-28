@@ -142,14 +142,6 @@ namespace Xv2CoreLib.BSA
         [YAXDontSerialize]
         public int SortID { get { return int.Parse(Index); } set { Index = value.ToString(); } }
 
-        [YAXDontSerialize]
-        public ushort Expires { get { return (I_26 == "-1") ? ushort.MaxValue : ushort.Parse(I_26); } set { I_26 = value.ToString(); } }
-        [YAXDontSerialize]
-        public ushort ImpactProjectile { get { return (I_28 == "-1") ? ushort.MaxValue : ushort.Parse(I_28); } set { I_28 = value.ToString(); } }
-        [YAXDontSerialize]
-        public ushort ImpactEnemy { get { return (I_30 == "-1") ? ushort.MaxValue : ushort.Parse(I_30); } set { I_30 = value.ToString(); } }
-        [YAXDontSerialize]
-        public ushort ImpactGround { get { return (I_32 == "-1") ? ushort.MaxValue : ushort.Parse(I_32); } set { I_32 = value.ToString(); } }
         #endregion
 
         [YAXAttributeForClass]
@@ -180,16 +172,16 @@ namespace Xv2CoreLib.BSA
         public ushort I_24 { get; set; }
         [YAXAttributeFor("EntryPassOn_When")]
         [YAXSerializeAs("Expires")]
-        public string I_26 { get; set; } = "-1"; //short
+        public ushort Expires { get; set; } = ushort.MaxValue;
         [YAXAttributeFor("EntryPassOn_When")]
         [YAXSerializeAs("ImpactProjectile")]
-        public string I_28 { get; set; } = "-1";//short
+        public ushort ImpactProjectile { get; set; } = ushort.MaxValue;
         [YAXAttributeFor("EntryPassOn_When")]
         [YAXSerializeAs("ImpactEnemy")]
-        public string I_30 { get; set; } = "-1"; //short
+        public ushort ImpactEnemy { get; set; } = ushort.MaxValue;
         [YAXAttributeFor("EntryPassOn_When")]
         [YAXSerializeAs("ImpactGround")]
-        public string I_32 { get; set; } = "-1"; //short
+        public ushort ImpactGround { get; set; } = ushort.MaxValue;
         [YAXAttributeFor("I_40")]
         [YAXSerializeAs("values")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
@@ -374,13 +366,13 @@ namespace Xv2CoreLib.BSA
     {
         [YAXAttributeFor("EEPK")]
         [YAXSerializeAs("Type")]
-        public EepkType I_00 { get; set; } //int16
+        public EepkType EepkType { get; set; } //int16
         [YAXAttributeFor("Skill_ID")]
         [YAXSerializeAs("value")]
-        public string I_02 { get; set; } = "0"; //ushort
+        public ushort SkillID { get; set; }
         [YAXAttributeFor("Effect_ID")]
         [YAXSerializeAs("value")]
-        public string I_04 { get; set; } = "0"; //ushort
+        public ushort EffectID { get; set; }
         [YAXAttributeFor("I_06")]
         [YAXSerializeAs("value")]
         public ushort I_06 { get; set; }
@@ -397,21 +389,13 @@ namespace Xv2CoreLib.BSA
         [YAXSerializeAs("value")]
         public int I_20 { get; set; }
 
-        //Properties
-        [YAXDontSerialize]
-        public EepkType eepkType { get { return I_00; } set { I_00 = value; } }
-        [YAXDontSerialize]
-        public ushort SkillID { get { return  ushort.Parse(I_02); } set { I_02 = value.ToString(); } }
-        [YAXDontSerialize]
-        public ushort EffectID { get { return ushort.Parse(I_04); } set { I_04 = value.ToString(); } }
-
         public static List<BSA_Collision> ChangeSkillId(List<BSA_Collision> types, int skillID)
         {
             if (types == null) return null;
 
             for (int i = 0; i < types.Count; i++)
             {
-                switch (types[i].I_00)
+                switch (types[i].EepkType)
                 {
                     case EepkType.AwokenSkill:
                     case EepkType.SuperSkill:
@@ -434,16 +418,16 @@ namespace Xv2CoreLib.BSA
     {
         [YAXAttributeFor("I_00")]
         [YAXSerializeAs("value")]
-        public UInt16 I_00 { get; set; }
+        public ushort I_00 { get; set; }
         [YAXAttributeFor("I_02")]
         [YAXSerializeAs("value")]
-        public UInt16 I_02 { get; set; }
+        public ushort I_02 { get; set; }
         [YAXAttributeFor("I_04")]
         [YAXSerializeAs("value")]
-        public UInt16 I_04 { get; set; }
+        public ushort I_04 { get; set; }
         [YAXAttributeFor("I_06")]
         [YAXSerializeAs("value")]
-        public UInt16 I_06 { get; set; }
+        public ushort I_06 { get; set; }
     }
     
     //Types
@@ -467,7 +451,7 @@ namespace Xv2CoreLib.BSA
         public ushort I_02 { get; set; }
         [YAXAttributeFor("BSA_Entry")]
         [YAXSerializeAs("ID")]
-        public string I_04 { get; set; } = "0"; //ushort
+        public ushort BSA_EntryID { get; set; }
         [YAXAttributeFor("I_06")]
         [YAXSerializeAs("value")]
         public short I_06 { get; set; }
@@ -479,10 +463,6 @@ namespace Xv2CoreLib.BSA
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
         public float F_12 { get; set; }
-
-        //Props
-        [YAXDontSerialize]
-        public ushort BSA_EntryID { get { return (I_04 == "-1") ? ushort.MaxValue : ushort.Parse(I_04); } set { I_04 = value.ToString(); } }
 
     }
 
@@ -659,21 +639,14 @@ namespace Xv2CoreLib.BSA
         public UInt16 I_56 { get; set; }
         [YAXAttributeFor("BDM_ID")]
         [YAXSerializeAs("FirstHit")]
-        public string I_58 { get; set; } = "0"; //ushort
+        public ushort FirstHit { get; set; }
         [YAXAttributeFor("BDM_ID")]
         [YAXSerializeAs("MultipleHits")]
-        public string I_60 { get; set; } = "0"; //ushort
+        public ushort MultipleHits { get; set; }
         [YAXAttributeFor("BDM_ID")]
         [YAXSerializeAs("LastHit")]
-        public string I_62 { get; set; } = "0"; //ushort
+        public ushort LastHit { get; set; }
 
-        //Props
-        [YAXDontSerialize]
-        public ushort FirstHit { get { return (I_58 == "-1") ? ushort.MaxValue : ushort.Parse(I_58); } set { I_58 = value.ToString(); } }
-        [YAXDontSerialize]
-        public ushort MultipleHits { get { return (I_60 == "-1") ? ushort.MaxValue : ushort.Parse(I_60); } set { I_60 = value.ToString(); } }
-        [YAXDontSerialize]
-        public ushort LastHit { get { return (I_62 == "-1") ? ushort.MaxValue : ushort.Parse(I_62); } set { I_62 = value.ToString(); } }
     }
 
     [YAXSerializeAs("Deflection")]
@@ -729,16 +702,16 @@ namespace Xv2CoreLib.BSA
 
         [YAXAttributeFor("I_48")]
         [YAXSerializeAs("value")]
-        public UInt16 I_48 { get; set; }
+        public ushort I_48 { get; set; }
         [YAXAttributeFor("I_50")]
         [YAXSerializeAs("value")]
-        public UInt16 I_50 { get; set; }
+        public ushort I_50 { get; set; }
         [YAXAttributeFor("I_52")]
         [YAXSerializeAs("value")]
-        public UInt16 I_52 { get; set; }
+        public ushort I_52 { get; set; }
         [YAXAttributeFor("I_54")]
         [YAXSerializeAs("value")]
-        public UInt16 I_54 { get; set; }
+        public ushort I_54 { get; set; }
     }
 
     [YAXSerializeAs("Effect")]
@@ -754,22 +727,22 @@ namespace Xv2CoreLib.BSA
         public ushort Duration { get; set; }
         [YAXAttributeFor("EEPK")]
         [YAXSerializeAs("Type")]
-        public EepkType I_00 { get; set; } //Int16
+        public EepkType EepkType { get; set; } //Int16
         [YAXAttributeFor("Skill ID")]
         [YAXSerializeAs("value")]
-        public string I_02 { get; set; } = "0"; //ushort
+        public ushort SkillID { get; set; }
         [YAXAttributeFor("Effect")]
         [YAXSerializeAs("ID")]
-        public UInt16 I_04 { get; set; }
+        public ushort EffectID { get; set; }
         [YAXAttributeFor("I_06")]
         [YAXSerializeAs("value")]
-        public UInt16 I_06 { get; set; }
+        public ushort I_06 { get; set; }
         [YAXAttributeFor("Effect")]
         [YAXSerializeAs("Switch")]
         public Switch I_08 { get; set; }
         [YAXAttributeFor("I_10")]
         [YAXSerializeAs("value")]
-        public UInt16 I_10 { get; set; }
+        public ushort I_10 { get; set; }
         [YAXAttributeFor("Position")]
         [YAXSerializeAs("X")]
         [YAXFormat("0.0##########")]
@@ -783,17 +756,10 @@ namespace Xv2CoreLib.BSA
         [YAXFormat("0.0##########")]
         public float F_20 { get; set; }
 
-        //Props
-        [YAXDontSerialize]
-        public ushort SkillID { get { return ushort.Parse(I_02); } set { I_02 = value.ToString(); } }
-        [YAXDontSerialize]
-        public ushort EffectID { get { return ushort.Parse(I_02); } set { I_02 = value.ToString(); } }
-        [YAXDontSerialize]
-        public EepkType eepkType { get { return I_00; } set { I_00 = value; } }
 
         public bool IsSkillEepk()
         {
-            switch (I_00)
+            switch (EepkType)
             {
                 case EepkType.SuperSkill:
                 case EepkType.UltimateSkill:
@@ -811,7 +777,7 @@ namespace Xv2CoreLib.BSA
 
             for (int i = 0; i < types.Count; i++)
             {
-                switch (types[i].I_00)
+                switch (types[i].EepkType)
                 {
                     case EepkType.SuperSkill:
                     case EepkType.UltimateSkill:
@@ -840,24 +806,16 @@ namespace Xv2CoreLib.BSA
         public ushort Duration { get; set; }
         [YAXAttributeFor("ACB_File")]
         [YAXSerializeAs("value")]
-        public AcbType I_00 { get; set; } //int16
+        public AcbType AcbType { get; set; } //int16
         [YAXAttributeFor("I_02")]
         [YAXSerializeAs("value")]
         public ushort I_02 { get; set; }
         [YAXAttributeFor("Cue ID")]
         [YAXSerializeAs("value")]
-        public ushort I_04 { get; set; }
+        public ushort CueId { get; set; }
         [YAXAttributeFor("I_06")]
         [YAXSerializeAs("value")]
         public ushort I_06 { get; set; }
-        
-        //Props
-        [YAXDontSerialize]
-        public AcbType acbType { get { return I_00; } set { I_00 = value; } }
-        [YAXDontSerialize]
-        public ushort CueId { get { return I_04; } set { I_04 = value; } }
-
-
     }
 
     [YAXSerializeAs("BSA_Type8")]
@@ -913,7 +871,7 @@ namespace Xv2CoreLib.BSA
         public EepkType I_04 { get; set; }
         [YAXAttributeFor("Skill_ID")]
         [YAXSerializeAs("value")]
-        public string I_08 { get; set; } = "0"; //int32
+        public int I_08 { get; set; }
         [YAXAttributeFor("I_12")]
         [YAXSerializeAs("value")]
         public int I_12 { get; set; } //Effect ID or something?

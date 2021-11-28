@@ -123,22 +123,22 @@ namespace Xv2CoreLib.QXD
                     F_72 = BitConverter.ToSingle(rawBytes, offset + 72),
                     F_76 = BitConverter.ToSingle(rawBytes, offset + 76),
                     F_80 = BitConverter.ToSingle(rawBytes, offset + 80),
-                    I_84 = BitConverter.ToInt32(rawBytes, offset + 84).ToString(),
+                    I_84 = BitConverter.ToInt32(rawBytes, offset + 84),
                     _Skills = new Skills
                     {
-                        I_00 = BitConverter.ToUInt16(rawBytes, offset + 88).ToString(),
-                        I_02 = BitConverter.ToUInt16(rawBytes, offset + 90).ToString(),
-                        I_04 = BitConverter.ToUInt16(rawBytes, offset + 92).ToString(),
-                        I_06 = BitConverter.ToUInt16(rawBytes, offset + 94).ToString(),
-                        I_08 = BitConverter.ToUInt16(rawBytes, offset + 96).ToString(),
-                        I_10 = BitConverter.ToUInt16(rawBytes, offset + 98).ToString(),
-                        I_12 = BitConverter.ToUInt16(rawBytes, offset + 100).ToString(),
-                        I_14 = BitConverter.ToUInt16(rawBytes, offset + 102).ToString(),
-                        I_16 = BitConverter.ToUInt16(rawBytes, offset + 104).ToString(),
+                        I_00 = BitConverter.ToUInt16(rawBytes, offset + 88),
+                        I_02 = BitConverter.ToUInt16(rawBytes, offset + 90),
+                        I_04 = BitConverter.ToUInt16(rawBytes, offset + 92),
+                        I_06 = BitConverter.ToUInt16(rawBytes, offset + 94),
+                        I_08 = BitConverter.ToUInt16(rawBytes, offset + 96),
+                        I_10 = BitConverter.ToUInt16(rawBytes, offset + 98),
+                        I_12 = BitConverter.ToUInt16(rawBytes, offset + 100),
+                        I_14 = BitConverter.ToUInt16(rawBytes, offset + 102),
+                        I_16 = BitConverter.ToUInt16(rawBytes, offset + 104),
                     },
                     I_106 = BitConverter_Ex.ToInt16Array(rawBytes, offset + 106, 7),
                     I_120 = BitConverter.ToInt16(rawBytes, offset + 120),
-                    I_122 = BitConverter.ToUInt16(rawBytes, offset + 122).ToString()
+                    I_122 = BitConverter.ToUInt16(rawBytes, offset + 122)
                 });
                 offset += 124;
             }
@@ -170,22 +170,22 @@ namespace Xv2CoreLib.QXD
                     F_72 = BitConverter.ToSingle(rawBytes, offset + 72),
                     F_76 = BitConverter.ToSingle(rawBytes, offset + 76),
                     F_80 = BitConverter.ToSingle(rawBytes, offset + 80),
-                    I_84 = BitConverter.ToInt32(rawBytes, offset + 84).ToString(),
+                    I_84 = BitConverter.ToInt32(rawBytes, offset + 84),
                     _Skills = new Skills
                     {
-                        I_00 = BitConverter.ToUInt16(rawBytes, offset + 88).ToString(),
-                        I_02 = BitConverter.ToUInt16(rawBytes, offset + 90).ToString(),
-                        I_04 = BitConverter.ToUInt16(rawBytes, offset + 92).ToString(),
-                        I_06 = BitConverter.ToUInt16(rawBytes, offset + 94).ToString(),
-                        I_08 = BitConverter.ToUInt16(rawBytes, offset + 96).ToString(),
-                        I_10 = BitConverter.ToUInt16(rawBytes, offset + 98).ToString(),
-                        I_12 = BitConverter.ToUInt16(rawBytes, offset + 100).ToString(),
-                        I_14 = BitConverter.ToUInt16(rawBytes, offset + 102).ToString(),
-                        I_16 = BitConverter.ToUInt16(rawBytes, offset + 104).ToString(),
+                        I_00 = BitConverter.ToUInt16(rawBytes, offset + 88),
+                        I_02 = BitConverter.ToUInt16(rawBytes, offset + 90),
+                        I_04 = BitConverter.ToUInt16(rawBytes, offset + 92),
+                        I_06 = BitConverter.ToUInt16(rawBytes, offset + 94),
+                        I_08 = BitConverter.ToUInt16(rawBytes, offset + 96),
+                        I_10 = BitConverter.ToUInt16(rawBytes, offset + 98),
+                        I_12 = BitConverter.ToUInt16(rawBytes, offset + 100),
+                        I_14 = BitConverter.ToUInt16(rawBytes, offset + 102),
+                        I_16 = BitConverter.ToUInt16(rawBytes, offset + 104),
                     },
                     I_106 = BitConverter_Ex.ToInt16Array(rawBytes, offset + 106, 7),
                     I_120 = BitConverter.ToInt16(rawBytes, offset + 120),
-                    I_122 = BitConverter.ToUInt16(rawBytes, offset + 122).ToString()
+                    I_122 = BitConverter.ToUInt16(rawBytes, offset + 122)
                 });
                 offset += 124;
             }

@@ -49,7 +49,7 @@ namespace Xv2CoreLib.BEV
                     I_00 = BitConverter.ToInt32(rawBytes, entryOffset + 0),
                     Index = BitConverter.ToInt32(rawBytes, entryOffset + 4).ToString(),
                     I_08 = BitConverter.ToInt32(rawBytes, entryOffset + 8),
-                    I_12 = HexConverter.GetHexString(BitConverter.ToInt32(rawBytes, entryOffset + 12)),
+                    I_12 = BitConverter.ToInt32(rawBytes, entryOffset + 12),
                     I_24 = BitConverter.ToInt32(rawBytes, entryOffset + 24)
                 });
 

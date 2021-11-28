@@ -50,13 +50,13 @@ namespace Xv2CoreLib.TSD
         public int I_12 { get; set; }
         [YAXSerializeAs("value")]
         [YAXAttributeFor("TNL_ID")]
-        public string I_16 { get; set; } //Int32
+        public int I_16 { get; set; } //Int32
         [YAXSerializeAs("value")]
         [YAXAttributeFor("TNL_SubID")]
         public int I_20 { get; set; }
         [YAXSerializeAs("value")]
         [YAXAttributeFor("Event_ID")]
-        public string I_24 { get; set; } //Int32
+        public int I_24 { get; set; } //Int32
         [YAXSerializeAs("value")]
         [YAXAttributeFor("I_28")]
         public int I_28 { get; set; }

@@ -957,7 +957,7 @@ namespace Xv2CoreLib.BAC
         {
             get
             {
-                return  $"Animation ({I_08})";
+                return  $"Animation ({Ean_Type})";
             }
         }
 
@@ -1188,16 +1188,12 @@ namespace Xv2CoreLib.BAC
             }
         }
        
-        [YAXDontSerialize]
-        public ushort EanTypeProp { get { return (ushort)I_08; } set { I_08 = (EanType)value; } }
-        [YAXDontSerialize]
-        public ushort EanIndexProp { get { return ushort.Parse(I_10); } set { I_10 = value.ToString(); } }
         #endregion
 
         private EanType _eanType = EanType.Common;
         [YAXAttributeFor("EAN")]
         [YAXSerializeAs("File")]
-        public EanType I_08
+        public EanType Ean_Type
         {
             get
             {
@@ -1213,7 +1209,7 @@ namespace Xv2CoreLib.BAC
         }
         [YAXAttributeFor("EAN_Index")]
         [YAXSerializeAs("value")]
-        public string I_10 { get; set; } = "0"; //ushort
+        public ushort EanIndex { get; set; }  //ushort
         [YAXAttributeFor("AnimationFlags")]
         [YAXSerializeAs("values")]
         public AnimationFlags I_12 { get; set; } //ushort
@@ -1245,10 +1241,6 @@ namespace Xv2CoreLib.BAC
         [YAXSerializeAs("value")]
         public float F_32 { get; set; } = 0f;
 
-        //Propeties
-        [YAXDontSerialize]
-        public ushort EanIndex { get { return ushort.Parse(I_10); } set { I_10 = value.ToString(); } }
-
         public static List<BAC_Type0> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
         {
             List<BAC_Type0> Type0 = new List<BAC_Type0>();
@@ -1261,7 +1253,7 @@ namespace Xv2CoreLib.BAC
                     Duration = BitConverter.ToInt16(rawBytes, offset + 2),
                     I_04 = BitConverter.ToInt16(rawBytes, offset + 4),
                     Flags = BitConverter.ToInt16(rawBytes, offset + 6),
-                    I_08 = (EanType)BitConverter.ToUInt16(rawBytes, offset + 8),
+                    Ean_Type = (EanType)BitConverter.ToUInt16(rawBytes, offset + 8),
                     EanIndex = BitConverter.ToUInt16(rawBytes, offset + 10),
                     I_12 = (AnimationFlags)BitConverter.ToUInt16(rawBytes, offset + 12),
                     I_14 = BitConverter.ToUInt16(rawBytes, offset + 14),
@@ -1290,7 +1282,7 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.Duration));
                 bytes.AddRange(BitConverter.GetBytes(type.I_04));
                 bytes.AddRange(BitConverter.GetBytes(type.Flags));
-                bytes.AddRange(BitConverter.GetBytes((ushort)type.I_08));
+                bytes.AddRange(BitConverter.GetBytes((ushort)type.Ean_Type));
                 bytes.AddRange(BitConverter.GetBytes(type.EanIndex));
                 bytes.AddRange(BitConverter.GetBytes((ushort)type.I_12));
                 bytes.AddRange(BitConverter.GetBytes(type.I_14));
@@ -1330,8 +1322,8 @@ namespace Xv2CoreLib.BAC
                 Duration = Duration,
                 I_04 = I_04,
                 Flags = Flags,
-                I_08 = I_08,
-                I_10 = I_10,
+                Ean_Type = Ean_Type,
+                EanIndex = EanIndex,
                 I_12 = I_12,
                 I_14 = I_14,
                 I_16 = I_16,
@@ -1363,7 +1355,7 @@ namespace Xv2CoreLib.BAC
         public BdmType I_18_c { get; set; }
         [YAXAttributeFor("BDM_Entry")]
         [YAXSerializeAs("ID")]
-        public string I_08 { get; set; } //ushort
+        public ushort BdmEntryID { get; set; } //ushort
         [YAXAttributeFor("Flag_18")]
         [YAXSerializeAs("A")]
         public byte I_18_a { get; set; }
@@ -1375,10 +1367,11 @@ namespace Xv2CoreLib.BAC
         public byte I_18_d { get; set; }
         [YAXAttributeFor("Hitbox_Flags")]
         [YAXSerializeAs("value")]
-        public string I_10 { get; set; } //uint16
+        [YAXHexValue]
+        public ushort HitboxFlags { get; set; } //uint16
         [YAXAttributeFor("Damage")]
         [YAXSerializeAs("value")]
-        public ushort I_12 { get; set; }
+        public ushort Damage { get; set; }
         [YAXAttributeFor("Damage_When_Blocked")]
         [YAXSerializeAs("value")]
         public ushort I_14 { get; set; }
@@ -1392,43 +1385,40 @@ namespace Xv2CoreLib.BAC
         [YAXAttributeFor("Position")]
         [YAXFormat("0.0########")]
         [YAXSerializeAs("X")]
-        public float F_28 { get; set; }
+        public float PositionX { get; set; }
         [YAXAttributeFor("Position")]
         [YAXFormat("0.0########")]
         [YAXSerializeAs("Y")]
-        public float F_32 { get; set; }
+        public float PositionY { get; set; }
         [YAXAttributeFor("Position")]
         [YAXFormat("0.0########")]
         [YAXSerializeAs("Z")]
-        public float F_36 { get; set; }
+        public float PositionZ { get; set; }
         [YAXAttributeFor("Scale")]
         [YAXFormat("0.0########")]
         [YAXSerializeAs("X")]
-        public float F_40 { get; set; }
+        public float ScaleX { get; set; }
         [YAXAttributeFor("Scale")]
         [YAXFormat("0.0########")]
         [YAXSerializeAs("Y")]
-        public float F_44 { get; set; }
+        public float ScaleY { get; set; }
         [YAXAttributeFor("Scale")]
         [YAXFormat("0.0########")]
         [YAXSerializeAs("Z")]
-        public float F_48 { get; set; }
+        public float ScaleZ { get; set; }
         [YAXAttributeFor("Rotation")]
         [YAXFormat("0.0########")]
         [YAXSerializeAs("X")]
-        public float F_52 { get; set; }
+        public float RotationX { get; set; }
         [YAXAttributeFor("Rotation")]
         [YAXFormat("0.0########")]
         [YAXSerializeAs("Y")]
-        public float F_56 { get; set; }
+        public float RotationY { get; set; }
         [YAXAttributeFor("Rotation")]
         [YAXFormat("0.0########")]
         [YAXSerializeAs("Z")]
-        public float F_60 { get; set; }
+        public float RotationZ { get; set; }
 
-        //Properties
-        [YAXDontSerialize]
-        public ushort BdmEntryID { get { return ushort.Parse(I_08); } set { I_08 = value.ToString(); } }
 
         public static List<BAC_Type1> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
         {
@@ -1443,8 +1433,8 @@ namespace Xv2CoreLib.BAC
                     I_04 = BitConverter.ToInt16(rawBytes, offset + 4),
                     Flags = BitConverter.ToInt16(rawBytes, offset + 6),
                     BdmEntryID = BitConverter.ToUInt16(rawBytes, offset + 8),
-                    I_10 = HexConverter.GetHexString(BitConverter.ToUInt16(rawBytes, offset + 10)),
-                    I_12 = BitConverter.ToUInt16(rawBytes, offset + 12),
+                    HitboxFlags = BitConverter.ToUInt16(rawBytes, offset + 10),
+                    Damage = BitConverter.ToUInt16(rawBytes, offset + 12),
                     I_14 = BitConverter.ToUInt16(rawBytes, offset + 14),
                     I_16 = BitConverter.ToUInt16(rawBytes, offset + 16),
                     I_18_a = Int4Converter.ToInt4(rawBytes[offset + 18])[0],
@@ -1452,15 +1442,15 @@ namespace Xv2CoreLib.BAC
                     I_18_c = (BdmType)Int4Converter.ToInt4(rawBytes[offset + 19])[0],
                     I_18_d = Int4Converter.ToInt4(rawBytes[offset + 19])[1],
                     I_20 = BitConverter_Ex.ToInt16Array(rawBytes, offset + 20, 4),
-                    F_28 = BitConverter.ToSingle(rawBytes, offset + 28),
-                    F_32 = BitConverter.ToSingle(rawBytes, offset + 32),
-                    F_36 = BitConverter.ToSingle(rawBytes, offset + 36),
-                    F_40 = BitConverter.ToSingle(rawBytes, offset + 40),
-                    F_44 = BitConverter.ToSingle(rawBytes, offset + 44),
-                    F_48 = BitConverter.ToSingle(rawBytes, offset + 48),
-                    F_52 = BitConverter.ToSingle(rawBytes, offset + 52),
-                    F_56 = BitConverter.ToSingle(rawBytes, offset + 56),
-                    F_60 = BitConverter.ToSingle(rawBytes, offset + 60),
+                    PositionX = BitConverter.ToSingle(rawBytes, offset + 28),
+                    PositionY = BitConverter.ToSingle(rawBytes, offset + 32),
+                    PositionZ = BitConverter.ToSingle(rawBytes, offset + 36),
+                    ScaleX = BitConverter.ToSingle(rawBytes, offset + 40),
+                    ScaleY = BitConverter.ToSingle(rawBytes, offset + 44),
+                    ScaleZ = BitConverter.ToSingle(rawBytes, offset + 48),
+                    RotationX = BitConverter.ToSingle(rawBytes, offset + 52),
+                    RotationY = BitConverter.ToSingle(rawBytes, offset + 56),
+                    RotationZ = BitConverter.ToSingle(rawBytes, offset + 60),
                 });
 
                 offset += 64;
@@ -1480,22 +1470,22 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.I_04));
                 bytes.AddRange(BitConverter.GetBytes(type.Flags));
                 bytes.AddRange(BitConverter.GetBytes(type.BdmEntryID));
-                bytes.AddRange(BitConverter.GetBytes(HexConverter.ToInt16(type.I_10)));
-                bytes.AddRange(BitConverter.GetBytes(type.I_12));
+                bytes.AddRange(BitConverter.GetBytes(type.HitboxFlags));
+                bytes.AddRange(BitConverter.GetBytes(type.Damage));
                 bytes.AddRange(BitConverter.GetBytes(type.I_14));
                 bytes.AddRange(BitConverter.GetBytes(type.I_16));
                 bytes.Add(Int4Converter.GetByte(type.I_18_a, type.I_18_b, "Hitbox > Flag_18 > A", "Hitbox > Flag_18 > B"));
                 bytes.Add(Int4Converter.GetByte((byte)type.I_18_c, type.I_18_d, "Hitbox > BDM File", "Hitbox > Flag_18 > D"));
                 bytes.AddRange(BitConverter_Ex.GetBytes(type.I_20));
-                bytes.AddRange(BitConverter.GetBytes(type.F_28));
-                bytes.AddRange(BitConverter.GetBytes(type.F_32));
-                bytes.AddRange(BitConverter.GetBytes(type.F_36));
-                bytes.AddRange(BitConverter.GetBytes(type.F_40));
-                bytes.AddRange(BitConverter.GetBytes(type.F_44));
-                bytes.AddRange(BitConverter.GetBytes(type.F_48));
-                bytes.AddRange(BitConverter.GetBytes(type.F_52));
-                bytes.AddRange(BitConverter.GetBytes(type.F_56));
-                bytes.AddRange(BitConverter.GetBytes(type.F_60));
+                bytes.AddRange(BitConverter.GetBytes(type.PositionX));
+                bytes.AddRange(BitConverter.GetBytes(type.PositionY));
+                bytes.AddRange(BitConverter.GetBytes(type.PositionZ));
+                bytes.AddRange(BitConverter.GetBytes(type.ScaleX));
+                bytes.AddRange(BitConverter.GetBytes(type.ScaleY));
+                bytes.AddRange(BitConverter.GetBytes(type.ScaleZ));
+                bytes.AddRange(BitConverter.GetBytes(type.RotationX));
+                bytes.AddRange(BitConverter.GetBytes(type.RotationY));
+                bytes.AddRange(BitConverter.GetBytes(type.RotationZ));
             }
 
             return bytes;
@@ -1519,15 +1509,15 @@ namespace Xv2CoreLib.BAC
         {
             return new BAC_Type1()
             {
-                F_28 = F_28,
-                F_32 = F_32,
+                PositionX = PositionX,
+                PositionY = PositionY,
                 StartTime = StartTime,
                 Duration = Duration,
                 I_04 = I_04,
                 Flags = Flags,
-                I_08 = I_08,
-                I_10 = I_10,
-                I_12 = I_12,
+                BdmEntryID = BdmEntryID,
+                HitboxFlags = HitboxFlags,
+                Damage = Damage,
                 I_14 = I_14,
                 I_16 = I_16,
                 I_20 = I_20,
@@ -1535,13 +1525,13 @@ namespace Xv2CoreLib.BAC
                 I_18_b = I_18_b,
                 I_18_c = I_18_c,
                 I_18_d = I_18_d,
-                F_36 = F_36,
-                F_40 = F_40,
-                F_44 = F_44,
-                F_48 = F_48,
-                F_52 = F_52,
-                F_56 = F_56,
-                F_60 = F_60
+                PositionZ = PositionZ,
+                ScaleX = ScaleX,
+                ScaleY = ScaleY,
+                ScaleZ = ScaleZ,
+                RotationX = RotationX,
+                RotationY = RotationY,
+                RotationZ = RotationZ
             };
 
         }
@@ -1558,7 +1548,8 @@ namespace Xv2CoreLib.BAC
         
         [YAXAttributeFor("Movement_Type")]
         [YAXSerializeAs("Flags")]
-        public string I_08 { get; set; } //uint16
+        [YAXHexValue]
+        public ushort I_08 { get; set; } //uint16
         [YAXAttributeFor("I_10")]
         [YAXSerializeAs("value")]
         public short I_10 { get; set; }
@@ -1599,7 +1590,7 @@ namespace Xv2CoreLib.BAC
                     Duration = BitConverter.ToInt16(rawBytes, offset + 2),
                     I_04 = BitConverter.ToInt16(rawBytes, offset + 4),
                     Flags = BitConverter.ToInt16(rawBytes, offset + 6),
-                    I_08 = HexConverter.GetHexString(BitConverter.ToUInt16(rawBytes, offset + 8)),
+                    I_08 = BitConverter.ToUInt16(rawBytes, offset + 8),
                     I_10 = BitConverter.ToInt16(rawBytes, offset + 10),
                     F_12 = BitConverter.ToSingle(rawBytes, offset + 12),
                     F_16 = BitConverter.ToSingle(rawBytes, offset + 16),
@@ -1625,7 +1616,7 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.Duration));
                 bytes.AddRange(BitConverter.GetBytes(type.I_04));
                 bytes.AddRange(BitConverter.GetBytes(type.Flags));
-                bytes.AddRange(BitConverter.GetBytes(HexConverter.ToInt16(type.I_08)));
+                bytes.AddRange(BitConverter.GetBytes(type.I_08));
                 bytes.AddRange(BitConverter.GetBytes(type.I_10));
                 bytes.AddRange(BitConverter.GetBytes(type.F_12));
                 bytes.AddRange(BitConverter.GetBytes(type.F_16));
@@ -2027,23 +2018,16 @@ namespace Xv2CoreLib.BAC
             Off = 1
         }
 
-        #region WrapperProps
-        [YAXDontSerialize]
-        public ushort SkillID { get { return ushort.Parse(I_12); } set { I_12 = value.ToString(); } }
-        [YAXDontSerialize]
-        public int EffectID { get { return I_16; } set { I_16 = value; } }
-
-        #endregion
 
         [YAXAttributeFor("EEPK")]
         [YAXSerializeAs("Type")]
         public EepkType I_08 { get; set; }
         [YAXAttributeFor("Skill_ID")]
         [YAXSerializeAs("value")]
-        public string I_12 { get; set; } //ushort
+        public ushort SkillID { get; set; } //ushort
         [YAXAttributeFor("Effect")]
         [YAXSerializeAs("ID")]
-        public int I_16 { get; set; }
+        public int EffectID { get; set; }
         [YAXAttributeFor("Effect")]
         [YAXSerializeAs("Switch")]
         public Switch I_44 { get; set; } //uint32
@@ -2097,7 +2081,7 @@ namespace Xv2CoreLib.BAC
                     I_10 = BitConverter.ToUInt16(rawBytes, offset + 10),
                     SkillID = BitConverter.ToUInt16(rawBytes, offset + 12),
                     I_14 = (UseSkillId)BitConverter.ToUInt16(rawBytes, offset + 14),
-                    I_16 = BitConverter.ToInt32(rawBytes, offset + 16),
+                    EffectID = BitConverter.ToInt32(rawBytes, offset + 16),
                     F_20 = BitConverter.ToSingle(rawBytes, offset + 20),
                     F_24 = BitConverter.ToSingle(rawBytes, offset + 24),
                     F_28 = BitConverter.ToSingle(rawBytes, offset + 28),
@@ -2127,7 +2111,7 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.I_10));
                 bytes.AddRange(BitConverter.GetBytes(type.SkillID));
                 bytes.AddRange(BitConverter.GetBytes((ushort)type.I_14));
-                bytes.AddRange(BitConverter.GetBytes(type.I_16));
+                bytes.AddRange(BitConverter.GetBytes(type.EffectID));
                 bytes.AddRange(BitConverter.GetBytes(type.F_20));
                 bytes.AddRange(BitConverter.GetBytes(type.F_24));
                 bytes.AddRange(BitConverter.GetBytes(type.F_28));
@@ -2197,26 +2181,18 @@ namespace Xv2CoreLib.BAC
             True = 65535
         }
 
-        #region WrapperProps
-        [YAXDontSerialize]
-        public ushort SkillID { get { return ushort.Parse(I_08); } set { I_08 = value.ToString(); } }
-        [YAXDontSerialize]
-        public int EntryID { get { return int.Parse(I_12); } set { I_12 = value.ToString(); } }
-
-        #endregion
-
         [YAXAttributeFor("BSA")]
         [YAXSerializeAs("Type")]
         public BsaType I_44 { get; set; }
         [YAXAttributeFor("BSA")]
         [YAXSerializeAs("Skill_ID")]
-        public string I_08 { get; set; } //ushort
+        public ushort SkillID { get; set; } //ushort
         [YAXAttributeFor("Can_Use_Cmn_Bsa")]
         [YAXSerializeAs("value")]
         public CanUseCmnBsa I_10 { get; set; } // uint16
         [YAXAttributeFor("BSA")]
         [YAXSerializeAs("Entry ID")]
-        public string I_12 { get; set; } //int
+        public int EntryID { get; set; } //int
         [YAXAttributeFor("Bone")]
         [YAXSerializeAs("value")]
         public ushort I_16 { get; set; }
@@ -2303,9 +2279,9 @@ namespace Xv2CoreLib.BAC
                     Duration = BitConverter.ToInt16(rawBytes, offset + 2),
                     I_04 = BitConverter.ToInt16(rawBytes, offset + 4),
                     Flags = BitConverter.ToInt16(rawBytes, offset + 6),
-                    I_08 = BitConverter.ToUInt16(rawBytes, offset + 8).ToString(),
+                    SkillID = BitConverter.ToUInt16(rawBytes, offset + 8),
                     I_10 = (CanUseCmnBsa)BitConverter.ToUInt16(rawBytes, offset + 10),
-                    I_12 = BitConverter.ToInt32(rawBytes, offset + 12).ToString(),
+                    EntryID = BitConverter.ToInt32(rawBytes, offset + 12),
                     I_16 = BitConverter.ToUInt16(rawBytes, offset + 16),
                     I_18 = BitConverter.ToUInt16(rawBytes, offset + 18),
                     F_20 = BitConverter.ToSingle(rawBytes, offset + 20),
@@ -2338,9 +2314,9 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.Duration));
                 bytes.AddRange(BitConverter.GetBytes(type.I_04));
                 bytes.AddRange(BitConverter.GetBytes(type.Flags));
-                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(type.I_08)));
+                bytes.AddRange(BitConverter.GetBytes(type.SkillID));
                 bytes.AddRange(BitConverter.GetBytes((ushort)type.I_10));
-                bytes.AddRange(BitConverter.GetBytes(int.Parse(type.I_12)));
+                bytes.AddRange(BitConverter.GetBytes(type.EntryID));
                 bytes.AddRange(BitConverter.GetBytes(type.I_16));
                 bytes.AddRange(BitConverter.GetBytes(type.I_18));
                 bytes.AddRange(BitConverter.GetBytes(type.F_20));
@@ -2399,26 +2375,19 @@ namespace Xv2CoreLib.BAC
             Skill = 5
         }
 
-        #region WrapperProps
-
-        [YAXDontSerialize]
-        public ushort EanTypeProp { get { return (ushort)I_08; } set { I_08 = (EanType)value; } }
-        [YAXDontSerialize]
-        public ushort EanIndexProp { get { return ushort.Parse(I_12); } set { I_12 = value.ToString(); } }
-        #endregion
 
         [YAXAttributeFor("EAN_TO_USE")]
         [YAXSerializeAs("value")]
-        public EanType I_08 { get; set; } = EanType.Common;
+        public EanType Ean_Type { get; set; } = EanType.Common;
         [YAXAttributeFor("BoneToFocusOn")]
         [YAXSerializeAs("value")]
         public ushort I_10 { get; set; }
         [YAXAttributeFor("EAN_Index")]
         [YAXSerializeAs("value")]
-        public string I_12 { get; set; } = "0"; //ushort
+        public ushort EanIndex { get; set; } //ushort
         [YAXAttributeFor("StartFrame")]
         [YAXSerializeAs("value")]
-        public ushort I_14 { get; set; }
+        public ushort StartFrame { get; set; }
         [YAXAttributeFor("I_16")]
         [YAXSerializeAs("value")]
         public ushort I_16 { get; set; }
@@ -2524,10 +2493,6 @@ namespace Xv2CoreLib.BAC
         [YAXHexValue]
         public byte I_75 { get; set; } //Int8
 
-        //Propeties
-        [YAXDontSerialize]
-        public ushort EanIndex { get { return ushort.Parse(I_12); } set { I_12 = value.ToString(); } }
-
         public static List<BAC_Type10> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
         {
             List<BAC_Type10> Type10 = new List<BAC_Type10>();
@@ -2542,10 +2507,10 @@ namespace Xv2CoreLib.BAC
                     Duration = BitConverter.ToInt16(rawBytes, offset + 2),
                     I_04 = BitConverter.ToInt16(rawBytes, offset + 4),
                     Flags = BitConverter.ToInt16(rawBytes, offset + 6),
-                    I_08 = (EanType)BitConverter.ToUInt16(rawBytes, offset + 8),
+                    Ean_Type = (EanType)BitConverter.ToUInt16(rawBytes, offset + 8),
                     I_10 = BitConverter.ToUInt16(rawBytes, offset + 10),
                     EanIndex = BitConverter.ToUInt16(rawBytes, offset + 12),
-                    I_14 = BitConverter.ToUInt16(rawBytes, offset + 14),
+                    StartFrame = BitConverter.ToUInt16(rawBytes, offset + 14),
                     I_16 = BitConverter.ToUInt16(rawBytes, offset + 16),
                     I_18 = BitConverter.ToUInt16(rawBytes, offset + 18),
                     F_20 = BitConverter.ToSingle(rawBytes, offset + 20),
@@ -2595,10 +2560,10 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.Duration));
                 bytes.AddRange(BitConverter.GetBytes(type.I_04));
                 bytes.AddRange(BitConverter.GetBytes(type.Flags));
-                bytes.AddRange(BitConverter.GetBytes((ushort)type.I_08));
+                bytes.AddRange(BitConverter.GetBytes((ushort)type.Ean_Type));
                 bytes.AddRange(BitConverter.GetBytes(type.I_10));
                 bytes.AddRange(BitConverter.GetBytes(type.EanIndex));
-                bytes.AddRange(BitConverter.GetBytes(type.I_14));
+                bytes.AddRange(BitConverter.GetBytes(type.StartFrame));
                 bytes.AddRange(BitConverter.GetBytes(type.I_16));
                 bytes.AddRange(BitConverter.GetBytes(type.I_18));
                 bytes.AddRange(BitConverter.GetBytes(type.F_20));
@@ -2647,23 +2612,19 @@ namespace Xv2CoreLib.BAC
 
         #region WrapperProps
         [YAXDontSerialize]
-        public ushort CueId { get { return I_12; } set { I_12 = value; } }
-        [YAXDontSerialize]
-        public AcbType acbType { get { return I_08; } set { I_08 = value; } }
-        [YAXDontSerialize]
-        public ushort AcbTypeNumeric { get { return (ushort)I_08; } set { I_08 = (AcbType)value; } }
+        public ushort AcbTypeNumeric { get { return (ushort)acbType; } set { acbType = (AcbType)value; } }
         #endregion
 
         [YAXAttributeFor("ACB")]
         [YAXSerializeAs("File")]
-        public AcbType I_08 { get; set; }
+        public AcbType acbType { get; set; }
         [YAXAttributeFor("I_10")]
         [YAXSerializeAs("value")]
         [YAXHexValue]
         public ushort I_10 { get; set; }
         [YAXAttributeFor("Cue_ID")]
         [YAXSerializeAs("value")]
-        public ushort I_12 { get; set; }
+        public ushort CueId { get; set; }
         [YAXAttributeFor("I_14")]
         [YAXSerializeAs("value")]
         public short I_14 { get; set; }
@@ -2681,9 +2642,9 @@ namespace Xv2CoreLib.BAC
                     Duration = BitConverter.ToInt16(rawBytes, offset + 2),
                     I_04 = BitConverter.ToInt16(rawBytes, offset + 4),
                     Flags = BitConverter.ToInt16(rawBytes, offset + 6),
-                    I_08 = (AcbType)BitConverter.ToUInt16(rawBytes, offset + 8),
+                    acbType = (AcbType)BitConverter.ToUInt16(rawBytes, offset + 8),
                     I_10 = BitConverter.ToUInt16(rawBytes, offset + 10),
-                    I_12 = BitConverter.ToUInt16(rawBytes, offset + 12),
+                    CueId = BitConverter.ToUInt16(rawBytes, offset + 12),
                     I_14 = BitConverter.ToInt16(rawBytes, offset + 14)
                 });
 
@@ -2703,9 +2664,9 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.Duration));
                 bytes.AddRange(BitConverter.GetBytes(type.I_04));
                 bytes.AddRange(BitConverter.GetBytes(type.Flags));
-                bytes.AddRange(BitConverter.GetBytes((ushort)type.I_08));
+                bytes.AddRange(BitConverter.GetBytes((ushort)type.acbType));
                 bytes.AddRange(BitConverter.GetBytes(type.I_10));
-                bytes.AddRange(BitConverter.GetBytes(type.I_12));
+                bytes.AddRange(BitConverter.GetBytes(type.CueId));
                 bytes.AddRange(BitConverter.GetBytes(type.I_14));
             }
 
@@ -2923,16 +2884,16 @@ namespace Xv2CoreLib.BAC
         public ushort I_10 { get; set; }
         [YAXAttributeFor("Function")]
         [YAXSerializeAs("Parameter")]
-        //[YAXFormat("0.0########")]
-        public string F_12 { get; set; }
+        [YAXFormat("0.0########")]
+        public float Function { get; set; } //Function type
         [YAXAttributeFor("F_16")]
         [YAXSerializeAs("value")]
-        //[YAXFormat("0.0########")]
-        public string F_16 { get; set; }
+        [YAXFormat("0.0########")]
+        public float Param1 { get; set; } //Param 1
         [YAXAttributeFor("F_20")]
         [YAXSerializeAs("value")]
-        //[YAXFormat("0.0########")]
-        public string F_20 { get; set; }
+        [YAXFormat("0.0########")]
+        public float Param2 { get; set; } //Param 2
         [YAXAttributeFor("I_24")]
         [YAXSerializeAs("value")]
         public int I_24 { get; set; }
@@ -2940,15 +2901,6 @@ namespace Xv2CoreLib.BAC
         [YAXSerializeAs("value")]
         public int I_28 { get; set; }
 
-        #region ParamProps
-        [YAXDontSerialize]
-        public float Param1_Float { get { return float.Parse(F_12); } set { F_12 = value.ToString("0.0#########"); } }
-        [YAXDontSerialize]
-        public float Param2_Float { get { return float.Parse(F_16); } set { F_16 = value.ToString("0.0#########"); } }
-        [YAXDontSerialize]
-        public float Param3_Float { get { return float.Parse(F_20); } set { F_20 = value.ToString("0.0#########"); } }
-
-        #endregion
 
         public static List<BAC_Type15> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
         {
@@ -2964,9 +2916,9 @@ namespace Xv2CoreLib.BAC
                     Flags = BitConverter.ToInt16(rawBytes, offset + 6),
                     I_08 = BitConverter.ToUInt16(rawBytes, offset + 8),
                     I_10 = BitConverter.ToUInt16(rawBytes, offset + 10),
-                    Param1_Float = BitConverter.ToSingle(rawBytes, offset + 12),
-                    Param2_Float = BitConverter.ToSingle(rawBytes, offset + 16),
-                    Param3_Float = BitConverter.ToSingle(rawBytes, offset + 20),
+                    Function = BitConverter.ToSingle(rawBytes, offset + 12),
+                    Param1 = BitConverter.ToSingle(rawBytes, offset + 16),
+                    Param2 = BitConverter.ToSingle(rawBytes, offset + 20),
                     I_24 = BitConverter.ToInt32(rawBytes, offset + 24),
                     I_28 = BitConverter.ToInt32(rawBytes, offset + 28)
                 });
@@ -2989,9 +2941,9 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.Flags));
                 bytes.AddRange(BitConverter.GetBytes(type.I_08));
                 bytes.AddRange(BitConverter.GetBytes(type.I_10));
-                bytes.AddRange(BitConverter.GetBytes(type.Param1_Float));
-                bytes.AddRange(BitConverter.GetBytes(type.Param2_Float));
-                bytes.AddRange(BitConverter.GetBytes(type.Param3_Float));
+                bytes.AddRange(BitConverter.GetBytes(type.Function));
+                bytes.AddRange(BitConverter.GetBytes(type.Param1));
+                bytes.AddRange(BitConverter.GetBytes(type.Param2));
                 bytes.AddRange(BitConverter.GetBytes(type.I_24));
                 bytes.AddRange(BitConverter.GetBytes(type.I_28));
             }
@@ -4124,7 +4076,7 @@ namespace Xv2CoreLib.BAC
 
         [YAXAttributeFor("SkillID")]
         [YAXSerializeAs("value")]
-        public string I_08 { get; set; } //uint16
+        public ushort I_08 { get; set; } //uint16
         [YAXAttributeFor("SkillType")]
         [YAXSerializeAs("value")]
         public ushort I_10 { get; set; }
@@ -4162,7 +4114,7 @@ namespace Xv2CoreLib.BAC
                     Duration = BitConverter.ToInt16(rawBytes, offset + 2),
                     I_04 = BitConverter.ToInt16(rawBytes, offset + 4),
                     Flags = BitConverter.ToInt16(rawBytes, offset + 6),
-                    I_08 = BitConverter.ToUInt16(rawBytes, offset + 8).ToString(),
+                    I_08 = BitConverter.ToUInt16(rawBytes, offset + 8),
                     I_10 = BitConverter.ToUInt16(rawBytes, offset + 10),
                     I_12 = BitConverter.ToUInt16(rawBytes, offset + 12),
                     I_14 = BitConverter.ToUInt16(rawBytes, offset + 14),
@@ -4188,7 +4140,7 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.Duration));
                 bytes.AddRange(BitConverter.GetBytes(type.I_04));
                 bytes.AddRange(BitConverter.GetBytes(type.Flags));
-                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(type.I_08)));
+                bytes.AddRange(BitConverter.GetBytes(type.I_08));
                 bytes.AddRange(BitConverter.GetBytes(type.I_10));
                 bytes.AddRange(BitConverter.GetBytes(type.I_12));
                 bytes.AddRange(BitConverter.GetBytes(type.I_14));

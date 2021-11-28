@@ -150,7 +150,7 @@ namespace Xv2CoreLib.BSA_XV1
                 {
                     unk1.Add(new BSA.BSA_Collision()
                     {
-                        I_00 = (BSA.EepkType)BitConverter.ToUInt16(rawBytes, offset + 0),
+                        EepkType = (BSA.EepkType)BitConverter.ToUInt16(rawBytes, offset + 0),
                         SkillID = BitConverter.ToUInt16(rawBytes, offset + 2),
                         EffectID = BitConverter.ToUInt16(rawBytes, offset + 4),
                         I_06 = BitConverter.ToUInt16(rawBytes, offset + 6),
@@ -397,9 +397,9 @@ namespace Xv2CoreLib.BSA_XV1
                 {
                     Type.Add(new BSA.BSA_Type6()
                     {
-                        I_00 = (BSA.EepkType)BitConverter.ToUInt16(rawBytes, offset + 0),
+                        EepkType = (BSA.EepkType)BitConverter.ToUInt16(rawBytes, offset + 0),
                         SkillID = BitConverter.ToUInt16(rawBytes, offset + 2),
-                        I_04 = BitConverter.ToUInt16(rawBytes, offset + 4),
+                        EffectID = BitConverter.ToUInt16(rawBytes, offset + 4),
                         I_06 = BitConverter.ToUInt16(rawBytes, offset + 6),
                         I_08 = (BSA.Switch)BitConverter.ToUInt16(rawBytes, offset + 8),
                         I_10 = BitConverter.ToUInt16(rawBytes, offset + 10),
@@ -432,9 +432,9 @@ namespace Xv2CoreLib.BSA_XV1
                 {
                     Type.Add(new BSA.BSA_Type7()
                     {
-                        I_00 = (BSA.AcbType)BitConverter.ToUInt16(rawBytes, offset + 0),
+                        AcbType = (BSA.AcbType)BitConverter.ToUInt16(rawBytes, offset + 0),
                         I_02 = BitConverter.ToUInt16(rawBytes, offset + 2),
-                        I_04 = BitConverter.ToUInt16(rawBytes, offset + 4),
+                        CueId = BitConverter.ToUInt16(rawBytes, offset + 4),
                         I_06 = BitConverter.ToUInt16(rawBytes, offset + 6),
                         StartTime = BitConverter.ToUInt16(rawBytes, hdrOffset + 0),
                         Duration = GetTypeDuration(BitConverter.ToUInt16(rawBytes, hdrOffset + 0), BitConverter.ToUInt16(rawBytes, hdrOffset + 2)),

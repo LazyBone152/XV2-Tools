@@ -162,13 +162,13 @@ namespace Xv2CoreLib.CNC
         public ushort I_04 { get; set; }
         [YAXAttributeFor("Dual_Skill_1")]
         [YAXSerializeAs("Dual_ID")]
-        public string I_06 { get; set; } //ushort
+        public ushort I_06 { get; set; } //ushort
         [YAXAttributeFor("Dual_Skill_2")]
         [YAXSerializeAs("Dual_ID")]
-        public string I_08 { get; set; } //ushort
+        public ushort I_08 { get; set; } //ushort
         [YAXAttributeFor("Dual_Skill_3")]
         [YAXSerializeAs("Dual_ID")]
-        public string I_10 { get; set; } //ushort
+        public ushort I_10 { get; set; } //ushort
 
         public static CNC_Entry Read(byte[] rawBytes, int offset)
         {
@@ -177,9 +177,9 @@ namespace Xv2CoreLib.CNC
                 I_00 = BitConverter.ToUInt16(rawBytes, offset + 0).ToString(),
                 I_02 = BitConverter.ToUInt16(rawBytes, offset + 2),
                 I_04 = BitConverter.ToUInt16(rawBytes, offset + 4),
-                I_06 = BitConverter.ToUInt16(rawBytes, offset + 6).ToString(),
-                I_08 = BitConverter.ToUInt16(rawBytes, offset + 8).ToString(),
-                I_10 = BitConverter.ToUInt16(rawBytes, offset + 10).ToString()
+                I_06 = BitConverter.ToUInt16(rawBytes, offset + 6),
+                I_08 = BitConverter.ToUInt16(rawBytes, offset + 8),
+                I_10 = BitConverter.ToUInt16(rawBytes, offset + 10)
             };
         }
 
@@ -189,9 +189,9 @@ namespace Xv2CoreLib.CNC
             bytes.AddRange(BitConverter.GetBytes(ushort.Parse(cncEntry.I_00)));
             bytes.AddRange(BitConverter.GetBytes(cncEntry.I_02));
             bytes.AddRange(BitConverter.GetBytes(cncEntry.I_04));
-            bytes.AddRange(BitConverter.GetBytes(ushort.Parse(cncEntry.I_06)));
-            bytes.AddRange(BitConverter.GetBytes(ushort.Parse(cncEntry.I_08)));
-            bytes.AddRange(BitConverter.GetBytes(ushort.Parse(cncEntry.I_10)));
+            bytes.AddRange(BitConverter.GetBytes(cncEntry.I_06));
+            bytes.AddRange(BitConverter.GetBytes(cncEntry.I_08));
+            bytes.AddRange(BitConverter.GetBytes(cncEntry.I_10));
             return bytes;
         }
 

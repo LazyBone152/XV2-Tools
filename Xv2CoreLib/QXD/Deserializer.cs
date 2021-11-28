@@ -493,23 +493,23 @@ namespace Xv2CoreLib.QXD
                 bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters1[i].F_72));
                 bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters1[i].F_76));
                 bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters1[i].F_80));
-                bytes.AddRange(BitConverter.GetBytes(int.Parse(qxd_File.Characters1[i].I_84)));
+                bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters1[i].I_84));
 
 
                 //Skills
-                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(qxd_File.Characters1[i]._Skills.I_00)));
-                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(qxd_File.Characters1[i]._Skills.I_02)));
-                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(qxd_File.Characters1[i]._Skills.I_04)));
-                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(qxd_File.Characters1[i]._Skills.I_06)));
-                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(qxd_File.Characters1[i]._Skills.I_08)));
-                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(qxd_File.Characters1[i]._Skills.I_10)));
-                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(qxd_File.Characters1[i]._Skills.I_12)));
-                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(qxd_File.Characters1[i]._Skills.I_14)));
-                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(qxd_File.Characters1[i]._Skills.I_16)));
+                bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters1[i]._Skills.I_00));
+                bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters1[i]._Skills.I_02));
+                bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters1[i]._Skills.I_04));
+                bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters1[i]._Skills.I_06));
+                bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters1[i]._Skills.I_08));
+                bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters1[i]._Skills.I_10));
+                bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters1[i]._Skills.I_12));
+                bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters1[i]._Skills.I_14));
+                bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters1[i]._Skills.I_16));
                 bytes.AddRange(BitConverter_Ex.GetBytes(qxd_File.Characters1[i].I_106));
 
                 bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters1[i].I_120));
-                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(qxd_File.Characters1[i].I_122)));
+                bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters1[i].I_122));
                 
             }
 
@@ -548,23 +548,23 @@ namespace Xv2CoreLib.QXD
                 bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters2[i].F_72));
                 bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters2[i].F_76));
                 bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters2[i].F_80));
-                bytes.AddRange(BitConverter.GetBytes(int.Parse(qxd_File.Characters2[i].I_84)));
+                bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters2[i].I_84));
 
 
 
                 //Skills
-                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(qxd_File.Characters2[i]._Skills.I_00)));
-                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(qxd_File.Characters2[i]._Skills.I_02)));
-                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(qxd_File.Characters2[i]._Skills.I_04)));
-                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(qxd_File.Characters2[i]._Skills.I_06)));
-                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(qxd_File.Characters2[i]._Skills.I_08)));
-                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(qxd_File.Characters2[i]._Skills.I_10)));
-                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(qxd_File.Characters2[i]._Skills.I_12)));
-                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(qxd_File.Characters2[i]._Skills.I_14)));
-                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(qxd_File.Characters2[i]._Skills.I_16)));
+                bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters2[i]._Skills.I_00));
+                bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters2[i]._Skills.I_02));
+                bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters2[i]._Skills.I_04));
+                bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters2[i]._Skills.I_06));
+                bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters2[i]._Skills.I_08));
+                bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters2[i]._Skills.I_10));
+                bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters2[i]._Skills.I_12));
+                bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters2[i]._Skills.I_14));
+                bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters2[i]._Skills.I_16));
                 bytes.AddRange(BitConverter_Ex.GetBytes(qxd_File.Characters2[i].I_106));
                 bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters2[i].I_120));
-                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(qxd_File.Characters2[i].I_122)));
+                bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters2[i].I_122));
 
             }
 

@@ -66,25 +66,25 @@ namespace Xv2CoreLib.IDB
 
                     idbFile.Entries.Add(new IDB_Entry()
                     {
-                        I_00 = BitConverter.ToUInt16(rawBytes, offset + 0).ToString(),
+                        ID = BitConverter.ToUInt16(rawBytes, offset + 0),
                         I_02 = BitConverter.ToUInt16(rawBytes, offset + 2),
-                        I_04 = BitConverter.ToUInt16(rawBytes, offset + 4),
-                        I_06 = BitConverter.ToUInt16(rawBytes, offset + 6),
-                        I_08 = BitConverter.ToUInt16(rawBytes, offset + 8),
+                        NameMsgID = BitConverter.ToUInt16(rawBytes, offset + 4),
+                        DescMsgID = BitConverter.ToUInt16(rawBytes, offset + 6),
+                        Type = (IDB_Type)BitConverter.ToUInt16(rawBytes, offset + 8),
                         I_10 = BitConverter.ToUInt16(rawBytes, offset + 10),
                         I_12 = BitConverter.ToUInt16(rawBytes, offset + 12),
                         I_14 = BitConverter.ToUInt16(rawBytes, offset + 14),
                         I_16 = BitConverter.ToInt32(rawBytes, offset + 16),
                         I_20 = BitConverter.ToInt32(rawBytes, offset + 20),
-                        I_24 = BitConverter.ToInt32(rawBytes, offset + 24),
+                        RaceLock = (RaceLock)BitConverter.ToInt32(rawBytes, offset + 24),
                         I_28 = BitConverter.ToInt32(rawBytes, offset + 28),
-                        I_32 = BitConverter.ToInt32(rawBytes, offset + 32).ToString(),
+                        I_32 = BitConverter.ToInt32(rawBytes, offset + 32),
                         I_36 = BitConverter.ToUInt16(rawBytes, offset + 36),
                         I_38 = (LB_Color)BitConverter.ToUInt16(rawBytes, offset + 38),
                         I_40 = BitConverter.ToUInt16(rawBytes, offset + 40),
-                        I_42 = BitConverter.ToUInt16(rawBytes, offset + 42).ToString(),
-                        I_44 = BitConverter.ToUInt16(rawBytes, offset + 44).ToString(),
-                        I_46 = BitConverter.ToUInt16(rawBytes, offset + 46).ToString(),
+                        I_42 = BitConverter.ToUInt16(rawBytes, offset + 42),
+                        I_44 = BitConverter.ToUInt16(rawBytes, offset + 44),
+                        I_46 = BitConverter.ToUInt16(rawBytes, offset + 46),
                         Effects = ParseEffect(offset + 48)
                     });
 

@@ -1408,12 +1408,12 @@ namespace LB_Mod_Installer.Installer
                     if (msgComponent.MsgType == Msg_Component.MsgComponentType.Name)
                     {
                         string nameMsgPath = String.Format("msg/{0}", IDB_File.NameMsgFile(Path.GetFileName(filePath)));
-                        IdbEntry.I_04 = (ushort)msgComponentInstall.WriteMsgEntries(msgComponent, nameMsgPath, MsgComponentInstall.Mode.IDB);
+                        IdbEntry.NameMsgID = (ushort)msgComponentInstall.WriteMsgEntries(msgComponent, nameMsgPath, MsgComponentInstall.Mode.IDB);
                     }
                     else if (msgComponent.MsgType == Msg_Component.MsgComponentType.Info)
                     {
                         string infoMsgPath = String.Format("msg/{0}", IDB_File.InfoMsgFile(Path.GetFileName(filePath)));
-                        IdbEntry.I_06 = (ushort)msgComponentInstall.WriteMsgEntries(msgComponent, infoMsgPath, MsgComponentInstall.Mode.IDB);
+                        IdbEntry.DescMsgID = (ushort)msgComponentInstall.WriteMsgEntries(msgComponent, infoMsgPath, MsgComponentInstall.Mode.IDB);
                     }
                     else if (msgComponent.MsgType == Msg_Component.MsgComponentType.LimitBurst)
                     {

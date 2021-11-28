@@ -8,6 +8,17 @@ using YAXLib;
 
 namespace Xv2CoreLib.BPE
 {
+    
+    public enum BpeType
+    {
+        Blur = 0,
+        WhiteShine = 1,
+        Disorientation = 4,
+        Zoom = 6,
+        Hue = 8,
+        BodyOutline = 9
+    }
+
     [YAXSerializeAs("BPE")]
     public class BPE_File : ISorting
     {
@@ -52,11 +63,11 @@ namespace Xv2CoreLib.BPE
         public int I_00 { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("Duration")]
-        public UInt16 I_04 { get; set; }
+        public ushort I_04 { get; set; }
         [YAXAttributeForClass]
-        public UInt16 I_06 { get; set; }
+        public ushort I_06 { get; set; }
         [YAXAttributeForClass]
-        public UInt16 I_08 { get; set; }
+        public ushort I_08 { get; set; }
 
         
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BPE_SubEntry")]
@@ -71,19 +82,19 @@ namespace Xv2CoreLib.BPE
     {
         [YAXAttributeForClass]
         [YAXSerializeAs("Type")]
-        public string I_00 { get; set; } //Int32
+        public BpeType BpeType { get; set; } //Int32
         [YAXAttributeFor("Start_Time")]
         [YAXSerializeAs("value")]
-        public UInt16 I_04 { get; set; }
+        public ushort I_04 { get; set; }
         [YAXAttributeFor("End_Time")]
         [YAXSerializeAs("value")]
-        public UInt16 I_06 { get; set; }
+        public ushort I_06 { get; set; }
         [YAXAttributeFor("I_08")]
         [YAXSerializeAs("value")]
-        public UInt16 I_08 { get; set; }
+        public ushort I_08 { get; set; }
         [YAXAttributeFor("I_10")]
         [YAXSerializeAs("value")]
-        public UInt16 I_10 { get; set; }
+        public ushort I_10 { get; set; }
         [YAXAttributeFor("F_12")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
@@ -113,7 +124,7 @@ namespace Xv2CoreLib.BPE
         public int I_36 { get; set; }
         [YAXAttributeFor("I_40")]
         [YAXSerializeAs("value")]
-        public UInt16 I_40 { get; set; }
+        public ushort I_40 { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Blur")]
         [YAXDontSerializeIfNull]
@@ -146,48 +157,6 @@ namespace Xv2CoreLib.BPE
         [YAXDontSerializeIfNull]
         public List<BPE_Type9> Type9 { get; set; }
 
-
-        public static string GetBpeType(int type)
-        {
-            switch (type)
-            {
-                case 0:
-                    return "Blur";
-                case 1:
-                    return "WhiteShine";
-                case 4:
-                    return "Disorientation";
-                case 6:
-                    return "Zoom";
-                case 8:
-                    return "Hue";
-                case 9:
-                    return "BodyOutline";
-                default:
-                    return type.ToString();
-            }
-        }
-
-        public int GetBpeType()
-        {
-            switch (I_00)
-            {
-                case "Blur":
-                    return 0;
-                case "WhiteShine":
-                    return 1;
-                case "Disorientation":
-                    return 4;
-                case "Zoom":
-                    return 6;
-                case "Hue":
-                    return 8;
-                case "BodyOutline":
-                    return 9;
-                default:
-                    return Int32.Parse(I_00);
-            }
-        }
 
     }
 

@@ -17,8 +17,8 @@
         mc:Ignorable="d"
         x:Name="empEditorWindow" Title="EMP Editor" Height="575" Width="1110" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen" AllowDrop="True" WindowStyle="ThreeDBorderWindow">
     <Window.InputBindings>
-        <KeyBinding Key="Z" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=UndoCommand}"/>
-        <KeyBinding Key="Y" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=RedoCommand}"/>
+        <KeyBinding Key="Z" Modifiers="Ctrl"  Command="{Binding UndoCommand}"/>
+        <KeyBinding Key="Y" Modifiers="Ctrl"  Command="{Binding RedoCommand}"/>
     </Window.InputBindings>
     <Window.Resources>
         <converters:ColorFormatConverter x:Key="RgbConverter" />
@@ -50,6 +50,8 @@
                         </TreeView.InputBindings>
                         <TreeView.ItemContainerStyle>
                             <Style TargetType="TreeViewItem">
+                                <Setter Property="IsExpanded" Value="{Binding Path=IsExpanded, Mode=TwoWay}" />
+                                <Setter Property="IsSelected" Value="{Binding Path=IsSelected, Mode=TwoWay}" />
                                 <EventSetter Event="TreeViewItem.MouseRightButtonDown" Handler="TreeViewItem_MouseRightButtonDown"/>
                             </Style>
                         </TreeView.ItemContainerStyle>

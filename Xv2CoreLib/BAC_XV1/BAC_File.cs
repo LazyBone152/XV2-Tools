@@ -294,10 +294,10 @@ namespace Xv2CoreLib.BAC_XV1
                     Duration = type.I_02,
                     I_04 = (short)type.I_04,
                     Flags = (short)type.I_06,
-                    I_08 = type.I_08,
+                    Ean_Type = type.I_08,
                     I_10 = type.I_10,
                     EanIndex = type.I_12,
-                    I_14 = type.I_14,
+                    StartFrame = type.I_14,
                     I_16 = type.I_16,
                     I_18 = type.I_18
                 });
@@ -392,8 +392,8 @@ namespace Xv2CoreLib.BAC_XV1
                     I_08 = (ushort)type.I_08,
                     I_04 = type.I_04,
                     Flags = type.I_06,
-                    F_12 = type.F_12.ToString(),
-                    F_16 = type.F_12.ToString()
+                    Function = type.F_12,
+                    Param1 = type.F_12
                 });
 
             }

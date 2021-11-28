@@ -117,7 +117,7 @@ namespace Xv2CoreLib.TNL
                 tnl_File.Characters[_pos].Str2 = StringEx.GetString(rawBytes, currentOffset + addedOffset, false, StringEx.EncodingType.UTF8, stringSize, false);
                 addedOffset += stringSize;
 
-                tnl_File.Characters[_pos].I32_2 = BitConverter.ToInt32(rawBytes, currentOffset + addedOffset).ToString();
+                tnl_File.Characters[_pos].I32_2 = BitConverter.ToInt32(rawBytes, currentOffset + addedOffset);
                 addedOffset += 8;
 
                 stringSize = BitConverter.ToInt32(rawBytes, currentOffset + addedOffset - 4);
@@ -128,7 +128,7 @@ namespace Xv2CoreLib.TNL
                 tnl_File.Characters[_pos].Str4 = StringEx.GetString(rawBytes, currentOffset + addedOffset, false, StringEx.EncodingType.UTF8, stringSize, false);
                 addedOffset += stringSize;
 
-                tnl_File.Characters[_pos].I32_3 = BitConverter.ToInt32(rawBytes, currentOffset + addedOffset).ToString();
+                tnl_File.Characters[_pos].I32_3 = BitConverter.ToInt32(rawBytes, currentOffset + addedOffset);
                 currentOffset += addedOffset + 4;
             }
             return currentOffset;
@@ -161,7 +161,7 @@ namespace Xv2CoreLib.TNL
                 stringSize = BitConverter.ToInt32(rawBytes, currentOffset + addedOffset - 4);
                 tnl_File.Teachers[_pos].Str2 = StringEx.GetString(rawBytes, currentOffset + addedOffset, false, StringEx.EncodingType.UTF8, stringSize, false);
                 addedOffset += stringSize;
-                tnl_File.Teachers[_pos].I32_2 = BitConverter.ToInt32(rawBytes, currentOffset + addedOffset).ToString();
+                tnl_File.Teachers[_pos].I32_2 = BitConverter.ToInt32(rawBytes, currentOffset + addedOffset);
                 addedOffset += 8;
 
                 stringSize = BitConverter.ToInt32(rawBytes, currentOffset + addedOffset - 4);
@@ -172,7 +172,7 @@ namespace Xv2CoreLib.TNL
                 tnl_File.Teachers[_pos].Str4 = StringEx.GetString(rawBytes, currentOffset + addedOffset, false, StringEx.EncodingType.UTF8, stringSize, false);
                 addedOffset += stringSize;
 
-                tnl_File.Teachers[_pos].I32_3 = BitConverter.ToInt32(rawBytes, currentOffset + addedOffset).ToString();
+                tnl_File.Teachers[_pos].I32_3 = BitConverter.ToInt32(rawBytes, currentOffset + addedOffset);
                 currentOffset += addedOffset + 4;
             }
             return currentOffset;
@@ -192,7 +192,7 @@ namespace Xv2CoreLib.TNL
                 tnl_File.Objects[_pos].Str1 = StringEx.GetString(rawBytes, currentOffset + addedOffset, false, StringEx.EncodingType.UTF8, BitConverter.ToInt32(rawBytes, currentOffset + addedOffset - 4), false);
                 addedOffset += BitConverter.ToInt32(rawBytes, currentOffset + addedOffset - 4);
 
-                tnl_File.Objects[_pos].I32_2 = BitConverter.ToInt32(rawBytes, currentOffset + addedOffset).ToString();
+                tnl_File.Objects[_pos].I32_2 = BitConverter.ToInt32(rawBytes, currentOffset + addedOffset);
                 addedOffset += 8;
 
                 tnl_File.Objects[_pos].Str2 = StringEx.GetString(rawBytes, currentOffset + addedOffset, false, StringEx.EncodingType.UTF8, BitConverter.ToInt32(rawBytes, currentOffset + addedOffset - 4), false);
@@ -204,9 +204,9 @@ namespace Xv2CoreLib.TNL
                 tnl_File.Objects[_pos].Str4 = StringEx.GetString(rawBytes, currentOffset + addedOffset, false, StringEx.EncodingType.UTF8, BitConverter.ToInt32(rawBytes, currentOffset + addedOffset - 4), false);
                 addedOffset += BitConverter.ToInt32(rawBytes, currentOffset + addedOffset - 4);
 
-                tnl_File.Objects[_pos].I32_3 = BitConverter.ToInt32(rawBytes, currentOffset + addedOffset).ToString();
-                tnl_File.Objects[_pos].I32_4 = BitConverter.ToInt32(rawBytes, currentOffset + addedOffset + 4).ToString();
-                tnl_File.Objects[_pos].I32_5 = BitConverter.ToInt32(rawBytes, currentOffset + addedOffset + 8).ToString();
+                tnl_File.Objects[_pos].I32_3 = BitConverter.ToInt32(rawBytes, currentOffset + addedOffset);
+                tnl_File.Objects[_pos].I32_4 = BitConverter.ToInt32(rawBytes, currentOffset + addedOffset + 4);
+                tnl_File.Objects[_pos].I32_5 = BitConverter.ToInt32(rawBytes, currentOffset + addedOffset + 8);
                 currentOffset += addedOffset + 12;
             }
             return currentOffset;

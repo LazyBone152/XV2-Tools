@@ -108,9 +108,9 @@ namespace Xv2CoreLib.TSD
                     I_04 = BitConverter.ToInt32(rawBytes, currentOffset + 4),
                     I_08 = BitConverter.ToInt32(rawBytes, currentOffset + 8),
                     I_12 = BitConverter.ToInt32(rawBytes, currentOffset + 12),
-                    I_16 = BitConverter.ToInt32(rawBytes, currentOffset + 16).ToString(),
+                    I_16 = BitConverter.ToInt32(rawBytes, currentOffset + 16),
                     I_20 = BitConverter.ToInt32(rawBytes, currentOffset + 20),
-                    I_24 = BitConverter.ToInt32(rawBytes, currentOffset + 24).ToString(),
+                    I_24 = BitConverter.ToInt32(rawBytes, currentOffset + 24),
                     I_28 = BitConverter.ToInt32(rawBytes, currentOffset + 28),
                     Condition = StringEx.GetString(rawBytes, currentOffset + 36, false, StringEx.EncodingType.UTF8, BitConverter.ToInt32(rawBytes, currentOffset + 32), false)
                 });

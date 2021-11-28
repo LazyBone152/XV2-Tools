@@ -62,12 +62,12 @@ namespace Xv2CoreLib.IDB
         public void SortEntries()
         {
             //Split entries by I_08 (Type), Sort them and then rejoin
-            int split = Entries.Max(x => x.I_08) + 1;
+            int split = ((int)Entries.Max(x => x.Type)) + 1;
             List<List<IDB_Entry>> splitEntries = new List<List<IDB_Entry>>();
 
             for(int i = 0; i < split; i++)
             {
-                splitEntries.Add(Entries.FindAll(x => x.I_08 == (ushort)i));
+                splitEntries.Add(Entries.FindAll(x => x.Type == (IDB_Type)i));
                 
                 if(splitEntries[i] != null)
                     splitEntries[i].Sort((x, y) => x.SortID - y.SortID);
@@ -90,7 +90,7 @@ namespace Xv2CoreLib.IDB
 
             foreach (var entry in Entries)
             {
-                if (entry.ID == skillId && entry.I_08 == type) return true;
+                if (entry.ID == skillId && entry.Type == (IDB_Type)type) return true;
             }
 
             return false;
@@ -196,40 +196,29 @@ namespace Xv2CoreLib.IDB
 
         #region WrapperProperties
         [YAXDontSerialize]
-        public int SortID { get { return int.Parse(I_00); } }
+        public int SortID { get { return ID; } }
         [YAXDontSerialize]
-        public ushort ID { get { return ushort.Parse(I_00); } set { I_00 = value.ToString(); } }
-        [YAXDontSerialize]
-        public ushort NameMsgID { get { return I_04; } set { I_04 = value; } }
-        [YAXDontSerialize]
-        public ushort DescMsgID { get { return I_06; } set { I_06 = value; } }
-        [YAXDontSerialize]
-        public IDB_Type Type { get { return (IDB_Type)I_08; } set { I_08 = (ushort)value; } }
-        [YAXDontSerialize]
-        public RaceLock RaceLock { get { return (RaceLock)I_24; } set { I_24 = (int)value; } }
+        public string Index { get { return $"{ID}_{Type}"; } set { ID = ushort.Parse(value.Split('_')[0]); Type = (IDB_Type)ushort.Parse(value.Split('_')[1]); } }
 
         #endregion
 
 
-        [YAXDontSerialize]
-        public string Index { get { return $"{I_00}_{I_08}"; } set { I_00 = value.Split('_')[0]; I_08 = ushort.Parse(value.Split('_')[1]); } }
-
         [YAXAttributeForClass]
         [YAXSerializeAs("ID")]
         [BindingAutoId]
-        public string I_00 { get; set; } //ushort
+        public ushort ID { get; set; } //ushort
         [YAXAttributeFor("Stars")]
         [YAXSerializeAs("value")]
         public ushort I_02 { get; set; }
         [YAXAttributeFor("Name")]
         [YAXSerializeAs("MSG_ID")]
-        public ushort I_04 { get; set; }
+        public ushort NameMsgID { get; set; }
         [YAXAttributeFor("Description")]
         [YAXSerializeAs("MSG_ID")]
-        public ushort I_06 { get; set; }
+        public ushort DescMsgID { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("Type")]
-        public ushort I_08 { get; set; } //ushort
+        public IDB_Type Type { get; set; } //ushort
         [YAXAttributeFor("I_10")]
         [YAXSerializeAs("value")]
         public ushort I_10 { get; set; }
@@ -247,13 +236,13 @@ namespace Xv2CoreLib.IDB
         public int I_20 { get; set; }
         [YAXAttributeFor("RaceLock")]
         [YAXSerializeAs("value")]
-        public int I_24 { get; set; }
+        public RaceLock RaceLock { get; set; } //int
         [YAXAttributeFor("TPMedals")]
         [YAXSerializeAs("value")]
         public int I_28 { get; set; }
         [YAXAttributeFor("Model")]
         [YAXSerializeAs("value")]
-        public string I_32 { get; set; } //int32
+        public int I_32 { get; set; } //int32
         [YAXAttributeFor("LimitBurst.EEPK_Effect")]
         [YAXSerializeAs("ID")]
         public ushort I_36 { get; set; }
@@ -265,13 +254,13 @@ namespace Xv2CoreLib.IDB
         public ushort I_40 { get; set; }
         [YAXAttributeFor("LimitBurst.Talisman")]
         [YAXSerializeAs("ID1")]
-        public string I_42 { get; set; } //ushort
+        public ushort I_42 { get; set; } //ushort
         [YAXAttributeFor("LimitBurst.Talisman")]
         [YAXSerializeAs("ID2")]
-        public string I_44 { get; set; } //ushort
+        public ushort I_44 { get; set; } //ushort
         [YAXAttributeFor("LimitBurst.Talisman")]
         [YAXSerializeAs("ID3")]
-        public string I_46 { get; set; } //ushort
+        public ushort I_46 { get; set; } //ushort
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Effect")]
         public List<IBD_Effect> Effects { get; set; } // size 3
@@ -282,12 +271,12 @@ namespace Xv2CoreLib.IDB
 
         public string GetRaceLockAsString()
         {
-            if (I_24 == 255) return null;
-            if (I_24 == 0) return null;
+            if ((ushort)RaceLock == 255) return null;
+            if ((ushort)RaceLock == 0) return null;
 
             bool first = true;
             List<string> str = new List<string>();
-            RaceLock raceLock = (RaceLock)I_24;
+            RaceLock raceLock = (RaceLock)RaceLock;
 
             if (raceLock.HasFlag(RaceLock.HUM))
             {

@@ -161,8 +161,6 @@ namespace Xv2CoreLib.CML
     public class CML_Entry : IInstallable
     {
         #region NonSerialized
-        [YAXDontSerialize]
-        public ushort CharaId { get { return ushort.Parse(I_00); } set { I_00 = value.ToString(); } }
 
         //interface
         [YAXDontSerialize]
@@ -172,7 +170,7 @@ namespace Xv2CoreLib.CML
         { 
             get
             { 
-                return $"{I_00}_{Costume}";
+                return $"{CharaId}_{Costume}";
             }
             set
             {
@@ -180,7 +178,7 @@ namespace Xv2CoreLib.CML
 
                 if (split.Length == 2)
                 {
-                    I_00 = split[0];
+                    CharaId = ushort.Parse(split[0]);
                     Costume = ushort.Parse(split[1]);
                 }
             }
@@ -189,7 +187,7 @@ namespace Xv2CoreLib.CML
 
         [YAXAttributeForClass]
         [YAXSerializeAs("CharaId")]
-        public string I_00 { get; set; } //0
+        public ushort CharaId { get; set; } //0
         [YAXAttributeForClass]
         [YAXSerializeAs("Costume")]
         public ushort Costume { get; set; } //2

@@ -508,14 +508,14 @@ namespace Xv2CoreLib.QXD
         public float F_80 { get; set; }
         [YAXAttributeFor("AI_Table")]
         [YAXSerializeAs("ID")]
-        public string I_84 { get; set; } //Int32
+        public int I_84 { get; set; } //Int32
         
         [YAXSerializeAs("value")]
         [YAXAttributeFor("Transformation")]
         public short I_120 { get; set; }
         [YAXAttributeFor("Super Soul")]
         [YAXSerializeAs("value")]
-        public string I_122 { get; set; } //ushort
+        public ushort I_122 { get; set; } //ushort
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
         [YAXAttributeFor("I_106")]
         [YAXSerializeAs("values")]
@@ -532,31 +532,31 @@ namespace Xv2CoreLib.QXD
 
         [YAXAttributeFor("Super_1")]
         [YAXSerializeAs("ID2")]
-        public string I_00 { get; set; } 
+        public ushort I_00 { get; set; } 
         [YAXAttributeFor("Super_2")]
         [YAXSerializeAs("ID2")]
-        public string I_02 { get; set; }
+        public ushort I_02 { get; set; }
         [YAXAttributeFor("Super_3")]
         [YAXSerializeAs("ID2")]
-        public string I_04 { get; set; }
+        public ushort I_04 { get; set; }
         [YAXAttributeFor("Super_4")]
         [YAXSerializeAs("ID2")]
-        public string I_06 { get; set; }
+        public ushort I_06 { get; set; }
         [YAXAttributeFor("Ultimate_1")]
         [YAXSerializeAs("ID2")]
-        public string I_08 { get; set; }
+        public ushort I_08 { get; set; }
         [YAXAttributeFor("Ultimate_2")]
         [YAXSerializeAs("ID2")]
-        public string I_10 { get; set; }
+        public ushort I_10 { get; set; }
         [YAXAttributeFor("Evasive")]
         [YAXSerializeAs("ID2")]
-        public string I_12 { get; set; }
+        public ushort I_12 { get; set; }
         [YAXAttributeFor("Blast_Type")]
         [YAXSerializeAs("ID2")]
-        public string I_14 { get; set; }
+        public ushort I_14 { get; set; }
         [YAXAttributeFor("Awoken")]
         [YAXSerializeAs("ID2")]
-        public string I_16 { get; set; }
+        public ushort I_16 { get; set; }
     }
 
     public class QXD_CollectionEntry : IInstallable
@@ -578,10 +578,10 @@ namespace Xv2CoreLib.QXD
                 {
                     I_00 = split[0];
                     I_02 = (QxdItemType)ushort.Parse(split[1]);
-                    I_04 = split[2];
+                    I_04 = ushort.Parse(split[2]);
                     I_06 = ushort.Parse(split[3]);
                     I_08 = ushort.Parse(split[4]);
-                    I_10 = split[5];
+                    I_10 = ushort.Parse(split[5]);
                 }
             }
         }
@@ -596,7 +596,7 @@ namespace Xv2CoreLib.QXD
         public QxdItemType I_02 { get; set; } //uint16
         [YAXAttributeForClass]
         [YAXSerializeAs("Item_ID")]
-        public string I_04 { get; set; } //uint16
+        public ushort I_04 { get; set; } //uint16
         [YAXAttributeForClass]
         [YAXSerializeAs("I_06")]
         public ushort I_06 { get; set; } //uint16
@@ -605,7 +605,7 @@ namespace Xv2CoreLib.QXD
         public ushort I_08 { get; set; } //uint16
         [YAXAttributeForClass]
         [YAXSerializeAs("I_10")]
-        public string I_10 { get; set; } //uint16
+        public ushort I_10 { get; set; } //uint16
 
         public static QXD_CollectionEntry Read(byte[] bytes, int offset)
         {
@@ -613,10 +613,10 @@ namespace Xv2CoreLib.QXD
             {
                 I_00 = BitConverter.ToUInt16(bytes, offset + 0).ToString(),
                 I_02 = (QxdItemType)BitConverter.ToUInt16(bytes, offset + 2),
-                I_04 = BitConverter.ToUInt16(bytes, offset + 4).ToString(),
+                I_04 = BitConverter.ToUInt16(bytes, offset + 4),
                 I_06 = BitConverter.ToUInt16(bytes, offset + 6),
                 I_08 = BitConverter.ToUInt16(bytes, offset + 8),
-                I_10 = BitConverter.ToUInt16(bytes, offset + 10).ToString()
+                I_10 = BitConverter.ToUInt16(bytes, offset + 10)
             };
         }
 
@@ -626,10 +626,10 @@ namespace Xv2CoreLib.QXD
 
             bytes.AddRange(BitConverter.GetBytes(ushort.Parse(I_00)));
             bytes.AddRange(BitConverter.GetBytes((ushort)I_02));
-            bytes.AddRange(BitConverter.GetBytes(ushort.Parse(I_04)));
+            bytes.AddRange(BitConverter.GetBytes(I_04));
             bytes.AddRange(BitConverter.GetBytes(I_06));
             bytes.AddRange(BitConverter.GetBytes(I_08));
-            bytes.AddRange(BitConverter.GetBytes(ushort.Parse(I_10)));
+            bytes.AddRange(BitConverter.GetBytes(I_10));
 
             if (bytes.Count != 12) throw new Exception("QXD_CollectionEntry must be 12 bytes.");
             return bytes.ToArray();

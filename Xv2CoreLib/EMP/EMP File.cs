@@ -522,6 +522,7 @@ namespace Xv2CoreLib.EMP
     [Serializable]
     public class ParticleEffect : INotifyPropertyChanged
     {
+        #region UI
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
         
@@ -532,6 +533,45 @@ namespace Xv2CoreLib.EMP
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
+
+        private bool isExpanded = false;
+        [YAXDontSerialize]
+        public bool IsExpanded
+        {
+            get
+            {
+                return isExpanded;
+            }
+
+            set
+            {
+                if (value != isExpanded)
+                {
+                    isExpanded = value;
+                    NotifyPropertyChanged(nameof(IsExpanded));
+                }
+            }
+        }
+        private bool isSelected = false;
+        [YAXDontSerialize]
+        public bool IsSelected
+        {
+            get
+            {
+                return isSelected;
+            }
+
+            set
+            {
+                if (value != isSelected)
+                {
+                    isSelected = value;
+                    NotifyPropertyChanged(nameof(IsSelected));
+                }
+            }
+        }
+
+        #endregion
 
         public enum ComponentType
         {

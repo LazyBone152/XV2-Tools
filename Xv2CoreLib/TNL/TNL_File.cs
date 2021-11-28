@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace Xv2CoreLib.TNL
@@ -107,7 +104,7 @@ namespace Xv2CoreLib.TNL
         public string Str2 { get; set; }
         [YAXSerializeAs("value")]
         [YAXAttributeFor("I32_2")]
-        public string I32_2 { get; set; } //Int32
+        public int I32_2 { get; set; } //Int32
         [YAXSerializeAs("value")]
         [YAXAttributeFor("Position")]
         public string Str3 { get; set; }
@@ -116,7 +113,7 @@ namespace Xv2CoreLib.TNL
         public string Str4 { get; set; } 
         [YAXSerializeAs("value")]
         [YAXAttributeFor("Action_ID")]
-        public string I32_3 { get; set; } //Int32
+        public int I32_3 { get; set; } //Int32
     }
 
     [YAXSerializeAs("Teacher")]
@@ -170,7 +167,7 @@ namespace Xv2CoreLib.TNL
         public string Str2 { get; set; }
         [YAXSerializeAs("value")]
         [YAXAttributeFor("I32_2")]
-        public string I32_2 { get; set; }
+        public int I32_2 { get; set; }
         [YAXSerializeAs("value")]
         [YAXAttributeFor("Position")]
         public string Str3 { get; set; }
@@ -179,7 +176,7 @@ namespace Xv2CoreLib.TNL
         public string Str4 { get; set; }
         [YAXSerializeAs("value")]
         [YAXAttributeFor("Action_ID")]
-        public string I32_3 { get; set; } //Int32
+        public int I32_3 { get; set; } //Int32
     }
 
     [YAXSerializeAs("Object")]
@@ -197,7 +194,7 @@ namespace Xv2CoreLib.TNL
         public string Str1 { get; set; }
         [YAXSerializeAs("value")]
         [YAXAttributeFor("I32_2")]
-        public string I32_2 { get; set; } //Int32
+        public int I32_2 { get; set; } //Int32
         [YAXSerializeAs("value")]
         [YAXAttributeFor("Position1")]
         public string Str2 { get; set; }
@@ -209,13 +206,13 @@ namespace Xv2CoreLib.TNL
         public string Str4 { get; set; } 
         [YAXSerializeAs("value")]
         [YAXAttributeFor("I32_3")]
-        public string I32_3 { get; set; } //Int32
+        public int I32_3 { get; set; } //Int32
         [YAXSerializeAs("value")]
         [YAXAttributeFor("I32_4")]
-        public string I32_4 { get; set; } //Int32
+        public int I32_4 { get; set; } //Int32
         [YAXSerializeAs("value")]
         [YAXAttributeFor("I32_5")]
-        public string I32_5 { get; set; } //Int32
+        public int I32_5 { get; set; } //Int32
     }
 
     [YAXSerializeAs("ScriptEntry")]

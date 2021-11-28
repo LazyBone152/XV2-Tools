@@ -38,11 +38,11 @@ namespace Xv2CoreLib.CSO
             new Deserializer(this, path);
         }
 
-        public CSO_Entry GetEntry(string id)
+        public CSO_Entry GetEntry(int id)
         {
             foreach(var entry in CsoEntries)
             {
-                if (entry.I_00 == id) return entry;
+                if (entry.CharaID == id) return entry;
             }
 
             return null;
@@ -74,7 +74,7 @@ namespace Xv2CoreLib.CSO
         {
             get
             {
-                return string.Format("{0}_{1}", I_00, I_04);
+                return string.Format("{0}_{1}", CharaID, Costume);
             }
             set
             {
@@ -82,8 +82,8 @@ namespace Xv2CoreLib.CSO
 
                 if (split.Length == 2)
                 {
-                    I_00 = split[0];
-                    I_04 = uint.Parse(split[1]);
+                    CharaID = int.Parse(split[0]);
+                    Costume = uint.Parse(split[1]);
                 }
             }
         }
@@ -92,21 +92,9 @@ namespace Xv2CoreLib.CSO
         {
             get
             {
-                return int.Parse(I_00);
+                return CharaID;
             }
         }
-        [YAXDontSerialize]
-        public int CharaID { get { return int.Parse(I_00); } set { I_00 = value.ToString(); } }
-        [YAXDontSerialize]
-        public uint Costume { get { return I_04; } set { I_04 = value; } }
-        [YAXDontSerialize]
-        public string SePath { get { return Str_08; } set { Str_08 = value; } }
-        [YAXDontSerialize]
-        public string VoxPath { get { return Str_12; } set { Str_12 = value; } }
-        [YAXDontSerialize]
-        public string AmkPath { get { return Str_16; } set { Str_16 = value; } } //Relative to data/chara. Doesn't include extension.
-        [YAXDontSerialize]
-        public string SkillCharaCode { get { return Str_20; } set { Str_20 = value; } } //"NULL" = use own chara code
         
         [YAXDontSerialize]
         public bool HasSePath { get { return !(SePath == "NULL" || string.IsNullOrWhiteSpace(SePath)); } }
@@ -116,22 +104,23 @@ namespace Xv2CoreLib.CSO
 
         [YAXAttributeForClass]
         [YAXSerializeAs("Chara_ID")]
-        public string I_00 { get; set; } //uint32
+        public int CharaID { get; set; } 
         [YAXAttributeForClass]
         [YAXSerializeAs("Costume")]
-        public uint I_04 { get; set; }
+        public uint Costume { get; set; }
         [YAXAttributeFor("SE")]
         [YAXSerializeAs("Path")]
-        public string Str_08 { get; set; }
+        public string SePath { get; set; }
         [YAXAttributeFor("VOX")]
         [YAXSerializeAs("Path")]
-        public string Str_12 { get; set; }
+        public string VoxPath { get; set; }
         [YAXAttributeFor("AMK")]
         [YAXSerializeAs("Path")]
-        public string Str_16 { get; set; }
+        public string AmkPath { get; set; } //Relative to data/chara. Doesn't include extension.
         [YAXAttributeFor("Skills")]
         [YAXSerializeAs("Path")]
-        public string Str_20 { get; set; }
+        public string SkillCharaCode { get; set; } //"NULL" = use own chara code
+
         //64 bits padding at end
     }
 }

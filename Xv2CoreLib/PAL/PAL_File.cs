@@ -119,26 +119,26 @@ namespace Xv2CoreLib.PAL
     {
         #region IInstallable
         [YAXDontSerialize]
-        public int SortID { get { return int.Parse(I_00); } }
+        public int SortID { get { return I_00; } }
         [YAXDontSerialize]
-        public string Index { get { return I_00; } set { I_00 = value; } }
+        public string Index { get { return I_00.ToString(); } set { I_00 = ushort.Parse(value); } }
         #endregion
 
         [YAXAttributeForClass]
         [YAXSerializeAs("ID")]
-        public string I_00 { get; set; } //uint16
+        public ushort I_00 { get; set; } //uint16
         [YAXAttributeForClass]
         [YAXSerializeAs("NameID")]
-        public string I_02 { get; set; } //uint16
+        public ushort I_02 { get; set; } //uint16
         [YAXAttributeFor("CMS_ID")]
         [YAXSerializeAs("value")]
-        public string I_04 { get; set; } //uint16
+        public ushort I_04 { get; set; } //uint16
         [YAXAttributeFor("Voice")]
         [YAXSerializeAs("value")]
         public ushort I_06 { get; set; } //uint16
         [YAXAttributeFor("TeamMate")]
         [YAXSerializeAs("value")]
-        public string I_08 { get; set; } //uint16
+        public ushort I_08 { get; set; } //uint16
 
         [BindingSubClass]
         public Equipment Equipment { get; set; }
@@ -159,11 +159,11 @@ namespace Xv2CoreLib.PAL
         {
             return new PalEntry()
             {
-                I_00 = BitConverter.ToUInt16(bytes, offset + 0).ToString(),
-                I_02 = BitConverter.ToUInt16(bytes, offset + 2).ToString(),
-                I_04 = BitConverter.ToUInt16(bytes, offset + 4).ToString(),
+                I_00 = BitConverter.ToUInt16(bytes, offset + 0),
+                I_02 = BitConverter.ToUInt16(bytes, offset + 2),
+                I_04 = BitConverter.ToUInt16(bytes, offset + 4),
                 I_06 = BitConverter.ToUInt16(bytes, offset + 6),
-                I_08 = BitConverter.ToUInt16(bytes, offset + 8).ToString()
+                I_08 = BitConverter.ToUInt16(bytes, offset + 8)
             };
         }
 
@@ -181,11 +181,11 @@ namespace Xv2CoreLib.PAL
         {
             List<byte> bytes = new List<byte>();
 
-            bytes.AddRange(BitConverter.GetBytes(ushort.Parse(I_00)));
-            bytes.AddRange(BitConverter.GetBytes(ushort.Parse(I_02)));
-            bytes.AddRange(BitConverter.GetBytes(ushort.Parse(I_04)));
+            bytes.AddRange(BitConverter.GetBytes(I_00));
+            bytes.AddRange(BitConverter.GetBytes(I_02));
+            bytes.AddRange(BitConverter.GetBytes(I_04));
             bytes.AddRange(BitConverter.GetBytes(I_06));
-            bytes.AddRange(BitConverter.GetBytes(ushort.Parse(I_08)));
+            bytes.AddRange(BitConverter.GetBytes(I_08));
 
             return bytes.ToArray();
         }
@@ -309,7 +309,7 @@ namespace Xv2CoreLib.PAL
         public ushort I_74 { get; set; }
         [YAXAttributeFor("Talisman")]
         [YAXSerializeAs("value")]
-        public string I_76 { get; set; } //ushort
+        public ushort I_76 { get; set; } //ushort
         
         public static List<Equipment> ReadAll(byte[] bytes, int offset, int count)
         {
@@ -363,7 +363,7 @@ namespace Xv2CoreLib.PAL
                 I_70 = BitConverter.ToUInt16(bytes, offset + 70),
                 I_72 = BitConverter.ToUInt16(bytes, offset + 72),
                 I_74 = BitConverter.ToUInt16(bytes, offset + 74),
-                I_76 = BitConverter.ToUInt16(bytes, offset + 76).ToString()
+                I_76 = BitConverter.ToUInt16(bytes, offset + 76)
             };
         }
         
@@ -419,7 +419,7 @@ namespace Xv2CoreLib.PAL
             bytes.AddRange(BitConverter.GetBytes(I_70));
             bytes.AddRange(BitConverter.GetBytes(I_72));
             bytes.AddRange(BitConverter.GetBytes(I_74));
-            bytes.AddRange(BitConverter.GetBytes(ushort.Parse(I_76)));
+            bytes.AddRange(BitConverter.GetBytes(I_76));
 
             return bytes.ToArray();
         }
@@ -453,46 +453,46 @@ namespace Xv2CoreLib.PAL
         public ushort I_14 { get; set; }
         [YAXAttributeFor("SuperSkill1")]
         [YAXSerializeAs("value")]
-        public string I_16 { get; set; } //ushort
+        public ushort I_16 { get; set; } //ushort
         [YAXAttributeFor("SuperSkill2")]
         [YAXSerializeAs("value")]
-        public string I_18 { get; set; } //ushort
+        public ushort I_18 { get; set; } //ushort
         [YAXAttributeFor("SuperSkill3")]
         [YAXSerializeAs("value")]
-        public string I_20 { get; set; } //ushort
+        public ushort I_20 { get; set; } //ushort
         [YAXAttributeFor("SuperSkill4")]
         [YAXSerializeAs("value")]
-        public string I_22 { get; set; } //ushort
+        public ushort I_22 { get; set; } //ushort
         [YAXAttributeFor("UltimateSkill1")]
         [YAXSerializeAs("value")]
-        public string I_24 { get; set; } //ushort
+        public ushort I_24 { get; set; } //ushort
         [YAXAttributeFor("UltimateSkill2")]
         [YAXSerializeAs("value")]
-        public string I_26 { get; set; } //ushort
+        public ushort I_26 { get; set; } //ushort
         [YAXAttributeFor("EvasiveSkill")]
         [YAXSerializeAs("value")]
-        public string I_28 { get; set; } //ushort
+        public ushort I_28 { get; set; } //ushort
         [YAXAttributeFor("BlastSkill")]
         [YAXSerializeAs("value")]
-        public string I_30 { get; set; } //ushort
+        public ushort I_30 { get; set; } //ushort
         [YAXAttributeFor("AwokenSkill")]
         [YAXSerializeAs("value")]
-        public string I_32 { get; set; } //ushort
+        public ushort I_32 { get; set; } //ushort
 
         public Stats()
         {
             //Set default stats
             I_00 = 1;
             I_14 = 100;
-            I_16 = ushort.MaxValue.ToString();
-            I_18 = ushort.MaxValue.ToString();
-            I_20 = ushort.MaxValue.ToString();
-            I_22 = ushort.MaxValue.ToString();
-            I_24 = ushort.MaxValue.ToString();
-            I_26 = ushort.MaxValue.ToString();
-            I_28 = ushort.MaxValue.ToString();
-            I_30 = ushort.MaxValue.ToString();
-            I_32 = ushort.MaxValue.ToString();
+            I_16 = ushort.MaxValue;
+            I_18 = ushort.MaxValue;
+            I_20 = ushort.MaxValue;
+            I_22 = ushort.MaxValue;
+            I_24 = ushort.MaxValue;
+            I_26 = ushort.MaxValue;
+            I_28 = ushort.MaxValue;
+            I_30 = ushort.MaxValue;
+            I_32 = ushort.MaxValue;
         }
 
         public static List<Stats> ReadAll(byte[] bytes, int offset, int count)
@@ -519,15 +519,15 @@ namespace Xv2CoreLib.PAL
                     I_10 = BitConverter.ToUInt16(bytes, offset + 10),
                     I_12 = BitConverter.ToUInt16(bytes, offset + 12),
                     I_14 = BitConverter.ToUInt16(bytes, offset + 14),
-                    I_16 = BitConverter.ToUInt16(bytes, offset + 16).ToString(),
-                    I_18 = BitConverter.ToUInt16(bytes, offset + 18).ToString(),
-                    I_20 = BitConverter.ToUInt16(bytes, offset + 20).ToString(),
-                    I_22 = BitConverter.ToUInt16(bytes, offset + 22).ToString(),
-                    I_24 = BitConverter.ToUInt16(bytes, offset + 24).ToString(),
-                    I_26 = BitConverter.ToUInt16(bytes, offset + 26).ToString(),
-                    I_28 = BitConverter.ToUInt16(bytes, offset + 28).ToString(),
-                    I_30 = BitConverter.ToUInt16(bytes, offset + 30).ToString(),
-                    I_32 = BitConverter.ToUInt16(bytes, offset + 32).ToString()
+                    I_16 = BitConverter.ToUInt16(bytes, offset + 16),
+                    I_18 = BitConverter.ToUInt16(bytes, offset + 18),
+                    I_20 = BitConverter.ToUInt16(bytes, offset + 20),
+                    I_22 = BitConverter.ToUInt16(bytes, offset + 22),
+                    I_24 = BitConverter.ToUInt16(bytes, offset + 24),
+                    I_26 = BitConverter.ToUInt16(bytes, offset + 26),
+                    I_28 = BitConverter.ToUInt16(bytes, offset + 28),
+                    I_30 = BitConverter.ToUInt16(bytes, offset + 30),
+                    I_32 = BitConverter.ToUInt16(bytes, offset + 32)
                 };
             }
             else
@@ -559,15 +559,15 @@ namespace Xv2CoreLib.PAL
             bytes.AddRange(BitConverter.GetBytes(I_10));
             bytes.AddRange(BitConverter.GetBytes(I_12));
             bytes.AddRange(BitConverter.GetBytes(I_14));
-            bytes.AddRange(BitConverter.GetBytes(ushort.Parse(I_16)));
-            bytes.AddRange(BitConverter.GetBytes(ushort.Parse(I_18)));
-            bytes.AddRange(BitConverter.GetBytes(ushort.Parse(I_20)));
-            bytes.AddRange(BitConverter.GetBytes(ushort.Parse(I_22)));
-            bytes.AddRange(BitConverter.GetBytes(ushort.Parse(I_24)));
-            bytes.AddRange(BitConverter.GetBytes(ushort.Parse(I_26)));
-            bytes.AddRange(BitConverter.GetBytes(ushort.Parse(I_28)));
-            bytes.AddRange(BitConverter.GetBytes(ushort.Parse(I_30)));
-            bytes.AddRange(BitConverter.GetBytes(ushort.Parse(I_32)));
+            bytes.AddRange(BitConverter.GetBytes(I_16));
+            bytes.AddRange(BitConverter.GetBytes(I_18));
+            bytes.AddRange(BitConverter.GetBytes(I_20));
+            bytes.AddRange(BitConverter.GetBytes(I_22));
+            bytes.AddRange(BitConverter.GetBytes(I_24));
+            bytes.AddRange(BitConverter.GetBytes(I_26));
+            bytes.AddRange(BitConverter.GetBytes(I_28));
+            bytes.AddRange(BitConverter.GetBytes(I_30));
+            bytes.AddRange(BitConverter.GetBytes(I_32));
 
             return bytes.ToArray();
         }

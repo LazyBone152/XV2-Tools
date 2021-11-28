@@ -59,7 +59,7 @@ namespace Xv2CoreLib.BEV
                 bytes.AddRange(BitConverter.GetBytes(bevFile.Entries[i].I_00));
                 bytes.AddRange(BitConverter.GetBytes(int.Parse(bevFile.Entries[i].Index)));
                 bytes.AddRange(BitConverter.GetBytes(bevFile.Entries[i].I_08));
-                bytes.AddRange(BitConverter.GetBytes(HexConverter.ToInt32(bevFile.Entries[i].I_12)));
+                bytes.AddRange(BitConverter.GetBytes(bevFile.Entries[i].I_12));
                 bytes.AddRange(BitConverter.GetBytes(TotalTypeCount(bevFile.Entries[i])));
 
                 subEntryPointers.Add(bytes.Count());

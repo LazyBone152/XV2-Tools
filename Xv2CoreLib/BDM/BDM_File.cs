@@ -181,16 +181,16 @@ namespace Xv2CoreLib.BDM
                             I_102 = subEntry.I_94,
                             I_04 = subEntry.I_04,
                             I_94 = subEntry.I_86,
-                            I_12 = (AcbType)subEntry.I_12,
-                            I_14 = subEntry.I_14,
-                            I_16 = subEntry.I_16,
+                            AcbType = (AcbType)subEntry.I_12,
+                            CueId = subEntry.I_14,
+                            Effect1_ID = subEntry.I_16,
                             Effect1_SkillID = (ushort)subEntry.I_18,
-                            I_20 = (EepkType)subEntry.I_20,
+                            Effect1_EepkType = (EepkType)subEntry.I_20,
                             I_22 = subEntry.I_22,
-                            I_24 = subEntry.I_24,
+                            Effect2_ID = subEntry.I_24,
                             Effect2_SkillID = (ushort)subEntry.I_26,
-                            I_28 = (EepkType)subEntry.I_28,
-                            I_32 = -1,
+                            Effect2_EepkType = (EepkType)subEntry.I_28,
+                            Effect3_ID = -1,
                             F_40 = subEntry.F_32,
                             F_44 = subEntry.F_36,
                             I_48 = subEntry.I_40,
@@ -209,7 +209,7 @@ namespace Xv2CoreLib.BDM
                             I_106 = subEntry.I_98,
                             I_108 = subEntry.I_100,
                             I_110 = subEntry.I_102,
-                            I_112 = -1,
+                            StaminaBrokenOverrideBdmId = -1,
                             I_84 = subEntry.I_76,
                             I_100 = subEntry.I_92,
                             I_58 = subEntry.I_50,
@@ -255,16 +255,16 @@ namespace Xv2CoreLib.BDM
                             I_102 = subEntry.I_94,
                             I_04 = subEntry.I_04,
                             I_94 = subEntry.I_86,
-                            I_12 = (AcbType)subEntry.I_12,
-                            I_14 = subEntry.I_14,
-                            I_16 = subEntry.I_16,
+                            AcbType = (AcbType)subEntry.I_12,
+                            CueId = subEntry.I_14,
+                            Effect1_ID = subEntry.I_16,
                             Effect1_SkillID = (ushort)subEntry.I_18,
-                            I_20 = (EepkType)subEntry.I_20,
+                            Effect1_EepkType = (EepkType)subEntry.I_20,
                             I_22 = subEntry.I_22,
-                            I_24 = subEntry.I_24,
+                            Effect2_ID = subEntry.I_24,
                             Effect2_SkillID = (ushort)subEntry.I_26,
-                            I_28 = (EepkType)subEntry.I_28,
-                            I_32 = -1,
+                            Effect2_EepkType = (EepkType)subEntry.I_28,
+                            Effect3_ID = -1,
                             F_40 = subEntry.F_32,
                             F_44 = subEntry.F_36,
                             I_48 = subEntry.I_40,
@@ -283,7 +283,7 @@ namespace Xv2CoreLib.BDM
                             I_106 = subEntry.I_98,
                             I_108 = subEntry.I_100,
                             I_110 = subEntry.I_102,
-                            I_112 = -1,
+                            StaminaBrokenOverrideBdmId = -1,
                             I_84 = subEntry.I_76,
                             I_100 = subEntry.I_92,
                             I_58 = subEntry.I_50,
@@ -351,16 +351,16 @@ namespace Xv2CoreLib.BDM
                             I_102 = subEntry.I_94,
                             I_04 = subEntry.I_04,
                             I_94 = subEntry.I_86,
-                            I_12 = (AcbType)subEntry.I_12,
-                            I_14 = subEntry.I_14,
-                            I_16 = (short)skillID1,
+                            AcbType = (AcbType)subEntry.I_12,
+                            CueId = subEntry.I_14,
+                            Effect1_ID = (short)skillID1,
                             Effect1_SkillID = (ushort)subEntry.I_18,
-                            I_20 = (EepkType)subEntry.I_20,
+                            Effect1_EepkType = (EepkType)subEntry.I_20,
                             I_22 = subEntry.I_22,
-                            I_24 = (short)skillID2,
+                            Effect2_ID = (short)skillID2,
                             Effect2_SkillID = (ushort)subEntry.I_26,
-                            I_28 = (EepkType)subEntry.I_28,
-                            I_32 = -1,
+                            Effect2_EepkType = (EepkType)subEntry.I_28,
+                            Effect3_ID = -1,
                             F_40 = subEntry.F_32,
                             F_44 = subEntry.F_36,
                             I_48 = subEntry.I_40,
@@ -379,7 +379,7 @@ namespace Xv2CoreLib.BDM
                             I_106 = subEntry.I_98,
                             I_108 = subEntry.I_100,
                             I_110 = subEntry.I_102,
-                            I_112 = -1,
+                            StaminaBrokenOverrideBdmId = -1,
                             I_84 = subEntry.I_76,
                             I_100 = subEntry.I_92,
                             I_58 = subEntry.I_50,
@@ -571,39 +571,6 @@ namespace Xv2CoreLib.BDM
     [Serializable]
     public class Type0SubEntry
     {
-
-        #region WrapperProps
-        [YAXDontSerialize]
-        public AcbType AcbType { get { return I_12; } set { I_12 = value; } }
-        [YAXDontSerialize]
-        public ushort CueID { get { return (ushort)I_14; } set { I_14 = (short)value; } }
-
-        [YAXDontSerialize]
-        public ushort Effect1_ID { get { return (ushort)I_16; } set { I_16 = (short)value; } }
-        [YAXDontSerialize]
-        public ushort Effect1_SkillID { get { return ushort.Parse(I_18); } set { I_18 = value.ToString(); } }
-        [YAXDontSerialize]
-        public EepkType Effect1_EepkType { get { return I_20; } set { I_20 = value; } }
-
-        [YAXDontSerialize]
-        public ushort Effect2_ID { get { return (ushort)I_24; } set { I_24 = (short)value; } }
-        [YAXDontSerialize]
-        public ushort Effect2_SkillID { get { return ushort.Parse(I_26); } set { I_26 = value.ToString(); } }
-        [YAXDontSerialize]
-        public EepkType Effect2_EepkType { get { return I_28; } set { I_28 = value; } }
-
-        [YAXDontSerialize]
-        public ushort Effect3_ID { get { return (ushort)I_32; } set { I_32 = (short)value; } }
-        [YAXDontSerialize]
-        public ushort Effect3_SkillID { get { return ushort.Parse(I_34); } set { I_34 = value.ToString(); } }
-        [YAXDontSerialize]
-        public EepkType Effect3_EepkType { get { return I_36; } set { I_36 = value; } }
-
-        [YAXDontSerialize]
-        public ushort StaminaBrokenOverrideBdmId { get { return (ushort)I_112; } set { I_112 = (short)value; } }
-        #endregion
-
-
         [YAXAttributeForClass]
         [YAXSerializeAs("Index")]
         public int Index { get; set; }
@@ -622,37 +589,37 @@ namespace Xv2CoreLib.BDM
         public UInt16 I_94 { get; set; }
         [YAXAttributeFor("Sound")]
         [YAXSerializeAs("AcbType")]
-        public AcbType I_12 { get; set; }
+        public AcbType AcbType { get; set; }
         [YAXAttributeFor("Sound")]
         [YAXSerializeAs("CueID")]
-        public short I_14 { get; set; }
+        public short CueId { get; set; }
         [YAXAttributeFor("Effect_1")]
         [YAXSerializeAs("ID")]
-        public short I_16 { get; set; }
+        public short Effect1_ID { get; set; }
         [YAXAttributeFor("Effect_1")]
         [YAXSerializeAs("Skill_ID")]
-        public string I_18 { get; set; }
+        public ushort Effect1_SkillID { get; set; }
         [YAXAttributeFor("Effect_1")]
         [YAXSerializeAs("EepkType")]
-        public EepkType I_20 { get; set; }
+        public EepkType Effect1_EepkType { get; set; }
         [YAXAttributeFor("Effect_2")]
         [YAXSerializeAs("ID")]
-        public short I_24 { get; set; }
+        public short Effect2_ID { get; set; }
         [YAXAttributeFor("Effect_2")]
         [YAXSerializeAs("Skill_ID")]
-        public string I_26 { get; set; }
+        public ushort Effect2_SkillID { get; set; }
         [YAXAttributeFor("Effect_2")]
         [YAXSerializeAs("EepkType")]
-        public EepkType I_28 { get; set; }
+        public EepkType Effect2_EepkType { get; set; }
         [YAXAttributeFor("Effect_3")]
         [YAXSerializeAs("ID")]
-        public short I_32 { get; set; }
+        public short Effect3_ID { get; set; }
         [YAXAttributeFor("Effect_3")]
         [YAXSerializeAs("Skill_ID")]
-        public string I_34 { get; set; }
+        public ushort Effect3_SkillID { get; set; }
         [YAXAttributeFor("Effect_3")]
         [YAXSerializeAs("EepkType")]
-        public EepkType I_36 { get; set; }
+        public EepkType Effect3_EepkType { get; set; }
         
 
 
@@ -720,7 +687,7 @@ namespace Xv2CoreLib.BDM
         public short I_110 { get; set; }
         [YAXAttributeFor("Stamina Broken BDM ID Override")]
         [YAXSerializeAs("value")]
-        public short I_112 { get; set; }
+        public short StaminaBrokenOverrideBdmId { get; set; }
         [YAXAttributeFor("Time Before Z-Vanish Enabled")]
         [YAXSerializeAs("value")]
         public UInt16 I_114 { get; set; }
@@ -802,15 +769,15 @@ namespace Xv2CoreLib.BDM
                 I_100 = I_100,
                 I_102 = I_102,
                 I_104 = I_104,
-                I_12 = I_12,
-                I_14 = I_14,
-                I_16 = I_16,
-                I_18 = I_18,
-                I_20 = I_20,
+                AcbType = AcbType,
+                CueId = CueId,
+                Effect1_ID = Effect1_ID,
+                Effect1_SkillID = Effect1_SkillID,
+                Effect1_EepkType = Effect1_EepkType,
                 I_22 = I_22,
-                I_24 = I_24,
-                I_26 = I_26,
-                I_28 = I_28,
+                Effect2_ID = Effect2_ID,
+                Effect2_SkillID = Effect2_SkillID,
+                Effect2_EepkType = Effect2_EepkType,
                 I_30 = I_30,
                 I_50 = I_50,
                 I_76 = I_76,
@@ -826,13 +793,13 @@ namespace Xv2CoreLib.BDM
                 I_106 = I_106,
                 I_108 = I_108,
                 I_110 = I_110,
-                I_112 = I_112,
+                StaminaBrokenOverrideBdmId = StaminaBrokenOverrideBdmId,
                 I_114 = I_114,
                 I_116 = I_116,
                 I_118 = I_118,
-                I_32 = I_32,
-                I_34 = I_34,
-                I_36 = I_36,
+                Effect3_ID = Effect3_ID,
+                Effect3_SkillID = Effect3_SkillID,
+                Effect3_EepkType = Effect3_EepkType,
                 I_38 = I_38,
                 I_52 = I_52,
                 I_54 = I_54,
@@ -856,6 +823,8 @@ namespace Xv2CoreLib.BDM
     [Serializable]
     public class Type1SubEntry
     {
+        //Older XV1-style BDM entry
+
         [YAXAttributeForClass]
         [YAXSerializeAs("Index")]
         public int Index { get; set; }

@@ -53,16 +53,16 @@ namespace Xv2CoreLib.CSO
             //Writing Cso Entries
             for(int i = 0; i < count; i++)
             {
-                bytes.AddRange(BitConverter.GetBytes(uint.Parse(csoFile.CsoEntries[i].I_00)));
-                bytes.AddRange(BitConverter.GetBytes(csoFile.CsoEntries[i].I_04));
+                bytes.AddRange(BitConverter.GetBytes(csoFile.CsoEntries[i].CharaID));
+                bytes.AddRange(BitConverter.GetBytes(csoFile.CsoEntries[i].Costume));
 
-                StringInfo.Add(new StringWriter.StringInfo() { Offset = bytes.Count(), RelativeOffset = 0, StringToWrite = csoFile.CsoEntries[i].Str_08 });
+                StringInfo.Add(new StringWriter.StringInfo() { Offset = bytes.Count(), RelativeOffset = 0, StringToWrite = csoFile.CsoEntries[i].SePath });
                 bytes.AddRange(new byte[4]);
-                StringInfo.Add(new StringWriter.StringInfo() { Offset = bytes.Count(), RelativeOffset = 0, StringToWrite = csoFile.CsoEntries[i].Str_12 });
+                StringInfo.Add(new StringWriter.StringInfo() { Offset = bytes.Count(), RelativeOffset = 0, StringToWrite = csoFile.CsoEntries[i].VoxPath });
                 bytes.AddRange(new byte[4]);
-                StringInfo.Add(new StringWriter.StringInfo() { Offset = bytes.Count(), RelativeOffset = 0, StringToWrite = csoFile.CsoEntries[i].Str_16 });
+                StringInfo.Add(new StringWriter.StringInfo() { Offset = bytes.Count(), RelativeOffset = 0, StringToWrite = csoFile.CsoEntries[i].AmkPath });
                 bytes.AddRange(new byte[4]);
-                StringInfo.Add(new StringWriter.StringInfo() { Offset = bytes.Count(), RelativeOffset = 0, StringToWrite = csoFile.CsoEntries[i].Str_20 });
+                StringInfo.Add(new StringWriter.StringInfo() { Offset = bytes.Count(), RelativeOffset = 0, StringToWrite = csoFile.CsoEntries[i].SkillCharaCode });
                 bytes.AddRange(new byte[4]);
 
                 /*

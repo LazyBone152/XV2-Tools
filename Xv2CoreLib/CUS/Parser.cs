@@ -90,15 +90,15 @@ namespace Xv2CoreLib.CUS
             {
                 I_00 = BitConverter.ToInt32(rawBytes, offset + 0).ToString(),
                 I_04 = BitConverter.ToInt32(rawBytes, offset + 4),
-                I_08 = BitConverter.ToUInt16(rawBytes, offset + 8).ToString(),
-                I_10 = BitConverter.ToUInt16(rawBytes, offset + 10).ToString(),
-                I_12 = BitConverter.ToUInt16(rawBytes, offset + 12).ToString(),
-                I_14 = BitConverter.ToUInt16(rawBytes, offset + 14).ToString(),
-                I_16 = BitConverter.ToUInt16(rawBytes, offset + 16).ToString(),
-                I_18 = BitConverter.ToUInt16(rawBytes, offset + 18).ToString(),
-                I_20 = BitConverter.ToUInt16(rawBytes, offset + 20).ToString(),
-                I_22 = BitConverter.ToUInt16(rawBytes, offset + 22).ToString(),
-                I_24 = BitConverter.ToUInt16(rawBytes, offset + 24).ToString(),
+                I_08 = BitConverter.ToUInt16(rawBytes, offset + 8),
+                I_10 = BitConverter.ToUInt16(rawBytes, offset + 10),
+                I_12 = BitConverter.ToUInt16(rawBytes, offset + 12),
+                I_14 = BitConverter.ToUInt16(rawBytes, offset + 14),
+                I_16 = BitConverter.ToUInt16(rawBytes, offset + 16),
+                I_18 = BitConverter.ToUInt16(rawBytes, offset + 18),
+                I_20 = BitConverter.ToUInt16(rawBytes, offset + 20),
+                I_22 = BitConverter.ToUInt16(rawBytes, offset + 22),
+                I_24 = BitConverter.ToUInt16(rawBytes, offset + 24),
                 I_26 = BitConverter.ToUInt16(rawBytes, offset + 26)
             };
         }
@@ -109,22 +109,22 @@ namespace Xv2CoreLib.CUS
             {
                 skillEntries.Add(new Skill()
                 {
-                    Str_00 = Utils.GetString(rawBytes.ToList(), offset),
+                    ShortName = Utils.GetString(rawBytes.ToList(), offset),
                     I_04 = BitConverter.ToInt32(rawBytes, offset + 4),
                     ID1 = BitConverter.ToUInt16(rawBytes, offset + 8),
                     ID2 = BitConverter.ToUInt16(rawBytes, offset + 10),
                     I_12 = rawBytes[offset + 12],
                     I_13 = rawBytes[offset + 13],
-                    I_14 = (Skill.FilesLoadedFlags)BitConverter.ToUInt16(rawBytes, offset + 14),
+                    FilesLoadedFlags1 = (Skill.FilesLoadedFlags)BitConverter.ToUInt16(rawBytes, offset + 14),
                     I_16 = BitConverter.ToInt16(rawBytes, offset + 16),
                     I_18 = BitConverter.ToUInt16(rawBytes, offset + 18),
-                    Str_20 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 20)),
-                    Str_24 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 24)),
-                    Str_28 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 28)),
-                    Str_32 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 32)),
-                    Str_36 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 36)),
-                    Str_40 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 40)),
-                    Str_44 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 44)),
+                    EanPath = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 20)),
+                    CamEanPath = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 24)),
+                    EepkPath = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 28)),
+                    SePath = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 32)),
+                    VoxPath = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 36)),
+                    AfterBacPath = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 40)),
+                    AfterBcmPath = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 44)),
                     I_48 = BitConverter.ToUInt16(rawBytes, offset + 48),
                     I_50 = BitConverter.ToUInt16(rawBytes, offset + 50),
                     I_52 = BitConverter.ToUInt16(rawBytes, offset + 52),
@@ -133,7 +133,7 @@ namespace Xv2CoreLib.CUS
                     I_58 = BitConverter.ToInt16(rawBytes, offset + 58),
                     CharaSwapId = BitConverter.ToUInt16(rawBytes, offset + 60),
                     I_62 = BitConverter.ToInt16(rawBytes, offset + 62),
-                    I_64 = BitConverter.ToUInt16(rawBytes, offset + 64),
+                    NumTransformations = BitConverter.ToUInt16(rawBytes, offset + 64),
                     I_66 = BitConverter.ToUInt16(rawBytes, offset + 66)
                 });
                 offset += 68;

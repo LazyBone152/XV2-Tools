@@ -852,14 +852,14 @@ namespace LB_Mod_Installer.Binding
 
             foreach(var skill in skills)
             {
-                if(skill.Str_00.ToLower() == shortName)
+                if(skill.ShortName.ToLower() == shortName)
                 {
                     switch (idType)
                     {
                         case CusIdType.ID1:
-                            return int.Parse(skill.Index);
+                            return skill.ID1;
                         case CusIdType.ID2:
-                            return int.Parse(skill.I_10);
+                            return skill.ID2;
                     }
                 }
             }

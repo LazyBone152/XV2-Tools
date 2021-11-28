@@ -68,25 +68,25 @@ namespace Xv2CoreLib.IDB
             
             for (int i = 0; i < count; i++)
             {
-                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(idbFile.Entries[i].I_00)));
+                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].ID));
                 bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_02));
-                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_04));
-                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_06));
-                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_08));
+                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].NameMsgID));
+                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].DescMsgID));
+                bytes.AddRange(BitConverter.GetBytes((ushort)idbFile.Entries[i].Type));
                 bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_10));
                 bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_12));
                 bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_14));
                 bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_16));
                 bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_20));
-                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_24));
+                bytes.AddRange(BitConverter.GetBytes((int)idbFile.Entries[i].RaceLock));
                 bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_28));
-                bytes.AddRange(BitConverter.GetBytes(int.Parse(idbFile.Entries[i].I_32)));
+                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_32));
                 bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_36));
                 bytes.AddRange(BitConverter.GetBytes((UInt16)idbFile.Entries[i].I_38));
                 bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_40));
-                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(idbFile.Entries[i].I_42)));
-                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(idbFile.Entries[i].I_44)));
-                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(idbFile.Entries[i].I_46)));
+                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_42));
+                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_44));
+                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_46));
                 if (idbFile.Entries[i].Effects.Count() != 3)
                 {
                     Console.WriteLine(String.Format("Effect entry count mismatch. There must be 3. (ID: {0})", idbFile.Entries[i].Index));

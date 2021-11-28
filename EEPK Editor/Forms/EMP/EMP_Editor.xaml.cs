@@ -1,24 +1,23 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using EEPK_Organiser.Forms.Recolor;
+using EEPK_Organiser.Misc;
+using EEPK_Organiser.View;
+using GalaSoft.MvvmLight.CommandWpf;
+using MahApps.Metro.Controls;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.EMM;
 using Xv2CoreLib.EMP;
-using EEPK_Organiser.Misc;
-using System.Collections.Generic;
-using System.Linq;
-using EEPK_Organiser.View;
-using MahApps.Metro.Controls;
-using Xv2CoreLib.Resource.UndoRedo;
-using Xv2CoreLib.EMB_CLASS;
-using GalaSoft.MvvmLight.CommandWpf;
-using EEPK_Organiser.Forms.Recolor;
-using Xv2CoreLib.Resource.App;
 using Xv2CoreLib.Resource;
+using Xv2CoreLib.Resource.App;
+using Xv2CoreLib.Resource.UndoRedo;
 
 namespace EEPK_Organiser.Forms.EMP
 {
@@ -340,6 +339,26 @@ namespace EEPK_Organiser.Forms.EMP
             }
         }
 
+        //Undo/Redo 
+        public RelayCommand UndoCommand => new RelayCommand(Undo, UndoManager.Instance.CanUndo);
+        private void Undo()
+        {
+            UndoManager.Instance.Undo();
+            RefreshItems();
+        }
+
+        public RelayCommand RedoCommand => new RelayCommand(Redo, UndoManager.Instance.CanRedo);
+        private void Redo()
+        {
+            UndoManager.Instance.Redo();
+            RefreshItems();
+        }
+
+        private void RefreshItems()
+        {
+            empTree.Items.Refresh();
+        }
+
         //ParticleEffect (general)
         public RelayCommand AddParticleEffect_Command => new RelayCommand(AddParticleEffect);
         private void AddParticleEffect()
@@ -373,6 +392,8 @@ namespace EEPK_Organiser.Forms.EMP
                 List<IUndoRedo> undos = new List<IUndoRedo>();
                 _particleEffect.AddNew(-1, undos);
                 UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Add Child Particle Effect"));
+
+                RefreshItems();
             }
             catch (Exception ex)
             {
@@ -393,6 +414,7 @@ namespace EEPK_Organiser.Forms.EMP
 
             UndoManager.Instance.AddCompositeUndo(undos, "Remove Particle Effect");
 
+            RefreshItems();
             empTree.Focus();
 
         }
@@ -406,7 +428,6 @@ namespace EEPK_Organiser.Forms.EMP
                 e.Handled = true;
             }
         }
-
 
         private bool IsParticleSelected()
         {
@@ -551,6 +572,8 @@ namespace EEPK_Organiser.Forms.EMP
                     {
                         undos.Add(new UndoableListAdd<ParticleEffect>(parentList, newParticleEffect));
                         parentList.Add(newParticleEffect);
+
+                        RefreshItems();
                     }
                 }
 
@@ -584,6 +607,8 @@ namespace EEPK_Organiser.Forms.EMP
 
                 undos.Add(new UndoableListAdd<ParticleEffect>(_particleEffect.ChildParticleEffects, newParticleEffect));
                 _particleEffect.ChildParticleEffects.Add(newParticleEffect);
+
+                RefreshItems();
 
                 UndoManager.Instance.AddCompositeUndo(undos, "Paste Particle Effect");
             }
@@ -1700,5 +1725,6 @@ namespace EEPK_Organiser.Forms.EMP
                 }
             }
         }
+
     }
 }

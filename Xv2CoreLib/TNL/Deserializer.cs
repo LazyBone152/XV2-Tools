@@ -54,12 +54,12 @@ namespace Xv2CoreLib.TNL
                 bytes.AddRange(BitConverter.GetBytes(tnl_File.Characters[i].I16_2));
                 bytes.AddRange(BitConverter.GetBytes(tnl_File.Characters[i].Str2.Count()));
                 bytes.AddRange(Encoding.UTF8.GetBytes(tnl_File.Characters[i].Str2));
-                bytes.AddRange(BitConverter.GetBytes(int.Parse(tnl_File.Characters[i].I32_2)));
+                bytes.AddRange(BitConverter.GetBytes(tnl_File.Characters[i].I32_2));
                 bytes.AddRange(BitConverter.GetBytes(tnl_File.Characters[i].Str3.Count()));
                 bytes.AddRange(Encoding.UTF8.GetBytes(tnl_File.Characters[i].Str3));
                 bytes.AddRange(BitConverter.GetBytes(tnl_File.Characters[i].Str4.Count()));
                 bytes.AddRange(Encoding.UTF8.GetBytes(tnl_File.Characters[i].Str4));
-                bytes.AddRange(BitConverter.GetBytes(int.Parse(tnl_File.Characters[i].I32_3)));
+                bytes.AddRange(BitConverter.GetBytes(tnl_File.Characters[i].I32_3));
             }
 
 
@@ -79,12 +79,12 @@ namespace Xv2CoreLib.TNL
                 bytes.AddRange(BitConverter.GetBytes(tnl_File.Teachers[i].I16_2));
                 bytes.AddRange(BitConverter.GetBytes(tnl_File.Teachers[i].Str2.Count()));
                 bytes.AddRange(Encoding.UTF8.GetBytes(tnl_File.Teachers[i].Str2));
-                bytes.AddRange(BitConverter.GetBytes(int.Parse(tnl_File.Teachers[i].I32_2)));
+                bytes.AddRange(BitConverter.GetBytes(tnl_File.Teachers[i].I32_2));
                 bytes.AddRange(BitConverter.GetBytes(tnl_File.Teachers[i].Str3.Count()));
                 bytes.AddRange(Encoding.UTF8.GetBytes(tnl_File.Teachers[i].Str3));
                 bytes.AddRange(BitConverter.GetBytes(tnl_File.Teachers[i].Str4.Count()));
                 bytes.AddRange(Encoding.UTF8.GetBytes(tnl_File.Teachers[i].Str4));
-                bytes.AddRange(BitConverter.GetBytes(int.Parse(tnl_File.Teachers[i].I32_3)));
+                bytes.AddRange(BitConverter.GetBytes(tnl_File.Teachers[i].I32_3));
             }
 
             //Section 3 (Object)
@@ -96,16 +96,16 @@ namespace Xv2CoreLib.TNL
                 bytes.AddRange(BitConverter.GetBytes(int.Parse(tnl_File.Objects[i].Index)));
                 bytes.AddRange(BitConverter.GetBytes(tnl_File.Objects[i].Str1.Count()));
                 bytes.AddRange(Encoding.UTF8.GetBytes(tnl_File.Objects[i].Str1));
-                bytes.AddRange(BitConverter.GetBytes(int.Parse(tnl_File.Objects[i].I32_2)));
+                bytes.AddRange(BitConverter.GetBytes(tnl_File.Objects[i].I32_2));
                 bytes.AddRange(BitConverter.GetBytes(tnl_File.Objects[i].Str2.Count()));
                 bytes.AddRange(Encoding.UTF8.GetBytes(tnl_File.Objects[i].Str2));
                 bytes.AddRange(BitConverter.GetBytes(tnl_File.Objects[i].Str3.Count()));
                 bytes.AddRange(Encoding.UTF8.GetBytes(tnl_File.Objects[i].Str3));
                 bytes.AddRange(BitConverter.GetBytes(tnl_File.Objects[i].Str4.Count()));
                 bytes.AddRange(Encoding.UTF8.GetBytes(tnl_File.Objects[i].Str4));
-                bytes.AddRange(BitConverter.GetBytes(int.Parse(tnl_File.Objects[i].I32_3)));
-                bytes.AddRange(BitConverter.GetBytes(int.Parse(tnl_File.Objects[i].I32_4)));
-                bytes.AddRange(BitConverter.GetBytes(int.Parse(tnl_File.Objects[i].I32_5)));
+                bytes.AddRange(BitConverter.GetBytes(tnl_File.Objects[i].I32_3));
+                bytes.AddRange(BitConverter.GetBytes(tnl_File.Objects[i].I32_4));
+                bytes.AddRange(BitConverter.GetBytes(tnl_File.Objects[i].I32_5));
             }
 
             //Section 4 (Script)

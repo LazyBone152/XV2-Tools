@@ -56,12 +56,12 @@ namespace Xv2CoreLib.CSO
                 {
                     csoFile.CsoEntries.Add(new CSO_Entry()
                     {
-                        I_00 = BitConverter.ToUInt32(rawBytes, offset + 0).ToString(),
-                        I_04 = BitConverter.ToUInt32(rawBytes, offset + 4),
-                        Str_08 = StringEx.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 8), false),
-                        Str_12 = StringEx.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 12), false),
-                        Str_16 = StringEx.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 16), false),
-                        Str_20 = StringEx.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 20), false)
+                        CharaID = BitConverter.ToInt32(rawBytes, offset + 0),
+                        Costume = BitConverter.ToUInt32(rawBytes, offset + 4),
+                        SePath = StringEx.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 8), false),
+                        VoxPath = StringEx.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 12), false),
+                        AmkPath = StringEx.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 16), false),
+                        SkillCharaCode = StringEx.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 20), false)
                     });
                     offset += 32;
                 }

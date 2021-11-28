@@ -52,11 +52,11 @@ namespace Xv2CoreLib.Resource.App
                 }
                 else if (split[3] == "0")
                 {
-                    return String.Format("{0}.{1}{2}", split[0], split[1], split[2]);
+                    return String.Format("{0}.{1}.{2}", split[0], split[1], split[2]);
                 }
                 else
                 {
-                    return String.Format("{0}.{1}{2}{3}", split[0], split[1], split[2], split[3]);
+                    return String.Format("{0}.{1}.{2}.{3}", split[0], split[1], split[2], split[3]);
                 }
             }
         }
