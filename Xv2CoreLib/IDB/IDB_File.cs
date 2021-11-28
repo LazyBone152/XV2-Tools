@@ -198,7 +198,9 @@ namespace Xv2CoreLib.IDB
         [YAXDontSerialize]
         public int SortID { get { return ID; } }
         [YAXDontSerialize]
-        public string Index { get { return $"{ID}_{Type}"; } set { ID = ushort.Parse(value.Split('_')[0]); Type = (IDB_Type)ushort.Parse(value.Split('_')[1]); } }
+        public string Index { get { return $"{ID_Binding}_{Type}"; } set { ID_Binding = value.Split('_')[0]; Type = (IDB_Type)ushort.Parse(value.Split('_')[1]); } }
+        [YAXDontSerialize]
+        public ushort ID { get { return ushort.Parse(ID_Binding); } set { ID_Binding = value.ToString(); } }
 
         #endregion
 
@@ -206,7 +208,7 @@ namespace Xv2CoreLib.IDB
         [YAXAttributeForClass]
         [YAXSerializeAs("ID")]
         [BindingAutoId]
-        public ushort ID { get; set; } //ushort
+        public string ID_Binding { get; set; } //ushort
         [YAXAttributeFor("Stars")]
         [YAXSerializeAs("value")]
         public ushort I_02 { get; set; }

@@ -1204,7 +1204,7 @@ namespace Xv2CoreLib
 
         public void InstallSkillIdbEntry(IDB_Entry idbEntry)
         {
-            var existingIdx = skillIdbFile.Entries.IndexOf(skillIdbFile.Entries.FirstOrDefault(x => x.ID == idbEntry.ID && x.Type == idbEntry.Type));
+            var existingIdx = skillIdbFile.Entries.IndexOf(skillIdbFile.Entries.FirstOrDefault(x => x.ID_Binding == idbEntry.ID_Binding && x.Type == idbEntry.Type));
 
             if(existingIdx != -1)
             {
