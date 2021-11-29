@@ -192,11 +192,10 @@ namespace Xv2CoreLib.EMD
 
                         //Triangles pointer list
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - submeshStart), submeshStart + 76);
-                        List<PtrWriter.Ptr> trianglePtrs = new List<PtrWriter.Ptr>();
+                        int triangleTableStart = bytes.Count;
 
                         for(int t = 0; t < emdFile.Models[i].Meshes[a].Submeshes[s].TriangleListCount; t++)
                         {
-                            trianglePtrs.Add(new PtrWriter.Ptr() { Offset = bytes.Count, RelativeTo = submeshStart });
                             bytes.AddRange(new byte[4]);
                         }
                         
@@ -204,7 +203,7 @@ namespace Xv2CoreLib.EMD
                         //Triangles
                         for (int t = 0; t < emdFile.Models[i].Meshes[a].Submeshes[s].TriangleListCount; t++)
                         {
-                            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - trianglePtrs[t].RelativeTo), trianglePtrs[t].Offset);
+                            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - submeshStart), triangleTableStart);
 
                             int triangleStart = bytes.Count;
 
@@ -219,13 +218,15 @@ namespace Xv2CoreLib.EMD
                                 bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].Submeshes[s].Triangles[t].Faces[f]));
                             }
 
+                            //The cause of all that "emd corruption" 
+                            PadFile(4);
+
                             //Bones ptr list
-                            List<PtrWriter.Ptr> bonePtr = new List<PtrWriter.Ptr>();
+                            int boneTablePos = bytes.Count;
                             bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - triangleStart), triangleStart + 12);
 
                             for(int b = 0; b < emdFile.Models[i].Meshes[a].Submeshes[s].Triangles[t].BonesCount; b++)
                             {
-                                bonePtr.Add(new PtrWriter.Ptr() { Offset = bytes.Count, RelativeTo = triangleStart });
                                 bytes.AddRange(new byte[4]);
                             }
 
@@ -234,12 +235,15 @@ namespace Xv2CoreLib.EMD
                             {
                                 if(emdFile.Models[i].Meshes[a].Submeshes[s].Triangles[t].Bones[b] != "NULL")
                                 {
-                                    bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - bonePtr[b].RelativeTo), bonePtr[b].Offset);
+                                    bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - triangleStart), boneTablePos);
                                     bytes.AddRange(Encoding.ASCII.GetBytes(emdFile.Models[i].Meshes[a].Submeshes[s].Triangles[t].Bones[b]));
                                     bytes.Add(0);
                                 }
+
+                                boneTablePos += 4;
                             }
 
+                            triangleTableStart += 4;
                         }
 
 

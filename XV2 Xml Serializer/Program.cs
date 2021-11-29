@@ -3,14 +3,11 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using YAXLib;
 using System.Globalization;
 using System.Threading;
 using Xv2CoreLib;
-using System.Diagnostics;
-using Xv2CoreLib.CPK;
-using System.Threading.Tasks;
 using Xv2CoreLib.Eternity;
+using YAXLib;
 
 namespace XV2_Xml_Serializer
 {
@@ -22,7 +19,7 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
-            args = new string[1] { @"1171_THC_DCR.bsa" };
+            //args = new string[1] { @"GK4_000_Face_base - Copy.emd" };
 
             DEBUG_MODE = true;
 #endif

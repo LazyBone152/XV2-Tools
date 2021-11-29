@@ -22,7 +22,7 @@ namespace Xv2CoreLib.IDB
         MAF = 128
     }
 
-    public enum LB_Color : UInt16
+    public enum LB_Color : ushort
     {
         Red = 0,
         Blue = 1,
@@ -61,6 +61,10 @@ namespace Xv2CoreLib.IDB
 
         public void SortEntries()
         {
+
+            Entries = (List<IDB_Entry>)Entries.OrderBy(x => (int)x.Type).ThenByDescending(x => x.ID);
+
+            /*
             //Split entries by I_08 (Type), Sort them and then rejoin
             int split = ((int)Entries.Max(x => x.Type)) + 1;
             List<List<IDB_Entry>> splitEntries = new List<List<IDB_Entry>>();
@@ -80,6 +84,7 @@ namespace Xv2CoreLib.IDB
                 if(splitEntries[i] != null)
                     Entries.AddRange(splitEntries[i]);
             }
+            */
         }
 
         public bool DoesSkillExist(string id, IDB_Type skillType)

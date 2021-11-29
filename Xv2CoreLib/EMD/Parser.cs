@@ -300,9 +300,15 @@ namespace Xv2CoreLib.EMD
                                 //Offsets & counts
                                 int faceCount = BitConverter.ToInt32(rawBytes, triangleOffset + 0);
                                 int faceNameCount = BitConverter.ToInt32(rawBytes, triangleOffset + 4);
-                                int faceTableOffset = 16 + triangleOffset;
-                                int faceNameTableOffset = faceTableOffset + faceCount * 2;
+                                int faceTableOffset = (BitConverter.ToInt32(rawBytes, triangleOffset + 8) != 0) ? BitConverter.ToInt32(rawBytes, triangleOffset + 8) + triangleOffset : triangleOffset + 16;
+
+                                /*
+                                int faceNameTableOffset = faceTableOffset + (faceCount * 2);
                                 if ((faceNameTableOffset % 4) == 2) faceNameTableOffset += 2;
+                                */
+
+                                int faceNameTableOffset = BitConverter.ToInt32(rawBytes, triangleOffset + 12) + triangleOffset;
+
                                 triangle.FaceCount_Debug = faceCount;
                                 triangle.FaceCountDivided_Debug = faceCount / 3;
 
