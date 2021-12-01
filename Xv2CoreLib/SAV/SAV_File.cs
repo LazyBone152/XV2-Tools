@@ -184,7 +184,9 @@ namespace Xv2CoreLib.SAV
         public const int HC_ITEM_COUNT = 128;
         public const int HC_SKILL_COUNT = 1024;
         public const int HC_FIGURE_INVENTORY = 507064;
+        public const int HC_FIGURE_INVENTORY2 = 726968; //Added in 1.17.01
         public const int HC_FIGURE_INVENTORY_COUNT = 256;
+        public const int HC_FIGURE_INVENTORY_COUNT2 = 344; //Added in 1.17.01
         public const int HC_DECK = 517304;
 
         //New stuff in 1.15
@@ -196,6 +198,7 @@ namespace Xv2CoreLib.SAV
 
         //New stuff in 1.17
         public const int PARTNER_KEY_FLAGS2 = 724484; //Like the previous keys, these need to be set if the keys are in the inventory. (11 - 15)
+
 
 
     }
@@ -638,6 +641,8 @@ namespace Xv2CoreLib.SAV
                         return "1.16.01";
                     case 22:
                         return "1.17";
+                    case 23:
+                        return "1.17.01";
                     default:
                         return String.Format("Unknown ({0})", Version);
 
@@ -678,6 +683,7 @@ namespace Xv2CoreLib.SAV
                     case 20:
                     case 21:
                     case 22:
+                    case 23:
                         return null;
                     default:
                         return "This save version is not supported. It is recommened to update the application (if one is available).";
@@ -715,6 +721,7 @@ namespace Xv2CoreLib.SAV
                     case 20:
                     case 21:
                     case 22:
+                    case 23:
                         return Brushes.Blue;
                     default:
                         return Brushes.Red;
@@ -772,6 +779,15 @@ namespace Xv2CoreLib.SAV
         }
 
         #endregion
+
+        [YAXDontSerialize]
+        public int FigureInventorySize
+        {
+            get
+            {
+                return (Version >= 23) ? Offsets.HC_FIGURE_INVENTORY_COUNT + Offsets.HC_FIGURE_INVENTORY_COUNT2 : Offsets.HC_FIGURE_INVENTORY_COUNT;
+            }
+        }
 
         #region FileInfo
         //Bytes
@@ -1074,7 +1090,7 @@ namespace Xv2CoreLib.SAV
             //HC
             if (savFile.DLC5)
             {
-                savFile.HeroColosseum = HeroColosseumGlobal.Read(rawBytes, bytes);
+                savFile.HeroColosseum = HeroColosseumGlobal.Read(rawBytes, bytes, savFile.Version);
             }
 
             //Mentor Customization Flags
@@ -1137,7 +1153,7 @@ namespace Xv2CoreLib.SAV
             //HC
             if (DLC5)
             {
-                bytes = HeroColosseum.Write(bytes);
+                bytes = HeroColosseum.Write(bytes, Version);
             }
 
             //Xv1 Hero
@@ -6407,7 +6423,7 @@ namespace Xv2CoreLib.SAV
 
         //General values
         private int _figureXp = 0;
-        private byte _extrafigureSlots = 0;
+        private ushort _extrafigureSlots = 0;
         private byte _extraDeckSlots = 0;
 
         [YAXAttributeFor("FigureXp")]
@@ -6430,7 +6446,7 @@ namespace Xv2CoreLib.SAV
         }
         [YAXAttributeFor("ExtraFigureSlots")]
         [YAXSerializeAs("value")]
-        public byte I_10
+        public ushort I_10
         {
             get
             {
@@ -6663,44 +6679,62 @@ namespace Xv2CoreLib.SAV
         {
             get
             {
-                if (Figures == null) return String.Format("0/{0}", Offsets.HC_FIGURE_INVENTORY_COUNT);
-                return String.Format("{1}/{0}", Offsets.HC_FIGURE_INVENTORY_COUNT, Figures.Count);
+                if (Figures == null) return String.Format("0/{0}", 100 + I_10);
+                return String.Format("{0}/{1}", Figures.Count, 100 + I_10);
             }
         }
         
-        public static HeroColosseumGlobal Read(byte[] rawBytes, List<byte> bytes)
+        public static HeroColosseumGlobal Read(byte[] rawBytes, List<byte> bytes, int version)
         {
             HeroColosseumGlobal hc = new HeroColosseumGlobal();
 
             //General values
             hc.I_04 = BitConverter.ToInt32(rawBytes, Offsets.HC_GLOBAL_VALUES + 4);
-            hc.I_10 = rawBytes[Offsets.HC_GLOBAL_VALUES + 10];
             hc.I_11 = rawBytes[Offsets.HC_GLOBAL_VALUES + 11];
+
+            if(version >= 23)
+            {
+                //1.17.01
+                hc.I_10 = BitConverter.ToUInt16(rawBytes, Offsets.HC_GLOBAL_VALUES + 76);
+            }
+            else
+            {
+                hc.I_10 = rawBytes[Offsets.HC_GLOBAL_VALUES + 10];
+            }
 
             //Collections
             hc.Items = HCItem.Read(rawBytes, bytes, Offsets.HC_ITEM_UNLOCKED_FLAGS, Offsets.HC_ITEM_UNKNOWN_FLAGS, Offsets.HC_ITEM_QUANTITY, Offsets.HC_ITEM_COUNT);
             hc.Skills = HCItem.Read(rawBytes, bytes, Offsets.HC_SKILL_UNLOCKED_FLAGS, Offsets.HC_SKILL_UNKNOWN_FLAGS, Offsets.HC_SKILL_QUANTITY, Offsets.HC_SKILL_COUNT);
             hc.OwnedFigureCollection = FigureCollectionItem.Read(rawBytes, bytes);
-            hc.Figures = Figure.ReadAll(rawBytes);
+            hc.Figures = Figure.ReadAll(rawBytes, version);
             hc.Decks = Deck.ReadAll(rawBytes);
 
             return hc;
         }
 
-        public List<byte> Write(List<byte> bytes)
+        public List<byte> Write(List<byte> bytes, int version)
         {
             //General values
             bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(I_04), Offsets.HC_GLOBAL_VALUES + 4);
-            bytes[Offsets.HC_GLOBAL_VALUES + 10] = I_10;
             bytes[Offsets.HC_GLOBAL_VALUES + 11] = I_11;
 
             //Collections
             bytes = Utils.ReplaceRange(bytes, HCItem.Write(Items, Offsets.HC_ITEM_COUNT).ToArray(), Offsets.HC_ITEM_UNLOCKED_FLAGS);
             bytes = Utils.ReplaceRange(bytes, HCItem.Write(Skills, Offsets.HC_SKILL_COUNT).ToArray(), Offsets.HC_SKILL_UNLOCKED_FLAGS);
             bytes = Utils.ReplaceRange(bytes, FigureCollectionItem.Write(OwnedFigureCollection).ToArray(), Offsets.HC_FIGURE_COLLECTION_UNLOCKED_FLAGS);
-            bytes = Utils.ReplaceRange(bytes, Figure.WriteAll(Figures).ToArray(), Offsets.HC_FIGURE_INVENTORY);
+            bytes = Utils.ReplaceRange(bytes, Figure.WriteFigureInventory1(Figures).ToArray(), Offsets.HC_FIGURE_INVENTORY);
             bytes = Utils.ReplaceRange(bytes, Deck.WriteAll(Decks).ToArray(), Offsets.HC_DECK);
 
+            if (version >= 23)
+            {
+                //1.17.01
+                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(I_10), Offsets.HC_GLOBAL_VALUES + 76);
+                bytes = Utils.ReplaceRange(bytes, Figure.WriteFigureInventory2(Figures).ToArray(), Offsets.HC_FIGURE_INVENTORY2);
+            }
+            else
+            {
+                bytes[Offsets.HC_GLOBAL_VALUES + 10] = (byte)I_10;
+            }
 
             return bytes;
         }
@@ -7721,12 +7755,13 @@ namespace Xv2CoreLib.SAV
         [YAXSerializeAs("value")]
         public int I_36 { get; set; }
 
-        public static ObservableCollection<Figure> ReadAll(byte[] rawBytes)
+        public static ObservableCollection<Figure> ReadAll(byte[] rawBytes, int version)
         {
             ObservableCollection<Figure> figures = new ObservableCollection<Figure>();
 
             int offset = Offsets.HC_FIGURE_INVENTORY;
 
+            //Base figures
             for (int i = 0; i < Offsets.HC_FIGURE_INVENTORY_COUNT; i++)
             {
                 if (BitConverter.ToInt64(rawBytes, offset) == 0) break;
@@ -7739,15 +7774,35 @@ namespace Xv2CoreLib.SAV
                 offset += 40;
             }
 
+            //Extra figures added in 1.17.01
+            if(version >= 23)
+            {
+                offset = Offsets.HC_FIGURE_INVENTORY2;
+
+                for (int i = 0; i < Offsets.HC_FIGURE_INVENTORY_COUNT2; i++)
+                {
+                    if (BitConverter.ToInt64(rawBytes, offset) == 0) break;
+
+                    var figure = Figure.Read(rawBytes, offset, i);
+
+                    if (figure != null)
+                        figures.Add(figure);
+
+                    offset += 40;
+                }
+            }
+
             return figures;
         }
 
-        public static List<byte> WriteAll(ObservableCollection<Figure> figures)
+        public static List<byte> WriteFigureInventory1(ObservableCollection<Figure> figures)
         {
             List<byte> bytes = new List<byte>();
 
             for (int i = 0; i < figures.Count; i++)
             {
+                if (i >= Offsets.HC_FIGURE_INVENTORY_COUNT) break;
+
                 bytes.AddRange(figures[i].Write());
             }
 
@@ -7760,6 +7815,26 @@ namespace Xv2CoreLib.SAV
             if (bytes.Count != Offsets.HC_FIGURE_INVENTORY_COUNT * 40) throw new InvalidDataException("Figure collection is an invalid size.");
             return bytes;
         }
+
+        public static List<byte> WriteFigureInventory2(ObservableCollection<Figure> figures)
+        {
+            List<byte> bytes = new List<byte>();
+
+            for (int i = Offsets.HC_FIGURE_INVENTORY_COUNT; i < figures.Count; i++)
+            {
+                bytes.AddRange(figures[i].Write());
+            }
+
+            while (bytes.Count != Offsets.HC_FIGURE_INVENTORY_COUNT2 * 40)
+            {
+                bytes.AddRange(new byte[40]);
+                if (bytes.Count > Offsets.HC_FIGURE_INVENTORY_COUNT2 * 40) break;
+            }
+
+            if (bytes.Count != Offsets.HC_FIGURE_INVENTORY_COUNT2 * 40) throw new InvalidDataException("Figure collection is an invalid size.");
+            return bytes;
+        }
+
 
         public static Figure Read(byte[] rawBytes, int offset, int index)
         {

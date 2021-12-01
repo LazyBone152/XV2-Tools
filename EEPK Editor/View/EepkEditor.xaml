@@ -6,7 +6,6 @@
              xmlns:local="clr-namespace:EEPK_Organiser"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
-             xmlns:utils="clr-namespace:EEPK_Organiser.Utils"
              xmlns:lbUtils="clr-namespace:LB_Common.Utils;assembly=LB_Common"
              xmlns:eepk="clr-namespace:Xv2CoreLib.EEPK;assembly=Xv2CoreLib"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"

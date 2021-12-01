@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.Resource.App;
 
-namespace EEPK_Organiser.Utils
+namespace EEPK_Organiser.Misc
 {
     public class CacheManager
     {

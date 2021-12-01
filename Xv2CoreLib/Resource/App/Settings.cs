@@ -525,7 +525,8 @@ namespace Xv2CoreLib.Resource.App
         #endregion
 
         #region XenoKit
-        public int XenoKit_WindowSizeX, XenoKit_WindowSizeY = -1;
+        public int XenoKit_WindowSizeX { get; set; } = -1;
+        public int XenoKit_WindowSizeY { get; set; } = -1;
         public bool XenoKit_HideEmptyBacEntries { get; set; } = true;
         public bool XenoKit_EnableCameraAnimations { get; set; } = true;
         public bool XenoKit_EnableVisualSkeleton { get; set; } = true;

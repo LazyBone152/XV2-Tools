@@ -9,7 +9,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Xv2CoreLib.EffectContainer;
-using EEPK_Organiser.Utils;
 using MahApps.Metro.Controls;
 using xv2 = Xv2CoreLib.Xenoverse2;
 using MahApps.Metro.Controls.Dialogs;

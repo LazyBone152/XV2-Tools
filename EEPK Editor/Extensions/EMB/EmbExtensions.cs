@@ -1,22 +1,14 @@
 ﻿using AForge;
-using CSharpImageLibrary;
-using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
-using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.Resource.UndoRedo;
 
 namespace Xv2CoreLib.EMB_CLASS
 {
-    public static class Extensions
+    public static class EmbExtensions
     {
-        
-        //AFORGE Extensions
+        //AFORGE Extensions:
 
         public static void ChangeHue(this EMB_File embFile, double hue, double saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0)
         {

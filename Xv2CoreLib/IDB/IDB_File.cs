@@ -87,15 +87,14 @@ namespace Xv2CoreLib.IDB
             */
         }
 
-        public bool DoesSkillExist(string id, IDB_Type skillType)
+        public bool DoesSkillExist(int id, IDB_Type skillType)
         {
             if (Entries == null) return false;
             int type = (int)skillType;
-            ushort skillId = ushort.Parse(id);
 
             foreach (var entry in Entries)
             {
-                if (entry.ID == skillId && entry.Type == (IDB_Type)type) return true;
+                if (entry.ID == (ushort)id && entry.Type == (IDB_Type)type) return true;
             }
 
             return false;

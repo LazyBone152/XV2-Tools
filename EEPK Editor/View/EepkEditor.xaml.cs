@@ -19,7 +19,6 @@ using Xv2CoreLib.EMP;
 using Xv2CoreLib.EMM;
 using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.Resource.UndoRedo;
-using EEPK_Organiser.Utils;
 using EEPK_Organiser.Misc;
 using MahApps.Metro.Controls;
 using System.Threading.Tasks;
@@ -31,6 +30,10 @@ using Xv2CoreLib.Resource.App;
 using Application = System.Windows.Application;
 using Xv2CoreLib.Resource;
 using System.Windows.Media;
+
+#if XenoKit
+using XenoKit;
+#endif
 
 namespace EEPK_Organiser.View
 {
@@ -73,15 +76,6 @@ namespace EEPK_Organiser.View
                 SetValue(EepkInstanceProperty, value);
                 NotifyPropertyChanged("EepkInstance");
                 NotifyPropertyChanged(nameof(effectContainerFile));
-                NotifyPropertyChanged(nameof(IsFileLoaded));
-            }
-        }
-        public bool IsFileLoaded
-        {
-            get
-            {
-                if (effectContainerFile == null) return false;
-                return true;
             }
         }
 

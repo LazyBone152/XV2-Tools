@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EEPK_Organiser.Forms.Recolor"
-        xmlns:utils="clr-namespace:EEPK_Organiser.Utils"
         xmlns:emm="clr-namespace:Xv2CoreLib.EMM;assembly=Xv2CoreLib"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:undoRedo="clr-namespace:Xv2CoreLib.Resource.UndoRedo;assembly=Xv2CoreLib"

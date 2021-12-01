@@ -161,7 +161,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="DialogSettings.cs" />
-    <Compile Include="Extensions\EMB\Extensions.cs" />
+    <Compile Include="Extensions\EMB\EmbExtensions.cs" />
     <Compile Include="Forms\EffectSelector.xaml.cs">
       <DependentUpon>EffectSelector.xaml</DependentUpon>
     </Compile>
@@ -199,7 +199,7 @@
     <Compile Include="Misc\InputValidation.cs" />
     <Compile Include="Name\Namelist.cs" />
     <Compile Include="Name\NameListManager.cs" />
-    <Compile Include="Utils\CacheManager.cs" />
+    <Compile Include="Misc\CacheManager.cs" />
     <Compile Include="Misc\LoadFromGameHelper.cs" />
     <Compile Include="ViewModel\EffectPartViewModel.cs" />
     <Compile Include="View\EepkEditor.xaml.cs">
