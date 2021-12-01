@@ -16,6 +16,7 @@ namespace Xv2CoreLib.ACB
     //Can copy cues between ACB files, and thats about it.
     //Keeping this here because the skill/moveset merger still uses it currently.
 
+    [Obsolete("Use ACB_NEW instead. This is an old legacy ACB parser with very limited (and buggy) functionality.")]
     public class ACB_File
     {
         #region Versions

@@ -11,8 +11,6 @@ namespace EEPK_Organiser
     /// </summary>
     public partial class App : System.Windows.Application
     {
-        public static MetroDialogSettings DefaultDialogSettings = new MetroDialogSettings() { AnimateHide = false, AnimateShow = false, DialogTitleFontSize = 16, DialogMessageFontSize = 12 };
-
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
 #if !DEBUG

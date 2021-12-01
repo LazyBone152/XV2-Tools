@@ -1431,7 +1431,7 @@ namespace EEPK_Organiser.View
 
         }
 
-        private void PBIND_RemoveColorAnimations(object sender, RoutedEventArgs e)
+        private async void PBIND_RemoveColorAnimations(object sender, RoutedEventArgs e)
         {
             List<Asset> selectedAssets = pbindDataGrid.SelectedItems.Cast<Asset>().ToList();
 
@@ -1442,7 +1442,15 @@ namespace EEPK_Organiser.View
                 foreach (var asset in selectedAssets)
                     undos.AddRange(asset.Files[0].EmpFile.RemoveColorAnimations());
 
-                UndoManager.Instance.AddCompositeUndo(undos, "Remove Color Animations (PBIND)");
+                if(undos.Count > 0)
+                {
+                    UndoManager.Instance.AddCompositeUndo(undos, "Remove Color Animations (PBIND)");
+                    await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, "Remove Color Animations (PBIND)", $"{undos.Count} animations were removed", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                }
+                else
+                {
+                    await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, "Remove Color Animations (PBIND)", $"No animations found.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                }
             }
         }
 

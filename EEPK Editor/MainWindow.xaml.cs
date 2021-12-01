@@ -19,6 +19,7 @@ using EEPK_Organiser.Forms.Recolor;
 using AutoUpdater;
 using Xv2CoreLib.Resource.App;
 using System.Diagnostics;
+using LB_Common.Utils;
 
 namespace EEPK_Organiser
 {
@@ -177,7 +178,7 @@ namespace EEPK_Organiser
 
         public async Task AsyncInit()
         {
-            var controller = await this.ShowProgressAsync($"Initializing...", $"", false, App.DefaultDialogSettings);
+            var controller = await this.ShowProgressAsync($"Initializing...", $"", false, DialogSettings.Default);
             controller.SetIndeterminate();
 
             try
@@ -296,11 +297,11 @@ namespace EEPK_Organiser
 
             if (isUpdateAvailable)
             {
-                var messageResult = await this.ShowMessageAsync("Update Available", $"An update is available ({latestVersion}). Do you want to download and install it?\n\nNote: All instances of the application will be closed and any unsaved work will be lost.", MessageDialogStyle.AffirmativeAndNegative, App.DefaultDialogSettings);
+                var messageResult = await this.ShowMessageAsync("Update Available", $"An update is available ({latestVersion}). Do you want to download and install it?\n\nNote: All instances of the application will be closed and any unsaved work will be lost.", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.Default);
 
                 if(messageResult == MessageDialogResult.Affirmative)
                 {
-                    var controller = await this.ShowProgressAsync("Update Available", "Downloading...", false, App.DefaultDialogSettings);
+                    var controller = await this.ShowProgressAsync("Update Available", "Downloading...", false, DialogSettings.Default);
                     controller.SetIndeterminate();
 
                     try
@@ -321,14 +322,14 @@ namespace EEPK_Organiser
                     }
                     else
                     {
-                        await this.ShowMessageAsync("Update Failed", Update.DownloadFailedText, MessageDialogStyle.AffirmativeAndNegative, App.DefaultDialogSettings);
+                        await this.ShowMessageAsync("Update Failed", Update.DownloadFailedText, MessageDialogStyle.AffirmativeAndNegative, DialogSettings.Default);
                     }
 
                 }
             }
             else if (userInitiated)
             {
-                await this.ShowMessageAsync("Update", $"No update is available.", MessageDialogStyle.Affirmative, App.DefaultDialogSettings);
+                await this.ShowMessageAsync("Update", $"No update is available.", MessageDialogStyle.Affirmative, DialogSettings.Default);
             }
         }
 
@@ -515,7 +516,7 @@ namespace EEPK_Organiser
             {
                 if (MessageBox.Show(String.Format("This will associate the .eepk extension with EEPK Organiser and make that the default application for those files.\n\nPlease note that the association will be with \"{0}\" and if the executable is moved anywhere else you will have to re-associate it.", System.Reflection.Assembly.GetEntryAssembly().Location), "Associate Extension?", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 {
-                    FileAssociations.EnsureAssociationsSetForEepk();
+                    FileAssociations.EepkOrganiser_EnsureAssociationsSetForEepk();
                     MessageBox.Show(".eepk extension successfully associated!", "Associate Extension", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
@@ -532,7 +533,7 @@ namespace EEPK_Organiser
             {
                 if (MessageBox.Show(String.Format("This will associate the .vfxpackage extension with EEPK Organiser and make that the default application for those files.\n\nPlease note that the association will be with \"{0}\" and if the executable is moved anywhere else you will have to re-associate it.", System.Reflection.Assembly.GetEntryAssembly().Location), "Associate Extension?", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 {
-                    FileAssociations.EnsureAssociationsSetForVfxPackage();
+                    FileAssociations.EepkOrganiser_EnsureAssociationsSetForVfxPackage();
                     MessageBox.Show(".vfxpackage extension successfully associated!", "Associate Extension", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }

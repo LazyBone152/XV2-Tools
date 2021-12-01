@@ -1,24 +1,19 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using System.Collections.Specialized;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace AudioCueEditor.Utils
+namespace LB_Common.Utils
 {
-    public static class AttachedProperties
+    public static class DataGridBindingExt
     {
-        #region AttachedProperties.SelectedItems Attached Property
-        public static IList GetSelectedItems(ListBox obj)
+        #region DataGridBindingExt.SelectedItems Attached Property
+        public static IList GetSelectedItems(DataGrid obj)
         {
             return (IList)obj.GetValue(SelectedItemsProperty);
         }
 
-        public static void SetSelectedItems(ListBox obj, IList value)
+        public static void SetSelectedItems(DataGrid obj, IList value)
         {
             obj.SetValue(SelectedItemsProperty, value);
         }
@@ -28,7 +23,7 @@ namespace AudioCueEditor.Utils
                 DependencyProperty.RegisterAttached(
                     "SelectedItems",
                     typeof(IList),
-                    typeof(AttachedProperties),
+                    typeof(DataGridBindingExt),
                     new PropertyMetadata(null,
                         SelectedItems_PropertyChanged));
 
@@ -36,7 +31,7 @@ namespace AudioCueEditor.Utils
             DependencyObject d,
             DependencyPropertyChangedEventArgs e)
         {
-            var lb = d as ListBox;
+            var lb = d as DataGrid;
             IList coll = e.NewValue as IList;
 
             //  If you want to go both ways and have changes to 
@@ -74,22 +69,14 @@ namespace AudioCueEditor.Utils
 
                 lb.SelectionChanged += (s, e2) =>
                 {
-                    try
-                    {
-                        if (null != e2.RemovedItems)
-                            foreach (var item in e2.RemovedItems)
-                                coll.Remove(item);
-                        if (null != e2.AddedItems)
-                            foreach (var item in e2.AddedItems)
-                                coll.Add(item);
-                    }
-                    catch
-                    {
-
-                    }
+                    if (null != e2.RemovedItems)
+                        foreach (var item in e2.RemovedItems)
+                            coll.Remove(item);
+                    if (null != e2.AddedItems)
+                        foreach (var item in e2.AddedItems)
+                            coll.Add(item);
                 };
             }
-            
         }
         #endregion AttachedProperties.SelectedItems Attached Property
     }

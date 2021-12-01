@@ -544,6 +544,11 @@ namespace Xv2CoreLib.ACB_NEW
         /// <param name="fullRebuild">Determines if table indexes will be dynamicly re-linked upon saving, using the TableGuid/InstanceGuid linkage.\n\nRecommended: Disabled for XMLs, enabled for all other uses.</param>
         public void Save(string path, bool fullRebuild = true)
         {
+            if(Path.GetExtension(path) == ".acb")
+            {
+                path = string.Format("{0}/{1}", Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
+            }
+
             List<IUndoRedo> undos = null;
 
             //Clean tables up

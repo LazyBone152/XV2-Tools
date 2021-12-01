@@ -547,14 +547,15 @@ namespace Xv2CoreLib
                 {
                     moveFiles.AfterBacPath = String.Format("{0}/{1}/{1}_AFTER.bac", skillDir, folderName);
 
-                    if(loadSkillFiles)
+                    if (loadSkillFiles)
                         moveFiles.AfterBacFile = new Xv2File<BAC_File>((BAC_File)GetParsedFileFromGame(moveFiles.AfterBacPath), fileIO.PathInGameDir(moveFiles.AfterBacPath), false, null, false, MoveFileTypes.BAC);
                 }
                 else
                 {
-                    moveFiles.AfterBacPath = String.Format("skill/{0}/{1}.bac", cusEntry.AfterBacPath, Path.GetFileName(cusEntry.AfterBacPath));
+                    //moveFiles.AfterBacPath = String.Format("skill/{0}/{1}.bac", cusEntry.AfterBacPath, Path.GetFileName(cusEntry.AfterBacPath));
+                    moveFiles.AfterBacPath = String.Format("skill/{0}.bac", cusEntry.AfterBacPath);
 
-                    if(loadSkillFiles)
+                    if (loadSkillFiles)
                         moveFiles.AfterBacFile = new Xv2File<BAC_File>((BAC_File)GetParsedFileFromGame(moveFiles.AfterBacPath), fileIO.PathInGameDir(moveFiles.AfterBacPath), true, null, false, MoveFileTypes.BAC);
                 }
             }
@@ -571,9 +572,10 @@ namespace Xv2CoreLib
                 }
                 else
                 {
-                    moveFiles.AfterBcmPath = String.Format("skill/{0}/{1}.bcm", cusEntry.AfterBcmPath, Path.GetFileName(cusEntry.AfterBcmPath));
+                    //moveFiles.AfterBcmPath = String.Format("skill/{0}/{1}.bcm", cusEntry.AfterBcmPath, Path.GetFileName(cusEntry.AfterBcmPath));
+                    moveFiles.AfterBcmPath = String.Format("skill/{0}.bcm", cusEntry.AfterBcmPath);
 
-                    if(loadSkillFiles)
+                    if (loadSkillFiles)
                         moveFiles.AfterBcmFile = new Xv2File<BCM_File>((BCM_File)GetParsedFileFromGame(moveFiles.AfterBcmPath), fileIO.PathInGameDir(moveFiles.AfterBcmPath), true, null, false, MoveFileTypes.BCM);
                 }
             }
@@ -1923,18 +1925,22 @@ namespace Xv2CoreLib
                 }
             }
 
-            for (int i = 0; i < MovesetFiles.VoxAcbFile.Count; i++)
+            //VOX Eng
+            int uniqueEngVoxCount = 0;
+            foreach(var vox in MovesetFiles.VoxAcbFile.Where(x => x.IsEnglish && !x.Borrowed))
             {
-                //Number the ACB file if there are more than one
+                vox.Path = Xenoverse2.Instance.GetAbsolutePath(String.Format("sound/VOX/Battle/chara/en/CAR_BTL_{0}{1}_VOX.acb", CmsEntry.ShortName, (uniqueEngVoxCount > 0) ? uniqueEngVoxCount.ToString() : string.Empty));
 
-                if (!MovesetFiles.VoxAcbFile[i].Borrowed && MovesetFiles.VoxAcbFile[i].IsEnglish)
-                {
-                    MovesetFiles.VoxAcbFile[i].Path = Xenoverse2.Instance.GetAbsolutePath(String.Format("sound/VOX/Battle/chara/en/CAR_BTL_{0}{1}_VOX.acb", CmsEntry.ShortName, (i > 0) ? i.ToString() : string.Empty));
-                }
-                else if (!MovesetFiles.VoxAcbFile[i].Borrowed && !MovesetFiles.VoxAcbFile[i].IsEnglish)
-                {
-                    MovesetFiles.VoxAcbFile[i].Path = Xenoverse2.Instance.GetAbsolutePath(String.Format("sound/VOX/Battle/chara/CAR_BTL_{0}{1}_VOX.acb", CmsEntry.ShortName, (i > 0) ? i.ToString() : string.Empty));
-                }
+                uniqueEngVoxCount++;
+            }
+
+            //VOX Jpn
+            int uniqueJpnVoxCount = 0;
+            foreach (var vox in MovesetFiles.VoxAcbFile.Where(x => !x.IsEnglish && !x.Borrowed))
+            {
+                vox.Path = Xenoverse2.Instance.GetAbsolutePath(String.Format("sound/VOX/Battle/chara/CAR_BTL_{0}{1}_VOX.acb", CmsEntry.ShortName, (uniqueJpnVoxCount > 0) ? uniqueJpnVoxCount.ToString() : string.Empty));
+
+                uniqueJpnVoxCount++;
             }
 
             //EANs

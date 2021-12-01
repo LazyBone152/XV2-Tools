@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
 
-namespace EEPK_Organiser.Converters
+namespace LB_Common.Converters
 {
     public class NullToFalseConverter : IValueConverter
     {

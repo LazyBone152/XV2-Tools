@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace EEPK_Organiser.Utils
+namespace LB_Common
 {
     public class ZoomBorder : Border
     {
@@ -19,13 +15,13 @@ namespace EEPK_Organiser.Utils
         private TranslateTransform GetTranslateTransform(UIElement element)
         {
             return (TranslateTransform)((TransformGroup)element.RenderTransform)
-              .Children.First(tr => tr is TranslateTransform);
+                .Children.First(tr => tr is TranslateTransform);
         }
 
         private ScaleTransform GetScaleTransform(UIElement element)
         {
             return (ScaleTransform)((TransformGroup)element.RenderTransform)
-              .Children.First(tr => tr is ScaleTransform);
+                .Children.First(tr => tr is ScaleTransform);
         }
 
         public override UIElement Child
@@ -56,7 +52,7 @@ namespace EEPK_Organiser.Utils
                 this.MouseLeftButtonUp += child_MouseLeftButtonUp;
                 this.MouseMove += child_MouseMove;
                 this.PreviewMouseRightButtonDown += new MouseButtonEventHandler(
-                  child_PreviewMouseRightButtonDown);
+                    child_PreviewMouseRightButtonDown);
             }
         }
 
@@ -146,4 +142,5 @@ namespace EEPK_Organiser.Utils
 
         #endregion
     }
+
 }

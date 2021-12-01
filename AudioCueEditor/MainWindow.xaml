@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AudioCueEditor"
         xmlns:view="clr-namespace:AudioCueEditor.View"
-        xmlns:utils="clr-namespace:AudioCueEditor.Utils"
+        xmlns:utils="clr-namespace:LB_Common.Utils;assembly=LB_Common"
         xmlns:Themes1="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:acb="clr-namespace:Xv2CoreLib.ACB_NEW;assembly=Xv2CoreLib"

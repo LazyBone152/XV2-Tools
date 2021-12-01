@@ -208,16 +208,11 @@
     <Compile Include="Audio\LoopStream.cs" />
     <Compile Include="Audio\VGAudio.Cli\ConvertStream.cs" />
     <Compile Include="Audio\WavStream.cs" />
-    <Compile Include="Converters\VisibilityToNullableBoolean.cs" />
     <Compile Include="DialogSettings.cs" />
     <Compile Include="Forms\Settings.xaml.cs">
       <DependentUpon>Settings.xaml</DependentUpon>
     </Compile>
     <Compile Include="LB Mod Installer\Installer\InstallerXml.cs" />
-    <Compile Include="Utils\DataGridSelectedItemsBinding.cs" />
-    <Compile Include="Utils\DataGridSelectedItemsBinding2.cs" />
-    <Compile Include="Utils\FileAssociation.cs" />
-    <Compile Include="Utils\ListBoxSelectedItemsBinding.cs" />
     <Compile Include="Audio\VGAudio.Cli\AudioFormat.cs" />
     <Compile Include="Audio\VGAudio.Cli\Batch.cs" />
     <Compile Include="Audio\VGAudio.Cli\CliArguments.cs" />
@@ -677,10 +672,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Controls\" />
-    <Folder Include="Resources\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7">
       <Visible>False</Visible>
@@ -694,6 +686,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\LB_Common\LB_Common.csproj">
+      <Project>{513b1851-4576-45ec-8f8e-400a38b05502}</Project>
+      <Name>LB_Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Xv2CoreLib\Xv2CoreLib.csproj">
       <Project>{fdb88e51-0d73-47b9-a342-e574ec0ba583}</Project>
       <Name>Xv2CoreLib</Name>

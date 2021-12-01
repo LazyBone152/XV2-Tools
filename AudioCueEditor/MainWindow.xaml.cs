@@ -6,32 +6,21 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System.Media;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using Xv2CoreLib;
 using Xv2CoreLib.ACB_NEW;
 using MahApps.Metro.Controls.Dialogs;
 using xv2Utils = Xv2CoreLib.Utils;
 using Xv2CoreLib.Resource.UndoRedo;
 using MahApps.Metro;
-using AudioCueEditor.Utils;
 using Xv2CoreLib.AFS2;
 using VGAudio.Cli;
 using System.Runtime.ExceptionServices;
 using Xv2CoreLib.Resource.App;
 using AutoUpdater;
 using System.Diagnostics;
+using LB_Common.Utils;
 
 namespace AudioCueEditor
 {
@@ -386,7 +375,7 @@ namespace AudioCueEditor
         {
             if (MessageBox.Show(String.Format("This will associate the .acb extension with Audio Cue Editor and make that the default application for those files.\n\nPlease note that the association will be with \"{0}\" and if the executable is moved anywhere else you will have to re-associate it.", System.Reflection.Assembly.GetEntryAssembly().Location), "Associate Extension?", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
-                FileAssociations.EnsureAssociationsSetForAcb();
+                FileAssociations.ACE_EnsureAssociationsSetForAcb();
                 MessageBox.Show(".acb extension successfully associated!\n\nNote: If for some reason it did not work then you may need to go into the properties and change the default program manually.", "Associate Extension", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
@@ -396,7 +385,7 @@ namespace AudioCueEditor
         {
             if (MessageBox.Show(String.Format("This will associate the {1} extension with Audio Cue Editor and make that the default application for those files.\n\nPlease note that the association will be with \"{0}\" and if the executable is moved anywhere else you will have to re-associate it.", System.Reflection.Assembly.GetEntryAssembly().Location, ACB_File.MUSIC_PACKAGE_EXTENSION.ToLower()), "Associate Extension?", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
-                FileAssociations.EnsureAssociationsSetForAcb();
+                FileAssociations.ACE_EnsureAssociationsSetForAcb();
                 MessageBox.Show($"{ACB_File.MUSIC_PACKAGE_EXTENSION.ToLower()} extension successfully associated!\n\nNote: If for some reason it did not work then you may need to go into the properties and change the default program manually.", "Associate Extension", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }

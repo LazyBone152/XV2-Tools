@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using Microsoft.Win32;
 
-namespace EEPK_Organiser.Utils
+namespace LB_Common.Utils
 {
     public class FileAssociation
     {
@@ -21,7 +21,8 @@ namespace EEPK_Organiser.Utils
         private const int SHCNE_ASSOCCHANGED = 0x8000000;
         private const int SHCNF_FLUSH = 0x1000;
 
-        public static void EnsureAssociationsSetForEepk()
+        #region EepkOrg
+        public static void EepkOrganiser_EnsureAssociationsSetForEepk()
         {
             var filePath = Process.GetCurrentProcess().MainModule.FileName;
             EnsureAssociationsSet(
@@ -34,7 +35,7 @@ namespace EEPK_Organiser.Utils
                 });
         }
 
-        public static void EnsureAssociationsSetForVfxPackage()
+        public static void EepkOrganiser_EnsureAssociationsSetForVfxPackage()
         {
             var filePath = Process.GetCurrentProcess().MainModule.FileName;
             EnsureAssociationsSet(
@@ -46,7 +47,40 @@ namespace EEPK_Organiser.Utils
                     ExecutableFilePath = filePath
                 });
         }
+        #endregion
 
+        #region ACE
+        private const string MUSIC_PACKAGE_EXTENSION = ".musicpackage";
+
+        public static void ACE_EnsureAssociationsSetForAcb()
+        {
+            var filePath = Process.GetCurrentProcess().MainModule.FileName;
+            EnsureAssociationsSet(
+                new FileAssociation
+                {
+                    Extension = ".acb",
+                    ProgId = "ACB_File",
+                    FileTypeDescription = "CRIWARE ACB File",
+                    ExecutableFilePath = filePath
+                });
+        }
+
+        public static void ACE_EnsureAssociationsSetForMusicPackage()
+        {
+            var filePath = Process.GetCurrentProcess().MainModule.FileName;
+            EnsureAssociationsSet(
+                new FileAssociation
+                {
+                    Extension = MUSIC_PACKAGE_EXTENSION,
+                    ProgId = "MusicPackage",
+                    FileTypeDescription = "Installable XV2 MusicPackage",
+                    ExecutableFilePath = filePath
+                });
+        }
+
+        #endregion
+
+        #region TheMainStuff
         public static void EnsureAssociationsSet(params FileAssociation[] associations)
         {
             bool madeChanges = false;
@@ -87,5 +121,7 @@ namespace EEPK_Organiser.Utils
 
             return false;
         }
+
+        #endregion
     }
 }

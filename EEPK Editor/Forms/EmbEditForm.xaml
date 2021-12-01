@@ -3,10 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:utils="clr-namespace:EEPK_Organiser.Utils"
         xmlns:Themes1="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:undoRedo="clr-namespace:Xv2CoreLib.Resource.UndoRedo;assembly=Xv2CoreLib"
+        xmlns:lbCommon="clr-namespace:LB_Common;assembly=LB_Common"
         mc:Ignorable="d"
         Title="Texture Viewer" Height="580" Width="650" ResizeMode="CanMinimize" WindowStartupLocation="CenterOwner" WindowStyle="ThreeDBorderWindow">
     <Window.InputBindings>
@@ -125,9 +125,9 @@
                     <Grid.Background>
                         <ImageBrush x:Name="grid" ImageSource="{StaticResource gridlines}" Stretch="UniformToFill" Opacity="0.0"/>
                     </Grid.Background>
-                    <utils:ZoomBorder x:Name="border" ClipToBounds="True" Background="Transparent">
+                    <lbCommon:ZoomBorder x:Name="border" ClipToBounds="True" Background="Transparent">
                         <Image x:Name="image_Preview" Source="{Binding SelectedItem.DdsImage,ElementName=listBox_Textures}" Stretch="Uniform"/>
-                    </utils:ZoomBorder>
+                    </lbCommon:ZoomBorder>
 
                 </Grid>
             </Grid>

@@ -48,7 +48,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;UndoRedo, NvvmLight</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;UndoRedo, NvvmLight, EepkOrg</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <LangVersion>7.1</LangVersion>
@@ -58,7 +58,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;UndoRedo, NvvmLight</DefineConstants>
+    <DefineConstants>TRACE;UndoRedo, NvvmLight, EepkOrg</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <LangVersion>7.1</LangVersion>
@@ -160,12 +160,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="..\Xv2CoreLib\Resource\WriteableBitmapExtensions.cs">
-      <Link>Utils\WriteableBitmapExtensions.cs</Link>
-    </Compile>
-    <Compile Include="Converters\ColorFormatConverter.cs" />
-    <Compile Include="Converters\FloatConverter.cs" />
-    <Compile Include="Converters\NullToFalseConverter.cs" />
     <Compile Include="DialogSettings.cs" />
     <Compile Include="Extensions\EMB\Extensions.cs" />
     <Compile Include="Forms\EffectSelector.xaml.cs">
@@ -205,15 +199,8 @@
     <Compile Include="Misc\InputValidation.cs" />
     <Compile Include="Name\Namelist.cs" />
     <Compile Include="Name\NameListManager.cs" />
-    <Compile Include="Utils\BindingProxy.cs" />
     <Compile Include="Utils\CacheManager.cs" />
-    <Compile Include="Utils\DataGridSelectedItemsBinding.cs" />
-    <Compile Include="Utils\DataGridSelectedItemsBinding2.cs" />
     <Compile Include="Misc\LoadFromGameHelper.cs" />
-    <Compile Include="Utils\FileAssociation.cs" />
-    <Compile Include="Utils\LeftClickContextMenu.cs" />
-    <Compile Include="Utils\ListBoxSelectedItemsBinding.cs" />
-    <Compile Include="Controls\ZoomBorder.cs" />
     <Compile Include="ViewModel\EffectPartViewModel.cs" />
     <Compile Include="View\EepkEditor.xaml.cs">
       <DependentUpon>EepkEditor.xaml</DependentUpon>
@@ -294,7 +281,6 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Converters\VisibilityToNullableBoolean.cs" />
     <Compile Include="Forms\AssetSelector.xaml.cs">
       <DependentUpon>AssetSelector.xaml</DependentUpon>
     </Compile>
@@ -367,6 +353,10 @@
     <Resource Include="Resources\icons8-undo-24.png" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\LB_Common\LB_Common.csproj">
+      <Project>{513b1851-4576-45ec-8f8e-400a38b05502}</Project>
+      <Name>LB_Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Xv2CoreLib\Xv2CoreLib.csproj">
       <Project>{fdb88e51-0d73-47b9-a342-e574ec0ba583}</Project>
       <Name>Xv2CoreLib</Name>

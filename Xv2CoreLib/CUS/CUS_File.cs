@@ -249,7 +249,7 @@ namespace Xv2CoreLib.CUS
                 case SkillType.Blast:
                     return ID2 + 20000;
                 case SkillType.Awoken:
-                    return ID2 = 25000;
+                    return ID2 + 25000;
                 case SkillType.Super:
                 default:
                     return ID2;

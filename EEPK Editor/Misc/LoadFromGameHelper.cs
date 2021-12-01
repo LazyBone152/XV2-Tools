@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xv2CoreLib.CMS;
 using Xv2CoreLib.CUS;
 using Xv2CoreLib.MSG;
 using Xv2CoreLib.ERS;
-using Xv2CoreLib.Resource;
 using System.Collections.ObjectModel;
 using System.IO;
 using Xv2CoreLib;
