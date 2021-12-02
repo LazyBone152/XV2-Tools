@@ -1161,7 +1161,7 @@ namespace Xv2CoreLib.ACB_NEW
             waveform.AwbId = newAwbId;
             waveform.Streaming = streaming;
             waveform.StreamAwbPortNo = newStreamAwbPortNo;
-            waveform.EncodeType = EncodeType.HCA;
+            waveform.EncodeType = encodeType;
             waveform.LoopFlag = Convert.ToByte(hasLoop);
             waveform.LoopStart = loopStart;
             waveform.LoopEnd = loopEnd;

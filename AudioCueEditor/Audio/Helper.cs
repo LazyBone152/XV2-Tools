@@ -29,6 +29,7 @@ namespace AudioCueEditor.Audio
                 case ".hca":
                     return ConvertFile(File.ReadAllBytes(path), FileType.Hca, convertToType, loop);
                 case ".adx":
+                    if (convertToType == FileType.Adx) return File.ReadAllBytes(path);
                     return ConvertFile(File.ReadAllBytes(path), FileType.Adx, convertToType, loop);
                 case ".at9":
                     return ConvertFile(File.ReadAllBytes(path), FileType.Atrac9, convertToType, loop);

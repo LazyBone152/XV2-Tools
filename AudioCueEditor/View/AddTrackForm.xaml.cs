@@ -178,11 +178,14 @@ namespace AudioCueEditor.View
         {
             OpenFileDialog openFile = new OpenFileDialog();
             openFile.Title = "Select audio file...";
-            openFile.Filter = "Audio files | *.hca; *.wav; *.mp3; *.wma; *.aac";
+            openFile.Filter = "Audio files | *.hca; *.adx; *.wav; *.mp3; *.wma; *.aac";
             
             if(openFile.ShowDialog(this) == true)
             {
                 AudioFilePath = openFile.FileName;
+
+                if (System.IO.Path.GetExtension(openFile.FileName) == ".adx")
+                    EncodeType = EncodeType.ADX;
             }
         }
 
