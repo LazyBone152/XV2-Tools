@@ -1,14 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Media;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Media;
 using System.Windows.Threading;
 using NAudio.Wave;
-using NAudio.Wave.SampleProviders;
 
 namespace AudioCueEditor.Audio
 {

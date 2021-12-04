@@ -3,32 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using Xv2CoreLib.CST;
 using YAXLib;
 
 namespace Xv2CoreLib.Eternity
 {
-    [Flags]
-    public enum CstDlcVer
-    {
-        DLC_Def = 1,
-        DLC_Gkb = 2,
-        DLC_1 = 4,
-        DLC_2 = 8,
-        DLC_3 = 16,
-        DLC_4 = 32,
-        DLC_5 = 64,
-        DLC_6 = 128,
-        DLC_7 = 256,
-        DLC_8 = 512,
-        DLC_9 = 1024,
-        DLC_10 = 2048,
-        Ver_Day1 = 4096,
-        Ver_TU4 = 65536,
-        UD7 = 524288,
-        PRB = 0x10000000,
-        EL0 = 0x20000000
-    }
 
     public class CharaSlotsFile
     {
@@ -174,10 +153,9 @@ namespace Xv2CoreLib.Eternity
             return null;
         }
 
-        /// <returns> Bool indicating if the installation successfull. If it is false, then there was an ID conflict. </returns>
-        public bool InstallEntries(List<CharaSlot> installSlots, List<string> installIDs)
+        public void InstallEntries(List<CharaSlot> installSlots, List<string> installIDs)
         {
-            if (installSlots == null) return true;
+            if (installSlots == null) return;
 
             foreach(var installSlot in installSlots)
             {
@@ -191,32 +169,46 @@ namespace Xv2CoreLib.Eternity
 
                 foreach(var installCostume in installSlot.CostumeSlots)
                 {
-                    if (!SlotExists(installCostume.InstallID))
+                    int slotIdx = charaSlot.IndexOfSlot(installCostume.InstallID);
+
+                    if (slotIdx == -1)
                     {
+                        //Costume slot doesn't exist
                         installIDs.Add(installCostume.InstallID);
                         charaSlot.CostumeSlots.Add(installCostume);
                     }
                     else
                     {
-                        return false;
+                        //Costume slot already exists
+                        installIDs.Add(installCostume.InstallID);
+                        charaSlot.CostumeSlots[slotIdx] = installCostume;
                     }
                 }
 
             }
-
-            return true;
         }
 
-        public void UninstallEntries(List<string> installIDs)
+        public void UninstallEntries(List<string> installIDs, CST_File cstFile)
         {
             foreach(var charaSlot in CharaSlots)
             {
                 for (int i = charaSlot.CostumeSlots.Count - 1; i >= 0; i--)
                 {
+                    var existing = cstFile.GetEntry(charaSlot.CostumeSlots[i].InstallID);
+
+
                     if (installIDs.Contains(charaSlot.CostumeSlots[i].InstallID))
                     {
-                        charaSlot.CostumeSlots.RemoveAt(i);
-                        continue;
+                        if (existing != null)
+                        {
+                            //Restore default entry from the CST
+                            charaSlot.CostumeSlots[i] = existing;
+                        }
+                        else
+                        {
+                            charaSlot.CostumeSlots.RemoveAt(i);
+                            continue;
+                        }
                     }
                 }
             }
@@ -251,6 +243,8 @@ namespace Xv2CoreLib.Eternity
 
             return false;
         }
+        
+
     }
 
     public class CharaSlot
@@ -262,6 +256,11 @@ namespace Xv2CoreLib.Eternity
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "CharaCostumeSlot")]
         [BindingSubList]
         public List<CharaCostumeSlot> CostumeSlots { get; set; } = new List<CharaCostumeSlot>();
+
+        public int IndexOfSlot(string installID)
+        {
+            return CostumeSlots.IndexOf(CostumeSlots.FirstOrDefault(x => x.InstallID == installID));
+        }
     }
 
     public class CharaCostumeSlot

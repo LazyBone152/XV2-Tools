@@ -1,5 +1,4 @@
-﻿using NAudio;
-using NAudio.Wave;
+﻿using NAudio.Wave;
 using System.IO;
 
 namespace AudioCueEditor.Audio

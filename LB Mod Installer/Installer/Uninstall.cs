@@ -38,6 +38,7 @@ using Xv2CoreLib.SEV;
 using Xv2CoreLib.HCI;
 using Xv2CoreLib.CML;
 using Xv2CoreLib.Eternity;
+using Xv2CoreLib.CST;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -1027,13 +1028,15 @@ namespace LB_Mod_Installer.Installer
             try
             {
                 CharaSlotsFile charaSlotsFile = (CharaSlotsFile)GetParsedFile<CharaSlotsFile>(CharaSlotsFile.FILE_NAME_BIN, false, false);
+                CST_File cstFile = (CST_File)GetParsedFile<CST_File>(CST_File.CST_PATH, true, true);
+
                 if (charaSlotsFile == null) return;
 
                 Section section = file.GetSection(Sections.CharaSlotEntry);
 
                 if (section != null)
                 {
-                    charaSlotsFile.UninstallEntries(section.IDs);
+                    charaSlotsFile.UninstallEntries(section.IDs, cstFile);
                 }
 
             }

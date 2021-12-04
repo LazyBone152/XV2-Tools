@@ -27,10 +27,11 @@
 
     </UserControl.Resources>
     <Grid x:Name="rootGrid">
-        <Controls:MetroTabControl x:Name="tabControl" SelectionChanged="TabControl_SelectionChanged">
+        
+        <Controls:MetroTabControl x:Name="tabControl" SelectionChanged="TabControl_SelectionChanged" Controls:TabControlHelper.IsUnderlined="True" IsEnabled="{Binding IsFileLoaded}" Margin="0, 4">
 
 
-            <Controls:MetroTabItem Header="EFFECT" Controls:ControlsHelper.HeaderFontSize="20">
+            <Controls:MetroTabItem Header="EFFECT" Controls:ControlsHelper.HeaderFontSize="14">
                 <Grid Background="Transparent">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="60"/>
@@ -111,7 +112,7 @@
                         <DataGrid.RowDetailsTemplate>
                             <DataTemplate>
                                 <ListBox Tag="{Binding DataContext, ElementName=rootGrid}" BorderBrush="{DynamicResource AccentColorBrush2}" PreviewMouseWheel="ListBox_PreviewMouseWheel" BorderThickness="1" SelectionChanged="effectPart_SelectionChanged" MouseDoubleClick="EffectPart_DoubleClick" MouseLeftButtonUp="ListBox_MouseLeftButtonUp" MouseRightButtonUp="ListBox_MouseRightButtonUp" VirtualizingPanel.ScrollUnit="Pixel" ItemsSource="{Binding EffectParts.Binding}" SelectionMode="Extended" SelectedItem="{Binding SelectedEffectPart, UpdateSourceTrigger=PropertyChanged}" lbUtils:AttachedProperties.SelectedItems="{Binding SelectedEffectParts}">
-                                    
+
 
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
@@ -208,7 +209,7 @@
                                                 <Label Content="Deactivation"/>
                                                 <ComboBox Grid.Column="1" SelectedItem="{Binding effectPartViewModel.Deactivation, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={StaticResource ResourceKey=DeactivationModeEnum}}"/>
                                             </Grid>
-                                            
+
                                             <Grid Margin="3,3,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
@@ -225,7 +226,7 @@
                                                 <Label Content="Attach Bone"/>
                                                 <ComboBox Grid.Column="1" IsEditable="True" Text="{Binding effectPartViewModel.ESK, UpdateSourceTrigger=LostFocus}" ItemsSource="{x:Static eepk:EffectPart.CommonBones}"/>
                                             </Grid>
-                                            
+
                                         </WrapPanel>
 
                                         <WrapPanel>
@@ -335,7 +336,7 @@
                                             <Label Grid.Column="5" Content="Z" HorizontalContentAlignment="Right"/>
                                             <Controls:NumericUpDown Grid.Column="6" Value="{Binding effectPartViewModel.F_72, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
                                         </Grid>
-                                        
+
                                     </WrapPanel>
                                 </Expander>
                                 <Expander x:Name="effectPartAnimation" Header="EMA Animation" Expanded="effectPartTabs_ExpandedOrCollapsed" Collapsed="effectPartTabs_ExpandedOrCollapsed">
@@ -548,7 +549,7 @@
                 </Grid>
             </Controls:MetroTabItem>
 
-            <Controls:MetroTabItem Header="PBIND" Controls:ControlsHelper.HeaderFontSize="20">
+            <Controls:MetroTabItem Header="PBIND" Controls:ControlsHelper.HeaderFontSize="14">
                 <Grid Background="Transparent">
 
                     <DataGrid MouseDoubleClick="PBIND_MouseDoubleClick" PreviewKeyDown="PbindDataGrid_Hotkeys_PreviewKeyDown" SelectionMode="Extended" x:Name="pbindDataGrid" RowDetailsVisibilityMode="Collapsed" ItemsSource="{Binding effectContainerFile.Pbind.ViewAssets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False">
@@ -629,7 +630,7 @@
 
                 </Grid>
             </Controls:MetroTabItem>
-            <Controls:MetroTabItem Header="TBIND" Controls:ControlsHelper.HeaderFontSize="20">
+            <Controls:MetroTabItem Header="TBIND" Controls:ControlsHelper.HeaderFontSize="14">
                 <Grid Background="Transparent">
 
                     <DataGrid PreviewKeyDown="TbindDataGrid_Hotkeys_PreviewKeyDown" SelectionMode="Extended" x:Name="tbindDataGrid" RowDetailsVisibilityMode="Collapsed" ItemsSource="{Binding effectContainerFile.Tbind.ViewAssets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False">
@@ -706,7 +707,7 @@
 
                 </Grid>
             </Controls:MetroTabItem>
-            <Controls:MetroTabItem Header="CBIND" Controls:ControlsHelper.HeaderFontSize="20">
+            <Controls:MetroTabItem Header="CBIND" Controls:ControlsHelper.HeaderFontSize="14">
                 <Grid Background="Transparent">
 
                     <DataGrid PreviewKeyDown="CbindDataGrid_Hotkeys_PreviewKeyDown" SelectionMode="Extended" x:Name="cbindDataGrid" RowDetailsVisibilityMode="Collapsed" ItemsSource="{Binding effectContainerFile.Cbind.ViewAssets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False">
@@ -783,7 +784,7 @@
 
                 </Grid>
             </Controls:MetroTabItem>
-            <Controls:MetroTabItem Header="EMO" Controls:ControlsHelper.HeaderFontSize="20">
+            <Controls:MetroTabItem Header="EMO" Controls:ControlsHelper.HeaderFontSize="14">
                 <Grid Background="Transparent">
 
                     <DataGrid PreviewKeyDown="EmoDataGrid_Hotkeys_PreviewKeyDown" SelectionMode="Extended" x:Name="emoDataGrid" RowDetailsVisibilityMode="VisibleWhenSelected" ItemsSource="{Binding effectContainerFile.Emo.ViewAssets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False">
@@ -924,7 +925,7 @@
                 </Grid>
             </Controls:MetroTabItem>
 
-            <Controls:MetroTabItem Header="LIGHT" Controls:ControlsHelper.HeaderFontSize="20">
+            <Controls:MetroTabItem Header="LIGHT" Controls:ControlsHelper.HeaderFontSize="14">
                 <Grid Background="Transparent">
 
                     <DataGrid PreviewKeyDown="LightEmaDataGrid_Hotkeys_PreviewKeyDown" SelectionMode="Extended" x:Name="lightDataGrid" RowDetailsVisibilityMode="Collapsed" ItemsSource="{Binding effectContainerFile.LightEma.ViewAssets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False">
@@ -1003,9 +1004,26 @@
 
 
         </Controls:MetroTabControl>
-        <Button Click="Search_Click" Content="Search..." HorizontalAlignment="Right" Margin="0,0,86,0" VerticalAlignment="Top" Width="70" Height="21"/>
-        <TextBox KeyDown="Search_KeyDown" VerticalContentAlignment="Center" HorizontalAlignment="Right" Height="23" Margin="0,0,161,0" TextWrapping="Wrap" Text="{Binding SearchFilter, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top" Width="199"/>
-        <Button Click="Search_Clear" Content="Clear" HorizontalAlignment="Right" Margin="0,0,10,0" VerticalAlignment="Top" Width="70" Height="21"/>
 
+        <Grid HorizontalAlignment="Right" VerticalAlignment="Top" Width="216" Margin="0,0,10,0" IsEnabled="{Binding IsFileLoaded}">
+
+            <!-- Tool menu for when embedded on XenoKit  -->
+            <Button x:Name="toolButton" lbUtils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True" HorizontalAlignment="Right" VerticalAlignment="Top" Width="25" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Height="25" Margin="0,0,181,0">
+                <iconPacks:PackIconModern Kind="Tools" />
+                <Button.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Hue Adjustment" Click="ToolMenu_HueAdjustment_Click"/>
+                        <MenuItem Header="Hue Set" Click="ToolMenu_HueSet_Click"/>
+                    </ContextMenu>
+                </Button.ContextMenu>
+
+            </Button>
+
+            <TextBox TextChanged="TextBox_TextChanged" VerticalContentAlignment="Center" HorizontalAlignment="Right" Height="23" Margin="0,0,0,0" TextWrapping="Wrap" Text="{Binding SearchFilter, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top" Width="176" Controls:TextBoxHelper.Watermark="Search..." Controls:TextBoxHelper.ButtonCommand="{Binding ClearSearchCommand}" Controls:TextBoxHelper.ClearTextButton="True">
+                <TextBox.InputBindings>
+                    <KeyBinding Key="Return" Command="{Binding SearchCommand}"/>
+                </TextBox.InputBindings>
+            </TextBox>
+        </Grid>
     </Grid>
 </UserControl>

@@ -6,7 +6,7 @@ using VGAudio.Formats;
 
 namespace VGAudio.Cli
 {
-    internal class ConvertStream
+    public class ConvertStream
     {
         private ConvertStream() { }
         private AudioData Audio { get; set; }

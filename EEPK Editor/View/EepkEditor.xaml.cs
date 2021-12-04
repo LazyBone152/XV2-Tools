@@ -65,8 +65,25 @@ namespace EEPK_Organiser.View
             Light = 5
         }
 
+
+        #region DependencyProperty
         public static readonly DependencyProperty EepkInstanceProperty = DependencyProperty.Register(
-            nameof(effectContainerFile), typeof(EffectContainerFile), typeof(EepkEditor), new PropertyMetadata(default(EffectContainerFile)));
+            nameof(effectContainerFile), typeof(EffectContainerFile), typeof(EepkEditor), new PropertyMetadata(OnEepkChanged));
+
+        private static DependencyPropertyChangedEventHandler EepkChanged;
+
+        private static void OnEepkChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (EepkChanged != null)
+                EepkChanged.Invoke(sender, e);
+        }
+
+        private void EepkInstanceChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            NotifyPropertyChanged(nameof(effectContainerFile));
+            NotifyPropertyChanged(nameof(IsFileLoaded));
+        }
+        #endregion
 
         public EffectContainerFile effectContainerFile
         {
@@ -78,6 +95,7 @@ namespace EEPK_Organiser.View
                 NotifyPropertyChanged(nameof(effectContainerFile));
             }
         }
+        public bool IsFileLoaded { get { return effectContainerFile != null; } }
 
         //ViewModel
         private EffectPartViewModel _effectPartViewModel = null;
@@ -178,6 +196,21 @@ namespace EEPK_Organiser.View
             effectPartUnkFlags.IsExpanded = SettingsManager.settings.EepkOrganiser_EffectPart_UnkFlags_Expanded;
             effectPartUnkValues.IsExpanded = SettingsManager.settings.EepkOrganiser_EffectPart_UnkValues_Expanded;
             effectPartTabInitialize = true;
+
+            EepkChanged += EepkInstanceChanged;
+            UndoManager.Instance.UndoOrRedoCalled += UndoManager_UndoOrRedoCalled;
+#if XenoKit
+            toolButton.Visibility = Visibility.Visible;
+#else
+            toolButton.Visibility = Visibility.Hidden;
+#endif
+        }
+
+        private void UndoManager_UndoOrRedoCalled(object sender, EventArgs e)
+        {
+            if (effectContainerFile == null) return;
+
+            emoDataGrid.Items.Refresh();
         }
 
         public void SaveExceptionLog(string ex)
@@ -190,8 +223,6 @@ namespace EEPK_Organiser.View
             {
             }
         }
-
-
 
         //Loading
         public async Task<EffectContainerFile> LoadEffectContainerFile(bool cacheFile = true)
@@ -341,7 +372,7 @@ namespace EEPK_Organiser.View
             e.Handled = true;
         }
 
-        #region EMO
+#region EMO
         private void EMO_AssetContainer_Merge_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -380,31 +411,38 @@ namespace EEPK_Organiser.View
 
                     if (File.Exists(openFile.FileName) && !String.IsNullOrWhiteSpace(openFile.FileName))
                     {
-                        string originalName = System.IO.Path.GetFileName(openFile.FileName);
+                        string originalName = Path.GetFileName(openFile.FileName);
                         byte[] bytes = File.ReadAllBytes(openFile.FileName);
                         string newName = effectContainerFile.Emo.GetUnusedName(originalName); //To prevent duplicates
+
+                        List<IUndoRedo> undos = new List<IUndoRedo>();
 
                         switch (EffectFile.GetExtension(openFile.FileName))
                         {
                             case ".emm":
-                                asset.AddFile(EMM_File.LoadEmm(bytes), newName, EffectFile.FileType.EMM);
+                                asset.AddFile(EMM_File.LoadEmm(bytes), newName, EffectFile.FileType.EMM, undos);
                                 break;
                             case ".emb":
-                                asset.AddFile(EMB_File.LoadEmb(bytes), newName, EffectFile.FileType.EMB);
+                                asset.AddFile(EMB_File.LoadEmb(bytes), newName, EffectFile.FileType.EMB, undos);
                                 break;
                             case ".light.ema":
-                                asset.AddFile(EMA_File.Load(bytes), newName, EffectFile.FileType.EMA);
+                                asset.AddFile(EMA_File.Load(bytes), newName, EffectFile.FileType.EMA, undos);
                                 break;
                             default:
-                                asset.AddFile(bytes, newName, EffectFile.FileType.Other);
+                                asset.AddFile(bytes, newName, EffectFile.FileType.Other, undos);
                                 break;
                         }
+
+                        UndoManager.Instance.AddCompositeUndo(undos, "Add File (EMO)");
 
                         if (newName != originalName)
                         {
                             MessageBox.Show(String.Format("The added file was renamed to \"{0}\" because \"{1}\" was already used.", newName, originalName), "Add File", MessageBoxButton.OK, MessageBoxImage.Information);
                         }
 
+                        emoDataGrid.Items.Refresh();
+                        emoDataGrid.SelectedItem = asset;
+                        emoDataGrid.ScrollIntoView(asset);
                     }
 
                 }
@@ -511,6 +549,10 @@ namespace EEPK_Organiser.View
                         {
                             parentAsset.RefreshNamePreview();
                         }
+
+                        emoDataGrid.Items.Refresh();
+                        emoDataGrid.SelectedItem = parentAsset;
+                        emoDataGrid.ScrollIntoView(parentAsset);
                     }
                 }
 
@@ -544,26 +586,34 @@ namespace EEPK_Organiser.View
 
                         if (File.Exists(openFile.FileName) && !String.IsNullOrWhiteSpace(openFile.FileName))
                         {
-                            if (System.IO.Path.GetExtension(openFile.FileName) != selectedFile.Extension)
+                            if (Path.GetExtension(openFile.FileName) != selectedFile.Extension)
                             {
                                 MessageBox.Show(String.Format("The file type of the selected external file ({0}) does not match that of {1}.", openFile.FileName, selectedFile.FullFileName), "Replace", MessageBoxButton.OK, MessageBoxImage.Error);
                                 return;
                             }
 
-                            string originalNewFileName = System.IO.Path.GetFileName(openFile.FileName);
+                            string originalNewFileName = Path.GetFileName(openFile.FileName);
                             byte[] bytes = File.ReadAllBytes(openFile.FileName);
                             string newFileName = effectContainerFile.Emo.GetUnusedName(originalNewFileName); //To prevent duplicates
+
+                            object oldFile;
 
                             switch (selectedFile.fileType)
                             {
                                 case EffectFile.FileType.EMM:
+                                    oldFile = selectedFile.EmmFile;
                                     selectedFile.EmmFile = EMM_File.LoadEmm(bytes);
+                                    UndoManager.Instance.AddUndo(new UndoableProperty<EffectFile>(nameof(EffectFile.EmmFile), selectedFile, oldFile, selectedFile.EmmFile, "Replace File (EMO)"));
                                     break;
                                 case EffectFile.FileType.EMB:
+                                    oldFile = selectedFile.EmbFile;
                                     selectedFile.EmbFile = EMB_File.LoadEmb(bytes);
+                                    UndoManager.Instance.AddUndo(new UndoableProperty<EffectFile>(nameof(EffectFile.EmbFile), selectedFile, oldFile, selectedFile.EmbFile, "Replace File (EMO)"));
                                     break;
                                 default:
+                                    oldFile = selectedFile.Bytes;
                                     selectedFile.Bytes = bytes;
+                                    UndoManager.Instance.AddUndo(new UndoableProperty<EffectFile>(nameof(EffectFile.Bytes), selectedFile, oldFile, selectedFile.Bytes, "Replace File (EMO)"));
                                     break;
                             }
 
@@ -576,6 +626,11 @@ namespace EEPK_Organiser.View
                                     MessageBox.Show(String.Format("The added file was renamed to \"{0}\" because \"{1}\" was already used.", newFileName, originalNewFileName), "Add File", MessageBoxButton.OK, MessageBoxImage.Information);
                                 }
                             }
+
+                            var selectedItem = emoDataGrid.SelectedItem;
+                            emoDataGrid.Items.Refresh();
+                            emoDataGrid.SelectedItem = selectedItem;
+                            emoDataGrid.ScrollIntoView(selectedItem);
                         }
                     }
                 }
@@ -605,16 +660,24 @@ namespace EEPK_Organiser.View
                     {
                         var parentAsset = effectContainerFile.Emo.GetAssetByFileInstance(selectedFile);
 
+                        List<IUndoRedo> undos = new List<IUndoRedo>();
+
                         if (parentAsset != null)
                         {
                             if (parentAsset.Files.Count > 1)
                             {
-                                parentAsset.RemoveFile(selectedFile);
+                                parentAsset.RemoveFile(selectedFile, undos);
                             }
                             else
                             {
                                 MessageBox.Show(String.Format("Cannot delete the last file."), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                             }
+
+                            UndoManager.Instance.AddCompositeUndo(undos, "Delete File (EMO)");
+
+                            emoDataGrid.Items.Refresh();
+                            emoDataGrid.SelectedItem = parentAsset;
+                            emoDataGrid.ScrollIntoView(parentAsset);
                         }
                         else
                         {
@@ -855,6 +918,8 @@ namespace EEPK_Organiser.View
                     effectContainerFile.Emo.RefreshAssetCount();
                     emoDataGrid.SelectedItem = asset;
                     emoDataGrid.ScrollIntoView(asset);
+
+                    UndoManager.Instance.AddUndo(new UndoableListAdd<Asset>(effectContainerFile.Emo.Assets, asset, "Add EMO"));
                 }
 
             }
@@ -999,9 +1064,9 @@ namespace EEPK_Organiser.View
 
         }
 
-        #endregion
+#endregion
 
-        #region PBIND
+#region PBIND
         public void PBIND_AssetContainer_AddAsset_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -1463,9 +1528,9 @@ namespace EEPK_Organiser.View
             }
         }
 
-        #endregion
+#endregion
 
-        #region TBIND
+#region TBIND
         public void TBIND_AssetContainer_AddAsset_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -1855,9 +1920,9 @@ namespace EEPK_Organiser.View
 #endif
         }
 
-        #endregion
+#endregion
 
-        #region CBIND
+#region CBIND
         public void CBIND_AssetContainer_AddAsset_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -2243,9 +2308,9 @@ namespace EEPK_Organiser.View
 #endif
 
         }
-        #endregion
+#endregion
 
-        #region LIGHT
+#region LIGHT
         public void LIGHT_AssetContainer_AddAsset_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -2634,9 +2699,9 @@ namespace EEPK_Organiser.View
 #endif
 
         }
-        #endregion
+#endregion
 
-        #region Asset_Containers_General
+#region Asset_Containers_General
         private async Task AssetContainer_ImportAssets(AssetContainerTool container, AssetType type, EffectContainerFile importFile = null)
         {
             if (importFile == null)
@@ -3021,10 +3086,10 @@ namespace EEPK_Organiser.View
             effectContainerFile.LightEma.RefreshAssetCount();
         }
 
-        #endregion
+#endregion
 
 
-        #region EFFECT
+#region EFFECT
         private void Effect_EffectIdChange_ValueChanged(object sender, DataGridCellEditEndingEventArgs e)
         {
             if ((string)e.Column.Header == "Name")
@@ -3893,7 +3958,7 @@ namespace EEPK_Organiser.View
         {
             return (IsEffectPartSelected()) ? Clipboard.ContainsData(ClipboardDataTypes.EffectPart) : false;
         }
-        #endregion
+#endregion
 
 
 
@@ -4034,40 +4099,8 @@ namespace EEPK_Organiser.View
         }
 
         //Filtering
-        private void Search_Click(object sender, RoutedEventArgs e)
-        {
-            if (effectContainerFile == null) return;
-
-            switch ((Tabs)tabControl.SelectedIndex)
-            {
-                case Tabs.Effect:
-                    effectContainerFile.NewEffectFilter(SearchFilter);
-                    effectContainerFile.UpdateEffectFilter();
-                    break;
-                case Tabs.Pbind:
-                    effectContainerFile.Pbind.NewAssetFilter(SearchFilter);
-                    effectContainerFile.Pbind.UpdateAssetFilter();
-                    break;
-                case Tabs.Tbind:
-                    effectContainerFile.Tbind.NewAssetFilter(SearchFilter);
-                    effectContainerFile.Tbind.UpdateAssetFilter();
-                    break;
-                case Tabs.Cbind:
-                    effectContainerFile.Cbind.NewAssetFilter(SearchFilter);
-                    effectContainerFile.Cbind.UpdateAssetFilter();
-                    break;
-                case Tabs.Emo:
-                    effectContainerFile.Emo.NewAssetFilter(SearchFilter);
-                    effectContainerFile.Emo.UpdateAssetFilter();
-                    break;
-                case Tabs.Light:
-                    effectContainerFile.LightEma.NewAssetFilter(SearchFilter);
-                    effectContainerFile.LightEma.UpdateAssetFilter();
-                    break;
-            }
-        }
-
-        private void Search_Clear(object sender, RoutedEventArgs e)
+        public RelayCommand ClearSearchCommand => new RelayCommand(ClearSearch);
+        private void ClearSearch()
         {
             if (effectContainerFile == null) return;
 
@@ -4100,9 +4133,47 @@ namespace EEPK_Organiser.View
                     effectContainerFile.LightEma.UpdateAssetFilter();
                     break;
             }
-
         }
 
+        public RelayCommand SearchCommand => new RelayCommand(Search);
+        private void Search()
+        {
+            if (effectContainerFile == null) return;
+
+            switch ((Tabs)tabControl.SelectedIndex)
+            {
+                case Tabs.Effect:
+                    effectContainerFile.NewEffectFilter(SearchFilter);
+                    effectContainerFile.UpdateEffectFilter();
+                    break;
+                case Tabs.Pbind:
+                    effectContainerFile.Pbind.NewAssetFilter(SearchFilter);
+                    effectContainerFile.Pbind.UpdateAssetFilter();
+                    break;
+                case Tabs.Tbind:
+                    effectContainerFile.Tbind.NewAssetFilter(SearchFilter);
+                    effectContainerFile.Tbind.UpdateAssetFilter();
+                    break;
+                case Tabs.Cbind:
+                    effectContainerFile.Cbind.NewAssetFilter(SearchFilter);
+                    effectContainerFile.Cbind.UpdateAssetFilter();
+                    break;
+                case Tabs.Emo:
+                    effectContainerFile.Emo.NewAssetFilter(SearchFilter);
+                    effectContainerFile.Emo.UpdateAssetFilter();
+                    break;
+                case Tabs.Light:
+                    effectContainerFile.LightEma.NewAssetFilter(SearchFilter);
+                    effectContainerFile.LightEma.UpdateAssetFilter();
+                    break;
+            }
+        }
+
+
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            Search();
+        }
 
         private void effectPart_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -4130,13 +4201,6 @@ namespace EEPK_Organiser.View
 
 
         //Hotkeys (to be replaced with commands)
-        private void Search_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter)
-            {
-                Search_Click(null, null);
-            }
-        }
 
         private void PbindDataGrid_Hotkeys_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -4389,6 +4453,49 @@ namespace EEPK_Organiser.View
             SettingsManager.settings.EepkOrganiser_EffectPart_Flags_Expanded = effectPartFlags.IsExpanded;
             SettingsManager.settings.EepkOrganiser_EffectPart_UnkFlags_Expanded = effectPartUnkFlags.IsExpanded;
             SettingsManager.settings.EepkOrganiser_EffectPart_UnkValues_Expanded = effectPartUnkValues.IsExpanded;
+        }
+
+        //Tool Button
+        private void ToolMenu_HueAdjustment_Click(object sender, RoutedEventArgs e)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                Forms.RecolorAll recolor = new Forms.RecolorAll(effectContainerFile, App.Current.MainWindow);
+
+                if (recolor.Initialize())
+                    recolor.ShowDialog();
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+#endif
+
+        }
+
+        private void ToolMenu_HueSet_Click(object sender, RoutedEventArgs e)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                RecolorAll_HueSet recolor = new RecolorAll_HueSet(effectContainerFile, App.Current.MainWindow);
+
+                if (recolor.Initialize())
+                    recolor.ShowDialog();
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+#endif
+
         }
     }
 }

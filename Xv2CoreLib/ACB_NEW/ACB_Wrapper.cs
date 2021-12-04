@@ -1239,7 +1239,7 @@ namespace Xv2CoreLib.ACB_NEW
         public CopiedTrack(ACB_Waveform waveform, AFS2_Entry awbEntry)
         {
             TrackBytes = awbEntry?.bytes;
-            Streaming = (bool)waveform?.Streaming;
+            Streaming = (bool)waveform?.IsStreaming;
             Loop = (waveform?.LoopFlag == 0) ? false : true;
             encodeType = waveform.EncodeType;
         }

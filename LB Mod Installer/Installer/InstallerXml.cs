@@ -108,6 +108,10 @@ namespace LB_Mod_Installer.Installer
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "File")]
         public List<FilePath> InstallFiles { get; set; }
 
+        [YAXDontSerializeIfNull]
+        [YAXCollection(YAXCollectionSerializationTypes.Recursive, EachElementName = "Local")]
+        public List<Localisation> Localisations { get; set; } = new List<Localisation>();
+
         /// <summary>
         /// Returns a list of all selected files + the static InstallFiles.
         /// </summary>
@@ -368,6 +372,33 @@ namespace LB_Mod_Installer.Installer
             NotifyPropertyChanged("CurrentStepString");
         }
     
+        //Localisation
+        public string GetLocalisedString(string key)
+        {
+            if (Localisations == null) return string.Empty;
+
+            Localisation local = Localisations.FirstOrDefault(x => x.Key.ToLower() == key);
+
+            if(local != null)
+            {
+                LocalisationLanguage lang = local.LanguageEntries.FirstOrDefault(x => x.Language.ToLower() == GeneralInfo.SystemCulture.TwoLetterISOLanguageName.ToLower());
+
+                if(local != null)
+                {
+                    return lang.Text;
+                }
+                else if(GeneralInfo.SystemCulture.TwoLetterISOLanguageName != "en")
+                {
+                    //Localisation not found, try for en
+                    lang = local.LanguageEntries.FirstOrDefault(x => x.Language == "en");
+
+                    if (lang != null)
+                        return lang.Text;
+                }
+            }
+
+            return string.Empty;
+        }
     }
     
     public class Overrides
@@ -1035,5 +1066,27 @@ namespace LB_Mod_Installer.Installer
         CopyDir,
         VfxPackage,
         MusicPackage
+    }
+
+    //Localisation
+    [YAXSerializeAs("Local")]
+    public class Localisation
+    {
+        [YAXAttributeForClass]
+        public string Key { get; set; }
+
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "LocalEntry")]
+        public List<LocalisationLanguage> LanguageEntries { get; set; } = new List<LocalisationLanguage>();
+    }
+
+    [YAXSerializeAs("LocalEntry")]
+    public class LocalisationLanguage
+    {
+        [YAXAttributeForClass]
+        public string Language { get; set; }
+
+        [YAXAttributeFor("Text")]
+        [YAXSerializeAs("value")]
+        public string Text { get; set; }
     }
 }

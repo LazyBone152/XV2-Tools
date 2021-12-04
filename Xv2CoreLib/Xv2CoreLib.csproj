@@ -22,7 +22,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;NvvmLight</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;NvvmLight, UndoRedo</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -177,6 +177,7 @@
     <Compile Include="CSO\CSO_File.cs" />
     <Compile Include="CSO\Deserializer.cs" />
     <Compile Include="CSO\Parser.cs" />
+    <Compile Include="CST\CST_File.cs" />
     <Compile Include="CUS\CUS_File.cs" />
     <Compile Include="CUS\Deserializer.cs" />
     <Compile Include="CUS\Parser.cs" />

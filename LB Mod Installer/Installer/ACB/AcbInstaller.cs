@@ -222,8 +222,8 @@ namespace LB_Mod_Installer.Installer.ACB
         private void InstallMusic()
         {
             //Force all tracks to be streamed
-            foreach (var waveform in musicPackage.Waveforms.Where(x => !x.Streaming))
-                waveform.Streaming = true;
+            foreach (var waveform in musicPackage.Waveforms.Where(x => !x.IsStreaming))
+                waveform.IsStreaming = true;
 
             if(musicPackage.MusicPackageType == MusicPackageType.BGM_NewOption)
             {

@@ -3637,89 +3637,97 @@ namespace Xv2CoreLib.EffectContainer
             return true;
         }
 
-        public void AddFile(object data, string name, EffectFile.FileType type)
+        public void AddFile(object data, string name, EffectFile.FileType type, List<IUndoRedo> undos = null)
         {
             if(Files.Count == 5)
             {
                 throw new InvalidOperationException("Cannot add file because the maximum allowed amount of 5 is already reached.");
             }
 
+            EffectFile newEffectFile = null;
 
             switch (type)
             {
                 case EffectFile.FileType.EMP:
-                    Files.Add(new EffectFile()
+                    newEffectFile = new EffectFile()
                     {
                         EmpFile = data as EMP_File,
                         FileName = name,
                         fileType = type,
                         OriginalFileName = name
-                    });
+                    };
                     break;
                 case EffectFile.FileType.ETR:
-                    Files.Add(new EffectFile()
+                    newEffectFile = new EffectFile()
                     {
                         EtrFile = data as ETR_File,
                         FileName = name,
                         fileType = type,
                         OriginalFileName = name
-                    });
+                    };
                     break;
                 case EffectFile.FileType.ECF:
-                    Files.Add(new EffectFile()
+                    newEffectFile = new EffectFile()
                     {
                         EcfFile = data as ECF_File,
                         FileName = name,
                         fileType = type,
                         OriginalFileName = name
-                    });
+                    };
                     break;
                 case EffectFile.FileType.EMM:
-                    Files.Add(new EffectFile()
+                    newEffectFile = new EffectFile()
                     {
                         EmmFile = data as EMM_File,
                         FileName = name,
                         fileType = type,
                         OriginalFileName = name
-                    });
+                    };
                     break;
                 case EffectFile.FileType.EMB:
-                    Files.Add(new EffectFile()
+                    newEffectFile = new EffectFile()
                     {
                         EmbFile = data as EMB_File,
                         FileName = name,
                         fileType = type,
                         OriginalFileName = name
-                    });
+                    };
                     break;
                 case EffectFile.FileType.EMA:
-                    Files.Add(new EffectFile()
+                    newEffectFile = new EffectFile()
                     {
                         EmaFile = data as EMA_File,
                         FileName = name,
                         fileType = type,
                         OriginalFileName = name
-                    });
+                    };
                     break;
                 default:
                     if(data as byte[] == null)
                     {
                         throw new InvalidDataException(String.Format("EffectFile.AddFile: tried add undefined file type ({0}), but bytes was null.", type));
                     }
-                    Files.Add(new EffectFile()
+                    newEffectFile = new EffectFile()
                     {
                         Bytes = data as byte[],
                         FileName = name,
                         fileType = type,
                         OriginalFileName = name
-                    });
+                    };
                     break;
             }
+
+            Files.Add(newEffectFile);
+
+            if(undos != null)
+            {
+                undos.Add(new UndoableListAdd<EffectFile>(Files, newEffectFile));
+            }
             
-            NotifyPropertyChanged("FileNamesPreview");
+            NotifyPropertyChanged(nameof(FileNamesPreview));
         }
 
-        public void RemoveFile(EffectFile file)
+        public void RemoveFile(EffectFile file, List<IUndoRedo> undos = null)
         {
             if(Files.Count == 1)
             {
@@ -3727,7 +3735,11 @@ namespace Xv2CoreLib.EffectContainer
             }
 
             Files.Remove(file);
-            NotifyPropertyChanged("FileNamesPreview");
+
+            if (undos != null)
+                undos.Add(new UndoableListRemove<EffectFile>(Files, file));
+
+            NotifyPropertyChanged(nameof(FileNamesPreview));
         }
 
         public void RefreshNamePreview()
@@ -3952,13 +3964,13 @@ namespace Xv2CoreLib.EffectContainer
         public string OriginalFileName { get; set; } //Original name before importing, which we save to show on the UI as a helper.
 
         //File data
-        public EMP_File EmpFile = null;
-        public ETR_File EtrFile = null;
-        public ECF_File EcfFile = null;
-        public EMB_File EmbFile = null;
-        public EMM_File EmmFile = null;
-        public EMA_File EmaFile = null;
-        public byte[] Bytes = null;
+        public EMP_File EmpFile { get; set; } = null;
+        public ETR_File EtrFile { get; set; } = null;
+        public ECF_File EcfFile { get; set; } = null;
+        public EMB_File EmbFile { get; set; } = null;
+        public EMM_File EmmFile { get; set; } = null;
+        public EMA_File EmaFile { get; set; } = null;
+        public byte[] Bytes { get; set; } = null;
 
         public void SetName(string name)
         {

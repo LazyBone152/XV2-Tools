@@ -279,7 +279,7 @@ namespace Xv2CoreLib.EAN
                 Animations = AsyncObservableCollection<EAN_Animation>.Create(),
                 IsCamera = true,
                 I_08 = 37508,
-                Skeleton = skeleton.Clone()
+                Skeleton = skeleton.Copy()
             };
         }
 

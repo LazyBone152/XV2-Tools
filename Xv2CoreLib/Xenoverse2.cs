@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.CMS;
 using Xv2CoreLib.CUS;
@@ -31,6 +29,7 @@ using Xv2CoreLib.Resource.UndoRedo;
 using System.ComponentModel;
 using static Xv2CoreLib.CUS.CUS_File;
 using Xv2CoreLib.PSC;
+using System.Globalization;
 
 namespace Xv2CoreLib
 {
@@ -1507,6 +1506,38 @@ namespace Xv2CoreLib
             return (fileIO != null) ? fileIO.PathInGameDir(relativePath) : relativePath;
         }
 
+        public static Language SystemLanguageToXv2()
+        {
+            switch (CultureInfo.InstalledUICulture.TwoLetterISOLanguageName)
+            {
+                case "en":
+                    return Language.English;
+                case "fr":
+                    return Language.French;
+                case "it":
+                    return Language.Italian;
+                case "de":
+                    return Language.German;
+                case "es":
+                    return Language.Spanish1;
+                case "ca":
+                    return Language.Spanish2;
+                case "pt":
+                    return Language.Portuguese;
+                case "pl":
+                    return Language.Polish;
+                case "ru":
+                    return Language.Russian;
+                case "tw":
+                    return Language.Chinese1;
+                case "zh":
+                    return Language.Chinese2;
+                case "kr":
+                    return Language.Korean;
+                default:
+                    return Language.English;
+            }
+        }
 
     }
 
@@ -2522,7 +2553,7 @@ namespace Xv2CoreLib
             }
         }
         /// <summary>
-        /// Is this file a default file? (Default files are always on a move and cannot be deleted).
+        /// Is this file a default file? (Default files are always on a move and cannot be deleted.).
         /// </summary>
         public bool IsDefault { get; private set; }
 
@@ -2747,6 +2778,17 @@ namespace Xv2CoreLib
             {
                 file.AddCostume(costume);
                 return true;
+            }
+
+            return false;
+        }
+    
+        public static bool IsCharaCodeUsed(IList<Xv2File<T>> files, string charaCode, int excludeIndex = -1)
+        {
+            for(int i = 0; i < files.Count; i++)
+            {
+                if (excludeIndex != i && files[i].CharaCode == charaCode)
+                    return true;
             }
 
             return false;

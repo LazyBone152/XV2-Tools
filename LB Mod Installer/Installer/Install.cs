@@ -41,6 +41,7 @@ using Xv2CoreLib.SEV;
 using Xv2CoreLib.HCI;
 using Xv2CoreLib.CML;
 using Xv2CoreLib.Eternity;
+using Xv2CoreLib.CST;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -733,7 +734,7 @@ namespace LB_Mod_Installer.Installer
                 CharaSlotsFile xmlFile = zipManager.DeserializeXmlFromArchive_Ext<CharaSlotsFile>(GeneralInfo.GetPathInZipDataDir(xmlPath));
                 CharaSlotsFile slotsFile = (CharaSlotsFile)GetParsedFile<CharaSlotsFile>(CharaSlotsFile.FILE_NAME_BIN, false, false);
 
-                if(slotsFile == null)
+                if (slotsFile == null)
                 {
                     throw new FileNotFoundException($"Could not find {CharaSlotsFile.FILE_NAME_BIN}. This file must exist before install - to create it simply run xv2ins.exe once (the X2M installer).");
                 }
@@ -742,12 +743,7 @@ namespace LB_Mod_Installer.Installer
                 bindingManager.ParseProperties(xmlFile.CharaSlots, null, xmlPath);
 
                 List<string> installIDs = new List<string>();
-                bool success = slotsFile.InstallEntries(xmlFile.CharaSlots, installIDs);
-
-                if (!success)
-                {
-                    throw new Exception("Attempted to install a slot that already existed.");
-                }
+                slotsFile.InstallEntries(xmlFile.CharaSlots, installIDs);
 
                 foreach(var id in installIDs)
                 {
@@ -1594,6 +1590,8 @@ namespace LB_Mod_Installer.Installer
                     return HCI_File.Parse(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".cml":
                     return CML_File.Parse(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".cst":
+                    return CST_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 default:
                     throw new InvalidDataException(String.Format("GetParsedFileFromGame: The filetype of \"{0}\" is not supported.", path));
             }
@@ -1661,6 +1659,8 @@ namespace LB_Mod_Installer.Installer
                     return ((HCI_File)data).SaveToBytes();
                 case ".cml":
                     return ((CML_File)data).SaveToBytes();
+                case ".cst":
+                    return ((CST_File)data).SaveToBytes();
                 case ".x2s":
                     return ((CharaSlotsFile)data).SaveToBytes();
                 default:

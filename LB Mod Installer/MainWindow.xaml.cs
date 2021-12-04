@@ -1,19 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using LB_Mod_Installer.Installer;
-using YAXLib;
 using System.IO;
 using System.IO.Compression;
 using System.Windows.Threading;
@@ -293,12 +285,15 @@ namespace LB_Mod_Installer
                 ToolTipService.ShowDurationProperty.OverrideMetadata(
                 typeof(DependencyObject), new FrameworkPropertyMetadata(Int32.MaxValue));
 
+
                 //CultureInfo
+                GeneralInfo.SystemCulture = Thread.CurrentThread.CurrentCulture;
                 Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
 
                 //Init window
                 InitializeComponent();
                 DataContext = this;
+
 
                 //Load installinfo
                 LoadInstallInfoZip();
@@ -319,6 +314,7 @@ namespace LB_Mod_Installer
                 //Init installer
                 installer = new Install(InstallerInfo, zipManager, this, FileIO, fileManager);
                 Installer.Install.bindingManager.ProcessInstallerXmlBindings(_installerXml);
+
             }
 #if !DEBUG
             catch (Exception ex)
@@ -344,7 +340,10 @@ namespace LB_Mod_Installer
 
         private void LoadInstallInfoZip()
         {
+
+#if !DEBUG
             try
+#endif
             {
                 //Look for .installinfo file
                 string path = System.IO.Path.GetFullPath(String.Format("{0}.installinfo", System.Diagnostics.Process.GetCurrentProcess().ProcessName));
@@ -369,14 +368,16 @@ namespace LB_Mod_Installer
                 InstallerInfo.Init();
                 GeneralInfo.InstallerXmlInfo = InstallerInfo;
             }
+#if !DEBUG
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "InstallInfo open failed.", MessageBoxButton.OK, MessageBoxImage.Error);
                 Environment.Exit(0);
             }
-
+            
+#endif
         }
-        
+
         private void LoadDefaultBrushes()
         {
             try

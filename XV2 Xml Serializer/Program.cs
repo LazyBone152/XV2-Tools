@@ -19,7 +19,7 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
-            //args = new string[1] { @"GK4_000_Face_base - Copy.emd" };
+            //args = new string[1] { @"CMN.ean.xml" };
 
             DEBUG_MODE = true;
 #endif
@@ -37,7 +37,7 @@ namespace XV2_Xml_Serializer
             }
             
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
-
+            
             for (int i = 0; i < args.Count(); i++)
             {
                 fileLocation = args[i];
@@ -287,6 +287,9 @@ namespace XV2_Xml_Serializer
                                     break;
                                 case ".tnn":
                                     Xv2CoreLib.TNN.TNN_File.Parse(fileLocation, true);
+                                    break;
+                                case ".cst":
+                                    Xv2CoreLib.CST.CST_File.CreateXml(fileLocation);
                                     break;
                                 case ".xml":
                                     LoadXmlInitial(fileLocation);
@@ -539,6 +542,9 @@ namespace XV2_Xml_Serializer
                     case ".cml":
                         Xv2CoreLib.CML.CML_File.Write(fileLocation);
                         break;
+                    case ".cst":
+                        Xv2CoreLib.CST.CST_File.ConvertFromXml(fileLocation);
+                        break;
                     default:
                         FileTypeNotSupported(fileLocation);
                         break;
@@ -594,7 +600,7 @@ namespace XV2_Xml_Serializer
 
 
         //Debug/testing code
-
+#if DEBUG
         private static void BulkParseInitial(string fileLocation)
         {
             string[] files = Directory.GetFiles(fileLocation);
@@ -625,9 +631,6 @@ namespace XV2_Xml_Serializer
                     break;
                 case ".eepk":
                     BulkParseEepk(fileLocation);
-                    break;
-                case ".bac":
-                    BulkParseBac(fileLocation);
                     break;
                 case ".bsa":
                     BulkParseBsa(fileLocation);
@@ -850,62 +853,6 @@ namespace XV2_Xml_Serializer
 
         }
         
-        static void BulkParseBac(string directory)
-        {
-            string[] files = Directory.GetFiles(directory);
-            List<string> UsedValues = new List<string>();
-
-            foreach (string s in files)
-            {
-                if (Path.GetExtension(s) == ".bac")
-                {
-                    
-                    Console.WriteLine(s);
-                    var bac = new Xv2CoreLib.BAC.Parser(s, false).GetBacFile();
-
-                    if (bac.BacEntries == null) continue;
-                    foreach (var entry in bac.BacEntries)
-                    {
-                        if(entry.Type0 == null) continue;
-
-                        foreach (var anim in entry.Type0)
-                        {
-
-                            if (anim.I_12.HasFlag(Xv2CoreLib.BAC.BAC_Type0.AnimationFlags.Unk9))
-                            {
-                                Console.WriteLine($"({entry.Index}) This. ({anim.I_12})");
-                                Console.Read();
-                            }
-                            if (anim.F_28 < 0f)
-                            {
-                                Console.WriteLine($"({entry.Index})F_28 = " + anim.F_28);
-                                Console.Read();
-                            }
-                            if (anim.F_32 < 0f)
-                            {
-                                Console.WriteLine($"({entry.Index})F_32 = " + anim.F_32);
-                                Console.Read();
-                            }
-                        }
-                    }
-                    
-
-                }
-
-                UsedValues.Sort();
-                //Log
-                StringBuilder log = new StringBuilder();
-
-                foreach (string e in UsedValues)
-                {
-                    log.Append(e);
-                    log.AppendLine();
-                }
-
-                File.WriteAllText("debug_bac_log.txt", log.ToString());
-            }
-
-        }
 
         static void BulkParseBsa(string directory)
         {
@@ -1309,7 +1256,7 @@ namespace XV2_Xml_Serializer
             File.WriteAllText("acb_debug.txt", log.ToString());
         }
         
-
+#endif
         
     }
 }

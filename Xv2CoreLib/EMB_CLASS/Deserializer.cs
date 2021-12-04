@@ -48,7 +48,7 @@ namespace Xv2CoreLib.EMB_CLASS
             if(embFile.Entry != null)
             {
                 //Getting all file paths;
-                int totalEntries = embFile.Entry.Count();
+                int totalEntries = embFile.Entry.Count;
 
 
                 for (int i = 0; i < totalEntries; i++)
@@ -74,30 +74,12 @@ namespace Xv2CoreLib.EMB_CLASS
 
 
                 //Padding between string pointers and first entry
-                float fileSize = Convert.ToSingle(bytes.Count());
-                int addedSize = 0;
-                while (fileSize / 64 != Math.Floor(fileSize / 64))
-                {
-                    addedSize++;
-                    fileSize++;
-                }
-                for (int a = 0; a < addedSize; a++)
-                {
-                    bytes.Add(0);
-                }
+                bytes.AddRange(new byte[Utils.CalculatePadding(bytes.Count, 64)]);
 
                 int reducedOffset = 32;
                 for (int i = 0; i < totalEntries; i++)//Updates data offsets, adds data entries
                 {
-
-                    float size = Convert.ToSingle(files[i].Count());
-                    int addedPadding = 0;
-                    while (size / 64 != Math.Floor(size / 64))
-                    {//Adding the required padding
-                        size++;
-                        addedPadding++;
-                    }
-
+                    int addedPadding = Utils.CalculatePadding(bytes.Count, 64);
 
                     bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - reducedOffset), dataOffsets[i]);
                     bytes.AddRange(files[i]);

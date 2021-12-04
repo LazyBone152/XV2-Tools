@@ -1,16 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using NAudio.Wave;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VGAudio.Cli;
-using VGAudio.Cli.Metadata;
 using Xv2CoreLib.HCA;
-using Xv2CoreLib.Resource;
 
 namespace AudioCueEditor.Audio
 {
+    public static class WAV
+    {
+        /// <summary>
+        /// Convert common audio formats to wav.
+        /// </summary>
+        /// <returns></returns>
+        public static byte[] ConvertToWav(string path)
+        {
+            byte[] outBytes;
+
+            using (var reader = new MediaFoundationReader(path))
+            {
+                using (var stream = new MemoryStream())
+                {
+                    WaveFileWriter.WriteWavFileToStream(stream, reader);
+                    outBytes = stream.ToArray();
+                }
+            }
+
+            return outBytes;
+        }
+
+    }
+
     public static class HCA
     {
         public static WavStream Decode(byte[] hcaBytes)
@@ -46,6 +64,28 @@ namespace AudioCueEditor.Audio
             HcaMetadata metadata = new HcaMetadata(hcaBytes);
             if (metadata.HasLoopData && loop) return hcaBytes; //Reuse existing loop data
             return HcaMetadata.SetLoop(hcaBytes, loop, 0, metadata.DurationSeconds, 0);
+        }
+    }
+
+    public static class ADX
+    {
+
+        public static WavStream Decode(byte[] adxBytes)
+        {
+            byte[] wavBytes;
+
+            using (MemoryStream stream = new MemoryStream(adxBytes))
+            {
+                wavBytes = ConvertStream.ConvertFile(new Options(), stream, FileType.Adx, FileType.Wave);
+            }
+
+            return new WavStream(wavBytes);
+        }
+
+        public static byte[] Encode(byte[] wavBytes)
+        {
+            using (var wavStream = new MemoryStream(wavBytes))
+                return ConvertStream.ConvertFile(new Options(), wavStream, FileType.Wave, FileType.Adx);
         }
     }
 
@@ -94,4 +134,28 @@ namespace AudioCueEditor.Audio
             }
         }
     }
+
+    public static class AT9
+    {
+        public static WavStream Decode(byte[] at9Bytes)
+        {
+            byte[] wavBytes;
+
+            using (MemoryStream stream = new MemoryStream(at9Bytes))
+            {
+                wavBytes = ConvertStream.ConvertFile(new Options(), stream, FileType.Atrac9, FileType.Wave);
+            }
+
+            return new WavStream(wavBytes);
+        }
+
+        public static byte[] Encode(byte[] wavBytes)
+        {
+            using (var stream = new MemoryStream(wavBytes))
+            {
+                return ConvertStream.ConvertFile(new Options(), stream, FileType.Wave, FileType.Atrac9);
+            }
+        }
+    }
+
 }

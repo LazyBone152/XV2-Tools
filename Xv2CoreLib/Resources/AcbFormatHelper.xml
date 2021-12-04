@@ -304,4 +304,13 @@
   <Column Name="TrackCommandTable" PrimaryLowestVersion="1.29.0.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="1.28.2.0" SecondaryHighestVersion="0.0.0.0">
     <Column Name="Command" ValueType="Data" Index="0" PrimaryLowestVersion="1.29.0.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
   </Column>
+  <Column Name="BeatSyncInfoTable" PrimaryLowestVersion="1.28.2.0" PrimaryHighestVersion="1.28.2.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0">
+    <Column Name="Bpm" ValueType="Single" Index="0" PrimaryLowestVersion="1.28.2.0" PrimaryHighestVersion="1.28.2.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
+    <Column Name="NumBeats" ValueType="Int32" Index="1" PrimaryLowestVersion="1.28.2.0" PrimaryHighestVersion="1.28.2.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
+    <Column Name="BeatDenominator" ValueType="Int32" Index="2" PrimaryLowestVersion="1.28.2.0" PrimaryHighestVersion="1.28.2.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
+    <Column Name="SyncBeatFlags" ValueType="UInt32" Index="3" PrimaryLowestVersion="1.28.2.0" PrimaryHighestVersion="1.28.2.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
+    <Column Name="BaseRate" ValueType="UInt32" Index="4" PrimaryLowestVersion="1.28.2.0" PrimaryHighestVersion="1.28.2.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
+    <Column Name="StartSample" ValueType="UInt32" Index="5" PrimaryLowestVersion="1.28.2.0" PrimaryHighestVersion="1.28.2.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
+    <Column Name="EndSample" ValueType="UInt32" Index="6" PrimaryLowestVersion="1.28.2.0" PrimaryHighestVersion="1.28.2.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
+  </Column>
 </AcbFormatHelperMain>

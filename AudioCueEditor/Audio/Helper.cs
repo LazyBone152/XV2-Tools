@@ -25,7 +25,7 @@ namespace AudioCueEditor.Audio
                 case ".mp3":
                 case ".wma":
                 case ".aac":
-                    return ConvertFile(CommonFormatsConverter.ConvertToWav(path), FileType.Wave, convertToType, loop);
+                    return ConvertFile(WAV.ConvertToWav(path), FileType.Wave, convertToType, loop);
                 case ".hca":
                     return ConvertFile(File.ReadAllBytes(path), FileType.Hca, convertToType, loop);
                 case ".adx":

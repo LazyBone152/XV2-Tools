@@ -218,6 +218,7 @@ namespace Xv2CoreLib.ACB_NEW
         public List<ACB_StringValue> StringValues { get; set; } = new List<ACB_StringValue>();
         public List<ACB_SequenceBlock> BlockSequences { get; set; } = new List<ACB_SequenceBlock>();
         public List<ACB_Block> Blocks { get; set; } = new List<ACB_Block>();
+        public List<ACB_BeatSyncInfo> BeatSyncInfo { get; set; } = new List<ACB_BeatSyncInfo>();
 
 
         /// <summary>
@@ -331,6 +332,7 @@ namespace Xv2CoreLib.ACB_NEW
             acbFile.AutoModulations = ACB_AutoModulation.Load(utfFile.GetColumnTable("AutoModulationTable", false, header, acbFile.Version), acbFile.Version);
             acbFile.CommandTables = ACB_CommandTables.Load(utfFile, acbFile, loadUnknownCommands);
             acbFile.StringValues = ACB_StringValue.Load(utfFile.GetColumnTable("StringValueTable", false, header, acbFile.Version), acbFile.Version);
+            acbFile.BeatSyncInfo = ACB_BeatSyncInfo.Load(utfFile.GetColumnTable("BeatSyncInfoTable", false, header, acbFile.Version), acbFile.Version);
 
             //If no StringValueTable exists, then use default table. (this is required for some commands)
             if (acbFile.StringValues.Count == 0)
@@ -364,7 +366,7 @@ namespace Xv2CoreLib.ACB_NEW
                 }
             }
 
-            if (awbBytes == null && acbFile.Waveforms.Any(x => x.Streaming) && !isMusicPackage)
+            if (awbBytes == null && acbFile.Waveforms.Any(x => x.IsStreaming) && !isMusicPackage)
                 acbFile.ExternalAwbError = true;
 
             //MusicPackage values
@@ -495,8 +497,8 @@ namespace Xv2CoreLib.ACB_NEW
         private void ValidateTables(UTF_File utfFile)
         {
             if (utfFile.ColumnTableExists("BlockSequenceTable", true) || utfFile.ColumnTableExists("BlockTable", true) || utfFile.ColumnTableExists("EventTable", true) 
-                || utfFile.ColumnTableExists("AisacNameTable", true) || utfFile.ColumnTableExists("BeatSyncInfoTable", true)
-                || utfFile.ColumnTableExists("SeqParameterPalletTable", true) || utfFile.ColumnTableExists("TrackParameterPalletTable", true) || utfFile.ColumnTableExists("SynthParameterPalletTable", true))
+                || utfFile.ColumnTableExists("AisacNameTable", true) || utfFile.ColumnTableExists("SeqParameterPalletTable", true) || 
+                utfFile.ColumnTableExists("TrackParameterPalletTable", true) || utfFile.ColumnTableExists("SynthParameterPalletTable", true))
                 TableValidationFailed = true;
         }
 
@@ -645,6 +647,7 @@ namespace Xv2CoreLib.ACB_NEW
             UTF_File autoModTable = CreateDefaultAutoModulationTable();
             UTF_File waveformExtensionTable = CreateDefaultWaveformExtensionTable();
             UTF_File stringValueTable = CreateDefaultStringValueTable();
+            UTF_File beatSyncTable = CreateDefaultBeatSyncInfoTable();
 
             //Reordering
             SortActionTracks(); //Sort them to be sequential, as in the UTF file ActionTracks are specified with a StartIndex and Count
@@ -662,6 +665,7 @@ namespace Xv2CoreLib.ACB_NEW
             ACB_Graph.WriteToTable(Graphs, Version, graphTable);
             ACB_AutoModulation.WriteToTable(AutoModulations, Version, autoModTable);
             ACB_StringValue.WriteToTable(StringValues, Version, stringValueTable);
+            ACB_BeatSyncInfo.WriteToTable(BeatSyncInfo, Version, beatSyncTable);
 
             //Columns
             utfFile.AddValue("FileIdentifier", TypeFlag.UInt32, 0, FileIdentifier.ToString(), tableHelper, Version);
@@ -752,7 +756,7 @@ namespace Xv2CoreLib.ACB_NEW
             utfFile.AddData("ActionTrackTable", 0, (ActionTracks.Count > 0) ? actionTrackTable.Write() : null, tableHelper, Version);
             utfFile.AddData("AcfReferenceTable", 0, (AcfReferenceTable != null) ? AcfReferenceTable.Write() : null, tableHelper, Version);
             utfFile.AddData("WaveformExtensionDataTable", 0, (waveformExtensionTable.IsValid() && !EternityCompatibility) ? waveformExtensionTable.Write() : null, tableHelper, Version);
-            utfFile.AddData("BeatSyncInfoTable", 0, null, tableHelper, Version); //Not implemented
+            utfFile.AddData("BeatSyncInfoTable", 0, (BeatSyncInfo.Count > 0) ? beatSyncTable.Write() : null, tableHelper, Version);
             utfFile.AddValue("CuePriorityType", TypeFlag.UInt8, 0, CuePriorityType.ToString(), tableHelper, Version);
             utfFile.AddValue("NumCueLimit", TypeFlag.UInt16, 0, NumCueLimit.ToString(), tableHelper, Version);
             utfFile.AddData("SeqParameterPalletTable", 0, null, tableHelper, Version);
@@ -987,7 +991,7 @@ namespace Xv2CoreLib.ACB_NEW
 
             //Create waveform
             waveform.AwbId = awbId;
-            waveform.Streaming = streaming;
+            waveform.IsStreaming = streaming;
             waveform.StreamAwbPortNo = (streaming) ? (ushort)0 : ushort.MaxValue;
             waveform.EncodeType = encodeType;
             waveform.LoopFlag = Convert.ToByte(loop);
@@ -1159,7 +1163,7 @@ namespace Xv2CoreLib.ACB_NEW
             undos.Add(new UndoableProperty<ACB_Waveform>("NumSamples", waveform, waveform.SamplingRate, (uint)trackMetadata.NumSamples));
 
             waveform.AwbId = newAwbId;
-            waveform.Streaming = streaming;
+            waveform.IsStreaming = streaming;
             waveform.StreamAwbPortNo = newStreamAwbPortNo;
             waveform.EncodeType = encodeType;
             waveform.LoopFlag = Convert.ToByte(hasLoop);
@@ -1842,7 +1846,7 @@ namespace Xv2CoreLib.ACB_NEW
         {
             if (Waveforms == null) return;
 
-            foreach(var waveform in Waveforms.Where(w => w.Streaming == stream && w.AwbId == oldAwbId))
+            foreach(var waveform in Waveforms.Where(w => w.IsStreaming == stream && w.AwbId == oldAwbId))
             {
                 waveform.AwbId = (ushort)newAwbId;
             }
@@ -2133,7 +2137,7 @@ namespace Xv2CoreLib.ACB_NEW
 
             if(SaveFormat == SaveFormat.Default)
             {
-                foreach (var waveforms in Waveforms.Where(w => w.Streaming == streamingAwb && w.AwbId != ushort.MaxValue))
+                foreach (var waveforms in Waveforms.Where(w => w.IsStreaming == streamingAwb && w.AwbId != ushort.MaxValue))
                     tracks.Add(waveforms.AwbId);
             }
             else if(SaveFormat == SaveFormat.MusicPackage && !streamingAwb)
@@ -2667,6 +2671,11 @@ namespace Xv2CoreLib.ACB_NEW
         internal UTF_File CreateDefaultStringValueTable()
         {
             return AcbFormatHelper.Instance.CreateTable("StringValueTable", "Strings", Version);
+        }
+
+        internal UTF_File CreateDefaultBeatSyncInfoTable()
+        {
+            return AcbFormatHelper.Instance.CreateTable("BeatSyncInfoTable", "BeatSyncInfo", Version);
         }
 
         #endregion
@@ -4099,16 +4108,19 @@ namespace Xv2CoreLib.ACB_NEW
         {
             get
             {
-                return Streaming;
+                return IsStreaming;
             }
             set
             {
-                if (Streaming != value)
+                byte oldValue = Streaming;
+                byte newValue = Convert.ToByte(value);
+
+                if(oldValue != newValue)
                 {
-                    bool oldValue = Streaming;
-                    Streaming = value;
-                    UndoManager.Instance.AddUndo(new UndoableProperty<ACB_Waveform>("Streaming", this, oldValue, value, "Streaming"));
-                    NotifyPropertyChanged("UndoableStreaming");
+                    Streaming = newValue;
+
+                    UndoManager.Instance.AddUndo(new UndoableProperty<ACB_Waveform>(nameof(Streaming), this, oldValue, value, nameof(Streaming)));
+                    NotifyPropertyChanged(nameof(UndoableStreaming));
                 }
             }
         }
@@ -4116,7 +4128,9 @@ namespace Xv2CoreLib.ACB_NEW
         #endregion
 
         //Values
-        private bool _streaming = false;
+        private byte _streaming = 0;
+        [YAXDontSerialize]
+        public bool IsStreaming { get { return Streaming > 0; } set { Streaming = Convert.ToByte(value); } }
 
         //Properties
         [YAXAttributeForClass]
@@ -4127,7 +4141,21 @@ namespace Xv2CoreLib.ACB_NEW
         public EncodeType EncodeType { get; set; }
         [YAXAttributeFor("Streaming")]
         [YAXSerializeAs("value")]
-        public bool Streaming { get { return _streaming; } set { _streaming = value; NotifyPropertyChanged(nameof(UndoableStreaming)); } }
+        public byte Streaming
+        { 
+            get
+            {
+                return _streaming;
+            }
+            set
+            {
+                if(value != _streaming)
+                {
+                    _streaming = value;
+                    NotifyPropertyChanged(nameof(UndoableStreaming));
+                }
+            }
+        }
         [YAXAttributeFor("AwbId")]
         [YAXSerializeAs("value")]
         public ushort AwbId { get; set; } //Tracks will be stored in a seperate section
@@ -4177,7 +4205,7 @@ namespace Xv2CoreLib.ACB_NEW
             waveform.Index = index;
 
             waveform.EncodeType = (EncodeType)waveformTable.GetValue<byte>("EncodeType", TypeFlag.UInt8, index);
-            waveform.Streaming = Convert.ToBoolean(waveformTable.GetValue<byte>("Streaming", TypeFlag.UInt8, index));
+            waveform.Streaming = waveformTable.GetValue<byte>("Streaming", TypeFlag.UInt8, index, tableHelper, ParseVersion);
             waveform.NumChannels = waveformTable.GetValue<byte>("NumChannels", TypeFlag.UInt8, index, tableHelper, ParseVersion);
             waveform.LoopFlag = waveformTable.GetValue<byte>("LoopFlag", TypeFlag.UInt8, index);
             waveform.SamplingRate = waveformTable.GetValue<ushort>("SamplingRate", TypeFlag.UInt16, index, tableHelper, ParseVersion);
@@ -4187,7 +4215,7 @@ namespace Xv2CoreLib.ACB_NEW
             if (tableHelper.ColumnExists("StreamAwbId", TypeFlag.UInt16, ParseVersion))
             {
                 //Is newer format
-                waveform.AwbId = (waveform.Streaming) ? waveformTable.GetValue<ushort>("StreamAwbId", TypeFlag.UInt16, index) : waveformTable.GetValue<ushort>("MemoryAwbId", TypeFlag.UInt16, index, tableHelper, ParseVersion);
+                waveform.AwbId = (waveform.IsStreaming) ? waveformTable.GetValue<ushort>("StreamAwbId", TypeFlag.UInt16, index) : waveformTable.GetValue<ushort>("MemoryAwbId", TypeFlag.UInt16, index, tableHelper, ParseVersion);
             }
             else
             {
@@ -4258,7 +4286,7 @@ namespace Xv2CoreLib.ACB_NEW
             if (tableHelper.ColumnExists("StreamAwbId", TypeFlag.UInt16, ParseVersion))
             {
 
-                if (Streaming)
+                if (IsStreaming)
                 {
                     utfTable.AddValue("StreamAwbId", TypeFlag.UInt16, index, AwbId.ToString());
                     utfTable.AddValue("MemoryAwbId", TypeFlag.UInt16, index, ushort.MaxValue.ToString());
@@ -4280,11 +4308,11 @@ namespace Xv2CoreLib.ACB_NEW
             {
                 if(StreamAwbPortNo == ushort.MaxValue)
                 {
-                    utfTable.AddValue("StreamAwbPortNo", TypeFlag.UInt16, index, (Streaming) ? "0" : ushort.MaxValue.ToString());
+                    utfTable.AddValue("StreamAwbPortNo", TypeFlag.UInt16, index, (IsStreaming) ? "0" : ushort.MaxValue.ToString());
                 }
                 else
                 {
-                    utfTable.AddValue("StreamAwbPortNo", TypeFlag.UInt16, index, (Streaming) ? StreamAwbPortNo.ToString() : ushort.MaxValue.ToString());
+                    utfTable.AddValue("StreamAwbPortNo", TypeFlag.UInt16, index, (IsStreaming) ? StreamAwbPortNo.ToString() : ushort.MaxValue.ToString());
                 }
             }
 
@@ -4746,6 +4774,89 @@ namespace Xv2CoreLib.ACB_NEW
 
             return bytes.ToArray();
         }
+    }
+
+    [YAXSerializeAs("BeatSyncInfo")]
+    [Serializable]
+    public class ACB_BeatSyncInfo : AcbTableBase
+    {
+        [YAXAttributeForClass]
+        public int Index { get; set; }
+
+        [YAXAttributeFor("Bpm")]
+        [YAXSerializeAs("value")]
+        public float Bpm { get; set; }
+        [YAXAttributeFor("NumBeats")]
+        [YAXSerializeAs("value")]
+        public int NumBeats { get; set; }
+        [YAXAttributeFor("BeatDenominator")]
+        [YAXSerializeAs("value")]
+        public int BeatDenominator { get; set; }
+        [YAXAttributeFor("SyncBeatFlags")]
+        [YAXSerializeAs("value")]
+        public uint SyncBeatFlags { get; set; }
+        [YAXAttributeFor("BaseRate")]
+        [YAXSerializeAs("value")]
+        public uint BaseRate { get; set; }
+        [YAXAttributeFor("StartSample")]
+        [YAXSerializeAs("value")]
+        public uint StartSample { get; set; }
+        [YAXAttributeFor("EndSample")]
+        [YAXSerializeAs("value")]
+        public uint EndSample { get; set; }
+
+        public static List<ACB_BeatSyncInfo> Load(UTF_File table, Version ParseVersion)
+        {
+            List<ACB_BeatSyncInfo> rows = new List<ACB_BeatSyncInfo>();
+            if (table == null) return rows;
+
+            for (int i = 0; i < table.DefaultRowCount; i++)
+            {
+                rows.Add(Load(table, i, ParseVersion));
+            }
+
+            return rows;
+        }
+
+        public static ACB_BeatSyncInfo Load(UTF_File graphTable, int index, Version version)
+        {
+            AcbFormatHelperTable tableHelper = AcbFormatHelper.Instance.GetTableHelper("BeatSyncInfoTable");
+
+            ACB_BeatSyncInfo graph = new ACB_BeatSyncInfo();
+            graph.Index = index;
+            graph.Bpm = graphTable.GetValue<float>("Bpm", TypeFlag.Single, index, tableHelper, version);
+            graph.NumBeats = graphTable.GetValue<int>("NumBeats", TypeFlag.Int32, index, tableHelper, version);
+            graph.BeatDenominator = graphTable.GetValue<int>("BeatDenominator", TypeFlag.Int32, index, tableHelper, version);
+            graph.SyncBeatFlags = graphTable.GetValue<uint>("SyncBeatFlags", TypeFlag.UInt32, index, tableHelper, version);
+            graph.BaseRate = graphTable.GetValue<uint>("BaseRate", TypeFlag.UInt32, index, tableHelper, version);
+            graph.StartSample = graphTable.GetValue<uint>("StartSample", TypeFlag.UInt32, index, tableHelper, version);
+            graph.EndSample = graphTable.GetValue<uint>("EndSample", TypeFlag.UInt32, index, tableHelper, version);
+
+            return graph;
+        }
+
+        public static void WriteToTable(IList<ACB_BeatSyncInfo> entries, Version ParseVersion, UTF_File utfTable)
+        {
+            for (int i = 0; i < entries.Count; i++)
+            {
+                entries[i].WriteToTable(utfTable, i, ParseVersion);
+            }
+        }
+
+        public void WriteToTable(UTF_File utfTable, int index, Version ParseVersion)
+        {
+            AcbFormatHelperTable tableHelper = AcbFormatHelper.Instance.GetTableHelper("BeatSyncInfoTable");
+
+            utfTable.AddValue("Bpm", TypeFlag.Single, index, Bpm.ToString(), tableHelper, ParseVersion);
+            utfTable.AddValue("NumBeats", TypeFlag.Int32, index, NumBeats.ToString(), tableHelper, ParseVersion);
+            utfTable.AddValue("BeatDenominator", TypeFlag.Int32, index, BeatDenominator.ToString(), tableHelper, ParseVersion);
+
+            utfTable.AddValue("SyncBeatFlags", TypeFlag.UInt32, index, SyncBeatFlags.ToString(), tableHelper, ParseVersion);
+            utfTable.AddValue("BaseRate", TypeFlag.UInt32, index, BaseRate.ToString(), tableHelper, ParseVersion);
+            utfTable.AddValue("StartSample", TypeFlag.UInt32, index, StartSample.ToString(), tableHelper, ParseVersion);
+            utfTable.AddValue("EndSample", TypeFlag.UInt32, index, EndSample.ToString(), tableHelper, ParseVersion);
+        }
+
     }
 
     #region Commands

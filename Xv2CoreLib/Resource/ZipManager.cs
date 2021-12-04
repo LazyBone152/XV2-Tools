@@ -2,7 +2,6 @@
 using System.IO;
 using System.IO.Compression;
 using System.Windows.Media.Imaging;
-using System.Xml;
 using System.Xml.Linq;
 using YAXLib;
 

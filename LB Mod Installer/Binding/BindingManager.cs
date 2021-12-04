@@ -388,7 +388,18 @@ namespace LB_Mod_Installer.Binding
                             break;
                         case Function.X2MInstalled:
                             retIsString = true;
-                            retStr = (x2mHelper.IsModInstalled(b.GetArgument1())) ? "true" : "false";
+                            retStr = x2mHelper.IsModInstalled(b.GetArgument1()) ? "true" : "false";
+                            break;
+                        case Function.LocalKey:
+                            retIsString = true;
+                            retStr = GeneralInfo.InstallerXmlInfo.GetLocalisedString(b.GetArgument1());
+                            break;
+                        case Function.IsLanguage:
+                            {
+                                bool isLang = b.GetArgument1().ToLower() == GeneralInfo.SystemCulture.TwoLetterISOLanguageName.ToLower();
+                                retIsString = true;
+                                retStr = (isLang) ? "true" : "false";
+                            }
                             break;
                     }
                 }
@@ -403,7 +414,7 @@ namespace LB_Mod_Installer.Binding
                 //Generic error handling code
                 if (retID == NullTokenInt && errorHandler == ErrorHandling.Stop)
                 {
-                    GeneralInfo.SpecialFailState = GeneralInfo.SpecialFailStates.IdBindingFailed;
+                    GeneralInfo.SpecialFailState = GeneralInfo.SpecialFailStates.BindingFailed;
                     throw new Exception(String.Format("An ID could not be assigned according to the binding. Install failed. \nBinding: {1}\n({0})", comment, binding));
                 }
                 else if(retID == NullTokenInt && errorHandler == ErrorHandling.UseDefaultValue)
@@ -544,6 +555,12 @@ namespace LB_Mod_Installer.Binding
                     case "x2minstalled":
                         bindings.Add(new BindingValue() { Function = Function.X2MInstalled, Arguments = arguments });
                         break;
+                    case "islang":
+                        bindings.Add(new BindingValue() { Function = Function.IsLanguage, Arguments = arguments });
+                        break;
+                    case "localkey":
+                        bindings.Add(new BindingValue() { Function = Function.LocalKey, Arguments = arguments });
+                        break;
                     default:
                         throw new FormatException(String.Format("Invalid ID Binding Function (Function = {0}, Argument = {1})\nFull binding: {2}", function, argument, originalBinding));
                 }
@@ -625,6 +642,8 @@ namespace LB_Mod_Installer.Binding
                     case Function.X2MCharaID:
                     case Function.X2MCharaCode:
                     case Function.X2MInstalled:
+                    case Function.LocalKey:
+                    case Function.IsLanguage:
                         //Must have an argument
                         if (!bindings[i].HasArgument()) throw new Exception(String.Format("The {0} binding function takes a string argument, but none was found.\n({1})", bindings[i].Function, comment));
                         break;
@@ -1016,19 +1035,33 @@ namespace LB_Mod_Installer.Binding
 
         public void ProcessInstallerXmlBindings(InstallerXml installerXml)
         {
+            if(installerXml.UiOverrides != null)
+            {
+                ProcessUiOverrides(installerXml.UiOverrides.InstallConfirm);
+                ProcessUiOverrides(installerXml.UiOverrides.UninstallConfirm);
+                ProcessUiOverrides(installerXml.UiOverrides.ReinstallInitialPrompt);
+                ProcessUiOverrides(installerXml.UiOverrides.UpdateInitialPrompt);
+                ProcessUiOverrides(installerXml.UiOverrides.DowngradeInitialPrompt);
+            }
+
             foreach(var step in installerXml.InstallOptionSteps)
             {
-                step.IsEnabled = ParseString(step.IsEnabled, GeneralInfo.InstallerXml, "IsEnabled");
+                step.IsEnabled = ParseString(step.IsEnabled, GeneralInfo.InstallerXml, "Step.IsEnabled");
+                step.Name = ParseString(step.Name, GeneralInfo.InstallerXml, "Step.Message");
+                step.Message = ParseString(step.Message, GeneralInfo.InstallerXml, "Step.Message");
 
-                if(step.OptionList != null)
+                if (step.OptionList != null)
                 {
                     foreach (var option in step.OptionList)
                     {
-                        if(option.Paths != null)
+                        option.Name = ParseString(option.Name, GeneralInfo.InstallerXml, "Option.Name");
+                        option.Tooltip = ParseString(option.Tooltip, GeneralInfo.InstallerXml, "Option.Tooltip");
+
+                        if (option.Paths != null)
                         {
                             foreach(var file in option.Paths)
                             {
-                                file.IsEnabled = ParseString(file.IsEnabled, GeneralInfo.InstallerXml, "IsEnabled");
+                                file.IsEnabled = ParseString(file.IsEnabled, GeneralInfo.InstallerXml, "File.IsEnabled");
                                 //file.InstallPath = ParseString(file.InstallPath, GeneralInfo.InstallerXml, "InstallPath"); //We do this later, as the file is installed. This way we can access any aliases that have been set.
                             }
                         }
@@ -1038,8 +1071,17 @@ namespace LB_Mod_Installer.Binding
 
             foreach(var file in installerXml.InstallFiles)
             {
-                file.IsEnabled = ParseString(file.IsEnabled, GeneralInfo.InstallerXml, "IsEnabled");
+                file.IsEnabled = ParseString(file.IsEnabled, GeneralInfo.InstallerXml, "File.IsEnabled");
                 //file.InstallPath = ParseString(file.InstallPath, GeneralInfo.InstallerXml, "InstallPath"); //We do this later, as the file is installed. This way we can access any aliases that have been set.
+            }
+        }
+
+        private void ProcessUiOverrides(InstallStep step)
+        {
+            if(step != null)
+            {
+                step.Name = ParseString(step.Name, GeneralInfo.InstallerXml, "Step.Message");
+                step.Message = ParseString(step.Message, GeneralInfo.InstallerXml, "Step.Message");
             }
         }
 
@@ -1276,6 +1318,8 @@ namespace LB_Mod_Installer.Binding
         //For use in InstallerXml:
         X2MSkillPath,
         X2MInstalled,
+        LocalKey,
+        IsLanguage,
 
         //Auxiliary functions:
         Format,

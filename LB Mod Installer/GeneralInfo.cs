@@ -1,10 +1,8 @@
 ﻿using LB_Mod_Installer.Installer;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace LB_Mod_Installer
@@ -15,7 +13,7 @@ namespace LB_Mod_Installer
         {
             None,
             AutoIdBindingFailed,
-            IdBindingFailed, //Missing mod most likely
+            BindingFailed, //Missing mod most likely
             X2MNotFound
         }
         public static string AppName
@@ -195,6 +193,9 @@ namespace LB_Mod_Installer
         public static TrackingXml Tracker { get; set; }
         public static SpecialFailStates SpecialFailState = SpecialFailStates.None;
         public static bool isInstalled = false;
+
+        //CultureInfo
+        public static CultureInfo SystemCulture = CultureInfo.CurrentUICulture;
 
         //Safe InstallerXml requests
         public static string CurrentModName

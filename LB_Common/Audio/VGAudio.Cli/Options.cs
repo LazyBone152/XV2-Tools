@@ -8,7 +8,7 @@ using VGAudio.Utilities;
 
 namespace VGAudio.Cli
 {
-    internal class Options
+    public class Options
     {
         public JobType Job { get; set; }
         public JobFiles Files { get; } = new JobFiles();
@@ -46,13 +46,13 @@ namespace VGAudio.Cli
         public bool EncodeCbr { get; set; }
     }
 
-    internal class JobFiles
+    public class JobFiles
     {
         public List<AudioFile> InFiles { get; } = new List<AudioFile>();
         public List<AudioFile> OutFiles { get; } = new List<AudioFile>();
     }
 
-    internal class AudioFile
+    public class AudioFile
     {
         public AudioFile() { }
         public AudioFile(string path)
@@ -67,7 +67,7 @@ namespace VGAudio.Cli
         public List<int> Channels { get; set; }
     }
 
-    internal class AudioFileStream
+    public class AudioFileStream
     {
         public AudioFileStream() { }
         public AudioFileStream(Stream stream, FileType type)
@@ -83,7 +83,7 @@ namespace VGAudio.Cli
     }
 
 
-    internal enum JobType
+    public enum JobType
     {
         Convert,
         Batch,

@@ -1000,11 +1000,11 @@ namespace Xv2CoreLib.BAC
         {
             get
             {
-                return I_12.HasFlag(AnimationFlags.MoveWithAxis_X);
+                return AnimFlags.HasFlag(AnimationFlags.MoveWithAxis_X);
             }
             set
             {
-                I_12 = I_12.SetFlag(AnimationFlags.MoveWithAxis_X, value);
+                AnimFlags = AnimFlags.SetFlag(AnimationFlags.MoveWithAxis_X, value);
             }
         }
         [YAXDontSerialize]
@@ -1012,11 +1012,11 @@ namespace Xv2CoreLib.BAC
         {
             get
             {
-                return I_12.HasFlag(AnimationFlags.MoveWithAxis_Y);
+                return AnimFlags.HasFlag(AnimationFlags.MoveWithAxis_Y);
             }
             set
             {
-                I_12 = I_12.SetFlag(AnimationFlags.MoveWithAxis_Y, value);
+                AnimFlags = AnimFlags.SetFlag(AnimationFlags.MoveWithAxis_Y, value);
             }
         }
         [YAXDontSerialize]
@@ -1024,11 +1024,11 @@ namespace Xv2CoreLib.BAC
         {
             get
             {
-                return I_12.HasFlag(AnimationFlags.MoveWithAxis_Z);
+                return AnimFlags.HasFlag(AnimationFlags.MoveWithAxis_Z);
             }
             set
             {
-                I_12 = I_12.SetFlag(AnimationFlags.MoveWithAxis_Z, value);
+                AnimFlags = AnimFlags.SetFlag(AnimationFlags.MoveWithAxis_Z, value);
             }
         }
         [YAXDontSerialize]
@@ -1036,11 +1036,11 @@ namespace Xv2CoreLib.BAC
         {
             get
             {
-                return I_12.HasFlag(AnimationFlags.Unk3);
+                return AnimFlags.HasFlag(AnimationFlags.Unk3);
             }
             set
             {
-                I_12 = I_12.SetFlag(AnimationFlags.Unk3, value);
+                AnimFlags = AnimFlags.SetFlag(AnimationFlags.Unk3, value);
             }
         }
         [YAXDontSerialize]
@@ -1048,11 +1048,11 @@ namespace Xv2CoreLib.BAC
         {
             get
             {
-                return I_12.HasFlag(AnimationFlags.Unk4);
+                return AnimFlags.HasFlag(AnimationFlags.Unk4);
             }
             set
             {
-                I_12 = I_12.SetFlag(AnimationFlags.Unk4, value);
+                AnimFlags = AnimFlags.SetFlag(AnimationFlags.Unk4, value);
             }
         }
         [YAXDontSerialize]
@@ -1060,11 +1060,11 @@ namespace Xv2CoreLib.BAC
         {
             get
             {
-                return I_12.HasFlag(AnimationFlags.Unk5);
+                return AnimFlags.HasFlag(AnimationFlags.Unk5);
             }
             set
             {
-                I_12 = I_12.SetFlag(AnimationFlags.Unk5, value);
+                AnimFlags = AnimFlags.SetFlag(AnimationFlags.Unk5, value);
             }
         }
         [YAXDontSerialize]
@@ -1072,11 +1072,11 @@ namespace Xv2CoreLib.BAC
         {
             get
             {
-                return I_12.HasFlag(AnimationFlags.Unk6);
+                return AnimFlags.HasFlag(AnimationFlags.Unk6);
             }
             set
             {
-                I_12 = I_12.SetFlag(AnimationFlags.Unk6, value);
+                AnimFlags = AnimFlags.SetFlag(AnimationFlags.Unk6, value);
             }
         }
         [YAXDontSerialize]
@@ -1084,11 +1084,11 @@ namespace Xv2CoreLib.BAC
         {
             get
             {
-                return I_12.HasFlag(AnimationFlags.Unk7);
+                return AnimFlags.HasFlag(AnimationFlags.Unk7);
             }
             set
             {
-                I_12 = I_12.SetFlag(AnimationFlags.Unk7, value);
+                AnimFlags = AnimFlags.SetFlag(AnimationFlags.Unk7, value);
             }
         }
         [YAXDontSerialize]
@@ -1096,11 +1096,11 @@ namespace Xv2CoreLib.BAC
         {
             get
             {
-                return I_12.HasFlag(AnimationFlags.Unk8);
+                return AnimFlags.HasFlag(AnimationFlags.Unk8);
             }
             set
             {
-                I_12 = I_12.SetFlag(AnimationFlags.Unk8, value);
+                AnimFlags = AnimFlags.SetFlag(AnimationFlags.Unk8, value);
             }
         }
         [YAXDontSerialize]
@@ -1108,11 +1108,11 @@ namespace Xv2CoreLib.BAC
         {
             get
             {
-                return I_12.HasFlag(AnimationFlags.Unk9);
+                return AnimFlags.HasFlag(AnimationFlags.Unk9);
             }
             set
             {
-                I_12 = I_12.SetFlag(AnimationFlags.Unk9, value);
+                AnimFlags = AnimFlags.SetFlag(AnimationFlags.Unk9, value);
             }
         }
         [YAXDontSerialize]
@@ -1120,11 +1120,11 @@ namespace Xv2CoreLib.BAC
         {
             get
             {
-                return I_12.HasFlag(AnimationFlags.Unk10);
+                return AnimFlags.HasFlag(AnimationFlags.Unk10);
             }
             set
             {
-                I_12 = I_12.SetFlag(AnimationFlags.Unk10, value);
+                AnimFlags = AnimFlags.SetFlag(AnimationFlags.Unk10, value);
             }
         }
         [YAXDontSerialize]
@@ -1132,11 +1132,11 @@ namespace Xv2CoreLib.BAC
         {
             get
             {
-                return I_12.HasFlag(AnimationFlags.Unk11);
+                return AnimFlags.HasFlag(AnimationFlags.Unk11);
             }
             set
             {
-                I_12 = I_12.SetFlag(AnimationFlags.Unk11, value);
+                AnimFlags = AnimFlags.SetFlag(AnimationFlags.Unk11, value);
             }
         }
         [YAXDontSerialize]
@@ -1144,11 +1144,11 @@ namespace Xv2CoreLib.BAC
         {
             get
             {
-                return I_12.HasFlag(AnimationFlags.Unk12);
+                return AnimFlags.HasFlag(AnimationFlags.Unk12);
             }
             set
             {
-                I_12 = I_12.SetFlag(AnimationFlags.Unk12, value);
+                AnimFlags = AnimFlags.SetFlag(AnimationFlags.Unk12, value);
             }
         }
         [YAXDontSerialize]
@@ -1156,11 +1156,11 @@ namespace Xv2CoreLib.BAC
         {
             get
             {
-                return I_12.HasFlag(AnimationFlags.Unk13);
+                return AnimFlags.HasFlag(AnimationFlags.Unk13);
             }
             set
             {
-                I_12 = I_12.SetFlag(AnimationFlags.Unk13, value);
+                AnimFlags = AnimFlags.SetFlag(AnimationFlags.Unk13, value);
             }
         }
         [YAXDontSerialize]
@@ -1168,11 +1168,11 @@ namespace Xv2CoreLib.BAC
         {
             get
             {
-                return I_12.HasFlag(AnimationFlags.Unk14);
+                return AnimFlags.HasFlag(AnimationFlags.Unk14);
             }
             set
             {
-                I_12 = I_12.SetFlag(AnimationFlags.Unk14, value);
+                AnimFlags = AnimFlags.SetFlag(AnimationFlags.Unk14, value);
             }
         }
         [YAXDontSerialize]
@@ -1180,11 +1180,11 @@ namespace Xv2CoreLib.BAC
         {
             get
             {
-                return I_12.HasFlag(AnimationFlags.Unk15);
+                return AnimFlags.HasFlag(AnimationFlags.Unk15);
             }
             set
             {
-                I_12 = I_12.SetFlag(AnimationFlags.Unk15, value);
+                AnimFlags = AnimFlags.SetFlag(AnimationFlags.Unk15, value);
             }
         }
        
@@ -1212,34 +1212,34 @@ namespace Xv2CoreLib.BAC
         public ushort EanIndex { get; set; }  //ushort
         [YAXAttributeFor("AnimationFlags")]
         [YAXSerializeAs("values")]
-        public AnimationFlags I_12 { get; set; } //ushort
+        public AnimationFlags AnimFlags { get; set; } //ushort
         [YAXAttributeFor("I_14")]
         [YAXSerializeAs("value")]
         public ushort I_14 { get; set; }
         [YAXAttributeFor("StartFrame")]
         [YAXSerializeAs("value")]
-        public ushort I_16 { get; set; }
+        public ushort StartFrame { get; set; }
         [YAXAttributeFor("EndFrame")]
         [YAXSerializeAs("value")]
-        public ushort I_18 { get; set; } = ushort.MaxValue;
+        public ushort EndFrame { get; set; } = ushort.MaxValue;
         [YAXAttributeFor("LoopStartFrame")]
         [YAXSerializeAs("value")]
-        public ushort I_20 { get; set; } = ushort.MaxValue;
+        public ushort LoopStartFrame { get; set; } = ushort.MaxValue;
         [YAXAttributeFor("I_22")]
         [YAXSerializeAs("value")]
         public ushort I_22 { get; set; }
         [YAXAttributeFor("TimeScale")]
         [YAXFormat("0.0########")]
         [YAXSerializeAs("Amount")]
-        public float F_24 { get; set; } = 1f;
+        public float TimeScale { get; set; } = 1f;
         [YAXAttributeFor("StartBlendWeight")]
         [YAXFormat("0.0########")]
         [YAXSerializeAs("value")]
-        public float F_28 { get; set; } = 1f;
+        public float BlendWeight { get; set; } = 1f;
         [YAXAttributeFor("BlendWeightIncreasePerFrame")]
         [YAXFormat("0.0########")]
         [YAXSerializeAs("value")]
-        public float F_32 { get; set; } = 0f;
+        public float BlendWeightIncrease { get; set; } = 0f;
 
         public static List<BAC_Type0> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
         {
@@ -1255,15 +1255,15 @@ namespace Xv2CoreLib.BAC
                     Flags = BitConverter.ToInt16(rawBytes, offset + 6),
                     Ean_Type = (EanType)BitConverter.ToUInt16(rawBytes, offset + 8),
                     EanIndex = BitConverter.ToUInt16(rawBytes, offset + 10),
-                    I_12 = (AnimationFlags)BitConverter.ToUInt16(rawBytes, offset + 12),
+                    AnimFlags = (AnimationFlags)BitConverter.ToUInt16(rawBytes, offset + 12),
                     I_14 = BitConverter.ToUInt16(rawBytes, offset + 14),
-                    I_16 = BitConverter.ToUInt16(rawBytes, offset + 16),
-                    I_18 = BitConverter.ToUInt16(rawBytes, offset + 18),
-                    I_20 = BitConverter.ToUInt16(rawBytes, offset + 20),
+                    StartFrame = BitConverter.ToUInt16(rawBytes, offset + 16),
+                    EndFrame = BitConverter.ToUInt16(rawBytes, offset + 18),
+                    LoopStartFrame = BitConverter.ToUInt16(rawBytes, offset + 20),
                     I_22 = BitConverter.ToUInt16(rawBytes, offset + 22),
-                    F_24 = BitConverter.ToSingle(rawBytes, offset + 24),
-                    F_28 = BitConverter.ToSingle(rawBytes, offset + 28),
-                    F_32 = BitConverter.ToSingle(rawBytes, offset + 32)
+                    TimeScale = BitConverter.ToSingle(rawBytes, offset + 24),
+                    BlendWeight = BitConverter.ToSingle(rawBytes, offset + 28),
+                    BlendWeightIncrease = BitConverter.ToSingle(rawBytes, offset + 32)
                 });
 
                 offset += 36;
@@ -1284,15 +1284,15 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.Flags));
                 bytes.AddRange(BitConverter.GetBytes((ushort)type.Ean_Type));
                 bytes.AddRange(BitConverter.GetBytes(type.EanIndex));
-                bytes.AddRange(BitConverter.GetBytes((ushort)type.I_12));
+                bytes.AddRange(BitConverter.GetBytes((ushort)type.AnimFlags));
                 bytes.AddRange(BitConverter.GetBytes(type.I_14));
-                bytes.AddRange(BitConverter.GetBytes(type.I_16));
-                bytes.AddRange(BitConverter.GetBytes(type.I_18));
-                bytes.AddRange(BitConverter.GetBytes(type.I_20));
+                bytes.AddRange(BitConverter.GetBytes(type.StartFrame));
+                bytes.AddRange(BitConverter.GetBytes(type.EndFrame));
+                bytes.AddRange(BitConverter.GetBytes(type.LoopStartFrame));
                 bytes.AddRange(BitConverter.GetBytes(type.I_22));
-                bytes.AddRange(BitConverter.GetBytes(type.F_24));
-                bytes.AddRange(BitConverter.GetBytes(type.F_28));
-                bytes.AddRange(BitConverter.GetBytes(type.F_32));
+                bytes.AddRange(BitConverter.GetBytes(type.TimeScale));
+                bytes.AddRange(BitConverter.GetBytes(type.BlendWeight));
+                bytes.AddRange(BitConverter.GetBytes(type.BlendWeightIncrease));
             }
 
             return bytes;
@@ -1315,25 +1315,58 @@ namespace Xv2CoreLib.BAC
         {
             return new BAC_Type0()
             {
-                F_24 = F_24,
-                F_28 = F_28,
-                F_32 = F_32,
+                TimeScale = TimeScale,
+                BlendWeight = BlendWeight,
+                BlendWeightIncrease = BlendWeightIncrease,
                 StartTime = StartTime,
                 Duration = Duration,
                 I_04 = I_04,
                 Flags = Flags,
                 Ean_Type = Ean_Type,
                 EanIndex = EanIndex,
-                I_12 = I_12,
+                AnimFlags = AnimFlags,
                 I_14 = I_14,
-                I_16 = I_16,
-                I_18 = I_18,
-                I_20 = I_20,
+                StartFrame = StartFrame,
+                EndFrame = EndFrame,
+                LoopStartFrame = LoopStartFrame,
                 I_22 = I_22
             };
 
         }
         
+        //XenoKit
+        public static int CalculateNumOfBlendingFrames(IList<IBacType> types, int frame)
+        {
+            int blendingFrames = 0;
+
+            for(int currentFrame = 0; currentFrame <= frame; currentFrame++)
+            {
+                if (blendingFrames > 0)
+                    blendingFrames--;
+
+                foreach (var type in types.Where(x => x.GetType() == typeof(BAC_Type0) && x.StartTime == currentFrame))
+                {
+                    if (type is BAC_Type0 anim)
+                    {
+                        if (anim.EanIndex != ushort.MaxValue && anim.BlendWeight < 1f && anim.BlendWeightIncrease > 0f)
+                        {
+                            //Raise to power of ten twice (1.0 -> 100)
+                            float blendWeight = anim.BlendWeight * (10 ^ 2);
+                            float blendWeightIncrease = anim.BlendWeightIncrease * (10 ^ 2);
+                            float maxBlendWeight = 1f * (10 ^ 2);
+
+                            int blendAmount = (int)((maxBlendWeight - blendWeight) / blendWeightIncrease);
+
+                            if (blendAmount > blendingFrames)
+                                blendingFrames = blendAmount;
+                        }
+                    }
+                }
+            }
+
+            //ALways return atleast 1
+            return (blendingFrames != 0) ? blendingFrames : 1;
+        }
     }
 
     [YAXSerializeAs("Hitbox")]
@@ -1691,7 +1724,7 @@ namespace Xv2CoreLib.BAC
         [YAXAttributeFor("TimeScale")]
         [YAXFormat("0.0########")]
         [YAXSerializeAs("Amount")]
-        public float F_08 { get; set; } = 1f;
+        public float TimeScale { get; set; } = 1f;
 
         public static List<BAC_Type4> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
         {
@@ -1705,7 +1738,7 @@ namespace Xv2CoreLib.BAC
                     Duration = BitConverter.ToInt16(rawBytes, offset + 2),
                     I_04 = BitConverter.ToInt16(rawBytes, offset + 4),
                     Flags = BitConverter.ToInt16(rawBytes, offset + 6),
-                    F_08 = BitConverter.ToSingle(rawBytes, offset + 8)
+                    TimeScale = BitConverter.ToSingle(rawBytes, offset + 8)
                 });
 
                 offset += 12;
@@ -1724,7 +1757,7 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.Duration));
                 bytes.AddRange(BitConverter.GetBytes(type.I_04));
                 bytes.AddRange(BitConverter.GetBytes(type.Flags));
-                bytes.AddRange(BitConverter.GetBytes(type.F_08));
+                bytes.AddRange(BitConverter.GetBytes(type.TimeScale));
             }
 
             return bytes;
