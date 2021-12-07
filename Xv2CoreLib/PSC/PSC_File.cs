@@ -8,6 +8,7 @@ using YAXLib;
 
 namespace Xv2CoreLib.PSC
 {
+    [Serializable]
     [YAXSerializeAs("PSC")]
     public class PSC_File
     {
@@ -213,6 +214,7 @@ namespace Xv2CoreLib.PSC
         }
     }
 
+    [Serializable]
     [YAXSerializeAs("Configuration")]
     public class PSC_Configuration
     {
@@ -255,6 +257,7 @@ namespace Xv2CoreLib.PSC
         }
     }
 
+    [Serializable]
     public class PSC_Entry : IInstallable
     {
         [YAXDontSerialize]
@@ -280,6 +283,7 @@ namespace Xv2CoreLib.PSC
 
     }
 
+    [Serializable]
     public class PSC_SpecEntry : IInstallable
     {
         [YAXDontSerialize]

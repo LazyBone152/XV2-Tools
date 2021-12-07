@@ -54,11 +54,11 @@ namespace EEPK_Organiser.Forms.EMP
         }
 
 
-        private Xv2CoreLib.EMB_CLASS.EMB_File textureContainer { get; set; }
+        private EMB_File textureContainer { get; set; }
         private EMM_File materialFile { get; set; }
         private EepkEditor mainWindow = null;
 
-        public EMP_Editor(EMP_File _empFile, string empName, Xv2CoreLib.EMB_CLASS.EMB_File _textureContainer, EMM_File _materialFile, EepkEditor _mainWindow)
+        public EMP_Editor(EMP_File _empFile, string empName, EMB_File _textureContainer, EMM_File _materialFile, EepkEditor _mainWindow)
         {
             if (_empFile == null)
                 throw new InvalidDataException("_empFile was null. Cannot open EMP Editor.");
@@ -339,26 +339,6 @@ namespace EEPK_Organiser.Forms.EMP
             }
         }
 
-        //Undo/Redo 
-        public RelayCommand UndoCommand => new RelayCommand(Undo, UndoManager.Instance.CanUndo);
-        private void Undo()
-        {
-            UndoManager.Instance.Undo();
-            RefreshItems();
-        }
-
-        public RelayCommand RedoCommand => new RelayCommand(Redo, UndoManager.Instance.CanRedo);
-        private void Redo()
-        {
-            UndoManager.Instance.Redo();
-            RefreshItems();
-        }
-
-        private void RefreshItems()
-        {
-            empTree.Items.Refresh();
-        }
-
         //ParticleEffect (general)
         public RelayCommand AddParticleEffect_Command => new RelayCommand(AddParticleEffect);
         private void AddParticleEffect()
@@ -392,8 +372,6 @@ namespace EEPK_Organiser.Forms.EMP
                 List<IUndoRedo> undos = new List<IUndoRedo>();
                 _particleEffect.AddNew(-1, undos);
                 UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Add Child Particle Effect"));
-
-                RefreshItems();
             }
             catch (Exception ex)
             {
@@ -414,7 +392,6 @@ namespace EEPK_Organiser.Forms.EMP
 
             UndoManager.Instance.AddCompositeUndo(undos, "Remove Particle Effect");
 
-            RefreshItems();
             empTree.Focus();
 
         }
@@ -572,8 +549,6 @@ namespace EEPK_Organiser.Forms.EMP
                     {
                         undos.Add(new UndoableListAdd<ParticleEffect>(parentList, newParticleEffect));
                         parentList.Add(newParticleEffect);
-
-                        RefreshItems();
                     }
                 }
 
@@ -607,8 +582,6 @@ namespace EEPK_Organiser.Forms.EMP
 
                 undos.Add(new UndoableListAdd<ParticleEffect>(_particleEffect.ChildParticleEffects, newParticleEffect));
                 _particleEffect.ChildParticleEffects.Add(newParticleEffect);
-
-                RefreshItems();
 
                 UndoManager.Instance.AddCompositeUndo(undos, "Paste Particle Effect");
             }

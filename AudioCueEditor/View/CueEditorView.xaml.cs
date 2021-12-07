@@ -23,6 +23,7 @@ using GalaSoft.MvvmLight.CommandWpf;
 using MahApps.Metro.Controls.Dialogs;
 using Xv2CoreLib.Resource.UndoRedo;
 using Xv2CoreLib.HCA;
+using System.Diagnostics;
 
 namespace AudioCueEditor.View
 {
@@ -43,9 +44,25 @@ namespace AudioCueEditor.View
         }
         #endregion
 
-
+        #region DependencyProperty
         public static readonly DependencyProperty AcbFileProperty = DependencyProperty.Register(
-            "AcbFile", typeof(ACB_Wrapper), typeof(CueEditorView), new PropertyMetadata(default(ACB_Wrapper)));
+            "AcbFile", typeof(ACB_Wrapper), typeof(CueEditorView), new PropertyMetadata(OnAcbChanged));
+
+        private static DependencyPropertyChangedEventHandler AcbChanged;
+
+        private static void OnAcbChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (AcbChanged != null)
+                AcbChanged.Invoke(sender, e);
+        }
+
+
+        private void AcbInstanceChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            NotifyPropertyChanged(nameof(AcbFile));
+            NotifyPropertyChanged(nameof(IsFileLoadedProp));
+        }
+        #endregion
 
         public ACB_Wrapper AcbFile
         {
@@ -58,6 +75,7 @@ namespace AudioCueEditor.View
                 NotifyPropertyChanged(nameof(IsActionsEnabled));
             }
         }
+        public bool IsFileLoadedProp { get { return AcbFile != null; } }
         public bool IsSequenceTypeEnabled { get { return (AcbFile != null) ? AcbFormatHelper.Instance.IsSequenceTypeEnabled(AcbFile.AcbFile.Version) : false; } }
         public bool IsActionsEnabled { get { return (AcbFile != null) ? AcbFormatHelper.Instance.IsActionsEnabled(AcbFile.AcbFile.Version) : false; } }
 
@@ -212,8 +230,10 @@ namespace AudioCueEditor.View
             InitializeComponent();
             rootGrid.DataContext = this;
             dataGrid.SelectionChanged += new SelectionChangedEventHandler(CueSelectionChanged);
+            AcbChanged += AcbInstanceChanged;
         }
-        
+
+
         private void CueSelectionChanged(object sender, SelectionChangedEventArgs arg)
         {
             NotifyPropertyChanged("SequenceCueNotVisibile");

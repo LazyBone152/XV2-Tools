@@ -87,5 +87,7 @@ namespace Xv2CoreLib.EMB_CLASS
             if(undos != null)
                 undos.Add(new UndoableProperty<EmbEntry>(nameof(EmbEntry.DdsImage), entry, oldBitmap, entry.DdsImage));
         }
+    
+    
     }
 }

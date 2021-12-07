@@ -181,4 +181,5 @@ namespace AudioCueEditor.Audio
             CurrentWav.waveStream.CurrentTime = new TimeSpan(0, 0, 0, (int)seconds);
         }
     }
+
 }

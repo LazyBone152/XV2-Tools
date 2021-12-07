@@ -94,7 +94,7 @@ namespace Xv2CoreLib.IDB
 
             foreach (var entry in Entries)
             {
-                if (entry.ID == (ushort)id && entry.Type == (IDB_Type)type) return true;
+                if (entry.ID == (ushort)id && entry.Type == type) return true;
             }
 
             return false;
@@ -107,6 +107,32 @@ namespace Xv2CoreLib.IDB
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
             }
             new Deserializer(this, path);
+        }
+
+        public static bool IsIdbMsgFile(string path)
+        {
+            switch (Path.GetFileName(path))
+            {
+                case "proper_noun_costume_name_":
+                case "proper_noun_accessory_name_":
+                case "proper_noun_talisman_name_":
+                case "proper_noun_material_name_":
+                case "proper_noun_battle_name_":
+                case "proper_noun_extra_name_":
+                case "proper_noun_gallery_illust_name_":
+                case "proper_noun_float_pet_name_":
+                case "proper_noun_costume_info_":
+                case "proper_noun_accessory_info_":
+                case "proper_noun_talisman_info_":
+                case "proper_noun_material_info_":
+                case "proper_noun_battle_info_":
+                case "proper_noun_extra_info_":
+                case "proper_noun_gallery_illust_info_":
+                case "proper_noun_float_pet_info_":
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         public static string NameMsgFile(string idbName)
@@ -202,7 +228,7 @@ namespace Xv2CoreLib.IDB
         [YAXDontSerialize]
         public int SortID { get { return ID; } }
         [YAXDontSerialize]
-        public string Index { get { return $"{ID_Binding}_{Type}"; } set { ID_Binding = value.Split('_')[0]; Type = (IDB_Type)ushort.Parse(value.Split('_')[1]); } }
+        public string Index { get { return $"{ID_Binding}_{Type}"; } set { ID_Binding = value.Split('_')[0]; Type = ushort.Parse(value.Split('_')[1]); } }
         [YAXDontSerialize]
         public ushort ID { get { return ushort.Parse(ID_Binding); } set { ID_Binding = value.ToString(); } }
 
@@ -224,7 +250,7 @@ namespace Xv2CoreLib.IDB
         public ushort DescMsgID { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("Type")]
-        public IDB_Type Type { get; set; } //ushort
+        public ushort Type { get; set; } //ushort
         [YAXAttributeFor("I_10")]
         [YAXSerializeAs("value")]
         public ushort I_10 { get; set; }
@@ -335,6 +361,7 @@ namespace Xv2CoreLib.IDB
 
             return str2.ToString();
         }
+
     }
 
     [YAXSerializeAs("Effect")]

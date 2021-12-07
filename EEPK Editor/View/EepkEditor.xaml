@@ -850,7 +850,7 @@
 
                         <DataGrid.RowDetailsTemplate>
                             <DataTemplate>
-                                <ListBox x:Name="emoListBox" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" ItemsSource="{Binding Files}">
+                                <ListBox x:Name="emoListBox" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" ItemsSource="{Binding Files.Binding}">
                                     <ListBox.Resources>
                                         <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Black"/>
 

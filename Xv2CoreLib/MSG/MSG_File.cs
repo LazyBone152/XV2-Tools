@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using YAXLib;
 using System.Net;
+using Xv2CoreLib.IDB;
 
 namespace Xv2CoreLib.MSG
 {
@@ -547,7 +548,7 @@ namespace Xv2CoreLib.MSG
 
         [BindingSubList]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Line")]
-        public List<Msg_Line> Msg_Content { get; set; }
+        public List<Msg_Line> Msg_Content { get; set; } = new List<Msg_Line>();
 
         public string DecodedString(int line = 0)
         {
@@ -555,6 +556,57 @@ namespace Xv2CoreLib.MSG
             if (Msg_Content.Count == 0) throw new Exception("Msg_Content.Count was 0.");
 
             return WebUtility.HtmlDecode(Msg_Content[line].Text);
+        }
+   
+        public static MSG_Entry CreateDummy(string name, int id)
+        {
+            return new MSG_Entry() 
+            { 
+                Index = id.ToString(),
+                Name = name,
+                Msg_Content = new List<Msg_Line>() { new Msg_Line() { Text = ""} }
+            };
+
+        }
+
+        public static string ChooseCostumeEntryName(IDB_Entry idb)
+        {
+            string str = "wear_";
+
+            if (idb.RaceLock == RaceLock.HUM || idb.RaceLock == RaceLock.SYM || idb.RaceLock == (RaceLock.HUM | RaceLock.SYM))
+            {
+                str += "hum_";
+            }
+            else if (idb.RaceLock == RaceLock.HUF || idb.RaceLock == RaceLock.SYF || idb.RaceLock == (RaceLock.HUF | RaceLock.SYF))
+            {
+                str += "huf_";
+            }
+            else if (idb.RaceLock == RaceLock.NMC)
+            {
+                str += "nmc_";
+            }
+            else if (idb.RaceLock == RaceLock.FRI)
+            {
+                str += "fri_";
+            }
+            else if (idb.RaceLock == RaceLock.MAM)
+            {
+                str += "mam_";
+            }
+            else if (idb.RaceLock == RaceLock.MAF)
+            {
+                str += "maf_";
+            }
+            else if (idb.RaceLock == (RaceLock.MAM | RaceLock.MAF))
+            {
+                str += "mar_";
+            }
+            else
+            {
+                str += "cmn_";
+            }
+
+            return str;
         }
     }
 

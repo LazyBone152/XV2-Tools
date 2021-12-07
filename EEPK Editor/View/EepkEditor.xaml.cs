@@ -440,7 +440,6 @@ namespace EEPK_Organiser.View
                             MessageBox.Show(String.Format("The added file was renamed to \"{0}\" because \"{1}\" was already used.", newName, originalName), "Add File", MessageBoxButton.OK, MessageBoxImage.Information);
                         }
 
-                        emoDataGrid.Items.Refresh();
                         emoDataGrid.SelectedItem = asset;
                         emoDataGrid.ScrollIntoView(asset);
                     }
@@ -628,7 +627,6 @@ namespace EEPK_Organiser.View
                             }
 
                             var selectedItem = emoDataGrid.SelectedItem;
-                            emoDataGrid.Items.Refresh();
                             emoDataGrid.SelectedItem = selectedItem;
                             emoDataGrid.ScrollIntoView(selectedItem);
                         }
@@ -675,7 +673,6 @@ namespace EEPK_Organiser.View
 
                             UndoManager.Instance.AddCompositeUndo(undos, "Delete File (EMO)");
 
-                            emoDataGrid.Items.Refresh();
                             emoDataGrid.SelectedItem = parentAsset;
                             emoDataGrid.ScrollIntoView(parentAsset);
                         }

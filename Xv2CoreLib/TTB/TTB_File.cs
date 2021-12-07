@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using YAXLib;
 
@@ -144,6 +145,9 @@ namespace Xv2CoreLib.TTB
         {
             if (Entries == null) Entries = new List<TTB_Entry>();
 
+            //Ensure all IDs are sequential
+            AddDummyEntries();
+
             List<byte> bytes = new List<byte>();
             List<byte> ttbEntryBytes = new List<byte>();
             List<string> strings = new List<string>();
@@ -257,29 +261,56 @@ namespace Xv2CoreLib.TTB
 
         #endregion
 
+        public bool IsEventIdUsed(int id)
+        {
+            foreach (var entry in Entries)
+            {
+                if (entry.SubEntries != null)
+                {
+                    if (entry.SubEntries.FirstOrDefault(x => x.ID == id) != null)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        public void AddDummyEntries()
+        {
+            int maxID = Entries.Max(x => x.CmsID);
+
+            for(int i = 0; i < maxID; i++)
+            {
+                if (!Entries.Any(x => x.CmsID == i))
+                    Entries.Add(new TTB_Entry() { CmsID = i });
+            }
+
+            Entries.Sort((x, y) => x.SortID - y.SortID);
+        }
     }
 
     [YAXSerializeAs("Entry")]
     public class TTB_Entry : IInstallable_2<TTB_Event>, IInstallable
     {
         #region NonSerialized
-        [YAXDontSerialize]
-        public int CmsID { set { I_12 = value.ToString(); } get { return int.Parse(I_12); } }
 
         //interface
         [YAXDontSerialize]
         public int SortID { get { return CmsID; } }
         [YAXDontSerialize]
-        public string Index { get { return I_12; } set { I_12 = value; } }
+        public string Index { get { return CmsID.ToString(); } set { CmsID = int.Parse(value); } }
         #endregion
 
         [YAXAttributeForClass]
         [YAXSerializeAs("Cms_Id")]
-        public string I_12 { get; set; } //12
+        public int CmsID { get; set; } //12
 
         [BindingSubList]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Event")]
         public List<TTB_Event> SubEntries { get; set; } = new List<TTB_Event>();
+   
     }
 
     [YAXSerializeAs("Event")]
@@ -287,24 +318,15 @@ namespace Xv2CoreLib.TTB
     {
         #region NonSerialized
         [YAXDontSerialize]
-        public int SortID { get { return int.Parse(Index); } set { Index = value.ToString(); } }
-
+        public int SortID { get { return ID; } set { ID = value; } }
         [YAXDontSerialize]
-        public int Cms_Id1 { get { return int.Parse(I_04); } set { I_04 = value.ToString(); } }
-        [YAXDontSerialize]
-        public int Cms_Id2 { get { return int.Parse(I_16); } set { I_16 = value.ToString(); } }
-        [YAXDontSerialize]
-        public int Cms_Id3 { get { return int.Parse(I_28); } set { I_28 = value.ToString(); } }
-        [YAXDontSerialize]
-        public int Cms_Id4 { get { return int.Parse(I_40); } set { I_40 = value.ToString(); } }
-        [YAXDontSerialize]
-        public int Cms_Id5 { get { return int.Parse(I_52); } set { I_52 = value.ToString(); } }
+        public string Index { get { return ID.ToString(); } set { ID = int.Parse(value); } }
         #endregion
 
-        [BindingAutoId]
+        //[BindingAutoId]
         [YAXAttributeForClass]
         [YAXSerializeAs("ID")]
-        public string Index { get; set; } //0 (ID)
+        public int ID { get; set; } //0 (ID)
        
 
         [YAXAttributeFor("Type")]
@@ -314,7 +336,7 @@ namespace Xv2CoreLib.TTB
 
         [YAXAttributeFor("Actor1")]
         [YAXSerializeAs("Cms_Id")]
-        public string I_04 { get; set; } //4
+        public int Cms_Id1 { get; set; } //4
         [YAXAttributeFor("Actor1")]
         [YAXSerializeAs("Costume")]
         public int Costume { get; set; } //8
@@ -330,7 +352,7 @@ namespace Xv2CoreLib.TTB
 
         [YAXAttributeFor("Actor2")]
         [YAXSerializeAs("Cms_Id")]
-        public string I_16 { get; set; } //16
+        public int Cms_Id2 { get; set; } //16
         [YAXAttributeFor("Actor2")]
         [YAXSerializeAs("Costume")]
         public int Costume2 { get; set; } //20
@@ -346,7 +368,7 @@ namespace Xv2CoreLib.TTB
 
         [YAXAttributeFor("Actor3")]
         [YAXSerializeAs("Cms_Id")]
-        public string I_28 { get; set; } //28
+        public int Cms_Id3 { get; set; } //28
         [YAXAttributeFor("Actor3")]
         [YAXSerializeAs("Costume")]
         public int Costume3 { get; set; } //32
@@ -362,7 +384,7 @@ namespace Xv2CoreLib.TTB
 
         [YAXAttributeFor("Actor4")]
         [YAXSerializeAs("Cms_Id")]
-        public string I_40 { get; set; } //40
+        public int Cms_Id4 { get; set; } //40
         [YAXAttributeFor("Actor4")]
         [YAXSerializeAs("Costume")]
         public int Costume4 { get; set; } //44
@@ -378,7 +400,7 @@ namespace Xv2CoreLib.TTB
 
         [YAXAttributeFor("Actor5")]
         [YAXSerializeAs("Cms_Id")]
-        public string I_52 { get; set; } //52
+        public int Cms_Id5 { get; set; } //52
         [YAXAttributeFor("Actor5")]
         [YAXSerializeAs("Costume")]
         public int Costume5 { get; set; } //56

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Xv2CoreLib.IDB;
 using Xv2CoreLib.MSG;
 
 namespace LB_Mod_Installer.Installer
@@ -33,7 +34,7 @@ namespace LB_Mod_Installer.Installer
         /// <param name="mode"></param>
         /// <param name="args"></param>
         /// <returns>MSG ID for Mode==CMS, MSG Index for Mode==IDB</returns>
-        public int WriteMsgEntries(Msg_Component msgComponent, string path, Mode mode, string args = null)
+        public int WriteMsgEntries(Msg_Component msgComponent, string path, Mode mode, string args = null, IDB_Entry idbEntry = null)
         {
             Start:
             List<MSG_File> msgFiles = LoadMsgFiles(path);
@@ -64,11 +65,11 @@ namespace LB_Mod_Installer.Installer
 
             if (mode == Mode.CMS || mode == Mode.IDB_LB_HUD)
             {
-                name = GetMsgName(path, args);
+                name = GetMsgName(path, args, msgFiles[0]);
             }
             else if (mode == Mode.IDB)
             {
-                name = GetMsgName(path, id.ToString());
+                name = GetMsgName(path, id.ToString(), msgFiles[0], idbEntry);
             }
 
             //Process MsgComponent and add name and id
@@ -113,16 +114,45 @@ namespace LB_Mod_Installer.Installer
             return id;
         }
 
-        private string GetMsgName(string filePath, string args)
+        private List<MSG_File> LoadMsgFiles(string path)
         {
-            switch (Path.GetFileName(filePath))
+            List<MSG_File> files = new List<MSG_File>();
+
+            foreach (string suffix in GeneralInfo.LanguageSuffix)
+            {
+                string msgPath = string.Format("{0}{1}", path, suffix);
+                
+                files.Add((MSG_File)install.GetParsedFile<MSG_File>(msgPath));
+            }
+
+            if (files.Count != GeneralInfo.LanguageSuffix.Length) throw new Exception("The amount of msg files did not match the amount of languages.");
+
+            return files;
+        }
+        
+        private string GetMsgName(string path, string args, MSG_File msgFile, IDB_Entry idbEntry = null)
+        {
+            switch (Path.GetFileName(path))
             {
                 case "proper_noun_talisman_info_":
                     return String.Format("talisman_eff_{0}", int.Parse(args).ToString("D3"));
                 case "proper_noun_talisman_name_":
                     return String.Format("talisman_{0}", int.Parse(args).ToString("D3"));
                 case "proper_noun_costume_name_":
-                    return String.Format("wear_cmn_{0}", int.Parse(args).ToString("D3"));
+                    {
+                        string name = MSG_Entry.ChooseCostumeEntryName(idbEntry);
+                        int id = 300;
+
+                        while (msgFile.MSG_Entries.Any(x => x.Name == String.Format("{0}{1}", name, id.ToString("D3"))))
+                        {
+                            id++;
+
+                            if (id >= ushort.MaxValue)
+                                throw new Exception("MsgComponentInstall.GetMsgName: Overflow, an ID could not be assigned to the costume.");
+                        }
+
+                        return String.Format("{0}{1}", name, id.ToString("D3"));
+                    }
                 case "proper_noun_costume_info_":
                     return String.Format("wear_cmn_eff_{0}", int.Parse(args).ToString("D3"));
                 case "proper_noun_accessory_name_":
@@ -159,23 +189,6 @@ namespace LB_Mod_Installer.Installer
 
             throw new InvalidOperationException("Could not determine the name for the msg entry.");
         }
-
-        private List<MSG_File> LoadMsgFiles(string path)
-        {
-            List<MSG_File> files = new List<MSG_File>();
-
-            foreach (string suffix in GeneralInfo.LanguageSuffix)
-            {
-                string msgPath = string.Format("{0}{1}", path, suffix);
-                
-                files.Add((MSG_File)install.GetParsedFile<MSG_File>(msgPath));
-            }
-
-            if (files.Count != GeneralInfo.LanguageSuffix.Length) throw new Exception("The amount of msg files did not match the amount of languages.");
-
-            return files;
-        }
-        
 
         private bool ValidateMsgFiles(List<MSG_File> MsgFiles, string path)
         {

@@ -334,21 +334,7 @@ namespace Xv2CoreLib.AFS2
             //Keeps all IDs consecutive by adding null entries (need for compatibility with Eternity Audio Tool)
 
             int maxId = Entries.Max(x => x.AwbId);
-            /*
-            List<AFS2_AudioFile> newEntries = new List<AFS2_AudioFile>();
 
-            for (int i = 0; i <= maxId; i++)
-            {
-                if(!Entries.Any(x => x.AwbId == i))
-                {
-                    newEntries.Add(new AFS2_AudioFile() { AwbId = (ushort)i, bytes = new byte[0] });
-                }
-                else
-                {
-                    newEntries.Add(Entries.FirstOrDefault(x => x.AwbId == i));
-                }
-            }
-            */
             for (int i = 0; i < maxId; i++)
             {
                 if (!Entries.Any(x => x.AwbId == i))

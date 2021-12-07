@@ -18,8 +18,8 @@
         mc:Ignorable="d"
         x:Name="empEditorWindow" Title="EMP Editor" Height="575" Width="1110" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen" AllowDrop="True" WindowStyle="ThreeDBorderWindow">
     <Window.InputBindings>
-        <KeyBinding Key="Z" Modifiers="Ctrl"  Command="{Binding UndoCommand}"/>
-        <KeyBinding Key="Y" Modifiers="Ctrl"  Command="{Binding RedoCommand}"/>
+        <KeyBinding Key="Z" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=UndoCommand}"/>
+        <KeyBinding Key="Y" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=RedoCommand}"/>
     </Window.InputBindings>
     <Window.Resources>
         <converters:ColorFormatConverter x:Key="RgbConverter" />
@@ -61,7 +61,7 @@
                             <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="{DynamicResource {x:Static SystemColors.HighlightTextColorKey}}"/>
                         </TreeView.Resources>
                         <TreeView.ItemTemplate>
-                            <HierarchicalDataTemplate DataType="{x:Type emp:ParticleEffect}" ItemsSource="{Binding ChildParticleEffects}">
+                            <HierarchicalDataTemplate DataType="{x:Type emp:ParticleEffect}" ItemsSource="{Binding ChildParticleEffects.Binding}">
                                 <TextBlock Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" MinWidth="100" Tag="{Binding DataContext, ElementName=empEditorWindow}">
                                     <TextBlock.ContextMenu>
                                         <ContextMenu StaysOpen="true" FontSize="12">

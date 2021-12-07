@@ -14,6 +14,7 @@ using Xv2CoreLib.CUS;
 using Xv2CoreLib.Eternity;
 using Xv2CoreLib.HCI;
 using Xv2CoreLib.PSC;
+using Xv2CoreLib.TTB;
 using YAXLib;
 
 namespace LB_Mod_Installer.Binding
@@ -30,6 +31,7 @@ namespace LB_Mod_Installer.Binding
         public const string CSO_PATH = "system/chara_sound.cso";
         public const string PSC_PATH = "system/parameter_spec_char.psc";
         public const string AUR_PATH = "system/aura_setting.aur";
+        public const string TTB_PATH = "quest/XTALK/CommonDialogue.ttb";
         private const string HCI_PATH = "ui/CharaImage/chara_image.hci";
         private const string HUM_BCS_PATH = "chara/HUM/HUM.bcs";
         private const string HUF_BCS_PATH = "chara/HUF/HUF.bcs";
@@ -67,6 +69,8 @@ namespace LB_Mod_Installer.Binding
         private List<int> AssignedPartSets = new List<int>();
         private List<int> AssignedCharaIDs = new List<int>();
         private List<string> AssignedCostumes = new List<string>();
+        private List<int> AssignedTtbEventIDs = new List<int>();
+
 
         public BindingManager(Install install)
         {
@@ -401,6 +405,9 @@ namespace LB_Mod_Installer.Binding
                                 retStr = (isLang) ? "true" : "false";
                             }
                             break;
+                        case Function.AutoTtbEvent:
+                            retID = GetFreeTtbEventId();
+                            break;
                     }
                 }
 
@@ -561,6 +568,9 @@ namespace LB_Mod_Installer.Binding
                     case "localkey":
                         bindings.Add(new BindingValue() { Function = Function.LocalKey, Arguments = arguments });
                         break;
+                    case "autottbevent":
+                        bindings.Add(new BindingValue() { Function = Function.AutoTtbEvent, Arguments = arguments });
+                        break;
                     default:
                         throw new FormatException(String.Format("Invalid ID Binding Function (Function = {0}, Argument = {1})\nFull binding: {2}", function, argument, originalBinding));
                 }
@@ -627,10 +637,14 @@ namespace LB_Mod_Installer.Binding
             {
                 switch (bindings[i].Function)
                 {
+                    case Function.AutoTtbEvent:
+                    case Function.Skip:
+                        //Cant have arguments
+                        if (bindings[i].HasArgument()) throw new Exception(String.Format("The {0} binding function takes no arguments, but {2} was found\n({1})", bindings[i].Function, comment, bindings[i].Arguments.Length));
+                        break;
                     case Function.AutoID:
                     case Function.AutoCharaID:
                     case Function.AutoPartSet:
-                    case Function.Skip:
                         //Can have no arguments or have arguments
                         break;
                     case Function.AliasLink:
@@ -1150,6 +1164,31 @@ namespace LB_Mod_Installer.Binding
             return false;
         }
 
+        //TtbEvent
+        private int GetFreeTtbEventId()
+        {
+            int current = 1200;
+
+            while (IsTtbEventIdUsed(current))
+            {
+                current++;
+
+                if (current >= int.MaxValue) return NullTokenInt;
+            }
+            
+            AssignedTtbEventIDs.Add(current);
+
+            return current;
+        }
+
+        private bool IsTtbEventIdUsed(int id)
+        {
+            if (((TTB_File)install.GetParsedFile<TTB_File>(TTB_PATH)).IsEventIdUsed(id)) return true;
+            if (AssignedTtbEventIDs.Contains(id)) return true;
+
+            return false;
+        }
+
         #endregion
 
         #region Misc
@@ -1305,6 +1344,7 @@ namespace LB_Mod_Installer.Binding
         AutoPartSet,
         AutoCharaID,
         AutoCostume,
+        AutoTtbEvent,
         AliasLink,
         SkillID1,
         SkillID2,

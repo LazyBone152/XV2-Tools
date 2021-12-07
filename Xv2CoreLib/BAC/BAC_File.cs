@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -961,7 +960,6 @@ namespace Xv2CoreLib.BAC
             }
         }
 
-        [Serializable]
         public enum EanType : ushort
         {
             Common = 0,
@@ -973,7 +971,6 @@ namespace Xv2CoreLib.BAC
         }
 
         [Flags]
-        [Serializable]
         public enum AnimationFlags : ushort
         {
             MoveWithAxis_X = 1,
@@ -1350,7 +1347,6 @@ namespace Xv2CoreLib.BAC
                     {
                         if (anim.EanIndex != ushort.MaxValue && anim.BlendWeight < 1f && anim.BlendWeightIncrease > 0f)
                         {
-                            //Raise to power of ten twice (1.0 -> 100)
                             float blendWeight = anim.BlendWeight * (10 ^ 2);
                             float blendWeightIncrease = anim.BlendWeightIncrease * (10 ^ 2);
                             float maxBlendWeight = 1f * (10 ^ 2);
@@ -1364,8 +1360,8 @@ namespace Xv2CoreLib.BAC
                 }
             }
 
-            //ALways return atleast 1
-            return (blendingFrames != 0) ? blendingFrames : 1;
+            //Always return atleast 1
+            return (blendingFrames > 0) ? blendingFrames : 1;
         }
     }
 
@@ -2633,34 +2629,23 @@ namespace Xv2CoreLib.BAC
         [YAXDontSerialize]
         public string Type { get { return "Sound"; } }
 
-
-        public enum AcbType : ushort
-        {
-            Common_SE = 0,
-            Character_SE = 2,
-            Character_VOX = 3,
-            Skill_SE = 10,
-            Skill_VOX = 11
-        }
-
-        #region WrapperProps
+        #region NonSerialized
         [YAXDontSerialize]
-        public ushort AcbTypeNumeric { get { return (ushort)acbType; } set { acbType = (AcbType)value; } }
+        public ushort AcbTypeNumeric { get { return (ushort)AcbType; } set { AcbType = (AcbType)value; } }
         #endregion
 
         [YAXAttributeFor("ACB")]
         [YAXSerializeAs("File")]
-        public AcbType acbType { get; set; }
-        [YAXAttributeFor("I_10")]
+        public AcbType AcbType { get; set; }
+        [YAXAttributeFor("SoundFlags")]
         [YAXSerializeAs("value")]
-        [YAXHexValue]
-        public ushort I_10 { get; set; }
+        public SoundFlags SoundFlags { get; set; }
         [YAXAttributeFor("Cue_ID")]
         [YAXSerializeAs("value")]
         public ushort CueId { get; set; }
         [YAXAttributeFor("I_14")]
         [YAXSerializeAs("value")]
-        public short I_14 { get; set; }
+        public ushort I_14 { get; set; }
 
         
         public static List<BAC_Type11> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
@@ -2675,10 +2660,10 @@ namespace Xv2CoreLib.BAC
                     Duration = BitConverter.ToInt16(rawBytes, offset + 2),
                     I_04 = BitConverter.ToInt16(rawBytes, offset + 4),
                     Flags = BitConverter.ToInt16(rawBytes, offset + 6),
-                    acbType = (AcbType)BitConverter.ToUInt16(rawBytes, offset + 8),
-                    I_10 = BitConverter.ToUInt16(rawBytes, offset + 10),
+                    AcbType = (AcbType)BitConverter.ToUInt16(rawBytes, offset + 8),
+                    SoundFlags = (SoundFlags)BitConverter.ToUInt16(rawBytes, offset + 10),
                     CueId = BitConverter.ToUInt16(rawBytes, offset + 12),
-                    I_14 = BitConverter.ToInt16(rawBytes, offset + 14)
+                    I_14 = BitConverter.ToUInt16(rawBytes, offset + 14)
                 });
 
                 offset += 16;
@@ -2697,8 +2682,8 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.Duration));
                 bytes.AddRange(BitConverter.GetBytes(type.I_04));
                 bytes.AddRange(BitConverter.GetBytes(type.Flags));
-                bytes.AddRange(BitConverter.GetBytes((ushort)type.acbType));
-                bytes.AddRange(BitConverter.GetBytes(type.I_10));
+                bytes.AddRange(BitConverter.GetBytes((ushort)type.AcbType));
+                bytes.AddRange(BitConverter.GetBytes((ushort)type.SoundFlags));
                 bytes.AddRange(BitConverter.GetBytes(type.CueId));
                 bytes.AddRange(BitConverter.GetBytes(type.I_14));
             }
@@ -2714,17 +2699,9 @@ namespace Xv2CoreLib.BAC
         [YAXDontSerialize]
         public string Type { get { return "TargetingAssistance"; } }
 
-
-        public enum Axis : ushort
-        {
-            X = 0,
-            Y = 1,
-            Z = 2
-        }
-        
         [YAXAttributeFor("Axis")]
         [YAXSerializeAs("value")]
-        public Axis I_08 { get; set; } //uint16
+        public TargettingAxis I_08 { get; set; } //uint16
         [YAXAttributeFor("I_10")]
         [YAXSerializeAs("value")]
         public short I_10 { get; set; }
@@ -2741,7 +2718,7 @@ namespace Xv2CoreLib.BAC
                     Duration = BitConverter.ToInt16(rawBytes, offset + 2),
                     I_04 = BitConverter.ToInt16(rawBytes, offset + 4),
                     Flags = BitConverter.ToInt16(rawBytes, offset + 6),
-                    I_08 = (Axis)BitConverter.ToInt16(rawBytes, offset + 8),
+                    I_08 = (TargettingAxis)BitConverter.ToInt16(rawBytes, offset + 8),
                     I_10 = BitConverter.ToInt16(rawBytes, offset + 10)
                 });
 
@@ -2776,33 +2753,12 @@ namespace Xv2CoreLib.BAC
         [YAXDontSerialize]
         public string Type { get { return "BcsPartSetInvisibility"; } }
 
-
-        public enum BcsPartId : ushort
-        {
-            FaceBase = 0,
-            FaceForehead = 1,
-            FaceEye = 2,
-            FaceNose = 3,
-            FaceEar = 4,
-            Hair = 5,
-            Bust = 6,
-            Pants = 7,
-            Rists = 8,
-            Boots = 9
-        }
-
-        public enum Switch : ushort
-        {
-            On = 0,
-            Off = 1
-        }
-        
         [YAXAttributeFor("Part")]
         [YAXSerializeAs("value")]
         public BcsPartId I_08 { get; set; } //uint16
         [YAXAttributeFor("Switch")]
         [YAXSerializeAs("value")]
-        public Switch I_10 { get; set; } //uint16
+        public BcsPartVisibilitySwitch I_10 { get; set; } //uint16
         
         public static List<BAC_Type13> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
         {
@@ -2817,7 +2773,7 @@ namespace Xv2CoreLib.BAC
                     I_04 = BitConverter.ToInt16(rawBytes, offset + 4),
                     Flags = BitConverter.ToInt16(rawBytes, offset + 6),
                     I_08 = (BcsPartId)BitConverter.ToInt16(rawBytes, offset + 8),
-                    I_10 = (Switch)BitConverter.ToInt16(rawBytes, offset + 10)
+                    I_10 = (BcsPartVisibilitySwitch)BitConverter.ToInt16(rawBytes, offset + 10)
                 });
 
                 offset += 12;
@@ -3283,33 +3239,13 @@ namespace Xv2CoreLib.BAC
         [YAXDontSerialize]
         public string Type { get { return "Aura"; } }
 
-
-        public enum AuraType : ushort
-        {
-            BoostStart = 0,
-            BoostLoop = 1,
-            BoostEnd = 2,
-            KiaiCharge = 3,
-            KiryokuMax = 4,
-            HenshinStart = 5,
-            HenshinEnd = 6
-        }
-
-        public enum Switch : ushort
-        {
-            On = 0,
-            Off = 1,
-            On_8 = 8,
-            Off_9 = 9
-        }
-
         
         [YAXAttributeFor("Aura")]
         [YAXSerializeAs("Type")]
         public AuraType I_08 { get; set; } //uint16
         [YAXAttributeFor("Aura")]
         [YAXSerializeAs("Switch")]
-        public Switch I_10 { get; set; } // uint16
+        public AuraSwitch I_10 { get; set; } // uint16
         [YAXAttributeFor("I_12")]
         [YAXSerializeAs("value")]
         public int I_12 { get; set; }
@@ -3327,7 +3263,7 @@ namespace Xv2CoreLib.BAC
                     I_04 = BitConverter.ToInt16(rawBytes, offset + 4),
                     Flags = BitConverter.ToInt16(rawBytes, offset + 6),
                     I_08 = (AuraType)BitConverter.ToInt16(rawBytes, offset + 8),
-                    I_10 = (Switch)BitConverter.ToInt16(rawBytes, offset + 10),
+                    I_10 = (AuraSwitch)BitConverter.ToInt16(rawBytes, offset + 10),
                     I_12 = BitConverter.ToInt32(rawBytes, offset + 12),
                 });
 
@@ -4190,5 +4126,82 @@ namespace Xv2CoreLib.BAC
     }
 
 
+    #region Enums
+    public enum AcbType : ushort
+    {
+        Common_SE = 0,
+        Character_SE = 2,
+        Character_VOX = 3,
+        Skill_SE = 10,
+        Skill_VOX = 11
+    }
+
+    [Flags]
+    public enum SoundFlags : ushort
+    {
+        Unk1 = 0x1,
+        Unk2 = 0x2,
+        Unk3 = 0x4,
+        StopWhenParentEnds = 0x8,
+        Unk4 = 0x10,
+        Unk5 = 0x20,
+        Unk6 = 0x40,
+        Unk7 = 0x80,
+        Unk8 = 0x100,
+        Unk9 = 0x200,
+        Unk10 = 0x400,
+        Unk11 = 0x800,
+        Unk12 = 0x1000,
+        Unk13 = 0x2000,
+        Unk14 = 0x4000,
+        Unk15 = 0x8000,
+    }
+
+    public enum AuraType : ushort
+    {
+        BoostStart = 0,
+        BoostLoop = 1,
+        BoostEnd = 2,
+        KiaiCharge = 3,
+        KiryokuMax = 4,
+        HenshinStart = 5,
+        HenshinEnd = 6
+    }
+
+    public enum AuraSwitch : ushort
+    {
+        On = 0,
+        Off = 1,
+        On_8 = 8,
+        Off_9 = 9
+    }
+
+    public enum BcsPartId : ushort
+    {
+        FaceBase = 0,
+        FaceForehead = 1,
+        FaceEye = 2,
+        FaceNose = 3,
+        FaceEar = 4,
+        Hair = 5,
+        Bust = 6,
+        Pants = 7,
+        Rists = 8,
+        Boots = 9
+    }
+
+    public enum BcsPartVisibilitySwitch : ushort
+    {
+        On = 0,
+        Off = 1
+    }
+
+    public enum TargettingAxis : ushort
+    {
+        X = 0,
+        Y = 1,
+        Z = 2
+    }
+    #endregion
 
 }

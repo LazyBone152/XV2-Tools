@@ -533,6 +533,7 @@ namespace Xv2CoreLib.EMB_CLASS
 
             return colors;
         }
+    
     }
 
     [Serializable]

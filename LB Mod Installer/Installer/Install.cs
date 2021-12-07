@@ -1188,6 +1188,15 @@ namespace LB_Mod_Installer.Installer
                 TTB_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<TTB_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : TTB_File.Parse(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 TTB_File binaryFile = (TTB_File)GetParsedFile<TTB_File>(installPath);
 
+                //Set Actor1 CMS_ID
+                foreach(var entry in xmlFile.Entries.Where(x => x.SubEntries != null))
+                {
+                    foreach(var _event in entry.SubEntries)
+                    {
+                        _event.Cms_Id1 = entry.CmsID;
+                    }
+                }
+
                 //Install entries
                 InstallSubEntries<TTB_Event, TTB_Entry>(xmlFile.Entries, binaryFile.Entries, installPath, Sections.TTB_Entry, useSkipBindings);
 
@@ -1404,12 +1413,12 @@ namespace LB_Mod_Installer.Installer
                     if (msgComponent.MsgType == Msg_Component.MsgComponentType.Name)
                     {
                         string nameMsgPath = String.Format("msg/{0}", IDB_File.NameMsgFile(Path.GetFileName(filePath)));
-                        IdbEntry.NameMsgID = (ushort)msgComponentInstall.WriteMsgEntries(msgComponent, nameMsgPath, MsgComponentInstall.Mode.IDB);
+                        IdbEntry.NameMsgID = (ushort)msgComponentInstall.WriteMsgEntries(msgComponent, nameMsgPath, MsgComponentInstall.Mode.IDB, null, IdbEntry);
                     }
                     else if (msgComponent.MsgType == Msg_Component.MsgComponentType.Info)
                     {
                         string infoMsgPath = String.Format("msg/{0}", IDB_File.InfoMsgFile(Path.GetFileName(filePath)));
-                        IdbEntry.DescMsgID = (ushort)msgComponentInstall.WriteMsgEntries(msgComponent, infoMsgPath, MsgComponentInstall.Mode.IDB);
+                        IdbEntry.DescMsgID = (ushort)msgComponentInstall.WriteMsgEntries(msgComponent, infoMsgPath, MsgComponentInstall.Mode.IDB, null, IdbEntry);
                     }
                     else if (msgComponent.MsgType == Msg_Component.MsgComponentType.LimitBurst)
                     {

@@ -632,7 +632,45 @@ namespace LB_Mod_Installer.Installer
 
                 if (section != null)
                 {
-                    UninstallEntries(binaryFile.MSG_Entries, (cpkBinFile != null) ? cpkBinFile.MSG_Entries : null, section.IDs);
+
+                    if (!IDB_File.IsIdbMsgFile(file.filePath))
+                    {
+                        //Default ID-based uninstallation
+                        UninstallEntries(binaryFile.MSG_Entries, cpkBinFile?.MSG_Entries, section.IDs);
+                    }
+                    else
+                    {
+                        //Index based uninstallation
+                        for (int i = binaryFile.MSG_Entries.Count - 1; i >= 0; i--)
+                        {
+                            if (section.IDs.Contains(i.ToString()))
+                            {
+                                MSG_Entry newEntry = (cpkBinFile?.MSG_Entries != null) ? GetOriginalEntry(cpkBinFile.MSG_Entries, i.ToString()) : null;
+
+                                if (newEntry != null)
+                                {
+                                    binaryFile.MSG_Entries[i] = newEntry;
+                                }
+                                else
+                                {
+                                    if (i == binaryFile.MSG_Entries.Count - 1)
+                                    {
+                                        //Last index, can remove freely
+                                        binaryFile.MSG_Entries.RemoveAt(i);
+                                    }
+                                    else
+                                    {
+                                        //Cant remove entry or the index of every other entry after it will be wrong.
+                                        //We can make it a dummy entry instead.
+                                        binaryFile.MSG_Entries[i].Msg_Content.Clear();
+                                        binaryFile.MSG_Entries[i].Msg_Content.Add(new Msg_Line() { Text = "" });
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    
                 }
             }
             catch (Exception ex)
