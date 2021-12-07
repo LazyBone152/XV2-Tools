@@ -130,12 +130,14 @@ namespace AudioCueEditor
             //Return values
             bool isUpdateAvailable = (bool)ret[0];
             Version latestVersion = (Version)ret[1];
+            string changelog = (string)ret[2];
+            int numUpdates = (int)ret[3];
 
             await Task.Delay(1000);
 
             if (isUpdateAvailable)
             {
-                var messageResult = await this.ShowMessageAsync("Update Available", $"An update is available ({latestVersion}). Do you want to download and install it?\n\nNote: All instances of the application will be closed and any unsaved work will be lost.", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.Default);
+                var messageResult = await this.ShowMessageAsync("Update Available", $"An update is available ({latestVersion}). Do you want to download and install it?\n\nNote: All instances of the application will be closed and any unsaved work will be lost.\n\nChangelog:\n{changelog}", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.ScrollDialog);
 
                 if (messageResult == MessageDialogResult.Affirmative)
                 {
