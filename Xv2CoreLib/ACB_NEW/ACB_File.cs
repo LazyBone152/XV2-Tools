@@ -2696,6 +2696,19 @@ namespace Xv2CoreLib.ACB_NEW
         public ACB_StringValue GetStringValue(Guid guid, bool allowNull = true) { return GetTable(guid, StringValues, allowNull); }
         public ACB_StringValue GetStringValue(string stringValue) { return StringValues.FirstOrDefault(x => x.StringValue == stringValue); }
         public ACB_GlobalAisacReference GetGlobalAisacReference(string globalAisacValue) { return GlobalAisacReferences.FirstOrDefault(x => x.Name == globalAisacValue); }
+        
+        private ACB_Sequence GetSequence(ACB_Cue cue)
+        {
+            if (cue.ReferenceType == ReferenceType.Sequence)
+            {
+                if (!cue.ReferenceIndex.IsNull)
+                {
+                    return GetSequence(cue.ReferenceIndex.TableGuid);
+                }
+            }
+
+            return null;
+        }
 
         public AFS2_Entry GetAfs2Entry(int id, bool allowNull = true)
         {
@@ -2876,6 +2889,38 @@ namespace Xv2CoreLib.ACB_NEW
 
             return waveforms;
         }
+
+        //Volume
+        public float GetCueBaseVolume(ACB_Cue cue)
+        {
+            var sequence = GetSequence(cue);
+            ACB_CommandGroup sequenceCommand = (!sequence.CommandIndex.IsNull) ? CommandTables.GetCommand(sequence.CommandIndex.TableGuid, CommandTableType.SequenceCommand) : null;
+
+            if (sequenceCommand != null)
+            {
+                ACB_Command volumeCommand = sequenceCommand.Commands.FirstOrDefault(x => x.CommandType == CommandType.VolumeRandomization1 || x.CommandType == CommandType.VolumeRandomization2);
+                if (volumeCommand == null) return 1f;
+                return (volumeCommand.CommandType == CommandType.VolumeRandomization2) ? volumeCommand.Param1 / 100f : 0f;
+            }
+                
+            return 1f;
+        }
+
+        public float GetCueRandomVolume(ACB_Cue cue)
+        {
+            var sequence = GetSequence(cue);
+            ACB_CommandGroup sequenceCommand = (!sequence.CommandIndex.IsNull) ? CommandTables.GetCommand(sequence.CommandIndex.TableGuid, CommandTableType.SequenceCommand) : null;
+
+            if (sequenceCommand != null)
+            {
+                ACB_Command volumeCommand = sequenceCommand.Commands.FirstOrDefault(x => x.CommandType == CommandType.VolumeRandomization1 || x.CommandType == CommandType.VolumeRandomization2);
+                if (volumeCommand == null) return 0f;
+                return (volumeCommand.CommandType == CommandType.VolumeRandomization2) ? volumeCommand.Param2 / 100f : volumeCommand.Param1 / 100f;
+            }
+
+            return 0f;
+        }
+
         #endregion
 
         public int GetFreeCueId()
@@ -5219,6 +5264,27 @@ namespace Xv2CoreLib.ACB_NEW
         public byte[] GetBytes()
         {
             return GetBytes(this);
+        }
+    
+        //Get
+        /// <summary>
+        /// Returns the first ActionType among the Commands.
+        /// </summary>
+        public CommandType GetActionType()
+        {
+            foreach(var command in Commands)
+            {
+                switch (command.CommandType)
+                {
+                    case CommandType.Action_Play:
+                    case CommandType.Action_Stop:
+                        return command.CommandType;
+                    default:
+                        break;
+                }
+            }
+
+            return CommandType.Null;
         }
     }
 

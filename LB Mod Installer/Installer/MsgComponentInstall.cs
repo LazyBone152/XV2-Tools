@@ -57,8 +57,9 @@ namespace LB_Mod_Installer.Installer
             //Now determine the ID/Index
             //We need to assign a new ID and add it to the tracker
             //If mode == IDB, then id is the MSG Index
-            int id = (mode == Mode.IDB) ? msgFiles[0].MSG_Entries.Count : msgFiles[0].NextID();
-            GeneralInfo.Tracker.AddMsgID(path, Sections.MSG_Entries, id);
+            int msgId = msgFiles[0].NextID();
+            int id = (mode == Mode.IDB) ? msgFiles[0].MSG_Entries.Count : msgId;
+            GeneralInfo.Tracker.AddMsgID(path, Sections.MSG_Entries, msgId);
             
             //Get the name
             string name = null;
@@ -148,13 +149,26 @@ namespace LB_Mod_Installer.Installer
                             id++;
 
                             if (id >= ushort.MaxValue)
-                                throw new Exception("MsgComponentInstall.GetMsgName: Overflow, an ID could not be assigned to the costume.");
+                                throw new Exception("MsgComponentInstall.GetMsgName: Overflow, an MSG ID could not be assigned to the costume.");
                         }
 
                         return String.Format("{0}{1}", name, id.ToString("D3"));
                     }
                 case "proper_noun_costume_info_":
-                    return String.Format("wear_cmn_eff_{0}", int.Parse(args).ToString("D3"));
+                    {
+                        string name = MSG_Entry.ChooseCostumeEntryName(idbEntry) + "eff_";
+                        int id = 300;
+
+                        while (msgFile.MSG_Entries.Any(x => x.Name == String.Format("{0}{1}", name, id.ToString("D3"))))
+                        {
+                            id++;
+
+                            if (id >= ushort.MaxValue)
+                                throw new Exception("MsgComponentInstall.GetMsgName: Overflow, an MSG ID could not be assigned to the costume.");
+                        }
+
+                        return String.Format("{0}{1}", name, id.ToString("D3"));
+                    }
                 case "proper_noun_accessory_name_":
                     return String.Format("accessory_{0}", int.Parse(args).ToString("D3"));
                 case "proper_noun_accessory_info_":

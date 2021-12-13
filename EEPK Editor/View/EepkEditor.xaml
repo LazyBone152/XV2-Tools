@@ -177,7 +177,7 @@
                                         </WrapPanel>
 
                                         <WrapPanel>
-                                            <Grid Margin="3,3,0,0" Width="250">
+                                            <Grid Margin="3,5,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
@@ -185,7 +185,7 @@
                                                 <Label Content="Start Time"/>
                                                 <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.StartTime, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
                                             </Grid>
-                                            <Grid Margin="3,3,0,0" Width="250">
+                                            <Grid Margin="3,5,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
@@ -193,7 +193,7 @@
                                                 <Label Content="Attachment"/>
                                                 <ComboBox Grid.Column="1" SelectedItem="{Binding effectPartViewModel.Attachment, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={StaticResource ResourceKey=PlacementEnum}}"/>
                                             </Grid>
-                                            <Grid Margin="3,3,0,0" Width="250">
+                                            <Grid Margin="3,5,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
@@ -201,7 +201,7 @@
                                                 <Label Content="Rotate Movement"/>
                                                 <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.RotateOnMovement, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
                                             </Grid>
-                                            <Grid Margin="3,3,0,0" Width="250">
+                                            <Grid Margin="3,5,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
@@ -210,7 +210,7 @@
                                                 <ComboBox Grid.Column="1" SelectedItem="{Binding effectPartViewModel.Deactivation, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={StaticResource ResourceKey=DeactivationModeEnum}}"/>
                                             </Grid>
 
-                                            <Grid Margin="3,3,0,0" Width="250">
+                                            <Grid Margin="3,5,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
@@ -218,7 +218,7 @@
                                                 <Label Content="Avoid Sphere"/>
                                                 <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.F_24, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.05"/>
                                             </Grid>
-                                            <Grid Margin="3,3,0,0" Width="250">
+                                            <Grid Margin="3,5,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
@@ -230,7 +230,7 @@
                                         </WrapPanel>
 
                                         <WrapPanel>
-                                            <Grid Margin="3,3,0,0" Width="250">
+                                            <Grid Margin="3,5,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
@@ -238,7 +238,7 @@
                                                 <Label Content="Near Fade Distance"/>
                                                 <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.F_84, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.05"/>
                                             </Grid>
-                                            <Grid Margin="3,3,0,0" Width="250">
+                                            <Grid Margin="3,5,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
@@ -248,7 +248,7 @@
                                             </Grid>
                                         </WrapPanel>
                                         <WrapPanel>
-                                            <Grid Margin="3,3,0,0" Width="250">
+                                            <Grid Margin="3,5,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
@@ -256,7 +256,7 @@
                                                 <Label Content="Scale (Min)" ToolTip="Scales the EffectPart. The actual scale will be randomly chosen between the Min and Max value.&#x0a;&#x0a;Not applicable for TBIND."/>
                                                 <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.SIZE_1, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01" IsEnabled="{Binding effectPartViewModel.IsNotTBIND}"/>
                                             </Grid>
-                                            <Grid Margin="3,3,0,0" Width="250">
+                                            <Grid Margin="3,5,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
@@ -270,7 +270,7 @@
                                 </Expander>
                                 <Expander x:Name="effectPartPos" Header="Positioning" IsExpanded="True" Expanded="effectPartTabs_ExpandedOrCollapsed" Collapsed="effectPartTabs_ExpandedOrCollapsed">
                                     <WrapPanel>
-                                        <Grid Margin="3,3,0,0" Width="900">
+                                        <Grid Margin="3,5,0,0" Width="900">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="104"/>
                                                 <ColumnDefinition Width="20"/>
@@ -292,7 +292,7 @@
                                             <Label Grid.Column="5" Content="Z" HorizontalContentAlignment="Right"/>
                                             <Controls:NumericUpDown Grid.Column="6" Value="{Binding effectPartViewModel.POSITION_Z, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
                                         </Grid>
-                                        <Grid Margin="3,3,0,0" Width="900">
+                                        <Grid Margin="3,5,0,0" Width="900">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="104"/>
                                                 <ColumnDefinition Width="20"/>
@@ -314,7 +314,7 @@
                                             <Label Grid.Column="5" Content="Z" HorizontalContentAlignment="Right"/>
                                             <Controls:NumericUpDown Grid.Column="6" Value="{Binding effectPartViewModel.F_68, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
                                         </Grid>
-                                        <Grid Margin="3,3,0,0" Width="900">
+                                        <Grid Margin="3,5,0,0" Width="900">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="104"/>
                                                 <ColumnDefinition Width="20"/>
@@ -342,7 +342,7 @@
                                 <Expander x:Name="effectPartAnimation" Header="EMA Animation" Expanded="effectPartTabs_ExpandedOrCollapsed" Collapsed="effectPartTabs_ExpandedOrCollapsed">
                                     <StackPanel>
                                         <WrapPanel>
-                                            <Grid Margin="3,3,0,0" Width="250">
+                                            <Grid Margin="3,5,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
@@ -351,7 +351,7 @@
                                                 <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.I_30, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
                                             </Grid>
 
-                                            <Grid Margin="3,3,0,0" Width="250">
+                                            <Grid Margin="3,5,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
@@ -361,7 +361,7 @@
                                             </Grid>
                                         </WrapPanel>
                                         <WrapPanel>
-                                            <Grid Margin="3,3,0,0" Width="250">
+                                            <Grid Margin="3,5,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
@@ -369,7 +369,7 @@
                                                 <Label Content="Start Frame"/>
                                                 <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.I_92, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
                                             </Grid>
-                                            <Grid Margin="3,3,0,0" Width="250">
+                                            <Grid Margin="3,5,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>

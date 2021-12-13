@@ -643,7 +643,7 @@ namespace LB_Mod_Installer.Installer
                         //Index based uninstallation
                         for (int i = binaryFile.MSG_Entries.Count - 1; i >= 0; i--)
                         {
-                            if (section.IDs.Contains(i.ToString()))
+                            if (section.IDs.Contains(binaryFile.MSG_Entries[i].Index))
                             {
                                 MSG_Entry newEntry = (cpkBinFile?.MSG_Entries != null) ? GetOriginalEntry(cpkBinFile.MSG_Entries, i.ToString()) : null;
 

@@ -31,16 +31,17 @@ namespace AudioCueEditor.Audio
 
     public static class HCA
     {
-        public static WavStream Decode(byte[] hcaBytes)
+        public static byte[] DecodeToWav(byte[] hcaBytes)
         {
-            byte[] wavBytes;
-
-            using(MemoryStream stream = new MemoryStream(hcaBytes))
+            using (MemoryStream stream = new MemoryStream(hcaBytes))
             {
-                wavBytes = ConvertStream.ConvertFile(new Options(), stream, FileType.Hca, FileType.Wave);
+                return ConvertStream.ConvertFile(new Options(), stream, FileType.Hca, FileType.Wave);
             }
+        }
 
-            return new WavStream(wavBytes);
+        public static WavStream DecodeToWavStream(byte[] hcaBytes)
+        {
+            return new WavStream(DecodeToWav(hcaBytes));
         }
 
         public static byte[] Encode(byte[] wavBytes)

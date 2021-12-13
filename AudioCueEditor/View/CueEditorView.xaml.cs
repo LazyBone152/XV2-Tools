@@ -316,7 +316,7 @@ namespace AudioCueEditor.View
                             {
                                 case EncodeType.HCA:
                                 case EncodeType.HCA_ALT:
-                                    audioPlayer.SetAudio(HCA.Decode(afs2Entry.bytes));
+                                    audioPlayer.SetAudio(HCA.DecodeToWavStream(afs2Entry.bytes));
                                     break;
                                 case EncodeType.ADX:
                                     audioPlayer.SetAudio(ADX.Decode(afs2Entry.bytes));

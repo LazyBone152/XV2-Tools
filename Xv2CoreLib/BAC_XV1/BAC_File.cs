@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Xv2CoreLib.BAC;
 using Xv2CoreLib.Resource;
 using YAXLib;
 
@@ -295,11 +296,11 @@ namespace Xv2CoreLib.BAC_XV1
                     I_04 = (short)type.I_04,
                     Flags = (short)type.I_06,
                     Ean_Type = type.I_08,
-                    I_10 = type.I_10,
+                    BoneLink = (BoneLinks)type.I_10,
                     EanIndex = type.I_12,
                     StartFrame = type.I_14,
                     I_16 = type.I_16,
-                    I_18 = type.I_18
+                    GlobalModiferDuration = type.I_18
                 });
 
             }
@@ -326,10 +327,7 @@ namespace Xv2CoreLib.BAC_XV1
         public short I_06 { get; set; }
         [YAXAttributeFor("Function")]
         [YAXSerializeAs("Type")]
-        public short I_08 { get; set; }
-        [YAXAttributeFor("I_10")]
-        [YAXSerializeAs("value")]
-        public short I_10 { get; set; }
+        public int I_08 { get; set; }
         [YAXAttributeFor("Function")]
         [YAXSerializeAs("Parameter")]
         [YAXFormat("0.0########")]
@@ -347,8 +345,7 @@ namespace Xv2CoreLib.BAC_XV1
                     I_02 = BitConverter.ToInt16(rawBytes, offset + 2),
                     I_04 = BitConverter.ToInt16(rawBytes, offset + 4),
                     I_06 = BitConverter.ToInt16(rawBytes, offset + 6),
-                    I_08 = BitConverter.ToInt16(rawBytes, offset + 8),
-                    I_10 = BitConverter.ToInt16(rawBytes, offset + 10),
+                    I_08 = BitConverter.ToInt32(rawBytes, offset + 8),
                     F_12 = BitConverter.ToSingle(rawBytes, offset + 12)
                 });
 
@@ -369,7 +366,6 @@ namespace Xv2CoreLib.BAC_XV1
                 bytes.AddRange(BitConverter.GetBytes(type.I_04));
                 bytes.AddRange(BitConverter.GetBytes(type.I_06));
                 bytes.AddRange(BitConverter.GetBytes(type.I_08));
-                bytes.AddRange(BitConverter.GetBytes(type.I_10));
                 bytes.AddRange(BitConverter.GetBytes(type.F_12));
             }
 
@@ -388,12 +384,11 @@ namespace Xv2CoreLib.BAC_XV1
                 {
                     StartTime = type.I_00,
                     Duration = type.I_02,
-                    I_10 = (ushort)type.I_10,
-                    I_08 = (ushort)type.I_08,
+                    FunctionType = (ushort)type.I_08,
                     I_04 = type.I_04,
                     Flags = type.I_06,
-                    Function = type.F_12,
-                    Param1 = type.F_12
+                    Param1 = type.F_12,
+                    Param2 = type.F_12
                 });
 
             }

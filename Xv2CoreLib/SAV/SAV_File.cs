@@ -5912,7 +5912,7 @@ namespace Xv2CoreLib.SAV
                 case 53:
                     return 148; //Android 17 (DB Super)
                 case 54:
-                    return 58; //Jenemba
+                    return 88; //Jenemba
                 case 55:
                     return 147; //Tapion
                 case 56:

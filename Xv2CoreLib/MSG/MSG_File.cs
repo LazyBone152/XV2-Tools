@@ -536,6 +536,12 @@ namespace Xv2CoreLib.MSG
         [YAXDontSerialize]
         public int SortID { get { return int.Parse(Index); } }
 
+#if !DEBUG
+        [YAXDontSerialize]
+#endif
+        [YAXAttributeForClass]
+        public int DebugIndex { get; set; }
+
         [YAXAttributeForClass]
         [YAXSerializeAs("ID")]
         [BindingAutoId]
@@ -608,6 +614,7 @@ namespace Xv2CoreLib.MSG
 
             return str;
         }
+    
     }
 
     [YAXSerializeAs("Line")]

@@ -54,6 +54,23 @@ namespace Xv2CoreLib
             return RandomGenerator.Next(min, max);
         }
 
+        public static int RangeNoRepeat(int min, int max, int lastResult)
+        {
+            int tries = 0;
+            int result = Range(min, max);
+
+            while (result == lastResult)
+            {
+                result = Range(min, max);
+                tries++;
+
+                if (tries >= 300)
+                    break;
+            }
+
+            return result;
+        }
+
         private static void InitRandomGenerator()
         {
             if (RandomGenerator == null) RandomGenerator = new System.Random(_getRandomInt(352, 242142142));

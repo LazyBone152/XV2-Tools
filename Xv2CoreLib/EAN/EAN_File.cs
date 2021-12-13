@@ -567,6 +567,7 @@ namespace Xv2CoreLib.EAN
         internal void LinkEskData(ESK_Skeleton skeleton)
         {
             if (skeleton == null) new ArgumentNullException("EAN_Animation.LinkEskData: skeleton was null.");
+            if (Nodes == null) Nodes = new AsyncObservableCollection<EAN_Node>();
 
             eskSkeleton = skeleton;
             foreach (var node in Nodes)
@@ -759,6 +760,7 @@ namespace Xv2CoreLib.EAN
         public List<IUndoRedo> PasteNodes(IList<EAN_Node> nodes)
         {
             List<IUndoRedo> undos = new List<IUndoRedo>();
+            if (nodes == null) return undos;
 
             foreach(var node in nodes)
             {
@@ -1157,6 +1159,7 @@ namespace Xv2CoreLib.EAN
         internal void LinkEskData(ESK_Skeleton skeleton)
         {
             if (skeleton == null) new ArgumentNullException("EAN_Node.LinkEskData: skeleton was null.");
+            if (AnimationComponents == null) AnimationComponents = new AsyncObservableCollection<EAN_AnimationComponent>();
 
             var esk = skeleton.GetBone(BoneName);
             EskRelativeTransform = esk?.RelativeTransform;

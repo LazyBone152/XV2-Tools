@@ -98,6 +98,7 @@ namespace Xv2CoreLib.MSG
 
                 int nameStringOffset = BitConverter.ToInt32(rawBytes, nameSectionOffset);
 
+                msg_File.MSG_Entries[i].DebugIndex = i;
                 msg_File.MSG_Entries[i].Name = Utils.GetString(bytes, nameStringOffset, sizeNames, unicode_names);
                 msg_File.MSG_Entries[i].I_12 = BitConverter.ToInt32(rawBytes, nameSectionOffset + 12);
                 nameSectionOffset += 16;

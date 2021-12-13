@@ -532,6 +532,7 @@ namespace Xv2CoreLib.Resource.App
         public bool XenoKit_EnableVisualSkeleton { get; set; } = true;
         public bool XenoKit_AutoPlay { get; set; } = true;
         public bool XenoKit_Loop { get; set; } = false;
+        public bool XenoKit_AudioSimulation { get; set; } = true;
 
 
         #endregion

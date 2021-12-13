@@ -275,7 +275,7 @@ namespace Xv2CoreLib.CPK
         /// Extract all CPKs into the same directory. The extraction is done in the CPK load order.
         /// </summary>
         /// <returns></returns>
-        public async Task ExtractAll(string outputDir)
+        public async Task ExtractAll(string outputDir, string fileExtToExtract = null)
         {
             List<object> extracted = new List<object>(); //string
 
@@ -285,6 +285,9 @@ namespace Xv2CoreLib.CPK
 
                 foreach (var file in results)
                 {
+                    if (fileExtToExtract != null && Path.GetExtension((string)file.FileName) != fileExtToExtract)
+                        continue;
+
                     //Only extract if it hasn't been previously extracted
                     if(extracted.IndexOf(file.FileName) == -1)
                     {
@@ -311,8 +314,9 @@ namespace Xv2CoreLib.CPK
                 }
             }
         }
-
         #endregion
+
+
     }
 
     public class CPK_MultiThreadedExtractor : INotifyPropertyChanged
@@ -400,7 +404,7 @@ namespace Xv2CoreLib.CPK
         CriPakTools.CPK cpk;
         List<BinaryReader> binaryReaders = new List<BinaryReader>();
         string outputDir;
-
+        
         public bool isFinished = false;
 
         public CPK_MultiThreadedExtractor(string cpkPath, string outputDir, int numThreads = -1)

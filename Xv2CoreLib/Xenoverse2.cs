@@ -55,6 +55,19 @@ namespace Xv2CoreLib
             NumLanguages
         }
 
+        public enum CustomCharacter
+        {
+            HUM = 100,
+            HUF = 101,
+            SYM = 102,
+            SYF = 103,
+            NMC = 104,
+            FRI = 105,
+            MAM = 106,
+            MAF = 107,
+            MAP = 108
+        }
+
         public enum MoveFileTypes
         {
             BAC,
@@ -795,7 +808,7 @@ namespace Xv2CoreLib
 
             var cmsEntry = cmsFile.CMS_Entries.FirstOrDefault(x => x.ID == cmsId);
             if (cmsEntry == null) throw new InvalidOperationException($"Xenoverse2.GetCharacter: Character was not found in the system (ID: {cmsId}).");
-            var names = GetCharacterName(cmsEntry.ShortName);
+            var names = (IsCac(cmsId)) ? new string[1] { GetCacRaceName(cmsId) } : GetCharacterName(cmsEntry.ShortName);
             var csoEntries = csoFile.CsoEntries.Where(x => x.CharaID == cmsId).ToList();
             var ersEntry = ersFile.GetEntry(2, cmsId);
 
@@ -827,7 +840,7 @@ namespace Xv2CoreLib
                     if (!string.IsNullOrWhiteSpace(csoEntry.AmkPath) && !loadedFiles.Contains(amkPath))
                     {
                         AMK_File amkFile = (AMK_File)GetParsedFileFromGame(amkPath);
-                        amkFiles.Add(new Xv2File<AMK_File>(amkFile, GetAbsolutePath(amkPath), !Utils.CompareSplitString(csoEntry.AmkPath, '/', 0, cmsEntry.ShortName), null, false, 0, (int)csoEntry.Costume));
+                        amkFiles.Add(new Xv2File<AMK_File>(amkFile, GetAbsolutePath(amkPath), !Utils.CompareSplitString(csoEntry.AmkPath, '/', 0, cmsEntry.ShortName), null, false, MoveFileTypes.AMK, (int)csoEntry.Costume, true, MoveType.Character));
                         loadedFiles.Add(amkPath);
                     }
                     else
@@ -876,7 +889,9 @@ namespace Xv2CoreLib
 
             foreach (var character in cmsFile.CMS_Entries)
             {
-                items.Add(new Xv2Item(character.ID, charaNameMsgFile[(int)PreferedLanguage].GetCharacterName(character.ShortName)));
+                string name = (IsCac(character.ID)) ? GetCacRaceName(character.ID) : charaNameMsgFile[(int)PreferedLanguage].GetCharacterName(character.ShortName);
+
+                items.Add(new Xv2Item(character.ID, name));
             }
 
             return items;
@@ -1001,37 +1016,45 @@ namespace Xv2CoreLib
                         Xv2File<ACB_Wrapper>.AddCostume(moveFiles.SeAcbFile, GetAbsolutePath(moveFiles.SeAcbPath), (int)csoEntry.Costume, false);
                     }
 
-                    //VOX, Jap
-                    if (csoEntry.HasVoxPath && !loadedFiles.Contains(acbPath))
+                    if(cmsEntry.ID >= 100 && cmsEntry.ID <= 107)
                     {
-                        bool borrowed = !Utils.CompareSplitString(csoEntry.VoxPath, '_', 2, cmsEntry.ShortName);
+                        //CaC
+                        for(int i = 0; i <= 14; i++)
+                        {
+                            switch ((CustomCharacter)cmsEntry.ID)
+                            {
+                                case CustomCharacter.HUF:
+                                case CustomCharacter.SYF:
+                                    LoadCaCVox(false, i, moveFiles, true, loadedFiles, loadFiles);
+                                    LoadCaCVox(false, i, moveFiles, false, loadedFiles, loadFiles);
+                                    break;
+                                case CustomCharacter.HUM:
+                                case CustomCharacter.SYM:
+                                case CustomCharacter.NMC:
+                                case CustomCharacter.FRI:
+                                case CustomCharacter.MAM:
+                                    LoadCaCVox(true, i, moveFiles, true, loadedFiles, loadFiles);
+                                    LoadCaCVox(true, i, moveFiles, false, loadedFiles, loadFiles);
+                                    break;
+                                case CustomCharacter.MAP:
+                                    LoadCaCVox(true, i, moveFiles, true, loadedFiles, loadFiles); //Male (En)
+                                    LoadCaCVox(false, i, moveFiles, true, loadedFiles, loadFiles); //Female (En)
+                                    LoadCaCVox(true, i, moveFiles, false, loadedFiles, loadFiles); //Male (Jp)
+                                    LoadCaCVox(false, i, moveFiles, false, loadedFiles, loadFiles); //Female (Jp)
+                                    break;
 
-                        moveFiles.VoxAcbPath.Add(acbPath);
+                            }
+                        }
 
-                        if (loadFiles)
-                            moveFiles.VoxAcbFile.Add(new Xv2File<ACB_Wrapper>((ACB_Wrapper)GetParsedFileFromGame(acbPath), fileIO.PathInGameDir(acbPath), borrowed, null, false, MoveFileTypes.VOX_ACB, (int)csoEntry.Costume, csoEntry.Costume == 0, MoveType.Character));
-
-                        loadedFiles.Add(acbPath);
                     }
                     else
                     {
-                        Xv2File<ACB_Wrapper>.AddCostume(moveFiles.VoxAcbFile, GetAbsolutePath(acbPath), (int)csoEntry.Costume, false);
-                    }
+                        //Regular roster character
+                        //VOX, Jap
+                        LoadCharaVox(cmsEntry.ShortName, csoEntry, moveFiles, false, loadedFiles, loadFiles);
 
-                    //VOX, Eng
-                    if (csoEntry.HasVoxPath && !loadedFiles.Contains(acbEngPath))
-                    {
-                        bool borrowed = !Utils.CompareSplitString(csoEntry.VoxPath, '_', 2, cmsEntry.ShortName);
-                        moveFiles.VoxAcbPath.Add(acbEngPath);
-
-                        if (loadFiles)
-                            moveFiles.VoxAcbFile.Add(new Xv2File<ACB_Wrapper>((ACB_Wrapper)GetParsedFileFromGame(acbEngPath), fileIO.PathInGameDir(acbEngPath), borrowed, null, true, MoveFileTypes.VOX_ACB, (int)csoEntry.Costume, csoEntry.Costume == 0, MoveType.Character));
-
-                        loadedFiles.Add(acbEngPath);
-                    }
-                    else
-                    {
-                        Xv2File<ACB_Wrapper>.AddCostume(moveFiles.VoxAcbFile, GetAbsolutePath(acbEngPath), (int)csoEntry.Costume, true);
+                        //VOX, Eng
+                        LoadCharaVox(cmsEntry.ShortName, csoEntry, moveFiles, true, loadedFiles, loadFiles);
                     }
                 }
             }
@@ -1044,6 +1067,75 @@ namespace Xv2CoreLib
             return moveFiles;
         }
 
+        private void LoadCharaVox(string shortName, CSO_Entry csoEntry, Xv2MoveFiles moveFiles, bool english, List<string> loadedFiles, bool loadFiles)
+        {
+            string acbPath = (english) ? $"sound/VOX/Battle/Chara/en/{csoEntry.VoxPath}.acb" : $"sound/VOX/Battle/Chara/{csoEntry.VoxPath}.acb";
+
+            if (csoEntry.HasVoxPath && !loadedFiles.Contains(acbPath))
+            {
+                bool borrowed = !Utils.CompareSplitString(csoEntry.VoxPath, '_', 2, shortName);
+
+                moveFiles.VoxAcbPath.Add(acbPath);
+
+                if (loadFiles)
+                    moveFiles.VoxAcbFile.Add(new Xv2File<ACB_Wrapper>((ACB_Wrapper)GetParsedFileFromGame(acbPath), fileIO.PathInGameDir(acbPath), borrowed, shortName, english, MoveFileTypes.VOX_ACB, (int)csoEntry.Costume, true, MoveType.Character));
+
+                loadedFiles.Add(acbPath);
+            }
+            else
+            {
+                Xv2File<ACB_Wrapper>.AddCostume(moveFiles.VoxAcbFile, GetAbsolutePath(acbPath), (int)csoEntry.Costume, false);
+            }
+        }
+
+        private void LoadCaCVox(bool isMale, int id, Xv2MoveFiles moveFiles, bool english, List<string> loadedFiles, bool loadFiles)
+        {
+            string acbPath;
+
+            if (isMale)
+                acbPath = (english) ? $"sound/VOX/Battle/Chara/en/CAR_BTL_M{id.ToString("D2")}_VOX.acb" : $"sound/VOX/Battle/Chara/CAR_BTL_M{id.ToString("D2")}_VOX.acb";
+            else
+                acbPath = (english) ? $"sound/VOX/Battle/Chara/en/CAR_BTL_F{id.ToString("D2")}_VOX.acb" : $"sound/VOX/Battle/Chara/CAR_BTL_F{id.ToString("D2")}_VOX.acb";
+
+            moveFiles.VoxAcbPath.Add(acbPath);
+
+            if (loadFiles)
+                moveFiles.VoxAcbFile.Add(new Xv2File<ACB_Wrapper>((ACB_Wrapper)GetParsedFileFromGame(acbPath), fileIO.PathInGameDir(acbPath), false, "HUM", english, MoveFileTypes.VOX_ACB, id, true, MoveType.Character));
+
+            loadedFiles.Add(acbPath);
+        }
+        
+        public static string GetCacRaceName(int cmsId)
+        {
+            switch ((CustomCharacter)cmsId)
+            {
+                case CustomCharacter.HUM: 
+                    return "Human Male";
+                case CustomCharacter.HUF: 
+                    return "Human Female";
+                case CustomCharacter.SYM: 
+                    return "Sayian Male";
+                case CustomCharacter.SYF: 
+                    return "Saiyan Female";
+                case CustomCharacter.NMC: 
+                    return "Namekian";
+                case CustomCharacter.FRI: 
+                    return "Frieza Race";
+                case CustomCharacter.MAM: 
+                    return "Majin Male";
+                case CustomCharacter.MAF: 
+                    return "Majin Female";
+                case CustomCharacter.MAP:
+                    return "Majin Purification";
+            }
+
+            return null;
+        }
+
+        public static bool IsCac(int cmsId)
+        {
+            return cmsId >= 100 && cmsId <= 108;
+        }
         #endregion
 
         #region Save/Install
@@ -1864,6 +1956,8 @@ namespace Xv2CoreLib
 
     public class Xv2Character 
     {
+        public bool IsCaC { get { return CmsEntry?.ID >= 100 && CmsEntry?.ID <= 108; } }
+
         public string[] Name = new string[(int)Xenoverse2.Language.NumLanguages];
 
         public ObservableCollection<Xv2CharaCostume> Costumes { get; set; } = new ObservableCollection<Xv2CharaCostume>();
@@ -2305,6 +2399,14 @@ namespace Xv2CoreLib
             return VoxAcbFile.FirstOrDefault(x => x.CharaCode == chara && x.IsEnglish == isEnglish && x.IsDefault)?.File;
         }
 
+        public ACB_Wrapper GetVoxFile(int costume, bool isEnglish)
+        {
+            var file = VoxAcbFile.FirstOrDefault(x => x.IsEnglish == isEnglish && x.HasCostume(costume));
+
+            if (file != null) return file.File;
+            return VoxAcbFile.FirstOrDefault(x => x.IsEnglish == isEnglish && x.IsDefault)?.File;
+        }
+
         public ACB_Wrapper GetSeFile(int costume = -1)
         {
             if (SeAcbFile.Count > 0 && costume == -1)
@@ -2543,7 +2645,6 @@ namespace Xv2CoreLib
         {
             get
             {
-
                 switch (FileType)
                 {
                     case Xenoverse2.MoveFileTypes.TAL_EAN:
@@ -2557,6 +2658,11 @@ namespace Xv2CoreLib
                     case Xenoverse2.MoveFileTypes.SE_ACB:
                         string lang = (IsEnglish) ? "EN" : "JP";
 
+                        if(CharaCode == "HUM" && FileType == MoveFileTypes.VOX_ACB)
+                        {
+                            return $"Voice {Costumes[0]} ({lang})";
+                        }
+
                         switch (MoveType)
                         {
                             case Xenoverse2.MoveType.Common:
@@ -2564,7 +2670,7 @@ namespace Xv2CoreLib
                             case Xenoverse2.MoveType.Character:
                                 return (FileType == MoveFileTypes.VOX_ACB) ? $"Costume: {GetCostumesString()} ({lang})" : $"Costume: {GetCostumesString()}";
                             case Xenoverse2.MoveType.Skill:
-                                return (FileType == MoveFileTypes.VOX_ACB) ? $"Chara: {CharaCode} ({lang})" : $"Chara: {CharaCode}";
+                                return (FileType == MoveFileTypes.VOX_ACB) ? $"Chara: {CharaCode} ({lang})" : $"SE";
                             default:
                                 return "invalid_ACB_Type";
                         }

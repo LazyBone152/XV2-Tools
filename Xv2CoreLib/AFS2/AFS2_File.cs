@@ -449,12 +449,31 @@ namespace Xv2CoreLib.AFS2
     {
         [YAXAttributeForClass]
         public ushort AwbId { get; set; }
+
+        //Bytes:
+        private byte[] _bytes = null;
         [YAXAttributeFor("Data")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]
-        public byte[] bytes { get; set; }
+        public byte[] bytes
+        {
+            get { return _bytes; }
+            set
+            {
+                if(_bytes != value)
+                {
+                    _bytes = value;
+                    WavBytes = null;
+                }
+            }
+        }
 
+        //HCA:
         [YAXDontSerialize]
         public TrackMetadata HcaInfo { get { return new TrackMetadata(bytes); } }
+
+        //WAV:
+        public byte[] WavBytes = null;
+
 
         public AFS2_Entry() { }
 

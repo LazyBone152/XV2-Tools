@@ -407,6 +407,7 @@
     <Compile Include="Controls\ZoomBorder.cs" />
     <Compile Include="Converters\ColorFormatConverter.cs" />
     <Compile Include="Converters\FloatConverter.cs" />
+    <Compile Include="Converters\InverseVisibilityToNullableBoolean.cs" />
     <Compile Include="Converters\NullToFalseConverter.cs" />
     <Compile Include="Converters\VisibilityToNullableBoolean.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

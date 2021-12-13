@@ -97,7 +97,7 @@ namespace AudioCueEditor.View
                 if (metadata.ValidHcaFile)
                 {
                     awbBytes = awbEntry.bytes;
-                    await Task.Run(() => wavStream = HCA.Decode(awbEntry.bytes));
+                    await Task.Run(() => wavStream = HCA.DecodeToWavStream(awbEntry.bytes));
                     SetLoopOnStream();
 
                     CommandManager.InvalidateRequerySuggested();
@@ -171,7 +171,7 @@ namespace AudioCueEditor.View
                 if (!wavStream.IsValid)
                 {
                     wavStream = null;
-                    await Task.Run(() => wavStream = HCA.Decode(awbBytes));
+                    await Task.Run(() => wavStream = HCA.DecodeToWavStream(awbBytes));
                     SetLoopOnStream();
                 }
 

@@ -88,7 +88,7 @@ namespace AudioCueEditor.Audio
         public async Task AsyncSetHcaAudio(byte[] hcaBytes)
         {
             WavStream wav = null;
-            await Task.Run(() => wav = HCA.Decode(hcaBytes));
+            await Task.Run(() => wav = HCA.DecodeToWavStream(hcaBytes));
             
             if (wavePlayer.PlaybackState != PlaybackState.Stopped)
                 wavePlayer.Stop();
