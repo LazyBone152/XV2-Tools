@@ -11,8 +11,8 @@
     <Grid>
         <StackPanel Margin="43,4,36,135.333" Orientation="Horizontal" >
 
-            <iconPacks:PackIconMaterialLight Kind="Information"  Margin="0, 5" Foreground="{DynamicResource AccentColorBrush}" Height="33" Width="33" />
-            <TextBlock Text="Sets the hue value to the desired amount, keeping the saturation and lightness values the same. This will result in everything being different shades of the same color." Foreground="{DynamicResource AccentColorBrush}" TextWrapping="Wrap" FontSize="9" Margin="5,5,0,0" Width="304"/>
+            <iconPacks:PackIconMaterialLight Kind="Information"  Margin="0, 5" Foreground="{DynamicResource MahApps.Brushes.Accent}" Height="33" Width="33" />
+            <TextBlock Text="Sets the hue value to the desired amount, keeping the saturation and lightness values the same. This will result in everything being different shades of the same color." Foreground="{DynamicResource MahApps.Brushes.Accent}" TextWrapping="Wrap" FontSize="9" Margin="5,5,0,0" Width="304"/>
         </StackPanel>
 
 
@@ -24,7 +24,7 @@
         <Grid Background="{Binding preview}" HorizontalAlignment="Left" Height="19" Margin="99,58,0,0" VerticalAlignment="Top" Width="188" ToolTip="{Binding RgbPreviewTooltip, UpdateSourceTrigger=PropertyChanged}"/>
         <Label Content="Preview" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="10,52,0,0" VerticalAlignment="Top" Width="75"/>
         <Button HorizontalAlignment="Left" Margin="389,78,0,0" VerticalAlignment="Top" Width="21" Height="20"  Style="{StaticResource ButtonNoGlow}" Click="Button_UndoHueChange_Click" ToolTip="{Binding HueRevertTooltip, UpdateSourceTrigger=PropertyChanged}">
-            <iconPacks:PackIconMaterialDesign Kind="Undo"  Foreground="{DynamicResource AccentColorBrush}"/>
+            <iconPacks:PackIconMaterialDesign Kind="Undo"  Foreground="{DynamicResource MahApps.Brushes.Accent}"/>
         </Button>
 
         <Label ToolTip="Add in a small random variance in the final hue. Each texture, particle, animation and so on will have a small hue difference. (Can go up to 180, but nest to keep to small values!)" Content="Variance" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="10,108,0,0" VerticalAlignment="Top" Width="75"/>

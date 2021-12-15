@@ -18,7 +18,7 @@
     </Window.Resources>
     <Grid Margin="0, 2">
         <Controls:MetroTabControl HorizontalAlignment="Left" Height="273" VerticalAlignment="Top" Width="527" Margin="0,0,0,-0.333">
-            <Controls:MetroTabItem Header="General" Controls:ControlsHelper.HeaderFontSize="14">
+            <Controls:MetroTabItem Header="General" Controls:HeaderedControlHelper.HeaderFontSize="14">
                 <Grid Background="Transparent">
                     <GroupBox Header="File Clean Up" ToolTip="Controls how the editor should handle left over asset files that are no longer used." HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="242">
                         <StackPanel>
@@ -54,7 +54,7 @@
 
                 </Grid>
             </Controls:MetroTabItem>
-            <Controls:MetroTabItem Header="Texture" Controls:ControlsHelper.HeaderFontSize="14">
+            <Controls:MetroTabItem Header="Texture" Controls:HeaderedControlHelper.HeaderFontSize="14">
                 <Grid Background="Transparent">
                     <GroupBox Header="Texture Reuse" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="242">
                         <StackPanel>
@@ -67,13 +67,13 @@
 
                 </Grid>
             </Controls:MetroTabItem>
-            <Controls:MetroTabItem Header="Asset" Controls:ControlsHelper.HeaderFontSize="14">
+            <Controls:MetroTabItem Header="Asset" Controls:HeaderedControlHelper.HeaderFontSize="14">
                 <Grid Background="Transparent">
                     <CheckBox ToolTip="When importing assets any existing asset with the same name will be re-used rather than adding a new (and likely duplicate) asset entry." IsChecked="{Binding settings.AssetReuse_NameMatch, UpdateSourceTrigger=PropertyChanged}" Content="Reuse Assets (Name Match)" HorizontalAlignment="Left" Margin="10,20,0,0" VerticalAlignment="Top" Width="242"/>
 
                 </Grid>
             </Controls:MetroTabItem>
-            <Controls:MetroTabItem Header="Game Directory" Controls:ControlsHelper.HeaderFontSize="14">
+            <Controls:MetroTabItem Header="Game Directory" Controls:HeaderedControlHelper.HeaderFontSize="14">
                 <Grid Background="Transparent">
                     <TextBox HorizontalAlignment="Left" Height="23" Margin="20,41,0,0" TextWrapping="NoWrap" IsReadOnly="True" Text="{Binding settings.GameDirectory, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top" Width="375"/>
                     <Button Click="Browse_Click" Content="Browse" HorizontalAlignment="Left" Margin="400,41,0,0" VerticalAlignment="Top" Width="75"/>

@@ -8,7 +8,7 @@
         xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         Dialog:DialogParticipation.Register="{Binding}"
-        Title="Volume Control" TitleCaps="False" Height="140" Width="350" ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner">
+        Title="Volume Control" TitleCharacterCasing="Normal" Height="140" Width="350" ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner">
     <Grid>
         <StackPanel Margin="0,10,0,0">
             <StackPanel Orientation="Horizontal" ToolTip="The base volume level of the track. The sum of this and Random Range may not exceed 100.">

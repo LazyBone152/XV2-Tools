@@ -13,7 +13,7 @@
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:undoRedo="clr-namespace:Xv2CoreLib.Resource.UndoRedo;assembly=Xv2CoreLib"
-        Title="ACE" TitleCaps="False" MinWidth="790" MinHeight="460" Height="600" Width="900" WindowStartupLocation="CenterScreen">
+        Title="ACE" TitleCharacterCasing="Normal" MinWidth="790" MinHeight="460" Height="600" Width="900" WindowStartupLocation="CenterScreen">
     <Window.InputBindings>
         <KeyBinding Key="Z" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=UndoCommand}"/>
         <KeyBinding Key="Y" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=RedoCommand}"/>
@@ -65,7 +65,7 @@
             </MenuItem>
         </Menu>
         <view:CueEditorView Grid.Row="1" AcbFile="{Binding AcbFile}"/>
-        <Grid Grid.Row="2" Background="{DynamicResource AccentColorBrush2}">
+        <Grid Grid.Row="2" Background="{DynamicResource MahApps.Brushes.Accent2}">
             <TextBlock Text="{Binding AcbPathDisplay}" VerticalAlignment="Stretch" HorizontalAlignment="Right" FontSize="12" Margin="0,6,-0.2,0.309"/>
         </Grid>
     </Grid>

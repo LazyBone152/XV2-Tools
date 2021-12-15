@@ -206,6 +206,16 @@ namespace Xv2CoreLib.Resource.App
             EffectContainer.EepkToolInterlop.AssetReuseMatchName = AssetReuseMatchName;
         }
 
+        /// <summary>
+        /// Get current theme as a string formatted for MahApps.Metro 2.0+.
+        /// </summary>
+        public string GetTheme()
+        {
+            string baseTheme = settings.UseDarkTheme ? "Dark" : "Light";
+            AppAccent accent = settings.UseDarkTheme ? settings.CurrentDarkAccent : settings.CurrentLightAccent;
+            return $"{baseTheme}.{accent.ToString()}";
+        }
+
 #region PathHelpers
         public static string GetAbsolutePathRelativeToExe(string relativePath)
         {

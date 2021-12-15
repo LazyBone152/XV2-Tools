@@ -8,7 +8,7 @@
         xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         Dialog:DialogParticipation.Register="{Binding}"
-        Title="Cue Limit" TitleCaps="False" Height="120" Width="270" ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner">
+        Title="Cue Limit" TitleCharacterCasing="Normal" Height="120" Width="270" ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner">
     <Grid>
         <StackPanel Margin="0, 10">
             <StackPanel Orientation="Horizontal" ToolTip="The maximum amount of instances of this cue allowed to be playing at any given time. (0 = Infinite)">

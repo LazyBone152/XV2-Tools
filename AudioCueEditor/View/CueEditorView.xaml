@@ -34,12 +34,12 @@
             <ColumnDefinition Width="3"/>
             <ColumnDefinition Width="290"/>
         </Grid.ColumnDefinitions>
-        <Grid Grid.Column="1" HorizontalAlignment="Stretch" Background="{DynamicResource AccentColorBrush4}" Margin="0,0,0.236,0.564"/>
+        <Grid Grid.Column="1" HorizontalAlignment="Stretch" Background="{DynamicResource MahApps.Brushes.Accent4}" Margin="0,0,0.236,0.564"/>
 
         <DataGrid x:Name="dataGrid" Grid.Column="0" ItemsSource="{Binding AcbFile.Cues.Binding}" Drop="DataGrid_Drop" AllowDrop="True" VirtualizingPanel.ScrollUnit="Pixel" EnableRowVirtualization="True" EnableColumnVirtualization="True" SelectionMode="Extended" RowDetailsVisibilityMode="VisibleWhenSelected" Margin="10,64,6.927,10.327" CanUserResizeRows="False" CanUserAddRows="False" AutoGenerateColumns="False" CanUserDeleteRows="False">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="SteelBlue"/>
-                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="SteelBlue"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightColorKey}" Color="SteelBlue"/>
                 <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="White"/>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="White"/>
 
@@ -131,8 +131,8 @@
                                                 <Setter Property="Margin" Value="10,0,0,0"/>
                                             </Style>
                                         </StackPanel.Resources>
-                                        <iconPacks:PackIconMaterialDesign Visibility="{Binding IsTrack}" Kind="Audiotrack" Foreground="{DynamicResource AccentColorBrush}"/>
-                                        <iconPacks:PackIconMaterialDesign Visibility="{Binding IsAction}" Kind="CallToAction" Foreground="{DynamicResource AccentColorBrush}"/>
+                                        <iconPacks:PackIconMaterialDesign Visibility="{Binding IsTrack}" Kind="Audiotrack" Foreground="{DynamicResource MahApps.Brushes.Accent}"/>
+                                        <iconPacks:PackIconMaterialDesign Visibility="{Binding IsAction}" Kind="CallToAction" Foreground="{DynamicResource MahApps.Brushes.Accent}"/>
                                         <TextBlock Text="{Binding DisplayName}"/>
                                     </StackPanel>
                                 </Grid>
@@ -175,32 +175,32 @@
                 </Style>
             </StackPanel.Resources>
             <StackPanel VerticalAlignment="Center">
-                <Button Command="{Binding PlayCommand}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Height="30">
+                <Button Command="{Binding PlayCommand}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="30">
                     <iconPacks:PackIconMaterialLight Kind="Play" />
                 </Button>
                 <TextBlock Text="Play" HorizontalAlignment="Center" FontSize="8"/>
             </StackPanel>
             <StackPanel VerticalAlignment="Center">
-                <Button Command="{Binding PauseCommand}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Height="30">
+                <Button Command="{Binding PauseCommand}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="30">
                     <iconPacks:PackIconMaterialLight Kind="Pause" />
                 </Button>
                 <TextBlock Text="Pause" HorizontalAlignment="Center" FontSize="8"/>
             </StackPanel>
             <StackPanel VerticalAlignment="Center">
-                <Button Command="{Binding StopCommand}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Height="30">
+                <Button Command="{Binding StopCommand}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="30">
                     <iconPacks:PackIconMaterialLight Kind="Stop" />
                 </Button>
                 <TextBlock Text="Stop" HorizontalAlignment="Center" FontSize="8"/>
             </StackPanel>
 
             <StackPanel VerticalAlignment="Center">
-                <RepeatButton Command="{Binding RewindCommand}" ClickMode="Press" HorizontalAlignment="Left" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Height="30">
+                <RepeatButton Command="{Binding RewindCommand}" ClickMode="Press" HorizontalAlignment="Left" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="30">
                     <iconPacks:PackIconMaterialLight Kind="SeekPrevious" />
                 </RepeatButton>
                 <TextBlock Text="Rewind" HorizontalAlignment="Center" FontSize="8"/>
             </StackPanel>
             <StackPanel VerticalAlignment="Center">
-                <RepeatButton Command="{Binding FastForwardCommand}" ClickMode="Press" HorizontalAlignment="Left" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Height="30">
+                <RepeatButton Command="{Binding FastForwardCommand}" ClickMode="Press" HorizontalAlignment="Left" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="30">
                     <iconPacks:PackIconMaterialLight Kind="SeekNext" />
                 </RepeatButton>
                 <TextBlock Text="Forward" HorizontalAlignment="Center" FontSize="8"/>
@@ -223,21 +223,21 @@
 
 
             <StackPanel VerticalAlignment="Center">
-                <Button Command="{Binding AddNewCueCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Height="30">
+                <Button Command="{Binding AddNewCueCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="30">
                     <iconPacks:PackIconMaterialLight Kind="Plus"/>
                 </Button>
                 <TextBlock Text="New Cue" HorizontalAlignment="Center" FontSize="8"/>
             </StackPanel>
 
             <StackPanel VerticalAlignment="Center">
-                <Button Command="{Binding AddTrackToCueCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Height="30">
+                <Button Command="{Binding AddTrackToCueCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="30">
                     <iconPacks:PackIconMaterialLight Kind="Plus"/>
                 </Button>
                 <TextBlock Text="Add Track" HorizontalAlignment="Center" FontSize="8"/>
             </StackPanel>
 
             <StackPanel VerticalAlignment="Center">
-                <Button Command="{Binding AddActionToCueCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Height="30">
+                <Button Command="{Binding AddActionToCueCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="30">
                     <iconPacks:PackIconMaterialLight Kind="Plus"/>
                 </Button>
                 <TextBlock Text="Add Action" HorizontalAlignment="Center" FontSize="8"/>
@@ -308,7 +308,7 @@
                                 <Label Content="Target ID" ToolTip="Usually this is the Cue ID that the Action is targeting. Depending on the above settings, the cue may be in another ACB file." HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="0,67,0,0" VerticalAlignment="Top" Width="78"/>
                                 <TextBox Text="{Binding Path=SelectedItem.SelectedTrack.UndoableTargetId, ElementName=dataGrid}" HorizontalAlignment="Left" Height="23" Margin="78,67,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="124"/>
                                 <ComboBox x:Name="actionComboBox" DisplayMemberPath="DisplayName" ItemsSource="{Binding Path=SelectedItem.SelectedTrack.TrackCommand.Commands.Binding, ElementName=dataGrid}" HorizontalAlignment="Left" Margin="64,117,0,0" VerticalAlignment="Top" Width="151" SelectionChanged="ActionComboBox_SelectionChanged"/>
-                                <Separator Background="{DynamicResource AccentColorBrush3}" HorizontalAlignment="Left" Height="15" Margin="10,102,0,0" VerticalAlignment="Top" Width="247"/>
+                                <Separator Background="{DynamicResource MahApps.Brushes.Accent3}" HorizontalAlignment="Left" Height="15" Margin="10,102,0,0" VerticalAlignment="Top" Width="247"/>
                                 <Button Click="ActionCommandAdd_Proxy" Content="Add" HorizontalAlignment="Left" Margin="53,148,0,0" VerticalAlignment="Top" Width="75"/>
                                 <Button Click="ActionCommandRemove_Proxy" Content="Remove" HorizontalAlignment="Left" Margin="152,148,0,0" VerticalAlignment="Top" Width="75"/>
                                 <ComboBox Visibility="{Binding ActionChoiceVisible}" SelectedItem="{Binding Path=SelectedItem.UndoableCommandType, ElementName=actionComboBox}" ItemsSource="{Binding ActionCommandTypes}" HorizontalAlignment="Left" Margin="78,193,0,0" VerticalAlignment="Top" Width="179"/>

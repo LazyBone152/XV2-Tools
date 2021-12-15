@@ -21,6 +21,7 @@ using Xv2CoreLib.Resource.App;
 using AutoUpdater;
 using System.Diagnostics;
 using LB_Common.Utils;
+using ControlzEx.Theming;
 
 namespace AudioCueEditor
 {
@@ -178,15 +179,7 @@ namespace AudioCueEditor
         {
             Dispatcher.Invoke((() =>
             {
-                switch (SettingsManager.Instance.Settings.GetCurrentTheme())
-                {
-                    case Xv2CoreLib.Resource.App.AppTheme.Light:
-                        ThemeManager.ChangeAppStyle(System.Windows.Application.Current, ThemeManager.GetAccent(SettingsManager.Instance.Settings.CurrentLightAccent.ToString()), ThemeManager.GetAppTheme("BaseLight"));
-                        break;
-                    case Xv2CoreLib.Resource.App.AppTheme.Dark:
-                        ThemeManager.ChangeAppStyle(System.Windows.Application.Current, ThemeManager.GetAccent(SettingsManager.Instance.Settings.CurrentDarkAccent.ToString()), ThemeManager.GetAppTheme("BaseDark"));
-                        break;
-                }
+                ThemeManager.Current.ChangeTheme(System.Windows.Application.Current, SettingsManager.Instance.GetTheme());
             }));
         }
         private void LoadOnStartUp()

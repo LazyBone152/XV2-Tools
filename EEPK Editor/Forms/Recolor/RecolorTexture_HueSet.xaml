@@ -13,8 +13,8 @@
     <Grid>
         <StackPanel Margin="43,4,35.667,80.667" Orientation="Horizontal" >
 
-            <iconPacks:PackIconMaterialLight Kind="Information"  Margin="0, 5" Foreground="{DynamicResource AccentColorBrush}" Height="33" Width="33" />
-            <TextBlock Text="Sets the hue value to the desired amount on all pixels, keeping the saturation and lightness values the same. This will result in the texture being different shades of the same color." Foreground="{DynamicResource AccentColorBrush}" TextWrapping="Wrap" FontSize="9" Margin="5,10,0,0" Width="309"/>
+            <iconPacks:PackIconMaterialLight Kind="Information"  Margin="0, 5" Foreground="{DynamicResource MahApps.Brushes.Accent}" Height="33" Width="33" />
+            <TextBlock Text="Sets the hue value to the desired amount on all pixels, keeping the saturation and lightness values the same. This will result in the texture being different shades of the same color." Foreground="{DynamicResource MahApps.Brushes.Accent}" TextWrapping="Wrap" FontSize="9" Margin="5,10,0,0" Width="309"/>
         </StackPanel>
 
         <Slider ValueChanged="Slider_ValueChanged" Value="{Binding HueValue, UpdateSourceTrigger=PropertyChanged}" Minimum="-180" Maximum="180" HorizontalAlignment="Left" Margin="89,63,0,0" VerticalAlignment="Top" Width="197"/>
@@ -23,7 +23,7 @@
         <Button Click="Ok_Click" Content="OK" HorizontalAlignment="Left" Margin="135,103,0,0" VerticalAlignment="Top" Width="75"/>
         <Button Click="Cancel_Click" Content="Cancel" HorizontalAlignment="Left" Margin="226,103,0,0" VerticalAlignment="Top" Width="75"/>
         <Button HorizontalAlignment="Left" Margin="397,61,0,0" VerticalAlignment="Top" Width="21" Height="20" Style="{StaticResource ButtonNoGlow}" Click="Button_UndoHueChange_Click">
-            <iconPacks:PackIconMaterialDesign Kind="Undo"  Foreground="{DynamicResource AccentColorBrush}"/>
+            <iconPacks:PackIconMaterialDesign Kind="Undo"  Foreground="{DynamicResource MahApps.Brushes.Accent}"/>
         </Button>
 
 

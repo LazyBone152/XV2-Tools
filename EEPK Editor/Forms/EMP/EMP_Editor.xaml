@@ -33,11 +33,11 @@
     </Window.Resources>
     <Grid x:Name="rootGrid">
 
-        <Controls:MetroTabControl x:Name="mainTabControl" HorizontalAlignment="Left" Height="537" VerticalAlignment="Top" Width="1095" Margin="0, 2">
-            <Controls:MetroTabItem Header="Particle Effects" Controls:ControlsHelper.HeaderFontSize="16">
+        <TabControl x:Name="mainTabControl" HorizontalAlignment="Left" Height="537" VerticalAlignment="Top" Width="1095" Margin="0, 2">
+            <Controls:MetroTabItem Header="Particle Effects" Controls:HeaderedControlHelper.HeaderFontSize="16">
                 <Grid Margin="0,0,-6.836,-0.055">
 
-                    <TreeView x:Name="empTree" ItemsSource="{Binding empFile.ParticleEffects.Binding}" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" HorizontalAlignment="Left" Height="487" Margin="41,15,0,0" VerticalAlignment="Top" Width="282" SelectedItemChanged="empTree_SelectedItemChanged">
+                    <TreeView x:Name="empTree" ItemsSource="{Binding empFile.ParticleEffects.Binding}" BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" BorderThickness="1" HorizontalAlignment="Left" Height="487" Margin="41,15,0,0" VerticalAlignment="Top" Width="282" SelectedItemChanged="empTree_SelectedItemChanged">
                         <TreeView.InputBindings>
                             <KeyBinding Key="Delete" Command="{Binding RemoveParticleEffect_Command}"/>
                             <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding AddParticleEffect_Command}"/>
@@ -92,8 +92,8 @@
                         </TreeView.ItemTemplate>
                     </TreeView>
 
-                    <Controls:MetroTabControl x:Name="tabControl_ParticleEffect" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" HorizontalAlignment="Left" Height="492" Margin="335,10,0,0" VerticalAlignment="Top" Width="753">
-                        <Controls:MetroTabItem Header="General" Controls:ControlsHelper.HeaderFontSize="16">
+                    <TabControl x:Name="tabControl_ParticleEffect" BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" BorderThickness="1" HorizontalAlignment="Left" Height="492" Margin="335,10,0,0" VerticalAlignment="Top" Width="753">
+                        <Controls:MetroTabItem Header="General" Controls:HeaderedControlHelper.HeaderFontSize="16">
                             <Grid Margin="0,0,0.055,0">
                                 <TextBox x:Name="general_Name" Text="{Binding SelectedItem.Name, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="134,57,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="253"/>
                                 <Label Content="Name" HorizontalAlignment="Left" Margin="30,55,0,0" VerticalAlignment="Top" Width="104" HorizontalContentAlignment="Right" ToolTip="The name of the Particle Effect. Has a maximum allowed length of 32 characters."/>
@@ -177,9 +177,9 @@
                             </Grid>
 
                         </Controls:MetroTabItem>
-                        <Controls:MetroTabItem x:Name="tab_TexturePart" Header="Texture Part" Controls:ControlsHelper.HeaderFontSize="16">
+                        <Controls:MetroTabItem x:Name="tab_TexturePart" Header="Texture Part" Controls:HeaderedControlHelper.HeaderFontSize="16">
                             <TabControl>
-                                <TabItem Header="Color/Material" Controls:ControlsHelper.HeaderFontSize="16">
+                                <TabItem Header="Color/Material" Controls:HeaderedControlHelper.HeaderFontSize="16">
                                     <Grid x:Name="grid_TexturePart" Margin="0,0,-0.055,0">
                                         <ex:ColorCanvas x:Name="ColorCanvas_Color1" Margin="10,83,0,0" SelectedColorChanged="ColorCanvas_Color1_SelectedColorChanged" HorizontalAlignment="Left" VerticalAlignment="Top" Width="236" Height="275" SelectedColor="{Binding SelectedItem.Type_Texture.Color1, ElementName=empTree}"/>
                                         <ex:ColorCanvas x:Name="ColorCanvas_Color2" Margin="251,83,0,0" Height="275" Width="236" HorizontalAlignment="Left" VerticalAlignment="Top" SelectedColor="{Binding SelectedItem.Type_Texture.Color2, ElementName=empTree}"/>
@@ -203,7 +203,7 @@
                                         <Label Content="Material" HorizontalAlignment="Left" Margin="8,7,0,0" VerticalAlignment="Top" Width="64" HorizontalContentAlignment="Right"/>
                                         <GroupBox Header="Textures" ToolTip="The textures assigned to this Particle Effect." HorizontalAlignment="Left" Height="164" Margin="492,10,-9.636,0" VerticalAlignment="Top" Width="242">
                                             <Grid Margin="0,0,0.333,-5">
-                                                <DataGrid x:Name="textureRefDataGrid" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" HorizontalAlignment="Left" Height="121" Margin="35,2,0,0" VerticalAlignment="Top" Width="185" AutoGenerateColumns="False" ItemsSource="{Binding SelectedItem.Type_Texture.TextureEntryRef.Binding, ElementName=empTree}" CanUserDeleteRows="False" CanUserAddRows="False">
+                                                <DataGrid x:Name="textureRefDataGrid" BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" BorderThickness="1" HorizontalAlignment="Left" Height="121" Margin="35,2,0,0" VerticalAlignment="Top" Width="185" AutoGenerateColumns="False" ItemsSource="{Binding SelectedItem.Type_Texture.TextureEntryRef.Binding, ElementName=empTree}" CanUserDeleteRows="False" CanUserAddRows="False">
                                                     <DataGrid.Resources>
                                                         <lbUtils:BindingProxy x:Key="proxy" Data="{Binding}"/>
                                                     </DataGrid.Resources>
@@ -213,7 +213,7 @@
                                                     </DataGrid.InputBindings>
 
                                                     <DataGrid.ContextMenu>
-                                                        <ContextMenu Controls:ControlsHelper.HeaderFontSize="12">
+                                                        <ContextMenu Controls:HeaderedControlHelper.HeaderFontSize="12">
                                                             <MenuItem Header="Add" Command="{Binding TexturePart_RemoveTextureCommand}"/>
                                                             <MenuItem Header="Delete" Command="{Binding TexturePart_RemoveTextureCommand}"/>
                                                         </ContextMenu>
@@ -276,7 +276,7 @@
                                     </Grid>
 
                                 </TabItem>
-                                <TabItem Header="Other" Controls:ControlsHelper.HeaderFontSize="16">
+                                <TabItem Header="Other" Controls:HeaderedControlHelper.HeaderFontSize="16">
                                     <Grid>
                                         <GroupBox Header="Scale2" HorizontalAlignment="Left" Height="83" Margin="516,121,0,0" VerticalAlignment="Top" Width="215">
                                             <Grid>
@@ -332,7 +332,7 @@
                                 </TabItem>
                             </TabControl>
                         </Controls:MetroTabItem>
-                        <Controls:MetroTabItem x:Name="Tab_VerticalDistribution" Header="Vertical Distribution" Controls:ControlsHelper.HeaderFontSize="16">
+                        <Controls:MetroTabItem x:Name="Tab_VerticalDistribution" Header="Vertical Distribution" Controls:HeaderedControlHelper.HeaderFontSize="16">
                             <Grid x:Name="grid_VerticalDistribution">
                                 <TextBox x:Name="verticalDistibution_F_00" Text="{Binding SelectedItem.FloatPart_00_01.F_00, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,44,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="Position Offset Y" HorizontalAlignment="Left" Margin="12,42,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
@@ -353,7 +353,7 @@
 
                             </Grid>
                         </Controls:MetroTabItem>
-                        <Controls:MetroTabItem x:Name="Tab_SphericalDistribution" Header="SphericalDistribution" Controls:ControlsHelper.HeaderFontSize="16">
+                        <Controls:MetroTabItem x:Name="Tab_SphericalDistribution" Header="SphericalDistribution" Controls:HeaderedControlHelper.HeaderFontSize="16">
                             <Grid x:Name="grid_SphericalDistribution">
                                 <TextBox x:Name="sphericalDistibution_F_00" Text="{Binding SelectedItem.FloatPart_01_01.F_16, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,44,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="Sphere Radius" HorizontalAlignment="Left" Margin="12,42,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right" ToolTip="SphereRadius_ForRandomPositionOnSphere"/>
@@ -366,7 +366,7 @@
 
                             </Grid>
                         </Controls:MetroTabItem>
-                        <Controls:MetroTabItem x:Name="Tab_ShapePerimeterDistribution" Header="ShapePerimeterDistribution" Controls:ControlsHelper.HeaderFontSize="16">
+                        <Controls:MetroTabItem x:Name="Tab_ShapePerimeterDistribution" Header="ShapePerimeterDistribution" Controls:HeaderedControlHelper.HeaderFontSize="16">
                             <Grid x:Name="grid_ShapePerimeterDistribution">
                                 <TextBox x:Name="shapePerimeterDistibution_F_00" Text="{Binding SelectedItem.FloatPart_02_01.F_00, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,44,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="Position Offset Y" HorizontalAlignment="Left" Margin="12,42,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
@@ -395,7 +395,7 @@
 
                             </Grid>
                         </Controls:MetroTabItem>
-                        <Controls:MetroTabItem x:Name="Tab_ShapeAreaDistribution" Header="ShapeAreaDistribution" Controls:ControlsHelper.HeaderFontSize="16">
+                        <Controls:MetroTabItem x:Name="Tab_ShapeAreaDistribution" Header="ShapeAreaDistribution" Controls:HeaderedControlHelper.HeaderFontSize="16">
                             <Grid x:Name="grid_ShapeAreaDistribution">
                                 <TextBox x:Name="shapeAreaDistibution_F_00" Text="{Binding SelectedItem.FloatPart_03_01.F_00, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,44,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="Position Offset Y" HorizontalAlignment="Left" Margin="12,42,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
@@ -424,7 +424,7 @@
 
                             </Grid>
                         </Controls:MetroTabItem>
-                        <Controls:MetroTabItem x:Name="Tab_AutoOriented" Header="AutoOriented" Controls:ControlsHelper.HeaderFontSize="16">
+                        <Controls:MetroTabItem x:Name="Tab_AutoOriented" Header="AutoOriented" Controls:HeaderedControlHelper.HeaderFontSize="16">
                             <Grid x:Name="grid_AutoOriented">
                                 <TextBox x:Name="autoOriented_F_00" Text="{Binding SelectedItem.FloatPart_00_02.F_16, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,44,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="Rotation" HorizontalAlignment="Left" Margin="12,42,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right" ToolTip="SphereRadius_ForRandomPositionOnSphere"/>
@@ -437,7 +437,7 @@
 
                             </Grid>
                         </Controls:MetroTabItem>
-                        <Controls:MetroTabItem x:Name="Tab_Default" Header="Default" Controls:ControlsHelper.HeaderFontSize="16">
+                        <Controls:MetroTabItem x:Name="Tab_Default" Header="Default" Controls:HeaderedControlHelper.HeaderFontSize="16">
                             <Grid x:Name="grid_Default">
                                 <TextBox x:Name="default_F_00" Text="{Binding SelectedItem.FloatPart_02_02.F_00, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,44,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="Angle Rotation" HorizontalAlignment="Left" Margin="12,42,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
@@ -463,7 +463,7 @@
 
                             </Grid>
                         </Controls:MetroTabItem>
-                        <Controls:MetroTabItem x:Name="Tab_ConeExtrude" Header="ConeExtrude" Controls:ControlsHelper.HeaderFontSize="16">
+                        <Controls:MetroTabItem x:Name="Tab_ConeExtrude" Header="ConeExtrude" Controls:HeaderedControlHelper.HeaderFontSize="16">
                             <Grid x:Name="grid_ConeExtrude">
                                 <TextBox x:Name="coneExtrude_I_00" Text="{Binding SelectedItem.Type_Struct3.I_00, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,44,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="Duration" HorizontalAlignment="Left" Margin="12,42,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
@@ -475,7 +475,7 @@
                                 <Label Content="I__08" HorizontalAlignment="Left" Margin="12,103,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
                                 <TextBox x:Name="coneExtrude_I_10" Text="{Binding SelectedItem.Type_Struct3.I_10, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,135,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="I__10" HorizontalAlignment="Left" Margin="12,133,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
-                                <DataGrid x:Name="dataGrid_coneExtrude" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" HorizontalAlignment="Left" Height="194" Margin="96,191,0,0" VerticalAlignment="Top" Width="609" ItemsSource="{Binding SelectedItem.Type_Struct3.FloatList.Binding, ElementName=empTree}" AutoGenerateColumns="False" CanUserSortColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
+                                <DataGrid x:Name="dataGrid_coneExtrude" BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" BorderThickness="1" HorizontalAlignment="Left" Height="194" Margin="96,191,0,0" VerticalAlignment="Top" Width="609" ItemsSource="{Binding SelectedItem.Type_Struct3.FloatList.Binding, ElementName=empTree}" AutoGenerateColumns="False" CanUserSortColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Binding="{Binding F_00, UpdateSourceTrigger=PropertyChanged}" Header="WorldScaleFactor" Width="*"/>
                                         <DataGridTextColumn Binding="{Binding F_04, UpdateSourceTrigger=PropertyChanged}" Header="WorldScaleAdd" Width="*"/>
@@ -483,16 +483,16 @@
                                         <DataGridTextColumn Binding="{Binding F_12, UpdateSourceTrigger=PropertyChanged}" Header="WorldOffsetFactorb" Width="*"/>
                                     </DataGrid.Columns>
                                 </DataGrid>
-                                <Button HorizontalAlignment="Left" Margin="65,219,0,0" VerticalAlignment="Top" Width="26" Height="25" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Command="{Binding AddConeExtrude_Command}" ToolTip="Add a new Cone Extrude entry">
+                                <Button HorizontalAlignment="Left" Margin="65,219,0,0" VerticalAlignment="Top" Width="26" Height="25" Style="{DynamicResource MahApps.Styles.Button.Circle}" Command="{Binding AddConeExtrude_Command}" ToolTip="Add a new Cone Extrude entry">
                                     <iconPacks:PackIconMaterialLight Kind="Plus" />
                                 </Button>
-                                <Button HorizontalAlignment="Left" Margin="65,249,0,0" VerticalAlignment="Top" Width="26" Height="25" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Command="{Binding RemoveConeExtrude_Command}" ToolTip="Remove the selected Cone Extrude entry">
+                                <Button HorizontalAlignment="Left" Margin="65,249,0,0" VerticalAlignment="Top" Width="26" Height="25" Style="{DynamicResource MahApps.Styles.Button.Circle}" Command="{Binding RemoveConeExtrude_Command}" ToolTip="Remove the selected Cone Extrude entry">
                                     <iconPacks:PackIconMaterialLight Kind="Delete" />
                                 </Button>
 
                             </Grid>
                         </Controls:MetroTabItem>
-                        <Controls:MetroTabItem x:Name="Tab_Mesh" Header="Mesh" Controls:ControlsHelper.HeaderFontSize="16">
+                        <Controls:MetroTabItem x:Name="Tab_Mesh" Header="Mesh" Controls:HeaderedControlHelper.HeaderFontSize="16">
                             <Grid x:Name="grid_Mesh">
                                 <TextBox x:Name="mesh_F_00" Text="{Binding SelectedItem.Type_Model.F_00, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,44,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="Angle Rotation" HorizontalAlignment="Left" Margin="12,42,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
@@ -524,7 +524,7 @@
 
                             </Grid>
                         </Controls:MetroTabItem>
-                        <Controls:MetroTabItem x:Name="Tab_ShapeDraw" Header="ShapeDraw" Controls:ControlsHelper.HeaderFontSize="16">
+                        <Controls:MetroTabItem x:Name="Tab_ShapeDraw" Header="ShapeDraw" Controls:HeaderedControlHelper.HeaderFontSize="16">
                             <Grid x:Name="grid_ShapeDraw">
                                 <TextBox x:Name="shapeDraw_F_00" Text="{Binding SelectedItem.Type_Struct5.F_00, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,44,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="Rotation" HorizontalAlignment="Left" Margin="12,42,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right" ToolTip="SphereRadius_ForRandomPositionOnSphere"/>
@@ -544,22 +544,22 @@
                                 <Label Content="I__28" HorizontalAlignment="Left" Margin="12,193,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
                                 <TextBox x:Name="shapeDraw_I_30" Text="{Binding SelectedItem.Type_Struct5.I_30, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,227,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="I__30" HorizontalAlignment="Left" Margin="12,223,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
-                                <DataGrid x:Name="dataGrid_ShapeDraw" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" HorizontalAlignment="Left" Height="328" Margin="521,42,0,0" VerticalAlignment="Top" Width="207" ItemsSource="{Binding SelectedItem.Type_Struct5.FloatList.Binding, ElementName=empTree}" AutoGenerateColumns="False" CanUserSortColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
+                                <DataGrid x:Name="dataGrid_ShapeDraw" BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" BorderThickness="1" HorizontalAlignment="Left" Height="328" Margin="521,42,0,0" VerticalAlignment="Top" Width="207" ItemsSource="{Binding SelectedItem.Type_Struct5.FloatList.Binding, ElementName=empTree}" AutoGenerateColumns="False" CanUserSortColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Binding="{Binding F_00, UpdateSourceTrigger=PropertyChanged}" Header="X" Width="*"/>
                                         <DataGridTextColumn Binding="{Binding F_04, UpdateSourceTrigger=PropertyChanged}" Header="Y" Width="*"/>
                                     </DataGrid.Columns>
                                 </DataGrid>
-                                <Button HorizontalAlignment="Left" Margin="490,72,0,0" VerticalAlignment="Top" Width="26" Height="25" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Command="{Binding AddShapeDraw_Command}" ToolTip="Add a new Shape Draw entry">
+                                <Button HorizontalAlignment="Left" Margin="490,72,0,0" VerticalAlignment="Top" Width="26" Height="25" Style="{DynamicResource MahApps.Styles.Button.Circle}" Command="{Binding AddShapeDraw_Command}" ToolTip="Add a new Shape Draw entry">
                                     <iconPacks:PackIconMaterialLight Kind="Plus" />
                                 </Button>
-                                <Button HorizontalAlignment="Left" Margin="490,102,0,0" VerticalAlignment="Top" Width="26" Height="25" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Command="{Binding RemoveShapeDraw_Command}" ToolTip="Remove the selected Shape Draw entry">
+                                <Button HorizontalAlignment="Left" Margin="490,102,0,0" VerticalAlignment="Top" Width="26" Height="25" Style="{DynamicResource MahApps.Styles.Button.Circle}" Command="{Binding RemoveShapeDraw_Command}" ToolTip="Remove the selected Shape Draw entry">
                                     <iconPacks:PackIconMaterialLight Kind="Delete" />
                                 </Button>
 
                             </Grid>
                         </Controls:MetroTabItem>
-                        <Controls:MetroTabItem x:Name="Tab_Animaions" Header="Animations" Controls:ControlsHelper.HeaderFontSize="16">
+                        <Controls:MetroTabItem x:Name="Tab_Animaions" Header="Animations" Controls:HeaderedControlHelper.HeaderFontSize="16">
                             <Grid>
 
 
@@ -590,7 +590,7 @@
                                         <Label Content="F__04" Margin="345,77,0,0" VerticalAlignment="Top" Width="73" HorizontalAlignment="Left" HorizontalContentAlignment="Right"/>
                                         <TextBox x:Name="animType0_I_00" Text="{Binding SelectedItem.I_08, ElementName=comboBox_Type0, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="418,24,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="97"/>
                                         <Label Content="Duration" Margin="345,22,0,0" VerticalAlignment="Top" Width="73" HorizontalAlignment="Left" HorizontalContentAlignment="Right"/>
-                                        <DataGrid x:Name="dataGrid_type0_Keyframes" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" HorizontalAlignment="Left" Height="176" Margin="208,137,0,0" VerticalAlignment="Top" Width="307" ItemsSource="{Binding SelectedItem.Keyframes.Binding, ElementName=comboBox_Type0}" AutoGenerateColumns="False" CanUserSortColumns="True" CanUserDeleteRows="False" CanUserAddRows="False">
+                                        <DataGrid x:Name="dataGrid_type0_Keyframes" BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" BorderThickness="1" HorizontalAlignment="Left" Height="176" Margin="208,137,0,0" VerticalAlignment="Top" Width="307" ItemsSource="{Binding SelectedItem.Keyframes.Binding, ElementName=comboBox_Type0}" AutoGenerateColumns="False" CanUserSortColumns="True" CanUserDeleteRows="False" CanUserAddRows="False">
                                             <DataGrid.InputBindings>
                                                 <KeyBinding Key="Delete" Command="{Binding RemoveType0KeyframeCommand}"/>
                                                 <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding AddType0KeyframeCommand}"/>
@@ -601,16 +601,16 @@
                                                 <DataGridTextColumn Binding="{Binding Float, UpdateSourceTrigger=PropertyChanged}" Header="Value" Width="*"/>
                                             </DataGrid.Columns>
                                             <DataGrid.ContextMenu>
-                                                <ContextMenu Controls:ControlsHelper.HeaderFontSize="12">
+                                                <ContextMenu Controls:HeaderedControlHelper.HeaderFontSize="12">
                                                     <MenuItem Header="Delete" Command="{Binding RemoveType0KeyframeCommand}"/>
                                                 </ContextMenu>
                                             </DataGrid.ContextMenu>
                                         </DataGrid>
 
-                                        <Button HorizontalAlignment="Left" Margin="177,166,0,0" VerticalAlignment="Top" Width="26" Height="25" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Command="{Binding AddType0KeyframeCommand}" ToolTip="Add a keyframe">
+                                        <Button HorizontalAlignment="Left" Margin="177,166,0,0" VerticalAlignment="Top" Width="26" Height="25" Style="{DynamicResource MahApps.Styles.Button.Circle}" Command="{Binding AddType0KeyframeCommand}" ToolTip="Add a keyframe">
                                             <iconPacks:PackIconMaterialLight Kind="Plus" />
                                         </Button>
-                                        <Button HorizontalAlignment="Left" Margin="177,196,0,0" VerticalAlignment="Top" Width="26" Height="25" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Command="{Binding RemoveType0KeyframeCommand}" ToolTip="Remove the selected keyframe">
+                                        <Button HorizontalAlignment="Left" Margin="177,196,0,0" VerticalAlignment="Top" Width="26" Height="25" Style="{DynamicResource MahApps.Styles.Button.Circle}" Command="{Binding RemoveType0KeyframeCommand}" ToolTip="Remove the selected keyframe">
                                             <iconPacks:PackIconMaterialLight Kind="Delete" />
                                         </Button>
                                     </Grid>
@@ -618,7 +618,7 @@
                                 </GroupBox>
                             </Grid>
                         </Controls:MetroTabItem>
-                        <Controls:MetroTabItem x:Name="Tab_AnimationsGroup" Header="Animations (group)" Controls:ControlsHelper.HeaderFontSize="16">
+                        <Controls:MetroTabItem x:Name="Tab_AnimationsGroup" Header="Animations (group)" Controls:HeaderedControlHelper.HeaderFontSize="16">
                             <Grid>
                                 <Grid Margin="0,67,0.055,0.345" IsEnabled="{Binding SelectedItem, ElementName=comboBox_Type1_Header, Converter={StaticResource NullToFalse}}">
 
@@ -641,13 +641,13 @@
                                             <Label Content="F__04" Margin="358,55,0,0" VerticalAlignment="Top" Width="73" HorizontalAlignment="Left" HorizontalContentAlignment="Right"/>
                                             <TextBox x:Name="animType1_I_08"  Text="{Binding SelectedItem.I_08, ElementName=comboBox_Type1, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="431,2,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="97"/>
                                             <Label Content="Duration" Margin="358,0,0,0" VerticalAlignment="Top" Width="73" HorizontalAlignment="Left" HorizontalContentAlignment="Right"/>
-                                            <DataGrid x:Name="dataGrid_type1_Keyframes" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" HorizontalAlignment="Left" Height="118" Margin="221,115,0,0" VerticalAlignment="Top" Width="307" ItemsSource="{Binding SelectedItem.Keyframes.Binding, ElementName=comboBox_Type1}" AutoGenerateColumns="False" CanUserSortColumns="True" CanUserDeleteRows="False" CanUserAddRows="False">
+                                            <DataGrid x:Name="dataGrid_type1_Keyframes" BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" BorderThickness="1" HorizontalAlignment="Left" Height="118" Margin="221,115,0,0" VerticalAlignment="Top" Width="307" ItemsSource="{Binding SelectedItem.Keyframes.Binding, ElementName=comboBox_Type1}" AutoGenerateColumns="False" CanUserSortColumns="True" CanUserDeleteRows="False" CanUserAddRows="False">
                                                 <DataGrid.InputBindings>
                                                     <KeyBinding Key="Delete" Command="{Binding RemoveType1KeyframeCommand}"/>
                                                     <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding AddType1KeyframeCommand}"/>
                                                 </DataGrid.InputBindings>
                                                 <DataGrid.ContextMenu>
-                                                    <ContextMenu Controls:ControlsHelper.HeaderFontSize="12">
+                                                    <ContextMenu Controls:HeaderedControlHelper.HeaderFontSize="12">
                                                         <MenuItem Header="Delete" Command="{Binding RemoveType1KeyframeCommand}"/>
                                                     </ContextMenu>
                                                 </DataGrid.ContextMenu>
@@ -658,10 +658,10 @@
                                             </DataGrid>
 
 
-                                            <Button HorizontalAlignment="Left" Margin="179,140,0,0" VerticalAlignment="Top" Width="26" Height="25" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Command="{Binding AddType1KeyframeCommand}" ToolTip="Add a keyframe">
+                                            <Button HorizontalAlignment="Left" Margin="179,140,0,0" VerticalAlignment="Top" Width="26" Height="25" Style="{DynamicResource MahApps.Styles.Button.Circle}" Command="{Binding AddType1KeyframeCommand}" ToolTip="Add a keyframe">
                                                 <iconPacks:PackIconMaterialLight Kind="Plus" />
                                             </Button>
-                                            <Button HorizontalAlignment="Left" Margin="179,170,0,0" VerticalAlignment="Top" Width="26" Height="25" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Command="{Binding RemoveType1KeyframeCommand}" ToolTip="Remove the selected keyframe">
+                                            <Button HorizontalAlignment="Left" Margin="179,170,0,0" VerticalAlignment="Top" Width="26" Height="25" Style="{DynamicResource MahApps.Styles.Button.Circle}" Command="{Binding RemoveType1KeyframeCommand}" ToolTip="Remove the selected keyframe">
                                                 <iconPacks:PackIconMaterialLight Kind="Delete" />
                                             </Button>
                                         </Grid>
@@ -697,24 +697,24 @@
                                 </Grid>
                             </Grid>
                         </Controls:MetroTabItem>
-                    </Controls:MetroTabControl>
-                    <Button HorizontalAlignment="Left" Margin="10,19,0,0" VerticalAlignment="Top" Width="26" Height="25" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Command="{Binding AddParticleEffect_Command}" ToolTip="Add a new Particle Effect">
+                    </TabControl>
+                    <Button HorizontalAlignment="Left" Margin="10,19,0,0" VerticalAlignment="Top" Width="26" Height="25" Style="{DynamicResource MahApps.Styles.Button.Circle}" Command="{Binding AddParticleEffect_Command}" ToolTip="Add a new Particle Effect">
                         <iconPacks:PackIconMaterialLight Kind="Plus" />
                     </Button>
 
-                    <Button HorizontalAlignment="Left" Margin="10,80,0,0" VerticalAlignment="Top" Width="26" Height="25" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Command="{Binding RemoveParticleEffect_Command}" ToolTip="Remove the selected Particle Effect">
+                    <Button HorizontalAlignment="Left" Margin="10,80,0,0" VerticalAlignment="Top" Width="26" Height="25" Style="{DynamicResource MahApps.Styles.Button.Circle}" Command="{Binding RemoveParticleEffect_Command}" ToolTip="Remove the selected Particle Effect">
                         <iconPacks:PackIconMaterialLight Kind="Delete" />
                     </Button>
-                    <Button HorizontalAlignment="Left" Margin="10,49,0,0" VerticalAlignment="Top" Width="26" Height="26" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Command="{Binding AddParticleEffectAsChild_Command}" ToolTip="Add a new Particle Effect as a child to the selected Particle Effect">
+                    <Button HorizontalAlignment="Left" Margin="10,49,0,0" VerticalAlignment="Top" Width="26" Height="26" Style="{DynamicResource MahApps.Styles.Button.Circle}" Command="{Binding AddParticleEffectAsChild_Command}" ToolTip="Add a new Particle Effect as a child to the selected Particle Effect">
                         <iconPacks:PackIconMaterialLight Kind="Plus" />
                     </Button>
 
 
                 </Grid>
             </Controls:MetroTabItem>
-            <Controls:MetroTabItem Header="Textures" Controls:ControlsHelper.HeaderFontSize="16">
+            <Controls:MetroTabItem Header="Textures" Controls:HeaderedControlHelper.HeaderFontSize="16">
                 <Grid>
-                    <ListBox Tag="{Binding DataContext, ElementName=empEditorWindow}" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" x:Name="listBox_Textures" ItemsSource="{Binding empFile.Textures.Binding}" HorizontalAlignment="Left" Height="482" Margin="48,10,0,0" VerticalAlignment="Top" Width="252" SelectionMode="Extended">
+                    <ListBox Tag="{Binding DataContext, ElementName=empEditorWindow}" BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" BorderThickness="1" x:Name="listBox_Textures" ItemsSource="{Binding empFile.Textures.Binding}" HorizontalAlignment="Left" Height="482" Margin="48,10,0,0" VerticalAlignment="Top" Width="252" SelectionMode="Extended">
                         <ListBox.Resources>
                             <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Black"/>
 
@@ -796,7 +796,7 @@
 
                                     </Grid>
                                     <Grid x:Name="grid_TextureType2" HorizontalAlignment="Left" Height="146" Width="345" VerticalAlignment="Top" Visibility="{Binding ElementName=listBox_Textures, Path=SelectedItem.IsType2Visible}">
-                                        <DataGrid x:Name="dataGrid_ScrollKeyframes" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1" FontSize="10" HorizontalAlignment="Left" Height="126" Margin="26,10,0,0" VerticalAlignment="Top" Width="300" ItemsSource="{Binding SelectedItem.SubData2.Keyframes.Binding, ElementName=listBox_Textures}" AutoGenerateColumns="False" CanUserSortColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
+                                        <DataGrid x:Name="dataGrid_ScrollKeyframes" BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" BorderThickness="1" FontSize="10" HorizontalAlignment="Left" Height="126" Margin="26,10,0,0" VerticalAlignment="Top" Width="300" ItemsSource="{Binding SelectedItem.SubData2.Keyframes.Binding, ElementName=listBox_Textures}" AutoGenerateColumns="False" CanUserSortColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
                                             <DataGrid.Columns>
                                                 <DataGridTextColumn Binding="{Binding I_00, UpdateSourceTrigger=PropertyChanged}" Header="Time" Width="*" />
                                                 <DataGridTextColumn Binding="{Binding F_04, UpdateSourceTrigger=PropertyChanged}" Header="Scroll X" Width="*" />
@@ -848,19 +848,19 @@
                     </GroupBox>
 
                     <Grid Margin="672,25,10.164,19.818" Background="#252525">
-                        <lbCommon:ZoomBorder x:Name="border" ClipToBounds="True" Background="Transparent" BorderBrush="{DynamicResource AccentColorBrush2}" BorderThickness="1">
+                        <lbCommon:ZoomBorder x:Name="border" ClipToBounds="True" Background="Transparent" BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" BorderThickness="1">
                             <Image Stretch="Uniform" Source="{Binding SelectedItem.TextureRef.DdsImage, ElementName=listBox_Textures}" ToolTip="{Binding SelectedItem.TextureRef.Name, ElementName=listBox_Textures}" Margin="0,0,-0.382,0.327"/>
                         </lbCommon:ZoomBorder>
                     </Grid>
 
-                    <Button HorizontalAlignment="Left" Margin="17,14,0,0" VerticalAlignment="Top" Width="26" Height="24" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Command="{Binding TextureAdd_Command}">
+                    <Button HorizontalAlignment="Left" Margin="17,14,0,0" VerticalAlignment="Top" Width="26" Height="24" Style="{DynamicResource MahApps.Styles.Button.Circle}" Command="{Binding TextureAdd_Command}">
                         <iconPacks:PackIconMaterialLight Kind="Plus" />
                     </Button>
-                    <Button HorizontalAlignment="Left" Margin="17,43,0,0" VerticalAlignment="Top" Width="26" Height="24" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Command="{Binding TextureRemove_Command}">
+                    <Button HorizontalAlignment="Left" Margin="17,43,0,0" VerticalAlignment="Top" Width="26" Height="24" Style="{DynamicResource MahApps.Styles.Button.Circle}" Command="{Binding TextureRemove_Command}">
                         <iconPacks:PackIconMaterialLight Kind="Delete" />
                     </Button>
                 </Grid>
             </Controls:MetroTabItem>
-        </Controls:MetroTabControl>
+        </TabControl>
     </Grid>
 </Controls:MetroWindow>

@@ -12,8 +12,8 @@
     <Grid>
         <StackPanel Margin="43,4,36,154.333" Orientation="Horizontal" >
 
-            <iconPacks:PackIconMaterialLight Kind="Information"  Margin="0, 5" Foreground="{DynamicResource AccentColorBrush}" Height="33" Width="33" />
-            <TextBlock Text="Adjusts the hue, saturation and lightness (HSL) values, shifting them by the desired amount. This recolors the effect while preserving any color variation." Foreground="{DynamicResource AccentColorBrush}" TextWrapping="Wrap" FontSize="9" Margin="5,10,0,0.333" Width="304"/>
+            <iconPacks:PackIconMaterialLight Kind="Information"  Margin="0, 5" Foreground="{DynamicResource MahApps.Brushes.Accent}" Height="33" Width="33" />
+            <TextBlock Text="Adjusts the hue, saturation and lightness (HSL) values, shifting them by the desired amount. This recolors the effect while preserving any color variation." Foreground="{DynamicResource MahApps.Brushes.Accent}" TextWrapping="Wrap" FontSize="9" Margin="5,10,0,0.333" Width="304"/>
         </StackPanel>
 
 
@@ -33,13 +33,13 @@
         <Controls:NumericUpDown StringFormat="0.000" ValueChanged="IntegerUpDown_ValueChanged" Value="{Binding hslColor.Lightness, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="1" Margin="292,138,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="92" Interval="0.01"/>
         <Label Content="Lightness" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="10,137,0,0" VerticalAlignment="Top" Width="75"/>
         <Button HorizontalAlignment="Left" Margin="389,78,0,0" VerticalAlignment="Top" Width="21" Height="20"  Style="{StaticResource ButtonNoGlow}" Click="Button_UndoHueChange_Click" ToolTip="{Binding HueRevertTooltip, UpdateSourceTrigger=PropertyChanged}">
-            <iconPacks:PackIconMaterialDesign Kind="Undo"  Foreground="{DynamicResource AccentColorBrush}"/>
+            <iconPacks:PackIconMaterialDesign Kind="Undo"  Foreground="{DynamicResource MahApps.Brushes.Accent}"/>
         </Button>
         <Button HorizontalAlignment="Left" Margin="389,108,0,0" VerticalAlignment="Top" Width="21" Height="20" Style="{StaticResource ButtonNoGlow}" Click="Button_UndoSaturationChange_Click" ToolTip="{Binding SaturationRevertTooltip, UpdateSourceTrigger=PropertyChanged}">
-            <iconPacks:PackIconMaterialDesign Kind="Undo"  Foreground="{DynamicResource AccentColorBrush}"/>
+            <iconPacks:PackIconMaterialDesign Kind="Undo"  Foreground="{DynamicResource MahApps.Brushes.Accent}"/>
         </Button>
         <Button HorizontalAlignment="Left" Margin="389,138,0,0" VerticalAlignment="Top" Width="21" Height="20"  Style="{StaticResource ButtonNoGlow}" Click="Button_UndoLightnessChange_Click" ToolTip="{Binding LightnessRevertTooltip, UpdateSourceTrigger=PropertyChanged}">
-            <iconPacks:PackIconMaterialDesign Kind="Undo"  Foreground="{DynamicResource AccentColorBrush}"/>
+            <iconPacks:PackIconMaterialDesign Kind="Undo"  Foreground="{DynamicResource MahApps.Brushes.Accent}"/>
         </Button>
 
     </Grid>

@@ -8,8 +8,8 @@
         mc:Ignorable="d"
         Title="Asset Selector" Height="489.71" Width="531.652" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" WindowStyle="ToolWindow" PreviewKeyUp="MetroWindow_PreviewKeyDown">
     <Grid>
-        <Controls:MetroTabControl x:Name="tabControl" HorizontalAlignment="Left" Height="374" VerticalAlignment="Top" Width="480" Margin="22,10,0,0">
-            <Controls:MetroTabItem Header="EMO" x:Name="emoTab" Controls:ControlsHelper.HeaderFontSize="14">
+        <TabControl x:Name="tabControl" HorizontalAlignment="Left" Height="374" VerticalAlignment="Top" Width="480" Margin="22,10,0,0">
+            <Controls:MetroTabItem Header="EMO" x:Name="emoTab" Controls:HeaderedControlHelper.HeaderFontSize="14">
                 <Grid Background="Transparent">
                     <DataGrid x:Name="emoGrid" ItemsSource="{Binding effectContainerFile.Emo.Assets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" HorizontalAlignment="Left" Height="346" VerticalAlignment="Top" Width="474" Margin="0,0,-0.109,-0.4">
                         <DataGrid.Resources>
@@ -23,7 +23,7 @@
                     </DataGrid>
                 </Grid>
             </Controls:MetroTabItem>
-            <Controls:MetroTabItem Header="PBIND"  x:Name="pbindTab" Controls:ControlsHelper.HeaderFontSize="14">
+            <Controls:MetroTabItem Header="PBIND"  x:Name="pbindTab" Controls:HeaderedControlHelper.HeaderFontSize="14">
                 <Grid Background="Transparent">
                     <DataGrid x:Name="pbindGrid" ItemsSource="{Binding effectContainerFile.Pbind.Assets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" HorizontalAlignment="Left" Height="346" VerticalAlignment="Top" Width="474" Margin="0,0,-0.109,-0.4">
                         <DataGrid.Resources>
@@ -37,7 +37,7 @@
                     </DataGrid>
                 </Grid>
             </Controls:MetroTabItem>
-            <Controls:MetroTabItem Header="TBIND"  x:Name="tbindTab" Controls:ControlsHelper.HeaderFontSize="14">
+            <Controls:MetroTabItem Header="TBIND"  x:Name="tbindTab" Controls:HeaderedControlHelper.HeaderFontSize="14">
                 <Grid Background="Transparent">
                     <DataGrid  x:Name="tbindGrid" ItemsSource="{Binding effectContainerFile.Tbind.Assets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" HorizontalAlignment="Left" Height="346" VerticalAlignment="Top" Width="474" Margin="0,0,-0.109,-0.4">
                         <DataGrid.Resources>
@@ -51,7 +51,7 @@
                     </DataGrid>
                 </Grid>
             </Controls:MetroTabItem>
-            <Controls:MetroTabItem Header="LIGHT.EMA" x:Name="lightEmaTab" Controls:ControlsHelper.HeaderFontSize="14">
+            <Controls:MetroTabItem Header="LIGHT.EMA" x:Name="lightEmaTab" Controls:HeaderedControlHelper.HeaderFontSize="14">
                 <Grid Background="Transparent">
                     <DataGrid x:Name="lightEmaGrid" ItemsSource="{Binding effectContainerFile.LightEma.Assets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" HorizontalAlignment="Left" Height="346" VerticalAlignment="Top" Width="474" Margin="0,0,-0.109,-0.4">
                         <DataGrid.Resources>
@@ -65,7 +65,7 @@
                     </DataGrid>
                 </Grid>
             </Controls:MetroTabItem>
-            <Controls:MetroTabItem Header="CBIND"  x:Name="cbindTab" Controls:ControlsHelper.HeaderFontSize="14">
+            <Controls:MetroTabItem Header="CBIND"  x:Name="cbindTab" Controls:HeaderedControlHelper.HeaderFontSize="14">
                 <Grid Background="Transparent">
                     <DataGrid x:Name="cbindGrid" ItemsSource="{Binding effectContainerFile.Cbind.Assets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" HorizontalAlignment="Left" Height="346" VerticalAlignment="Top" Width="474" Margin="0,0,-0.109,-0.4">
                         <DataGrid.Resources>
@@ -79,7 +79,7 @@
                     </DataGrid>
                 </Grid>
             </Controls:MetroTabItem>
-            <Controls:MetroTabItem Header="Search..." Controls:ControlsHelper.HeaderFontSize="14">
+            <Controls:MetroTabItem Header="Search..." Controls:HeaderedControlHelper.HeaderFontSize="14">
                 <Grid Background="Transparent">
                     <DataGrid x:Name="searchGrid" ItemsSource="{Binding ViewMergedAsserList}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" HorizontalAlignment="Left" Height="300" VerticalAlignment="Top" Width="474" Margin="0,46,-0.109,-0.4">
                         <DataGrid.Resources>
@@ -96,7 +96,7 @@
                     <Button Click="Button_Search_Click" Content="Search" HorizontalAlignment="Left" Margin="300,9,0,0" VerticalAlignment="Top" Width="75"/>
                 </Grid>
             </Controls:MetroTabItem>
-        </Controls:MetroTabControl>
+        </TabControl>
         <Button Content="Ok" HorizontalAlignment="Left" Margin="213,421,0,0" VerticalAlignment="Top" Width="75" Click="Button_OK_Click"/>
         <TextBlock x:Name="multiSelectTip" HorizontalAlignment="Left" Margin="122,395,0,0" TextWrapping="Wrap" Text="Tip: Use Left Ctrl + Left Mouse Click to multi-select." VerticalAlignment="Top" Height="21" Width="299"/>
 

@@ -9,7 +9,7 @@
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
         Dialog:DialogParticipation.Register="{Binding}"
-        Title="Edit Loop" TitleCaps="False" Height="250" Width="380" ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner" Closing="MetroWindow_Closing">
+        Title="Edit Loop" TitleCharacterCasing="Normal" Height="250" Width="380" ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner" Closing="MetroWindow_Closing">
     <Grid>
         <Label Content="Loop Enabled" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="30,21,0,0" VerticalAlignment="Top" Width="95"/>
         <CheckBox IsChecked="{Binding LoopEnabled}" HorizontalAlignment="Left" Margin="130,27,0,0" VerticalAlignment="Top" Width="172"/>
@@ -33,28 +33,28 @@
             <Label Content="{Binding LoopEndString}" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Margin="129,63,0,0" VerticalAlignment="Top" Width="95"/>
             <Label Content="Preview:" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="29,98,0,0" VerticalAlignment="Top" Width="95"/>
 
-            <Button Command="{Binding PlayPreviewCommand}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="25" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Height="24" Margin="129,97,0,45">
+            <Button Command="{Binding PlayPreviewCommand}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="25" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="24" Margin="129,97,0,45">
                 <iconPacks:PackIconMaterialLight Kind="Play" />
             </Button>
-            <Button Command="{Binding PausePreviewCommand}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="25" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Height="24" Margin="164,98,0,47">
+            <Button Command="{Binding PausePreviewCommand}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="25" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="24" Margin="164,98,0,47">
                 <iconPacks:PackIconMaterialLight Kind="Pause" />
             </Button>
-            <Button Command="{Binding SkipPreviewCommand}" ToolTip="Skip to 5 seconds before Loop End." HorizontalAlignment="Left" VerticalAlignment="Center" Width="25" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Height="24" Margin="199,98,0,47">
+            <Button Command="{Binding SkipPreviewCommand}" ToolTip="Skip to 5 seconds before Loop End." HorizontalAlignment="Left" VerticalAlignment="Center" Width="25" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="24" Margin="199,98,0,47">
                 <iconPacks:PackIconMaterialLight Kind="SeekNext" />
             </Button>
 
             <Label Content="{Binding CurrentTimeString}" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Margin="234,94,0,0" VerticalAlignment="Top" Width="95"/>
 
-            <RepeatButton Command="{Binding LoopStartDecreaseCommand}" ClickMode="Press" Interval="1" ToolTip="Allows fine tuning of Loop Start in increments of 1 millisecond." HorizontalAlignment="Left" VerticalAlignment="Center" Width="25" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Height="24" Margin="234,33,0,115">
+            <RepeatButton Command="{Binding LoopStartDecreaseCommand}" ClickMode="Press" Interval="1" ToolTip="Allows fine tuning of Loop Start in increments of 1 millisecond." HorizontalAlignment="Left" VerticalAlignment="Center" Width="25" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="24" Margin="234,33,0,115">
                 <iconPacks:PackIconMaterialLight Kind="SeekPrevious" />
             </RepeatButton>
-            <RepeatButton Command="{Binding LoopStartIncreaseCommand}" ClickMode="Press" Interval="1" ToolTip="Allows fine tuning of Loop Start in increments of 1 millisecond." HorizontalAlignment="Left" VerticalAlignment="Center" Width="25" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Height="24" Margin="264,33,0,115">
+            <RepeatButton Command="{Binding LoopStartIncreaseCommand}" ClickMode="Press" Interval="1" ToolTip="Allows fine tuning of Loop Start in increments of 1 millisecond." HorizontalAlignment="Left" VerticalAlignment="Center" Width="25" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="24" Margin="264,33,0,115">
                 <iconPacks:PackIconMaterialLight Kind="SeekNext" />
             </RepeatButton>
-            <RepeatButton Command="{Binding LoopEndDecreaseCommand}" ClickMode="Press" Interval="1" ToolTip="Allows fine tuning of Loop End in increments of 1 millisecond." HorizontalAlignment="Left" VerticalAlignment="Center" Width="25" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Height="24" Margin="234,62,0,86">
+            <RepeatButton Command="{Binding LoopEndDecreaseCommand}" ClickMode="Press" Interval="1" ToolTip="Allows fine tuning of Loop End in increments of 1 millisecond." HorizontalAlignment="Left" VerticalAlignment="Center" Width="25" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="24" Margin="234,62,0,86">
                 <iconPacks:PackIconMaterialLight Kind="SeekPrevious" />
             </RepeatButton>
-            <RepeatButton Command="{Binding LoopEndIncreaseCommand}" ClickMode="Press" Interval="1" ToolTip="Allows fine tuning of Loop End in increments of 1 millisecond." HorizontalAlignment="Left" VerticalAlignment="Center" Width="25" Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Height="24" Margin="264,62,0,86">
+            <RepeatButton Command="{Binding LoopEndIncreaseCommand}" ClickMode="Press" Interval="1" ToolTip="Allows fine tuning of Loop End in increments of 1 millisecond." HorizontalAlignment="Left" VerticalAlignment="Center" Width="25" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="24" Margin="264,62,0,86">
                 <iconPacks:PackIconMaterialLight Kind="SeekNext" />
             </RepeatButton>
 

@@ -6,7 +6,7 @@
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:local="clr-namespace:AudioCueEditor.View"
         mc:Ignorable="d"
-        Title="Add Track" TitleCaps="False" Height="189.333" Width="380" ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner" Closing="MetroWindow_Closing">
+        Title="Add Track" TitleCharacterCasing="Normal" Height="189.333" Width="380" ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner" Closing="MetroWindow_Closing">
     <Grid>
         <StackPanel Margin="10,10,10.667,120" Orientation="Horizontal">
             <Label Content="Path" VerticalAlignment="Center"/>

@@ -6,7 +6,7 @@
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:local="clr-namespace:AudioCueEditor.View"
         mc:Ignorable="d"
-        Title="Add Cue" TitleCaps="False" Height="303.698" Width="380" ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner" Closing="MetroWindow_Closing">
+        Title="Add Cue" TitleCharacterCasing="Normal" Height="303.698" Width="380" ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner" Closing="MetroWindow_Closing">
     <Grid>
         <StackPanel>
             <StackPanel Orientation="Horizontal" Margin="10, 5">
