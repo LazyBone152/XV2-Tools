@@ -6,7 +6,7 @@ using Xv2CoreLib.HCA;
 using Xv2CoreLib.CPK;
 using YAXLib;
 using Xv2CoreLib.Resource.UndoRedo;
-using Xv2CoreLib.ACB_NEW;
+using Xv2CoreLib.ACB;
 
 namespace Xv2CoreLib.AFS2
 {

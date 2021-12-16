@@ -20,7 +20,7 @@ using System.Windows.Shapes;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using System.Threading;
-using Xv2CoreLib.ACB_NEW;
+using Xv2CoreLib.ACB;
 
 namespace AudioCueEditor.View
 {

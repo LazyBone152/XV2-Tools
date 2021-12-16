@@ -1116,13 +1116,6 @@ namespace EEPK_Organiser.Forms.EMP
 
         }
 
-        private void ColorCanvas_Color1_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
-        {
-            //System.Windows.MessageBox.Show(String.Format("R = {0}, G = {1}, B = {2}, A = {3}", ColorCanvas_Color1.R.ToString(), ColorCanvas_Color1.G.ToString(), ColorCanvas_Color1.B.ToString(), ColorCanvas_Color1.A.ToString()));
-        }
-
-
-
         //Texture Tab
         public RelayCommand TextureRemove_Command => new RelayCommand(TextureRemove, IsTextureSelected);
         private void TextureRemove()

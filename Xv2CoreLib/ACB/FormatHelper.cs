@@ -7,7 +7,7 @@ using Xv2CoreLib.Resource;
 using Xv2CoreLib.UTF;
 using YAXLib;
 
-namespace Xv2CoreLib.ACB_NEW
+namespace Xv2CoreLib.ACB
 {
     public class AcbFormatHelper
     {

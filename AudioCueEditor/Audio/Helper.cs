@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using VGAudio.Cli;
-using Xv2CoreLib.ACB_NEW;
+using Xv2CoreLib.ACB;
 
 namespace AudioCueEditor.Audio
 {

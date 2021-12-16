@@ -2,12 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Xv2CoreLib.ACB_NEW;
+using Xv2CoreLib.ACB;
 using Xv2CoreLib.EffectContainer;
-using Xv2CoreLib.Resource;
 
 namespace LB_Mod_Installer.Installer
 {

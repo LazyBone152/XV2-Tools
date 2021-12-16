@@ -117,10 +117,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ACB\ACB_File.cs" />
-    <Compile Include="ACB_NEW\ACB_File.cs" />
-    <Compile Include="ACB_NEW\ACB_Wrapper.cs" />
-    <Compile Include="ACB_NEW\TrackMetadata.cs" />
-    <Compile Include="ACB_NEW\FormatHelper.cs" />
+    <Compile Include="ACB\ACB_Wrapper.cs" />
+    <Compile Include="ACB\TrackMetadata.cs" />
+    <Compile Include="ACB\FormatHelper.cs" />
     <Compile Include="AFS2\AFS2_File.cs" />
     <Compile Include="AGD\AGD_File.cs" />
     <Compile Include="AIG\AIG_File.cs" />

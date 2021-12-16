@@ -8,6 +8,8 @@ using System.Threading;
 using Xv2CoreLib;
 using Xv2CoreLib.Eternity;
 using YAXLib;
+using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace XV2_Xml_Serializer
 {
@@ -19,11 +21,11 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
-            //args = new string[1] { @"CMN.ean.xml" };
+            //args = new string[1] { @"E:\VS_Test\BAC\1.17 BACs" };
 
             DEBUG_MODE = true;
 #endif
-
+            //CpkExtract();
 
             string fileLocation = null;
             
@@ -244,7 +246,7 @@ namespace XV2_Xml_Serializer
                                     new Xv2CoreLib.EMM.Parser(fileLocation, true);
                                     break;
                                 case ".ean":
-                                    new Xv2CoreLib.EAN.Parser(fileLocation, true);
+                                    new Xv2CoreLib.EAN.Parser(fileLocation, true, false);
                                     break;
                                 case ".emb":
                                     new Xv2CoreLib.EMB_CLASS.Parser(fileLocation, true);
@@ -617,6 +619,9 @@ namespace XV2_Xml_Serializer
 
             switch (fileType)
             {
+                case ".bac":
+                    BulkParseBac(fileLocation);
+                    break;
                 case ".ema":
                     BulkParseEma(fileLocation);
                     break;
@@ -681,6 +686,132 @@ namespace XV2_Xml_Serializer
 
             Console.WriteLine("Done");
             Console.ReadLine();
+        }
+
+        static void BulkParseBac(string directory)
+        {
+            string[] files = Directory.GetFiles(directory);
+            //BacHomingParse(files);
+            
+
+            List<int> values = new List<int>();
+            List<int> valuesTotal = new List<int>();
+
+            foreach (string s in files)
+            {
+                try
+                {
+                    if (Path.GetExtension(s) == ".bac")
+                    {
+                        Console.WriteLine(s);
+                        var bac = Xv2CoreLib.BAC.BAC_File.Load(s);
+
+                        if (bac.BacEntries != null)
+                        {
+                            foreach (var entry in bac.BacEntries)
+                            {
+                                if (entry.Type7 != null)
+                                {
+                                    foreach (var type in entry.Type7)
+                                    {
+                                        //int flag = type.MovementFlags & 0xFFFb;
+
+                                        //if (!values.Contains((ushort)type.I_08))
+                                        //    values.Add((ushort)type.I_08);
+
+                                        //valuesTotal.Add((ushort)type.I_08);
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //Console.WriteLine(ex.ToString());
+                   // Console.ReadLine();
+                }
+            }
+
+            values.Sort();
+            StringBuilder str = new StringBuilder();
+
+            foreach(var value in values)
+            {
+                //str.AppendLine($"{value.ToString()} ({valuesTotal.Count(x => x == value)})");
+                str.AppendLine($"{HexConverter.GetHexString(value)} ({valuesTotal.Count(x => x == value)})");
+
+                //str.AppendLine($"{Convert.ToSingle(value)} ({valuesTotal.Count(x => x == value)})");
+            }
+
+            File.WriteAllText("bac_test.txt", str.ToString());
+
+            Process.Start("bac_test.txt");
+            Environment.Exit(0);
+        }
+
+        private static void BacTcParse(string[] files)
+        {
+            bool[] exists = new bool[100];
+            float[] param1 = new float[100];
+            float[] param2 = new float[100];
+            float[] param3 = new float[100];
+            float[] param4 = new float[100];
+            float[] param5 = new float[100];
+
+
+            foreach (string s in files)
+            {
+                try
+                {
+                    if (Path.GetExtension(s) == ".bac")
+                    {
+                        Console.WriteLine(s);
+                        var bac = Xv2CoreLib.BAC.BAC_File.Load(s);
+
+                        if (bac.BacEntries != null)
+                        {
+                            foreach (var entry in bac.BacEntries)
+                            {
+                                if (entry.Type15 != null)
+                                {
+                                    foreach (var type in entry.Type15)
+                                    {
+                                        if (type.Param1 != 0f) param1[type.FunctionType] = type.Param1;
+                                        if (type.Param2 != 0f) param2[type.FunctionType] = type.Param2;
+                                        if (type.Param3 != 0f) param3[type.FunctionType] = type.Param3;
+                                        if (type.Param4 != 0f) param4[type.FunctionType] = type.Param4;
+                                        if (type.Param5 != 0f) param5[type.FunctionType] = type.Param5;
+                                        exists[type.FunctionType] = true;
+
+
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //Console.WriteLine(ex.ToString());
+                    // Console.ReadLine();
+                }
+            }
+
+            StringBuilder str = new StringBuilder();
+
+            for(int i = 0; i < exists.Length; i++)
+            {
+                if(exists[i])
+                    str.AppendLine($"{i}: {param1[i]}, {param2[i]}, {param3[i]}, {param4[i]}, {param5[i]}");
+            }
+
+            File.WriteAllText("bac_test.txt", str.ToString());
+
+            Process.Start("bac_test.txt");
+            Environment.Exit(0);
         }
 
         static void BulkParseAmk(string directory)
@@ -926,7 +1057,7 @@ namespace XV2_Xml_Serializer
                 if (Path.GetExtension(s) == ".ean")
                 {
                     Console.WriteLine(String.Format("{0} (File {1} of {2})", s, i, files.Count()));
-                    new Xv2CoreLib.EAN.Parser(s, false);
+                    new Xv2CoreLib.EAN.Parser(s, false, false);
 
                     i++;
                 }
@@ -1232,7 +1363,7 @@ namespace XV2_Xml_Serializer
 
                     try
                     {
-                        var acb = Xv2CoreLib.ACB_NEW.ACB_File.Load(s, false);
+                        var acb = Xv2CoreLib.ACB.ACB_File.Load(s, false);
                         
 
                     }
@@ -1256,6 +1387,16 @@ namespace XV2_Xml_Serializer
             File.WriteAllText("acb_debug.txt", log.ToString());
         }
         
+        static void CpkExtract()
+        {
+            //Extract all of a specific file type
+            Xv2CoreLib.CPK.CPK_Reader cpk = new Xv2CoreLib.CPK.CPK_Reader(@"C:\Program Files (x86)\Steam\steamapps\common\DB Xenoverse 2\cpk", false);
+
+            var task = cpk.ExtractAll(@"C:\XV2_MultiThreadExtractTest", ".bac");
+            task.Wait();
+
+            Environment.Exit(0);
+        }
 #endif
         
     }

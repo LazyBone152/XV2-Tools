@@ -1,7 +1,7 @@
 ﻿using System;
 using Xv2CoreLib.Resource;
 
-namespace Xv2CoreLib.ACB_NEW
+namespace Xv2CoreLib.ACB
 {
     public struct TrackMetadata
     {

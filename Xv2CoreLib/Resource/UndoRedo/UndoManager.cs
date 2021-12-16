@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Runtime.ExceptionServices;
 
 #if NvvmLight
 using GalaSoft.MvvmLight.CommandWpf;
@@ -23,8 +22,8 @@ namespace Xv2CoreLib.Resource.UndoRedo
         }
         #endregion
 
-        public const int DefaultMaxCapacity = 500;
-        public const int MaximumMaxCapacity = 5000;
+        public const int DefaultMaxCapacity = 1000;
+        public const int MaximumMaxCapacity = 10000;
         
 
         //Singleton

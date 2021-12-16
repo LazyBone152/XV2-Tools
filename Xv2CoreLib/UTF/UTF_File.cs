@@ -8,7 +8,7 @@ using YAXLib;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.AFS2;
 using Xv2CoreLib.CPK;
-using Xv2CoreLib.ACB_NEW;
+using Xv2CoreLib.ACB;
 
 namespace Xv2CoreLib.UTF
 {

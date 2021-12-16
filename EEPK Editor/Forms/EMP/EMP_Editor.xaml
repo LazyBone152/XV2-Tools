@@ -181,8 +181,11 @@
                             <TabControl>
                                 <TabItem Header="Color/Material" Controls:HeaderedControlHelper.HeaderFontSize="16">
                                     <Grid x:Name="grid_TexturePart" Margin="0,0,-0.055,0">
-                                        <ex:ColorCanvas x:Name="ColorCanvas_Color1" Margin="10,83,0,0" SelectedColorChanged="ColorCanvas_Color1_SelectedColorChanged" HorizontalAlignment="Left" VerticalAlignment="Top" Width="236" Height="275" SelectedColor="{Binding SelectedItem.Type_Texture.Color1, ElementName=empTree}"/>
-                                        <ex:ColorCanvas x:Name="ColorCanvas_Color2" Margin="251,83,0,0" Height="275" Width="236" HorizontalAlignment="Left" VerticalAlignment="Top" SelectedColor="{Binding SelectedItem.Type_Texture.Color2, ElementName=empTree}"/>
+
+                                        <ex:ColorCanvas Margin="10,83,0,0" Foreground="Black" HorizontalAlignment="Left" VerticalAlignment="Top" Width="236" Height="311" SelectedColor="{Binding SelectedItem.Type_Texture.Color1, ElementName=empTree}"/>
+                                        <ex:ColorCanvas Margin="251,83,0,0" Foreground="Black" Height="311" Width="236" HorizontalAlignment="Left" VerticalAlignment="Top" SelectedColor="{Binding SelectedItem.Type_Texture.Color2, ElementName=empTree}"/>
+
+
                                         <TextBlock x:Name="textBlock_AddedRandomSafe" HorizontalAlignment="Left" Margin="998,388,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="67"/>
                                         <GroupBox Header="Color Random Range" HorizontalAlignment="Left" Height="118" Margin="492,179,0,0" VerticalAlignment="Top" Width="239">
                                             <Grid>

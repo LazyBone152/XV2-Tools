@@ -16,7 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
-using Xv2CoreLib.ACB_NEW;
+using Xv2CoreLib.ACB;
 using Xv2CoreLib.HCA;
 
 namespace AudioCueEditor.View

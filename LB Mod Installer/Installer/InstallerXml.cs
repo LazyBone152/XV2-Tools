@@ -1003,7 +1003,7 @@ namespace LB_Mod_Installer.Installer
             {
                 return FileType.VfxPackage;
             }
-            else if (Path.GetExtension(SourcePath) == Xv2CoreLib.ACB_NEW.ACB_File.MUSIC_PACKAGE_EXTENSION)
+            else if (Path.GetExtension(SourcePath) == Xv2CoreLib.ACB.ACB_File.MUSIC_PACKAGE_EXTENSION)
             {
                 return FileType.MusicPackage;
             }

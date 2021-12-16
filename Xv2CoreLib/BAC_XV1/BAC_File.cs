@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xv2CoreLib.BAC;
 using Xv2CoreLib.Resource;
 using YAXLib;
@@ -291,10 +288,10 @@ namespace Xv2CoreLib.BAC_XV1
             {
                 xv2Type10s.Add(new BAC.BAC_Type10()
                 {
-                    StartTime = type.I_00,
-                    Duration = type.I_02,
-                    I_04 = (short)type.I_04,
-                    Flags = (short)type.I_06,
+                    StartTime = (ushort)type.I_00,
+                    Duration = (ushort)type.I_02,
+                    I_04 = (ushort)type.I_04,
+                    Flags = (ushort)type.I_06,
                     Ean_Type = type.I_08,
                     BoneLink = (BoneLinks)type.I_10,
                     EanIndex = type.I_12,
@@ -382,11 +379,11 @@ namespace Xv2CoreLib.BAC_XV1
             {
                 xv2Type15s.Add(new BAC.BAC_Type15()
                 {
-                    StartTime = type.I_00,
-                    Duration = type.I_02,
+                    StartTime = (ushort)type.I_00,
+                    Duration = (ushort)type.I_02,
                     FunctionType = (ushort)type.I_08,
-                    I_04 = type.I_04,
-                    Flags = type.I_06,
+                    I_04 = (ushort)type.I_04,
+                    Flags = (ushort)type.I_06,
                     Param1 = type.F_12,
                     Param2 = type.F_12
                 });
