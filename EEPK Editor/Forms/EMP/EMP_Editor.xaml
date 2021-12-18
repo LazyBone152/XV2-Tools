@@ -781,13 +781,13 @@
                             <GroupBox Header="Sprite Coordinates" Width="345" Margin="4,254,2.333,7">
                                 <Grid>
                                     <Grid x:Name="grid_TextureType0" HorizontalAlignment="Left" Height="146" VerticalAlignment="Top" Width="345" Visibility="{Binding ElementName=listBox_Textures, Path=SelectedItem.IsType0Visible}">
-                                        <TextBox x:Name="textureType0_ScrollX" Text="{Binding SelectedItem.SubData2.Keyframes[0].F_04, ElementName=listBox_Textures, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" TextWrapping="NoWrap" VerticalAlignment="Top" Width="61" Margin="151,10,0,0"/>
+                                        <TextBox x:Name="textureType0_ScrollX" Text="{Binding SelectedItem.SubData2.Keyframes[0].ScrollX, ElementName=listBox_Textures, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" TextWrapping="NoWrap" VerticalAlignment="Top" Width="61" Margin="151,10,0,0"/>
                                         <Label Content="Scroll X" HorizontalAlignment="Left" VerticalAlignment="Top" Width="119" HorizontalContentAlignment="Right" Margin="27,8,0,0"/>
-                                        <TextBox x:Name="textureType0_ScrollY" Text="{Binding SelectedItem.SubData2.Keyframes[0].F_08, ElementName=listBox_Textures, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" TextWrapping="NoWrap" VerticalAlignment="Top" Width="61" Margin="151,40,0,0"/>
+                                        <TextBox x:Name="textureType0_ScrollY" Text="{Binding SelectedItem.SubData2.Keyframes[0].ScrollY, ElementName=listBox_Textures, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" TextWrapping="NoWrap" VerticalAlignment="Top" Width="61" Margin="151,40,0,0"/>
                                         <Label Content="Scroll Y" HorizontalAlignment="Left" VerticalAlignment="Top" Width="119" HorizontalContentAlignment="Right" Margin="27,38,0,0"/>
-                                        <TextBox x:Name="textureType0_ScaleX" Text="{Binding SelectedItem.SubData2.Keyframes[0].F_12, ElementName=listBox_Textures, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" TextWrapping="NoWrap" VerticalAlignment="Top" Width="61" Margin="151,70,0,0"/>
+                                        <TextBox x:Name="textureType0_ScaleX" Text="{Binding SelectedItem.SubData2.Keyframes[0].ScaleX, ElementName=listBox_Textures, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" TextWrapping="NoWrap" VerticalAlignment="Top" Width="61" Margin="151,70,0,0"/>
                                         <Label Content="Scale X" HorizontalAlignment="Left" VerticalAlignment="Top" Width="119" HorizontalContentAlignment="Right" Margin="27,68,0,0"/>
-                                        <TextBox x:Name="textureType0_ScaleY" Text="{Binding SelectedItem.SubData2.Keyframes[0].F_16, ElementName=listBox_Textures, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" TextWrapping="NoWrap" VerticalAlignment="Top" Width="61" Margin="151,100,0,0"/>
+                                        <TextBox x:Name="textureType0_ScaleY" Text="{Binding SelectedItem.SubData2.Keyframes[0].ScaleY, ElementName=listBox_Textures, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" TextWrapping="NoWrap" VerticalAlignment="Top" Width="61" Margin="151,100,0,0"/>
                                         <Label Content="Scale Y" HorizontalAlignment="Left" VerticalAlignment="Top" Width="119" HorizontalContentAlignment="Right" Margin="27,98,0,0"/>
 
                                     </Grid>
@@ -799,13 +799,13 @@
 
                                     </Grid>
                                     <Grid x:Name="grid_TextureType2" HorizontalAlignment="Left" Height="146" Width="345" VerticalAlignment="Top" Visibility="{Binding ElementName=listBox_Textures, Path=SelectedItem.IsType2Visible}">
-                                        <DataGrid x:Name="dataGrid_ScrollKeyframes" BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" BorderThickness="1" FontSize="10" HorizontalAlignment="Left" Height="126" Margin="26,10,0,0" VerticalAlignment="Top" Width="300" ItemsSource="{Binding SelectedItem.SubData2.Keyframes.Binding, ElementName=listBox_Textures}" AutoGenerateColumns="False" CanUserSortColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
+                                        <DataGrid x:Name="dataGrid_ScrollKeyframes" BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" BorderThickness="1" FontSize="8" HorizontalAlignment="Left" Height="126" Margin="26,10,0,0" VerticalAlignment="Top" Width="300" ItemsSource="{Binding SelectedItem.SubData2.Keyframes.Binding, ElementName=listBox_Textures}" AutoGenerateColumns="False" CanUserSortColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
                                             <DataGrid.Columns>
-                                                <DataGridTextColumn Binding="{Binding I_00, UpdateSourceTrigger=PropertyChanged}" Header="Time" Width="*" />
-                                                <DataGridTextColumn Binding="{Binding F_04, UpdateSourceTrigger=PropertyChanged}" Header="Scroll X" Width="*" />
-                                                <DataGridTextColumn Binding="{Binding F_08, UpdateSourceTrigger=PropertyChanged}" Header="Scroll Y" Width="*" />
-                                                <DataGridTextColumn Binding="{Binding F_12, UpdateSourceTrigger=PropertyChanged}" Header="Scale X" Width="*" />
-                                                <DataGridTextColumn Binding="{Binding F_16, UpdateSourceTrigger=PropertyChanged}" Header="Scale Y" Width="*" />
+                                                <DataGridTextColumn Binding="{Binding I_00, UpdateSourceTrigger=PropertyChanged}" Header="Time" Width="*"/>
+                                                <DataGridTextColumn Binding="{Binding ScrollX, UpdateSourceTrigger=PropertyChanged}" Header="Scroll X" Width="*"/>
+                                                <DataGridTextColumn Binding="{Binding ScrollY, UpdateSourceTrigger=PropertyChanged}" Header="Scroll Y" Width="*"/>
+                                                <DataGridTextColumn Binding="{Binding ScaleX, UpdateSourceTrigger=PropertyChanged}" Header="Scale X" Width="*"/>
+                                                <DataGridTextColumn Binding="{Binding ScaleY, UpdateSourceTrigger=PropertyChanged}" Header="Scale Y" Width="*"/>
                                             </DataGrid.Columns>
                                         </DataGrid>
                                         <Button x:Name="button_TextureType2_AddKeyFrame" HorizontalAlignment="Left" Margin="0,36,0,0" VerticalAlignment="Top" Width="22" Height="21" Foreground="Black" Style="{StaticResource ButtonNoGlow}" Click="button_TextureType2_AddKeyFrame_Click">

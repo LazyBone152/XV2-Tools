@@ -18,6 +18,9 @@ using System.IO.Compression;
 using Xv2CoreLib.HslColor;
 using Xv2CoreLib.Resource.UndoRedo;
 using Xv2CoreLib.Resource;
+using System.Windows.Media.Imaging;
+using System.Windows.Media;
+using System.Windows;
 
 namespace Xv2CoreLib.EffectContainer
 {
@@ -2423,6 +2426,149 @@ namespace Xv2CoreLib.EffectContainer
 
             container.Assets.Remove(asset);
         }
+        
+
+        //SUPER TEXTURES:
+        /// <summary>
+        /// Merges all PBIND textures into larger Super Textures, optimizing the amount of textures used.
+        /// </summary>
+        /// <returns>[0] = the number of textures merged, [1] = the number of super textures. </returns>
+        public int[] MergeAllTexturesIntoSuperTextures_PBIND()
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            //All textures, ordered by their highest dimension (lowest first)
+            List<WriteableBitmap> textures = EmbEntry.GetBitmaps(Pbind.File3_Ref.Entry);
+            textures = textures.OrderBy(x => Math.Max(x.Width, x.Height)).ToList();
+
+            //Remove any texture that is used by a EMP with SpeedScroll values (cant merge these)
+            textures.RemoveAll(x => Pbind.IsTextureUsedBySpeedScrollType(x));
+
+            //Remove larger than 2k textures
+            textures.RemoveAll(x => Math.Max(x.Width, x.Height) > 2048);
+
+            int superCount = 0;
+            int totalMerged = textures.Count;
+
+            while (textures.Count > 1)
+            {
+                var mergeList = SelectTexturesForMerge(textures);
+                var embList = Pbind.File3_Ref.GetAllEmbEntriesByBitmap(mergeList);
+                MergeIntoSuperTexture_PBIND(embList, undos);
+                superCount++;
+            }
+
+            if (textures.Count == 1)
+                totalMerged--;
+
+            UndoManager.Instance.AddCompositeUndo(undos, "Super Texture Merge");
+
+            return new int[2] { totalMerged, superCount };
+        }
+
+        private List<WriteableBitmap> SelectTexturesForMerge(List<WriteableBitmap> bitmaps)
+        {
+            List<WriteableBitmap> toMerge = new List<WriteableBitmap>();
+            toMerge.Add(bitmaps[0]);
+
+            for(int i = 1; i < bitmaps.Count; i++)
+            {
+                if(EmbEntry.SelectTextureSize(EmbEntry.HighestDimension(toMerge), toMerge.Count) != -1)
+                {
+                    toMerge.Add(bitmaps[i]);
+                }
+                else
+                {
+                    toMerge.RemoveAt(toMerge.Count - 1);
+                    break;
+                }
+            }
+
+            bitmaps.RemoveAll(x => toMerge.Contains(x));
+            return toMerge;
+        }
+
+        public void MergeIntoSuperTexture_PBIND(List<EmbEntry> embEntries, List<IUndoRedo> undos = null)
+        {
+            if (undos == null) undos = new List<IUndoRedo>();
+
+            var bitmaps = EmbEntry.GetBitmaps(embEntries);
+            double maxDimension = EmbEntry.HighestDimension(bitmaps);
+            int textureSize = (int)EmbEntry.SelectTextureSize(maxDimension, bitmaps.Count);
+
+            var superTexture = new WriteableBitmap(textureSize, textureSize, 96, 96, PixelFormats.Bgra32, null);
+            EmbEntry newEmbEntry = new EmbEntry();
+
+            for (int i = 0; i < bitmaps.Count; i++)
+            {
+                double position = maxDimension * i / textureSize;
+                int row = (int)position;
+                position -= row;
+                int x = (int)(position * textureSize);
+                int y = (int)maxDimension * row;
+
+                Rect sourceRect = new Rect(0, 0, bitmaps[i].Width, bitmaps[i].Height);
+                Rect destRect = new Rect(x, y, bitmaps[i].Width, bitmaps[i].Height);
+
+                superTexture.Blit(destRect, bitmaps[i], sourceRect);
+
+                //Update EMP Texture cordinates
+                List<EMP_TextureDefinition> textureDefs = Pbind.GetAllTextureDefinitions(embEntries[i]);
+
+                double a = textureSize / maxDimension;
+
+                foreach (var textureDef in textureDefs)
+                {
+                    undos.Add(new UndoableProperty<EMP_TextureDefinition>(nameof(EMP_TextureDefinition.TextureRef), textureDef, textureDef.TextureRef, newEmbEntry));
+                    textureDef.TextureRef = newEmbEntry;
+
+                    if(textureDef.TextureType == EMP_TextureDefinition.TextureAnimationType.SpriteSheet || textureDef.TextureType == EMP_TextureDefinition.TextureAnimationType.Static)
+                    {
+                        foreach(var keyframe in textureDef.SubData2.Keyframes)
+                        {
+                            float newScaleX = (float)(keyframe.ScaleX / a * (bitmaps[i].Width / maxDimension));
+                            float newScaleY = (float)(keyframe.ScaleY / a * (bitmaps[i].Height / maxDimension));
+                            float newScrollX = (float)((keyframe.ScrollX / a * (bitmaps[i].Width / maxDimension)) + position);
+                            float newScrollY = (float)((keyframe.ScrollY / a * (bitmaps[i].Height / maxDimension)) + (row / a));
+
+                            undos.Add(new UndoableProperty<SubData_2_Entry>(nameof(SubData_2_Entry.ScrollX), keyframe, keyframe.ScrollX, newScrollX));
+                            undos.Add(new UndoableProperty<SubData_2_Entry>(nameof(SubData_2_Entry.ScrollY), keyframe, keyframe.ScrollY, newScrollY));
+                            undos.Add(new UndoableProperty<SubData_2_Entry>(nameof(SubData_2_Entry.ScaleX), keyframe, keyframe.ScaleX, newScaleX));
+                            undos.Add(new UndoableProperty<SubData_2_Entry>(nameof(SubData_2_Entry.ScaleY), keyframe, keyframe.ScaleY, newScaleY));
+
+                            keyframe.ScrollX = newScrollX;
+                            keyframe.ScrollY = newScrollY;
+                            keyframe.ScaleX = newScaleX;
+                            keyframe.ScaleY = newScaleY;
+                        }
+                    }
+                }
+            }
+
+            //EmbEntry settings:
+
+            //We need to first save the new image to a byte array and then reload it, as CSharpImageLibrary can have trouble saving WriteableBitmaps directly created in code for some unknown reason. (The only other workaround I found was to disable mipmaps but that resulted in ridiculous file sizes)
+            using (MemoryStream ms = new MemoryStream())
+            {
+                superTexture.Save(ms);
+                newEmbEntry.Data = ms.ToArray().ToList();
+            }
+
+            newEmbEntry.LoadDds();
+            newEmbEntry.Name = $"SuperTexture ({newEmbEntry.DdsImage.GetHashCode()}).dds";
+
+            //Delete all previous textures
+            foreach (var entry in embEntries)
+            {
+                undos.Add(new UndoableListRemove<EmbEntry>(Pbind.File3_Ref.Entry, entry));
+                Pbind.File3_Ref.Entry.Remove(entry);
+            }
+
+            //Add new texture
+            undos.Add(new UndoableListAdd<EmbEntry>(Pbind.File3_Ref.Entry, newEmbEntry));
+            Pbind.File3_Ref.Entry.Add(newEmbEntry);
+
+        }
         #endregion
 
         #region Install
@@ -3138,6 +3284,43 @@ namespace Xv2CoreLib.EffectContainer
             return null;
         }
 
+        public List<EMP_TextureDefinition> GetAllTextureDefinitions(EmbEntry embEntry)
+        {
+            List<EMP_TextureDefinition> textures = new List<EMP_TextureDefinition>();
+
+            foreach(var asset in Assets)
+            {
+                if(asset.assetType == AssetType.PBIND && asset.Files.Count == 1)
+                {
+                    foreach(var textureDef in asset.Files[0].EmpFile.Textures)
+                    {
+                        if (textureDef.TextureRef == embEntry)
+                            textures.Add(textureDef);
+                    }
+                }
+            }
+
+            return textures;
+        }
+        
+        public bool IsTextureUsedBySpeedScrollType(WriteableBitmap bitmap)
+        {
+            foreach (var asset in Assets)
+            {
+                if (asset.assetType == AssetType.PBIND && asset.Files.Count == 1)
+                {
+                    foreach (var textureDef in asset.Files[0].EmpFile.Textures)
+                    {
+                        if (textureDef.TextureRef?.DdsImage == bitmap && textureDef.TextureType == EMP_TextureDefinition.TextureAnimationType.Speed)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
         #endregion
 
         #region AddAssetFunctions

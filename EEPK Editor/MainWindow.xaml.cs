@@ -597,6 +597,31 @@ namespace EEPK_Organiser
 
         }
 
+        private async void ToolMenu_SuperTextureMerge_Click(object sender, RoutedEventArgs e)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+
+                var messageResult = await this.ShowMessageAsync("Optimize Textures (SuperTexture)", $"This feature will attempt to optimize the number of textures used by this EEPK by combining them together. The result will be fewer, but larger individual textures. This should significantly increase the amount of textures that can be used.\n\nWARNING: This is an EXPERIMENTAL feature and has a high chance of messing up somewhere! Make backups of your files before using this!", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.Default);
+
+                if(messageResult == MessageDialogResult.Affirmative)
+                {
+                    int[] ret = effectContainerFile.MergeAllTexturesIntoSuperTextures_PBIND();
+
+                    await this.ShowMessageAsync("Optimize Textures (SuperTexture)", $"{ret[0]} textures were merged together to create {ret[1]} Super Textures.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                }
+
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                SaveExceptionLog(ex.ToString());
+                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+#endif
+        }
 
         private void UpdateSelectedVersion()
         {
@@ -1253,5 +1278,6 @@ namespace EEPK_Organiser
         {
             Process.Start("https://github.com/LazyBone152/EEPKOrganiser");
         }
+
     }
 }

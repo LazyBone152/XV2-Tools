@@ -81,14 +81,15 @@ namespace Xv2CoreLib.EMB_CLASS
             embFile.I_10 = BitConverter.ToUInt16(rawBytes, 10);
             embFile.UseFileNames = (fileNameTableOffset == 0) ? false : true;
             
-            //Gets offset and size for file contents (offset is absolute of course)
-            for (int i = 0; i < totalEntries * 8; i+=8) {
+            //Gets offset and size for file contents
+            for (int i = 0; i < totalEntries * 8; i+=8) 
+            {
                 dataContentsOffsets.Add(BitConverter.ToInt32(rawBytes, contentsOffset + i) + contentsOffset + i);
                 dataContentsSize.Add(BitConverter.ToInt32(rawBytes, contentsOffset + i + 4));
             }
             
             //Gets string offsets
-            for (int i = 0; i < totalEntries * 4; i+=4)
+            for (int i = 0; i < totalEntries * 4; i += 4)
             {
                 if(fileNameTableOffset != 0)
                 {
@@ -96,7 +97,8 @@ namespace Xv2CoreLib.EMB_CLASS
                 }
             }
             
-            for (int i = 0; i < totalEntries; i++) {
+            for (int i = 0; i < totalEntries; i++) 
+            {
                 //Extracting File
                 
                 string fileName = (fileNameTableOffset != 0) ? Utils.GetString(bytes, stringOffsets[i]) : String.Format("DATA{0}.dds", i);

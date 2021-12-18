@@ -158,15 +158,20 @@ namespace Xv2CoreLib.Resource.App
             {
                 if (prop.GetSetMethod() != null && prop.GetGetMethod() != null)
                 {
-                    var entry = GetEntry(prop.Name);
+                    var dontSerializeAttr = (DontSerialize[])prop.GetCustomAttributes(typeof(DontSerialize), false);
 
-                    if(entry != null)
+                    if (dontSerializeAttr.Length == 0)
                     {
-                        //Validate value type
-                        if (GetValueType(prop) != entry.ValueType) throw new InvalidDataException($"SettingsFormat.DeserializeProps: valueType for prop {prop.Name} does not match.");
+                        var entry = GetEntry(prop.Name);
 
-                        //Set value
-                        prop.SetValue(settings, entry.Value);
+                        if (entry != null)
+                        {
+                            //Validate value type
+                            if (GetValueType(prop) != entry.ValueType) throw new InvalidDataException($"SettingsFormat.DeserializeProps: valueType for prop {prop.Name} does not match.");
+
+                            //Set value
+                            prop.SetValue(settings, entry.Value);
+                        }
                     }
                 }
             }
@@ -180,7 +185,10 @@ namespace Xv2CoreLib.Resource.App
             {
                 if(prop.GetSetMethod() != null && prop.GetGetMethod() != null)
                 {
-                    AddEntry(prop.Name, GetValueType(prop), prop.GetValue(settings));
+                    var dontSerializeAttr = (DontSerialize[])prop.GetCustomAttributes(typeof(DontSerialize), false);
+
+                    if(dontSerializeAttr.Length == 0)
+                        AddEntry(prop.Name, GetValueType(prop), prop.GetValue(settings));
                 }
             }
         }
@@ -315,6 +323,11 @@ namespace Xv2CoreLib.Resource.App
 
 
 
+
+    }
+
+    public class DontSerialize : Attribute
+    {
 
     }
 }

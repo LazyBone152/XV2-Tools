@@ -206,6 +206,8 @@
                 <Separator/>
                 <MenuItem IsEnabled="{Binding IsFileLoaded}" Header="Hue Adjustment" Click="ToolMenu_HueAdjustment_Click"/>
                 <MenuItem IsEnabled="{Binding IsFileLoaded}" Header="Hue Set" Click="ToolMenu_HueSet_Click"/>
+                <Separator/>
+                <MenuItem IsEnabled="{Binding IsFileLoaded}" Header="Optimize Textures (experimental)" Click="ToolMenu_SuperTextureMerge_Click"/>
 
             </MenuItem>
             <MenuItem x:Name="nameListMenuMain" Header="Name Lists" IsEnabled="{Binding IsFileLoaded}">

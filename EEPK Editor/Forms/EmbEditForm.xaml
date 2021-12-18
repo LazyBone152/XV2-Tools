@@ -112,6 +112,7 @@
                     <MenuItem Header="Duplicate" Click="EmbContextMenu_Duplicate_Click"/>
                     <MenuItem Header="Extract" Click="EmbContextMenu_Extract_Click"/>
                     <MenuItem IsEnabled="{Binding IsForContainer}" Header="Used By?" Click="EmbContextMenu_UsedBy_Click"/>
+                    <MenuItem Header="Combine SuperTexture (experimental)" Click="EmbContextMenu_CreateSuperTexture_Click"/>
                     <Separator/>
                     <MenuItem Header="Hue Adjustment" Click="EmbContextMenu_HueAdjustment_Click"/>
                     <MenuItem Header="Hue Set" Click="EmbContextMenu_HueSet_Click"/>

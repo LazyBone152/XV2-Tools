@@ -543,7 +543,18 @@ namespace Xv2CoreLib.Resource.App
         public bool XenoKit_AutoPlay { get; set; } = true;
         public bool XenoKit_Loop { get; set; } = false;
         public bool XenoKit_AudioSimulation { get; set; } = true;
+        internal int XenoKit_BacTypeSortMode { get; set; }
 
+        //Enums, which are not-serialized directly
+        [DontSerialize]
+        public BacTypeSortMode XenoKit_BacTypeSortModeEnum
+        {
+            get => (BacTypeSortMode)XenoKit_BacTypeSortMode;
+            set
+            {
+                XenoKit_BacTypeSortMode = (int)value;
+            }
+        }
 
         #endregion
 
@@ -661,11 +672,18 @@ namespace Xv2CoreLib.Resource.App
             Identical,
             NameMatch
         }
+
+        
         #endregion
     }
 
+    #region Enums
+    public enum BacTypeSortMode
+    {
+        Default = 0, //Type Order
+        StartTime = 1,
+    }
 
-    #region Theme
     public enum AppTheme
     {
         Light,
@@ -699,4 +717,5 @@ namespace Xv2CoreLib.Resource.App
         Sienna
     }
     #endregion
+
 }

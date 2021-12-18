@@ -202,6 +202,13 @@ namespace Xv2CoreLib.BAC
                         if ((ushort)flag != 0)
                             return $"TrackingFlags ({HexConverter.GetHexString((ushort)flag)})";
                     }
+                    else if (type is BAC_Type7 type7)
+                    {
+                        var flag = type7.LinkFlags.RemoveFlag(BAC_Type7.BcmCallbackFlagsEnum.MASK);
+
+                        if ((uint)flag != 0)
+                            return $"BcmCallback LinkFlags ({HexConverter.GetHexString((uint)flag)})";
+                    }
                     else if (type is BAC_Type8 type8)
                     {
                         var flag = type8.EffectFlags.RemoveFlag(BAC_Type8.EffectFlagsEnum.Loop | BAC_Type8.EffectFlagsEnum.Unk2 | BAC_Type8.EffectFlagsEnum.Unk6 | BAC_Type8.EffectFlagsEnum.Off | BAC_Type8.EffectFlagsEnum.SpawnOnTarget | BAC_Type8.EffectFlagsEnum.UserOnly);
@@ -420,7 +427,7 @@ namespace Xv2CoreLib.BAC
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BcsPartSetInvisibility")]
         public List<BAC_Type13> Type13 { get; set; }
         [YAXDontSerializeIfNull]
-        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "AnimationModification")]
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BoneModification")]
         public List<BAC_Type14> Type14 { get; set; }
         [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Functions")]
@@ -1859,7 +1866,8 @@ namespace Xv2CoreLib.BAC
             Unk17 = 0x10000,
             Unk18 = 0x20000,
             Unk19 = 0x40000,
-            Unk20 = 0x80000
+            Unk20 = 0x80000,
+            MASK =  0xfffff
             //0x80000 and onwards are never used (included 0x80000 in the enum just to even it out)
         }
 
@@ -2740,12 +2748,12 @@ namespace Xv2CoreLib.BAC
 
     }
 
-    [YAXSerializeAs("AnimationModification")]
+    [YAXSerializeAs("BoneModification")]
     [Serializable]
     public class BAC_Type14 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type { get { return "AnimationModification"; } }
+        public string Type { get { return "BoneModification"; } }
 
         [Flags]
         public enum AnimationModFlags : ushort

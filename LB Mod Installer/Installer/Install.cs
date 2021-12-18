@@ -656,6 +656,10 @@ namespace LB_Mod_Installer.Installer
                     GeneralInfo.Tracker.AddID(installPath, Sections.EEPK_Effect, effect.Index);
                 }
 
+                //Cleanup the VFXPACKAGE before install
+                installFile.MergeDuplicateTextures(Xv2CoreLib.EEPK.AssetType.PBIND);
+                installFile.MergeDuplicateTextures(Xv2CoreLib.EEPK.AssetType.TBIND);
+
                 //Install effects
                 binaryFile.InstallEffects(installFile.Effects);
 

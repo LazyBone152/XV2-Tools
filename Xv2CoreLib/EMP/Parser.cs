@@ -370,10 +370,10 @@ namespace Xv2CoreLib.EMP
                         keyframes.Add(new SubData_2_Entry()
                         {
                             I_00 = -1,
-                            F_04 = BitConverter.ToSingle(rawBytes, textureOffset + 12),
-                            F_08 = BitConverter.ToSingle(rawBytes, textureOffset + 16),
-                            F_12 = BitConverter.ToSingle(rawBytes, textureOffset + 20),
-                            F_16 = BitConverter.ToSingle(rawBytes, textureOffset + 24),
+                            ScrollX = BitConverter.ToSingle(rawBytes, textureOffset + 12),
+                            ScrollY = BitConverter.ToSingle(rawBytes, textureOffset + 16),
+                            ScaleX = BitConverter.ToSingle(rawBytes, textureOffset + 20),
+                            ScaleY = BitConverter.ToSingle(rawBytes, textureOffset + 24),
                             F_20 = BitConverter.ToSingle(rawBytes, textureOffset + 28).ToString("0.0#######"),
                             F_24 = BitConverter.ToSingle(rawBytes, textureOffset + 32).ToString("0.0#######")
                         });
@@ -390,10 +390,10 @@ namespace Xv2CoreLib.EMP
                         keyframes.Add(new SubData_2_Entry()
                         {
                             I_00 = -1,
-                            F_04 = BitConverter.ToSingle(rawBytes, textureOffset + 12),
-                            F_08 = BitConverter.ToSingle(rawBytes, textureOffset + 16),
-                            F_12 = BitConverter.ToSingle(rawBytes, textureOffset + 20),
-                            F_16 = BitConverter.ToSingle(rawBytes, textureOffset + 24),
+                            ScrollX = BitConverter.ToSingle(rawBytes, textureOffset + 12),
+                            ScrollY = BitConverter.ToSingle(rawBytes, textureOffset + 16),
+                            ScaleX = BitConverter.ToSingle(rawBytes, textureOffset + 20),
+                            ScaleY = BitConverter.ToSingle(rawBytes, textureOffset + 24),
                         });
 
                         embEntry.SubData2 = new ScrollAnimation()
@@ -445,10 +445,10 @@ namespace Xv2CoreLib.EMP
                 return new SubData_2_Entry()
                 {
                     I_00 = BitConverter.ToInt32(rawBytes, offset + 0),
-                    F_04 = BitConverter.ToSingle(rawBytes, offset + 4),
-                    F_08 = BitConverter.ToSingle(rawBytes, offset + 8),
-                    F_12 = BitConverter.ToSingle(rawBytes, offset + 12),
-                    F_16 = BitConverter.ToSingle(rawBytes, offset + 16),
+                    ScrollX = BitConverter.ToSingle(rawBytes, offset + 4),
+                    ScrollY = BitConverter.ToSingle(rawBytes, offset + 8),
+                    ScaleX = BitConverter.ToSingle(rawBytes, offset + 12),
+                    ScaleY = BitConverter.ToSingle(rawBytes, offset + 16),
                     F_20 = BitConverter.ToSingle(rawBytes, offset + 20).ToString("0.0######"),
                     F_24 = BitConverter.ToSingle(rawBytes, offset + 24).ToString("0.0######"),
                 };
@@ -458,10 +458,10 @@ namespace Xv2CoreLib.EMP
                 return new SubData_2_Entry()
                 {
                     I_00 = BitConverter.ToInt32(rawBytes, offset + 0),
-                    F_04 = BitConverter.ToSingle(rawBytes, offset + 4),
-                    F_08 = BitConverter.ToSingle(rawBytes, offset + 8),
-                    F_12 = BitConverter.ToSingle(rawBytes, offset + 12),
-                    F_16 = BitConverter.ToSingle(rawBytes, offset + 16)
+                    ScrollX = BitConverter.ToSingle(rawBytes, offset + 4),
+                    ScrollY = BitConverter.ToSingle(rawBytes, offset + 8),
+                    ScaleX = BitConverter.ToSingle(rawBytes, offset + 12),
+                    ScaleY = BitConverter.ToSingle(rawBytes, offset + 16)
                 };
             }
         }

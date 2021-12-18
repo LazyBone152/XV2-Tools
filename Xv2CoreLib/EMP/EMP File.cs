@@ -4044,19 +4044,19 @@ namespace Xv2CoreLib.EMP
         [YAXAttributeForClass]
         [YAXSerializeAs("Scroll_X")]
         [YAXFormat("0.0###########")]
-        public float F_04 { get; set; }
+        public float ScrollX { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("Scroll_Y")]
         [YAXFormat("0.0###########")]
-        public float F_08 { get; set; }
+        public float ScrollY { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("Scale_X")]
         [YAXFormat("0.0###########")]
-        public float F_12 { get; set; }
+        public float ScaleX { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("Scale_Y")]
         [YAXFormat("0.0###########")]
-        public float F_16 { get; set; }
+        public float ScaleY { get; set; }
         [YAXAttributeForClass]
         [YAXDontSerializeIfNull]
         [YAXSerializeAs("F_20")]
@@ -4071,10 +4071,10 @@ namespace Xv2CoreLib.EMP
             return new SubData_2_Entry()
             {
                 I_00 = I_00,
-                F_12 = F_12,
-                F_08 = F_08,
-                F_04 = F_04,
-                F_16 = F_16,
+                ScaleX = ScaleX,
+                ScrollY = ScrollY,
+                ScrollX = ScrollX,
+                ScaleY = ScaleY,
                 F_20 = "0.0",
                 F_24 = "0.0"
             };
@@ -4096,10 +4096,10 @@ namespace Xv2CoreLib.EMP
         public static bool Compare(SubData_2_Entry obj1, SubData_2_Entry obj2)
         {
             if (obj1.I_00 != obj2.I_00) return false;
-            if (obj1.F_04 != obj2.F_04) return false;
-            if (obj1.F_08 != obj2.F_08) return false;
-            if (obj1.F_12 != obj2.F_12) return false;
-            if (obj1.F_16 != obj2.F_16) return false;
+            if (obj1.ScrollX != obj2.ScrollX) return false;
+            if (obj1.ScrollY != obj2.ScrollY) return false;
+            if (obj1.ScaleX != obj2.ScaleX) return false;
+            if (obj1.ScaleY != obj2.ScaleY) return false;
             if (obj1.F_20 != obj2.F_20) return false;
             if (obj1.F_24 != obj2.F_24) return false;
 

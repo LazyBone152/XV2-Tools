@@ -534,6 +534,17 @@ namespace Xv2CoreLib.EMB_CLASS
             return colors;
         }
     
+        public List<EmbEntry> GetAllEmbEntriesByBitmap(List<WriteableBitmap> bitmaps)
+        {
+            List<EmbEntry> entries = new List<EmbEntry>();
+
+            foreach(var bitmap in bitmaps)
+            {
+                entries.Add(Entry.FirstOrDefault(x => x.DdsImage == bitmap));
+            }
+
+            return entries;
+        }
     }
 
     [Serializable]
@@ -577,7 +588,7 @@ namespace Xv2CoreLib.EMB_CLASS
         [YAXAttributeForClass]
         [YAXSerializeAs("Index")]
         public string Index { get; set; }
-        private List<byte> _dataValue = null;
+        private List<byte> _dataValue = new List<byte>();
         [YAXAttributeFor("Data")]
         [YAXSerializeAs("bytes")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]
@@ -785,8 +796,8 @@ namespace Xv2CoreLib.EMB_CLASS
                 {
                     DdsImage.Save(png);
                     newImage = new ImageEngineImage(png);
+                    Data = newImage.Save(ImageFormat, MipHandling.Default).ToList();
                 }
-                Data = newImage.Save(ImageFormat, MipHandling.Default).ToList();
             }
             finally
             {
@@ -847,7 +858,49 @@ namespace Xv2CoreLib.EMB_CLASS
 
             return ColorEx.GetAverageColor(colors);
         }
-        
+
+
+        #region SuperTexture
+        public static List<WriteableBitmap> GetBitmaps(IList<EmbEntry> entries)
+        {
+            List<WriteableBitmap> bitmaps = new List<WriteableBitmap>();
+
+            foreach (var entry in entries)
+                bitmaps.Add(entry.DdsImage);
+
+            return bitmaps;
+        }
+
+        public static double SelectTextureSize(double maxDimension, int textureCount)
+        {
+            double size = Math.Sqrt(textureCount) * maxDimension;
+            double textureSize = 64;
+
+            while(textureSize < size)
+            {
+                if (textureSize >= 4096)
+                    return -1; //4k max texture size
+
+                textureSize *= 2;
+            }
+
+            return textureSize;
+        }
+
+        public static double HighestDimension(List<WriteableBitmap> bitmaps)
+        {
+            double dimension = 0;
+
+            foreach (var bitmap in bitmaps)
+            {
+                if (bitmap.Width > dimension) dimension = bitmap.Width;
+                if (bitmap.Height > dimension) dimension = bitmap.Height;
+            }
+
+            return dimension;
+        }
+
+        #endregion
     }
-    
+
 }

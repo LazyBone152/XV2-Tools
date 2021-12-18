@@ -21,7 +21,7 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
-            //args = new string[1] { @"E:\VS_Test\BAC\1.17 BACs" };
+            args = new string[1] { @"E:\VS_Test\BAC\1.17 BACs" };
 
             DEBUG_MODE = true;
 #endif
@@ -694,8 +694,8 @@ namespace XV2_Xml_Serializer
             //BacHomingParse(files);
             
 
-            List<int> values = new List<int>();
-            List<int> valuesTotal = new List<int>();
+            List<uint> values = new List<uint>();
+            List<uint> valuesTotal = new List<uint>();
 
             foreach (string s in files)
             {
@@ -710,6 +710,12 @@ namespace XV2_Xml_Serializer
                         {
                             foreach (var entry in bac.BacEntries)
                             {
+
+                                if (!values.Contains((uint)entry.Flag))
+                                    values.Add((uint)entry.Flag);
+
+                                valuesTotal.Add((uint)entry.Flag);
+
                                 if (entry.Type7 != null)
                                 {
                                     foreach (var type in entry.Type7)
@@ -717,9 +723,9 @@ namespace XV2_Xml_Serializer
                                         //int flag = type.MovementFlags & 0xFFFb;
 
                                         //if (!values.Contains((ushort)type.I_08))
-                                        //    values.Add((ushort)type.I_08);
+                                         //   values.Add((ushort)type.I_08);
 
-                                        //valuesTotal.Add((ushort)type.I_08);
+                                       // valuesTotal.Add((ushort)type.I_08);
                                     }
                                 }
                             }

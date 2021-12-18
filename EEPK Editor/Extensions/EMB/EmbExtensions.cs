@@ -1,6 +1,8 @@
 ﻿using AForge;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Windows;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Xv2CoreLib.Resource.UndoRedo;
 
@@ -88,6 +90,55 @@ namespace Xv2CoreLib.EMB_CLASS
                 undos.Add(new UndoableProperty<EmbEntry>(nameof(EmbEntry.DdsImage), entry, oldBitmap, entry.DdsImage));
         }
     
+        public static WriteableBitmap Test(WriteableBitmap bitmap1, WriteableBitmap bitmap2)
+        {
+            var bitmap = new WriteableBitmap(4096, 4096, 96, 96, PixelFormats.Pbgra32, null);
+
+            Rect sourceRect1 = new Rect(0,0, bitmap1.Width, bitmap1.Height);
+            Rect sourceRect2 = new Rect(0, 0, bitmap2.Width, bitmap2.Height);
+            Rect destRect1 = new Rect(0, 0, bitmap1.Width, bitmap1.Height);
+            Rect destRect2 = new Rect(bitmap1.Width * 2, 0, bitmap2.Width, bitmap2.Height);
+
+            bitmap.Blit(destRect1, bitmap1, sourceRect1);
+            bitmap.Blit(destRect2, bitmap2, sourceRect2);
+
+            return bitmap;
+        }
+
+        public static WriteableBitmap MergeIntoSuperTexture(List<WriteableBitmap> bitmaps)
+        {
+            double segementSize = HighestDimension(bitmaps);
+            const int textureSize = 4096;
+            var superTexture = new WriteableBitmap(textureSize, textureSize, 96, 96, PixelFormats.Bgra32, null);
+
+            for (int i = 0; i < bitmaps.Count; i++)
+            {
+                double position = segementSize * i / textureSize;
+                int row = (int)position;
+                int x = (int)((position - row) * textureSize);
+                int y = (int)segementSize * row;
+
+                Rect sourceRect = new Rect(0, 0, bitmaps[i].Width, bitmaps[i].Height);
+                Rect destRect = new Rect(x, y, bitmaps[i].Width, bitmaps[i].Height);
+
+                superTexture.Blit(destRect, bitmaps[i], sourceRect);
+            }
+
+            return superTexture;
+        }
+
+        public static double HighestDimension(List<WriteableBitmap> bitmaps)
+        {
+            double dimension = 0;
+
+            foreach(var bitmap in bitmaps)
+            {
+                if (bitmap.Width > dimension) dimension = bitmap.Width;
+                if (bitmap.Height > dimension) dimension = bitmap.Height;
+            }
+
+            return dimension;
+        }
     
     }
 }

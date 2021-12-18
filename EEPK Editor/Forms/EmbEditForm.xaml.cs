@@ -727,5 +727,53 @@ namespace EEPK_Organiser.Forms
                 grid.Opacity = 0.5;
             }
         }
+
+
+
+        private void EmbContextMenu_CreateSuperTexture_Click(object sender, RoutedEventArgs e)
+        {
+            if (assetType != AssetType.PBIND)
+            {
+                MessageBox.Show("SuperTexture is only available for PBIND EMBs.", "Combine", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            List<EmbEntry> selectedTextures = listBox_Textures.SelectedItems.Cast<EmbEntry>().ToList();
+
+            if(selectedTextures.Count < 2)
+            {
+                MessageBox.Show("Cannot proceed. A SuperTexture requires atleast two selected textures.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            foreach(var entry in selectedTextures)
+            {
+
+                if (parent.effectContainerFile.Pbind.GetAllTextureDefinitions(entry).Any(x => x.TextureType == Xv2CoreLib.EMP.EMP_TextureDefinition.TextureAnimationType.Speed))
+                {
+                    MessageBox.Show("One of the selected textures is used by an EMP with the Type = Speed, which isn't supported by Super Textures.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+            }
+
+            var bitmaps = EmbEntry.GetBitmaps(selectedTextures);
+            double maxDimension = EmbEntry.HighestDimension(bitmaps);
+            int textureSize = (int)EmbEntry.SelectTextureSize(maxDimension, bitmaps.Count);
+
+            if (textureSize == -1)
+            {
+                MessageBox.Show("Cannot proceed. The resulting texture would be too large (greater than 4096 x 4096).", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+            
+            //Do the merge
+            parent.effectContainerFile.MergeIntoSuperTexture_PBIND(selectedTextures, undos);
+
+            UndoManager.Instance.AddCompositeUndo(undos, "Combine SuperTexture");
+        }
+   
+    
     }
 }

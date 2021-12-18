@@ -683,10 +683,10 @@ namespace Xv2CoreLib.EMP
                 switch (textureType)
                 {
                     case EMP_TextureDefinition.TextureAnimationType.Static:
-                        bytes.AddRange(BitConverter.GetBytes(embEntries[i].SubData2.Keyframes[0].F_04));
-                        bytes.AddRange(BitConverter.GetBytes(embEntries[i].SubData2.Keyframes[0].F_08));
-                        bytes.AddRange(BitConverter.GetBytes(embEntries[i].SubData2.Keyframes[0].F_12));
-                        bytes.AddRange(BitConverter.GetBytes(embEntries[i].SubData2.Keyframes[0].F_16));
+                        bytes.AddRange(BitConverter.GetBytes(embEntries[i].SubData2.Keyframes[0].ScrollX));
+                        bytes.AddRange(BitConverter.GetBytes(embEntries[i].SubData2.Keyframes[0].ScrollY));
+                        bytes.AddRange(BitConverter.GetBytes(embEntries[i].SubData2.Keyframes[0].ScaleX));
+                        bytes.AddRange(BitConverter.GetBytes(embEntries[i].SubData2.Keyframes[0].ScaleY));
 
                         if (empFile.Version == VersionEnum.SDBH)
                         {
@@ -742,10 +742,10 @@ namespace Xv2CoreLib.EMP
                         for (int a = 0; a < embEntries[i].SubData2.Keyframes.Count(); a++)
                         {
                             bytes.AddRange(BitConverter.GetBytes(embEntries[i].SubData2.Keyframes[a].I_00));
-                            bytes.AddRange(BitConverter.GetBytes(embEntries[i].SubData2.Keyframes[a].F_04));
-                            bytes.AddRange(BitConverter.GetBytes(embEntries[i].SubData2.Keyframes[a].F_08));
-                            bytes.AddRange(BitConverter.GetBytes(embEntries[i].SubData2.Keyframes[a].F_12));
-                            bytes.AddRange(BitConverter.GetBytes(embEntries[i].SubData2.Keyframes[a].F_16));
+                            bytes.AddRange(BitConverter.GetBytes(embEntries[i].SubData2.Keyframes[a].ScrollX));
+                            bytes.AddRange(BitConverter.GetBytes(embEntries[i].SubData2.Keyframes[a].ScrollY));
+                            bytes.AddRange(BitConverter.GetBytes(embEntries[i].SubData2.Keyframes[a].ScaleX));
+                            bytes.AddRange(BitConverter.GetBytes(embEntries[i].SubData2.Keyframes[a].ScaleY));
 
                             if (empFile.Version == VersionEnum.SDBH)
                             {
