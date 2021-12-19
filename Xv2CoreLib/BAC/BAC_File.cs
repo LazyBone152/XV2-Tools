@@ -204,7 +204,7 @@ namespace Xv2CoreLib.BAC
                     }
                     else if (type is BAC_Type7 type7)
                     {
-                        var flag = type7.LinkFlags.RemoveFlag(BAC_Type7.BcmCallbackFlagsEnum.MASK);
+                        var flag = type7.LinkFlags.RemoveFlag(BAC_Type7.BcmCallbackFlagsEnum.KNOWN_MASK);
 
                         if ((uint)flag != 0)
                             return $"BcmCallback LinkFlags ({HexConverter.GetHexString((uint)flag)})";
@@ -263,14 +263,21 @@ namespace Xv2CoreLib.BAC
                         if ((ushort)flag != 0)
                             return $"ScreenEffectFlags ({HexConverter.GetHexString((ushort)flag)})";
                     }
-                    if (type is BAC_Type19 type19)
+                    else if (type is BAC_Type19 type19)
                     {
                         var flag = type19.AuraFlags.RemoveFlag(BAC_Type19.AuraFlagsEnum.DisableAura | BAC_Type19.AuraFlagsEnum.Unk2 | BAC_Type19.AuraFlagsEnum.Unk3 | BAC_Type19.AuraFlagsEnum.Unk4);
 
                         if ((ushort)flag != 0)
                             return $"AuraFlags ({HexConverter.GetHexString((ushort)flag)})";
                     }
-                    if (type is BAC_Type23 type23)
+                    else if (type is BAC_Type20 type20)
+                    {
+                        var flag = type20.HomingFlags.RemoveFlag(BAC_Type20.HomingFlagsEnum.KNOWN_MASK);
+
+                        if ((ushort)flag != 0)
+                            return $"HomingFlags ({HexConverter.GetHexString((ushort)flag)})";
+                    }
+                    else if (type is BAC_Type23 type23)
                     {
                         var flag = type23.TransparencyFlags.RemoveFlag(BAC_Type23.TransparencyFlagsEnum.Activate | BAC_Type23.TransparencyFlagsEnum.Unk1 | BAC_Type23.TransparencyFlagsEnum.Unk3 | BAC_Type23.TransparencyFlagsEnum.Unk4);
 
@@ -1867,7 +1874,7 @@ namespace Xv2CoreLib.BAC
             Unk18 = 0x20000,
             Unk19 = 0x40000,
             Unk20 = 0x80000,
-            MASK =  0xfffff
+            KNOWN_MASK =  0xfffff
             //0x80000 and onwards are never used (included 0x80000 in the enum just to even it out)
         }
 
@@ -3345,24 +3352,38 @@ namespace Xv2CoreLib.BAC
             Unk3
         }
 
-        public enum HomingArcDirectionEnum : ushort
+        [Flags]
+        public enum HomingFlagsEnum : ushort
         {
-            Right = 0,
-            Left = 1,
-            Float7 = 7,
-            Float15 = 15,
-            Float35 = 35
+            Left = 0x1,
+            UseFloatSpeedModifier = 0x2,
+            Unk3 = 0x4,
+            UseBones = 0x8,
+            Unk5 = 0x10,
+            Unk6 = 0x20,
+            Unk7 = 0x40, //unused
+            Unk8 = 0x80, //unused
+            Unk9 = 0x100, //unused
+            Unk10 = 0x200, //unused
+            Unk11 = 0x400, //unused
+            Unk12 = 0x800, //unused
+            Unk13 = 0x1000, //unused
+            Unk14 = 0x2000, //unused
+            Unk15 = 0x4000, //unused
+            Unk16 = 0x8000, //unused
+
+            KNOWN_MASK = 0x3f
         }
 
         [YAXAttributeFor("Type")]
         [YAXSerializeAs("value")]
         public HomingType HomingMovementType { get; set; }
-        [YAXAttributeFor("HomingArcDirection")]
+        [YAXAttributeFor("HomingFlags")]
         [YAXSerializeAs("value")]
-        public HomingArcDirectionEnum HomingArcDirection { get; set; }
+        public HomingFlagsEnum HomingFlags { get; set; }
         [YAXAttributeFor("SpeedModifier")]
         [YAXSerializeAs("value")]
-        public float SpeedModifier { get; set; } // Either UInt or Float, depending on HorizontalHomingArcDirection (7/15/35 = float, else int). We can store the int version as a float for simplicity since the int version will never be too large.
+        public float SpeedModifier { get; set; } // Either UInt or Float, depending on HomingArcFlags. We can store the int version as a float for simplicity since the int version will never be too large.
         [YAXAttributeFor("FrameThreshold")]
         [YAXSerializeAs("value")]
         public int FrameThreshold { get; set; }
@@ -3378,12 +3399,12 @@ namespace Xv2CoreLib.BAC
         [YAXSerializeAs("Z")]
         [YAXFormat("0.0########")]
         public float DisplacementZ { get; set; }
-        [YAXAttributeFor("I_32")]
+        [YAXAttributeFor("UserBone")]
         [YAXSerializeAs("value")]
-        public int I_32 { get; set; } // Range 0x0 -> 0x18. Looks a lot like a BoneLink.
-        [YAXAttributeFor("I_36")]
+        public BoneLinks UserBone { get; set; } //Inverted
+        [YAXAttributeFor("TargetBone")]
         [YAXSerializeAs("value")]
-        public int I_36 { get; set; } //The same as I_32
+        public BoneLinks TargetBone { get; set; } //This one works normally
         [YAXAttributeFor("I_40")]
         [YAXSerializeAs("value")]
         public int I_40 { get; set; } //always 0
@@ -3397,10 +3418,10 @@ namespace Xv2CoreLib.BAC
 
             for (int i = 0; i < count; i++)
             {
-                ushort horizontalArcDirection = BitConverter.ToUInt16(rawBytes, offset + 10);
+                HomingFlagsEnum horizontalArctype = (HomingFlagsEnum)BitConverter.ToUInt16(rawBytes, offset + 10);
                 float speed;
 
-                if (horizontalArcDirection == 7 || horizontalArcDirection == 15 || horizontalArcDirection == 35)
+                if (horizontalArctype.HasFlag(HomingFlagsEnum.UseFloatSpeedModifier))
                 {
                     speed = BitConverter.ToSingle(rawBytes, offset + 12);
                 }
@@ -3416,14 +3437,14 @@ namespace Xv2CoreLib.BAC
                     I_04 = BitConverter.ToUInt16(rawBytes, offset + 4),
                     Flags = BitConverter.ToUInt16(rawBytes, offset + 6),
                     HomingMovementType = (HomingType)BitConverter.ToUInt16(rawBytes, offset + 8),
-                    HomingArcDirection = (HomingArcDirectionEnum)horizontalArcDirection,
+                    HomingFlags = (HomingFlagsEnum)horizontalArctype,
                     SpeedModifier = speed,
                     FrameThreshold = BitConverter.ToInt32(rawBytes, offset + 16),
                     DisplacementX = BitConverter.ToSingle(rawBytes, offset + 20),
                     DisplacementY = BitConverter.ToSingle(rawBytes, offset + 24),
                     DisplacementZ = BitConverter.ToSingle(rawBytes, offset + 28),
-                    I_32 = BitConverter.ToInt32(rawBytes, offset + 32),
-                    I_36 = BitConverter.ToInt32(rawBytes, offset + 36),
+                    UserBone = (BoneLinks)BitConverter.ToInt16(rawBytes, offset + 32),
+                    TargetBone = (BoneLinks)BitConverter.ToInt16(rawBytes, offset + 36),
                     I_40 = BitConverter.ToInt32(rawBytes, offset + 40),
                     I_44 = BitConverter.ToInt32(rawBytes, offset + 44),
                 });
@@ -3445,9 +3466,9 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.I_04));
                 bytes.AddRange(BitConverter.GetBytes(type.Flags));
                 bytes.AddRange(BitConverter.GetBytes((ushort)type.HomingMovementType));
-                bytes.AddRange(BitConverter.GetBytes((ushort)type.HomingArcDirection));
+                bytes.AddRange(BitConverter.GetBytes((ushort)type.HomingFlags));
 
-                if (type.HomingArcDirection == HomingArcDirectionEnum.Float7 || type.HomingArcDirection == HomingArcDirectionEnum.Float15 || type.HomingArcDirection == HomingArcDirectionEnum.Float35)
+                if (type.HomingFlags.HasFlag(HomingFlagsEnum.UseFloatSpeedModifier))
                 {
                     bytes.AddRange(BitConverter.GetBytes(type.SpeedModifier));
                 }
@@ -3460,8 +3481,8 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.DisplacementX));
                 bytes.AddRange(BitConverter.GetBytes(type.DisplacementY));
                 bytes.AddRange(BitConverter.GetBytes(type.DisplacementZ));
-                bytes.AddRange(BitConverter.GetBytes(type.I_32));
-                bytes.AddRange(BitConverter.GetBytes(type.I_36));
+                bytes.AddRange(BitConverter.GetBytes((int)type.UserBone));
+                bytes.AddRange(BitConverter.GetBytes((int)type.TargetBone));
                 bytes.AddRange(BitConverter.GetBytes(type.I_40));
                 bytes.AddRange(BitConverter.GetBytes(type.I_44));
             }

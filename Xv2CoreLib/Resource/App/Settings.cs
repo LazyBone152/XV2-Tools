@@ -69,6 +69,7 @@ namespace Xv2CoreLib.Resource.App
 
         //Events
         public static event EventHandler SettingsReloaded;
+        public static event EventHandler SettingsSaved;
 
         private SettingsManager()
         {
@@ -152,7 +153,7 @@ namespace Xv2CoreLib.Resource.App
             settings.ValidateSettings();
 
             Settings = settings;
-            SettingsReloaded?.Invoke(oldSettings, new EventArgs());
+            SettingsReloaded?.Invoke(oldSettings, EventArgs.Empty);
 #if !DEBUG
             }
             catch
@@ -173,6 +174,8 @@ namespace Xv2CoreLib.Resource.App
         {
             //if (CurrentApp == Application.NotSet) throw new InvalidOperationException("SettingsManager.LoadSettings: CurrentApp has not been set.");
             if (Settings == null) throw new Exception("SettingsManager.SaveSettings: No settings are loaded.");
+
+            SettingsSaved?.Invoke(this, EventArgs.Empty);
 
 #if !DEBUG
             try

@@ -115,6 +115,8 @@ namespace Xv2CoreLib.MSG
                     offsetToMsgString.Add(bytes.Count());
                     bytes.AddRange(new byte[4]);
 
+                    if (msg_File.MSG_Entries[i].Msg_Content[a].Text == null) msg_File.MSG_Entries[i].Msg_Content[a].Text = string.Empty;
+
                     bytes.AddRange(BitConverter.GetBytes(msg_File.MSG_Entries[i].Msg_Content[a].Text.Length));
 
                     if (unicode_msg == true)

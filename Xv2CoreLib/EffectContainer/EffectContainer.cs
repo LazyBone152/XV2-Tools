@@ -2441,8 +2441,8 @@ namespace Xv2CoreLib.EffectContainer
             List<WriteableBitmap> textures = EmbEntry.GetBitmaps(Pbind.File3_Ref.Entry);
             textures = textures.OrderBy(x => Math.Max(x.Width, x.Height)).ToList();
 
-            //Remove any texture that is used by a EMP with SpeedScroll values (cant merge these)
-            textures.RemoveAll(x => Pbind.IsTextureUsedBySpeedScrollType(x));
+            //Remove any texture that is used by a EMP with SpeedScroll values or is Mirrored (cant merge these)
+            textures.RemoveAll(x => Pbind.SuperTexture_IsTextureUsedByUnallowedType(x));
 
             //Remove larger than 2k textures
             textures.RemoveAll(x => Math.Max(x.Width, x.Height) > 2048);
@@ -2522,8 +2522,27 @@ namespace Xv2CoreLib.EffectContainer
                     undos.Add(new UndoableProperty<EMP_TextureDefinition>(nameof(EMP_TextureDefinition.TextureRef), textureDef, textureDef.TextureRef, newEmbEntry));
                     textureDef.TextureRef = newEmbEntry;
 
-                    if(textureDef.TextureType == EMP_TextureDefinition.TextureAnimationType.SpriteSheet || textureDef.TextureType == EMP_TextureDefinition.TextureAnimationType.Static)
+                    //If SpriteSheet or Static and not TextureRepetition == Mirror
+                    if ((textureDef.TextureType == EMP_TextureDefinition.TextureAnimationType.SpriteSheet || textureDef.TextureType == EMP_TextureDefinition.TextureAnimationType.Static) &&
+                        (textureDef.I_06_byte != EMP_TextureDefinition.TextureRepitition.Mirror && textureDef.I_07_byte != EMP_TextureDefinition.TextureRepitition.Mirror))
                     {
+
+                        //If no keyframe exists, then create a default one. (Some EMPs are like this, for some weird reason????)
+                        if(textureDef.SubData2.Keyframes.Count == 0)
+                        {
+                            SubData_2_Entry newKeyframe = new SubData_2_Entry();
+                            newKeyframe.ScaleX = 1f;
+                            newKeyframe.ScaleY = 1f;
+                            textureDef.SubData2.Keyframes.Add(newKeyframe);
+                            undos.Add(new UndoableListAdd<SubData_2_Entry>(textureDef.SubData2.Keyframes, newKeyframe));
+
+                            if(textureDef.TextureType == EMP_TextureDefinition.TextureAnimationType.SpriteSheet)
+                            {
+                                textureDef.TextureType = EMP_TextureDefinition.TextureAnimationType.Static;
+                                undos.Add(new UndoableProperty<EMP_TextureDefinition>(nameof(EMP_TextureDefinition.TextureType), textureDef, EMP_TextureDefinition.TextureAnimationType.SpriteSheet, EMP_TextureDefinition.TextureAnimationType.Static));
+                            }
+                        }
+
                         foreach(var keyframe in textureDef.SubData2.Keyframes)
                         {
                             float newScaleX = (float)(keyframe.ScaleX / a * (bitmaps[i].Width / maxDimension));
@@ -3303,17 +3322,22 @@ namespace Xv2CoreLib.EffectContainer
             return textures;
         }
         
-        public bool IsTextureUsedBySpeedScrollType(WriteableBitmap bitmap)
+        public bool SuperTexture_IsTextureUsedByUnallowedType(WriteableBitmap bitmap)
         {
             foreach (var asset in Assets)
             {
-                if (asset.assetType == AssetType.PBIND && asset.Files.Count == 1)
+                if (asset.assetType == AssetType.PBIND)
                 {
                     foreach (var textureDef in asset.Files[0].EmpFile.Textures)
                     {
-                        if (textureDef.TextureRef?.DdsImage == bitmap && textureDef.TextureType == EMP_TextureDefinition.TextureAnimationType.Speed)
+                        if (textureDef.TextureRef?.DdsImage == bitmap)
                         {
-                            return true;
+                            if (textureDef.TextureType == EMP_TextureDefinition.TextureAnimationType.Speed 
+                                || textureDef.I_06_byte == EMP_TextureDefinition.TextureRepitition.Mirror || textureDef.I_07_byte == EMP_TextureDefinition.TextureRepitition.Mirror 
+                                || textureDef.I_06_byte == EMP_TextureDefinition.TextureRepitition.Clamp || textureDef.I_07_byte == EMP_TextureDefinition.TextureRepitition.Clamp)
+                            {
+                                return true;
+                            }
                         }
                     }
                 }

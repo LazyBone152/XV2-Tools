@@ -749,9 +749,9 @@ namespace EEPK_Organiser.Forms
             foreach(var entry in selectedTextures)
             {
 
-                if (parent.effectContainerFile.Pbind.GetAllTextureDefinitions(entry).Any(x => x.TextureType == Xv2CoreLib.EMP.EMP_TextureDefinition.TextureAnimationType.Speed))
+                if (parent.effectContainerFile.Pbind.GetAllTextureDefinitions(entry).Any(x => x.TextureType == Xv2CoreLib.EMP.EMP_TextureDefinition.TextureAnimationType.Speed || x.I_06_byte == Xv2CoreLib.EMP.EMP_TextureDefinition.TextureRepitition.Mirror || x.I_07_byte == Xv2CoreLib.EMP.EMP_TextureDefinition.TextureRepitition.Mirror))
                 {
-                    MessageBox.Show("One of the selected textures is used by an EMP with the Type = Speed, which isn't supported by Super Textures.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("One of the selected textures is used by an EMP with an unallowed type. These can't be merged.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
             }

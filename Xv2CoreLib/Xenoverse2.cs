@@ -1177,9 +1177,12 @@ namespace Xv2CoreLib
             InstallSkillCusEntry(skill.CusEntry, skill.skillType);
 
             //IDB Entry
-            skill.IdbEntry.ID = skill.CusEntry.ID2;
-            skill.IdbEntry.Type = (ushort)skill.skillType;
-            InstallSkillIdbEntry(skill.IdbEntry);
+            if(skill.IdbEntry != null)
+            {
+                skill.IdbEntry.ID = skill.CusEntry.ID2;
+                skill.IdbEntry.Type = (ushort)skill.skillType;
+                InstallSkillIdbEntry(skill.IdbEntry);
+            }
 
             //Skill files
             skill.CalculateSkillFilePaths();

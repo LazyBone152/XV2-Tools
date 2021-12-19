@@ -50,7 +50,7 @@ namespace XV2_Xml_Serializer
 
                 if (Directory.Exists(fileLocation))
                 {
-                    new Xv2CoreLib.EMB.XmlRepack(fileLocation);
+                    //new Xv2CoreLib.EMB.XmlRepack(fileLocation);
 
                     //Used for debugging
                     //BulkParseInitial(fileLocation);
@@ -711,16 +711,17 @@ namespace XV2_Xml_Serializer
                             foreach (var entry in bac.BacEntries)
                             {
 
-                                if (!values.Contains((uint)entry.Flag))
-                                    values.Add((uint)entry.Flag);
-
-                                valuesTotal.Add((uint)entry.Flag);
-
-                                if (entry.Type7 != null)
+                                if (entry.Type1 != null)
                                 {
-                                    foreach (var type in entry.Type7)
+                                    foreach (var type in entry.Type1)
                                     {
                                         //int flag = type.MovementFlags & 0xFFFb;
+
+                                        if(type.I_22 != 0)
+                                        {
+                                            Console.WriteLine($"this: {entry.Index}");
+                                            Console.ReadLine();
+                                        }
 
                                         //if (!values.Contains((ushort)type.I_08))
                                          //   values.Add((ushort)type.I_08);
