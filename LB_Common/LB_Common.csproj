@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -411,6 +412,8 @@
     <Compile Include="Converters\NullToFalseConverter.cs" />
     <Compile Include="Converters\VisibilityToNullableBoolean.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TypeExtensions.cs" />
+    <Compile Include="Utils\ArraySearch.cs" />
     <Compile Include="Utils\BindingProxy.cs" />
     <Compile Include="Utils\DataGridSelectedItemsBinding.cs" />
     <Compile Include="Utils\DataGridSelectedItemsBinding2.cs" />

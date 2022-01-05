@@ -1471,14 +1471,14 @@ namespace Xv2CoreLib.ACB
         #endregion
 
         #region CopyFunctions
-        public List<IUndoRedo> CopyCue(int cueId, ACB_File copyAcb)
+        public List<IUndoRedo> CopyCue(int cueId, ACB_File copyAcb, bool copyActionReferences)
         {
             //For when you dont care about the new cue ID
             int id;
-            return CopyCue(cueId, copyAcb, out id);
+            return CopyCue(cueId, copyAcb, copyActionReferences, out id);
         }
 
-        public List<IUndoRedo> CopyCue(int cueId, ACB_File copyAcb, out int newCueId)
+        public List<IUndoRedo> CopyCue(int cueId, ACB_File copyAcb, bool copyActionReferences, out int newCueId)
         {
             List<IUndoRedo> undos = new List<IUndoRedo>();
 
@@ -1507,6 +1507,22 @@ namespace Xv2CoreLib.ACB
             undos.Add(new UndoableListAdd<ACB_Cue>(Cues, cue));
 
             newCueId = (int)cue.ID;
+
+            //Now copy any referenced cues on ActionTracks on this cue
+            if (copyActionReferences)
+            {
+                //Note: Name would've beeen adjusted in CopyActionTrack method, so it should point to this ACB, rather than the original one
+                foreach(var action in GetAllActionTracksOnCue(cue.InstanceGuid).Where(x => x.TargetAcbName == Name))
+                {
+                    if (!action.TargetId.IsNull && GetCueId(action.TargetId.TableGuid) == uint.MaxValue)
+                    {
+                        int newCueIdForAction;
+                        undos.AddRange(CopyCue(action.TargetId.TableIndex_Int, copyAcb, false, out newCueIdForAction));
+                        action.TargetId.TableIndex = (uint)newCueIdForAction;
+                    }
+                }
+            }
+
             return undos;
         }
 
@@ -1800,6 +1816,12 @@ namespace Xv2CoreLib.ACB
 
                     if (!actionTable.EventIndex.IsNull)
                         undos.AddRange(CopyCommand(copyAcb.CommandTables.GetCommand(actionTable.EventIndex.TableGuid, CommandTableType.TrackEvent, false), copyAcb, CommandTableType.TrackEvent));
+
+                    if(actionTable.TargetAcbName == copyAcb.Name)
+                    {
+                        //Is Target=Self
+                        actionTable.TargetAcbName = Name;
+                    }
 
                     ActionTracks.Add(actionTable);
                     undos.Add(new UndoableListAdd<ACB_Track>(ActionTracks, actionTable));
@@ -2548,7 +2570,7 @@ namespace Xv2CoreLib.ACB
 
 
         //Helper
-        internal uint GetCueId(Guid cueGuid)
+        public uint GetCueId(Guid cueGuid)
         {
             var cue = Cues.FirstOrDefault(x => x.InstanceGuid == cueGuid);
             return (cue != null) ? cue.ID : uint.MaxValue;
@@ -2715,6 +2737,42 @@ namespace Xv2CoreLib.ACB
             return entry;
         }
         
+        public List<ACB_Track> GetAllActionTracksOnCue(Guid cueGuid)
+        {
+            ACB_Cue cue = GetCue(cueGuid);
+            List<ACB_Track> actions = new List<ACB_Track>();
+
+            if(cue != null)
+            {
+                if (cue.ReferenceType == ReferenceType.Sequence)
+                {
+                    ACB_Sequence sequence = GetSequence(cue.ReferenceIndex.TableGuid);
+
+                    if(sequence != null)
+                    {
+                        foreach(var action in sequence.ActionTracks)
+                        {
+                            actions.Add(GetActionTrack(action.TableGuid));
+                        }
+                    }
+                }
+                else if (cue.ReferenceType == ReferenceType.Synth)
+                {
+                    ACB_Synth synth = GetSynth(cue.ReferenceIndex.TableGuid);
+
+                    if (synth != null)
+                    {
+                        foreach (var action in synth.ActionTracks)
+                        {
+                            actions.Add(GetActionTrack(action.TableGuid));
+                        }
+                    }
+                }
+            }
+
+            return actions;
+        }
+
         /// <summary>
         /// Check if a table is referenced by any other table.
         /// </summary>
@@ -2927,7 +2985,6 @@ namespace Xv2CoreLib.ACB
             return id;
         }
     
-        
     }
 
     [YAXSerializeAs("Cue")]

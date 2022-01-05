@@ -62,7 +62,7 @@
                 <DataGridTemplateColumn Header="Name" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Str_00, UpdateSourceTrigger=PropertyChanged}">
+                            <TextBlock Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}">
                                 <TextBlock.ContextMenu>
                                     <ContextMenu>
                                         <MenuItem Header="Add Parameter" Click="ContextMenu_AddParameter_Click"/>
@@ -81,7 +81,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Str_00, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>

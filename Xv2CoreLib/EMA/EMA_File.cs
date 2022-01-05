@@ -113,8 +113,6 @@ namespace Xv2CoreLib.EMA
 
         public static EMA_File Load(byte[] rawBytes)
         {
-            List<byte> bytes = rawBytes.ToList();
-
             EMA_File emaFile = new EMA_File();
 
             //Header
@@ -131,7 +129,7 @@ namespace Xv2CoreLib.EMA
             //Parse skeleton
             if(skeletonOffset > 0)
             {
-                emaFile.skeleton = Skeleton.Parse(rawBytes, bytes, skeletonOffset);
+                emaFile.skeleton = Skeleton.Parse(rawBytes, skeletonOffset);
             }
 
             //Parse animations
@@ -143,7 +141,7 @@ namespace Xv2CoreLib.EMA
 
                 if (animOffset != 0)
                 {
-                    emaFile.Animations.Add(EMA_Animation.Read(rawBytes, bytes, BitConverter.ToInt32(rawBytes, animationsStart + (i * 4)), i, emaFile));
+                    emaFile.Animations.Add(EMA_Animation.Read(rawBytes, BitConverter.ToInt32(rawBytes, animationsStart + (i * 4)), i, emaFile));
                 }
             }
 
@@ -422,7 +420,7 @@ namespace Xv2CoreLib.EMA
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Command")]
         public AsyncObservableCollection<EMA_Command> Commands { get; set; }
 
-        public static EMA_Animation Read(byte[] rawBytes, List<byte> bytes, int offset, int index, EMA_File emaFile)
+        public static EMA_Animation Read(byte[] rawBytes, int offset, int index, EMA_File emaFile)
         {
             EMA_Animation animation = new EMA_Animation();
             animation.Index = index;
@@ -439,7 +437,7 @@ namespace Xv2CoreLib.EMA
             //Name
             if(nameOffset > 0)
             {
-                animation.Name = Utils.GetString(bytes, nameOffset + 11);
+                animation.Name = StringEx.GetString(rawBytes, nameOffset + 11, false, StringEx.EncodingType.UTF8);
             }
 
             //Values

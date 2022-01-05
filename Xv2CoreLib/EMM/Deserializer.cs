@@ -106,17 +106,17 @@ namespace Xv2CoreLib.EMM
 
                 //emmFile.Materials[i].Str_00 = AddUniqueIdToName(emmFile.Materials[i].Str_00, i);
 
-                bytes = StringWriter.WriteFixedLengthString(emmFile.Materials[i].Str_00, 32, "Name", bytes);
-                bytes = StringWriter.WriteFixedLengthString(emmFile.Materials[i].Str_32, 32, "Shader", bytes);
+                bytes = StringWriter.WriteFixedLengthString(emmFile.Materials[i].Name, 32, "Name", bytes);
+                bytes = StringWriter.WriteFixedLengthString(emmFile.Materials[i].ShaderProgram, 32, "Shader", bytes);
                 int paramCount = (emmFile.Materials[i].Parameters != null) ? emmFile.Materials[i].Parameters.Count() : 0;
                 bytes.AddRange(BitConverter.GetBytes((short)paramCount));
                 bytes.AddRange(BitConverter.GetBytes(emmFile.Materials[i].I_66));
 
                 for (int a = 0; a < paramCount; a++)
                 {
-                    bytes = StringWriter.WriteFixedLengthString(emmFile.Materials[i].Parameters[a].Str_00, 32, "Name", bytes);
-                    bytes.AddRange(BitConverter.GetBytes(GetValueType(emmFile.Materials[i].Parameters[a].I_32)));
-                    switch (GetValueType(emmFile.Materials[i].Parameters[a].I_32))
+                    bytes = StringWriter.WriteFixedLengthString(emmFile.Materials[i].Parameters[a].Name, 32, "Name", bytes);
+                    bytes.AddRange(BitConverter.GetBytes(GetValueType(emmFile.Materials[i].Parameters[a].Type)));
+                    switch (GetValueType(emmFile.Materials[i].Parameters[a].Type))
                     {
                         case 0:
                             bytes.AddRange(BitConverter.GetBytes(GetType_Float(emmFile.Materials[i].Parameters[a].value)));

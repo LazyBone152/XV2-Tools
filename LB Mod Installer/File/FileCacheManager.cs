@@ -119,7 +119,7 @@ namespace LB_Mod_Installer.Installer
                 
                 foreach(var cue in ((ACB_File)data).Cues)
                 {
-                    acb.CopyCue((int)cue.ID, (ACB_File)data);
+                    acb.CopyCue((int)cue.ID, (ACB_File)data, false);
                 }
 
                 cachedFile.backupBgmFile = acb;

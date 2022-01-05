@@ -71,7 +71,8 @@ namespace Xv2CoreLib.EMB_CLASS
             }
         }
 
-        void ParseFile() {
+        void ParseFile()
+        {
             List<int> dataContentsOffsets = new List<int>();
             List<int> dataContentsSize = new List<int>();
             List<int> stringOffsets = new List<int>();
@@ -107,7 +108,7 @@ namespace Xv2CoreLib.EMB_CLASS
                 {
                     Index = i.ToString(),
                     Name = fileName,
-                    Data = bytes.GetRange(dataContentsOffsets[i], dataContentsSize[i])
+                    Data = rawBytes.GetRange(dataContentsOffsets[i], dataContentsSize[i])
                 });
             }
             

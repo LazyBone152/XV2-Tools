@@ -44,15 +44,15 @@ namespace Xv2CoreLib.EMM
         [YAXSerializeAs("Version")]
         public UInt32 I_08 { get; set; }
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Material")]
-        public AsyncObservableCollection<Material> Materials { get; set; } = new AsyncObservableCollection<Material>();
+        public AsyncObservableCollection<EmmMaterial> Materials { get; set; } = new AsyncObservableCollection<EmmMaterial>();
         [YAXSerializeAs("UnknownData")]
         [YAXDontSerializeIfNull]
         public UnknownData Unknown_Data { get; set; }
 
         //ViewModel
-        private Material _selectedMaterial = null;
+        private EmmMaterial _selectedMaterial = null;
         [YAXDontSerialize]
-        public Material SelectedMaterial
+        public EmmMaterial SelectedMaterial
         {
             get
             {
@@ -116,11 +116,11 @@ namespace Xv2CoreLib.EMM
         public bool MaterialFilterCheck(object matObject)
         {
             if (String.IsNullOrWhiteSpace(MaterialSearchFilter)) return true;
-            var _material = matObject as Material;
+            var _material = matObject as EmmMaterial;
 
             if (_material != null)
             {
-                if (_material.Str_00.ToLower().Contains(MaterialSearchFilter.ToLower())) return true;
+                if (_material.Name.ToLower().Contains(MaterialSearchFilter.ToLower())) return true;
             }
 
             return false;
@@ -170,7 +170,7 @@ namespace Xv2CoreLib.EMM
                     return new EMM_File()
                     {
                         I_08 = 0,
-                        Materials = AsyncObservableCollection<Material>.Create()
+                        Materials = AsyncObservableCollection<EmmMaterial>.Create()
                     };
                 }
                 else
@@ -205,16 +205,16 @@ namespace Xv2CoreLib.EMM
             return new EMM_File()
             {
                 I_08 = 16,
-                Materials = AsyncObservableCollection<Material>.Create(),
+                Materials = AsyncObservableCollection<EmmMaterial>.Create(),
                 Unknown_Data = new UnknownData()
             };
         }
 
-        public Material GetMaterial(string name)
+        public EmmMaterial GetMaterial(string name)
         {
             foreach(var e in Materials)
             {
-                if(e.Str_00 == name)
+                if(e.Name == name)
                 {
                     return e;
                 }
@@ -223,7 +223,7 @@ namespace Xv2CoreLib.EMM
             return null;
         }
 
-        public Material GetEntry(int index)
+        public EmmMaterial GetEntry(int index)
         {
             if (index >= Materials.Count || index < 0)
             {
@@ -233,7 +233,7 @@ namespace Xv2CoreLib.EMM
             return Materials[index];
         }
 
-        public Material Compare(Material emmEntry2)
+        public EmmMaterial Compare(EmmMaterial emmEntry2)
         {
             foreach (var entry in Materials)
             {
@@ -266,7 +266,7 @@ namespace Xv2CoreLib.EMM
         {
             foreach (var entry in Materials)
             {
-                if (entry.Str_00 == name) return true;
+                if (entry.Name == name) return true;
 
             }
 
@@ -287,15 +287,15 @@ namespace Xv2CoreLib.EMM
 
             for(int i = 0; i < Materials.Count; i++)
             {
-                if (names.Contains(Materials[i].Str_00))
+                if (names.Contains(Materials[i].Name))
                 {
                     //Name was used previously
-                    Materials[i].Str_00 = GetUnusedName(Materials[i].Str_00);
+                    Materials[i].Name = GetUnusedName(Materials[i].Name);
                 }
                 else
                 {
                     //Name is unused
-                    names.Add(Materials[i].Str_00);
+                    names.Add(Materials[i].Name);
                 }
             }
         }
@@ -327,7 +327,7 @@ namespace Xv2CoreLib.EMM
 
     [Serializable]
     [YAXSerializeAs("Material")]
-    public class Material : INotifyPropertyChanged
+    public class EmmMaterial : INotifyPropertyChanged
     {
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
@@ -348,11 +348,8 @@ namespace Xv2CoreLib.EMM
         [YAXAttributeForClass]
         public int Index { get; set; }
         [YAXAttributeForClass]
-        [YAXSerializeAs("UseLocalCopy")]
-        public bool LocalCopy { get; set; }
-        [YAXAttributeForClass]
         [YAXSerializeAs("Name")]
-        public string Str_00
+        public string Name
         {
             get
             {
@@ -363,18 +360,18 @@ namespace Xv2CoreLib.EMM
                 if(value.Length > 32)
                 {
                     _name = value.Remove(32, value.Length - 32);
-                    NotifyPropertyChanged(nameof(Str_00));
+                    NotifyPropertyChanged(nameof(Name));
                 }
                 else if (value != this._name)
                 {
                     this._name = value;
-                    NotifyPropertyChanged(nameof(Str_00));
+                    NotifyPropertyChanged(nameof(Name));
                 }
             }
         }
         [YAXAttributeForClass]
         [YAXSerializeAs("Shader")]
-        public string Str_32
+        public string ShaderProgram
         {
             get
             {
@@ -385,20 +382,20 @@ namespace Xv2CoreLib.EMM
                 if (value.Length > 32)
                 {
                     _shader = value.Remove(32, value.Length - 32);
-                    NotifyPropertyChanged(nameof(Str_32));
+                    NotifyPropertyChanged(nameof(ShaderProgram));
                     NotifyPropertyChanged(nameof(UndoableShader));
                 }
                 else if (value != this._shader)
                 {
                     this._shader = value;
-                    NotifyPropertyChanged(nameof(Str_32));
+                    NotifyPropertyChanged(nameof(ShaderProgram));
                     NotifyPropertyChanged(nameof(UndoableShader));
                 }
             }
         }
         [YAXAttributeFor("I_66")]
         [YAXSerializeAs("value")]
-        public UInt16 I_66 { get; set; }
+        public ushort I_66 { get; set; }
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Parameter")]
         public AsyncObservableCollection<Parameter> Parameters { get; set; }
 
@@ -428,14 +425,14 @@ namespace Xv2CoreLib.EMM
         {
             get
             {
-                return Str_32;
+                return ShaderProgram;
             }
             set
             {
-                if(Str_32 != value)
+                if(ShaderProgram != value)
                 {
-                    UndoManager.Instance.AddUndo(new UndoableProperty<Material>(nameof(Str_32), this, Str_32, value, "Shader"));
-                    Str_32 = value;
+                    UndoManager.Instance.AddUndo(new UndoableProperty<EmmMaterial>(nameof(ShaderProgram), this, ShaderProgram, value, "Shader"));
+                    ShaderProgram = value;
                 }
             }
         }
@@ -449,7 +446,7 @@ namespace Xv2CoreLib.EMM
         /// <returns></returns>
         public string AddPrefixToName(string prefix)
         {
-            StringBuilder newName = new StringBuilder((string)Str_00.Clone());
+            StringBuilder newName = new StringBuilder((string)Name.Clone());
 
             while(newName.Length > 25)
             {
@@ -459,24 +456,11 @@ namespace Xv2CoreLib.EMM
             return String.Format("{0}{1}", prefix, newName.ToString());
         }
 
-        public string GetValue(string parameter)
-        {
-            foreach(var e in Parameters)
-            {
-                if(e.Str_00 == parameter)
-                {
-                    return e.value;
-                }
-            }
-
-            return null;
-        }
-
-        public bool Compare(Material material2)
+        public bool Compare(EmmMaterial material2)
         {
             //Name can be different. We only care about the shader type and parameters.
 
-            if (Str_32 != material2.Str_32)
+            if (ShaderProgram != material2.ShaderProgram)
                 return false;
 
             if (I_66 != material2.I_66)
@@ -502,25 +486,24 @@ namespace Xv2CoreLib.EMM
             }
         }
 
-        public static Material NewMaterial()
+        public static EmmMaterial NewMaterial()
         {
             var param = AsyncObservableCollection<Parameter>.Create();
             param.Add(Parameter.NewParameter());
 
-            return new Material()
+            return new EmmMaterial()
             {
-                Str_00 = "NewMaterial",
-                Str_32 = "ParticleDecal",
+                Name = "NewMaterial",
+                ShaderProgram = "ParticleDecal",
                 Parameters = param
             };
         }
 
-        public Material Clone()
+        public EmmMaterial Clone()
         {
-            Material newMaterial = new Material();
-            newMaterial.Str_00 = Str_00;
-            newMaterial.Str_32 = Str_32;
-            newMaterial.LocalCopy = true;
+            EmmMaterial newMaterial = new EmmMaterial();
+            newMaterial.Name = Name;
+            newMaterial.ShaderProgram = ShaderProgram;
             newMaterial.I_66 = I_66;
             newMaterial.Parameters = AsyncObservableCollection<Parameter>.Create();
 
@@ -530,18 +513,6 @@ namespace Xv2CoreLib.EMM
             }
 
             return newMaterial;
-        }
-
-        public Parameter GetParameter(string parameterName)
-        {
-            if (Parameters == null) Parameters = AsyncObservableCollection<Parameter>.Create();
-
-            foreach(var parameter in Parameters)
-            {
-                if (parameter.Str_00 == parameterName) return parameter;
-            }
-
-            return null;
         }
 
         /// <summary>
@@ -561,27 +532,27 @@ namespace Xv2CoreLib.EMM
                     {
                         Parameters.Add(new Parameter()
                         {
-                            Str_00 = string.Format("{0}R", param),
+                            Name = string.Format("{0}R", param),
                             value = "0.0",
-                            I_32 = "Float"
+                            Type = "Float"
                         });
                     }
                     if (g == null)
                     {
                         Parameters.Add(new Parameter()
                         {
-                            Str_00 = string.Format("{0}G", param),
+                            Name = string.Format("{0}G", param),
                             value = "0.0",
-                            I_32 = "Float"
+                            Type = "Float"
                         });
                     }
                     if (b == null)
                     {
                         Parameters.Add(new Parameter()
                         {
-                            Str_00 = string.Format("{0}B", param),
+                            Name = string.Format("{0}B", param),
                             value = "0.0",
-                            I_32 = "Float"
+                            Type = "Float"
                         });
                     }
 
@@ -589,32 +560,6 @@ namespace Xv2CoreLib.EMM
                 }
 
             }
-        }
-
-        public List<RgbColor> GetUsedColors()
-        {
-            SyncColorParameters();
-            List<RgbColor> colors = new List<RgbColor>();
-            if (Parameters == null) return colors;
-
-            foreach (var param in Parameter.ColorParameters)
-            {
-                var r = GetParameter(string.Format("{0}R", param));
-                var g = GetParameter(string.Format("{0}G", param));
-                var b = GetParameter(string.Format("{0}B", param));
-                
-                if(r != null && g != null && b != null)
-                {
-                    var color = new RgbColor(r.Float, g.Float, b.Float);
-
-                    if (!color.IsWhiteOrBlack)
-                    {
-                        colors.Add(color);
-                    }
-                }
-            }
-
-            return colors;
         }
 
         public void ChangeHsl(double hue, double saturation = 0.0, double lightness = 0.0, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0)
@@ -659,6 +604,96 @@ namespace Xv2CoreLib.EMM
             }
         }
 
+        #region Get
+        public float[] GetVector4(string name)
+        {
+            var param = Parameters.FirstOrDefault(x => x.Name == name);
+            if (param != null)
+            {
+                return new float[] { param.Float, param.Float, param.Float, param.Float };
+            }
+
+            float val0 = float.Parse(GetValue($"{name}X")); 
+            float val1 = float.Parse(GetValue($"{name}Y"));
+            float val2 = float.Parse(GetValue($"{name}Z"));
+            float val3 = float.Parse(GetValue($"{name}W"));
+            return new float[] { val0, val1, val2, val3 };
+        }
+
+        public float[] GetColor(string name)
+        {
+            var param = Parameters.FirstOrDefault(x => x.Name == name);
+            if (param != null)
+            {
+                return new float[] { param.Float, param.Float, param.Float, param.Float };
+            }
+
+            float val0 = float.Parse(GetValue($"{name}R"));
+            float val1 = float.Parse(GetValue($"{name}G"));
+            float val2 = float.Parse(GetValue($"{name}B"));
+            float val3 = float.Parse(GetValue($"{name}A"));
+            return new float[] { val0, val1, val2, val3 };
+        }
+
+        public float[] GetUV(string name)
+        {
+            float val0 = float.Parse(GetValue($"{name}U"));
+            float val1 = float.Parse(GetValue($"{name}V"));
+            return new float[] { val0, val1 };
+        }
+
+        public string GetValue(string parameter, bool returnDefault = false)
+        {
+            foreach (var e in Parameters)
+            {
+                if (e.Name == parameter)
+                {
+                    return e.value;
+                }
+            }
+
+            return returnDefault ? "0" : null;
+        }
+
+        public Parameter GetParameter(string parameterName)
+        {
+            if (Parameters == null) Parameters = AsyncObservableCollection<Parameter>.Create();
+
+            foreach (var parameter in Parameters)
+            {
+                if (parameter.Name == parameterName) return parameter;
+            }
+
+            return null;
+        }
+
+        public List<RgbColor> GetUsedColors()
+        {
+            SyncColorParameters();
+            List<RgbColor> colors = new List<RgbColor>();
+            if (Parameters == null) return colors;
+
+            foreach (var param in Parameter.ColorParameters)
+            {
+                var r = GetParameter(string.Format("{0}R", param));
+                var g = GetParameter(string.Format("{0}G", param));
+                var b = GetParameter(string.Format("{0}B", param));
+
+                if (r != null && g != null && b != null)
+                {
+                    var color = new RgbColor(r.Float, g.Float, b.Float);
+
+                    if (!color.IsWhiteOrBlack)
+                    {
+                        colors.Add(color);
+                    }
+                }
+            }
+
+            return colors;
+        }
+
+        #endregion
     }
 
     [Serializable]
@@ -699,7 +734,7 @@ namespace Xv2CoreLib.EMM
         //Properties
         [YAXAttributeForClass]
         [YAXSerializeAs("Name")]
-        public string Str_00
+        public string Name
         {
             get
             {
@@ -710,20 +745,20 @@ namespace Xv2CoreLib.EMM
                 if (value.Length > 32)
                 {
                     _str_00 = value.Remove(32, value.Length - 32);
-                    NotifyPropertyChanged(nameof(Str_00));
+                    NotifyPropertyChanged(nameof(Name));
                     NotifyPropertyChanged(nameof(UndoableName));
                 }
                 else if (value != this._str_00)
                 {
                     this._str_00 = value;
-                    NotifyPropertyChanged(nameof(Str_00));
+                    NotifyPropertyChanged(nameof(Name));
                     NotifyPropertyChanged(nameof(UndoableName));
                 }
             }
         }
         [YAXAttributeForClass]
         [YAXSerializeAs("Type")]
-        public string I_32 { get; set; } //int16, but write it twice (so it takes up 4 bytes)
+        public string Type { get; set; } //int16, but write it twice (so it takes up 4 bytes)
         private string _value = null;
         [YAXAttributeForClass]
         [YAXSerializeAs("value")]
@@ -758,6 +793,19 @@ namespace Xv2CoreLib.EMM
                 return 0f;
             }
         }
+        [YAXDontSerialize]
+        public int IntValue
+        {
+            get
+            {
+                int _intValue;
+                if (int.TryParse(value, out _intValue))
+                {
+                    return _intValue;
+                }
+                return 0;
+            }
+        }
 
         #region View
         [YAXDontSerialize]
@@ -765,14 +813,14 @@ namespace Xv2CoreLib.EMM
         {
             get
             {
-                return Str_00;
+                return Name;
             }
             set
             {
-                if (Str_00 != value)
+                if (Name != value)
                 {
-                    UndoManager.Instance.AddUndo(new UndoableProperty<Parameter>(nameof(Str_00), this, Str_00, value, "Name"));
-                    Str_00 = value;
+                    UndoManager.Instance.AddUndo(new UndoableProperty<Parameter>(nameof(Name), this, Name, value, "Name"));
+                    Name = value;
                 }
             }
         }
@@ -781,14 +829,14 @@ namespace Xv2CoreLib.EMM
         {
             get
             {
-                return I_32;
+                return Type;
             }
             set
             {
-                if (I_32 != value)
+                if (Type != value)
                 {
-                    UndoManager.Instance.AddUndo(new CompositeUndo(new List<IUndoRedo>() { new UndoableProperty<Parameter>(nameof(I_32), this, I_32, value), new UndoActionDelegate(this, nameof(RefreshProperties), true) }, "Type"));
-                    I_32 = value;
+                    UndoManager.Instance.AddUndo(new CompositeUndo(new List<IUndoRedo>() { new UndoableProperty<Parameter>(nameof(Type), this, Type, value), new UndoActionDelegate(this, nameof(RefreshProperties), true) }, "Type"));
+                    Type = value;
                 }
             }
         }
@@ -811,8 +859,8 @@ namespace Xv2CoreLib.EMM
         
         public void RefreshProperties()
         {
-            NotifyPropertyChanged(nameof(Str_00));
-            NotifyPropertyChanged(nameof(I_32));
+            NotifyPropertyChanged(nameof(Name));
+            NotifyPropertyChanged(nameof(Type));
             NotifyPropertyChanged(nameof(value));
             NotifyPropertyChanged(nameof(UndoableName));
             NotifyPropertyChanged(nameof(UndoableType));
@@ -822,10 +870,10 @@ namespace Xv2CoreLib.EMM
 
         public bool Compare(Parameter parameter2)
         {
-            if (Str_00 != parameter2.Str_00)
+            if (Name != parameter2.Name)
                 return false;
             
-            if (I_32 != parameter2.I_32)
+            if (Type != parameter2.Type)
                 return false;
 
             if (value != parameter2.value)
@@ -838,7 +886,7 @@ namespace Xv2CoreLib.EMM
         {
             //Only validate Ints when typing == true.
 
-            switch (I_32)
+            switch (Type)
             {
                 case "Float":
                 case "Float2":
@@ -885,8 +933,8 @@ namespace Xv2CoreLib.EMM
         {
             return new Parameter()
             {
-                Str_00 = "ParameterName",
-                I_32 = "Int",
+                Name = "ParameterName",
+                Type = "Int",
                 value = "0"
             };
         }
@@ -895,8 +943,8 @@ namespace Xv2CoreLib.EMM
         {
             return new Parameter()
             {
-                I_32 = I_32,
-                Str_00 = Str_00,
+                Type = Type,
+                Name = Name,
                 value = value
             };
         }

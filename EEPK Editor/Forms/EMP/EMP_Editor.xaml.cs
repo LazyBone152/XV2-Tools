@@ -668,8 +668,8 @@ namespace EEPK_Organiser.Forms.EMP
                     if (result == null)
                     {
                         //Material didn't exist so we have to add it
-                        particleEffect.Type_Texture.MaterialRef.Str_00 = materialFile.GetUnusedName(particleEffect.Type_Texture.MaterialRef.Str_00);
-                        undos.Add(new UndoableListAdd<Material>(materialFile.Materials, particleEffect.Type_Texture.MaterialRef));
+                        particleEffect.Type_Texture.MaterialRef.Name = materialFile.GetUnusedName(particleEffect.Type_Texture.MaterialRef.Name);
+                        undos.Add(new UndoableListAdd<EmmMaterial>(materialFile.Materials, particleEffect.Type_Texture.MaterialRef));
                         materialFile.Materials.Add(particleEffect.Type_Texture.MaterialRef);
                     }
                     else if (result != particleEffect.Type_Texture.MaterialRef)
@@ -1301,7 +1301,7 @@ namespace EEPK_Organiser.Forms.EMP
 
                     if (texturePartsThatUsedSameRef.Count > 0)
                     {
-                        if (MessageBox.Show(String.Format("Do you also want to change the {0} other TextureParts in this EMP that uses \"{1}\" to use \"{2}\"?.", texturePartsThatUsedSameRef.Count, previousMaterialRef.Str_00, materialSelector.SelectedMaterial.Str_00), "Change Texture", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                        if (MessageBox.Show(String.Format("Do you also want to change the {0} other TextureParts in this EMP that uses \"{1}\" to use \"{2}\"?.", texturePartsThatUsedSameRef.Count, previousMaterialRef.Name, materialSelector.SelectedMaterial.Name), "Change Texture", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                         {
                             foreach (var texturePart in texturePartsThatUsedSameRef)
                             {

@@ -6,16 +6,24 @@ using YAXLib;
 namespace Xv2CoreLib.EMD
 {
     [Flags]
-    public enum VTX_FLAGS : Int32
+    public enum VertexFlags : int
     {
-        EMD_VTX_FLAG_POS = 0x1,
-        EMD_VTX_FLAG_NORM = 0x2,
-        EMD_VTX_FLAG_TEX = 0x4,
-        EMD_VTX_FLAG_TEX2 = 0x8,
-        EMD_VTX_FLAG_COLOR = 0x40,
-        EMD_VTX_FLAG_TANGENT = 0x80,
-        EMD_VTX_FLAG_BLEND_WEIGHT = 0x200,
-        EMD_VTX_FLAG_COMPRESSED_FORMAT = 0x8000
+        Position = 0x1,
+        Normal = 0x2,
+        TexUV = 0x4,
+        Tex2UV = 0x8,
+        Unk5 = 0x10,
+        Unk6 = 0x20,
+        Color = 0x40,
+        Tangent = 0x80,
+        Unk9 = 0x100,
+        BlendWeight = 0x200,
+        Unk11 = 0x400,
+        Unk12 = 0x800,
+        Unk13 = 0x1000,
+        Unk14 = 0x2000,
+        Unk15 = 0x4000,
+        CompressedFormat = 0x8000, //Use float16
     }
 
     public class EMD_File
@@ -64,51 +72,14 @@ namespace Xv2CoreLib.EMD
     [YAXSerializeAs("Mesh")]
     public class EMD_Mesh
     {
-        [YAXDontSerialize]
-        public string UniqueName { get; set; }
-        [YAXAttributeFor("AABB_Center")]
-        [YAXSerializeAs("X")]
-        public float F_00 { get; set; }
-        [YAXAttributeFor("AABB_Center")]
-        [YAXSerializeAs("Y")]
-        public float F_04 { get; set; }
-        [YAXAttributeFor("AABB_Center")]
-        [YAXSerializeAs("Z")]
-        public float F_08 { get; set; }
-        [YAXAttributeFor("AABB_Center")]
-        [YAXSerializeAs("W")]
-        public float F_12 { get; set; }
-        [YAXAttributeFor("AABB_Min")]
-        [YAXSerializeAs("X")]
-        public float F_16 { get; set; }
-        [YAXAttributeFor("AABB_Min")]
-        [YAXSerializeAs("Y")]
-        public float F_20 { get; set; }
-        [YAXAttributeFor("AABB_Min")]
-        [YAXSerializeAs("Z")]
-        public float F_24 { get; set; }
-        [YAXAttributeFor("AABB_Min")]
-        [YAXSerializeAs("W")]
-        public float F_28 { get; set; }
-        [YAXAttributeFor("AABB_Max")]
-        [YAXSerializeAs("X")]
-        public float F_32 { get; set; }
-        [YAXAttributeFor("AABB_Max")]
-        [YAXSerializeAs("Y")]
-        public float F_36 { get; set; }
-        [YAXAttributeFor("AABB_Max")]
-        [YAXSerializeAs("Z")]
-        public float F_40 { get; set; }
-        [YAXAttributeFor("AABB_Max")]
-        [YAXSerializeAs("W")]
-        public float F_44 { get; set; }
-
         [YAXAttributeForClass]
         public string Name { get; set; }
-
-        [YAXAttributeFor("I_52")]
-        [YAXSerializeAs("value")]
+        [YAXAttributeForClass]
         public ushort I_52 { get; set; }
+
+        public EMD_AABB AABB { get; set; }
+
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Submesh")]
         public List<EMD_Submesh> Submeshes { get; set; }
 
         [YAXDontSerialize]
@@ -126,74 +97,97 @@ namespace Xv2CoreLib.EMD
         }
     }
 
+    public class EMD_AABB
+    {
+        [YAXAttributeFor("AABB_Center")]
+        [YAXSerializeAs("X")]
+        public float CenterX { get; set; }
+        [YAXAttributeFor("AABB_Center")]
+        [YAXSerializeAs("Y")]
+        public float CenterY { get; set; }
+        [YAXAttributeFor("AABB_Center")]
+        [YAXSerializeAs("Z")]
+        public float CenterZ { get; set; }
+        [YAXAttributeFor("AABB_Center")]
+        [YAXSerializeAs("W")]
+        public float CenterW { get; set; }
+        [YAXAttributeFor("AABB_Min")]
+        [YAXSerializeAs("X")]
+        public float MinX { get; set; }
+        [YAXAttributeFor("AABB_Min")]
+        [YAXSerializeAs("Y")]
+        public float MinY { get; set; }
+        [YAXAttributeFor("AABB_Min")]
+        [YAXSerializeAs("Z")]
+        public float MinZ { get; set; }
+        [YAXAttributeFor("AABB_Min")]
+        [YAXSerializeAs("W")]
+        public float MinW { get; set; }
+        [YAXAttributeFor("AABB_Max")]
+        [YAXSerializeAs("X")]
+        public float MaxX { get; set; }
+        [YAXAttributeFor("AABB_Max")]
+        [YAXSerializeAs("Y")]
+        public float MaxY { get; set; }
+        [YAXAttributeFor("AABB_Max")]
+        [YAXSerializeAs("Z")]
+        public float MaxZ { get; set; }
+        [YAXAttributeFor("AABB_Max")]
+        [YAXSerializeAs("W")]
+        public float MaxW { get; set; }
+
+        public static EMD_AABB Read(byte[] bytes, int offset)
+        {
+            return new EMD_AABB()
+            {
+                CenterX = BitConverter.ToSingle(bytes, offset + 0),
+                CenterY = BitConverter.ToSingle(bytes, offset + 4),
+                CenterZ = BitConverter.ToSingle(bytes, offset + 8),
+                CenterW = BitConverter.ToSingle(bytes, offset + 12),
+                MinX = BitConverter.ToSingle(bytes, offset + 16),
+                MinY = BitConverter.ToSingle(bytes, offset + 20),
+                MinZ = BitConverter.ToSingle(bytes, offset + 24),
+                MinW = BitConverter.ToSingle(bytes, offset + 28),
+                MaxX = BitConverter.ToSingle(bytes, offset + 32),
+                MaxY = BitConverter.ToSingle(bytes, offset + 36),
+                MaxZ = BitConverter.ToSingle(bytes, offset + 40),
+                MaxW = BitConverter.ToSingle(bytes, offset + 44)
+            };
+        }
+
+        public byte[] Write()
+        {
+            List<byte> bytes = new List<byte>();
+
+            bytes.AddRange(BitConverter.GetBytes(CenterX));
+            bytes.AddRange(BitConverter.GetBytes(CenterY));
+            bytes.AddRange(BitConverter.GetBytes(CenterZ));
+            bytes.AddRange(BitConverter.GetBytes(CenterW));
+            bytes.AddRange(BitConverter.GetBytes(MinX));
+            bytes.AddRange(BitConverter.GetBytes(MinY));
+            bytes.AddRange(BitConverter.GetBytes(MinZ));
+            bytes.AddRange(BitConverter.GetBytes(MinW));
+            bytes.AddRange(BitConverter.GetBytes(MaxX));
+            bytes.AddRange(BitConverter.GetBytes(MaxY));
+            bytes.AddRange(BitConverter.GetBytes(MaxZ));
+            bytes.AddRange(BitConverter.GetBytes(MaxW));
+
+            return bytes.ToArray();
+        }
+    }
+
     [YAXSerializeAs("Submesh")]
     public class EMD_Submesh
     {
-        [YAXDontSerialize]
-        public string UniqueName { get; set; }
-
-        [YAXAttributeFor("AABB_Center")]
-        [YAXSerializeAs("X")]
-        public float F_00 { get; set; }
-        [YAXAttributeFor("AABB_Center")]
-        [YAXSerializeAs("Y")]
-        public float F_04 { get; set; }
-        [YAXAttributeFor("AABB_Center")]
-        [YAXSerializeAs("Z")]
-        public float F_08 { get; set; }
-        [YAXAttributeFor("AABB_Center")]
-        [YAXSerializeAs("W")]
-        public float F_12 { get; set; }
-        [YAXAttributeFor("AABB_Min")]
-        [YAXSerializeAs("X")]
-        public float F_16 { get; set; }
-        [YAXAttributeFor("AABB_Min")]
-        [YAXSerializeAs("Y")]
-        public float F_20 { get; set; }
-        [YAXAttributeFor("AABB_Min")]
-        [YAXSerializeAs("Z")]
-        public float F_24 { get; set; }
-        [YAXAttributeFor("AABB_Min")]
-        [YAXSerializeAs("W")]
-        public float F_28 { get; set; }
-        [YAXAttributeFor("AABB_Max")]
-        [YAXSerializeAs("X")]
-        public float F_32 { get; set; }
-        [YAXAttributeFor("AABB_Max")]
-        [YAXSerializeAs("Y")]
-        public float F_36 { get; set; }
-        [YAXAttributeFor("AABB_Max")]
-        [YAXSerializeAs("Z")]
-        public float F_40 { get; set; }
-        [YAXAttributeFor("AABB_Max")]
-        [YAXSerializeAs("W")]
-        public float F_44 { get; set; }
-        [YAXAttributeFor("VtxFlags")]
+        [YAXAttributeFor("VertexFlags")]
         [YAXSerializeAs("values")]
-        public VTX_FLAGS VtxFlags { get; set; }
-
-        [YAXDontSerialize]
-        public int VertexSize
-        {
-            get
-            {
-                return EMD_Vertex.GetVertexSize(VtxFlags);
-            }
-        }
+        public VertexFlags VertexFlags { get; set; }
+        public EMD_AABB AABB { get; set; }
 
         [YAXAttributeForClass]
         public string Name { get; set; }
 
-        [YAXAttributeForClass]
-        public string RootBone
-        {
-            get
-            {
-                return GetRootBone();
-            }
-        }
-
-        //Debug
+        //Counts
         [YAXDontSerialize]
         public int VertexCount
         {
@@ -208,7 +202,7 @@ namespace Xv2CoreLib.EMD
         {
             get
             {
-                if (TextureDefinitions != null) return TextureDefinitions.Count;
+                if (TextureSamplerDefs != null) return TextureSamplerDefs.Count;
                 return 0;
             }
         }
@@ -236,19 +230,21 @@ namespace Xv2CoreLib.EMD
                 return (Triangles != null) ? Triangles.Count : 0;
             }
         }
+        [YAXDontSerialize]
+        public int VertexSize
+        {
+            get
+            {
+                return EMD_Vertex.GetVertexSize(VertexFlags);
+            }
+        }
 
-
-        public List<EMD_TextureDefinition> TextureDefinitions { get; set; }
+        [YAXComment("Sampler entries depend on the shader defined in EMM. Usually if there are duplicate entries then only the last one matters, the earlier ones are just there to maintain the sampler index. (Dont delete them) \n" +
+            "There is a max of 4 possible entries that the shaders will accept, but no actual (vanilla) EMD shader uses more than 3.")]
+        public List<EMD_TextureSamplerDef> TextureSamplerDefs { get; set; }
         public List<EMD_Triangle> Triangles { get; set; }
         public List<EMD_Vertex> Vertexes { get; set; }
 
-        private string GetRootBone()
-        {
-            List<string> usedBones = new List<string>();
-
-
-            return null;
-        }
 
         public string GetBoneName(int vertexIdx, int boneIdx)
         {
@@ -267,38 +263,115 @@ namespace Xv2CoreLib.EMD
         }
     }
 
-    [YAXSerializeAs("TextureDefinition")]
-    public class EMD_TextureDefinition
+    [YAXSerializeAs("TextureSamplerDef")]
+    public class EMD_TextureSamplerDef
     {
+        public enum AddressMode : byte
+        {
+            Wrap = 0,
+            Mirror = 1,
+            Clamp = 2
+        }
+
+        public enum Filtering : byte
+        {
+            None = 0,
+            Point = 1,
+            Linear = 2
+        }
+
         [YAXAttributeForClass]
         [YAXSerializeAs("Flag0")]
+        [YAXHexValue]
         public byte I_00 { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("TextureIndex")]
-        public byte I_01 { get; set; }
+        public byte EmbIndex { get; set; }
+
         [YAXAttributeForClass]
-        [YAXSerializeAs("Flag1")]
-        public byte I_02 { get; set; }
+        [YAXSerializeAs("AddressModeU")]
+        public AddressMode AddressModeU { get; set; }
         [YAXAttributeForClass]
-        [YAXSerializeAs("Flag2")]
-        public byte I_03 { get; set; }
+        [YAXSerializeAs("AddressModeV")]
+        public AddressMode AddressModeV { get; set; }
+
+
         [YAXAttributeForClass]
-        [YAXSerializeAs("Scale_U")]
-        public float F_04 { get; set; }
+        [YAXSerializeAs("FilteringMin")]
+        public Filtering FilteringMin { get; set; }
         [YAXAttributeForClass]
-        [YAXSerializeAs("Scale_V")]
-        public float F_08 { get; set; }
+        [YAXSerializeAs("FilteringMag")]
+        public Filtering FilteringMag { get; set; }
+
+        [YAXAttributeForClass]
+        [YAXSerializeAs("ScaleU")]
+        public float ScaleU { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("ScaleV")]
+        public float ScaleV { get; set; }
+
+        public static List<EMD_TextureSamplerDef> Read(byte[] bytes, int offset, int count)
+        {
+            List<EMD_TextureSamplerDef> samplerDefs = new List<EMD_TextureSamplerDef>();
+
+            for(int i = 0; i < count; i++)
+            {
+                samplerDefs.Add(Read(bytes, offset));
+                offset += 12;
+            }
+
+            return samplerDefs;
+        }
+
+        public static EMD_TextureSamplerDef Read(byte[] bytes, int offset)
+        {
+            EMD_TextureSamplerDef samplerDef = new EMD_TextureSamplerDef();
+
+            byte[] val2 = Int4Converter.ToInt4(bytes[offset + 2]);
+            byte[] val3 = Int4Converter.ToInt4(bytes[offset + 3]);
+
+            samplerDef.I_00 = bytes[offset + 0];
+            samplerDef.EmbIndex = bytes[offset + 1];
+
+            samplerDef.AddressModeU = (AddressMode)val2[0];
+            samplerDef.AddressModeV = (AddressMode)val2[1];
+            samplerDef.FilteringMin = (Filtering)val3[0];
+            samplerDef.FilteringMag = (Filtering)val3[1];
+
+            samplerDef.ScaleU = BitConverter.ToSingle(bytes, offset + 4);
+            samplerDef.ScaleV = BitConverter.ToSingle(bytes, offset + 8);
+
+            return samplerDef;
+        }
+    
+        public static byte[] Write(List<EMD_TextureSamplerDef> samplerDefs)
+        {
+            List<byte> bytes = new List<byte>();
+
+            foreach (var samplerDef in samplerDefs)
+                bytes.AddRange(samplerDef.Write());
+
+            return bytes.ToArray();
+        }
+
+        public List<byte> Write()
+        {
+            List<byte> bytes = new List<byte>();
+
+            bytes.Add(I_00);
+            bytes.Add(EmbIndex);
+            bytes.Add(Int4Converter.GetByte((byte)AddressModeU, (byte)AddressModeV));
+            bytes.Add(Int4Converter.GetByte((byte)FilteringMin, (byte)FilteringMag));
+            bytes.AddRange(BitConverter.GetBytes(ScaleU));
+            bytes.AddRange(BitConverter.GetBytes(ScaleV));
+
+            return bytes;
+        }
     }
 
     [YAXSerializeAs("Triangle")]
     public class EMD_Triangle
     {
-        //Debug
-        [YAXDontSerialize]
-        public int FaceCount_Debug { get; set; }
-        [YAXDontSerialize]
-        public int FaceCountDivided_Debug { get; set; }
-
         [YAXDontSerialize]
         public int FaceCount
         {
@@ -397,18 +470,18 @@ namespace Xv2CoreLib.EMD
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
         public float[] BlendWeights { get; set; } //Size 3 (if float16, then 2 bytes of padding after)
 
-        public static int GetVertexSize(VTX_FLAGS flags)
+        public static int GetVertexSize(VertexFlags flags)
         {
             int size = 0;
 
-            if (flags.HasFlag(VTX_FLAGS.EMD_VTX_FLAG_POS))
+            if (flags.HasFlag(VertexFlags.Position))
             {
                 size += 12;
             }
 
-            if (flags.HasFlag(VTX_FLAGS.EMD_VTX_FLAG_NORM))
+            if (flags.HasFlag(VertexFlags.Normal))
             {
-                if (flags.HasFlag(VTX_FLAGS.EMD_VTX_FLAG_COMPRESSED_FORMAT))
+                if (flags.HasFlag(VertexFlags.CompressedFormat))
                 {
                     size += 8;
                 }
@@ -418,9 +491,9 @@ namespace Xv2CoreLib.EMD
                 }
             }
 
-            if (flags.HasFlag(VTX_FLAGS.EMD_VTX_FLAG_TANGENT))
+            if (flags.HasFlag(VertexFlags.Tangent))
             {
-                if (flags.HasFlag(VTX_FLAGS.EMD_VTX_FLAG_COMPRESSED_FORMAT))
+                if (flags.HasFlag(VertexFlags.CompressedFormat))
                 {
                     size += 8;
                 }
@@ -430,9 +503,9 @@ namespace Xv2CoreLib.EMD
                 }
             }
 
-            if (flags.HasFlag(VTX_FLAGS.EMD_VTX_FLAG_TEX))
+            if (flags.HasFlag(VertexFlags.TexUV))
             {
-                if (flags.HasFlag(VTX_FLAGS.EMD_VTX_FLAG_COMPRESSED_FORMAT))
+                if (flags.HasFlag(VertexFlags.CompressedFormat))
                 {
                     size += 4;
                 }
@@ -442,9 +515,9 @@ namespace Xv2CoreLib.EMD
                 }
             }
 
-            if (flags.HasFlag(VTX_FLAGS.EMD_VTX_FLAG_TEX2))
+            if (flags.HasFlag(VertexFlags.Tex2UV))
             {
-                if (flags.HasFlag(VTX_FLAGS.EMD_VTX_FLAG_COMPRESSED_FORMAT))
+                if (flags.HasFlag(VertexFlags.CompressedFormat))
                 {
                     size += 4;
                 }
@@ -454,16 +527,16 @@ namespace Xv2CoreLib.EMD
                 }
             }
 
-            if (flags.HasFlag(VTX_FLAGS.EMD_VTX_FLAG_COLOR))
+            if (flags.HasFlag(VertexFlags.Color))
             {
                 size += 4;
             }
 
-            if (flags.HasFlag(VTX_FLAGS.EMD_VTX_FLAG_BLEND_WEIGHT))
+            if (flags.HasFlag(VertexFlags.BlendWeight))
             {
                 size += 4;
 
-                if (flags.HasFlag(VTX_FLAGS.EMD_VTX_FLAG_COMPRESSED_FORMAT))
+                if (flags.HasFlag(VertexFlags.CompressedFormat))
                 {
                     size += 8;
                 }
@@ -476,12 +549,151 @@ namespace Xv2CoreLib.EMD
             return size;
         }
 
-        public List<byte> GetBytes(VTX_FLAGS flags)
+        public static List<EMD_Vertex> ReadVertices(VertexFlags flags, byte[] rawBytes, int offset, int vertexCount, int vertexSize)
+        {
+            List<EMD_Vertex> vertices = new List<EMD_Vertex>();
+
+            for (int z = 0; z < vertexCount; z++)
+            {
+                int addedOffset = 0;
+                EMD_Vertex vertex = new EMD_Vertex();
+
+                if (flags.HasFlag(VertexFlags.Position))
+                {
+                    vertex.PositionX = BitConverter.ToSingle(rawBytes, offset + addedOffset + 0);
+                    vertex.PositionY = BitConverter.ToSingle(rawBytes, offset + addedOffset + 4);
+                    vertex.PositionZ = BitConverter.ToSingle(rawBytes, offset + addedOffset + 8);
+                    addedOffset += 12;
+                }
+
+                if (flags.HasFlag(VertexFlags.Normal))
+                {
+                    if (flags.HasFlag(VertexFlags.CompressedFormat))
+                    {
+                        vertex.NormalX = Half.ToHalf(rawBytes, offset + addedOffset + 0);
+                        vertex.NormalY = Half.ToHalf(rawBytes, offset + addedOffset + 2);
+                        vertex.NormalZ = Half.ToHalf(rawBytes, offset + addedOffset + 4);
+                        addedOffset += 8;
+                    }
+                    else
+                    {
+                        vertex.NormalX = BitConverter.ToSingle(rawBytes, offset + addedOffset + 0);
+                        vertex.NormalY = BitConverter.ToSingle(rawBytes, offset + addedOffset + 4);
+                        vertex.NormalZ = BitConverter.ToSingle(rawBytes, offset + addedOffset + 8);
+                        addedOffset += 12;
+                    }
+                }
+
+
+
+                if (flags.HasFlag(VertexFlags.TexUV))
+                {
+                    if (flags.HasFlag(VertexFlags.CompressedFormat))
+                    {
+                        vertex.TextureU = Half.ToHalf(rawBytes, offset + addedOffset + 0);
+                        vertex.TextureV = Half.ToHalf(rawBytes, offset + addedOffset + 2);
+                        addedOffset += 4;
+                    }
+                    else
+                    {
+                        vertex.TextureU = BitConverter.ToSingle(rawBytes, offset + addedOffset + 0);
+                        vertex.TextureV = BitConverter.ToSingle(rawBytes, offset + addedOffset + 4);
+                        addedOffset += 8;
+                    }
+                }
+
+                if (flags.HasFlag(VertexFlags.Tex2UV))
+                {
+                    if (flags.HasFlag(VertexFlags.CompressedFormat))
+                    {
+                        vertex.Texture2U = Half.ToHalf(rawBytes, offset + addedOffset + 0);
+                        vertex.Texture2V = Half.ToHalf(rawBytes, offset + addedOffset + 2);
+                        addedOffset += 4;
+                    }
+                    else
+                    {
+                        vertex.Texture2U = BitConverter.ToSingle(rawBytes, offset + addedOffset + 0);
+                        vertex.Texture2V = BitConverter.ToSingle(rawBytes, offset + addedOffset + 4);
+                        addedOffset += 8;
+                    }
+                }
+
+                if (flags.HasFlag(VertexFlags.Tangent))
+                {
+                    if (flags.HasFlag(VertexFlags.CompressedFormat))
+                    {
+                        vertex.TangentX = Half.ToHalf(rawBytes, offset + addedOffset + 0);
+                        vertex.TangentY = Half.ToHalf(rawBytes, offset + addedOffset + 2);
+                        vertex.TangentZ = Half.ToHalf(rawBytes, offset + addedOffset + 4);
+                        addedOffset += 8;
+                    }
+                    else
+                    {
+                        vertex.TangentX = BitConverter.ToSingle(rawBytes, offset + addedOffset + 0);
+                        vertex.TangentY = BitConverter.ToSingle(rawBytes, offset + addedOffset + 4);
+                        vertex.TangentZ = BitConverter.ToSingle(rawBytes, offset + addedOffset + 8);
+                        addedOffset += 12;
+                    }
+                }
+
+                if (flags.HasFlag(VertexFlags.Color))
+                {
+                    vertex.ColorR = rawBytes[offset + addedOffset + 0];
+                    vertex.ColorG = rawBytes[offset + addedOffset + 1];
+                    vertex.ColorB = rawBytes[offset + addedOffset + 2];
+                    vertex.ColorA = rawBytes[offset + addedOffset + 3];
+                    addedOffset += 4;
+                }
+
+                if (flags.HasFlag(VertexFlags.BlendWeight))
+                {
+                    vertex.BlendIndexes = new byte[4] { rawBytes[offset + addedOffset + 0], rawBytes[offset + addedOffset + 1], rawBytes[offset + addedOffset + 2], rawBytes[offset + addedOffset + 3] };
+
+                    addedOffset += 4;
+
+                    if (flags.HasFlag(VertexFlags.CompressedFormat))
+                    {
+                        vertex.BlendWeights = new float[4] { Half.ToHalf(rawBytes, offset + addedOffset + 0), Half.ToHalf(rawBytes, offset + addedOffset + 2), Half.ToHalf(rawBytes, offset + addedOffset + 4), 0f };
+                        addedOffset += 8;
+                    }
+                    else
+                    {
+                        vertex.BlendWeights = new float[4] { BitConverter.ToSingle(rawBytes, offset + addedOffset + 0), BitConverter.ToSingle(rawBytes, offset + addedOffset + 4), BitConverter.ToSingle(rawBytes, offset + addedOffset + 8), 0f };
+                        addedOffset += 16;
+                    }
+
+                    vertex.BlendWeights[3] = 1.0f - (vertex.BlendWeights[0] + vertex.BlendWeights[1] + vertex.BlendWeights[2]);
+                }
+
+                if(vertexSize != addedOffset)
+                {
+                    throw new InvalidDataException("EMD_Vertex.ReadVertices: VertexSize mismatch.");
+                }
+
+                offset += addedOffset;
+
+                vertices.Add(vertex);
+            }
+
+            return vertices;
+        }
+
+        public static List<byte> GetBytes(IList<EMD_Vertex> vertices, VertexFlags flags)
+        {
+            List<byte> bytes = new List<byte>();
+
+            foreach (var vertex in vertices)
+                bytes.AddRange(vertex.GetBytes(flags));
+
+            return bytes;
+        }
+
+        public List<byte> GetBytes(VertexFlags flags)
         {
             List<byte> bytes = new List<byte>();
             int size = 0;
 
-            if (flags.HasFlag(VTX_FLAGS.EMD_VTX_FLAG_POS))
+            if (flags.HasFlag(VertexFlags.Position))
             {
                 bytes.AddRange(BitConverter.GetBytes(PositionX));
                 bytes.AddRange(BitConverter.GetBytes(PositionY));
@@ -489,9 +701,9 @@ namespace Xv2CoreLib.EMD
                 size += 12;
             }
 
-            if (flags.HasFlag(VTX_FLAGS.EMD_VTX_FLAG_NORM))
+            if (flags.HasFlag(VertexFlags.Normal))
             {
-                if (flags.HasFlag(VTX_FLAGS.EMD_VTX_FLAG_COMPRESSED_FORMAT))
+                if (flags.HasFlag(VertexFlags.CompressedFormat))
                 {
                     bytes.AddRange(Half.GetBytes((Half)NormalX));
                     bytes.AddRange(Half.GetBytes((Half)NormalY));
@@ -508,9 +720,9 @@ namespace Xv2CoreLib.EMD
                 }
             }
 
-            if (flags.HasFlag(VTX_FLAGS.EMD_VTX_FLAG_TANGENT))
+            if (flags.HasFlag(VertexFlags.Tangent))
             {
-                if (flags.HasFlag(VTX_FLAGS.EMD_VTX_FLAG_COMPRESSED_FORMAT))
+                if (flags.HasFlag(VertexFlags.CompressedFormat))
                 {
                     bytes.AddRange(Half.GetBytes((Half)TangentX));
                     bytes.AddRange(Half.GetBytes((Half)TangentY));
@@ -527,9 +739,9 @@ namespace Xv2CoreLib.EMD
                 }
             }
 
-            if (flags.HasFlag(VTX_FLAGS.EMD_VTX_FLAG_TEX))
+            if (flags.HasFlag(VertexFlags.TexUV))
             {
-                if (flags.HasFlag(VTX_FLAGS.EMD_VTX_FLAG_COMPRESSED_FORMAT))
+                if (flags.HasFlag(VertexFlags.CompressedFormat))
                 {
                     bytes.AddRange(Half.GetBytes((Half)TextureU));
                     bytes.AddRange(Half.GetBytes((Half)TextureV));
@@ -543,9 +755,9 @@ namespace Xv2CoreLib.EMD
                 }
             }
 
-            if (flags.HasFlag(VTX_FLAGS.EMD_VTX_FLAG_TEX2))
+            if (flags.HasFlag(VertexFlags.Tex2UV))
             {
-                if (flags.HasFlag(VTX_FLAGS.EMD_VTX_FLAG_COMPRESSED_FORMAT))
+                if (flags.HasFlag(VertexFlags.CompressedFormat))
                 {
                     bytes.AddRange(Half.GetBytes((Half)Texture2U));
                     bytes.AddRange(Half.GetBytes((Half)Texture2V));
@@ -559,7 +771,7 @@ namespace Xv2CoreLib.EMD
                 }
             }
 
-            if (flags.HasFlag(VTX_FLAGS.EMD_VTX_FLAG_COLOR))
+            if (flags.HasFlag(VertexFlags.Color))
             {
                 bytes.Add(ColorR);
                 bytes.Add(ColorG);
@@ -568,7 +780,7 @@ namespace Xv2CoreLib.EMD
                 size += 4;
             }
 
-            if (flags.HasFlag(VTX_FLAGS.EMD_VTX_FLAG_BLEND_WEIGHT))
+            if (flags.HasFlag(VertexFlags.BlendWeight))
             {
                 bytes.Add(BlendIndexes[0]);
                 bytes.Add(BlendIndexes[1]);
@@ -576,7 +788,7 @@ namespace Xv2CoreLib.EMD
                 bytes.Add(BlendIndexes[3]);
                 size += 4;
 
-                if (flags.HasFlag(VTX_FLAGS.EMD_VTX_FLAG_COMPRESSED_FORMAT))
+                if (flags.HasFlag(VertexFlags.CompressedFormat))
                 {
                     bytes.AddRange(Half.GetBytes((Half)BlendWeights[0]));
                     bytes.AddRange(Half.GetBytes((Half)BlendWeights[1]));

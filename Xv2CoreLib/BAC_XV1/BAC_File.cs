@@ -212,7 +212,7 @@ namespace Xv2CoreLib.BAC_XV1
         public ushort I_06 { get; set; }
         [YAXAttributeFor("EAN_TO_USE")]
         [YAXSerializeAs("value")]
-        public BAC.BAC_Type10.EanType I_08 { get; set; }
+        public BAC.BAC_Type10.EanTypeEnum I_08 { get; set; }
         [YAXAttributeFor("I_10")]
         [YAXSerializeAs("value")]
         public ushort I_10 { get; set; }
@@ -243,7 +243,7 @@ namespace Xv2CoreLib.BAC_XV1
                     I_02 = BitConverter.ToInt16(rawBytes, offset + 2),
                     I_04 = BitConverter.ToUInt16(rawBytes, offset + 4),
                     I_06 = BitConverter.ToUInt16(rawBytes, offset + 6),
-                    I_08 = (BAC.BAC_Type10.EanType)BitConverter.ToInt16(rawBytes, offset + 8),
+                    I_08 = (BAC.BAC_Type10.EanTypeEnum)BitConverter.ToInt16(rawBytes, offset + 8),
                     I_10 = BitConverter.ToUInt16(rawBytes, offset + 10),
                     I_12 = BitConverter.ToUInt16(rawBytes, offset + 12),
                     I_14 = BitConverter.ToUInt16(rawBytes, offset + 14),
@@ -292,7 +292,7 @@ namespace Xv2CoreLib.BAC_XV1
                     Duration = (ushort)type.I_02,
                     I_04 = (ushort)type.I_04,
                     Flags = (ushort)type.I_06,
-                    Ean_Type = type.I_08,
+                    EanType = type.I_08,
                     BoneLink = (BoneLinks)type.I_10,
                     EanIndex = type.I_12,
                     StartFrame = type.I_14,

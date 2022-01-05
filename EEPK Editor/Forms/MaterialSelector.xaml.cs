@@ -37,9 +37,9 @@ namespace EEPK_Organiser.Forms
                 }
             }
         }
-        public Material SelectedMaterial { get; private set; }
+        public EmmMaterial SelectedMaterial { get; private set; }
 
-        public MaterialSelector(EMM_File _emmFile, Window parent, Material initialSelection)
+        public MaterialSelector(EMM_File _emmFile, Window parent, EmmMaterial initialSelection)
         {
             emmFile = _emmFile;
             InitializeComponent();
@@ -53,7 +53,7 @@ namespace EEPK_Organiser.Forms
         {
             if(listBox_Materials.SelectedItem != null)
             {
-                SelectedMaterial = listBox_Materials.SelectedItem as Material;
+                SelectedMaterial = listBox_Materials.SelectedItem as EmmMaterial;
             }
 
             Close();

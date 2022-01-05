@@ -39,7 +39,7 @@ namespace Xv2CoreLib.EAN
         }
         #endregion
 
-        public const float DefaultFoV = 39.97836f;
+        public const float DefaultFoV = 39.97835f;
 
         [YAXAttributeForClass]
         public bool IsCamera { get; set; } //offset 16
@@ -49,23 +49,7 @@ namespace Xv2CoreLib.EAN
         public byte I_17 { get; set; }
 
         public ESK_Skeleton Skeleton { get; set; }
-        private AsyncObservableCollection<EAN_Animation> AnimationsValue = null;
-        public AsyncObservableCollection<EAN_Animation> Animations
-        {
-            get
-            {
-                return this.AnimationsValue;
-            }
-
-            set
-            {
-                if (value != this.AnimationsValue)
-                {
-                    this.AnimationsValue = value;
-                    NotifyPropertyChanged("Animations");
-                }
-            }
-        }
+        public AsyncObservableCollection<EAN_Animation> Animations { get; set; }
 
         #region Load/Save
         public static EAN_File Load(byte[] rawBytes, bool linkEskToAnims = false)
@@ -84,7 +68,7 @@ namespace Xv2CoreLib.EAN
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
             }
-            new Deserializer(this, path);
+            new Deserializer(this.Copy(), path);
         }
 
         public byte[] SaveToBytes()
@@ -207,7 +191,7 @@ namespace Xv2CoreLib.EAN
         #endregion
 
         #region AddAnimation
-        public void AddEntry(int id, EAN_Animation entry)
+        public void AddEntry(int id, EAN_Animation entry, List<IUndoRedo> undos = null)
         {
             entry.IndexNumeric = (ushort)id;
 
@@ -222,6 +206,8 @@ namespace Xv2CoreLib.EAN
 
             Animations.Add(entry);
             entry.LinkEskData(Skeleton);
+
+            if (undos != null) undos.Add(new UndoableListAdd<EAN_Animation>(Animations, entry));
         }
 
         /// <summary>
@@ -229,13 +215,16 @@ namespace Xv2CoreLib.EAN
         /// </summary>
         /// <param name="anim"></param>
         /// <returns></returns>
-        public int AddEntry(EAN_Animation anim)
+        public int AddEntry(EAN_Animation anim, List<IUndoRedo> undos = null)
         {
             anim.LinkEskData(Skeleton);
 
             int newId = NextID();
             anim.IndexNumeric = newId;
             Animations.Add(anim);
+            anim.LinkEskData(Skeleton);
+
+            if (undos != null) undos.Add(new UndoableListAdd<EAN_Animation>(Animations, anim));
 
             return newId;
         }

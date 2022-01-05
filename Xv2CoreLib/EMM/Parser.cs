@@ -1,19 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xv2CoreLib.Resource;
 using YAXLib;
 
 namespace Xv2CoreLib.EMM
 {
     public class Parser
-    {
-        private List<string> Values { get; set; } = new List<string>();
-
+    { 
         const UInt16 FILE_VERSION = 37568;
 
         string saveLocation { get; set; }
@@ -46,27 +41,6 @@ namespace Xv2CoreLib.EMM
             ParseEmm();
         }
 
-
-        public Parser(string location, bool writeXml, List<string> values)
-        {
-            Values = values;
-            saveLocation = location;
-            rawBytes = File.ReadAllBytes(saveLocation);
-            bytes = rawBytes.ToList();
-            if (Validation(location))
-            {
-                ParseEmm();
-
-                if (writeXml)
-                {
-                    YAXSerializer serializer = new YAXSerializer(typeof(EMM_File));
-                    serializer.SerializeToFile(emmFile, saveLocation + ".xml");
-                }
-            }
-
-        }
-
-
         public EMM_File GetEmmFile()
         {
             return emmFile;
@@ -94,7 +68,7 @@ namespace Xv2CoreLib.EMM
             int unkCount = bytes.Count() - unkOffset;
 
 
-            emmFile.Materials = AsyncObservableCollection<Material>.Create();
+            emmFile.Materials = AsyncObservableCollection<EmmMaterial>.Create();
 
             if (count > 0)
             {
@@ -135,24 +109,17 @@ namespace Xv2CoreLib.EMM
 
         }
 
-        private Material ParseMaterial(int offset, int index, int headerSize)
+        private EmmMaterial ParseMaterial(int offset, int index, int headerSize)
         {
             if(offset != 0)
             {
                 offset += headerSize;
 
-                //Debug
-                string _val = Utils.GetString(bytes, offset + 32, 32);
-                if(Values.IndexOf(_val) == -1)
-                {
-                    Values.Add(_val);
-                }
-
-                return new Material()
+                return new EmmMaterial()
                 {
                     Index = index,
-                    Str_00 = Utils.GetString(bytes, offset + 0, 32),
-                    Str_32 = Utils.GetString(bytes, offset + 32, 32),
+                    Name = Utils.GetString(bytes, offset + 0, 32),
+                    ShaderProgram = Utils.GetString(bytes, offset + 32, 32),
                     I_66 = BitConverter.ToUInt16(rawBytes, offset + 66),
                     Parameters = ParseParameters(offset + 68, BitConverter.ToInt16(rawBytes, offset + 64))
                 };
@@ -173,8 +140,8 @@ namespace Xv2CoreLib.EMM
                 {
                     paramaters.Add(new Parameter()
                     {
-                        Str_00 = Utils.GetString(bytes, offset + 0, 32),
-                        I_32 = GetValueType(BitConverter.ToInt32(rawBytes, offset + 32), offset + 36),
+                        Name = Utils.GetString(bytes, offset + 0, 32),
+                        Type = GetValueType(BitConverter.ToInt32(rawBytes, offset + 32), offset + 36),
                         value = GetValue(BitConverter.ToInt32(rawBytes, offset + 32), offset + 36)
                     });
                     offset += 40;

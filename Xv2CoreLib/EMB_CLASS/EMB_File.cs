@@ -262,7 +262,7 @@ namespace Xv2CoreLib.EMB_CLASS
                 {
                     if (overWrite)
                     {
-                        Entry[i].Data = bytes.ToList();
+                        Entry[i].Data = bytes;
                     }
                     return i;
                 }
@@ -275,7 +275,7 @@ namespace Xv2CoreLib.EMB_CLASS
             {
                 Index = newIdx.ToString(),
                 Name = name,
-                Data = bytes.ToList()
+                Data = bytes
             });
 
             return newIdx;
@@ -437,7 +437,6 @@ namespace Xv2CoreLib.EMB_CLASS
 
             if(_installMode == InstallMode.MatchIndex)
             {
-
                 if (idx <= (Entry.Count - 1))
                 {
                     Entry[idx] = embEntry;
@@ -448,7 +447,7 @@ namespace Xv2CoreLib.EMB_CLASS
                     //Add empty entries until idx is reached
                     while ((Entry.Count - 1) < (idx - 1))
                     {
-                        Entry.Add(new EmbEntry() { Name = "dummy_" + (Entry.Count - 1).ToString(), Data = new List<byte>() });
+                        Entry.Add(new EmbEntry() { Name = "dummy_" + (Entry.Count - 1).ToString(), Data = new byte[0]});
                     }
 
                     Entry.Add(embEntry);
@@ -506,12 +505,8 @@ namespace Xv2CoreLib.EMB_CLASS
                 if (!Entry[i].Name.Contains("dummy_"))
                     break;
 
-                if(Entry[i].Data == null)
-                {
-                    Entry.RemoveAt(i);
-                }
-                else if(Entry[i].Data.Count == 0)
-                {
+                if (Entry[i].IsNull()) 
+                { 
                     Entry.RemoveAt(i);
                 }
                 else
@@ -561,6 +556,8 @@ namespace Xv2CoreLib.EMB_CLASS
             }
         }
 
+        public const int DDS_SIGNATURE = 542327876;
+
         [YAXDontSerialize]
         public int SortID { get { return int.Parse(Index); } }
 
@@ -588,11 +585,11 @@ namespace Xv2CoreLib.EMB_CLASS
         [YAXAttributeForClass]
         [YAXSerializeAs("Index")]
         public string Index { get; set; }
-        private List<byte> _dataValue = new List<byte>();
+        private byte[] _dataValue = new byte[0];
         [YAXAttributeFor("Data")]
         [YAXSerializeAs("bytes")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]
-        public List<byte> Data
+        public byte[] Data
         {
             get
             {
@@ -613,10 +610,10 @@ namespace Xv2CoreLib.EMB_CLASS
                         wasEdited = false; 
                     }
                     
-                    NotifyPropertyChanged("Data");
-                    NotifyPropertyChanged("Height");
-                    NotifyPropertyChanged("Width");
-                    NotifyPropertyChanged("FilesizeString");
+                    NotifyPropertyChanged(nameof(Data));
+                    NotifyPropertyChanged(nameof(Height));
+                    NotifyPropertyChanged(nameof(Width));
+                    NotifyPropertyChanged(nameof(FilesizeString));
                 }
             }
         }
@@ -666,8 +663,9 @@ namespace Xv2CoreLib.EMB_CLASS
         {
             get
             {
-                if (DdsImage == null) return 0;
-                return (int)DdsImage.Height;
+                //It is possible for the texture to not be DDS (and loads perfectly fine ingame), so we must check.
+                if (IsNull()) return 0;
+                return (BitConverter.ToInt32(Data, 0) == DDS_SIGNATURE) ? BitConverter.ToInt32(Data, 16) : (int)DdsImage.Height;
             }
         }
         [YAXDontSerialize]
@@ -675,8 +673,17 @@ namespace Xv2CoreLib.EMB_CLASS
         {
             get
             {
-                if (DdsImage == null) return 0;
-                return (int)DdsImage.Width;
+                if (IsNull()) return 0;
+                return (BitConverter.ToInt32(Data, 0) == DDS_SIGNATURE) ? BitConverter.ToInt32(Data, 12) : (int)DdsImage.Width;
+            }
+        }
+        [YAXDontSerialize]
+        public int MipMapsCount
+        {
+            get
+            {
+                if (IsNull()) return 0;
+                return (BitConverter.ToInt32(Data, 0) == DDS_SIGNATURE) ? BitConverter.ToInt32(Data, 24) : 1;
             }
         }
         [YAXDontSerialize]
@@ -686,20 +693,20 @@ namespace Xv2CoreLib.EMB_CLASS
             {
                 if(Data != null)
                 {
-                    if(Data.Count < 1000)
+                    if(Data.Length < 1000)
                     {
                         //Is less than a kilobyte
-                        return String.Format("{0} bytes", Data.Count);
+                        return String.Format("{0} bytes", Data.Length);
                     }
-                    else if(Data.Count < 1000000)
+                    else if(Data.Length < 1000000)
                     {
                         //Is atleast a kilobyte and less than a megabyte
-                        return String.Format("{0} KB", Utils.BytesToKilobytes(Data.Count));
+                        return String.Format("{0} KB", Utils.BytesToKilobytes(Data.Length));
                     }
                     else
                     {
                         //Is a megabyte or more
-                        return String.Format("{0} MB", Utils.BytesToMegabytes(Data.Count));
+                        return String.Format("{0} MB", Utils.BytesToMegabytes(Data.Length));
                     }
                 }
                 else
@@ -736,13 +743,12 @@ namespace Xv2CoreLib.EMB_CLASS
             try
             {
                 ddsIsLoading = true;
-                byte[] data = Data.ToArray();
                 int numMipMaps = 0;
 
                 //PROBLEM: Most files load fine with DDSReader, but it CANT load files that are saved with CSharpImageLibrary.
                 //CSharpImageLibrary may be able to load them on Win7/Win8 machines, but I cant test that...
 
-                using (var ImageSource = new ImageEngineImage(data))
+                using (var ImageSource = new ImageEngineImage(Data))
                 {
                     DdsImage = new WriteableBitmap(ImageSource.GetWPFBitmap());
                     ImageFormat = ImageSource.Format.SurfaceFormat;
@@ -796,7 +802,7 @@ namespace Xv2CoreLib.EMB_CLASS
                 {
                     DdsImage.Save(png);
                     newImage = new ImageEngineImage(png);
-                    Data = newImage.Save(ImageFormat, MipHandling.Default).ToList();
+                    Data = newImage.Save(ImageFormat, MipHandling.Default);
                 }
             }
             finally
@@ -806,6 +812,13 @@ namespace Xv2CoreLib.EMB_CLASS
             }
         }
         
+        public bool IsNull()
+        {
+            if (Data == null) return true;
+            if (Data.Length == 0) return true;
+
+            return false;
+        }
 
         public EmbEntry Clone()
         {
@@ -822,7 +835,7 @@ namespace Xv2CoreLib.EMB_CLASS
             return new EmbEntry()
             {
                 Name = "dummy_" + idx.ToString(),
-                Data = new List<byte>(),
+                Data = new byte[0],
                 Index = idx.ToString()
             };
         }

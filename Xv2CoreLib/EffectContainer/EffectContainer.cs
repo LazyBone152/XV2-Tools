@@ -697,12 +697,11 @@ namespace Xv2CoreLib.EffectContainer
                     if (file.FullFileName != "NULL")
                     {
                         //Get the file bytes
-                        List<byte> fileBytes = null;
-                        byte[] _fileBytes = null;
+                        byte[] fileBytes = null;
+
                         if (container.LooseFiles || type == AssetType.EMO)
                         {
-                            _fileBytes = LoadExternalFile(String.Format("{0}/{1}", Directory, file.FullFileName));
-                            fileBytes = _fileBytes.ToList();
+                            fileBytes = LoadExternalFile(String.Format("{0}/{1}", Directory, file.FullFileName));
                         }
                         else
                         {
@@ -710,39 +709,38 @@ namespace Xv2CoreLib.EffectContainer
                             if (entry == null) throw new FileNotFoundException(string.Format("Could not find file \"{0}\" in \"{1}\".\n\nThis is possibly caused by a corrupted eepk file.", file.FullFileName, container.File1_Name));
 
                             fileBytes = entry.Data;
-                            _fileBytes = fileBytes.ToArray();
                         }
 
 
                         switch (file.Extension)
                         {
                             case ".emp":
-                                file.EmpFile = EMP_File.Load(fileBytes, ParserMode.Tool);
+                                file.EmpFile = EMP_File.Load(fileBytes.ToList(), ParserMode.Tool);
                                 file.fileType = EffectFile.FileType.EMP;
                                 break;
                             case ".etr":
-                                file.EtrFile = ETR_File.Load(_fileBytes);
+                                file.EtrFile = ETR_File.Load(fileBytes);
                                 file.fileType = EffectFile.FileType.ETR;
                                 break;
                             case ".ecf":
-                                file.EcfFile = ECF_File.Load(fileBytes);
+                                file.EcfFile = ECF_File.Load(fileBytes.ToList());
                                 file.fileType = EffectFile.FileType.ECF;
                                 break;
                             case ".emb":
-                                file.EmbFile = EMB_File.LoadEmb(fileBytes.ToArray());
+                                file.EmbFile = EMB_File.LoadEmb(fileBytes);
                                 file.fileType = EffectFile.FileType.EMB;
                                 break;
                             case ".emm":
-                                file.EmmFile = EMM_File.LoadEmm(fileBytes.ToArray());
+                                file.EmmFile = EMM_File.LoadEmm(fileBytes);
                                 file.fileType = EffectFile.FileType.EMM;
                                 break;
                             case ".light.ema":
                             case ".ema":
-                                file.EmaFile = EMA_File.Load(fileBytes.ToArray());
+                                file.EmaFile = EMA_File.Load(fileBytes);
                                 file.fileType = EffectFile.FileType.EMA;
                                 break;
                             default:
-                                file.Bytes = _fileBytes;
+                                file.Bytes = fileBytes;
                                 file.fileType = EffectFile.FileType.Other;
                                 break;
                         }
@@ -995,7 +993,7 @@ namespace Xv2CoreLib.EffectContainer
                     byte[] bytes = asset.Files[0].EmpFile.SaveToBytes(ParserMode.Tool);
                     Pbind.File1_Ref.Entry.Add(new EMB_CLASS.EmbEntry()
                     {
-                        Data = bytes.ToList(),
+                        Data = bytes,
                         Name = asset.Files[0].FullFileName
                     });
                 }
@@ -1011,7 +1009,7 @@ namespace Xv2CoreLib.EffectContainer
                     byte[] bytes = asset.Files[0].EtrFile.Save(false);
                     Tbind.File1_Ref.Entry.Add(new EMB_CLASS.EmbEntry()
                     {
-                        Data = bytes.ToList(),
+                        Data = bytes,
                         Name = asset.Files[0].FullFileName
                     });
                 }
@@ -1027,7 +1025,7 @@ namespace Xv2CoreLib.EffectContainer
                     byte[] bytes = asset.Files[0].EcfFile.SaveToBytes();
                     Cbind.File1_Ref.Entry.Add(new EMB_CLASS.EmbEntry()
                     {
-                        Data = bytes.ToList(),
+                        Data = bytes,
                         Name = asset.Files[0].FullFileName
                     });
                 }
@@ -1044,7 +1042,7 @@ namespace Xv2CoreLib.EffectContainer
                     {
                         LightEma.File1_Ref.Entry.Add(new EMB_CLASS.EmbEntry()
                         {
-                            Data = asset.Files[0].EmaFile.Write().ToList(),
+                            Data = asset.Files[0].EmaFile.Write(),
                             Name = asset.Files[0].FullFileName
                         });
                     }
@@ -1053,7 +1051,7 @@ namespace Xv2CoreLib.EffectContainer
                         byte[] bytes = asset.Files[0].Bytes;
                         LightEma.File1_Ref.Entry.Add(new EMB_CLASS.EmbEntry()
                         {
-                            Data = bytes.ToList(),
+                            Data = bytes,
                             Name = asset.Files[0].FullFileName
                         });
                     }
@@ -2359,7 +2357,7 @@ namespace Xv2CoreLib.EffectContainer
             {
                 if (!container.IsMaterialUsed(container.File2_Ref.Materials[i]))
                 {
-                    undos.Add(new UndoableListRemove<Material>(container.File2_Ref.Materials, container.File2_Ref.Materials[i]));
+                    undos.Add(new UndoableListRemove<EmmMaterial>(container.File2_Ref.Materials, container.File2_Ref.Materials[i]));
                     container.File2_Ref.Materials.RemoveAt(i);
                     removed++;
                 }
@@ -2385,7 +2383,7 @@ namespace Xv2CoreLib.EffectContainer
             restart:
             foreach (var material1 in container.File2_Ref.Materials)
             {
-                List<Material> Duplicates = new List<Material>();
+                List<EmmMaterial> Duplicates = new List<EmmMaterial>();
 
                 foreach (var material2 in container.File2_Ref.Materials)
                 {
@@ -2405,7 +2403,7 @@ namespace Xv2CoreLib.EffectContainer
                         container.RefactorMaterialRef(duplicate, material1, undos);
 
                         //Delete the duplicate
-                        undos.Add(new UndoableListRemove<Material>(container.File2_Ref.Materials, duplicate));
+                        undos.Add(new UndoableListRemove<EmmMaterial>(container.File2_Ref.Materials, duplicate));
                         container.File2_Ref.Materials.Remove(duplicate);
                     }
                     goto restart;
@@ -2570,7 +2568,7 @@ namespace Xv2CoreLib.EffectContainer
             using (MemoryStream ms = new MemoryStream())
             {
                 superTexture.Save(ms);
-                newEmbEntry.Data = ms.ToArray().ToList();
+                newEmbEntry.Data = ms.ToArray();
             }
 
             newEmbEntry.LoadDds();
@@ -3108,7 +3106,7 @@ namespace Xv2CoreLib.EffectContainer
             return textureUsedBy;
         }
 
-        public List<string> MaterialUsedBy(Material material)
+        public List<string> MaterialUsedBy(EmmMaterial material)
         {
             if (ContainerAssetType != AssetType.PBIND && ContainerAssetType != AssetType.TBIND)
                 throw new InvalidOperationException("MaterialUsedBy: AssetType is not PBIND or TBIND, cannot continue.");
@@ -3156,7 +3154,7 @@ namespace Xv2CoreLib.EffectContainer
             return materialUsedBy;
         }
 
-        private void MaterialUsedBy_Recursive(IList<ParticleEffect> childParticleEffects, Material material, List<string> textureUsedBy, string fileName)
+        private void MaterialUsedBy_Recursive(IList<ParticleEffect> childParticleEffects, EmmMaterial material, List<string> textureUsedBy, string fileName)
         {
             foreach (var particle in childParticleEffects)
             {
@@ -3210,7 +3208,7 @@ namespace Xv2CoreLib.EffectContainer
             return false;
         }
 
-        public bool IsMaterialUsed(Material material)
+        public bool IsMaterialUsed(EmmMaterial material)
         {
             if (ContainerAssetType != AssetType.PBIND && ContainerAssetType != AssetType.TBIND)
                 throw new InvalidOperationException("IsMaterialUsed: AssetType is not PBIND or TBIND, cannot continue.");
@@ -3252,7 +3250,7 @@ namespace Xv2CoreLib.EffectContainer
             return false;
         }
 
-        private bool IsMaterialUsed_Recursive(IList<ParticleEffect> childParticleEffects, Material material)
+        private bool IsMaterialUsed_Recursive(IList<ParticleEffect> childParticleEffects, EmmMaterial material)
         {
             foreach (var mat in childParticleEffects)
             {
@@ -3276,7 +3274,7 @@ namespace Xv2CoreLib.EffectContainer
             return false;
         }
 
-        public Material GetMaterialAssociatedWithParameters(List<Parameter> parameters, Material firstMaterial)
+        public EmmMaterial GetMaterialAssociatedWithParameters(List<Parameter> parameters, EmmMaterial firstMaterial)
         {
             if (ContainerAssetType != AssetType.PBIND && ContainerAssetType != AssetType.TBIND)
                 throw new InvalidOperationException("GetMaterialAssociatedWithParameters: AssetType is not PBIND or TBIND, cannot continue.");
@@ -3511,9 +3509,9 @@ namespace Xv2CoreLib.EffectContainer
                         if (ret == null)
                         {
                             //No identical material was found, so add it
-                            particleEffect.Type_Texture.MaterialRef.Str_00 = File2_Ref.GetUnusedName(particleEffect.Type_Texture.MaterialRef.Str_00); //Regenerate the name
+                            particleEffect.Type_Texture.MaterialRef.Name = File2_Ref.GetUnusedName(particleEffect.Type_Texture.MaterialRef.Name); //Regenerate the name
                             File2_Ref.Materials.Add(particleEffect.Type_Texture.MaterialRef);
-                            undos?.Add(new UndoableListAdd<Material>(File2_Ref.Materials, particleEffect.Type_Texture.MaterialRef));
+                            undos?.Add(new UndoableListAdd<EmmMaterial>(File2_Ref.Materials, particleEffect.Type_Texture.MaterialRef));
                         }
                         else
                         {
@@ -3579,9 +3577,9 @@ namespace Xv2CoreLib.EffectContainer
                 if (ret == null)
                 {
                     //No identical material was found, so add it
-                    entry.MaterialRef.Str_00 = File2_Ref.GetUnusedName(entry.MaterialRef.Str_00); //Regenerate the name
+                    entry.MaterialRef.Name = File2_Ref.GetUnusedName(entry.MaterialRef.Name); //Regenerate the name
                     File2_Ref.Materials.Add(entry.MaterialRef);
-                    undos?.Add(new UndoableListAdd<Material>(File2_Ref.Materials, entry.MaterialRef));
+                    undos?.Add(new UndoableListAdd<EmmMaterial>(File2_Ref.Materials, entry.MaterialRef));
                 }
                 else
                 {
@@ -3606,13 +3604,13 @@ namespace Xv2CoreLib.EffectContainer
             File3_Ref.Entry.Remove(embEntry);
         }
 
-        public void DeleteMaterial(Material material, List<IUndoRedo> undos = null)
+        public void DeleteMaterial(EmmMaterial material, List<IUndoRedo> undos = null)
         {
             if (ContainerAssetType != AssetType.PBIND && ContainerAssetType != AssetType.TBIND)
                 throw new InvalidOperationException("DeleteMaterial: AssetType is not PBIND or TBIND, cannot continue.");
 
             if (undos != null && File2_Ref.Materials.Contains(material))
-                undos.Add(new UndoableListRemove<Material>(File2_Ref.Materials, material));
+                undos.Add(new UndoableListRemove<EmmMaterial>(File2_Ref.Materials, material));
 
             File2_Ref.Materials.Remove(material);
         }
@@ -3652,7 +3650,7 @@ namespace Xv2CoreLib.EffectContainer
             }
         }
         
-        public void RefactorMaterialRef(Material oldRef, Material newRef, List<IUndoRedo> undos = null)
+        public void RefactorMaterialRef(EmmMaterial oldRef, EmmMaterial newRef, List<IUndoRedo> undos = null)
         {
             if (ContainerAssetType != AssetType.PBIND && ContainerAssetType != AssetType.TBIND)
                 throw new InvalidOperationException("RefactorMaterialRef: AssetType is not PBIND or TBIND, cannot continue.");
@@ -3694,7 +3692,7 @@ namespace Xv2CoreLib.EffectContainer
             }
         }
 
-        private void RefactorMaterialRef_Recursive(IList<ParticleEffect> childParticleEffects, Material oldRef, Material newRef, List<IUndoRedo> undos)
+        private void RefactorMaterialRef_Recursive(IList<ParticleEffect> childParticleEffects, EmmMaterial oldRef, EmmMaterial newRef, List<IUndoRedo> undos)
         {
             foreach (var particleEffect in childParticleEffects)
             {

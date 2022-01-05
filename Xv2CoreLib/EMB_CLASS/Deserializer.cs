@@ -53,7 +53,7 @@ namespace Xv2CoreLib.EMB_CLASS
 
                 for (int i = 0; i < totalEntries; i++)
                 {
-                    files.Add(embFile.Entry[i].Data.ToArray());
+                    files.Add(embFile.Entry[i].Data);
                 }
 
                 for (int i = 0; i < totalEntries; i++)//Adding pointer blank spaces, and setting size

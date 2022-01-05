@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace Xv2CoreLib.DEM
@@ -154,7 +152,7 @@ namespace Xv2CoreLib.DEM
         {
             switch (demoType)
             {
-                case DEM_Type.DemoDataTypes.Type0_1_6:
+                case DEM_Type.DemoDataTypes.TextureSwitch:
                     subEntry.Type0_1_6 = Type0_1_6.Read(rawBytes, bytes, offset);
                     break;
                 case DEM_Type.DemoDataTypes.FadeInOut:
@@ -205,7 +203,7 @@ namespace Xv2CoreLib.DEM
                 case DEM_Type.DemoDataTypes.Type1_12_2:
                     subEntry.Type1_12_2 = Type1_12_2.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type1_13_10:
+                case DEM_Type.DemoDataTypes.EyeColor:
                     subEntry.Type1_13_10 = Type1_13_10.Read(rawBytes, bytes, offset);
                     break;
                 case DEM_Type.DemoDataTypes.Type1_14_1:
@@ -337,7 +335,7 @@ namespace Xv2CoreLib.DEM
                 case DEM_Type.DemoDataTypes.YearDisplay:
                     subEntry.Type9_0_2 = Type9_0_2.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type9_1_5:
+                case DEM_Type.DemoDataTypes.Subtitle:
                     subEntry.Type9_1_5 = Type9_1_5.Read(rawBytes, bytes, offset);
                     break;
                 case DEM_Type.DemoDataTypes.Type0_17_0:

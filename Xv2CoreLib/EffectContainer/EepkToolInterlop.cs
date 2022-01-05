@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Xv2CoreLib.EffectContainer
+﻿namespace Xv2CoreLib.EffectContainer
 {
     public static class EepkToolInterlop
     {

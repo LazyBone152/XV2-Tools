@@ -134,7 +134,7 @@ namespace EEPK_Organiser.Forms
                     string fileName = System.IO.Path.GetFileName(file);
 
                     EmbEntry newEntry = new EmbEntry();
-                    newEntry.Data = bytes.ToList();
+                    newEntry.Data = bytes;
                     newEntry.Name = EmbFile.GetUnusedName(fileName);
                     newEntry.LoadDds();
 
@@ -255,7 +255,7 @@ namespace EEPK_Organiser.Forms
                             texture.Name = newName;
                         }
 
-                        var newData = bytes.ToList();
+                        var newData = bytes;
                         undos.Add(new UndoableProperty<EmbEntry>(nameof(texture.Data), texture, texture.Data, newData));
                         texture.Data = newData;
 
@@ -542,7 +542,7 @@ namespace EEPK_Organiser.Forms
                 string path = (selectedTextures.Count == 1) ? extractionPath : $"{extractionPath}/{texture.Name}";
                 Directory.CreateDirectory(System.IO.Path.GetDirectoryName(path));
                 texture.SaveDds();
-                File.WriteAllBytes(path, texture.Data.ToArray());
+                File.WriteAllBytes(path, texture.Data);
             }
         }
 

@@ -184,10 +184,10 @@ namespace Xv2CoreLib.BCS
 
                 return new Part()
                 {
-                    I_00 = BitConverter.ToInt16(rawBytes, offset + 0),
-                    I_02 = BitConverter.ToInt16(rawBytes, offset + 2),
-                    I_04 = BitConverter.ToInt16(rawBytes, offset + 4),
-                    I_16 = BitConverter.ToInt16(rawBytes, offset + 16),
+                    Model = BitConverter.ToInt16(rawBytes, offset + 0),
+                    Model2 = BitConverter.ToInt16(rawBytes, offset + 2),
+                    Texture = BitConverter.ToInt16(rawBytes, offset + 4),
+                    Shader = BitConverter.ToInt16(rawBytes, offset + 16),
                     I_24 = BitConverter.ToUInt32(rawBytes, offset + 24),
                     Hide_FaceBase = _I_28[0],
                     Hide_Forehead = _I_28[1],
@@ -213,11 +213,11 @@ namespace Xv2CoreLib.BCS
                     F_40 = BitConverter.ToSingle(rawBytes, offset + 40),
                     I_44 = BitConverter.ToInt32(rawBytes, offset + 44),
                     I_48 = BitConverter.ToInt32(rawBytes, offset + 48),
-                    Str_52 = Utils.GetString(bytes, offset + 52, 4),
-                    Str_56 = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 56), offset),
-                    Str_60 = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 60), offset),
-                    Str_64 = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 64), offset),
-                    Str_68 = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 68), offset),
+                    Name = Utils.GetString(bytes, offset + 52, 4),
+                    EmdPath = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 56), offset),
+                    EmmPath = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 60), offset),
+                    EmbPath = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 64), offset),
+                    EanPath = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 68), offset),
                     Color_Selectors = ParseColorSelector(BitConverter.ToInt32(rawBytes, offset + 20) + offset, BitConverter.ToInt16(rawBytes, offset + 18)),
                     Physics_Objects = ParsePhysicsObject(BitConverter.ToInt32(rawBytes, offset + 76) + offset, BitConverter.ToInt16(rawBytes, offset + 74)),
                     Unk_3 = ParseUnk3(BitConverter.ToInt32(rawBytes, offset + 84) + offset, BitConverter.ToInt16(rawBytes, offset + 82))

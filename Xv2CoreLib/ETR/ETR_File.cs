@@ -335,7 +335,7 @@ namespace Xv2CoreLib.ETR
     [Serializable]
     public class ETR_MainEntry
     {
-        public EMM.Material MaterialRef { get; set; }
+        public EMM.EmmMaterial MaterialRef { get; set; }
 
         public ushort I_108 { get; set; } //EMM Index
         

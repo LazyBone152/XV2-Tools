@@ -27,6 +27,7 @@
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <LangVersion>7.1</LangVersion>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -208,9 +209,11 @@
     <Compile Include="EMD\Deserializer.cs" />
     <Compile Include="EMD\EMD_File.cs" />
     <Compile Include="EMD\Parser.cs" />
+    <Compile Include="EMG\EMG_File.cs" />
     <Compile Include="EMM\Deserializer.cs" />
     <Compile Include="EMM\EMM_File.cs" />
     <Compile Include="EMM\Parser.cs" />
+    <Compile Include="EMO\EMO_File.cs" />
     <Compile Include="EMP\Deserializer.cs" />
     <Compile Include="EMP\EMP File.cs" />
     <Compile Include="EMP\Parser.cs" />
@@ -293,6 +296,7 @@
     <Compile Include="Resource\UndoRedo\UndoableArrayChange.cs" />
     <Compile Include="Resource\UndoRedo\UndoableListInsert.cs" />
     <Compile Include="Resource\UndoRedo\UndoableListMove.cs" />
+    <Compile Include="Resource\UndoRedo\UndoablePropertyGeneric.cs" />
     <Compile Include="Resource\UndoRedo\UndoActionDelegate.cs" />
     <Compile Include="Resource\UndoRedo\UndoActionPropNotify.cs" />
     <Compile Include="Resource\Utils.cs" />
@@ -312,6 +316,7 @@
     <Compile Include="Resource\ZipManager.cs" />
     <Compile Include="SAV\Encrypt.cs" />
     <Compile Include="SAV\SAV_File.cs" />
+    <Compile Include="SDS\SDS_File.cs" />
     <Compile Include="SEV\SEV_File.cs" />
     <Compile Include="TDB\TDB_File.cs" />
     <Compile Include="TNL\Deserializer.cs" />
@@ -326,6 +331,7 @@
     <Compile Include="TTB\TTB_File.cs" />
     <Compile Include="TTC\TTC_File.cs" />
     <Compile Include="UTF\UTF_File.cs" />
+    <Compile Include="ValuesDictionary\BAC.cs" />
     <Compile Include="Xenoverse2.cs" />
   </ItemGroup>
   <ItemGroup>

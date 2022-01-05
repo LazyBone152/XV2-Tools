@@ -21,7 +21,7 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
-            args = new string[1] { @"E:\VS_Test\BAC\1.17 BACs" };
+            args = new string[1] { @"E:\VS_Test\EMO\ALL EMO - Copy" };
 
             DEBUG_MODE = true;
 #endif
@@ -50,10 +50,13 @@ namespace XV2_Xml_Serializer
 
                 if (Directory.Exists(fileLocation))
                 {
-                    //new Xv2CoreLib.EMB.XmlRepack(fileLocation);
-
                     //Used for debugging
-                    //BulkParseInitial(fileLocation);
+#if DEBUG
+                    BulkParseInitial(fileLocation);
+#else
+                    new Xv2CoreLib.EMB.XmlRepack(fileLocation);
+#endif
+
                 }
                 else
                 {
@@ -292,6 +295,9 @@ namespace XV2_Xml_Serializer
                                     break;
                                 case ".cst":
                                     Xv2CoreLib.CST.CST_File.CreateXml(fileLocation);
+                                    break;
+                                case ".emo":
+                                    Xv2CoreLib.EMO.EMO_File.CreateXml(fileLocation);
                                     break;
                                 case ".xml":
                                     LoadXmlInitial(fileLocation);
@@ -547,6 +553,9 @@ namespace XV2_Xml_Serializer
                     case ".cst":
                         Xv2CoreLib.CST.CST_File.ConvertFromXml(fileLocation);
                         break;
+                    case ".emo":
+                        Xv2CoreLib.EMO.EMO_File.ConvertFromXml(fileLocation);
+                        break;
                     default:
                         FileTypeNotSupported(fileLocation);
                         break;
@@ -562,7 +571,6 @@ namespace XV2_Xml_Serializer
         
         private static bool LoadBinaryInitial_Debug(string fileLocation)
         {
-
             if (DEBUG_MODE == false) return false;
 
             switch (Path.GetExtension(fileLocation))
@@ -619,6 +627,12 @@ namespace XV2_Xml_Serializer
 
             switch (fileType)
             {
+                case ".emo":
+                    BulkParseEmo(fileLocation);
+                    break;
+                case ".emd":
+                    BulkParseEmd(fileLocation);
+                    break;
                 case ".bac":
                     BulkParseBac(fileLocation);
                     break;
@@ -686,6 +700,99 @@ namespace XV2_Xml_Serializer
 
             Console.WriteLine("Done");
             Console.ReadLine();
+        }
+
+        static void BulkParseEmo(string directory)
+        {
+            string[] files = Directory.GetFiles(directory);
+
+            foreach (string s in files)
+            {
+                //try
+                {
+                    if (Path.GetExtension(s) == ".emo")
+                    {
+                        Console.WriteLine(s);
+                        var emo = Xv2CoreLib.EMO.EMO_File.Load(s);
+
+                        emo.SaveFile(s);
+                    }
+                }
+                //catch (Exception ex)
+                {
+                    //Console.WriteLine(ex.ToString());
+                    // Console.ReadLine();
+                }
+            }
+
+        }
+
+        static void BulkParseEmd(string directory)
+        {
+            string[] files = Directory.GetFiles(directory);
+            //BacHomingParse(files);
+
+
+            List<uint> values = new List<uint>();
+            List<uint> valuesTotal = new List<uint>();
+
+            foreach (string s in files)
+            {
+                try
+                {
+                    if (Path.GetExtension(s) == ".emd")
+                    {
+                        Console.WriteLine(s);
+                        var emd = Xv2CoreLib.EMD.EMD_File.Load(s);
+
+                        if (emd.Models != null)
+                        {
+                            foreach (var entry in emd.Models)
+                            {
+                                if (entry.Meshes != null)
+                                {
+                                    foreach (var mesh in entry.Meshes)
+                                    {
+                                        if(mesh.Submeshes != null)
+                                        {
+                                            foreach(var submesh in mesh.Submeshes)
+                                            {
+                                                if(submesh.TextureDefinitionCount > 2)
+                                                {
+                                                    Console.WriteLine("Here: " + submesh.TextureDefinitionCount);
+                                                    Console.ReadLine();
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //Console.WriteLine(ex.ToString());
+                    // Console.ReadLine();
+                }
+            }
+
+            values.Sort();
+            StringBuilder str = new StringBuilder();
+
+            foreach (var value in values)
+            {
+                //str.AppendLine($"{value.ToString()} ({valuesTotal.Count(x => x == value)})");
+                str.AppendLine($"{HexConverter.GetHexString(value)} ({valuesTotal.Count(x => x == value)})");
+
+                //str.AppendLine($"{Convert.ToSingle(value)} ({valuesTotal.Count(x => x == value)})");
+            }
+
+            File.WriteAllText("emd_test.txt", str.ToString());
+
+            Process.Start("emd_test.txt");
+            Environment.Exit(0);
         }
 
         static void BulkParseBac(string directory)
@@ -911,16 +1018,53 @@ namespace XV2_Xml_Serializer
         static void BulkParseEmp(string directory)
         {
             string[] files = Directory.GetFiles(directory);
+            List<string> values = new List<string>();
 
             foreach (string s in files)
             {
-                if (Path.GetExtension(s) == ".emp")
+                //try
                 {
-                    Console.WriteLine(s);
-                    var ema = new Xv2CoreLib.EMP.Parser(s, false).empFile;
-                    
+                    if (Path.GetExtension(s) == ".emp")
+                    {
+                        Console.WriteLine(s);
+                        var emp = new Xv2CoreLib.EMP.Parser(s, false).empFile;
+                        var particleEffects = emp.GetAllParticleEffects_DEBUG();
+
+                        foreach (var particle in particleEffects)
+                        {
+                            if(particle.FloatPart_02_01 != null)
+                            {
+                                if (!values.Contains(particle.FloatPart_02_01.F_44.ToString()))
+                                    values.Add(particle.FloatPart_02_01.F_44.ToString());
+                                
+                               // if(!values.Contains(particle.Type_Texture.I_08.ToString()))
+                                 //   values.Add(particle.Type_Texture.I_08.ToString());
+
+                                //if (!values.Contains(HexConverter.GetHexString(particle.Type_Texture.I_08)))
+                                //    values.Add(HexConverter.GetHexString(particle.Type_Texture.I_08));
+
+                            }
+                        }
+
+                    }
+                }
+                //catch
+                {
+
                 }
             }
+
+            //log
+            StringBuilder str = new StringBuilder();
+
+            foreach (var value in values)
+            {
+                str.AppendLine(value);
+            }
+
+            File.WriteAllText("emp_test.txt", str.ToString());
+            Process.Start("emp_test.txt");
+            Environment.Exit(0);
         }
         
         static void BulkParseEcf(string directory)
@@ -1030,20 +1174,42 @@ namespace XV2_Xml_Serializer
         {
             string[] files = Directory.GetFiles(directory);
             List<string> shaderTypes = new List<string>();
+            int errors = 0;
 
             foreach (string s in files)
             {
-                if (Path.GetExtension(s) == ".emm")
+                try
                 {
-                    Console.WriteLine(s);
-                    new Xv2CoreLib.EMM.Parser(s, false, shaderTypes);
+                    if (Path.GetExtension(s) == ".emm")
+                    {
+                        Console.WriteLine(s);
+                        var emm = new Xv2CoreLib.EMM.Parser(s, false).emmFile;
 
+                        foreach (var mat in emm.Materials)
+                        {
+                            foreach (var parm in mat.Parameters)
+                            {
+                                if(parm.Name.Contains("MipMapLod"))
+                                {
+                                    if(!shaderTypes.Contains(parm.Float.ToString()))
+                                        shaderTypes.Add(parm.Float.ToString());
+                                }
+                                //if (!shaderTypes.Contains(parm.Name))
+                                //    shaderTypes.Add(parm.Name);
+                            }
+                        }
 
+                    }
+                }
+                catch
+                {
+                    errors++;
                 }
             }
 
             //Debug log
             StringBuilder str = new StringBuilder();
+            str.Append($"{errors} errors.\n\n");
 
             foreach(var shader in shaderTypes)
             {
@@ -1051,6 +1217,8 @@ namespace XV2_Xml_Serializer
             }
 
             File.WriteAllText("emm_debug_log.txt", str.ToString());
+            Process.Start("emm_debug_log.txt");
+            Environment.Exit(0);
 
         }
 
@@ -1116,16 +1284,15 @@ namespace XV2_Xml_Serializer
         {
             string[] files = Directory.GetFiles(directory);
 
-            List<Xv2CoreLib.DEM.DebugInfo> debugInfo = new List<Xv2CoreLib.DEM.DebugInfo>();
-
             foreach (string s in files)
             {
                 if (Path.GetExtension(s) == ".dem")
                 {
-                    Console.WriteLine(s);
-                    debugInfo = new Xv2CoreLib.DEM.Parser(s, false, debugInfo).debugList;
+                    var dem = new Xv2CoreLib.DEM.Parser(s, true).demFile;
                 }
             }
+
+            /*
             StringBuilder log = new StringBuilder();
 
             foreach(var e in debugInfo)
@@ -1141,7 +1308,7 @@ namespace XV2_Xml_Serializer
                 log.AppendLine();
             }
             File.WriteAllText("dem_debug_log.txt", log.ToString());
-
+            */
         }
 
         static void BulkParseBai(string directory)
@@ -1399,7 +1566,7 @@ namespace XV2_Xml_Serializer
             //Extract all of a specific file type
             Xv2CoreLib.CPK.CPK_Reader cpk = new Xv2CoreLib.CPK.CPK_Reader(@"C:\Program Files (x86)\Steam\steamapps\common\DB Xenoverse 2\cpk", false);
 
-            var task = cpk.ExtractAll(@"C:\XV2_MultiThreadExtractTest", ".bac");
+            var task = cpk.ExtractAll(@"C:\XV2_MultiThreadExtractTest", ".emo");
             task.Wait();
 
             Environment.Exit(0);

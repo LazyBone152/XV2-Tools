@@ -3440,21 +3440,24 @@ namespace EEPK_Organiser.View
                     Forms.AssetSelector assetSel = new Forms.AssetSelector(effectContainerFile, false, false, effectContainerFile.SelectedEffect.SelectedEffectPart.I_02, this, effectContainerFile.SelectedEffect.SelectedEffectPart.AssetRef);
                     assetSel.ShowDialog();
 
-                    List<IUndoRedo> undos = new List<IUndoRedo>();
-
-                    foreach (var effectPart in effectContainerFile.SelectedEffect.SelectedEffectParts)
+                    if(assetSel.SelectedAsset != null)
                     {
-                        undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.I_02), effectPart, effectPart.I_02, assetSel.SelectedAssetType));
-                        undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.AssetRef), effectPart, effectPart.AssetRef, assetSel.SelectedAsset));
+                        List<IUndoRedo> undos = new List<IUndoRedo>();
 
-                        effectPart.I_02 = assetSel.SelectedAssetType;
-                        effectPart.AssetRef = assetSel.SelectedAsset;
+                        foreach (var effectPart in effectContainerFile.SelectedEffect.SelectedEffectParts)
+                        {
+                            undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.I_02), effectPart, effectPart.I_02, assetSel.SelectedAssetType));
+                            undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.AssetRef), effectPart, effectPart.AssetRef, assetSel.SelectedAsset));
+
+                            effectPart.I_02 = assetSel.SelectedAssetType;
+                            effectPart.AssetRef = assetSel.SelectedAsset;
+                        }
+
+                        UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Change Asset(s)"));
+
+                        if (effectPartViewModel != null)
+                            effectPartViewModel.UpdateProperties();
                     }
-
-                    UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Change Asset(s)"));
-
-                    if (effectPartViewModel != null)
-                        effectPartViewModel.UpdateProperties();
                 }
             }
         }

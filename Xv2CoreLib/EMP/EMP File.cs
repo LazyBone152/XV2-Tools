@@ -352,7 +352,7 @@ namespace Xv2CoreLib.EMP
             return textures;
         }
 
-        public List<TexturePart> GetTexturePartsThatUseMaterialRef(Material materialRef)
+        public List<TexturePart> GetTexturePartsThatUseMaterialRef(EmmMaterial materialRef)
         {
             List<TexturePart> textureParts = new List<TexturePart>();
 
@@ -373,7 +373,7 @@ namespace Xv2CoreLib.EMP
             return textureParts;
         }
 
-        private List<TexturePart> GetTexturePartsThatUseMaterialRef_Recursive(Material materialRef, List<TexturePart> textureParts, AsyncObservableCollection<ParticleEffect> particleEffects)
+        private List<TexturePart> GetTexturePartsThatUseMaterialRef_Recursive(EmmMaterial materialRef, List<TexturePart> textureParts, AsyncObservableCollection<ParticleEffect> particleEffects)
         {
             foreach (var particleEffect in particleEffects)
             {
@@ -514,6 +514,29 @@ namespace Xv2CoreLib.EMP
             }
 
             return undos;
+        }
+    
+        //DEBUG:
+        public List<ParticleEffect> GetAllParticleEffects_DEBUG()
+        {
+            return GetAllParticleEffectsRecursive_DEBUG(ParticleEffects);
+        }
+
+        private List<ParticleEffect> GetAllParticleEffectsRecursive_DEBUG(IList<ParticleEffect> particleEffects)
+        {
+            List<ParticleEffect> total = new List<ParticleEffect>();
+
+            foreach (var particle in particleEffects)
+            {
+                total.Add(particle);
+
+                if(particle.ChildParticleEffects != null)
+                {
+                    total.AddRange(GetAllParticleEffectsRecursive_DEBUG(particle.ChildParticleEffects));
+                }
+            }
+
+            return total;
         }
     }
 
@@ -1749,9 +1772,9 @@ namespace Xv2CoreLib.EMP
         }
 
         //Ref
-        private Material _materialRef = null;
+        private EmmMaterial _materialRef = null;
         [YAXDontSerialize]
-        public Material MaterialRef
+        public EmmMaterial MaterialRef
         {
             get
             {

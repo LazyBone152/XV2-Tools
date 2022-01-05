@@ -92,7 +92,7 @@ namespace Xv2CoreLib.Resource.UndoRedo
             redoStack.Push(action);
             NotifyPropertyChanged("UndoDescription");
             NotifyPropertyChanged("RedoDescription");
-            UndoOrRedoCalled?.Invoke(this, new EventArgs());
+            UndoOrRedoCalled?.Invoke(this, EventArgs.Empty);
         }
 
         public void Redo()
@@ -131,6 +131,10 @@ namespace Xv2CoreLib.Resource.UndoRedo
             NotifyPropertyChanged("RedoDescription");
         }
 
+        public void ForceEventCall()
+        {
+            UndoOrRedoCalled?.Invoke(this, EventArgs.Empty);
+        }
 
 #if DEBUG
         //For debugging purposes

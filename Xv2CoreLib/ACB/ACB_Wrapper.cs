@@ -256,7 +256,7 @@ namespace Xv2CoreLib.ACB
             ACB_File newAcb = ACB_File.NewXv2Acb();
 
             foreach (var cue in cues)
-                newAcb.CopyCue((int)cue.CueRef.ID, AcbFile);
+                newAcb.CopyCue((int)cue.CueRef.ID, AcbFile, false);
             
             newAcb.SaveToClipboard();
         }
@@ -274,7 +274,7 @@ namespace Xv2CoreLib.ACB
             
             foreach(var cue in tempAcb.Cues)
             {
-                undos.AddRange(AcbFile.CopyCue((int)cue.ID, tempAcb));
+                undos.AddRange(AcbFile.CopyCue((int)cue.ID, tempAcb, false));
             }
 
             Refresh();

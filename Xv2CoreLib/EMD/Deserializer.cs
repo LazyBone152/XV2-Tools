@@ -97,18 +97,7 @@ namespace Xv2CoreLib.EMD
                     ushort submeshCount = (ushort)((emdFile.Models[i].Meshes[a].Submeshes != null) ? emdFile.Models[i].Meshes[a].Submeshes.Count : 0);
                     int meshStart = bytes.Count;
 
-                    bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].F_00));
-                    bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].F_04));
-                    bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].F_08));
-                    bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].F_12));
-                    bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].F_16));
-                    bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].F_20));
-                    bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].F_24));
-                    bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].F_28));
-                    bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].F_32));
-                    bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].F_36));
-                    bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].F_40));
-                    bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].F_44));
+                    bytes.AddRange(emdFile.Models[i].Meshes[a].AABB.Write());
                     bytes.AddRange(new byte[4]); // Name offset
                     bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].I_52));
                     bytes.AddRange(BitConverter.GetBytes(submeshCount));
@@ -146,19 +135,8 @@ namespace Xv2CoreLib.EMD
 
                         int submeshStart = bytes.Count;
 
-                        bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].Submeshes[s].F_00));
-                        bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].Submeshes[s].F_04));
-                        bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].Submeshes[s].F_08));
-                        bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].Submeshes[s].F_12));
-                        bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].Submeshes[s].F_16));
-                        bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].Submeshes[s].F_20));
-                        bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].Submeshes[s].F_24));
-                        bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].Submeshes[s].F_28));
-                        bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].Submeshes[s].F_32));
-                        bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].Submeshes[s].F_36));
-                        bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].Submeshes[s].F_40));
-                        bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].Submeshes[s].F_44));
-                        bytes.AddRange(BitConverter.GetBytes((uint)emdFile.Models[i].Meshes[a].Submeshes[s].VtxFlags));
+                        bytes.AddRange(emdFile.Models[i].Meshes[a].Submeshes[s].AABB.Write());
+                        bytes.AddRange(BitConverter.GetBytes((uint)emdFile.Models[i].Meshes[a].Submeshes[s].VertexFlags));
                         bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].Submeshes[s].VertexSize));
                         bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].Submeshes[s].VertexCount));
                         bytes.AddRange(new byte[4]); //Vertex pointer
@@ -179,16 +157,7 @@ namespace Xv2CoreLib.EMD
 
                         //Texture definitions
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - submeshStart), submeshStart + 72);
-
-                        for (int t = 0; t < emdFile.Models[i].Meshes[a].Submeshes[s].TextureDefinitionCount; t++)
-                        {
-                            bytes.Add(emdFile.Models[i].Meshes[a].Submeshes[s].TextureDefinitions[t].I_00);
-                            bytes.Add(emdFile.Models[i].Meshes[a].Submeshes[s].TextureDefinitions[t].I_01);
-                            bytes.Add(emdFile.Models[i].Meshes[a].Submeshes[s].TextureDefinitions[t].I_02);
-                            bytes.Add(emdFile.Models[i].Meshes[a].Submeshes[s].TextureDefinitions[t].I_03);
-                            bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].Submeshes[s].TextureDefinitions[t].F_04));
-                            bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].Submeshes[s].TextureDefinitions[t].F_08));
-                        }
+                        bytes.AddRange(EMD_TextureSamplerDef.Write(emdFile.Models[i].Meshes[a].Submeshes[s].TextureSamplerDefs));
 
                         //Triangles pointer list
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - submeshStart), submeshStart + 76);
@@ -252,7 +221,7 @@ namespace Xv2CoreLib.EMD
 
                         for(int v = 0; v < emdFile.Models[i].Meshes[a].Submeshes[s].VertexCount; v++)
                         {
-                            bytes.AddRange(emdFile.Models[i].Meshes[a].Submeshes[s].Vertexes[v].GetBytes(emdFile.Models[i].Meshes[a].Submeshes[s].VtxFlags));
+                            bytes.AddRange(emdFile.Models[i].Meshes[a].Submeshes[s].Vertexes[v].GetBytes(emdFile.Models[i].Meshes[a].Submeshes[s].VertexFlags));
                         }
                         
                     }

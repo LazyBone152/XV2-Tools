@@ -192,7 +192,7 @@ namespace LB_Mod_Installer.Installer.ACB
 
                 if(cueToCopy != null)
                 {
-                    second.CopyCue(newCueId, main);
+                    second.CopyCue(newCueId, main, false);
                 }
                 else
                 {
@@ -230,7 +230,7 @@ namespace LB_Mod_Installer.Installer.ACB
                 foreach (var cue in musicPackage.Cues)
                 {
                     cue.ID = (uint)GetNextCueId();
-                    bgmFile.CopyCue((int)cue.ID, musicPackage);
+                    bgmFile.CopyCue((int)cue.ID, musicPackage, false);
                     oblFile.AddEntry((int)cue.ID);
 
                     foreach (var msgFile in msgFiles)
@@ -249,7 +249,7 @@ namespace LB_Mod_Installer.Installer.ACB
                     //Remove cue with matching ID (if exists)
                     bgmFile.Cues.RemoveAll(x => x.ID == cue.ID);
                     
-                    bgmFile.CopyCue((int)cue.ID, musicPackage);
+                    bgmFile.CopyCue((int)cue.ID, musicPackage, false);
 
                     GeneralInfo.Tracker.AddID(DIRECT_INSTALL_TYPE, Sections.ACB_Cue, cue.ID.ToString());
                 }

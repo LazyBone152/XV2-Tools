@@ -107,7 +107,7 @@ namespace EEPK_Organiser.Forms
 
             try
             {
-                var material = dataGrid.SelectedItem as Material;
+                var material = dataGrid.SelectedItem as EmmMaterial;
                 
                 if(material != null)
                 {
@@ -125,7 +125,7 @@ namespace EEPK_Organiser.Forms
         {
             try
             {
-                var material = dataGrid.SelectedItem as Material;
+                var material = dataGrid.SelectedItem as EmmMaterial;
 
                 if (material != null)
                 {
@@ -143,7 +143,7 @@ namespace EEPK_Organiser.Forms
         {
             try
             {
-                var material = dataGrid.SelectedItem as Material;
+                var material = dataGrid.SelectedItem as EmmMaterial;
 
                 if (material != null)
                 {
@@ -169,8 +169,8 @@ namespace EEPK_Organiser.Forms
         {
             try
             {
-                Material material = Material.NewMaterial();
-                material.Str_00 = EmmFile.GetUnusedName(material.Str_00);
+                EmmMaterial material = EmmMaterial.NewMaterial();
+                material.Name = EmmFile.GetUnusedName(material.Name);
                 
                 EmmFile.Materials.Add(material);
                 RefreshMaterialCount();
@@ -178,7 +178,7 @@ namespace EEPK_Organiser.Forms
                 dataGrid.ScrollIntoView(material);
 
                 List<IUndoRedo> undos = new List<IUndoRedo>();
-                undos.Add(new UndoableListAdd<Material>(EmmFile.Materials, material));
+                undos.Add(new UndoableListAdd<EmmMaterial>(EmmFile.Materials, material));
                 undos.Add(new UndoActionDelegate(this, nameof(RefreshMaterialCount), true));
                 UndoManager.Instance.AddUndo(new CompositeUndo(undos, "New Material"));
             }
@@ -259,15 +259,15 @@ namespace EEPK_Organiser.Forms
             return removed;
         }
 
-        private void RenameFile_PopUp(Material material)
+        private void RenameFile_PopUp(EmmMaterial material)
         {
-            RenameForm renameForm = new RenameForm(material.Str_00, "", String.Format("Renaming {0}", material.Str_00), EmmFile, this, RenameForm.Mode.Material, 32);
+            RenameForm renameForm = new RenameForm(material.Name, "", String.Format("Renaming {0}", material.Name), EmmFile, this, RenameForm.Mode.Material, 32);
             renameForm.ShowDialog();
 
             if (renameForm.WasNameChanged)
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<Material>(nameof(material.Str_00), material, material.Str_00, renameForm.NameValue, "Rename (Material)"));
-                material.Str_00 = renameForm.NameValue;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EmmMaterial>(nameof(material.Name), material, material.Name, renameForm.NameValue, "Rename (Material)"));
+                material.Name = renameForm.NameValue;
             }
         }
 
@@ -275,7 +275,7 @@ namespace EEPK_Organiser.Forms
         //Context Menu
         private void ContextMenu_AddParameter_Click(object sender, RoutedEventArgs e)
         {
-            var material = dataGrid.SelectedItem as Material;
+            var material = dataGrid.SelectedItem as EmmMaterial;
 
             if(material != null)
             {
@@ -288,13 +288,13 @@ namespace EEPK_Organiser.Forms
 
         private void ContextMenu_Duplicate_Click(object sender, RoutedEventArgs e)
         {
-            List<Material> selectedMaterials = dataGrid.SelectedItems.Cast<Material>().ToList();
+            List<EmmMaterial> selectedMaterials = dataGrid.SelectedItems.Cast<EmmMaterial>().ToList();
             List<IUndoRedo> undos = new List<IUndoRedo>();
 
             foreach(var mat in selectedMaterials)
             {
-                Material newMaterial = mat.Copy();
-                undos.Add(new UndoableListAdd<Material>(EmmFile.Materials, newMaterial));
+                EmmMaterial newMaterial = mat.Copy();
+                undos.Add(new UndoableListAdd<EmmMaterial>(EmmFile.Materials, newMaterial));
                 EmmFile.Materials.Add(newMaterial);
             }
 
@@ -304,7 +304,7 @@ namespace EEPK_Organiser.Forms
 
         private void ContextMenu_RenameMaterial_Click(object sender, RoutedEventArgs e)
         {
-            var material = dataGrid.SelectedItem as Material;
+            var material = dataGrid.SelectedItem as EmmMaterial;
 
             if (material != null)
             {
@@ -316,8 +316,8 @@ namespace EEPK_Organiser.Forms
         {
             try
             {
-                var material = dataGrid.SelectedItem as Material;
-                List<Material> selectedMaterials = dataGrid.SelectedItems.Cast<Material>().ToList();
+                var material = dataGrid.SelectedItem as EmmMaterial;
+                List<EmmMaterial> selectedMaterials = dataGrid.SelectedItems.Cast<EmmMaterial>().ToList();
                 selectedMaterials.Remove(material);
 
 
@@ -326,12 +326,12 @@ namespace EEPK_Organiser.Forms
                     List<IUndoRedo> undos = new List<IUndoRedo>();
                     int count = selectedMaterials.Count + 1;
 
-                    if (MessageBox.Show(string.Format("All currently selected materials will be MERGED into {0}.\n\nAll other selected materials will be deleted, with all references to them changed to {0}.\n\nDo you wish to continue?", material.Str_00), string.Format("Merge ({0} materials)", count), MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
+                    if (MessageBox.Show(string.Format("All currently selected materials will be MERGED into {0}.\n\nAll other selected materials will be deleted, with all references to them changed to {0}.\n\nDo you wish to continue?", material.Name), string.Format("Merge ({0} materials)", count), MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
                     {
                         foreach (var materialToRemove in selectedMaterials)
                         {
                             container.RefactorMaterialRef(materialToRemove, material, undos);
-                            undos.Add(new UndoableListRemove<Material>(container.File2_Ref.Materials, materialToRemove));
+                            undos.Add(new UndoableListRemove<EmmMaterial>(container.File2_Ref.Materials, materialToRemove));
                             container.File2_Ref.Materials.Remove(materialToRemove);
                         }
 
@@ -356,7 +356,7 @@ namespace EEPK_Organiser.Forms
         {
             bool materialInUse = false;
             int removed = 0;
-            List<Material> selectedMaterials = dataGrid.SelectedItems.Cast<Material>().ToList();
+            List<EmmMaterial> selectedMaterials = dataGrid.SelectedItems.Cast<EmmMaterial>().ToList();
             List<IUndoRedo> undos = new List<IUndoRedo>();
 
             if (selectedMaterials.Count > 0)
@@ -395,7 +395,7 @@ namespace EEPK_Organiser.Forms
 
         private void ContextMenu_UsedBy_Click(object sender, RoutedEventArgs e)
         {
-            var material = dataGrid.SelectedItem as Material;
+            var material = dataGrid.SelectedItem as EmmMaterial;
 
             if (material != null)
             {
@@ -408,7 +408,7 @@ namespace EEPK_Organiser.Forms
                     str.Append(String.Format("{0}\r", asset));
                 }
 
-                LogForm logForm = new LogForm(String.Format("The following {0} assets use this material:", AssetTypeWildcard), str.ToString(), String.Format("{0}: Used By", material.Str_00), this, true);
+                LogForm logForm = new LogForm(String.Format("The following {0} assets use this material:", AssetTypeWildcard), str.ToString(), String.Format("{0}: Used By", material.Name), this, true);
                 logForm.Show();
             }
         }
@@ -424,7 +424,7 @@ namespace EEPK_Organiser.Forms
                     var nestedDataGrid = ((ContextMenu)menuItem.Parent).PlacementTarget as DataGrid;
 
                     var selectedParams = nestedDataGrid.SelectedItems.Cast<Parameter>().ToList();
-                    var parentMaterial = container.GetMaterialAssociatedWithParameters(selectedParams, dataGrid.SelectedItem as Material);
+                    var parentMaterial = container.GetMaterialAssociatedWithParameters(selectedParams, dataGrid.SelectedItem as EmmMaterial);
                     
 
                     if (selectedParams.Count > 0 && parentMaterial != null)
@@ -453,7 +453,7 @@ namespace EEPK_Organiser.Forms
             try
 #endif
             {
-                var material = dataGrid.SelectedItem as Material;
+                var material = dataGrid.SelectedItem as EmmMaterial;
 
                 if (material != null)
                 {
@@ -478,7 +478,7 @@ namespace EEPK_Organiser.Forms
             try
 #endif
             {
-                var material = dataGrid.SelectedItem as Material;
+                var material = dataGrid.SelectedItem as EmmMaterial;
 
                 if (material != null)
                 {

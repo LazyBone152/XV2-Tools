@@ -140,7 +140,7 @@ namespace LB_Mod_Installer.Installer.ACB
                         else if(file.filePath == AcbInstaller.DIRECT_INSTALL_TYPE)
                         {
                             if (cpkAcbFile.Cues.Exists(x => x.ID == (uint)cueId))
-                                acbFile.CopyCue(cueId, cpkAcbFile);
+                                acbFile.CopyCue(cueId, cpkAcbFile, false);
                         }
                     }
                 }

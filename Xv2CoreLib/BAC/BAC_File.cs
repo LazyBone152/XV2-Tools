@@ -16,10 +16,14 @@ namespace Xv2CoreLib.BAC
 {
     public interface IBacType
     {
+        int TypeID { get; }
+
         ushort StartTime { get; set; } //0
         ushort Duration { get; set; } //2
         ushort I_04 { get; set; } //4
         ushort Flags { get; set; } //6
+
+        void RefreshType();
     }
 
     [YAXSerializeAs("BAC")]
@@ -310,6 +314,9 @@ namespace Xv2CoreLib.BAC
         }
         #endregion
 
+        public const int MAX_ENTRIES_CHARACTER = 1000;
+        public const int MAX_ENTRIES_SKILL = 100;
+
         [Flags]
         public enum Flags : uint
         {
@@ -344,46 +351,33 @@ namespace Xv2CoreLib.BAC
             unk29 = 0x10000000,
             unk30 = 0x20000000,
             unk31 = 0x40000000,
-            CMN = 0x80000000
+            Empty = 0x80000000
         }
 
-        #region WrapperProperties
+        #region NonSerialized
         [YAXDontSerialize]
-        public int SortID { get { return int.Parse(Index); } set { Index = value.ToString(); NotifyPropertyChanged("UndoableId"); } }
+        public int SortID { get { return int.Parse(Index); } set { Index = value.ToString(); NotifyPropertyChanged(nameof(Index)); } }
         [YAXDontSerialize]
-        public Flags FlagProp { get { return Flag; } set { Flag = value; NotifyPropertyChanged("UndoableFlag"); } }
+        public string FlagStr => HexConverter.GetHexString((uint)Flag);
+
+        private Flags _flag = 0;
         #endregion
 
-#if UndoRedo
-        [YAXDontSerialize]
-        public int UndoableId
-        {
-            get { return SortID; }
-            set
-            {
-                Resource.UndoRedo.UndoManager.Instance.AddUndo(new Resource.UndoRedo.UndoableProperty<BAC_Entry>("SortID", this, SortID, value, "Bac Entry ID"));
-                SortID = value;
-                NotifyPropertyChanged("UndoableId");
-            }
-        }
-        [YAXDontSerialize]
-        public Flags UndoableFlag
-        {
-            get { return FlagProp; }
-            set
-            {
-                Resource.UndoRedo.UndoManager.Instance.AddUndo(new Resource.UndoRedo.UndoableProperty<BAC_Entry>("FlagProp", this, FlagProp, value, "Bac Entry Flag"));
-                FlagProp = value;
-                NotifyPropertyChanged("UndoableFlag");
-            }
-        }
-#endif
 
         [YAXAttributeForClass]
         [BindingAutoId]
         public string Index { get; set; } = "0"; //int32
         [YAXAttributeForClass]
-        public Flags Flag { get; set; }
+        public Flags Flag
+        {
+            get => _flag;
+            set
+            {
+                _flag = value;
+                NotifyPropertyChanged(nameof(Flag));
+                NotifyPropertyChanged(nameof(FlagStr));
+            }
+        }
 
 
         [YAXDontSerializeIfNull]
@@ -494,88 +488,88 @@ namespace Xv2CoreLib.BAC
 
             IBacTypes = AsyncObservableCollection<IBacType>.Create();
 
-            foreach (var bacEntry in Type0)
+            foreach (var bacEntry in Type0.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-            foreach (var bacEntry in Type1)
+            foreach (var bacEntry in Type1.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-            foreach (var bacEntry in Type2)
+            foreach (var bacEntry in Type2.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-            foreach (var bacEntry in Type3)
+            foreach (var bacEntry in Type3.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-            foreach (var bacEntry in Type4)
+            foreach (var bacEntry in Type4.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-            foreach (var bacEntry in Type5)
+            foreach (var bacEntry in Type5.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-            foreach (var bacEntry in Type6)
+            foreach (var bacEntry in Type6.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-            foreach (var bacEntry in Type7)
+            foreach (var bacEntry in Type7.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-            foreach (var bacEntry in Type8)
+            foreach (var bacEntry in Type8.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-            foreach (var bacEntry in Type9)
+            foreach (var bacEntry in Type9.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-            foreach (var bacEntry in Type10)
+            foreach (var bacEntry in Type10.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-            foreach (var bacEntry in Type11)
+            foreach (var bacEntry in Type11.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-            foreach (var bacEntry in Type12)
+            foreach (var bacEntry in Type12.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-            foreach (var bacEntry in Type13)
+            foreach (var bacEntry in Type13.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-            foreach (var bacEntry in Type14)
+            foreach (var bacEntry in Type14.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-            foreach (var bacEntry in Type15)
+            foreach (var bacEntry in Type15.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-            foreach (var bacEntry in Type16)
+            foreach (var bacEntry in Type16.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-            foreach (var bacEntry in Type17)
+            foreach (var bacEntry in Type17.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-            foreach (var bacEntry in Type18)
+            foreach (var bacEntry in Type18.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-            foreach (var bacEntry in Type19)
+            foreach (var bacEntry in Type19.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-            foreach (var bacEntry in Type20)
+            foreach (var bacEntry in Type20.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-            foreach (var bacEntry in Type21)
+            foreach (var bacEntry in Type21.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-            foreach (var bacEntry in Type22)
+            foreach (var bacEntry in Type22.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-            foreach (var bacEntry in Type23)
+            foreach (var bacEntry in Type23.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-            foreach (var bacEntry in Type24)
+            foreach (var bacEntry in Type24.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-            foreach (var bacEntry in Type25)
+            foreach (var bacEntry in Type25.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-            foreach (var bacEntry in Type26)
+            foreach (var bacEntry in Type26.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-            foreach (var bacEntry in Type27)
+            foreach (var bacEntry in Type27.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
         }
 
@@ -794,6 +788,7 @@ namespace Xv2CoreLib.BAC
             Type27.Clear();
         }
 
+
 #if UndoRedo
         /// <summary>
         /// Add a new instance of the specified IBacType as an undoable operation.
@@ -894,8 +889,30 @@ namespace Xv2CoreLib.BAC
                     throw new InvalidOperationException($"UndoableAddIBacType: Invalid bacType {bacType}!");
             }
 
-            IBacTypes.Add(iBacType);
-            UndoManager.Instance.AddUndo(new UndoableListAdd<IBacType>(IBacTypes, iBacType, $"New BacType {bacType}"));
+            int insertIdx = 0;
+
+            for(int i = 0; i < IBacTypes.Count; i++)
+            {
+                if (IBacTypes[i].TypeID > iBacType.TypeID)
+                {
+                    break;
+                }
+
+                insertIdx++;
+            }
+
+            if(insertIdx >= IBacTypes.Count - 1)
+            {
+                //Add
+                IBacTypes.Add(iBacType);
+                UndoManager.Instance.AddUndo(new UndoableListAdd<IBacType>(IBacTypes, iBacType, $"New BacType {bacType}"));
+            }
+            else
+            {
+                //Insert
+                IBacTypes.Insert(insertIdx, iBacType);
+                UndoManager.Instance.AddUndo(new UndoableListInsert<IBacType>(IBacTypes, insertIdx, iBacType, $"New BacType {bacType}"));
+            }
         }
 
         /// <summary>
@@ -981,7 +998,7 @@ namespace Xv2CoreLib.BAC
         {
             return new BAC_Entry()
             {
-                Flag = Flags.CMN,
+                Flag = Flags.Empty,
                 SortID = id
             };
         }
@@ -1003,12 +1020,16 @@ namespace Xv2CoreLib.BAC
         }
 
         #endregion
+        
+        [YAXDontSerialize]
+        public virtual int TypeID => -1;
 
-
+        //Values:
         private ushort _startTime = 0;
         private ushort _duration = 1;
         private ushort _flags = 0;
 
+        //Props:
         [YAXAttributeForClass]
         [YAXSerializeAs("StartTime")]
         public ushort StartTime
@@ -1064,6 +1085,10 @@ namespace Xv2CoreLib.BAC
             }
         }
 
+        public void RefreshType()
+        {
+            NotifyPropertyChanged("Type");
+        }
     }
 
     [YAXSerializeAs("Animation")]
@@ -1075,11 +1100,13 @@ namespace Xv2CoreLib.BAC
         {
             get
             {
-                return $"Animation ({Ean_Type})";
+                return $"Animation ({EanType})";
             }
         }
+        [YAXDontSerialize]
+        public override int TypeID => 0;
 
-        public enum EanType : ushort
+        public enum EanTypeEnum : ushort
         {
             Common = 0,
             Character = 5,
@@ -1110,24 +1137,10 @@ namespace Xv2CoreLib.BAC
             Unk16 = 0x8000
         }
 
-        private EanType _eanType = EanType.Common;
         [YAXAttributeFor("EAN")]
         [YAXSerializeAs("File")]
-        public EanType Ean_Type
-        {
-            get
-            {
-                return _eanType;
-            }
-            set
-            {
-                _eanType = value;
-                NotifyPropertyChanged("I_08");
-                NotifyPropertyChanged("EanTypeProp");
-                NotifyPropertyChanged("Type");
-            }
-        }
-        [YAXAttributeFor("EAN_Index")]
+        public EanTypeEnum EanType { get; set; }
+        [YAXAttributeFor("EanIndex")]
         [YAXSerializeAs("value")]
         public ushort EanIndex { get; set; }  //ushort
         [YAXAttributeFor("AnimationFlags")]
@@ -1173,7 +1186,7 @@ namespace Xv2CoreLib.BAC
                     Duration = BitConverter.ToUInt16(rawBytes, offset + 2),
                     I_04 = BitConverter.ToUInt16(rawBytes, offset + 4),
                     Flags = BitConverter.ToUInt16(rawBytes, offset + 6),
-                    Ean_Type = (EanType)BitConverter.ToUInt16(rawBytes, offset + 8),
+                    EanType = (EanTypeEnum)BitConverter.ToUInt16(rawBytes, offset + 8),
                     EanIndex = BitConverter.ToUInt16(rawBytes, offset + 10),
                     AnimFlags = (AnimationFlags)BitConverter.ToUInt16(rawBytes, offset + 12),
                     I_14 = BitConverter.ToUInt16(rawBytes, offset + 14),
@@ -1202,7 +1215,7 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.Duration));
                 bytes.AddRange(BitConverter.GetBytes(type.I_04));
                 bytes.AddRange(BitConverter.GetBytes(type.Flags));
-                bytes.AddRange(BitConverter.GetBytes((ushort)type.Ean_Type));
+                bytes.AddRange(BitConverter.GetBytes((ushort)type.EanType));
                 bytes.AddRange(BitConverter.GetBytes(type.EanIndex));
                 bytes.AddRange(BitConverter.GetBytes((ushort)type.AnimFlags));
                 bytes.AddRange(BitConverter.GetBytes(type.I_14));
@@ -1242,7 +1255,7 @@ namespace Xv2CoreLib.BAC
                 Duration = Duration,
                 I_04 = I_04,
                 Flags = Flags,
-                Ean_Type = Ean_Type,
+                EanType = EanType,
                 EanIndex = EanIndex,
                 AnimFlags = AnimFlags,
                 I_14 = I_14,
@@ -1293,7 +1306,9 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type1 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type { get { return "Hitbox"; } }
+        public string Type { get { return $"Hitbox ({bdmFile})"; } }
+        [YAXDontSerialize]
+        public override int TypeID => 1;
 
         public enum BdmType : byte
         {
@@ -1507,7 +1522,9 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type2 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type { get { return "Movement"; } }
+        public string Type { get { return $"Movement"; } }
+        [YAXDontSerialize]
+        public override int TypeID => 2;
 
 
         [YAXAttributeFor("Movement_Type")]
@@ -1599,7 +1616,23 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type3 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type { get { return "Invulnerability"; } }
+        public string Type
+        { 
+            get
+            {
+                return $"Invulnerability";
+
+                /*
+                string ret;
+                if (!ValuesDictionary.BAC.InvulnerabilityTypes.TryGetValue(InvulnerabilityType, out ret))
+                    ret = InvulnerabilityType.ToString();
+
+                return $"Invulnerability ({ret})";
+                */
+            } 
+        }
+        [YAXDontSerialize]
+        public override int TypeID => 3;
 
 
         [YAXAttributeFor("Type")]
@@ -1655,6 +1688,8 @@ namespace Xv2CoreLib.BAC
     {
         [YAXDontSerialize]
         public string Type { get { return "TimeScale"; } }
+        [YAXDontSerialize]
+        public override int TypeID => 4;
 
 
         [YAXAttributeFor("TimeScale")]
@@ -1707,6 +1742,8 @@ namespace Xv2CoreLib.BAC
     {
         [YAXDontSerialize]
         public string Type { get { return "Tracking"; } }
+        [YAXDontSerialize]
+        public override int TypeID => 5;
 
         [Flags]
         public enum TrackingFlagsEnum : ushort
@@ -1789,6 +1826,8 @@ namespace Xv2CoreLib.BAC
     {
         [YAXDontSerialize]
         public string Type { get { return "ChargeControl"; } }
+        [YAXDontSerialize]
+        public override int TypeID => 6;
 
 
         [YAXAttributeFor("I_08")]
@@ -1850,6 +1889,8 @@ namespace Xv2CoreLib.BAC
     {
         [YAXDontSerialize]
         public string Type { get { return "BcmCallback"; } }
+        [YAXDontSerialize]
+        public override int TypeID => 7;
 
         [Flags]
         public enum BcmCallbackFlagsEnum : uint
@@ -1926,7 +1967,9 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type8 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type { get { return "Effect"; } }
+        public string Type { get { return $"Effect ({EepkType})"; } }
+        [YAXDontSerialize]
+        public override int TypeID => 8;
 
 
         public enum EepkTypeEnum : ushort
@@ -2102,7 +2145,9 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type9 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type { get { return "Projectile"; } }
+        public string Type { get { return $"Projectile ({BsaType})"; } }
+        [YAXDontSerialize]
+        public override int TypeID => 9;
 
         public enum BsaTypeEnum : byte
         {
@@ -2336,10 +2381,12 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type10 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type { get { return "Camera"; } }
+        public string Type { get { return $"Camera ({EanType})"; } }
+        [YAXDontSerialize]
+        public override int TypeID => 10;
 
 
-        public enum EanType : ushort
+        public enum EanTypeEnum : ushort
         {
             Target = 0,
             Common = 3,
@@ -2360,13 +2407,13 @@ namespace Xv2CoreLib.BAC
             Unk16 = 0x80
         }
 
-        [YAXAttributeFor("EAN_TO_USE")]
+        [YAXAttributeFor("EanType")]
         [YAXSerializeAs("value")]
-        public EanType Ean_Type { get; set; } = EanType.Common;
+        public EanTypeEnum EanType { get; set; } = EanTypeEnum.Common;
         [YAXAttributeFor("BoneToFocusOn")]
         [YAXSerializeAs("value")]
         public BoneLinks BoneLink { get; set; }
-        [YAXAttributeFor("EAN_Index")]
+        [YAXAttributeFor("EanIndex")]
         [YAXSerializeAs("value")]
         public ushort EanIndex { get; set; } //ushort
         [YAXAttributeFor("StartFrame")]
@@ -2380,96 +2427,96 @@ namespace Xv2CoreLib.BAC
         public ushort GlobalModiferDuration { get; set; }
         [YAXAttributeFor("EnableTransformModifers")]
         [YAXSerializeAs("value")]
-        public bool I_74_7 { get; set; } //I_74_7
+        public bool EnableTransformModifiers { get; set; } //I_74_7
         [YAXAttributeFor("Position")]
         [YAXSerializeAs("X")]
         [YAXFormat("0.0###########")]
-        public float F_40 { get; set; }
+        public float PositionX { get; set; }
         [YAXAttributeFor("Position")]
         [YAXSerializeAs("Y")]
         [YAXFormat("0.0###########")]
-        public float F_44 { get; set; }
+        public float PositionY { get; set; }
         [YAXAttributeFor("Position")]
         [YAXSerializeAs("Z")]
         [YAXFormat("0.0###########")]
-        public float F_20 { get; set; }
+        public float PositionZ { get; set; }
         [YAXAttributeFor("Rotation")]
         [YAXSerializeAs("X")]
         [YAXFormat("0.0###########")]
-        public float F_32 { get; set; }
+        public float RotationX { get; set; }
         [YAXAttributeFor("Rotation")]
         [YAXSerializeAs("Y")]
         [YAXFormat("0.0###########")]
-        public float F_36 { get; set; }
+        public float RotationY { get; set; }
         [YAXAttributeFor("Rotation")]
         [YAXSerializeAs("Z")]
         [YAXFormat("0.0###########")]
-        public float F_52 { get; set; }
+        public float RotationZ { get; set; }
         [YAXAttributeFor("Displacement")]
         [YAXSerializeAs("XZ")]
         [YAXFormat("0.0###########")]
-        public float F_24 { get; set; }
+        public float DisplacementXZ { get; set; }
         [YAXAttributeFor("Displacement")]
         [YAXSerializeAs("ZY")]
         [YAXFormat("0.0###########")]
-        public float F_28 { get; set; }
+        public float DisplacementZY { get; set; }
         [YAXAttributeFor("FieldOfView")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0###########")]
-        public float F_48 { get; set; }
+        public float FieldOfView { get; set; }
 
         [YAXAttributeFor("PositionDuration")]
         [YAXSerializeAs("X")]
-        public ushort I_66 { get; set; }
+        public ushort PositionX_Duration { get; set; }
         [YAXAttributeFor("PositionDuration")]
         [YAXSerializeAs("Y")]
-        public ushort I_68 { get; set; }
+        public ushort PositionY_Duration { get; set; }
         [YAXAttributeFor("PositionDuration")]
         [YAXSerializeAs("Z")]
-        public ushort I_56 { get; set; }
+        public ushort PositionZ_Duration { get; set; }
 
         [YAXAttributeFor("RotationDuration")]
         [YAXSerializeAs("X")]
-        public ushort I_62 { get; set; }
+        public ushort RotationX_Duration { get; set; }
         [YAXAttributeFor("RotationDuration")]
         [YAXSerializeAs("Y")]
-        public ushort I_64 { get; set; }
+        public ushort RotationY_Duration { get; set; }
         [YAXAttributeFor("RotationDuration")]
         [YAXSerializeAs("Z")]
-        public ushort I_72 { get; set; }
+        public ushort RotationZ_Duration { get; set; }
 
         [YAXAttributeFor("DisplacementDuration")]
         [YAXSerializeAs("XZ")]
-        public ushort I_58 { get; set; }
+        public ushort DisplacementXZ_Duration { get; set; }
         [YAXAttributeFor("DisplacementDuration")]
         [YAXSerializeAs("ZY")]
-        public ushort I_60 { get; set; }
+        public ushort DisplacementZY_Duration { get; set; }
 
         [YAXAttributeFor("FieldOfViewDuration")]
         [YAXSerializeAs("value")]
-        public ushort I_70 { get; set; }
+        public ushort FieldOfView_Duration { get; set; }
 
         [YAXAttributeFor("EnableCameraForAllPlayers")]
         [YAXSerializeAs("value")]
-        public bool I_74_0 { get; set; }
+        public bool EnableCameraForAllPlayers { get; set; } //I_74_0
         [YAXAttributeFor("Flag_74")]
         [YAXSerializeAs("Unk1")]
-        public bool I_74_1 { get; set; }
+        public bool I_74_1 { get; set; } //I_74_1
         [YAXAttributeFor("FocusOnTarget")]
         [YAXSerializeAs("value")]
-        public bool I_74_2 { get; set; }
+        public bool FocusOnTarget { get; set; } //I_74_2
         [YAXAttributeFor("UseCharacterSpecificCameraEan")]
         [YAXSerializeAs("value")]
-        public bool I_74_3 { get; set; }
+        public bool UseCharacterSpecificCameraEan { get; set; } //I_74_3
         [YAXAttributeFor("Flag_74")]
         [YAXSerializeAs("Unk4")]
-        public bool I_74_4 { get; set; }
+        public bool I_74_4 { get; set; } //I_74_4
         [YAXAttributeFor("Flag_74")]
         [YAXSerializeAs("Unk5")]
-        public bool I_74_5 { get; set; }
+        public bool I_74_5 { get; set; } //I_74_5
         [YAXAttributeFor("DontOverrideActiveCameras")]
         [YAXSerializeAs("value")]
-        public bool I_74_6 { get; set; }
+        public bool DontOverrideActiveCameras { get; set; } //I_74_6
 
 
         [YAXAttributeFor("ExtraFlags")]
@@ -2490,38 +2537,38 @@ namespace Xv2CoreLib.BAC
                     Duration = BitConverter.ToUInt16(rawBytes, offset + 2),
                     I_04 = BitConverter.ToUInt16(rawBytes, offset + 4),
                     Flags = BitConverter.ToUInt16(rawBytes, offset + 6),
-                    Ean_Type = (EanType)BitConverter.ToUInt16(rawBytes, offset + 8),
+                    EanType = (EanTypeEnum)BitConverter.ToUInt16(rawBytes, offset + 8),
                     BoneLink = (BoneLinks)BitConverter.ToUInt16(rawBytes, offset + 10),
                     EanIndex = BitConverter.ToUInt16(rawBytes, offset + 12),
                     StartFrame = BitConverter.ToUInt16(rawBytes, offset + 14),
                     I_16 = BitConverter.ToUInt16(rawBytes, offset + 16),
                     GlobalModiferDuration = BitConverter.ToUInt16(rawBytes, offset + 18),
-                    F_20 = BitConverter.ToSingle(rawBytes, offset + 20),
-                    F_24 = BitConverter.ToSingle(rawBytes, offset + 24),
-                    F_28 = BitConverter.ToSingle(rawBytes, offset + 28),
-                    F_32 = BitConverter.ToSingle(rawBytes, offset + 32),
-                    F_36 = BitConverter.ToSingle(rawBytes, offset + 36),
-                    F_40 = BitConverter.ToSingle(rawBytes, offset + 40),
-                    F_44 = BitConverter.ToSingle(rawBytes, offset + 44),
-                    F_48 = BitConverter.ToSingle(rawBytes, offset + 48),
-                    F_52 = BitConverter.ToSingle(rawBytes, offset + 52),
-                    I_56 = BitConverter.ToUInt16(rawBytes, offset + 56),
-                    I_58 = BitConverter.ToUInt16(rawBytes, offset + 58),
-                    I_60 = BitConverter.ToUInt16(rawBytes, offset + 60),
-                    I_62 = BitConverter.ToUInt16(rawBytes, offset + 62),
-                    I_64 = BitConverter.ToUInt16(rawBytes, offset + 64),
-                    I_66 = BitConverter.ToUInt16(rawBytes, offset + 66),
-                    I_68 = BitConverter.ToUInt16(rawBytes, offset + 68),
-                    I_70 = BitConverter.ToUInt16(rawBytes, offset + 70),
-                    I_72 = BitConverter.ToUInt16(rawBytes, offset + 72),
-                    I_74_0 = I_74[0],
+                    PositionZ = BitConverter.ToSingle(rawBytes, offset + 20),
+                    DisplacementXZ = BitConverter.ToSingle(rawBytes, offset + 24),
+                    DisplacementZY = BitConverter.ToSingle(rawBytes, offset + 28),
+                    RotationX = BitConverter.ToSingle(rawBytes, offset + 32),
+                    RotationY = BitConverter.ToSingle(rawBytes, offset + 36),
+                    PositionX = BitConverter.ToSingle(rawBytes, offset + 40),
+                    PositionY = BitConverter.ToSingle(rawBytes, offset + 44),
+                    FieldOfView = BitConverter.ToSingle(rawBytes, offset + 48),
+                    RotationZ = BitConverter.ToSingle(rawBytes, offset + 52),
+                    PositionZ_Duration = BitConverter.ToUInt16(rawBytes, offset + 56),
+                    DisplacementXZ_Duration = BitConverter.ToUInt16(rawBytes, offset + 58),
+                    DisplacementZY_Duration = BitConverter.ToUInt16(rawBytes, offset + 60),
+                    RotationX_Duration = BitConverter.ToUInt16(rawBytes, offset + 62),
+                    RotationY_Duration = BitConverter.ToUInt16(rawBytes, offset + 64),
+                    PositionX_Duration = BitConverter.ToUInt16(rawBytes, offset + 66),
+                    PositionY_Duration = BitConverter.ToUInt16(rawBytes, offset + 68),
+                    FieldOfView_Duration = BitConverter.ToUInt16(rawBytes, offset + 70),
+                    RotationZ_Duration = BitConverter.ToUInt16(rawBytes, offset + 72),
+                    EnableCameraForAllPlayers = I_74[0],
                     I_74_1 = I_74[1],
-                    I_74_2 = I_74[2],
-                    I_74_3 = I_74[3],
+                    FocusOnTarget = I_74[2],
+                    UseCharacterSpecificCameraEan = I_74[3],
                     I_74_4 = I_74[4],
                     I_74_5 = I_74[5],
-                    I_74_6 = I_74[6],
-                    I_74_7 = I_74[7],
+                    DontOverrideActiveCameras = I_74[6],
+                    EnableTransformModifiers = I_74[7],
                     cameraFlags2 = (CameraFlags2)rawBytes[offset + 75]
                 });
 
@@ -2537,36 +2584,36 @@ namespace Xv2CoreLib.BAC
 
             foreach (var type in types)
             {
-                BitArray I_74 = new BitArray(new bool[8] { type.I_74_0, type.I_74_1, type.I_74_2, type.I_74_3, type.I_74_4, type.I_74_5, type.I_74_6, type.I_74_7, });
+                BitArray I_74 = new BitArray(new bool[8] { type.EnableCameraForAllPlayers, type.I_74_1, type.FocusOnTarget, type.UseCharacterSpecificCameraEan, type.I_74_4, type.I_74_5, type.DontOverrideActiveCameras, type.EnableTransformModifiers, });
 
                 bytes.AddRange(BitConverter.GetBytes(type.StartTime));
                 bytes.AddRange(BitConverter.GetBytes(type.Duration));
                 bytes.AddRange(BitConverter.GetBytes(type.I_04));
                 bytes.AddRange(BitConverter.GetBytes(type.Flags));
-                bytes.AddRange(BitConverter.GetBytes((ushort)type.Ean_Type));
+                bytes.AddRange(BitConverter.GetBytes((ushort)type.EanType));
                 bytes.AddRange(BitConverter.GetBytes((ushort)type.BoneLink));
                 bytes.AddRange(BitConverter.GetBytes(type.EanIndex));
                 bytes.AddRange(BitConverter.GetBytes(type.StartFrame));
                 bytes.AddRange(BitConverter.GetBytes(type.I_16));
                 bytes.AddRange(BitConverter.GetBytes(type.GlobalModiferDuration));
-                bytes.AddRange(BitConverter.GetBytes(type.F_20));
-                bytes.AddRange(BitConverter.GetBytes(type.F_24));
-                bytes.AddRange(BitConverter.GetBytes(type.F_28));
-                bytes.AddRange(BitConverter.GetBytes(type.F_32));
-                bytes.AddRange(BitConverter.GetBytes(type.F_36));
-                bytes.AddRange(BitConverter.GetBytes(type.F_40));
-                bytes.AddRange(BitConverter.GetBytes(type.F_44));
-                bytes.AddRange(BitConverter.GetBytes(type.F_48));
-                bytes.AddRange(BitConverter.GetBytes(type.F_52));
-                bytes.AddRange(BitConverter.GetBytes(type.I_56));
-                bytes.AddRange(BitConverter.GetBytes(type.I_58));
-                bytes.AddRange(BitConverter.GetBytes(type.I_60));
-                bytes.AddRange(BitConverter.GetBytes(type.I_62));
-                bytes.AddRange(BitConverter.GetBytes(type.I_64));
-                bytes.AddRange(BitConverter.GetBytes(type.I_66));
-                bytes.AddRange(BitConverter.GetBytes(type.I_68));
-                bytes.AddRange(BitConverter.GetBytes(type.I_70));
-                bytes.AddRange(BitConverter.GetBytes(type.I_72));
+                bytes.AddRange(BitConverter.GetBytes(type.PositionZ));
+                bytes.AddRange(BitConverter.GetBytes(type.DisplacementXZ));
+                bytes.AddRange(BitConverter.GetBytes(type.DisplacementZY));
+                bytes.AddRange(BitConverter.GetBytes(type.RotationX));
+                bytes.AddRange(BitConverter.GetBytes(type.RotationY));
+                bytes.AddRange(BitConverter.GetBytes(type.PositionX));
+                bytes.AddRange(BitConverter.GetBytes(type.PositionY));
+                bytes.AddRange(BitConverter.GetBytes(type.FieldOfView));
+                bytes.AddRange(BitConverter.GetBytes(type.RotationZ));
+                bytes.AddRange(BitConverter.GetBytes(type.PositionZ_Duration));
+                bytes.AddRange(BitConverter.GetBytes(type.DisplacementXZ_Duration));
+                bytes.AddRange(BitConverter.GetBytes(type.DisplacementZY_Duration));
+                bytes.AddRange(BitConverter.GetBytes(type.RotationX_Duration));
+                bytes.AddRange(BitConverter.GetBytes(type.RotationY_Duration));
+                bytes.AddRange(BitConverter.GetBytes(type.PositionX_Duration));
+                bytes.AddRange(BitConverter.GetBytes(type.PositionY_Duration));
+                bytes.AddRange(BitConverter.GetBytes(type.FieldOfView_Duration));
+                bytes.AddRange(BitConverter.GetBytes(type.RotationZ_Duration));
                 bytes.Add(Utils.ConvertToByte(I_74));
                 bytes.Add((byte)type.cameraFlags2);
             }
@@ -2581,12 +2628,14 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type11 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type { get { return "Sound"; } }
+        public string Type { get { return $"Sound ({AcbType})"; } }
+        [YAXDontSerialize]
+        public override int TypeID => 11;
 
         #region NonSerialized
         [YAXDontSerialize]
         public ushort AcbTypeNumeric { get { return (ushort)AcbType; } set { AcbType = (AcbType)value; } }
-        #endregion
+#endregion
 
         [YAXAttributeFor("ACB")]
         [YAXSerializeAs("File")]
@@ -2651,7 +2700,9 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type12 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type { get { return "TargetingAssistance"; } }
+        public string Type { get { return $"TargetingAssistance ({Axis})"; } }
+        [YAXDontSerialize]
+        public override int TypeID => 12;
 
         [YAXAttributeFor("Axis")]
         [YAXSerializeAs("value")]
@@ -2705,7 +2756,9 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type13 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type { get { return "BcsPartSetInvisibility"; } }
+        public string Type { get { return $"BcsPartSetInvisibility ({Part}, {Visibility})"; } }
+        [YAXDontSerialize]
+        public override int TypeID => 13;
 
         [YAXAttributeFor("Part")]
         [YAXSerializeAs("value")]
@@ -2761,6 +2814,8 @@ namespace Xv2CoreLib.BAC
     {
         [YAXDontSerialize]
         public string Type { get { return "BoneModification"; } }
+        [YAXDontSerialize]
+        public override int TypeID => 14;
 
         [Flags]
         public enum AnimationModFlags : ushort
@@ -2836,7 +2891,19 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type15 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type { get { return "Functions"; } }
+        public string Type
+        {
+            get
+            {
+                string ret;
+                if (!ValuesDictionary.BAC.BacFunctionNames.TryGetValue(FunctionType, out ret))
+                    ret = FunctionType.ToString();
+
+                return $"Functions ({ret})";
+            }
+        }
+        [YAXDontSerialize]
+        public override int TypeID => 15;
 
 
         [YAXAttributeFor("Function")]
@@ -2918,6 +2985,8 @@ namespace Xv2CoreLib.BAC
     {
         [YAXDontSerialize]
         public string Type { get { return "ScreenEffect"; } }
+        [YAXDontSerialize]
+        public override int TypeID => 16;
 
         [Flags]
         public enum ScreenEffectFlagsEnum : ushort
@@ -3027,6 +3096,8 @@ namespace Xv2CoreLib.BAC
     {
         [YAXDontSerialize]
         public string Type { get { return "ThrowHandler"; } }
+        [YAXDontSerialize]
+        public override int TypeID => 17;
 
         [Flags]
         public enum ThrowHandlerFlagsEnum : ushort
@@ -3165,7 +3236,9 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type18 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type { get { return "PhysicsObject"; } }
+        public string Type { get { return $"PhysicsObject ({Function})"; } }
+        [YAXDontSerialize]
+        public override int TypeID => 18;
 
         public enum FunctionType : ushort
         {
@@ -3259,7 +3332,9 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type19 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type { get { return "Aura"; } }
+        public string Type { get { return $"Aura ({AuraType})"; } }
+        [YAXDontSerialize]
+        public override int TypeID => 19;
 
         [Flags]
         public enum AuraFlagsEnum : ushort
@@ -3341,7 +3416,9 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type20 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type { get { return "HomingMovement"; } }
+        public string Type { get { return $"HomingMovement ({HomingMovementType})"; } }
+        [YAXDontSerialize]
+        public override int TypeID => 20;
 
         public enum HomingType : ushort
         {
@@ -3497,7 +3574,9 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type21 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type { get { return "EyeMovement"; } }
+        public string Type { get { return $"EyeMovement ({EyeDirectionNext})"; } }
+        [YAXDontSerialize]
+        public override int TypeID => 21;
 
         public enum EyeDirection : ushort
         {
@@ -3597,6 +3676,8 @@ namespace Xv2CoreLib.BAC
     {
         [YAXDontSerialize]
         public string Type { get { return "BAC_Type22"; } }
+        [YAXDontSerialize]
+        public override int TypeID => 22;
 
 
         [YAXAttributeFor("I_08")]
@@ -3671,6 +3752,8 @@ namespace Xv2CoreLib.BAC
     {
         [YAXDontSerialize]
         public string Type { get { return "TransparencyEffect"; } }
+        [YAXDontSerialize]
+        public override int TypeID => 23;
 
         [Flags]
         public enum TransparencyFlagsEnum : byte
@@ -3835,6 +3918,8 @@ namespace Xv2CoreLib.BAC
     {
         [YAXDontSerialize]
         public string Type { get { return "DualSkillHandler"; } }
+        [YAXDontSerialize]
+        public override int TypeID => 24;
 
         [Flags]
         public enum DualSkillHandlerFlagsEnum : ushort
@@ -3993,6 +4078,8 @@ namespace Xv2CoreLib.BAC
     {
         [YAXDontSerialize]
         public string Type { get { return "ExtendedChargeControl"; } }
+        [YAXDontSerialize]
+        public override int TypeID => 25;
 
 
         [YAXAttributeFor("I_08")]
@@ -4048,6 +4135,8 @@ namespace Xv2CoreLib.BAC
     {
         [YAXDontSerialize]
         public string Type { get { return "BAC_Type26"; } }
+        [YAXDontSerialize]
+        public override int TypeID => 26;
 
 
         [YAXAttributeFor("I_08")]
@@ -4200,7 +4289,9 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type27 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type { get { return "EffectPropertyControl"; } }
+        public string Type { get { return $"EffectPropertyControl ({SkillType})"; } }
+        [YAXDontSerialize]
+        public override int TypeID => 27;
 
 
         [YAXAttributeFor("SkillID")]
@@ -4287,7 +4378,7 @@ namespace Xv2CoreLib.BAC
     }
 
 
-    #region Enums
+#region Enums
     public enum AcbType : ushort
     {
         Common_SE = 0,
@@ -4385,6 +4476,6 @@ namespace Xv2CoreLib.BAC
         g_x_CAM = 0x17,
         g_x_LND = 0x18
     }
-    #endregion
+#endregion
 
 }

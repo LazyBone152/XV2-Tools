@@ -5908,13 +5908,13 @@ namespace Xv2CoreLib.SAV
                 case 51:
                     return 154; //SSB Gogeta
                 case 52:
-                    return 139; //Goku Black Rose
-                case 53:
-                    return 148; //Android 17 (DB Super)
-                case 54:
-                    return 88; //Jenemba
-                case 55:
                     return 147; //Tapion
+                case 53:
+                    return 139; //Goku Black Rose
+                case 54:
+                    return 148; //Android 17 (DB Super)
+                case 55:
+                    return 88; //Jenemba
                 case 56:
                     return 155; //Broly (FSS)
                 case 57:

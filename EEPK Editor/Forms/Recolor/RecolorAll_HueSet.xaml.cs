@@ -40,7 +40,7 @@ namespace EEPK_Organiser.Forms.Recolor
 
         private AssetType assetType = AssetType.EMO;
         private Asset asset = null;
-        private Material material = null;
+        private EmmMaterial material = null;
         private EffectContainerFile effectContainerFile = null;
         private ParticleEffect particleEffect = null;
 
@@ -148,7 +148,7 @@ namespace EEPK_Organiser.Forms.Recolor
         /// Hue shift a material.
         /// </summary>
         /// <param name="_material"></param>
-        public RecolorAll_HueSet(Material _material, Window parent)
+        public RecolorAll_HueSet(EmmMaterial _material, Window parent)
         {
             currentMode = Mode.Material;
             material = _material;

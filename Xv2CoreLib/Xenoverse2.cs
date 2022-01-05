@@ -32,6 +32,8 @@ using Xv2CoreLib.PSC;
 using System.Globalization;
 using System.Text;
 using static Xv2CoreLib.Xenoverse2;
+using Xv2CoreLib.EMB_CLASS;
+using Xv2CoreLib.EMM;
 
 namespace Xv2CoreLib
 {
@@ -167,7 +169,7 @@ namespace Xv2CoreLib
         private MSG_File[] btlHudMsgFile = new MSG_File[(int)Language.NumLanguages];
 
         //Misc variables
-        private Xv2FileIO fileIO;
+        public Xv2FileIO fileIO { get; private set; }
         public Language PreferedLanguage = Language.English;
         public bool IsInitialized = false;
 
@@ -1078,7 +1080,7 @@ namespace Xv2CoreLib
                 moveFiles.VoxAcbPath.Add(acbPath);
 
                 if (loadFiles)
-                    moveFiles.VoxAcbFile.Add(new Xv2File<ACB_Wrapper>((ACB_Wrapper)GetParsedFileFromGame(acbPath), fileIO.PathInGameDir(acbPath), borrowed, shortName, english, MoveFileTypes.VOX_ACB, (int)csoEntry.Costume, true, MoveType.Character));
+                    moveFiles.VoxAcbFile.Add(new Xv2File<ACB_Wrapper>((ACB_Wrapper)GetParsedFileFromGame(acbPath), fileIO.PathInGameDir(acbPath), borrowed, null, english, MoveFileTypes.VOX_ACB, (int)csoEntry.Costume, true, MoveType.Character));
 
                 loadedFiles.Add(acbPath);
             }
@@ -1533,6 +1535,10 @@ namespace Xv2CoreLib
                     return ESK_File.Load(GetBytesFromGameWrapper(path, onlyFromCpk, raiseEx));
                 case ".emd":
                     return EMD_File.Load(GetBytesFromGameWrapper(path, onlyFromCpk, raiseEx));
+                case ".emb":
+                    return EMB_File.LoadEmb(GetBytesFromGameWrapper(path, onlyFromCpk, raiseEx));
+                case ".emm":
+                    return EMM_File.LoadEmm(GetBytesFromGameWrapper(path, onlyFromCpk, raiseEx));
                 case ".msg":
                     return MSG_File.Load(GetBytesFromGameWrapper(path, onlyFromCpk, raiseEx));
                 case ".psc":
@@ -1612,6 +1618,12 @@ namespace Xv2CoreLib
                     return ((PUP_File)data).SaveToBytes();
                 case ".psc":
                     return ((PSC_File)data).SaveToBytes();
+                case ".emb":
+                    return ((EMB_File)data).SaveToBytes();
+                case ".emd":
+                    return ((EMD_File)data).SaveToBytes();
+                case ".emm":
+                    return ((EMM_File)data).SaveToBytes();
                 default:
                     throw new InvalidDataException(String.Format("Xenoverse2.GetBytesFromParsedFile: The filetype of \"{0}\" is not supported.", path));
             }

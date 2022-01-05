@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace Xv2CoreLib.DEM
@@ -176,7 +174,7 @@ namespace Xv2CoreLib.DEM
 
                     switch (type)
                     {
-                        case DEM_Type.DemoDataTypes.Type0_1_6:
+                        case DEM_Type.DemoDataTypes.TextureSwitch:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type0_1_6.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
                         case DEM_Type.DemoDataTypes.FadeInOut:
@@ -227,7 +225,7 @@ namespace Xv2CoreLib.DEM
                         case DEM_Type.DemoDataTypes.Type1_12_2:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type1_12_2.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
-                        case DEM_Type.DemoDataTypes.Type1_13_10:
+                        case DEM_Type.DemoDataTypes.EyeColor:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type1_13_10.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
                         case DEM_Type.DemoDataTypes.Type1_14_1:
@@ -359,7 +357,7 @@ namespace Xv2CoreLib.DEM
                         case DEM_Type.DemoDataTypes.YearDisplay:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type9_0_2.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
-                        case DEM_Type.DemoDataTypes.Type9_1_5:
+                        case DEM_Type.DemoDataTypes.Subtitle:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type9_1_5.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
                         case DEM_Type.DemoDataTypes.Type0_16_0:

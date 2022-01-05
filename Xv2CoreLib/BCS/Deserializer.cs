@@ -335,11 +335,11 @@ namespace Xv2CoreLib.BCS
                 
 
                 //Write bytes
-                bytes.AddRange(BitConverter.GetBytes(part.I_00));
-                bytes.AddRange(BitConverter.GetBytes(part.I_02));
-                bytes.AddRange(BitConverter.GetBytes(part.I_04));
+                bytes.AddRange(BitConverter.GetBytes(part.Model));
+                bytes.AddRange(BitConverter.GetBytes(part.Model2));
+                bytes.AddRange(BitConverter.GetBytes(part.Texture));
                 bytes.AddRange(new byte[10]);
-                bytes.AddRange(BitConverter.GetBytes(part.I_16));
+                bytes.AddRange(BitConverter.GetBytes(part.Shader));
                 bytes.AddRange(BitConverter.GetBytes((short)ColorSelectorsCount));
                 bytes.AddRange(new byte[4]);
                 bytes.AddRange(BitConverter.GetBytes(part.I_24));
@@ -350,38 +350,38 @@ namespace Xv2CoreLib.BCS
                 bytes.AddRange(BitConverter.GetBytes(part.I_44));
                 bytes.AddRange(BitConverter.GetBytes(part.I_48));
 
-                if (part.Str_52.Length > 4)
+                if (part.Name.Length > 4)
                 {
-                    throw new InvalidDataException(String.Format("\"{0}\" exceeds the maximum allowed length of 4 for the paramater \"Name\"", part.Str_52));
+                    throw new InvalidDataException(String.Format("\"{0}\" exceeds the maximum allowed length of 4 for the paramater \"Name\"", part.Name));
                 }
-                bytes.AddRange(Encoding.ASCII.GetBytes(part.Str_52));
-                bytes.AddRange(new byte[4 - part.Str_52.Length]);
+                bytes.AddRange(Encoding.ASCII.GetBytes(part.Name));
+                bytes.AddRange(new byte[4 - part.Name.Length]);
                 stringInfo.Add(new StringWriter.StringInfo()
                 {
                     Offset = bytes.Count(),
                     RelativeOffset = partStartOffset,
-                    StringToWrite = part.Str_56
+                    StringToWrite = part.EmdPath
                 });
                 bytes.AddRange(new byte[4]);
                 stringInfo.Add(new StringWriter.StringInfo()
                 {
                     Offset = bytes.Count(),
                     RelativeOffset = partStartOffset,
-                    StringToWrite = part.Str_60
+                    StringToWrite = part.EmmPath
                 });
                 bytes.AddRange(new byte[4]);
                 stringInfo.Add(new StringWriter.StringInfo()
                 {
                     Offset = bytes.Count(),
                     RelativeOffset = partStartOffset,
-                    StringToWrite = part.Str_64
+                    StringToWrite = part.EmbPath
                 });
                 bytes.AddRange(new byte[4]);
                 stringInfo.Add(new StringWriter.StringInfo()
                 {
                     Offset = bytes.Count(),
                     RelativeOffset = partStartOffset,
-                    StringToWrite = part.Str_68
+                    StringToWrite = part.EanPath
                 });
                 bytes.AddRange(new byte[6]);
                 bytes.AddRange(BitConverter.GetBytes((short)PhysicsObjectCount));

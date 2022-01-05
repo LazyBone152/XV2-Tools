@@ -202,7 +202,7 @@
 
                                             </Grid>
                                         </GroupBox>
-                                        <TextBox IsReadOnly="True" IsEnabled="False" Text="{Binding SelectedItem.Type_Texture.MaterialRef.Str_00, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="78,8,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="177"/>
+                                        <TextBox IsReadOnly="True" IsEnabled="False" Text="{Binding SelectedItem.Type_Texture.MaterialRef.Name, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="78,8,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="177"/>
                                         <Label Content="Material" HorizontalAlignment="Left" Margin="8,7,0,0" VerticalAlignment="Top" Width="64" HorizontalContentAlignment="Right"/>
                                         <GroupBox Header="Textures" ToolTip="The textures assigned to this Particle Effect." HorizontalAlignment="Left" Height="164" Margin="492,10,-9.636,0" VerticalAlignment="Top" Width="242">
                                             <Grid Margin="0,0,0.333,-5">
