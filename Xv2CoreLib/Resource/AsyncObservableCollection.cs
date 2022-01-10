@@ -241,6 +241,24 @@ namespace Xv2CoreLib.Resource
             return wasRemoved;
         }
 
+        public void Sort(Comparison<T> comparison)
+        {
+            lock (list)
+            {
+                list.Sort(comparison);
+
+                if (_observableList != null)
+                {
+                    lock (_observableList)
+                    {
+                        for(int i = 0; i < list.Count; i++)
+                        {
+                            _observableList[i] = list[i];
+                        }
+                    }
+                }
+            }
+        }
 
         private void Resync()
         {

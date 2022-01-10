@@ -29,9 +29,9 @@ namespace EEPK_Organiser
 
         public LoadFromGameHelper()
         {
-            CUS_File cusFile = (CUS_File)Xenoverse2.Instance.GetParsedFileFromGame(CUS_PATH);
-            CMS_File cmsFile = (CMS_File)Xenoverse2.Instance.GetParsedFileFromGame(CMS_PATH);
-            ERS_File ersFile = (ERS_File)Xenoverse2.Instance.GetParsedFileFromGame(ERS_PATH);
+            CUS_File cusFile = (CUS_File)FileManager.Instance.GetParsedFileFromGame(CUS_PATH);
+            CMS_File cmsFile = (CMS_File)FileManager.Instance.GetParsedFileFromGame(CMS_PATH);
+            ERS_File ersFile = (ERS_File)FileManager.Instance.GetParsedFileFromGame(ERS_PATH);
 
             characters = LoadCharacterNames(cmsFile, ersFile);
             superSkills = LoadSkillNames(CUS_File.SkillType.Super, cusFile, cmsFile);
@@ -47,7 +47,7 @@ namespace EEPK_Organiser
         {
             ObservableCollection<GameEntity> entities = new ObservableCollection<GameEntity>();
 
-            MSG_File characterMsgFile = (MSG_File)Xenoverse2.Instance.GetParsedFileFromGame(CHARACTER_MSG_PATH);
+            MSG_File characterMsgFile = (MSG_File)FileManager.Instance.GetParsedFileFromGame(CHARACTER_MSG_PATH);
 
             foreach(var ersEntry in ersFile.GetSubentryList(2))
             {
@@ -81,7 +81,7 @@ namespace EEPK_Organiser
         {
             ObservableCollection<GameEntity> entities = new ObservableCollection<GameEntity>();
             
-            MSG_File nameMsgFile = (skillType != CUS_File.SkillType.Blast) ? (MSG_File)Xenoverse2.Instance.GetParsedFileFromGame(string.Format("{0}en.msg", cusFile.GetNameMsgPath(skillType))) : null;
+            MSG_File nameMsgFile = (skillType != CUS_File.SkillType.Blast) ? (MSG_File)FileManager.Instance.GetParsedFileFromGame(string.Format("{0}en.msg", cusFile.GetNameMsgPath(skillType))) : null;
             string skillDir;
 
             List<Skill> skills;

@@ -110,7 +110,6 @@ namespace Xv2CoreLib
             }
 
             return entries;
-
         }
 
         public static List<T> SortEntries<T>(List<T> entries) where T : IInstallable, new()

@@ -67,19 +67,29 @@ namespace Xv2CoreLib.ESK
         public ESK_Unk1 Unk1 { get; set; }
 
         //Non-hierarchy list - Save it here for better performance when using GetBone. (mostly for XenoKit, since it needs to use this method several dozen times each frame)
-        public List<ESK_BoneNonHierarchal> listBones = null;
+        private List<ESK_Bone> _nonRecursiveBones = null;
+        public List<ESK_Bone> NonRecursiveBones
+        {
+            get
+            {
+                if (_nonRecursiveBones == null)
+                    CreateNonRecursiveBoneList();
+
+                return _nonRecursiveBones;
+            }
+        }
 
         #region Load/Save
         public byte[] Write(bool writeAbsTransform)
         {
             List<byte> bytes = new List<byte>();
 
-            List<ESK_BoneNonHierarchal> bones = GetNonHierarchalBoneList();
+            CreateNonRecursiveBoneList();
 
             //bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), offsetToReplace);
 
             int startOffset = bytes.Count();
-            int count = (bones != null) ? bones.Count() : 0;
+            int count = (NonRecursiveBones != null) ? NonRecursiveBones.Count : 0;
 
             bytes.AddRange(BitConverter.GetBytes((short)count));
             bytes.AddRange(BitConverter.GetBytes(I_02));
@@ -93,10 +103,10 @@ namespace Xv2CoreLib.ESK
 
                 for (int i = 0; i < count; i++)
                 {
-                    bytes.AddRange(BitConverter.GetBytes(bones[i].Index1));
-                    bytes.AddRange(BitConverter.GetBytes(bones[i].Index2));
-                    bytes.AddRange(BitConverter.GetBytes(bones[i].Index3));
-                    bytes.AddRange(BitConverter.GetBytes(bones[i].Index4));
+                    bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].Index1));
+                    bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].Index2));
+                    bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].Index3));
+                    bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].Index4));
                 }
 
                 //Writing Name Table and List
@@ -107,7 +117,7 @@ namespace Xv2CoreLib.ESK
                 {
                     stringInfo.Add(new StringWriter.StringInfo()
                     {
-                        StringToWrite = bones[i].Name,
+                        StringToWrite = NonRecursiveBones[i].Name,
                         Offset = bytes.Count(),
                         RelativeOffset = startOffset
                     });
@@ -127,18 +137,18 @@ namespace Xv2CoreLib.ESK
 
                 for (int i = 0; i < count; i++)
                 {
-                    bytes.AddRange(BitConverter.GetBytes(bones[i].RelativeTransform.F_00));
-                    bytes.AddRange(BitConverter.GetBytes(bones[i].RelativeTransform.F_04));
-                    bytes.AddRange(BitConverter.GetBytes(bones[i].RelativeTransform.F_08));
-                    bytes.AddRange(BitConverter.GetBytes(bones[i].RelativeTransform.F_12));
-                    bytes.AddRange(BitConverter.GetBytes(bones[i].RelativeTransform.F_16));
-                    bytes.AddRange(BitConverter.GetBytes(bones[i].RelativeTransform.F_20));
-                    bytes.AddRange(BitConverter.GetBytes(bones[i].RelativeTransform.F_24));
-                    bytes.AddRange(BitConverter.GetBytes(bones[i].RelativeTransform.F_28));
-                    bytes.AddRange(BitConverter.GetBytes(bones[i].RelativeTransform.F_32));
-                    bytes.AddRange(BitConverter.GetBytes(bones[i].RelativeTransform.F_36));
-                    bytes.AddRange(BitConverter.GetBytes(bones[i].RelativeTransform.F_40));
-                    bytes.AddRange(BitConverter.GetBytes(bones[i].RelativeTransform.F_44));
+                    bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].RelativeTransform.PositionX));
+                    bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].RelativeTransform.PositionY));
+                    bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].RelativeTransform.PositionZ));
+                    bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].RelativeTransform.PositionW));
+                    bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].RelativeTransform.RotationX));
+                    bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].RelativeTransform.RotationY));
+                    bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].RelativeTransform.RotationZ));
+                    bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].RelativeTransform.RotationW));
+                    bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].RelativeTransform.ScaleX));
+                    bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].RelativeTransform.ScaleY));
+                    bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].RelativeTransform.ScaleZ));
+                    bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].RelativeTransform.ScaleW));
                 }
 
                 if (writeAbsTransform)
@@ -149,22 +159,22 @@ namespace Xv2CoreLib.ESK
 
                     for (int i = 0; i < count; i++)
                     {
-                        bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_00));
-                        bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_04));
-                        bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_08));
-                        bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_12));
-                        bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_16));
-                        bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_20));
-                        bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_24));
-                        bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_28));
-                        bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_32));
-                        bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_36));
-                        bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_40));
-                        bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_44));
-                        bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_48));
-                        bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_52));
-                        bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_56));
-                        bytes.AddRange(BitConverter.GetBytes(bones[i].AbsoluteTransform.F_60));
+                        bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].AbsoluteTransform.F_00));
+                        bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].AbsoluteTransform.F_04));
+                        bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].AbsoluteTransform.F_08));
+                        bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].AbsoluteTransform.F_12));
+                        bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].AbsoluteTransform.F_16));
+                        bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].AbsoluteTransform.F_20));
+                        bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].AbsoluteTransform.F_24));
+                        bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].AbsoluteTransform.F_28));
+                        bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].AbsoluteTransform.F_32));
+                        bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].AbsoluteTransform.F_36));
+                        bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].AbsoluteTransform.F_40));
+                        bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].AbsoluteTransform.F_44));
+                        bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].AbsoluteTransform.F_48));
+                        bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].AbsoluteTransform.F_52));
+                        bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].AbsoluteTransform.F_56));
+                        bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].AbsoluteTransform.F_60));
                     }
                 }
 
@@ -237,6 +247,8 @@ namespace Xv2CoreLib.ESK
                 ESKBones = AsyncObservableCollection<ESK_Bone>.Create()
             };
 
+            short boneCount = BitConverter.ToInt16(rawBytes, offset);
+
             //Setting the offsets for the initial loop to use
             int[] offsets = GetBoneOffset(rawBytes, 0, offset);
             int boneIndexOffset = offsets[0];
@@ -252,15 +264,26 @@ namespace Xv2CoreLib.ESK
                 ESK_Bone parent = ESK_Bone.Read(rawBytes, offsets, _index, null, loadAbsTransform);
                 skeleton.ESKBones.Add(parent);
                 _index += 1;
-                if (BitConverter.ToInt16(rawBytes, boneIndexOffset + 2) != -1)
+
+                //Children
+                short childIdx = BitConverter.ToInt16(rawBytes, boneIndexOffset + 2);
+
+                //Fix for some files like "ZMG_000.esk" where the first bone doesn't reference the child.
+                if (childIdx == -1 && idx == 0 && boneCount > 1)
+                    childIdx = 1;
+
+                if (childIdx != -1)
                 {
-                    skeleton.ESKBones[idx].ESK_Bones = ParseChildrenBones(rawBytes, BitConverter.ToInt16(rawBytes, boneIndexOffset + 2), offset, parent, ref _index, loadAbsTransform);
+                    skeleton.ESKBones[idx].ESK_Bones = ParseChildrenBones(rawBytes, childIdx, offset, parent, ref _index, loadAbsTransform);
                 }
+
                 //Loop management
-                if (BitConverter.ToInt16(rawBytes, boneIndexOffset + 4) != -1)
+                short siblingIdx = BitConverter.ToInt16(rawBytes, boneIndexOffset + 4);
+
+                if (siblingIdx != -1)
                 {
                     //There is a sibling
-                    offsets = GetBoneOffset(rawBytes, BitConverter.ToInt16(rawBytes, boneIndexOffset + 4), offset);
+                    offsets = GetBoneOffset(rawBytes, siblingIdx, offset);
                     boneIndexOffset = offsets[0];
                     nameOffset = offsets[1];
                     skinningMatrixOffset = offsets[2];
@@ -350,7 +373,7 @@ namespace Xv2CoreLib.ESK
                 AddBone(parent, bone, false);
             }
 
-            listBones = GetNonHierarchalBoneList();
+            CreateNonRecursiveBoneList();
         }
 
         public bool AddBone(string parent, ESK_Bone boneToAdd, bool reloadListBones = true)
@@ -360,7 +383,7 @@ namespace Xv2CoreLib.ESK
                 ESKBones.Add(boneToAdd.Clone());
 
                 if(reloadListBones)
-                    listBones = GetNonHierarchalBoneList();
+                    CreateNonRecursiveBoneList();
 
                 return true;
             }
@@ -372,7 +395,7 @@ namespace Xv2CoreLib.ESK
                     ESKBones[i].ESK_Bones.Add(boneToAdd.Clone());
 
                     if (reloadListBones)
-                        listBones = GetNonHierarchalBoneList();
+                        CreateNonRecursiveBoneList();
 
                     return true;
                 }
@@ -384,7 +407,7 @@ namespace Xv2CoreLib.ESK
                     if (result == true)
                     {
                         if (reloadListBones)
-                            listBones = GetNonHierarchalBoneList();
+                            CreateNonRecursiveBoneList();
 
                         return true;
                     }
@@ -424,30 +447,11 @@ namespace Xv2CoreLib.ESK
         #region Get
         public ESK_Bone GetBone(string boneName)
         {
-            if (listBones == null)
-                listBones = GetNonHierarchalBoneList();
-
-            for (int i = 0; i < listBones.Count; i++)
-                if (listBones[i].Name == boneName)
-                    return listBones[i].GetAsEskBone();
+            for (int i = 0; i < NonRecursiveBones.Count; i++)
+                if (NonRecursiveBones[i].Name == boneName)
+                    return NonRecursiveBones[i];
 
             return null;
-        }
-
-        public static int IndexOf(string bone, List<ESK_BoneNonHierarchal> bones)
-        {
-            if (bones != null)
-            {
-                for (int i = 0; i < bones.Count; i++)
-                {
-                    if (bones[i].Name == bone)
-                    {
-                        return i;
-                    }
-                }
-            }
-
-            return -1;
         }
 
         public string NameOf(int index)
@@ -645,67 +649,40 @@ namespace Xv2CoreLib.ESK
             return String.Empty;
         }
 
-        public List<ESK_BoneNonHierarchal> GetNonHierarchalBoneList()
+
+        public void CreateNonRecursiveBoneList()
         {
-            List<ESK_BoneNonHierarchal> bones = new List<ESK_BoneNonHierarchal>();
-
-            //Generating the list
-            foreach (var bone in ESKBones)
+            List<ESK_Bone> CreateNonRecursiveBoneList_Rec(AsyncObservableCollection<ESK_Bone> eskBones)
             {
-                bones.Add(new ESK_BoneNonHierarchal()
-                {
-                    AbsoluteTransform = (bone.AbsoluteTransform != null) ? bone.AbsoluteTransform.Clone() : new ESK_AbsoluteTransform(),
-                    RelativeTransform = (bone.RelativeTransform != null) ? bone.RelativeTransform.Clone() : new ESK_RelativeTransform(),
-                    Name = bone.Name,
-                    Index1_Name = GetParent(bone.Name),
-                    Index2_Name = GetChild(bone.Name),
-                    Index3_Name = GetSibling(bone.Name),
-                    Index4 = bone.Index4
-                });
+                List<ESK_Bone> _bones = new List<ESK_Bone>();
 
-                if (bone.ESK_Bones != null)
+                foreach (var bone in eskBones)
                 {
-                    bones.AddRange(GetNonHierarchalBoneListRecursive(bone.ESK_Bones));
+                    _bones.Add(bone);
+
+                    if (bone.ESK_Bones != null)
+                    {
+                        _bones.AddRange(CreateNonRecursiveBoneList_Rec(bone.ESK_Bones));
+                    }
                 }
 
+                return _bones;
             }
+
+            List<ESK_Bone> bones = CreateNonRecursiveBoneList_Rec(ESKBones);
 
             //Setting index numbers
             for (int i = 0; i < bones.Count; i++)
             {
-                bones[i].Index1 = (short)IndexOf(bones[i].Index1_Name, bones);
-                bones[i].Index2 = (short)IndexOf(bones[i].Index2_Name, bones);
-                bones[i].Index3 = (short)IndexOf(bones[i].Index3_Name, bones);
+                bones[i].Index1_Name = GetParent(bones[i].Name);
+                bones[i].Index2_Name = GetChild(bones[i].Name);
+                bones[i].Index3_Name = GetSibling(bones[i].Name);
+                bones[i].Index1 = (short)bones.IndexOf(bones.FirstOrDefault(x => x.Name == bones[i].Index1_Name));
+                bones[i].Index2 = (short)bones.IndexOf(bones.FirstOrDefault(x => x.Name == bones[i].Index2_Name));
+                bones[i].Index3 = (short)bones.IndexOf(bones.FirstOrDefault(x => x.Name == bones[i].Index3_Name));
             }
 
-            //Returning the list
-            return bones;
-        }
-
-        private List<ESK_BoneNonHierarchal> GetNonHierarchalBoneListRecursive(AsyncObservableCollection<ESK_Bone> eskBones)
-        {
-            List<ESK_BoneNonHierarchal> bones = new List<ESK_BoneNonHierarchal>();
-
-            foreach (var bone in eskBones)
-            {
-                bones.Add(new ESK_BoneNonHierarchal()
-                {
-                    AbsoluteTransform = (bone.AbsoluteTransform != null) ? bone.AbsoluteTransform.Clone() : new ESK_AbsoluteTransform(),
-                    RelativeTransform = (bone.RelativeTransform != null) ? bone.RelativeTransform.Clone() : new ESK_RelativeTransform(),
-                    Name = bone.Name,
-                    Index1_Name = GetParent(bone.Name),
-                    Index2_Name = GetChild(bone.Name),
-                    Index3_Name = GetSibling(bone.Name),
-                    Index4 = bone.Index4
-                });
-
-                if (bone.ESK_Bones != null)
-                {
-                    bones.AddRange(GetNonHierarchalBoneListRecursive(bone.ESK_Bones));
-                }
-            }
-
-            return bones;
+            _nonRecursiveBones = bones;
         }
 
         #endregion
@@ -713,10 +690,7 @@ namespace Xv2CoreLib.ESK
         #region Helper
         public bool Exists(string boneName)
         {
-            if (listBones == null)
-                listBones = GetNonHierarchalBoneList();
-
-            foreach(var bone in listBones)
+            foreach(var bone in NonRecursiveBones)
             {
                 if (bone.Name == boneName) return true;
             }
@@ -817,6 +791,21 @@ namespace Xv2CoreLib.ESK
             }
         }
 
+        //For non-recursive bone list:
+        [YAXDontSerialize]
+        public short Index1 { get; set; }
+        [YAXDontSerialize]
+        public short Index2 { get; set; }
+        [YAXDontSerialize]
+        public short Index3 { get; set; }
+        [YAXDontSerialize]
+        public string Index1_Name { get; set; }
+        [YAXDontSerialize]
+        public string Index2_Name { get; set; }
+        [YAXDontSerialize]
+        public string Index3_Name { get; set; }
+
+
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Bone")]
         public AsyncObservableCollection<ESK_Bone> ESK_Bones { get; set; }
         
@@ -829,7 +818,14 @@ namespace Xv2CoreLib.ESK
                 RelativeTransform = RelativeTransform.Clone(),
                 AbsoluteTransform = AbsoluteTransform?.Clone(),
                 ESK_Bones = CloneChildrenRecursive(ESK_Bones),
-                isSelected = true
+                isSelected = true,
+                Index = Index,
+                Index1 = Index1,
+                Index2 = Index2, 
+                Index3 = Index3,
+                Index1_Name = Index1_Name,
+                Index2_Name = Index2_Name,
+                Index3_Name = Index3_Name
             };
         }
 
@@ -907,70 +903,70 @@ namespace Xv2CoreLib.ESK
         [YAXAttributeFor("Position")]
         [YAXSerializeAs("X")]
         [YAXFormat("0.0##########")]
-        public float F_00 { get; set; }
+        public float PositionX { get; set; }
         [YAXAttributeFor("Position")]
         [YAXSerializeAs("Y")]
         [YAXFormat("0.0##########")]
-        public float F_04 { get; set; }
+        public float PositionY { get; set; }
         [YAXAttributeFor("Position")]
         [YAXSerializeAs("Z")]
         [YAXFormat("0.0##########")]
-        public float F_08 { get; set; }
+        public float PositionZ { get; set; }
         [YAXAttributeFor("Position")]
         [YAXSerializeAs("W")]
         [YAXFormat("0.0##########")]
-        public float F_12 { get; set; }
+        public float PositionW { get; set; }
 
         [YAXAttributeFor("Rotation")]
         [YAXSerializeAs("X")]
         [YAXFormat("0.0##########")]
-        public float F_16 { get; set; }
+        public float RotationX { get; set; }
         [YAXAttributeFor("Rotation")]
         [YAXSerializeAs("Y")]
         [YAXFormat("0.0##########")]
-        public float F_20 { get; set; }
+        public float RotationY { get; set; }
         [YAXAttributeFor("Rotation")]
         [YAXSerializeAs("Z")]
         [YAXFormat("0.0##########")]
-        public float F_24 { get; set; }
+        public float RotationZ { get; set; }
         [YAXAttributeFor("Rotation")]
         [YAXSerializeAs("W")]
         [YAXFormat("0.0##########")]
-        public float F_28 { get; set; }
+        public float RotationW { get; set; }
 
         [YAXAttributeFor("Scale")]
         [YAXSerializeAs("X")]
         [YAXFormat("0.0##########")]
-        public float F_32 { get; set; }
+        public float ScaleX { get; set; }
         [YAXAttributeFor("Scale")]
         [YAXSerializeAs("Y")]
         [YAXFormat("0.0##########")]
-        public float F_36 { get; set; }
+        public float ScaleY { get; set; }
         [YAXAttributeFor("Scale")]
         [YAXSerializeAs("Z")]
         [YAXFormat("0.0##########")]
-        public float F_40 { get; set; }
+        public float ScaleZ { get; set; }
         [YAXAttributeFor("Scale")]
         [YAXSerializeAs("W")]
         [YAXFormat("0.0##########")]
-        public float F_44 { get; set; }
+        public float ScaleW { get; set; }
 
         public ESK_RelativeTransform Clone()
         {
             return new ESK_RelativeTransform()
             {
-                F_00 = F_00,
-                F_04 = F_04,
-                F_08 = F_08,
-                F_12 = F_12,
-                F_16 = F_16,
-                F_20 = F_20,
-                F_24 = F_24,
-                F_28 = F_28,
-                F_32 = F_32,
-                F_36 = F_36,
-                F_40 = F_40,
-                F_44 = F_44
+                PositionX = PositionX,
+                PositionY = PositionY,
+                PositionZ = PositionZ,
+                PositionW = PositionW,
+                RotationX = RotationX,
+                RotationY = RotationY,
+                RotationZ = RotationZ,
+                RotationW = RotationW,
+                ScaleX = ScaleX,
+                ScaleY = ScaleY,
+                ScaleZ = ScaleZ,
+                ScaleW = ScaleW
             };
         }
         
@@ -980,18 +976,18 @@ namespace Xv2CoreLib.ESK
 
             return new ESK_RelativeTransform()
             {
-                F_00 = BitConverter.ToSingle(bytes, offset + 0),
-                F_04 = BitConverter.ToSingle(bytes, offset + 4),
-                F_08 = BitConverter.ToSingle(bytes, offset + 8),
-                F_12 = BitConverter.ToSingle(bytes, offset + 12),
-                F_16 = BitConverter.ToSingle(bytes, offset + 16),
-                F_20 = BitConverter.ToSingle(bytes, offset + 20),
-                F_24 = BitConverter.ToSingle(bytes, offset + 24),
-                F_28 = BitConverter.ToSingle(bytes, offset + 28),
-                F_32 = BitConverter.ToSingle(bytes, offset + 32),
-                F_36 = BitConverter.ToSingle(bytes, offset + 36),
-                F_40 = BitConverter.ToSingle(bytes, offset + 40),
-                F_44 = BitConverter.ToSingle(bytes, offset + 44)
+                PositionX = BitConverter.ToSingle(bytes, offset + 0),
+                PositionY = BitConverter.ToSingle(bytes, offset + 4),
+                PositionZ = BitConverter.ToSingle(bytes, offset + 8),
+                PositionW = BitConverter.ToSingle(bytes, offset + 12),
+                RotationX = BitConverter.ToSingle(bytes, offset + 16),
+                RotationY = BitConverter.ToSingle(bytes, offset + 20),
+                RotationZ = BitConverter.ToSingle(bytes, offset + 24),
+                RotationW = BitConverter.ToSingle(bytes, offset + 28),
+                ScaleX = BitConverter.ToSingle(bytes, offset + 32),
+                ScaleY = BitConverter.ToSingle(bytes, offset + 36),
+                ScaleZ = BitConverter.ToSingle(bytes, offset + 40),
+                ScaleW = BitConverter.ToSingle(bytes, offset + 44)
             };
         }
 
@@ -1001,26 +997,26 @@ namespace Xv2CoreLib.ESK
         {
             Matrix4x4 matrix = Matrix4x4.Identity;
 
-            matrix *= Matrix4x4.CreateScale(new Vector3(F_32, F_36, F_40) * F_44);
-            matrix *= Matrix4x4.CreateFromQuaternion(new Quaternion(F_16, F_20, F_24, F_28));
-            matrix *= Matrix4x4.CreateTranslation(new Vector3(F_00, F_04, F_08) * F_12);
+            matrix *= Matrix4x4.CreateScale(new Vector3(ScaleX, ScaleY, ScaleZ) * ScaleW);
+            matrix *= Matrix4x4.CreateFromQuaternion(new Quaternion(RotationX, RotationY, RotationZ, RotationW));
+            matrix *= Matrix4x4.CreateTranslation(new Vector3(PositionX, PositionY, PositionZ) * PositionW);
 
             return matrix;
         }
 
         public EAN_Keyframe ToEanPosKeyframe(int frame = 0)
         {
-            return new EAN_Keyframe((ushort)frame, F_00, F_04, F_08, F_12);
+            return new EAN_Keyframe((ushort)frame, PositionX, PositionY, PositionZ, PositionW);
         }
 
         public EAN_Keyframe ToEanRotKeyframe(int frame = 0)
         {
-            return new EAN_Keyframe((ushort)frame, F_16, F_20, F_24, F_28);
+            return new EAN_Keyframe((ushort)frame, RotationX, RotationY, RotationZ, RotationW);
         }
 
         public EAN_Keyframe ToEanScaleKeyframe(int frame = 0)
         {
-            return new EAN_Keyframe((ushort)frame, F_32, F_36, F_40, F_44);
+            return new EAN_Keyframe((ushort)frame, ScaleX, ScaleY, ScaleZ, ScaleW);
         }
         #endregion
     }
@@ -1292,56 +1288,5 @@ namespace Xv2CoreLib.ESK
     }
 
 
-    //Special, for rewriting binary file
-    [Serializable]
-    public class ESK_BoneNonHierarchal
-    {
-        public string Name { get; set; }
-        public short Index1 { get; set; }
-        public short Index2 { get; set; }
-        public short Index3 { get; set; }
-        public short Index4 { get; set; }
-
-
-        public string Index1_Name { get; set; }
-        public string Index2_Name { get; set; }
-        public string Index3_Name { get; set; }
-
-        //Transforms
-        public ESK_RelativeTransform RelativeTransform { get; set; }
-        public ESK_AbsoluteTransform AbsoluteTransform { get; set; }
-
-        public ESK_BoneNonHierarchal Clone()
-        {
-            return new ESK_BoneNonHierarchal()
-            {
-                Name = Name,
-                Index1 = Index1,
-                Index1_Name = Index1_Name,
-                Index2 = Index2,
-                Index2_Name = Index2_Name,
-                Index3 =Index3,
-                Index3_Name = Index3_Name,
-                Index4 = Index4,
-                AbsoluteTransform = AbsoluteTransform.Clone(),
-                RelativeTransform = RelativeTransform.Clone()
-            };
-        }
-
-
-        public ESK_Bone GetAsEskBone()
-        {
-            return new ESK_Bone()
-            {
-                isSelected = true,
-                Index4 = Index4,
-                ESK_Bones = AsyncObservableCollection<ESK_Bone>.Create(),
-                Name = (string)Name.Clone(),
-                RelativeTransform = RelativeTransform.Clone(),
-                AbsoluteTransform = AbsoluteTransform?.Clone()
-            };
-        }
-
-    }
 
 }

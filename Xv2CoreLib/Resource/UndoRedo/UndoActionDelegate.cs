@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Xv2CoreLib.Resource.UndoRedo
 {
@@ -62,8 +58,6 @@ namespace Xv2CoreLib.Resource.UndoRedo
                 this.args = args;
         }
 
-
-
         public void Undo()
         {
             if (isStatic)
@@ -86,6 +80,16 @@ namespace Xv2CoreLib.Resource.UndoRedo
             {
                 instance.GetType()?.GetMethod(redoFunctionName)?.Invoke(instance, args);
             }
+        }
+
+        public override int GetHashCode()
+        {
+            int hash1 = (instance != null) ? instance.GetHashCode() : 1;
+            int hash2 = undoFunctionName.GetHashCode();
+            int hash3 = (redoFunctionName != null) ? redoFunctionName.GetHashCode() : 1;
+            int hash4 = (args != null) ? args.GetHashCode() : 1;
+
+            return hash1 ^ hash2 ^ hash3 ^ hash4;
         }
     }
 }

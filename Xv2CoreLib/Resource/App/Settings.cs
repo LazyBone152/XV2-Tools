@@ -327,9 +327,11 @@ namespace Xv2CoreLib.Resource.App
         private EepkFileCleanUp _fileCleanUp = EepkFileCleanUp.Prompt;
         private bool _autoContainerRename = true;
         private int _fileCacheLimit = 10;
-#endregion
+        #endregion
 
-#region Common
+        #region Common
+        public int SettingsVersion { get; set; } = 1;
+
         public bool UpdateNotifications { get; set; } = true;
         public string GameDirectory
         {
@@ -549,6 +551,7 @@ namespace Xv2CoreLib.Resource.App
         public bool XenoKit_PreserveCameraState { get; set; } = true;
         public bool XenoKit_RenderBoneNames { get; set; } = true;
         public bool XenoKit_RenderBoneNamesMouseOverOnly { get; set; } = true;
+        public bool XenoKit_RimLightingEnabled { get; set; } = true;
         internal int XenoKit_BacTypeSortMode { get; set; }
 
         //Enums, which are not-serialized directly

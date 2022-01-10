@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace Xv2CoreLib.BCS
@@ -22,16 +19,32 @@ namespace Xv2CoreLib.BCS
         Boots
     }
 
+    public enum Race : byte
+    {
+        Human = 0,
+        Saiyan = 1,
+        Namekian = 2,
+        FriezaRace = 3,
+        Majin = 4,
+        Other = 5
+    }
+
+    public enum Gender : byte
+    {
+        Male = 0,
+        Female = 1
+    }
+
     [YAXSerializeAs("BCS")]
     public class BCS_File : ISorting
     {
+
         [YAXAttributeFor("Race")]
         [YAXSerializeAs("value")]
-        [YAXFormat("X02")]
-        public byte Race { get; set; }
-        [YAXAttributeFor("Female")]
+        public Race Race { get; set; }
+        [YAXAttributeFor("Gender")]
         [YAXSerializeAs("value")]
-        public bool Sex { get; set; }
+        public Gender Gender { get; set; }
         [YAXAttributeFor("F_48")]
         [YAXSerializeAs("values")]
         [YAXFormat("0.0###########")]
@@ -108,6 +121,7 @@ namespace Xv2CoreLib.BCS
             }
 
         }
+
     }
 
     //PartSet
@@ -151,10 +165,73 @@ namespace Xv2CoreLib.BCS
         public Part Rist { get; set; }
         [YAXDontSerializeIfNull]
         public Part Boots { get; set; }
+
+        public Part GetPart(int index)
+        {
+            switch (index)
+            {
+                case 0:
+                    return FaceBase;
+                case 1:
+                    return FaceForehead;
+                case 2:
+                    return FaceEye;
+                case 3:
+                    return FaceNose;
+                case 4:
+                    return FaceEar;
+                case 5:
+                    return Hair;
+                case 6:
+                    return Bust;
+                case 7:
+                    return Pants;
+                case 8:
+                    return Rist;
+                case 9:
+                    return Boots;
+                default:
+                    throw new ArgumentException($"PartSet.GetPart: part index out of range ({index})");
+            }
+        }
+
+#if DEBUG
+        public List<Part> GetAllParts_DEBUG()
+        {
+            List<Part> parts = new List<Part>();
+
+            if (FaceBase != null) parts.Add(FaceBase);
+            if (FaceForehead != null) parts.Add(FaceForehead);
+            if (FaceEye != null) parts.Add(FaceEye);
+            if (FaceNose != null) parts.Add(FaceNose);
+            if (FaceEar != null) parts.Add(FaceEar);
+            if (Hair != null) parts.Add(Hair);
+            if (Bust != null) parts.Add(Bust);
+            if (Pants != null) parts.Add(Pants);
+            if (Rist != null) parts.Add(Rist);
+            if (Boots != null) parts.Add(Boots);
+
+            return parts;
+        }
+#endif
     }
 
     public class Part
     {
+        [Flags]
+        public enum PartFlags : int
+        {
+            Unk1 = 0x1, //Seemingly does nothing
+            DytFromTextureEmb = 0x2, //Both Model2 and Files_EMB
+            DytRampsFromTextureEmb = 0x4, //Untested
+            GreenScouterOverlay = 0x8,
+            RedScouterOverlay = 0x10,
+            BlueScouterOverlay = 0x20,
+            PurpleScouterOverlay = 0x40,
+            Unk8 = 0x80,
+            Unk9 = 0x100,
+            OrangeScouterOverlay = 0x200,
+        }
 
         [YAXAttributeFor("Model")]
         [YAXSerializeAs("value")]
@@ -168,10 +245,9 @@ namespace Xv2CoreLib.BCS
         [YAXAttributeFor("Shader")]
         [YAXSerializeAs("value")]
         public short Shader { get; set; }
-        [YAXAttributeFor("I_24")]
+        [YAXAttributeFor("PartFlags")]
         [YAXSerializeAs("value")]
-        [YAXHexValue]
-        public uint I_24 { get; set; }
+        public PartFlags Flags { get; set; }
 
         //Flags
         [YAXAttributeFor("HideParts")]
@@ -253,7 +329,7 @@ namespace Xv2CoreLib.BCS
         public int I_48 { get; set; }
         [YAXAttributeFor("Name")]
         [YAXSerializeAs("value")]
-        public string Name { get; set; }
+        public string CharaCode { get; set; }
         //Str
         [YAXAttributeFor("Files")]
         [YAXSerializeAs("EMD")]
@@ -278,68 +354,16 @@ namespace Xv2CoreLib.BCS
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Unk3")]
         public List<Unk3> Unk_3 { get; set; }
 
-        public string GetModelPath(PartType partType, int partSetIdx = -1)
+        public string GetModelPath(PartType partType)
         {
-            if ((EmdPath == "NULL" || String.IsNullOrWhiteSpace(EmdPath)) && Model != -1)
+            if (!string.IsNullOrWhiteSpace(EmdPath))
             {
-                //Use I_00
-                switch (partType)
-                {
-                    case PartType.FaceBase:
-                        return string.Format("chara/{0}/{0}_{1}_Face_base.emd", Name, Model.ToString("D3"));
-                    case PartType.FaceForehead:
-                        return string.Format("chara/{0}/{0}_{1}_Face_forehead.emd", Name, Model.ToString("D3"));
-                    case PartType.FaceEye:
-                        return string.Format("chara/{0}/{0}_{1}_Face_eye.emd", Name, Model.ToString("D3"));
-                    case PartType.FaceNose:
-                        return string.Format("chara/{0}/{0}_{1}_Face_nose.emd", Name, Model.ToString("D3"));
-                    case PartType.FaceEar:
-                        return string.Format("chara/{0}/{0}_{1}_Face_ear.emd", Name, Model.ToString("D3"));
-                    case PartType.Bust:
-                        return string.Format("chara/{0}/{0}_{1}_Bust.emd", Name, Model.ToString("D3"));
-                    case PartType.Boots:
-                        return string.Format("chara/{0}/{0}_{1}_Boots.emd", Name, Model.ToString("D3"));
-                    case PartType.Rist:
-                        return string.Format("chara/{0}/{0}_{1}_Rist.emd", Name, Model.ToString("D3"));
-                    case PartType.Hair:
-                        return string.Format("chara/{0}/{0}_{1}_Hair.emd", Name, Model.ToString("D3"));
-                    case PartType.Pants:
-                        return string.Format("chara/{0}/{0}_{1}_Pants.emd", Name, Model.ToString("D3"));
-                    default:
-                        throw new InvalidDataException("Invalid partType = " + partType);
-                }
+                return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.emd", CharaCode, EmdPath));
             }
-            else if (EmdPath != "NULL" && !String.IsNullOrWhiteSpace(EmdPath))
+            else if (Model != -1)
             {
-                return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.emd", Name, EmdPath));
-            }
-            else if(partSetIdx != -1)
-            {
-                switch (partType)
-                {
-                    case PartType.FaceBase:
-                        return string.Format("chara/{0}/{0}_{1}_Face_base.emd", Name, partSetIdx.ToString("D3"));
-                    case PartType.FaceForehead:
-                        return string.Format("chara/{0}/{0}_{1}_Face_forehead.emd", Name, partSetIdx.ToString("D3"));
-                    case PartType.FaceEye:
-                        return string.Format("chara/{0}/{0}_{1}_Face_eye.emd", Name, partSetIdx.ToString("D3"));
-                    case PartType.FaceNose:
-                        return string.Format("chara/{0}/{0}_{1}_Face_nose.emd", Name, partSetIdx.ToString("D3"));
-                    case PartType.FaceEar:
-                        return string.Format("chara/{0}/{0}_{1}_Face_ear.emd", Name, partSetIdx.ToString("D3"));
-                    case PartType.Bust:
-                        return string.Format("chara/{0}/{0}_{1}_Bust.emd", Name, partSetIdx.ToString("D3"));
-                    case PartType.Boots:
-                        return string.Format("chara/{0}/{0}_{1}_Boots.emd", Name, partSetIdx.ToString("D3"));
-                    case PartType.Rist:
-                        return string.Format("chara/{0}/{0}_{1}_Rist.emd", Name, partSetIdx.ToString("D3"));
-                    case PartType.Hair:
-                        return string.Format("chara/{0}/{0}_{1}_Hair.emd", Name, partSetIdx.ToString("D3"));
-                    case PartType.Pants:
-                        return string.Format("chara/{0}/{0}_{1}_Pants.emd", Name, partSetIdx.ToString("D3"));
-                    default:
-                        throw new InvalidDataException("Invalid partType = " + partType);
-                }
+                //Use Model1
+                return string.Format("{0}.emd", GetPath(Model, partType));
             }
             else
             {
@@ -348,85 +372,15 @@ namespace Xv2CoreLib.BCS
             }
         }
 
-        public string GetEmbPath(PartType partType)
-        {
-            if ((EmbPath == "NULL" || String.IsNullOrWhiteSpace(EmbPath)) && Model != -1)
-            {
-                switch (partType)
-                {
-                    case PartType.FaceBase:
-                        return string.Format("chara/{0}/{0}_{1}_Face_base.emb", Name, Model.ToString("D3"));
-                    case PartType.FaceForehead:
-                        return string.Format("chara/{0}/{0}_{1}_Face_forehead.emb", Name, Model.ToString("D3"));
-                    case PartType.FaceEye:
-                        return string.Format("chara/{0}/{0}_{1}_Face_eye.emb", Name, Model.ToString("D3"));
-                    case PartType.FaceNose:
-                        return string.Format("chara/{0}/{0}_{1}_Face_nose.emb", Name, Model.ToString("D3"));
-                    case PartType.FaceEar:
-                        return string.Format("chara/{0}/{0}_{1}_Face_ear.emb", Name, Model.ToString("D3"));
-                    case PartType.Bust:
-                        return string.Format("chara/{0}/{0}_{1}_Bust.emb", Name, Model.ToString("D3"));
-                    case PartType.Boots:
-                        return string.Format("chara/{0}/{0}_{1}_Boots.emb", Name, Model.ToString("D3"));
-                    case PartType.Rist:
-                        return string.Format("chara/{0}/{0}_{1}_Rist.emb", Name, Model.ToString("D3"));
-                    case PartType.Hair:
-                        return string.Format("chara/{0}/{0}_{1}_Hair.emb", Name, Model.ToString("D3"));
-                    case PartType.Pants:
-                        return string.Format("chara/{0}/{0}_{1}_Pants.emb", Name, Model.ToString("D3"));
-                    default:
-                        throw new InvalidDataException("Invalid partType = " + partType);
-                }
-            }
-            else if (EmbPath != "NULL" && !String.IsNullOrWhiteSpace(EmbPath))
-            {
-                return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.emb", Name, EmbPath));
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        public string GetDytPath(PartType partType, int partSetIdx = -1)
-        {
-            string emdPath = GetModelPath(partType, partSetIdx);
-            return string.Format("{0}/{1}.dyt.emb", Path.GetDirectoryName(emdPath), Path.GetFileNameWithoutExtension(emdPath));
-        }
-
         public string GetEmmPath(PartType partType)
         {
-            if ((EmmPath == "NULL" || String.IsNullOrWhiteSpace(EmmPath)) && Model != -1)
+            if (!String.IsNullOrWhiteSpace(EmmPath))
             {
-                switch (partType)
-                {
-                    case PartType.FaceBase:
-                        return string.Format("chara/{0}/{0}_{1}_Face_base.emm", Name, Model.ToString("D3"));
-                    case PartType.FaceForehead:
-                        return string.Format("chara/{0}/{0}_{1}_Face_forehead.emm", Name, Model.ToString("D3"));
-                    case PartType.FaceEye:
-                        return string.Format("chara/{0}/{0}_{1}_Face_eye.emm", Name, Model.ToString("D3"));
-                    case PartType.FaceNose:
-                        return string.Format("chara/{0}/{0}_{1}_Face_nose.emm", Name, Model.ToString("D3"));
-                    case PartType.FaceEar:
-                        return string.Format("chara/{0}/{0}_{1}_Face_ear.emm", Name, Model.ToString("D3"));
-                    case PartType.Bust:
-                        return string.Format("chara/{0}/{0}_{1}_Bust.emm", Name, Model.ToString("D3"));
-                    case PartType.Boots:
-                        return string.Format("chara/{0}/{0}_{1}_Boots.emm", Name, Model.ToString("D3"));
-                    case PartType.Rist:
-                        return string.Format("chara/{0}/{0}_{1}_Rist.emm", Name, Model.ToString("D3"));
-                    case PartType.Hair:
-                        return string.Format("chara/{0}/{0}_{1}_Hair.emm", Name, Model.ToString("D3"));
-                    case PartType.Pants:
-                        return string.Format("chara/{0}/{0}_{1}_Pants.emm", Name, Model.ToString("D3"));
-                    default:
-                        throw new InvalidDataException("Invalid partType = " + partType);
-                }
+                return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.emm", CharaCode, EmmPath));
             }
-            else if (EmmPath != "NULL" && !String.IsNullOrWhiteSpace(EmmPath))
+            else if (Model != -1)
             {
-                return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.emb", Name, EmmPath));
+                return string.Format("{0}.emm", GetPath(Model, partType));
             }
             else
             {
@@ -434,6 +388,74 @@ namespace Xv2CoreLib.BCS
             }
         }
 
+        public string GetEmbPath(PartType partType)
+        {
+            if (!String.IsNullOrWhiteSpace(EmbPath))
+            {
+                return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.emb", CharaCode, EmbPath));
+            }
+            else if (Model2 != -1)
+            {
+                return string.Format("{0}.emb", GetPath(Model2, partType));
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public string GetDytPath(PartType partType)
+        {
+            if (Flags.HasFlag(PartFlags.DytFromTextureEmb))
+            {
+                //Uses Model2/EmbPath
+                string embPath = GetEmbPath(partType);
+                if (string.IsNullOrWhiteSpace(embPath)) return null;
+
+                return string.Format("{0}/{1}.dyt.emb", Path.GetDirectoryName(embPath), Path.GetFileNameWithoutExtension(embPath));
+            }
+            else if(Model != -1)
+            {
+                //Uses Model1
+                return string.Format("{0}.dyt.emb", GetPath(Model, partType));
+            }
+
+            return null;
+        }
+
+        public string GetEanPath()
+        {
+            return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.ean", CharaCode, EanPath));
+        }
+
+        private string GetPath(int modelNumber, PartType partType)
+        {
+            switch (partType)
+            {
+                case PartType.FaceBase:
+                    return string.Format("chara/{0}/{0}_{1}_Face_base", CharaCode, modelNumber.ToString("D3"));
+                case PartType.FaceForehead:
+                    return string.Format("chara/{0}/{0}_{1}_Face_forehead", CharaCode, modelNumber.ToString("D3"));
+                case PartType.FaceEye:
+                    return string.Format("chara/{0}/{0}_{1}_Face_eye", CharaCode, modelNumber.ToString("D3"));
+                case PartType.FaceNose:
+                    return string.Format("chara/{0}/{0}_{1}_Face_nose", CharaCode, modelNumber.ToString("D3"));
+                case PartType.FaceEar:
+                    return string.Format("chara/{0}/{0}_{1}_Face_ear", CharaCode, modelNumber.ToString("D3"));
+                case PartType.Bust:
+                    return string.Format("chara/{0}/{0}_{1}_Bust", CharaCode, modelNumber.ToString("D3"));
+                case PartType.Boots:
+                    return string.Format("chara/{0}/{0}_{1}_Boots", CharaCode, modelNumber.ToString("D3"));
+                case PartType.Rist:
+                    return string.Format("chara/{0}/{0}_{1}_Rist", CharaCode, modelNumber.ToString("D3"));
+                case PartType.Hair:
+                    return string.Format("chara/{0}/{0}_{1}_Hair", CharaCode, modelNumber.ToString("D3"));
+                case PartType.Pants:
+                    return string.Format("chara/{0}/{0}_{1}_Pants", CharaCode, modelNumber.ToString("D3"));
+                default:
+                    throw new InvalidDataException("Invalid partType = " + partType);
+            }
+        }
 
     }
 
@@ -449,19 +471,18 @@ namespace Xv2CoreLib.BCS
 
     public class PhysicsObject
     {
-        [YAXAttributeFor("I_00")]
+        [YAXAttributeFor("Model1")]
         [YAXSerializeAs("value")]
         public short I_00 { get; set; }
-        [YAXAttributeFor("I_02")]
+        [YAXAttributeFor("Model2")]
         [YAXSerializeAs("value")]
         public short I_02 { get; set; }
         [YAXAttributeFor("Texture")]
         [YAXSerializeAs("value")]
         public short I_04 { get; set; }
-        [YAXAttributeFor("I_24")]
+        [YAXAttributeFor("Flags")]
         [YAXSerializeAs("value")]
-        [YAXHexValue]
-        public uint I_24 { get; set; }
+        public Part.PartFlags I_24 { get; set; }
 
 
         //Flags
@@ -529,7 +550,7 @@ namespace Xv2CoreLib.BCS
 
         [YAXAttributeFor("Name")]
         [YAXSerializeAs("value")]
-        public string Str_36 { get; set; }
+        public string CharaCode { get; set; }
 
         //Str
         [YAXAttributeFor("BoneToAttach")]
@@ -552,26 +573,44 @@ namespace Xv2CoreLib.BCS
         [YAXSerializeAs("SCD")]
         public string Files_SCD { get; set; }
 
-        public string GetModelPath(PartType partType)
+        public string GetModelPath()
         {
-            return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.emd", Str_36, Files_EMD));
+            return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.emd", CharaCode, Files_EMD));
         }
 
-        public string GetEmbPath(PartType partType)
+        public string GetEmbPath()
         {
-            return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.emb", Str_36, Files_EMB));
+            if(string.IsNullOrWhiteSpace(Files_EMB))
+                return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.emb", CharaCode, Files_EMD));
+            else
+                return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.emb", CharaCode, Files_EMB));
         }
 
-        public string GetEmmPath(PartType partType)
+        public string GetEmmPath()
         {
-            return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.emm", Str_36, Files_EMM));
+            if (string.IsNullOrWhiteSpace(Files_EMM))
+                return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.emm", CharaCode, Files_EMD));
+            else
+                return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.emm", CharaCode, Files_EMM));
         }
 
-        public string GetDytPath(PartType partType)
+        public string GetDytPath()
         {
-            return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.dyt.emb", Str_36, Files_EMD));
+            if (string.IsNullOrWhiteSpace(Files_EMB))
+                return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.dyt.emb", CharaCode, Files_EMD));
+            else
+                return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.dyt.emb", CharaCode, Files_EMB));
         }
 
+        public string GetEanPath()
+        {
+            return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.ean", CharaCode, Files_EAN));
+        }
+
+        public string GetScdPath()
+        {
+            return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.scd", CharaCode, Files_SCD));
+        }
     }
 
     public class Unk3

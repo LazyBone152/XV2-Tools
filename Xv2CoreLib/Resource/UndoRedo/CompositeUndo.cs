@@ -17,6 +17,27 @@ namespace Xv2CoreLib.Resource.UndoRedo
         {
             undos = (_undos != null) ? _undos : new List<IUndoRedo>();
             Message = message;
+
+            //Remove duplicate doLast actions
+            List<int> existing = new List<int>();
+
+            for (int i = undos.Count - 1; i >= 0; i--)
+            {
+                if (undos[i].doLast)
+                {
+                    int hash = undos[i].GetHashCode();
+
+                    if (existing.Contains(hash))
+                    {
+                        undos.RemoveAt(i);
+                        continue;
+                    }
+                    else
+                    {
+                        existing.Add(hash);
+                    }
+                }
+            }
         }
 
         public void Undo()

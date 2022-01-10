@@ -332,7 +332,13 @@
     <Compile Include="TTC\TTC_File.cs" />
     <Compile Include="UTF\UTF_File.cs" />
     <Compile Include="ValuesDictionary\BAC.cs" />
-    <Compile Include="Xenoverse2.cs" />
+    <Compile Include="Xenoverse2\FileManager.cs" />
+    <Compile Include="Xenoverse2\FileWatcher.cs" />
+    <Compile Include="Xenoverse2\Xenoverse2.cs" />
+    <Compile Include="Xenoverse2\Xv2Character.cs" />
+    <Compile Include="Xenoverse2\Xv2File.cs" />
+    <Compile Include="Xenoverse2\Xv2MoveFiles.cs" />
+    <Compile Include="Xenoverse2\Xv2Skill.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="costura32\AesCtrLibrary.dll" />

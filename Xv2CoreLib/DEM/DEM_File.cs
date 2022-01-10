@@ -283,7 +283,7 @@ namespace Xv2CoreLib.DEM
         {
             TextureSwitch, //0_1_6
             FadeInOut, //0_2_7
-            Type0_3_8,
+            Type0_3_8, //LightDir? (I_1 = Actor, F_2 - F_4 = LightDir1, F_5 - F_7 = LightDir2, I_8 = Transition time)... all guesses but values line up
             Type0_16_0,
             Type0_16_1,
             Type0_17_0,
@@ -327,8 +327,8 @@ namespace Xv2CoreLib.DEM
             Type3_4_2,
             Effect, //4_0_12
             ScreenEffect, //4_1_8
-            Type4_2_3,
-            Type4_3_5,
+            Type4_2_3, //Aura? (I_1 = Actor, I_2 = Aura, I_3 = On/Off)
+            Type4_3_5, //SetDoF?
             Type4_4_1,
             Type5_0_2,
             Sound, //5_0_3
@@ -2960,9 +2960,10 @@ namespace Xv2CoreLib.DEM
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
         public float F_3 { get; set; }
-        [YAXAttributeFor("I_4")]
+        [YAXAttributeFor("F_4")]
         [YAXSerializeAs("value")]
-        public int I_4 { get; set; }
+        [YAXFormat("0.0#########")]
+        public float F_4 { get; set; }
         [YAXAttributeFor("F_5")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
@@ -2982,7 +2983,7 @@ namespace Xv2CoreLib.DEM
                 I_1 = BitConverter.ToInt32(rawBytes, BitConverter.ToInt32(rawBytes, offset + 0)),
                 F_2 = BitConverter.ToSingle(rawBytes, BitConverter.ToInt32(rawBytes, offset + 8)),
                 F_3 = BitConverter.ToSingle(rawBytes, BitConverter.ToInt32(rawBytes, offset + 16)),
-                I_4 = BitConverter.ToInt32(rawBytes, BitConverter.ToInt32(rawBytes, offset + 24)),
+                F_4 = BitConverter.ToSingle(rawBytes, BitConverter.ToInt32(rawBytes, offset + 24)),
                 F_5 = BitConverter.ToSingle(rawBytes, BitConverter.ToInt32(rawBytes, offset + 32)),
                 F_6 = BitConverter.ToSingle(rawBytes, BitConverter.ToInt32(rawBytes, offset + 40)),
                 I_7 = BitConverter.ToInt32(rawBytes, BitConverter.ToInt32(rawBytes, offset + 48))
@@ -2997,7 +2998,7 @@ namespace Xv2CoreLib.DEM
             writer.WriteValue(I_1);
             writer.WriteValue(F_2);
             writer.WriteValue(F_3);
-            writer.WriteValue(I_4);
+            writer.WriteValue(F_4);
             writer.WriteValue(F_5);
             writer.WriteValue(F_6);
             writer.WriteValue(I_7);

@@ -17,16 +17,15 @@ namespace Xv2CoreLib.EAN
         string saveLocation;
         EAN_File eanFile;
         public List<byte> bytes = new List<byte>() { 35, 69, 65, 78, 254, 255, 32, 0 };
-        List<ESK_BoneNonHierarchal> nonHierarchalBones = null;
 
         public Deserializer(string location)
         {
             saveLocation = String.Format("{0}/{1}", Path.GetDirectoryName(location), Path.GetFileNameWithoutExtension(location));
             YAXSerializer serializer = new YAXSerializer(typeof(EAN_File), YAXSerializationOptions.DontSerializeNullObjects);
             eanFile = (EAN_File)serializer.DeserializeFromFile(location);
+            eanFile.Skeleton.CreateNonRecursiveBoneList();
             eanFile.ValidateAnimationIndexes();
             eanFile.SortEntries();
-            nonHierarchalBones = eanFile.Skeleton.GetNonHierarchalBoneList();
             ValidateAnimationBones();
             Write();
             File.WriteAllBytes(saveLocation, bytes.ToArray());
@@ -36,9 +35,9 @@ namespace Xv2CoreLib.EAN
         {
             saveLocation = location;
             eanFile = _eanFile;
+            eanFile.Skeleton.CreateNonRecursiveBoneList();
             eanFile.ValidateAnimationIndexes();
             eanFile.SortEntries();
-            nonHierarchalBones = eanFile.Skeleton.GetNonHierarchalBoneList();
             ValidateAnimationBones();
             Write();
             File.WriteAllBytes(saveLocation, bytes.ToArray());
@@ -47,9 +46,9 @@ namespace Xv2CoreLib.EAN
         public Deserializer(EAN_File _eanFile)
         {
             eanFile = _eanFile;
+            eanFile.Skeleton.CreateNonRecursiveBoneList();
             eanFile.ValidateAnimationIndexes();
             eanFile.SortEntries();
-            nonHierarchalBones = eanFile.Skeleton.GetNonHierarchalBoneList();
            
             ValidateAnimationBones();
            
@@ -72,7 +71,7 @@ namespace Xv2CoreLib.EAN
                 {
                     for (int a = eanFile.Animations[i].Nodes.Count - 1; a >= 0; a--)
                     {
-                        if(!nonHierarchalBones.Any(x => x.Name == eanFile.Animations[i].Nodes[a].BoneName))
+                        if(!eanFile.Skeleton.NonRecursiveBones.Any(x => x.Name == eanFile.Animations[i].Nodes[a].BoneName))
                         {
                             eanFile.Animations[i].Nodes.RemoveAt(a);
                         }
@@ -417,9 +416,9 @@ namespace Xv2CoreLib.EAN
 
         private short GetBoneIndex(string name, string animationName)
         {
-            for(int i = 0; i < nonHierarchalBones.Count(); i++)
+            for(int i = 0; i < eanFile.Skeleton.NonRecursiveBones.Count; i++)
             {
-                if(nonHierarchalBones[i].Name == name)
+                if(eanFile.Skeleton.NonRecursiveBones[i].Name == name)
                 {
                     return (short)i;
                 }

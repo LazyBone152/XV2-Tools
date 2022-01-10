@@ -76,7 +76,7 @@ namespace Xv2CoreLib.BCS
             
             //Header
             int I_18 = (bcsFile.SkeletonData2 != null) ? 1 : 0;
-            byte[] _i_44 = { bcsFile.Race, Convert.ToByte(bcsFile.Sex), 0, 0 };
+            byte[] _i_44 = { (byte)bcsFile.Race, (byte)bcsFile.Gender, 0, 0 };
             bytes.AddRange(BitConverter.GetBytes((short)PartSetCount));
             bytes.AddRange(BitConverter.GetBytes((short)PartColorCount));
             bytes.AddRange(BitConverter.GetBytes((short)BodyCount));
@@ -342,7 +342,7 @@ namespace Xv2CoreLib.BCS
                 bytes.AddRange(BitConverter.GetBytes(part.Shader));
                 bytes.AddRange(BitConverter.GetBytes((short)ColorSelectorsCount));
                 bytes.AddRange(new byte[4]);
-                bytes.AddRange(BitConverter.GetBytes(part.I_24));
+                bytes.AddRange(BitConverter.GetBytes((int)part.Flags));
                 bytes.AddRange(Utils.ConvertToByteArray(_i_28, 4));
                 bytes.AddRange(Utils.ConvertToByteArray(_i_32, 4));
                 bytes.AddRange(BitConverter.GetBytes(part.F_36));
@@ -350,12 +350,12 @@ namespace Xv2CoreLib.BCS
                 bytes.AddRange(BitConverter.GetBytes(part.I_44));
                 bytes.AddRange(BitConverter.GetBytes(part.I_48));
 
-                if (part.Name.Length > 4)
+                if (part.CharaCode.Length > 4)
                 {
-                    throw new InvalidDataException(String.Format("\"{0}\" exceeds the maximum allowed length of 4 for the paramater \"Name\"", part.Name));
+                    throw new InvalidDataException(String.Format("\"{0}\" exceeds the maximum allowed length of 4 for the paramater \"Name\"", part.CharaCode));
                 }
-                bytes.AddRange(Encoding.ASCII.GetBytes(part.Name));
-                bytes.AddRange(new byte[4 - part.Name.Length]);
+                bytes.AddRange(Encoding.ASCII.GetBytes(part.CharaCode));
+                bytes.AddRange(new byte[4 - part.CharaCode.Length]);
                 stringInfo.Add(new StringWriter.StringInfo()
                 {
                     Offset = bytes.Count(),
@@ -428,16 +428,15 @@ namespace Xv2CoreLib.BCS
                     bytes.AddRange(BitConverter.GetBytes(physicsObjects[i].I_02));
                     bytes.AddRange(BitConverter.GetBytes(physicsObjects[i].I_04));
                     bytes.AddRange(new byte[18]);
-                    bytes.AddRange(BitConverter.GetBytes(physicsObjects[i].I_24));
+                    bytes.AddRange(BitConverter.GetBytes((int)physicsObjects[i].I_24));
                     bytes.AddRange(Utils.ConvertToByteArray(_i_28, 4));
                     bytes.AddRange(Utils.ConvertToByteArray(_i_32, 4));
-                    if (physicsObjects[i].Str_36.Length > 4)
+                    if (physicsObjects[i].CharaCode.Length > 4)
                     {
-                        Console.WriteLine(String.Format("\"{0}\" exceeds the maximum allowed length of 4 for the paramater \"Name\"", physicsObjects[i].Str_36));
-                        Utils.WaitForInputThenQuit();
+                        throw new InvalidDataException(String.Format("BCS: \"{0}\" exceeds the maximum allowed length of 4 for the paramater \"Name\"", physicsObjects[i].CharaCode));
                     }
-                    bytes.AddRange(Encoding.ASCII.GetBytes(physicsObjects[i].Str_36));
-                    bytes.AddRange(new byte[4 - physicsObjects[i].Str_36.Length]);
+                    bytes.AddRange(Encoding.ASCII.GetBytes(physicsObjects[i].CharaCode));
+                    bytes.AddRange(new byte[4 - physicsObjects[i].CharaCode.Length]);
                     stringInfo.Add(new StringWriter.StringInfo()
                     {
                         Offset = bytes.Count(),

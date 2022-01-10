@@ -240,10 +240,10 @@ namespace Xv2CoreLib.EAN
                 Name = EAN_Node.CAM_NODE,
                 RelativeTransform = new ESK_RelativeTransform()
                 {
-                    F_28 = 1f,
-                    F_32 = 1f,
-                    F_36 = 1f,
-                    F_40 = 1f
+                    RotationW = 1f,
+                    ScaleX = 1f,
+                    ScaleY = 1f,
+                    ScaleZ = 1f
                 }
             });
 
@@ -1372,8 +1372,6 @@ namespace Xv2CoreLib.EAN
             Scale = 2, //Or "Camera"
         }
 
-        [YAXDontSerialize]
-        internal ESK_RelativeTransform EskRelativeTransform { get; set; }
 
         [YAXAttributeForClass]
         [YAXSerializeAs("Type")]
@@ -1394,6 +1392,34 @@ namespace Xv2CoreLib.EAN
             I_01 = (byte)((isCamera) ? 3 : 7);
             EskRelativeTransform = relativeTransform;
         }
+
+        #region BoneLinking
+        //Bone Linking for animation playback:
+        private ESK_RelativeTransform _eskRelativeTransform = null;
+        [YAXDontSerialize]
+        internal ESK_RelativeTransform EskRelativeTransform
+        {
+            get { return _eskRelativeTransform; }
+            set
+            {
+                _eskRelativeTransform = value;
+                _defaultKeyframe = null;
+            }
+        }
+
+        private EAN_Keyframe _defaultKeyframe = null;
+        [YAXDontSerialize]
+        internal EAN_Keyframe DefaultKeyframe
+        {
+            get
+            {
+                if (_defaultKeyframe == null)
+                    _defaultKeyframe = GetDefaultKeyframe();
+                return _defaultKeyframe;
+            }
+        }
+
+        #endregion
 
         #region KeyframeManipulation
         public void AddKeyframe(int frame, float x, float y, float z, float w, List<IUndoRedo> undos = null)
@@ -1430,15 +1456,26 @@ namespace Xv2CoreLib.EAN
                     undos.Add(new UndoableListAdd<EAN_Keyframe>(Keyframes, newKeyframe));
 
                 Keyframes.Add(newKeyframe);
+                SortKeyframes(undos);
             }
         }
 
-        public bool ChangeKeyframe(int oldKeyframe, int newKeyframe)
+        public bool ChangeKeyframe(int oldKeyframe, int newKeyframe, List<IUndoRedo> undos = null)
         {
-            var keyframe = Keyframes.FirstOrDefault(k => k.FrameIndex == (ushort)oldKeyframe);
-            var _newKeyframe = Keyframes.FirstOrDefault(k => k.FrameIndex == (ushort)newKeyframe);
+            EAN_Keyframe keyframe = Keyframes.FirstOrDefault(k => k.FrameIndex == (ushort)oldKeyframe);
+            EAN_Keyframe _newKeyframe = Keyframes.FirstOrDefault(k => k.FrameIndex == (ushort)newKeyframe);
+
             if (keyframe == null || _newKeyframe != null) return false;
+
+            if (undos != null)
+            {
+                undos.Add(new UndoablePropertyGeneric(nameof(EAN_Keyframe.FrameIndex), keyframe, keyframe.FrameIndex, newKeyframe));
+            }
+
             keyframe.FrameIndex = (ushort)newKeyframe;
+
+            SortKeyframes(undos);
+
             return true;
         }
 
@@ -1449,15 +1486,19 @@ namespace Xv2CoreLib.EAN
             if (keyframe != null)
             {
                 if (undos != null)
+                {
                     undos.Add(new UndoableListRemove<EAN_Keyframe>(Keyframes, keyframe));
+                }
 
                 Keyframes.Remove(keyframe);
+                SortKeyframes(undos);
             }
         }
 
-        public EAN_Keyframe AddKeyframe(int frame)
+        public EAN_Keyframe AddKeyframe(int frame, List<IUndoRedo> undos = null)
         {
-            AddKeyframe(frame, GetKeyframeValue(frame, Axis.X), GetKeyframeValue(frame, Axis.Y), GetKeyframeValue(frame, Axis.Z), GetKeyframeValue(frame, Axis.W));
+            AddKeyframe(frame, GetKeyframeValue(frame, Axis.X), GetKeyframeValue(frame, Axis.Y), GetKeyframeValue(frame, Axis.Z), GetKeyframeValue(frame, Axis.W), undos);
+
             return Keyframes.FirstOrDefault(k => k.FrameIndex == (ushort)frame);
         }
 
@@ -1498,6 +1539,16 @@ namespace Xv2CoreLib.EAN
             return undos;
         }
 
+        /// <summary>
+        /// Sort keyframes to be sequential. 
+        /// </summary>
+        public void SortKeyframes(List<IUndoRedo> undos = null)
+        {
+            Keyframes.Sort((x, y) => x.FrameIndex - y.FrameIndex);
+
+            if(undos != null)
+                undos.Add(new UndoActionDelegate(this, nameof(SortKeyframes), true, null, new object[1] { null }));
+        }
         #endregion
 
         #region Get
@@ -1549,24 +1600,24 @@ namespace Xv2CoreLib.EAN
             }
             else if (I_00 == ComponentType.Scale)
             {
-                keyframe.X = EskRelativeTransform.F_32;
-                keyframe.Y = EskRelativeTransform.F_36;
-                keyframe.Z = EskRelativeTransform.F_40;
-                keyframe.W = EskRelativeTransform.F_44;
+                keyframe.X = EskRelativeTransform.ScaleX;
+                keyframe.Y = EskRelativeTransform.ScaleY;
+                keyframe.Z = EskRelativeTransform.ScaleZ;
+                keyframe.W = EskRelativeTransform.ScaleW;
             }
             else if (I_00 == ComponentType.Position)
             {
-                keyframe.X = EskRelativeTransform.F_00;
-                keyframe.Y = EskRelativeTransform.F_04;
-                keyframe.Z = EskRelativeTransform.F_08;
-                keyframe.W = EskRelativeTransform.F_12;
+                keyframe.X = EskRelativeTransform.PositionX;
+                keyframe.Y = EskRelativeTransform.PositionY;
+                keyframe.Z = EskRelativeTransform.PositionZ;
+                keyframe.W = EskRelativeTransform.PositionW;
             }
             else if (I_00 == ComponentType.Rotation)
             {
-                keyframe.X = EskRelativeTransform.F_16;
-                keyframe.Y = EskRelativeTransform.F_20;
-                keyframe.Z = EskRelativeTransform.F_24;
-                keyframe.W = EskRelativeTransform.F_28;
+                keyframe.X = EskRelativeTransform.RotationX;
+                keyframe.Y = EskRelativeTransform.RotationY;
+                keyframe.Z = EskRelativeTransform.RotationZ;
+                keyframe.W = EskRelativeTransform.RotationW;
             }
 
             return keyframe;
@@ -1598,22 +1649,34 @@ namespace Xv2CoreLib.EAN
         #endregion
 
         #region KeyframeInterpolation
+        public float GetKeyframeValue(float frame, Axis axis)
+        {
+            int index = 0;
+            return GetKeyframeValue(frame, axis, ref index);
+        }
+
+        public float GetKeyframeValue(int frame, Axis axis)
+        {
+            int index = 0;
+            return GetKeyframeValue(frame, axis, ref index);
+        }
+
         /// <summary>
         /// Get an interpolated keyframe value, from the specified floating-point frame. Allows time-scaled animations.
         /// </summary>
-        public float GetKeyframeValue(float frame, Axis axis)
+        public float GetKeyframeValue(float frame, Axis axis, ref int index, int startIdx = 0)
         {
             bool isWhole = Math.Floor(frame) == frame;
 
             if (isWhole)
             {
-                return GetKeyframeValue((int)frame, axis);
+                return GetKeyframeValue((int)frame, axis, ref index, startIdx);
             }
 
             int flooredFrame = (int)Math.Floor(frame);
 
-            float beforeValue = GetKeyframeValue(flooredFrame, axis);
-            float afterValue = GetKeyframeValue(flooredFrame + 1, axis);
+            float beforeValue = GetKeyframeValue(flooredFrame, axis, ref index, startIdx);
+            float afterValue = GetKeyframeValue(flooredFrame + 1, axis, ref index, startIdx);
             float factor = (float)(frame - Math.Floor(frame));
 
             return Utils.Lerp(beforeValue, afterValue, factor);
@@ -1622,7 +1685,7 @@ namespace Xv2CoreLib.EAN
         /// <summary>
         /// Get an interpolated keyframe value.
         /// </summary>
-        public float GetKeyframeValue(int frame, Axis axis)
+        public float GetKeyframeValue(int frame, Axis axis, ref int index, int startIdx = 0)
         {
             EAN_Keyframe existing = GetKeyframe(frame);
 
@@ -1646,10 +1709,10 @@ namespace Xv2CoreLib.EAN
             //No keyframe existed. Calculate the value.
             int prevFrame = 0;
             int nextFrame = 0;
-            EAN_Keyframe previousKeyframe = GetNearestKeyframeBefore(frame, ref prevFrame);
-            EAN_Keyframe nextKeyframe = GetNearestKeyframeAfter(frame, ref nextFrame);
+            EAN_Keyframe previousKeyframe = GetNearestKeyframeBefore(frame, startIdx, ref prevFrame, ref index);
+            EAN_Keyframe nextKeyframe = GetNearestKeyframeAfter(frame, startIdx, ref nextFrame, ref index);
 
-            if (previousKeyframe != null && nextKeyframe == null)
+            if ((previousKeyframe != null && nextKeyframe == null) || (previousKeyframe == nextKeyframe && previousKeyframe != null))
             {
                 switch (axis)
                 {
@@ -1706,9 +1769,19 @@ namespace Xv2CoreLib.EAN
         /// </summary>
         /// <param name="frame">The specified frame.</param>
         /// <param name="nearFrame">The frame the returned EAN_Keyframe belongs to (ignore FrameIndex on the keyframe) </param>
-        private EAN_Keyframe GetNearestKeyframeBefore(int frame, ref int nearFrame)
+        private EAN_Keyframe GetNearestKeyframeBefore(int frame, int startIdx, ref int nearFrame, ref int index)
         {
             EAN_Keyframe nearest = null;
+
+            int nearIdx = GetClosestKeyframeIndexBefore(frame, startIdx, ref index);
+
+            if(nearIdx != -1)
+            {
+                nearest = Keyframes[nearIdx];
+                nearFrame = nearest.FrameIndex;
+            }
+
+            /*
 
             //First search for keyframe before frame
             foreach(var keyframe in Keyframes.Where(x => x.FrameIndex < frame && (x.FrameIndex > nearest?.FrameIndex || nearest == null)))
@@ -1727,10 +1800,12 @@ namespace Xv2CoreLib.EAN
                 }
             }
 
+            */
+
             //None found, so use default
             if (nearest == null)
             {
-                nearest = GetDefaultKeyframe();
+                nearest = DefaultKeyframe;
                 nearFrame = frame - 1;
             }
 
@@ -1742,10 +1817,19 @@ namespace Xv2CoreLib.EAN
         /// </summary>
         /// <param name="frame">The specified frame.</param>
         /// <param name="nearFrame">The frame the returned EAN_Keyframe belongs to (ignore FrameIndex on the keyframe) </param>
-        private EAN_Keyframe GetNearestKeyframeAfter(int frame, ref int nearFrame)
+        private EAN_Keyframe GetNearestKeyframeAfter(int frame, int startIdx, ref int nearFrame, ref int index)
         {
             EAN_Keyframe nearest = null;
 
+            int nearIdx = GetClosestKeyframeIndexAfter(frame, startIdx, ref index);
+
+            if (nearIdx != -1)
+            {
+                nearest = Keyframes[nearIdx];
+                nearFrame = nearest.FrameIndex;
+            }
+
+            /*
             //First search for keyframe after frame
             foreach (var keyframe in Keyframes.Where(x => x.FrameIndex > frame && (x.FrameIndex < nearest?.FrameIndex || nearest == null)))
             {
@@ -1762,11 +1846,11 @@ namespace Xv2CoreLib.EAN
                     nearFrame = frame + 1;
                 }
             }
-
+            */
             //None found, so use default
             if (nearest == null)
             {
-                nearest = GetDefaultKeyframe();
+                nearest = DefaultKeyframe;
                 nearFrame = frame + 1;
             }
 
@@ -1818,9 +1902,80 @@ namespace Xv2CoreLib.EAN
             return true;
         }
 
+        private int GetClosestKeyframeIndexBefore(int frame, int startIdx, ref int index)
+        {
+            if (startIdx < 0) startIdx = 0;
+
+            if(Keyframes.Count == 1)
+            {
+                index = 0;
+                return index;
+            }
+
+            for(int i = startIdx; i < Keyframes.Count; i++)
+            {
+                if (Keyframes[i].FrameIndex >= frame)
+                {
+                    index = i - 1;
+                    return index;
+                }
+            }
+
+            index = Keyframes.Count - 1;
+            return Keyframes.Count - 1;
+        }
+
+        private int GetClosestKeyframeIndexAfter(int frame, int startIdx, ref int index)
+        {
+            if (startIdx < 0) startIdx = 0;
+
+            if (Keyframes.Count == 1)
+            {
+                index = 0;
+                return index;
+            }
+
+            for (int i = startIdx; i < Keyframes.Count; i++)
+            {
+                if (Keyframes[i].FrameIndex >= frame)
+                {
+                    index = i;
+                    return index;
+                }
+            }
+
+            index = Keyframes.Count - 1;
+            return Keyframes.Count - 1;
+
+            /*
+            int before = GetClosestKeyframeIndexBefore(frame, startIdx, ref index);
+            if (before == -1) return -1;
+
+            if((Keyframes.Count - 1) >= before + 1)
+            {
+                if(Keyframes[before + 1].FrameIndex > frame)
+                {
+                    index = before + 1;
+                    return index;
+                }
+            }
+
+            if ((Keyframes.Count - 1) >= before + 2)
+            {
+                if (Keyframes[before + 2].FrameIndex > frame)
+                {
+                    index = before + 2;
+                    return index;
+                }
+            }
+
+            index = before;
+            return before;
+            */
+        }
         #endregion
 
-#region Modifiers
+        #region Modifiers
         public void ApplyNodeOffset(float x, float y, float z, float w, List<IUndoRedo> undos)
         {
             if (Keyframes == null) throw new Exception(String.Format("Could not apply NodeOffset because Keyframes is null."));

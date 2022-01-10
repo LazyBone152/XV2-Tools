@@ -329,7 +329,7 @@ namespace EEPK_Organiser.View
                     else
                     {
                         //Load from game
-                        loadedFile = EffectContainerFile.Load(path, Xenoverse2.Instance.GetFileIO(), onlyFromCpk);
+                        loadedFile = EffectContainerFile.Load(path, FileManager.Instance.fileIO, onlyFromCpk);
                     }
                 });
             }

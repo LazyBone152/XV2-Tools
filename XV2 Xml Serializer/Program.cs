@@ -21,7 +21,7 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
-            args = new string[1] { @"E:\VS_Test\EMO\ALL EMO - Copy" };
+            args = new string[1] { @"E:\VS_Test\DEM\ALL DEM" };
 
             DEBUG_MODE = true;
 #endif
@@ -1156,18 +1156,52 @@ namespace XV2_Xml_Serializer
         static void BulkParseBcs(string directory)
         {
             string[] files = Directory.GetFiles(directory);
+            List<string> stuff = new List<string>();
 
             foreach (string s in files)
             {
-                if (Path.GetExtension(s) == ".bcs")
+                try
                 {
-                    Console.WriteLine(s);
-                    new Xv2CoreLib.BCS.Parser(s, true);
+                    if (Path.GetExtension(s) == ".bcs")
+                    {
+                        Console.WriteLine(s);
+                        var bcs = new Xv2CoreLib.BCS.Parser(s, true).bcsFile;
 
+                        foreach (var partSet in bcs.PartSets)
+                        {
+                            foreach (var part in partSet.GetAllParts_DEBUG())
+                            {
+                                if (!string.IsNullOrWhiteSpace(part.EanPath))
+                                {
+                                    //Console.WriteLine(part.EanPath);
+                                    //Console.ReadLine();
+                                }
+
+                                if (!stuff.Contains(part.EanPath))
+                                    stuff.Add(part.EanPath);
+                            }
+                        }
+
+                    }
+                }
+                catch
+                {
 
                 }
             }
 
+            //Debug log
+            StringBuilder str = new StringBuilder();
+
+            foreach (var val in stuff)
+            {
+                str.Append(val).AppendLine();
+                //str.Append(HexConverter.GetHexString(val)).AppendLine();
+            }
+
+            File.WriteAllText("bcs_debug_log.txt", str.ToString());
+            Process.Start("bcs_debug_log.txt");
+            Environment.Exit(0);
         }
 
         static void BulkParseEmm(string directory)
@@ -1283,32 +1317,44 @@ namespace XV2_Xml_Serializer
         static void BulkParseDem(string directory)
         {
             string[] files = Directory.GetFiles(directory);
+            List<int> values = new List<int>();
 
             foreach (string s in files)
             {
                 if (Path.GetExtension(s) == ".dem")
                 {
+                    Console.WriteLine(s);
                     var dem = new Xv2CoreLib.DEM.Parser(s, true).demFile;
+
+                    foreach(var sum in dem.Section2Entries)
+                    {
+                        foreach(var sub in sum.SubEntries)
+                        {
+                            if(sub.Type6_18_7 != null)
+                            {
+                                if (!values.Contains(sub.Type6_18_7.I_7))
+                                    values.Add(sub.Type6_18_7.I_7);
+                            }
+                        }
+                    }
                 }
             }
 
-            /*
-            StringBuilder log = new StringBuilder();
+            StringBuilder str = new StringBuilder();
 
-            foreach(var e in debugInfo)
+            foreach (var value in values)
             {
-                StringBuilder countList = new StringBuilder();
+                str.AppendLine($"{value.ToString()}");
+                //str.AppendLine($"{HexConverter.GetHexString(value)}");
 
-                foreach(var c in e.Count)
-                {
-                    countList.Append(String.Format("{0}, ", c));
-                }
-
-                log.Append(String.Format("Flag = {0}/{1}, Counts = ({2})", e.I_04, e.I_06, countList.ToString()));
-                log.AppendLine();
+                //str.AppendLine($"{Convert.ToSingle(value)} ({valuesTotal.Count(x => x == value)})");
             }
-            File.WriteAllText("dem_debug_log.txt", log.ToString());
-            */
+
+            File.WriteAllText("dem_test.txt", str.ToString());
+
+            Process.Start("dem_test.txt");
+            Environment.Exit(0);
+
         }
 
         static void BulkParseBai(string directory)
@@ -1566,7 +1612,7 @@ namespace XV2_Xml_Serializer
             //Extract all of a specific file type
             Xv2CoreLib.CPK.CPK_Reader cpk = new Xv2CoreLib.CPK.CPK_Reader(@"C:\Program Files (x86)\Steam\steamapps\common\DB Xenoverse 2\cpk", false);
 
-            var task = cpk.ExtractAll(@"C:\XV2_MultiThreadExtractTest", ".emo");
+            var task = cpk.ExtractAll(@"C:\XV2_MultiThreadExtractTest", ".bcs");
             task.Wait();
 
             Environment.Exit(0);

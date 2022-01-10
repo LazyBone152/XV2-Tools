@@ -85,8 +85,6 @@ namespace Xv2CoreLib.EAN
         //Animations
         private EAN_Animation ParseAnimation(int offset, int nameOffset, int animIndex)
         {
-            List<ESK_BoneNonHierarchal> bonesNonHierachal = eanFile.Skeleton.GetNonHierarchalBoneList();
-
             EAN_Animation animation = new EAN_Animation();
 
             byte indexSize = rawBytes[offset + 2];
@@ -106,7 +104,7 @@ namespace Xv2CoreLib.EAN
                 for(int i = 0; i < nodeCount; i++)
                 {
                     int thisNodeOffset = BitConverter.ToInt32(rawBytes, nodeOffset) + offset;
-                    animation.Nodes.Add(new EAN_Node() { BoneName = GetBoneName(BitConverter.ToInt16(rawBytes, thisNodeOffset), animIndex, bonesNonHierachal) });
+                    animation.Nodes.Add(new EAN_Node() { BoneName = GetBoneName(BitConverter.ToInt16(rawBytes, thisNodeOffset), animIndex, eanFile.Skeleton.NonRecursiveBones) });
                     int keyframedAnimationsCount = BitConverter.ToInt16(rawBytes, thisNodeOffset + 2);
                     int keyframedAnimationsOffset = BitConverter.ToInt32(rawBytes, thisNodeOffset + 4) + thisNodeOffset;
 
@@ -199,7 +197,7 @@ namespace Xv2CoreLib.EAN
             return keyframes;
         }
 
-        private string GetBoneName(short boneIndex, int animIndex, List<ESK_BoneNonHierarchal> bonesNonHierarchal)
+        private string GetBoneName(short boneIndex, int animIndex, List<ESK_Bone> bonesNonHierarchal)
         {
             try
             {
