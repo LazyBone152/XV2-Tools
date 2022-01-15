@@ -740,11 +740,11 @@ namespace EEPK_Organiser.View
                                 break;
                             case EffectFile.FileType.EMM:
                                 {
-                                    Forms.EmmEditForm emmForm = GetActiveEmmForm(selectedFile.EmmFile);
+                                    Forms.MaterialsEditorForm emmForm = GetActiveEmmForm(selectedFile.EmmFile);
 
                                     if (emmForm == null)
                                     {
-                                        emmForm = new Forms.EmmEditForm(selectedFile.EmmFile, null, AssetType.EMO, this, false, selectedFile.FullFileName);
+                                        emmForm = new Forms.MaterialsEditorForm(selectedFile.EmmFile, null, AssetType.EMO, selectedFile.FullFileName);
                                     }
                                     else
                                     {
@@ -1204,11 +1204,11 @@ namespace EEPK_Organiser.View
 
         private void PBIND_AssetContainer_EmmEdit_Click(object sender, RoutedEventArgs e)
         {
-            Forms.EmmEditForm emmForm = GetActiveEmmForm(effectContainerFile.Pbind.File2_Ref);
+            Forms.MaterialsEditorForm emmForm = GetActiveEmmForm(effectContainerFile.Pbind.File2_Ref);
 
             if (emmForm == null)
             {
-                emmForm = new Forms.EmmEditForm(effectContainerFile.Pbind.File2_Ref, effectContainerFile.Pbind, AssetType.PBIND, this, true, AssetType.PBIND.ToString());
+                emmForm = new Forms.MaterialsEditorForm(effectContainerFile.Pbind.File2_Ref, effectContainerFile.Pbind, AssetType.PBIND, AssetType.PBIND.ToString());
             }
             else
             {
@@ -1255,7 +1255,7 @@ namespace EEPK_Organiser.View
             return form;
         }
 
-        public Forms.EmmEditForm PBIND_OpenMaterialEditor()
+        public Forms.MaterialsEditorForm PBIND_OpenMaterialEditor()
         {
             PBIND_AssetContainer_EmmEdit_Click(null, null);
             var form = GetActiveEmmForm(effectContainerFile.Pbind.File2_Ref);
@@ -1668,11 +1668,11 @@ namespace EEPK_Organiser.View
 
         private void TBIND_AssetContainer_EmmEdit_Click(object sender, RoutedEventArgs e)
         {
-            Forms.EmmEditForm emmForm = GetActiveEmmForm(effectContainerFile.Tbind.File2_Ref);
+            Forms.MaterialsEditorForm emmForm = GetActiveEmmForm(effectContainerFile.Tbind.File2_Ref);
 
             if (emmForm == null)
             {
-                emmForm = new Forms.EmmEditForm(effectContainerFile.Tbind.File2_Ref, effectContainerFile.Tbind, AssetType.TBIND, this, true, AssetType.TBIND.ToString());
+                emmForm = new Forms.MaterialsEditorForm(effectContainerFile.Tbind.File2_Ref, effectContainerFile.Tbind, AssetType.TBIND, AssetType.TBIND.ToString());
             }
             else
             {
@@ -1690,7 +1690,7 @@ namespace EEPK_Organiser.View
             return form;
         }
 
-        public Forms.EmmEditForm TBIND_OpenMaterialEditor()
+        public Forms.MaterialsEditorForm TBIND_OpenMaterialEditor()
         {
             TBIND_AssetContainer_EmmEdit_Click(null, null);
             var form = GetActiveEmmForm(effectContainerFile.Tbind.File2_Ref);
@@ -3992,13 +3992,13 @@ namespace EEPK_Organiser.View
             return null;
         }
 
-        public Forms.EmmEditForm GetActiveEmmForm(EMM_File _emmFile)
+        public Forms.MaterialsEditorForm GetActiveEmmForm(EMM_File _emmFile)
         {
             foreach (var window in App.Current.Windows)
             {
-                if (window is Forms.EmmEditForm)
+                if (window is Forms.MaterialsEditorForm)
                 {
-                    Forms.EmmEditForm _form = (Forms.EmmEditForm)window;
+                    Forms.MaterialsEditorForm _form = (Forms.MaterialsEditorForm)window;
 
                     if (_form.EmmFile == _emmFile)
                         return _form;

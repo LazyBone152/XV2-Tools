@@ -1,18 +1,18 @@
 ﻿namespace Xv2CoreLib.Resource.UndoRedo
 {
-    public class UndoablePropertyGeneric : IUndoRedo
+    public class UndoableField : IUndoRedo
     {
         public bool doLast { get; set; }
         private object _oldValue;
         private object _newValue;
-        private string _property;
+        private string _field;
         private object _instance;
         public string Message { get; }
 
-        public UndoablePropertyGeneric(string property, object instance, object oldValue, object newValue, string description = "")
+        public UndoableField(string field, object instance, object oldValue, object newValue, string description = "")
         {
             _instance = instance;
-            _property = property;
+            _field = field;
             _oldValue = oldValue;
             _newValue = newValue;
 
@@ -21,12 +21,12 @@
 
         public void Undo()
         {
-            _instance.GetType().GetProperty(_property).SetValue(_instance, _oldValue, null);
+            _instance.GetType().GetField(_field).SetValue(_instance, _oldValue);
         }
 
         public void Redo()
         {
-            _instance.GetType().GetProperty(_property).SetValue(_instance, _newValue, null);
+            _instance.GetType().GetField(_field).SetValue(_instance, _newValue);
         }
 
     }

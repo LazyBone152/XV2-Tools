@@ -176,7 +176,6 @@ namespace EEPK_Organiser
             {
                 await Task.Run(() =>
                 {
-                    xv2.GameDir = SettingsManager.Instance.Settings.GameDirectory;
                     xv2.Instance.loadCharacters = true;
                     xv2.Instance.loadSkills = true;
                     xv2.Instance.loadCmn = false;
@@ -936,7 +935,7 @@ namespace EEPK_Organiser
             foreach (var window in App.Current.Windows)
             {
                 if (window is Forms.EmbEditForm ||
-                    window is Forms.EmmEditForm ||
+                    window is Forms.MaterialsEditorForm ||
                     window is Forms.EMP.EMP_Editor)
                 {
                     (window as Window).Close();

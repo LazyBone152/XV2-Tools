@@ -210,6 +210,8 @@
     <Compile Include="EMD\EMD_File.cs" />
     <Compile Include="EMD\Parser.cs" />
     <Compile Include="EMG\EMG_File.cs" />
+    <Compile Include="EMM\DecompiledMaterial.cs" />
+    <Compile Include="EMM\DefaultMaterialValues.cs" />
     <Compile Include="EMM\Deserializer.cs" />
     <Compile Include="EMM\EMM_File.cs" />
     <Compile Include="EMM\Parser.cs" />
@@ -294,6 +296,7 @@
     <Compile Include="Resource\Random.cs" />
     <Compile Include="Resource\ReflectionHelper.cs" />
     <Compile Include="Resource\UndoRedo\UndoableArrayChange.cs" />
+    <Compile Include="Resource\UndoRedo\UndoableField.cs" />
     <Compile Include="Resource\UndoRedo\UndoableListInsert.cs" />
     <Compile Include="Resource\UndoRedo\UndoableListMove.cs" />
     <Compile Include="Resource\UndoRedo\UndoablePropertyGeneric.cs" />
@@ -356,6 +359,12 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\AcbFormatHelper.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\LB_Common\LB_Common.csproj">
+      <Project>{513b1851-4576-45ec-8f8e-400a38b05502}</Project>
+      <Name>LB_Common</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Fody.3.3.2\build\Fody.targets" Condition="Exists('..\packages\Fody.3.3.2\build\Fody.targets')" />

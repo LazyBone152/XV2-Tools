@@ -411,6 +411,10 @@
     <Compile Include="Converters\InverseVisibilityToNullableBoolean.cs" />
     <Compile Include="Converters\NullToFalseConverter.cs" />
     <Compile Include="Converters\VisibilityToNullableBoolean.cs" />
+    <Compile Include="Numbers\CustomColor.cs" />
+    <Compile Include="Numbers\CustomMatRepUV.cs" />
+    <Compile Include="Numbers\CustomMatUV.cs" />
+    <Compile Include="Numbers\CustomVector4.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TypeExtensions.cs" />
     <Compile Include="Utils\ArraySearch.cs" />

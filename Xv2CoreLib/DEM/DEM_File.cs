@@ -294,8 +294,8 @@ namespace Xv2CoreLib.DEM
             Animation, //1_0_10
             Type1_1_5,
             Type1_1_9,
-            Type1_2_3,
-            Type1_2_5,
+            Type1_2_3, //Should be rotate. Need to make I_2 a float.
+            Type1_2_5, //Rotate Animation (I_1 = Actor, F_2 = Rotate Angle, X axis)
             ActorVisibility, //1_3_2
             Transformation, //1_4_2
             Type1_6_4,
@@ -327,7 +327,7 @@ namespace Xv2CoreLib.DEM
             Type3_4_2,
             Effect, //4_0_12
             ScreenEffect, //4_1_8
-            Type4_2_3, //Aura? (I_1 = Actor, I_2 = Aura, I_3 = On/Off)
+            Type4_2_3, //Aura (I_1 = Actor, I_2 = Aura, I_3 = On/Off)
             Type4_3_5, //SetDoF?
             Type4_4_1,
             Type5_0_2,

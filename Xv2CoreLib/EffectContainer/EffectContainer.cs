@@ -2348,71 +2348,10 @@ namespace Xv2CoreLib.EffectContainer
         public int RemoveUnusedMaterials(AssetType type, List<IUndoRedo> undos = null)
         {
             if (type != AssetType.PBIND && type != AssetType.TBIND) throw new InvalidOperationException(String.Format("RemoveUnusedMaterials: Method was called with type parameter = {0}, which is invalid (expecting either PBIND or TBIND).", type));
-            if (undos == null) undos = new List<IUndoRedo>();
-
-            int removed = 0;
-            AssetContainerTool container = GetAssetContainer(type);
-
-            for (int i = container.File2_Ref.Materials.Count - 1; i >= 0; i--)
-            {
-                if (!container.IsMaterialUsed(container.File2_Ref.Materials[i]))
-                {
-                    undos.Add(new UndoableListRemove<EmmMaterial>(container.File2_Ref.Materials, container.File2_Ref.Materials[i]));
-                    container.File2_Ref.Materials.RemoveAt(i);
-                    removed++;
-                }
-            }
-
-            return removed;
-        }
-
-        /// <summary>
-        /// Merges all identical materials into a single instance.
-        /// </summary>
-        /// <param name="type">PBIND or TBIND.</param>
-        /// <returns>The amount of merged materials.</returns>
-        public int MergeDuplicateMaterials(AssetType type, List<IUndoRedo> undos = null)
-        {
-            if (type != AssetType.PBIND && type != AssetType.TBIND) throw new InvalidOperationException(String.Format("MergeDuplicateMaterials: Method was called with type parameter = {0}, which is invalid (expecting either PBIND or TBIND).", type));
-            if (undos == null) undos = new List<IUndoRedo>();
 
             AssetContainerTool container = GetAssetContainer(type);
 
-            int duplicateCount = 0;
-
-            restart:
-            foreach (var material1 in container.File2_Ref.Materials)
-            {
-                List<EmmMaterial> Duplicates = new List<EmmMaterial>();
-
-                foreach (var material2 in container.File2_Ref.Materials)
-                {
-                    if (material1 != material2 && material1.Compare(material2))
-                    {
-                        //Textures are the same, but the EmbEntry instances are different, thus its a duplicate
-                        duplicateCount++;
-                        Duplicates.Add(material2);
-                    }
-                }
-
-                //Redirect the duplicates
-                if (Duplicates.Count > 0)
-                {
-                    foreach (var duplicate in Duplicates)
-                    {
-                        container.RefactorMaterialRef(duplicate, material1, undos);
-
-                        //Delete the duplicate
-                        undos.Add(new UndoableListRemove<EmmMaterial>(container.File2_Ref.Materials, duplicate));
-                        container.File2_Ref.Materials.Remove(duplicate);
-                    }
-                    goto restart;
-                }
-
-            }
-
-
-            return duplicateCount;
+            return container.RemoveUnusedMaterials(undos);
         }
 
         public void RemoveAsset(Asset asset, AssetType type, List<IUndoRedo> undos = null)
@@ -3591,7 +3530,6 @@ namespace Xv2CoreLib.EffectContainer
 
         #endregion
 
-
         #region Editor
         public void DeleteTexture(EmbEntry embEntry, List<IUndoRedo> undos = null)
         {
@@ -3614,7 +3552,77 @@ namespace Xv2CoreLib.EffectContainer
 
             File2_Ref.Materials.Remove(material);
         }
-        
+
+        //Operations
+        /// <summary>
+        /// Merges all identical materials into a single instance.
+        /// </summary>
+        /// <returns>The amount of merged materials.</returns>
+        public int MergeDuplicateMaterials(List<IUndoRedo> undos = null)
+        {
+            if (undos == null) undos = new List<IUndoRedo>();
+
+            AssetContainerTool container = this;
+
+            int duplicateCount = 0;
+
+        restart:
+            foreach (var material1 in container.File2_Ref.Materials)
+            {
+                List<EmmMaterial> Duplicates = new List<EmmMaterial>();
+
+                foreach (var material2 in container.File2_Ref.Materials)
+                {
+                    if (material1 != material2 && material1.Compare(material2))
+                    {
+                        //Textures are the same, but the EmbEntry instances are different, thus its a duplicate
+                        duplicateCount++;
+                        Duplicates.Add(material2);
+                    }
+                }
+
+                //Redirect the duplicates
+                if (Duplicates.Count > 0)
+                {
+                    foreach (var duplicate in Duplicates)
+                    {
+                        container.RefactorMaterialRef(duplicate, material1, undos);
+
+                        //Delete the duplicate
+                        undos.Add(new UndoableListRemove<EmmMaterial>(container.File2_Ref.Materials, duplicate));
+                        container.File2_Ref.Materials.Remove(duplicate);
+                    }
+                    goto restart;
+                }
+
+            }
+
+            return duplicateCount;
+        }
+
+        /// <summary>
+        /// Remove all materials that are unused by Particle Effects or ETR Effects.
+        /// </summary>
+        /// <returns>The amount of materials that were removed.</returns>
+        public int RemoveUnusedMaterials(List<IUndoRedo> undos = null)
+        {
+            if (undos == null) undos = new List<IUndoRedo>();
+
+            int removed = 0;
+            AssetContainerTool container = this;
+
+            for (int i = container.File2_Ref.Materials.Count - 1; i >= 0; i--)
+            {
+                if (!container.IsMaterialUsed(container.File2_Ref.Materials[i]))
+                {
+                    undos.Add(new UndoableListRemove<EmmMaterial>(container.File2_Ref.Materials, container.File2_Ref.Materials[i]));
+                    container.File2_Ref.Materials.RemoveAt(i);
+                    removed++;
+                }
+            }
+
+            return removed;
+        }
         //Refactoring
         public void RefactorTextureRef(EMB_CLASS.EmbEntry oldRef, EMB_CLASS.EmbEntry newRef, List<IUndoRedo> undos = null)
         {
