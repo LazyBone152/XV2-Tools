@@ -11,9 +11,10 @@ using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.Resource.UndoRedo;
 using EEPK_Organiser.Forms;
 using EEPK_Organiser.Forms.Recolor;
+using EEPK_Organiser.ViewModel;
 using MahApps.Metro.Controls.Dialogs;
 using GalaSoft.MvvmLight.CommandWpf;
-using EEPK_Organiser.ViewModel;
+using MahApps.Metro.Controls;
 
 namespace EEPK_Organiser.View
 {
@@ -76,20 +77,14 @@ namespace EEPK_Organiser.View
                 NotifyPropertyChanged(nameof(SelectedMaterial));
                 NotifyPropertyChanged(nameof(MaterialViewModel));
                 NotifyPropertyChanged(nameof(ParameterEditorEnabled));
+
+                ExpanderUpdate();
             }
         }
         public bool ParameterEditorEnabled => _selectedMaterial != null;
 
         //ViewModel
-        private MaterialViewModel mat = null;
-        public MaterialViewModel MaterialViewModel
-        {
-            set => mat = value;
-            get
-            {
-                return mat;
-            }
-        }
+        public MaterialViewModel MaterialViewModel { get; set; }
 
         //Selected Material Editing
         public string SelectedMaterialName
@@ -200,7 +195,7 @@ namespace EEPK_Organiser.View
             InitializeComponent();
             UndoManager.Instance.UndoOrRedoCalled += Instance_UndoOrRedoCalled;
             Loaded += MaterialsEditor_Loaded;
-
+            ExpanderUpdate();
         }
 
         private void MaterialsEditor_Loaded(object sender, RoutedEventArgs e)
@@ -221,6 +216,9 @@ namespace EEPK_Organiser.View
 
             //If properties on the material itself have changed externally (such as on a undo/redo), then the list needs to be refreshed.
             materialDataGrid.Items.Refresh();
+
+            if (MaterialViewModel != null)
+                MaterialViewModel.UpdateProperties();
         }
 
         public void Dispose()
@@ -401,10 +399,12 @@ namespace EEPK_Organiser.View
         {
             if (SelectedMaterial != null)
             {
-                RecolorAll recolor = new RecolorAll(SelectedMaterial, Application.Current.MainWindow);
+                RecolorAll recolor = new RecolorAll(SelectedMaterial, Application.Current.Windows.OfType<MetroWindow>().SingleOrDefault(x => x.IsFocused));
 
                 if (recolor.Initialize())
                     recolor.ShowDialog();
+
+                UndoManager.Instance.ForceEventCall();
             }
         }
 
@@ -413,10 +413,12 @@ namespace EEPK_Organiser.View
         {
             if (SelectedMaterial != null)
             {
-                RecolorAll_HueSet recolor = new RecolorAll_HueSet(SelectedMaterial, Application.Current.MainWindow);
+                RecolorAll_HueSet recolor = new RecolorAll_HueSet(SelectedMaterial, Application.Current.Windows.OfType<MetroWindow>().SingleOrDefault(x => x.IsFocused));
 
                 if (recolor.Initialize())
                     recolor.ShowDialog();
+
+                UndoManager.Instance.ForceEventCall();
             }
         }
 
@@ -473,6 +475,7 @@ namespace EEPK_Organiser.View
                 UndoManager.Instance.AddCompositeUndo(undos, "Paste Values");
 
                 NotifyPropertyChanged(nameof(SelectedMaterialShaderProgram));
+                UpdateProperties();
             }
 
         }
@@ -546,5 +549,29 @@ namespace EEPK_Organiser.View
 
 
         #endregion
+
+        private void ExpanderUpdate()
+        {
+            //Collapse all expanders
+            alphaExpander.IsExpanded = false;
+            colorExpander.IsExpanded = false;
+            lightingExpander.IsExpanded = false;
+            miscExpander.IsExpanded = false;
+            scaleOffsetExpander.IsExpanded = false;
+            textureExpander.IsExpanded = false;
+            unknownExpander.IsExpanded = false;
+
+            if(SelectedMaterial != null)
+            {
+                //Selectively expand ones that have parameters within
+                alphaExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Alpha);
+                colorExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Color);
+                lightingExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Lighting);
+                miscExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Misc);
+                scaleOffsetExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.MatScaleOffset);
+                textureExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Texture);
+                unknownExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Unsorted);
+            }
+        }
     }
 }

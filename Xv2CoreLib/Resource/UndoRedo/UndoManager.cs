@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-
-#if NvvmLight
 using GalaSoft.MvvmLight.CommandWpf;
-#endif
 
 namespace Xv2CoreLib.Resource.UndoRedo
 {
@@ -37,7 +34,9 @@ namespace Xv2CoreLib.Resource.UndoRedo
         private LimitedStack<IUndoRedo> undoStack;
         private LimitedStack<IUndoRedo> redoStack;
         private int Capacity = DefaultMaxCapacity;
-        
+        private DateTime LastAddition = DateTime.MinValue;
+        private readonly TimeSpan MergeAdditionTimeSpan = new TimeSpan(0, 0, 1);
+
         public string UndoDescription
         {
             get
@@ -65,12 +64,17 @@ namespace Xv2CoreLib.Resource.UndoRedo
         {
             if (Capacity == 0) return;
 
-            if (redoStack.Count > 0)
-                redoStack.Clear();
-            
-            undoStack.Push(undo);
-            NotifyPropertyChanged("UndoDescription");
-            NotifyPropertyChanged("RedoDescription");
+            if (!MergeUndo(undo))
+            {
+                if (redoStack.Count > 0)
+                    redoStack.Clear();
+
+                undoStack.Push(undo);
+                NotifyPropertyChanged(nameof(UndoDescription));
+                NotifyPropertyChanged(nameof(RedoDescription));
+            }
+
+            LastAddition = DateTime.Now;
         }
 
         public void AddCompositeUndo(List<IUndoRedo> undos, string message)
@@ -78,11 +82,42 @@ namespace Xv2CoreLib.Resource.UndoRedo
             AddUndo(new CompositeUndo(undos, message));
         }
 
-#if NvvmLight
+        /// <summary>
+        /// Attempt to merge undos of the same time type were commited in the same time span. Only applies to <see cref="UndoableProperty{T}"/>, <see cref="UndoablePropertyGeneric"/>, and <see cref="UndoableField"/> <see cref="IUndoRedo"/> types.
+        /// </summary>
+        /// <returns>True if the undos were merged, otherwise false.</returns>
+        private bool MergeUndo(IUndoRedo undo)
+        {
+            if (CanUndo() && LastAddition + MergeAdditionTimeSpan >= DateTime.Now)
+            {
+                IUndoRedo prevUndo = undoStack.First.Value;
+
+                if (undo is IMergableUndo mergeUndo && prevUndo is IMergableUndo prevMergeUndo)
+                {
+                    //Undos qualify for merging
+                    if(mergeUndo._field == prevMergeUndo._field && mergeUndo._instance == prevMergeUndo._instance && mergeUndo.doLast == prevMergeUndo.doLast)
+                    {
+                        prevMergeUndo._newValue = mergeUndo._newValue;
+                        return true;
+                    }
+                }
+                else if(undo is CompositeUndo compositeMerge && prevUndo is CompositeUndo compositePrev)
+                {
+                    if (compositePrev.CanMerge(compositeMerge))
+                    {
+                        compositePrev.MergeCompositeUndos(compositeMerge);
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         public RelayCommand RedoCommand => new RelayCommand(Redo, CanRedo);
 
         public RelayCommand UndoCommand => new RelayCommand(Undo, CanUndo);
-#endif
+
 
         public void Undo()
         {
@@ -127,8 +162,8 @@ namespace Xv2CoreLib.Resource.UndoRedo
         {
             undoStack.Clear();
             redoStack.Clear();
-            NotifyPropertyChanged("UndoDescription");
-            NotifyPropertyChanged("RedoDescription");
+            NotifyPropertyChanged(nameof(UndoDescription));
+            NotifyPropertyChanged(nameof(RedoDescription));
         }
 
         public void ForceEventCall()
@@ -136,11 +171,6 @@ namespace Xv2CoreLib.Resource.UndoRedo
             UndoOrRedoCalled?.Invoke(this, EventArgs.Empty);
         }
 
-#if DEBUG
-        //For debugging purposes
-        public LimitedStack<IUndoRedo> GetUndoStack() { return undoStack; }
-        public LimitedStack<IUndoRedo> GetRedoStack() { return redoStack; }
-#endif
 
     }
     

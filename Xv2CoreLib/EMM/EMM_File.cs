@@ -429,9 +429,9 @@ namespace Xv2CoreLib.EMM
                     float G = (float)newColor.G;
                     float B = (float)newColor.B;
 
-                    undos.Add(new UndoableField(nameof(col.R), col, col.R, R));
-                    undos.Add(new UndoableField(nameof(col.G), col, col.G, G));
-                    undos.Add(new UndoableField(nameof(col.B), col, col.B, B));
+                    undos.Add(new UndoablePropertyGeneric(nameof(col.R), col, col.R, R));
+                    undos.Add(new UndoablePropertyGeneric(nameof(col.G), col, col.G, G));
+                    undos.Add(new UndoablePropertyGeneric(nameof(col.B), col, col.B, B));
 
                     //Add new color to parameters
                     col.R = R;

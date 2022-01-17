@@ -295,6 +295,7 @@
     <Compile Include="Resource\ColorEx.cs" />
     <Compile Include="Resource\Random.cs" />
     <Compile Include="Resource\ReflectionHelper.cs" />
+    <Compile Include="Resource\UndoRedo\IMergableUndo.cs" />
     <Compile Include="Resource\UndoRedo\UndoableArrayChange.cs" />
     <Compile Include="Resource\UndoRedo\UndoableField.cs" />
     <Compile Include="Resource\UndoRedo\UndoableListInsert.cs" />

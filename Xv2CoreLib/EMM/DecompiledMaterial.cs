@@ -35,12 +35,12 @@ namespace Xv2CoreLib.EMM
         /// </summary>
         private static readonly EmmMaterial DefaultMaterial = new EmmMaterial();
         private static readonly FieldInfo[] Fields;
-        private static readonly ParameterGroupAttribute.ParameterGroup[] Groups;
+        private static readonly ParameterGroup[] Groups;
 
         static DecompiledMaterial()
         {
             Fields = typeof(DecompiledMaterial).GetFields();
-            Groups = new ParameterGroupAttribute.ParameterGroup[Fields.Length];
+            Groups = new ParameterGroup[Fields.Length];
 
             for (int i = 0; i < Fields.Length; i++)
             {
@@ -52,122 +52,122 @@ namespace Xv2CoreLib.EMM
                 }
                 else
                 {
-                    Groups[i] = ParameterGroupAttribute.ParameterGroup.Unsorted;
+                    Groups[i] = ParameterGroup.Unsorted;
                 }
             }
         }
         #endregion
 
         //Glare
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Color)]
+        [ParameterGroup(ParameterGroup.Color)]
         public int Glare;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Color)]
+        [ParameterGroup(ParameterGroup.Color)]
         public CustomColor GlareCol;
 
         //MatOffsets
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.MatScaleOffset)]
+        [ParameterGroup(ParameterGroup.MatScaleOffset)]
         public CustomVector4 MatOffset0;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.MatScaleOffset)]
+        [ParameterGroup(ParameterGroup.MatScaleOffset)]
         public CustomVector4 MatOffset1;
 
         //MatScales
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.MatScaleOffset)]
+        [ParameterGroup(ParameterGroup.MatScaleOffset)]
         public CustomVector4 MatScale0;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.MatScaleOffset)]
+        [ParameterGroup(ParameterGroup.MatScaleOffset)]
         public CustomVector4 MatScale1;
 
         //MatCols
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Color)]
+        [ParameterGroup(ParameterGroup.Color)]
         public CustomColor MatCol0;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Color)]
+        [ParameterGroup(ParameterGroup.Color)]
         public CustomColor MatCol1;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Color)]
+        [ParameterGroup(ParameterGroup.Color)]
         public CustomColor MatCol2;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Color)]
+        [ParameterGroup(ParameterGroup.Color)]
         public CustomColor MatCol3;
 
         //Texture Scroll
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Texture)]
+        [ParameterGroup(ParameterGroup.Texture)]
         public CustomMatUV TexScrl0;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Texture)]
+        [ParameterGroup(ParameterGroup.Texture)]
         public CustomMatUV TexScrl1;
 
         //Texture Sampler parameters
         //In these values the index lines up with a sampler index. So in theory, the limit is 4, but in vanilla EMM files only 3 is used.
         [VectorFormat(ParameterNameFormat.Name, ParameterNameFormat.Value, ParameterNameFormat.Index)]
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Texture)]
+        [ParameterGroup(ParameterGroup.Texture)]
         public CustomMatRepUV TexRep0;
         [VectorFormat(ParameterNameFormat.Name, ParameterNameFormat.Value, ParameterNameFormat.Index)]
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Texture)]
+        [ParameterGroup(ParameterGroup.Texture)]
         public CustomMatRepUV TexRep1;
         [VectorFormat(ParameterNameFormat.Name, ParameterNameFormat.Value, ParameterNameFormat.Index)]
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Texture)]
+        [ParameterGroup(ParameterGroup.Texture)]
         public CustomMatRepUV TexRep2;
         [VectorFormat(ParameterNameFormat.Name, ParameterNameFormat.Value, ParameterNameFormat.Index)]
         public CustomMatRepUV TexRep3;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Texture)]
+        [ParameterGroup(ParameterGroup.Texture)]
         public int TextureFilter0;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Texture)]
+        [ParameterGroup(ParameterGroup.Texture)]
         public int TextureFilter1;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Texture)]
+        [ParameterGroup(ParameterGroup.Texture)]
         public int TextureFilter2;
         public int TextureFilter3;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Texture)]
+        [ParameterGroup(ParameterGroup.Texture)]
         public float MipMapLod0; //"Float2" type in EMM (so are 1,2,3).
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Texture)]
+        [ParameterGroup(ParameterGroup.Texture)]
         public float MipMapLod1;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Texture)]
+        [ParameterGroup(ParameterGroup.Texture)]
         public float MipMapLod2;
         public float MipMapLod3;
 
         //Other Texture Parameters:
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Texture)]
+        [ParameterGroup(ParameterGroup.Texture)]
         public float gToonTextureWidth;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Texture)]
+        [ParameterGroup(ParameterGroup.Texture)]
         public float gToonTextureHeight;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Texture)]
+        [ParameterGroup(ParameterGroup.Texture)]
         public CustomMatUV ToonSamplerAddress; //U/V
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Texture)]
+        [ParameterGroup(ParameterGroup.Texture)]
         public CustomMatUV MarkSamplerAddress; //U/V
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Texture)]
+        [ParameterGroup(ParameterGroup.Texture)]
         public CustomMatUV MaskSamplerAddress; //U/V
 
         //MatDiff/Amb Lighting
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Lighting)]
+        [ParameterGroup(ParameterGroup.Lighting)]
         public CustomVector4 gCamPos;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Lighting)]
+        [ParameterGroup(ParameterGroup.Lighting)]
         public CustomColor MatDif;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Lighting)]
+        [ParameterGroup(ParameterGroup.Lighting)]
         public CustomColor MatAmb;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Lighting)]
+        [ParameterGroup(ParameterGroup.Lighting)]
         public CustomColor MatSpc;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Lighting)]
+        [ParameterGroup(ParameterGroup.Lighting)]
         public float MatDifScale;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Lighting)]
+        [ParameterGroup(ParameterGroup.Lighting)]
         public float MatAmbScale;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Lighting)]
+        [ParameterGroup(ParameterGroup.Lighting)]
         public float SpcCoeff;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Lighting)]
+        [ParameterGroup(ParameterGroup.Lighting)]
         public float SpcPower;
 
         //Alpha
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Alpha)]
+        [ParameterGroup(ParameterGroup.Alpha)]
         public int AlphaBlend;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Alpha)]
+        [ParameterGroup(ParameterGroup.Alpha)]
         public int AlphaBlendType;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Alpha)]
+        [ParameterGroup(ParameterGroup.Alpha)]
         public int AlphaTest;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Alpha)]
+        [ParameterGroup(ParameterGroup.Alpha)]
         public bool AlphaTestThreshold;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Alpha)]
+        [ParameterGroup(ParameterGroup.Alpha)]
         public bool AlphaRef;
 
         //Mask
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Alpha)]
+        [ParameterGroup(ParameterGroup.Alpha)]
         public int AlphaSortMask;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Alpha)]
+        [ParameterGroup(ParameterGroup.Alpha)]
         public int ZTestMask;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.Alpha)]
+        [ParameterGroup(ParameterGroup.Alpha)]
         public int ZWriteMask;
 
         //Unknown lighting values. These aren't used by many EMM files and are mostly in stages.
@@ -180,33 +180,33 @@ namespace Xv2CoreLib.EMM
         public CustomColor AmbLight0Col;
 
         //Flags
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.General)]
+        [ParameterGroup(ParameterGroup.Misc)]
         public bool VsFlag0;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.General)]
+        [ParameterGroup(ParameterGroup.Misc)]
         public bool VsFlag1;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.General)]
+        [ParameterGroup(ParameterGroup.Misc)]
         public bool VsFlag2;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.General)]
+        [ParameterGroup(ParameterGroup.Misc)]
         public bool VsFlag3;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.General)]
+        [ParameterGroup(ParameterGroup.Misc)]
         public int CustomFlag; //bit flags. 0x40 max value.
 
         //Cull
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.General)]
+        [ParameterGroup(ParameterGroup.Misc)]
         public int BackFace;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.General)]
+        [ParameterGroup(ParameterGroup.Misc)]
         public int TwoSidedRender;
 
         //LowRez
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.General)]
+        [ParameterGroup(ParameterGroup.Misc)]
         public int LowRez;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.General)]
+        [ParameterGroup(ParameterGroup.Misc)]
         public int LowRezSmoke;
 
         //Incidence
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.General)]
+        [ParameterGroup(ParameterGroup.Misc)]
         public float IncidencePower;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.General)]
+        [ParameterGroup(ParameterGroup.Misc)]
         public float IncidenceAlphaBias;
 
         //Billboard
@@ -214,15 +214,15 @@ namespace Xv2CoreLib.EMM
         public int BillboardType;
 
         //Reflect
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.General)]
+        [ParameterGroup(ParameterGroup.Misc)]
         public float ReflectCoeff;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.General)]
+        [ParameterGroup(ParameterGroup.Misc)]
         public float ReflectFresnelBias;
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.General)]
+        [ParameterGroup(ParameterGroup.Misc)]
         public float ReflectFresnelCoeff;
 
         //Other
-        [ParameterGroup(ParameterGroupAttribute.ParameterGroup.General)]
+        [ParameterGroup(ParameterGroup.Misc)]
         public int AnimationChannel;
         public int NoEdge;
         public int Shimmer;
@@ -259,13 +259,13 @@ namespace Xv2CoreLib.EMM
         {
             List<Parameter> parameters = new List<Parameter>();
 
-            foreach(var field in Fields)
+            foreach (var field in Fields)
             {
                 VectorFormatAttribute formatAttr = (VectorFormatAttribute)field.GetCustomAttribute(typeof(VectorFormatAttribute), false);
 
                 if (field.FieldType == typeof(int))
                 {
-                    if(HasParameterInt(field))
+                    if (HasParameterInt(field))
                     {
                         parameters.Add(new Parameter(field.Name, Parameter.ParameterType.Int, field.GetValue(this).ToString()));
                     }
@@ -281,15 +281,15 @@ namespace Xv2CoreLib.EMM
                 {
                     if (HasParameterFloat(field))
                     {
-                        if(field.Name.Contains("MipMapLod"))
+                        if (field.Name.Contains("MipMapLod"))
                             parameters.Add(new Parameter(field.Name, Parameter.ParameterType.Float2, field.GetValue(this).ToString()));
                         else
                             parameters.Add(new Parameter(field.Name, Parameter.ParameterType.Float, field.GetValue(this).ToString()));
                     }
                 }
-                else if(field.FieldType == typeof(CustomVector4))
+                else if (field.FieldType == typeof(CustomVector4))
                 {
-                    if(HasParameterVector(field, VectorType.Vector4))
+                    if (HasParameterVector(field, VectorType.Vector4))
                     {
                         parameters.Add(new Parameter(GetParamterName(field.Name, VectorType.Vector4, GetNameFormat(formatAttr, 2), GetNameFormat(formatAttr, 3), 0), Parameter.ParameterType.Float, GetVectorValue(field, VectorType.Vector4, 0).ToString()));
                         parameters.Add(new Parameter(GetParamterName(field.Name, VectorType.Vector4, GetNameFormat(formatAttr, 2), GetNameFormat(formatAttr, 3), 1), Parameter.ParameterType.Float, GetVectorValue(field, VectorType.Vector4, 1).ToString()));
@@ -357,7 +357,7 @@ namespace Xv2CoreLib.EMM
             object currentValue = fieldInfo.GetValue(this);
             float value = 0;
 
-            if(type == VectorType.Vector4)
+            if (type == VectorType.Vector4)
             {
                 value = ((CustomVector4)currentValue).GetValue(valueIdx);
             }
@@ -371,7 +371,7 @@ namespace Xv2CoreLib.EMM
             }
             else if (type == VectorType.UV && currentValue is CustomMatRepUV)
             {
-                value = ((CustomMatRepUV)currentValue).GetValue(valueIdx) ? 1f: 0f;
+                value = ((CustomMatRepUV)currentValue).GetValue(valueIdx) ? 1f : 0f;
             }
 
             if (defaultValue == null)
@@ -423,7 +423,7 @@ namespace Xv2CoreLib.EMM
         {
             DecompiledMaterial decMat = new DecompiledMaterial();
 
-            foreach(var field in Fields)
+            foreach (var field in Fields)
             {
                 VectorFormatAttribute formatAttr = (VectorFormatAttribute)field.GetCustomAttribute(typeof(VectorFormatAttribute), false);
 
@@ -459,7 +459,7 @@ namespace Xv2CoreLib.EMM
                     float[] vector = GetVectorValues(field.Name, material, VectorType.UV, GetNameFormat(formatAttr, 2), GetNameFormat(formatAttr, 3));
                     field.SetValue(decMat, new CustomMatRepUV(vector[0] >= 1f, vector[1] >= 1f));
                 }
-                else if(field.FieldType == typeof(CustomMatUV))
+                else if (field.FieldType == typeof(CustomMatUV))
                 {
                     float[] vector = GetVectorValues(field.Name, material, VectorType.UV, GetNameFormat(formatAttr, 2), GetNameFormat(formatAttr, 3));
                     field.SetValue(decMat, new CustomMatUV(vector[0], vector[1]));
@@ -479,7 +479,7 @@ namespace Xv2CoreLib.EMM
             //Special case of g_MaterialOffset0_VS (the shader parameter) being referenced directly in the EMM:
             Parameter parameter = material.GetParameter("g_MaterialOffset0_VS");
 
-            if(parameter != null)
+            if (parameter != null)
             {
                 decMat.MatOffset0 = new CustomVector4(parameter.FloatValue);
             }
@@ -492,7 +492,7 @@ namespace Xv2CoreLib.EMM
             //Check for a parameter without the "index". This should initialize all members of the array to this value, so we need to look no further. (NOTE: array means stuff like MatCol0, MatCol1, MatCol2...)
             Parameter param = material.GetParameter(GetParameterNameWithoutIndex(fieldName));
 
-            if(param != null)
+            if (param != null)
             {
                 return new float[4] { param.FloatValue, param.FloatValue, param.FloatValue, param.FloatValue };
             }
@@ -521,7 +521,7 @@ namespace Xv2CoreLib.EMM
             if (param != null)
                 y = param.FloatValue;
 
-            if(type == VectorType.Color || type == VectorType.Vector4)
+            if (type == VectorType.Color || type == VectorType.Vector4)
             {
                 param = material.GetParameter(GetParamterName(fieldName, type, pos2, pos3, 2));
 
@@ -534,7 +534,7 @@ namespace Xv2CoreLib.EMM
                     w = param.FloatValue;
             }
 
-            if(x != 0 || y != 0 || z != 0 || w != 0)
+            if (x != 0 || y != 0 || z != 0 || w != 0)
             {
                 //Values were found, so return here.
                 return new float[4] { x, y, z, w };
@@ -557,7 +557,7 @@ namespace Xv2CoreLib.EMM
         #region Helper
         private static string GetParamterName(string fieldName, VectorType type, ParameterNameFormat pos2, ParameterNameFormat pos3, int valueIdx)
         {
-            if((pos2 == pos3) || pos2 == ParameterNameFormat.Name || pos3 == ParameterNameFormat.Name)
+            if ((pos2 == pos3) || pos2 == ParameterNameFormat.Name || pos3 == ParameterNameFormat.Name)
             {
                 throw new ArgumentException("DecompiledMaterial.GetParameterName: Invalid pos2 and pos3 arguments.");
             }
@@ -583,7 +583,7 @@ namespace Xv2CoreLib.EMM
                     if (valueIdx == 3) value = "W";
                     break;
                 case VectorType.Color:
-                    if(valueIdx == 0) value = "R";
+                    if (valueIdx == 0) value = "R";
                     if (valueIdx == 1) value = "G";
                     if (valueIdx == 2) value = "B";
                     if (valueIdx == 3) value = "A";
@@ -598,12 +598,12 @@ namespace Xv2CoreLib.EMM
 
             return (pos2 == ParameterNameFormat.Index) ? $"{fieldName}{value}" : $"{fieldName}{value}{idx}";
         }
-        
+
         private static string GetParameterNameWithoutIndex(string fieldName)
         {
             return fieldName.Remove(fieldName.Length - 1, 1);
         }
-    
+
         private static ParameterNameFormat GetNameFormat(VectorFormatAttribute attr, int pos)
         {
             switch (pos)
@@ -654,7 +654,7 @@ namespace Xv2CoreLib.EMM
 
         public bool Compare(DecompiledMaterial material)
         {
-            foreach(var field in Fields)
+            foreach (var field in Fields)
             {
                 object oldValue = field.GetValue(this);
                 object newValue = field.GetValue(material);
@@ -678,9 +678,9 @@ namespace Xv2CoreLib.EMM
             string nameNoIdx = GetParameterNameWithoutIndex(name);
             int valIdx = GetIndexOfValueType(name.Substring(name.Length - 1, 1));
 
-            foreach(var field in Fields)
+            foreach (var field in Fields)
             {
-                if(field.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                if (field.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
                 {
                     if (field.FieldType == typeof(int))
                         return HasParameterInt(field);
@@ -702,7 +702,7 @@ namespace Xv2CoreLib.EMM
                         return HasParameterVector(field, VectorType.UV);
 
                 }
-                else if(field.Name.Equals(nameNoIdx, StringComparison.OrdinalIgnoreCase))
+                else if (field.Name.Equals(nameNoIdx, StringComparison.OrdinalIgnoreCase))
                 {
                     //1 element of a vector
                     if (field.FieldType == typeof(CustomVector4))
@@ -713,6 +713,19 @@ namespace Xv2CoreLib.EMM
 
                     if (field.FieldType == typeof(CustomMatUV) || field.FieldType == typeof(CustomMatRepUV))
                         return HasParameterVector(field, VectorType.UV, valIdx);
+                }
+            }
+
+            return false;
+        }
+
+        public bool IsGroupUsed(ParameterGroup group)
+        {
+            for (int i = 0; i < Fields.Length; i++)
+            {
+                if (Groups[i] == group)
+                {
+                    if (HasParameter(Fields[i].Name)) return true;
                 }
             }
 
@@ -737,7 +750,7 @@ namespace Xv2CoreLib.EMM
         {
             List<IUndoRedo> undos = new List<IUndoRedo>();
 
-            foreach(var field in Fields)
+            foreach (var field in Fields)
             {
                 //Get both values
                 object oldValue = field.GetValue(this);
@@ -771,6 +784,17 @@ namespace Xv2CoreLib.EMM
         Value
     }
 
+    public enum ParameterGroup
+    {
+        Unsorted,
+        Misc,
+        MatScaleOffset,
+        Color,
+        Alpha,
+        Texture,
+        Lighting
+    }
+
     #region Attributes
     /// <summary>
     /// Specify the format of this parameter name. The default format is: Name -> Index -> Value. 
@@ -794,17 +818,6 @@ namespace Xv2CoreLib.EMM
     [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
     sealed class ParameterGroupAttribute : Attribute
     {
-        public enum ParameterGroup 
-        { 
-            Unsorted,
-            General,
-            MatScaleOffset,
-            Color,
-            Alpha,
-            Texture,
-            Lighting
-        }
-
         public ParameterGroup Group;
 
         public ParameterGroupAttribute(ParameterGroup group)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -66,6 +67,7 @@ namespace EEPK_Organiser.View.Vectors
             {
                 if (Value != null) SetFloatValue(value, nameof(Value.R));
                 NotifyPropertyChanged(nameof(Preview));
+                NotifyPropertyChanged(nameof(CurrentColor));
             }
         }
         public float G
@@ -75,6 +77,7 @@ namespace EEPK_Organiser.View.Vectors
             {
                 if (Value != null) SetFloatValue(value, nameof(Value.G));
                 NotifyPropertyChanged(nameof(Preview));
+                NotifyPropertyChanged(nameof(CurrentColor));
             }
         }
         public float B
@@ -84,6 +87,7 @@ namespace EEPK_Organiser.View.Vectors
             {
                 if (Value != null) SetFloatValue(value, nameof(Value.B));
                 NotifyPropertyChanged(nameof(Preview));
+                NotifyPropertyChanged(nameof(CurrentColor));
             }
         }
         public float A
@@ -92,6 +96,16 @@ namespace EEPK_Organiser.View.Vectors
             set
             {
                 if (Value != null) SetFloatValue(value, nameof(Value.A));
+                NotifyPropertyChanged(nameof(CurrentColor));
+            }
+        }
+
+        public Color? CurrentColor
+        {
+            get => Color.FromArgb((byte)(NormalizedFloatColor(A) * 255), (byte)(NormalizedFloatColor(R) * 255), (byte)(NormalizedFloatColor(G) * 255), (byte)(NormalizedFloatColor(B) * 255));
+            set
+            {
+                SetColorValue(value);
             }
         }
 
@@ -114,7 +128,7 @@ namespace EEPK_Organiser.View.Vectors
             UndoManager.Instance.UndoOrRedoCalled -= Instance_UndoOrRedoCalled;
         }
 
-        private void SetFloatValue(float newValue, string propName)
+        private IUndoRedo SetFloatValue(float newValue, string propName, bool addUndo = true)
         {
             float original = (float)Value.GetType().GetProperty(propName).GetValue(Value);
 
@@ -122,8 +136,24 @@ namespace EEPK_Organiser.View.Vectors
             {
                 Value.GetType().GetProperty(propName).SetValue(Value, newValue);
 
-                UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(propName, Value, original, newValue, $"{propName}"));
+                if (addUndo)
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(propName, Value, original, newValue, $"{propName}"));
             }
+            return (!addUndo) ? new UndoablePropertyGeneric(propName, Value, original, newValue, $"{propName}") : null;
+        }
+
+        private void SetColorValue(Color? newValue)
+        {
+            if (newValue.Value == null) return;
+
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+            undos.Add(SetFloatValue(newValue.Value.ScR, "R", false));
+            undos.Add(SetFloatValue(newValue.Value.ScG, "G", false));
+            undos.Add(SetFloatValue(newValue.Value.ScB, "B", false));
+            undos.Add(SetFloatValue(newValue.Value.ScA, "A", false));
+
+            UndoManager.Instance.AddCompositeUndo(undos, "Color");
+            UpdateProperties();
         }
 
         private void UpdateProperties()
@@ -132,6 +162,7 @@ namespace EEPK_Organiser.View.Vectors
             NotifyPropertyChanged(nameof(G));
             NotifyPropertyChanged(nameof(B));
             NotifyPropertyChanged(nameof(A));
+            NotifyPropertyChanged(nameof(CurrentColor));
             NotifyPropertyChanged(nameof(Preview));
         }
     

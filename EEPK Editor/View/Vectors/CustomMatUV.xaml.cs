@@ -9,7 +9,7 @@ namespace EEPK_Organiser.View.Vectors
     /// <summary>
     /// Interaction logic for MatVector4.xaml
     /// </summary>
-    public partial class CustomVector4 : UserControl, INotifyPropertyChanged, IDisposable
+    public partial class CustomMatUV : UserControl, INotifyPropertyChanged, IDisposable
     {
         #region NotifyPropChanged
         public event PropertyChangedEventHandler PropertyChanged;
@@ -25,22 +25,23 @@ namespace EEPK_Organiser.View.Vectors
 
         #region DP
         public static readonly DependencyProperty ValueProperty = DependencyProperty.Register(
-            "Value", typeof(LB_Common.Numbers.CustomVector4), typeof(CustomVector4), new PropertyMetadata(OnDpChanged));
+            "Value", typeof(LB_Common.Numbers.CustomMatUV), typeof(CustomMatUV), new PropertyMetadata(OnDpChanged));
 
-        public LB_Common.Numbers.CustomVector4 Value
+        public LB_Common.Numbers.CustomMatUV Value
         {
-            get { return (LB_Common.Numbers.CustomVector4)GetValue(ValueProperty); }
+            get { return (LB_Common.Numbers.CustomMatUV)GetValue(ValueProperty); }
             set { SetValue(ValueProperty, value); }
         }
 
         public static readonly DependencyProperty IntervalProperty = DependencyProperty.Register(
-            "Interval", typeof(float), typeof(CustomVector4), new PropertyMetadata(0.05f));
+            "Interval", typeof(float), typeof(CustomMatUV), new PropertyMetadata(0.05f));
 
         public float Interval
         {
             get { return (float)GetValue(IntervalProperty); }
             set { SetValue(IntervalProperty, value); }
         }
+
 
         private static DependencyPropertyChangedEventHandler DpChanged;
 
@@ -57,40 +58,24 @@ namespace EEPK_Organiser.View.Vectors
 
         #endregion
 
-        public float X
+        public float U
         {
-            get => Value != null ? Value.X : 0;
+            get => Value != null ? Value.U : 0;
             set
             {
-                if (Value != null) SetFloatValue(value, nameof(Value.X));
+                if (Value != null) SetFloatValue(value, nameof(Value.U));
             }
         }
-        public float Y
+        public float V
         {
-            get => Value != null ? Value.Y : 0;
+            get => Value != null ? Value.V : 0;
             set
             {
-                if (Value != null) SetFloatValue(value, nameof(Value.Y));
+                if (Value != null) SetFloatValue(value, nameof(Value.V));
             }
         }
-        public float Z
-        {
-            get => Value != null ? Value.Z : 0;
-            set
-            {
-                if (Value != null) SetFloatValue(value, nameof(Value.Z));
-            }
-        }
-        public float W
-        {
-            get => Value != null ? Value.W : 0;
-            set
-            {
-                if(Value != null) SetFloatValue(value, nameof(Value.W));
-            }
-        }
-
-        public CustomVector4()
+       
+        public CustomMatUV()
         {
             InitializeComponent();
             DpChanged += ValueInstanceChanged;
@@ -121,10 +106,8 @@ namespace EEPK_Organiser.View.Vectors
 
         private void UpdateProperties()
         {
-            NotifyPropertyChanged(nameof(X));
-            NotifyPropertyChanged(nameof(Y));
-            NotifyPropertyChanged(nameof(Z));
-            NotifyPropertyChanged(nameof(W));
+            NotifyPropertyChanged(nameof(U));
+            NotifyPropertyChanged(nameof(V));
         }
     }
 }

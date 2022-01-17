@@ -27,6 +27,9 @@
         <Label Content="A" FontSize="10" VerticalContentAlignment="Center" Grid.Column="6" Grid.ColumnSpan="2" Margin="0.667,0,57,0"/>
         <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=A}" Grid.Column="7" TrackMouseWheelWhenMouseOver="True" HideUpDownButtons="True" StringFormat="0.0##" Grid.ColumnSpan="2" Margin="0.333,0,35,0"/>
 
-        <Grid Background="{Binding ElementName=UserControl, Path=Preview}" Grid.Column="8" Margin="10,0,3,0"/>
+        <Grid Background="{Binding ElementName=UserControl, Path=Preview}" Grid.Column="8" Margin="10,0,3,0">
+            <controls:ColorPicker SelectedColor="{Binding ElementName=UserControl, Path=CurrentColor}" Background="Transparent" BorderBrush="Transparent" Foreground="Transparent"/>
+
+        </Grid>
     </Grid>
 </UserControl>

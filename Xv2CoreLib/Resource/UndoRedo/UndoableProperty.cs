@@ -2,19 +2,21 @@
 
 namespace Xv2CoreLib.Resource.UndoRedo
 {
-    public class UndoableProperty<T> : IUndoRedo
+    public class UndoableProperty<T> : IUndoRedo, IMergableUndo
     {
+        //Was accidently made a generic class. Cant remove that now.
+
         public bool doLast { get; set; }
-        private object _oldValue;
-        private object _newValue;
-        private string _property;
-        private T _instance;
+        public object _oldValue { get; set; }
+        public object _newValue { get; set; }
+        public string _field { get; set; }
+        public object _instance { get; set; }
         public string Message { get; }
 
-        public UndoableProperty(string property, T instance, object oldValue, object newValue, string description = "")
+        public UndoableProperty(string property, object instance, object oldValue, object newValue, string description = "")
         {
             _instance = instance;
-            _property = property;
+            _field = property;
             _oldValue = oldValue;
             _newValue = newValue;
 
@@ -23,12 +25,12 @@ namespace Xv2CoreLib.Resource.UndoRedo
 
         public void Undo()
         {
-            _instance.GetType().GetProperty(_property).SetValue(_instance, _oldValue, null);
+            _instance.GetType().GetProperty(_field).SetValue(_instance, _oldValue, null);
         }
 
         public void Redo()
         {
-            _instance.GetType().GetProperty(_property).SetValue(_instance, _newValue, null);
+            _instance.GetType().GetProperty(_field).SetValue(_instance, _newValue, null);
         }
         
     }

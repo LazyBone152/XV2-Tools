@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 
 namespace Xv2CoreLib.HslColor
@@ -183,9 +179,10 @@ namespace Xv2CoreLib.HslColor
         public double B_Multi { get; set; }
 
         //Only preserve multi when value is 0.10 or greater. 
-        public double R_WithMulti { get { return (R <= 0.09) ? R : R + R_Multi; } }
-        public double G_WithMulti { get { return (G <= 0.09) ? G : G + G_Multi; } }
-        public double B_WithMulti { get { return (B <= 0.09) ? B : B + B_Multi; } }
+        //public double R_WithMulti { get { return (R <= 0.09) ? R : R + R_Multi; } }
+        //public double G_WithMulti { get { return (G <= 0.09) ? G : G + G_Multi; } }
+        //public double B_WithMulti { get { return (B <= 0.09) ? B : B + B_Multi; } }
+        //private float[] ExtraColor = new float[3];
 
         public byte R_int { get { return (byte)(R * 255.0); } set { R = value / 255.0; } }
         public byte G_int { get { return (byte)(G * 255.0); } set { G = value / 255.0; } }
@@ -203,6 +200,20 @@ namespace Xv2CoreLib.HslColor
 
         private double[] ReadFloatColor(double value)
         {
+            int asInt = (int)value;
+
+            if (asInt == value) 
+            {
+                //Whole value (0 or 1)
+                return new double[2] { value, 0 };
+            }
+            else
+            {
+                //Has remainder
+                return new double[2] { value - asInt, asInt };
+            }
+
+            /*
             //0 = value, 1 = multi
             double floored = Math.Floor(value);
 
@@ -226,6 +237,7 @@ namespace Xv2CoreLib.HslColor
                 //Value does not have multi
                 return new double[] { value, floored };
             }
+            */
         }
 
         public HslColor ToHsl()

@@ -1,12 +1,12 @@
 ﻿namespace Xv2CoreLib.Resource.UndoRedo
 {
-    public class UndoableField : IUndoRedo
+    public class UndoableField : IUndoRedo, IMergableUndo
     {
         public bool doLast { get; set; }
-        private object _oldValue;
-        private object _newValue;
-        private string _field;
-        private object _instance;
+        public object _oldValue { get; set; }
+        public object _newValue { get; set; }
+        public string _field { get; set; }
+        public object _instance { get; set; }
         public string Message { get; }
 
         public UndoableField(string field, object instance, object oldValue, object newValue, string description = "")

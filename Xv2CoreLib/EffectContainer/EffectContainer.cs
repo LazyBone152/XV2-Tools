@@ -2435,9 +2435,13 @@ namespace Xv2CoreLib.EffectContainer
 
             var superTexture = new WriteableBitmap(textureSize, textureSize, 96, 96, PixelFormats.Bgra32, null);
             EmbEntry newEmbEntry = new EmbEntry();
+            newEmbEntry.ImageFormat = CSharpImageLibrary.ImageEngineFormat.PNG;
 
             for (int i = 0; i < bitmaps.Count; i++)
             {
+                if (bitmaps[i] == null)
+                    throw new NullReferenceException("Bitmap was null.");
+
                 double position = maxDimension * i / textureSize;
                 int row = (int)position;
                 position -= row;
@@ -2511,7 +2515,12 @@ namespace Xv2CoreLib.EffectContainer
             }
 
             newEmbEntry.LoadDds();
+
+            if (newEmbEntry.DdsImage == null)
+                throw new NullReferenceException("DdsImage was null at end.");
+
             newEmbEntry.Name = $"SuperTexture ({newEmbEntry.DdsImage.GetHashCode()}).dds";
+            //newEmbEntry.Name = $"SuperTexture ({newEmbEntry.Data.GetHashCode()}).dds";
 
             //Delete all previous textures
             foreach (var entry in embEntries)

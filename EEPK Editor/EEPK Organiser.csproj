@@ -212,6 +212,9 @@
     <Compile Include="View\Vectors\CustomColor.xaml.cs">
       <DependentUpon>CustomColor.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\Vectors\CustomMatUV.xaml.cs">
+      <DependentUpon>CustomMatUV.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\Vectors\CustomVector4.xaml.cs">
       <DependentUpon>CustomVector4.xaml</DependentUpon>
     </Compile>
@@ -316,6 +319,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Vectors\CustomColor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Vectors\CustomMatUV.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
