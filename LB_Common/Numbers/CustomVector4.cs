@@ -71,6 +71,11 @@ namespace LB_Common.Numbers
             return (a == b) ? false : true;
         }
 
+        public static CustomVector4 operator *(CustomVector4 a, float b)
+        {
+            return new CustomVector4(a.X * b, a.Y * b, a.Z * b, a.W * b);
+        }
+
         #endregion
     }
 }

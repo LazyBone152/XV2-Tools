@@ -1,39 +1,27 @@
 ﻿using System;
-using System.Linq;
-using System.IO;
-using System.Globalization;
-using System.Text;
-using System.ComponentModel;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Xv2CoreLib.CMS;
-using Xv2CoreLib.CUS;
-using Xv2CoreLib.MSG;
-using Xv2CoreLib.BCS;
+using System.ComponentModel;
+using System.IO;
+using System.Linq;
+using Xv2CoreLib.ACB;
+using Xv2CoreLib.AMK;
 using Xv2CoreLib.BAC;
+using Xv2CoreLib.BAI;
+using Xv2CoreLib.BCM;
+using Xv2CoreLib.BCS;
 using Xv2CoreLib.BDM;
-using Xv2CoreLib.BSA;
+using Xv2CoreLib.CMS;
 using Xv2CoreLib.CSO;
 using Xv2CoreLib.EAN;
-using Xv2CoreLib.ERS;
-using Xv2CoreLib.IDB;
-using Xv2CoreLib.PUP;
-using Xv2CoreLib.BCM;
-using Xv2CoreLib.ACB;
-using Xv2CoreLib.BAI;
-using Xv2CoreLib.AMK;
-using Xv2CoreLib.BAS;
-using Xv2CoreLib.ESK;
-using Xv2CoreLib.EMD;
-using Xv2CoreLib.EEPK;
-using Xv2CoreLib.PSC;
-using Xv2CoreLib.EMM;
-using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.EffectContainer;
+using Xv2CoreLib.EMB_CLASS;
+using Xv2CoreLib.EMD;
+using Xv2CoreLib.EMM;
+using Xv2CoreLib.ERS;
+using Xv2CoreLib.ESK;
+using Xv2CoreLib.PSC;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
-using static Xv2CoreLib.Xenoverse2;
-using static Xv2CoreLib.CUS.CUS_File;
 
 namespace Xv2CoreLib
 {
@@ -52,12 +40,13 @@ namespace Xv2CoreLib
 
         //BCS:
         public Xv2File<BCS_File> BcsFile { get; set; }
-        public AsyncObservableCollection<Xv2BcsFile> PartSetFiles { get; set; } = new AsyncObservableCollection<Xv2BcsFile>();
+        public AsyncObservableCollection<Xv2PartSetFile> PartSetFiles { get; set; } = new AsyncObservableCollection<Xv2PartSetFile>();
 
         //Moveset:
         public Xv2MoveFiles MovesetFiles { get; set; }
+        public Xv2File<ESK_File> EskFile { get; set; }
 
-        //EMDs, ESKs loaded seperately
+
         public void SaveFiles()
         {
             if (MovesetFiles.BacFile?.File?.IsNull() == false)
@@ -97,39 +86,44 @@ namespace Xv2CoreLib
                 if (se.File?.IsNull() == false)
                     se.File.AcbFile.Save(se.Path);
             }
+
+            if(EskFile?.File != null)
+            {
+                EskFile.File.Save(EskFile.Path);
+            }
         }
 
         public void CalculateFilePaths()
         {
-            string skillDir = $"chara/{CmsEntry.ShortName}";
+            string charaDir = $"chara/{CmsEntry.ShortName}";
 
             if (MovesetFiles.BacFile?.Borrowed == false)
             {
-                MovesetFiles.BacFile.Path = FileManager.Instance.GetAbsolutePath(String.Format("{0}/{1}_PLAYER.bac", skillDir, CmsEntry.ShortName));
+                MovesetFiles.BacFile.Path = FileManager.Instance.GetAbsolutePath(String.Format("{0}/{1}_PLAYER.bac", charaDir, CmsEntry.ShortName));
                 CmsEntry.BacPath = CmsEntry.ShortName;
             }
 
             if (MovesetFiles.BcmFile?.Borrowed == false)
             {
-                MovesetFiles.BcmFile.Path = FileManager.Instance.GetAbsolutePath(String.Format("{0}/{1}_PLAYER.bcm", skillDir, CmsEntry.ShortName));
+                MovesetFiles.BcmFile.Path = FileManager.Instance.GetAbsolutePath(String.Format("{0}/{1}_PLAYER.bcm", charaDir, CmsEntry.ShortName));
                 CmsEntry.BcmPath = CmsEntry.ShortName;
             }
 
             if (MovesetFiles.BdmFile?.Borrowed == false)
             {
-                MovesetFiles.BdmFile.Path = FileManager.Instance.GetAbsolutePath(String.Format("{0}/{1}_PLAYER.bdm", skillDir, CmsEntry.ShortName));
+                MovesetFiles.BdmFile.Path = FileManager.Instance.GetAbsolutePath(String.Format("{0}/{1}_PLAYER.bdm", charaDir, CmsEntry.ShortName));
                 CmsEntry.BdmPath = CmsEntry.ShortName;
             }
 
             if (!MovesetFiles.CamEanFile[0]?.Borrowed == false)
             {
-                MovesetFiles.CamEanFile[0].Path = FileManager.Instance.GetAbsolutePath(String.Format("{0}/{1}.cam.ean", skillDir, CmsEntry.ShortName));
+                MovesetFiles.CamEanFile[0].Path = FileManager.Instance.GetAbsolutePath(String.Format("{0}/{1}.cam.ean", charaDir, CmsEntry.ShortName));
                 CmsEntry.CamEanPath = CmsEntry.ShortName;
             }
 
             if (BaiFile?.Borrowed == false)
             {
-                BaiFile.Path = FileManager.Instance.GetAbsolutePath(String.Format("{0}/{1}.bai", skillDir, CmsEntry.ShortName));
+                BaiFile.Path = FileManager.Instance.GetAbsolutePath(String.Format("{0}/{1}.bai", charaDir, CmsEntry.ShortName));
                 CmsEntry.BaiPath = CmsEntry.ShortName;
             }
 
@@ -144,7 +138,7 @@ namespace Xv2CoreLib
 
                 if (!AmkFile[i].Borrowed)
                 {
-                    AmkFile[i].Path = FileManager.Instance.GetAbsolutePath(String.Format("{0}/{1}{2}.amk", skillDir, CmsEntry.ShortName, (i > 0) ? i.ToString() : string.Empty));
+                    AmkFile[i].Path = FileManager.Instance.GetAbsolutePath(String.Format("{0}/{1}{2}.amk", charaDir, CmsEntry.ShortName, (i > 0) ? i.ToString() : string.Empty));
                 }
             }
 
@@ -182,14 +176,20 @@ namespace Xv2CoreLib
 
             if (mainEan?.Borrowed == false)
             {
-                mainEan.Path = FileManager.Instance.GetAbsolutePath(String.Format("{0}/{1}.ean", skillDir, CmsEntry.ShortName));
+                mainEan.Path = FileManager.Instance.GetAbsolutePath(String.Format("{0}/{1}.ean", charaDir, CmsEntry.ShortName));
                 CmsEntry.EanPath = CmsEntry.ShortName;
             }
 
             if (fceEan?.Borrowed == false)
             {
-                fceEan.Path = FileManager.Instance.GetAbsolutePath(String.Format("{0}/{1}.fce.ean", skillDir, CmsEntry.ShortName));
+                fceEan.Path = FileManager.Instance.GetAbsolutePath(String.Format("{0}/{1}.fce.ean", charaDir, CmsEntry.ShortName));
                 CmsEntry.FceEanPath = CmsEntry.ShortName;
+            }
+
+            //ESK
+            if (EskFile?.Borrowed == false)
+            {
+                EskFile.Path = FileManager.Instance.GetAbsolutePath(String.Format("{0}/{1}_000.esk", charaDir, CmsEntry.ShortName));
             }
         }
 
@@ -232,34 +232,25 @@ namespace Xv2CoreLib
         }
 
         //PartSet loading
-        /// <summary>
-        /// Loads the specified PartSet and stores the files in <see cref="PartSetFiles"/>.
-        /// </summary>
-        /// <param name="id"PartSet ID></param>
-        /// <returns>Signals whether the PartSet was found or not</returns>
-        public bool LoadPartSet(int id, bool forceReload = false)
+        public void LoadPartSets()
         {
-            PartSet partSet = BcsFile.File.PartSets.FirstOrDefault(x => x.ID == id);
-
-            if(partSet != null)
+            foreach(var partSet in BcsFile.File.PartSets)
             {
-                LoadPart(partSet.FaceBase, PartType.FaceBase, forceReload);
-                LoadPart(partSet.FaceEar, PartType.FaceEar, forceReload);
-                LoadPart(partSet.FaceEye, PartType.FaceEye, forceReload);
-                LoadPart(partSet.FaceForehead, PartType.FaceForehead, forceReload);
-                LoadPart(partSet.FaceNose, PartType.FaceNose, forceReload);
-                LoadPart(partSet.Hair, PartType.Hair, forceReload);
-                LoadPart(partSet.Bust, PartType.Bust, forceReload);
-                LoadPart(partSet.Pants, PartType.Pants, forceReload);
-                LoadPart(partSet.Boots, PartType.Boots, forceReload);
-                LoadPart(partSet.Rist, PartType.Rist, forceReload);
-                return true;
+                LoadPart(partSet.FaceBase, PartType.FaceBase);
+                LoadPart(partSet.FaceEar, PartType.FaceEar);
+                LoadPart(partSet.FaceEye, PartType.FaceEye);
+                LoadPart(partSet.FaceForehead, PartType.FaceForehead);
+                LoadPart(partSet.FaceNose, PartType.FaceNose);
+                LoadPart(partSet.Hair, PartType.Hair);
+                LoadPart(partSet.Bust, PartType.Bust);
+                LoadPart(partSet.Pants, PartType.Pants);
+                LoadPart(partSet.Boots, PartType.Boots);
+                LoadPart(partSet.Rist, PartType.Rist);
             }
 
-            return false;
         }
 
-        private void LoadPart(Part part, PartType type, bool forceReload)
+        private void LoadPart(Part part, PartType type)
         {
             string emd = part.GetModelPath(type);
             string emb = part.GetEmbPath(type);
@@ -267,11 +258,11 @@ namespace Xv2CoreLib
             string dyt = part.GetDytPath(type);
             string ean = part.GetEanPath();
 
-            LoadPartSetFile(emd, part.CharaCode, null, forceReload);
-            LoadPartSetFile(emb, part.CharaCode, null, forceReload);
-            LoadPartSetFile(emm, part.CharaCode, null, forceReload);
-            LoadPartSetFile(ean, part.CharaCode, null, forceReload);
-            LoadPartSetFile(dyt, part.CharaCode, null, forceReload);
+            LoadPartSetFile(emd, part.CharaCode, null);
+            LoadPartSetFile(emb, part.CharaCode, null);
+            LoadPartSetFile(emm, part.CharaCode, null);
+            LoadPartSetFile(ean, part.CharaCode, null);
+            LoadPartSetFile(dyt, part.CharaCode, null);
 
             if(part.Physics_Objects != null)
             {
@@ -284,69 +275,52 @@ namespace Xv2CoreLib
                     string physicsEan = physicsPart.GetEanPath();
                     string physicsScd = physicsPart.GetScdPath();
 
-                    LoadPartSetFile(physicsEmd, physicsPart.CharaCode, null, forceReload);
-                    LoadPartSetFile(physicsEmb, physicsPart.CharaCode, emb, forceReload);
-                    LoadPartSetFile(physicsEmm, physicsPart.CharaCode, emm, forceReload);
-                    LoadPartSetFile(physicsDyt, physicsPart.CharaCode, dyt, forceReload);
-                    LoadPartSetFile(physicsEan, physicsPart.CharaCode, null, forceReload);
-                    LoadPartSetFile(physicsScd, physicsPart.CharaCode, null, forceReload);
+                    LoadPartSetFile(physicsEmd, physicsPart.CharaCode, null);
+                    LoadPartSetFile(physicsEmb, physicsPart.CharaCode, emb);
+                    LoadPartSetFile(physicsEmm, physicsPart.CharaCode, emm);
+                    LoadPartSetFile(physicsDyt, physicsPart.CharaCode, dyt);
+                    LoadPartSetFile(physicsEan, physicsPart.CharaCode, null);
+                    LoadPartSetFile(physicsScd, physicsPart.CharaCode, null);
                 }
             }
         }
 
-        private void LoadPartSetFile(string path, string charaCode, string altPath = null, bool forceReload = false)
+        private void LoadPartSetFile(string path, string charaCode, string altPath = null)
         {
-            if (string.IsNullOrWhiteSpace(path)) return; //Nothing to load
-            if (PartSetFiles.Any(x => x.Name == Path.GetFileName(path) && x.CharacterCode == charaCode) && !forceReload) return; //File already loaded
+            if (charaCode != CmsEntry.ShortName) return; //Dont load files belonging to another character
 
-            path = Utils.SanitizePath(path.ToLower());
+            string name = Path.GetFileName(path);
+
+            if (string.IsNullOrWhiteSpace(path)) return; //Nothing to load
+            if (PartSetFiles.Any(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase))) return; //File already loaded
+
+            path = Utils.SanitizePath(path);
 
             //Special case: EMB, EMM and DYT for physics parts can use the parents files if none are found
             if (!FileManager.Instance.fileIO.FileExists(path))
                 path = altPath;
 
-            Xv2BcsFile.Type type = Xv2BcsFile.GetType(path);
-            Xv2BcsFile xv2bcsFile = null;
+            //Exit if no file is found
+            if (!FileManager.Instance.fileIO.FileExists(path))
+                return; 
 
-            //Get name and chara folder
-            string name = Path.GetFileName(path);
 
-            switch (type)
+            PartSetFiles.Add(new Xv2PartSetFile(name, this));
+        }
+
+        public object GetPartSetFile(string name)
+        {
+            var file = PartSetFiles.FirstOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+
+            if(file != null)
             {
-                case Xv2BcsFile.Type.EMD:
-                    xv2bcsFile = new Xv2BcsFile((EMD_File)FileManager.Instance.GetParsedFileFromGame(path, forceReload: forceReload), name, charaCode);
-                    break;
-                case Xv2BcsFile.Type.EMB:
-                    xv2bcsFile = new Xv2BcsFile((EMB_File)FileManager.Instance.GetParsedFileFromGame(path, forceReload: forceReload), name, charaCode, false);
-                    break;
-                case Xv2BcsFile.Type.DYT_EMB:
-                    xv2bcsFile = new Xv2BcsFile((EMB_File)FileManager.Instance.GetParsedFileFromGame(path, forceReload: forceReload), name, charaCode, true);
-                    break;
-                case Xv2BcsFile.Type.EMM:
-                    xv2bcsFile = new Xv2BcsFile((EMM_File)FileManager.Instance.GetParsedFileFromGame(path, forceReload: forceReload), name, charaCode);
-                    break;
-                case Xv2BcsFile.Type.EAN:
-                    xv2bcsFile = new Xv2BcsFile((EAN_File)FileManager.Instance.GetParsedFileFromGame(path, forceReload: forceReload), name, charaCode);
-                    break;
-                case Xv2BcsFile.Type.SCD_ESK:
-                    xv2bcsFile = new Xv2BcsFile((ESK_File)FileManager.Instance.GetParsedFileFromGame(path, forceReload: forceReload), name, charaCode);
-                    break;
-                case Xv2BcsFile.Type.SCD:
-                    xv2bcsFile = new Xv2BcsFile(FileManager.Instance.GetBytesFromGame(path), name, charaCode);
-                    break;
+                if (!file.IsLoaded)
+                    file.Load();
+
+                return file.File;
             }
 
-            //If file already exists, then we will overwrite it. Normally this will never happen unless forceReload is true.
-            int idx = PartSetFiles.IndexOf(PartSetFiles.FirstOrDefault(x => x.Name == Path.GetFileName(path) && x.CharacterCode == charaCode));
-
-            if(idx != -1)
-            {
-                PartSetFiles[idx] = xv2bcsFile;
-            }
-            else
-            {
-                PartSetFiles.Add(xv2bcsFile);
-            }
+            return null;
         }
 
         //Costumes
@@ -450,7 +424,7 @@ namespace Xv2CoreLib
 
     }
 
-    public class Xv2BcsFile
+    public class Xv2PartSetFile
     {
         public enum Type
         {
@@ -471,59 +445,72 @@ namespace Xv2CoreLib
         /// The complete name of the file, including the extension.
         /// </summary>
         public string Name { get; set; }
-        /// <summary>
-        /// The character code of the owner of this file. For a self-owned file, this should be null or <see cref="string.Empty"/>
-        /// </summary>
-        public string CharacterCode { get; set; } 
+        private string RelativePath => $"chara/{Owner.CmsEntry.ShortName}/{Name}";
+        public Xv2Character Owner { get; set; } 
 
         //Type:
         public Type FileType { get; private set; }
         /// <summary>
         /// When true, <see cref="File"/> will contain the parsed file of the type specified in <see cref="FileType"/>. Otherwise, the raw bytes of the file will be stored in <see cref="Bytes"/>
         /// </summary>
-        public bool IsParsed { get; private set; }
 
         //Data:
+        public bool IsLoaded { get; private set; }
         public object File { get; private set; }
         public byte[] Bytes { get; private set; }
 
-        //Constructors:
-        public Xv2BcsFile(EMB_File file, string name, string charaCode, bool isDyt) : this(file, name, charaCode, isDyt ? Type.DYT_EMB : Type.EMB) { }
-
-        public Xv2BcsFile(EMD_File file, string name, string charaCode) : this(file, name, charaCode, Type.EMD) { }
-
-        public Xv2BcsFile(EMM_File file, string name, string charaCode) : this(file, name, charaCode, Type.EMM) { }
-
-        public Xv2BcsFile(EAN_File file, string name, string charaCode) : this(file, name, charaCode, Type.EAN) { }
-
-        public Xv2BcsFile(ESK_File file, string name, string charaCode) : this(file, name, charaCode, Type.SCD_ESK) { }
-
-        public Xv2BcsFile(byte[] bytes, string name, string charaCode) : this(bytes, name, charaCode, Type.SCD) { }
-
-        public Xv2BcsFile(object file, string name, string charaCode, Type type)
+        //Constructor:
+        public Xv2PartSetFile(string name, Xv2Character owner)
         {
             Name = name;
-            CharacterCode = charaCode;
-            FileType = type;
+            Owner = owner;
+            FileType = GetFileType(name);
+        }
 
-            if(file.GetType() == typeof(byte[]))
+        public void Load()
+        {
+            switch (FileType)
             {
-                Bytes = (byte[])file;
-            }
-            else
-            {
-                File = file;
-                IsParsed = true;
+                case Type.EMD:
+                case Type.EMB:
+                case Type.DYT_EMB:
+                case Type.EMM:
+                case Type.EAN:
+                case Type.SCD_ESK:
+                    File = FileManager.Instance.GetParsedFileFromGame(RelativePath);
+                    break;
+                case Type.SCD:
+                    Bytes = FileManager.Instance.GetBytesFromGame(RelativePath);
+                    break;
+                default:
+                    return;
             }
 
+            IsLoaded = true;
         }
 
         public void Save()
         {
-            FileManager.Instance.SaveFileToGame($"chara/{CharacterCode}/{Name}", File);
+            if (IsLoaded)
+            {
+                switch (FileType)
+                {
+                    case Type.EMD:
+                    case Type.EMB:
+                    case Type.DYT_EMB:
+                    case Type.EMM:
+                    case Type.EAN:
+                    case Type.SCD_ESK:
+                        FileManager.Instance.SaveFileToGame(RelativePath, File);
+                        break;
+                    case Type.SCD:
+                        System.IO.File.WriteAllBytes(FileManager.Instance.fileIO.PathInGameDir(RelativePath), Bytes);
+                        break;
+                }
+            }
         }
 
-        public static Type GetType(string path)
+        private static Type GetFileType(string path)
         {
             path = path.ToLower();
 

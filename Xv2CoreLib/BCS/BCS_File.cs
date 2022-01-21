@@ -611,6 +611,12 @@ namespace Xv2CoreLib.BCS
         {
             return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.scd", CharaCode, Files_SCD));
         }
+
+        public string GetEskPath()
+        {
+            string emd = GetModelPath();
+            return string.Format("{0}/{1}.esk", Path.GetDirectoryName(emd), Path.GetFileNameWithoutExtension(emd));
+        }
     }
 
     public class Unk3

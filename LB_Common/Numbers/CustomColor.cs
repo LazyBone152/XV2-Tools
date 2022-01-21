@@ -66,6 +66,10 @@ namespace LB_Common.Numbers
             return (a == b) ? false : true;
         }
 
+        public static CustomColor operator *(CustomColor a, float b)
+        {
+            return new CustomColor(a.R * b, a.G * b, a.B * b, a.A * b);
+        }
         #endregion
     }
 }

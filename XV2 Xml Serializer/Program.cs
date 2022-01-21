@@ -21,7 +21,7 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
-            args = new string[1] { @"E:\VS_Test\EMM\ALL EMM" };
+            args = new string[1] { @"C:\XV2_MultiThreadExtractTest\EMD" };
 
             DEBUG_MODE = true;
 #endif
@@ -41,12 +41,12 @@ namespace XV2_Xml_Serializer
             
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
             
-            for (int i = 0; i < args.Count(); i++)
+            for (int i = 0; i < args.Length; i++)
             {
                 fileLocation = args[i];
-                if(args.Count() > 1)
+                if(args.Length > 1)
                 {
-                    Console.WriteLine(String.Format("Processing File {2} of {1}: \"{0}\"...\n", fileLocation, args.Count(), i + 1));
+                    Console.WriteLine(String.Format("Processing File {2} of {1}: \"{0}\"...\n", fileLocation, args.Length, i + 1));
                 }
 
                 if (Directory.Exists(fileLocation))
@@ -767,9 +767,18 @@ namespace XV2_Xml_Serializer
                                         {
                                             foreach(var submesh in mesh.Submeshes)
                                             {
-                                                if(submesh.TextureDefinitionCount > 2)
+                                                int count = 0;
+                                                for(int i = 0; i < submesh.TriangleListCount; i++)
                                                 {
-                                                    Console.WriteLine("Here: " + submesh.TextureDefinitionCount);
+                                                    for(int a = 0; a < submesh.Triangles[i].BonesCount; a++)
+                                                    {
+                                                        count++;
+                                                    }
+                                                }
+
+                                                if(count > 24)
+                                                {
+                                                    Console.WriteLine("Here: " + count);
                                                     Console.ReadLine();
                                                 }
                                             }

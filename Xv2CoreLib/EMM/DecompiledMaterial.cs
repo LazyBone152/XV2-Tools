@@ -652,6 +652,23 @@ namespace Xv2CoreLib.EMM
             return (CustomColor)GetType().GetField(name).GetValue(this);
         }
 
+        public float GetMipMapLod(int index)
+        {
+            switch (index)
+            {
+                case 0:
+                    return MipMapLod0;
+                case 1:
+                    return MipMapLod1;
+                case 2:
+                    return MipMapLod2;
+                case 3:
+                    return MipMapLod3;
+            }
+
+            return 0f;
+        }
+
         public bool Compare(DecompiledMaterial material)
         {
             foreach (var field in Fields)
