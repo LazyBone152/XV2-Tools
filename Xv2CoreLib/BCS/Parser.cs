@@ -273,10 +273,10 @@ namespace Xv2CoreLib.BCS
 
                     physicsObjects.Add(new PhysicsObject()
                     {
-                        I_00 = BitConverter.ToInt16(rawBytes, offset + 0),
-                        I_02 = BitConverter.ToInt16(rawBytes, offset + 2),
-                        I_04 = BitConverter.ToInt16(rawBytes, offset + 4),
-                        I_24 = (Part.PartFlags)BitConverter.ToInt32(rawBytes, offset + 24),
+                        Model1 = BitConverter.ToInt16(rawBytes, offset + 0),
+                        Model2 = BitConverter.ToInt16(rawBytes, offset + 2),
+                        Texture = BitConverter.ToInt16(rawBytes, offset + 4),
+                        Flags = (Part.PartFlags)BitConverter.ToInt32(rawBytes, offset + 24),
                         Hide_FaceBase = _I_28[0],
                         Hide_Forehead = _I_28[1],
                         Hide_Eye = _I_28[2],
@@ -298,12 +298,12 @@ namespace Xv2CoreLib.BCS
                         HideMat_Rist = _I_32[8],
                         HideMat_Boots = _I_32[9],
                         CharaCode = StringEx.GetString(rawBytes, offset + 36, false, StringEx.EncodingType.ASCII, 4),
-                        Files_EMD = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 40), offset),
-                        Files_EMM = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 44), offset),
-                        Files_EMB = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 48), offset),
-                        Files_EAN = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 52), offset),
+                        EmdPath = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 40), offset),
+                        EmmPath = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 44), offset),
+                        EmbPath = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 48), offset),
+                        EanPath = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 52), offset),
                         BoneToAttach = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 56), offset),
-                        Files_SCD = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 60), offset)
+                        ScdPath = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 60), offset)
                     });
                     offset += 72;
                 }

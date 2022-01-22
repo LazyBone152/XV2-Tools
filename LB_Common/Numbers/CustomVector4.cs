@@ -5,10 +5,12 @@ namespace LB_Common.Numbers
     [Serializable]
     public class CustomVector4
     {
-        public float X { get; set; }
-        public float Y { get; set; }
-        public float Z { get; set; }
-        public float W { get; set; }
+        public readonly float[] Values = new float[4];
+
+        public float X { get { return Values[0]; } set { Values[0] = value; } }
+        public float Y { get { return Values[1]; } set { Values[1] = value; } }
+        public float Z { get { return Values[2]; } set { Values[2] = value; } }
+        public float W { get { return Values[3]; } set { Values[3] = value; } }
 
         public CustomVector4() { }
 
@@ -77,5 +79,7 @@ namespace LB_Common.Numbers
         }
 
         #endregion
+
+        
     }
 }

@@ -5,10 +5,12 @@ namespace LB_Common.Numbers
     [Serializable]
     public class CustomColor
     {
-        public float R { get; set; }
-        public float G { get; set; }
-        public float B { get; set; }
-        public float A { get; set; }
+        public readonly float[] Values = new float[4];
+
+        public float R { get { return Values[0]; } set { Values[0] = value; } }
+        public float G { get { return Values[1]; } set { Values[1] = value; } }
+        public float B { get { return Values[2]; } set { Values[2] = value; } }
+        public float A { get { return Values[3]; } set { Values[3] = value; } }
 
         public CustomColor() { }
 

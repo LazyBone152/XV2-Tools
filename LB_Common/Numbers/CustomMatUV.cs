@@ -5,8 +5,10 @@ namespace LB_Common.Numbers
     [Serializable]
     public class CustomMatUV
     {
-        public float U { get; set; }
-        public float V { get; set; }
+        public readonly float[] Values = new float[4];
+
+        public float U { get { return Values[0]; } set { Values[0] = value; } }
+        public float V { get { return Values[1]; } set { Values[1] = value; } }
 
         public CustomMatUV() { }
 

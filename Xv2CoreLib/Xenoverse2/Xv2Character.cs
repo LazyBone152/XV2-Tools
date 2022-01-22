@@ -252,6 +252,8 @@ namespace Xv2CoreLib
 
         private void LoadPart(Part part, PartType type)
         {
+            if (part == null) return;
+
             string emd = part.GetModelPath(type);
             string emb = part.GetEmbPath(type);
             string emm = part.GetEmmPath(type);
@@ -269,6 +271,7 @@ namespace Xv2CoreLib
                 foreach (var physicsPart in part.Physics_Objects)
                 {
                     string physicsEmd = physicsPart.GetModelPath();
+                    string physicsEsk = physicsPart.GetEskPath();
                     string physicsEmb = physicsPart.GetEmbPath();
                     string physicsEmm = physicsPart.GetEmmPath();
                     string physicsDyt = physicsPart.GetDytPath();
@@ -281,6 +284,7 @@ namespace Xv2CoreLib
                     LoadPartSetFile(physicsDyt, physicsPart.CharaCode, dyt);
                     LoadPartSetFile(physicsEan, physicsPart.CharaCode, null);
                     LoadPartSetFile(physicsScd, physicsPart.CharaCode, null);
+                    LoadPartSetFile(physicsEsk, physicsPart.CharaCode, null);
                 }
             }
         }

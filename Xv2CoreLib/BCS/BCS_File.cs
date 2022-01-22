@@ -473,16 +473,16 @@ namespace Xv2CoreLib.BCS
     {
         [YAXAttributeFor("Model1")]
         [YAXSerializeAs("value")]
-        public short I_00 { get; set; }
+        public short Model1 { get; set; }
         [YAXAttributeFor("Model2")]
         [YAXSerializeAs("value")]
-        public short I_02 { get; set; }
+        public short Model2 { get; set; }
         [YAXAttributeFor("Texture")]
         [YAXSerializeAs("value")]
-        public short I_04 { get; set; }
+        public short Texture { get; set; }
         [YAXAttributeFor("Flags")]
         [YAXSerializeAs("value")]
-        public Part.PartFlags I_24 { get; set; }
+        public Part.PartFlags Flags { get; set; }
 
 
         //Flags
@@ -559,57 +559,57 @@ namespace Xv2CoreLib.BCS
 
         [YAXAttributeFor("Files")]
         [YAXSerializeAs("EMD")]
-        public string Files_EMD { get; set; }
+        public string EmdPath { get; set; }
         [YAXAttributeFor("Files")]
         [YAXSerializeAs("EMM")]
-        public string Files_EMM { get; set; }
+        public string EmmPath { get; set; }
         [YAXAttributeFor("Files")]
         [YAXSerializeAs("EMB")]
-        public string Files_EMB { get; set; }
+        public string EmbPath { get; set; }
         [YAXAttributeFor("Files")]
         [YAXSerializeAs("EAN")]
-        public string Files_EAN { get; set; }
+        public string EanPath { get; set; }
         [YAXAttributeFor("Files")]
         [YAXSerializeAs("SCD")]
-        public string Files_SCD { get; set; }
+        public string ScdPath { get; set; }
 
         public string GetModelPath()
         {
-            return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.emd", CharaCode, Files_EMD));
+            return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.emd", CharaCode, EmdPath));
         }
 
         public string GetEmbPath()
         {
-            if(string.IsNullOrWhiteSpace(Files_EMB))
-                return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.emb", CharaCode, Files_EMD));
+            if(string.IsNullOrWhiteSpace(EmbPath))
+                return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.emb", CharaCode, EmdPath));
             else
-                return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.emb", CharaCode, Files_EMB));
+                return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.emb", CharaCode, EmbPath));
         }
 
         public string GetEmmPath()
         {
-            if (string.IsNullOrWhiteSpace(Files_EMM))
-                return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.emm", CharaCode, Files_EMD));
+            if (string.IsNullOrWhiteSpace(EmmPath))
+                return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.emm", CharaCode, EmdPath));
             else
-                return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.emm", CharaCode, Files_EMM));
+                return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.emm", CharaCode, EmmPath));
         }
 
         public string GetDytPath()
         {
-            if (string.IsNullOrWhiteSpace(Files_EMB))
-                return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.dyt.emb", CharaCode, Files_EMD));
+            if (string.IsNullOrWhiteSpace(EmbPath))
+                return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.dyt.emb", CharaCode, EmdPath));
             else
-                return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.dyt.emb", CharaCode, Files_EMB));
+                return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.dyt.emb", CharaCode, EmbPath));
         }
 
         public string GetEanPath()
         {
-            return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.ean", CharaCode, Files_EAN));
+            return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.ean", CharaCode, EanPath));
         }
 
         public string GetScdPath()
         {
-            return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.scd", CharaCode, Files_SCD));
+            return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.scd", CharaCode, ScdPath));
         }
 
         public string GetEskPath()

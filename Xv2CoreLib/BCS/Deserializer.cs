@@ -424,11 +424,11 @@ namespace Xv2CoreLib.BCS
                     BitArray _i_28 = new BitArray(new bool[] { physicsObjects[i].Hide_FaceBase, physicsObjects[i].Hide_Forehead, physicsObjects[i].Hide_Eye, physicsObjects[i].Hide_Nose, physicsObjects[i].Hide_Ear, physicsObjects[i].Hide_Hair, physicsObjects[i].Hide_Bust, physicsObjects[i].Hide_Pants, physicsObjects[i].Hide_Rist, physicsObjects[i].Hide_Boots, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false }); //32 bools = 32 bits
                     BitArray _i_32 = new BitArray(new bool[] { physicsObjects[i].HideMat_FaceBase, physicsObjects[i].HideMat_Forehead, physicsObjects[i].HideMat_Eye, physicsObjects[i].HideMat_Nose, physicsObjects[i].HideMat_Ear, physicsObjects[i].HideMat_Hair, physicsObjects[i].HideMat_Bust, physicsObjects[i].HideMat_Pants, physicsObjects[i].HideMat_Rist, physicsObjects[i].HideMat_Boots, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false }); //32 bools = 32 bits
 
-                    bytes.AddRange(BitConverter.GetBytes(physicsObjects[i].I_00));
-                    bytes.AddRange(BitConverter.GetBytes(physicsObjects[i].I_02));
-                    bytes.AddRange(BitConverter.GetBytes(physicsObjects[i].I_04));
+                    bytes.AddRange(BitConverter.GetBytes(physicsObjects[i].Model1));
+                    bytes.AddRange(BitConverter.GetBytes(physicsObjects[i].Model2));
+                    bytes.AddRange(BitConverter.GetBytes(physicsObjects[i].Texture));
                     bytes.AddRange(new byte[18]);
-                    bytes.AddRange(BitConverter.GetBytes((int)physicsObjects[i].I_24));
+                    bytes.AddRange(BitConverter.GetBytes((int)physicsObjects[i].Flags));
                     bytes.AddRange(Utils.ConvertToByteArray(_i_28, 4));
                     bytes.AddRange(Utils.ConvertToByteArray(_i_32, 4));
                     if (physicsObjects[i].CharaCode.Length > 4)
@@ -441,28 +441,28 @@ namespace Xv2CoreLib.BCS
                     {
                         Offset = bytes.Count(),
                         RelativeOffset = physicsObjectStartOffset,
-                        StringToWrite = physicsObjects[i].Files_EMD
+                        StringToWrite = physicsObjects[i].EmdPath
                     });
                     bytes.AddRange(new byte[4]);
                     stringInfo.Add(new StringWriter.StringInfo()
                     {
                         Offset = bytes.Count(),
                         RelativeOffset = physicsObjectStartOffset,
-                        StringToWrite = physicsObjects[i].Files_EMM
+                        StringToWrite = physicsObjects[i].EmmPath
                     });
                     bytes.AddRange(new byte[4]);
                     stringInfo.Add(new StringWriter.StringInfo()
                     {
                         Offset = bytes.Count(),
                         RelativeOffset = physicsObjectStartOffset,
-                        StringToWrite = physicsObjects[i].Files_EMB
+                        StringToWrite = physicsObjects[i].EmbPath
                     });
                     bytes.AddRange(new byte[4]);
                     stringInfo.Add(new StringWriter.StringInfo()
                     {
                         Offset = bytes.Count(),
                         RelativeOffset = physicsObjectStartOffset,
-                        StringToWrite = physicsObjects[i].Files_EAN
+                        StringToWrite = physicsObjects[i].EanPath
                     });
                     bytes.AddRange(new byte[4]);
                     stringInfo.Add(new StringWriter.StringInfo()
@@ -476,7 +476,7 @@ namespace Xv2CoreLib.BCS
                     {
                         Offset = bytes.Count(),
                         RelativeOffset = physicsObjectStartOffset,
-                        StringToWrite = physicsObjects[i].Files_SCD
+                        StringToWrite = physicsObjects[i].ScdPath
                     });
                     bytes.AddRange(new byte[12]);
 
