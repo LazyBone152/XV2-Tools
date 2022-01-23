@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:undoRedo="clr-namespace:Xv2CoreLib.Resource.UndoRedo;assembly=Xv2CoreLib"
-        Title="ACE" TitleCharacterCasing="Normal" MinWidth="790" MinHeight="460" Height="600" Width="900" WindowStartupLocation="CenterScreen">
+        Title="ACE" TitleCharacterCasing="Normal" MinWidth="790" MinHeight="460" Height="600" Width="900" WindowStartupLocation="CenterScreen" ResizeMode="CanResizeWithGrip">
     <Window.InputBindings>
         <KeyBinding Key="Z" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=UndoCommand}"/>
         <KeyBinding Key="Y" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=RedoCommand}"/>

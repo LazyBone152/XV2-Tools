@@ -142,11 +142,19 @@ namespace LB_Mod_Installer.Binding
 
                         if (value != null)
                         {
+                            string str = (string)value;
+                            str = str.ToLower();
+
+                            if(str.Contains("autoid") && autoIdAttr.Length == 0)
+                            {
+                                throw new ArgumentException($"AutoID binding not valid for this value ({childProp.Name}).");
+                            }
+
                             if (autoIdAttr.Length > 0)
                             {
                                 //Has BindingAutoId attribute.
                                 if (allowAutoId)
-                                    childProp.SetValue(obj, ParseBinding((string)value, string.Format("{0}", childProp.Name), filePath, installList, binaryList, true, autoIdAttr[0].MaxId, usedIDs).ToString());
+                                    childProp.SetValue(obj, ParseBinding(str, string.Format("{0}", childProp.Name), filePath, installList, binaryList, true, autoIdAttr[0].MaxId, usedIDs).ToString());
                             }
                         }
                     }

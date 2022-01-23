@@ -45,6 +45,7 @@ namespace Xv2CoreLib.ACB
         public const string GLOBAL_AISAC_3DVOL_DEF = "3Dvol_def";
 
         //Known ACB Versions
+        public readonly static Version _1_35_0_0 = new Version("1.35.0.0"); //SMT V
         public readonly static Version _1_30_0_0 = new Version("1.30.0.0"); //SDBH
         public readonly static Version _1_29_2_0 = new Version("1.29.2.0"); //SDBH
         public readonly static Version _1_29_0_0 = new Version("1.29.0.0"); //SDBH
@@ -199,6 +200,9 @@ namespace Xv2CoreLib.ACB
         [YAXSerializeAs("values")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]
         public byte[] StreamAwbTocWork { get; set; }
+        [YAXAttributeFor("ProjectKey")]
+        [YAXSerializeAs("value")]
+        public Guid ProjectKey { get; set; }
 
         public List<ACB_Cue> Cues { get; set; } = new List<ACB_Cue>();
         public List<ACB_Waveform> Waveforms { get; set; } = new List<ACB_Waveform>();
@@ -311,6 +315,7 @@ namespace Xv2CoreLib.ACB
             acbFile.CuePriorityType = utfFile.GetValue<byte>("CuePriorityType", TypeFlag.UInt8, 0, header, acbFile.Version);
 
             acbFile.GUID = new Guid(utfFile.GetData("AcbGuid", 0, header, acbFile.Version));
+            acbFile.ProjectKey = header.ColumnExists("ProjectKey", TypeFlag.Data, acbFile.Version) ? new Guid(utfFile.GetData("ProjectKey", 0, header, acbFile.Version)) : default(Guid);
             acbFile.OutsideLinkTable = utfFile.GetColumnTable("OutsideLinkTable", true, header, acbFile.Version);
 
             //Tables
@@ -493,8 +498,7 @@ namespace Xv2CoreLib.ACB
         private void ValidateTables(UTF_File utfFile)
         {
             if (utfFile.ColumnTableExists("BlockSequenceTable", true) || utfFile.ColumnTableExists("BlockTable", true) || utfFile.ColumnTableExists("EventTable", true) 
-                || utfFile.ColumnTableExists("AisacNameTable", true) || utfFile.ColumnTableExists("SeqParameterPalletTable", true) || 
-                utfFile.ColumnTableExists("TrackParameterPalletTable", true) || utfFile.ColumnTableExists("SynthParameterPalletTable", true))
+                || utfFile.ColumnTableExists("AisacNameTable", true) || utfFile.ColumnTableExists("InstrumentPluginTrackTable", true) || utfFile.ColumnTableExists("InstrumentPluginParameterTable", true))
                 TableValidationFailed = true;
         }
 
@@ -503,13 +507,15 @@ namespace Xv2CoreLib.ACB
             if (afs2File == null) return;
             if (afs2File.Entries == null) return;
 
+            List<ACB_Waveform> processed = new List<ACB_Waveform>();
+
             foreach (var entry in afs2File.Entries.Where(x => !x.BytesIsNullOrEmpty()))
             {
                 int oldId = entry.AwbId;
                 int newId = AudioTracks.AddEntry(entry, true);
 
                 if (oldId != newId)
-                    WaveformAwbIdRefactor(oldId, newId, streaming);
+                    WaveformAwbIdRefactor(oldId, newId, streaming, processed);
             }
         }
 
@@ -650,7 +656,7 @@ namespace Xv2CoreLib.ACB
             SortGlobalAisacRefs();
 
             //Fill tables
-            ACB_Cue.WriteToTable(Cues, Version, cueTable, cueNameTable);
+            ACB_Cue.WriteToTable(Cues, Version, cueTable, cueNameTable, this);
             ACB_Aisac.WriteToTable(Aisacs, Version, aisacTable, aisacControlNameTable);
             ACB_GlobalAisacReference.WriteToTable(GlobalAisacReferences, Version, globalAisacRefTable);
             ACB_Synth.WriteToTable(Synths, Version, synthTable);
@@ -761,6 +767,8 @@ namespace Xv2CoreLib.ACB
             utfFile.AddData("SoundGeneratorTable", 0, (SoundGeneratorTable != null) ? SoundGeneratorTable.Write() : null, tableHelper, Version);
             utfFile.AddData("PaddingArea", 0, null, tableHelper, Version);
             utfFile.AddData("StreamAwbTocWork", 0, StreamAwbTocWork, tableHelper, Version); //Not sure what this is...
+
+            utfFile.AddData("ProjectKey", 0, (ProjectKey != null) ? ProjectKey.ToByteArray() : null, tableHelper, Version);
 
             //External AWB header
             var headerHelper = AcbFormatHelper.Instance.GetTableHelper("StreamAwbAfs2Header");
@@ -1860,12 +1868,18 @@ namespace Xv2CoreLib.ACB
         #endregion
 
         #region RefactorFunctions
-        private void WaveformAwbIdRefactor(int oldAwbId, int newAwbId, bool stream)
+        private void WaveformAwbIdRefactor(int oldAwbId, int newAwbId, bool stream, List<ACB_Waveform> processedWaveeforms = null)
         {
             if (Waveforms == null) return;
 
             foreach(var waveform in Waveforms.Where(w => w.IsStreaming == stream && w.AwbId == oldAwbId))
             {
+                if(processedWaveeforms != null)
+                {
+                    if (processedWaveeforms.Contains(waveform)) continue;
+                    processedWaveeforms.Add(waveform);
+                }
+
                 waveform.AwbId = (ushort)newAwbId;
             }
         }
@@ -2287,6 +2301,10 @@ namespace Xv2CoreLib.ACB
             LinkEventIndexGuid(Tracks, CommandTableType.TrackEvent);
             LinkCommandIndexGuid(Tracks, CommandTableType.TrackCommand);
 
+            LinkParameterPalletGuid(Sequences, CommandTableType.SequenceParameterPallet);
+            LinkParameterPalletGuid(Synths, CommandTableType.SynthParameterPallet);
+            LinkParameterPalletGuid(Tracks, CommandTableType.TrackParameterPallet);
+
             LinkLocalAisacGuid(ActionTracks);
             LinkGlobalAisacGuid(ActionTracks);
             LinkEventIndexGuid(ActionTracks, CommandTableType.TrackEvent);
@@ -2322,6 +2340,10 @@ namespace Xv2CoreLib.ACB
             LinkGlobalAisacIndex(Tracks);
             LinkEventIndexIndex(Tracks, CommandTableType.TrackEvent);
             LinkCommandIndexIndex(Tracks, CommandTableType.TrackCommand);
+
+            LinkParameterPalletIndex(Sequences, CommandTableType.SequenceParameterPallet);
+            LinkParameterPalletIndex(Synths, CommandTableType.SynthParameterPallet);
+            LinkParameterPalletIndex(Tracks, CommandTableType.TrackParameterPallet);
 
             LinkLocalAisacIndex(ActionTracks);
             LinkGlobalAisacIndex(ActionTracks);
@@ -2397,6 +2419,14 @@ namespace Xv2CoreLib.ACB
             foreach (var entry in table)
             {
                 entry.EventIndex.TableGuid = CommandTables.GetCommandGuid(entry.EventIndex.TableIndex_Int, commandTableType);
+            }
+        }
+
+        private void LinkParameterPalletGuid<T>(IList<T> table, CommandTableType commandTableType) where T : IParameterPallet
+        {
+            foreach (var entry in table)
+            {
+                entry.ParameterPallet.TableGuid = CommandTables.GetCommandGuid(entry.ParameterPallet.TableIndex_Int, commandTableType);
             }
         }
 
@@ -2526,6 +2556,14 @@ namespace Xv2CoreLib.ACB
             }
         }
 
+        private void LinkParameterPalletIndex<T>(IList<T> table, CommandTableType commandTableType) where T : IParameterPallet
+        {
+            foreach (var entry in table)
+            {
+                entry.ParameterPallet.TableIndex = CommandTables.GetCommandIndex(entry.ParameterPallet.TableGuid, commandTableType);
+            }
+        }
+
         private void LinkActionTrackIndex<T>(IList<T> table) where T : IActionTrack
         {
             foreach (var entry in table)
@@ -2592,6 +2630,8 @@ namespace Xv2CoreLib.ACB
 
         internal ushort GetTableIndex<T>(Guid guid, IList<T> table) where T : AcbTableBase
         {
+            if (table == null) return ushort.MaxValue;
+
             var entry = table.FirstOrDefault(x => x.InstanceGuid == guid);
             return (entry != null) ? (ushort)table.IndexOf(entry) : ushort.MaxValue;
             //if (entry == null) throw new ArgumentOutOfRangeException($"ACB_File.GetTableIndex: Cannot find entry with guid {guid}.");
@@ -3095,15 +3135,15 @@ namespace Xv2CoreLib.ACB
             return cue;
         }
 
-        public static void WriteToTable(IList<ACB_Cue> cues, Version ParseVersion, UTF_File utfTable, UTF_File nameTable)
+        public static void WriteToTable(IList<ACB_Cue> cues, Version ParseVersion, UTF_File utfTable, UTF_File nameTable, ACB_File acbFile)
         {
             for(int i = 0; i < cues.Count; i++)
             {
-                cues[i].WriteToTable(utfTable, i, ParseVersion, nameTable);
+                cues[i].WriteToTable(utfTable, i, ParseVersion, nameTable, acbFile);
             }
         }
 
-        public void WriteToTable(UTF_File utfTable, int index, Version ParseVersion, UTF_File nameTable)
+        public void WriteToTable(UTF_File utfTable, int index, Version ParseVersion, UTF_File nameTable, ACB_File acbFile)
         {
             AcbFormatHelperTable tableHelper = AcbFormatHelper.Instance.GetTableHelper("CueTable");
 
@@ -3127,12 +3167,21 @@ namespace Xv2CoreLib.ACB
 
             nameTable.AddValue("CueName", TypeFlag.String, newRowIdx, Name);
             nameTable.AddValue("CueIndex", TypeFlag.UInt16, newRowIdx, index.ToString());
+
+            //NumWaveforms
+            if(tableHelper.ColumnExists("NumRelatedWaveforms", TypeFlag.UInt16, ParseVersion))
+            {
+                List<ACB_Waveform> waveforms = acbFile.GetWaveformsFromCue(this);
+                utfTable.AddValue("NumRelatedWaveforms", TypeFlag.UInt16, index, waveforms.Count.ToString());
+            }
+
+
         }
     }
 
     [YAXSerializeAs("Synth")]
     [Serializable]
-    public class ACB_Synth : AcbTableBase, IReferenceItems, ICommandIndex, ILocalAisac, IGlobalAisacRef, IActionTrack
+    public class ACB_Synth : AcbTableBase, IReferenceItems, ICommandIndex, ILocalAisac, IGlobalAisacRef, IActionTrack, IParameterPallet
     {
         [YAXAttributeForClass]
         public int Index { get; set; }
@@ -3145,7 +3194,7 @@ namespace Xv2CoreLib.ACB
         public string VoiceLimitGroupName { get; set; } = string.Empty;
         [YAXAttributeFor("ParameterPallet")]
         [YAXSerializeAs("value")]
-        public ushort ParameterPallet { get; set; } = ushort.MaxValue;
+        public AcbTableReference ParameterPallet { get; set; } = new AcbTableReference(); //ushort
         [YAXAttributeFor("TrackValues")]
         [YAXSerializeAs("values")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]
@@ -3184,6 +3233,7 @@ namespace Xv2CoreLib.ACB
             if (ReferenceItems == null) ReferenceItems = new List<ACB_ReferenceItem>();
             if (ActionTracks == null) ActionTracks = new List<AcbTableReference>();
             if (CommandIndex == null) CommandIndex = new AcbTableReference();
+            if (ParameterPallet == null) ParameterPallet = new AcbTableReference();
             if (LocalAisac == null) LocalAisac = new List<AcbTableReference>();
             if (GlobalAisacRefs == null) GlobalAisacRefs = new List<AcbTableReference>();
         }
@@ -3210,12 +3260,12 @@ namespace Xv2CoreLib.ACB
             synth.Type = synthTable.GetValue<byte>("Type", TypeFlag.UInt8, index, tableHelper, ParseVersion);
             synth.VoiceLimitGroupName = synthTable.GetValue<string>("VoiceLimitGroupName", TypeFlag.String, index, tableHelper, ParseVersion);
             synth.Type = synthTable.GetValue<byte>("Type", TypeFlag.UInt8, index, tableHelper, ParseVersion);
-            synth.ParameterPallet = synthTable.GetValue<ushort>("ParameterPallet", TypeFlag.UInt16, index, tableHelper, ParseVersion);
             synth.TrackValues = synthTable.GetData("TrackValues", index, tableHelper, ParseVersion);
 
             //Attached data
             ushort[] referenceItems = BigEndianConverter.ToUInt16Array(synthTable.GetData("ReferenceItems", index));
             synth.CommandIndex.TableIndex = synthTable.GetValue<ushort>("CommandIndex", TypeFlag.UInt16, index);
+            synth.ParameterPallet.TableIndex = synthTable.GetValue<ushort>("ParameterPallet", TypeFlag.UInt16, index, tableHelper, ParseVersion);
 
 
             if (tableHelper.ColumnExists("LocalAisacs", TypeFlag.Data, ParseVersion))
@@ -3296,7 +3346,7 @@ namespace Xv2CoreLib.ACB
 
     [YAXSerializeAs("Sequence")]
     [Serializable]
-    public class ACB_Sequence : AcbTableBase, ITrack, ICommandIndex, ILocalAisac, IGlobalAisacRef, IActionTrack
+    public class ACB_Sequence : AcbTableBase, ITrack, ICommandIndex, ILocalAisac, IGlobalAisacRef, IActionTrack, IParameterPallet
     {
 
         #region Undoable
@@ -3331,9 +3381,6 @@ namespace Xv2CoreLib.ACB
         [YAXAttributeFor("PlaybackRatio")]
         [YAXSerializeAs("value")]
         public ushort PlaybackRatio { get; set; } = 100;
-        [YAXAttributeFor("ParameterPallet")]
-        [YAXSerializeAs("value")]
-        public ushort ParameterPallet { get; set; } = ushort.MaxValue;
         [YAXAttributeFor("Tempo")]
         [YAXSerializeAs("value")]
         public ushort Tempo { get; set; } //only in old versions
@@ -3341,6 +3388,10 @@ namespace Xv2CoreLib.ACB
         //Tracks
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Track")]
         public AsyncObservableCollection<ACB_SequenceTrack> Tracks { get; set; } = new AsyncObservableCollection<ACB_SequenceTrack>();
+
+        //ParameterPallet
+        [YAXAttributeFor("ParameterPallet")]
+        public AcbTableReference ParameterPallet { get; set; } = new AcbTableReference(); //ushort
 
         //CommandIndex
         [YAXSerializeAs("CommandIndex")]
@@ -3366,6 +3417,7 @@ namespace Xv2CoreLib.ACB
             if (Tracks == null) Tracks = AsyncObservableCollection<ACB_SequenceTrack>.Create();
             if (ActionTracks == null) ActionTracks = new List<AcbTableReference>();
             if (CommandIndex == null) CommandIndex = new AcbTableReference();
+            if (ParameterPallet == null) ParameterPallet = new AcbTableReference();
             if (LocalAisac == null) LocalAisac = new List<AcbTableReference>();
             if (GlobalAisacRefs == null) GlobalAisacRefs = new List<AcbTableReference>();
         }
@@ -3393,7 +3445,7 @@ namespace Xv2CoreLib.ACB
             sequence.Index = index;
             sequence.CommandIndex.TableIndex = sequenceTable.GetValue<ushort>("CommandIndex", TypeFlag.UInt16, index);
             sequence.Tempo = sequenceTable.GetValue<ushort>("Tempo", TypeFlag.UInt16, index, tableHelper, ParseVersion);
-            sequence.ParameterPallet = sequenceTable.GetValue<ushort>("ParameterPallet", TypeFlag.UInt16, index, tableHelper, ParseVersion);
+            sequence.ParameterPallet.TableIndex = sequenceTable.GetValue<ushort>("ParameterPallet", TypeFlag.UInt16, index, tableHelper, ParseVersion);
             sequence.PlaybackRatio = sequenceTable.GetValue<ushort>("PlaybackRatio", TypeFlag.UInt16, index, tableHelper, ParseVersion);
             sequence.Type = (SequenceType)sequenceTable.GetValue<byte>("Type", TypeFlag.UInt8, index, tableHelper, ParseVersion);
 
@@ -3504,6 +3556,10 @@ namespace Xv2CoreLib.ACB
             utfTable.AddValue("GlobalAisacStartIndex", TypeFlag.UInt16, index, globalAisacRefIndex.ToString(), tableHelper, ParseVersion);
             utfTable.AddValue("ActionTrackStartIndex", TypeFlag.UInt16, index, actionTrackIndex.ToString(), tableHelper, ParseVersion);
             utfTable.AddValue("NumActionTracks", TypeFlag.UInt16, index, ActionTracks.Count.ToString(), tableHelper, ParseVersion);
+
+            //Unknown table values
+            utfTable.AddValue("InstPluginTrackStartIndex", TypeFlag.UInt16, index, ushort.MaxValue.ToString(), tableHelper, ParseVersion);
+            utfTable.AddValue("NumInstPluginTracks", TypeFlag.UInt16, index, "0", tableHelper, ParseVersion);
 
             if (trackValues.Count > 0 && (Type == SequenceType.Random || Type == SequenceType.RandomNoRepeat))
             {
@@ -3941,7 +3997,7 @@ namespace Xv2CoreLib.ACB
 
     [YAXSerializeAs("Track")]
     [Serializable]
-    public class ACB_Track : AcbTableBase, IEventIndex, ICommandIndex, ILocalAisac, IGlobalAisacRef, ITargetId
+    public class ACB_Track : AcbTableBase, IEventIndex, ICommandIndex, ILocalAisac, IGlobalAisacRef, ITargetId, IParameterPallet
     {
         #region Undoable
         [YAXDontSerialize]
@@ -4012,8 +4068,7 @@ namespace Xv2CoreLib.ACB
         public int Index { get; set; }
 
         [YAXAttributeFor("ParameterPallet")]
-        [YAXSerializeAs("value")]
-        public ushort ParameterPallet { get; set; } = ushort.MaxValue;
+        public AcbTableReference ParameterPallet { get; set; } = new AcbTableReference(); //ushort
         [YAXAttributeFor("TargetType")]
         [YAXSerializeAs("value")]
         public TargetType TargetType { get { return _targetType; } set { _targetType = value; NotifyPropertyChanged(nameof(UndoableTargetType)); } }
@@ -4055,6 +4110,7 @@ namespace Xv2CoreLib.ACB
         {
             if (EventIndex == null) EventIndex = new AcbTableReference();
             if (CommandIndex == null) CommandIndex = new AcbTableReference();
+            if (ParameterPallet == null) ParameterPallet = new AcbTableReference();
             if (LocalAisac == null) LocalAisac = new List<AcbTableReference>();
             if (GlobalAisacRefs == null) GlobalAisacRefs = new List<AcbTableReference>();
         }
@@ -4082,6 +4138,7 @@ namespace Xv2CoreLib.ACB
             //Track values
             track.EventIndex.TableIndex = trackTable.GetValue<ushort>("EventIndex", TypeFlag.UInt16, index);
             track.CommandIndex.TableIndex = trackTable.GetValue<ushort>("CommandIndex", TypeFlag.UInt16, index);
+            track.ParameterPallet.TableIndex = trackTable.GetValue<ushort>("ParameterPallet", TypeFlag.UInt16, index, tableHelper, ParseVersion);
             track.LocalAisac = AcbTableReference.FromArray(BigEndianConverter.ToUInt16Array(trackTable.GetData("LocalAisacs", index, tableHelper, ParseVersion)));
             track.TargetType = (TargetType)trackTable.GetValue<byte>("TargetType", TypeFlag.UInt8, index, tableHelper, ParseVersion);
             track.TargetName = trackTable.GetValue<string>("TargetName", TypeFlag.String, index, tableHelper, ParseVersion);
@@ -4089,7 +4146,6 @@ namespace Xv2CoreLib.ACB
             track.TargetAcbName = trackTable.GetValue<string>("TargetAcbName", TypeFlag.String, index, tableHelper, ParseVersion);
             track.Scope = trackTable.GetValue<byte>("Scope", TypeFlag.UInt8, index, tableHelper, ParseVersion);
             track.TargetTrackNo = trackTable.GetValue<ushort>("TargetTrackNo", TypeFlag.UInt16, index, tableHelper, ParseVersion);
-            track.ParameterPallet = trackTable.GetValue<ushort>("ParameterPallet", TypeFlag.UInt16, index, tableHelper, ParseVersion);
 
             if (tableHelper.ColumnExists("GlobalAisacStartIndex", TypeFlag.UInt16, ParseVersion))
             {
@@ -5080,12 +5136,23 @@ namespace Xv2CoreLib.ACB
             if (header.ColumnExists("TrackEventTable", TypeFlag.Data, acbFile.Version))
                 commandTables.CommandTables.Add(ACB_CommandTable.Load(utfFile.GetColumnTable("TrackEventTable", true), CommandTableType.TrackEvent, loadUnknownCommands));
 
+            if (header.ColumnExists("SeqParameterPalletTable", TypeFlag.Data, acbFile.Version))
+                commandTables.CommandTables.Add(ACB_CommandTable.Load(utfFile.GetColumnTable("SeqParameterPalletTable", true), CommandTableType.SequenceParameterPallet, loadUnknownCommands));
+
+            if (header.ColumnExists("TrackParameterPalletTable", TypeFlag.Data, acbFile.Version))
+                commandTables.CommandTables.Add(ACB_CommandTable.Load(utfFile.GetColumnTable("TrackParameterPalletTable", true), CommandTableType.TrackParameterPallet, loadUnknownCommands));
+
+            if (header.ColumnExists("SynthParameterPalletTable", TypeFlag.Data, acbFile.Version))
+                commandTables.CommandTables.Add(ACB_CommandTable.Load(utfFile.GetColumnTable("SynthParameterPalletTable", true), CommandTableType.SynthParameterPallet, loadUnknownCommands));
+
             if (header.ColumnExists("CommandTable", TypeFlag.Data, acbFile.Version))
             {
                 if (header.ColumnExists("SeqCommandTable", TypeFlag.Data, acbFile.Version) || header.ColumnExists("TrackCommandTable", TypeFlag.Data, acbFile.Version) ||
-                    header.ColumnExists("SynthCommandTable", TypeFlag.Data, acbFile.Version) || header.ColumnExists("TrackEventTable", TypeFlag.Data, acbFile.Version))
+                    header.ColumnExists("SynthCommandTable", TypeFlag.Data, acbFile.Version) || header.ColumnExists("TrackEventTable", TypeFlag.Data, acbFile.Version) ||
+                    header.ColumnExists("SeqParameterPalletTable", TypeFlag.Data, acbFile.Version) || header.ColumnExists("TrackParameterPalletTable", TypeFlag.Data, acbFile.Version) ||
+                    header.ColumnExists("SynthParameterPalletTable", TypeFlag.Data, acbFile.Version))
                 {
-                    throw new InvalidDataException($"CommandTable column cannot exist with SeqCommandTable, TrackCommandTable, SynthCommandTable or TrackEventTable.");
+                    throw new InvalidDataException($"CommandTable column cannot exist with SeqCommandTable, TrackCommandTable, SynthCommandTable, TrackEventTable, SeqParameterPalletTable, TrackParameterPalletTable or SynthParameterPalletTable.");
                 }
 
                 commandTables.CommandTables.Add(ACB_CommandTable.Load(utfFile.GetColumnTable("CommandTable", true), CommandTableType.SequenceCommand, loadUnknownCommands));
@@ -5142,6 +5209,11 @@ namespace Xv2CoreLib.ACB
                             cmd.ReferenceIndex = new AcbTableReference(cmd.Param1);
                             cmd.ReferenceIndex.TableGuid = root.GetTableGuid(cmd.Param1, root.StringValues);
                         }
+                        else if (cmd.CommandType == CommandType.BeatSyncReference)
+                        {
+                            cmd.ReferenceIndex = new AcbTableReference(cmd.Param2);
+                            cmd.ReferenceIndex.TableGuid = root.GetTableGuid(cmd.Param2, root.BeatSyncInfo);
+                        }
                     }
                 }
             }
@@ -5179,6 +5251,10 @@ namespace Xv2CoreLib.ACB
                         else if (cmd.CommandType == CommandType.VolumeBus || cmd.CommandType == CommandType.Bus)
                         {
                             cmd.ReferenceIndex.TableIndex = (ushort)root.GetTableIndex(cmd.ReferenceIndex.TableGuid, root.StringValues);
+                        }
+                        else if (cmd.CommandType == CommandType.BeatSyncReference)
+                        {
+                            cmd.ReferenceIndex.TableIndex = (ushort)root.GetTableIndex(cmd.ReferenceIndex.TableGuid, root.BeatSyncInfo);
                         }
                     }
                 }
@@ -5244,6 +5320,15 @@ namespace Xv2CoreLib.ACB
                         break;
                     case CommandTableType.TrackEvent:
                         utfTable.TableName = "TrackEvent";
+                        break;
+                    case CommandTableType.SequenceParameterPallet:
+                        utfTable.TableName = "SeqParameterPallet";
+                        break;
+                    case CommandTableType.TrackParameterPallet:
+                        utfTable.TableName = "TrackParameterPallet";
+                        break;
+                    case CommandTableType.SynthParameterPallet:
+                        utfTable.TableName = "SynthParameterPallet";
                         break;
                 }
             }
@@ -5379,9 +5464,6 @@ namespace Xv2CoreLib.ACB
 
         #endregion
 
-        //Values
-
-
         //Properties
         [YAXDontSerialize]
         public string DisplayName { get { return $"Command: {CommandType}"; } }
@@ -5514,6 +5596,7 @@ namespace Xv2CoreLib.ACB
                         break;
                     case CommandType.ReferenceItem:
                     case CommandType.ReferenceItem2:
+                    case CommandType.BeatSyncReference:
                         Param2 = ReferenceIndex.TableIndex_Ushort;
                         break;
                 }
@@ -5554,6 +5637,11 @@ namespace Xv2CoreLib.ACB
     public interface IEventIndex
     {
         AcbTableReference EventIndex { get; set; }
+    }
+
+    public interface IParameterPallet
+    {
+        AcbTableReference ParameterPallet { get; set; }
     }
 
     public interface IActionTrack
@@ -5629,6 +5717,7 @@ namespace Xv2CoreLib.ACB
         LoopStart = 0x04b1, //4 parameters, 2 uint16s (0=LoopID,1=Loop Count)
         LoopEnd = 0x04b0, //6 parameters 3 uint16s (0=LoopID)
         Wait = 0x07d1, //4 parameters (1 uint32). Wait command, freezes command execution for desired time (0 = miliseconds)
+        BeatSyncReference = 0x0071, //4 parameters (2 uint16s). 0 = ?, 1 = BeatSyncTable index
 
         //Slightly known commands:
         Unk10 = 0x0010, //2 params (1 uint16). Seems to control volume, but only with a Unk85 entry present.
@@ -5652,6 +5741,7 @@ namespace Xv2CoreLib.ACB
         Unk199 = 0x07c7, //6 parameters. Required for ReferencedItem2 to function (must preceed it).
         Unk65 = 0x0041, //4 parameters
         Unk87 = 0x0057, //2 parameters
+        Unk105 = 0x0069, //1 parameter. Used in ParameterPallets
 
     }
 
@@ -5671,7 +5761,12 @@ namespace Xv2CoreLib.ACB
         SequenceCommand, //In older ACB versions this is the only command table and was used for everything (was just called "CommandTable")
         SynthCommand,
         TrackCommand, //Use by Track Commands
-        TrackEvent //Used by Track Events and ActionTrack Commands (assuming Action events as well...)
+        TrackEvent, //Used by Track Events and ActionTrack Commands (assuming Action events as well...)
+
+        //ParameterPallets are a command type, and as of newer ACB versions also have separate tables (discovered thanks to Yakuza 6 acbs, they were never used anywhere else I looked...)
+        SequenceParameterPallet,
+        TrackParameterPallet,
+        SynthParameterPallet
     }
 
     public enum TargetType : byte
