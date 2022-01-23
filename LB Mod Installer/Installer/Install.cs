@@ -42,6 +42,7 @@ using Xv2CoreLib.HCI;
 using Xv2CoreLib.CML;
 using Xv2CoreLib.Eternity;
 using Xv2CoreLib.CST;
+using Xv2CoreLib.OCS;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -183,7 +184,7 @@ namespace LB_Mod_Installer.Installer
                     case FileType.MusicPackage:
                         //Install new BGM or CSS tracks
                         UpdateProgessBarText("_Installing Audio...");
-                        Install_ACB(File.SourcePath);
+                        Install_ACB(File.SourcePath, File.InstallPath);
                         break;
                     case FileType.CopyFile:
                         //Binary file. Copy to dir.
@@ -314,6 +315,9 @@ namespace LB_Mod_Installer.Installer
                 case ".x2s":
                     Install_CharaSlots(xmlPath);
                     break;
+                case ".ocs":
+                    Install_OCS(xmlPath, installPath, isXml);
+                    break;
                 default:
                     throw new InvalidDataException(string.Format("The filetype of \"{0}\" is not supported.", xmlPath));
             }
@@ -380,7 +384,7 @@ namespace LB_Mod_Installer.Installer
 #if !DEBUG
             catch (Exception ex)
             {
-                throw new Exception(string.Format("Failed at file save phase."), ex);
+                throw new Exception(string.Format($"Failed at file save phase ({fileManager.lastSaved})."), ex);
             }
 #endif
         }
@@ -712,13 +716,13 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_ACB(string xmlPath)
+        private void Install_ACB(string xmlPath, string installPath)
         {
 #if !DEBUG
             try
 #endif
             {
-                new AcbInstaller(this, xmlPath);
+                new AcbInstaller(this, xmlPath, installPath);
             }
 #if !DEBUG
             catch (Exception ex)
@@ -758,6 +762,33 @@ namespace LB_Mod_Installer.Installer
             catch (Exception ex)
             {
                 string error = string.Format("Failed at CharaSlots install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
+        private void Install_OCS(string xmlPath, string installPath, bool isXml)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                OCS_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<OCS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : OCS_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                OCS_File binaryFile = (OCS_File)GetParsedFile<OCS_File>(installPath);
+
+                //Install entries
+                if(xmlFile?.Partners != null)
+                {
+                    var ids = binaryFile.InstallEntries(xmlFile.Partners);
+
+                    foreach (var id in ids)
+                        GeneralInfo.Tracker.AddID(installPath, Sections.OCS_Skill, id);
+                }
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at OCS install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
@@ -1605,6 +1636,8 @@ namespace LB_Mod_Installer.Installer
                     return CML_File.Parse(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".cst":
                     return CST_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".ocs":
+                    return OCS_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 default:
                     throw new InvalidDataException(String.Format("GetParsedFileFromGame: The filetype of \"{0}\" is not supported.", path));
             }
@@ -1676,6 +1709,8 @@ namespace LB_Mod_Installer.Installer
                     return ((CST_File)data).SaveToBytes();
                 case ".x2s":
                     return ((CharaSlotsFile)data).SaveToBytes();
+                case ".ocs":
+                    return ((OCS_File)data).SaveToBytes();
                 default:
                     throw new InvalidDataException(String.Format("GetBytesFromParsedFile: The filetype of \"{0}\" is not supported.", path));
             }

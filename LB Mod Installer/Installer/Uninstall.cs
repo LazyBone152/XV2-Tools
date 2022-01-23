@@ -39,6 +39,7 @@ using Xv2CoreLib.HCI;
 using Xv2CoreLib.CML;
 using Xv2CoreLib.Eternity;
 using Xv2CoreLib.CST;
+using Xv2CoreLib.OCS;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -134,7 +135,7 @@ namespace LB_Mod_Installer.Installer
             catch (Exception ex)
             {
                 //Handle install errors here
-                MessageBox.Show(string.Format("{0}\n\n{1}", ex.Message, (ex.InnerException != null) ? ex.InnerException.Message : ""), "Uninstall Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(string.Format("{0}\n\n{1}\n\nFile: {2}", ex.Message, (ex.InnerException != null) ? ex.InnerException.Message : "", fileManager.lastSaved), "Uninstall Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 
                 MessageBox.Show("Installation changes will now be undone.", "Uninstall Error", MessageBoxButton.OK, MessageBoxImage.Warning);
 
@@ -261,6 +262,9 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".cml":
                     Uninstall_CML(path, file);
+                    break;
+                case ".ocs":
+                    Uninstall_OCS(path, file);
                     break;
                 default:
                     throw new Exception(string.Format("The filetype of \"{0}\" is unsupported. Uninstall failed.\n\nThis mod was likely installed by a newer version of the installer.", path));
@@ -1084,6 +1088,28 @@ namespace LB_Mod_Installer.Installer
                 throw new Exception(error, ex);
             }
         }
+
+        private void Uninstall_OCS(string path, _File file)
+        {
+            try
+            {
+                OCS_File binaryFile = (OCS_File)GetParsedFile<OCS_File>(path, false);
+                OCS_File cpkBinFile = (OCS_File)GetParsedFile<OCS_File>(path, true);
+
+                Section section = file.GetSection(Sections.OCS_Skill);
+
+                if (section != null)
+                {
+                    binaryFile.UninstallEntries(section.IDs, cpkBinFile);
+                }
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at OCS uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
+
 
         //Generic uninstallers
         private void UninstallEntries<T>(IList<T> entries, IList<T> ogEntries, List<string> ids) where T : IInstallable

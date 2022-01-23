@@ -13,6 +13,7 @@ namespace LB_Mod_Installer.Installer
     public class FileCacheManager
     {
         public List<CachedFile> cachedFiles = new List<CachedFile>();
+        public string lastSaved;
 
         /// <summary>
         /// Add a parsed file. Will overwrite existing files if path matches.
@@ -141,6 +142,7 @@ namespace LB_Mod_Installer.Installer
         {
             foreach (var file in cachedFiles)
             {
+                lastSaved = file.Path + " (xml)";
                 Directory.CreateDirectory(Path.GetDirectoryName(GeneralInfo.GetPathInGameDir(file.Path)));
 
                 if (file.FileType == CachedFileType.Parsed && file.Data.GetType() == typeof(EffectContainerFile))
@@ -170,6 +172,7 @@ namespace LB_Mod_Installer.Installer
         {
             foreach (var file in cachedFiles)
             {
+                lastSaved = file.Path + " (binary)";
                 Directory.CreateDirectory(Path.GetDirectoryName(GeneralInfo.GetPathInGameDir(file.Path)));
 
                 if (file.FileType == CachedFileType.Stream)

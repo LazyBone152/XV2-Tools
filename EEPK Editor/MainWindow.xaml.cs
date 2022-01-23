@@ -176,7 +176,6 @@ namespace EEPK_Organiser
             {
                 await Task.Run(() =>
                 {
-                    xv2.GameDir = SettingsManager.Instance.Settings.GameDirectory;
                     xv2.Instance.loadCharacters = true;
                     xv2.Instance.loadSkills = true;
                     xv2.Instance.loadCmn = false;

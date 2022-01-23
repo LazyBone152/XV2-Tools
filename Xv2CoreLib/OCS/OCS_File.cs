@@ -1,28 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace Xv2CoreLib.OCS
 {
     [YAXSerializeAs("OCS")]
-    class OCS_File
+    [Serializable]
+    public class OCS_File
     {
         [YAXAttributeForClass]
         public ushort Version { get; set; } //0x6: 16 = pre 1.13, 20 = 1.13 or later
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Partner")]
-        public List<OCS_TableEntry> TableEntries { get; set; }
+        public List<OCS_Partner> Partners { get; set; }
 
         public int CalculateDataOffset()
         {
-            int offset = (int)(TableEntries.Count * 16);
+            int offset = (int)(Partners.Count * 16);
 
-            foreach(var tableEntry in TableEntries)
+            foreach(var tableEntry in Partners)
             {
-                foreach(var secondEntry in tableEntry.SubEntries)
+                foreach(var secondEntry in tableEntry.SkillTypes)
                 {
                     offset += 16;
                 }
@@ -30,22 +29,167 @@ namespace Xv2CoreLib.OCS
 
             return offset;
         }
+
+        #region LoadSave
+        public static OCS_File Load(byte[] bytes)
+        {
+            return new Parser(bytes).octFile;
+        }
+
+        public byte[] SaveToBytes()
+        {
+            return new Deserializer(this).GetByteArray();
+        }
+        #endregion
+
+        #region Install
+        public List<string> InstallEntries(List<OCS_Partner> entries)
+        {
+            List<string> ids = new List<string>();
+
+            if(entries != null)
+            {
+                foreach(var entry in entries)
+                {
+                    OCS_Partner destEntry = Partners.FirstOrDefault(x => x.Index == entry.Index);
+
+                    //If no entry exists for this Partner ID, then create it.
+                    if(destEntry == null)
+                    {
+                        destEntry = new OCS_Partner(entry.Index);
+                        Partners.Add(destEntry);
+                    }
+
+                    foreach (var skillType in entry.SkillTypes)
+                    {
+                        OCS_SkillTypeGroup destSkillType = destEntry.SkillTypes.FirstOrDefault(x => x.Skill_Type == skillType.Skill_Type);
+
+                        //Create the sub entry if required.
+                        if(destSkillType == null)
+                        {
+                            destSkillType = new OCS_SkillTypeGroup(skillType.Skill_Type);
+                            destEntry.SkillTypes.Add(destSkillType);
+                        }
+
+                        foreach (var skill in skillType.Skills)
+                        {
+                            string installID = GetInstallId(entry, skillType, skill);
+                            ids.Add(installID);
+
+                            OCS_Skill destSkill = destSkillType.Skills.FirstOrDefault(x => x.SkillID2 == skill.SkillID2);
+
+                            skill.EntryID = GetSkillEntryId(destSkillType.Skills);
+
+                            if(destSkill == null)
+                            {
+                                destSkillType.Skills.Add(skill);
+                            }
+                            else
+                            {
+                                destSkillType.Skills[destSkillType.Skills.IndexOf(destSkill)] = skill;
+                            }
+                        }
+
+                    }
+
+                    //Sort skill type list
+                    destEntry.SkillTypes.Sort((x, y) => (int)x.Skill_Type - (int)y.Skill_Type);
+                }
+
+                //Sort partner list
+                Partners.Sort((x, y) => x.Index - y.Index);
+
+            }
+
+            return ids;
+        }
+
+        public void UninstallEntries(List<string> installIds, OCS_File originalFile)
+        {
+            //Uninstall skill entries
+            foreach(var partner in Partners)
+            {
+                foreach(var skillType in partner.SkillTypes)
+                {
+                    for (int i = skillType.Skills.Count - 1; i >= 0; i--)
+                    {
+                        string installId = GetInstallId(partner, skillType, skillType.Skills[i]);
+                        OCS_Skill originalSkill = (originalFile != null) ? originalFile.GetSkill(partner.Index, skillType.Skill_Type, skillType.Skills[i].SkillID2) : null;
+
+                        if (installIds.Contains(installId))
+                        {
+                            if(originalSkill != null)
+                            {
+                                skillType.Skills[i] = originalSkill.Copy();
+                                skillType.Skills[i].EntryID = GetSkillEntryId(skillType.Skills);
+                            }
+                            else
+                            {
+                                skillType.Skills.RemoveAt(i);
+                            }
+                        }
+                    }
+                }
+
+            }
+
+            //Remove empty entries
+            foreach(var partner in Partners)
+            {
+                partner.SkillTypes.RemoveAll(x => x.Skills.Count == 0);
+            }
+
+            Partners.RemoveAll(x => x.SkillTypes.Count == 0);
+        }
+
+        private string GetInstallId(OCS_Partner main, OCS_SkillTypeGroup skillType, OCS_Skill skill)
+        {
+            return $"{main.Index}_{skillType.Skill_Type}_{skill.SkillID2}";
+        }
+
+        private int GetSkillEntryId(List<OCS_Skill> skills)
+        {
+            return skills.Count == 0 ? 0 : skills.Max(x => x.EntryID) + 1;
+        }
+        
+        private OCS_Skill GetSkill(int partnerID, OCS_SkillTypeGroup.SkillType skillType, int skillID2)
+        {
+            var partner = Partners.FirstOrDefault(x => x.Index == partnerID);
+            if (partner == null) return null;
+
+            var skillTypeGroup = partner.SkillTypes.FirstOrDefault(x => x.Skill_Type == skillType);
+            if (skillTypeGroup == null) return null;
+
+            return skillTypeGroup.Skills.FirstOrDefault(x => x.SkillID2 == skillID2);
+        }
+        #endregion
     }
 
     [YAXSerializeAs("Partner")]
-    public class OCS_TableEntry
+    [Serializable]
+    public class OCS_Partner
     {
         [YAXAttributeForClass]
         [YAXSerializeAs("Partner_ID")]
         public int Index { get; set; }
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "SkillList")]
-        public List<OCS_SubTableEntry> SubEntries { get; set; }
+        public List<OCS_SkillTypeGroup> SkillTypes { get; set; } = new List<OCS_SkillTypeGroup>();
+
+        public OCS_Partner() 
+        {
+        }
+
+        public OCS_Partner(int id)
+        {
+            Index = id;
+        }
         
 
     }
 
     [YAXSerializeAs("SkillList")]
-    public class OCS_SubTableEntry
+    [Serializable]
+    public class OCS_SkillTypeGroup
     {
         public enum SkillType
         {
@@ -59,30 +203,37 @@ namespace Xv2CoreLib.OCS
         [YAXSerializeAs("Type")]
         public SkillType Skill_Type { get; set; }
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Skill")]
-        public List<OCS_SubEntry> SubEntries { get; set; }
+        public List<OCS_Skill> Skills { get; set; } = new List<OCS_Skill>();
 
+        public OCS_SkillTypeGroup()
+        {
+        }
+
+        public OCS_SkillTypeGroup(SkillType skillType)
+        {
+            Skill_Type = skillType;
+        }
 
     }
 
     [YAXSerializeAs("Skill")]
-    public class OCS_SubEntry
+    [Serializable]
+    public class OCS_Skill
     {
-
         [YAXAttributeForClass]
-        [YAXSerializeAs("I_04")]
-        public int I_04 { get; set; } //0x4
+        [YAXSerializeAs("EntryID")]
+        public int EntryID { get; set; } //Some kind of entry or sorting ID?
         [YAXAttributeForClass]
         [YAXSerializeAs("TP_Cost_Toggle")]
-        public int I_08 { get; set; } // uint32
+        public int TP_Cost_Toggle { get; set; } // uint32
         [YAXAttributeForClass]
         [YAXSerializeAs("TP_Cost")]
-        public int I_12 { get; set; }
+        public int TP_Cost { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("ID2")]
-        public int I_20 { get; set; }
+        public int SkillID2 { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("DLC_Flag")]
-        public int I_24 { get; set; }
-
+        public int DLC_Flag { get; set; }
     }
 }

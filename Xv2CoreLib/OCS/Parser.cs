@@ -1,25 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace Xv2CoreLib.OCS
 {
     public class Parser
     {
-        string saveLocation;
-        byte[] rawBytes;
-        List<byte> bytes;
-        private OCS_File octFile = new OCS_File();
+        private string saveLocation;
+        private byte[] rawBytes;
+        public OCS_File octFile { get; private set; } = new OCS_File();
 
         public Parser(string path, bool _writeXml)
         {
             saveLocation = path;
             rawBytes = File.ReadAllBytes(path);
-            bytes = rawBytes.ToList();
 
             Parse();
 
@@ -28,6 +23,12 @@ namespace Xv2CoreLib.OCS
                 YAXSerializer serializer = new YAXSerializer(typeof(OCS_File));
                 serializer.SerializeToFile(octFile, saveLocation + ".xml");
             }
+        }
+
+        public Parser(byte[] bytes)
+        {
+            rawBytes = bytes;
+            Parse();
         }
 
         private void Parse()
@@ -39,58 +40,58 @@ namespace Xv2CoreLib.OCS
 
             if (count > 0)
             {
-                octFile.TableEntries = new List<OCS_TableEntry>();
+                octFile.Partners = new List<OCS_Partner>();
 
                 for(int i = 0; i < count; i++)
                 {
                     int subTableCount = BitConverter.ToInt32(rawBytes, firstTableOffset);
                     int subTableOffset = BitConverter.ToInt32(rawBytes, firstTableOffset + 4) + (16 * BitConverter.ToInt32(rawBytes, firstTableOffset + 8)) + 16;
-                    octFile.TableEntries.Add(new OCS_TableEntry() { Index = BitConverter.ToInt32(rawBytes, firstTableOffset + 12) });
+                    octFile.Partners.Add(new OCS_Partner() { Index = BitConverter.ToInt32(rawBytes, firstTableOffset + 12) });
                     
                     if(subTableCount > 0)
                     {
-                        octFile.TableEntries[i].SubEntries = new List<OCS_SubTableEntry>();
+                        octFile.Partners[i].SkillTypes = new List<OCS_SkillTypeGroup>();
                     }
 
                     for(int a = 0; a < subTableCount; a++)
                     {
                         int subEntryCount2 = BitConverter.ToInt32(rawBytes, subTableOffset);
                         int subDataOffset2 = BitConverter.ToInt32(rawBytes, subTableOffset + 4) + (GetSkillDataSize() * BitConverter.ToInt32(rawBytes, subTableOffset + 8)) + 16;
-                        octFile.TableEntries[i].SubEntries.Add(new OCS_SubTableEntry() { Skill_Type = (OCS_SubTableEntry.SkillType)BitConverter.ToInt32(rawBytes, subTableOffset + 12) });
+                        octFile.Partners[i].SkillTypes.Add(new OCS_SkillTypeGroup() { Skill_Type = (OCS_SkillTypeGroup.SkillType)BitConverter.ToInt32(rawBytes, subTableOffset + 12) });
 
                         if (subEntryCount2 > 0)
                         {
-                            octFile.TableEntries[i].SubEntries[a].SubEntries = new List<OCS_SubEntry>();
+                            octFile.Partners[i].SkillTypes[a].Skills = new List<OCS_Skill>();
                         }
 
                         for (int s = 0; s < subEntryCount2; s++)
                         {
-                            if(BitConverter.ToInt32(rawBytes, subDataOffset2 + 16) != (int)octFile.TableEntries[i].SubEntries[a].Skill_Type)
+                            if(BitConverter.ToInt32(rawBytes, subDataOffset2 + 16) != (int)octFile.Partners[i].SkillTypes[a].Skill_Type)
                             {
                                 throw new Exception("Skill type mismatch.");
                             }
 
                             if(octFile.Version == 16)
                             {
-                                octFile.TableEntries[i].SubEntries[a].SubEntries.Add(new OCS_SubEntry()
+                                octFile.Partners[i].SkillTypes[a].Skills.Add(new OCS_Skill()
                                 {
-                                    I_04 = BitConverter.ToInt32(rawBytes, subDataOffset2 + 4),
-                                    I_08 = BitConverter.ToInt32(rawBytes, subDataOffset2 + 8),
-                                    I_12 = BitConverter.ToInt32(rawBytes, subDataOffset2 + 12),
-                                    I_20 = BitConverter.ToInt32(rawBytes, subDataOffset2 + 20)
+                                    EntryID = BitConverter.ToInt32(rawBytes, subDataOffset2 + 4),
+                                    TP_Cost_Toggle = BitConverter.ToInt32(rawBytes, subDataOffset2 + 8),
+                                    TP_Cost = BitConverter.ToInt32(rawBytes, subDataOffset2 + 12),
+                                    SkillID2 = BitConverter.ToInt32(rawBytes, subDataOffset2 + 20)
                                 });
 
                                 subDataOffset2 += 24;
                             }
                             else if (octFile.Version == 20)
                             {
-                                octFile.TableEntries[i].SubEntries[a].SubEntries.Add(new OCS_SubEntry()
+                                octFile.Partners[i].SkillTypes[a].Skills.Add(new OCS_Skill()
                                 {
-                                    I_04 = BitConverter.ToInt32(rawBytes, subDataOffset2 + 4),
-                                    I_08 = BitConverter.ToInt32(rawBytes, subDataOffset2 + 8),
-                                    I_12 = BitConverter.ToInt32(rawBytes, subDataOffset2 + 12),
-                                    I_20 = BitConverter.ToInt32(rawBytes, subDataOffset2 + 20),
-                                    I_24 = BitConverter.ToInt32(rawBytes, subDataOffset2 + 24)
+                                    EntryID = BitConverter.ToInt32(rawBytes, subDataOffset2 + 4),
+                                    TP_Cost_Toggle = BitConverter.ToInt32(rawBytes, subDataOffset2 + 8),
+                                    TP_Cost = BitConverter.ToInt32(rawBytes, subDataOffset2 + 12),
+                                    SkillID2 = BitConverter.ToInt32(rawBytes, subDataOffset2 + 20),
+                                    DLC_Flag =BitConverter.ToInt32(rawBytes, subDataOffset2 + 24)
                                 });
                                 subDataOffset2 += 28;
                             }
@@ -104,7 +105,6 @@ namespace Xv2CoreLib.OCS
                         subTableOffset += 16;
 
                     }
-                    
 
                     firstTableOffset += 16;
                 }

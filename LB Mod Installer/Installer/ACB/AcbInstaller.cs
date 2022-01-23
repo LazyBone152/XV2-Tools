@@ -16,6 +16,7 @@ namespace LB_Mod_Installer.Installer.ACB
 
         //BGM Constants
         internal const string BGM_PATH = "sound/BGM/CAR_BGM.acb";
+        internal const string BGM_TU10_PATH = "sound/BGM/CAR_TU10_Add_BGM.acb";
         internal const string OBL_PATH = "system/OptionBGMList.obl";
         internal const string OPTION_MSG_PATH = "msg/option_text_";
         internal const string OPTION_INSTALL_TYPE = "BGM_OPTION";
@@ -24,6 +25,7 @@ namespace LB_Mod_Installer.Installer.ACB
         private Install install;
 
         private ACB_File musicPackage;
+        private string installPath;
 
         //CSS:
         private ACB_File enCssFile;
@@ -35,13 +37,29 @@ namespace LB_Mod_Installer.Installer.ACB
         private List<MSG_File> msgFiles;
         private int currentCueId = 500;
 
-        public AcbInstaller(Install _install, string musicPackagePath)
+        public AcbInstaller(Install _install, string musicPackagePath, string _installPath)
         {
             install = _install;
             musicPackage = ACB_File.Load(install.zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(musicPackagePath)), null, false, true);
+            installPath = _installPath;
 
             if(musicPackage.MusicPackageType == MusicPackageType.BGM_Direct || musicPackage.MusicPackageType == MusicPackageType.BGM_NewOption)
             {
+                //Validate the install path
+                if (!string.IsNullOrWhiteSpace(installPath))
+                {
+                    if (!installPath.Equals(BGM_TU10_PATH, StringComparison.OrdinalIgnoreCase) && !installPath.Equals(BGM_PATH, StringComparison.OrdinalIgnoreCase))
+                        throw new ArgumentException($"InstallPath is not valid. It must be either for a supported BGM ACB (CAR_BGM and CAR_TU10_Add_BGM) or empty.");
+                    
+                    if(installPath.Equals(BGM_TU10_PATH, StringComparison.OrdinalIgnoreCase) && musicPackage.MusicPackageType == MusicPackageType.BGM_NewOption)
+                        throw new ArgumentException($"NewOption cannot be used when installing into CAR_TU10_Add_BGM.acb.");
+
+                }
+                else
+                {
+                    installPath = BGM_PATH;
+                }
+
                 LoadMusicFiles();
                 InstallMusic();
             }
@@ -205,7 +223,7 @@ namespace LB_Mod_Installer.Installer.ACB
         #region BGM
         private void LoadMusicFiles()
         {
-            bgmFile = (ACB_File)install.GetParsedFile<ACB_File>(BGM_PATH, false);
+            bgmFile = (ACB_File)install.GetParsedFile<ACB_File>(installPath, false);
 
             if (musicPackage.MusicPackageType == MusicPackageType.BGM_NewOption)
             {

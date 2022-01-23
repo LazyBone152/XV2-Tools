@@ -2,17 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace Xv2CoreLib.OCS
 {
     public class Deserializer
     {
-        string saveLocation;
-        OCS_File ocsFile;
-        List<byte> bytes = new List<byte>() { 35, 79, 67, 83, 254, 255 };
+        private string saveLocation;
+        private OCS_File ocsFile;
+        private List<byte> bytes = new List<byte>() { 35, 79, 67, 83, 254, 255 };
 
         public Deserializer(string location)
         {
@@ -23,12 +21,18 @@ namespace Xv2CoreLib.OCS
             File.WriteAllBytes(saveLocation, bytes.ToArray());
         }
 
+        public Deserializer(OCS_File file)
+        {
+            ocsFile = file;
+            Write();
+        }
+
         private void Write()
         {
             //Header
             VersionCheck();
             bytes.AddRange(BitConverter.GetBytes(ocsFile.Version));
-            int count = (ocsFile.TableEntries != null) ? ocsFile.TableEntries.Count() : 0;
+            int count = (ocsFile.Partners != null) ? ocsFile.Partners.Count() : 0;
             bytes.AddRange(BitConverter.GetBytes(count));
             bytes.AddRange(new byte[4]);
 
@@ -42,27 +46,27 @@ namespace Xv2CoreLib.OCS
             //1st Table Entries
             for (int i = 0; i < count; i++)
             {
-                int subEntryCount = (ocsFile.TableEntries[i].SubEntries != null) ? ocsFile.TableEntries[i].SubEntries.Count() : 0;
+                int subEntryCount = (ocsFile.Partners[i].SkillTypes != null) ? ocsFile.Partners[i].SkillTypes.Count() : 0;
                 bytes.AddRange(BitConverter.GetBytes(subEntryCount));
                 bytes.AddRange(BitConverter.GetBytes(secondTableOffset));
                 bytes.AddRange(BitConverter.GetBytes(currentIndex1));
-                bytes.AddRange(BitConverter.GetBytes(ocsFile.TableEntries[i].Index));
+                bytes.AddRange(BitConverter.GetBytes(ocsFile.Partners[i].Index));
                 currentIndex1 += subEntryCount;
             }
 
             //2nd Table Entries
-            foreach(var tableEntry in ocsFile.TableEntries)
+            foreach(var tableEntry in ocsFile.Partners)
             {
-                int subEntryCount = (tableEntry.SubEntries != null) ? tableEntry.SubEntries.Count() : 0;
+                int subEntryCount = (tableEntry.SkillTypes != null) ? tableEntry.SkillTypes.Count() : 0;
 
                 for (int i = 0; i < subEntryCount; i++)
                 {
-                    int subDataCount = (tableEntry.SubEntries[i].SubEntries != null) ? tableEntry.SubEntries[i].SubEntries.Count() : 0;
+                    int subDataCount = (tableEntry.SkillTypes[i].Skills != null) ? tableEntry.SkillTypes[i].Skills.Count() : 0;
 
                     bytes.AddRange(BitConverter.GetBytes(subDataCount));
                     bytes.AddRange(BitConverter.GetBytes(dataOffset));
                     bytes.AddRange(BitConverter.GetBytes(currentIndex2));
-                    bytes.AddRange(BitConverter.GetBytes((int)tableEntry.SubEntries[i].Skill_Type));
+                    bytes.AddRange(BitConverter.GetBytes((int)tableEntry.SkillTypes[i].Skill_Type));
                     currentIndex2 += subDataCount;
                 }
             }
@@ -70,24 +74,24 @@ namespace Xv2CoreLib.OCS
             //Table Entries
             for (int i = 0; i < count; i++)
             {
-                int subTableCount = (ocsFile.TableEntries[i].SubEntries != null) ? ocsFile.TableEntries[i].SubEntries.Count() : 0;
+                int subTableCount = (ocsFile.Partners[i].SkillTypes != null) ? ocsFile.Partners[i].SkillTypes.Count() : 0;
 
                 for(int a = 0; a < subTableCount; a++)
                 {
-                    int subDataCount = (ocsFile.TableEntries[i].SubEntries[a].SubEntries != null) ? ocsFile.TableEntries[i].SubEntries[a].SubEntries.Count() : 0;
+                    int subDataCount = (ocsFile.Partners[i].SkillTypes[a].Skills != null) ? ocsFile.Partners[i].SkillTypes[a].Skills.Count() : 0;
 
                     for (int s = 0; s < subDataCount; s++)
                     {
-                        bytes.AddRange(BitConverter.GetBytes(ocsFile.TableEntries[i].Index));
-                        bytes.AddRange(BitConverter.GetBytes(ocsFile.TableEntries[i].SubEntries[a].SubEntries[s].I_04));
-                        bytes.AddRange(BitConverter.GetBytes(ocsFile.TableEntries[i].SubEntries[a].SubEntries[s].I_08));
-                        bytes.AddRange(BitConverter.GetBytes(ocsFile.TableEntries[i].SubEntries[a].SubEntries[s].I_12));
-                        bytes.AddRange(BitConverter.GetBytes((int)ocsFile.TableEntries[i].SubEntries[a].Skill_Type));
-                        bytes.AddRange(BitConverter.GetBytes(ocsFile.TableEntries[i].SubEntries[a].SubEntries[s].I_20));
+                        bytes.AddRange(BitConverter.GetBytes(ocsFile.Partners[i].Index));
+                        bytes.AddRange(BitConverter.GetBytes(ocsFile.Partners[i].SkillTypes[a].Skills[s].EntryID));
+                        bytes.AddRange(BitConverter.GetBytes(ocsFile.Partners[i].SkillTypes[a].Skills[s].TP_Cost_Toggle));
+                        bytes.AddRange(BitConverter.GetBytes(ocsFile.Partners[i].SkillTypes[a].Skills[s].TP_Cost));
+                        bytes.AddRange(BitConverter.GetBytes((int)ocsFile.Partners[i].SkillTypes[a].Skill_Type));
+                        bytes.AddRange(BitConverter.GetBytes(ocsFile.Partners[i].SkillTypes[a].Skills[s].SkillID2));
 
                         if(ocsFile.Version == 20)
                         {
-                            bytes.AddRange(BitConverter.GetBytes(ocsFile.TableEntries[i].SubEntries[a].SubEntries[s].I_24));
+                            bytes.AddRange(BitConverter.GetBytes(ocsFile.Partners[i].SkillTypes[a].Skills[s].DLC_Flag));
                         }
                     }
                 }
@@ -107,6 +111,11 @@ namespace Xv2CoreLib.OCS
                     throw new Exception("Unknown OCS version: " + ocsFile.Version);
             }
 
+        }
+
+        public byte[] GetByteArray()
+        {
+            return bytes.ToArray();
         }
     }
 }

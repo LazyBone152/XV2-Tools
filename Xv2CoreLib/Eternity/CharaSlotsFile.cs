@@ -80,7 +80,7 @@ namespace Xv2CoreLib.Eternity
                     costumeSlot.flag_gk2 = (parameters[4] == "1") ? true : false;
                     costumeSlot.CssVoice1 = int.Parse(parameters[5]);
                     costumeSlot.CssVoice2 = int.Parse(parameters[6]);
-                    costumeSlot.DLC = (CstDlcVer)int.Parse(parameters[7]);
+                    costumeSlot.DLC = (CstDlcVer)uint.Parse(parameters[7]);
 
                     charaSlot.CostumeSlots.Add(costumeSlot);
                 }
@@ -110,7 +110,7 @@ namespace Xv2CoreLib.Eternity
                     strBuilder.Append((costume.flag_gk2) ? 1 : 0).Append(",");
                     strBuilder.Append(costume.CssVoice1).Append(",");
                     strBuilder.Append(costume.CssVoice2).Append(",");
-                    strBuilder.Append((int)costume.DLC);
+                    strBuilder.Append((uint)costume.DLC);
 
                     strBuilder.Append("]");
                 }
@@ -161,10 +161,21 @@ namespace Xv2CoreLib.Eternity
             {
                 CharaSlot charaSlot = GetCharaSlotFromInstallID(installSlot.InstallID);
 
+                //Sorting
+                int sortBefore = GetIndexOfSlot(installSlot.SortBefore);
+                int sortAfter = GetIndexAfter(installSlot.SortAfter);
+
+                //Sorting priority. Before -> After
+                int sortIndex = sortBefore != -1 ? sortBefore : sortAfter;
+
                 if (charaSlot == null)
                 {
                     charaSlot = new CharaSlot();
-                    CharaSlots.Add(charaSlot);
+
+                    if (sortIndex != -1)
+                        CharaSlots.Insert(sortIndex, charaSlot);
+                    else
+                        CharaSlots.Add(charaSlot);
                 }
 
                 foreach(var installCostume in installSlot.CostumeSlots)
@@ -232,8 +243,28 @@ namespace Xv2CoreLib.Eternity
                 }
             }
         }
+        
+        private int GetIndexOfSlot(string installID)
+        {
+            CharaSlot slot = GetCharaSlotFromInstallID(installID);
+
+            if (slot != null)
+                return CharaSlots.IndexOf(slot) - 1;
+
+            return -1;
+        }
+
+        private int GetIndexAfter(string installID)
+        {
+            CharaSlot slot = GetCharaSlotFromInstallID(installID);
+
+            if (slot != null)
+                return CharaSlots.IndexOf(slot) + 1;
+
+            return -1;
+        }
         #endregion
-    
+
         public bool SlotExists(string charCode, int costume)
         {
             foreach(var slot in CharaSlots)
@@ -253,6 +284,13 @@ namespace Xv2CoreLib.Eternity
         [YAXAttributeForClass]
         public string InstallID { get; set; }
 
+        [YAXDontSerializeIfNull]
+        [YAXAttributeForClass]
+        public string SortBefore { get; set; }
+        [YAXDontSerializeIfNull]
+        [YAXAttributeForClass]
+        public string SortAfter { get; set; }
+
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "CharaCostumeSlot")]
         [BindingSubList]
         public List<CharaCostumeSlot> CostumeSlots { get; set; } = new List<CharaCostumeSlot>();
@@ -267,7 +305,7 @@ namespace Xv2CoreLib.Eternity
     {
         [YAXDontSerialize]
         public string InstallID { get { return $"{CharaCode}_{Costume}_{Preset}"; } }
-        
+
         //Serialized values
         [YAXAttributeForClass]
         public string CharaCode { get; set; }

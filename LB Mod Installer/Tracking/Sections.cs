@@ -55,6 +55,7 @@
         public const string HCI_Entry = "HCI_Entry";
         public const string CML_Entry = "CML_Entry";
         public const string CharaSlotEntry = "CharaSlotEntry";
+        public const string OCS_Skill = "OCS_Skill";
 
         public static string GetBcsPartColor(string id) { return string.Format("{0}{1}", BCS_PartColors, id); }
         public static string GetPscEntry(string charaID) { return string.Format("{0}_{1}", PSC_Spec_Entry, charaID); }
