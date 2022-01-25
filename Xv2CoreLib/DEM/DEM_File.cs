@@ -125,7 +125,7 @@ namespace Xv2CoreLib.DEM
 
         //Types
         [YAXDontSerializeIfNull]
-        [YAXSerializeAs("FadeInOut")]
+        [YAXSerializeAs("ScreenFade")]
         public Type0_2_7 Type0_2_7 { get; set; }
         [YAXDontSerializeIfNull]
         public Type0_3_8 Type0_3_8 { get; set; }
@@ -183,13 +183,16 @@ namespace Xv2CoreLib.DEM
         [YAXSerializeAs("TextureSwitch")]
         public Type0_1_6 Type0_1_6 { get; set; }
         [YAXDontSerializeIfNull]
+        [YAXSerializeAs("Position1")]
         public Type1_1_5 Type1_1_5 { get; set; }
         [YAXDontSerializeIfNull]
+        [YAXSerializeAs("RotateY_1")]
         public Type1_2_3 Type1_2_3 { get; set; }
         [YAXDontSerializeIfNull]
         [YAXSerializeAs("Transformation")]
         public Type1_4_2 Type1_4_2 { get; set; }
         [YAXDontSerializeIfNull]
+        [YAXSerializeAs("SetEyes")]
         public Type1_8_6 Type1_8_6 { get; set; }
         [YAXSerializeAs("EyeColor")]
         [YAXDontSerializeIfNull]
@@ -201,6 +204,7 @@ namespace Xv2CoreLib.DEM
         [YAXDontSerializeIfNull]
         public Type3_1_1 Type3_1_1 { get; set; }
         [YAXDontSerializeIfNull]
+        [YAXSerializeAs("AuraEffect")]
         public Type4_2_3 Type4_2_3 { get; set; }
         [YAXDontSerializeIfNull]
         public Type4_3_5 Type4_3_5 { get; set; }
@@ -224,12 +228,16 @@ namespace Xv2CoreLib.DEM
 
         //3rd batch
         [YAXDontSerializeIfNull]
+        [YAXSerializeAs("StartTransparent")]
         public Type1_6_4 Type1_6_4 { get; set; }
         [YAXDontSerializeIfNull]
+        [YAXSerializeAs("StopTransparent")]
         public Type1_7_1 Type1_7_1 { get; set; }
         [YAXDontSerializeIfNull]
+        [YAXSerializeAs("ShadowVisible")]
         public Type1_11_2 Type1_11_2 { get; set; }
         [YAXDontSerializeIfNull]
+        [YAXSerializeAs("ResetEyesColor")]
         public Type1_14_1 Type1_14_1 { get; set; }
         [YAXDontSerializeIfNull]
         public Type1_16_2 Type1_16_2 { get; set; }
@@ -246,14 +254,19 @@ namespace Xv2CoreLib.DEM
         [YAXDontSerializeIfNull]
         public Type0_21_2 Type0_21_2 { get; set; }
         [YAXDontSerializeIfNull]
+        [YAXSerializeAs("Position2")]
         public Type1_1_9 Type1_1_9 { get; set; }
         [YAXDontSerializeIfNull]
+        [YAXSerializeAs("RotateY_2")]
         public Type1_2_5 Type1_2_5 { get; set; }
         [YAXDontSerializeIfNull]
+        [YAXSerializeAs("CancelAnimation")]
         public Type1_12_2 Type1_12_2 { get; set; }
         [YAXDontSerializeIfNull]
+        [YAXSerializeAs("Scale")]
         public Type1_26_2 Type1_26_2 { get; set; }
         [YAXDontSerializeIfNull]
+        [YAXSerializeAs("SetHologramMaterial")]
         public Type1_27_2 Type1_27_2 { get; set; }
         [YAXDontSerializeIfNull]
         public Type2_6_3 Type2_6_3 { get; set; }
@@ -282,7 +295,7 @@ namespace Xv2CoreLib.DEM
         public enum DemoDataTypes
         {
             TextureSwitch, //0_1_6
-            FadeInOut, //0_2_7
+            ScreenFade, //0_2_7
             Type0_3_8, //LightDir? (I_1 = Actor, F_2 - F_4 = LightDir1, F_5 - F_7 = LightDir2, I_8 = Transition time)... all guesses but values line up
             Type0_16_0,
             Type0_16_1,
@@ -292,27 +305,27 @@ namespace Xv2CoreLib.DEM
             Type0_21_2,
             AnimationSmall, //1_0_9
             Animation, //1_0_10
-            Type1_1_5,
-            Type1_1_9,
-            Type1_2_3,
-            Type1_2_5,
+            Position1, //1_1_5
+            Position2, //1_5_9
+            RotateY_1, //1_2_3
+            RotateY_2, // 1_2_5
             ActorVisibility, //1_3_2
             Transformation, //1_4_2
-            Type1_6_4,
-            Type1_7_1,
-            Type1_8_6,
+            StartTransparent, //1_6_4
+            StopTransparent, //1_7_1
+            SetEyes, //1_8_6
             ActorDamage, //1_9_5
             Type1_10_8, 
-            Type1_11_2,
-            Type1_12_2,
+            ShadowVisible, //1_11_2
+            CancelAnimation, //1_12_2
             EyeColor, //1_13_10
-            Type1_14_1,
+            ResetEyesColor,//1_14_1
             Type1_16_2,
             Type1_17_6,
             Type1_19_3,
             Type1_20_12,
-            Type1_26_2,
-            Type1_27_2,
+            Scale, //1_26_2
+            SetHologramMaterial, //1_27_2
             Camera, //2_0_1
             Type2_6_3,
             Type2_7_5,
@@ -327,7 +340,7 @@ namespace Xv2CoreLib.DEM
             Type3_4_2,
             Effect, //4_0_12
             ScreenEffect, //4_1_8
-            Type4_2_3, //Aura? (I_1 = Actor, I_2 = Aura, I_3 = On/Off)
+            AuraEffect, //4_2_3
             Type4_3_5, //SetDoF?
             Type4_4_1,
             Type5_0_2,
@@ -361,14 +374,40 @@ namespace Xv2CoreLib.DEM
                     return DemoDataTypes.Animation;
                 case "1_3_2":
                     return DemoDataTypes.ActorVisibility;
+                case "1_1_5":
+                    return DemoDataTypes.Position1;
+                case "1_1_9":
+                    return DemoDataTypes.Position2;
+                case "1_2_3":
+                    return DemoDataTypes.RotateY_1;
+                case "1_2_5":
+                    return DemoDataTypes.RotateY_2;
+                case "1_6_4":
+                    return DemoDataTypes.StartTransparent;
+                case "1_7_1":
+                    return DemoDataTypes.StopTransparent;
+                case "1_8_6":
+                    return DemoDataTypes.SetEyes;
+                case "1_11_2":
+                    return DemoDataTypes.ShadowVisible;
+                case "1_12_2":
+                    return DemoDataTypes.CancelAnimation;
                 case "1_13_10":
                     return DemoDataTypes.EyeColor;
+                case "1_26_2":
+                    return DemoDataTypes.Scale;
+                case "1_27_2":
+                    return DemoDataTypes.SetHologramMaterial;
+                case "1_14_1":
+                    return DemoDataTypes.ResetEyesColor;
                 case "2_0_1":
                     return DemoDataTypes.Camera;
                 case "4_0_12":
                     return DemoDataTypes.Effect;
                 case "4_1_8":
                     return DemoDataTypes.ScreenEffect;
+                case "4_2_3":
+                    return DemoDataTypes.AuraEffect;
                 case "5_0_3":
                     return DemoDataTypes.Sound;
                 case "5_2_3":
@@ -386,7 +425,7 @@ namespace Xv2CoreLib.DEM
                 case "9_1_5":
                     return DemoDataTypes.Subtitle;
                 case "0_2_7":
-                    return DemoDataTypes.FadeInOut;
+                    return DemoDataTypes.ScreenFade;
             }
 
             //Generic type parsing
@@ -417,14 +456,40 @@ namespace Xv2CoreLib.DEM
                     return new int[3] { 1, 0, 10 };
                 case DemoDataTypes.ActorVisibility:
                     return new int[3] { 1, 3, 2 };
+                case DemoDataTypes.Position1:
+                    return new int[3] { 1, 1, 5 };
+                case DemoDataTypes.Position2:
+                    return new int[3] { 1, 1, 9 };
+                case DemoDataTypes.RotateY_1:
+                    return new int[3] { 1, 2, 3 };
+                case DemoDataTypes.RotateY_2:
+                    return new int[3] { 1, 2, 5 };
+                case DemoDataTypes.StartTransparent:
+                    return new int[3] { 1, 6, 4 };
+                case DemoDataTypes.StopTransparent:
+                    return new int[3] { 1, 7, 1 };
+                case DemoDataTypes.SetEyes:
+                    return new int[3] { 1, 8, 6 };
+                case DemoDataTypes.ShadowVisible:
+                    return new int[3] { 1, 11, 2 };
+                case DemoDataTypes.CancelAnimation:
+                    return new int[3] { 1, 12, 2 };
                 case DemoDataTypes.EyeColor:
                     return new int[3] { 1, 13, 10 };
+                case DemoDataTypes.ResetEyesColor:
+                    return new int[3] { 1, 14, 1 };
+                case DemoDataTypes.Scale:
+                    return new int[3] { 1, 26, 2 };
+                case DemoDataTypes.SetHologramMaterial:
+                    return new int[3] { 1, 27, 2 };
                 case DemoDataTypes.Camera:
                     return new int[3] { 2, 0, 1 };
                 case DemoDataTypes.Effect:
                     return new int[3] { 4, 0, 12 };
                 case DemoDataTypes.ScreenEffect:
                     return new int[3] { 4, 1, 8 };
+                case DemoDataTypes.AuraEffect:
+                    return new int[3] { 4, 2, 3 };
                 case DemoDataTypes.Sound:
                     return new int[3] { 5, 0, 3 };
                 case DemoDataTypes.Music:
@@ -441,7 +506,7 @@ namespace Xv2CoreLib.DEM
                     return new int[3] { 6, 16, 6 };
                 case DemoDataTypes.Subtitle:
                     return new int[3] { 9, 1, 5 };
-                case DemoDataTypes.FadeInOut:
+                case DemoDataTypes.ScreenFade:
                     return new int[3] { 0, 2, 7 };
                 default:
                     string[] types = I_04.ToString().Remove(0, 4).Split('_');
@@ -567,12 +632,12 @@ namespace Xv2CoreLib.DEM
         [YAXAttributeFor("Dyt")]
         [YAXSerializeAs("Index")]
         public int I_3 { get; set; }
-        [YAXAttributeFor("F_4")]
-        [YAXSerializeAs("value")]
+        [YAXAttributeFor("Texture")]
+        [YAXSerializeAs("Opacity")]
         [YAXFormat("0.0#######")]
         public float F_4 { get; set; }
-        [YAXAttributeFor("F_5")]
-        [YAXSerializeAs("value")]
+        [YAXAttributeFor("Dyt")]
+        [YAXSerializeAs("Opacity")]
         [YAXFormat("0.0#######")]
         public float F_5 { get; set; }
         [YAXAttributeFor("SwapDuration")]
@@ -1060,10 +1125,10 @@ namespace Xv2CoreLib.DEM
 
     public class Type1_2_5
     {
-        [YAXAttributeFor("I_1")]
+        [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
-        [YAXAttributeFor("F_2")]
+        [YAXAttributeFor("Angle")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
         public float F_2 { get; set; }
@@ -1218,12 +1283,13 @@ namespace Xv2CoreLib.DEM
 
     public class Type1_2_3
     {
-        [YAXAttributeFor("I_1")]
+        [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
-        [YAXAttributeFor("I_2")]
+        [YAXAttributeFor("Angle")]
         [YAXSerializeAs("value")]
-        public int I_2 { get; set; }
+        [YAXFormat("0.0#########")]
+        public float F_2 { get; set; }
         [YAXAttributeFor("I_3")]
         [YAXSerializeAs("value")]
         public int I_3 { get; set; }
@@ -1233,7 +1299,7 @@ namespace Xv2CoreLib.DEM
             return new Type1_2_3()
             {
                 I_1 = BitConverter.ToInt32(rawBytes, BitConverter.ToInt32(rawBytes, offset + 0)),
-                I_2 = BitConverter.ToInt32(rawBytes, BitConverter.ToInt32(rawBytes, offset + 8)),
+                F_2 = BitConverter.ToSingle(rawBytes, BitConverter.ToInt32(rawBytes, offset + 8)),
                 I_3 = BitConverter.ToInt32(rawBytes, BitConverter.ToInt32(rawBytes, offset + 16)),
             };
         }
@@ -1244,7 +1310,7 @@ namespace Xv2CoreLib.DEM
 
             //Values
             writer.WriteValue(I_1);
-            writer.WriteValue(I_2);
+            writer.WriteValue(F_2);
             writer.WriteValue(I_3);
 
             return writer.bytes;
@@ -1253,7 +1319,7 @@ namespace Xv2CoreLib.DEM
 
     public class Type1_6_4
     {
-        [YAXAttributeFor("I_1")]
+        [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
         [YAXAttributeFor("I_2")]
@@ -1294,7 +1360,7 @@ namespace Xv2CoreLib.DEM
 
     public class Type1_7_1
     {
-        [YAXAttributeFor("I_1")]
+        [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
 
@@ -1475,10 +1541,10 @@ namespace Xv2CoreLib.DEM
 
     public class Type1_11_2
     {
-        [YAXAttributeFor("I_1")]
+        [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
-        [YAXAttributeFor("I_2")]
+        [YAXAttributeFor("IsVisible")]
         [YAXSerializeAs("value")]
         public int I_2 { get; set; }
 
@@ -1505,7 +1571,7 @@ namespace Xv2CoreLib.DEM
 
     public class Type1_12_2
     {
-        [YAXAttributeFor("I_1")]
+        [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
         [YAXAttributeFor("I_2")]
@@ -1606,7 +1672,7 @@ namespace Xv2CoreLib.DEM
 
     public class Type1_14_1
     {
-        [YAXAttributeFor("I_1")]
+        [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
 
@@ -1830,10 +1896,10 @@ namespace Xv2CoreLib.DEM
 
     public class Type1_26_2
     {
-        [YAXAttributeFor("I_1")]
+        [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
-        [YAXAttributeFor("F_2")]
+        [YAXAttributeFor("Scale")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
         public float F_2 { get; set; }
@@ -2427,10 +2493,10 @@ namespace Xv2CoreLib.DEM
 
     public class Type4_2_3
     {
-        [YAXAttributeFor("I_1")]
+        [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
-        [YAXAttributeFor("I_2")]
+        [YAXAttributeFor("AuraType")]
         [YAXSerializeAs("value")]
         public int I_2 { get; set; }
         [YAXAttributeFor("I_3")]

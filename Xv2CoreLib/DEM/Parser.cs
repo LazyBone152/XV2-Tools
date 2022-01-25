@@ -155,7 +155,7 @@ namespace Xv2CoreLib.DEM
                 case DEM_Type.DemoDataTypes.TextureSwitch:
                     subEntry.Type0_1_6 = Type0_1_6.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.FadeInOut:
+                case DEM_Type.DemoDataTypes.ScreenFade:
                     subEntry.Type0_2_7 = Type0_2_7.Read(rawBytes, bytes, offset);
                     break;
                 case DEM_Type.DemoDataTypes.Type0_3_8:
@@ -173,40 +173,40 @@ namespace Xv2CoreLib.DEM
                 case DEM_Type.DemoDataTypes.Type0_21_2:
                     subEntry.Type0_21_2 = Type0_21_2.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type1_1_5:
+                case DEM_Type.DemoDataTypes.Position1:
                     subEntry.Type1_1_5 = Type1_1_5.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type1_1_9:
+                case DEM_Type.DemoDataTypes.Position2:
                     subEntry.Type1_1_9 = Type1_1_9.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type1_2_3:
+                case DEM_Type.DemoDataTypes.RotateY_1:
                     subEntry.Type1_2_3 = Type1_2_3.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type1_2_5:
+                case DEM_Type.DemoDataTypes.RotateY_2:
                     subEntry.Type1_2_5 = Type1_2_5.Read(rawBytes, bytes, offset);
                     break;
                 case DEM_Type.DemoDataTypes.Transformation:
                     subEntry.Type1_4_2 = Type1_4_2.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type1_6_4:
+                case DEM_Type.DemoDataTypes.StartTransparent:
                     subEntry.Type1_6_4 = Type1_6_4.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type1_7_1:
+                case DEM_Type.DemoDataTypes.StopTransparent:
                     subEntry.Type1_7_1 = Type1_7_1.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type1_8_6:
+                case DEM_Type.DemoDataTypes.SetEyes:
                     subEntry.Type1_8_6 = Type1_8_6.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type1_11_2:
+                case DEM_Type.DemoDataTypes.ShadowVisible:
                     subEntry.Type1_11_2 = Type1_11_2.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type1_12_2:
+                case DEM_Type.DemoDataTypes.CancelAnimation:
                     subEntry.Type1_12_2 = Type1_12_2.Read(rawBytes, bytes, offset);
                     break;
                 case DEM_Type.DemoDataTypes.EyeColor:
                     subEntry.Type1_13_10 = Type1_13_10.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type1_14_1:
+                case DEM_Type.DemoDataTypes.ResetEyesColor:
                     subEntry.Type1_14_1 = Type1_14_1.Read(rawBytes, bytes, offset);
                     break;
                 case DEM_Type.DemoDataTypes.Type1_16_2:
@@ -215,10 +215,10 @@ namespace Xv2CoreLib.DEM
                 case DEM_Type.DemoDataTypes.Type1_20_12:
                     subEntry.Type1_20_12 = Type1_20_12.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type1_26_2:
+                case DEM_Type.DemoDataTypes.Scale:
                     subEntry.Type1_26_2 = Type1_26_2.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type1_27_2:
+                case DEM_Type.DemoDataTypes.SetHologramMaterial:
                     subEntry.Type1_27_2 = Type1_27_2.Read(rawBytes, bytes, offset);
                     break;
                 case DEM_Type.DemoDataTypes.AnimationSmall:
@@ -278,7 +278,7 @@ namespace Xv2CoreLib.DEM
                 case DEM_Type.DemoDataTypes.Type3_4_2:
                     subEntry.Type3_4_2 = Type3_4_2.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type4_2_3:
+                case DEM_Type.DemoDataTypes.AuraEffect:
                     subEntry.Type4_2_3 = Type4_2_3.Read(rawBytes, bytes, offset);
                     break;
                 case DEM_Type.DemoDataTypes.Type4_3_5:

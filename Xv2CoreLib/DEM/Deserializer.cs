@@ -177,7 +177,7 @@ namespace Xv2CoreLib.DEM
                         case DEM_Type.DemoDataTypes.TextureSwitch:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type0_1_6.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
-                        case DEM_Type.DemoDataTypes.FadeInOut:
+                        case DEM_Type.DemoDataTypes.ScreenFade:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type0_2_7.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
                         case DEM_Type.DemoDataTypes.Type0_3_8:
@@ -195,40 +195,40 @@ namespace Xv2CoreLib.DEM
                         case DEM_Type.DemoDataTypes.Type0_21_2:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type0_21_2.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
-                        case DEM_Type.DemoDataTypes.Type1_1_5:
+                        case DEM_Type.DemoDataTypes.Position1:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type1_1_5.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
-                        case DEM_Type.DemoDataTypes.Type1_1_9:
+                        case DEM_Type.DemoDataTypes.Position2:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type1_1_9.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
-                        case DEM_Type.DemoDataTypes.Type1_2_3:
+                        case DEM_Type.DemoDataTypes.RotateY_1:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type1_2_3.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
-                        case DEM_Type.DemoDataTypes.Type1_2_5:
+                        case DEM_Type.DemoDataTypes.RotateY_2:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type1_2_5.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
                         case DEM_Type.DemoDataTypes.Transformation:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type1_4_2.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
-                        case DEM_Type.DemoDataTypes.Type1_6_4:
+                        case DEM_Type.DemoDataTypes.StartTransparent:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type1_6_4.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
-                        case DEM_Type.DemoDataTypes.Type1_7_1:
+                        case DEM_Type.DemoDataTypes.StopTransparent:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type1_7_1.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
-                        case DEM_Type.DemoDataTypes.Type1_8_6:
+                        case DEM_Type.DemoDataTypes.SetEyes:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type1_8_6.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
-                        case DEM_Type.DemoDataTypes.Type1_11_2:
+                        case DEM_Type.DemoDataTypes.ShadowVisible:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type1_11_2.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
-                        case DEM_Type.DemoDataTypes.Type1_12_2:
+                        case DEM_Type.DemoDataTypes.CancelAnimation:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type1_12_2.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
                         case DEM_Type.DemoDataTypes.EyeColor:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type1_13_10.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
-                        case DEM_Type.DemoDataTypes.Type1_14_1:
+                        case DEM_Type.DemoDataTypes.ResetEyesColor:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type1_14_1.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
                         case DEM_Type.DemoDataTypes.Type1_16_2:
@@ -237,10 +237,10 @@ namespace Xv2CoreLib.DEM
                         case DEM_Type.DemoDataTypes.Type1_20_12:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type1_20_12.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
-                        case DEM_Type.DemoDataTypes.Type1_26_2:
+                        case DEM_Type.DemoDataTypes.Scale:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type1_26_2.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
-                        case DEM_Type.DemoDataTypes.Type1_27_2:
+                        case DEM_Type.DemoDataTypes.SetHologramMaterial:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type1_27_2.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
                         case DEM_Type.DemoDataTypes.AnimationSmall:
@@ -306,7 +306,7 @@ namespace Xv2CoreLib.DEM
                         case DEM_Type.DemoDataTypes.ScreenEffect:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type4_1_8.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
-                        case DEM_Type.DemoDataTypes.Type4_2_3:
+                        case DEM_Type.DemoDataTypes.AuraEffect:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type4_2_3.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
                         case DEM_Type.DemoDataTypes.Type4_3_5:

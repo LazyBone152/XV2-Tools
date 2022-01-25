@@ -236,6 +236,8 @@ namespace Xv2CoreLib.ACB
         public UTF_File OutsideLinkTable { get; set; } // No need to parse this
         public UTF_File AcfReferenceTable { get; set; } // No need to parse this
         public UTF_File SoundGeneratorTable { get; set; } // No need to parse this
+        public UTF_File InstrumentPluginTrackTable { get; set; } // No need to parse this
+        public UTF_File InstrumentPluginParameterTable { get; set; } // No need to parse this
 
         #region Settings
         public bool ReuseTrackCommand = false;
@@ -334,6 +336,10 @@ namespace Xv2CoreLib.ACB
             acbFile.CommandTables = ACB_CommandTables.Load(utfFile, acbFile, loadUnknownCommands);
             acbFile.StringValues = ACB_StringValue.Load(utfFile.GetColumnTable("StringValueTable", false, header, acbFile.Version), acbFile.Version);
             acbFile.BeatSyncInfo = ACB_BeatSyncInfo.Load(utfFile.GetColumnTable("BeatSyncInfoTable", false, header, acbFile.Version), acbFile.Version);
+
+            //Added in 1.35.0.0
+            acbFile.InstrumentPluginTrackTable = utfFile.GetColumnTable("InstrumentPluginTrackTable", true, header, acbFile.Version);
+            acbFile.InstrumentPluginParameterTable = utfFile.GetColumnTable("InstrumentPluginParameterTable", true, header, acbFile.Version);
 
             //If no StringValueTable exists, then use default table. (this is required for some commands)
             if (acbFile.StringValues.Count == 0)
@@ -464,6 +470,9 @@ namespace Xv2CoreLib.ACB
             if (Graphs == null) Graphs = new List<ACB_Graph>();
             if (AutoModulations == null) AutoModulations = new List<ACB_AutoModulation>();
             if (GlobalAisacReferences == null) GlobalAisacReferences = new List<ACB_GlobalAisacReference>();
+            if (BeatSyncInfo == null) BeatSyncInfo = new List<ACB_BeatSyncInfo>();
+            if (Blocks == null) Blocks = new List<ACB_Block>();
+            if (BlockSequences == null) BlockSequences = new List<ACB_SequenceBlock>();
 
             foreach (var entry in Cues)
                 entry.Initialize();
@@ -498,7 +507,7 @@ namespace Xv2CoreLib.ACB
         private void ValidateTables(UTF_File utfFile)
         {
             if (utfFile.ColumnTableExists("BlockSequenceTable", true) || utfFile.ColumnTableExists("BlockTable", true) || utfFile.ColumnTableExists("EventTable", true) 
-                || utfFile.ColumnTableExists("AisacNameTable", true) || utfFile.ColumnTableExists("InstrumentPluginTrackTable", true) || utfFile.ColumnTableExists("InstrumentPluginParameterTable", true))
+                || utfFile.ColumnTableExists("AisacNameTable", true))
                 TableValidationFailed = true;
         }
 
@@ -765,6 +774,8 @@ namespace Xv2CoreLib.ACB
             utfFile.AddData("TrackParameterPalletTable", 0, null, tableHelper, Version);
             utfFile.AddData("SynthParameterPalletTable", 0, null, tableHelper, Version);
             utfFile.AddData("SoundGeneratorTable", 0, (SoundGeneratorTable != null) ? SoundGeneratorTable.Write() : null, tableHelper, Version);
+            utfFile.AddData("InstrumentPluginTrackTable", 0, (InstrumentPluginTrackTable != null) ? InstrumentPluginTrackTable.Write() : null, tableHelper, Version);
+            utfFile.AddData("InstrumentPluginParameterTable", 0, (InstrumentPluginParameterTable != null) ? InstrumentPluginParameterTable.Write() : null, tableHelper, Version);
             utfFile.AddData("PaddingArea", 0, null, tableHelper, Version);
             utfFile.AddData("StreamAwbTocWork", 0, StreamAwbTocWork, tableHelper, Version); //Not sure what this is...
 
@@ -3384,6 +3395,12 @@ namespace Xv2CoreLib.ACB
         [YAXAttributeFor("Tempo")]
         [YAXSerializeAs("value")]
         public ushort Tempo { get; set; } //only in old versions
+        [YAXAttributeFor("InstPluginTrackStartIndex")]
+        [YAXSerializeAs("value")]
+        public ushort InstPluginTrackStartIndex { get; set; } = ushort.MaxValue;
+        [YAXAttributeFor("NumInstPluginTracks")]
+        [YAXSerializeAs("value")]
+        public ushort NumInstPluginTracks { get; set; } 
 
         //Tracks
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Track")]
@@ -3448,6 +3465,8 @@ namespace Xv2CoreLib.ACB
             sequence.ParameterPallet.TableIndex = sequenceTable.GetValue<ushort>("ParameterPallet", TypeFlag.UInt16, index, tableHelper, ParseVersion);
             sequence.PlaybackRatio = sequenceTable.GetValue<ushort>("PlaybackRatio", TypeFlag.UInt16, index, tableHelper, ParseVersion);
             sequence.Type = (SequenceType)sequenceTable.GetValue<byte>("Type", TypeFlag.UInt8, index, tableHelper, ParseVersion);
+            sequence.InstPluginTrackStartIndex = sequenceTable.GetValue<ushort>("InstPluginTrackStartIndex", TypeFlag.UInt16, index, tableHelper, ParseVersion);
+            sequence.NumInstPluginTracks = sequenceTable.GetValue<ushort>("NumInstPluginTracks", TypeFlag.UInt16, index, tableHelper, ParseVersion);
 
             //References
             if (tableHelper.ColumnExists("LocalAisacs", TypeFlag.Data, ParseVersion))
@@ -3558,8 +3577,8 @@ namespace Xv2CoreLib.ACB
             utfTable.AddValue("NumActionTracks", TypeFlag.UInt16, index, ActionTracks.Count.ToString(), tableHelper, ParseVersion);
 
             //Unknown table values
-            utfTable.AddValue("InstPluginTrackStartIndex", TypeFlag.UInt16, index, ushort.MaxValue.ToString(), tableHelper, ParseVersion);
-            utfTable.AddValue("NumInstPluginTracks", TypeFlag.UInt16, index, "0", tableHelper, ParseVersion);
+            utfTable.AddValue("InstPluginTrackStartIndex", TypeFlag.UInt16, index, InstPluginTrackStartIndex.ToString(), tableHelper, ParseVersion);
+            utfTable.AddValue("NumInstPluginTracks", TypeFlag.UInt16, index, NumInstPluginTracks.ToString(), tableHelper, ParseVersion);
 
             if (trackValues.Count > 0 && (Type == SequenceType.Random || Type == SequenceType.RandomNoRepeat))
             {
@@ -4336,7 +4355,6 @@ namespace Xv2CoreLib.ACB
         [YAXAttributeFor("ExtensionData")]
         [YAXSerializeAs("LoopEnd")]
         public uint LoopEnd { get; set; }
-        
 
         public static List<ACB_Waveform> Load(UTF_File table, UTF_File waveformTable, Version ParseVersion)
         {
