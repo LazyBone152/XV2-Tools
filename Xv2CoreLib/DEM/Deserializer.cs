@@ -303,7 +303,7 @@ namespace Xv2CoreLib.DEM
                         case DEM_Type.DemoDataTypes.Effect:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type4_0_12.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
-                        case DEM_Type.DemoDataTypes.ScreenEffect:
+                        case DEM_Type.DemoDataTypes.PostEffect:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type4_1_8.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
                         case DEM_Type.DemoDataTypes.AuraEffect:

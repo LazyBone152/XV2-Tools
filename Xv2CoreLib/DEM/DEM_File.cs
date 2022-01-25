@@ -339,7 +339,7 @@ namespace Xv2CoreLib.DEM
             Type3_3_1,
             Type3_4_2,
             Effect, //4_0_12
-            ScreenEffect, //4_1_8
+            PostEffect, //4_1_8
             AuraEffect, //4_2_3
             Type4_3_5, //SetDoF?
             Type4_4_1,
@@ -405,7 +405,7 @@ namespace Xv2CoreLib.DEM
                 case "4_0_12":
                     return DemoDataTypes.Effect;
                 case "4_1_8":
-                    return DemoDataTypes.ScreenEffect;
+                    return DemoDataTypes.PostEffect;
                 case "4_2_3":
                     return DemoDataTypes.AuraEffect;
                 case "5_0_3":
@@ -486,7 +486,7 @@ namespace Xv2CoreLib.DEM
                     return new int[3] { 2, 0, 1 };
                 case DemoDataTypes.Effect:
                     return new int[3] { 4, 0, 12 };
-                case DemoDataTypes.ScreenEffect:
+                case DemoDataTypes.PostEffect:
                     return new int[3] { 4, 1, 8 };
                 case DemoDataTypes.AuraEffect:
                     return new int[3] { 4, 2, 3 };

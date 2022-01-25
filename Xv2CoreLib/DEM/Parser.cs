@@ -290,7 +290,7 @@ namespace Xv2CoreLib.DEM
                 case DEM_Type.DemoDataTypes.Effect:
                     subEntry.Type4_0_12 = Type4_0_12.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.ScreenEffect:
+                case DEM_Type.DemoDataTypes.PostEffect:
                     subEntry.Type4_1_8 = Type4_1_8.Read(rawBytes, bytes, offset);
                     break;
                 case DEM_Type.DemoDataTypes.Type5_0_2:
