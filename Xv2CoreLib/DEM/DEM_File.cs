@@ -158,7 +158,7 @@ namespace Xv2CoreLib.DEM
         [YAXSerializeAs("Effect")]
         public Type4_0_12 Type4_0_12 { get; set; } 
         [YAXDontSerializeIfNull]
-        [YAXSerializeAs("ScreenEffect")]
+        [YAXSerializeAs("PostEffect")]
         public Type4_1_8 Type4_1_8 { get; set; }
         [YAXDontSerializeIfNull]
         [YAXSerializeAs("Sound")]
