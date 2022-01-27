@@ -5,12 +5,13 @@ using System.IO;
 using System.Linq;
 using YAXLib;
 using System.Windows.Media.Imaging;
-using CSharpImageLibrary;
 using Xv2CoreLib.EffectContainer;
 using System.Windows.Data;
 using Xv2CoreLib.HslColor;
 using Xv2CoreLib.Resource.UndoRedo;
 using Xv2CoreLib.Resource;
+using CSharpImageLibrary;
+using Pfim;
 
 namespace Xv2CoreLib.EMB_CLASS
 {

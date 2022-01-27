@@ -196,7 +196,7 @@ namespace Xv2CoreLib.EMM
         {
             foreach (var e in Materials)
             {
-                if (e.Name == name)
+                if (e.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
                 {
                     return e;
                 }
@@ -328,6 +328,36 @@ namespace Xv2CoreLib.EMM
     [YAXSerializeAs("Material")]
     public class EmmMaterial
     {
+        public static readonly string[] CommonShaderPrograms = new string[]
+        {
+            "TOON_UNIF_STAIN1_DFD",
+            "TOON_UNIF_STAIN2_DFD",
+            "TOON_UNIF_STAIN3_DFD",
+            "TOON_UNIF_STAIN1_DFDAth",
+            "TOON_UNIF_STAIN2_DFDAth",
+            "TOON_UNIF_STAIN3_DFDAth",
+            "TOON_STAIN1_DFD",
+            "TOON_STAIN2_DFD",
+            "TOON_DFD",
+            "TOON_UNIF_DFD",
+
+            "TOON_UNIF_EYE_MUT1_DFD",
+            "TOON_UNIF_EYE_MUT2_DFD",
+            "TOON_UNIF_EYE_MUT3_DFD",
+
+            "ParticleDecal",
+            "ParticleDecalPT",
+            "SoftParticleDecal",
+            "ParticleRefract",
+            "DecalColor",
+
+            "T1_VFX",
+            "T1_VFX_MTN",
+            "T1_VFX_MTN_DIS_ALPHA",
+            "T1_VFX_MTN_REFRACT",
+            "T1_SM_DYN_MTN",
+        };
+
         [YAXAttributeForClass]
         public int Index { get; set; }
         [YAXAttributeForClass]

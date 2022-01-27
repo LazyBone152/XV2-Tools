@@ -4,13 +4,13 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-             xmlns:local="clr-namespace:EEPK_Organiser.View"
              xmlns:vector="clr-namespace:EEPK_Organiser.View.Vectors"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:lbUtils="clr-namespace:LB_Common.Utils;assembly=LB_Common"
+             xmlns:emm="clr-namespace:Xv2CoreLib.EMM;assembly=Xv2CoreLib"
              xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
-             Dialog:DialogParticipation.Register="{Binding}"
              mc:Ignorable="d" 
+             Dialog:DialogParticipation.Register="{Binding}"
              d:DesignHeight="2000" d:DesignWidth="900" Name="UserControl">
     <Grid>
         <Grid.RowDefinitions>
@@ -112,7 +112,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                         <DataGridTemplateColumn.CellEditingTemplate>
                             <DataTemplate>
-                                <TextBox Text="{Binding ElementName=UserControl, Path=SelectedMaterialShaderProgram, UpdateSourceTrigger=Default}" MaxLength="32"/>
+                                <ComboBox IsEditable="True" Text="{Binding ElementName=UserControl, Path=SelectedMaterialShaderProgram, UpdateSourceTrigger=LostFocus}" ItemsSource="{x:Static emm:EmmMaterial.CommonShaderPrograms}"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>
                     </DataGridTemplateColumn>

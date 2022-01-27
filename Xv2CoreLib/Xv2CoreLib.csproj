@@ -70,6 +70,9 @@
     <Reference Include="Microsoft.IO.RecyclableMemoryStream, Version=1.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.IO.RecyclableMemoryStream.1.2.2\lib\net45\Microsoft.IO.RecyclableMemoryStream.dll</HintPath>
     </Reference>
+    <Reference Include="Pfim, Version=0.10.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\XenoKit\packages\Pfim.0.10.3\lib\netstandard2.0\Pfim.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="Shim, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c55ec16d10c4b366, processorArchitecture=MSIL">
@@ -293,6 +296,7 @@
     <Compile Include="Resource\AsyncObservableCollection.cs" />
     <Compile Include="Resource\BinaryConverter.cs" />
     <Compile Include="Resource\ColorEx.cs" />
+    <Compile Include="Resource\Image\WpfBitmapConvert.cs" />
     <Compile Include="Resource\Random.cs" />
     <Compile Include="Resource\ReflectionHelper.cs" />
     <Compile Include="Resource\UndoRedo\IMergableUndo.cs" />
@@ -315,7 +319,7 @@
     <Compile Include="Resource\UndoRedo\UndoableProperty.cs" />
     <Compile Include="Resource\UndoRedo\UndoableStateChange.cs" />
     <Compile Include="Resource\UndoRedo\UndoManager.cs" />
-    <Compile Include="Resource\WriteableBitmapExtensions.cs" />
+    <Compile Include="Resource\Image\WriteableBitmapExtensions.cs" />
     <Compile Include="Resource\Xv2FileIO.cs" />
     <Compile Include="Resource\ZipManager.cs" />
     <Compile Include="SAV\Encrypt.cs" />

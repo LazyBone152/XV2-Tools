@@ -266,9 +266,9 @@ namespace Xv2CoreLib
             LoadPartSetFile(ean, part.CharaCode, null);
             LoadPartSetFile(dyt, part.CharaCode, null);
 
-            if(part.Physics_Objects != null)
+            if(part.PhysicsParts != null)
             {
-                foreach (var physicsPart in part.Physics_Objects)
+                foreach (var physicsPart in part.PhysicsParts)
                 {
                     string physicsEmd = physicsPart.GetModelPath();
                     string physicsEsk = physicsPart.GetEskPath();

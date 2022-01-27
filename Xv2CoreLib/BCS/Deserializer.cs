@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Xv2CoreLib.Resource;
 using YAXLib;
 
 namespace Xv2CoreLib.BCS
@@ -38,7 +39,7 @@ namespace Xv2CoreLib.BCS
             bcsFile.SortEntries();
 
             PartSetCount = (bcsFile.PartSets != null) ? int.Parse(bcsFile.PartSets[bcsFile.PartSets.Count() - 1].Index) + 1 : 0;
-            PartColorCount = (bcsFile.Part_Colors != null) ? int.Parse(bcsFile.Part_Colors[bcsFile.Part_Colors.Count() - 1].Index) + 1 : 0;
+            PartColorCount = (bcsFile.PartColors != null) ? int.Parse(bcsFile.PartColors[bcsFile.PartColors.Count() - 1].Index) + 1 : 0;
             BodyCount = (bcsFile.Bodies != null) ? int.Parse(bcsFile.Bodies[bcsFile.Bodies.Count() - 1].Index) + 1 : 0;
 
             Write();
@@ -52,7 +53,7 @@ namespace Xv2CoreLib.BCS
             _bcsFile.SortEntries();
 
             PartSetCount = (bcsFile.PartSets != null) ? int.Parse(bcsFile.PartSets[bcsFile.PartSets.Count() - 1].Index) + 1 : 0;
-            PartColorCount = (bcsFile.Part_Colors != null) ? int.Parse(bcsFile.Part_Colors[bcsFile.Part_Colors.Count() - 1].Index) + 1 : 0;
+            PartColorCount = (bcsFile.PartColors != null) ? int.Parse(bcsFile.PartColors[bcsFile.PartColors.Count() - 1].Index) + 1 : 0;
             BodyCount = (bcsFile.Bodies != null) ? int.Parse(bcsFile.Bodies[bcsFile.Bodies.Count() - 1].Index) + 1 : 0;
 
             Write();
@@ -65,7 +66,7 @@ namespace Xv2CoreLib.BCS
             _bcsFile.SortEntries();
 
             PartSetCount = (bcsFile.PartSets != null) ? int.Parse(bcsFile.PartSets[bcsFile.PartSets.Count() - 1].Index) + 1 : 0;
-            PartColorCount = (bcsFile.Part_Colors != null) ? int.Parse(bcsFile.Part_Colors[bcsFile.Part_Colors.Count() - 1].Index) + 1 : 0;
+            PartColorCount = (bcsFile.PartColors != null) ? int.Parse(bcsFile.PartColors[bcsFile.PartColors.Count() - 1].Index) + 1 : 0;
             BodyCount = (bcsFile.Bodies != null) ? int.Parse(bcsFile.Bodies[bcsFile.Bodies.Count() - 1].Index) + 1 : 0;
 
             Write();
@@ -113,20 +114,20 @@ namespace Xv2CoreLib.BCS
             }
 
             //PartColor Table
-            if (bcsFile.Part_Colors != null)
+            if (bcsFile.PartColors != null)
             {
                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), 28);
                 for (int i = 0; i < PartColorCount; i++)
                 {
-                    for (int a = 0; a < bcsFile.Part_Colors.Count(); a++)
+                    for (int a = 0; a < bcsFile.PartColors.Count(); a++)
                     {
-                        if (int.Parse(bcsFile.Part_Colors[a].Index) == i)
+                        if (int.Parse(bcsFile.PartColors[a].Index) == i)
                         {
                             PartColorTable.Add(bytes.Count());
                             bytes.AddRange(new byte[4]);
                             break;
                         }
-                        else if (a == bcsFile.Part_Colors.Count() - 1)
+                        else if (a == bcsFile.PartColors.Count() - 1)
                         {
                             //Null entry
                             bytes.AddRange(new byte[4]);
@@ -209,21 +210,21 @@ namespace Xv2CoreLib.BCS
             }
 
             //PartColors
-            if(bcsFile.Part_Colors != null)
+            if(bcsFile.PartColors != null)
             {
                 List<int> PartColorOffsets = new List<int>();
 
-                for (int i = 0; i < bcsFile.Part_Colors.Count(); i++)
+                for (int i = 0; i < bcsFile.PartColors.Count(); i++)
                 {
                     bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), PartColorTable[i]);
                     int PartColorStart = bytes.Count();
-                    int colorCount = (bcsFile.Part_Colors[i]._Colors != null) ? bcsFile.Part_Colors[i]._Colors.Count() : 0;
+                    int colorCount = (bcsFile.PartColors[i].Colors != null) ? bcsFile.PartColors[i].Colors.Count() : 0;
 
                     stringInfo.Add(new StringWriter.StringInfo()
                     {
                         Offset = bytes.Count(),
                         RelativeOffset = PartColorStart,
-                        StringToWrite = bcsFile.Part_Colors[i].Str_00
+                        StringToWrite = bcsFile.PartColors[i].Name
                     });
                     bytes.AddRange(new byte[10]);
                     bytes.AddRange(BitConverter.GetBytes((short)colorCount));
@@ -231,33 +232,33 @@ namespace Xv2CoreLib.BCS
                     bytes.AddRange(new byte[4]);
                 }
 
-                for(int i = 0; i < bcsFile.Part_Colors.Count(); i++)
+                for(int i = 0; i < bcsFile.PartColors.Count(); i++)
                 {
-                    if(bcsFile.Part_Colors[i]._Colors != null)
+                    if(bcsFile.PartColors[i].Colors != null)
                     {
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - PartColorOffsets[i] + 12), PartColorOffsets[i]);
-                        for (int a = 0; a < bcsFile.Part_Colors[i]._Colors.Count(); a++)
+                        for (int a = 0; a < bcsFile.PartColors[i].Colors.Count(); a++)
                         {
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.Part_Colors[i]._Colors[a].F_00));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.Part_Colors[i]._Colors[a].F_04));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.Part_Colors[i]._Colors[a].F_08));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.Part_Colors[i]._Colors[a].F_12));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.Part_Colors[i]._Colors[a].F_16));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.Part_Colors[i]._Colors[a].F_20));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.Part_Colors[i]._Colors[a].F_24));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.Part_Colors[i]._Colors[a].F_28));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.Part_Colors[i]._Colors[a].F_32));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.Part_Colors[i]._Colors[a].F_36));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.Part_Colors[i]._Colors[a].F_40));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.Part_Colors[i]._Colors[a].F_44));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.Part_Colors[i]._Colors[a].F_48));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.Part_Colors[i]._Colors[a].F_52));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.Part_Colors[i]._Colors[a].F_56));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.Part_Colors[i]._Colors[a].F_60));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.Part_Colors[i]._Colors[a].F_64));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.Part_Colors[i]._Colors[a].F_68));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.Part_Colors[i]._Colors[a].F_72));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.Part_Colors[i]._Colors[a].F_76));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color1_R));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color1_G));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color1_B));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color1_A));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color2_R));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color2_G));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color2_B));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color2_A));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color3_R));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color3_G));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color3_B));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color3_A));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color4_R));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color4_G));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color4_B));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color4_A));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color5_R));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color5_G));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color5_B));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color5_A));
                         }
                     }
                 }
@@ -288,9 +289,9 @@ namespace Xv2CoreLib.BCS
                         
                         for(int a = 0; a < bcsFile.Bodies[i].BodyScales.Count(); a++)
                         {
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.Bodies[i].BodyScales[a].F_00));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.Bodies[i].BodyScales[a].F_04));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.Bodies[i].BodyScales[a].F_08)); stringInfo.Add(new StringWriter.StringInfo()
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.Bodies[i].BodyScales[a].ScaleX));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.Bodies[i].BodyScales[a].ScaleY));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.Bodies[i].BodyScales[a].ScaleZ)); stringInfo.Add(new StringWriter.StringInfo()
                             {
                                 Offset = bytes.Count(),
                                 RelativeOffset = bytes.Count() - 12,
@@ -325,8 +326,8 @@ namespace Xv2CoreLib.BCS
                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - offsetRelativeTo), offsetToFill);
 
                 int partStartOffset = bytes.Count();
-                int ColorSelectorsCount = (part.Color_Selectors != null) ? part.Color_Selectors.Count() : 0;
-                int PhysicsObjectCount = (part.Physics_Objects != null) ? part.Physics_Objects.Count() : 0;
+                int ColorSelectorsCount = (part.ColorSelectors != null) ? part.ColorSelectors.Count() : 0;
+                int PhysicsObjectCount = (part.PhysicsParts != null) ? part.PhysicsParts.Count() : 0;
                 int Unk3Count = (part.Unk_3 != null) ? part.Unk_3.Count() : 0;
 
                 //Create values
@@ -390,8 +391,8 @@ namespace Xv2CoreLib.BCS
                 bytes.AddRange(new byte[4]);
 
                 //Extended data
-                WriteColorSelectors(part.Color_Selectors, partStartOffset + 20, partStartOffset);
-                WritePhysicsObjects(part.Physics_Objects, partStartOffset + 76, partStartOffset);
+                WriteColorSelectors(part.ColorSelectors, partStartOffset + 20, partStartOffset);
+                WritePhysicsObjects(part.PhysicsParts, partStartOffset + 76, partStartOffset);
                 WriteUnk3(part.Unk_3, partStartOffset + 84, partStartOffset);
             }
         }
@@ -410,7 +411,7 @@ namespace Xv2CoreLib.BCS
             }
         }
 
-        private void WritePhysicsObjects(List<PhysicsObject> physicsObjects, int offsetToFill, int relativeOffset)
+        private void WritePhysicsObjects(AsyncObservableCollection<PhysicsPart> physicsObjects, int offsetToFill, int relativeOffset)
         {
             if (physicsObjects != null)
             {
@@ -529,7 +530,7 @@ namespace Xv2CoreLib.BCS
                     {
                         Offset = bytes.Count(),
                         RelativeOffset = bytes.Count() - 48,
-                        StringToWrite = skeleton.Bones[i].Str_48
+                        StringToWrite = skeleton.Bones[i].BoneName
                     });
                     bytes.AddRange(new byte[4]);
                 }

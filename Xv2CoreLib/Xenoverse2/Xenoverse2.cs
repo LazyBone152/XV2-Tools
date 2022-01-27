@@ -790,7 +790,7 @@ namespace Xv2CoreLib
                 BAI_File baiFile = (BAI_File)FileManager.Instance.GetParsedFileFromGame(baiPath);
 
                 //Load esk file
-                string eskPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{0}_000.esk", cmsEntry.ShortName));
+                string eskPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}_000.esk", cmsEntry.ShortName, cmsEntry.BcsPath));
                 ESK_File eskFile = (ESK_File)FileManager.Instance.GetParsedFileFromGame(eskPath);
 
                 //Costumes

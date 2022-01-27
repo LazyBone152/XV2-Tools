@@ -214,8 +214,12 @@ namespace EEPK_Organiser.View
             NotifyPropertyChanged(nameof(SelectedMaterialName));
             NotifyPropertyChanged(nameof(SelectedMaterialShaderProgram));
 
-            //If properties on the material itself have changed externally (such as on a undo/redo), then the list needs to be refreshed.
-            materialDataGrid.Items.Refresh();
+            try
+            {
+                //If properties on the material itself have changed externally (such as on a undo/redo), then the list needs to be refreshed.
+                materialDataGrid.Items.Refresh();
+            }
+            catch { }
 
             if (MaterialViewModel != null)
                 MaterialViewModel.UpdateProperties();

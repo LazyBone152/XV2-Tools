@@ -10,12 +10,12 @@
     <Window.Resources>
         <DataTemplate x:Key="PictureTemplate">
             <Canvas Width="190" Height="48">
-                <TextBlock Text="{Binding Str_00}" Canvas.Left="20" Canvas.Top="8" Width="140"/>
+                <TextBlock Text="{Binding Name}" Canvas.Left="20" Canvas.Top="8" Width="140"/>
             </Canvas>
         </DataTemplate>
     </Window.Resources>
     <Grid>
-        <ListBox x:Name="listBox_Materials" ItemsSource="{Binding emmFile.Materials}" TextSearch.TextPath="Str_00" HorizontalAlignment="Left" Height="249" Margin="31,10,0,0" VerticalAlignment="Top" Width="230" ItemTemplate="{DynamicResource PictureTemplate}">
+        <ListBox x:Name="listBox_Materials" ItemsSource="{Binding emmFile.Materials}" TextSearch.TextPath="Name" HorizontalAlignment="Left" Height="249" Margin="31,10,0,0" VerticalAlignment="Top" Width="230" ItemTemplate="{DynamicResource PictureTemplate}">
             <ListBox.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Black"/>
 

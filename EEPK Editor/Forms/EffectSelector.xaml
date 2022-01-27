@@ -7,7 +7,7 @@
         xmlns:Themes1="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
-        Title="Effect Selector" Height="465.127" Width="430" ShowInTaskbar="True" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" WindowStyle="ToolWindow">
+        Title="Effect Selector" Height="465.127" Width="430" ShowInTaskbar="True" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" WindowStyle="ToolWindow" TitleCharacterCasing="Normal">
     <Grid>
         <DataGrid x:Name="effectDataGrid" ItemsSource="{Binding Effects}" CellEditEnding="EffectDataGrid_CellEditEnding" CanUserDeleteRows="False" EnableRowVirtualization="True" EnableColumnVirtualization="True" ScrollViewer.CanContentScroll="True" SelectionMode="Extended" RowDetailsVisibilityMode="Collapsed" HorizontalAlignment="Left" Height="321" Margin="10,10,0,0" VerticalAlignment="Top" Width="400" CanUserResizeRows="False" CanUserAddRows="False" AutoGenerateColumns="False">
             <DataGrid.Resources>

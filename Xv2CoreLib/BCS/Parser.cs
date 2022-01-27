@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Xv2CoreLib.Resource;
 using YAXLib;
 
 namespace Xv2CoreLib.BCS
@@ -105,7 +106,7 @@ namespace Xv2CoreLib.BCS
             //PartColors
             if(partcolorsCount > 0)
             {
-                bcsFile.Part_Colors = new List<PartColor>();
+                bcsFile.PartColors = new List<PartColor>();
 
                 for(int i = 0; i < partcolorsCount; i++)
                 {
@@ -113,11 +114,11 @@ namespace Xv2CoreLib.BCS
 
                     if(thisPartColorOffset != 0)
                     {
-                        bcsFile.Part_Colors.Add(new PartColor()
+                        bcsFile.PartColors.Add(new PartColor()
                         {
                             Index = i.ToString(),
-                            Str_00 = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, thisPartColorOffset + 0) + thisPartColorOffset, false),
-                            _Colors = ParseColors(BitConverter.ToInt32(rawBytes, thisPartColorOffset + 12) + thisPartColorOffset, BitConverter.ToInt16(rawBytes, thisPartColorOffset + 10))
+                            Name = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, thisPartColorOffset + 0) + thisPartColorOffset, false),
+                            Colors = ParseColors(BitConverter.ToInt32(rawBytes, thisPartColorOffset + 12) + thisPartColorOffset, BitConverter.ToInt16(rawBytes, thisPartColorOffset + 10))
                         });
                     }
 
@@ -212,8 +213,8 @@ namespace Xv2CoreLib.BCS
                     EmmPath = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 60), offset),
                     EmbPath = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 64), offset),
                     EanPath = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 68), offset),
-                    Color_Selectors = ParseColorSelector(BitConverter.ToInt32(rawBytes, offset + 20) + offset, BitConverter.ToInt16(rawBytes, offset + 18)),
-                    Physics_Objects = ParsePhysicsObject(BitConverter.ToInt32(rawBytes, offset + 76) + offset, BitConverter.ToInt16(rawBytes, offset + 74)),
+                    ColorSelectors = ParseColorSelector(BitConverter.ToInt32(rawBytes, offset + 20) + offset, BitConverter.ToInt16(rawBytes, offset + 18)),
+                    PhysicsParts = ParsePhysicsObject(BitConverter.ToInt32(rawBytes, offset + 76) + offset, BitConverter.ToInt16(rawBytes, offset + 74)),
                     Unk_3 = ParseUnk3(BitConverter.ToInt32(rawBytes, offset + 84) + offset, BitConverter.ToInt16(rawBytes, offset + 82))
                 };
 
@@ -249,11 +250,11 @@ namespace Xv2CoreLib.BCS
             
         }
 
-        private List<PhysicsObject> ParsePhysicsObject(int offset, int count)
+        private AsyncObservableCollection<PhysicsPart> ParsePhysicsObject(int offset, int count)
         {
             if (count > 0)
             {
-                List<PhysicsObject> physicsObjects = new List<PhysicsObject>();
+                AsyncObservableCollection<PhysicsPart> physicsObjects = new AsyncObservableCollection<PhysicsPart>();
 
                 for (int i = 0; i < count; i++)
                 {
@@ -271,7 +272,7 @@ namespace Xv2CoreLib.BCS
                     if (i_32 > 0x200)
                         throw new InvalidDataException($"Unexpected I_32 value: {i_32}.");
 
-                    physicsObjects.Add(new PhysicsObject()
+                    physicsObjects.Add(new PhysicsPart()
                     {
                         Model1 = BitConverter.ToInt16(rawBytes, offset + 0),
                         Model2 = BitConverter.ToInt16(rawBytes, offset + 2),
@@ -352,26 +353,26 @@ namespace Xv2CoreLib.BCS
                     colors.Add(new Colors()
                     {
                         Index = i.ToString(),
-                        F_00 = BitConverter.ToSingle(rawBytes, offset + 0),
-                        F_04 = BitConverter.ToSingle(rawBytes, offset + 4),
-                        F_08 = BitConverter.ToSingle(rawBytes, offset + 8),
-                        F_12 = BitConverter.ToSingle(rawBytes, offset + 12),
-                        F_16 = BitConverter.ToSingle(rawBytes, offset + 16),
-                        F_20 = BitConverter.ToSingle(rawBytes, offset + 20),
-                        F_24 = BitConverter.ToSingle(rawBytes, offset + 24),
-                        F_28 = BitConverter.ToSingle(rawBytes, offset + 28),
-                        F_32 = BitConverter.ToSingle(rawBytes, offset + 32),
-                        F_36 = BitConverter.ToSingle(rawBytes, offset + 36),
-                        F_40 = BitConverter.ToSingle(rawBytes, offset + 40),
-                        F_44 = BitConverter.ToSingle(rawBytes, offset + 44),
-                        F_48 = BitConverter.ToSingle(rawBytes, offset + 48),
-                        F_52 = BitConverter.ToSingle(rawBytes, offset + 52),
-                        F_56 = BitConverter.ToSingle(rawBytes, offset + 56),
-                        F_60 = BitConverter.ToSingle(rawBytes, offset + 60),
-                        F_64 = BitConverter.ToSingle(rawBytes, offset + 64),
-                        F_68 = BitConverter.ToSingle(rawBytes, offset + 68),
-                        F_72 = BitConverter.ToSingle(rawBytes, offset + 72),
-                        F_76 = BitConverter.ToSingle(rawBytes, offset + 76)
+                        Color1_R = BitConverter.ToSingle(rawBytes, offset + 0),
+                        Color1_G = BitConverter.ToSingle(rawBytes, offset + 4),
+                        Color1_B = BitConverter.ToSingle(rawBytes, offset + 8),
+                        Color1_A = BitConverter.ToSingle(rawBytes, offset + 12),
+                        Color2_R = BitConverter.ToSingle(rawBytes, offset + 16),
+                        Color2_G = BitConverter.ToSingle(rawBytes, offset + 20),
+                        Color2_B = BitConverter.ToSingle(rawBytes, offset + 24),
+                        Color2_A = BitConverter.ToSingle(rawBytes, offset + 28),
+                        Color3_R = BitConverter.ToSingle(rawBytes, offset + 32),
+                        Color3_G = BitConverter.ToSingle(rawBytes, offset + 36),
+                        Color3_B = BitConverter.ToSingle(rawBytes, offset + 40),
+                        Color3_A = BitConverter.ToSingle(rawBytes, offset + 44),
+                        Color4_R = BitConverter.ToSingle(rawBytes, offset + 48),
+                        Color4_G = BitConverter.ToSingle(rawBytes, offset + 52),
+                        Color4_B = BitConverter.ToSingle(rawBytes, offset + 56),
+                        Color4_A = BitConverter.ToSingle(rawBytes, offset + 60),
+                        Color5_R = BitConverter.ToSingle(rawBytes, offset + 64),
+                        Color5_G = BitConverter.ToSingle(rawBytes, offset + 68),
+                        Color5_B = BitConverter.ToSingle(rawBytes, offset + 72),
+                        Color5_A = BitConverter.ToSingle(rawBytes, offset + 76)
                     });
 
                     offset += 80;
@@ -396,9 +397,9 @@ namespace Xv2CoreLib.BCS
             {
                 body.BodyScales.Add(new BoneScale()
                 {
-                    F_00 = BitConverter.ToSingle(rawBytes, bodyOffset + 0),
-                    F_04 = BitConverter.ToSingle(rawBytes, bodyOffset + 4),
-                    F_08 = BitConverter.ToSingle(rawBytes, bodyOffset + 8),
+                    ScaleX = BitConverter.ToSingle(rawBytes, bodyOffset + 0),
+                    ScaleY = BitConverter.ToSingle(rawBytes, bodyOffset + 4),
+                    ScaleZ = BitConverter.ToSingle(rawBytes, bodyOffset + 8),
                     Str_12 = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, bodyOffset + 12) + bodyOffset, false)
                 });
                 bodyOffset += 16;
@@ -436,7 +437,7 @@ namespace Xv2CoreLib.BCS
                             F_36 = BitConverter.ToSingle(rawBytes, boneOffset + 36),
                             F_40 = BitConverter.ToSingle(rawBytes, boneOffset + 40),
                             F_44 = BitConverter.ToSingle(rawBytes, boneOffset + 44),
-                            Str_48 = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, boneOffset + 48) + boneOffset, false)
+                            BoneName = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, boneOffset + 48) + boneOffset, false)
                         });
 
                         boneOffset += 52;

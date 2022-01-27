@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using Xv2CoreLib.Resource;
 using YAXLib;
 
 namespace Xv2CoreLib.BCS
@@ -49,13 +51,12 @@ namespace Xv2CoreLib.BCS
         [YAXSerializeAs("values")]
         [YAXFormat("0.0###########")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public float[] F_48 { get; set; } // size 7
+        public float[] F_48 { get; set; } = new float[7]; // size 7
         
         [YAXDontSerializeIfNull]
         public List<PartSet> PartSets { get; set; }
         [YAXDontSerializeIfNull]
-        [YAXSerializeAs("PartColors")]
-        public List<PartColor> Part_Colors { get; set; }
+        public List<PartColor> PartColors { get; set; }
         [YAXDontSerializeIfNull]
         public List<Body> Bodies { get; set; }
         [YAXDontSerializeIfNull]
@@ -75,13 +76,13 @@ namespace Xv2CoreLib.BCS
             if(PartSets != null)
                 PartSets.Sort((x, y) => x.SortID - y.SortID);
 
-            if (Part_Colors != null)
+            if (PartColors != null)
             {
-                Part_Colors.Sort((x, y) => x.SortID - y.SortID);
+                PartColors.Sort((x, y) => x.SortID - y.SortID);
 
-                foreach (var partColor in Part_Colors)
+                foreach (var partColor in PartColors)
                 {
-                    partColor._Colors.Sort((x, y) => x.SortID - y.SortID);
+                    partColor.Colors.Sort((x, y) => x.SortID - y.SortID);
                 }
             }
 
@@ -105,18 +106,18 @@ namespace Xv2CoreLib.BCS
 
         public PartColor GetPartColors(string id, string name)
         {
-            if (Part_Colors == null) Part_Colors = new List<PartColor>();
+            if (PartColors == null) PartColors = new List<PartColor>();
 
-            int index = Part_Colors.FindIndex(p => (p.Index == id));
+            int index = PartColors.FindIndex(p => (p.Index == id));
 
             if(index != -1)
             {
-                return Part_Colors[index];
+                return PartColors[index];
             }
             else
             {
-                PartColor newPartColor = new PartColor() { Index = id, Str_00 = name, _Colors = new List<Colors>() };
-                Part_Colors.Add(newPartColor);
+                PartColor newPartColor = new PartColor() { Index = id, Name = name, Colors = new List<Colors>() };
+                PartColors.Add(newPartColor);
                 return newPartColor;
             }
 
@@ -143,28 +144,31 @@ namespace Xv2CoreLib.BCS
         [YAXAttributeForClass]
         [BindingAutoId(999)]
         public string Index { get; set; } //uint16
-        
+
         //Parts
+        [YAXDontSerialize]
+        public AsyncObservableCollection<Part> Parts { get; set; } = new AsyncObservableCollection<Part>();
+
         [YAXDontSerializeIfNull]
-        public Part FaceBase { get; set; }
+        public Part FaceBase { get { return GetPart(PartType.FaceBase); } set { SetPart(value, PartType.FaceBase); } }
         [YAXDontSerializeIfNull]
-        public Part FaceForehead { get; set; }
+        public Part FaceForehead { get { return GetPart(PartType.FaceForehead); } set { SetPart(value, PartType.FaceForehead); } }
         [YAXDontSerializeIfNull]
-        public Part FaceEye { get; set; }
+        public Part FaceEye { get { return GetPart(PartType.FaceEye); } set { SetPart(value, PartType.FaceEye); } }
         [YAXDontSerializeIfNull]
-        public Part FaceNose { get; set; }
+        public Part FaceNose { get { return GetPart(PartType.FaceNose); } set { SetPart(value, PartType.FaceNose); } }
         [YAXDontSerializeIfNull]
-        public Part FaceEar { get; set; }
+        public Part FaceEar { get { return GetPart(PartType.FaceEar); } set { SetPart(value, PartType.FaceEar); } }
         [YAXDontSerializeIfNull]
-        public Part Hair { get; set; }
+        public Part Hair { get { return GetPart(PartType.Hair); } set { SetPart(value, PartType.Hair); } }
         [YAXDontSerializeIfNull]
-        public Part Bust { get; set; }
+        public Part Bust { get { return GetPart(PartType.Bust); } set { SetPart(value, PartType.Bust); } }
         [YAXDontSerializeIfNull]
-        public Part Pants { get; set; }
+        public Part Pants { get { return GetPart(PartType.Pants); } set { SetPart(value, PartType.Pants); } }
         [YAXDontSerializeIfNull]
-        public Part Rist { get; set; }
+        public Part Rist { get { return GetPart(PartType.Rist); } set { SetPart(value, PartType.Rist); } }
         [YAXDontSerializeIfNull]
-        public Part Boots { get; set; }
+        public Part Boots { get { return GetPart(PartType.Boots); } set { SetPart(value, PartType.Boots); } }
 
         public Part GetPart(int index)
         {
@@ -193,6 +197,35 @@ namespace Xv2CoreLib.BCS
                 default:
                     throw new ArgumentException($"PartSet.GetPart: part index out of range ({index})");
             }
+        }
+
+        public void SetPart(Part part, PartType type)
+        {
+            if (part == null) return;
+            if (Parts == null) Parts = new AsyncObservableCollection<Part>();
+
+            part.PartType = type;
+            var entry = GetPart(type);
+
+            if (entry == null)
+            {
+                int insetIdx = (int)type;
+
+                if (insetIdx <= Parts.Count)
+                    Parts.Insert(insetIdx, part);
+                else
+                    Parts.Add(part);
+            }
+            else
+            {
+                Parts[Parts.IndexOf(entry)] = part;
+            }
+        }
+
+        public Part GetPart(PartType type)
+        {
+            if (Parts == null) return null;
+            return Parts.FirstOrDefault(x => x.PartType == type);
         }
 
 #if DEBUG
@@ -232,6 +265,9 @@ namespace Xv2CoreLib.BCS
             Unk9 = 0x100,
             OrangeScouterOverlay = 0x200,
         }
+
+        [YAXDontSerialize]
+        public PartType PartType { get; set; }
 
         [YAXAttributeFor("Model")]
         [YAXSerializeAs("value")]
@@ -330,7 +366,7 @@ namespace Xv2CoreLib.BCS
         [YAXAttributeFor("Name")]
         [YAXSerializeAs("value")]
         public string CharaCode { get; set; }
-        //Str
+
         [YAXAttributeFor("Files")]
         [YAXSerializeAs("EMD")]
         public string EmdPath { get; set; }
@@ -346,10 +382,10 @@ namespace Xv2CoreLib.BCS
 
         [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "ColorSelector")]
-        public List<ColorSelector> Color_Selectors { get; set; }
+        public List<ColorSelector> ColorSelectors { get; set; }
         [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "PhysicsObject")]
-        public List<PhysicsObject> Physics_Objects { get; set; }
+        public AsyncObservableCollection<PhysicsPart> PhysicsParts { get; set; }
         [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Unk3")]
         public List<Unk3> Unk_3 { get; set; }
@@ -459,7 +495,7 @@ namespace Xv2CoreLib.BCS
 
     }
 
-    public struct ColorSelector
+    public class ColorSelector
     {
         [YAXAttributeFor("PartColors")]
         [YAXSerializeAs("value")]
@@ -469,7 +505,7 @@ namespace Xv2CoreLib.BCS
         public short I_02 { get; set; }
     }
 
-    public class PhysicsObject
+    public class PhysicsPart
     {
         [YAXAttributeFor("Model1")]
         [YAXSerializeAs("value")]
@@ -643,32 +679,32 @@ namespace Xv2CoreLib.BCS
         public string Index { get; set; } //int16
         [YAXAttributeFor("Name")]
         [YAXSerializeAs("value")]
-        public string Str_00 { get; set; }
+        public string Name { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Colors")]
-        public List<Colors> _Colors { get; set; }
+        public List<Colors> Colors { get; set; }
 
         public void AddColor(Colors color)
         {
-            if (_Colors == null) _Colors = new List<Colors>();
+            if (Colors == null) Colors = new List<Colors>();
             int idx = int.Parse(color.Index);
 
-            int existingIndex = _Colors.FindIndex(p => p.Index == color.Index);
+            int existingIndex = Colors.FindIndex(p => p.Index == color.Index);
 
             if(existingIndex != -1)
             {
-                _Colors[existingIndex] = color;
+                Colors[existingIndex] = color;
             }
             else
             {
                 //Index doesnt exist. Pad entries until index is reached then add entry.
 
-                while ((_Colors.Count - 1) < (idx - 1))
+                while ((Colors.Count - 1) < (idx - 1))
                 {
-                    _Colors.Add(new Colors() { Index = _Colors.Count.ToString() });
+                    Colors.Add(new Colors() { Index = Colors.Count.ToString() });
                 }
 
-                _Colors.Add(color);
+                Colors.Add(color);
             }
         }
         
@@ -685,83 +721,83 @@ namespace Xv2CoreLib.BCS
         [YAXAttributeFor("Color1")]
         [YAXSerializeAs("R")]
         [YAXFormat("0.0###########")]
-        public float F_00 { get; set; }
+        public float Color1_R { get; set; }
         [YAXAttributeFor("Color1")]
         [YAXSerializeAs("G")]
         [YAXFormat("0.0###########")]
-        public float F_04 { get; set; }
+        public float Color1_G { get; set; }
         [YAXAttributeFor("Color1")]
         [YAXSerializeAs("B")]
         [YAXFormat("0.0###########")]
-        public float F_08 { get; set; }
+        public float Color1_B { get; set; }
         [YAXAttributeFor("Color1")]
         [YAXSerializeAs("A")]
         [YAXFormat("0.0###########")]
-        public float F_12 { get; set; }
+        public float Color1_A { get; set; }
         [YAXAttributeFor("Color2")]
         [YAXSerializeAs("R")]
         [YAXFormat("0.0###########")]
-        public float F_16 { get; set; }
+        public float Color2_R { get; set; }
         [YAXAttributeFor("Color2")]
         [YAXSerializeAs("G")]
         [YAXFormat("0.0###########")]
-        public float F_20 { get; set; }
+        public float Color2_G { get; set; }
         [YAXAttributeFor("Color2")]
         [YAXSerializeAs("B")]
         [YAXFormat("0.0###########")]
-        public float F_24 { get; set; }
+        public float Color2_B { get; set; }
         [YAXAttributeFor("Color2")]
         [YAXSerializeAs("A")]
         [YAXFormat("0.0###########")]
-        public float F_28 { get; set; }
+        public float Color2_A { get; set; }
         [YAXAttributeFor("Color3")]
         [YAXSerializeAs("R")]
         [YAXFormat("0.0###########")]
-        public float F_32 { get; set; }
+        public float Color3_R { get; set; }
         [YAXAttributeFor("Color3")]
         [YAXSerializeAs("G")]
         [YAXFormat("0.0###########")]
-        public float F_36 { get; set; }
+        public float Color3_G { get; set; }
         [YAXAttributeFor("Color3")]
         [YAXSerializeAs("B")]
         [YAXFormat("0.0###########")]
-        public float F_40 { get; set; }
+        public float Color3_B { get; set; }
         [YAXAttributeFor("Color3")]
         [YAXSerializeAs("A")]
         [YAXFormat("0.0###########")]
-        public float F_44 { get; set; }
+        public float Color3_A { get; set; }
         [YAXAttributeFor("Color4")]
         [YAXSerializeAs("R")]
         [YAXFormat("0.0###########")]
-        public float F_48 { get; set; }
+        public float Color4_R { get; set; }
         [YAXAttributeFor("Color4")]
         [YAXSerializeAs("G")]
         [YAXFormat("0.0###########")]
-        public float F_52 { get; set; }
+        public float Color4_G { get; set; }
         [YAXAttributeFor("Color4")]
         [YAXSerializeAs("B")]
         [YAXFormat("0.0###########")]
-        public float F_56 { get; set; }
+        public float Color4_B { get; set; }
         [YAXAttributeFor("Color4")]
         [YAXSerializeAs("A")]
         [YAXFormat("0.0###########")]
-        public float F_60 { get; set; }
+        public float Color4_A { get; set; }
         [YAXAttributeFor("Color5")]
         [YAXSerializeAs("R")]
         [YAXFormat("0.0###########")]
-        public float F_64 { get; set; }
+        public float Color5_R { get; set; }
         [YAXAttributeFor("Color5")]
         [YAXSerializeAs("G")]
         [YAXFormat("0.0###########")]
-        public float F_68 { get; set; }
+        public float Color5_G { get; set; }
         [YAXAttributeFor("Color5")]
         [YAXSerializeAs("B")]
         [YAXFormat("0.0###########")]
-        public float F_72 { get; set; }
+        public float Color5_B { get; set; }
         [YAXAttributeFor("Color5")]
         [YAXSerializeAs("A")]
         [YAXFormat("0.0###########")]
-        public float F_76 { get; set; }
+        public float Color5_A { get; set; }
     }
 
     //BCS Body
@@ -791,13 +827,13 @@ namespace Xv2CoreLib.BCS
         public string Str_12 { get; set; }
         [YAXAttributeFor("Scale")]
         [YAXSerializeAs("X")]
-        public float F_00 { get; set; }
+        public float ScaleX { get; set; }
         [YAXAttributeFor("Scale")]
         [YAXSerializeAs("Y")]
-        public float F_04 { get; set; }
+        public float ScaleY { get; set; }
         [YAXAttributeFor("Scale")]
         [YAXSerializeAs("Z")]
-        public float F_08 { get; set; }
+        public float ScaleZ { get; set; }
     }
 
     //Skeleton
@@ -815,7 +851,7 @@ namespace Xv2CoreLib.BCS
     {
         [YAXAttributeForClass]
         [YAXSerializeAs("Name")]
-        public string Str_48 { get; set; }
+        public string BoneName { get; set; }
         [YAXAttributeFor("I_00")]
         [YAXSerializeAs("value")]
         public int I_00 { get; set; }
