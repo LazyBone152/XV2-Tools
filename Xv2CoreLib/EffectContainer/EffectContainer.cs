@@ -2435,7 +2435,8 @@ namespace Xv2CoreLib.EffectContainer
 
             var superTexture = new WriteableBitmap(textureSize, textureSize, 96, 96, PixelFormats.Bgra32, null);
             EmbEntry newEmbEntry = new EmbEntry();
-            newEmbEntry.ImageFormat = CSharpImageLibrary.ImageEngineFormat.PNG;
+            newEmbEntry.ImageFormat = CSharpImageLibrary.ImageEngineFormat.DDS_DXT5;
+            newEmbEntry.DdsImage = superTexture;
 
             for (int i = 0; i < bitmaps.Count; i++)
             {
@@ -2448,8 +2449,8 @@ namespace Xv2CoreLib.EffectContainer
                 int x = (int)(position * textureSize);
                 int y = (int)maxDimension * row;
 
-                Rect sourceRect = new Rect(0, 0, bitmaps[i].Width, bitmaps[i].Height);
-                Rect destRect = new Rect(x, y, bitmaps[i].Width, bitmaps[i].Height);
+                Rect sourceRect = new Rect(0, 0, bitmaps[i].PixelWidth, bitmaps[i].PixelHeight);
+                Rect destRect = new Rect(x, y, bitmaps[i].PixelWidth, bitmaps[i].PixelHeight);
 
                 superTexture.Blit(destRect, bitmaps[i], sourceRect);
 
@@ -2506,21 +2507,16 @@ namespace Xv2CoreLib.EffectContainer
             }
 
             //EmbEntry settings:
-
-            //We need to first save the new image to a byte array and then reload it, as CSharpImageLibrary can have trouble saving WriteableBitmaps directly created in code for some unknown reason. (The only other workaround I found was to disable mipmaps but that resulted in ridiculous file sizes)
-            using (MemoryStream ms = new MemoryStream())
-            {
-                superTexture.Save(ms);
-                newEmbEntry.Data = ms.ToArray();
-            }
-
+            newEmbEntry.SaveDds(false);
+#if DEBUG
             newEmbEntry.LoadDds();
 
             if (newEmbEntry.DdsImage == null)
-                throw new NullReferenceException("DdsImage was null at end.");
+                throw new NullReferenceException("DdsImage couldn't be reloaded after merge.");
+#endif
 
-            newEmbEntry.Name = $"SuperTexture ({newEmbEntry.DdsImage.GetHashCode()}).dds";
-            //newEmbEntry.Name = $"SuperTexture ({newEmbEntry.Data.GetHashCode()}).dds";
+
+            newEmbEntry.Name = (newEmbEntry.DdsImage != null) ? $"SuperTexture ({newEmbEntry.DdsImage.GetHashCode()}).dds" : $"SuperTexture ({newEmbEntry.Data.GetHashCode()}).dds";
 
             //Delete all previous textures
             foreach (var entry in embEntries)

@@ -18,6 +18,9 @@
     <PackageReference Include="MvvmLight">
       <Version>5.4.1.1</Version>
     </PackageReference>
+    <PackageReference Include="shim.drawing">
+      <Version>3.0.0</Version>
+    </PackageReference>
     <PackageReference Include="System.Numerics.Vectors">
       <Version>4.3.0</Version>
     </PackageReference>
@@ -95,12 +98,6 @@
       <HintPath>..\packages\Ookii.Dialogs.Wpf.1.1.0\lib\net45\Ookii.Dialogs.Wpf.dll</HintPath>
     </Reference>
     <Reference Include="PresentationFramework.Aero" />
-    <Reference Include="Shim, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c55ec16d10c4b366, processorArchitecture=MSIL">
-      <HintPath>..\packages\shim.2.0.0\lib\net40\Shim.dll</HintPath>
-    </Reference>
-    <Reference Include="Shim.Drawing, Version=3.0.0.0, Culture=neutral, PublicKeyToken=a7d03c0bc8d64dbc, processorArchitecture=MSIL">
-      <HintPath>..\packages\shim.drawing.3.0.0\lib\net45\Shim.Drawing.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.Common, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">

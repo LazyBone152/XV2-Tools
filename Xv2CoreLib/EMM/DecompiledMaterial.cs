@@ -787,6 +787,14 @@ namespace Xv2CoreLib.EMM
 
     }
 
+    public enum AlphaBlendType : int
+    {
+        NotSet = -1,
+        Normal = 0,
+        Additive = 1,
+        Subtractive = 2
+    }
+
     internal enum VectorType
     {
         Vector4,

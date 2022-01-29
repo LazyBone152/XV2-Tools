@@ -1,0 +1,1297 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Shim</name>
+    </assembly>
+    <members>
+        <member name="T:System.ApplicationException">
+            <summary>Serves as the base class for application-defined exceptions.</summary>
+        </member>
+        <member name="M:System.ApplicationException.#ctor">
+            <summary>Initializes a new instance of the <see cref="T:System.ApplicationException" /> class.</summary>
+        </member>
+        <member name="M:System.ApplicationException.#ctor(System.String)">
+            <summary>Initializes a new instance of the <see cref="T:System.ApplicationException" /> class with a specified error message.</summary><param name="message">A message that describes the error. </param>
+        </member>
+        <member name="T:System.Collections.Concurrent.ConcurrentBag`1">
+            <!-- No matching elements were found for the following include tag --><include file="../../_Doc/System.xml" path="doc/members/member[@name=&quot;T:System.Collections.Concurrent.ConcurrentBag`1&quot;]/*" />
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentBag`1.Remove(`0)">
+            <remarks>
+            Class currently inherits <see cref="T:System.Collections.Generic.List`1"/> for convenience, and overrides this methd for safety. 
+            Ideally <see cref="T:System.Collections.Concurrent.ConcurrentBag`1"/> should be implemented independently of <see cref="T:System.Collections.Generic.List`1"/>.
+            </remarks>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentBag`1.RemoveAt(System.Int32)">
+            <remarks>
+            Class currently inherits <see cref="T:System.Collections.Generic.List`1"/> for convenience, and overrides this methd for safety. 
+            Ideally <see cref="T:System.Collections.Concurrent.ConcurrentBag`1"/> should be implemented independently of <see cref="T:System.Collections.Generic.List`1"/>.
+            </remarks>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentBag`1.RemoveAll(System.Predicate{`0})">
+            <remarks>
+            Class currently inherits <see cref="T:System.Collections.Generic.List`1"/> for convenience, and overrides this methd for safety. 
+            Ideally <see cref="T:System.Collections.Concurrent.ConcurrentBag`1"/> should be implemented independently of <see cref="T:System.Collections.Generic.List`1"/>.
+            </remarks>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentBag`1.RemoveRange(System.Int32,System.Int32)">
+            <remarks>
+            Class currently inherits <see cref="T:System.Collections.Generic.List`1"/> for convenience, and overrides this methd for safety. 
+            Ideally <see cref="T:System.Collections.Concurrent.ConcurrentBag`1"/> should be implemented independently of <see cref="T:System.Collections.Generic.List`1"/>.
+            </remarks>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentBag`1.TryPeek(`0@)">
+            <!-- No matching elements were found for the following include tag --><include file="../../_Doc/System.xml" path="doc/members/member[@name=&quot;M:System.Collections.Concurrent.ConcurrentBag`1.TryPeek(`0@)&quot;]/*" />
+        </member>
+        <member name="T:System.Collections.Concurrent.ConcurrentDictionary`2">
+            <summary>Represents a thread-safe collection of key/value pairs that can be accessed by multiple threads concurrently. </summary><typeparam name="TKey">The type of the keys in the dictionary.</typeparam><typeparam name="TValue">The type of the values in the dictionary.</typeparam>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.AddOrUpdate(`0,System.Func{`0,`1},System.Func{`0,`1,`1})">
+            <summary>Uses the specified functions to add a key/value pair to the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2" /> if the key does not already exist, or to update a key/value pair in the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2" /> if the key already exists.</summary><returns>The new value for the key. This will be either be the result of addValueFactory (if the key was absent) or the result of updateValueFactory (if the key was present).</returns><param name="key">The key to be added or whose value should be updated</param><param name="addValueFactory">The function used to generate a value for an absent key</param><param name="updateValueFactory">The function used to generate a new value for an existing key based on the key's existing value</param><exception cref="T:System.ArgumentNullException">
+        <paramref name="key" />, <paramref name="addValueFactory" />, or <paramref name="updateValueFactory" /> is null.</exception><exception cref="T:System.OverflowException">The dictionary already contains the maximum number of elements (<see cref="F:System.Int32.MaxValue" />).</exception>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.GetOrAdd(`0,System.Func{`0,`1})">
+            <summary>Adds a key/value pair to the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2" /> by using the specified function, if the key does not already exist.</summary><returns>The value for the key. This will be either the existing value for the key if the key is already in the dictionary, or the new value for the key as returned by valueFactory if the key was not in the dictionary.</returns><param name="key">The key of the element to add.</param><param name="valueFactory">The function used to generate a value for the key</param><exception cref="T:System.ArgumentNullException">
+        <paramref name="key" /> or <paramref name="valueFactory" /> is null.</exception><exception cref="T:System.OverflowException">The dictionary already contains the maximum number of elements (<see cref="F:System.Int32.MaxValue" />).</exception>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.GetOrAdd(`0,`1)">
+            <summary>Adds a key/value pair to the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2" /> if the key does not already exist.</summary><returns>The value for the key. This will be either the existing value for the key if the key is already in the dictionary, or the new value if the key was not in the dictionary.</returns><param name="key">The key of the element to add.</param><param name="value">the value to be added, if the key does not already exist</param><exception cref="T:System.ArgumentNullException">
+        <paramref name="key" /> is null.</exception><exception cref="T:System.OverflowException">The dictionary already contains the maximum number of elements (<see cref="F:System.Int32.MaxValue" />).</exception>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.TryRemove(`0,`1@)">
+            <summary>Attempts to remove and return the value that has the specified key from the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2" />.</summary><returns>true if the object was removed successfully; otherwise, false.</returns><param name="key">The key of the element to remove and return.</param><param name="value">When this method returns, contains the object removed from the <see cref="T:System.Collections.Concurrent.ConcurrentDictionary`2" />, or the default value of  the TValue type if <paramref name="key" /> does not exist. </param><exception cref="T:System.ArgumentNullException">
+        <paramref name="key" /> is  null.</exception>
+        </member>
+        <member name="T:System.Collections.Concurrent.ConcurrentStack`1">
+            <summary>Represents a thread-safe last in-first out (LIFO) collection.</summary><typeparam name="T">The type of the elements contained in the stack.</typeparam>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentStack`1.#ctor">
+            <summary>Initializes a new instance of the <see cref="T:System.Collections.Concurrent.ConcurrentStack`1" /> class.</summary>
+        </member>
+        <member name="P:System.Collections.Concurrent.ConcurrentStack`1.Count">
+            <summary>Gets the number of elements contained in the <see cref="T:System.Collections.Concurrent.ConcurrentStack`1" />.</summary><returns>The number of elements contained in the <see cref="T:System.Collections.Concurrent.ConcurrentStack`1" />.</returns>
+        </member>
+        <member name="P:System.Collections.Concurrent.ConcurrentStack`1.System#Collections#ICollection#IsSynchronized">
+            <summary>Gets a value indicating whether access to the <see cref="T:System.Collections.ICollection" /> is synchronized with the SyncRoot.</summary><returns>true if access to the <see cref="T:System.Collections.ICollection" /> is synchronized with the SyncRoot; otherwise, false. For <see cref="T:System.Collections.Concurrent.ConcurrentStack`1" />, this property always returns false.</returns>
+        </member>
+        <member name="P:System.Collections.Concurrent.ConcurrentStack`1.System#Collections#ICollection#SyncRoot">
+            <summary>Gets an object that can be used to synchronize access to the <see cref="T:System.Collections.ICollection" />. This property is not supported.</summary><returns>Returns null (Nothing in Visual Basic).</returns><exception cref="T:System.NotSupportedException">The SyncRoot property is not supported</exception>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentStack`1.GetEnumerator">
+            <summary>Returns an enumerator that iterates through the <see cref="T:System.Collections.Concurrent.ConcurrentStack`1" />.</summary><returns>An enumerator for the <see cref="T:System.Collections.Concurrent.ConcurrentStack`1" />.</returns>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentStack`1.System#Collections#IEnumerable#GetEnumerator">
+            <summary>Returns an enumerator that iterates through a collection.</summary><returns>An <see cref="T:System.Collections.IEnumerator" /> that can be used to iterate through the collection.</returns>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentStack`1.CopyTo(`0[],System.Int32)">
+            <summary>Copies the <see cref="T:System.Collections.Concurrent.ConcurrentStack`1" /> elements to an existing one-dimensional <see cref="T:System.Array" />, starting at the specified array index.</summary><param name="array">The one-dimensional <see cref="T:System.Array" /> that is the destination of the elements copied from the <see cref="T:System.Collections.Concurrent.ConcurrentStack`1" />. The <see cref="T:System.Array" /> must have zero-based indexing.</param><param name="index">The zero-based index in <paramref name="array" /> at which copying begins.</param><exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> is a null reference (Nothing in Visual Basic).</exception><exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="index" /> is less than zero.</exception><exception cref="T:System.ArgumentException">
+        <paramref name="index" /> is equal to or greater than the length of the <paramref name="array" /> -or- The number of elements in the source <see cref="T:System.Collections.Concurrent.ConcurrentStack`1" /> is greater than the available space from <paramref name="index" /> to the end of the destination <paramref name="array" />.</exception>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentStack`1.System#Collections#ICollection#CopyTo(System.Array,System.Int32)">
+            <summary>Copies the elements of the <see cref="T:System.Collections.ICollection" /> to an <see cref="T:System.Array" />, starting at a particular <see cref="T:System.Array" /> index.</summary><param name="array">The one-dimensional <see cref="T:System.Array" /> that is the destination of the elements copied from the <see cref="T:System.Collections.Concurrent.ConcurrentStack`1" />. The <see cref="T:System.Array" /> must have zero-based indexing.</param><param name="index">The zero-based index in <paramref name="array" /> at which copying begins.</param><exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> is a null reference (Nothing in Visual Basic).</exception><exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="index" /> is less than zero.</exception><exception cref="T:System.ArgumentException">
+        <paramref name="array" /> is multidimensional. -or- <paramref name="array" /> does not have zero-based indexing. -or- <paramref name="index" /> is equal to or greater than the length of the <paramref name="array" /> -or- The number of elements in the source <see cref="T:System.Collections.ICollection" /> is greater than the available space from <paramref name="index" /> to the end of the destination <paramref name="array" />. -or- The type of the source <see cref="T:System.Collections.ICollection" /> cannot be cast automatically to the type of the destination <paramref name="array" />.</exception>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentStack`1.ToArray">
+            <summary>Copies the items stored in the <see cref="T:System.Collections.Concurrent.ConcurrentStack`1" /> to a new array.</summary><returns>A new array containing a snapshot of elements copied from the <see cref="T:System.Collections.Concurrent.ConcurrentStack`1" />.</returns>
+        </member>
+        <member name="M:System.Collections.Concurrent.ConcurrentStack`1.Push(`0)">
+            <summary>Inserts an object at the top of the <see cref="T:System.Collections.Concurrent.ConcurrentStack`1" />.</summary><param name="item">The object to push onto the <see cref="T:System.Collections.Concurrent.ConcurrentStack`1" />. The value can be a null reference (Nothing in Visual Basic) for reference types.</param>
+        </member>
+        <member name="T:System.Collections.Concurrent.Partitioner`1">
+            <summary>Represents a particular manner of splitting a data source into multiple partitions.</summary><typeparam name="TSource">Type of the elements in the collection.</typeparam>
+        </member>
+        <member name="M:System.Collections.Concurrent.Partitioner`1.GetPartitions(System.Int32)">
+            <summary>Partitions the underlying collection into the given number of partitions.</summary><returns>A list containing <paramref name="partitionCount" /> enumerators.</returns><param name="partitionCount">The number of partitions to create.</param>
+        </member>
+        <member name="P:System.Collections.Concurrent.Partitioner`1.SupportsDynamicPartitions">
+            <summary>Gets whether additional partitions can be created dynamically.</summary><returns>true if the <see cref="T:System.Collections.Concurrent.Partitioner`1" /> can create partitions dynamically as they are requested; false if the <see cref="T:System.Collections.Concurrent.Partitioner`1" /> can only allocate partitions statically.</returns>
+        </member>
+        <member name="M:System.Collections.Concurrent.Partitioner`1.GetDynamicPartitions">
+            <summary>Creates an object that can partition the underlying collection into a variable number of partitions.</summary><returns>An object that can create partitions over the underlying data source.</returns><exception cref="T:System.NotSupportedException">Dynamic partitioning is not supported by the base class. You must implement it in a derived class.</exception>
+        </member>
+        <member name="T:System.Collections.Generic.EnumerableExtensions">
+            <summary>
+            Internal class providing <see cref="T:System.Collections.Generic.IEnumerable`1"/> support methods.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.EnumerableExtensions.TypeSafeCopyTo``1(System.Collections.Generic.IEnumerable{``0},System.Array,System.Int32)">
+            <summary>
+            Copy contents from type collection to array, provided the array is of same type as collection.
+            </summary>
+            <typeparam name="T">Type of the collection items.</typeparam>
+            <param name="source">Collection subject to copying.</param>
+            <param name="array">Array to which the collection should be copied, items must be of same type as collection items.</param>
+            <param name="index">Start index in <paramref name="array"/>.</param>
+        </member>
+        <member name="T:System.Collections.Generic.ListExtensions">
+            <summary>
+            Shim complement for the <see cref="T:System.Collections.Generic.List`1"/> class. <see cref="T:System.Collections.Generic.List`1"/> instance methods that are not available in the 
+            PCL profile are here provided as equivalent extension methods.
+            </summary>
+        </member>
+        <member name="M:System.Collections.Generic.ListExtensions.AsReadOnly``1(System.Collections.Generic.List{``0})">
+            <summary>Returns a read-only <see cref="T:System.Collections.Generic.IList`1" /> wrapper for the current collection.</summary><returns>A <see cref="T:System.Collections.ObjectModel.ReadOnlyCollection`1" /> that acts as a read-only wrapper around the current <see cref="T:System.Collections.Generic.List`1" />.</returns>
+            <param name="list">List to be returned as a read-only list.</param>
+        </member>
+        <member name="M:System.Collections.Generic.ListExtensions.ConvertAll``2(System.Collections.Generic.List{``0},System.Converter{``0,``1})">
+            <summary>Converts the elements in the current <see cref="T:System.Collections.Generic.List`1" /> to another type, and returns a list containing the converted elements.</summary><returns>A <see cref="T:System.Collections.Generic.List`1" /> of the target type containing the converted elements from the current <see cref="T:System.Collections.Generic.List`1" />.</returns><param name="converter">A <see cref="T:System.Converter`2" /> delegate that converts each element from one type to another type.</param><typeparam name="TOutput">The type of the elements of the target array.</typeparam><exception cref="T:System.ArgumentNullException">
+        <paramref name="converter" /> is null.</exception>
+            <param name="list">List subject to conversion.</param>
+        </member>
+        <member name="T:System.ComponentModel.DataAnnotations.RangeAttribute">
+            <!-- No matching elements were found for the following include tag --><include file="../../_Doc/System.ComponentModel.DataAnnotations.xml" path="doc/members/member[@name=&quot;T:System.ComponentModel.DataAnnotations.RangeAttribute&quot;]/*" />
+        </member>
+        <member name="M:System.ComponentModel.DataAnnotations.RangeAttribute.#ctor(System.Double,System.Double)">
+            <!-- No matching elements were found for the following include tag --><include file="../../_Doc/System.ComponentModel.DataAnnotations.xml" path="doc/members/member[@name=&quot;M:System.ComponentModel.DataAnnotations.RangeAttribute.#ctor(System.Double,System.Double)&quot;]/*" />
+        </member>
+        <member name="M:System.ComponentModel.DataAnnotations.RangeAttribute.#ctor(System.Int32,System.Int32)">
+            <!-- No matching elements were found for the following include tag --><include file="../../_Doc/System.ComponentModel.DataAnnotations.xml" path="doc/members/member[@name=&quot;M:System.ComponentModel.DataAnnotations.RangeAttribute.#ctor(System.Int32,System.Int32)&quot;]/*" />
+        </member>
+        <member name="P:System.ComponentModel.DataAnnotations.RangeAttribute.Minimum">
+            <!-- No matching elements were found for the following include tag --><include file="../../_Doc/System.ComponentModel.DataAnnotations.xml" path="doc/members/member[@name=&quot;P:System.ComponentModel.DataAnnotations.RangeAttribute.Minimum&quot;]/*" />
+        </member>
+        <member name="P:System.ComponentModel.DataAnnotations.RangeAttribute.Maximum">
+            <!-- No matching elements were found for the following include tag --><include file="../../_Doc/System.ComponentModel.DataAnnotations.xml" path="doc/members/member[@name=&quot;P:System.ComponentModel.DataAnnotations.RangeAttribute.Maximum&quot;]/*" />
+        </member>
+        <member name="T:System.ComponentModel.DisplayNameAttribute">
+            <summary>Specifies the display name for a property, event, or public void method which takes no arguments. </summary>
+        </member>
+        <member name="M:System.ComponentModel.DisplayNameAttribute.#ctor(System.String)">
+            <summary>Initializes a new instance of the <see cref="T:System.ComponentModel.DisplayNameAttribute" /> class using the display name.</summary><param name="displayName">The display name.</param>
+        </member>
+        <member name="T:System.ComponentModel.ISynchronizeInvoke">
+            <summary>Provides a way to synchronously or asynchronously execute a delegate.</summary>
+        </member>
+        <member name="T:System.Data.Common.SchemaTableColumn">
+            <summary>Describes the column metadata of the schema for a database table.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableColumn.ColumnName">
+            <summary>Specifies the name of the column in the schema table.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableColumn.ColumnOrdinal">
+            <summary>Specifies the ordinal of the column.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableColumn.ColumnSize">
+            <summary>Specifies the size of the column.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableColumn.NumericPrecision">
+            <summary>Specifies the precision of the column data, if the data is numeric.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableColumn.NumericScale">
+            <summary>Specifies the scale of the column data, if the data is numeric.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableColumn.DataType">
+            <summary>Specifies the type of data in the column.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableColumn.ProviderType">
+            <summary>Specifies the provider-specific data type of the column.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableColumn.NonVersionedProviderType">
+            <summary>Specifies the non-versioned provider-specific data type of the column.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableColumn.IsLong">
+            <summary>Specifies whether this column contains long data.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableColumn.AllowDBNull">
+            <summary>Specifies whether value DBNull is allowed.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableColumn.IsAliased">
+            <summary>Specifies whether this column is aliased.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableColumn.IsExpression">
+            <summary>Specifies whether this column is an expression.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableColumn.IsKey">
+            <summary>Specifies whether this column is a key for the table. </summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableColumn.IsUnique">
+            <summary>Specifies whether a unique constraint applies to this column.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableColumn.BaseSchemaName">
+            <summary>Specifies the name of the schema in the schema table.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableColumn.BaseTableName">
+            <summary>Specifies the name of the table in the schema table.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableColumn.BaseColumnName">
+            <summary>Specifies the name of the column in the schema table.</summary>
+        </member>
+        <member name="T:System.Data.Common.SchemaTableOptionalColumn">
+            <summary>Describes optional column metadata of the schema for a database table.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableOptionalColumn.ProviderSpecificDataType">
+            <summary>Specifies the provider-specific data type of the column.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableOptionalColumn.IsAutoIncrement">
+            <summary>Specifies whether the column values in the column are automatically incremented.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableOptionalColumn.IsHidden">
+            <summary>Specifies whether this column is hidden.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableOptionalColumn.IsReadOnly">
+            <summary>Specifies whether this column is read-only.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableOptionalColumn.IsRowVersion">
+            <summary>Specifies whether this column contains row version information.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableOptionalColumn.BaseServerName">
+            <summary>The server name of the column.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableOptionalColumn.BaseCatalogName">
+            <summary>The name of the catalog associated with the results of the latest query.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableOptionalColumn.AutoIncrementSeed">
+            <summary>Specifies the value at which the series for new identity columns is assigned.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableOptionalColumn.AutoIncrementStep">
+            <summary>Specifies the increment between values in the identity column.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableOptionalColumn.DefaultValue">
+            <summary>The default value for the column.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableOptionalColumn.Expression">
+            <summary>The expression used to compute the column.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableOptionalColumn.BaseTableNamespace">
+            <summary>The namespace for the table that contains the column.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableOptionalColumn.BaseColumnNamespace">
+            <summary>The namespace of the column.</summary>
+        </member>
+        <member name="F:System.Data.Common.SchemaTableOptionalColumn.ColumnMapping">
+            <summary>Specifies the mapping for the column.</summary>
+        </member>
+        <member name="T:System.Data.DataColumn">
+            <summary>Represents the schema of a column in a <see cref="T:System.Data.DataTable" />.</summary>
+        </member>
+        <member name="M:System.Data.DataColumn.#ctor(System.String,System.Type)">
+            <summary>Initializes a new instance of the <see cref="T:System.Data.DataColumn" /> class using the specified column name and data type.</summary><param name="columnName">A string that represents the name of the column to be created. If set to null or an empty string (""), a default name will be specified when added to the columns collection. </param><param name="dataType">A supported <see cref="P:System.Data.DataColumn.DataType" />. </param><exception cref="T:System.ArgumentNullException">No <paramref name="dataType" /> was specified. </exception>
+        </member>
+        <member name="P:System.Data.DataColumn.Table">
+            <summary>Gets the <see cref="T:System.Data.DataTable" /> to which the column belongs to.</summary><returns>The <see cref="T:System.Data.DataTable" /> that the <see cref="T:System.Data.DataColumn" /> belongs to.</returns>
+        </member>
+        <member name="P:System.Data.DataColumn.ReadOnly">
+            <summary>Gets or sets a value that indicates whether the column allows for changes as soon as a row has been added to the table.</summary><returns>true if the column is read only; otherwise, false. The default is false.</returns><exception cref="T:System.ArgumentException">The property is set to false on a computed column. </exception>
+        </member>
+        <member name="P:System.Data.DataColumn.DataType">
+            <summary>Gets or sets the type of data stored in the column.</summary><returns>A <see cref="T:System.Type" /> object that represents the column data type.</returns><exception cref="T:System.ArgumentException">The column already has data stored. </exception>
+        </member>
+        <member name="P:System.Data.DataColumn.MaxLength">
+            <summary>Gets or sets the maximum length of a text column.</summary><returns>The maximum length of the column in characters. If the column has no maximum length, the value is –1 (default).</returns>
+        </member>
+        <member name="P:System.Data.DataColumn.ColumnName">
+            <summary>Gets or sets the name of the column in the <see cref="T:System.Data.DataColumnCollection" />.</summary><returns>The name of the column.</returns><exception cref="T:System.ArgumentException">The property is set to null or an empty string and the column belongs to a collection. </exception><exception cref="T:System.Data.DuplicateNameException">A column with the same name already exists in the collection. The name comparison is not case sensitive. </exception>
+        </member>
+        <member name="P:System.Data.DataColumn.DefaultValue">
+            <summary>Gets or sets the default value for the column when you are creating new rows.</summary><returns>A value appropriate to the column's <see cref="P:System.Data.DataColumn.DataType" />.</returns><exception cref="T:System.InvalidCastException">When you are adding a row, the default value is not an instance of the column's data type. </exception>
+        </member>
+        <member name="P:System.Data.DataColumn.Caption">
+            <summary>Gets or sets the caption for the column.</summary><returns>The caption of the column. If not set, returns the <see cref="P:System.Data.DataColumn.ColumnName" /> value.</returns>
+        </member>
+        <member name="T:System.Data.DataColumnCollection">
+            <summary>Represents a collection of <see cref="T:System.Data.DataColumn" /> objects for a <see cref="T:System.Data.DataTable" />.</summary>
+        </member>
+        <member name="M:System.Data.DataColumnCollection.#ctor(System.Data.DataTable)">
+            <summary>
+            Initializes a collection of data columns.
+            </summary>
+            <param name="table">Table that is the owner of the collection of data columns.</param>
+        </member>
+        <member name="P:System.Data.DataColumnCollection.Item(System.String)">
+            <summary>Gets the <see cref="T:System.Data.DataColumn" /> from the collection with the specified name.</summary><returns>The <see cref="T:System.Data.DataColumn" /> in the collection with the specified <see cref="P:System.Data.DataColumn.ColumnName" />; otherwise a null value if the <see cref="T:System.Data.DataColumn" /> does not exist.</returns><param name="name">The <see cref="P:System.Data.DataColumn.ColumnName" /> of the column to return. </param>
+        </member>
+        <member name="P:System.Data.DataColumnCollection.Item(System.Int32)">
+            <summary>Gets the <see cref="T:System.Data.DataColumn" /> from the collection at the specified index.</summary><returns>The <see cref="T:System.Data.DataColumn" /> at the specified index.</returns><param name="index">The zero-based index of the column to return. </param><exception cref="T:System.IndexOutOfRangeException">The index value is greater than the number of items in the collection. </exception>
+        </member>
+        <member name="P:System.Data.DataColumnCollection.Count">
+            <summary>Gets the total number of elements in a collection.</summary><returns>The total number of elements in a collection.</returns>
+        </member>
+        <member name="P:System.Data.DataColumnCollection.IsSynchronized">
+            <summary>Gets a value that indicates whether the <see cref="T:System.Data.InternalDataCollectionBase" /> is synchonized.</summary><returns>true if the collection is synchronized; otherwise, false. The default is false.</returns>
+        </member>
+        <member name="P:System.Data.DataColumnCollection.SyncRoot">
+            <summary>Gets an object that can be used to synchronize the collection.</summary><returns>The <see cref="T:System.object" /> used to synchronize the collection.</returns>
+        </member>
+        <member name="M:System.Data.DataColumnCollection.Add(System.String,System.Type)">
+            <summary>Creates and adds a <see cref="T:System.Data.DataColumn" /> object that has the specified name and type to the <see cref="T:System.Data.DataColumnCollection" />.</summary><returns>The newly created <see cref="T:System.Data.DataColumn" />.</returns><param name="columnName">The <see cref="P:System.Data.DataColumn.ColumnName" /> to use when you create the column. </param><param name="type">The <see cref="P:System.Data.DataColumn.DataType" /> of the new column. </param><exception cref="T:System.Data.DuplicateNameException">The collection already has a column with the specified name. (The comparison is not case-sensitive.) </exception><exception cref="T:System.Data.InvalidExpressionException">The expression is invalid. See the <see cref="P:System.Data.DataColumn.Expression" /> property for more information about how to create expressions. </exception>
+        </member>
+        <member name="M:System.Data.DataColumnCollection.Add(System.String)">
+            <summary>Creates and adds a <see cref="T:System.Data.DataColumn" /> object that has the specified name to the <see cref="T:System.Data.DataColumnCollection" />.</summary><returns>The newly created <see cref="T:System.Data.DataColumn" />.</returns><param name="columnName">The name of the column. </param><exception cref="T:System.Data.DuplicateNameException">The collection already has a column with the specified name. (The comparison is not case-sensitive.) </exception>
+        </member>
+        <member name="M:System.Data.DataColumnCollection.Add(System.Data.DataColumn)">
+            <summary>Creates and adds the specified <see cref="T:System.Data.DataColumn" /> object to the <see cref="T:System.Data.DataColumnCollection" />.</summary><param name="column">The <see cref="T:System.Data.DataColumn" /> to add. </param><exception cref="T:System.ArgumentNullException">The <paramref name="column" /> parameter is null. </exception><exception cref="T:System.ArgumentException">The column already belongs to this collection, or to another collection. </exception><exception cref="T:System.Data.DuplicateNameException">The collection already has a column with the specified name. (The comparison is not case-sensitive.) </exception><exception cref="T:System.Data.InvalidExpressionException">The expression is invalid. See the <see cref="P:System.Data.DataColumn.Expression" /> property for more information about how to create expressions. </exception>
+        </member>
+        <member name="M:System.Data.DataColumnCollection.Remove(System.String)">
+            <summary>Removes the <see cref="T:System.Data.DataColumn" /> object that has the specified name from the collection.</summary><param name="name">The name of the column to remove. </param><exception cref="T:System.ArgumentException">The collection does not have a column with the specified name. </exception>
+        </member>
+        <member name="M:System.Data.DataColumnCollection.Contains(System.String)">
+            <summary>Checks whether the collection contains a column with the specified name.</summary><returns>true if a column exists with this name; otherwise, false.</returns><param name="name">The <see cref="P:System.Data.DataColumn.ColumnName" /> of the column to look for. </param>
+        </member>
+        <member name="M:System.Data.DataColumnCollection.GetEnumerator">
+            <summary>Gets an <see cref="T:System.Collections.IEnumerator" /> for the collection.</summary><returns>An <see cref="T:System.Collections.IEnumerator" /> for the collection.</returns>
+        </member>
+        <member name="M:System.Data.DataColumnCollection.CopyTo(System.Array,System.Int32)">
+            <summary>Copies all the elements of the current <see cref="T:System.Data.InternalDataCollectionBase" /> to a one-dimensional <see cref="T:System.Array" />, starting at the specified <see cref="T:System.Data.InternalDataCollectionBase" /> index.</summary><param name="ar">The one-dimensional <see cref="T:System.Array" /> to copy the current <see cref="T:System.Data.InternalDataCollectionBase" /> object's elements into. </param><param name="index">The destination <see cref="T:System.Array" /> index to start copying into. </param>
+        </member>
+        <member name="T:System.Data.DataRow">
+            <summary>Represents a row of data in a <see cref="T:System.Data.DataTable" />.</summary>
+        </member>
+        <member name="M:System.Data.DataRow.#ctor(System.Data.DataTable,System.Collections.IEnumerable)">
+            <summary>
+            Initializes a data row with specified cells.
+            </summary>
+            <param name="table">Data table that is the owner of this data row.</param>
+            <param name="cells">Cells to be included in the data row.</param>
+        </member>
+        <member name="M:System.Data.DataRow.#ctor(System.Data.DataTable)">
+            <summary>
+            Initializes an empty data row.
+            </summary>
+            <param name="table">Data table that is the owner of this data row.</param>
+        </member>
+        <member name="P:System.Data.DataRow.Item(System.Int32)">
+            <summary>Gets or sets the data stored in the column specified by index.</summary><returns>An <see cref="T:System.Object" /> that contains the data.</returns><param name="columnIndex">The zero-based index of the column. </param><exception cref="T:System.Data.DeletedRowInaccessibleException">Occurs when you try to set a value on a deleted row. </exception><exception cref="T:System.IndexOutOfRangeException">The <paramref name="columnIndex" /> argument is out of range. </exception><exception cref="T:System.InvalidCastException">Occurs when you set the value and the new value's <see cref="T:System.Type" /> does not match <see cref="P:System.Data.DataColumn.DataType" />. </exception>
+        </member>
+        <member name="P:System.Data.DataRow.Item(System.Data.DataColumn)">
+            <summary>Gets or sets the data stored in the specified <see cref="T:System.Data.DataColumn" />.</summary><returns>An <see cref="T:System.Object" /> that contains the data.</returns><param name="column">A <see cref="T:System.Data.DataColumn" /> that contains the data. </param><exception cref="T:System.ArgumentException">The column does not belong to this table. </exception><exception cref="T:System.ArgumentNullException">The <paramref name="column" /> is null. </exception><exception cref="T:System.Data.DeletedRowInaccessibleException">An attempt was made to set a value on a deleted row. </exception><exception cref="T:System.InvalidCastException">The data types of the value and the column do not match. </exception>
+        </member>
+        <member name="P:System.Data.DataRow.Item(System.String)">
+            <summary>Gets or sets the data stored in the column specified by name.</summary><returns>An <see cref="T:System.Object" /> that contains the data.</returns><param name="columnName">The name of the column. </param><exception cref="T:System.ArgumentException">The column specified by <paramref name="columnName" /> cannot be found. </exception><exception cref="T:System.Data.DeletedRowInaccessibleException">Occurs when you try to set a value on a deleted row. </exception><exception cref="T:System.InvalidCastException">Occurs when you set a value and its <see cref="T:System.Type" /> does not match <see cref="P:System.Data.DataColumn.DataType" />. </exception><exception cref="T:System.Data.NoNullAllowedException">Occurs when you try to insert a null value into a column where <see cref="P:System.Data.DataColumn.AllowDBNull" /> is set to false.</exception>
+        </member>
+        <member name="P:System.Data.DataRow.Table">
+            <summary>Gets the <see cref="T:System.Data.DataTable" /> for which this row has a schema.</summary><returns>The <see cref="T:System.Data.DataTable" /> to which this row belongs.</returns>
+        </member>
+        <member name="P:System.Data.DataRow.RowError">
+            <summary>Gets or sets the custom error description for a row.</summary><returns>The text describing an error.</returns>
+        </member>
+        <member name="P:System.Data.DataRow.ItemArray">
+            <summary>Gets or sets all the values for this row through an array.</summary><returns>An array of type <see cref="T:System.Object" />.</returns><exception cref="T:System.ArgumentException">The array is larger than the number of columns in the table. </exception><exception cref="T:System.InvalidCastException">A value in the array does not match its <see cref="P:System.Data.DataColumn.DataType" /> in its respective <see cref="T:System.Data.DataColumn" />. </exception><exception cref="T:System.Data.ConstraintException">An edit broke a constraint. </exception><exception cref="T:System.Data.ReadOnlyException">An edit tried to change the value of a read-only column. </exception><exception cref="T:System.Data.NoNullAllowedException">An edit tried to put a null value in a column where <see cref="P:System.Data.DataColumn.AllowDBNull" /> of the <see cref="T:System.Data.DataColumn" /> object is false. </exception><exception cref="T:System.Data.DeletedRowInaccessibleException">The row has been deleted. </exception>
+        </member>
+        <member name="T:System.Data.DataRowCollection">
+            <summary>Represents a collection of rows for a <see cref="T:System.Data.DataTable" />.</summary>
+        </member>
+        <member name="M:System.Data.DataRowCollection.#ctor(System.Data.DataTable)">
+            <summary>
+            Initializes a collection of data rows.
+            </summary>
+            <param name="table">Data table that owns this collection of data rows.</param>
+        </member>
+        <member name="P:System.Data.DataRowCollection.Item(System.Int32)">
+            <summary>Gets the row at the specified index.</summary><returns>The specified <see cref="T:System.Data.DataRow" />.</returns><param name="index">The zero-based index of the row to return. </param><exception cref="T:System.IndexOutOfRangeException">The index value is greater than the number of items in the collection. </exception>
+        </member>
+        <member name="P:System.Data.DataRowCollection.Count">
+            <summary>Gets the total number of <see cref="T:System.Data.DataRow" /> objects in this collection.</summary><returns>The total number of <see cref="T:System.Data.DataRow" /> objects in this collection.</returns>
+        </member>
+        <member name="P:System.Data.DataRowCollection.IsSynchronized">
+            <summary>Gets a value that indicates whether the <see cref="T:System.Data.InternalDataCollectionBase" /> is synchonized.</summary><returns>true if the collection is synchronized; otherwise, false. The default is false.</returns>
+        </member>
+        <member name="P:System.Data.DataRowCollection.SyncRoot">
+            <summary>Gets an object that can be used to synchronize the collection.</summary><returns>The <see cref="T:System.object" /> used to synchronize the collection.</returns>
+        </member>
+        <member name="M:System.Data.DataRowCollection.Add(System.Data.DataRow)">
+            <summary>Adds the specified <see cref="T:System.Data.DataRow" /> to the <see cref="T:System.Data.DataRowCollection" /> object.</summary><param name="row">The <see cref="T:System.Data.DataRow" /> to add.</param><exception cref="T:System.ArgumentNullException">The row is null. </exception><exception cref="T:System.ArgumentException">The row either belongs to another table or already belongs to this table.</exception><exception cref="T:System.Data.ConstraintException">The addition invalidates a constraint. </exception><exception cref="T:System.Data.NoNullAllowedException">The addition tries to put a null in a <see cref="T:System.Data.DataColumn" /> where <see cref="P:System.Data.DataColumn.AllowDBNull" /> is false.</exception>
+        </member>
+        <member name="M:System.Data.DataRowCollection.Add(System.Object[])">
+            <summary>Creates a row using specified values and adds it to the <see cref="T:System.Data.DataRowCollection" />.</summary><returns>None.</returns><param name="values">The array of values that are used to create the new row. </param><exception cref="T:System.ArgumentException">The array is larger than the number of columns in the table.</exception><exception cref="T:System.InvalidCastException">A value does not match its respective column type. </exception><exception cref="T:System.Data.ConstraintException">Adding the row invalidates a constraint. </exception><exception cref="T:System.Data.NoNullAllowedException">Trying to put a null in a column where <see cref="P:System.Data.DataColumn.AllowDBNull" /> is false. </exception>
+        </member>
+        <member name="M:System.Data.DataRowCollection.Remove(System.Data.DataRow)">
+            <summary>Removes the specified <see cref="T:System.Data.DataRow" /> from the collection.</summary><param name="row">The <see cref="T:System.Data.DataRow" /> to remove. </param>
+        </member>
+        <member name="M:System.Data.DataRowCollection.IndexOf(System.Data.DataRow)">
+            <summary>Gets the index of the specified <see cref="T:System.Data.DataRow" /> object.</summary><returns>The zero-based index of the row, or -1 if the row is not found in the collection.</returns><param name="row">The DataRow to search for.</param>
+        </member>
+        <member name="M:System.Data.DataRowCollection.GetEnumerator">
+            <summary>Gets an <see cref="T:System.Collections.IEnumerator" /> for this collection.</summary><returns>An <see cref="T:System.Collections.IEnumerator" /> for this collection.</returns>
+        </member>
+        <member name="M:System.Data.DataRowCollection.CopyTo(System.Array,System.Int32)">
+            <summary>Copies all the <see cref="T:System.Data.DataRow" /> objects from the collection into the given array, starting at the given destination array index.</summary><param name="ar">The one-dimensional array that is the destination of the elements copied from the DataRowCollection. The array must have zero-based indexing.</param><param name="index">The zero-based index in the array at which copying begins.</param>
+        </member>
+        <member name="T:System.Data.DataTable">
+            <summary>Represents one table of in-memory data.</summary>
+        </member>
+        <member name="M:System.Data.DataTable.#ctor">
+            <summary>Initializes a new instance of the <see cref="T:System.Data.DataTable" /> class with no arguments.</summary>
+        </member>
+        <member name="M:System.Data.DataTable.#ctor(System.String)">
+            <summary>Initializes a new instance of the <see cref="T:System.Data.DataTable" /> class with the specified table name.</summary><param name="tableName">The name to give the table. If <paramref name="tableName" /> is null or an empty string, a default name is given when added to the <see cref="T:System.Data.DataTableCollection" />. </param>
+        </member>
+        <member name="P:System.Data.DataTable.TableName">
+            <summary>Gets or sets the name of the <see cref="T:System.Data.DataTable" />.</summary><returns>The name of the <see cref="T:System.Data.DataTable" />.</returns><exception cref="T:System.ArgumentException">null or empty string ("") is passed in and this table belongs to a collection. </exception><exception cref="T:System.Data.DuplicateNameException">The table belongs to a collection that already has a table with the same name. (Comparison is case-sensitive).</exception>
+        </member>
+        <member name="P:System.Data.DataTable.Columns">
+            <summary>Gets the collection of columns that belong to this table.</summary><returns>A <see cref="T:System.Data.DataColumnCollection" /> that contains the collection of <see cref="T:System.Data.DataColumn" /> objects for the table. An empty collection is returned if no <see cref="T:System.Data.DataColumn" /> objects exist.</returns>
+        </member>
+        <member name="P:System.Data.DataTable.Rows">
+            <summary>Gets the collection of rows that belong to this table.</summary><returns>A <see cref="T:System.Data.DataRowCollection" /> that contains <see cref="T:System.Data.DataRow" /> objects; otherwise a null value if no <see cref="T:System.Data.DataRow" /> objects exist.</returns>
+        </member>
+        <member name="P:System.Data.DataTable.Locale">
+            <summary>Gets or sets the locale information used to compare strings within the table.</summary><returns>A <see cref="T:System.Globalization.CultureInfo" /> that contains data about the user's machine locale. The default is the <see cref="T:System.Data.DataSet" /> object's <see cref="T:System.Globalization.CultureInfo" /> (returned by the <see cref="P:System.Data.DataSet.Locale" /> property) to which the <see cref="T:System.Data.DataTable" /> belongs; if the table doesn't belong to a <see cref="T:System.Data.DataSet" />, the default is the current system <see cref="T:System.Globalization.CultureInfo" />.</returns>
+        </member>
+        <member name="P:System.Data.DataTable.DefaultView">
+            <summary>Gets a customized view of the table that may include a filtered view, or a cursor position.</summary><returns>The <see cref="T:System.Data.DataView" /> associated with the <see cref="T:System.Data.DataTable" />.</returns>
+        </member>
+        <member name="P:System.Data.DataTable.MinimumCapacity">
+            <summary>Gets or sets the initial starting size for this table.</summary><returns>The initial starting size in rows of this table. The default is 50.</returns>
+        </member>
+        <member name="M:System.Data.DataTable.Clone">
+            <summary>Clones the structure of the <see cref="T:System.Data.DataTable" />, including all <see cref="T:System.Data.DataTable" /> schemas and constraints.</summary><returns>A new <see cref="T:System.Data.DataTable" /> with the same schema as the current <see cref="T:System.Data.DataTable" />.</returns>
+        </member>
+        <member name="M:System.Data.DataTable.Copy">
+            <summary>Copies both the structure and data for this <see cref="T:System.Data.DataTable" />.</summary><returns>A new <see cref="T:System.Data.DataTable" /> with the same structure (table schemas and constraints) and data as this <see cref="T:System.Data.DataTable" />.If these classes have been derived, the copy will also be of the same derived classes.<see cref="M:System.Data.DataTable.Copy" /> creates a new <see cref="T:System.Data.DataTable" /> with the same structure and data as the original <see cref="T:System.Data.DataTable" />. To copy the structure to a new <see cref="T:System.Data.DataTable" />, but not the data, use <see cref="M:System.Data.DataTable.Clone" />.</returns>
+        </member>
+        <member name="M:System.Data.DataTable.ImportRow(System.Data.DataRow)">
+            <summary>Copies a <see cref="T:System.Data.DataRow" /> into a <see cref="T:System.Data.DataTable" />, preserving any property settings, as well as original and current values.</summary><param name="row">The <see cref="T:System.Data.DataRow" /> to be imported. </param>
+        </member>
+        <member name="M:System.Data.DataTable.NewRow">
+            <summary>Creates a new <see cref="T:System.Data.DataRow" /> with the same schema as the table.</summary><returns>A <see cref="T:System.Data.DataRow" /> with the same schema as the <see cref="T:System.Data.DataTable" />.</returns>
+        </member>
+        <member name="M:System.Data.DataTable.Select(System.String,System.String)">
+            <summary>Gets an array of all <see cref="T:System.Data.DataRow" /> objects that match the filter criteria, in the specified sort order.</summary><returns>An array of <see cref="T:System.Data.DataRow" /> objects matching the filter expression.</returns><param name="filterExpression">The criteria to use to filter the rows. For examples on how to filter rows, see DataView RowFilter Syntax [C#].</param><param name="sort">A string specifying the column and sort direction. </param>
+        </member>
+        <member name="M:System.Data.DataTable.Load(System.Data.IDataReader)">
+            <summary>Fills a <see cref="T:System.Data.DataTable" /> with values from a data source using the supplied <see cref="T:System.Data.IDataReader" />. If the <see cref="T:System.Data.DataTable" /> already contains rows, the incoming data from the data source is merged with the existing rows.</summary><param name="reader">An <see cref="T:System.Data.IDataReader" /> that provides a result set.</param>
+        </member>
+        <member name="T:System.Data.DataView">
+            <summary>Represents a databindable, customized view of a <see cref="T:System.Data.DataTable" /> for sorting, filtering, searching, editing, and navigation. The <see cref="T:System.Data.DataView" /> does not store data, but instead represents a connected view of its corresponding <see cref="T:System.Data.DataTable" />. Changes to the <see cref="T:System.Data.DataView" />’s data will affect the <see cref="T:System.Data.DataTable" />. Changes to the <see cref="T:System.Data.DataTable" />’s data will affect all <see cref="T:System.Data.DataView" />s associated with it.</summary>
+        </member>
+        <member name="M:System.Data.DataView.#ctor(System.Data.DataTable)">
+            <summary>Initializes a new instance of the <see cref="T:System.Data.DataView" /> class with the specified <see cref="T:System.Data.DataTable" />.</summary><param name="table">A <see cref="T:System.Data.DataTable" /> to add to the <see cref="T:System.Data.DataView" />. </param>
+        </member>
+        <member name="M:System.Data.DataView.ToTable(System.Boolean,System.String[])">
+            <summary>Creates and returns a new <see cref="T:System.Data.DataTable" /> based on rows in an existing <see cref="T:System.Data.DataView" />.</summary><returns>A new <see cref="T:System.Data.DataTable" /> instance that contains the requested rows and columns.</returns><param name="distinct">If true, the returned <see cref="T:System.Data.DataTable" /> contains rows that have distinct values for all its columns. The default value is false.</param><param name="columnNames">A string array that contains a list of the column names to be included in the returned <see cref="T:System.Data.DataTable" />. The <see cref="T:System.Data.DataTable" /> contains the specified columns in the order they appear within this array.</param>
+        </member>
+        <member name="T:System.Data.DbType">
+            <summary>Specifies the data type of a field, a property, or a Parameter object of a .NET Framework data provider.</summary>
+        </member>
+        <member name="F:System.Data.DbType.String">
+            <summary>A type representing Unicode character strings.</summary>
+        </member>
+        <member name="T:System.Data.IDataReader">
+            <summary>Provides a means of reading one or more forward-only streams of result sets obtained by executing a command at a data source, and is implemented by .NET Framework data providers that access relational databases.</summary>
+        </member>
+        <member name="P:System.Data.IDataReader.Depth">
+            <summary>Gets a value indicating the depth of nesting for the current row.</summary><returns>The level of nesting.</returns>
+        </member>
+        <member name="P:System.Data.IDataReader.IsClosed">
+            <summary>Gets a value indicating whether the data reader is closed.</summary><returns>true if the data reader is closed; otherwise, false.</returns>
+        </member>
+        <member name="P:System.Data.IDataReader.RecordsAffected">
+            <summary>Gets the number of rows changed, inserted, or deleted by execution of the SQL statement.</summary><returns>The number of rows changed, inserted, or deleted; 0 if no rows were affected or the statement failed; and -1 for SELECT statements.</returns>
+        </member>
+        <member name="M:System.Data.IDataReader.Close">
+            <summary>Closes the <see cref="T:System.Data.IDataReader" /> Object.</summary>
+        </member>
+        <member name="M:System.Data.IDataReader.GetSchemaTable">
+            <summary>Returns a <see cref="T:System.Data.DataTable" /> that describes the column metadata of the <see cref="T:System.Data.IDataReader" />.</summary><returns>A <see cref="T:System.Data.DataTable" /> that describes the column metadata.</returns><exception cref="T:System.InvalidOperationException">The <see cref="T:System.Data.IDataReader" /> is closed. </exception>
+        </member>
+        <member name="M:System.Data.IDataReader.NextResult">
+            <summary>Advances the data reader to the next result, when reading the results of batch SQL statements.</summary><returns>true if there are more rows; otherwise, false.</returns>
+        </member>
+        <member name="M:System.Data.IDataReader.Read">
+            <summary>Advances the <see cref="T:System.Data.IDataReader" /> to the next record.</summary><returns>true if there are more rows; otherwise, false.</returns>
+        </member>
+        <member name="T:System.Data.IDataRecord">
+            <summary>Provides access to the column values within each row for a DataReader, and is implemented by .NET Framework data providers that access relational databases.</summary>
+        </member>
+        <member name="P:System.Data.IDataRecord.FieldCount">
+            <summary>Gets the number of columns in the current row.</summary><returns>When not positioned in a valid recordset, 0; otherwise, the number of columns in the current record. The default is -1.</returns>
+        </member>
+        <member name="P:System.Data.IDataRecord.Item(System.Int32)">
+            <summary>Gets the column located at the specified index.</summary><returns>The column located at the specified index as an <see cref="T:System.Object" />.</returns><param name="i">The zero-based index of the column to get. </param><exception cref="T:System.IndexOutOfRangeException">The index passed was outside the range of 0 through <see cref="P:System.Data.IDataRecord.FieldCount" />. </exception>
+        </member>
+        <member name="P:System.Data.IDataRecord.Item(System.String)">
+            <summary>Gets the column with the specified name.</summary><returns>The column with the specified name as an <see cref="T:System.Object" />.</returns><param name="name">The name of the column to find. </param><exception cref="T:System.IndexOutOfRangeException">No column with the specified name was found. </exception>
+        </member>
+        <member name="M:System.Data.IDataRecord.GetName(System.Int32)">
+            <summary>Gets the name for the field to find.</summary><returns>The name of the field or the empty string (""), if there is no value to return.</returns><param name="i">The index of the field to find. </param><exception cref="T:System.IndexOutOfRangeException">The index passed was outside the range of 0 through <see cref="P:System.Data.IDataRecord.FieldCount" />. </exception>
+        </member>
+        <member name="M:System.Data.IDataRecord.GetDataTypeName(System.Int32)">
+            <summary>Gets the data type information for the specified field.</summary><returns>The data type information for the specified field.</returns><param name="i">The index of the field to find. </param><exception cref="T:System.IndexOutOfRangeException">The index passed was outside the range of 0 through <see cref="P:System.Data.IDataRecord.FieldCount" />. </exception>
+        </member>
+        <member name="M:System.Data.IDataRecord.GetFieldType(System.Int32)">
+            <summary>Gets the <see cref="T:System.Type" /> information corresponding to the type of <see cref="T:System.Object" /> that would be returned from <see cref="M:System.Data.IDataRecord.GetValue(System.Int32)" />.</summary><returns>The <see cref="T:System.Type" /> information corresponding to the type of <see cref="T:System.Object" /> that would be returned from <see cref="M:System.Data.IDataRecord.GetValue(System.Int32)" />.</returns><param name="i">The index of the field to find. </param><exception cref="T:System.IndexOutOfRangeException">The index passed was outside the range of 0 through <see cref="P:System.Data.IDataRecord.FieldCount" />. </exception>
+        </member>
+        <member name="M:System.Data.IDataRecord.GetValue(System.Int32)">
+            <summary>Return the value of the specified field.</summary><returns>The <see cref="T:System.Object" /> which will contain the field value upon return.</returns><param name="i">The index of the field to find. </param><exception cref="T:System.IndexOutOfRangeException">The index passed was outside the range of 0 through <see cref="P:System.Data.IDataRecord.FieldCount" />. </exception>
+        </member>
+        <member name="M:System.Data.IDataRecord.GetValues(System.Object[])">
+            <summary>Populates an array of objects with the column values of the current record.</summary><returns>The number of instances of <see cref="T:System.Object" /> in the array.</returns><param name="values">An array of <see cref="T:System.Object" /> to copy the attribute fields into. </param>
+        </member>
+        <member name="M:System.Data.IDataRecord.GetOrdinal(System.String)">
+            <summary>Return the index of the named field.</summary><returns>The index of the named field.</returns><param name="name">The name of the field to find. </param>
+        </member>
+        <member name="M:System.Data.IDataRecord.GetBoolean(System.Int32)">
+            <summary>Gets the value of the specified column as a Boolean.</summary><returns>The value of the column.</returns><param name="i">The zero-based column ordinal. </param><exception cref="T:System.IndexOutOfRangeException">The index passed was outside the range of 0 through <see cref="P:System.Data.IDataRecord.FieldCount" />. </exception>
+        </member>
+        <member name="M:System.Data.IDataRecord.GetByte(System.Int32)">
+            <summary>Gets the 8-bit unsigned integer value of the specified column.</summary><returns>The 8-bit unsigned integer value of the specified column.</returns><param name="i">The zero-based column ordinal. </param><exception cref="T:System.IndexOutOfRangeException">The index passed was outside the range of 0 through <see cref="P:System.Data.IDataRecord.FieldCount" />. </exception>
+        </member>
+        <member name="M:System.Data.IDataRecord.GetBytes(System.Int32,System.Int64,System.Byte[],System.Int32,System.Int32)">
+            <summary>Reads a stream of bytes from the specified column offset into the buffer as an array, starting at the given buffer offset.</summary><returns>The actual number of bytes read.</returns><param name="i">The zero-based column ordinal. </param><param name="fieldOffset">The index within the field from which to start the read operation. </param><param name="buffer">The buffer into which to read the stream of bytes. </param><param name="bufferoffset">The index for <paramref name="buffer" /> to start the read operation. </param><param name="length">The number of bytes to read. </param><exception cref="T:System.IndexOutOfRangeException">The index passed was outside the range of 0 through <see cref="P:System.Data.IDataRecord.FieldCount" />. </exception>
+        </member>
+        <member name="M:System.Data.IDataRecord.GetChar(System.Int32)">
+            <summary>Gets the character value of the specified column.</summary><returns>The character value of the specified column.</returns><param name="i">The zero-based column ordinal. </param><exception cref="T:System.IndexOutOfRangeException">The index passed was outside the range of 0 through <see cref="P:System.Data.IDataRecord.FieldCount" />. </exception>
+        </member>
+        <member name="M:System.Data.IDataRecord.GetChars(System.Int32,System.Int64,System.Char[],System.Int32,System.Int32)">
+            <summary>Reads a stream of characters from the specified column offset into the buffer as an array, starting at the given buffer offset.</summary><returns>The actual number of characters read.</returns><param name="i">The zero-based column ordinal. </param><param name="fieldoffset">The index within the row from which to start the read operation. </param><param name="buffer">The buffer into which to read the stream of bytes. </param><param name="bufferoffset">The index for <paramref name="buffer" /> to start the read operation. </param><param name="length">The number of bytes to read. </param><exception cref="T:System.IndexOutOfRangeException">The index passed was outside the range of 0 through <see cref="P:System.Data.IDataRecord.FieldCount" />. </exception>
+        </member>
+        <member name="M:System.Data.IDataRecord.GetGuid(System.Int32)">
+            <summary>Returns the GUID value of the specified field.</summary><returns>The GUID value of the specified field.</returns><param name="i">The index of the field to find. </param><exception cref="T:System.IndexOutOfRangeException">The index passed was outside the range of 0 through <see cref="P:System.Data.IDataRecord.FieldCount" />. </exception>
+        </member>
+        <member name="M:System.Data.IDataRecord.GetInt16(System.Int32)">
+            <summary>Gets the 16-bit signed integer value of the specified field.</summary><returns>The 16-bit signed integer value of the specified field.</returns><param name="i">The index of the field to find. </param><exception cref="T:System.IndexOutOfRangeException">The index passed was outside the range of 0 through <see cref="P:System.Data.IDataRecord.FieldCount" />. </exception>
+        </member>
+        <member name="M:System.Data.IDataRecord.GetInt32(System.Int32)">
+            <summary>Gets the 32-bit signed integer value of the specified field.</summary><returns>The 32-bit signed integer value of the specified field.</returns><param name="i">The index of the field to find. </param><exception cref="T:System.IndexOutOfRangeException">The index passed was outside the range of 0 through <see cref="P:System.Data.IDataRecord.FieldCount" />. </exception>
+        </member>
+        <member name="M:System.Data.IDataRecord.GetInt64(System.Int32)">
+            <summary>Gets the 64-bit signed integer value of the specified field.</summary><returns>The 64-bit signed integer value of the specified field.</returns><param name="i">The index of the field to find. </param><exception cref="T:System.IndexOutOfRangeException">The index passed was outside the range of 0 through <see cref="P:System.Data.IDataRecord.FieldCount" />. </exception>
+        </member>
+        <member name="M:System.Data.IDataRecord.GetFloat(System.Int32)">
+            <summary>Gets the single-precision floating point number of the specified field.</summary><returns>The single-precision floating point number of the specified field.</returns><param name="i">The index of the field to find. </param><exception cref="T:System.IndexOutOfRangeException">The index passed was outside the range of 0 through <see cref="P:System.Data.IDataRecord.FieldCount" />. </exception>
+        </member>
+        <member name="M:System.Data.IDataRecord.GetDouble(System.Int32)">
+            <summary>Gets the double-precision floating point number of the specified field.</summary><returns>The double-precision floating point number of the specified field.</returns><param name="i">The index of the field to find. </param><exception cref="T:System.IndexOutOfRangeException">The index passed was outside the range of 0 through <see cref="P:System.Data.IDataRecord.FieldCount" />. </exception>
+        </member>
+        <member name="M:System.Data.IDataRecord.GetString(System.Int32)">
+            <summary>Gets the string value of the specified field.</summary><returns>The string value of the specified field.</returns><param name="i">The index of the field to find. </param><exception cref="T:System.IndexOutOfRangeException">The index passed was outside the range of 0 through <see cref="P:System.Data.IDataRecord.FieldCount" />. </exception>
+        </member>
+        <member name="M:System.Data.IDataRecord.GetDecimal(System.Int32)">
+            <summary>Gets the fixed-position numeric value of the specified field.</summary><returns>The fixed-position numeric value of the specified field.</returns><param name="i">The index of the field to find. </param><exception cref="T:System.IndexOutOfRangeException">The index passed was outside the range of 0 through <see cref="P:System.Data.IDataRecord.FieldCount" />. </exception>
+        </member>
+        <member name="M:System.Data.IDataRecord.GetDateTime(System.Int32)">
+            <summary>Gets the date and time data value of the specified field.</summary><returns>The date and time data value of the specified field.</returns><param name="i">The index of the field to find. </param><exception cref="T:System.IndexOutOfRangeException">The index passed was outside the range of 0 through <see cref="P:System.Data.IDataRecord.FieldCount" />. </exception>
+        </member>
+        <member name="M:System.Data.IDataRecord.GetData(System.Int32)">
+            <summary>Returns an <see cref="T:System.Data.IDataReader" /> for the specified column ordinal.</summary><returns>The <see cref="T:System.Data.IDataReader" /> for the specified column ordinal.</returns><param name="i">The index of the field to find. </param><exception cref="T:System.IndexOutOfRangeException">The index passed was outside the range of 0 through <see cref="P:System.Data.IDataRecord.FieldCount" />. </exception>
+        </member>
+        <member name="M:System.Data.IDataRecord.IsDBNull(System.Int32)">
+            <summary>Return whether the specified field is set to null.</summary><returns>true if the specified field is set to null; otherwise, false.</returns><param name="i">The index of the field to find. </param><exception cref="T:System.IndexOutOfRangeException">The index passed was outside the range of 0 through <see cref="P:System.Data.IDataRecord.FieldCount" />. </exception>
+        </member>
+        <member name="T:System.Diagnostics.Process">
+            <!-- No matching elements were found for the following include tag --><include file="../_Doc/System.xml" path="doc/members/member[@name=&quot;T:System.Diagnostics.Process&quot;]/*" />
+        </member>
+        <member name="M:System.Diagnostics.Process.#ctor">
+            <!-- No matching elements were found for the following include tag --><include file="../_Doc/System.xml" path="doc/members/member[@name=&quot;M:System.Diagnostics.Process.#ctor&quot;]/*" />
+        </member>
+        <member name="P:System.Diagnostics.Process.ProcessorAffinity">
+            <!-- No matching elements were found for the following include tag --><include file="../_Doc/System.xml" path="doc/members/member[@name=&quot;P:System.Diagnostics.Process.ProcessorAffinity&quot;]/*" />
+        </member>
+        <member name="M:System.Diagnostics.Process.GetCurrentProcess">
+            <!-- No matching elements were found for the following include tag --><include file="../_Doc/System.xml" path="doc/members/member[@name=&quot;M:System.Diagnostics.Process.GetCurrentProcess&quot;]/*" />
+        </member>
+        <member name="T:System.Diagnostics.Trace">
+            <!-- No matching elements were found for the following include tag --><include file="../_Doc/System.xml" path="doc/members/member[@name=&quot;T:System.Diagnostics.Trace&quot;]/*" />
+        </member>
+        <member name="M:System.Diagnostics.Trace.Write(System.String)">
+            <!-- No matching elements were found for the following include tag --><include file="../_Doc/System.xml" path="doc/members/member[@name=&quot;M:System.Diagnostics.Trace.Write(System.String)&quot;]/*" />
+        </member>
+        <member name="M:System.Diagnostics.Trace.WriteLine(System.String)">
+            <!-- No matching elements were found for the following include tag --><include file="../_Doc/System.xml" path="doc/members/member[@name=&quot;M:System.Diagnostics.Trace.WriteLine(System.String)&quot;]/*" />
+        </member>
+        <member name="M:System.Diagnostics.Trace.TraceWarning(System.String)">
+            <!-- No matching elements were found for the following include tag --><include file="../_Doc/System.xml" path="doc/members/member[@name=&quot;M:System.Diagnostics.Trace.TraceWarning(System.String)&quot;]/*" />
+        </member>
+        <member name="M:System.Diagnostics.Trace.TraceInformation(System.String,System.Object[])">
+            <!-- No matching elements were found for the following include tag --><include file="../_Doc/System.xml" path="doc/members/member[@name=&quot;M:System.Diagnostics.Trace.TraceInformation(System.String,System.Object[])&quot;]/*" />
+        </member>
+        <member name="M:System.Diagnostics.Trace.Assert(System.Boolean)">
+            <!-- No matching elements were found for the following include tag --><include file="../_Doc/System.xml" path="doc/members/member[@name=&quot;M:System.Diagnostics.Trace.Assert(System.Boolean)&quot;]/*" />
+        </member>
+        <member name="T:System.ICloneable">
+            <summary>Supports cloning, which creates a new instance of a class with the same value as an existing instance.</summary>
+        </member>
+        <member name="M:System.ICloneable.Clone">
+            <summary>Creates a new object that is a copy of the current instance.</summary><returns>A new object that is a copy of this instance.</returns>
+        </member>
+        <member name="T:System.IO.SearchOption">
+            <!-- No matching elements were found for the following include tag --><include file="../_Doc/mscorlib.xml" path="doc/members/member[@name=&quot;T:System.IO.SearchOption&quot;]/*" />
+        </member>
+        <member name="F:System.IO.SearchOption.TopDirectoryOnly">
+            <!-- No matching elements were found for the following include tag --><include file="../_Doc/mscorlib.xml" path="doc/members/member[@name=&quot;F:System.IO.SearchOption.TopDirectoryOnly&quot;]/*" />
+        </member>
+        <member name="F:System.IO.SearchOption.AllDirectories">
+            <!-- No matching elements were found for the following include tag --><include file="../_Doc/mscorlib.xml" path="doc/members/member[@name=&quot;F:System.IO.SearchOption.AllDirectories&quot;]/*" />
+        </member>
+        <member name="T:System.IO.BinaryReaderExtensions">
+            <summary>
+            Shim complement for the <see cref="T:System.IO.BinaryReader"/> class. <see cref="T:System.IO.BinaryReader"/> instance methods that are not available in the 
+            PCL profile are here provided as equivalent extension methods.
+            </summary>
+        </member>
+        <member name="M:System.IO.BinaryReaderExtensions.Close(System.IO.BinaryReader)">
+            <summary>Closes the current reader and the underlying stream.</summary>
+            <param name="reader">Binary reader to be closed.</param>
+        </member>
+        <member name="T:System.IO.BinaryWriterExtensions">
+            <summary>
+            Shim complement for the <see cref="T:System.IO.BinaryWriter"/> class. <see cref="T:System.IO.BinaryWriter"/> instance methods that are not available in the 
+            PCL profile are here provided as equivalent extension methods.
+            </summary>
+        </member>
+        <member name="M:System.IO.BinaryWriterExtensions.Close(System.IO.BinaryWriter)">
+            <summary>Closes the current <see cref="T:System.IO.BinaryWriter" /> and the underlying stream.</summary>
+            <param name="writer">Binary writer to be closed.</param>
+        </member>
+        <member name="T:System.IO.Path_">
+            <summary>
+            Shim complement for the <see cref="T:System.IO.Path"/> class, providing static members that are
+            not included in all platform subsets of the <see cref="T:System.IO.Path"/> class.
+            </summary>
+        </member>
+        <member name="F:System.IO.Path_.PathSeparator">
+            <summary>A platform-specific separator character used to separate path strings in environment variables.</summary>
+        </member>
+        <member name="F:System.IO.Path_.DirectorySeparatorChar">
+            <summary>Provides a platform-specific character used to separate directory levels in a path string that reflects a hierarchical file system organization.</summary>
+        </member>
+        <member name="T:System.IO.StreamExtensions">
+            <summary>
+            Shim complement for the <see cref="T:System.IO.Stream"/> class. <see cref="T:System.IO.Stream"/> instance methods that are not available in the 
+            PCL profile are here provided as equivalent extension methods.
+            </summary>
+        </member>
+        <member name="M:System.IO.StreamExtensions.Close(System.IO.Stream)">
+            <summary>Closes the current stream and releases any resources (such as sockets and file handles) associated with the current stream. Instead of calling this method, ensure that the stream is properly disposed.</summary>
+            <param name="stream">Stream to be closed.</param>
+        </member>
+        <member name="M:System.IO.StreamExtensions.BeginWrite(System.IO.Stream,System.Byte[],System.Int32,System.Int32,System.AsyncCallback,System.Object)">
+            <summary>Begins an asynchronous write operation. (Consider using <see cref="M:System.IO.Stream.WriteAsync(System.Byte[],System.Int32,System.Int32)" /> instead; see the Remarks section.)</summary><returns>An IAsyncResult that represents the asynchronous write, which could still be pending.</returns><param name="buffer">The buffer to write data from. </param><param name="offset">The byte offset in <paramref name="buffer" /> from which to begin writing. </param><param name="count">The maximum number of bytes to write. </param><param name="callback">An optional asynchronous callback, to be called when the write is complete. </param><param name="state">A user-provided object that distinguishes this particular asynchronous write request from other requests. </param><exception cref="T:System.IO.IOException">Attempted an asynchronous write past the end of the stream, or a disk error occurs. </exception><exception cref="T:System.ArgumentException">One or more of the arguments is invalid. </exception><exception cref="T:System.ObjectDisposedException">Methods were called after the stream was closed. </exception><exception cref="T:System.NotSupportedException">The current Stream implementation does not support the write operation. </exception>
+            <param name="stream">Stream on which to begin writing.</param>
+        </member>
+        <member name="M:System.IO.StreamExtensions.EndWrite(System.IO.Stream,System.IAsyncResult)">
+            <summary>Ends an asynchronous write operation. (Consider using <see cref="M:System.IO.Stream.WriteAsync(System.Byte[],System.Int32,System.Int32)" /> instead; see the Remarks section.)</summary><param name="asyncResult">A reference to the outstanding asynchronous I/O request. </param><exception cref="T:System.ArgumentNullException">
+        <paramref name="asyncResult" /> is null. </exception><exception cref="T:System.ArgumentException">A handle to the pending write operation is not available.-or-The pending operation does not support writing.</exception><exception cref="T:System.InvalidOperationException">
+        <paramref name="asyncResult" /> did not originate from a <see cref="M:System.IO.Stream.BeginWrite(System.Byte[],System.Int32,System.Int32,System.AsyncCallback,System.Object)" /> method on the current stream.</exception><exception cref="T:System.IO.IOException">The stream is closed or an internal error has occurred.</exception>
+            <param name="stream">Stream on which to end writing.</param>
+        </member>
+        <member name="M:System.IO.StreamExtensions.BeginRead(System.IO.Stream,System.Byte[],System.Int32,System.Int32,System.AsyncCallback,System.Object)">
+            <summary>Begins an asynchronous read operation. (Consider using <see cref="M:System.IO.Stream.ReadAsync(System.Byte[],System.Int32,System.Int32)" /> instead; see the Remarks section.)</summary><returns>An <see cref="T:System.IAsyncResult" /> that represents the asynchronous read, which could still be pending.</returns><param name="buffer">The buffer to read the data into. </param><param name="offset">The byte offset in <paramref name="buffer" /> at which to begin writing data read from the stream. </param><param name="count">The maximum number of bytes to read. </param><param name="callback">An optional asynchronous callback, to be called when the read is complete. </param><param name="state">A user-provided object that distinguishes this particular asynchronous read request from other requests. </param><exception cref="T:System.IO.IOException">Attempted an asynchronous read past the end of the stream, or a disk error occurs. </exception><exception cref="T:System.ArgumentException">One or more of the arguments is invalid. </exception><exception cref="T:System.ObjectDisposedException">Methods were called after the stream was closed. </exception><exception cref="T:System.NotSupportedException">The current Stream implementation does not support the read operation. </exception>
+            <param name="stream">Stream on which to begin reading.</param>
+        </member>
+        <member name="M:System.IO.StreamExtensions.EndRead(System.IO.Stream,System.IAsyncResult)">
+            <summary>Waits for the pending asynchronous read to complete. (Consider using <see cref="M:System.IO.Stream.ReadAsync(System.Byte[],System.Int32,System.Int32)" /> instead; see the Remarks section.)</summary><returns>The number of bytes read from the stream, between zero (0) and the number of bytes you requested. Streams return zero (0) only at the end of the stream, otherwise, they should block until at least one byte is available.</returns><param name="asyncResult">The reference to the pending asynchronous request to finish. </param><exception cref="T:System.ArgumentNullException">
+        <paramref name="asyncResult" /> is null. </exception><exception cref="T:System.ArgumentException">A handle to the pending read operation is not available.-or-The pending operation does not support reading.</exception><exception cref="T:System.InvalidOperationException">
+        <paramref name="asyncResult" /> did not originate from a <see cref="M:System.IO.Stream.BeginRead(System.Byte[],System.Int32,System.Int32,System.AsyncCallback,System.Object)" /> method on the current stream.</exception><exception cref="T:System.IO.IOException">The stream is closed or an internal error has occurred.</exception>
+            <param name="stream">Stream on which to end reading.</param>
+        </member>
+        <member name="T:System.IO.TextReaderExtensions">
+            <summary>
+            Shim complement for the <see cref="T:System.IO.TextReader"/> class. <see cref="T:System.IO.TextReader"/> instance methods that are not available in the 
+            PCL profile are here provided as equivalent extension methods.
+            </summary>
+        </member>
+        <member name="M:System.IO.TextReaderExtensions.Close(System.IO.TextReader)">
+            <summary>Closes the <see cref="T:System.IO.TextReader" /> and releases any system resources associated with the TextReader.</summary>
+            <param name="reader">Text reader to be closed.</param>
+        </member>
+        <member name="T:System.IO.TextWriterExtensions">
+            <summary>
+            Shim complement for the <see cref="T:System.IO.TextWriter"/> class. <see cref="T:System.IO.TextWriter"/> instance methods that are not available in the 
+            PCL profile are here provided as equivalent extension methods.
+            </summary>
+        </member>
+        <member name="M:System.IO.TextWriterExtensions.Close(System.IO.TextWriter)">
+            <summary>Closes the current writer and releases any system resources associated with the writer.</summary>
+            <param name="writer">Text writer to be closed.</param>
+        </member>
+        <member name="T:System.Net.IWebProxy">
+            <!-- No matching elements were found for the following include tag --><include file="../_Doc/System.xml" path="doc/members/member[@name=&quot;T:System.Net.IWebProxy&quot;]/*" />
+        </member>
+        <member name="T:System.Net.Security.SslPolicyErrors">
+            <summary>Enumerates Secure Socket Layer (SSL) policy errors.</summary>
+        </member>
+        <member name="F:System.Net.Security.SslPolicyErrors.None">
+            <summary>No SSL policy errors.</summary>
+        </member>
+        <member name="T:System.Net.Security.RemoteCertificateValidationCallback">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;T:System.Net.Security.RemoteCertificateValidationCallback&quot;]/*" />
+        </member>
+        <member name="T:System.Net.Security.SslStream">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;T:System.Net.Security.SslStream&quot;]/*" />
+        </member>
+        <member name="M:System.Net.Security.SslStream.#ctor(System.IO.Stream,System.Boolean,System.Net.Security.RemoteCertificateValidationCallback)">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;M:System.Net.Security.SslStream.#ctor(System.IO.Stream,System.Boolean,System.Net.Security.RemoteCertificateValidationCallback)&quot;]/*" />
+        </member>
+        <member name="M:System.Net.Security.SslStream.#ctor(System.IO.Stream,System.Boolean)">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;M:System.Net.Security.SslStream.#ctor(System.IO.Stream,System.Boolean)&quot;]/*" />
+        </member>
+        <member name="M:System.Net.Security.SslStream.#ctor(System.IO.Stream)">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;M:System.Net.Security.SslStream.#ctor(System.IO.Stream)&quot;]/*" />
+        </member>
+        <member name="M:System.Net.Security.SslStream.AuthenticateAsServer(System.Security.Cryptography.X509Certificates.X509Certificate,System.Boolean,System.Security.Authentication.SslProtocols,System.Boolean)">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;M:System.Net.Security.SslStream.AuthenticateAsServer(System.Security.Cryptography.X509Certificates.X509Certificate,System.Boolean,System.Security.Authentication.SslProtocols,System.Boolean)&quot;]/*" />
+        </member>
+        <member name="M:System.Net.Security.SslStream.AuthenticateAsClient(System.String)">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;M:System.Net.Security.SslStream.AuthenticateAsClient(System.String)&quot;]/*" />
+        </member>
+        <member name="T:System.Net.Sockets.NetworkStream">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;T:System.Net.Sockets.NetworkStream&quot;]/*" />
+        </member>
+        <member name="M:System.Net.Sockets.NetworkStream.#ctor">
+            <summary>
+            Default constructor is private to avoid invalid initialization of the <see cref="T:System.Net.Sockets.NetworkStream"/> class.
+            </summary>
+        </member>
+        <member name="M:System.Net.Sockets.NetworkStream.#ctor(Windows.Networking.Sockets.StreamSocket)">
+            <summary>
+            Initializes a network stream object.
+            </summary>
+            <param name="socket">Socket corresponding to the network stream.</param>
+        </member>
+        <member name="M:System.Net.Sockets.NetworkStream.UpgradeToSsl(System.String)">
+            <summary>
+            Attempt to upgrade stream to SSL.
+            </summary>
+            <param name="validationHost">Host subject to SSL upgrade.</param>
+        </member>
+        <member name="M:System.Net.Sockets.NetworkStream.Flush">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;M:System.Net.Sockets.NetworkStream.Flush&quot;]/*" />
+        </member>
+        <member name="M:System.Net.Sockets.NetworkStream.Read(System.Byte[],System.Int32,System.Int32)">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;M:System.Net.Sockets.NetworkStream.Read(System.Byte[],System.Int32,System.Int32)&quot;]/*" />
+        </member>
+        <member name="M:System.Net.Sockets.NetworkStream.Seek(System.Int64,System.IO.SeekOrigin)">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;M:System.Net.Sockets.NetworkStream.Seek(System.Int64,System.IO.SeekOrigin)&quot;]/*" />
+        </member>
+        <member name="M:System.Net.Sockets.NetworkStream.SetLength(System.Int64)">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;M:System.Net.Sockets.NetworkStream.SetLength(System.Int64)&quot;]/*" />
+        </member>
+        <member name="M:System.Net.Sockets.NetworkStream.Write(System.Byte[],System.Int32,System.Int32)">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;M:System.Net.Sockets.NetworkStream.Write(System.Byte[],System.Int32,System.Int32)&quot;]/*" />
+        </member>
+        <member name="M:System.Net.Sockets.NetworkStream.BeginRead(System.Byte[],System.Int32,System.Int32,System.AsyncCallback,System.Object)">
+            <summary>Begins an asynchronous read from the <see cref="T:System.Net.Sockets.NetworkStream" />.</summary><returns>An <see cref="T:System.IAsyncResult" /> that represents the asynchronous call.</returns><param name="buffer">An array of type <see cref="T:System.Byte" /> that is the location in memory to store data read from the <see cref="T:System.Net.Sockets.NetworkStream" />. </param><param name="offset">The location in <paramref name="buffer" /> to begin storing the data. </param><param name="size">The number of bytes to read from the <see cref="T:System.Net.Sockets.NetworkStream" />. </param><param name="callback">The <see cref="T:System.AsyncCallback" /> delegate that is executed when <see cref="M:System.Net.Sockets.NetworkStream.BeginRead(System.Byte[],System.Int32,System.Int32,System.AsyncCallback,System.Object)" /> completes. </param><param name="state">An object that contains any additional user-defined data. </param><exception cref="T:System.ArgumentNullException">The <paramref name="buffer" /> parameter is null. </exception><exception cref="T:System.ArgumentOutOfRangeException">The <paramref name="offset" /> parameter is less than 0.-or- The <paramref name="offset" /> parameter is greater than the length of the <paramref name="buffer" /> paramater.-or- The <paramref name="size" /> is less than 0.-or- The <paramref name="size" /> is greater than the length of <paramref name="buffer" /> minus the value of the <paramref name="offset" /> parameter.</exception><exception cref="T:System.IO.IOException">The underlying <see cref="T:System.Net.Sockets.Socket" /> is closed.-or- There was a failure while reading from the network. -or-An error occurred when accessing the socket. See the Remarks section for more information.</exception><exception cref="T:System.ObjectDisposedException">The <see cref="T:System.Net.Sockets.NetworkStream" /> is closed. </exception>
+        </member>
+        <member name="M:System.Net.Sockets.NetworkStream.EndRead(System.IAsyncResult)">
+            <summary>Handles the end of an asynchronous read.</summary><returns>The number of bytes read from the <see cref="T:System.Net.Sockets.NetworkStream" />.</returns><param name="asyncResult">An <see cref="T:System.IAsyncResult" /> that represents an asynchronous call. </param><exception cref="T:System.ArgumentException">The <paramref name="asyncResult" /> parameter is null. </exception><exception cref="T:System.IO.IOException">The underlying <see cref="T:System.Net.Sockets.Socket" /> is closed.-or- An error occurred when accessing the socket. See the Remarks section for more information.</exception><exception cref="T:System.ObjectDisposedException">The <see cref="T:System.Net.Sockets.NetworkStream" /> is closed. </exception>
+        </member>
+        <member name="M:System.Net.Sockets.NetworkStream.BeginWrite(System.Byte[],System.Int32,System.Int32,System.AsyncCallback,System.Object)">
+            <summary>Begins an asynchronous write to a stream.</summary><returns>An <see cref="T:System.IAsyncResult" /> that represents the asynchronous call.</returns><param name="buffer">An array of type <see cref="T:System.Byte" /> that contains the data to write to the <see cref="T:System.Net.Sockets.NetworkStream" />. </param><param name="offset">The location in <paramref name="buffer" /> to begin sending the data. </param><param name="size">The number of bytes to write to the <see cref="T:System.Net.Sockets.NetworkStream" />. </param><param name="callback">The <see cref="T:System.AsyncCallback" /> delegate that is executed when <see cref="M:System.Net.Sockets.NetworkStream.BeginWrite(System.Byte[],System.Int32,System.Int32,System.AsyncCallback,System.Object)" /> completes. </param><param name="state">An object that contains any additional user-defined data. </param><exception cref="T:System.ArgumentNullException">The <paramref name="buffer" /> parameter is null. </exception><exception cref="T:System.ArgumentOutOfRangeException">The <paramref name="offset" /> parameter is less than 0.-or- The <paramref name="offset" /> parameter is greater than the length of <paramref name="buffer" />.-or- The <paramref name="size" /> parameter is less than 0.-or- The <paramref name="size" /> parameter is greater than the length of <paramref name="buffer" /> minus the value of the <paramref name="offset" /> parameter. </exception><exception cref="T:System.IO.IOException">The underlying <see cref="T:System.Net.Sockets.Socket" /> is closed.-or- There was a failure while writing to the network. -or-An error occurred when accessing the socket. See the Remarks section for more information.</exception><exception cref="T:System.ObjectDisposedException">The <see cref="T:System.Net.Sockets.NetworkStream" /> is closed. </exception>
+        </member>
+        <member name="M:System.Net.Sockets.NetworkStream.EndWrite(System.IAsyncResult)">
+            <summary>Handles the end of an asynchronous write.</summary><param name="asyncResult">The <see cref="T:System.IAsyncResult" /> that represents the asynchronous call. </param><exception cref="T:System.ArgumentNullException">The <paramref name="asyncResult" /> parameter is null. </exception><exception cref="T:System.IO.IOException">The underlying <see cref="T:System.Net.Sockets.Socket" /> is closed.-or- An error occurred while writing to the network. -or-An error occurred when accessing the socket. See the Remarks section for more information.</exception><exception cref="T:System.ObjectDisposedException">The <see cref="T:System.Net.Sockets.NetworkStream" /> is closed. </exception>
+        </member>
+        <member name="M:System.Net.Sockets.NetworkStream.Dispose(System.Boolean)">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;P:System.Net.Sockets.NetworkStream.Dispose(System.Boolean)&quot;]/*" />
+        </member>
+        <member name="P:System.Net.Sockets.NetworkStream.CanRead">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;P:System.Net.Sockets.NetworkStream.CanRead&quot;]/*" />
+        </member>
+        <member name="P:System.Net.Sockets.NetworkStream.CanSeek">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;P:System.Net.Sockets.NetworkStream.CanSeek&quot;]/*" />
+        </member>
+        <member name="P:System.Net.Sockets.NetworkStream.CanWrite">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;P:System.Net.Sockets.NetworkStream.CanWrite&quot;]/*" />
+        </member>
+        <member name="P:System.Net.Sockets.NetworkStream.Length">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;P:System.Net.Sockets.NetworkStream.Length&quot;]/*" />
+        </member>
+        <member name="P:System.Net.Sockets.NetworkStream.Position">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;P:System.Net.Sockets.NetworkStream.Position&quot;]/*" />
+        </member>
+        <member name="T:System.Net.Sockets.TcpClient">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;T:System.Net.Sockets.TcpClient&quot;]/*" />
+        </member>
+        <member name="M:System.Net.Sockets.TcpClient.#ctor(System.String,System.Int32)">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;M:System.Net.Sockets.TcpClient.#ctor(System.String,System.Int32)&quot;]/*" />
+        </member>
+        <member name="M:System.Net.Sockets.TcpClient.#ctor(Windows.Networking.Sockets.StreamSocket)">
+            <summary>
+            Initializes a TCP client for an existing <paramref name="socket"/>.
+            </summary>
+            <param name="socket">Socket on which the TCP client should be based.</param>
+        </member>
+        <member name="P:System.Net.Sockets.TcpClient.NoDelay">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;P:System.Net.Sockets.TcpClient.NoDelay&quot;]/*" />
+        </member>
+        <member name="P:System.Net.Sockets.TcpClient.Client">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;P:System.Net.Sockets.TcpClient.Client&quot;]/*" />
+        </member>
+        <member name="M:System.Net.Sockets.TcpClient.GetStream">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;M:System.Net.Sockets.TcpClient.GetStream&quot;]/*" />
+        </member>
+        <member name="M:System.Net.Sockets.TcpClient.Close">
+            <summary>Disposes this <see cref="T:System.Net.Sockets.TcpClient" /> instance and requests that the underlying TCP connection be closed.</summary>
+        </member>
+        <member name="T:System.Net.Sockets.TcpListener">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;T:System.Net.Sockets.TcpListener&quot;]/*" />
+        </member>
+        <member name="M:System.Net.Sockets.TcpListener.#ctor(System.Net.IPAddress,System.Int32)">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;M:System.Net.Sockets.TcpListener.#ctor(System.Net.IPAddress,System.Int32)&quot;]/*" />
+        </member>
+        <member name="M:System.Net.Sockets.TcpListener.Start">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;M:System.Net.Sockets.TcpListener.Start&quot;]/*" />
+        </member>
+        <member name="M:System.Net.Sockets.TcpListener.BeginAcceptTcpClient(System.AsyncCallback,System.Object)">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;M:System.Net.Sockets.TcpListener.BeginAcceptTcpClient(System.AsyncCallback,System.Object)&quot;]/*" />
+        </member>
+        <member name="M:System.Net.Sockets.TcpListener.EndAcceptTcpClient(System.IAsyncResult)">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;M:System.Net.Sockets.TcpListener.EndAcceptTcpClient(System.IAsyncResult)&quot;]/*" />
+        </member>
+        <member name="M:System.Net.Sockets.TcpListener.Stop">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;M:System.Net.Sockets.TcpListener.Stop&quot;]/*" />
+        </member>
+        <member name="M:System.Net.Sockets.TcpListener.OnConnectionReceived(Windows.Networking.Sockets.StreamSocketListener,Windows.Networking.Sockets.StreamSocketListenerConnectionReceivedEventArgs)">
+            <summary>
+            Event handler when connection is established.
+            </summary>
+            <param name="sender">Listener object.</param>
+            <param name="args">Connection received event arguments.</param>
+        </member>
+        <member name="T:System.Net.HttpWebRequestExtensions">
+            <summary>
+            Shim complement for the <see cref="T:System.Net.HttpWebRequest"/> class. <see cref="T:System.Net.HttpWebRequest"/> instance properties that are not available in the 
+            PCL profile are here provided as equivalent extension methods (since extension properties is not available in C#).
+            </summary>
+        </member>
+        <member name="M:System.Net.HttpWebRequestExtensions.UserAgent(System.Net.HttpWebRequest,System.String)">
+            <summary>Gets or sets the value of the User-agent HTTP header.</summary><returns>The value of the User-agent HTTP header. The default value is null.NoteThe value for this property is stored in <see cref="T:System.Net.WebHeaderCollection" />. If WebHeaderCollection is set, the property value is lost.</returns>
+            <param name="request">HTTP web request object on which to set user agent.</param>
+            <param name="userAgent">User agent value to set.</param>
+        </member>
+        <member name="T:System.Net.WebRequestExtensions">
+            <summary>
+            Shim complement for the <see cref="T:System.Net.WebRequest"/> class. <see cref="T:System.Net.WebRequest"/> instance properties and methods that are not available in the 
+            PCL profile are here provided as equivalent extension methods (since extension properties is not available in C#).
+            </summary>
+        </member>
+        <member name="M:System.Net.WebRequestExtensions.GetResponse(System.Net.WebRequest)">
+            <summary>When overridden in a descendant class, returns a response to an Internet request.</summary><returns>A <see cref="T:System.Net.WebResponse" /> containing the response to the Internet request.</returns><exception cref="T:System.NotImplementedException">Any attempt is made to access the method, when the method is not overridden in a descendant class. </exception>
+            <param name="request">HTTP web request object on which to get response.</param>
+        </member>
+        <member name="M:System.Net.WebRequestExtensions.GetRequestStream(System.Net.WebRequest)">
+            <summary>When overridden in a descendant class, returns a <see cref="T:System.IO.Stream" /> for writing data to the Internet resource.</summary><returns>A <see cref="T:System.IO.Stream" /> for writing data to the Internet resource.</returns><exception cref="T:System.NotImplementedException">Any attempt is made to access the method, when the method is not overridden in a descendant class. </exception>
+            <param name="request">HTTP web request object on which to get request stream.</param>
+        </member>
+        <member name="M:System.Net.WebRequestExtensions.ConnectionGroupName(System.Net.WebRequest,System.String)">
+            <summary>When overridden in a descendant class, gets or sets the name of the connection group for the request.</summary><returns>The name of the connection group for the request.</returns><exception cref="T:System.NotImplementedException">Any attempt is made to get or set the property, when the property is not overridden in a descendant class. </exception>
+            <param name="request">HTTP web request object on which to set connection group name.</param>
+            <param name="groupName">Connection group name value to set.</param>
+        </member>
+        <member name="M:System.Net.WebRequestExtensions.Proxy(System.Net.WebRequest,System.Net.IWebProxy)">
+            <summary>When overridden in a descendant class, gets or sets the network proxy to use to access this Internet resource.</summary><returns>The <see cref="T:System.Net.IWebProxy" /> to use to access the Internet resource.</returns><exception cref="T:System.NotImplementedException">Any attempt is made to get or set the property, when the property is not overridden in a descendant class. </exception>
+            <param name="request">HTTP web request object on which to set proxy.</param>
+            <param name="proxy">Web proxy value to set.</param>
+        </member>
+        <member name="M:System.Net.WebRequestExtensions.Timeout(System.Net.WebRequest,System.Int32)">
+            <summary>Gets or sets the length of time, in milliseconds, before the request times out.</summary><returns>The length of time, in milliseconds, until the request times out, or the value <see cref="F:System.Threading.Timeout.Infinite" /> to indicate that the request does not time out. The default value is defined by the descendant class.</returns><exception cref="T:System.NotImplementedException">Any attempt is made to get or set the property, when the property is not overridden in a descendant class. </exception>
+            <param name="request">HTTP web request object on which to set timeout.</param>
+            <param name="timeout">Timeout value to set.</param>
+        </member>
+        <member name="M:System.Net.WebRequestExtensions.ContentLength(System.Net.WebRequest,System.Int64)">
+            <summary>When overridden in a descendant class, gets or sets the content length of the request data being sent.</summary><returns>The number of bytes of request data being sent.</returns><exception cref="T:System.NotImplementedException">Any attempt is made to get or set the property, when the property is not overridden in a descendant class. </exception>
+            <param name="request">HTTP web request object on which to set content length.</param>
+            <param name="contentLength">Content length value to set.</param>
+        </member>
+        <member name="T:System.Net.WebResponseExtensions">
+            <summary>
+            Shim complement for the <see cref="T:System.Net.WebResponse"/> class. <see cref="T:System.Net.WebResponse"/> instance methods that are not available in the 
+            PCL profile are here provided as equivalent extension methods.
+            </summary>
+        </member>
+        <member name="M:System.Net.WebResponseExtensions.Close(System.Net.WebResponse)">
+            <summary>When overridden by a descendant class, closes the response stream.</summary><exception cref="T:System.NotSupportedException">Any attempt is made to access the method, when the method is not overridden in a descendant class. </exception>
+            <param name="webResponse">HTTP web response object to close.</param>
+        </member>
+        <member name="T:System.NonSerializedAttribute">
+            <summary>Indicates that a field of a serializable class should not be serialized. This class cannot be inherited.</summary>
+        </member>
+        <member name="T:System.NotFiniteNumberException">
+            <summary>The exception that is thrown when a floating-point value is positive infinity, negative infinity, or Not-a-Number (NaN).</summary>
+        </member>
+        <member name="M:System.NotFiniteNumberException.#ctor(System.String,System.Double)">
+            <summary>Initializes a new instance of the <see cref="T:System.NotFiniteNumberException" /> class with a specified error message and the invalid number.</summary><param name="message">The message that describes the error. </param><param name="offendingNumber">The value of the argument that caused the exception. </param>
+        </member>
+        <member name="T:System.Runtime.Serialization.Formatters.Binary.BinaryFormatter">
+            <summary>Serializes and deserializes an object, or an entire graph of connected objects, in binary format.</summary>
+        </member>
+        <member name="P:System.Runtime.Serialization.Formatters.Binary.BinaryFormatter.Binder">
+            <summary>Gets or sets an object of type <see cref="T:System.Runtime.Serialization.SerializationBinder" /> that controls the binding of a serialized object to a type.</summary><returns>The serialization binder to use with this formatter.</returns>
+        </member>
+        <member name="M:System.Runtime.Serialization.Formatters.Binary.BinaryFormatter.Deserialize(System.IO.Stream)">
+            <summary>Deserializes the specified stream into an object graph.</summary><returns>The top (root) of the object graph.</returns><param name="serializationStream">The stream from which to deserialize the object graph. </param><exception cref="T:System.ArgumentNullException">The <paramref name="serializationStream" /> is null. </exception><exception cref="T:System.Runtime.Serialization.SerializationException">The <paramref name="serializationStream" /> supports seeking, but its length is 0. -or-The target type is a <see cref="T:System.Decimal" />, but the value is out of range of the <see cref="T:System.Decimal" /> type.</exception><exception cref="T:System.Security.SecurityException">The caller does not have the required permission. </exception>
+        </member>
+        <member name="M:System.Runtime.Serialization.Formatters.Binary.BinaryFormatter.Serialize(System.IO.Stream,System.Object)">
+            <summary>Serializes the object, or graph of objects with the specified top (root), to the given stream.</summary><param name="serializationStream">The stream to which the graph is to be serialized. </param><param name="graph">The object at the root of the graph to serialize. </param><exception cref="T:System.ArgumentNullException">The <paramref name="serializationStream" /> is null. -or-The <paramref name="graph" /> is null.</exception><exception cref="T:System.Runtime.Serialization.SerializationException">An error has occurred during serialization, such as if an object in the <paramref name="graph" /> parameter is not marked as serializable. </exception><exception cref="T:System.Security.SecurityException">The caller does not have the required permission. </exception>
+        </member>
+        <member name="T:System.Runtime.Serialization.ISerializable">
+            <summary>Allows an object to control its own serialization and deserialization.</summary>
+        </member>
+        <member name="M:System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>Populates a <see cref="T:System.Runtime.Serialization.SerializationInfo" /> with the data needed to serialize the target object.</summary><param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo" /> to populate with data. </param><param name="context">The destination (see <see cref="T:System.Runtime.Serialization.StreamingContext" />) for this serialization. </param><exception cref="T:System.Security.SecurityException">The caller does not have the required permission. </exception>
+        </member>
+        <member name="T:System.Runtime.Serialization.OptionalFieldAttribute">
+            <summary>Specifies that a field can be missing from a serialization stream so that the <see cref="T:System.Runtime.Serialization.Formatters.Binary.BinaryFormatter" /> and the <see cref="T:System.Runtime.Serialization.Formatters.Soap.SoapFormatter" /> does not throw an exception. </summary>
+        </member>
+        <member name="T:System.Runtime.Serialization.SerializationBinder">
+            <summary>Allows users to control class loading and mandate what class to load.</summary>
+        </member>
+        <member name="M:System.Runtime.Serialization.SerializationBinder.BindToType(System.String,System.String)">
+            <summary>When overridden in a derived class, controls the binding of a serialized object to a type.</summary><returns>The type of the object the formatter creates a new instance of.</returns><param name="assemblyName">Specifies the <see cref="T:System.Reflection.Assembly" /> name of the serialized object. </param><param name="typeName">Specifies the <see cref="T:System.Type" /> name of the serialized object. </param>
+        </member>
+        <member name="T:System.Runtime.Serialization.SerializationInfo">
+            <summary>Stores all the data needed to serialize or deserialize an object. This class cannot be inherited.</summary>
+        </member>
+        <member name="M:System.Runtime.Serialization.SerializationInfo.AddValue(System.String,System.Double)">
+            <summary>Adds a double-precision floating-point value into the <see cref="T:System.Runtime.Serialization.SerializationInfo" /> store.</summary><param name="name">The name to associate with the value, so it can be deserialized later. </param><param name="value">The double value to serialize. </param><exception cref="T:System.ArgumentNullException">The <paramref name="name" /> parameter is null. </exception><exception cref="T:System.Runtime.Serialization.SerializationException">A value has already been associated with <paramref name="name" />. </exception>
+        </member>
+        <member name="M:System.Runtime.Serialization.SerializationInfo.GetValue(System.String,System.Type)">
+            <summary>Retrieves a value from the <see cref="T:System.Runtime.Serialization.SerializationInfo" /> store.</summary><returns>The object of the specified <see cref="T:System.Type" /> associated with <paramref name="name" />.</returns><param name="name">The name associated with the value to retrieve.</param><param name="type">The <see cref="T:System.Type" /> of the value to retrieve. If the stored value cannot be converted to this type, the system will throw a <see cref="T:System.InvalidCastException" />. </param><exception cref="T:System.ArgumentNullException">
+        <paramref name="name" /> or <paramref name="type" /> is null. </exception><exception cref="T:System.InvalidCastException">The value associated with <paramref name="name" /> cannot be converted to <paramref name="type" />. </exception><exception cref="T:System.Runtime.Serialization.SerializationException">An element with the specified name is not found in the current instance. </exception>
+        </member>
+        <member name="T:System.Security.Authentication.SslProtocols">
+            <summary>Defines the possible versions of <see cref="T:System.Security.Authentication.SslProtocols" />.</summary>
+        </member>
+        <member name="F:System.Security.Authentication.SslProtocols.Tls">
+            <summary>Specifies the TLS 1.0 security protocol. The TLS protocol is defined in IETF RFC 2246.</summary>
+        </member>
+        <member name="T:System.Security.Cryptography.X509Certificates.OpenFlags">
+            <summary>Specifies the way to open the X.509 certificate store.</summary>
+        </member>
+        <member name="F:System.Security.Cryptography.X509Certificates.OpenFlags.ReadOnly">
+            <summary>Open the X.509 certificate store for reading only.</summary>
+        </member>
+        <member name="T:System.Security.Cryptography.X509Certificates.StoreLocation">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;T:System.Security.Cryptography.X509Certificates.StoreLocation&quot;]/*" />
+        </member>
+        <member name="F:System.Security.Cryptography.X509Certificates.StoreLocation.LocalMachine">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;F:System.Security.Cryptography.X509Certificates.StoreLocation.LocalMachine&quot;]/*" />
+        </member>
+        <member name="T:System.Security.Cryptography.X509Certificates.StoreName">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;T:System.Security.Cryptography.X509Certificates.StoreName&quot;]/*" />
+        </member>
+        <member name="F:System.Security.Cryptography.X509Certificates.StoreName.My">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;F:System.Security.Cryptography.X509Certificates.StoreName.My&quot;]/*" />
+        </member>
+        <member name="T:System.Security.Cryptography.X509Certificates.X509Certificate2Collection">
+            <summary>Represents a collection of <see cref="T:System.Security.Cryptography.X509Certificates.X509Certificate2" /> objects. This class cannot be inherited.</summary>
+        </member>
+        <member name="M:System.Security.Cryptography.X509Certificates.X509Certificate2Collection.Find(System.Security.Cryptography.X509Certificates.X509FindType,System.Object,System.Boolean)">
+            <summary>Searches an <see cref="T:System.Security.Cryptography.X509Certificates.X509Certificate2Collection" /> object using the search criteria specified by the <see cref="T:System.Security.Cryptography.X509Certificates.X509FindType" /> enumeration and the <paramref name="findValue" /> object.</summary><returns>An <see cref="T:System.Security.Cryptography.X509Certificates.X509Certificate2Collection" /> object.</returns><param name="findType">One of the <see cref="T:System.Security.Cryptography.X509Certificates.X509FindType" />  values. </param><param name="findValue">The search criteria as an object. </param><param name="validOnly">true to allow only valid certificates to be returned from the search; otherwise, false. </param><exception cref="T:System.Security.Cryptography.CryptographicException">
+        <paramref name="findType" /> is invalid. </exception>
+        </member>
+        <member name="T:System.Security.Cryptography.X509Certificates.X509Chain">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;T:System.Security.Cryptography.X509Certificates.X509Chain&quot;]/*" />
+        </member>
+        <member name="T:System.Security.Cryptography.X509Certificates.X509FindType">
+            <summary>Specifies the type of value the <see cref="M:System.Security.Cryptography.X509Certificates.X509Certificate2Collection.Find(System.Security.Cryptography.X509Certificates.X509FindType,System.Object,System.Boolean)" /> method searches for.</summary>
+        </member>
+        <member name="F:System.Security.Cryptography.X509Certificates.X509FindType.FindBySubjectName">
+            <summary>The <paramref name="findValue" /> parameter for the <see cref="M:System.Security.Cryptography.X509Certificates.X509Certificate2Collection.Find(System.Security.Cryptography.X509Certificates.X509FindType,System.Object,System.Boolean)" /> method must be a string representing the subject name of the certificate. This is a less specific search than that provided by the <see cref="F:System.Security.Cryptography.X509Certificates.X509FindType.FindBySubjectDistinguishedName" /> enumeration value. Using the <see cref="F:System.Security.Cryptography.X509Certificates.X509FindType.FindBySubjectName" /> value, the <see cref="M:System.Security.Cryptography.X509Certificates.X509Certificate2Collection.Find(System.Security.Cryptography.X509Certificates.X509FindType,System.Object,System.Boolean)" /> method performs a case-insensitive string comparison using the supplied value. For example, if you pass "MyCert" to the <see cref="M:System.Security.Cryptography.X509Certificates.X509Certificate2Collection.Find(System.Security.Cryptography.X509Certificates.X509FindType,System.Object,System.Boolean)" /> method, it will find all certificates with the subject name containing that string, regardless of other subject values. Searching by distinguished name is a more precise search.</summary>
+        </member>
+        <member name="T:System.Security.Cryptography.X509Certificates.X509Store">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;T:System.Security.Cryptography.X509Certificates.X509Store&quot;]/*" />
+        </member>
+        <member name="M:System.Security.Cryptography.X509Certificates.X509Store.#ctor(System.Security.Cryptography.X509Certificates.StoreName,System.Security.Cryptography.X509Certificates.StoreLocation)">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;M:System.Security.Cryptography.X509Certificates.X509Store.#ctor(System.Security.Cryptography.X509Certificates.StoreName,System.Security.Cryptography.X509Certificates.StoreLocation)&quot;]/*" />
+        </member>
+        <member name="P:System.Security.Cryptography.X509Certificates.X509Store.Certificates">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;P:System.Security.Cryptography.X509Certificates.X509Store.Certificates&quot;]/*" />
+        </member>
+        <member name="M:System.Security.Cryptography.X509Certificates.X509Store.Open(System.Security.Cryptography.X509Certificates.OpenFlags)">
+            <!-- No matching elements were found for the following include tag --><include file="../../../_Doc/System.xml" path="doc/members/member[@name=&quot;M:System.Security.Cryptography.X509Certificates.X509Store.Open(System.Security.Cryptography.X509Certificates.OpenFlags)&quot;]/*" />
+        </member>
+        <member name="M:System.Security.Cryptography.X509Certificates.X509Store.Close">
+            <summary>Closes an X.509 certificate store.</summary>
+        </member>
+        <member name="T:System.SerializableAttribute">
+            <summary>Indicates that a class can be serialized. This class cannot be inherited.</summary>
+        </member>
+        <member name="T:System.Threading.Tasks.Parallel">
+            <summary>Provides support for parallel loops and regions.</summary>
+        </member>
+        <member name="M:System.Threading.Tasks.Parallel.For(System.Int32,System.Int32,System.Action{System.Int32})">
+            <summary>Executes a for (For in Visual Basic) loop in which iterations may run in parallel.</summary><returns>A structure that contains information about which portion of the loop completed.</returns><param name="fromInclusive">The start index, inclusive.</param><param name="toExclusive">The end index, exclusive.</param><param name="body">The delegate that is invoked once per iteration.</param><exception cref="T:System.ArgumentNullException">The <paramref name="body" /> argument is null.</exception><exception cref="T:System.AggregateException">The exception that contains all the individual exceptions thrown on all threads.</exception>
+        </member>
+        <member name="M:System.Threading.Tasks.Parallel.For(System.Int32,System.Int32,System.Action{System.Int32,System.Threading.Tasks.ParallelLoopState})">
+            <summary>Executes a for (For in Visual Basic) loop in which iterations may run in parallel and the state of the loop can be monitored and manipulated.  </summary><returns>A  structure that contains information about which portion of the loop completed.</returns><param name="fromInclusive">The start index, inclusive.</param><param name="toExclusive">The end index, exclusive.</param><param name="body">The delegate that is invoked once per iteration.</param><exception cref="T:System.ArgumentNullException">The <paramref name="body" /> argument is null.</exception><exception cref="T:System.AggregateException">The exception that contains all the individual exceptions thrown on all threads.</exception>
+        </member>
+        <member name="M:System.Threading.Tasks.Parallel.For(System.Int32,System.Int32,System.Threading.Tasks.ParallelOptions,System.Action{System.Int32})">
+            <summary>Executes a for (For in Visual Basic) loop in which iterations may run in parallel and loop options can be configured.</summary><returns>A  structure that contains information about which portion of the loop completed.</returns><param name="fromInclusive">The start index, inclusive.</param><param name="toExclusive">The end index, exclusive.</param><param name="parallelOptions">An object that configures the behavior of this operation.</param><param name="body">The delegate that is invoked once per iteration.</param><exception cref="T:System.OperationCanceledException">The <see cref="T:System.Threading.CancellationToken" /> in the <paramref name="parallelOptions" /> argument is canceled.</exception><exception cref="T:System.ArgumentNullException">The <paramref name="body" /> argument is null.-or-The <paramref name="parallelOptions" /> argument is null.</exception><exception cref="T:System.AggregateException">The exception that contains all the individual exceptions thrown on all threads.</exception><exception cref="T:System.ObjectDisposedException">The <see cref="T:System.Threading.CancellationTokenSource" /> associated with the <see cref="T:System.Threading.CancellationToken" /> in the <paramref name="parallelOptions" /> has been disposed.</exception>
+        </member>
+        <member name="M:System.Threading.Tasks.Parallel.For``1(System.Int32,System.Int32,System.Func{``0},System.Func{System.Int32,System.Threading.Tasks.ParallelLoopState,``0,``0},System.Action{``0})">
+            <summary>Executes a for (For in Visual Basic) loop with thread-local data in which iterations may run in parallel, and the state of the loop can be monitored and manipulated.</summary><returns>A  structure that contains information about which portion of the loop completed.</returns><param name="fromInclusive">The start index, inclusive.</param><param name="toExclusive">The end index, exclusive.</param><param name="localInit">The function delegate that returns the initial state of the local data for each task.</param><param name="body">The delegate that is invoked once per iteration.</param><param name="localFinally">The delegate that performs a final action on the local state of each task.</param><typeparam name="TLocal">The type of the thread-local data.</typeparam><exception cref="T:System.ArgumentNullException">The <paramref name="body" /> argument is null.-or-The <paramref name="localInit" /> argument is null.-or-The <paramref name="localFinally" /> argument is null.</exception><exception cref="T:System.AggregateException">The exception that contains all the individual exceptions thrown on all threads.</exception>
+        </member>
+        <member name="M:System.Threading.Tasks.Parallel.For``1(System.Int32,System.Int32,System.Threading.Tasks.ParallelOptions,System.Func{``0},System.Func{System.Int32,System.Threading.Tasks.ParallelLoopState,``0,``0},System.Action{``0})">
+            <summary>Executes a for (For in Visual Basic)  loop with thread-local data in which iterations may run in parallel, loop options can be configured, and the state of the loop can be monitored and manipulated.</summary><returns>A structure that contains information about which portion of the loop completed.</returns><param name="fromInclusive">The start index, inclusive.</param><param name="toExclusive">The end index, exclusive.</param><param name="parallelOptions">An object that configures the behavior of this operation.</param><param name="localInit">The function delegate that returns the initial state of the local data for each task.</param><param name="body">The delegate that is invoked once per iteration.</param><param name="localFinally">The delegate that performs a final action on the local state of each task.</param><typeparam name="TLocal">The type of the thread-local data.</typeparam><exception cref="T:System.ArgumentNullException">The <paramref name="body" /> argument is null.-or-The <paramref name="localInit" /> argument is null.-or-The <paramref name="localFinally" /> argument is null.-or-The <paramref name="parallelOptions" /> argument is null.</exception><exception cref="T:System.OperationCanceledException">The <see cref="T:System.Threading.CancellationToken" /> in the <paramref name="parallelOptions" /> argument is canceled.</exception><exception cref="T:System.ObjectDisposedException">The <see cref="T:System.Threading.CancellationTokenSource" /> associated with the <see cref="T:System.Threading.CancellationToken" /> in the <paramref name="parallelOptions" /> has been disposed.</exception><exception cref="T:System.AggregateException">The exception that contains all the individual exceptions thrown on all threads.</exception>
+        </member>
+        <member name="M:System.Threading.Tasks.Parallel.ForEach``1(System.Collections.Generic.IEnumerable{``0},System.Action{``0})">
+            <summary>Executes a foreach (For Each in Visual Basic) operation on an <see cref="T:System.Collections.IEnumerable" /> in which iterations may run in parallel.</summary><returns>A structure that contains information about which portion of the loop completed.</returns><param name="source">An enumerable data source.</param><param name="body">The delegate that is invoked once per iteration.</param><typeparam name="TSource">The type of the data in the source.</typeparam><exception cref="T:System.ArgumentNullException">The <paramref name="source" /> argument is null.-or-The <paramref name="body" /> argument is null.</exception><exception cref="T:System.AggregateException">The exception that contains all the individual exceptions thrown on all threads.</exception>
+        </member>
+        <member name="M:System.Threading.Tasks.Parallel.ForEach``1(System.Collections.Concurrent.Partitioner{``0},System.Threading.Tasks.ParallelOptions,System.Action{``0,System.Threading.Tasks.ParallelLoopState})">
+            <summary>Executes a foreach (For Each in Visual Basic) operation on a <see cref="T:System.Collections.Concurrent.Partitioner" /> in which iterations may run in parallel, loop options can be configured, and the state of the loop can be monitored and manipulated.</summary><returns>A  structure that contains information about which portion of the loop completed.</returns><param name="source">The partitioner that contains the original data source.</param><param name="parallelOptions">An object that configures the behavior of this operation.</param><param name="body">The delegate that is invoked once per iteration.</param><typeparam name="TSource">The type of the elements in <paramref name="source" />.</typeparam><exception cref="T:System.OperationCanceledException">The <see cref="T:System.Threading.CancellationToken" /> in the <paramref name="parallelOptions" /> argument is canceled.</exception><exception cref="T:System.ObjectDisposedException">The <see cref="T:System.Threading.CancellationTokenSource" /> associated with the <see cref="T:System.Threading.CancellationToken" /> in the <paramref name="parallelOptions" /> has been disposed.</exception><exception cref="T:System.ArgumentNullException">The <paramref name="source" /> argument is null.-or-The <paramref name="parallelOptions" /> argument is null.-or-The <paramref name="body" /> argument is null.</exception><exception cref="T:System.InvalidOperationException">The <see cref="P:System.Collections.Concurrent.Partitioner`1.SupportsDynamicPartitions" /> property in the <paramref name="source" /> partitioner returns false.-or-The exception that is thrown when any methods in the <paramref name="source" /> partitioner return null.</exception>
+        </member>
+        <member name="T:System.Threading.Tasks.ParallelLoopResult">
+            <summary>Provides completion status on the execution of a <see cref="T:System.Threading.Tasks.Parallel" /> loop.</summary>
+        </member>
+        <member name="P:System.Threading.Tasks.ParallelLoopResult.IsCompleted">
+            <summary>Gets whether the loop ran to completion, such that all iterations of the loop were executed and the loop didn't receive a request to end prematurely.</summary><returns>true if the loop ran to completion; otherwise false;</returns>
+        </member>
+        <member name="P:System.Threading.Tasks.ParallelLoopResult.LowestBreakIteration">
+            <summary>Gets the index of the lowest iteration from which <see cref="M:System.Threading.Tasks.ParallelLoopState.Break" /> was called.</summary><returns>Returns an integer that represents the lowest iteration from which the Break statement was called.</returns>
+        </member>
+        <member name="T:System.Threading.Tasks.ParallelLoopState">
+            <summary>Enables iterations of parallel loops to interact with other iterations. An instance of this class is provided by the <see cref="T:System.Threading.Tasks.Parallel" /> class to each loop; you can not create instances in your code. </summary>
+        </member>
+        <member name="M:System.Threading.Tasks.ParallelLoopState.#ctor">
+            <!-- No matching elements were found for the following include tag --><include file="../../_Doc/mscorlib.xml" path="doc/members/member[@name=&quot;M:System.Threading.Tasks.ParallelLoopState.#ctor&quot;]/*" />
+        </member>
+        <member name="P:System.Threading.Tasks.ParallelLoopState.ShouldExitCurrentIteration">
+            <summary>Gets whether the current iteration of the loop should exit based on requests made by this or other iterations.</summary><returns>true if the current iteration should exit; otherwise, false. </returns>
+        </member>
+        <member name="M:System.Threading.Tasks.ParallelLoopState.Stop">
+            <summary>Communicates that the <see cref="T:System.Threading.Tasks.Parallel" /> loop should cease execution at the system's earliest convenience.</summary><exception cref="T:System.InvalidOperationException">The <see cref="M:System.Threading.Tasks.ParallelLoopState.Break" /> method was called previously. <see cref="M:System.Threading.Tasks.ParallelLoopState.Break" /> and <see cref="M:System.Threading.Tasks.ParallelLoopState.Stop" /> may not be used in combination by iterations of the same loop.</exception>
+        </member>
+        <member name="T:System.Threading.Tasks.ParallelOptions">
+            <summary>Stores options that configure the operation of methods on the <see cref="T:System.Threading.Tasks.Parallel" /> class.</summary>
+        </member>
+        <member name="M:System.Threading.Tasks.ParallelOptions.#ctor">
+            <summary>Initializes a new instance of the <see cref="T:System.Threading.Tasks.ParallelOptions" /> class.</summary>
+        </member>
+        <member name="P:System.Threading.Tasks.ParallelOptions.MaxDegreeOfParallelism">
+            <summary>Gets or sets the maximum number of concurrent tasks enabled by this <see cref="T:System.Threading.Tasks.ParallelOptions" /> instance.</summary><returns>An integer that represents the maximum degree of parallelism.</returns><exception cref="T:System.ArgumentOutOfRangeException">The property is being set to zero or to a value that is less than -1.</exception>
+        </member>
+        <member name="T:System.Threading.WaitHandleExtensions">
+            <summary>
+            Shim complement for the <see cref="T:System.Threading.WaitHandle"/> class. <see cref="T:System.Threading.WaitHandle"/> instance methods that are not available in the 
+            PCL profile are here provided as equivalent extension methods.
+            </summary>
+        </member>
+        <member name="M:System.Threading.WaitHandleExtensions.Close(System.Threading.WaitHandle)">
+            <summary>Releases all resources held by the current <see cref="T:System.Threading.WaitHandle" />.</summary>
+            <param name="waitHandle">Wait handle to be closed.</param>
+        </member>
+        <member name="T:System.Timers.ElapsedEventArgs">
+            <summary>Provides data for the <see cref="E:System.Timers.Timer.Elapsed" /> event.</summary>
+        </member>
+        <member name="T:System.Timers.ElapsedEventHandler">
+            <summary>Represents the method that will handle the <see cref="E:System.Timers.Timer.Elapsed" /> event of a <see cref="T:System.Timers.Timer" />.</summary><param name="sender">The source of the event. </param><param name="e">An <see cref="T:System.Timers.ElapsedEventArgs" /> object that contains the event data. </param>
+        </member>
+        <member name="T:System.Timers.Timer">
+            <summary>Generates an event after a set interval, with an option to generate recurring events.To browse the .NET Framework source code for this type, see the Reference Source.</summary>
+        </member>
+        <member name="E:System.Timers.Timer.Elapsed">
+            <summary>Occurs when the interval elapses.</summary>
+        </member>
+        <member name="P:System.Timers.Timer.Enabled">
+            <summary>Gets or sets a value indicating whether the <see cref="T:System.Timers.Timer" /> should raise the <see cref="E:System.Timers.Timer.Elapsed" /> event.</summary><returns>true if the <see cref="T:System.Timers.Timer" /> should raise the <see cref="E:System.Timers.Timer.Elapsed" /> event; otherwise, false. The default is false.</returns><exception cref="T:System.ObjectDisposedException">This property cannot be set because the timer has been disposed.</exception><exception cref="T:System.ArgumentException">The <see cref="P:System.Timers.Timer.Interval" /> property was set to a value greater than <see cref="F:System.Int32.MaxValue" /> before the timer was enabled. </exception>
+        </member>
+        <member name="P:System.Timers.Timer.Interval">
+            <summary>Gets or sets the interval, expressed in milliseconds, at which to raise the <see cref="E:System.Timers.Timer.Elapsed" /> event.</summary><returns>The time, in milliseconds, between <see cref="E:System.Timers.Timer.Elapsed" /> events. The value must be greater than zero, and less than or equal to <see cref="F:System.Int32.MaxValue" />. The default is 100 milliseconds.</returns><exception cref="T:System.ArgumentException">The interval is less than or equal to zero.-or-The interval is greater than <see cref="F:System.Int32.MaxValue" />, and the timer is currently enabled. (If the timer is not currently enabled, no exception is thrown until it becomes enabled.) </exception>
+        </member>
+        <member name="P:System.Timers.Timer.SynchronizingObject">
+            <summary>Gets or sets the object used to marshal event-handler calls that are issued when an interval has elapsed.</summary><returns>The <see cref="T:System.ComponentModel.ISynchronizeInvoke" /> representing the object used to marshal the event-handler calls that are issued when an interval has elapsed. The default is null.</returns>
+        </member>
+        <member name="M:System.Timers.Timer.Dispose">
+            <summary>Releases all resources used by the <see cref="T:System.ComponentModel.Component" />.</summary>
+        </member>
+        <member name="M:System.Timers.Timer.Start">
+            <summary>Starts raising the <see cref="E:System.Timers.Timer.Elapsed" /> event by setting <see cref="P:System.Timers.Timer.Enabled" /> to true.</summary><exception cref="T:System.ArgumentOutOfRangeException">The <see cref="T:System.Timers.Timer" /> is created with an interval equal to or greater than <see cref="F:System.Int32.MaxValue" /> + 1, or set to an interval less than zero.</exception>
+        </member>
+        <member name="M:System.Timers.Timer.Stop">
+            <summary>Stops raising the <see cref="E:System.Timers.Timer.Elapsed" /> event by setting <see cref="P:System.Timers.Timer.Enabled" /> to false.</summary>
+        </member>
+        <member name="T:System.Array_">
+            <summary>
+            Shim complement for the <see cref="T:System.Array"/> class, providing static members that are
+            not included in the PCL member subset of the <see cref="T:System.Array"/> class.
+            </summary>
+        </member>
+        <member name="M:System.Array_.Sort``2(``0[],``1[])">
+            <summary>Sorts a pair of <see cref="T:System.Array" /> objects (one contains the keys and the other contains the corresponding items) based on the keys in the first <see cref="T:System.Array" /> using the <see cref="T:System.IComparable`1" /> generic interface implementation of each key.</summary><param name="keys">The one-dimensional, zero-based <see cref="T:System.Array" /> that contains the keys to sort. </param><param name="items">The one-dimensional, zero-based <see cref="T:System.Array" /> that contains the items that correspond to the keys in <paramref name="keys" />, or null to sort only <paramref name="keys" />.</param><typeparam name="TKey">The type of the elements of the key array.</typeparam><typeparam name="TValue">The type of the elements of the items array.</typeparam><exception cref="T:System.ArgumentNullException">
+        <paramref name="keys" /> is null.</exception><exception cref="T:System.ArgumentException">
+        <paramref name="items" /> is not null, and the lower bound of <paramref name="keys" /> does not match the lower bound of <paramref name="items" />.-or-<paramref name="items" /> is not null, and the length of <paramref name="keys" /> is greater than the length of <paramref name="items" />.</exception><exception cref="T:System.InvalidOperationException">One or more elements in the <paramref name="keys" /><see cref="T:System.Array" /> do not implement the <see cref="T:System.IComparable`1" /> generic interface.</exception>
+        </member>
+        <member name="M:System.Array_.Sort``2(``0[],``1[],System.Collections.Generic.IComparer{``0})">
+            <summary>Sorts a pair of <see cref="T:System.Array" /> objects (one contains the keys and the other contains the corresponding items) based on the keys in the first <see cref="T:System.Array" /> using the specified <see cref="T:System.Collections.Generic.IComparer`1" /> generic interface.</summary><param name="keys">The one-dimensional, zero-based <see cref="T:System.Array" /> that contains the keys to sort. </param><param name="items">The one-dimensional, zero-based <see cref="T:System.Array" /> that contains the items that correspond to the keys in <paramref name="keys" />, or null to sort only <paramref name="keys" />.</param><param name="comparer">The <see cref="T:System.Collections.Generic.IComparer`1" /> generic interface implementation to use when comparing elements, or null to use the <see cref="T:System.IComparable`1" /> generic interface implementation of each element.</param><typeparam name="TKey">The type of the elements of the key array.</typeparam><typeparam name="TValue">The type of the elements of the items array.</typeparam><exception cref="T:System.ArgumentNullException">
+        <paramref name="keys" /> is null.</exception><exception cref="T:System.ArgumentException">
+        <paramref name="items" /> is not null, and the lower bound of <paramref name="keys" /> does not match the lower bound of <paramref name="items" />.-or-<paramref name="items" /> is not null, and the length of <paramref name="keys" /> is greater than the length of <paramref name="items" />.-or-The implementation of <paramref name="comparer" /> caused an error during the sort. For example, <paramref name="comparer" /> might not return 0 when comparing an item with itself.</exception><exception cref="T:System.InvalidOperationException">
+        <paramref name="comparer" /> is null, and one or more elements in the <paramref name="keys" /><see cref="T:System.Array" /> do not implement the <see cref="T:System.IComparable`1" /> generic interface.</exception>
+        </member>
+        <member name="M:System.Array_.Sort``2(``0[],``1[],System.Int32,System.Int32,System.Collections.Generic.IComparer{``0})">
+            <summary>Sorts a range of elements in a pair of <see cref="T:System.Array" /> objects (one contains the keys and the other contains the corresponding items) based on the keys in the first <see cref="T:System.Array" /> using the specified <see cref="T:System.Collections.Generic.IComparer`1" /> generic interface.</summary><param name="keys">The one-dimensional, zero-based <see cref="T:System.Array" /> that contains the keys to sort. </param><param name="items">The one-dimensional, zero-based <see cref="T:System.Array" /> that contains the items that correspond to the keys in <paramref name="keys" />, or null to sort only <paramref name="keys" />.</param><param name="index">The starting index of the range to sort.</param><param name="length">The number of elements in the range to sort.</param><param name="comparer">The <see cref="T:System.Collections.Generic.IComparer`1" /> generic interface implementation to use when comparing elements, or null to use the <see cref="T:System.IComparable`1" /> generic interface implementation of each element.</param><typeparam name="TKey">The type of the elements of the key array.</typeparam><typeparam name="TValue">The type of the elements of the items array.</typeparam><exception cref="T:System.ArgumentNullException">
+        <paramref name="keys" /> is null.</exception><exception cref="T:System.ArgumentOutOfRangeException">
+        <paramref name="index" /> is less than the lower bound of <paramref name="keys" />.-or-<paramref name="length" /> is less than zero.</exception><exception cref="T:System.ArgumentException">
+        <paramref name="items" /> is not null, and the lower bound of <paramref name="keys" /> does not match the lower bound of <paramref name="items" />.-or-<paramref name="items" /> is not null, and the length of <paramref name="keys" /> is greater than the length of <paramref name="items" />.-or-<paramref name="index" /> and <paramref name="length" /> do not specify a valid range in the <paramref name="keys" /><see cref="T:System.Array" />.-or-<paramref name="items" /> is not null, and <paramref name="index" /> and <paramref name="length" /> do not specify a valid range in the <paramref name="items" /><see cref="T:System.Array" />. -or-The implementation of <paramref name="comparer" /> caused an error during the sort. For example, <paramref name="comparer" /> might not return 0 when comparing an item with itself.</exception><exception cref="T:System.InvalidOperationException">
+        <paramref name="comparer" /> is null, and one or more elements in the <paramref name="keys" /><see cref="T:System.Array" /> do not implement the <see cref="T:System.IComparable`1" /> generic interface.</exception>
+        </member>
+        <member name="M:System.Array_.ConvertAll``2(``0[],System.Converter{``0,``1})">
+            <summary>Converts an array of one type to an array of another type.</summary><returns>An array of the target type containing the converted elements from the source array.</returns><param name="array">The one-dimensional, zero-based <see cref="T:System.Array" /> to convert to a target type.</param><param name="converter">A <see cref="T:System.Converter`2" /> that converts each element from one type to another type.</param><typeparam name="TInput">The type of the elements of the source array.</typeparam><typeparam name="TOutput">The type of the elements of the target array.</typeparam><exception cref="T:System.ArgumentNullException">
+        <paramref name="array" /> is null.-or-<paramref name="converter" /> is null.</exception>
+        </member>
+        <member name="T:System.Attribute_">
+            <summary>
+            Shim complement for the <see cref="T:System.Attribute"/> class, providing members that are
+            not included in the PCL member subset of the <see cref="T:System.Attribute"/> class.
+            </summary>
+        </member>
+        <member name="M:System.Attribute_.GetCustomAttribute(System.Type,System.Type)">
+            <summary>Retrieves a custom attribute applied to a member of a type. Parameters specify the member, and the type of the custom attribute to search for.</summary><returns>A reference to the single custom attribute of type <paramref name="attributeType" /> that is applied to <paramref name="element" />, or null if there is no such attribute.</returns><param name="element">An object derived from the <see cref="T:System.Reflection.MemberInfo" /> class that describes a constructor, event, field, method, or property member of a class. </param><param name="attributeType">The type, or a base type, of the custom attribute to search for.</param><exception cref="T:System.ArgumentNullException">
+        <paramref name="element" /> or <paramref name="attributeType" /> is null. </exception><exception cref="T:System.ArgumentException">
+        <paramref name="attributeType" /> is not derived from <see cref="T:System.Attribute" />. </exception><exception cref="T:System.NotSupportedException">
+        <paramref name="element" /> is not a constructor, method, property, event, type, or field. </exception><exception cref="T:System.Reflection.AmbiguousMatchException">More than one of the requested attributes was found. </exception><exception cref="T:System.TypeLoadException">A custom attribute type cannot be loaded. </exception>
+            <remarks>On Universal Windows Platform and Portable Class Libraries, <see cref="T:System.Type" /> is not a sub-class of <see cref="T:System.Reflection.MemberInfo" />, therefore the
+            signature of this Shim method has been modified to use <see cref="T:System.Type" /> for <paramref name="element" /> instead.</remarks>
+        </member>
+        <member name="T:System.Reflection.AssemblyExtensions">
+            <summary>
+            Shim complement for the <see cref="T:System.Reflection.Assembly"/> class. <see cref="T:System.Reflection.Assembly"/> instance methods that are not available in the 
+            PCL profile are here provided as equivalent extension methods.
+            </summary>
+        </member>
+        <member name="M:System.Reflection.AssemblyExtensions.CreateInstance(System.Reflection.Assembly,System.String)">
+            <summary>Locates the specified type from this assembly and creates an instance of it using the system activator, using case-sensitive search.</summary><returns>An instance of the specified type created with the default constructor; or null if <paramref name="typeName" /> is not found. The type is resolved using the default binder, without specifying culture or activation attributes, and with <see cref="T:System.Reflection.BindingFlags" /> set to Public or Instance. </returns><param name="typeName">The <see cref="P:System.Type.FullName" /> of the type to locate. </param><exception cref="T:System.ArgumentException">
+        <paramref name="typeName" /> is an empty string ("") or a string beginning with a null character.-or-The current assembly was loaded into the reflection-only context.</exception><exception cref="T:System.ArgumentNullException">
+        <paramref name="typeName" /> is null. </exception><exception cref="T:System.MissingMethodException">No matching constructor was found. </exception><exception cref="T:System.IO.FileNotFoundException">
+        <paramref name="typeName" /> requires a dependent assembly that could not be found. </exception><exception cref="T:System.IO.FileLoadException">
+        <paramref name="typeName" /> requires a dependent assembly that was found but could not be loaded.-or-The current assembly was loaded into the reflection-only context, and <paramref name="typeName" /> requires a dependent assembly that was not preloaded. </exception><exception cref="T:System.BadImageFormatException">
+        <paramref name="typeName" /> requires a dependent assembly, but the file is not a valid assembly. -or-<paramref name="typeName" /> requires a dependent assembly that was compiled for a version of the runtime that is later than the currently loaded version.</exception>
+            <param name="assembly">Assembly on which the <paramref name="typeName" /> instance should be created.</param>
+        </member>
+        <member name="M:System.Reflection.AssemblyExtensions.GetTypes(System.Reflection.Assembly)">
+            <summary>Gets the types defined in this assembly.</summary><returns>An array that contains all the types that are defined in this assembly.</returns><exception cref="T:System.Reflection.ReflectionTypeLoadException">The assembly contains one or more types that cannot be loaded. The array returned by the <see cref="P:System.Reflection.ReflectionTypeLoadException.Types" /> property of this exception contains a <see cref="T:System.Type" /> object for each type that was loaded and null for each type that could not be loaded, while the <see cref="P:System.Reflection.ReflectionTypeLoadException.LoaderExceptions" /> property contains an exception for each type that could not be loaded.</exception>
+            <param name="assembly">Assembly for which the array of types should be listed.</param>
+        </member>
+        <member name="T:System.Reflection.Assembly_">
+            <summary>
+            Shim complement for the <see cref="T:System.Reflection.Assembly"/> class, providing static members that are
+            not included in the PCL member subset of the <see cref="T:System.Reflection.Assembly"/> class.
+            </summary>
+        </member>
+        <member name="M:System.Reflection.Assembly_.GetExecutingAssembly">
+            <summary>Gets the assembly that contains the code that is currently executing.</summary><returns>The assembly that contains the code that is currently executing. </returns>
+        </member>
+        <member name="M:System.Reflection.Assembly_.Load(System.String)">
+            <summary>Loads an assembly given the long form of its name.</summary><returns>The loaded assembly.</returns><param name="assemblyString">The long form of the assembly name. </param><exception cref="T:System.ArgumentNullException">
+        <paramref name="assemblyString" /> is null. </exception><exception cref="T:System.ArgumentException">
+        <paramref name="assemblyString" /> is a zero-length string. </exception><exception cref="T:System.IO.FileNotFoundException">
+        <paramref name="assemblyString" /> is not found. </exception><exception cref="T:System.IO.FileLoadException">A file that was found could not be loaded. </exception><exception cref="T:System.BadImageFormatException">
+        <paramref name="assemblyString" /> is not a valid assembly. -or-Version 2.0 or later of the common language runtime is currently loaded and <paramref name="assemblyString" /> was compiled with a later version.</exception>
+        </member>
+        <member name="T:System.ICloneableExtensions">
+            <summary>
+            Shim complement for the <see cref="T:System.ICloneable"/> interface. Runtime support for performing <see cref="M:System.ICloneable.Clone"/> when <see cref="T:System.ICloneable"/>
+            is not explcitly implemented.
+            </summary>
+        </member>
+        <member name="M:System.ICloneableExtensions.Clone``1(``0)">
+            <summary>Creates a new object that is a copy of the current instance.</summary><returns>A new object that is a copy of this instance.</returns>
+            <param name="thisObject">Object to clone.</param>
+        </member>
+        <member name="T:System.Type_">
+            <summary>
+            Shim complement for the <see cref="T:System.Type"/> class, providing static members that are
+            not included in the PCL member subset of the <see cref="T:System.Type"/> class.
+            </summary>
+        </member>
+        <member name="F:System.Type_.EmptyTypes">
+            <summary>Represents an empty array of type <see cref="T:System.Type" />. This field is read-only.</summary>
+        </member>
+        <member name="T:System.Xml.Linq.XDocumentExtensions">
+            <summary>
+            Shim complement for the <see cref="T:System.Xml.Linq.XDocument"/> class. <see cref="T:System.Xml.Linq.XDocument"/> instance methods that are not available in the 
+            PCL profile are here provided as equivalent extension methods.
+            </summary>
+        </member>
+        <member name="M:System.Xml.Linq.XDocumentExtensions.Save(System.Xml.Linq.XDocument,System.String)">
+            <summary>Serialize this <see cref="T:System.Xml.Linq.XDocument" /> to a file, overwriting an existing file, if it exists.</summary><param name="fileName">A string that contains the name of the file.</param>
+            <param name="self">Document object itself.</param>
+        </member>
+        <member name="T:System.Environment_">
+            <summary>
+            Shim complement for the <see cref="T:System.Environment"/> class, providing members that are
+            not included in the PCL member subset of the <see cref="T:System.Environment"/> class.
+            </summary>
+        </member>
+        <member name="P:System.Environment_.MachineName">
+            <summary>Gets the NetBIOS name of this local computer.</summary><returns>A string containing the name of this computer.</returns><exception cref="T:System.InvalidOperationException">The name of this computer cannot be obtained.</exception>
+        </member>
+        <member name="T:System.StringExtensions">
+            <summary>
+            Shim complement for the <see cref="T:System.String"/> class. <see cref="T:System.String"/> instance methods that are not available in the 
+            PCL profile are here provided as equivalent extension methods.
+            </summary>
+        </member>
+        <member name="M:System.StringExtensions.Clone(System.String)">
+            <summary>Returns a reference to this instance of <see cref="T:System.String" />.</summary><returns>This instance of <see cref="T:System.String" />.</returns>
+            <param name="thisString"><see cref="T:System.String" /> object.</param>
+        </member>
+        <member name="T:System.TypeExtensions">
+            <summary>
+            Shim complement for the <see cref="T:System.Type"/> class. <see cref="T:System.Type"/> instance methods that are not available in the 
+            PCL profile are here provided as equivalent extension methods. <see cref="T:System.Type"/> instance properties that are not available
+            in the PCL profile are here provided as extension methods without additional arguments (since extension properties are not supported in C#).
+            </summary>
+        </member>
+        <member name="M:System.TypeExtensions.IsEnum(System.Type)">
+            <summary>Gets a value indicating whether the current <see cref="T:System.Type" /> represents an enumeration.</summary><returns>true if the current <see cref="T:System.Type" /> represents an enumeration; otherwise, false.</returns>
+        </member>
+        <member name="M:System.TypeExtensions.IsValueType(System.Type)">
+            <summary>Gets a value indicating whether the <see cref="T:System.Type" /> is a value type.</summary><returns>true if the <see cref="T:System.Type" /> is a value type; otherwise, false.</returns>
+        </member>
+        <member name="M:System.TypeExtensions.IsAssignableFrom(System.Type,System.Type)">
+            <summary>Determines whether an instance of a specified type can be assigned to the current type instance. </summary><returns>true if any of the following conditions is true:  <paramref name="c" /> and the current instance represent the same type. <paramref name="c" /> is derived either directly or indirectly from the current instance. The current instance is an interface that <paramref name="c" /> implements. <paramref name="c" /> is a generic type parameter, and the current instance represents one of the constraints of <paramref name="c" />. <paramref name="c" /> represents a value type, and the current instance represents Nullable&lt;c&gt; (Nullable(Of c) in Visual Basic).false if none of these conditions are true, or if <paramref name="c" /> is null. </returns><param name="c">The type to compare with the current type. </param>
+            <param name="type"><see cref="T:System.Type" /> object.</param>
+        </member>
+        <member name="M:System.TypeExtensions.IsSubclassOf(System.Type,System.Type)">
+            <summary>Determines whether the current <see cref="T:System.Type" /> derives from the specified <see cref="T:System.Type" />.</summary><returns>true if the current Type derives from <paramref name="c" />; otherwise, false. This method also returns false if <paramref name="c" /> and the current Type are equal.</returns><param name="c">The type to compare with the current type. </param><exception cref="T:System.ArgumentNullException">
+        <paramref name="c" /> is null. </exception>
+            <param name="type"><see cref="T:System.Type" /> object.</param>
+        </member>
+        <member name="M:System.TypeExtensions.IsInstanceOfType(System.Type,System.Object)">
+            <summary>Determines whether the specified object is an instance of the current <see cref="T:System.Type" />.</summary><returns>true if the current Type is in the inheritance hierarchy of the object represented by <paramref name="o" />, or if the current Type is an interface that <paramref name="o" /> implements. false if neither of these conditions is the case, if <paramref name="o" /> is null, or if the current Type is an open generic type (that is, <see cref="P:System.Type.ContainsGenericParameters" /> returns true).</returns><param name="o">The object to compare with the current type. </param>
+            <param name="type"><see cref="T:System.Type" /> object.</param>
+        </member>
+        <member name="M:System.TypeExtensions.GetConstructor(System.Type,System.Type[])">
+            <summary>Searches for a public instance constructor whose parameters match the types in the specified array.</summary><returns>An object representing the public instance constructor whose parameters match the types in the parameter type array, if found; otherwise, null.</returns><param name="types">An array of <see cref="T:System.Type" /> objects representing the number, order, and type of the parameters for the desired constructor.-or- An empty array of <see cref="T:System.Type" /> objects, to get a constructor that takes no parameters. Such an empty array is provided by the static field <see cref="F:System.Type.EmptyTypes" />. </param><exception cref="T:System.ArgumentNullException">
+        <paramref name="types" /> is null.-or- One of the elements in <paramref name="types" /> is null. </exception><exception cref="T:System.ArgumentException">
+        <paramref name="types" /> is multidimensional. </exception>
+            <param name="type"><see cref="T:System.Type" /> object.</param>
+        </member>
+        <member name="M:System.TypeExtensions.GetField(System.Type,System.String)">
+            <summary>Searches for the public field with the specified name.</summary><returns>An object representing the public field with the specified name, if found; otherwise, null.</returns><param name="name">The string containing the name of the data field to get. </param><exception cref="T:System.ArgumentNullException">
+        <paramref name="name" /> is null. </exception><exception cref="T:System.NotSupportedException">This <see cref="T:System.Type" /> object is a <see cref="T:System.Reflection.Emit.TypeBuilder" /> whose <see cref="M:System.Reflection.Emit.TypeBuilder.CreateType" /> method has not yet been called. </exception>
+            <param name="type"><see cref="T:System.Type" /> object.</param>
+        </member>
+        <member name="M:System.TypeExtensions.GetField(System.Type,System.String,System.Reflection.BindingFlags)">
+            <summary>Searches for the specified field, using the specified binding constraints.</summary><returns>An object representing the field that matches the specified requirements, if found; otherwise, null.</returns><param name="name">The string containing the name of the data field to get. </param><param name="bindingAttr">A bitmask comprised of one or more <see cref="T:System.Reflection.BindingFlags" /> that specify how the search is conducted.-or- Zero, to return null. </param><exception cref="T:System.ArgumentNullException">
+        <paramref name="name" /> is null. </exception>
+            <param name="type"><see cref="T:System.Type" /> object.</param>
+        </member>
+        <member name="M:System.TypeExtensions.GetProperty(System.Type,System.String)">
+            <summary>Searches for the public field with the specified name.</summary><returns>An object representing the public field with the specified name, if found; otherwise, null.</returns><param name="name">The string containing the name of the data field to get. </param><exception cref="T:System.ArgumentNullException">
+        <paramref name="name" /> is null. </exception><exception cref="T:System.NotSupportedException">This <see cref="T:System.Type" /> object is a <see cref="T:System.Reflection.Emit.TypeBuilder" /> whose <see cref="M:System.Reflection.Emit.TypeBuilder.CreateType" /> method has not yet been called. </exception>
+            <param name="type"><see cref="T:System.Type" /> object.</param>
+        </member>
+        <member name="M:System.TypeExtensions.GetMethod(System.Type,System.String,System.Type[])">
+            <summary>Searches for the specified public method whose parameters match the specified argument types.</summary><returns>An object representing the public method whose parameters match the specified argument types, if found; otherwise, null.</returns><param name="name">The string containing the name of the public method to get. </param><param name="types">An array of <see cref="T:System.Type" /> objects representing the number, order, and type of the parameters for the method to get.-or- An empty array of <see cref="T:System.Type" /> objects (as provided by the <see cref="F:System.Type.EmptyTypes" /> field) to get a method that takes no parameters. </param><exception cref="T:System.Reflection.AmbiguousMatchException">More than one method is found with the specified name and specified parameters. </exception><exception cref="T:System.ArgumentNullException">
+        <paramref name="name" /> is null.-or- <paramref name="types" /> is null.-or- One of the elements in <paramref name="types" /> is null. </exception><exception cref="T:System.ArgumentException">
+        <paramref name="types" /> is multidimensional. </exception>
+            <param name="type"><see cref="T:System.Type" /> object.</param>
+        </member>
+        <member name="M:System.TypeExtensions.GetMethod(System.Type,System.String,System.Reflection.BindingFlags)">
+            <summary>Searches for the specified method, using the specified binding constraints.</summary><returns>An object representing the method that matches the specified requirements, if found; otherwise, null.</returns><param name="name">The string containing the name of the method to get. </param><param name="bindingAttr">A bitmask comprised of one or more <see cref="T:System.Reflection.BindingFlags" /> that specify how the search is conducted.-or- Zero, to return null. </param><exception cref="T:System.Reflection.AmbiguousMatchException">More than one method is found with the specified name and matching the specified binding constraints. </exception><exception cref="T:System.ArgumentNullException">
+        <paramref name="name" /> is null. </exception>
+            <param name="type"><see cref="T:System.Type" /> object.</param>
+        </member>
+        <member name="M:System.TypeExtensions.GetFields(System.Type,System.Reflection.BindingFlags)">
+            <summary>When overridden in a derived class, searches for the fields defined for the current <see cref="T:System.Type" />, using the specified binding constraints.</summary><returns>An array of <see cref="T:System.Reflection.FieldInfo" /> objects representing all fields defined for the current <see cref="T:System.Type" /> that match the specified binding constraints.-or- An empty array of type <see cref="T:System.Reflection.FieldInfo" />, if no fields are defined for the current <see cref="T:System.Type" />, or if none of the defined fields match the binding constraints.</returns><param name="bindingAttr">A bitmask comprised of one or more <see cref="T:System.Reflection.BindingFlags" /> that specify how the search is conducted.-or- Zero, to return null. </param>
+            <param name="type"><see cref="T:System.Type" /> object.</param>
+        </member>
+        <member name="M:System.TypeExtensions.GetMethods(System.Type,System.Reflection.BindingFlags)">
+            <summary>When overridden in a derived class, searches for the methods defined for the current <see cref="T:System.Type" />, using the specified binding constraints.</summary><returns>An array of <see cref="T:System.Reflection.MethodInfo" /> objects representing all methods defined for the current <see cref="T:System.Type" /> that match the specified binding constraints.-or- An empty array of type <see cref="T:System.Reflection.MethodInfo" />, if no methods are defined for the current <see cref="T:System.Type" />, or if none of the defined methods match the binding constraints.</returns><param name="bindingAttr">A bitmask comprised of one or more <see cref="T:System.Reflection.BindingFlags" /> that specify how the search is conducted.-or- Zero, to return null. </param>
+            <param name="type"><see cref="T:System.Type" /> object.</param>
+        </member>
+        <member name="M:System.TypeExtensions.InvokeMember(System.Type,System.String,System.Reflection.BindingFlags,System.Reflection.Binder,System.Object,System.Object[],System.Globalization.CultureInfo)">
+            <summary>Invokes the specified member, using the specified binding constraints and matching the specified argument list and culture.</summary><returns>An object representing the return value of the invoked member.</returns><param name="name">The string containing the name of the constructor, method, property, or field member to invoke.-or- An empty string ("") to invoke the default member. -or-For IDispatch members, a string representing the DispID, for example "[DispID=3]".</param><param name="invokeAttr">A bitmask comprised of one or more <see cref="T:System.Reflection.BindingFlags" /> that specify how the search is conducted. The access can be one of the BindingFlags such as Public, NonPublic, Private, InvokeMethod, GetField, and so on. The type of lookup need not be specified. If the type of lookup is omitted, BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static are used. </param><param name="binder">An object that defines a set of properties and enables binding, which can involve selection of an overloaded method, coercion of argument types, and invocation of a member through reflection.-or- A null reference (Nothing in Visual Basic), to use the <see cref="P:System.Type.DefaultBinder" />. Note that explicitly defining a <see cref="T:System.Reflection.Binder" /> object may be required for successfully invoking method overloads with variable arguments.</param><param name="target">The object on which to invoke the specified member. </param><param name="args">An array containing the arguments to pass to the member to invoke. </param><param name="culture">The object representing the globalization locale to use, which may be necessary for locale-specific conversions, such as converting a numeric <see cref="T:System.String" /> to a <see cref="T:System.Double" />.-or- A null reference (Nothing in Visual Basic) to use the current thread's <see cref="T:System.Globalization.CultureInfo" />. </param><exception cref="T:System.ArgumentNullException">
+        <paramref name="invokeAttr" /> does not contain CreateInstance and <paramref name="name" /> is null. </exception><exception cref="T:System.ArgumentException">
+        <paramref name="invokeAttr" /> is not a valid <see cref="T:System.Reflection.BindingFlags" /> attribute. -or- <paramref name="invokeAttr" /> does not contain one of the following binding flags: InvokeMethod, CreateInstance, GetField, SetField, GetProperty, or SetProperty.-or- <paramref name="invokeAttr" /> contains CreateInstance combined with InvokeMethod, GetField, SetField, GetProperty, or SetProperty.-or- <paramref name="invokeAttr" /> contains both GetField and SetField.-or- <paramref name="invokeAttr" /> contains both GetProperty and SetProperty.-or- <paramref name="invokeAttr" /> contains InvokeMethod combined with SetField or SetProperty.-or- <paramref name="invokeAttr" /> contains SetField and <paramref name="args" /> has more than one element.-or- This method is called on a COM object and one of the following binding flags was not passed in: BindingFlags.InvokeMethod, BindingFlags.GetProperty, BindingFlags.SetProperty, BindingFlags.PutDispProperty, or BindingFlags.PutRefDispProperty.-or- One of the named parameter arrays contains a string that is null. </exception><exception cref="T:System.MethodAccessException">The specified member is a class initializer. </exception><exception cref="T:System.MissingFieldException">The field or property cannot be found. </exception><exception cref="T:System.MissingMethodException">No method can be found that matches the arguments in <paramref name="args" />.-or- The current <see cref="T:System.Type" /> object represents a type that contains open type parameters, that is, <see cref="P:System.Type.ContainsGenericParameters" /> returns true. </exception><exception cref="T:System.Reflection.TargetException">The specified member cannot be invoked on <paramref name="target" />. </exception><exception cref="T:System.Reflection.AmbiguousMatchException">More than one method matches the binding criteria. </exception><exception cref="T:System.InvalidOperationException">The method represented by <paramref name="name" /> has one or more unspecified generic type parameters. That is, the method's <see cref="P:System.Reflection.MethodInfo.ContainsGenericParameters" /> property returns true.</exception>
+            <param name="type"><see cref="T:System.Type" /> object.</param>
+        </member>
+    </members>
+</doc>

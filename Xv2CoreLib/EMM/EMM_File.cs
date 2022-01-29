@@ -369,9 +369,7 @@ namespace Xv2CoreLib.EMM
         [YAXAttributeFor("I_66")]
         [YAXSerializeAs("value")]
         public ushort I_66 { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
+
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Parameter")]
         public List<Parameter> Parameters { get; set; } = new List<Parameter>();
 

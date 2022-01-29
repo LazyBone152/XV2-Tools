@@ -11,7 +11,7 @@ using Xv2CoreLib.HslColor;
 using Xv2CoreLib.Resource.UndoRedo;
 using Xv2CoreLib.Resource;
 using CSharpImageLibrary;
-using Pfim;
+using Xv2CoreLib.Resource.Image;
 
 namespace Xv2CoreLib.EMB_CLASS
 {
@@ -546,6 +546,7 @@ namespace Xv2CoreLib.EMB_CLASS
     [Serializable]
     public class EmbEntry : INotifyPropertyChanged, IInstallable
     {
+        #region NotifyPropertyChanged
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -556,6 +557,7 @@ namespace Xv2CoreLib.EMB_CLASS
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
+        #endregion
 
         public const int DDS_SIGNATURE = 542327876;
 
@@ -622,6 +624,7 @@ namespace Xv2CoreLib.EMB_CLASS
         #region DDS
         //DDS loading & handling
         public ImageEngineFormat ImageFormat = ImageEngineFormat.DDS_DXT5;
+
         [NonSerialized]
         public bool wasEdited = false; //If false, we won't save the DDS file.
         [NonSerialized]
@@ -732,87 +735,6 @@ namespace Xv2CoreLib.EMB_CLASS
             }
         }
 
-
-        /// <summary>
-        /// Loads DdsImage from Data.
-        /// </summary>
-        public void LoadDds()
-        {
-            if (!EepkToolInterlop.LoadTextures)
-                return;
-
-            try
-            {
-                ddsIsLoading = true;
-                int numMipMaps = 0;
-
-                //PROBLEM: Most files load fine with DDSReader, but it CANT load files that are saved with CSharpImageLibrary.
-                //CSharpImageLibrary may be able to load them on Win7/Win8 machines, but I cant test that...
-
-                using (var ImageSource = new ImageEngineImage(Data))
-                {
-                    DdsImage = new WriteableBitmap(ImageSource.GetWPFBitmap());
-                    ImageFormat = ImageSource.Format.SurfaceFormat;
-                    numMipMaps = ImageSource.NumMipMaps;
-                }
-
-                //If CSharpImageLibrary fails to load the image, then try DDSReader
-                //IMPORTANT: DDSReader CANNOT load files saved by CSharpImageLibrary!
-                //if (DdsImage == null || numMipMaps == 0)
-                //{
-
-                //    DDSReader.Utils.PixelFormat format;
-                //    DdsImage = new WriteableBitmap(DDSReader.DDS.LoadImage(data, out format, true));
-                //    ImageFormat = ImageEngineFormat.DDS_DXT5; //Default to DXT5
-
-                    //If DdsImage is still null, then the image has failed to load.
-                //    if (DdsImage == null)
-                //    {
-                //        throw new InvalidDataException(string.Format("Unable to parse \"{0}\".", Name));
-                //    }
-                //}
-
-
-
-            }
-            catch
-            {
-                loadDdsFail = true;
-            }
-            finally
-            {
-                loadDds = true;
-                ddsIsLoading = false;
-            }
-        }
-
-        /// <summary>
-        /// Saves DdsImage into Data.
-        /// </summary>
-        public void SaveDds(bool onlySaveIfEdited = true)
-        {
-            if (DdsImage == null || (!wasEdited && onlySaveIfEdited))
-                return;
-
-            try
-            {
-                _loadDdsLock = true;
-                ImageEngineImage newImage = null;
-
-                using (MemoryStream png = new MemoryStream())
-                {
-                    DdsImage.Save(png);
-                    newImage = new ImageEngineImage(png);
-                    Data = newImage.Save(ImageFormat, MipHandling.Default);
-                }
-            }
-            finally
-            {
-                wasReloaded = true;
-                _loadDdsLock = false;
-            }
-        }
-        
         public bool IsNull()
         {
             if (Data == null) return true;
@@ -847,11 +769,11 @@ namespace Xv2CoreLib.EMB_CLASS
             List<RgbColor> colors = new List<RgbColor>();
 
             //Lazy code. Checking every single pixel would be WAY too slow, so we just skim through them instead.
-            for(int i = 0; i < DdsImage.Width; i+=15)
+            for (int i = 0; i < DdsImage.Width; i += 15)
             {
                 if (i > DdsImage.Width) break;
 
-                for (int a = 0; a < DdsImage.Height; a+=15)
+                for (int a = 0; a < DdsImage.Height; a += 15)
                 {
                     if (a > DdsImage.Height) break;
 
@@ -865,7 +787,7 @@ namespace Xv2CoreLib.EMB_CLASS
                 }
             }
 
-            if(colors.Count == 0)
+            if (colors.Count == 0)
             {
                 return new RgbColor(255, 255, 255);
             }
@@ -873,6 +795,56 @@ namespace Xv2CoreLib.EMB_CLASS
             return ColorEx.GetAverageColor(colors);
         }
 
+        #region TextureLoadSave
+
+        /// <summary>
+        /// Loads DdsImage from Data.
+        /// </summary>
+        public void LoadDds()
+        {
+            if (!EepkToolInterlop.LoadTextures)
+                return;
+
+            try
+            {
+                ddsIsLoading = true;
+                ImageEngineFormat format;
+                DdsImage = TextureHelper.GetWpfBitmap(Data, out format);
+
+                ImageFormat = format;
+            }
+            catch
+            {
+                loadDdsFail = true;
+            }
+            finally
+            {
+                loadDds = true;
+                ddsIsLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// Saves DdsImage into Data.
+        /// </summary>
+        public void SaveDds(bool onlySaveIfEdited = true)
+        {
+            if (DdsImage == null || (!wasEdited && onlySaveIfEdited))
+                return;
+
+            try
+            {
+                _loadDdsLock = true;
+                Data = TextureHelper.SaveToBytes(DdsImage, ImageFormat);
+            }
+            finally
+            {
+                wasReloaded = true;
+                _loadDdsLock = false;
+            }
+        }
+
+        #endregion
 
         #region SuperTexture
         public static List<WriteableBitmap> GetBitmaps(IList<EmbEntry> entries)
@@ -890,10 +862,10 @@ namespace Xv2CoreLib.EMB_CLASS
             double size = Math.Sqrt(textureCount) * maxDimension;
             double textureSize = 64;
 
-            while(textureSize < size)
+            while (textureSize < size)
             {
-                if (textureSize >= 4096)
-                    return -1; //4k max texture size
+                if (textureSize >= 2048)
+                    return -1; //2k max texture size
 
                 textureSize *= 2;
             }

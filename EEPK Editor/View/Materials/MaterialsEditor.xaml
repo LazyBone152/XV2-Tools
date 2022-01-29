@@ -9,10 +9,19 @@
              xmlns:lbUtils="clr-namespace:LB_Common.Utils;assembly=LB_Common"
              xmlns:emm="clr-namespace:Xv2CoreLib.EMM;assembly=Xv2CoreLib"
              xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
              Dialog:DialogParticipation.Register="{Binding}"
-             d:DesignHeight="2000" d:DesignWidth="900" Name="UserControl">
+             d:DesignHeight="600" d:DesignWidth="900" Name="UserControl">
     <Grid>
+        <Grid.Resources>
+            <ObjectDataProvider x:Key="alphaBlendTypeEnum" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="emm:AlphaBlendType"/>
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+        </Grid.Resources>
+        
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
             <RowDefinition Height="*"/>
@@ -409,7 +418,7 @@
                                         <ColumnDefinition/>
                                     </Grid.ColumnDefinitions>
                                     <Label Content="AlphaBlendType"/>
-                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.AlphaBlendType}" Minimum="-1" Maximum="2" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                    <ComboBox Grid.Column="1" SelectedItem="{Binding MaterialViewModel.AlphaBlendType}" ItemsSource="{Binding Source={StaticResource ResourceKey=alphaBlendTypeEnum}}" HorizontalAlignment="Left" Width="102"/>
                                 </Grid>
                             </WrapPanel>
                             <WrapPanel>

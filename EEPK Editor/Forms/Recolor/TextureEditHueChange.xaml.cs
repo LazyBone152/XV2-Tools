@@ -12,6 +12,8 @@ using Xv2CoreLib.Resource.UndoRedo;
 
 namespace EEPK_Organiser.Forms
 {
+    //NOTE: In debug mode this can be quite crash prone when dealing with large textures (4k). Release build is fine.
+
     /// <summary>
     /// Interaction logic for TextureEditHueChange.xaml
     /// </summary>
@@ -93,7 +95,18 @@ namespace EEPK_Organiser.Forms
             get
             {
                 var formats = new AForge.Imaging.Filters.HSLLinear().FormatTranslations;
-                return (formats.ContainsKey(((Bitmap)OriginalTextureBackup).PixelFormat));
+                try
+                {
+                    return (formats.ContainsKey(((Bitmap)CurrentTexture.DdsImage).PixelFormat));
+                }
+                catch (InsufficientMemoryException)
+                {
+                    return false;
+                }
+                catch (OutOfMemoryException)
+                {
+                    return false;
+                }
             }
         }
 

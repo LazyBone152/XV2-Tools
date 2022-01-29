@@ -75,11 +75,8 @@
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="Shim, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c55ec16d10c4b366, processorArchitecture=MSIL">
-      <HintPath>..\packages\shim.2.0.0\lib\net40\Shim.dll</HintPath>
-    </Reference>
-    <Reference Include="Shim.Drawing, Version=3.0.0.0, Culture=neutral, PublicKeyToken=a7d03c0bc8d64dbc, processorArchitecture=MSIL">
-      <HintPath>..\packages\shim.drawing.3.0.0\lib\net45\Shim.Drawing.dll</HintPath>
+    <Reference Include="Shim, Version=2.0.1.0, Culture=neutral, PublicKeyToken=c55ec16d10c4b366, processorArchitecture=MSIL">
+      <HintPath>..\packages\shim.2.0.1\lib\net40\Shim.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -92,8 +89,8 @@
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Numerics" />
-    <Reference Include="System.Numerics.Vectors, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Numerics.Vectors.4.3.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
     </Reference>
     <Reference Include="System.Threading.Tasks.Dataflow, Version=4.5.24.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Tpl.Dataflow.4.5.24\lib\portable-net45+win8+wpa81\System.Threading.Tasks.Dataflow.dll</HintPath>
@@ -296,7 +293,7 @@
     <Compile Include="Resource\AsyncObservableCollection.cs" />
     <Compile Include="Resource\BinaryConverter.cs" />
     <Compile Include="Resource\ColorEx.cs" />
-    <Compile Include="Resource\Image\WpfBitmapConvert.cs" />
+    <Compile Include="Resource\Image\TextureHelper.cs" />
     <Compile Include="Resource\Random.cs" />
     <Compile Include="Resource\ReflectionHelper.cs" />
     <Compile Include="Resource\UndoRedo\IMergableUndo.cs" />
@@ -356,6 +353,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
     <EmbeddedResource Include="Resources\silence.hca" />
   </ItemGroup>

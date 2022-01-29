@@ -364,16 +364,16 @@ namespace LB_Mod_Installer.Installer
                 if (partSetSection != null)
                     UninstallEntries(binaryFile.PartSets, (cpkBinFile != null) ? cpkBinFile.PartSets : null, partSetSection.IDs);
                 
-                if(binaryFile.Part_Colors != null)
+                if(binaryFile.PartColors != null)
                 {
-                    foreach (var section in binaryFile.Part_Colors)
+                    foreach (var section in binaryFile.PartColors)
                     {
                         Section partColorSection = file.GetSection(Sections.GetBcsPartColor(section.Index));
 
                         if (partColorSection != null)
                         {
-                            var cpkSection = (cpkBinFile != null) ? cpkBinFile.GetPartColors(section.Index, section.Str_00) : null;
-                            UninstallEntries(section._Colors, (cpkSection != null) ? cpkSection._Colors : null, partColorSection.IDs);
+                            var cpkSection = (cpkBinFile != null) ? cpkBinFile.GetPartColors(section.Index, section.Name) : null;
+                            UninstallEntries(section.Colors, (cpkSection != null) ? cpkSection.Colors : null, partColorSection.IDs);
                         }
                     }
                 }

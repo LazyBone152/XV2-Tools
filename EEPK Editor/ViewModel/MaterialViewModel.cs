@@ -132,10 +132,10 @@ namespace EEPK_Organiser.ViewModel
             get => material.AlphaBlend;
             set => SetIntValue(value, nameof(material.AlphaBlend));
         }
-        public int AlphaBlendType
+        public AlphaBlendType AlphaBlendType
         {
-            get => material.AlphaBlendType;
-            set => SetIntValue(value, nameof(material.AlphaBlendType));
+            get => (AlphaBlendType)material.AlphaBlendType;
+            set => SetIntValue((int)value, nameof(material.AlphaBlendType));
         }
         public int AlphaTest
         {
