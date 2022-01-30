@@ -3,164 +3,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:Themes1="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:view="clr-namespace:EEPK_Organiser.View"
         xmlns:undoRedo="clr-namespace:Xv2CoreLib.Resource.UndoRedo;assembly=Xv2CoreLib"
-        xmlns:lbCommon="clr-namespace:LB_Common;assembly=LB_Common"
         mc:Ignorable="d"
-        Title="Texture Viewer" Height="580" Width="650" ResizeMode="CanMinimize" WindowStartupLocation="CenterOwner" WindowStyle="ThreeDBorderWindow">
+        Title="Texture Editor" Height="600" Width="900" MinHeight="400" MinWidth="840" ResizeMode="CanResizeWithGrip" SaveWindowPosition="True" WindowStartupLocation="CenterOwner" x:Name="Window" TitleCharacterCasing="Normal">
     <Window.InputBindings>
         <KeyBinding Key="Z" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=UndoCommand}"/>
         <KeyBinding Key="Y" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=RedoCommand}"/>
     </Window.InputBindings>
-    <Window.Resources>
-        <DataTemplate x:Key="PictureTemplate">
-            <Canvas Width="190" Height="48">
-                <Image Source="{Binding DdsImage}" Height="32" Width="32" Canvas.Left="8" Canvas.Top="8"/>
-                <TextBlock Text="{Binding Name}" Canvas.Left="56" Canvas.Top="8" Width="140"/>
-                <Canvas.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="Rename" Click="EmbContextMenu_Rename_Click"/>
-                        <MenuItem Header="Replace" Click="EmbContextMenu_Replace_Click"/>
-                        <MenuItem IsEnabled="{Binding IsForContainer}" Header="Merge" Click="EmbContextMenu_Merge_Click"/>
-                        <MenuItem Header="Copy" Click="EmbContextMenu_Copy_Click"/>
-                        <MenuItem Header="Paste" Click="EmbContextMenu_Paste_Click"/>
-                        <MenuItem Header="Delete" Click="EmbContextMenu_Delete_Click"/>
-                        <MenuItem Header="Duplicate" Click="EmbContextMenu_Duplicate_Click"/>
-                        <MenuItem IsEnabled="{Binding IsForContainer}" Header="Used By?" Click="EmbContextMenu_UsedBy_Click"/>
-                        <Separator/>
-                        <MenuItem Header="Hue Adjustment" Click="EmbContextMenu_HueAdjustment_Click"/>
-                    </ContextMenu>
-                </Canvas.ContextMenu>
-            </Canvas>
-        </DataTemplate>
-
-    </Window.Resources>
-
     <Grid>
-        <DataGrid x:Name="listBox_Textures" PreviewKeyDown="ListBox_Textures_PreviewKeyDown" ItemsSource="{Binding EmbFile.ViewTextures}" HorizontalAlignment="Left" Height="300" Margin="10,10,0,0" VerticalAlignment="Top" Width="254" SelectionMode="Extended" CanUserAddRows="False" CanUserDeleteRows="False" AutoGenerateColumns="False">
-            <DataGrid.Resources>
-                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="SteelBlue"/>
-                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightColorKey}" Color="SteelBlue"/>
-                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="White"/>
-                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="White"/>
-
-                <!-- For aligning the arrow button to the top, instead of the centre -->
-                <BooleanToVisibilityConverter x:Key="bool2VisibilityConverter"/>
-
-                <Style x:Key="RowHeaderGripperStyle" TargetType="{x:Type Thumb}">
-                    <Setter Property="Height" Value="8"/>
-                    <Setter Property="Background" Value="Transparent"/>
-                    <Setter Property="Cursor" Value="SizeNS"/>
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="{x:Type Thumb}">
-                                <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}"/>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-                <Style xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero" TargetType="{x:Type DataGridRowHeader}">
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="{x:Type DataGridRowHeader}">
-                                <Grid>
-                                    <Themes1:DataGridHeaderBorder BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" IsPressed="{TemplateBinding IsPressed}" IsHovered="{TemplateBinding IsMouseOver}" IsSelected="{TemplateBinding IsRowSelected}" Orientation="Horizontal" Padding="{TemplateBinding Padding}" SeparatorBrush="{TemplateBinding SeparatorBrush}" SeparatorVisibility="{TemplateBinding SeparatorVisibility}">
-                                        <StackPanel Orientation="Horizontal">
-                                            <ContentPresenter RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="Stretch"/>
-                                            <Control SnapsToDevicePixels="false" Template="{Binding ValidationErrorTemplate, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" Visibility="{Binding (Validation.HasError), Converter={StaticResource bool2VisibilityConverter}, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}"/>
-                                        </StackPanel>
-                                    </Themes1:DataGridHeaderBorder>
-                                    <Thumb x:Name="PART_TopHeaderGripper" Style="{StaticResource RowHeaderGripperStyle}" VerticalAlignment="Top"/>
-                                    <Thumb x:Name="PART_BottomHeaderGripper" Style="{StaticResource RowHeaderGripperStyle}" VerticalAlignment="Bottom"/>
-                                </Grid>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-
-            </DataGrid.Resources>
-
-            <DataGrid.Columns>
-                <DataGridTemplateColumn Header="Preview">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Grid Background="#1c1c1c">
-                                <Image Source="{Binding DdsImage}" Height="32" Width="32" Canvas.Left="8" Canvas.Top="8"/>
-                            </Grid>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                    <DataGridTemplateColumn.CellEditingTemplate>
-                        <DataTemplate>
-                            <Grid Background="#1c1c1c">
-                                <Image Source="{Binding DdsImage}" Height="32" Width="32" Canvas.Left="8" Canvas.Top="8"/>
-                            </Grid>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellEditingTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTextColumn Header="Name" IsReadOnly="True" Width="*" Binding="{Binding Name}"/>
-            </DataGrid.Columns>
-
-            <DataGrid.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="Rename" Click="EmbContextMenu_Rename_Click"/>
-                    <MenuItem Header="Replace" Click="EmbContextMenu_Replace_Click"/>
-                    <MenuItem IsEnabled="{Binding IsForContainer}" Header="Merge" Click="EmbContextMenu_Merge_Click"/>
-                    <MenuItem Header="Copy" Click="EmbContextMenu_Copy_Click"/>
-                    <MenuItem Header="Paste" Click="EmbContextMenu_Paste_Click"/>
-                    <MenuItem Header="Delete" Click="EmbContextMenu_Delete_Click"/>
-                    <MenuItem Header="Duplicate" Click="EmbContextMenu_Duplicate_Click"/>
-                    <MenuItem Header="Extract" Click="EmbContextMenu_Extract_Click"/>
-                    <MenuItem IsEnabled="{Binding IsForContainer}" Header="Used By?" Click="EmbContextMenu_UsedBy_Click"/>
-                    <MenuItem Header="Combine SuperTexture (experimental)" Click="EmbContextMenu_CreateSuperTexture_Click"/>
-                    <Separator/>
-                    <MenuItem Header="Hue Adjustment" Click="EmbContextMenu_HueAdjustment_Click"/>
-                    <MenuItem Header="Hue Set" Click="EmbContextMenu_HueSet_Click"/>
-                </ContextMenu>
-            </DataGrid.ContextMenu>
-        </DataGrid>
-
-        <GroupBox Header="Preview" HorizontalAlignment="Left" Height="300" Margin="269,13,0,0" VerticalAlignment="Top" Width="360">
-            <Grid Background="#252525">
-                <Grid>
-                    <Grid.Background>
-                        <ImageBrush x:Name="grid" ImageSource="{StaticResource gridlines}" Stretch="UniformToFill" Opacity="0.0"/>
-                    </Grid.Background>
-                    <lbCommon:ZoomBorder x:Name="border" ClipToBounds="True" Background="Transparent">
-                        <Image x:Name="image_Preview" Source="{Binding SelectedItem.DdsImage,ElementName=listBox_Textures}" Stretch="Uniform"/>
-                    </lbCommon:ZoomBorder>
-
-                </Grid>
-            </Grid>
-        </GroupBox>
-        <GroupBox Header="Options" HorizontalAlignment="Left" Height="84" Margin="10,433,0,0" VerticalAlignment="Top" Width="609">
-            <Grid>
-                <Button Click="EmbOptions_AddTexture_Click" ToolTip="Add one or more textures. Currently only DDS files can be imported." Content="Add Textures" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="100"/>
-                <Button IsEnabled="{Binding IsForContainer}" Click="EmbOptions_RemoveUnusuedTextures_Click" ToolTip="Removes all textures that are not currently used by any assets." Content="Delete Unused" HorizontalAlignment="Left" Margin="244,10,0,0" VerticalAlignment="Top" Width="100"/>
-                <Button IsEnabled="{Binding IsForContainer}" Click="EmbOptions_RemoveDuplicates_Click" ToolTip="Merges duplicated textures." Content="Merge Duplicates" HorizontalAlignment="Left" Margin="127,10,0,0" VerticalAlignment="Top" Width="100"/>
-                <Button Click="ToggleGrid_Button_Click" Content="Toggle Grid" HorizontalAlignment="Left" Margin="360,11,0,0" VerticalAlignment="Top" Width="100"/>
-
-            </Grid>
-        </GroupBox>
-        <GroupBox Header="Texture Details" HorizontalAlignment="Left" Height="113" Margin="278,315,0,0" VerticalAlignment="Top" Width="341">
-            <Grid>
-                <Label Content="Height:" HorizontalContentAlignment="Right" HorizontalAlignment="Left" VerticalAlignment="Top" Width="58"/>
-                <Label Content="Width:" HorizontalContentAlignment="Right" HorizontalAlignment="Left" VerticalAlignment="Top" Width="58" Margin="0,25,0,0"/>
-                <Label Content="Size:" HorizontalContentAlignment="Right" HorizontalAlignment="Left" VerticalAlignment="Top" Width="58" Margin="0,50,0,-0.073"/>
-                <TextBlock Text="{Binding SelectedItem.Height, ElementName=listBox_Textures}" HorizontalAlignment="Left" Margin="63,7,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="256"/>
-                <TextBlock Text="{Binding SelectedItem.Width, ElementName=listBox_Textures}" HorizontalAlignment="Left" Margin="63,30,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="256"/>
-                <TextBlock Text="{Binding SelectedItem.FilesizeString, ElementName=listBox_Textures}" HorizontalAlignment="Left" Margin="63,55,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="256"/>
-            </Grid>
-        </GroupBox>
-        <Label Content="{Binding TextureCount}" HorizontalContentAlignment="Right" VerticalContentAlignment="Bottom" HorizontalAlignment="Left" Margin="527,512,0,0" VerticalAlignment="Top" Width="108" Height="35"/>
-        <GroupBox Header="Search" HorizontalAlignment="Left" Height="113" Margin="10,315,0,0" VerticalAlignment="Top" Width="254">
-            <Grid>
-                <TextBox KeyDown="SearchBox_KeyDown" HorizontalAlignment="Left" Height="23" Margin="10,10,0,0" TextWrapping="Wrap" Text="{Binding EmbFile.TextureSearchFilter, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top" Width="223"/>
-                <Button Click="Search_Click" Content="Search" HorizontalAlignment="Left" Margin="42,41,0,0" VerticalAlignment="Top" Width="75"/>
-                <Button Click="ClearSearch_Click" Content="Clear" HorizontalAlignment="Left" Margin="122,41,0,0" VerticalAlignment="Top" Width="75"/>
-
-            </Grid>
-        </GroupBox>
-
+        <view:TextureEditor x:Name="textureEditor" EmbFile="{Binding ElementName=Window, Path=EmbFile}" AssetContainer="{Binding ElementName=Window,Path=AssetContainer}" TextureEditorType="{Binding ElementName=Window, Path=EditorType}" Margin="3, 3"/>
     </Grid>
 </Controls:MetroWindow>

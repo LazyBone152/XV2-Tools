@@ -1,0 +1,35 @@
+﻿<UserControl x:Class="EEPK_Organiser.View.Vectors.CustomColor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="30" d:DesignWidth="350" MaxWidth="350" Width="350" Name="UserControl">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="20"/>
+            <ColumnDefinition Width="60*"/>
+            <ColumnDefinition Width="18"/>
+            <ColumnDefinition Width="59*"/>
+            <ColumnDefinition Width="18"/>
+            <ColumnDefinition Width="60*"/>
+            <ColumnDefinition Width="17.333"/>
+            <ColumnDefinition Width="57*"/>
+            <ColumnDefinition Width="40"/>
+        </Grid.ColumnDefinitions>
+        <Label Content="R" FontSize="10" VerticalContentAlignment="Center"/>
+        <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=R}" Grid.Column="1" TrackMouseWheelWhenMouseOver="True" HideUpDownButtons="True" StringFormat="0.0##" Grid.ColumnSpan="2" Margin="0,0,16,0"/>
+        <Label Content="G" FontSize="10" VerticalContentAlignment="Center" Grid.Column="2" Margin="1,0,0,0"/>
+        <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=G}" Grid.Column="3" TrackMouseWheelWhenMouseOver="True" HideUpDownButtons="True" StringFormat="0.0##" Grid.ColumnSpan="2" Margin="0,0,15.333,0"/>
+        <Label Content="B" FontSize="10" VerticalContentAlignment="Center" Grid.Column="4" Margin="0.667,0,0.333,0"/>
+        <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=B}" Grid.Column="5" TrackMouseWheelWhenMouseOver="True" HideUpDownButtons="True" StringFormat="0.0##" Grid.ColumnSpan="2" Margin="0.667,0,14.667,0"/>
+        <Label Content="A" FontSize="10" VerticalContentAlignment="Center" Grid.Column="6" Grid.ColumnSpan="2" Margin="0.667,0,57,0"/>
+        <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=A}" Grid.Column="7" TrackMouseWheelWhenMouseOver="True" HideUpDownButtons="True" StringFormat="0.0##" Grid.ColumnSpan="2" Margin="0.333,0,35,0"/>
+
+        <Grid Background="{Binding ElementName=UserControl, Path=Preview}" Grid.Column="8" Margin="10,0,3,0">
+            <controls:ColorPicker SelectedColor="{Binding ElementName=UserControl, Path=CurrentColor}" Background="Transparent" BorderBrush="Transparent" Foreground="Transparent"/>
+
+        </Grid>
+    </Grid>
+</UserControl>

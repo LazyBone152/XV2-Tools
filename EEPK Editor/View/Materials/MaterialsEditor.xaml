@@ -1,0 +1,907 @@
+﻿<UserControl x:Class="EEPK_Organiser.View.MaterialsEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+             xmlns:vector="clr-namespace:EEPK_Organiser.View.Vectors"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:lbUtils="clr-namespace:LB_Common.Utils;assembly=LB_Common"
+             xmlns:emm="clr-namespace:Xv2CoreLib.EMM;assembly=Xv2CoreLib"
+             xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             mc:Ignorable="d" 
+             Dialog:DialogParticipation.Register="{Binding}"
+             d:DesignHeight="600" d:DesignWidth="900" Name="UserControl">
+    <Grid>
+        <Grid.Resources>
+            <ObjectDataProvider x:Key="alphaBlendTypeEnum" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="emm:AlphaBlendType"/>
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+        </Grid.Resources>
+        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="10"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="40"/>
+            <ColumnDefinition Width="320"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        
+        <!-- Search Bar-->
+        <StackPanel Grid.Row="0" Grid.Column="1">
+
+            <TextBox VerticalContentAlignment="Center" HorizontalAlignment="Right" Height="23" Margin="0,0,0,0" TextWrapping="Wrap" Text="{Binding ElementName=UserControl, Path=SearchFilter, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top" Width="250" Controls:TextBoxHelper.Watermark="Search..." Controls:TextBoxHelper.ButtonCommand="{Binding ElementName=UserControl, Path=ClearSearchCommand}" Controls:TextBoxHelper.ClearTextButton="True">
+                
+            </TextBox>
+        </StackPanel>
+        
+        <!-- Buttons -->
+        <StackPanel Grid.Column="0" Grid.Row="1">
+            <StackPanel.Resources>
+                <Style TargetType="{x:Type StackPanel}">
+                    <Setter Property="Margin" Value="0,5,0,0"/>
+                </Style>
+            </StackPanel.Resources>
+            <StackPanel VerticalAlignment="Center">
+                <Button Command="{Binding ElementName=UserControl, Path=AddNewMaterialCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="25" Height="25">
+                    <iconPacks:PackIconMaterialLight Kind="Plus" />
+                </Button>
+                <TextBlock Text="New" HorizontalAlignment="Center" FontSize="8"/>
+            </StackPanel>
+            <StackPanel VerticalAlignment="Center">
+                <Button Command="{Binding ElementName=UserControl, Path=DeleteMaterialCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="25" Height="25">
+                    <iconPacks:PackIconMaterialLight Kind="Delete" />
+                </Button>
+                <TextBlock Text="Delete" HorizontalAlignment="Center" FontSize="8"/>
+            </StackPanel>
+            <Separator/>
+            <!-- Currently this menu is only useful for container type EMMs, so it will be hidden for everything else. -->
+            <StackPanel VerticalAlignment="Center" Visibility="{Binding ElementName=UserControl, Path=ContainerVisiblility}" >
+                <Button HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="25" Height="25" lbUtils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
+                    <iconPacks:PackIconModern Kind="Tools" Width="13" Height="13"/>
+                    <Button.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Merge Duplicates" Command="{Binding MergeDuplicatesCommand}" Visibility="{Binding ElementName=UserControl, Path=ContainerVisiblility}" IsEnabled="{Binding ElementName=UserControl, Path=IsForContainer}"/>
+                            <MenuItem Header="Remove Unused" Command="{Binding RemoveUnusedMaterialsCommand}" Visibility="{Binding ElementName=UserControl, Path=ContainerVisiblility}" IsEnabled="{Binding ElementName=UserControl, Path=IsForContainer}"/>
+                        </ContextMenu>
+                    </Button.ContextMenu>
+                </Button>
+                <TextBlock Text="Tools" HorizontalAlignment="Center" FontSize="8"/>
+            </StackPanel>
+            
+
+        </StackPanel>
+        
+        <!-- Material selection -->
+        <Grid Grid.Column="1" Grid.Row="1">
+            <DataGrid x:Name="materialDataGrid" Style="{StaticResource MahApps.Styles.DataGrid.Azure}" ItemsSource="{Binding ElementName=UserControl, Path=ViewMaterials}" SelectedItem="{Binding ElementName=UserControl, Path=SelectedMaterial}" Controls:ControlsHelper.ContentCharacterCasing="Normal" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
+
+                <DataGrid.InputBindings>
+                    <KeyBinding Key="C" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=CopyMaterialCommand}"/>
+                    <KeyBinding Key="V" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=PasteMaterialCommand}"/>
+                    <KeyBinding Key="Delete" Command="{Binding ElementName=UserControl, Path=DeleteMaterialCommand}"/>
+                </DataGrid.InputBindings>
+                
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="New" Command="{Binding AddNewMaterialCommand}"/>
+                        <MenuItem Header="Duplicate" Command="{Binding DuplicateMaterialCommand}"/>
+                        <MenuItem Header="Delete" Command="{Binding DeleteMaterialCommand}"/>
+                        <MenuItem Header="Copy" Command="{Binding CopyMaterialCommand}"/>
+                        <MenuItem Header="Paste" Command="{Binding PasteMaterialCommand}"/>
+                        <MenuItem Header="Paste Values" Command="{Binding PasteMaterialValuesCommand}"/>
+                        
+                        <Separator Visibility="{Binding ContainerVisiblility}"/>
+                        <MenuItem Header="Merge" Command="{Binding MergeMaterialCommand}" IsEnabled="{Binding IsForContainer}" Visibility="{Binding ContainerVisiblility}"/>
+                        <MenuItem Header="Used By?" Command="{Binding UsedByCommand}" IsEnabled="{Binding IsForContainer}" Visibility="{Binding ContainerVisiblility}"/>
+                        
+                        <Separator/>
+                        <MenuItem Header="Hue Shift" Command="{Binding HueShiftCommand}"/>
+                        <MenuItem Header="Hue Set" Command="{Binding HueSetCommand}"/>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+                
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="Name" Width="150">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <TextBox Text="{Binding ElementName=UserControl, Path=SelectedMaterialName, UpdateSourceTrigger=Default}" MaxLength="32"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="Shader" Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding ShaderProgram}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <ComboBox IsEditable="True" Text="{Binding ElementName=UserControl, Path=SelectedMaterialShaderProgram, UpdateSourceTrigger=LostFocus}" ItemsSource="{x:Static emm:EmmMaterial.CommonShaderPrograms}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    
+        <!-- Parameters-->
+        <Grid Grid.Column="3" Grid.Row="1" HorizontalAlignment="Left" IsEnabled="{Binding ElementName=UserControl, Path=ParameterEditorEnabled}" DataContext="{Binding ElementName=UserControl}" MaxWidth="1000">
+            <ScrollViewer>
+                <StackPanel MinWidth="450">
+                    <Expander x:Name="scaleOffsetExpander" Header="Scale/Offset" IsExpanded="False">
+                        <StackPanel>
+                            <WrapPanel>
+                                <Grid Margin="3,3" Width="450">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="MatScale0"/>
+                                    <vector:CustomVector4 Grid.Column="1" Value="{Binding MaterialViewModel.MatScale0}"/>
+                                </Grid>
+                                <Grid Margin="3,3" Width="450">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="MatScale1"/>
+                                    <vector:CustomVector4 Grid.Column="1" Value="{Binding MaterialViewModel.MatScale1}"/>
+                                </Grid>
+
+                            </WrapPanel>
+                            <WrapPanel>
+
+                                <Grid Margin="3,3" Width="450">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="MatOffset0"/>
+                                    <vector:CustomVector4 Grid.Column="1" Value="{Binding MaterialViewModel.MatOffset0}"/>
+                                </Grid>
+                                <Grid Margin="3,3" Width="450">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="MatOffset1"/>
+                                    <vector:CustomVector4 Grid.Column="3" Value="{Binding MaterialViewModel.MatOffset1}"/>
+                                </Grid>
+                            </WrapPanel>
+
+                        </StackPanel>
+                    </Expander>
+
+                    <Expander x:Name="colorExpander" Header="Color" IsExpanded="True">
+                        <StackPanel>
+                            <StackPanel HorizontalAlignment="Left">
+                                <Grid Margin="3,3" Width="450">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Glare"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.Glare}" Width="60" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="True" HideUpDownButtons="True"/>
+                                </Grid>
+                                <Grid Margin="3,3" Width="450">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="GlareCol"/>
+                                    <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.GlareCol}"/>
+                                </Grid>
+                            </StackPanel>
+
+                            <WrapPanel>
+                                <Grid Margin="3,3" Width="450">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="MatCol0"/>
+                                    <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.MatCol0}" Width="350"/>
+                                </Grid>
+                                <Grid Margin="3,3" Width="450">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="MatCol1"/>
+                                    <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.MatCol1}"/>
+                                </Grid>
+                            </WrapPanel>
+                            <WrapPanel>
+                                <Grid Margin="3,3" Width="450">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="MatCol2"/>
+                                    <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.MatCol2}"/>
+                                </Grid>
+                                <Grid Margin="3,3" Width="450">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="MatCol3"/>
+                                    <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.MatCol3}"/>
+                                </Grid>
+                            </WrapPanel>
+                        </StackPanel>
+
+                    </Expander>
+
+                    <Expander x:Name="textureExpander" Header="Texture" IsExpanded="False">
+                        <StackPanel>
+                            <WrapPanel>
+                                <Grid Margin="3,3" Width="450">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="TexScrl0"/>
+                                    <vector:CustomMatUV Grid.Column="1" Value="{Binding MaterialViewModel.TexScrl0}" Width="315" HorizontalAlignment="Left"/>
+                                </Grid>
+                                <Grid Margin="3,3" Width="450">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="TexScrl1"/>
+                                    <vector:CustomMatUV Grid.Column="1" Value="{Binding MaterialViewModel.TexScrl1}" Width="315" HorizontalAlignment="Left"/>
+                                </Grid>
+
+                            </WrapPanel>
+                            <WrapPanel>
+                                <Grid Margin="3,3" Width="180">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="20"/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="20"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="TexRep0"/>
+                                    <Label Content="U" FontSize="10" VerticalContentAlignment="Center" Grid.Column="1"/>
+                                    <CheckBox IsChecked="{Binding MaterialViewModel.TexRep0.U}" Grid.Column="2"/>
+                                    <Label Content="V" FontSize="10" VerticalContentAlignment="Center" Grid.Column="3"/>
+                                    <CheckBox IsChecked="{Binding MaterialViewModel.TexRep0.V}" Grid.Column="4"/>
+                                </Grid>
+
+                                <Grid Margin="3,3" Width="150">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="70"/>
+                                        <ColumnDefinition Width="20"/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="20"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="TexRep1"/>
+                                    <Label Content="U" FontSize="10" VerticalContentAlignment="Center" Grid.Column="1"/>
+                                    <CheckBox IsChecked="{Binding MaterialViewModel.TexRep1.U}" Grid.Column="2"/>
+                                    <Label Content="V" FontSize="10" VerticalContentAlignment="Center" Grid.Column="3"/>
+                                    <CheckBox IsChecked="{Binding MaterialViewModel.TexRep1.V}" Grid.Column="4"/>
+                                </Grid>
+
+                                <Grid Margin="3,3" Width="150">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="70"/>
+                                        <ColumnDefinition Width="20"/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="20"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="TexRep2"/>
+                                    <Label Content="U" FontSize="10" VerticalContentAlignment="Center" Grid.Column="1"/>
+                                    <CheckBox IsChecked="{Binding MaterialViewModel.TexRep2.U}" Grid.Column="2"/>
+                                    <Label Content="V" FontSize="10" VerticalContentAlignment="Center" Grid.Column="3"/>
+                                    <CheckBox IsChecked="{Binding MaterialViewModel.TexRep2.V}" Grid.Column="4"/>
+                                </Grid>
+                            </WrapPanel>
+                            <WrapPanel>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="TextureFilter0"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.TextureFilter0}" Width="85" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="TextureFilter1"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.TextureFilter1}" Width="85" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="TextureFilter2"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.TextureFilter2}" Width="85" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                </Grid>
+                            </WrapPanel>
+                            <WrapPanel>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="MipMapLod0"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.MipMapLod0}" Width="85" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="True" Interval="0.05" HideUpDownButtons="True"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="MipMapLod1"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.MipMapLod1}" Width="85" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="True" Interval="0.05" HideUpDownButtons="True"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="MipMapLod2"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.MipMapLod2}" Width="85" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="True" Interval="0.05" HideUpDownButtons="True"/>
+                                </Grid>
+                            </WrapPanel>
+                            <WrapPanel>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="gToonTextureWidth"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.gToonTextureWidth}" Width="85" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="True" Interval="0.05" HideUpDownButtons="True"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="gToonTextureHeight"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.gToonTextureHeight}" Width="85" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="True" Interval="0.05" HideUpDownButtons="True"/>
+                                </Grid>
+
+                            </WrapPanel>
+                            <WrapPanel>
+
+                                <Grid Margin="3,3" Width="450">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="ToonSamplerAdd" FontSize="11" VerticalContentAlignment="Center"/>
+                                    <vector:CustomMatUV Grid.Column="1" Value="{Binding MaterialViewModel.ToonSamplerAddress}" Width="315" HorizontalAlignment="Left"/>
+                                </Grid>
+                                <Grid Margin="3,3" Width="450">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="MarkSamplerAdd" FontSize="11" VerticalContentAlignment="Center"/>
+                                    <vector:CustomMatUV Grid.Column="1" Value="{Binding MaterialViewModel.MarkSamplerAddress}" Width="315" HorizontalAlignment="Left"/>
+                                </Grid>
+
+                            </WrapPanel>
+
+                        </StackPanel>
+                    </Expander>
+
+                    <Expander x:Name="alphaExpander" Header="Alpha">
+                        <StackPanel>
+                            <WrapPanel>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="AlphaBlend"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.AlphaBlend}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="AlphaBlendType"/>
+                                    <ComboBox Grid.Column="1" SelectedItem="{Binding MaterialViewModel.AlphaBlendType}" ItemsSource="{Binding Source={StaticResource ResourceKey=alphaBlendTypeEnum}}" HorizontalAlignment="Left" Width="102"/>
+                                </Grid>
+                            </WrapPanel>
+                            <WrapPanel>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="AlphaTest"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.AlphaTest}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="AlphaTestThreshold"/>
+                                    <CheckBox IsChecked="{Binding MaterialViewModel.AlphaTestThreshold}" Grid.Column="1" Width="102"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="AlphaRef"/>
+                                    <CheckBox IsChecked="{Binding MaterialViewModel.AlphaRef}" Grid.Column="1" Width="102"/>
+                                </Grid>
+                            </WrapPanel>
+                            <WrapPanel>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="AlphaSortMask"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.AlphaSortMask}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="ZTestMask"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.ZTestMask}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="ZWriteMask"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.ZWriteMask}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                </Grid>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Expander>
+
+                    <Expander x:Name="lightingExpander" Header="Lighting">
+                        <StackPanel>
+                            <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <Label Content="gCamPos"/>
+                                <vector:CustomVector4 Grid.Column="1" Value="{Binding MaterialViewModel.gCamPos}"/>
+                            </Grid>
+                            <WrapPanel>
+                                <Grid Margin="3,3" Width="450">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="MatDif"/>
+                                    <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.MatDif}"/>
+                                </Grid>
+                                <Grid Margin="3,3" Width="450">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="MatAmb"/>
+                                    <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.MatAmb}"/>
+                                </Grid>
+                                <Grid Margin="3,3" Width="450">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="MatSpc"/>
+                                    <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.MatSpc}"/>
+                                </Grid>
+                            </WrapPanel>
+                            <WrapPanel>
+
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="MatDifScale"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.MatDifScale}" Width="102" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="True" Interval="0.05" HideUpDownButtons="True"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="MatAmbScale"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.MatAmbScale}" Width="102" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="True" Interval="0.05" HideUpDownButtons="True"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="SpcCoeff"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.SpcCoeff}" Width="102" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="True" Interval="0.05" HideUpDownButtons="True"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="SpcPower"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.SpcPower}" Width="102" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="True" Interval="0.05" HideUpDownButtons="True"/>
+                                </Grid>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Expander>
+
+                    <Expander x:Name="miscExpander" Header="Misc">
+                        <StackPanel>
+                            <WrapPanel>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="VsFlag0"/>
+                                    <CheckBox Grid.Column="1" IsChecked="{Binding MaterialViewModel.VsFlag0}" Width="102"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="VsFlag1"/>
+                                    <CheckBox Grid.Column="1" IsChecked="{Binding MaterialViewModel.VsFlag1}" Width="102"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="VsFlag2"/>
+                                    <CheckBox Grid.Column="1" IsChecked="{Binding MaterialViewModel.VsFlag2}" Width="102"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="VsFlag3"/>
+                                    <CheckBox Grid.Column="1" IsChecked="{Binding MaterialViewModel.VsFlag3}" Width="102"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="CustomFlag"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.CustomFlag}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                </Grid>
+                            </WrapPanel>
+                            <WrapPanel>
+
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="BackFace"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.BackFace}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="TwoSidedRender"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.TwoSidedRender}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                </Grid>
+                            </WrapPanel>
+                            <WrapPanel>
+
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="LowRez"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.LowRez}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="LowRezSmoke"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.LowRezSmoke}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                </Grid>
+                            </WrapPanel>
+                            <WrapPanel>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="IncidencePower"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.IncidencePower}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="IncidenceAlphaBias"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.IncidenceAlphaBias}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                </Grid>
+                            </WrapPanel>
+                            <WrapPanel>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="ReflectCoeff"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.ReflectCoeff}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="ReflectFresnelBias"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.ReflectFresnelBias}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="ReflectFresnelCoeff"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.ReflectFresnelCoeff}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                </Grid>
+                            </WrapPanel>
+                            <Grid Margin="3,3" HorizontalAlignment="Left">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <Label Content="AnimationChannel"/>
+                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.AnimationChannel}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                            </Grid>
+                        </StackPanel>
+                    </Expander>
+
+                    <Expander x:Name="unknownExpander" Header="Unsorted" ToolTip="All parameters in this group have very niche uses and aren't used by many materials in the base game.">
+                        <StackPanel>
+                            <WrapPanel>
+                                <Grid Margin="3,3" Width="450">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="gLightDir"/>
+                                    <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.gLightDir}"/>
+                                </Grid>
+                                <Grid Margin="3,3" Width="450">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="gLightDif"/>
+                                    <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.gLightDif}"/>
+                                </Grid>
+                                <Grid Margin="3,3" Width="450">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="gLightSpc"/>
+                                    <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.gLightSpc}"/>
+                                </Grid>
+                                <Grid Margin="3,3" Width="450">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="gLightAmb"/>
+                                    <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.gLightAmb}"/>
+                                </Grid>
+                                <Grid Margin="3,3" Width="450">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="DirLight0Dir"/>
+                                    <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.DirLight0Dir}"/>
+                                </Grid>
+                                <Grid Margin="3,3" Width="450">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="DirLight0Col"/>
+                                    <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.DirLight0Col}"/>
+                                </Grid>
+                                <Grid Margin="3,3" Width="450">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="AmbLight0Col"/>
+                                    <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.AmbLight0Col}"/>
+                                </Grid>
+                            </WrapPanel>
+                            <WrapPanel>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Billboard"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.Billboard}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="BillboardType"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.BillboardType}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="NoEdge"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.NoEdge}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Shimmer"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.Shimmer}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="gTime"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.gTime}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True" StringFormat="0.0##"/>
+                                </Grid>
+
+                            </WrapPanel>
+                            <WrapPanel>
+
+                                <Grid Margin="3,3" Width="450">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Ambient"/>
+                                    <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.Ambient}"/>
+                                </Grid>
+                                <Grid Margin="3,3" Width="450">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Diffuse"/>
+                                    <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.Diffuse}"/>
+                                </Grid>
+                                <Grid Margin="3,3" Width="450">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Specular"/>
+                                    <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.Specular}"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="SpecularPower"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.SpecularPower}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True" StringFormat="0.0##"/>
+                                </Grid>
+                            </WrapPanel>
+                            <WrapPanel>
+
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="FadeInit"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.FadeInit}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True" StringFormat="0.0##"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="FadeSpeed"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.FadeSpeed}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True" StringFormat="0.0##"/>
+                                </Grid>
+
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="GradientInit"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.GradientInit}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True" StringFormat="0.0##"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="GradientSpeed"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.GradientSpeed}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True" StringFormat="0.0##"/>
+                                </Grid>
+
+                                <Grid Margin="3,3" Width="450">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="gGradientCol"/>
+                                    <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.gGradientCol}"/>
+                                </Grid>
+                            </WrapPanel>
+                            <WrapPanel>
+
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="RimCoeff"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.RimCoeff}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True" StringFormat="0.0##"/>
+                                </Grid>
+                                <Grid Margin="3,3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="RimPower"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.RimPower}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True" StringFormat="0.0##"/>
+                                </Grid>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Expander>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+    </Grid>
+</UserControl>

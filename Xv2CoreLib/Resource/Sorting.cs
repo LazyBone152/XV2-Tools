@@ -96,6 +96,7 @@ namespace Xv2CoreLib
 
         public static AsyncObservableCollection<T> SortEntries<T>(AsyncObservableCollection<T> entries) where T : IInstallable, new()
         {
+            /*
             //ObservableCollect doesn't have a Sort method, so we need to do our own (bad) one here.
 
             if (entries != null)
@@ -108,7 +109,9 @@ namespace Xv2CoreLib
                     entries[i] = sortedEntries[i];
                 }
             }
+            */
 
+            entries.Sort((x, y) => x.SortID - y.SortID);
             return entries;
         }
 

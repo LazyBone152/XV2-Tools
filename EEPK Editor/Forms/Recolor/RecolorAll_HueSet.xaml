@@ -12,7 +12,7 @@
         <StackPanel Margin="43,4,36,135.333" Orientation="Horizontal" >
 
             <iconPacks:PackIconMaterialLight Kind="Information"  Margin="0, 5" Foreground="{DynamicResource MahApps.Brushes.Accent}" Height="33" Width="33" />
-            <TextBlock Text="Sets the hue value to the desired amount, keeping the saturation and lightness values the same. This will result in everything being different shades of the same color." Foreground="{DynamicResource MahApps.Brushes.Accent}" TextWrapping="Wrap" FontSize="9" Margin="5,5,0,0" Width="304"/>
+            <TextBlock Text="Sets the hue value to the desired amount, keeping the saturation and lightness values the same. This will result in everything being different shades of the same color." Foreground="{DynamicResource MahApps.Brushes.Accent}" TextWrapping="Wrap" FontSize="10" Margin="5,5,0,0" Width="304"/>
         </StackPanel>
 
 

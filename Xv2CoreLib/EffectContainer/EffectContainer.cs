@@ -2276,20 +2276,8 @@ namespace Xv2CoreLib.EffectContainer
             if (type != AssetType.PBIND && type != AssetType.TBIND) throw new InvalidOperationException(String.Format("RemoveUnusedTextures: Method was called with type parameter = {0}, which is invalid (expecting either PBIND or TBIND).", type));
             if (undos == null) undos = new List<IUndoRedo>();
 
-            int removed = 0;
             AssetContainerTool container = GetAssetContainer(type);
-
-            for (int i = container.File3_Ref.Entry.Count - 1; i >= 0; i--)
-            {
-                if (!container.IsTextureUsed(container.File3_Ref.Entry[i]))
-                {
-                    undos.Add(new UndoableListRemove<EmbEntry>(container.File3_Ref.Entry, container.File3_Ref.Entry[i]));
-                    container.File3_Ref.Entry.RemoveAt(i);
-                    removed++;
-                }
-            }
-
-            return removed;
+            return container.RemoveUnusedTextures(undos);
         }
 
         /// <summary>
@@ -2303,41 +2291,7 @@ namespace Xv2CoreLib.EffectContainer
             if (undos == null) undos = new List<IUndoRedo>();
 
             AssetContainerTool container = GetAssetContainer(type);
-
-            int duplicateCount = 0;
-
-            restart:
-            foreach (var texture1 in container.File3_Ref.Entry)
-            {
-                List<EmbEntry> Duplicates = new List<EmbEntry>();
-
-                foreach (var texture2 in container.File3_Ref.Entry)
-                {
-                    if (texture1 != texture2 && texture1.Compare(texture2, true))
-                    {
-                        //Textures are the same, but the EmbEntry instances are different, thus its a duplicate
-                        duplicateCount++;
-                        Duplicates.Add(texture2);
-                    }
-                }
-
-                //Redirect the duplicates
-                if (Duplicates.Count > 0)
-                {
-                    foreach (var duplicate in Duplicates)
-                    {
-                        container.RefactorTextureRef(duplicate, texture1, undos);
-
-                        //Delete the duplicate
-                        undos.Add(new UndoableListRemove<EmbEntry>(container.File3_Ref.Entry, duplicate));
-                        container.File3_Ref.Entry.Remove(duplicate);
-                    }
-                    goto restart;
-                }
-
-            }
-
-            return duplicateCount;
+            return container.MergeDuplicateTextures(undos);
         }
 
         /// <summary>
@@ -2348,71 +2302,10 @@ namespace Xv2CoreLib.EffectContainer
         public int RemoveUnusedMaterials(AssetType type, List<IUndoRedo> undos = null)
         {
             if (type != AssetType.PBIND && type != AssetType.TBIND) throw new InvalidOperationException(String.Format("RemoveUnusedMaterials: Method was called with type parameter = {0}, which is invalid (expecting either PBIND or TBIND).", type));
-            if (undos == null) undos = new List<IUndoRedo>();
-
-            int removed = 0;
-            AssetContainerTool container = GetAssetContainer(type);
-
-            for (int i = container.File2_Ref.Materials.Count - 1; i >= 0; i--)
-            {
-                if (!container.IsMaterialUsed(container.File2_Ref.Materials[i]))
-                {
-                    undos.Add(new UndoableListRemove<EmmMaterial>(container.File2_Ref.Materials, container.File2_Ref.Materials[i]));
-                    container.File2_Ref.Materials.RemoveAt(i);
-                    removed++;
-                }
-            }
-
-            return removed;
-        }
-
-        /// <summary>
-        /// Merges all identical materials into a single instance.
-        /// </summary>
-        /// <param name="type">PBIND or TBIND.</param>
-        /// <returns>The amount of merged materials.</returns>
-        public int MergeDuplicateMaterials(AssetType type, List<IUndoRedo> undos = null)
-        {
-            if (type != AssetType.PBIND && type != AssetType.TBIND) throw new InvalidOperationException(String.Format("MergeDuplicateMaterials: Method was called with type parameter = {0}, which is invalid (expecting either PBIND or TBIND).", type));
-            if (undos == null) undos = new List<IUndoRedo>();
 
             AssetContainerTool container = GetAssetContainer(type);
 
-            int duplicateCount = 0;
-
-            restart:
-            foreach (var material1 in container.File2_Ref.Materials)
-            {
-                List<EmmMaterial> Duplicates = new List<EmmMaterial>();
-
-                foreach (var material2 in container.File2_Ref.Materials)
-                {
-                    if (material1 != material2 && material1.Compare(material2))
-                    {
-                        //Textures are the same, but the EmbEntry instances are different, thus its a duplicate
-                        duplicateCount++;
-                        Duplicates.Add(material2);
-                    }
-                }
-
-                //Redirect the duplicates
-                if (Duplicates.Count > 0)
-                {
-                    foreach (var duplicate in Duplicates)
-                    {
-                        container.RefactorMaterialRef(duplicate, material1, undos);
-
-                        //Delete the duplicate
-                        undos.Add(new UndoableListRemove<EmmMaterial>(container.File2_Ref.Materials, duplicate));
-                        container.File2_Ref.Materials.Remove(duplicate);
-                    }
-                    goto restart;
-                }
-
-            }
-
-
-            return duplicateCount;
+            return container.RemoveUnusedMaterials(undos);
         }
 
         public void RemoveAsset(Asset asset, AssetType type, List<IUndoRedo> undos = null)
@@ -2445,6 +2338,9 @@ namespace Xv2CoreLib.EffectContainer
             //Remove larger than 2k textures
             textures.RemoveAll(x => Math.Max(x.Width, x.Height) > 2048);
 
+            //Remove all textures that aren't a power of 2, as the merging algo doesn't like that at all.
+            textures.RemoveAll(x => !Utils.IsPowerOfTwo(x.PixelWidth) || !Utils.IsPowerOfTwo(x.PixelHeight));
+
             int superCount = 0;
             int totalMerged = textures.Count;
 
@@ -2452,7 +2348,7 @@ namespace Xv2CoreLib.EffectContainer
             {
                 var mergeList = SelectTexturesForMerge(textures);
                 var embList = Pbind.File3_Ref.GetAllEmbEntriesByBitmap(mergeList);
-                MergeIntoSuperTexture_PBIND(embList, undos);
+                Pbind.MergeIntoSuperTexture_PBIND(embList, undos);
                 superCount++;
             }
 
@@ -2482,110 +2378,12 @@ namespace Xv2CoreLib.EffectContainer
                 }
             }
 
+            //Remove the bitmaps we are going to merge from the main list
             bitmaps.RemoveAll(x => toMerge.Contains(x));
+
             return toMerge;
         }
 
-        public void MergeIntoSuperTexture_PBIND(List<EmbEntry> embEntries, List<IUndoRedo> undos = null)
-        {
-            if (undos == null) undos = new List<IUndoRedo>();
-
-            var bitmaps = EmbEntry.GetBitmaps(embEntries);
-            double maxDimension = EmbEntry.HighestDimension(bitmaps);
-            int textureSize = (int)EmbEntry.SelectTextureSize(maxDimension, bitmaps.Count);
-
-            var superTexture = new WriteableBitmap(textureSize, textureSize, 96, 96, PixelFormats.Bgra32, null);
-            EmbEntry newEmbEntry = new EmbEntry();
-
-            for (int i = 0; i < bitmaps.Count; i++)
-            {
-                double position = maxDimension * i / textureSize;
-                int row = (int)position;
-                position -= row;
-                int x = (int)(position * textureSize);
-                int y = (int)maxDimension * row;
-
-                Rect sourceRect = new Rect(0, 0, bitmaps[i].Width, bitmaps[i].Height);
-                Rect destRect = new Rect(x, y, bitmaps[i].Width, bitmaps[i].Height);
-
-                superTexture.Blit(destRect, bitmaps[i], sourceRect);
-
-                //Update EMP Texture cordinates
-                List<EMP_TextureDefinition> textureDefs = Pbind.GetAllTextureDefinitions(embEntries[i]);
-
-                double a = textureSize / maxDimension;
-
-                foreach (var textureDef in textureDefs)
-                {
-                    undos.Add(new UndoableProperty<EMP_TextureDefinition>(nameof(EMP_TextureDefinition.TextureRef), textureDef, textureDef.TextureRef, newEmbEntry));
-                    textureDef.TextureRef = newEmbEntry;
-
-                    //If SpriteSheet or Static and not TextureRepetition == Mirror
-                    if ((textureDef.TextureType == EMP_TextureDefinition.TextureAnimationType.SpriteSheet || textureDef.TextureType == EMP_TextureDefinition.TextureAnimationType.Static) &&
-                        (textureDef.I_06_byte != EMP_TextureDefinition.TextureRepitition.Mirror && textureDef.I_07_byte != EMP_TextureDefinition.TextureRepitition.Mirror))
-                    {
-
-                        //If no keyframe exists, then create a default one. (Some EMPs are like this, for some weird reason????)
-                        if(textureDef.SubData2.Keyframes.Count == 0)
-                        {
-                            SubData_2_Entry newKeyframe = new SubData_2_Entry();
-                            newKeyframe.ScaleX = 1f;
-                            newKeyframe.ScaleY = 1f;
-                            textureDef.SubData2.Keyframes.Add(newKeyframe);
-                            undos.Add(new UndoableListAdd<SubData_2_Entry>(textureDef.SubData2.Keyframes, newKeyframe));
-
-                            if(textureDef.TextureType == EMP_TextureDefinition.TextureAnimationType.SpriteSheet)
-                            {
-                                textureDef.TextureType = EMP_TextureDefinition.TextureAnimationType.Static;
-                                undos.Add(new UndoableProperty<EMP_TextureDefinition>(nameof(EMP_TextureDefinition.TextureType), textureDef, EMP_TextureDefinition.TextureAnimationType.SpriteSheet, EMP_TextureDefinition.TextureAnimationType.Static));
-                            }
-                        }
-
-                        foreach(var keyframe in textureDef.SubData2.Keyframes)
-                        {
-                            float newScaleX = (float)(keyframe.ScaleX / a * (bitmaps[i].Width / maxDimension));
-                            float newScaleY = (float)(keyframe.ScaleY / a * (bitmaps[i].Height / maxDimension));
-                            float newScrollX = (float)((keyframe.ScrollX / a * (bitmaps[i].Width / maxDimension)) + position);
-                            float newScrollY = (float)((keyframe.ScrollY / a * (bitmaps[i].Height / maxDimension)) + (row / a));
-
-                            undos.Add(new UndoableProperty<SubData_2_Entry>(nameof(SubData_2_Entry.ScrollX), keyframe, keyframe.ScrollX, newScrollX));
-                            undos.Add(new UndoableProperty<SubData_2_Entry>(nameof(SubData_2_Entry.ScrollY), keyframe, keyframe.ScrollY, newScrollY));
-                            undos.Add(new UndoableProperty<SubData_2_Entry>(nameof(SubData_2_Entry.ScaleX), keyframe, keyframe.ScaleX, newScaleX));
-                            undos.Add(new UndoableProperty<SubData_2_Entry>(nameof(SubData_2_Entry.ScaleY), keyframe, keyframe.ScaleY, newScaleY));
-
-                            keyframe.ScrollX = newScrollX;
-                            keyframe.ScrollY = newScrollY;
-                            keyframe.ScaleX = newScaleX;
-                            keyframe.ScaleY = newScaleY;
-                        }
-                    }
-                }
-            }
-
-            //EmbEntry settings:
-
-            //We need to first save the new image to a byte array and then reload it, as CSharpImageLibrary can have trouble saving WriteableBitmaps directly created in code for some unknown reason. (The only other workaround I found was to disable mipmaps but that resulted in ridiculous file sizes)
-            using (MemoryStream ms = new MemoryStream())
-            {
-                superTexture.Save(ms);
-                newEmbEntry.Data = ms.ToArray();
-            }
-
-            newEmbEntry.LoadDds();
-            newEmbEntry.Name = $"SuperTexture ({newEmbEntry.DdsImage.GetHashCode()}).dds";
-
-            //Delete all previous textures
-            foreach (var entry in embEntries)
-            {
-                undos.Add(new UndoableListRemove<EmbEntry>(Pbind.File3_Ref.Entry, entry));
-                Pbind.File3_Ref.Entry.Remove(entry);
-            }
-
-            //Add new texture
-            undos.Add(new UndoableListAdd<EmbEntry>(Pbind.File3_Ref.Entry, newEmbEntry));
-            Pbind.File3_Ref.Entry.Add(newEmbEntry);
-
-        }
         #endregion
 
         #region Install
@@ -3328,7 +3126,7 @@ namespace Xv2CoreLib.EffectContainer
                 {
                     foreach (var textureDef in asset.Files[0].EmpFile.Textures)
                     {
-                        if (textureDef.TextureRef?.DdsImage == bitmap)
+                        if (textureDef.TextureRef?.Texture == bitmap)
                         {
                             if (textureDef.TextureType == EMP_TextureDefinition.TextureAnimationType.Speed 
                                 || textureDef.I_06_byte == EMP_TextureDefinition.TextureRepitition.Mirror || textureDef.I_07_byte == EMP_TextureDefinition.TextureRepitition.Mirror 
@@ -3591,7 +3389,6 @@ namespace Xv2CoreLib.EffectContainer
 
         #endregion
 
-
         #region Editor
         public void DeleteTexture(EmbEntry embEntry, List<IUndoRedo> undos = null)
         {
@@ -3614,7 +3411,236 @@ namespace Xv2CoreLib.EffectContainer
 
             File2_Ref.Materials.Remove(material);
         }
+
+        //Operations
+        /// <summary>
+        /// Merges all identical materials into a single instance.
+        /// </summary>
+        /// <returns>The amount of merged materials.</returns>
+        public int MergeDuplicateMaterials(List<IUndoRedo> undos = null)
+        {
+            AssetContainerTool container = this;
+
+            int duplicateCount = 0;
+
+        restart:
+            foreach (var material1 in container.File2_Ref.Materials)
+            {
+                List<EmmMaterial> Duplicates = new List<EmmMaterial>();
+
+                foreach (var material2 in container.File2_Ref.Materials)
+                {
+                    if (material1 != material2 && material1.Compare(material2))
+                    {
+                        //Textures are the same, but the EmbEntry instances are different, thus its a duplicate
+                        duplicateCount++;
+                        Duplicates.Add(material2);
+                    }
+                }
+
+                //Redirect the duplicates
+                if (Duplicates.Count > 0)
+                {
+                    foreach (var duplicate in Duplicates)
+                    {
+                        container.RefactorMaterialRef(duplicate, material1, undos);
+
+                        //Delete the duplicate
+                        undos?.Add(new UndoableListRemove<EmmMaterial>(container.File2_Ref.Materials, duplicate));
+                        container.File2_Ref.Materials.Remove(duplicate);
+                    }
+                    goto restart;
+                }
+
+            }
+
+            return duplicateCount;
+        }
+
+        /// <summary>
+        /// Remove all materials that are unused by Particle Effects or ETR Effects.
+        /// </summary>
+        /// <returns>The amount of materials that were removed.</returns>
+        public int RemoveUnusedMaterials(List<IUndoRedo> undos = null)
+        {
+            int removed = 0;
+            AssetContainerTool container = this;
+
+            for (int i = container.File2_Ref.Materials.Count - 1; i >= 0; i--)
+            {
+                if (!container.IsMaterialUsed(container.File2_Ref.Materials[i]))
+                {
+                    undos?.Add(new UndoableListRemove<EmmMaterial>(container.File2_Ref.Materials, container.File2_Ref.Materials[i]));
+                    container.File2_Ref.Materials.RemoveAt(i);
+                    removed++;
+                }
+            }
+
+            return removed;
+        }
         
+        public int MergeDuplicateTextures(List<IUndoRedo> undos = null)
+        {
+            int duplicateCount = 0;
+
+        restart:
+            foreach (var texture1 in File3_Ref.Entry)
+            {
+                List<EmbEntry> Duplicates = new List<EmbEntry>();
+
+                foreach (var texture2 in File3_Ref.Entry)
+                {
+                    if (texture1 != texture2 && texture1.Compare(texture2, true))
+                    {
+                        //Textures are the same, but the EmbEntry instances are different, thus its a duplicate
+                        duplicateCount++;
+                        Duplicates.Add(texture2);
+                    }
+                }
+
+                //Redirect the duplicates
+                if (Duplicates.Count > 0)
+                {
+                    foreach (var duplicate in Duplicates)
+                    {
+                        RefactorTextureRef(duplicate, texture1, undos);
+
+                        //Delete the duplicate
+                        undos?.Add(new UndoableListRemove<EmbEntry>(File3_Ref.Entry, duplicate));
+                        File3_Ref.Entry.Remove(duplicate);
+                    }
+                    goto restart;
+                }
+
+            }
+
+            return duplicateCount;
+        }
+        
+        public int RemoveUnusedTextures(List<IUndoRedo> undos = null)
+        {
+            int removed = 0;
+            for (int i = File3_Ref.Entry.Count - 1; i >= 0; i--)
+            {
+                if (!IsTextureUsed(File3_Ref.Entry[i]))
+                {
+                    undos?.Add(new UndoableListRemove<EmbEntry>(File3_Ref.Entry, File3_Ref.Entry[i]));
+                    File3_Ref.Entry.RemoveAt(i);
+                    removed++;
+                }
+            }
+
+            return removed;
+        }
+
+        public void MergeIntoSuperTexture_PBIND(List<EmbEntry> embEntries, List<IUndoRedo> undos = null)
+        {
+            if (ContainerAssetType != AssetType.PBIND) throw new InvalidOperationException("MergeIntoSuperTexture_PBIND: SuperTexture feature is only available for PBIND container type.");
+            if (undos == null) undos = new List<IUndoRedo>();
+
+            var bitmaps = EmbEntry.GetBitmaps(embEntries);
+            double maxDimension = EmbEntry.HighestDimension(bitmaps);
+            int textureSize = (int)EmbEntry.SelectTextureSize(maxDimension, bitmaps.Count);
+
+            var superTexture = new WriteableBitmap(textureSize, textureSize, 96, 96, PixelFormats.Bgra32, null);
+            EmbEntry newEmbEntry = new EmbEntry();
+            newEmbEntry.ImageFormat = CSharpImageLibrary.ImageEngineFormat.DDS_DXT5;
+            newEmbEntry.Texture = superTexture;
+
+            for (int i = 0; i < bitmaps.Count; i++)
+            {
+                if (bitmaps[i] == null)
+                    throw new NullReferenceException("Bitmap was null.");
+
+                double position = maxDimension * i / textureSize;
+                int row = (int)position;
+                position -= row;
+                int x = (int)(position * textureSize);
+                int y = (int)maxDimension * row;
+
+                Rect sourceRect = new Rect(0, 0, bitmaps[i].PixelWidth, bitmaps[i].PixelHeight);
+                Rect destRect = new Rect(x, y, bitmaps[i].PixelWidth, bitmaps[i].PixelHeight);
+
+                superTexture.Blit(destRect, bitmaps[i], sourceRect);
+
+                //Update EMP Texture cordinates
+                List<EMP_TextureDefinition> textureDefs = GetAllTextureDefinitions(embEntries[i]);
+
+                double a = textureSize / maxDimension;
+
+                foreach (var textureDef in textureDefs)
+                {
+                    undos.Add(new UndoableProperty<EMP_TextureDefinition>(nameof(EMP_TextureDefinition.TextureRef), textureDef, textureDef.TextureRef, newEmbEntry));
+                    textureDef.TextureRef = newEmbEntry;
+
+                    //If SpriteSheet or Static and not TextureRepetition == Mirror
+                    if ((textureDef.TextureType == EMP_TextureDefinition.TextureAnimationType.SpriteSheet || textureDef.TextureType == EMP_TextureDefinition.TextureAnimationType.Static) &&
+                        (textureDef.I_06_byte != EMP_TextureDefinition.TextureRepitition.Mirror && textureDef.I_07_byte != EMP_TextureDefinition.TextureRepitition.Mirror))
+                    {
+
+                        //If no keyframe exists, then create a default one. (Some EMPs are like this, for some weird reason????)
+                        if (textureDef.SubData2.Keyframes.Count == 0)
+                        {
+                            SubData_2_Entry newKeyframe = new SubData_2_Entry();
+                            newKeyframe.ScaleX = 1f;
+                            newKeyframe.ScaleY = 1f;
+                            textureDef.SubData2.Keyframes.Add(newKeyframe);
+                            undos.Add(new UndoableListAdd<SubData_2_Entry>(textureDef.SubData2.Keyframes, newKeyframe));
+
+                            if (textureDef.TextureType == EMP_TextureDefinition.TextureAnimationType.SpriteSheet)
+                            {
+                                textureDef.TextureType = EMP_TextureDefinition.TextureAnimationType.Static;
+                                undos.Add(new UndoableProperty<EMP_TextureDefinition>(nameof(EMP_TextureDefinition.TextureType), textureDef, EMP_TextureDefinition.TextureAnimationType.SpriteSheet, EMP_TextureDefinition.TextureAnimationType.Static));
+                            }
+                        }
+
+                        foreach (var keyframe in textureDef.SubData2.Keyframes)
+                        {
+                            float newScaleX = (float)(keyframe.ScaleX / a * (bitmaps[i].Width / maxDimension));
+                            float newScaleY = (float)(keyframe.ScaleY / a * (bitmaps[i].Height / maxDimension));
+                            float newScrollX = (float)((keyframe.ScrollX / a * (bitmaps[i].Width / maxDimension)) + position);
+                            float newScrollY = (float)((keyframe.ScrollY / a * (bitmaps[i].Height / maxDimension)) + (row / a));
+
+                            undos.Add(new UndoableProperty<SubData_2_Entry>(nameof(SubData_2_Entry.ScrollX), keyframe, keyframe.ScrollX, newScrollX));
+                            undos.Add(new UndoableProperty<SubData_2_Entry>(nameof(SubData_2_Entry.ScrollY), keyframe, keyframe.ScrollY, newScrollY));
+                            undos.Add(new UndoableProperty<SubData_2_Entry>(nameof(SubData_2_Entry.ScaleX), keyframe, keyframe.ScaleX, newScaleX));
+                            undos.Add(new UndoableProperty<SubData_2_Entry>(nameof(SubData_2_Entry.ScaleY), keyframe, keyframe.ScaleY, newScaleY));
+
+                            keyframe.ScrollX = newScrollX;
+                            keyframe.ScrollY = newScrollY;
+                            keyframe.ScaleX = newScaleX;
+                            keyframe.ScaleY = newScaleY;
+                        }
+                    }
+                }
+            }
+
+            //EmbEntry settings:
+            newEmbEntry.SaveDds(false);
+#if DEBUG
+            newEmbEntry.LoadDds();
+
+            if (newEmbEntry.Texture == null)
+                throw new NullReferenceException("DdsImage couldn't be reloaded after merge.");
+#endif
+
+
+            newEmbEntry.Name = (newEmbEntry.Texture != null) ? $"SuperTexture ({newEmbEntry.Texture.GetHashCode()}).dds" : $"SuperTexture ({newEmbEntry.Data.GetHashCode()}).dds";
+
+            //Delete all previous textures
+            foreach (var entry in embEntries)
+            {
+                undos.Add(new UndoableListRemove<EmbEntry>(File3_Ref.Entry, entry));
+                File3_Ref.Entry.Remove(entry);
+            }
+
+            //Add new texture
+            undos.Add(new UndoableListAdd<EmbEntry>(File3_Ref.Entry, newEmbEntry));
+            File3_Ref.Entry.Add(newEmbEntry);
+
+        }
+
+
         //Refactoring
         public void RefactorTextureRef(EMB_CLASS.EmbEntry oldRef, EMB_CLASS.EmbEntry newRef, List<IUndoRedo> undos = null)
         {

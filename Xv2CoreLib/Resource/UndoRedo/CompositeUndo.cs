@@ -6,7 +6,7 @@ namespace Xv2CoreLib.Resource.UndoRedo
     public class CompositeUndo : IUndoRedo
     {
         public bool doLast { get; set; }
-        private List<IUndoRedo> undos;
+        internal List<IUndoRedo> undos;
         public string Message { get; set; }
 
         /// <summary>
@@ -56,6 +56,43 @@ namespace Xv2CoreLib.Resource.UndoRedo
 
             foreach (IUndoRedo redo in undos.Where(x => x.doLast))
                 redo.Redo();
+        }
+
+        public bool CanMerge(CompositeUndo undo)
+        {
+            if (undo.undos.Count != undos.Count) return false;
+
+            for(int i = 0; i < undos.Count; i++)
+            {
+                if (undo.undos[i] is IMergableUndo mergeUndo && undos[i] is IMergableUndo prevMergeUndo)
+                {
+                    //Undos qualify for merging
+                    if (mergeUndo._field == prevMergeUndo._field && mergeUndo._instance == prevMergeUndo._instance && mergeUndo.doLast == prevMergeUndo.doLast)
+                    {
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+    
+        public void MergeCompositeUndos(CompositeUndo undoToMerge)
+        {
+            for (int i = 0; i < undos.Count; i++)
+            {
+                if (undoToMerge.undos[i] is IMergableUndo mergeUndo && undos[i] is IMergableUndo prevMergeUndo)
+                {
+                    //Undos qualify for merging
+                    if (mergeUndo._field == prevMergeUndo._field && mergeUndo._instance == prevMergeUndo._instance && mergeUndo.doLast == prevMergeUndo.doLast)
+                    {
+                        prevMergeUndo._newValue = mergeUndo._newValue;
+                    }
+                }
+            }
         }
     }
 }

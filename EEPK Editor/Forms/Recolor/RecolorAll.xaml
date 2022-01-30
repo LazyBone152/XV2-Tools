@@ -13,7 +13,7 @@
         <StackPanel Margin="43,4,36,154.333" Orientation="Horizontal" >
 
             <iconPacks:PackIconMaterialLight Kind="Information"  Margin="0, 5" Foreground="{DynamicResource MahApps.Brushes.Accent}" Height="33" Width="33" />
-            <TextBlock Text="Adjusts the hue, saturation and lightness (HSL) values, shifting them by the desired amount. This recolors the effect while preserving any color variation." Foreground="{DynamicResource MahApps.Brushes.Accent}" TextWrapping="Wrap" FontSize="9" Margin="5,10,0,0.333" Width="304"/>
+            <TextBlock Text="Adjusts the hue, saturation and lightness (HSL) values, shifting them by the desired amount. This recolors the effect while preserving any color variation." Foreground="{DynamicResource MahApps.Brushes.Accent}" TextWrapping="Wrap" FontSize="10" Margin="5,10,0,0.333" Width="304"/>
         </StackPanel>
 
 

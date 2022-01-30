@@ -72,7 +72,7 @@ namespace EEPK_Organiser.Forms.Recolor
             DataContext = this;
             Owner = parent;
 
-            OriginalTextureBackup = CurrentTexture.DdsImage;
+            OriginalTextureBackup = CurrentTexture.Texture;
             stopwatch.Start();
         }
 
@@ -80,7 +80,7 @@ namespace EEPK_Organiser.Forms.Recolor
         {
             cancelled = false;
             CurrentTexture.wasEdited = true;
-            UndoManager.Instance.AddUndo(new UndoableProperty<EmbEntry>(nameof(EmbEntry.DdsImage), CurrentTexture, OriginalTextureBackup, CurrentTexture.DdsImage, "Hue Set"));
+            UndoManager.Instance.AddUndo(new UndoableProperty<EmbEntry>(nameof(EmbEntry.Texture), CurrentTexture, OriginalTextureBackup, CurrentTexture.Texture, "Hue Set"));
             Close();
         }
 
@@ -120,7 +120,7 @@ namespace EEPK_Organiser.Forms.Recolor
             bitmap = hueFilter.Apply(bitmap);
 
             //Convert back to WPF Bitmap
-            CurrentTexture.DdsImage = (WriteableBitmap)bitmap;
+            CurrentTexture.Texture = (WriteableBitmap)bitmap;
 
             //Restart the timer
             isImageProcessing = false;
@@ -131,7 +131,7 @@ namespace EEPK_Organiser.Forms.Recolor
         {
             if (cancelled)
             {
-                CurrentTexture.DdsImage = OriginalTextureBackup;
+                CurrentTexture.Texture = OriginalTextureBackup;
             }
         }
 

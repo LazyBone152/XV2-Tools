@@ -21,11 +21,12 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
-            args = new string[1] { @"E:\VS_Test\DEM\ALL DEM" };
+            args = new string[1] { @"C:\XV2_MultiThreadExtractTest\EMD" };
 
             DEBUG_MODE = true;
 #endif
             //CpkExtract();
+            //MatDecompile(args);
 
             string fileLocation = null;
             
@@ -40,12 +41,12 @@ namespace XV2_Xml_Serializer
             
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
             
-            for (int i = 0; i < args.Count(); i++)
+            for (int i = 0; i < args.Length; i++)
             {
                 fileLocation = args[i];
-                if(args.Count() > 1)
+                if(args.Length > 1)
                 {
-                    Console.WriteLine(String.Format("Processing File {2} of {1}: \"{0}\"...\n", fileLocation, args.Count(), i + 1));
+                    Console.WriteLine(String.Format("Processing File {2} of {1}: \"{0}\"...\n", fileLocation, args.Length, i + 1));
                 }
 
                 if (Directory.Exists(fileLocation))
@@ -607,7 +608,16 @@ namespace XV2_Xml_Serializer
             }
         }
 
-
+        private static void MatDecompile(string[] args)
+        {
+            foreach(var file in args)
+            {
+                var emm = Xv2CoreLib.EMM.EMM_File.LoadEmm(file);
+                emm.DecompileMaterials();
+                emm.CompileMaterials();
+                emm.SaveBinaryEmmFile($"{Path.GetDirectoryName(file)}/{Path.GetFileNameWithoutExtension(file)}_dec.emm");
+            }
+        }
 
         //Debug/testing code
 #if DEBUG
@@ -757,9 +767,18 @@ namespace XV2_Xml_Serializer
                                         {
                                             foreach(var submesh in mesh.Submeshes)
                                             {
-                                                if(submesh.TextureDefinitionCount > 2)
+                                                int count = 0;
+                                                for(int i = 0; i < submesh.TriangleListCount; i++)
                                                 {
-                                                    Console.WriteLine("Here: " + submesh.TextureDefinitionCount);
+                                                    for(int a = 0; a < submesh.Triangles[i].BonesCount; a++)
+                                                    {
+                                                        count++;
+                                                    }
+                                                }
+
+                                                if(count > 24)
+                                                {
+                                                    Console.WriteLine("Here: " + count);
                                                     Console.ReadLine();
                                                 }
                                             }
@@ -1207,7 +1226,8 @@ namespace XV2_Xml_Serializer
         static void BulkParseEmm(string directory)
         {
             string[] files = Directory.GetFiles(directory);
-            List<string> shaderTypes = new List<string>();
+            List<string> value = new List<string>();
+            List<int> count = new List<int>();
             int errors = 0;
 
             foreach (string s in files)
@@ -1223,16 +1243,23 @@ namespace XV2_Xml_Serializer
                         {
                             foreach (var parm in mat.Parameters)
                             {
-                                if(parm.Name.Contains("MipMapLod"))
+                                if (parm.FloatValue > 1f)
                                 {
-                                    if(!shaderTypes.Contains(parm.Float.ToString()))
-                                        shaderTypes.Add(parm.Float.ToString());
+                                    Console.WriteLine("HERE : " + parm.FloatValue);
+                                    Console.ReadLine();
                                 }
-                                //if (!shaderTypes.Contains(parm.Name))
-                                //    shaderTypes.Add(parm.Name);
+                                string name = $"{parm.Name} ({parm.Type})";
+                                if (!value.Contains(name))
+                                {
+                                    value.Add(name);
+                                    count.Add(1);
+                                }
+                                else
+                                {
+                                    count[value.IndexOf(name)] += 1;
+                                }
                             }
                         }
-
                     }
                 }
                 catch
@@ -1245,9 +1272,11 @@ namespace XV2_Xml_Serializer
             StringBuilder str = new StringBuilder();
             str.Append($"{errors} errors.\n\n");
 
-            foreach(var shader in shaderTypes)
+            int idx = 0;
+            foreach(var shader in value)
             {
-                str.Append(shader).AppendLine();
+                str.Append(shader + $"({count[idx]})").AppendLine();
+                idx++;
             }
 
             File.WriteAllText("emm_debug_log.txt", str.ToString());

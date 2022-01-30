@@ -1239,8 +1239,8 @@ namespace EEPK_Organiser.Forms.EMP
                     if (texture.TextureRef != null)
                     {
                         EmbEditForm embForm = mainWindow.PBIND_OpenTextureViewer();
-                        embForm.listBox_Textures.SelectedItem = texture.TextureRef;
-                        embForm.listBox_Textures.ScrollIntoView(texture.TextureRef);
+                        embForm.textureEditor.SelectedTexture = texture.TextureRef;
+                        embForm.textureEditor.textureDataGrid.ScrollIntoView(texture.TextureRef);
                     }
                 }
             }
@@ -1333,9 +1333,9 @@ namespace EEPK_Organiser.Forms.EMP
                 {
                     if (particleEffect.Type_Texture.MaterialRef != null)
                     {
-                        EmmEditForm emmForm = mainWindow.PBIND_OpenMaterialEditor();
-                        emmForm.dataGrid.SelectedItem = particleEffect.Type_Texture.MaterialRef;
-                        emmForm.dataGrid.ScrollIntoView(particleEffect.Type_Texture.MaterialRef);
+                        MaterialsEditorForm emmForm = mainWindow.PBIND_OpenMaterialEditor();
+                        emmForm.materialsEditor.SelectedMaterial = particleEffect.Type_Texture.MaterialRef;
+                        emmForm.materialsEditor.materialDataGrid.ScrollIntoView(particleEffect.Type_Texture.MaterialRef);
                     }
                 }
             }

@@ -12,7 +12,7 @@
         <StackPanel Margin="43,4,35.667,133.333" Orientation="Horizontal" >
 
             <iconPacks:PackIconMaterialLight Kind="Information"  Margin="0, 5" Foreground="{DynamicResource MahApps.Brushes.Accent}" Height="33" Width="33" />
-            <TextBlock Text="Adjusts the hue, saturation and lightness (HSL) values, shifting them by the desired amount. This recolors the texture while preserving any color variation." Foreground="{DynamicResource MahApps.Brushes.Accent}" TextWrapping="Wrap" FontSize="9" Margin="5,10,0,0" Width="309"/>
+            <TextBlock Text="Adjusts the hue, saturation and lightness (HSL) values, shifting them by the desired amount. This recolors the texture while preserving any color variation." Foreground="{DynamicResource MahApps.Brushes.Accent}" TextWrapping="Wrap" FontSize="10" Margin="5,10,0,0" Width="309"/>
         </StackPanel>
 
         <Slider ValueChanged="Slider_ValueChanged" Value="{Binding HueValue, UpdateSourceTrigger=PropertyChanged}" Minimum="-180" Maximum="180" HorizontalAlignment="Left" Margin="89,63,0,0" VerticalAlignment="Top" Width="197"/>

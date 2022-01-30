@@ -341,7 +341,10 @@ namespace Xv2CoreLib
     
     public static class Utils
     {
-        
+        public static bool IsPowerOfTwo(int val)
+        {
+            return  (val & (val - 1)) == 0 && val != 0;
+        }
 
         public static bool IsFileWriteLocked(string path)
         {
@@ -401,7 +404,7 @@ namespace Xv2CoreLib
 
         public static float Lerp(float value1, float value2, float amount)
         {
-            return value1 + (value2 - value1) * amount;
+            return value1 + ((value2 - value1) * amount);
         }
 
         public static double ConvertRadiansToDegrees(double radians)

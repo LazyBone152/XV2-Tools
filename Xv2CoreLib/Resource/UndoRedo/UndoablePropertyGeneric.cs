@@ -1,20 +1,18 @@
-﻿using System;
-
-namespace Xv2CoreLib.Resource.UndoRedo
+﻿namespace Xv2CoreLib.Resource.UndoRedo
 {
-    public class UndoablePropertyGeneric : IUndoRedo
+    public class UndoablePropertyGeneric : IUndoRedo, IMergableUndo
     {
         public bool doLast { get; set; }
-        private object _oldValue;
-        private object _newValue;
-        private string _property;
-        private object _instance;
+        public object _oldValue { get; set; }
+        public object _newValue { get; set; }
+        public string _field { get; set; }
+        public object _instance { get; set; }
         public string Message { get; }
 
         public UndoablePropertyGeneric(string property, object instance, object oldValue, object newValue, string description = "")
         {
             _instance = instance;
-            _property = property;
+            _field = property;
             _oldValue = oldValue;
             _newValue = newValue;
 
@@ -23,12 +21,12 @@ namespace Xv2CoreLib.Resource.UndoRedo
 
         public void Undo()
         {
-            _instance.GetType().GetProperty(_property).SetValue(_instance, _oldValue, null);
+            _instance.GetType().GetProperty(_field).SetValue(_instance, _oldValue, null);
         }
 
         public void Redo()
         {
-            _instance.GetType().GetProperty(_property).SetValue(_instance, _newValue, null);
+            _instance.GetType().GetProperty(_field).SetValue(_instance, _newValue, null);
         }
 
     }

@@ -789,6 +789,10 @@ namespace Xv2CoreLib
                 string baiPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.bai", cmsEntry.ShortName, cmsEntry.BaiPath));
                 BAI_File baiFile = (BAI_File)FileManager.Instance.GetParsedFileFromGame(baiPath);
 
+                //Load esk file
+                string eskPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}_000.esk", cmsEntry.ShortName, cmsEntry.BcsPath));
+                ESK_File eskFile = (ESK_File)FileManager.Instance.GetParsedFileFromGame(eskPath);
+
                 //Costumes
                 List<Xv2File<AMK_File>> amkFiles = new List<Xv2File<AMK_File>>();
                 AsyncObservableCollection<Xv2CharaCostume> costumes = new AsyncObservableCollection<Xv2CharaCostume>();
@@ -831,10 +835,12 @@ namespace Xv2CoreLib
                     BcsFile = new Xv2File<BCS_File>(bcsFile, fileIO.PathInGameDir(bcsPath), false, null, false),
                     AmkFile = amkFiles,
                     BaiFile = new Xv2File<BAI_File>(baiFile, fileIO.PathInGameDir(baiPath), !cmsEntry.IsSelfReference(cmsEntry.BaiPath)),
+                    EskFile = new Xv2File<ESK_File>(eskFile, fileIO.PathInGameDir(eskPath), false),
                     MovesetFiles = GetCharacterMoveFiles(cmsEntry, ersEntry, csoEntries, loadFiles),
                     Costumes = costumes
                 };
 
+                chara.LoadPartSets();
                 chara.CreateDefaultFiles();
 
                 return chara;

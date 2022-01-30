@@ -12,6 +12,8 @@ using Xv2CoreLib.Resource.UndoRedo;
 
 namespace EEPK_Organiser.Forms
 {
+    //NOTE: In debug mode this can be quite crash prone when dealing with large textures (4k). Release build is fine.
+
     /// <summary>
     /// Interaction logic for TextureEditHueChange.xaml
     /// </summary>
@@ -93,7 +95,18 @@ namespace EEPK_Organiser.Forms
             get
             {
                 var formats = new AForge.Imaging.Filters.HSLLinear().FormatTranslations;
-                return (formats.ContainsKey(((Bitmap)OriginalTextureBackup).PixelFormat));
+                try
+                {
+                    return (formats.ContainsKey(((Bitmap)CurrentTexture.Texture).PixelFormat));
+                }
+                catch (InsufficientMemoryException)
+                {
+                    return false;
+                }
+                catch (OutOfMemoryException)
+                {
+                    return false;
+                }
             }
         }
 
@@ -104,7 +117,7 @@ namespace EEPK_Organiser.Forms
             DataContext = this;
             Owner = parent;
 
-            OriginalTextureBackup = CurrentTexture.DdsImage;
+            OriginalTextureBackup = CurrentTexture.Texture;
             stopwatch.Start();
         }
 
@@ -112,7 +125,7 @@ namespace EEPK_Organiser.Forms
         {
             cancelled = false;
             CurrentTexture.wasEdited = true;
-            UndoManager.Instance.AddUndo(new UndoableProperty<EmbEntry>(nameof(EmbEntry.DdsImage), CurrentTexture, OriginalTextureBackup, CurrentTexture.DdsImage, "Hue Adjustment"));
+            UndoManager.Instance.AddUndo(new UndoableProperty<EmbEntry>(nameof(EmbEntry.Texture), CurrentTexture, OriginalTextureBackup, CurrentTexture.Texture, "Hue Adjustment"));
             Close();
         }
 
@@ -185,7 +198,7 @@ namespace EEPK_Organiser.Forms
             hslFilter.ApplyInPlace(bitmap);
 
             //Convert back to WPF Bitmap
-            CurrentTexture.DdsImage = (WriteableBitmap)bitmap;
+            CurrentTexture.Texture = (WriteableBitmap)bitmap;
 
             //Restart the timer
             isImageProcessing = false;
@@ -196,7 +209,7 @@ namespace EEPK_Organiser.Forms
         {
             if (cancelled)
             {
-                CurrentTexture.DdsImage = OriginalTextureBackup;
+                CurrentTexture.Texture = OriginalTextureBackup;
             }
         }
 

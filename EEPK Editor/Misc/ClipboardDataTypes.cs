@@ -12,7 +12,6 @@ namespace EEPK_Organiser.Misc
         public static readonly string EmpParticleEffect = string.Format("EEPK_ORGANISER_{0}_EMP_PARTICLE_EFFECT", SettingsManager.Instance.CurrentVersionString);
         public static readonly string EmbTexture = string.Format("EEPK_ORGANISER_{0}_EMB_TEXTURE", SettingsManager.Instance.CurrentVersionString);
         public static readonly string EmmMaterial = string.Format("EEPK_ORGANISER_{0}_EMM_MATERIAL", SettingsManager.Instance.CurrentVersionString);
-        public static readonly string EmmParameter = string.Format("EEPK_ORGANISER_{0}_EMM_PARAMETER", SettingsManager.Instance.CurrentVersionString);
         public static readonly string EmaEntry = string.Format("EEPK_ORGANISER_{0}_EMA_ENTRY", SettingsManager.Instance.CurrentVersionString);
         public static readonly string EtrMainEntry = string.Format("EEPK_ORGANISER_{0}_ETR_ENTRY", SettingsManager.Instance.CurrentVersionString);
         public static readonly string EtrTextureEntry = string.Format("EEPK_ORGANISER_{0}_ETR_TEXTURE_ENTRY", SettingsManager.Instance.CurrentVersionString);

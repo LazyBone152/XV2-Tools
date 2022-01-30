@@ -1,11 +1,12 @@
 ﻿using GalaSoft.MvvmLight;
+using System;
 using Xv2CoreLib.EEPK;
 using Xv2CoreLib.Resource.UndoRedo;
 using static Xv2CoreLib.EEPK.EffectPart;
 
 namespace EEPK_Organiser.ViewModel
 {
-    public class EffectPartViewModel : ObservableObject
+    public class EffectPartViewModel : ObservableObject, IDisposable
     {
         private EffectPart effectPart;
 

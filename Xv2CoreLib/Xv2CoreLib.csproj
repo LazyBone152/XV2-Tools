@@ -70,13 +70,13 @@
     <Reference Include="Microsoft.IO.RecyclableMemoryStream, Version=1.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.IO.RecyclableMemoryStream.1.2.2\lib\net45\Microsoft.IO.RecyclableMemoryStream.dll</HintPath>
     </Reference>
+    <Reference Include="Pfim, Version=0.10.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\XenoKit\packages\Pfim.0.10.3\lib\netstandard2.0\Pfim.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="Shim, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c55ec16d10c4b366, processorArchitecture=MSIL">
-      <HintPath>..\packages\shim.2.0.0\lib\net40\Shim.dll</HintPath>
-    </Reference>
-    <Reference Include="Shim.Drawing, Version=3.0.0.0, Culture=neutral, PublicKeyToken=a7d03c0bc8d64dbc, processorArchitecture=MSIL">
-      <HintPath>..\packages\shim.drawing.3.0.0\lib\net45\Shim.Drawing.dll</HintPath>
+    <Reference Include="Shim, Version=2.0.1.0, Culture=neutral, PublicKeyToken=c55ec16d10c4b366, processorArchitecture=MSIL">
+      <HintPath>..\packages\shim.2.0.1\lib\net40\Shim.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -89,8 +89,8 @@
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Numerics" />
-    <Reference Include="System.Numerics.Vectors, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Numerics.Vectors.4.3.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
     </Reference>
     <Reference Include="System.Threading.Tasks.Dataflow, Version=4.5.24.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Tpl.Dataflow.4.5.24\lib\portable-net45+win8+wpa81\System.Threading.Tasks.Dataflow.dll</HintPath>
@@ -210,6 +210,8 @@
     <Compile Include="EMD\EMD_File.cs" />
     <Compile Include="EMD\Parser.cs" />
     <Compile Include="EMG\EMG_File.cs" />
+    <Compile Include="EMM\DecompiledMaterial.cs" />
+    <Compile Include="EMM\DefaultMaterialValues.cs" />
     <Compile Include="EMM\Deserializer.cs" />
     <Compile Include="EMM\EMM_File.cs" />
     <Compile Include="EMM\Parser.cs" />
@@ -291,9 +293,12 @@
     <Compile Include="Resource\AsyncObservableCollection.cs" />
     <Compile Include="Resource\BinaryConverter.cs" />
     <Compile Include="Resource\ColorEx.cs" />
+    <Compile Include="Resource\Image\TextureHelper.cs" />
     <Compile Include="Resource\Random.cs" />
     <Compile Include="Resource\ReflectionHelper.cs" />
+    <Compile Include="Resource\UndoRedo\IMergableUndo.cs" />
     <Compile Include="Resource\UndoRedo\UndoableArrayChange.cs" />
+    <Compile Include="Resource\UndoRedo\UndoableField.cs" />
     <Compile Include="Resource\UndoRedo\UndoableListInsert.cs" />
     <Compile Include="Resource\UndoRedo\UndoableListMove.cs" />
     <Compile Include="Resource\UndoRedo\UndoablePropertyGeneric.cs" />
@@ -311,7 +316,7 @@
     <Compile Include="Resource\UndoRedo\UndoableProperty.cs" />
     <Compile Include="Resource\UndoRedo\UndoableStateChange.cs" />
     <Compile Include="Resource\UndoRedo\UndoManager.cs" />
-    <Compile Include="Resource\WriteableBitmapExtensions.cs" />
+    <Compile Include="Resource\Image\WriteableBitmapExtensions.cs" />
     <Compile Include="Resource\Xv2FileIO.cs" />
     <Compile Include="Resource\ZipManager.cs" />
     <Compile Include="SAV\Encrypt.cs" />
@@ -348,6 +353,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
     <EmbeddedResource Include="Resources\silence.hca" />
   </ItemGroup>
@@ -356,6 +362,12 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\AcbFormatHelper.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\LB_Common\LB_Common.csproj">
+      <Project>{513b1851-4576-45ec-8f8e-400a38b05502}</Project>
+      <Name>LB_Common</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Fody.3.3.2\build\Fody.targets" Condition="Exists('..\packages\Fody.3.3.2\build\Fody.targets')" />
