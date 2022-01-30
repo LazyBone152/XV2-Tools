@@ -728,7 +728,7 @@ namespace EEPK_Organiser.View
 
                                     if (embForm == null)
                                     {
-                                        embForm = new Forms.EmbEditForm(selectedFile.EmbFile, null, AssetType.EMO, this, false, selectedFile.FullFileName);
+                                        embForm = new Forms.EmbEditForm(selectedFile.EmbFile, null, AssetType.EMO, selectedFile.FullFileName);
                                     }
                                     else
                                     {
@@ -755,7 +755,7 @@ namespace EEPK_Organiser.View
                                 }
                                 break;
                             default:
-                                MessageBox.Show(String.Format("Edit not possible for {0} files.", selectedFile.Extension), "Edit", MessageBoxButton.OK, MessageBoxImage.Stop);
+                                MessageBox.Show(string.Format("Edit not possible for {0} files.", selectedFile.Extension), "Edit", MessageBoxButton.OK, MessageBoxImage.Stop);
                                 break;
                         }
                     }
@@ -1192,7 +1192,7 @@ namespace EEPK_Organiser.View
 
             if (embForm == null)
             {
-                embForm = new Forms.EmbEditForm(effectContainerFile.Pbind.File3_Ref, effectContainerFile.Pbind, AssetType.PBIND, this, true, AssetType.PBIND.ToString());
+                embForm = new Forms.EmbEditForm(effectContainerFile.Pbind.File3_Ref, effectContainerFile.Pbind, AssetType.PBIND, AssetType.PBIND.ToString());
             }
             else
             {
@@ -1656,7 +1656,7 @@ namespace EEPK_Organiser.View
 
             if (embForm == null)
             {
-                embForm = new Forms.EmbEditForm(effectContainerFile.Tbind.File3_Ref, effectContainerFile.Tbind, AssetType.TBIND, this, true, AssetType.TBIND.ToString());
+                embForm = new Forms.EmbEditForm(effectContainerFile.Tbind.File3_Ref, effectContainerFile.Tbind, AssetType.TBIND, AssetType.TBIND.ToString());
             }
             else
             {

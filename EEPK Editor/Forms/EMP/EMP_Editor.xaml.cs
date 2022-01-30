@@ -1239,8 +1239,8 @@ namespace EEPK_Organiser.Forms.EMP
                     if (texture.TextureRef != null)
                     {
                         EmbEditForm embForm = mainWindow.PBIND_OpenTextureViewer();
-                        embForm.listBox_Textures.SelectedItem = texture.TextureRef;
-                        embForm.listBox_Textures.ScrollIntoView(texture.TextureRef);
+                        embForm.textureEditor.SelectedTexture = texture.TextureRef;
+                        embForm.textureEditor.textureDataGrid.ScrollIntoView(texture.TextureRef);
                     }
                 }
             }

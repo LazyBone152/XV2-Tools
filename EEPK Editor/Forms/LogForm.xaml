@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:EEPK_Organiser.Forms"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
-        Title="Log" Height="281.349" Width="400.118" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" WindowStyle="ToolWindow" PreviewKeyDown="Window_PreviewKeyDown">
+        Title="Log" Height="281.349" Width="400.118" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" WindowStyle="ToolWindow" PreviewKeyDown="Window_PreviewKeyDown" TitleCharacterCasing="Normal">
     <Grid>
         <RichTextBox x:Name="richTextBox" IsReadOnly="True" HorizontalAlignment="Left" Height="140" Margin="24,58,0,0" VerticalAlignment="Top" Width="341" VerticalScrollBarVisibility="Visible">
             <FlowDocument>

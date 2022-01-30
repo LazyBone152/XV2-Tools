@@ -27,8 +27,8 @@ namespace Xv2CoreLib.EMB_CLASS
             float brightness = (float)lightness / 5f;
             float saturation = (float)_saturation;
 
-            WriteableBitmap oldBitmap = entry.DdsImage;
-            Bitmap bitmap = (Bitmap)entry.DdsImage;
+            WriteableBitmap oldBitmap = entry.Texture;
+            Bitmap bitmap = (Bitmap)entry.Texture;
 
             if (hueSet)
             {
@@ -81,11 +81,11 @@ namespace Xv2CoreLib.EMB_CLASS
             }
 
             //Convert back to WPF Bitmap
-            entry.DdsImage = (WriteableBitmap)bitmap;
+            entry.Texture = (WriteableBitmap)bitmap;
             entry.wasEdited = true;
 
             if(undos != null)
-                undos.Add(new UndoableProperty<EmbEntry>(nameof(EmbEntry.DdsImage), entry, oldBitmap, entry.DdsImage));
+                undos.Add(new UndoableProperty<EmbEntry>(nameof(EmbEntry.Texture), entry, oldBitmap, entry.Texture));
         }
     
     }

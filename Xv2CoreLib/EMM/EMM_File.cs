@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
-using System.Windows.Data;
 using Xv2CoreLib.HslColor;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
@@ -13,21 +11,8 @@ namespace Xv2CoreLib.EMM
 {
     [Serializable]
     [YAXSerializeAs("EMM")]
-    public class EMM_File : INotifyPropertyChanged
+    public class EMM_File
     {
-        #region NotifyPropChanged
-        [field: NonSerialized]
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private void NotifyPropertyChanged(String propertyName = "")
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-        #endregion
-
         [YAXAttributeForClass]
         [YAXSerializeAs("Version")]
         public int Version { get; set; }
@@ -36,94 +21,6 @@ namespace Xv2CoreLib.EMM
         [YAXSerializeAs("UnknownData")]
         [YAXDontSerializeIfNull]
         public UnknownData Unknown_Data { get; set; }
-
-        #region UI Stuff
-        private EmmMaterial _selectedMaterial = null;
-        [YAXDontSerialize]
-        public EmmMaterial SelectedMaterial
-        {
-            get
-            {
-                return this._selectedMaterial;
-            }
-            set
-            {
-                if (value != this._selectedMaterial)
-                {
-                    this._selectedMaterial = value;
-                    NotifyPropertyChanged("SelectedMaterial");
-                }
-            }
-        }
-
-        //Search
-        private string _materialSearchFilter = null;
-        [YAXDontSerialize]
-        public string MaterialSearchFilter
-        {
-            get
-            {
-                return this._materialSearchFilter;
-            }
-
-            set
-            {
-                if (value != this._materialSearchFilter)
-                {
-                    this._materialSearchFilter = value;
-                    NotifyPropertyChanged("MaterialSearchFilter");
-                }
-            }
-        }
-
-        [NonSerialized]
-        private ListCollectionView _viewMaterials = null;
-        [YAXDontSerialize]
-        public ListCollectionView ViewMaterials
-        {
-            get
-            {
-                if (_viewMaterials != null)
-                {
-                    return _viewMaterials;
-                }
-                _viewMaterials = new ListCollectionView(Materials.Binding);
-                _viewMaterials.Filter = new Predicate<object>(MaterialFilterCheck);
-                return _viewMaterials;
-            }
-            set
-            {
-                if (value != _viewMaterials)
-                {
-                    _viewMaterials = value;
-                    NotifyPropertyChanged("ViewMaterials");
-                }
-            }
-        }
-
-        public bool MaterialFilterCheck(object matObject)
-        {
-            if (String.IsNullOrWhiteSpace(MaterialSearchFilter)) return true;
-            var _material = matObject as EmmMaterial;
-
-            if (_material != null)
-            {
-                if (_material.Name.ToLower().Contains(MaterialSearchFilter.ToLower())) return true;
-            }
-
-            return false;
-        }
-
-        public void UpdateMaterialFilter()
-        {
-            if (_viewMaterials == null)
-                _viewMaterials = new ListCollectionView(Materials.Binding);
-
-            _viewMaterials.Filter = new Predicate<object>(MaterialFilterCheck);
-            NotifyPropertyChanged("ViewMaterials");
-        }
-
-        #endregion
 
         #region LoadSave
         public static EMM_File LoadEmm(byte[] bytes)
@@ -328,6 +225,7 @@ namespace Xv2CoreLib.EMM
     [YAXSerializeAs("Material")]
     public class EmmMaterial
     {
+        //todo: split between characters/effects
         public static readonly string[] CommonShaderPrograms = new string[]
         {
             "TOON_UNIF_STAIN1_DFD",

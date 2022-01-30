@@ -64,6 +64,7 @@ namespace EEPK_Organiser.View
 
         #endregion
 
+        #region Properties
         //UI
         private EmmMaterial _selectedMaterial = null;
         public EmmMaterial SelectedMaterial
@@ -113,6 +114,8 @@ namespace EEPK_Organiser.View
         //Properties for disabling and hiding elements that aren't needed in the current context. (e.g: dont show merge/used by options when editing a emm file for a emo or character as those are only useful for PBIND/TBIND assets)
         public bool IsForContainer => AssetContainer != null;
         public Visibility ContainerVisiblility => IsForContainer ? Visibility.Visible : Visibility.Collapsed;
+
+        #endregion
 
         #region ViewMaterials
         private ListCollectionView _viewMaterials = null;
@@ -198,6 +201,7 @@ namespace EEPK_Organiser.View
             ExpanderUpdate();
         }
 
+        #region EventsAndManualUIUpdating
         private void MaterialsEditor_Loaded(object sender, RoutedEventArgs e)
         {
             NotifyPropertyChanged(nameof(ContainerVisiblility));
@@ -225,41 +229,31 @@ namespace EEPK_Organiser.View
                 MaterialViewModel.UpdateProperties();
         }
 
-        public void Dispose()
+        private void ExpanderUpdate()
         {
-            Loaded -= MaterialsEditor_Loaded;
-            UndoManager.Instance.UndoOrRedoCalled -= Instance_UndoOrRedoCalled;
-        }
+            //Collapse all expanders
+            alphaExpander.IsExpanded = false;
+            colorExpander.IsExpanded = false;
+            lightingExpander.IsExpanded = false;
+            miscExpander.IsExpanded = false;
+            scaleOffsetExpander.IsExpanded = false;
+            textureExpander.IsExpanded = false;
+            unknownExpander.IsExpanded = false;
 
-        private async void SetName(string name)
-        {
-            //Name should never be more than 32 since the UI is limited to just 32 characters, but just in case we will trim the name here if it exceeds the limit.
-            if (name.Length > 32)
-                name = name.Substring(0, 32);
-            
-            if (EmmFile.Materials.Any(x => x.Name == name && x != _selectedMaterial))
+            if (SelectedMaterial != null)
             {
-                await DialogCoordinator.Instance.ShowMessageAsync(this, "Name Already Used", $"Another material is already named\"{name}\".", MessageDialogStyle.Affirmative, DialogSettings.Default);
-                NotifyPropertyChanged(nameof(SelectedMaterialName));
-                return;
+                //Selectively expand ones that have parameters within
+                alphaExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Alpha);
+                colorExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Color);
+                lightingExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Lighting);
+                miscExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Misc);
+                scaleOffsetExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.MatScaleOffset);
+                textureExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Texture);
+                unknownExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Unsorted);
             }
-
-            UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(_selectedMaterial.Name), _selectedMaterial, _selectedMaterial.Name, name, "Material Name"));
-            _selectedMaterial.Name = name;
-            NotifyPropertyChanged(nameof(SelectedMaterialName));
         }
-
-        private void SetShaderProgram(string shader)
-        {
-            //ShaderProgram should never be more than 32 since the UI is limited to just 32 characters, but just in case we will trim the name here if it exceeds the limit.
-            if (shader.Length > 32)
-                shader = shader.Substring(0, 32);
-
-            UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(_selectedMaterial.ShaderProgram), _selectedMaterial, _selectedMaterial.ShaderProgram, shader, "Material ShaderProgram"));
-            _selectedMaterial.ShaderProgram = shader;
-            NotifyPropertyChanged(nameof(SelectedMaterialShaderProgram));
-        }
-
+        #endregion
+        
         #region ContextMenuCommands
         public RelayCommand AddNewMaterialCommand => new RelayCommand(AddNewMaterial);
         private void AddNewMaterial()
@@ -545,7 +539,7 @@ namespace EEPK_Organiser.View
                 }
                 else
                 {
-                    await DialogCoordinator.Instance.ShowMessageAsync(this, "Remove Unused ", "No materials were removed.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                    await DialogCoordinator.Instance.ShowMessageAsync(this, "Remove Unused ", "No unused materials were found.", MessageDialogStyle.Affirmative, DialogSettings.Default);
                 }
             }
 
@@ -554,28 +548,40 @@ namespace EEPK_Organiser.View
 
         #endregion
 
-        private void ExpanderUpdate()
+        public void Dispose()
         {
-            //Collapse all expanders
-            alphaExpander.IsExpanded = false;
-            colorExpander.IsExpanded = false;
-            lightingExpander.IsExpanded = false;
-            miscExpander.IsExpanded = false;
-            scaleOffsetExpander.IsExpanded = false;
-            textureExpander.IsExpanded = false;
-            unknownExpander.IsExpanded = false;
-
-            if(SelectedMaterial != null)
-            {
-                //Selectively expand ones that have parameters within
-                alphaExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Alpha);
-                colorExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Color);
-                lightingExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Lighting);
-                miscExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Misc);
-                scaleOffsetExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.MatScaleOffset);
-                textureExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Texture);
-                unknownExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Unsorted);
-            }
+            Loaded -= MaterialsEditor_Loaded;
+            UndoManager.Instance.UndoOrRedoCalled -= Instance_UndoOrRedoCalled;
         }
+
+        private async void SetName(string name)
+        {
+            //Name should never be more than 32 since the UI is limited to just 32 characters, but just in case we will trim the name here if it exceeds the limit.
+            if (name.Length > 32)
+                name = name.Substring(0, 32);
+
+            if (EmmFile.Materials.Any(x => x.Name == name && x != _selectedMaterial))
+            {
+                await DialogCoordinator.Instance.ShowMessageAsync(this, "Name Already Used", $"Another material is already named\"{name}\".", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                NotifyPropertyChanged(nameof(SelectedMaterialName));
+                return;
+            }
+
+            UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(_selectedMaterial.Name), _selectedMaterial, _selectedMaterial.Name, name, "Material Name"));
+            _selectedMaterial.Name = name;
+            NotifyPropertyChanged(nameof(SelectedMaterialName));
+        }
+
+        private void SetShaderProgram(string shader)
+        {
+            //ShaderProgram should never be more than 32 since the UI is limited to just 32 characters, but just in case we will trim the name here if it exceeds the limit.
+            if (shader.Length > 32)
+                shader = shader.Substring(0, 32);
+
+            UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(_selectedMaterial.ShaderProgram), _selectedMaterial, _selectedMaterial.ShaderProgram, shader, "Material ShaderProgram"));
+            _selectedMaterial.ShaderProgram = shader;
+            NotifyPropertyChanged(nameof(SelectedMaterialShaderProgram));
+        }
+
     }
 }

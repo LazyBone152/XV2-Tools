@@ -25,20 +25,8 @@ namespace Xv2CoreLib.EMB_CLASS
         "\nMatchIndex: install entry into this index" +
         "\nMatchName: if entry with same name exists, overwrite it, else add as new")]
     [Serializable]
-    public class EMB_File : INotifyPropertyChanged
+    public class EMB_File
     {
-        [field: NonSerialized]
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private void NotifyPropertyChanged(String propertyName = "")
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-
-
         public const int MAX_EFFECT_TEXTURES = 128;
 
         [YAXAttributeForClass]
@@ -55,74 +43,6 @@ namespace Xv2CoreLib.EMB_CLASS
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "EmbEntry")]
         public AsyncObservableCollection<EmbEntry> Entry { get; set; } = AsyncObservableCollection<EmbEntry>.Create();
-
-        //Filters
-        [YAXDontSerialize]
-        private string _textureSearchFilter = null;
-        [YAXDontSerialize]
-        public string TextureSearchFilter
-        {
-            get
-            {
-                return this._textureSearchFilter;
-            }
-            set
-            {
-                if (value != this._textureSearchFilter)
-                {
-                    this._textureSearchFilter = value;
-                    NotifyPropertyChanged("TextureSearchFilter");
-                }
-            }
-        }
-
-        [NonSerialized]
-        [YAXDontSerialize]
-        private ListCollectionView _viewTextures = null;
-        [YAXDontSerialize]
-        public ListCollectionView ViewTextures
-        {
-            get
-            {
-                if (_viewTextures != null)
-                {
-                    return _viewTextures;
-                }
-                _viewTextures = new ListCollectionView(Entry.Binding);
-                _viewTextures.Filter = new Predicate<object>(TextureFilterCheck);
-                return _viewTextures;
-            }
-            set
-            {
-                if (value != _viewTextures)
-                {
-                    _viewTextures = value;
-                    NotifyPropertyChanged("ViewTextures");
-                }
-            }
-        }
-
-        public bool TextureFilterCheck(object texture)
-        {
-            if (String.IsNullOrWhiteSpace(TextureSearchFilter)) return true;
-            var _texture = texture as EmbEntry;
-
-            if (_texture != null)
-            {
-                if (_texture.Name.ToLower().Contains(TextureSearchFilter.ToLower())) return true;
-            }
-
-            return false;
-        }
-
-        public void UpdateTextureFilter()
-        {
-            if (_viewTextures == null)
-                _viewTextures = new ListCollectionView(Entry.Binding);
-
-            _viewTextures.Filter = new Predicate<object>(TextureFilterCheck);
-            NotifyPropertyChanged("ViewTextures");
-        }
 
         public byte[] SaveToBytes()
         {
@@ -536,7 +456,7 @@ namespace Xv2CoreLib.EMB_CLASS
 
             foreach(var bitmap in bitmaps)
             {
-                entries.Add(Entry.FirstOrDefault(x => x.DdsImage == bitmap));
+                entries.Add(Entry.FirstOrDefault(x => x.Texture == bitmap));
             }
 
             return entries;
@@ -544,44 +464,30 @@ namespace Xv2CoreLib.EMB_CLASS
     }
 
     [Serializable]
-    public class EmbEntry : INotifyPropertyChanged, IInstallable
+    public class EmbEntry : IInstallable
     {
-        #region NotifyPropertyChanged
-        [field: NonSerialized]
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public void NotifyPropertyChanged(String propertyName = "")
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-        #endregion
-
         public const int DDS_SIGNATURE = 542327876;
 
         [YAXDontSerialize]
-        public int SortID { get { return int.Parse(Index); } }
-
-        private string _name = null;
-        [YAXAttributeForClass]
-        [YAXSerializeAs("Name")]
-        public string Name
+        public int SortID
         {
             get
             {
-                return this._name;
+                int num;
+                if (int.TryParse(Index, out num))
+                    return num;
+
+                return -1;
             }
             set
             {
-                if (value != this._name)
-                {
-                    this._name = value;
-                    NotifyPropertyChanged("Name");
-                }
+                Index = value.ToString();
             }
         }
+
+        [YAXAttributeForClass]
+        [YAXSerializeAs("Name")]
+        public string Name { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("UseLocalCopy")]
         public bool LocalCopy { get; set; }
@@ -600,9 +506,9 @@ namespace Xv2CoreLib.EMB_CLASS
             }
             set
             {
-                if (value != this._dataValue)
+                if (value != _dataValue)
                 {
-                    this._dataValue = value;
+                    _dataValue = value;
                     loadDdsFail = false;
 
                     //Reload DdsImage IF it has been loaded already (loadDds == true) AND it is not currently being saved (loadDdsLock == false)
@@ -612,17 +518,12 @@ namespace Xv2CoreLib.EMB_CLASS
                         LoadDds();
                         wasEdited = false; 
                     }
-                    
-                    NotifyPropertyChanged(nameof(Data));
-                    NotifyPropertyChanged(nameof(Height));
-                    NotifyPropertyChanged(nameof(Width));
-                    NotifyPropertyChanged(nameof(FilesizeString));
                 }
             }
         }
 
-        #region DDS
-        //DDS loading & handling
+        #region Texture
+        //Texture loading & handling
         public ImageEngineFormat ImageFormat = ImageEngineFormat.DDS_DXT5;
 
         [NonSerialized]
@@ -638,30 +539,29 @@ namespace Xv2CoreLib.EMB_CLASS
         [NonSerialized]
         public bool loadDdsFail = false;
         [NonSerialized] 
-        private WriteableBitmap _ddsImage = null;
+        private WriteableBitmap _texture = null;
         [YAXDontSerialize]
-        public WriteableBitmap DdsImage
+        public WriteableBitmap Texture
         {
             get
             {
-                if(_ddsImage == null && !loadDdsFail && !ddsIsLoading)
+                if(_texture == null && !loadDdsFail && !ddsIsLoading)
                 {
                     LoadDds();
                 }
-                return this._ddsImage;
+                return _texture;
             }
             set
             {
-                if (value != this._ddsImage)
+                if (value != this._texture)
                 {
-                    this._ddsImage = value;
-                    NotifyPropertyChanged(nameof(DdsImage));
+                    _texture = value;
                 }
             }
         }
         
 
-        //DDS Details
+        //Texture Details (readonly)
         [YAXDontSerialize]
         public int Height
         {
@@ -669,7 +569,7 @@ namespace Xv2CoreLib.EMB_CLASS
             {
                 //It is possible for the texture to not be DDS (and loads perfectly fine ingame), so we must check.
                 if (IsNull()) return 0;
-                return (BitConverter.ToInt32(Data, 0) == DDS_SIGNATURE) ? BitConverter.ToInt32(Data, 16) : (int)DdsImage.Height;
+                return (BitConverter.ToInt32(Data, 0) == DDS_SIGNATURE) ? BitConverter.ToInt32(Data, 16) : (int)Texture.Height;
             }
         }
         [YAXDontSerialize]
@@ -678,16 +578,7 @@ namespace Xv2CoreLib.EMB_CLASS
             get
             {
                 if (IsNull()) return 0;
-                return (BitConverter.ToInt32(Data, 0) == DDS_SIGNATURE) ? BitConverter.ToInt32(Data, 12) : (int)DdsImage.Width;
-            }
-        }
-        [YAXDontSerialize]
-        public int MipMapsCount
-        {
-            get
-            {
-                if (IsNull()) return 0;
-                return (BitConverter.ToInt32(Data, 0) == DDS_SIGNATURE) ? BitConverter.ToInt32(Data, 24) : 1;
+                return (BitConverter.ToInt32(Data, 0) == DDS_SIGNATURE) ? BitConverter.ToInt32(Data, 12) : (int)Texture.Width;
             }
         }
         [YAXDontSerialize]
@@ -719,7 +610,42 @@ namespace Xv2CoreLib.EMB_CLASS
                 }
             }
         }
-
+        [YAXDontSerialize]
+        public string ImageFormatString
+        {
+            get
+            {
+                switch (ImageFormat)
+                {
+                    case ImageEngineFormat.DDS_DXT1:
+                        return "DDS BC1";
+                    case ImageEngineFormat.DDS_DXT3:
+                        return "DDS BC2";
+                    case ImageEngineFormat.DDS_DXT5:
+                        return "DDS BC3";
+                    case ImageEngineFormat.DDS_ATI1:
+                        return "DDS BC4";
+                    case ImageEngineFormat.DDS_ATI2_3Dc:
+                        return "DDS BC5";
+                    default:
+                        return ImageFormat.ToString();
+                }
+            }
+        }
+        [YAXDontSerialize]
+        public string TextureToolTip
+        {
+            get
+            {
+                if (Texture != null)
+                {
+                    return $"Type: {ImageFormatString}\n" +
+                           $"Dimensions: {Width}x{Height}\n" +
+                           $"Size: {FilesizeString}";
+                }
+                return null;
+            }
+        }
         #endregion
 
         public bool Compare(EmbEntry embEntry2, bool ignoreName = false)
@@ -748,7 +674,7 @@ namespace Xv2CoreLib.EMB_CLASS
             EmbEntry newEntry = new EmbEntry();
             newEntry.Name = Name;
             newEntry.Data = Data;
-            newEntry.DdsImage = DdsImage;
+            newEntry.Texture = Texture;
             newEntry.LocalCopy = LocalCopy;
             return newEntry;
         }
@@ -765,19 +691,19 @@ namespace Xv2CoreLib.EMB_CLASS
 
         public RgbColor GetDdsColor()
         {
-            if (DdsImage == null) throw new InvalidOperationException("GetDdsColor: DdsImage was null.");
+            if (Texture == null) throw new InvalidOperationException("GetDdsColor: DdsImage was null.");
             List<RgbColor> colors = new List<RgbColor>();
 
             //Lazy code. Checking every single pixel would be WAY too slow, so we just skim through them instead.
-            for (int i = 0; i < DdsImage.Width; i += 15)
+            for (int i = 0; i < Texture.Width; i += 15)
             {
-                if (i > DdsImage.Width) break;
+                if (i > Texture.Width) break;
 
-                for (int a = 0; a < DdsImage.Height; a += 15)
+                for (int a = 0; a < Texture.Height; a += 15)
                 {
-                    if (a > DdsImage.Height) break;
+                    if (a > Texture.Height) break;
 
-                    var pixel = DdsImage.GetPixel(i, a);
+                    var pixel = Texture.GetPixel(i, a);
                     RgbColor rgbColor = new RgbColor(pixel.R, pixel.G, pixel.B);
 
                     if (!rgbColor.IsWhiteOrBlack)
@@ -809,7 +735,7 @@ namespace Xv2CoreLib.EMB_CLASS
             {
                 ddsIsLoading = true;
                 ImageEngineFormat format;
-                DdsImage = TextureHelper.GetWpfBitmap(Data, out format);
+                Texture = TextureHelper.GetWpfBitmap(Data, out format);
 
                 ImageFormat = format;
             }
@@ -829,13 +755,13 @@ namespace Xv2CoreLib.EMB_CLASS
         /// </summary>
         public void SaveDds(bool onlySaveIfEdited = true)
         {
-            if (DdsImage == null || (!wasEdited && onlySaveIfEdited))
+            if (Texture == null || (!wasEdited && onlySaveIfEdited))
                 return;
 
             try
             {
                 _loadDdsLock = true;
-                Data = TextureHelper.SaveToBytes(DdsImage, ImageFormat);
+                Data = TextureHelper.SaveToBytes(Texture, ImageFormat);
             }
             finally
             {
@@ -852,7 +778,7 @@ namespace Xv2CoreLib.EMB_CLASS
             List<WriteableBitmap> bitmaps = new List<WriteableBitmap>();
 
             foreach (var entry in entries)
-                bitmaps.Add(entry.DdsImage);
+                bitmaps.Add(entry.Texture);
 
             return bitmaps;
         }

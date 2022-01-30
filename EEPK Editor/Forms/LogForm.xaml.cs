@@ -1,17 +1,6 @@
 ﻿using MahApps.Metro.Controls;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace EEPK_Organiser.Forms
 {
@@ -27,7 +16,6 @@ namespace EEPK_Organiser.Forms
             Description = _description;
             InitializeComponent();
             DataContext = this;
-            Owner = _owner;
             Title = _windowName;
             richTextBox.AppendText(_logText);
             ShowInTaskbar = showInTaskBar;

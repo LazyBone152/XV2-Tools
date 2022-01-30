@@ -206,6 +206,9 @@
     <Compile Include="View\Materials\MaterialsEditor.xaml.cs">
       <DependentUpon>MaterialsEditor.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\Materials\TextureEditor.xaml.cs">
+      <DependentUpon>TextureEditor.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\Vectors\CustomColor.xaml.cs">
       <DependentUpon>CustomColor.xaml</DependentUpon>
     </Compile>
@@ -312,6 +315,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Materials\MaterialsEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Materials\TextureEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

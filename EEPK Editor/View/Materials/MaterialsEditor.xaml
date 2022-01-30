@@ -82,6 +82,12 @@
         <Grid Grid.Column="1" Grid.Row="1">
             <DataGrid x:Name="materialDataGrid" Style="{StaticResource MahApps.Styles.DataGrid.Azure}" ItemsSource="{Binding ElementName=UserControl, Path=ViewMaterials}" SelectedItem="{Binding ElementName=UserControl, Path=SelectedMaterial}" Controls:ControlsHelper.ContentCharacterCasing="Normal" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
 
+                <DataGrid.InputBindings>
+                    <KeyBinding Key="C" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=CopyMaterialCommand}"/>
+                    <KeyBinding Key="V" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=PasteMaterialCommand}"/>
+                    <KeyBinding Key="Delete" Command="{Binding ElementName=UserControl, Path=DeleteMaterialCommand}"/>
+                </DataGrid.InputBindings>
+                
                 <DataGrid.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="New" Command="{Binding AddNewMaterialCommand}"/>
@@ -90,9 +96,11 @@
                         <MenuItem Header="Copy" Command="{Binding CopyMaterialCommand}"/>
                         <MenuItem Header="Paste" Command="{Binding PasteMaterialCommand}"/>
                         <MenuItem Header="Paste Values" Command="{Binding PasteMaterialValuesCommand}"/>
-                        <Separator/>
+                        
+                        <Separator Visibility="{Binding ContainerVisiblility}"/>
                         <MenuItem Header="Merge" Command="{Binding MergeMaterialCommand}" IsEnabled="{Binding IsForContainer}" Visibility="{Binding ContainerVisiblility}"/>
                         <MenuItem Header="Used By?" Command="{Binding UsedByCommand}" IsEnabled="{Binding IsForContainer}" Visibility="{Binding ContainerVisiblility}"/>
+                        
                         <Separator/>
                         <MenuItem Header="Hue Shift" Command="{Binding HueShiftCommand}"/>
                         <MenuItem Header="Hue Set" Command="{Binding HueSetCommand}"/>
