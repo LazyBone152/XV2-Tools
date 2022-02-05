@@ -172,8 +172,8 @@ namespace Xv2CoreLib.EAN
             }
 
             bytes.AddRange(new byte[2]);
-            bytes.Add((byte)animation.I_02);
-            bytes.Add((byte)animation.I_03);
+            bytes.Add((byte)animation.IndexSize);
+            bytes.Add((byte)animation.FloatSize);
             bytes.AddRange(BitConverter.GetBytes(animation.FrameCount));
             bytes.AddRange(BitConverter.GetBytes(nodeCount));
             bytes.AddRange(new byte[4]);
@@ -238,7 +238,7 @@ namespace Xv2CoreLib.EAN
                             //Select default keyframe
                             EAN_Keyframe defaultKeyframe = null;
 
-                            switch (animation.Nodes[i].AnimationComponents[a].I_00)
+                            switch (animation.Nodes[i].AnimationComponents[a].Type)
                             {
                                 case EAN_AnimationComponent.ComponentType.Position:
                                     defaultKeyframe = eskRelativeTransform.ToEanPosKeyframe();
@@ -252,7 +252,7 @@ namespace Xv2CoreLib.EAN
                             }
 
                             //Write
-                            bytes.Add((byte)animation.Nodes[i].AnimationComponents[a].I_00);
+                            bytes.Add((byte)animation.Nodes[i].AnimationComponents[a].Type);
                             bytes.Add(animation.Nodes[i].AnimationComponents[a].I_01);
                             bytes.AddRange(BitConverter.GetBytes(animation.Nodes[i].AnimationComponents[a].I_02));
                             bytes.AddRange(BitConverter.GetBytes(KeyframeCount));
@@ -268,7 +268,7 @@ namespace Xv2CoreLib.EAN
                                 Sorting.SortEntries2(animation.Nodes[i].AnimationComponents[a].Keyframes);
 
                                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - KeyframeOffset), KeyframeOffset + 8);
-                                switch (animation.I_02)
+                                switch (animation.IndexSize)
                                 {
                                     case EAN_Animation.IntPrecision._8Bit:
                                         WriteKeyframeIndex_Int8(animation.Nodes[i].AnimationComponents[a].Keyframes, hasFirstKeyframe, hasFinalKeyframe, animation.FrameCount - 1);
@@ -280,7 +280,7 @@ namespace Xv2CoreLib.EAN
 
                                 StartNewLine();
                                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - KeyframeOffset), KeyframeOffset + 12);
-                                switch (animation.I_03)
+                                switch (animation.FloatSize)
                                 {
                                     case EAN_Animation.FloatPrecision._16Bit:
                                         WriteKeyframeFloats_Float16(animation.Nodes[i].AnimationComponents[a].Keyframes, hasFirstKeyframe, hasFinalKeyframe, defaultKeyframe);

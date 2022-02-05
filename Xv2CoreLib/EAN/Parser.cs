@@ -94,9 +94,8 @@ namespace Xv2CoreLib.EAN
 
             //animation header data
             ValidateFloatAndIntPrecision(indexSize, floatSize);
-            animation.I_02 = (EAN_Animation.IntPrecision)indexSize;
-            animation.I_03 = (EAN_Animation.FloatPrecision)floatSize;
-            animation.FrameCount = BitConverter.ToInt32(rawBytes, offset + 4);
+            //var indexValueType = (EAN_Animation.IntPrecision)indexSize;
+            animation.FloatSize = (EAN_Animation.FloatPrecision)floatSize;
 
             if(nodeCount > 0)
             {
@@ -115,7 +114,7 @@ namespace Xv2CoreLib.EAN
                         {
                             int thisKeyframedAnimationsOffset = BitConverter.ToInt32(rawBytes, keyframedAnimationsOffset) + thisNodeOffset;
                             animation.Nodes[i].AnimationComponents.Add(new EAN_AnimationComponent());
-                            animation.Nodes[i].AnimationComponents[a].I_00 = (EAN_AnimationComponent.ComponentType)rawBytes[thisKeyframedAnimationsOffset + 0];
+                            animation.Nodes[i].AnimationComponents[a].Type = (EAN_AnimationComponent.ComponentType)rawBytes[thisKeyframedAnimationsOffset + 0];
                             animation.Nodes[i].AnimationComponents[a].I_01 = rawBytes[thisKeyframedAnimationsOffset + 1];
                             animation.Nodes[i].AnimationComponents[a].I_02 = BitConverter.ToInt16(rawBytes, thisKeyframedAnimationsOffset + 2);
 

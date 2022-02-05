@@ -21,35 +21,19 @@ namespace Xv2CoreLib.EAN
 
     [YAXSerializeAs("EAN")]
     [Serializable]
-    public class EAN_File : INotifyPropertyChanged, ISorting, IIsNull
+    public class EAN_File : ISorting, IIsNull
     {
-        #region INotifyPropertyChanged
-        [field: NonSerialized]
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        // This method is called by the Set accessor of each property.
-        // The CallerMemberName attribute that is applied to the optional propertyName
-        // parameter causes the property name of the caller to be substituted as an argument.
-        private void NotifyPropertyChanged(String propertyName = "")
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-        #endregion
-
         public const float DefaultFoV = 39.97835f;
 
         [YAXAttributeForClass]
-        public bool IsCamera { get; set; } //offset 16
+        public bool IsCamera { get; set; }
         [YAXAttributeForClass]
         public int I_08 { get; set; }
         [YAXAttributeForClass]
         public byte I_17 { get; set; }
 
         public ESK_Skeleton Skeleton { get; set; }
-        public AsyncObservableCollection<EAN_Animation> Animations { get; set; }
+        public AsyncObservableCollection<EAN_Animation> Animations { get; set; } = new AsyncObservableCollection<EAN_Animation>();
 
         #region Load/Save
         public static EAN_File Load(byte[] rawBytes, bool linkEskToAnims = false)
@@ -229,6 +213,21 @@ namespace Xv2CoreLib.EAN
             return newId;
         }
 
+        public EAN_Animation AddNewAnimation(List<IUndoRedo> undos = null)
+        {
+            EAN_Animation anim = new EAN_Animation();
+
+            anim.ID_UShort = (ushort)NextID();
+            anim.Name = $"NewAnimation_{anim.ID_UShort}";
+            anim.LinkEskData(Skeleton);
+
+            Animations.Add(anim);
+
+            if (undos != null)
+                undos.Add(new UndoableListAdd<EAN_Animation>(Animations, anim));
+
+            return anim;
+        } 
         #endregion
 
         #region Defaults
@@ -323,7 +322,6 @@ namespace Xv2CoreLib.EAN
 
         #endregion
 
-
     }
 
     [YAXSerializeAs("Animation")]
@@ -354,10 +352,8 @@ namespace Xv2CoreLib.EAN
 
         public enum FloatPrecision
         {
-            _8Bit = 0,
             _16Bit = 1,
-            _32Bit = 2,
-            _64Bit = 3
+            _32Bit = 2
         }
 
         #region WrapperProps
@@ -387,9 +383,8 @@ namespace Xv2CoreLib.EAN
         [YAXDontSerialize]
         public ushort ID_UShort
         {
-            //For binding in WPF - cant be bothered doing a (int > ushort) value converter
             get { return ushort.Parse(Index); }
-            set { Index = ID_UShort.ToString(); }
+            set { Index = value.ToString(); }
         }
 
         [YAXDontSerialize]
@@ -397,21 +392,21 @@ namespace Xv2CoreLib.EAN
         {
             get
             {
-                return (byte)I_03;
+                return (byte)FloatSize;
             }
             set
             {
-                I_03 = (FloatPrecision)value;
+                FloatSize = (FloatPrecision)value;
             }
         }
         #endregion
 
+        [YAXDontSerialize]
         internal ESK_Skeleton eskSkeleton { get; set; }
 
         //Values
-        private string _index = null;
+        private string _index = "0";
         private string _NameValue = String.Empty;
-        private int _frameCountValue = 0;
 
         //Properties
         [YAXAttributeForClass]
@@ -459,55 +454,23 @@ namespace Xv2CoreLib.EAN
         {
             get
             {
-                return this._frameCountValue;
-            }
-            set
-            {
-                if (value != this._frameCountValue)
-                {
-                    this._frameCountValue = value;
-                    NotifyPropertyChanged(nameof(FrameCount));
-                }
+                return CalculateFrameCount();
             }
         }
         [YAXAttributeForClass]
         [YAXSerializeAs("IndexSize")]
-        public IntPrecision I_02 { get; set; } //int8
+        public IntPrecision IndexSize
+        {
+            get => FrameCount <= byte.MaxValue ? IntPrecision._8Bit : IntPrecision._16Bit;
+        }
         [YAXAttributeForClass]
         [YAXSerializeAs("FloatSize")]
-        public FloatPrecision I_03 { get; set; } //int8
+        public FloatPrecision FloatSize { get; set; } = FloatPrecision._32Bit;
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "AnimationNode")]
-        public AsyncObservableCollection<EAN_Node> Nodes { get; set; }
+        public AsyncObservableCollection<EAN_Node> Nodes { get; set; } = new AsyncObservableCollection<EAN_Node>();
 
-
-        #region KeyframeManipulation
-        public List<IUndoRedo> RemoveKeyframe(int frame)
-        {
-            List<IUndoRedo> undos = new List<IUndoRedo>();
-
-            foreach (var bone in Nodes)
-            {
-                bone.RemoveKeyframe(frame, undos);
-            }
-
-            return undos;
-        }
-
-        public List<IUndoRedo> AddKeyframe(string nodeName, int frame, float posX, float posY, float posZ, float posW, float rotX, float rotY, float rotZ, float rotW,
-            float scaleX, float scaleY, float scaleZ, float scaleW)
-        {
-            List<IUndoRedo> undos = new List<IUndoRedo>();
-            EAN_Node node = GetNode(nodeName, true, undos);
-
-            if (node == null) throw new InvalidDataException($"EAN_Animation.AddKeyframe: \"{nodeName}\" not found.");
-            node.AddKeyframe(frame, posX, posY, posZ, posW, rotX, rotY, rotZ, rotW, scaleX, scaleY, scaleZ, scaleW, undos);
-
-            return undos;
-        }
-        #endregion
-
-        #region Get
+        #region GetAndAdd
         public EAN_Node GetNode(string BoneName, bool createNode, List<IUndoRedo> undos = null)
         {
             EAN_Node node = GetNode(BoneName);
@@ -524,7 +487,7 @@ namespace Xv2CoreLib.EAN
         {
             if (Nodes == null) throw new Exception(String.Format("Could not retrieve the bone {0} becauses Nodes is null.", BoneName));
 
-            for (int i = 0; i < Nodes.Count(); i++)
+            for (int i = 0; i < Nodes.Count; i++)
             {
                 if (BoneName == Nodes[i].BoneName)
                 {
@@ -548,23 +511,7 @@ namespace Xv2CoreLib.EAN
             }
             return max;
         }
-
-        #endregion
-
-        #region Helpers
-
-        internal void LinkEskData(ESK_Skeleton skeleton)
-        {
-            if (skeleton == null) new ArgumentNullException("EAN_Animation.LinkEskData: skeleton was null.");
-            if (Nodes == null) Nodes = new AsyncObservableCollection<EAN_Node>();
-
-            eskSkeleton = skeleton;
-            foreach (var node in Nodes)
-            {
-                node.LinkEskData(skeleton);
-            }
-        }
-
+        
         public EAN_Node CreateNode(string bone, List<IUndoRedo> undos = null)
         {
             if (undos == null) undos = new List<IUndoRedo>();
@@ -583,6 +530,38 @@ namespace Xv2CoreLib.EAN
             return node;
         }
 
+        public IUndoRedo AddBone(string boneName)
+        {
+            if (Nodes.Any(x => x.BoneName == boneName)) return null;
+
+            EAN_Node node = new EAN_Node();
+            node.BoneName = boneName;
+            node.LinkEskData(eskSkeleton);
+            Nodes.Add(node);
+
+            return new UndoableListAdd<EAN_Node>(Nodes, node, "Add Bone");
+        }
+        #endregion
+
+        #region Helpers
+        public int CalculateFrameCount()
+        {
+            int frameCount = 0;
+
+            foreach(var bone in Nodes)
+            {
+                foreach(var comp in bone.AnimationComponents)
+                {
+                    int max = (comp.Keyframes.Count > 0) ? comp.Keyframes.Max(x => x.FrameIndex) + 1 : 0;
+
+                    if (max > frameCount)
+                        frameCount = max;
+                }
+            }
+
+            return frameCount;
+        }
+
         public EAN_Animation Clone()
         {
             AsyncObservableCollection<EAN_Node> _Nodes = AsyncObservableCollection<EAN_Node>.Create();
@@ -594,9 +573,7 @@ namespace Xv2CoreLib.EAN
             return new EAN_Animation()
             {
                 IndexNumeric = IndexNumeric,
-                I_02 = I_02,
-                I_03 = I_03,
-                FrameCount = FrameCount,
+                FloatSize = FloatSize,
                 Name = (string)Name.Clone(),
                 Nodes = _Nodes
             };
@@ -606,8 +583,8 @@ namespace Xv2CoreLib.EAN
         {
             if (anim.Name != Name) return false;
             if (anim.FloatType != FloatType) return false;
-            if (anim.I_02 != I_02) return false;
-            if (anim.I_03 != I_03) return false;
+            if (anim.IndexSize != IndexSize) return false;
+            if (anim.FloatSize != FloatSize) return false;
             if (anim.FrameCount != FrameCount) return false;
             if (anim.Nodes == null && Nodes == null) return true;
             if (anim.Nodes == null || Nodes == null) return false;
@@ -630,20 +607,20 @@ namespace Xv2CoreLib.EAN
             }
         }
 
-        public List<IUndoRedo> RemoveDuplicateKeyframes()
-        {
-            List<IUndoRedo> undos = new List<IUndoRedo>();
-
-            foreach(var node in Nodes)
-            {
-                undos.AddRange(node.RemoveDuplicateKeyframes());
-            }
-
-            return undos;
-        }
         #endregion
 
         #region Init
+        internal void LinkEskData(ESK_Skeleton skeleton)
+        {
+            if (skeleton == null) new ArgumentNullException("EAN_Animation.LinkEskData: skeleton was null.");
+            if (Nodes == null) Nodes = new AsyncObservableCollection<EAN_Node>();
+
+            eskSkeleton = skeleton;
+            foreach (var node in Nodes)
+            {
+                node.LinkEskData(skeleton);
+            }
+        }
 
         /// <summary>
         /// Returns a list of all bones that do not exist in the current skeleton.
@@ -682,7 +659,205 @@ namespace Xv2CoreLib.EAN
 
         #endregion
 
+        #region KeyframeManipulation
+        public List<IUndoRedo> AddKeyframe(string nodeName, int frame, float posX, float posY, float posZ, float posW, float rotX, float rotY, float rotZ, float rotW,
+            float scaleX, float scaleY, float scaleZ, float scaleW, bool hasPos = true, bool hasRot = true, bool hasScale = true)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+            EAN_Node node = GetNode(nodeName, true, undos);
+
+            if (node == null) throw new InvalidDataException($"EAN_Animation.AddKeyframe: \"{nodeName}\" not found.");
+            node.AddKeyframe(frame, posX, posY, posZ, posW, rotX, rotY, rotZ, rotW, scaleX, scaleY, scaleZ, scaleW, undos, hasPos, hasRot, hasScale);
+
+            return undos;
+        }
+
+        public List<IUndoRedo> AddKeyframes(List<SerializedBone> bones, bool removeCollisions, bool rebase, bool addPos, bool addRot, bool addScale)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            //Remove collisions 
+            if (removeCollisions && !rebase)
+            {
+                int min = SerializedBone.GetMinKeyframe(bones);
+                int max = SerializedBone.GetMaxKeyframe(bones);
+
+                foreach (var bone in bones)
+                {
+                    EAN_Node node = GetNode(bone.Name);
+
+                    if(node != null)
+                        node.RemoveCollisions(min, max, undos);
+                }
+            }
+
+            if (rebase)
+            {
+                int min = SerializedBone.GetMinKeyframe(bones);
+                int max = SerializedBone.GetMaxKeyframe(bones);
+                int rebaseAmount = max - min + 1;
+
+                foreach (var bone in bones)
+                {
+                    EAN_Node node = GetNode(bone.Name);
+
+                    if (node != null)
+                        node.RebaseKeyframes(min, rebaseAmount, addPos, addRot, addScale, undos);
+                }
+            }
+
+            //Paste keyframes
+            foreach (var bone in bones)
+            {
+                EAN_Node node = GetNode(bone.Name, true, undos);
+
+                if (node == null) throw new InvalidDataException($"EAN_Animation.AddKeyframes: \"{bone.Name}\" not found.");
+
+                bool hasPos = addPos ? bone.HasPos : false;
+                bool hasRot = addRot ? bone.HasRot : false;
+                bool hasScale = addScale ? bone.HasScale : false;
+
+                foreach (var keyframe in bone.Keyframes)
+                {
+                    node.AddKeyframe(keyframe.Frame, keyframe.PosX, keyframe.PosY, keyframe.PosZ, keyframe.PosW,
+                                     keyframe.RotX, keyframe.RotY, keyframe.RotZ, keyframe.RotW,
+                                     keyframe.ScaleX, keyframe.ScaleY, keyframe.ScaleZ, keyframe.ScaleW, undos, hasPos, hasRot, hasScale);
+                }
+            }
+
+            return undos;
+        }
+
+        public List<IUndoRedo> RemoveKeyframe(int frame, bool removePos = true, bool removeRot = true, bool removeScale = true)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            foreach (var bone in Nodes)
+            {
+                bone.RemoveKeyframe(frame, undos, removePos, removeRot, removeScale);
+            }
+
+            return undos;
+        }
+
+        public List<IUndoRedo> RemoveDuplicateKeyframes()
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            foreach (var node in Nodes)
+            {
+                undos.AddRange(node.RemoveDuplicateKeyframes());
+            }
+
+            return undos;
+        }
+
+        public List<IUndoRedo> RemoveKeyframeRange(int startFrame, int endFrame, List<string> boneNames, bool rebase, bool pos = true, bool rot = true, bool scale = true)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+            int rebaseAmount = endFrame - startFrame;
+
+            foreach (var boneName in boneNames)
+            {
+                var node = GetNode(boneName);
+
+                for(int i = startFrame; i <= endFrame; i++)
+                {
+                    node.RemoveKeyframe(i, undos);
+                }
+            }
+
+            if (rebase)
+            {
+                RebaseKeyframes(endFrame + 1, -rebaseAmount, boneNames, pos, rot, scale, undos);
+            }
+
+            return undos;
+        }
+
+        public void RebaseKeyframes(int startFrame, int rebaseAmount, List<string> boneNames, bool pos = true, bool rot = true, bool scale = true, List<IUndoRedo> undos = null)
+        {
+            foreach(var node in Nodes.Where(x => boneNames.Contains(x.BoneName)))
+            {
+                node.RebaseKeyframes(startFrame, rebaseAmount, pos, rot, scale, undos);
+            }
+        }
+
+        /// <summary>
+        /// Extend the animation by duplicating the last frame. If no keyframes exist, then a default one will be added.
+        /// </summary>
+        /// <param name="newDuration">The new duration of the animation. Must be greater than current frame count.</param>
+        public List<IUndoRedo> ExtendAnimation(int newDuration)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            if (newDuration <= FrameCount) return undos;
+
+            foreach (var node in Nodes)
+                node.ExtendAnimation(newDuration, undos);
+
+            return undos;
+        }
+
+        public List<IUndoRedo> ReverseAnimation(int startFrame, int endFrame)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            foreach(var bone in Nodes)
+            {
+                bone.ReverseAnimation(startFrame, endFrame, undos);
+            }
+
+            return undos;
+        }
+
+        public List<SerializedBone> SerializeKeyframeRange(int startFrame, int endFrame, List<string> boneNames, bool pos = true, bool rot = true, bool scale = true)
+        {
+            List<SerializedBone> bones = new List<SerializedBone>();
+
+            foreach (var boneName in boneNames)
+            {
+                EAN_Node node = GetNode(boneName);
+
+                if (node != null)
+                {
+                    var serBone = new SerializedBone(node, startFrame, endFrame, pos, rot, scale);
+
+                    if(serBone.Keyframes.Length > 0)
+                       bones.Add(serBone);
+                }
+            }
+
+            SerializedBone.StartFrameRebaseToZero(bones);
+
+            return bones;
+        }
+
+        public List<SerializedBone> SerializeKeyframes(List<int> frames, List<string> boneNames, bool usePos = true, bool useRot = true, bool useScale = true, bool isCamera = false)
+        {
+            List<SerializedBone> bones = new List<SerializedBone>();
+
+            foreach (var boneName in boneNames)
+            {
+                EAN_Node node = GetNode(boneName);
+
+                if (node != null)
+                {
+                    var serBone = new SerializedBone(node, frames, usePos, useRot, useScale, isCamera);
+
+                    if (serBone.Keyframes.Length > 0)
+                        bones.Add(serBone);
+                }
+            }
+
+            SerializedBone.StartFrameRebaseToZero(bones);
+
+            return bones;
+        }
+        #endregion
+
         #region Modifiers
+        //These are the old EanManager functions.
         public List<IUndoRedo> ApplyNodeOffset(List<string> boneFilter, EAN_AnimationComponent.ComponentType componentType, float x, float y, float z, float w)
         {
             List<IUndoRedo> undos = new List<IUndoRedo>();
@@ -781,38 +956,7 @@ namespace Xv2CoreLib.EAN
                 undos.AddRange(node.RescaleNode(newDuration));
             }
 
-            if(FrameCount != newDuration)
-            {
-                undos.AddRange(ChangeDuration(newDuration));
-            }
-
             undos.AddRange(RemoveDuplicateKeyframes());
-
-            return undos;
-        }
-
-        /// <summary>
-        /// Changes the animations durations without rescaling the keyframes.
-        /// </summary>
-        /// <returns></returns>
-        public List<IUndoRedo> ChangeDuration(int newDuration)
-        {
-            List<IUndoRedo> undos = new List<IUndoRedo>();
-
-            //With the changes to how first and final frames are handle when saving, adding them while editing is no longer necessary. So simply changing the FrameCount is sufficent.
-            undos.Add(new UndoableProperty<EAN_Animation>(nameof(FrameCount), this, FrameCount, newDuration));
-            FrameCount = newDuration;
-
-            if(newDuration > byte.MaxValue && I_02 != IntPrecision._16Bit)
-            {
-                undos.Add(new UndoableProperty<EAN_Animation>(nameof(I_02), this, I_02, IntPrecision._16Bit));
-                I_02 = IntPrecision._16Bit;
-            }
-            else if(I_02 != IntPrecision._8Bit)
-            {
-                undos.Add(new UndoableProperty<EAN_Animation>(nameof(I_02), this, I_02, IntPrecision._8Bit));
-                I_02 = IntPrecision._8Bit;
-            }
 
             return undos;
         }
@@ -836,7 +980,7 @@ namespace Xv2CoreLib.EAN
                 {
                     for (int a = 0; a < Nodes[i].AnimationComponents.Count(); a++)
                     {
-                        var addComponent = addNode.GetComponent(Nodes[i].AnimationComponents[a].I_00);
+                        var addComponent = addNode.GetComponent(Nodes[i].AnimationComponents[a].Type);
 
                         //Check if the component exists (Position/Rot/Scale)
                         if (addComponent != null)
@@ -967,58 +1111,158 @@ namespace Xv2CoreLib.EAN
         public const string CAM_NODE = "Node";
 
         [YAXDontSerialize]
-        internal ESK_RelativeTransform EskRelativeTransform { get; set; }
+        public ESK_RelativeTransform EskRelativeTransform { get; internal set; }
 
 
         [YAXAttributeForClass]
-        public string BoneName { get; set; } 
+        public string BoneName { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Keyframes")]
-        public AsyncObservableCollection<EAN_AnimationComponent> AnimationComponents { get; set; }
+        public AsyncObservableCollection<EAN_AnimationComponent> AnimationComponents { get; set; } = new AsyncObservableCollection<EAN_AnimationComponent>();
 
         #region KeyframeManipulation
         /// <summary>
         /// Add a keyframe at the specified frame (will overwrite any existing keyframe).
         /// </summary>
         public void AddKeyframe(int frame, float posX, float posY, float posZ, float posW, float rotX, float rotY, float rotZ, float rotW,
-            float scaleX, float scaleY, float scaleZ, float scaleW, List<IUndoRedo> undos)
+            float scaleX, float scaleY, float scaleZ, float scaleW, List<IUndoRedo> undos, bool hasPosition = true, bool hasRotation = true, bool hasScale = true)
         {
-            var pos = GetComponent(EAN_AnimationComponent.ComponentType.Position, true, undos, BoneName == CAM_NODE);
-            pos.AddKeyframe(frame, posX, posY, posZ, posW, undos);
+            //Only add the keyframe if the values aren't default.
+            if(hasPosition)
+            {
+                var pos = GetComponent(EAN_AnimationComponent.ComponentType.Position, true, undos, BoneName == CAM_NODE);
+                pos.AddKeyframe(frame, posX, posY, posZ, posW, undos);
+            }
 
-            var rot = GetComponent(EAN_AnimationComponent.ComponentType.Rotation, true, undos, BoneName == CAM_NODE);
-            rot.AddKeyframe(frame, rotX, rotY, rotZ, rotW, undos);
+            if(hasRotation)
+            {
+                var rot = GetComponent(EAN_AnimationComponent.ComponentType.Rotation, true, undos, BoneName == CAM_NODE);
+                rot.AddKeyframe(frame, rotX, rotY, rotZ, rotW, undos);
+            }
 
-            var scale = GetComponent(EAN_AnimationComponent.ComponentType.Scale, true, undos, BoneName == CAM_NODE);
-            scale.AddKeyframe(frame, scaleX, scaleY, scaleZ, scaleW, undos);
-
-
+            if(hasScale)
+            {
+                var scale = GetComponent(EAN_AnimationComponent.ComponentType.Scale, true, undos, BoneName == CAM_NODE);
+                scale.AddKeyframe(frame, scaleX, scaleY, scaleZ, scaleW, undos);
+            }
         }
 
-        public void RemoveKeyframe(int keyframe, List<IUndoRedo> undos = null)
+        public void RemoveKeyframe(int keyframe, List<IUndoRedo> undos = null, bool removePos = true, bool removeRot = true, bool removeScale = true)
         {
             foreach (var component in AnimationComponents)
             {
+                if (!IsValidComponent(component, removePos, removeRot, removeScale)) continue;
+
                 component.RemoveKeyframe(keyframe, undos);
             }
         }
 
-        /// <summary>
-        /// Changes keyframe. 
-        /// </summary>
-        /// <returns>Was the change successful or not. Returns false if a keyframe already existed at that frame.</returns>
-        public bool ChangeKeyframe(int oldKeyframe, int newKeyframe)
+        public List<IUndoRedo> SetKeyframe(int frame, EAN_AnimationComponent.ComponentType componentType, Axis axis, bool isCamera, float value)
         {
-            foreach (var components in AnimationComponents)
-            {
-                bool result = components.ChangeKeyframe(oldKeyframe, newKeyframe);
+            List<IUndoRedo> undos = new List<IUndoRedo>();
 
-                if (!result) return false;
+            var component = GetComponent(componentType, true, undos, isCamera);
+
+            var keyframe = component.GetKeyframe(frame, true, undos);
+
+            switch (axis)
+            {
+                case Axis.X:
+                    if (undos != null) undos.Add(new UndoableProperty<EAN_Keyframe>(nameof(EAN_Keyframe.X), keyframe, keyframe.X, value));
+                    keyframe.X = value;
+                    break;
+                case Axis.Y:
+                    if (undos != null) undos.Add(new UndoableProperty<EAN_Keyframe>(nameof(EAN_Keyframe.Y), keyframe, keyframe.Y, value));
+                    keyframe.Y = value;
+                    break;
+                case Axis.Z:
+                    if (undos != null) undos.Add(new UndoableProperty<EAN_Keyframe>(nameof(EAN_Keyframe.Z), keyframe, keyframe.Z, value));
+                    keyframe.Z = value;
+                    break;
+                case Axis.W:
+                    if (undos != null) undos.Add(new UndoableProperty<EAN_Keyframe>(nameof(EAN_Keyframe.W), keyframe, keyframe.W, value));
+                    keyframe.W = value;
+                    break;
             }
 
-            return true;
+            return undos;
         }
 
+        public void RebaseKeyframes(int startFrame, int rebaseAmount, bool pos = true, bool rot = true, bool scale = true, List<IUndoRedo> undos = null)
+        {
+            foreach(var comp in AnimationComponents)
+            {
+                if (!IsValidComponent(comp, pos, rot, scale)) continue;
+
+                foreach (var keyframe in comp.Keyframes.Where(x => x.FrameIndex >= startFrame))
+                {
+                    ushort frameIndex = (ushort)(keyframe.FrameIndex + rebaseAmount);
+
+                    if (undos != null)
+                        undos.Add(new UndoableProperty<EAN_Keyframe>(nameof(keyframe.FrameIndex), keyframe, keyframe.FrameIndex, frameIndex));
+
+                    keyframe.FrameIndex = frameIndex;
+                }
+            }
+        }
+
+        public void RebaseKeyframes(List<int> frames, int rebaseAmount, bool removeCollisions, bool pos = true, bool rot = true, bool scale = true, List<IUndoRedo> undos = null)
+        {
+            if (frames.Count == 0) return;
+            int min = frames.Min() + rebaseAmount;
+            int max = frames.Min() + rebaseAmount;
+
+            foreach (var comp in AnimationComponents)
+            {
+                if (!IsValidComponent(comp, pos, rot, scale)) continue;
+
+                if (removeCollisions)
+                    comp.RemoveCollisions(min, max, undos);
+
+                foreach (var keyframe in comp.Keyframes.Where(x => frames.Contains(x.FrameIndex)))
+                {
+                    ushort frameIndex = (ushort)(keyframe.FrameIndex + rebaseAmount);
+
+                    if (undos != null)
+                        undos.Add(new UndoableProperty<EAN_Keyframe>(nameof(keyframe.FrameIndex), keyframe, keyframe.FrameIndex, frameIndex));
+
+                    keyframe.FrameIndex = frameIndex;
+                }
+
+                comp.SortKeyframes(undos);
+            }
+        }
+
+        public void ExtendAnimation(int newDuration, List<IUndoRedo> undos = null)
+        {
+            foreach (var comp in AnimationComponents)
+                comp.ExtendKeyframes(newDuration, undos);
+        }
+        
+        public void ReverseAnimation(int startFrame, int endFrame, List<IUndoRedo> undos = null)
+        {
+            foreach (var component in AnimationComponents)
+                component.ReverseKeyframes(startFrame, endFrame, undos);
+        }
+
+        public void RemoveCollisions(int startFrame, int endFrame, List<IUndoRedo> undos = null)
+        {
+            foreach (var component in AnimationComponents)
+                component.RemoveCollisions(startFrame, endFrame, undos);
+        }
+
+        public void RemoveComponent(EAN_AnimationComponent.ComponentType type, List<IUndoRedo> undos = null)
+        {
+            var component = AnimationComponents.FirstOrDefault(x => x.Type == type);
+
+            if(component != null)
+            {
+                AnimationComponents.Remove(component);
+
+                if (undos != null)
+                    undos.Add(new UndoableListRemove<EAN_AnimationComponent>(AnimationComponents, component));
+            }
+        }
         #endregion
 
         #region Get
@@ -1036,6 +1280,7 @@ namespace Xv2CoreLib.EAN
             if (component == null && createComponent)
             {
                 component = new EAN_AnimationComponent(_type, isCamera, EskRelativeTransform);
+                component.EskRelativeTransform = EskRelativeTransform;
                 undos.Add(new UndoableListAdd<EAN_AnimationComponent>(AnimationComponents, component));
                 AnimationComponents.Add(component);
             }
@@ -1047,7 +1292,7 @@ namespace Xv2CoreLib.EAN
         {
             for (int i = 0; i < AnimationComponents.Count(); i++)
             {
-                if (_type == AnimationComponents[i].I_00)
+                if (_type == AnimationComponents[i].Type)
                 {
                     return AnimationComponents[i];
                 }
@@ -1064,12 +1309,16 @@ namespace Xv2CoreLib.EAN
         /// <summary>
         /// Get a list of all used keyframes for this Node.
         /// </summary>
-        public List<ushort> GetAllKeyframes()
+        public List<ushort> GetAllKeyframes(bool usePos = true, bool useRot = true, bool useScale = true)
         {
             List<ushort> keyframes = new List<ushort>();
 
             foreach (var component in AnimationComponents)
             {
+                if (component.Type == EAN_AnimationComponent.ComponentType.Position && !usePos) continue;
+                if (component.Type == EAN_AnimationComponent.ComponentType.Rotation && !useRot) continue;
+                if (component.Type == EAN_AnimationComponent.ComponentType.Scale && !useScale) continue;
+
                 foreach (var keyframe in component.Keyframes)
                 {
                     if (!keyframes.Contains(keyframe.FrameIndex))
@@ -1082,12 +1331,12 @@ namespace Xv2CoreLib.EAN
             return keyframes;
         }
 
-        public List<int> GetAllKeyframesInt()
+        public List<int> GetAllKeyframesInt(bool usePos = true, bool useRot = true, bool useScale = true)
         {
-            return ArrayConvert.ConvertToIntList(GetAllKeyframes());
+            return ArrayConvert.ConvertToIntList(GetAllKeyframes(usePos, useRot, useScale));
         }
 
-        public float[] GetKeyframeValues(int frame)
+        public float[] GetKeyframeValues(int frame, bool usePos = true, bool useRot = true, bool useScale = true, bool isCamera = false)
         {
             float[] values = new float[12];
             var pos = GetComponent(EAN_AnimationComponent.ComponentType.Position);
@@ -1095,28 +1344,36 @@ namespace Xv2CoreLib.EAN
             var scale = GetComponent(EAN_AnimationComponent.ComponentType.Scale);
 
             //Set default values
-            values[3] = 1f;
-            values[7] = 1f;
-            values[8] = 1f;
-            values[9] = 1f;
-            values[10] = 1f;
-            values[11] = 1f;
+            values[3] = 1f; // Pos W
+            values[7] = 1f; //Rot W
 
-            if (pos != null)
+            if (!isCamera)
+            {
+                values[8] = 1f; //Scale X
+                values[9] = 1f; //Scale Y
+                values[10] = 1f; //Scale Z
+                values[11] = 1f; //Scale W
+            }
+            else
+            {
+                values[9] = (float)Utils.ConvertDegreesToRadians(EAN_File.DefaultFoV); //FoV
+            }
+
+            if (pos != null && usePos)
             {
                 values[0] = pos.GetKeyframeValue(frame, Axis.X);
                 values[1] = pos.GetKeyframeValue(frame, Axis.Y);
                 values[2] = pos.GetKeyframeValue(frame, Axis.Z);
                 values[3] = pos.GetKeyframeValue(frame, Axis.W);
             }
-            if (rot != null)
+            if (rot != null && useRot)
             {
                 values[4] = rot.GetKeyframeValue(frame, Axis.X);
                 values[5] = rot.GetKeyframeValue(frame, Axis.Y);
                 values[6] = rot.GetKeyframeValue(frame, Axis.Z);
                 values[7] = rot.GetKeyframeValue(frame, Axis.W);
             }
-            if (scale != null)
+            if (scale != null && useScale)
             {
                 values[8] = scale.GetKeyframeValue(frame, Axis.X);
                 values[9] = scale.GetKeyframeValue(frame, Axis.Y);
@@ -1164,6 +1421,16 @@ namespace Xv2CoreLib.EAN
             foreach (var component in AnimationComponents)
             {
                 if (component.Keyframes.FirstOrDefault(e => e.FrameIndex == frame) != null) return true;
+            }
+
+            return false;
+        }
+        
+        public bool HasComponent(EAN_AnimationComponent.ComponentType componentType)
+        {
+            foreach (var component in AnimationComponents)
+            {
+                if (component.Type == componentType) return true;
             }
 
             return false;
@@ -1258,6 +1525,14 @@ namespace Xv2CoreLib.EAN
             return undos;
         }
 
+        private bool IsValidComponent(EAN_AnimationComponent component, bool pos, bool rot, bool scale)
+        {
+            if (component.Type == EAN_AnimationComponent.ComponentType.Position && !pos) return false;
+            if (component.Type == EAN_AnimationComponent.ComponentType.Rotation && !rot) return false;
+            if (component.Type == EAN_AnimationComponent.ComponentType.Scale && !scale) return false;
+
+            return true;
+        }
         #endregion
 
         #region Modifiers
@@ -1313,7 +1588,7 @@ namespace Xv2CoreLib.EAN
             return undos;
         }
 
-        public List<IUndoRedo> DeleteKeyframes(List<int> keyframes)
+        public List<IUndoRedo> DeleteKeyframes(List<int> keyframes, bool deletePos, bool deleteRot, bool deleteScale)
         {
             List<IUndoRedo> undos = new List<IUndoRedo>();
 
@@ -1323,9 +1598,9 @@ namespace Xv2CoreLib.EAN
 
             foreach (var keyframe in keyframes)
             {
-                if (pos != null) pos.RemoveKeyframe(keyframe, undos);
-                if (rot != null) rot.RemoveKeyframe(keyframe, undos);
-                if (scale != null) scale.RemoveKeyframe(keyframe, undos);
+                if (pos != null && deletePos) pos.RemoveKeyframe(keyframe, undos);
+                if (rot != null && deleteRot) rot.RemoveKeyframe(keyframe, undos);
+                if (scale != null && deleteScale) scale.RemoveKeyframe(keyframe, undos);
             }
 
             return undos;
@@ -1359,6 +1634,24 @@ namespace Xv2CoreLib.EAN
         }
         #endregion
 
+        public static List<int> GetAllKeyframes(IList<EAN_Node> nodes, bool pos = true, bool rot = true, bool scale = true)
+        {
+            List<int> keyframes = new List<int>();
+
+            foreach(var node in nodes)
+            {
+                List<int> nodeKeyframes = node.GetAllKeyframesInt(pos, rot, scale);
+
+                foreach(var val in nodeKeyframes)
+                {
+                    if (!keyframes.Contains(val))
+                        keyframes.Add(val);
+                }
+            }
+
+            keyframes.Sort();
+            return keyframes;
+        }
     }
 
     [YAXSerializeAs("Keyframes")]
@@ -1368,14 +1661,14 @@ namespace Xv2CoreLib.EAN
         public enum ComponentType : byte
         {
             Position = 0,
-            Rotation = 1,
+            Rotation = 1, //TargetPosition for camera
             Scale = 2, //Or "Camera"
         }
 
 
         [YAXAttributeForClass]
         [YAXSerializeAs("Type")]
-        public ComponentType I_00 { get; set; } //int8
+        public ComponentType Type { get; set; } //int8
         [YAXAttributeForClass]
         public byte I_01 { get; set; }
         [YAXAttributeForClass]
@@ -1388,7 +1681,7 @@ namespace Xv2CoreLib.EAN
 
         public EAN_AnimationComponent(ComponentType type, bool isCamera, ESK_RelativeTransform relativeTransform)
         {
-            I_00 = type;
+            Type = type;
             I_01 = (byte)((isCamera) ? 3 : 7);
             EskRelativeTransform = relativeTransform;
         }
@@ -1397,10 +1690,10 @@ namespace Xv2CoreLib.EAN
         //Bone Linking for animation playback:
         private ESK_RelativeTransform _eskRelativeTransform = null;
         [YAXDontSerialize]
-        internal ESK_RelativeTransform EskRelativeTransform
+        public ESK_RelativeTransform EskRelativeTransform
         {
             get { return _eskRelativeTransform; }
-            set
+            internal set
             {
                 _eskRelativeTransform = value;
                 _defaultKeyframe = null;
@@ -1502,6 +1795,59 @@ namespace Xv2CoreLib.EAN
             return Keyframes.FirstOrDefault(k => k.FrameIndex == (ushort)frame);
         }
 
+        public void ExtendKeyframes(int newDuration, List<IUndoRedo> undos = null)
+        {
+            EAN_Keyframe keyframe;
+
+            if(Keyframes.Count == 0)
+            {
+                keyframe = DefaultKeyframe.Copy();
+                keyframe.FrameIndex = (ushort)newDuration;
+            }
+            else
+            {
+                keyframe = Keyframes[Keyframes.Count - 1].Copy(); //Keyframes must always be in order, so this is valid
+                keyframe.FrameIndex = (ushort)newDuration;
+            }
+
+            Keyframes.Add(keyframe);
+
+            if (undos != null)
+                undos.Add(new UndoableListAdd<EAN_Keyframe>(Keyframes, keyframe));
+        }
+
+        public void ReverseKeyframes(int startFrame, int endFrame, List<IUndoRedo> undos = null)
+        {
+            foreach(var keyframe in Keyframes)
+            {
+                if(keyframe.FrameIndex >= startFrame && keyframe.FrameIndex <= endFrame)
+                {
+                    ushort newFrameIndex = (ushort)(endFrame - keyframe.FrameIndex + startFrame);
+
+                    if (undos != null)
+                        undos.Add(new UndoableProperty<EAN_Keyframe>(nameof(EAN_Keyframe.FrameIndex), keyframe, keyframe.FrameIndex, newFrameIndex));
+
+                    keyframe.FrameIndex = newFrameIndex;
+                }
+            }
+
+            SortKeyframes(undos);
+        }
+
+        public void RemoveCollisions(int startFrame, int endFrame, List<IUndoRedo> undos = null)
+        {
+            for (int i = Keyframes.Count - 1; i >= 0; i--)
+            {
+                if(Keyframes[i].FrameIndex >= startFrame && Keyframes[i].FrameIndex <= endFrame)
+                {
+                    if (undos != null)
+                        undos.Add(new UndoableListRemove<EAN_Keyframe>(Keyframes, Keyframes[i]));
+
+                    Keyframes.RemoveAt(i);
+                }
+            }
+        }
+
         public List<IUndoRedo> SetKeyframeValue(int frame, float value, Axis axis)
         {
             List<IUndoRedo> undos = new List<IUndoRedo>();
@@ -1540,7 +1886,7 @@ namespace Xv2CoreLib.EAN
         }
 
         /// <summary>
-        /// Sort keyframes to be sequential. 
+        /// Sort keyframes to be sequential. Required for keyframe interpolation to function correctly!
         /// </summary>
         public void SortKeyframes(List<IUndoRedo> undos = null)
         {
@@ -1560,6 +1906,7 @@ namespace Xv2CoreLib.EAN
             {
                 keyframe = new EAN_Keyframe((ushort)frame, GetKeyframeValue(frame, Axis.X), GetKeyframeValue(frame, Axis.Y), GetKeyframeValue(frame, Axis.Z), GetKeyframeValue(frame, Axis.W));
                 Keyframes.Add(keyframe);
+                SortKeyframes(undos);
 
                 if (undos != null)
                 {
@@ -1582,10 +1929,15 @@ namespace Xv2CoreLib.EAN
 
         private EAN_Keyframe GetDefaultKeyframe(int frame = 0)
         {
+            return GetDefaultKeyframe(EskRelativeTransform, Type, I_01 == 3, frame);
+        }
+
+        public static EAN_Keyframe GetDefaultKeyframe(ESK_RelativeTransform EskRelativeTransform, ComponentType Type, bool isCam, int frame = 0)
+        {
             EAN_Keyframe keyframe = new EAN_Keyframe();
             keyframe.FrameIndex = (ushort)frame;
 
-            if (I_00 == ComponentType.Scale && I_01 == 3)
+            if (Type == ComponentType.Scale && isCam)
             {
                 //Camera
                 keyframe.Y = (float)Utils.ConvertDegreesToRadians(EAN_File.DefaultFoV);
@@ -1594,25 +1946,25 @@ namespace Xv2CoreLib.EAN
             {
                 //Camera Pos/Rot
 
-                if (I_00 == ComponentType.Rotation)
+                if (Type == ComponentType.Rotation)
                     keyframe.W = 1f;
 
             }
-            else if (I_00 == ComponentType.Scale)
+            else if (Type == ComponentType.Scale)
             {
                 keyframe.X = EskRelativeTransform.ScaleX;
                 keyframe.Y = EskRelativeTransform.ScaleY;
                 keyframe.Z = EskRelativeTransform.ScaleZ;
                 keyframe.W = EskRelativeTransform.ScaleW;
             }
-            else if (I_00 == ComponentType.Position)
+            else if (Type == ComponentType.Position)
             {
                 keyframe.X = EskRelativeTransform.PositionX;
                 keyframe.Y = EskRelativeTransform.PositionY;
                 keyframe.Z = EskRelativeTransform.PositionZ;
                 keyframe.W = EskRelativeTransform.PositionW;
             }
-            else if (I_00 == ComponentType.Rotation)
+            else if (Type == ComponentType.Rotation)
             {
                 keyframe.X = EskRelativeTransform.RotationX;
                 keyframe.Y = EskRelativeTransform.RotationY;
@@ -1765,10 +2117,10 @@ namespace Xv2CoreLib.EAN
         }
 
         /// <summary>
-        /// Get a non-persistent instance of the nearest keyframe BEFORE the specified frame. This instant MAY belong to another keyframe entirely, or not exist in Keyframes at all (if its a default keyframe generated because no keyframes currently exist) - so this method is ONLY intended for reading purposes! 
+        /// Get a non-persistent instance of the nearest keyframe BEFORE the specified frame. This instance MAY belong to another keyframe entirely, or not exist in Keyframes at all (if its a default keyframe generated because no keyframes currently exist) - so this method is ONLY intended for reading purposes! 
         /// </summary>
         /// <param name="frame">The specified frame.</param>
-        /// <param name="nearFrame">The frame the returned EAN_Keyframe belongs to (ignore FrameIndex on the keyframe) </param>
+        /// <param name="nearFrame">The frame the returned <see cref="EAN_Keyframe"/> belongs to (ignore FrameIndex on the keyframe) </param>
         private EAN_Keyframe GetNearestKeyframeBefore(int frame, int startIdx, ref int nearFrame, ref int index)
         {
             EAN_Keyframe nearest = null;
@@ -1816,7 +2168,7 @@ namespace Xv2CoreLib.EAN
         /// Get a non-persistent instance of the nearest keyframe AFTER the specified frame. This instant MAY belong to another keyframe entirely, or not exist in Keyframes at all (if its a default keyframe generated because no keyframes currently exist) - so this method is ONLY intended for reading purposes! 
         /// </summary>
         /// <param name="frame">The specified frame.</param>
-        /// <param name="nearFrame">The frame the returned EAN_Keyframe belongs to (ignore FrameIndex on the keyframe) </param>
+        /// <param name="nearFrame">The frame the returned <see cref="EAN_Keyframe"/> belongs to (ignore <see cref="EAN_Keyframe.FrameIndex"/> on the keyframe) </param>
         private EAN_Keyframe GetNearestKeyframeAfter(int frame, int startIdx, ref int nearFrame, ref int index)
         {
             EAN_Keyframe nearest = null;
@@ -1856,67 +2208,26 @@ namespace Xv2CoreLib.EAN
 
             return nearest;
         }
-
-        #endregion
-
-        #region Helper
-
-        public EAN_AnimationComponent Clone()
-        {
-            AsyncObservableCollection<EAN_Keyframe> _keyframes = AsyncObservableCollection<EAN_Keyframe>.Create();
-
-            for (int i = 0; i < Keyframes.Count(); i++)
-            {
-                _keyframes.Add(Keyframes[i].Clone());
-            }
-
-            return new EAN_AnimationComponent()
-            {
-                I_00 = I_00,
-                I_02 = I_02,
-                Keyframes = _keyframes
-            };
-        }
-
-        public void IncreaseFrameIndex(int amount)
-        {
-            for (int i = 0; i < Keyframes.Count; i++)
-            {
-                Keyframes[i].FrameIndex += (ushort)amount;
-            }
-        }
-
-        public bool Compare(EAN_AnimationComponent component)
-        {
-            if (I_00 != component.I_00) return false;
-            if (I_01 != component.I_01) return false;
-            if (I_02 != component.I_02) return false;
-            if (Keyframes == null && component.Keyframes == null) return true;
-            if (Keyframes == null || component.Keyframes == null) return false;
-
-            for (int i = 0; i < Keyframes.Count; i++)
-            {
-                if (!Keyframes[i].Compare(component.Keyframes[i])) return false;
-            }
-
-            return true;
-        }
-
+        
         private int GetClosestKeyframeIndexBefore(int frame, int startIdx, ref int index)
         {
             if (startIdx < 0) startIdx = 0;
 
-            if(Keyframes.Count == 1)
+            if (Keyframes.Count == 1)
             {
                 index = 0;
                 return index;
             }
 
-            for(int i = startIdx; i < Keyframes.Count; i++)
+            for (int i = startIdx; i < Keyframes.Count; i++)
             {
                 if (Keyframes[i].FrameIndex >= frame)
                 {
                     index = i - 1;
+
+                    if (index < 0)
+                        index = 0;
+
                     return index;
                 }
             }
@@ -1972,6 +2283,77 @@ namespace Xv2CoreLib.EAN
             index = before;
             return before;
             */
+        }
+
+        #endregion
+
+        #region Helper
+        public EAN_AnimationComponent Clone()
+        {
+            AsyncObservableCollection<EAN_Keyframe> _keyframes = AsyncObservableCollection<EAN_Keyframe>.Create();
+
+            for (int i = 0; i < Keyframes.Count(); i++)
+            {
+                _keyframes.Add(Keyframes[i].Clone());
+            }
+
+            return new EAN_AnimationComponent()
+            {
+                Type = Type,
+                I_02 = I_02,
+                Keyframes = _keyframes
+            };
+        }
+
+        public void IncreaseFrameIndex(int amount)
+        {
+            for (int i = 0; i < Keyframes.Count; i++)
+            {
+                Keyframes[i].FrameIndex += (ushort)amount;
+            }
+        }
+
+        public bool Compare(EAN_AnimationComponent component)
+        {
+            if (Type != component.Type) return false;
+            if (I_01 != component.I_01) return false;
+            if (I_02 != component.I_02) return false;
+            if (Keyframes == null && component.Keyframes == null) return true;
+            if (Keyframes == null || component.Keyframes == null) return false;
+
+            for (int i = 0; i < Keyframes.Count; i++)
+            {
+                if (!Keyframes[i].Compare(component.Keyframes[i])) return false;
+            }
+
+            return true;
+        }
+
+        public bool HasKeyframe(int frame)
+        {
+            for(int i = 0; i < Keyframes.Count; i++)
+            {
+                if (Keyframes[i].FrameIndex == frame) return true;
+            }
+
+            return false;
+        }
+
+        public static string GetCameraTypeString(ComponentType type, Axis axis)
+        {
+            switch (type)
+            {
+                case ComponentType.Position:
+                    return $"Position {axis}";
+                case ComponentType.Rotation:
+                    return $"TargetPosition {axis}";
+                case ComponentType.Scale:
+                    if (axis == Axis.X) return "Roll";
+                    if (axis == Axis.Y) return "FoV";
+                    return $"Camera {axis}";
+            }
+
+            return type.ToString();
         }
         #endregion
 
@@ -2169,6 +2551,23 @@ namespace Xv2CoreLib.EAN
             return true;
         }
 
+        public static float GetDefaultValue(EAN_AnimationComponent.ComponentType type, Axis axis, bool isCamera = false)
+        {
+            switch (type)
+            {
+                case EAN_AnimationComponent.ComponentType.Rotation:
+                case EAN_AnimationComponent.ComponentType.Position:
+                    return (axis != Axis.W) ? 0f : 1f;
+                case EAN_AnimationComponent.ComponentType.Scale:
+                    if (isCamera)
+                        return (float)(axis == Axis.Y ? Utils.ConvertDegreesToRadians(EAN_File.DefaultFoV) : 0);
+                    return 1f;
+
+            }
+
+            return 0f;
+        }
+
         #region Convert
         internal Vector3 ToVector3()
         {
@@ -2189,6 +2588,267 @@ namespace Xv2CoreLib.EAN
             matrix *= Matrix4x4.CreateTranslation(pos);
 
             return matrix;
+        }
+        #endregion
+    }
+
+    [Serializable]
+    public class SerializedAnimation
+    {
+        public string Name { get; set; }
+        public EAN_Animation.FloatPrecision FloatType { get; set; }
+        public List<SerializedBone> Bones { get; set; }
+        private bool isDeserialized = false;
+
+        public SerializedAnimation(EAN_Animation animation, ESK_Skeleton bindPose)
+        {
+            Name = animation.Name;
+            FloatType = animation.FloatSize;
+            Bones = new List<SerializedBone>(animation.Nodes.Count);
+
+            for(int i = 0; i < animation.Nodes.Count; i++)
+            {
+                Bones.Add(new SerializedBone(animation.Nodes[i]));
+            }
+
+            SerializedBone.SetNeutralBindPose(Bones, bindPose);
+        }
+
+        public static List<SerializedAnimation> Serialize(List<EAN_Animation> animations, ESK_Skeleton bindPose)
+        {
+            List<SerializedAnimation> serializedAnims = new List<SerializedAnimation>();
+
+            foreach (var animation in animations)
+                serializedAnims.Add(new SerializedAnimation(animation, bindPose));
+
+            return serializedAnims;
+        }
+
+        public static List<EAN_Animation> Deserialize(List<SerializedAnimation> serialziedAnimations, ESK_Skeleton bindPose)
+        {
+            List<EAN_Animation> animations = new List<EAN_Animation>();
+
+            foreach (var animation in serialziedAnimations)
+                animations.Add(animation.Deserialize(bindPose));
+
+            return animations;
+        }
+
+        public EAN_Animation Deserialize(ESK_Skeleton bindPose)
+        {
+            if (isDeserialized)
+                throw new InvalidOperationException($"SerializedAnimation.Deserialize: This animation has already been deserialized!");
+
+            SerializedBone.SetBindPose(Bones, bindPose);
+
+            EAN_Animation animation = new EAN_Animation();
+            animation.eskSkeleton = bindPose;
+            animation.Name = Name;
+            animation.FloatSize = FloatType;
+            animation.AddKeyframes(Bones, false, false, true, true, true);
+
+            isDeserialized = true;
+            return animation;
+        }
+    }
+
+    [Serializable]
+    public class SerializedBone
+    {
+        public string Name { get; set; }
+        public SerializedKeyframe[] Keyframes { get; set; }
+        private bool IsCamera = false;
+        public bool HasPos { get; set; }
+        public bool HasRot { get; set; }
+        public bool HasScale { get; set; }
+
+        public SerializedBone(EAN_Node node, int startFrame = -1, int endFrame = -1, bool pos = true, bool rot = true, bool scale = true)
+        {
+            Name = node.BoneName;
+            
+            List<ushort> keyframes = node.GetAllKeyframes(pos, rot, scale);
+
+            if (startFrame != -1 && endFrame != -1 && startFrame == endFrame)
+            {
+                throw new ArgumentException("SerializedBone: StartFrame cannot be the same as EndFrame.");
+            }
+
+            if(startFrame != -1)
+                keyframes.RemoveAll(x => x < startFrame);
+
+            if (endFrame != -1)
+                keyframes.RemoveAll(x => x > endFrame);
+
+            Keyframes = new SerializedKeyframe[keyframes.Count];
+
+            HasPos = pos & node.HasComponent(EAN_AnimationComponent.ComponentType.Position);
+            HasRot = rot & node.HasComponent(EAN_AnimationComponent.ComponentType.Rotation);
+            HasScale = scale & node.HasComponent(EAN_AnimationComponent.ComponentType.Scale);
+
+            for (int i = 0; i < keyframes.Count; i++)
+                Keyframes[i] = new SerializedKeyframe(keyframes[i], node.GetKeyframeValues(keyframes[i], pos, rot, scale, node.BoneName == EAN_Node.CAM_NODE));
+        }
+
+        public SerializedBone(EAN_Node node, List<int> frames, bool usePos, bool useRot, bool useScale, bool isCamera)
+        {
+            Name = node.BoneName;
+            IsCamera = isCamera;
+
+            List<ushort> keyframes = node.GetAllKeyframes(usePos, useRot, useScale);
+
+            keyframes.RemoveAll(x => !frames.Contains(x));
+
+            Keyframes = new SerializedKeyframe[keyframes.Count];
+
+            HasPos = usePos & node.HasComponent(EAN_AnimationComponent.ComponentType.Position);
+            HasRot = useRot & node.HasComponent(EAN_AnimationComponent.ComponentType.Rotation);
+            HasScale = useScale & node.HasComponent(EAN_AnimationComponent.ComponentType.Scale);
+
+            for (int i = 0; i < keyframes.Count; i++)
+                Keyframes[i] = new SerializedKeyframe(keyframes[i], node.GetKeyframeValues(keyframes[i], usePos, useRot, useScale, isCamera));
+        }
+
+        /// <summary>
+        /// Rebases the animations first frame to be 0. If the lowest frame in the keyframes is already 0, then nothing is changed.
+        /// </summary>
+        public static void StartFrameRebaseToZero(List<SerializedBone> bones)
+        {
+            //Determine the start frame of these copied bones
+            int startFrame = GetMinKeyframe(bones);
+
+            //Rebase the animation start frame
+            foreach (var bone in bones)
+            {
+                foreach (var keyframe in bone.Keyframes)
+                    keyframe.Frame -= startFrame;
+            }
+            
+        }
+
+        public static void StartFrameRebase(List<SerializedBone> bones, int newStartFrame)
+        {
+            //Rebase the animation start frame
+            foreach (var bone in bones)
+            {
+                foreach (var keyframe in bone.Keyframes)
+                    keyframe.Frame += newStartFrame;
+            }
+
+        }
+
+        public static int GetMinKeyframe(List<SerializedBone> bones)
+        {
+            int absoluteMin = ushort.MaxValue;
+
+            foreach (var bone in bones)
+            {
+                int min = bone.Keyframes.Length > 0 ?  bone.Keyframes.Min(x => x.Frame) : 0;
+
+                if (min < absoluteMin)
+                    absoluteMin = min;
+            }
+
+            return absoluteMin;
+        }
+
+        public static int GetMaxKeyframe(List<SerializedBone> bones)
+        {
+            int absoluteMax = ushort.MaxValue;
+
+            foreach (var bone in bones)
+            {
+                int max = bone.Keyframes.Length > 0 ? bone.Keyframes.Max(x => x.Frame) : 0;
+
+                if (max > absoluteMax)
+                    absoluteMax = max;
+            }
+
+            return absoluteMax;
+        }
+    
+        public static List<string> GetBoneList(List<SerializedBone> bones)
+        {
+            List<string> names = new List<string>();
+
+            foreach (var bone in bones)
+                names.Add(bone.Name);
+
+            return names;
+        }
+
+        #region BindPose
+        public static void SetBindPose(List<SerializedBone> serialziedBones, ESK_Skeleton bindPose)
+        {
+            SetBindPoseState(serialziedBones, bindPose, false);
+        }
+
+        public static void SetNeutralBindPose(List<SerializedBone> serialziedBones, ESK_Skeleton bindPose)
+        {
+            SetBindPoseState(serialziedBones, bindPose, true);
+        }
+
+        private static void SetBindPoseState(List<SerializedBone> serialziedBones, ESK_Skeleton bindPose, bool invert)
+        {
+            foreach(var bone in serialziedBones)
+            {
+                Matrix4x4 bindBone = GetBindPose(bone.Name, bindPose, invert);
+
+                foreach(var keyframe in bone.Keyframes)
+                {
+                    //Vector3 scale = new Vector3(keyframe.ScaleX, keyframe.ScaleY, keyframe.ScaleZ) * keyframe.ScaleW;
+                    Quaternion rot = new Quaternion(keyframe.RotX, keyframe.RotY, keyframe.RotZ, keyframe.RotW);
+                    Vector3 pos = new Vector3(keyframe.PosX, keyframe.PosY, keyframe.PosZ) * keyframe.PosW;
+
+                    Matrix4x4 keyframeMatrix = Matrix4x4.Identity;
+                    //keyframeMatrix *= Matrix4x4.CreateScale(scale);
+                    keyframeMatrix *= Matrix4x4.CreateFromQuaternion(rot);
+                    keyframeMatrix *= Matrix4x4.CreateTranslation(pos);
+
+                    //Based on the invert flag, this will either set the bind pose on the keyframes or remove it
+                    keyframeMatrix *= bindBone;
+
+                    //Convert back to floats
+                    pos = keyframeMatrix.Translation;
+                    rot = Quaternion.CreateFromRotationMatrix(keyframeMatrix);
+
+                    keyframe.PosX = pos.X;
+                    keyframe.PosY = pos.Y;
+                    keyframe.PosZ = pos.Z;
+                    keyframe.PosW = 1f;
+                    keyframe.RotX = rot.X;
+                    keyframe.RotY = rot.Y;
+                    keyframe.RotZ = rot.Z;
+                    keyframe.RotW = rot.W;
+                }
+            }
+        }
+
+        private static Matrix4x4 GetBindPose(string boneName, ESK_Skeleton bindPose, bool invert)
+        {
+            var eskBone = bindPose.NonRecursiveBones.FirstOrDefault(x => x.Name.Equals(boneName, StringComparison.OrdinalIgnoreCase));
+            if (eskBone == null) return Matrix4x4.Identity;
+
+            ESK_RelativeTransform transform = eskBone.RelativeTransform;
+
+            Vector3 ean_initialBonePosition = new Vector3(transform.PositionX, transform.PositionY, transform.PositionZ) * transform.PositionW;
+            Quaternion ean_initialBoneOrientation = new Quaternion(transform.RotationX, transform.RotationY, transform.RotationZ, transform.RotationW);
+            //Vector3 ean_initialBoneScale = new Vector3(transform.ScaleX, transform.ScaleY, transform.ScaleZ) * transform.ScaleW;
+
+            Matrix4x4 relativeMatrix_EanBone_inv = Matrix4x4.Identity;
+            //relativeMatrix_EanBone_inv *= Matrix4x4.CreateScale(ean_initialBoneScale);
+            relativeMatrix_EanBone_inv *= Matrix4x4.CreateFromQuaternion(ean_initialBoneOrientation);
+            relativeMatrix_EanBone_inv *= Matrix4x4.CreateTranslation(ean_initialBonePosition);
+
+            if (invert)
+            {
+                Matrix4x4 invertedMatrix;
+                Matrix4x4.Invert(relativeMatrix_EanBone_inv, out invertedMatrix);
+                return invertedMatrix;
+            }
+            else
+            {
+                return relativeMatrix_EanBone_inv;
+            }
         }
         #endregion
     }
@@ -2244,6 +2904,7 @@ namespace Xv2CoreLib.EAN
         public float ScaleY { get; set; }
         public float ScaleZ { get; set; }
         public float ScaleW { get; set; }
+
     }
 
 
