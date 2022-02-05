@@ -28,7 +28,7 @@ namespace Xv2CoreLib.Resource.UndoRedo
         public static UndoManager Instance => instance.Value;
 
         //Event
-        public event EventHandler UndoOrRedoCalled;
+        public event UndoEventRaisedEventHandler UndoOrRedoCalled;
 
         //Instance
         private LimitedStack<IUndoRedo> undoStack;
@@ -77,9 +77,9 @@ namespace Xv2CoreLib.Resource.UndoRedo
             LastAddition = DateTime.Now;
         }
 
-        public void AddCompositeUndo(List<IUndoRedo> undos, string message)
+        public void AddCompositeUndo(List<IUndoRedo> undos, string message, UndoGroup undoGroup = UndoGroup.Default)
         {
-            AddUndo(new CompositeUndo(undos, message));
+            AddUndo(new CompositeUndo(undos, message, undoGroup));
         }
 
         /// <summary>
@@ -125,9 +125,9 @@ namespace Xv2CoreLib.Resource.UndoRedo
             IUndoRedo action = undoStack.Pop();
             action.Undo();
             redoStack.Push(action);
-            NotifyPropertyChanged("UndoDescription");
-            NotifyPropertyChanged("RedoDescription");
-            UndoOrRedoCalled?.Invoke(this, EventArgs.Empty);
+            NotifyPropertyChanged(nameof(UndoDescription));
+            NotifyPropertyChanged(nameof(RedoDescription));
+            UndoOrRedoCalled?.Invoke(this, new UndoEventRaisedEventArgs(GetUndoGroup(action)));
         }
 
         public void Redo()
@@ -136,9 +136,9 @@ namespace Xv2CoreLib.Resource.UndoRedo
             IUndoRedo action = redoStack.Pop();
             action.Redo();
             undoStack.Push(action);
-            NotifyPropertyChanged("UndoDescription");
-            NotifyPropertyChanged("RedoDescription");
-            UndoOrRedoCalled?.Invoke(this, new EventArgs());
+            NotifyPropertyChanged(nameof(UndoDescription));
+            NotifyPropertyChanged(nameof(RedoDescription));
+            UndoOrRedoCalled?.Invoke(this, new UndoEventRaisedEventArgs(GetUndoGroup(action)));
         }
 
         public bool CanUndo()
@@ -166,12 +166,45 @@ namespace Xv2CoreLib.Resource.UndoRedo
             NotifyPropertyChanged(nameof(RedoDescription));
         }
 
-        public void ForceEventCall()
+        /// <summary>
+        /// Force invoke <see cref="UndoOrRedoCalled"/>.
+        /// </summary>
+        /// <param name="undoGroup">The UndoGroup attached to the event. This can be used to conditionally respond when the event is raised.</param>
+        public void ForceEventCall(UndoGroup undoGroup = UndoGroup.Default)
         {
-            UndoOrRedoCalled?.Invoke(this, EventArgs.Empty);
+            UndoOrRedoCalled?.Invoke(this, new UndoEventRaisedEventArgs(undoGroup));
         }
 
 
+        private UndoGroup GetUndoGroup(IUndoRedo undo)
+        {
+            var prop = undo.GetType().GetProperty(nameof(CompositeUndo.UndoGroup));
+
+            if (prop != null)
+            {
+                return (UndoGroup)prop.GetValue(undo);
+            }
+
+            return UndoGroup.Default;
+        }
     }
-    
+
+    public enum UndoGroup
+    {
+        Default,
+        Animation,
+        Camera
+    }
+
+    public delegate void UndoEventRaisedEventHandler(object source, UndoEventRaisedEventArgs e);
+
+    public class UndoEventRaisedEventArgs : EventArgs
+    {
+        public UndoGroup UndoGroup { get; private set; }
+
+        public UndoEventRaisedEventArgs(UndoGroup undoGroup)
+        {
+            UndoGroup = undoGroup;
+        }
+    }
 }

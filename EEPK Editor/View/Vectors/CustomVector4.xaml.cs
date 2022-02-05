@@ -97,7 +97,7 @@ namespace EEPK_Organiser.View.Vectors
             UndoManager.Instance.UndoOrRedoCalled += Instance_UndoOrRedoCalled;
         }
 
-        private void Instance_UndoOrRedoCalled(object sender, EventArgs e)
+        private void Instance_UndoOrRedoCalled(object sender, UndoEventRaisedEventArgs e)
         {
             UpdateProperties();
         }

@@ -45,7 +45,7 @@ namespace Xv2CoreLib.ACB
         public const string GLOBAL_AISAC_3DVOL_DEF = "3Dvol_def";
 
         //Known ACB Versions
-        public readonly static Version _1_35_0_0 = new Version("1.35.0.0"); //SMT V
+        public readonly static Version _1_35_0_0 = new Version("1.35.0.0"); 
         public readonly static Version _1_30_0_0 = new Version("1.30.0.0"); //SDBH
         public readonly static Version _1_29_2_0 = new Version("1.29.2.0"); //SDBH
         public readonly static Version _1_29_0_0 = new Version("1.29.0.0"); //SDBH
@@ -3276,7 +3276,9 @@ namespace Xv2CoreLib.ACB
             //Attached data
             ushort[] referenceItems = BigEndianConverter.ToUInt16Array(synthTable.GetData("ReferenceItems", index));
             synth.CommandIndex.TableIndex = synthTable.GetValue<ushort>("CommandIndex", TypeFlag.UInt16, index);
-            synth.ParameterPallet.TableIndex = synthTable.GetValue<ushort>("ParameterPallet", TypeFlag.UInt16, index, tableHelper, ParseVersion);
+
+            if(tableHelper.ColumnExists("ParameterPallet", TypeFlag.UInt16, ParseVersion))
+                synth.ParameterPallet.TableIndex = synthTable.GetValue<ushort>("ParameterPallet", TypeFlag.UInt16, index, tableHelper, ParseVersion);
 
 
             if (tableHelper.ColumnExists("LocalAisacs", TypeFlag.Data, ParseVersion))
@@ -3462,11 +3464,13 @@ namespace Xv2CoreLib.ACB
             sequence.Index = index;
             sequence.CommandIndex.TableIndex = sequenceTable.GetValue<ushort>("CommandIndex", TypeFlag.UInt16, index);
             sequence.Tempo = sequenceTable.GetValue<ushort>("Tempo", TypeFlag.UInt16, index, tableHelper, ParseVersion);
-            sequence.ParameterPallet.TableIndex = sequenceTable.GetValue<ushort>("ParameterPallet", TypeFlag.UInt16, index, tableHelper, ParseVersion);
             sequence.PlaybackRatio = sequenceTable.GetValue<ushort>("PlaybackRatio", TypeFlag.UInt16, index, tableHelper, ParseVersion);
             sequence.Type = (SequenceType)sequenceTable.GetValue<byte>("Type", TypeFlag.UInt8, index, tableHelper, ParseVersion);
             sequence.InstPluginTrackStartIndex = sequenceTable.GetValue<ushort>("InstPluginTrackStartIndex", TypeFlag.UInt16, index, tableHelper, ParseVersion);
             sequence.NumInstPluginTracks = sequenceTable.GetValue<ushort>("NumInstPluginTracks", TypeFlag.UInt16, index, tableHelper, ParseVersion);
+
+            if (tableHelper.ColumnExists("ParameterPallet", TypeFlag.UInt16, ParseVersion))
+                sequence.ParameterPallet.TableIndex = sequenceTable.GetValue<ushort>("ParameterPallet", TypeFlag.UInt16, index, tableHelper, ParseVersion);
 
             //References
             if (tableHelper.ColumnExists("LocalAisacs", TypeFlag.Data, ParseVersion))
@@ -4157,7 +4161,6 @@ namespace Xv2CoreLib.ACB
             //Track values
             track.EventIndex.TableIndex = trackTable.GetValue<ushort>("EventIndex", TypeFlag.UInt16, index);
             track.CommandIndex.TableIndex = trackTable.GetValue<ushort>("CommandIndex", TypeFlag.UInt16, index);
-            track.ParameterPallet.TableIndex = trackTable.GetValue<ushort>("ParameterPallet", TypeFlag.UInt16, index, tableHelper, ParseVersion);
             track.LocalAisac = AcbTableReference.FromArray(BigEndianConverter.ToUInt16Array(trackTable.GetData("LocalAisacs", index, tableHelper, ParseVersion)));
             track.TargetType = (TargetType)trackTable.GetValue<byte>("TargetType", TypeFlag.UInt8, index, tableHelper, ParseVersion);
             track.TargetName = trackTable.GetValue<string>("TargetName", TypeFlag.String, index, tableHelper, ParseVersion);
@@ -4165,6 +4168,9 @@ namespace Xv2CoreLib.ACB
             track.TargetAcbName = trackTable.GetValue<string>("TargetAcbName", TypeFlag.String, index, tableHelper, ParseVersion);
             track.Scope = trackTable.GetValue<byte>("Scope", TypeFlag.UInt8, index, tableHelper, ParseVersion);
             track.TargetTrackNo = trackTable.GetValue<ushort>("TargetTrackNo", TypeFlag.UInt16, index, tableHelper, ParseVersion);
+
+            if (tableHelper.ColumnExists("ParameterPallet", TypeFlag.UInt16, ParseVersion))
+                track.ParameterPallet.TableIndex = trackTable.GetValue<ushort>("ParameterPallet", TypeFlag.UInt16, index, tableHelper, ParseVersion);
 
             if (tableHelper.ColumnExists("GlobalAisacStartIndex", TypeFlag.UInt16, ParseVersion))
             {

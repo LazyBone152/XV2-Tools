@@ -21,7 +21,7 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
-            args = new string[1] { @"C:\XV2_MultiThreadExtractTest\EMD" };
+            args = new string[1] { @"E:\VS_Test\EAN\ALL EAN" };
 
             DEBUG_MODE = true;
 #endif
@@ -1295,7 +1295,16 @@ namespace XV2_Xml_Serializer
                 if (Path.GetExtension(s) == ".ean")
                 {
                     Console.WriteLine(String.Format("{0} (File {1} of {2})", s, i, files.Count()));
-                    new Xv2CoreLib.EAN.Parser(s, false, false);
+                    var ean = new Xv2CoreLib.EAN.Parser(s, false, false).eanFile;
+
+                    foreach(var anim in ean.Animations)
+                    {
+                        if(anim.CalculateFrameCount() != anim.FrameCount)
+                        {
+                            Console.WriteLine($"{anim.CalculateFrameCount()} != {anim.FrameCount}");
+                            Console.ReadLine();
+                        }
+                    }
 
                     i++;
                 }

@@ -206,7 +206,7 @@ namespace EEPK_Organiser.View
 #endif
         }
 
-        private void UndoManager_UndoOrRedoCalled(object sender, EventArgs e)
+        private void UndoManager_UndoOrRedoCalled(object sender, UndoEventRaisedEventArgs e)
         {
             if (effectContainerFile == null) return;
 

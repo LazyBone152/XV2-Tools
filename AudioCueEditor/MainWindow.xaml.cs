@@ -116,7 +116,7 @@ namespace AudioCueEditor
             InitTheme();
         }
 
-        private async void CheckForUpdate(bool userInitiated)
+        private async Task CheckForUpdate(bool userInitiated)
         {
             //GitHub Settings
             Update.APP_TAG = "ACE";
@@ -125,7 +125,12 @@ namespace AudioCueEditor
             Update.DEFAULT_APP_NAME = "ACE.exe";
 
             //Check for update
-            object[] ret = await Update.CheckForUpdate();
+            object[] ret = null;
+
+            await Task.Run(() =>
+            {
+                ret = Update.CheckForUpdate();
+            });
 
             //Return values
             bool isUpdateAvailable = (bool)ret[0];
@@ -173,7 +178,6 @@ namespace AudioCueEditor
             }
         }
 
-
         public void InitTheme()
         {
             Dispatcher.Invoke((() =>
@@ -181,6 +185,7 @@ namespace AudioCueEditor
                 ThemeManager.Current.ChangeTheme(System.Windows.Application.Current, SettingsManager.Instance.GetTheme());
             }));
         }
+        
         private void LoadOnStartUp()
         {
             string[] args = Environment.GetCommandLineArgs();
@@ -525,7 +530,7 @@ namespace AudioCueEditor
             }
         }
 
-        private void Help_CheckForUpdates(object sender, RoutedEventArgs e)
+        private async void Help_CheckForUpdates(object sender, RoutedEventArgs e)
         {
             CheckForUpdate(true);
         }
@@ -533,6 +538,24 @@ namespace AudioCueEditor
         private void Help_GitHub(object sender, RoutedEventArgs e)
         {
             Process.Start($"https://github.com/LazyBone152/ACE");
+        }
+
+        private async void FileDrop_Event(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] droppedFilePaths = e.Data.GetData(DataFormats.FileDrop, true) as string[];
+
+                if(droppedFilePaths.Length == 1)
+                {
+                    if(Path.GetExtension(droppedFilePaths[0]) == ".acb")
+                    {
+                        LoadAcb(droppedFilePaths[0]);
+                        e.Handled = true;
+                    }
+                }
+
+            }
         }
     }
 }

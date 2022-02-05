@@ -10,7 +10,7 @@
     <Window.Resources>
         <DataTemplate x:Key="PictureTemplate">
             <Canvas Width="190" Height="48">
-                <Image Source="{Binding DdsImage}" Height="32" Width="32" Canvas.Left="8" Canvas.Top="8"/>
+                <Image Source="{Binding Texture}" Height="32" Width="32" Canvas.Left="8" Canvas.Top="8"/>
                 <TextBlock Text="{Binding Name}" Canvas.Left="56" Canvas.Top="8" Width="140"/>
             </Canvas>
         </DataTemplate>

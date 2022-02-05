@@ -103,6 +103,11 @@ namespace Xv2CoreLib.BCS
         {
             return new Parser(bytes).GetBcsFile();
         }
+        
+        public static BCS_File Load(string path)
+        {
+            return new Parser(File.ReadAllBytes(path)).GetBcsFile();
+        }
 
         public PartColor GetPartColors(string id, string name)
         {

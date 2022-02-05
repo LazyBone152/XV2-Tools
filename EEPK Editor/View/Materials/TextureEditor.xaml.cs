@@ -207,7 +207,7 @@ namespace EEPK_Organiser.View
             UpdateProperties();
         }
 
-        private void Instance_UndoOrRedoCalled(object sender, EventArgs e)
+        private void Instance_UndoOrRedoCalled(object sender, UndoEventRaisedEventArgs e)
         {
             UpdateProperties();
         }

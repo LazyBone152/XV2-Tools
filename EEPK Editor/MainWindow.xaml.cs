@@ -277,7 +277,12 @@ namespace EEPK_Organiser
             Update.DEFAULT_APP_NAME = "EEPK Organiser.exe";
 
             //Check for update
-            object[] ret = await Update.CheckForUpdate();
+            object[] ret = null;
+
+            await Task.Run(() =>
+            {
+                ret = Update.CheckForUpdate();
+            });
 
             //Return values
             bool isUpdateAvailable = (bool)ret[0];

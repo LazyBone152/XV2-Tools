@@ -756,8 +756,11 @@ namespace AudioCueEditor.View
                                         AcbFile.UndoableAddCue(form.CueName, form.ReferenceType, false);
                                 }
                                 break;
+                            case ".acb":
+                                e.Handled = false; //Let parent window handle it
+                                break;
                             default:
-                                MessageBox.Show(String.Format("The filetype of the dropped file ({0}) is not supported.", System.IO.Path.GetExtension(droppedFilePaths[0])), "File Drop", MessageBoxButton.OK, MessageBoxImage.Error);
+                                MessageBox.Show(String.Format("The filetype of the dropped file ({0}) is not supported.", System.IO.Path.GetExtension(droppedFile)), "File Drop", MessageBoxButton.OK, MessageBoxImage.Error);
                                 break;
                         }
                     }

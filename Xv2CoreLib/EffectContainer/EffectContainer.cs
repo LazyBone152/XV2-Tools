@@ -2719,7 +2719,7 @@ namespace Xv2CoreLib.EffectContainer
                     return _viewAssets;
                 }
                 _viewAssets = new ListCollectionView(Assets.Binding);
-                _viewAssets.GroupDescriptions.Add(new PropertyGroupDescription("SubType"));
+                _viewAssets.GroupDescriptions.Add(new PropertyGroupDescription(nameof(Asset.assetType)));
                 _viewAssets.Filter = new Predicate<object>(AssetFilterCheck);
                 return _viewAssets;
             }

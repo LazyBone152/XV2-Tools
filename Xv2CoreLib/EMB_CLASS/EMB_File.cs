@@ -464,8 +464,21 @@ namespace Xv2CoreLib.EMB_CLASS
     }
 
     [Serializable]
-    public class EmbEntry : IInstallable
+    public class EmbEntry : IInstallable, INotifyPropertyChanged
     {
+        #region NotPropChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        #endregion
         public const int DDS_SIGNATURE = 542327876;
 
         [YAXDontSerialize]
@@ -518,6 +531,8 @@ namespace Xv2CoreLib.EMB_CLASS
                         LoadDds();
                         wasEdited = false; 
                     }
+
+                    NotifyPropertyChanged(nameof(Data));
                 }
             }
         }
@@ -556,6 +571,7 @@ namespace Xv2CoreLib.EMB_CLASS
                 if (value != this._texture)
                 {
                     _texture = value;
+                    NotifyPropertyChanged(nameof(Texture));
                 }
             }
         }

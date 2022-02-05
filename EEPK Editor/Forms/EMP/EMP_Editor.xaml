@@ -852,7 +852,7 @@
 
                     <Grid Margin="672,25,10.164,19.818" Background="#252525">
                         <lbCommon:ZoomBorder x:Name="border" ClipToBounds="True" Background="Transparent" BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" BorderThickness="1">
-                            <Image Stretch="Uniform" Source="{Binding SelectedItem.TextureRef.DdsImage, ElementName=listBox_Textures}" ToolTip="{Binding SelectedItem.TextureRef.Name, ElementName=listBox_Textures}" Margin="0,0,-0.382,0.327"/>
+                            <Image Stretch="Uniform" Source="{Binding SelectedItem.TextureRef.Texture, ElementName=listBox_Textures}" ToolTip="{Binding SelectedItem.TextureRef.Name, ElementName=listBox_Textures}" Margin="0,0,-0.382,0.327"/>
                         </lbCommon:ZoomBorder>
                     </Grid>
 

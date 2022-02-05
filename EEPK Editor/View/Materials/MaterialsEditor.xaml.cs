@@ -208,7 +208,7 @@ namespace EEPK_Organiser.View
             RefreshViewMaterials();
         }
 
-        private void Instance_UndoOrRedoCalled(object sender, EventArgs e)
+        private void Instance_UndoOrRedoCalled(object sender, UndoEventRaisedEventArgs e)
         {
             UpdateProperties();
         }
