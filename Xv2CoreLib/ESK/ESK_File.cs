@@ -717,6 +717,15 @@ namespace Xv2CoreLib.ESK
             };
         }
 
+        public List<string> GetBoneList()
+        {
+            List<string> bones = new List<string>();
+
+            foreach (var bone in NonRecursiveBones)
+                bones.Add(bone.Name);
+
+            return bones;
+        }
         #endregion
 
 

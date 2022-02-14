@@ -324,7 +324,7 @@ namespace Xv2CoreLib
                 case ".ers":
                     return ((ERS_File)data).SaveToBytes();
                 case ".idb":
-                    return ((IDB_File)data).SaveToBytes();
+                    return ((IDB_File)data).SaveToBytes(Path.GetFileNameWithoutExtension(path).Equals("skill_item", StringComparison.OrdinalIgnoreCase));
                 case ".msg":
                     return ((MSG_File)data).SaveToBytes();
                 case ".pup":

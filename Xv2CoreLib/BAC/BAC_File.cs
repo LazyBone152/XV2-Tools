@@ -788,8 +788,6 @@ namespace Xv2CoreLib.BAC
             Type27.Clear();
         }
 
-
-#if UndoRedo
         /// <summary>
         /// Add a new instance of the specified IBacType as an undoable operation.
         /// </summary>
@@ -889,30 +887,8 @@ namespace Xv2CoreLib.BAC
                     throw new InvalidOperationException($"UndoableAddIBacType: Invalid bacType {bacType}!");
             }
 
-            int insertIdx = 0;
-
-            for(int i = 0; i < IBacTypes.Count; i++)
-            {
-                if (IBacTypes[i].TypeID > iBacType.TypeID)
-                {
-                    break;
-                }
-
-                insertIdx++;
-            }
-
-            if(insertIdx >= IBacTypes.Count - 1)
-            {
-                //Add
-                IBacTypes.Add(iBacType);
-                UndoManager.Instance.AddUndo(new UndoableListAdd<IBacType>(IBacTypes, iBacType, $"New BacType {bacType}"));
-            }
-            else
-            {
-                //Insert
-                IBacTypes.Insert(insertIdx, iBacType);
-                UndoManager.Instance.AddUndo(new UndoableListInsert<IBacType>(IBacTypes, insertIdx, iBacType, $"New BacType {bacType}"));
-            }
+            var undo = AddEntry(iBacType);
+            UndoManager.Instance.AddUndo(undo);
         }
 
         /// <summary>
@@ -930,8 +906,24 @@ namespace Xv2CoreLib.BAC
             }
             UndoManager.Instance.AddUndo(new CompositeUndo(undos, "BacType Delete"));
         }
-#endif
 
+        public IUndoRedo AddEntry(IBacType bacType)
+        {
+            int insertIdx = IBacTypes.IndexOf(IBacTypes.FirstOrDefault(x => x.TypeID > bacType.TypeID));
+            
+            if (insertIdx == -1)
+            {
+                //Add
+                IBacTypes.Add(bacType);
+                return new UndoableListAdd<IBacType>(IBacTypes, bacType, $"New BacType {bacType}");
+            }
+            else
+            {
+                //Insert
+                IBacTypes.Insert(insertIdx, bacType);
+                return new UndoableListInsert<IBacType>(IBacTypes, insertIdx, bacType, $"New BacType {bacType}");
+            }
+        }
         #endregion
 
         public bool IsBacEntryEmpty()
@@ -2069,9 +2061,9 @@ namespace Xv2CoreLib.BAC
                     PositionX = BitConverter.ToSingle(rawBytes, offset + 20),
                     PositionY = BitConverter.ToSingle(rawBytes, offset + 24),
                     PositionZ = BitConverter.ToSingle(rawBytes, offset + 28),
-                    RotationX = (float)Utils.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, offset + 32)),
-                    RotationY = (float)Utils.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, offset + 36)),
-                    RotationZ = (float)Utils.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, offset + 40)),
+                    RotationX = (float)MathHelpers.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, offset + 32)),
+                    RotationY = (float)MathHelpers.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, offset + 36)),
+                    RotationZ = (float)MathHelpers.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, offset + 40)),
                     EffectFlags = (EffectFlagsEnum)BitConverter.ToUInt32(rawBytes, offset + 44)
                 });
 
@@ -2099,9 +2091,9 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.PositionX));
                 bytes.AddRange(BitConverter.GetBytes(type.PositionY));
                 bytes.AddRange(BitConverter.GetBytes(type.PositionZ));
-                bytes.AddRange(BitConverter.GetBytes((float)Utils.ConvertRadiansToDegrees(type.RotationX)));
-                bytes.AddRange(BitConverter.GetBytes((float)Utils.ConvertRadiansToDegrees(type.RotationY)));
-                bytes.AddRange(BitConverter.GetBytes((float)Utils.ConvertRadiansToDegrees(type.RotationZ)));
+                bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertRadiansToDegrees(type.RotationX)));
+                bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertRadiansToDegrees(type.RotationY)));
+                bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertRadiansToDegrees(type.RotationZ)));
                 bytes.AddRange(BitConverter.GetBytes((uint)type.EffectFlags));
             }
 
@@ -2301,9 +2293,9 @@ namespace Xv2CoreLib.BAC
                     PositionX = BitConverter.ToSingle(rawBytes, offset + 20),
                     PositionY = BitConverter.ToSingle(rawBytes, offset + 24),
                     PositionZ = BitConverter.ToSingle(rawBytes, offset + 28),
-                    RotationX = (float)Utils.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, offset + 32)),
-                    RotationY = (float)Utils.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, offset + 36)),
-                    RotationZ = (float)Utils.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, offset + 40)),
+                    RotationX = (float)MathHelpers.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, offset + 32)),
+                    RotationY = (float)MathHelpers.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, offset + 36)),
+                    RotationZ = (float)MathHelpers.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, offset + 40)),
                     BsaType = (BsaTypeEnum)rawBytes[offset + 44],
                     BsaFlags = (BsaFlagsEnum)BitConverter.ToUInt16(rawBytes, offset + 45),
                     I_47 = rawBytes[offset + 47],
@@ -2338,9 +2330,9 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.PositionX));
                 bytes.AddRange(BitConverter.GetBytes(type.PositionY));
                 bytes.AddRange(BitConverter.GetBytes(type.PositionZ));
-                bytes.AddRange(BitConverter.GetBytes((float)Utils.ConvertRadiansToDegrees(type.RotationX)));
-                bytes.AddRange(BitConverter.GetBytes((float)Utils.ConvertRadiansToDegrees(type.RotationY)));
-                bytes.AddRange(BitConverter.GetBytes((float)Utils.ConvertRadiansToDegrees(type.RotationZ)));
+                bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertRadiansToDegrees(type.RotationX)));
+                bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertRadiansToDegrees(type.RotationY)));
+                bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertRadiansToDegrees(type.RotationZ)));
                 bytes.Add((byte)type.BsaType);
                 bytes.AddRange(BitConverter.GetBytes((ushort)type.BsaFlags));
                 bytes.Add(type.I_47);

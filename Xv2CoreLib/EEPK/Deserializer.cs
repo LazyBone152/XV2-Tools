@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using Xv2CoreLib.Resource;
 using YAXLib;
 
 namespace Xv2CoreLib.EEPK
@@ -236,12 +237,12 @@ namespace Xv2CoreLib.EEPK
                         bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].POSITION_Y));
                         bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].POSITION_Z));
 
-                        bytes.AddRange(BitConverter.GetBytes((float)Utils.ConvertDegreesToRadians(eepk_File.Effects[i].EffectParts[a].F_52)));
-                        bytes.AddRange(BitConverter.GetBytes((float)Utils.ConvertDegreesToRadians(eepk_File.Effects[i].EffectParts[a].F_56)));
-                        bytes.AddRange(BitConverter.GetBytes((float)Utils.ConvertDegreesToRadians(eepk_File.Effects[i].EffectParts[a].F_60)));
-                        bytes.AddRange(BitConverter.GetBytes((float)Utils.ConvertDegreesToRadians(eepk_File.Effects[i].EffectParts[a].F_64)));
-                        bytes.AddRange(BitConverter.GetBytes((float)Utils.ConvertDegreesToRadians(eepk_File.Effects[i].EffectParts[a].F_68)));
-                        bytes.AddRange(BitConverter.GetBytes((float)Utils.ConvertDegreesToRadians(eepk_File.Effects[i].EffectParts[a].F_72)));
+                        bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(eepk_File.Effects[i].EffectParts[a].F_52)));
+                        bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(eepk_File.Effects[i].EffectParts[a].F_56)));
+                        bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(eepk_File.Effects[i].EffectParts[a].F_60)));
+                        bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(eepk_File.Effects[i].EffectParts[a].F_64)));
+                        bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(eepk_File.Effects[i].EffectParts[a].F_68)));
+                        bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(eepk_File.Effects[i].EffectParts[a].F_72)));
 
                         bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].SIZE_1));
                         bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].SIZE_2));

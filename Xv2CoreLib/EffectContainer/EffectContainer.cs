@@ -309,6 +309,7 @@ namespace Xv2CoreLib.EffectContainer
             if (_viewEffects == null)
                 _viewEffects = new ListCollectionView(Effects.Binding);
 
+            _viewEffects.CommitEdit();
             _viewEffects.Filter = new Predicate<object>(EffectFilterCheck);
             NotifyPropertyChanged("ViewEffects");
         }
@@ -2187,10 +2188,16 @@ namespace Xv2CoreLib.EffectContainer
 
                     EMP_File empFile = empAsset.Files[0].EmpFile;
 
+                    /*
+                     //This is weird
                     string emmPath = String.Format("{0}/{1}.emm", Directory, Path.GetFileName(empAsset.Files[0].FileName));
                     string embPath = String.Format("{0}/{1}.emb", Directory, Path.GetFileName(empAsset.Files[0].FileName));
                     EMM_File emmFile = (DoesFileExist(emmPath)) ? EMM_File.LoadEmm(LoadExternalFile(emmPath, false)) : Pbind.File2_Ref;
                     EMB_File embFile = (DoesFileExist(emmPath)) ? EMB_File.LoadEmb(LoadExternalFile(embPath, false)) : Pbind.File3_Ref;
+                    */
+
+                    EMM_File emmFile = Pbind.File2_Ref;
+                    EMB_File embFile = Pbind.File3_Ref;
 
                     //Materials
                     foreach (var empEntry in empFile.ParticleEffects)
@@ -2339,7 +2346,7 @@ namespace Xv2CoreLib.EffectContainer
             textures.RemoveAll(x => Math.Max(x.Width, x.Height) > 2048);
 
             //Remove all textures that aren't a power of 2, as the merging algo doesn't like that at all.
-            textures.RemoveAll(x => !Utils.IsPowerOfTwo(x.PixelWidth) || !Utils.IsPowerOfTwo(x.PixelHeight));
+            textures.RemoveAll(x => !MathHelpers.IsPowerOfTwo(x.PixelWidth) || !MathHelpers.IsPowerOfTwo(x.PixelHeight));
 
             int superCount = 0;
             int totalMerged = textures.Count;

@@ -102,7 +102,11 @@ namespace EEPK_Organiser.View.Vectors
 
         public Color? CurrentColor
         {
-            get => Color.FromArgb((byte)(NormalizedFloatColor(A) * 255), (byte)(NormalizedFloatColor(R) * 255), (byte)(NormalizedFloatColor(G) * 255), (byte)(NormalizedFloatColor(B) * 255));
+            get
+            {
+                return Color.FromScRgb(NormalizedFloatColor(A), NormalizedFloatColor(R), NormalizedFloatColor(G), NormalizedFloatColor(B));
+                //return Color.FromArgb((byte)(NormalizedFloatColor(A) * 255), (byte)(NormalizedFloatColor(R) * 255), (byte)(NormalizedFloatColor(G) * 255), (byte)(NormalizedFloatColor(B) * 255));
+            }
             set
             {
                 SetColorValue(value);

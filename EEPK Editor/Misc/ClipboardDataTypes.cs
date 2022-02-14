@@ -1,20 +1,18 @@
-﻿using Xv2CoreLib.Resource.App;
-
-namespace EEPK_Organiser.Misc
+﻿namespace EEPK_Organiser.Misc
 {
     public static class ClipboardDataTypes
     {
-        public static readonly string Effect = string.Format("EEPK_ORGANISER_{0}_EFFECT", SettingsManager.Instance.CurrentVersionString);
-        public static readonly string EffectPart = string.Format("EEPK_ORGANISER_{0}_EFFECT_PART", SettingsManager.Instance.CurrentVersionString);
-        public static readonly string Asset = string.Format("EEPK_ORGANISER_{0}_ASSET_", SettingsManager.Instance.CurrentVersionString); //+ AssetType
-        public static readonly string EmoFile = string.Format("EEPK_ORGANISER_{0}_EMO_FILE", SettingsManager.Instance.CurrentVersionString);
-        public static readonly string EmpTextureEntry = string.Format("EEPK_ORGANISER_{0}_EMP_TEXTURE_ENTRY", SettingsManager.Instance.CurrentVersionString);
-        public static readonly string EmpParticleEffect = string.Format("EEPK_ORGANISER_{0}_EMP_PARTICLE_EFFECT", SettingsManager.Instance.CurrentVersionString);
-        public static readonly string EmbTexture = string.Format("EEPK_ORGANISER_{0}_EMB_TEXTURE", SettingsManager.Instance.CurrentVersionString);
-        public static readonly string EmmMaterial = string.Format("EEPK_ORGANISER_{0}_EMM_MATERIAL", SettingsManager.Instance.CurrentVersionString);
-        public static readonly string EmaEntry = string.Format("EEPK_ORGANISER_{0}_EMA_ENTRY", SettingsManager.Instance.CurrentVersionString);
-        public static readonly string EtrMainEntry = string.Format("EEPK_ORGANISER_{0}_ETR_ENTRY", SettingsManager.Instance.CurrentVersionString);
-        public static readonly string EtrTextureEntry = string.Format("EEPK_ORGANISER_{0}_ETR_TEXTURE_ENTRY", SettingsManager.Instance.CurrentVersionString);
-        public static readonly string EcfEntry = string.Format("EEPK_ORGANISER_{0}_ECF_ENTRY", SettingsManager.Instance.CurrentVersionString);
+        public static readonly string Effect = "EEPK_ORGANISER_EFFECT";
+        public static readonly string EffectPart = "EEPK_ORGANISER_EFFECT_PART";
+        public static readonly string Asset = "EEPK_ORGANISER_ASSET_"; //+ AssetType
+        public static readonly string EmoFile = "EEPK_ORGANISER_EMO_FILE";
+        public static readonly string EmpTextureEntry = "EEPK_ORGANISER_EMP_TEXTURE_ENTRY";
+        public static readonly string EmpParticleEffect = "EEPK_ORGANISER_EMP_PARTICLE_EFFECT";
+        public static readonly string EmbTexture = "EEPK_ORGANISER_EMB_TEXTURE";
+        public static readonly string EmmMaterial = "EEPK_ORGANISER_EMM_MATERIAL";
+        public static readonly string EmaEntry = "EEPK_ORGANISER_EMA_ENTRY";
+        public static readonly string EtrMainEntry = "EEPK_ORGANISER_ETR_ENTRY";
+        public static readonly string EtrTextureEntry = "EEPK_ORGANISER_ETR_TEXTURE_ENTRY";
+        public static readonly string EcfEntry = "EEPK_ORGANISER_ECF_ENTRY";
     }
 }

@@ -377,7 +377,7 @@ namespace LB_Mod_Installer.Installer
                         if (partColorSection != null)
                         {
                             var cpkSection = (cpkBinFile != null) ? cpkBinFile.GetPartColors(section.Index, section.Name) : null;
-                            UninstallEntries(section.Colors, (cpkSection != null) ? cpkSection.Colors : null, partColorSection.IDs);
+                            UninstallEntries(section.ColorsList, (cpkSection != null) ? cpkSection.ColorsList : null, partColorSection.IDs);
                         }
                     }
                 }

@@ -185,12 +185,12 @@ namespace Xv2CoreLib.EEPK
                     eepkFile.Effects[i].EffectParts[a].POSITION_Y = BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 44);
                     eepkFile.Effects[i].EffectParts[a].POSITION_Z = BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 48);
 
-                    eepkFile.Effects[i].EffectParts[a].F_52 = (float)Utils.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 52));
-                    eepkFile.Effects[i].EffectParts[a].F_56 = (float)Utils.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 56));
-                    eepkFile.Effects[i].EffectParts[a].F_60 = (float)Utils.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 60));
-                    eepkFile.Effects[i].EffectParts[a].F_64 = (float)Utils.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 64));
-                    eepkFile.Effects[i].EffectParts[a].F_68 = (float)Utils.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 68));
-                    eepkFile.Effects[i].EffectParts[a].F_72 = (float)Utils.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 72));
+                    eepkFile.Effects[i].EffectParts[a].F_52 = (float)MathHelpers.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 52));
+                    eepkFile.Effects[i].EffectParts[a].F_56 = (float)MathHelpers.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 56));
+                    eepkFile.Effects[i].EffectParts[a].F_60 = (float)MathHelpers.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 60));
+                    eepkFile.Effects[i].EffectParts[a].F_64 = (float)MathHelpers.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 64));
+                    eepkFile.Effects[i].EffectParts[a].F_68 = (float)MathHelpers.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 68));
+                    eepkFile.Effects[i].EffectParts[a].F_72 = (float)MathHelpers.ConvertRadiansToDegrees(BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 72));
 
                     eepkFile.Effects[i].EffectParts[a].SIZE_1 = BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 76);
                     eepkFile.Effects[i].EffectParts[a].SIZE_2 = BitConverter.ToSingle(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 80);

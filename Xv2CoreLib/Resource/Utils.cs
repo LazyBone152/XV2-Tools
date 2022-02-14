@@ -341,10 +341,6 @@ namespace Xv2CoreLib
     
     public static class Utils
     {
-        public static bool IsPowerOfTwo(int val)
-        {
-            return  (val & (val - 1)) == 0 && val != 0;
-        }
 
         public static bool IsFileWriteLocked(string path)
         {
@@ -362,6 +358,7 @@ namespace Xv2CoreLib
 
             return false;
         }
+        
         public static bool CompareSplitString(string originalString, char splitParam, int index, string compareParam)
         {
             var splitStr = originalString.Split(splitParam);
@@ -400,21 +397,6 @@ namespace Xv2CoreLib
         {
             if (list == null) return true;
             return list.Count == 0;
-        }
-
-        public static float Lerp(float value1, float value2, float amount)
-        {
-            return value1 + ((value2 - value1) * amount);
-        }
-
-        public static double ConvertRadiansToDegrees(double radians)
-        {
-            return (180 / Math.PI) * radians;
-        }
-
-        public static double ConvertDegreesToRadians(double degrees)
-        {
-            return (Math.PI / 180) * degrees;
         }
 
         public static string GetPathWithoutExtension(string path)
@@ -1175,18 +1157,6 @@ namespace Xv2CoreLib
 
         }
 
-        /// <summary>
-        /// Creates the directory if it does not already exist.
-        /// </summary>
-        /// <param name="directory"></param>
-        public static void CreateDirectory(string directory)
-        {
-            if (!Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
-        }
-
     }
 
     /// <summary>
@@ -1267,6 +1237,40 @@ namespace Xv2CoreLib
             return byte.Parse(splitValue[1], NumberStyles.HexNumber);
         }
         
+        public static string ToSerializedArray(List<int> values)
+        {
+            StringBuilder str = new StringBuilder();
+
+            for(int i = 0; i < values.Count; i++)
+            {
+                str.Append($"{HexConverter.GetHexString(values[i])}");
+
+                if (i != values.Count - 1)
+                {
+                    str.Append($", ");
+                }
+            }
+
+            return str.ToString();
+        }
+
+        public static List<int> ReadInt32Array(string array)
+        {
+            List<int> intValues = new List<int>();
+
+            if (!string.IsNullOrWhiteSpace(array))
+            {
+                string[] values = array.Split(',');
+
+                foreach (var value in values)
+                {
+                    intValues.Add(HexConverter.ToInt32(value.Trim(' ')));
+                }
+
+            }
+
+            return intValues;
+        }
     }
 
     public static class Int4Converter

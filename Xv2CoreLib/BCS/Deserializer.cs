@@ -218,7 +218,7 @@ namespace Xv2CoreLib.BCS
                 {
                     bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), PartColorTable[i]);
                     int PartColorStart = bytes.Count();
-                    int colorCount = (bcsFile.PartColors[i].Colors != null) ? bcsFile.PartColors[i].Colors.Count() : 0;
+                    int colorCount = (bcsFile.PartColors[i].ColorsList != null) ? bcsFile.PartColors[i].ColorsList.Count() : 0;
 
                     stringInfo.Add(new StringWriter.StringInfo()
                     {
@@ -234,31 +234,31 @@ namespace Xv2CoreLib.BCS
 
                 for(int i = 0; i < bcsFile.PartColors.Count(); i++)
                 {
-                    if(bcsFile.PartColors[i].Colors != null)
+                    if(bcsFile.PartColors[i].ColorsList != null)
                     {
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - PartColorOffsets[i] + 12), PartColorOffsets[i]);
-                        for (int a = 0; a < bcsFile.PartColors[i].Colors.Count(); a++)
+                        for (int a = 0; a < bcsFile.PartColors[i].ColorsList.Count(); a++)
                         {
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color1_R));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color1_G));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color1_B));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color1_A));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color2_R));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color2_G));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color2_B));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color2_A));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color3_R));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color3_G));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color3_B));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color3_A));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color4_R));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color4_G));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color4_B));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color4_A));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color5_R));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color5_G));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color5_B));
-                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].Colors[a].Color5_A));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].ColorsList[a].Color1_R));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].ColorsList[a].Color1_G));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].ColorsList[a].Color1_B));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].ColorsList[a].Color1_A));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].ColorsList[a].Color2_R));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].ColorsList[a].Color2_G));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].ColorsList[a].Color2_B));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].ColorsList[a].Color2_A));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].ColorsList[a].Color3_R));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].ColorsList[a].Color3_G));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].ColorsList[a].Color3_B));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].ColorsList[a].Color3_A));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].ColorsList[a].Color4_R));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].ColorsList[a].Color4_G));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].ColorsList[a].Color4_B));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].ColorsList[a].Color4_A));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].ColorsList[a].Color5_R));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].ColorsList[a].Color5_G));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].ColorsList[a].Color5_B));
+                            bytes.AddRange(BitConverter.GetBytes(bcsFile.PartColors[i].ColorsList[a].Color5_A));
                         }
                     }
                 }

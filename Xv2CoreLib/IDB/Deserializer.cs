@@ -10,13 +10,10 @@ namespace Xv2CoreLib.IDB
 {
     public class Deserializer
     {
-        string saveLocation;
-        IDB_File idbFile;
+        private bool isSkillIdb = false;
+        private string saveLocation;
+        private IDB_File idbFile;
         public List<byte> bytes = new List<byte>() { 35, 73, 68, 66, 254, 255, 7, 0 };
-
-        //Offset lists
-        int EntryCount { get; set; }
-        List<int> MainEntryOffsets = new List<int>();
 
         public Deserializer(string location)
         {
@@ -37,8 +34,9 @@ namespace Xv2CoreLib.IDB
             File.WriteAllBytes(this.saveLocation, bytes.ToArray());
         }
 
-        public Deserializer(IDB_File _idbFile)
+        public Deserializer(IDB_File _idbFile, bool isSkillIdb)
         {
+            this.isSkillIdb = isSkillIdb;
             idbFile = _idbFile;
             Validation();
             Write();
@@ -50,7 +48,7 @@ namespace Xv2CoreLib.IDB
             //skill_item = separate by type, sort by SortID, rejoin
             //Everything else = ignore type, just sort by SortID
 
-            if (Path.GetFileNameWithoutExtension(saveLocation) == "skill_item")
+            if (Path.GetFileNameWithoutExtension(saveLocation) == "skill_item" || isSkillIdb)
             {
                 idbFile.SortEntries();
             }

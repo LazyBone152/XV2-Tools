@@ -160,7 +160,7 @@ namespace Xv2CoreLib.ValuesDictionary
         };
 
         //"Flags"
-        public static Dictionary<short, string> Flags { get; private set; } = new Dictionary<short, string>()
+        public static Dictionary<ushort, string> Flags { get; private set; } = new Dictionary<ushort, string>()
         {
             { 0x0 , "Both" },
             { 0x1 , "CaC" },

@@ -75,6 +75,9 @@
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="SharpNoise, Version=0.12.1.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpNoise.0.12.1.1\lib\netstandard2.0\SharpNoise.dll</HintPath>
+    </Reference>
     <Reference Include="Shim, Version=2.0.1.0, Culture=neutral, PublicKeyToken=c55ec16d10c4b366, processorArchitecture=MSIL">
       <HintPath>..\packages\shim.2.0.1\lib\net40\Shim.dll</HintPath>
     </Reference>
@@ -226,6 +229,7 @@
     <Compile Include="ESK\ESK_File.cs" />
     <Compile Include="ESK\Parser.cs" />
     <Compile Include="Eternity\CharaSlotsFile.cs" />
+    <Compile Include="Eternity\PrebakedFile.cs" />
     <Compile Include="ETR\ETR_File.cs" />
     <Compile Include="FPF\FPF_File.cs" />
     <Compile Include="HCA\HcaMetadata.cs" />
@@ -294,6 +298,7 @@
     <Compile Include="Resource\BinaryConverter.cs" />
     <Compile Include="Resource\ColorEx.cs" />
     <Compile Include="Resource\Image\TextureHelper.cs" />
+    <Compile Include="Resource\MathHelpers.cs" />
     <Compile Include="Resource\Random.cs" />
     <Compile Include="Resource\ReflectionHelper.cs" />
     <Compile Include="Resource\UndoRedo\IMergableUndo.cs" />

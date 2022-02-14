@@ -82,7 +82,8 @@ namespace Xv2CoreLib.BCS
 
                 foreach (var partColor in PartColors)
                 {
-                    partColor.Colors.Sort((x, y) => x.SortID - y.SortID);
+                    if(partColor.ColorsList != null)
+                        partColor.ColorsList.Sort((x, y) => x.SortID - y.SortID);
                 }
             }
 
@@ -121,7 +122,7 @@ namespace Xv2CoreLib.BCS
             }
             else
             {
-                PartColor newPartColor = new PartColor() { Index = id, Name = name, Colors = new List<Colors>() };
+                PartColor newPartColor = new PartColor() { Index = id, Name = name, ColorsList = new List<Colors>() };
                 PartColors.Add(newPartColor);
                 return newPartColor;
             }
@@ -687,34 +688,35 @@ namespace Xv2CoreLib.BCS
         public string Name { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Colors")]
-        public List<Colors> Colors { get; set; }
+        public List<Colors> ColorsList { get; set; }
 
         public void AddColor(Colors color)
         {
-            if (Colors == null) Colors = new List<Colors>();
+            if (ColorsList == null) ColorsList = new List<Colors>();
             int idx = int.Parse(color.Index);
 
-            int existingIndex = Colors.FindIndex(p => p.Index == color.Index);
+            int existingIndex = ColorsList.FindIndex(p => p.Index == color.Index);
 
             if(existingIndex != -1)
             {
-                Colors[existingIndex] = color;
+                ColorsList[existingIndex] = color;
             }
             else
             {
                 //Index doesnt exist. Pad entries until index is reached then add entry.
 
-                while ((Colors.Count - 1) < (idx - 1))
+                while ((ColorsList.Count - 1) < (idx - 1))
                 {
-                    Colors.Add(new Colors() { Index = Colors.Count.ToString() });
+                    ColorsList.Add(new Colors() { Index = ColorsList.Count.ToString() });
                 }
 
-                Colors.Add(color);
+                ColorsList.Add(color);
             }
         }
         
     }
 
+    [YAXSerializeAs("Colors")]
     public class Colors : IInstallable
     {
         [YAXDontSerialize]

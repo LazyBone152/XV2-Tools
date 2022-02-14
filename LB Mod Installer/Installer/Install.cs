@@ -512,11 +512,11 @@ namespace LB_Mod_Installer.Installer
                     for (int i = 0; i < xmlFile.PartColors.Count; i++)
                     {
                         PartColor binPartColor = binaryFile.GetPartColors(xmlFile.PartColors[i].Index, xmlFile.PartColors[i].Name);
-                        bindingManager.ParseProperties(xmlFile.PartColors[i].Colors, binPartColor.Colors, installPath);
+                        bindingManager.ParseProperties(xmlFile.PartColors[i].ColorsList, binPartColor.ColorsList, installPath);
 
-                        if(xmlFile.PartColors[i].Colors != null)
+                        if(xmlFile.PartColors[i].ColorsList != null)
                         {
-                            foreach (var color in xmlFile.PartColors[i].Colors)
+                            foreach (var color in xmlFile.PartColors[i].ColorsList)
                             {
                                 GeneralInfo.Tracker.AddID(installPath, Sections.GetBcsPartColor(xmlFile.PartColors[i].Index), color.Index);
                                 binPartColor.AddColor(color);
@@ -1674,7 +1674,7 @@ namespace LB_Mod_Installer.Installer
                 case ".ers":
                     return ((ERS_File)data).SaveToBytes();
                 case ".idb":
-                    return ((IDB_File)data).SaveToBytes();
+                    return ((IDB_File)data).SaveToBytes(Path.GetFileNameWithoutExtension(path).Equals("skill_item", StringComparison.OrdinalIgnoreCase));
                 case ".msg":
                     return ((MSG_File)data).SaveToBytes();
                 case ".psc":

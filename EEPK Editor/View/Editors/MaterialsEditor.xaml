@@ -67,8 +67,8 @@
                     <iconPacks:PackIconModern Kind="Tools" Width="13" Height="13"/>
                     <Button.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="Merge Duplicates" Command="{Binding MergeDuplicatesCommand}" Visibility="{Binding ElementName=UserControl, Path=ContainerVisiblility}" IsEnabled="{Binding ElementName=UserControl, Path=IsForContainer}"/>
-                            <MenuItem Header="Remove Unused" Command="{Binding RemoveUnusedMaterialsCommand}" Visibility="{Binding ElementName=UserControl, Path=ContainerVisiblility}" IsEnabled="{Binding ElementName=UserControl, Path=IsForContainer}"/>
+                            <MenuItem Header="Merge Duplicates" Command="{Binding MergeDuplicatesCommand}"/>
+                            <MenuItem Header="Remove Unused" Command="{Binding RemoveUnusedMaterialsCommand}"/>
                         </ContextMenu>
                     </Button.ContextMenu>
                 </Button>

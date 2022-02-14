@@ -127,21 +127,25 @@ namespace Xv2CoreLib.DEM
             {
                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), section2Offsets[i]);
                 int subEntryCount = (demFile.Section2Entries[i].SubEntries != null) ? demFile.Section2Entries[i].SubEntries.Count : 0;
-                demFile.Section2Entries[i].SubEntries = demFile.Section2Entries[i].SubEntries.OrderBy(o => o.I_00).ToList();
 
-                for (int a  = 0; a < subEntryCount; a++)
+                if(subEntryCount > 0)
                 {
-                    bytes.AddRange(BitConverter.GetBytes(demFile.Section2Entries[i].SubEntries[a].I_00));
+                    demFile.Section2Entries[i].SubEntries = demFile.Section2Entries[i].SubEntries.OrderBy(o => o.I_00).ToList();
 
-                    //Type
-                    int[] type = demFile.Section2Entries[i].SubEntries[a].GetDemoType();
-                    bytes.AddRange(BitConverter.GetBytes((ushort)type[0])); //Type1
-                    bytes.AddRange(BitConverter.GetBytes((ushort)type[1])); //Type2
-                    bytes.AddRange(new byte[4]); //Padding
-                    demFile.Section2Entries[i].SubEntries[a].ValueCount = type[2];
-                    bytes.AddRange(BitConverter.GetBytes(type[2])); //Count
-                    demFile.Section2Entries[i].SubEntries[a].PointerOffset = bytes.Count;
-                    bytes.AddRange(new byte[16]); //Offset and padding
+                    for (int a = 0; a < subEntryCount; a++)
+                    {
+                        bytes.AddRange(BitConverter.GetBytes(demFile.Section2Entries[i].SubEntries[a].I_00));
+
+                        //Type
+                        int[] type = demFile.Section2Entries[i].SubEntries[a].GetDemoType();
+                        bytes.AddRange(BitConverter.GetBytes((ushort)type[0])); //Type1
+                        bytes.AddRange(BitConverter.GetBytes((ushort)type[1])); //Type2
+                        bytes.AddRange(new byte[4]); //Padding
+                        demFile.Section2Entries[i].SubEntries[a].ValueCount = type[2];
+                        bytes.AddRange(BitConverter.GetBytes(type[2])); //Count
+                        demFile.Section2Entries[i].SubEntries[a].PointerOffset = bytes.Count;
+                        bytes.AddRange(new byte[16]); //Offset and padding
+                    }
                 }
             }
 

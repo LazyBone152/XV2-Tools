@@ -203,11 +203,14 @@
     <Compile Include="View\EepkEditor.xaml.cs">
       <DependentUpon>EepkEditor.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Materials\MaterialsEditor.xaml.cs">
+    <Compile Include="View\Editors\MaterialsEditor.xaml.cs">
       <DependentUpon>MaterialsEditor.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Materials\TextureEditor.xaml.cs">
+    <Compile Include="View\Editors\TextureEditor.xaml.cs">
       <DependentUpon>TextureEditor.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Editors\EmpEditor.xaml.cs">
+      <DependentUpon>EmpEditor.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Vectors\CustomColor.xaml.cs">
       <DependentUpon>CustomColor.xaml</DependentUpon>
@@ -314,11 +317,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Materials\MaterialsEditor.xaml">
+    <Page Include="View\Editors\MaterialsEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Materials\TextureEditor.xaml">
+    <Page Include="View\Editors\TextureEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Editors\EmpEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

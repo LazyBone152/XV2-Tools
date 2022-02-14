@@ -11,7 +11,7 @@ namespace Xv2CoreLib.BAS
     public class BAS_File : IIsNull
     {
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BAS_Entry")]
-        public List<BAS_Entry> Entries { get; set; }
+        public List<BAS_Entry> Entries { get; set; } = new List<BAS_Entry>();
 
 
         public byte[] SaveToBytes()
@@ -36,7 +36,7 @@ namespace Xv2CoreLib.BAS
 
         public bool IsNull()
         {
-            return Entries?.Count == 0;
+            return Entries.Count == 0;
         }
     }
 

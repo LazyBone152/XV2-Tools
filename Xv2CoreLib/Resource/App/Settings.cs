@@ -117,13 +117,13 @@ namespace Xv2CoreLib.Resource.App
                     return;
                 }
 
-                LoadSettings();
+                LoadSettings(true);
 
                 reloadTriggered = false;
             }
         }
 
-        private void LoadSettings()
+        private void LoadSettings(bool isReload = false)
         {
             //if (CurrentApp == Application.NotSet) throw new InvalidOperationException("SettingsManager.LoadSettings: CurrentApp has not been set.");
 
@@ -142,10 +142,9 @@ namespace Xv2CoreLib.Resource.App
 #endif
 
 
-#if !DEBUG
             try
             {
-#endif
+
             //Try to load the settings
             var oldSettings = Settings;
             var settings = Settings.Load(GetSetingsPath());
@@ -154,18 +153,20 @@ namespace Xv2CoreLib.Resource.App
 
             Settings = settings;
             SettingsReloaded?.Invoke(oldSettings, EventArgs.Empty);
-#if !DEBUG
+
             }
             catch
             {
-                //If it fails, create a new instance and save it to disk.
-                Settings = new Settings();
+                if (!isReload)
+                {
+                    //If it fails, create a new instance and save it to disk.
+                    Settings = new Settings();
 
-                Settings.InitSettings();
+                    Settings.InitSettings();
 
-                SaveSettings();
+                    SaveSettings();
+                }
             }
-#endif
 
             UpdateEepkToolInterlop();
         }
@@ -542,6 +543,7 @@ namespace Xv2CoreLib.Resource.App
         #region XenoKit
         public int XenoKit_WindowSizeX { get; set; } = -1;
         public int XenoKit_WindowSizeY { get; set; } = -1;
+        public int XenoKit_DelayedUpdateInterval { get; set; } = 250;
         public bool XenoKit_HideEmptyBacEntries { get; set; } = true;
         public bool XenoKit_EnableCameraAnimations { get; set; } = true;
         public bool XenoKit_EnableVisualSkeleton { get; set; } = true;
@@ -613,7 +615,9 @@ namespace Xv2CoreLib.Resource.App
 
             if (_fileCleanUp != EepkFileCleanUp.Delete && _fileCleanUp != EepkFileCleanUp.Ignore && _fileCleanUp != EepkFileCleanUp.Prompt)
                 _fileCleanUp = EepkFileCleanUp.Prompt;
-        
+
+            //XenoKit
+            XenoKit_DelayedUpdateInterval = MathHelpers.Clamp(100, 1000, XenoKit_DelayedUpdateInterval);
         }
 
         private string FindGameDirectory()

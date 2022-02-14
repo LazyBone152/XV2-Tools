@@ -44,9 +44,9 @@ namespace Xv2CoreLib.IDB
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "IDB_Entry")]
         public List<IDB_Entry> Entries { get; set; }
 
-        public byte[] SaveToBytes()
+        public byte[] SaveToBytes(bool isSkillIdb = false)
         {
-            return new Deserializer(this).bytes.ToArray();
+            return new Deserializer(this, isSkillIdb).bytes.ToArray();
         }
 
         public static IDB_File Load(byte[] bytes)
@@ -61,8 +61,13 @@ namespace Xv2CoreLib.IDB
 
         public void SortEntries()
         {
+            var sortedEntries = Entries.OrderBy(x => (int)x.Type).ThenBy(x => x.ID).ToList();
 
-            Entries = (List<IDB_Entry>)Entries.OrderBy(x => (int)x.Type).ThenByDescending(x => x.ID);
+            //Copy over sorted entries to preserve original list instance
+            for(int i = 0; i < Entries.Count; i++)
+            {
+                Entries[i] = sortedEntries[i];
+            }
 
             /*
             //Split entries by I_08 (Type), Sort them and then rejoin

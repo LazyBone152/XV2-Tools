@@ -142,7 +142,7 @@
         <!-- Texture -->
         <Grid Grid.Row="1" Grid.Column="2" Margin="15, 10">
             <Grid.Background>
-                <ImageBrush ImageSource="{StaticResource gridlines}" Stretch="UniformToFill" Opacity="0.0"/>
+                <ImageBrush ImageSource="{StaticResource gridlines}" Stretch="UniformToFill" Opacity="1"/>
             </Grid.Background>
             <lbCommon:ZoomBorder ClipToBounds="True" Background="Transparent">
                 <Image x:Name="imagePreview" Source="{Binding ElementName=UserControl, Path=SelectedTexture.Texture}" Stretch="Uniform"/>

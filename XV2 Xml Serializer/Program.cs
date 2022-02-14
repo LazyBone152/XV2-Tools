@@ -21,7 +21,7 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
-            args = new string[1] { @"E:\VS_Test\EAN\ALL EAN" };
+            args = new string[1] { @"custom_skill.cus.xml" };
 
             DEBUG_MODE = true;
 #endif
@@ -29,7 +29,7 @@ namespace XV2_Xml_Serializer
             //MatDecompile(args);
 
             string fileLocation = null;
-            
+
             if (args.Length > 0)
             {
                 fileLocation = args[0];

@@ -118,7 +118,7 @@ namespace Xv2CoreLib.BCS
                         {
                             Index = i.ToString(),
                             Name = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, thisPartColorOffset + 0) + thisPartColorOffset, false),
-                            Colors = ParseColors(BitConverter.ToInt32(rawBytes, thisPartColorOffset + 12) + thisPartColorOffset, BitConverter.ToInt16(rawBytes, thisPartColorOffset + 10))
+                            ColorsList = ParseColors(BitConverter.ToInt32(rawBytes, thisPartColorOffset + 12) + thisPartColorOffset, BitConverter.ToInt16(rawBytes, thisPartColorOffset + 10))
                         });
                     }
 

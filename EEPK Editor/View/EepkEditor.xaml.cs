@@ -717,54 +717,59 @@ namespace EEPK_Organiser.View
                     var nestedListBox = ((ContextMenu)menuItem.Parent).PlacementTarget as ListBox;
 
                     var selectedFile = nestedListBox.SelectedItem as EffectFile;
-
-                    if (selectedFile != null)
-                    {
-                        switch (selectedFile.fileType)
-                        {
-                            case EffectFile.FileType.EMB:
-                                {
-                                    Forms.EmbEditForm embForm = GetActiveEmbForm(selectedFile.EmbFile);
-
-                                    if (embForm == null)
-                                    {
-                                        embForm = new Forms.EmbEditForm(selectedFile.EmbFile, null, AssetType.EMO, selectedFile.FullFileName);
-                                    }
-                                    else
-                                    {
-                                        embForm.Focus();
-                                    }
-
-                                    embForm.Show();
-                                }
-                                break;
-                            case EffectFile.FileType.EMM:
-                                {
-                                    Forms.MaterialsEditorForm emmForm = GetActiveEmmForm(selectedFile.EmmFile);
-
-                                    if (emmForm == null)
-                                    {
-                                        emmForm = new Forms.MaterialsEditorForm(selectedFile.EmmFile, null, AssetType.EMO, selectedFile.FullFileName);
-                                    }
-                                    else
-                                    {
-                                        emmForm.Focus();
-                                    }
-
-                                    emmForm.Show();
-                                }
-                                break;
-                            default:
-                                MessageBox.Show(string.Format("Edit not possible for {0} files.", selectedFile.Extension), "Edit", MessageBoxButton.OK, MessageBoxImage.Stop);
-                                break;
-                        }
-                    }
+                    OpenEmoEffectFileEditor(selectedFile, true);
                 }
             }
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
                 MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void OpenEmoEffectFileEditor(EffectFile selectedFile, bool showError)
+        {
+            if (selectedFile != null)
+            {
+                switch (selectedFile.fileType)
+                {
+                    case EffectFile.FileType.EMB:
+                        {
+                            Forms.EmbEditForm embForm = GetActiveEmbForm(selectedFile.EmbFile);
+
+                            if (embForm == null)
+                            {
+                                embForm = new Forms.EmbEditForm(selectedFile.EmbFile, null, AssetType.EMO, selectedFile.FullFileName);
+                            }
+                            else
+                            {
+                                embForm.Focus();
+                            }
+
+                            embForm.Show();
+                        }
+                        break;
+                    case EffectFile.FileType.EMM:
+                        {
+                            Forms.MaterialsEditorForm emmForm = GetActiveEmmForm(selectedFile.EmmFile);
+
+                            if (emmForm == null)
+                            {
+                                emmForm = new Forms.MaterialsEditorForm(selectedFile.EmmFile, null, AssetType.EMO, selectedFile.FullFileName);
+                            }
+                            else
+                            {
+                                emmForm.Focus();
+                            }
+
+                            emmForm.Show();
+                        }
+                        break;
+                    default:
+                        if(showError)
+                            MessageBox.Show(string.Format("Edit not possible for {0} files.", selectedFile.Extension), "Edit", MessageBoxButton.OK, MessageBoxImage.Stop);
+                        break;
+                }
             }
         }
 
@@ -1061,9 +1066,15 @@ namespace EEPK_Organiser.View
 
         }
 
-#endregion
+        public RelayCommand<EffectFile> EMO_DoubleClickCommand => new RelayCommand<EffectFile>(EMO_DoubleClick);
+        private void EMO_DoubleClick(EffectFile file)
+        {
+            OpenEmoEffectFileEditor(file, false);
+        }
 
-#region PBIND
+        #endregion
+
+        #region PBIND
         public void PBIND_AssetContainer_AddAsset_Click(object sender, RoutedEventArgs e)
         {
             try

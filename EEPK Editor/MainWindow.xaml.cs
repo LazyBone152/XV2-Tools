@@ -498,13 +498,14 @@ namespace EEPK_Organiser
         private void HelpMenu_About_Click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show(String.Format("{0} is a tool for editing Dragon Ball Xenoverse 2 EEPKs and its " +
-                "associated effect files.\n\n" +
+                "associated effect files (emp, ecf, etr, emo, ema, emb, emm...).\n\n" +
                 "Frameworks/Libraries used:\n" +
                 "WPF (UI)\n" +
                 "MahApps (UI)\n" +
                 "AForge.NET (image processing)\n" +
-                "CSharpImageLibrary (dds loading)\n" +
-                "YAXLib (xml)", "EEPK Organiser", SettingsManager.Instance.CurrentVersionString), "About", MessageBoxButton.OK, MessageBoxImage.Information);
+                "Pfim (primary texture loading)\n" +
+                "CSharpImageLibrary (texture saving and alternative texture loading)\n" +
+                "YAXLib (xml)", "Effect Organiser", SettingsManager.Instance.CurrentVersionString), "About", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         
         private void ToolMenu_AssociateEepkExt_Click(object sender, RoutedEventArgs e)

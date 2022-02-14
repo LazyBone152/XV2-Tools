@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Xv2CoreLib
 {
@@ -75,6 +71,7 @@ namespace Xv2CoreLib
         {
             if (RandomGenerator == null) RandomGenerator = new System.Random(_getRandomInt(352, 242142142));
         }
+    
     }
 
 }
