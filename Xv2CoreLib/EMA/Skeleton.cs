@@ -232,8 +232,8 @@ namespace Xv2CoreLib.EMA
         [YAXSerializeAs("SiblingIndex")]
         public ushort SiblingIndex { get; set; }
         [YAXAttributeForClass]
-        [YAXSerializeAs("EmgIndex")]
-        public ushort EmgIndex { get; set; }
+        [YAXSerializeAs("EmoPartIndex")]
+        public ushort EmoPartIndex { get; set; } //"EmgIndex" in LibXenoverse, but its actually the emo part index
         [YAXAttributeForClass]
         [YAXSerializeAs("UnkIndex")]
         public ushort I_08 { get; set; }
@@ -263,7 +263,7 @@ namespace Xv2CoreLib.EMA
             bone.ParentIndex = BitConverter.ToUInt16(rawBytes, offset + 0);
             bone.ChildIndex = BitConverter.ToUInt16(rawBytes, offset + 2);
             bone.SiblingIndex = BitConverter.ToUInt16(rawBytes, offset + 4);
-            bone.EmgIndex = BitConverter.ToUInt16(rawBytes, offset + 6);
+            bone.EmoPartIndex = BitConverter.ToUInt16(rawBytes, offset + 6);
             bone.I_08 = BitConverter.ToUInt16(rawBytes, offset + 8);
             bone.IKFlag = BitConverter.ToUInt16(rawBytes, offset + 10);
             bone.I_12 = BitConverter.ToUInt16(rawBytes, offset + 12);
@@ -290,7 +290,7 @@ namespace Xv2CoreLib.EMA
             bytes.AddRange(BitConverter.GetBytes(ParentIndex));
             bytes.AddRange(BitConverter.GetBytes(ChildIndex));
             bytes.AddRange(BitConverter.GetBytes(SiblingIndex));
-            bytes.AddRange(BitConverter.GetBytes(EmgIndex));
+            bytes.AddRange(BitConverter.GetBytes(EmoPartIndex));
             bytes.AddRange(BitConverter.GetBytes(I_08));
             bytes.AddRange(BitConverter.GetBytes(IKFlag));
             bytes.AddRange(BitConverter.GetBytes(I_12));

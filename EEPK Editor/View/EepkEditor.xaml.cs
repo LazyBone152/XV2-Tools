@@ -3097,7 +3097,7 @@ namespace EEPK_Organiser.View
 #endregion
 
 
-#region EFFECT
+        #region EFFECT
         private void Effect_EffectIdChange_ValueChanged(object sender, DataGridCellEditEndingEventArgs e)
         {
             if ((string)e.Column.Header == "Name")
@@ -3288,20 +3288,27 @@ namespace EEPK_Organiser.View
                     {
                         List<IUndoRedo> undos = new List<IUndoRedo>();
 
-                        foreach (var effectPart in effectParts)
+                        try
                         {
-                            if (effectPart.AssetRef != null)
-                                effectPart.AssetRef = effectContainerFile.AddAsset(effectPart.AssetRef, effectPart.I_02, undos);
+                            foreach (var effectPart in effectParts)
+                            {
+                                if (effectPart.AssetRef != null)
+                                    effectPart.AssetRef = effectContainerFile.AddAsset(effectPart.AssetRef, effectPart.I_02, undos);
 
-                            var newEffectPart = effectPart.Clone();
-                            effectContainerFile.SelectedEffect.EffectParts.Add(newEffectPart);
-                            effectContainerFile.RefreshAssetCounts();
+                                var newEffectPart = effectPart.Clone();
+                                effectContainerFile.SelectedEffect.EffectParts.Add(newEffectPart);
+                                effectContainerFile.RefreshAssetCounts();
 
-                            undos.Add(new UndoableListAdd<EffectPart>(effectContainerFile.SelectedEffect.EffectParts, newEffectPart));
+                                undos.Add(new UndoableListAdd<EffectPart>(effectContainerFile.SelectedEffect.EffectParts, newEffectPart));
+                            }
+
+                            undos.Add(new UndoActionDelegate(effectContainerFile, nameof(effectContainerFile.RefreshAssetCounts), true));
                         }
-
-                        undos.Add(new UndoActionDelegate(effectContainerFile, nameof(effectContainerFile.RefreshAssetCounts), true));
-                        UndoManager.Instance.AddUndo(new CompositeUndo(undos, (effectParts.Count > 1) ? "Paste EffectParts" : "Paste EffectPart"));
+                        finally
+                        {
+                            if(undos.Count > 0)
+                                UndoManager.Instance.AddUndo(new CompositeUndo(undos, (effectParts.Count > 1) ? "Paste EffectParts" : "Paste EffectPart"));
+                        }
                     }
                 }
             }
@@ -3824,37 +3831,34 @@ namespace EEPK_Organiser.View
                 effectSelector.ShowDialog();
                 List<IUndoRedo> undos = new List<IUndoRedo>();
 
-                if (effectSelector.SelectedEffects != null)
+                try
                 {
-                    foreach (var effect in effectSelector.SelectedEffects)
+                    if (effectSelector.SelectedEffects != null)
                     {
-                        var newEffect = effect.Clone();
-                        newEffect.IndexNum = effect.ImportIdIncrease;
-                        undos.AddRange(effectContainerFile.AddEffect(newEffect, true));
-                        undos.Add(new UndoableListAdd<Effect>(effectContainerFile.Effects, newEffect));
-                    }
+                        foreach (var effect in effectSelector.SelectedEffects)
+                        {
+                            var newEffect = effect.Clone();
+                            newEffect.IndexNum = effect.ImportIdIncrease;
+                            undos.AddRange(effectContainerFile.AddEffect(newEffect, true));
+                            undos.Add(new UndoableListAdd<Effect>(effectContainerFile.Effects, newEffect));
+                        }
 
-                    //Update UI
-                    if (effectSelector.SelectedEffects.Count > 0)
-                    {
-                        RefreshCounts();
-                        effectDataGrid.SelectedItem = effectSelector.SelectedEffects[0];
-                        effectDataGrid.ScrollIntoView(effectSelector.SelectedEffects);
-                        effectContainerFile.UpdateEffectFilter();
-                        undos.Add(new UndoActionDelegate(effectContainerFile, nameof(effectContainerFile.UpdateAllFilters), true));
+                        //Update UI
+                        if (effectSelector.SelectedEffects.Count > 0)
+                        {
+                            RefreshCounts();
+                            effectDataGrid.SelectedItem = effectSelector.SelectedEffects[0];
+                            effectDataGrid.ScrollIntoView(effectSelector.SelectedEffects);
+                            effectContainerFile.UpdateEffectFilter();
+                            undos.Add(new UndoActionDelegate(effectContainerFile, nameof(effectContainerFile.UpdateAllFilters), true));
+                        }
                     }
-
-                    UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Import Effects"));
                 }
-            }
-
-            try
-            {
-                effectDataGrid.Items.SortDescriptions.Add(new SortDescription("Index", ListSortDirection.Ascending));
-            }
-            catch
-            {
-
+                finally
+                {
+                    if(undos.Count > 0)
+                        UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Import Effects"));
+                }
             }
         }
 
@@ -3965,11 +3969,12 @@ namespace EEPK_Organiser.View
         {
             return Clipboard.ContainsData(ClipboardDataTypes.EffectPart);
         }
+        
         public bool CanPasteEffectPartValues()
         {
             return (IsEffectPartSelected()) ? Clipboard.ContainsData(ClipboardDataTypes.EffectPart) : false;
         }
-#endregion
+        #endregion
 
 
 

@@ -2374,11 +2374,9 @@ namespace Xv2CoreLib.EffectContainer
 
             for(int i = 1; i < bitmaps.Count; i++)
             {
-                if(EmbEntry.SelectTextureSize(EmbEntry.HighestDimension(toMerge), toMerge.Count) != -1)
-                {
-                    toMerge.Add(bitmaps[i]);
-                }
-                else
+                toMerge.Add(bitmaps[i]);
+
+                if (EmbEntry.SelectTextureSize(EmbEntry.HighestDimension(toMerge), toMerge.Count) == -1)
                 {
                     toMerge.RemoveAt(toMerge.Count - 1);
                     break;

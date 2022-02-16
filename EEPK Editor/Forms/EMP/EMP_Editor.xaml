@@ -98,17 +98,17 @@
                                 <TextBox x:Name="general_Name" Text="{Binding SelectedItem.Name, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="134,57,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="253"/>
                                 <Label Content="Name" HorizontalAlignment="Left" Margin="30,55,0,0" VerticalAlignment="Top" Width="104" HorizontalContentAlignment="Right" ToolTip="The name of the Particle Effect. Has a maximum allowed length of 32 characters."/>
                                 <TextBox x:Name="general_ParticleLifetime" Text="{Binding SelectedItem.I_40, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="134,118,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
-                                <Label Content="Particle Lifetime" HorizontalAlignment="Left" Margin="0,115,0,0" VerticalAlignment="Top" Width="134" HorizontalContentAlignment="Right"/>
+                                <Label Content="Particle Lifetime" HorizontalAlignment="Left" Margin="0,115,0,0" VerticalAlignment="Top" Width="134" HorizontalContentAlignment="Right" ToolTip="The number of frames that this particle will last."/>
                                 <TextBox x:Name="general_ParticleLifetimeAddRandom" Text="{Binding SelectedItem.I_42, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="305,118,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="Variance" HorizontalAlignment="Left" Margin="224,115,0,0" VerticalAlignment="Top" Width="81" HorizontalContentAlignment="Right"/>
                                 <TextBox x:Name="general_ParticleCount" Text="{Binding SelectedItem.I_38, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="134,150,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
-                                <Label Content="Particle Count" HorizontalAlignment="Left" Margin="0,146,0,0" VerticalAlignment="Top" Width="134" HorizontalContentAlignment="Right"/>
+                                <Label Content="Particle Count" HorizontalAlignment="Left" Margin="0,146,0,0" VerticalAlignment="Top" Width="134" HorizontalContentAlignment="Right" ToolTip="The maximum possible instances of this particle that can be active at the same time. For use with particle effects that are children to a spawner type - does nothing on the root entry."/>
                                 <TextBox x:Name="general_NewDelay" Text="{Binding SelectedItem.I_46, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="134,180,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
-                                <Label Content="Create Delay" HorizontalAlignment="Left" Margin="0,177,0,0" VerticalAlignment="Top" Width="134" HorizontalContentAlignment="Right" ToolTip="The number of frames that must pass before new particles are created."/>
+                                <Label Content="Create Delay" HorizontalAlignment="Left" Margin="0,177,0,0" VerticalAlignment="Top" Width="134" HorizontalContentAlignment="Right" ToolTip="The number of frames that must pass before new particles are created. For use only on spawner-type particle effects."/>
                                 <TextBox x:Name="general_NewDelayAddRandom" Text="{Binding SelectedItem.I_47, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="305,180,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="Variance" HorizontalAlignment="Left" Margin="224,177,0,0" VerticalAlignment="Top" Width="81" HorizontalContentAlignment="Right"/>
                                 <TextBox x:Name="general_MaxParticlesPerFrame" Text="{Binding SelectedItem.I_52, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="134,211,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
-                                <Label Content="Max Particles (frame)" HorizontalAlignment="Left" Margin="0,207,0,0" VerticalAlignment="Top" Width="134" HorizontalContentAlignment="Right" ToolTip="The maximum amount of particles that can be created in a single frame."/>
+                                <Label Content="Max Particles (frame)" HorizontalAlignment="Left" Margin="0,207,0,0" VerticalAlignment="Top" Width="134" HorizontalContentAlignment="Right" ToolTip="The maximum amount of particles that can be created from this entry in a single frame. For use with spawner-type particle effects."/>
                                 <TextBox x:Name="general_MaxParticlesPerFrameAddRandom" Text="{Binding SelectedItem.I_54, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="305,211,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="Variance" HorizontalAlignment="Left" Margin="224,207,0,0" VerticalAlignment="Top" Width="81" HorizontalContentAlignment="Right"/>
                                 <GroupBox Header="Position" HorizontalAlignment="Left" Height="167" Margin="479,25,0,0" VerticalAlignment="Top" Width="241">
@@ -163,10 +163,10 @@
                                 <Label Content="Auto Orientation Type" HorizontalAlignment="Left" Margin="0,237,0,0" VerticalAlignment="Top" Width="134" HorizontalContentAlignment="Right"/>
                                 <CheckBox x:Name="checkBox_General_Hide" IsChecked="{Binding SelectedItem.I_33_3, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" Content="Hide" HorizontalAlignment="Left" Margin="160,270,0,0" VerticalAlignment="Top" Width="171"/>
                                 <TextBox x:Name="general_StartTime" Text="{Binding SelectedItem.I_44, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="134,87,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
-                                <Label Content="Start Time" HorizontalAlignment="Left" Margin="0,85,0,0" VerticalAlignment="Top" Width="134" HorizontalContentAlignment="Right"/>
+                                <Label Content="Start Time" HorizontalAlignment="Left" Margin="0,85,0,0" VerticalAlignment="Top" Width="134" HorizontalContentAlignment="Right" ToolTip="Delays the start of this particle by the specified amount of frames. Does not shorten the life time."/>
                                 <TextBox x:Name="general_StartTimeAddRandom" Text="{Binding SelectedItem.I_45, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="305,87,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="Variance" HorizontalAlignment="Left" Margin="224,85,0,0" VerticalAlignment="Top" Width="81" HorizontalContentAlignment="Right"/>
-                                <CheckBox x:Name="checkBox_General_EnableRandomRotationDirection" IsChecked="{Binding SelectedItem.I_34_4, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" Content="EnableRandomRotationDirection" HorizontalAlignment="Left" Margin="160,291,0,0" VerticalAlignment="Top" Width="284"/>
+                                <CheckBox x:Name="checkBox_General_EnableRandomRotationDirection" IsChecked="{Binding SelectedItem.I_34_4, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" Content="EnableRandomRotationDirection" HorizontalAlignment="Left" Margin="160,291,0,0" VerticalAlignment="Top" Width="284" ToolTip="Enables random behaviour for SpeedRotation/AngleRotation values.&#x0a;&#x0a;When enabled, a value of 50 has an equal chance of being either 50 or -50."/>
                                 <CheckBox x:Name="checkBox_General_EnableRandomUpVectorOnVirtualCone" IsChecked="{Binding SelectedItem.I_34_6, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" Content="EnableRandomUpVectorOnVirtualCone" HorizontalAlignment="Left" Margin="160,312,0,0" VerticalAlignment="Top" Width="284"/>
                                 <TextBox x:Name="general_F_128" Text="{Binding SelectedItem.F_128, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="79,364,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="F__128" HorizontalAlignment="Left" Margin="10,363,0,0" VerticalAlignment="Top" Width="69" HorizontalContentAlignment="Right"/>
@@ -380,21 +380,21 @@
                                 <TextBox x:Name="shapePerimeterDistibution_F_12" Text="{Binding SelectedItem.FloatPart_02_01.F_12, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="390,74,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="Variance" HorizontalAlignment="Left" Margin="280,72,0,0" VerticalAlignment="Top" Width="104" HorizontalContentAlignment="Right"/>
                                 <TextBox x:Name="shapePerimeterDistibution_F_16" Text="{Binding SelectedItem.FloatPart_02_01.F_16, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,104,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
-                                <Label Content="F__16" HorizontalAlignment="Left" Margin="12,102,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
-                                <TextBox x:Name="shapePerimeterDistibution_F_20" Text="{Binding SelectedItem.FloatPart_02_01.F_20, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,134,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
-                                <Label Content="F__20" HorizontalAlignment="Left" Margin="62,132,0,0" VerticalAlignment="Top" Width="104" HorizontalContentAlignment="Right"/>
-                                <TextBox x:Name="shapePerimeterDistibution_F_24" Text="{Binding SelectedItem.FloatPart_02_01.F_24, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,165,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
-                                <Label Content="Width1" HorizontalAlignment="Left" Margin="12,162,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
-                                <TextBox x:Name="shapePerimeterDistibution_F_28" Text="{Binding SelectedItem.FloatPart_02_01.F_28, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="390,165,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
-                                <Label Content="Variance" HorizontalAlignment="Left" Margin="280,163,0,0" VerticalAlignment="Top" Width="104" HorizontalContentAlignment="Right"/>
-                                <TextBox x:Name="shapePerimeterDistibution_F_32" Text="{Binding SelectedItem.FloatPart_02_01.F_32, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,193,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
-                                <Label Content="Width2" HorizontalAlignment="Left" Margin="12,190,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
-                                <TextBox x:Name="shapePerimeterDistibution_F_36" Text="{Binding SelectedItem.FloatPart_02_01.F_36, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="390,193,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
-                                <Label Content="Variance" HorizontalAlignment="Left" Margin="280,193,0,0" VerticalAlignment="Top" Width="104" HorizontalContentAlignment="Right"/>
-                                <ComboBox SelectedItem="{Binding SelectedItem.FloatPart_02_01.I_40, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding SelectedItem.FloatPart_02_01.Shapes, ElementName=empTree}" HorizontalAlignment="Left" Margin="171,222,0,0" VerticalAlignment="Top" Width="82"/>
-                                <Label Content="Shape" HorizontalAlignment="Left" Margin="12,219,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
-                                <TextBox x:Name="shapePerimeterDistibution_F_44" Text="{Binding SelectedItem.FloatPart_02_01.F_44, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,251,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
-                                <Label Content="F__44" HorizontalAlignment="Left" Margin="12,249,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
+                                <Label Content="Angle Rotation X" HorizontalAlignment="Left" Margin="12,102,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
+                                <TextBox x:Name="shapePerimeterDistibution_F_20" Text="{Binding SelectedItem.FloatPart_02_01.F_20, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="390,105,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
+                                <Label Content="Variance" HorizontalAlignment="Left" Margin="281,103,0,0" VerticalAlignment="Top" Width="104" HorizontalContentAlignment="Right"/>
+                                <TextBox x:Name="shapePerimeterDistibution_F_24" Text="{Binding SelectedItem.FloatPart_02_01.F_24, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,134,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
+                                <Label Content="Width1" HorizontalAlignment="Left" Margin="12,130,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
+                                <TextBox x:Name="shapePerimeterDistibution_F_28" Text="{Binding SelectedItem.FloatPart_02_01.F_28, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="390,134,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
+                                <Label Content="Variance" HorizontalAlignment="Left" Margin="280,131,0,0" VerticalAlignment="Top" Width="104" HorizontalContentAlignment="Right"/>
+                                <TextBox x:Name="shapePerimeterDistibution_F_32" Text="{Binding SelectedItem.FloatPart_02_01.F_32, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,162,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
+                                <Label Content="Width2" HorizontalAlignment="Left" Margin="12,158,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
+                                <TextBox x:Name="shapePerimeterDistibution_F_36" Text="{Binding SelectedItem.FloatPart_02_01.F_36, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="390,162,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
+                                <Label Content="Variance" HorizontalAlignment="Left" Margin="280,161,0,0" VerticalAlignment="Top" Width="104" HorizontalContentAlignment="Right"/>
+                                <ComboBox SelectedItem="{Binding SelectedItem.FloatPart_02_01.I_40, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding SelectedItem.FloatPart_02_01.Shapes, ElementName=empTree}" HorizontalAlignment="Left" Margin="171,190,0,0" VerticalAlignment="Top" Width="82"/>
+                                <Label Content="Shape" HorizontalAlignment="Left" Margin="12,187,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
+                                <TextBox x:Name="shapePerimeterDistibution_F_44" Text="{Binding SelectedItem.FloatPart_02_01.F_44, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,219,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
+                                <Label Content="F__44" HorizontalAlignment="Left" Margin="12,217,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
 
                             </Grid>
                         </Controls:MetroTabItem>
@@ -409,21 +409,21 @@
                                 <TextBox x:Name="shapeAreaDistibution_F_12" Text="{Binding SelectedItem.FloatPart_03_01.F_12, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="390,74,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="Variance" HorizontalAlignment="Left" Margin="280,72,0,0" VerticalAlignment="Top" Width="104" HorizontalContentAlignment="Right"/>
                                 <TextBox x:Name="shapeAreaDistibution_F_16" Text="{Binding SelectedItem.FloatPart_03_01.F_16, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,104,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
-                                <Label Content="F__16" HorizontalAlignment="Left" Margin="12,102,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
-                                <TextBox x:Name="shapeAreaDistibution_F_20" Text="{Binding SelectedItem.FloatPart_03_01.F_20, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,134,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
-                                <Label Content="F__20" HorizontalAlignment="Left" Margin="62,132,0,0" VerticalAlignment="Top" Width="104" HorizontalContentAlignment="Right"/>
-                                <TextBox x:Name="shapeAreaDistibution_F_24" Text="{Binding SelectedItem.FloatPart_03_01.F_24, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,165,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
-                                <Label Content="Width1" HorizontalAlignment="Left" Margin="12,162,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
-                                <TextBox x:Name="shapeAreaDistibution_F_28" Text="{Binding SelectedItem.FloatPart_03_01.F_28, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="390,165,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
-                                <Label Content="Variance" HorizontalAlignment="Left" Margin="280,163,0,0" VerticalAlignment="Top" Width="104" HorizontalContentAlignment="Right"/>
-                                <TextBox x:Name="shapeAreaDistibution_F_32" Text="{Binding SelectedItem.FloatPart_03_01.F_32, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,193,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
-                                <Label Content="Width2" HorizontalAlignment="Left" Margin="12,190,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
-                                <TextBox x:Name="shapeAreaDistibution_F_36" Text="{Binding SelectedItem.FloatPart_03_01.F_36, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="390,193,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
-                                <Label Content="Variance" HorizontalAlignment="Left" Margin="280,193,0,0" VerticalAlignment="Top" Width="104" HorizontalContentAlignment="Right"/>
-                                <ComboBox SelectedItem="{Binding SelectedItem.FloatPart_03_01.I_40, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding SelectedItem.FloatPart_03_01.Shapes, ElementName=empTree}" HorizontalAlignment="Left" Margin="171,222,0,0" VerticalAlignment="Top" Width="82"/>
-                                <Label Content="Shape" HorizontalAlignment="Left" Margin="12,219,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
-                                <TextBox x:Name="shapeAreaDistibution_F_44" Text="{Binding SelectedItem.FloatPart_03_01.F_44, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,251,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
-                                <Label Content="F__44" HorizontalAlignment="Left" Margin="12,249,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
+                                <Label Content="Angle Rotation X" HorizontalAlignment="Left" Margin="12,102,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
+                                <TextBox x:Name="shapeAreaDistibution_F_20" Text="{Binding SelectedItem.FloatPart_03_01.F_20, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="390,102,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
+                                <Label Content="Variance" HorizontalAlignment="Left" Margin="280,101,0,0" VerticalAlignment="Top" Width="104" HorizontalContentAlignment="Right"/>
+                                <TextBox x:Name="shapeAreaDistibution_F_24" Text="{Binding SelectedItem.FloatPart_03_01.F_24, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,134,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
+                                <Label Content="Width1" HorizontalAlignment="Left" Margin="12,130,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
+                                <TextBox x:Name="shapeAreaDistibution_F_28" Text="{Binding SelectedItem.FloatPart_03_01.F_28, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="390,134,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
+                                <Label Content="Variance" HorizontalAlignment="Left" Margin="280,131,0,0" VerticalAlignment="Top" Width="104" HorizontalContentAlignment="Right"/>
+                                <TextBox x:Name="shapeAreaDistibution_F_32" Text="{Binding SelectedItem.FloatPart_03_01.F_32, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,162,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
+                                <Label Content="Width2" HorizontalAlignment="Left" Margin="12,158,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
+                                <TextBox x:Name="shapeAreaDistibution_F_36" Text="{Binding SelectedItem.FloatPart_03_01.F_36, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="390,162,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
+                                <Label Content="Variance" HorizontalAlignment="Left" Margin="280,161,0,0" VerticalAlignment="Top" Width="104" HorizontalContentAlignment="Right"/>
+                                <ComboBox SelectedItem="{Binding SelectedItem.FloatPart_03_01.I_40, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding SelectedItem.FloatPart_03_01.Shapes, ElementName=empTree}" HorizontalAlignment="Left" Margin="171,190,0,0" VerticalAlignment="Top" Width="82"/>
+                                <Label Content="Shape" HorizontalAlignment="Left" Margin="12,187,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
+                                <TextBox x:Name="shapeAreaDistibution_F_44" Text="{Binding SelectedItem.FloatPart_03_01.F_44, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,219,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
+                                <Label Content="F__44" HorizontalAlignment="Left" Margin="12,217,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
 
                             </Grid>
                         </Controls:MetroTabItem>
@@ -601,7 +601,7 @@
 
                                             <DataGrid.Columns>
                                                 <DataGridTextColumn Binding="{Binding Index, UpdateSourceTrigger=PropertyChanged}" Header="Time Index" Width="*"/>
-                                                <DataGridTextColumn Binding="{Binding Float, UpdateSourceTrigger=PropertyChanged}" Header="Value" Width="*"/>
+                                                <DataGridTextColumn Binding="{Binding Float, UpdateSourceTrigger=LostFocus}" Header="Value" Width="*"/>
                                             </DataGrid.Columns>
                                             <DataGrid.ContextMenu>
                                                 <ContextMenu Controls:HeaderedControlHelper.HeaderFontSize="12">
@@ -656,7 +656,7 @@
                                                 </DataGrid.ContextMenu>
                                                 <DataGrid.Columns>
                                                     <DataGridTextColumn Binding="{Binding Index, UpdateSourceTrigger=PropertyChanged}" Header="Time Index" Width="*"/>
-                                                    <DataGridTextColumn Binding="{Binding Float, UpdateSourceTrigger=PropertyChanged}" Header="Value" Width="*"/>
+                                                    <DataGridTextColumn Binding="{Binding Float, UpdateSourceTrigger=LostFocus}" Header="Value" Width="*"/>
                                                 </DataGrid.Columns>
                                             </DataGrid>
 
@@ -693,7 +693,7 @@
 
                                 <Grid IsEnabled="{Binding SelectedItem, ElementName=comboBox_Type1_Header, Converter={StaticResource NullToFalse}}">
                                     <TextBox x:Name="animType1_Header_I_00"  Text="{Binding SelectedItem.I_00, ElementName=comboBox_Type1_Header, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="231,44,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="97"/>
-                                    <Label Content="I__00" Margin="158,42,0,0" VerticalAlignment="Top" Width="73" HorizontalAlignment="Left" HorizontalContentAlignment="Right"/>
+                                    <Label Content="Type" Margin="158,42,0,0" VerticalAlignment="Top" Width="73" HorizontalAlignment="Left" HorizontalContentAlignment="Right"/>
                                     <TextBox x:Name="animType1_Header_I_01"  Text="{Binding SelectedItem.I_01, ElementName=comboBox_Type1_Header, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="414,44,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="97"/>
                                     <Label Content="I__01" Margin="341,42,0,0" VerticalAlignment="Top" Width="73" HorizontalAlignment="Left" HorizontalContentAlignment="Right"/>
 
@@ -850,7 +850,10 @@
                         </Grid>
                     </GroupBox>
 
-                    <Grid Margin="672,25,10.164,19.818" Background="#252525">
+                    <Grid Margin="672,25,10.164,19.818">
+                        <Grid.Background>
+                            <ImageBrush ImageSource="{StaticResource gridlines}" Stretch="UniformToFill" Opacity="1"/>
+                        </Grid.Background>
                         <lbCommon:ZoomBorder x:Name="border" ClipToBounds="True" Background="Transparent" BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" BorderThickness="1">
                             <Image Stretch="Uniform" Source="{Binding SelectedItem.TextureRef.Texture, ElementName=listBox_Textures}" ToolTip="{Binding SelectedItem.TextureRef.Name, ElementName=listBox_Textures}" Margin="0,0,-0.382,0.327"/>
                         </lbCommon:ZoomBorder>

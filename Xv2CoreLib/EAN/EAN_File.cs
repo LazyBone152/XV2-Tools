@@ -483,20 +483,22 @@ namespace Xv2CoreLib.EAN
             }
         }
 
+        private int _frameCount = -1;
         [YAXAttributeForClass]
         [YAXSerializeAs("Duration")]
         public int FrameCount
         {
             get
             {
-                return CalculateFrameCount();
+                _frameCount = CalculateFrameCount();
+                return _frameCount;
             }
         }
         [YAXAttributeForClass]
         [YAXSerializeAs("IndexSize")]
         public IntPrecision IndexSize
         {
-            get => FrameCount <= byte.MaxValue ? IntPrecision._8Bit : IntPrecision._16Bit;
+            get => GetFrameCount() <= byte.MaxValue ? IntPrecision._8Bit : IntPrecision._16Bit;
         }
         [YAXAttributeForClass]
         [YAXSerializeAs("FloatSize")]
@@ -585,16 +587,29 @@ namespace Xv2CoreLib.EAN
 
             foreach(var bone in Nodes)
             {
-                foreach(var comp in bone.AnimationComponents)
+                if(bone.AnimationComponents != null)
                 {
-                    int max = (comp.Keyframes.Count > 0) ? comp.Keyframes.Max(x => x.FrameIndex) + 1 : 0;
+                    foreach (var comp in bone.AnimationComponents)
+                    {
+                        int max = (comp.Keyframes.Count > 0) ? comp.Keyframes.Max(x => x.FrameIndex) + 1 : 0;
 
-                    if (max > frameCount)
-                        frameCount = max;
+                        if (max > frameCount)
+                            frameCount = max;
+                    }
                 }
             }
 
             return frameCount;
+        }
+
+        public int GetFrameCount(bool recalculate = false)
+        {
+            if(_frameCount == -1 || recalculate)
+            {
+                return FrameCount;
+            }
+
+            return _frameCount;
         }
 
         public EAN_Animation Clone()
@@ -620,7 +635,7 @@ namespace Xv2CoreLib.EAN
             if (anim.FloatType != FloatType) return false;
             if (anim.IndexSize != IndexSize) return false;
             if (anim.FloatSize != FloatSize) return false;
-            if (anim.FrameCount != FrameCount) return false;
+            if (anim.GetFrameCount() != GetFrameCount()) return false;
             if (anim.Nodes == null && Nodes == null) return true;
             if (anim.Nodes == null || Nodes == null) return false;
 

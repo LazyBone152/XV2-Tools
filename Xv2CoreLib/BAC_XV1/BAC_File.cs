@@ -41,7 +41,7 @@ namespace Xv2CoreLib.BAC_XV1
                 I_20 = I_20,
                 I_80 = I_80,
                 F_32 = F_32,
-                BacEntries = AsyncObservableCollection<BAC.BAC_Entry>.Create(xv2BacEntries)
+                BacEntries = new AsyncObservableCollection<BAC.BAC_Entry>(xv2BacEntries)
             };
 
         }

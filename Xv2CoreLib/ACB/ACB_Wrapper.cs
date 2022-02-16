@@ -97,7 +97,7 @@ namespace Xv2CoreLib.ACB
         }
 
         public ACB_File AcbFile { get; set; }
-        public AsyncObservableCollection<Cue_Wrapper> Cues { get; set; } = AsyncObservableCollection<Cue_Wrapper>.Create();
+        public AsyncObservableCollection<Cue_Wrapper> Cues { get; set; } = new AsyncObservableCollection<Cue_Wrapper>();
         
         
 

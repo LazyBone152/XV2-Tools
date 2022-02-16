@@ -68,6 +68,7 @@ namespace Xv2CoreLib.ESK
 
         //Non-hierarchy list - Save it here for better performance when using GetBone. (mostly for XenoKit, since it needs to use this method several dozen times each frame)
         private List<ESK_Bone> _nonRecursiveBones = null;
+        [YAXDontSerializeIfNull]
         public List<ESK_Bone> NonRecursiveBones
         {
             get

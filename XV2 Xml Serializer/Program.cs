@@ -21,7 +21,7 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
-            args = new string[1] { @"custom_skill.cus.xml" };
+            args = new string[1] { @"E:\VS_Test\EMO\ALL EMO" };
 
             DEBUG_MODE = true;
 #endif
@@ -725,7 +725,23 @@ namespace XV2_Xml_Serializer
                         Console.WriteLine(s);
                         var emo = Xv2CoreLib.EMO.EMO_File.Load(s);
 
-                        emo.SaveFile(s);
+                        if(emo != null)
+                        {
+                            foreach(var part in emo.Parts)
+                            {
+                                foreach(var emg in part.EmgFiles)
+                                {
+                                    foreach(var model in emg.Mesh)
+                                    {
+                                        if(model.TextureLists.Count != model.Submesh.Count)
+                                        {
+                                            Console.WriteLine("This");
+                                            Console.Read();
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 //catch (Exception ex)

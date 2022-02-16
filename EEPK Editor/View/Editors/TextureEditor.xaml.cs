@@ -299,7 +299,7 @@ namespace EEPK_Organiser.View
                     if (Path.GetExtension(file) != ".dds")
                     {
                         MessageBox.Show(String.Format("{0} is not a supported format.", System.IO.Path.GetExtension(file)), "Invalid Format", MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
+                        continue;
                     }
 
                     byte[] bytes = File.ReadAllBytes(file);
@@ -315,7 +315,7 @@ namespace EEPK_Organiser.View
                     if (EmbFile.Entry.Count >= EMB_File.MAX_EFFECT_TEXTURES && IsForContainer)
                     {
                         MessageBox.Show(String.Format("The maximum allowed amount of textures has been reached. Cannot add anymore.\n\n{1} of the selected textures were added before the limit was reached.", EMB_File.MAX_EFFECT_TEXTURES, added), "Error", MessageBoxButton.OK, MessageBoxImage.Stop);
-                        return;
+                        break;
                     }
 
                     //Add the emb
@@ -436,7 +436,7 @@ namespace EEPK_Organiser.View
                 if (EmbFile.Entry.Count >= EMB_File.MAX_EFFECT_TEXTURES && IsForContainer)
                 {
                     MessageBox.Show("The maximum amount of textures has been reached. Cannot add anymore.", "Duplicate", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
+                    break;
                 }
 
                 var newTexture = texture.Clone();
@@ -481,7 +481,7 @@ namespace EEPK_Organiser.View
                     if (EmbFile.Entry.Count >= EMB_File.MAX_EFFECT_TEXTURES && IsForContainer)
                     {
                         MessageBox.Show("The maximum amount of textures has been reached. Cannot add anymore.", "Duplicate", MessageBoxButton.OK, MessageBoxImage.Warning);
-                        return;
+                        break;
                     }
 
                     var newTexture = texture.Copy();
@@ -663,7 +663,7 @@ namespace EEPK_Organiser.View
 
             if (textureSize == -1)
             {
-                MessageBox.Show("Cannot proceed. The resulting texture would be too large (greater than 4096 x 4096).", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Cannot proceed. The resulting texture would be too large (greater than 2048 x 2048).", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 

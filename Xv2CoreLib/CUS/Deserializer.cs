@@ -152,7 +152,7 @@ namespace Xv2CoreLib.CUS
                     bytes.AddRange(BitConverter.GetBytes(skills[i].I_52));
                     bytes.AddRange(BitConverter.GetBytes(skills[i].I_54));
                     bytes.AddRange(BitConverter.GetBytes(skills[i].PUP));
-                    bytes.AddRange(BitConverter.GetBytes(skills[i].I_58));
+                    bytes.AddRange(BitConverter.GetBytes(skills[i].CusAura));
                     bytes.AddRange(BitConverter.GetBytes(skills[i].CharaSwapId));
                     bytes.AddRange(BitConverter.GetBytes(skills[i].I_62));
                     bytes.AddRange(BitConverter.GetBytes(skills[i].NumTransformations));

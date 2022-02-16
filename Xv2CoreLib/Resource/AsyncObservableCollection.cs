@@ -277,14 +277,10 @@ namespace Xv2CoreLib.Resource
         }
 
 
+        [Obsolete("Not required anymore. Just create a new instance directly.")]
         public static AsyncObservableCollection<T> Create()
         {
             return new AsyncObservableCollection<T>();
-        }
-
-        public static AsyncObservableCollection<T> Create(IList<T> oldList)
-        {
-            return new AsyncObservableCollection<T>(oldList);
         }
 
     }

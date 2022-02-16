@@ -39,10 +39,11 @@ namespace Xv2CoreLib.EMP
         public VersionEnum Version { get; set; } = VersionEnum.DBXV2;
 
         [YAXDontSerializeIfNull]
-        public AsyncObservableCollection<ParticleEffect> ParticleEffects { get; set; } = AsyncObservableCollection<ParticleEffect>.Create();
+        public AsyncObservableCollection<ParticleEffect> ParticleEffects { get; set; } = new AsyncObservableCollection<ParticleEffect>();
         [YAXDontSerializeIfNull]
-        public AsyncObservableCollection<EMP_TextureDefinition> Textures { get; set; } = AsyncObservableCollection<EMP_TextureDefinition>.Create();
+        public AsyncObservableCollection<EMP_TextureDefinition> Textures { get; set; } = new AsyncObservableCollection<EMP_TextureDefinition>();
 
+        #region LoadSave
         public byte[] SaveToBytes(ParserMode _parserMode)
         {
             return new Deserializer(this, _parserMode).bytes.ToArray();
@@ -58,34 +59,9 @@ namespace Xv2CoreLib.EMP
             return new Parser(bytes, parserMode).GetEmpFile();
         }
 
+        #endregion
 
-        public int NextTextureId()
-        {
-            bool used = false;
-            int id = 0;
-
-            restart:
-            foreach (var e in Textures)
-            {
-                if (e.EntryIndex == id)
-                {
-                    used = true;
-                    break;
-                }
-            }
-
-            if (used)
-            {
-                id++;
-                used = false;
-                goto restart;
-            }
-            else
-            {
-                return id;
-            }
-        }
-
+        #region References
         /// <summary>
         /// Parses all ParticleEffects and removes the specified Texture ID, if found.
         /// </summary>
@@ -143,7 +119,7 @@ namespace Xv2CoreLib.EMP
 
                 if (children[i].Type_Texture != null)
                 {
-                    startPoint:
+                startPoint:
                     foreach (var e in children[i].Type_Texture.TextureEntryRef)
                     {
                         if (e.TextureRef == textureRef)
@@ -158,7 +134,7 @@ namespace Xv2CoreLib.EMP
                 }
             }
         }
-        
+
         public void RefactorTextureRef(EMP_TextureDefinition oldTextureRef, EMP_TextureDefinition newTextureRef, List<IUndoRedo> undos)
         {
             if (ParticleEffects != null)
@@ -190,8 +166,9 @@ namespace Xv2CoreLib.EMP
             }
         }
 
+        #endregion
 
-
+        #region AddRemove
         /// <summary>
         /// Add a new ParticleEffect entry.
         /// </summary>
@@ -227,7 +204,7 @@ namespace Xv2CoreLib.EMP
 
                 if (ParticleEffects[i] == effectToRemove)
                 {
-                    if(undos != null)
+                    if (undos != null)
                         undos.Add(new UndoableListRemove<ParticleEffect>(ParticleEffects, effectToRemove));
 
                     ParticleEffects.Remove(effectToRemove);
@@ -266,6 +243,9 @@ namespace Xv2CoreLib.EMP
             return false;
         }
 
+        #endregion
+
+        #region Get
         public AsyncObservableCollection<ParticleEffect> GetParentList(ParticleEffect particleEffect)
         {
             foreach (var e in ParticleEffects)
@@ -316,34 +296,14 @@ namespace Xv2CoreLib.EMP
                 return null;
             }
         }
-        
-        public EMP_File Clone()
-        {
-            AsyncObservableCollection<ParticleEffect> _ParticleEffects = AsyncObservableCollection<ParticleEffect>.Create();
-            AsyncObservableCollection<EMP_TextureDefinition> _Textures = AsyncObservableCollection<EMP_TextureDefinition>.Create();
-            foreach (var e in ParticleEffects)
-            {
-                _ParticleEffects.Add(e.Clone());
-            }
-            foreach (var e in Textures)
-            {
-                _Textures.Add(e.Clone());
-            }
-
-            return new EMP_File()
-            {
-                ParticleEffects = _ParticleEffects,
-                Textures = _Textures
-            };
-        }
 
         public List<EMP_TextureDefinition> GetTextureEntriesThatUseRef(EMB_CLASS.EmbEntry textureRef)
         {
             List<EMP_TextureDefinition> textures = new List<EMP_TextureDefinition>();
 
-            foreach(var texture in Textures)
+            foreach (var texture in Textures)
             {
-                if(texture.TextureRef == textureRef)
+                if (texture.TextureRef == textureRef)
                 {
                     textures.Add(texture);
                 }
@@ -356,14 +316,14 @@ namespace Xv2CoreLib.EMP
         {
             List<TexturePart> textureParts = new List<TexturePart>();
 
-            foreach(var particleEffect in ParticleEffects)
+            foreach (var particleEffect in ParticleEffects)
             {
-                if(particleEffect.Type_Texture.MaterialRef == materialRef)
+                if (particleEffect.Type_Texture.MaterialRef == materialRef)
                 {
                     textureParts.Add(particleEffect.Type_Texture);
                 }
 
-                if(particleEffect.ChildParticleEffects != null)
+                if (particleEffect.ChildParticleEffects != null)
                 {
                     textureParts = GetTexturePartsThatUseMaterialRef_Recursive(materialRef, textureParts, particleEffect.ChildParticleEffects);
                 }
@@ -398,9 +358,9 @@ namespace Xv2CoreLib.EMP
 
             foreach (var particleEffect in ParticleEffects)
             {
-                foreach(var textureEntry in particleEffect.Type_Texture.TextureEntryRef)
+                foreach (var textureEntry in particleEffect.Type_Texture.TextureEntryRef)
                 {
-                    if(textureEntry.TextureRef == embEntryRef)
+                    if (textureEntry.TextureRef == embEntryRef)
                     {
                         textureParts.Add(particleEffect.Type_Texture);
                         break;
@@ -447,7 +407,7 @@ namespace Xv2CoreLib.EMP
         /// <returns></returns>
         public EMP_TextureDefinition GetTexture(EMP_TextureDefinition texture)
         {
-            foreach(var tex in Textures)
+            foreach (var tex in Textures)
             {
                 if (tex.Compare(texture)) return tex;
             }
@@ -455,12 +415,16 @@ namespace Xv2CoreLib.EMP
             return null;
         }
 
+        #endregion
+
+        #region Color
+
         public List<RgbColor> GetUsedColors()
         {
             List<RgbColor> colors = new List<RgbColor>();
             if (ParticleEffects == null) return colors;
 
-            foreach(var particleEffect in ParticleEffects)
+            foreach (var particleEffect in ParticleEffects)
             {
                 colors.AddRange(particleEffect.GetUsedColors());
             }
@@ -473,12 +437,12 @@ namespace Xv2CoreLib.EMP
             if (ParticleEffects == null) return;
             if (undos == null) undos = new List<IUndoRedo>();
 
-            foreach(var particleEffects in ParticleEffects)
+            foreach (var particleEffects in ParticleEffects)
             {
                 particleEffects.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
             }
         }
-    
+
         public List<IUndoRedo> RemoveColorAnimations(AsyncObservableCollection<ParticleEffect> particleEffects = null, bool root = true)
         {
             if (particleEffects == null && root) particleEffects = ParticleEffects;
@@ -515,28 +479,60 @@ namespace Xv2CoreLib.EMP
 
             return undos;
         }
-    
+
+        #endregion
+
+        public EMP_File Clone()
+        {
+            AsyncObservableCollection<ParticleEffect> _ParticleEffects = new AsyncObservableCollection<ParticleEffect>();
+            AsyncObservableCollection<EMP_TextureDefinition> _Textures = new AsyncObservableCollection<EMP_TextureDefinition>();
+            foreach (var e in ParticleEffects)
+            {
+                _ParticleEffects.Add(e.Clone());
+            }
+            foreach (var e in Textures)
+            {
+                _Textures.Add(e.Clone());
+            }
+
+            return new EMP_File()
+            {
+                ParticleEffects = _ParticleEffects,
+                Textures = _Textures
+            };
+        }
+
+        public int NextTextureId()
+        {
+            int id = 0;
+
+            while (Textures.Any(x => x.EntryIndex == id))
+                id++;
+
+            return id;
+        }
+
         //DEBUG:
         public List<ParticleEffect> GetAllParticleEffects_DEBUG()
         {
-            return GetAllParticleEffectsRecursive_DEBUG(ParticleEffects);
-        }
-
-        private List<ParticleEffect> GetAllParticleEffectsRecursive_DEBUG(IList<ParticleEffect> particleEffects)
-        {
-            List<ParticleEffect> total = new List<ParticleEffect>();
-
-            foreach (var particle in particleEffects)
+            List<ParticleEffect> GetAllParticleEffectsRecursive_DEBUG(IList<ParticleEffect> particleEffects)
             {
-                total.Add(particle);
+                List<ParticleEffect> total = new List<ParticleEffect>();
 
-                if(particle.ChildParticleEffects != null)
+                foreach (var particle in particleEffects)
                 {
-                    total.AddRange(GetAllParticleEffectsRecursive_DEBUG(particle.ChildParticleEffects));
+                    total.Add(particle);
+
+                    if (particle.ChildParticleEffects != null)
+                    {
+                        total.AddRange(GetAllParticleEffectsRecursive_DEBUG(particle.ChildParticleEffects));
+                    }
                 }
+
+                return total;
             }
 
-            return total;
+            return GetAllParticleEffectsRecursive_DEBUG(ParticleEffects);
         }
     }
 

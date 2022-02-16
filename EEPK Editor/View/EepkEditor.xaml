@@ -39,7 +39,7 @@
                         <ColumnDefinition Width="*" MinWidth="500" MaxWidth="800"/>
                     </Grid.ColumnDefinitions>
 
-                    <DataGrid x:Name="effectDataGrid" Grid.Column="1" Tag="{Binding DataContext, ElementName=rootGrid}" SelectionChanged="effectPart_SelectionChanged" VirtualizingPanel.ScrollUnit="Pixel" ItemsSource="{Binding effectContainerFile.ViewEffects}" SelectedItem="{Binding effectContainerFile.SelectedEffect, UpdateSourceTrigger=PropertyChanged}" EnableRowVirtualization="True" EnableColumnVirtualization="True" SelectionMode="Extended" RowDetailsVisibilityMode="VisibleWhenSelected" CellEditEnding="Effect_EffectIdChange_ValueChanged" CanUserResizeRows="False" CanUserAddRows="False" AutoGenerateColumns="False" CanUserDeleteRows="False">
+                    <DataGrid x:Name="effectDataGrid" Grid.Column="1" Tag="{Binding DataContext, ElementName=rootGrid}" SelectionChanged="effectPart_SelectionChanged" VirtualizingPanel.ScrollUnit="Pixel" ItemsSource="{Binding effectContainerFile.ViewEffects}" SelectedItem="{Binding effectContainerFile.SelectedEffect, UpdateSourceTrigger=PropertyChanged}" EnableRowVirtualization="True" EnableColumnVirtualization="True" SelectionMode="Extended" RowDetailsVisibilityMode="VisibleWhenSelected" CellEditEnding="Effect_EffectIdChange_ValueChanged" CanUserResizeRows="False" CanUserAddRows="False" AutoGenerateColumns="False" CanUserDeleteRows="False" RowHeaderWidth="0">
                         
                         <DataGrid.InputBindings>
                             <KeyBinding Key="Delete" Command="{Binding Effect_DeleteEffect_Command}"/>

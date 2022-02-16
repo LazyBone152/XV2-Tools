@@ -130,7 +130,7 @@ namespace Xv2CoreLib.CUS
                     I_52 = BitConverter.ToUInt16(rawBytes, offset + 52),
                     I_54 = BitConverter.ToUInt16(rawBytes, offset + 54),
                     PUP = BitConverter.ToUInt16(rawBytes, offset + 56),
-                    I_58 = BitConverter.ToInt16(rawBytes, offset + 58),
+                    CusAura = BitConverter.ToInt16(rawBytes, offset + 58),
                     CharaSwapId = BitConverter.ToUInt16(rawBytes, offset + 60),
                     I_62 = BitConverter.ToInt16(rawBytes, offset + 62),
                     NumTransformations = BitConverter.ToUInt16(rawBytes, offset + 64),

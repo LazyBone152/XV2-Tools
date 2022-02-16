@@ -36,7 +36,7 @@
         </Grid.ColumnDefinitions>
         <Grid Grid.Column="1" HorizontalAlignment="Stretch" Background="{DynamicResource MahApps.Brushes.Accent4}" Margin="0,0,0.236,0.564"/>
 
-        <DataGrid x:Name="dataGrid" Grid.Column="0" ItemsSource="{Binding AcbFile.Cues.Binding}" Drop="DataGrid_Drop" AllowDrop="True" VirtualizingPanel.ScrollUnit="Pixel" EnableRowVirtualization="True" EnableColumnVirtualization="True" SelectionMode="Extended" RowDetailsVisibilityMode="VisibleWhenSelected" Margin="10,64,6.927,10.327" CanUserResizeRows="False" CanUserAddRows="False" AutoGenerateColumns="False" CanUserDeleteRows="False">
+        <DataGrid x:Name="dataGrid" Grid.Column="0" ItemsSource="{Binding AcbFile.Cues.Binding}" Drop="DataGrid_Drop" AllowDrop="True" VirtualizingPanel.ScrollUnit="Pixel" EnableRowVirtualization="True" EnableColumnVirtualization="True" SelectionMode="Extended" RowDetailsVisibilityMode="VisibleWhenSelected" Margin="10,64,6.927,10.327" CanUserResizeRows="False" CanUserAddRows="False" AutoGenerateColumns="False" CanUserDeleteRows="False" RowHeaderWidth="0">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="SteelBlue"/>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightColorKey}" Color="SteelBlue"/>

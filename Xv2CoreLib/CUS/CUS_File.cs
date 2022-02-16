@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Xv2CoreLib.Eternity;
 using YAXLib;
 
 namespace Xv2CoreLib.CUS
@@ -26,12 +27,12 @@ namespace Xv2CoreLib.CUS
 
         public void SortEntries()
         {
-            Skillsets.Sort((x, y) => x.SortID - y.SortID);
-            SuperSkills.Sort((x, y) => x.SortID - y.SortID);
-            UltimateSkills.Sort((x, y) => x.SortID - y.SortID);
-            EvasiveSkills.Sort((x, y) => x.SortID - y.SortID);
-            BlastSkills.Sort((x, y) => x.SortID - y.SortID);
-            AwokenSkills.Sort((x, y) => x.SortID - y.SortID);
+            Skillsets?.Sort((x, y) => x.SortID - y.SortID);
+            SuperSkills?.Sort((x, y) => x.SortID - y.SortID);
+            UltimateSkills?.Sort((x, y) => x.SortID - y.SortID);
+            EvasiveSkills?.Sort((x, y) => x.SortID - y.SortID);
+            BlastSkills?.Sort((x, y) => x.SortID - y.SortID);
+            AwokenSkills?.Sort((x, y) => x.SortID - y.SortID);
         }
 
         public static CUS_File Load(byte[] bytes)
@@ -465,7 +466,7 @@ namespace Xv2CoreLib.CUS
         public ushort PUP { get; set; } //ushort
         [YAXAttributeFor("CUS_Aura")]
         [YAXSerializeAs("value")]
-        public short I_58 { get; set; }
+        public short CusAura { get; set; }
         [YAXAttributeFor("TransformCharaSwap")]
         [YAXSerializeAs("Chara_ID")]
         public ushort CharaSwapId { get; set; } //ushort
@@ -479,9 +480,22 @@ namespace Xv2CoreLib.CUS
         [YAXSerializeAs("value")]
         public ushort I_66 { get; set; }
 
+
+        #region Installer
         [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "MsgComponent")]
         public List<MSG.Msg_Component> MsgComponents { get; set; }
+
+        //Prebaked Auras:
+        //We keep track of these values as they were upon load so that the prebaked auras can be properly updated when saving.
+        //The original sequence can be reused if the CusAuras haven't changed, but if they have, then it needs to be uninstalled.
+        public short OriginalCusAura = -1;
+        public ushort OriginalNumTrans = 1;
+
+        [YAXDontSerializeIfNull]
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "CusAuraData")]
+        public List<CusAuraData> CusAuras { get; set; } = new List<CusAuraData>();
+        #endregion
     }
 
 }

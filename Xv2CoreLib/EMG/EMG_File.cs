@@ -255,7 +255,7 @@ namespace Xv2CoreLib.EMG
         [YAXSerializeAs("W")]
         public float BarycenterW { get; set; }
 
-        public List<ushort> Faces { get; set; } = new List<ushort>();
+        public short[] Faces { get; set; }
         public List<ushort> Bones { get; set; } = new List<ushort>();
 
         public static EMG_Submesh Read(byte[] bytes, int offset)
@@ -273,9 +273,11 @@ namespace Xv2CoreLib.EMG
             submesh.MaterialName = StringEx.GetString(bytes, offset + 22, false, StringEx.EncodingType.UTF8, 32);
 
             //Faces
+            submesh.Faces = new short[faceCount];
+
             for(int i = 0; i < faceCount; i++)
             {
-                submesh.Faces.Add(BitConverter.ToUInt16(bytes, offset + 54 + (i * 2)));
+                submesh.Faces[i] = BitConverter.ToInt16(bytes, offset + 54 + (i * 2));
             }
 
             //Bones
@@ -298,7 +300,7 @@ namespace Xv2CoreLib.EMG
             bytes.AddRange(BitConverter.GetBytes(BarycenterZ));
             bytes.AddRange(BitConverter.GetBytes(BarycenterW));
             bytes.AddRange(BitConverter.GetBytes(TextureListIndex));
-            bytes.AddRange(BitConverter.GetBytes((ushort)Faces.Count));
+            bytes.AddRange(BitConverter.GetBytes((ushort)Faces.Length));
             bytes.AddRange(BitConverter.GetBytes((ushort)Bones.Count));
 
             if (MaterialName.Length > 32)
@@ -315,6 +317,20 @@ namespace Xv2CoreLib.EMG
                 bytes.AddRange(BitConverter.GetBytes(bone));
 
             return bytes;
+        }
+
+
+        public int GetBoneIndex(int vertexIdx, int boneIdx)
+        {
+            foreach (var vertex in Faces)
+            {
+                if (vertex == vertexIdx)
+                {
+                    return Bones[boneIdx];
+                }
+            }
+
+            throw new InvalidDataException(String.Format("Could not get the bone idx for boneIndex: {0} on vertex: {1}", boneIdx, vertexIdx));
         }
     }
 }

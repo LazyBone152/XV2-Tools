@@ -152,7 +152,7 @@ namespace Xv2CoreLib.EAN
         {
             StartNewLine();
 
-            if (animation.FrameCount <= 0)
+            if (animation.GetFrameCount(true) <= 0)
                 throw new InvalidDataException("EAN Save: FrameCount cannot be 0 or less!");
 
             bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), offsetToReplace);
@@ -171,10 +171,12 @@ namespace Xv2CoreLib.EAN
                 }
             }
 
+            int frameCount = animation.GetFrameCount();
+
             bytes.AddRange(new byte[2]);
             bytes.Add((byte)animation.IndexSize);
             bytes.Add((byte)animation.FloatSize);
-            bytes.AddRange(BitConverter.GetBytes(animation.FrameCount));
+            bytes.AddRange(BitConverter.GetBytes(frameCount));
             bytes.AddRange(BitConverter.GetBytes(nodeCount));
             bytes.AddRange(new byte[4]);
 
@@ -224,11 +226,11 @@ namespace Xv2CoreLib.EAN
 
                             //Can happen if loaded from XML and no keyframes were declared.
                             if (animation.Nodes[i].AnimationComponents[a].Keyframes == null)
-                                animation.Nodes[i].AnimationComponents[a].Keyframes = AsyncObservableCollection<EAN_Keyframe>.Create();
+                                animation.Nodes[i].AnimationComponents[a].Keyframes = new AsyncObservableCollection<EAN_Keyframe>();
 
                             //Handle first and last keyframe
                             bool hasFirstKeyframe = animation.Nodes[i].AnimationComponents[a].Keyframes.Any(x => x.FrameIndex == 0);
-                            bool hasFinalKeyframe = animation.Nodes[i].AnimationComponents[a].Keyframes.Any(x => x.FrameIndex == animation.FrameCount - 1);
+                            bool hasFinalKeyframe = animation.Nodes[i].AnimationComponents[a].Keyframes.Any(x => x.FrameIndex == animation.GetFrameCount() - 1);
                             int KeyframeCount = animation.Nodes[i].AnimationComponents[a].Keyframes.Count;
 
                             //If no first or final keyframes were found, increment count to include them
@@ -258,9 +260,10 @@ namespace Xv2CoreLib.EAN
                             bytes.AddRange(BitConverter.GetBytes(KeyframeCount));
                             bytes.AddRange(new byte[8]);
 
+                            //Not needed now, right? Declared FrameCount is read-only and always calculated based on keyframes.
                             //Validate
-                            if(animation.Nodes[i].AnimationComponents[a].Keyframes.Any(x => x.FrameIndex > (animation.FrameCount - 1)))
-                                throw new Exception($"EAN Save: Keyframe FrameIndex must not exceed the animation duration. (Name: {animation.Name}, ID: {animation.ID_UShort}");
+                            //if(animation.Nodes[i].AnimationComponents[a].Keyframes.Any(x => x.FrameIndex > (animation.GetFrameCount() - 1)))
+                            //    throw new Exception($"EAN Save: Keyframe FrameIndex must not exceed the animation duration. (Name: {animation.Name}, ID: {animation.ID_UShort}");
 
                             //Write Keyframes
                             if (KeyframeCount > 0)
@@ -271,10 +274,10 @@ namespace Xv2CoreLib.EAN
                                 switch (animation.IndexSize)
                                 {
                                     case EAN_Animation.IntPrecision._8Bit:
-                                        WriteKeyframeIndex_Int8(animation.Nodes[i].AnimationComponents[a].Keyframes, hasFirstKeyframe, hasFinalKeyframe, animation.FrameCount - 1);
+                                        WriteKeyframeIndex_Int8(animation.Nodes[i].AnimationComponents[a].Keyframes, hasFirstKeyframe, hasFinalKeyframe, animation.GetFrameCount() - 1);
                                         break;
                                     case EAN_Animation.IntPrecision._16Bit:
-                                        WriteKeyframeIndex_Int16(animation.Nodes[i].AnimationComponents[a].Keyframes, hasFirstKeyframe, hasFinalKeyframe, animation.FrameCount - 1);
+                                        WriteKeyframeIndex_Int16(animation.Nodes[i].AnimationComponents[a].Keyframes, hasFirstKeyframe, hasFinalKeyframe, animation.GetFrameCount() - 1);
                                         break;
                                 }
 
@@ -408,10 +411,7 @@ namespace Xv2CoreLib.EAN
 
         private void StartNewLine()
         {
-            while(Convert.ToSingle(bytes.Count()) / 16 != Math.Floor(Convert.ToSingle(bytes.Count()) / 16))
-            {
-                bytes.Add(0);
-            }
+            bytes.AddRange(new byte[Utils.CalculatePadding(bytes.Count, 16)]);
         }
 
         private short GetBoneIndex(string name, string animationName)
