@@ -71,7 +71,7 @@
       <HintPath>..\packages\Microsoft.IO.RecyclableMemoryStream.1.2.2\lib\net45\Microsoft.IO.RecyclableMemoryStream.dll</HintPath>
     </Reference>
     <Reference Include="Pfim, Version=0.10.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\XenoKit\packages\Pfim.0.10.3\lib\netstandard2.0\Pfim.dll</HintPath>
+      <HintPath>..\DLLs\Pfim.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
