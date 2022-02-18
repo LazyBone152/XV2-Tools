@@ -18,7 +18,6 @@ namespace Xv2CoreLib.EEPK
         //Bad code. Should really rewrite it...
 
         private byte[] rawBytes;
-        private List<byte> bytes;
         public EEPK_File eepkFile { get; private set; } = new EEPK_File();
         private string saveLocation;
 
@@ -32,8 +31,7 @@ namespace Xv2CoreLib.EEPK
 
         public Parser(string fileLocation, bool writeXml)
         {
-            bytes = File.ReadAllBytes(fileLocation).ToList();
-            rawBytes = bytes.ToArray();
+            rawBytes = File.ReadAllBytes(fileLocation);
             totalAssetContainerEntries = BitConverter.ToUInt16(rawBytes, 12);
             totalEffects = BitConverter.ToUInt16(rawBytes, 14);
             assetSectionLocation = BitConverter.ToInt32(rawBytes, 16);
@@ -50,7 +48,6 @@ namespace Xv2CoreLib.EEPK
         public Parser(byte[] _rawBytes)
         {
             rawBytes = _rawBytes;
-            bytes = rawBytes.ToList();
             totalAssetContainerEntries = BitConverter.ToUInt16(rawBytes, 12);
             totalEffects = BitConverter.ToUInt16(rawBytes, 14);
             assetSectionLocation = BitConverter.ToInt32(rawBytes, 16);
@@ -204,7 +201,7 @@ namespace Xv2CoreLib.EEPK
                         //Get ESK string if it exists, otherwise put it as "NULL"
                         try
                         {
-                            eepkFile.Effects[i].EffectParts[a].ESK = Utils.GetString(bytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + eskOffset);
+                            eepkFile.Effects[i].EffectParts[a].ESK = StringEx.GetString(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + eskOffset);
                         }
                         catch
                         {
@@ -249,7 +246,7 @@ namespace Xv2CoreLib.EEPK
                     
                     if (fileOffset != 0)
                     {
-                        eepkFile.Assets[i].FILES[count] = Utils.GetString(bytes, fileOffset + assetSectionLocation + addedOffset);
+                        eepkFile.Assets[i].FILES[count] = StringEx.GetString(rawBytes, fileOffset + assetSectionLocation + addedOffset);
                     }
                     else if (fileOffset == 0)
                     {
@@ -299,7 +296,7 @@ namespace Xv2CoreLib.EEPK
                             
                             if (offsetsForFileString[z / 4] != 0)
                             {
-                                eepkFile.Assets[i].AssetEntries[f].FILES[z / 4] = new Asset_File() { Path = Utils.GetString(bytes, offsetsForFileString[z / 4]) };
+                                eepkFile.Assets[i].AssetEntries[f].FILES[z / 4] = new Asset_File() { Path = StringEx.GetString(rawBytes, offsetsForFileString[z / 4]) };
                             }
                             else
                             {

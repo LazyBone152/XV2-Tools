@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
-using Xv2CoreLib;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.ESK;
 
@@ -17,7 +13,6 @@ namespace Xv2CoreLib.EAN
         string saveLocation { get; set; }
         public EAN_File eanFile { private set; get; }
         byte[] rawBytes { get; set; }
-        List<byte> bytes { get; set; }
         private int boneCount = 0;
         private bool linkEsk = false;
 
@@ -25,7 +20,6 @@ namespace Xv2CoreLib.EAN
         public Parser(byte[] _rawBytes, bool linkEsk = true)
         {
             rawBytes = _rawBytes;
-            bytes = rawBytes.ToList();
             eanFile = new EAN_File();
             this.linkEsk = linkEsk;
             Parse();
@@ -35,7 +29,6 @@ namespace Xv2CoreLib.EAN
         {
             saveLocation = location;
             rawBytes = File.ReadAllBytes(saveLocation);
-            bytes = rawBytes.ToList();
             eanFile = new EAN_File();
             this.linkEsk = linkEsk;
             Parse();
@@ -63,7 +56,7 @@ namespace Xv2CoreLib.EAN
             eanFile.Skeleton = ESK_Skeleton.Read(rawBytes, SkeletonOffset, false);
 
             //Animations
-            eanFile.Animations = AsyncObservableCollection<EAN_Animation>.Create();
+            eanFile.Animations = new AsyncObservableCollection<EAN_Animation>();
             if (AnimationCount > 0)
             {
                 for(int i = 0; i < AnimationCount; i++)
@@ -134,7 +127,7 @@ namespace Xv2CoreLib.EAN
                 }
             }
 
-            animation.Name = Utils.GetString(bytes, nameOffset);
+            animation.Name = StringEx.GetString(rawBytes, nameOffset);
             animation.IndexNumeric = animIndex;
 
             return animation;

@@ -1,20 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace Xv2CoreLib.IDB
 {
     public class Parser
     {
-        private List<int> UsedValues = new List<int>();
-
         string saveLocation;
         byte[] rawBytes;
-        List<byte> bytes;
         IDB_File idbFile = new IDB_File();
 
 
@@ -22,7 +16,6 @@ namespace Xv2CoreLib.IDB
         {
             saveLocation = location;
             rawBytes = File.ReadAllBytes(location);
-            bytes = rawBytes.ToList();
             Parse();
             if (_writeXml)
             {
@@ -34,8 +27,7 @@ namespace Xv2CoreLib.IDB
         public Parser(byte[] _bytes)
         {
             rawBytes = _bytes;
-            bytes = rawBytes.ToList();
-            if (bytes != null)
+            if (rawBytes != null)
             {
                 Parse();
             }
@@ -61,9 +53,6 @@ namespace Xv2CoreLib.IDB
 
                 for(int i = 0; i < count; i++)
                 {
-                    //if(!UsedValues.Contains(BitConverter.ToUInt16(rawBytes, offset + 38)))
-                    //    UsedValues.Add(BitConverter.ToUInt16(rawBytes, offset + 38));
-
                     idbFile.Entries.Add(new IDB_Entry()
                     {
                         ID = BitConverter.ToUInt16(rawBytes, offset + 0),
@@ -91,12 +80,6 @@ namespace Xv2CoreLib.IDB
                     offset += 720;
                 }
             }
-
-            //foreach(int i in UsedValues)
-            //{
-            //    Console.WriteLine(i.ToString());
-            //}
-            //Console.Read();
         }
 
         private List<IBD_Effect> ParseEffect(int offset)

@@ -33,7 +33,7 @@ namespace Xv2CoreLib.ECF
             return new Parser(path, false).GetEcfFile();
         }
         
-        public static ECF_File Load(List<byte> bytes)
+        public static ECF_File Load(byte[] bytes)
         {
             return new Parser(bytes).GetEcfFile();
         }

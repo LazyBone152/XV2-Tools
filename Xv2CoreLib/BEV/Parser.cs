@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace Xv2CoreLib.BEV
@@ -12,7 +9,6 @@ namespace Xv2CoreLib.BEV
     {
         public List<int> UsedValues = new List<int>();
         string saveLocation;
-        List<byte> bytes;
         byte[] rawBytes;
         public BEV_File bevFile { get; private set; } = new BEV_File();
         
@@ -20,7 +16,6 @@ namespace Xv2CoreLib.BEV
         {
             saveLocation = location;
             rawBytes = File.ReadAllBytes(location);
-            bytes = rawBytes.ToList();
             bevFile.Entries = new List<Entry>();
             Parse();
             if (writeXml)
@@ -32,13 +27,13 @@ namespace Xv2CoreLib.BEV
         public Parser(byte[] _bytes)
         {
             rawBytes = _bytes;
-            bytes = rawBytes.ToList();
             bevFile.Entries = new List<Entry>();
             Parse();
         }
 
 
-        void Parse() {
+        void Parse() 
+        {
             int entryCount = BitConverter.ToInt32(rawBytes, 8);
             int entryOffset = BitConverter.ToInt32(rawBytes, 12);
 

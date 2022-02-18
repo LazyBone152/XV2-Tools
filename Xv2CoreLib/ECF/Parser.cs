@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xv2CoreLib.Resource;
 using YAXLib;
 using static Xv2CoreLib.ECF.ECF_Entry;
@@ -15,7 +11,6 @@ namespace Xv2CoreLib.ECF
     {
         string saveLocation;
         byte[] rawBytes;
-        List<byte> bytes;
         ECF_File ecfFile = new ECF_File();
 
         //info
@@ -26,7 +21,6 @@ namespace Xv2CoreLib.ECF
         {
             saveLocation = location;
             rawBytes = File.ReadAllBytes(location);
-            bytes = rawBytes.ToList();
             totalMainEntries = BitConverter.ToInt16(rawBytes, 26);
             mainEntryOffset = BitConverter.ToInt32(rawBytes, 28);
             Parse();
@@ -37,11 +31,9 @@ namespace Xv2CoreLib.ECF
             }
         }
 
-
-        public Parser(List<byte> _bytes)
+        public Parser(byte[] _bytes)
         {
-            bytes = _bytes;
-            rawBytes = bytes.ToArray();
+            rawBytes = _bytes;
             totalMainEntries = BitConverter.ToInt16(rawBytes, 26);
             mainEntryOffset = BitConverter.ToInt32(rawBytes, 28);
             Parse();
@@ -55,8 +47,6 @@ namespace Xv2CoreLib.ECF
         private void Parse()
         {
             ecfFile.I_12 = BitConverter.ToUInt16(rawBytes, 12);
-
-            
 
             if (totalMainEntries > 0)
             {
@@ -128,7 +118,7 @@ namespace Xv2CoreLib.ECF
 
                     if (Str_Offset != 0)
                     {
-                        ecfFile.Entries[i].Unk_Str = Utils.GetString(bytes, Str_Offset);
+                        ecfFile.Entries[i].Unk_Str = StringEx.GetString(rawBytes, Str_Offset);
                     }
                     else
                     {

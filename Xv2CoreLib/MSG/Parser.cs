@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Net;
 using System.Collections.Generic;
-using System.Linq;
 using YAXLib;
 using System.IO;
 
@@ -10,11 +8,12 @@ namespace Xv2CoreLib.MSG
     public class Parser
     {
         string saveLocation;
-        List<byte> bytes;
         byte[] rawBytes;
         public MSG_File msg_File { get; private set; } = new MSG_File();
         bool unicode_names = false;
         bool unicode_msg = false;
+        StringEx.EncodingType encodingType = StringEx.EncodingType.ASCII;
+        StringEx.EncodingType encodingTypeName = StringEx.EncodingType.ASCII;
 
         //State
         bool writeXml = false;
@@ -24,7 +23,6 @@ namespace Xv2CoreLib.MSG
             writeXml = _writeXml;
             saveLocation = location;
             rawBytes = File.ReadAllBytes(location);
-            bytes = rawBytes.ToList();
             UnicodeCheck();
             Parse();
             if (writeXml == true)
@@ -36,8 +34,7 @@ namespace Xv2CoreLib.MSG
         public Parser(byte[] _bytes)
         {
             rawBytes = _bytes;
-            bytes = rawBytes.ToList();
-            if (bytes != null)
+            if (rawBytes != null)
             {
                 UnicodeCheck();
                 Parse();
@@ -62,11 +59,13 @@ namespace Xv2CoreLib.MSG
             {
                 unicode_names = true;
                 msg_File.unicode_names = true;
+                encodingTypeName = StringEx.EncodingType.Unicode;
             }
             if (msg == 1)
             {
                 unicode_msg = true;
                 msg_File.unicode_msg = true;
+                encodingType = StringEx.EncodingType.Unicode;
             }
         }
 
@@ -99,7 +98,7 @@ namespace Xv2CoreLib.MSG
                 int nameStringOffset = BitConverter.ToInt32(rawBytes, nameSectionOffset);
 
                 msg_File.MSG_Entries[i].DebugIndex = i;
-                msg_File.MSG_Entries[i].Name = Utils.GetString(bytes, nameStringOffset, sizeNames, unicode_names);
+                msg_File.MSG_Entries[i].Name = StringEx.GetString(rawBytes, nameStringOffset, false, encodingTypeName, sizeNames);
                 msg_File.MSG_Entries[i].I_12 = BitConverter.ToInt32(rawBytes, nameSectionOffset + 12);
                 nameSectionOffset += 16;
 
@@ -130,7 +129,7 @@ namespace Xv2CoreLib.MSG
 
                     msg_File.MSG_Entries[i].Msg_Content.Add(new Msg_Line()
                     {
-                        Text = Utils.GetString(bytes, offsetToString, sizeMsg, unicode_msg),
+                        Text = StringEx.GetString(rawBytes, offsetToString, false, encodingType, sizeMsg),
                         I_12 = BitConverter.ToInt32(rawBytes, offsetToStringSection + 12)
                     });
 

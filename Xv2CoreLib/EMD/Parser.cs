@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
-using static Xv2CoreLib.EMD.EMD_TextureSamplerDef;
 
 namespace Xv2CoreLib.EMD
 {
@@ -15,13 +11,11 @@ namespace Xv2CoreLib.EMD
         const int EMD_SIGNATURE = 1145914659;
 
         private byte[] rawBytes;
-        private List<byte> bytes;
         public EMD_File emdFile { get; private set; }
 
         public Parser(string path, bool writeXml)
         {
             rawBytes = File.ReadAllBytes(path);
-            bytes = rawBytes.ToList();
 
             if (BitConverter.ToInt32(rawBytes, 0) != EMD_SIGNATURE) throw new InvalidDataException("EMD_SIGNATURE not found at offset 0x0. Parse failed.");
 
@@ -37,7 +31,6 @@ namespace Xv2CoreLib.EMD
         public Parser(byte[] _rawBytes)
         {
             rawBytes = _rawBytes;
-            bytes = rawBytes.ToList();
 
             if (BitConverter.ToInt32(rawBytes, 0) != EMD_SIGNATURE) throw new InvalidDataException("EMD_SIGNATURE not found at offset 0x0. Parse failed.");
 
@@ -68,7 +61,7 @@ namespace Xv2CoreLib.EMD
                     //Name
                     if (modelNameOffset != 0)
                     {
-                        model.Name = Utils.GetString(bytes, modelNameOffset);
+                        model.Name = StringEx.GetString(rawBytes, modelNameOffset);
                     }
                     else
                     {
@@ -90,7 +83,7 @@ namespace Xv2CoreLib.EMD
 
                         if (BitConverter.ToInt32(rawBytes, meshOffset + 48) != 0) //Checking if name offset is null
                         {
-                            mesh.Name = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, meshOffset + 48) + meshOffset);
+                            mesh.Name = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, meshOffset + 48) + meshOffset);
                         }
                         else
                         {
@@ -118,7 +111,7 @@ namespace Xv2CoreLib.EMD
                             //Name
                             if (BitConverter.ToInt32(rawBytes, submeshOffset + 64) != 0)
                             {
-                                submesh.Name = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, submeshOffset + 64) + submeshOffset);
+                                submesh.Name = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, submeshOffset + 64) + submeshOffset);
                             }
                             else
                             {
@@ -155,7 +148,7 @@ namespace Xv2CoreLib.EMD
                                 for (int h = 0; h < faceNameCount; h++)
                                 {
                                     int faceNameOffset = BitConverter.ToInt32(rawBytes, faceNameTableOffset) + triangleOffset;
-                                    triangle.Bones.Add(Utils.GetString(bytes, faceNameOffset));
+                                    triangle.Bones.Add(StringEx.GetString(rawBytes, faceNameOffset));
                                     faceNameTableOffset += 4;
                                 }
 

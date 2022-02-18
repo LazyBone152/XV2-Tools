@@ -62,8 +62,7 @@ namespace Xv2CoreLib.TDB
         public static TDB_File Parse(string path, bool writeXml)
         {
             byte[] rawBytes = File.ReadAllBytes(path);
-            List<byte> bytes = rawBytes.ToList();
-            var file = Parse(rawBytes, bytes, GetTdbFileType(path));
+            var file = Parse(rawBytes, GetTdbFileType(path));
 
             if (writeXml)
             {
@@ -74,7 +73,7 @@ namespace Xv2CoreLib.TDB
             return file;
         }
 
-        public static TDB_File Parse(byte[] rawBytes, List<byte> bytes, TdbType tdbType)
+        public static TDB_File Parse(byte[] rawBytes, TdbType tdbType)
         {
             int count1 = BitConverter.ToInt32(rawBytes, 8);
             int offset1 = BitConverter.ToInt32(rawBytes, 12);
@@ -88,27 +87,27 @@ namespace Xv2CoreLib.TDB
             switch (tdbType)
             {
                 case TdbType.TtlEnemyDataList:
-                    tdbFile.EnemyFigures = TtlEnemyDataList1.ReadAll(rawBytes, bytes, offset1, count1);
-                    tdbFile.EnemySets = TtlEnemyDataList2.ReadAll(rawBytes, bytes, offset2, count2);
+                    tdbFile.EnemyFigures = TtlEnemyDataList1.ReadAll(rawBytes, offset1, count1);
+                    tdbFile.EnemySets = TtlEnemyDataList2.ReadAll(rawBytes, offset2, count2);
                     break;
                 case TdbType.TtlMasterLevelTable:
-                    tdbFile.MasterLevels = TtlMasterLevelTable.ReadAll(rawBytes, bytes, offset1, count1);
+                    tdbFile.MasterLevels = TtlMasterLevelTable.ReadAll(rawBytes, offset1, count1);
                     break;
                 case TdbType.TTLItemList:
                     bool oldVersion = ((offset2 - 32) / count1 == 44) ? true : false;
-                    tdbFile.Items = TtlItemList.ReadAll(rawBytes, bytes, offset1, count1, oldVersion);
-                    tdbFile.Skills = TtlItemList.ReadAll(rawBytes, bytes, offset2, count2, oldVersion);
+                    tdbFile.Items = TtlItemList.ReadAll(rawBytes, offset1, count1, oldVersion);
+                    tdbFile.Skills = TtlItemList.ReadAll(rawBytes, offset2, count2, oldVersion);
                     break;
                 case TdbType.TtlFigureDataList:
-                    tdbFile.Figures = TtlFigureDataList1.ReadAll(rawBytes, bytes, offset1, count1);
-                    tdbFile.LevelingXpRequirements = TtlFigureDataList2.ReadAll(rawBytes, bytes, offset2, count2);
+                    tdbFile.Figures = TtlFigureDataList1.ReadAll(rawBytes, offset1, count1);
+                    tdbFile.LevelingXpRequirements = TtlFigureDataList2.ReadAll(rawBytes, offset2, count2);
                     break;
                 case TdbType.TtlFigurePoseList:
-                    tdbFile.FigurePoseList = TtlFigurePoseList.ReadAll(rawBytes, bytes, offset1, count1);
+                    tdbFile.FigurePoseList = TtlFigurePoseList.ReadAll(rawBytes, offset1, count1);
                     break;
                 case TdbType.TTL_skill_list:
-                    tdbFile.PosingSkills = TTL_skill_list.ReadAll(rawBytes, bytes, offset1, count1);
-                    tdbFile.CharacterSkills = TTL_skill_list.ReadAll(rawBytes, bytes, offset2, count2);
+                    tdbFile.PosingSkills = TTL_skill_list.ReadAll(rawBytes, offset1, count1);
+                    tdbFile.CharacterSkills = TTL_skill_list.ReadAll(rawBytes, offset2, count2);
                     break;
             }
 
@@ -332,20 +331,20 @@ namespace Xv2CoreLib.TDB
         [YAXSerializeAs("ID")]
         public int I_20 { get; set; }
 
-        public static List<TtlEnemyDataList1> ReadAll(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<TtlEnemyDataList1> ReadAll(byte[] rawBytes, int offset, int count)
         {
             List<TtlEnemyDataList1> enemyData = new List<TtlEnemyDataList1>();
 
             for(int i = 0; i < count; i++)
             {
-                enemyData.Add(Read(rawBytes, bytes, offset));
+                enemyData.Add(Read(rawBytes, offset));
                 offset += 24;
             }
 
             return enemyData;
         }
 
-        public static TtlEnemyDataList1 Read(byte[] rawBytes, List<byte> bytes, int offset)
+        public static TtlEnemyDataList1 Read(byte[] rawBytes, int offset)
         {
             return new TtlEnemyDataList1()
             {
@@ -437,20 +436,20 @@ namespace Xv2CoreLib.TDB
         [YAXSerializeAs("value")]
         public int I_60 { get; set; }
 
-        public static List<TtlEnemyDataList2> ReadAll(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<TtlEnemyDataList2> ReadAll(byte[] rawBytes, int offset, int count)
         {
             List<TtlEnemyDataList2> enemyData = new List<TtlEnemyDataList2>();
 
             for (int i = 0; i < count; i++)
             {
-                enemyData.Add(Read(rawBytes, bytes, offset));
+                enemyData.Add(Read(rawBytes, offset));
                 offset += 64;
             }
 
             return enemyData;
         }
 
-        public static TtlEnemyDataList2 Read(byte[] rawBytes, List<byte> bytes, int offset)
+        public static TtlEnemyDataList2 Read(byte[] rawBytes, int offset)
         {
             return new TtlEnemyDataList2()
             {
@@ -538,20 +537,20 @@ namespace Xv2CoreLib.TDB
         [YAXSerializeAs("value")]
         public int I_16 { get; set; }
 
-        public static List<TtlMasterLevelTable> ReadAll(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<TtlMasterLevelTable> ReadAll(byte[] rawBytes, int offset, int count)
         {
             List<TtlMasterLevelTable> masterTable = new List<TtlMasterLevelTable>();
 
             for (int i = 0; i < count; i++)
             {
-                masterTable.Add(Read(rawBytes, bytes, offset));
+                masterTable.Add(Read(rawBytes, offset));
                 offset += 20;
             }
 
             return masterTable;
         }
 
-        public static TtlMasterLevelTable Read(byte[] rawBytes, List<byte> bytes, int offset)
+        public static TtlMasterLevelTable Read(byte[] rawBytes, int offset)
         {
             return new TtlMasterLevelTable()
             {
@@ -644,20 +643,20 @@ namespace Xv2CoreLib.TDB
         [YAXSerializeAs("value")]
         public ushort I_46 { get; set; } //ushort
 
-        public static List<TtlItemList> ReadAll(byte[] rawBytes, List<byte> bytes, int offset, int count, bool oldVersion)
+        public static List<TtlItemList> ReadAll(byte[] rawBytes, int offset, int count, bool oldVersion)
         {
             List<TtlItemList> items = new List<TtlItemList>();
 
             for (int i = 0; i < count; i++)
             {
-                items.Add(Read(rawBytes, bytes, offset, oldVersion));
+                items.Add(Read(rawBytes, offset, oldVersion));
                 offset += (oldVersion) ? 44 : 48;
             }
 
             return items;
         }
 
-        public static TtlItemList Read(byte[] rawBytes, List<byte> bytes, int offset, bool oldVersion)
+        public static TtlItemList Read(byte[] rawBytes, int offset, bool oldVersion)
         {
             int _I_44 = (oldVersion) ? 0 : BitConverter.ToUInt16(rawBytes, offset + 44);
             int _I_46 = (oldVersion) ? 0 : BitConverter.ToUInt16(rawBytes, offset + 46);
@@ -672,7 +671,7 @@ namespace Xv2CoreLib.TDB
                 I_10 = BitConverter.ToUInt16(rawBytes, offset + 10),
                 I_12 = BitConverter.ToUInt16(rawBytes, offset + 12),
                 I_14 = BitConverter.ToUInt16(rawBytes, offset + 14),
-                Str_16 = Utils.GetString(bytes, offset + 16, 16),
+                Str_16 = StringEx.GetString(rawBytes, offset + 16, maxSize: 16),
                 I_32 = BitConverter.ToInt32(rawBytes, offset + 32),
                 I_36 = BitConverter.ToUInt16(rawBytes, offset + 36),
                 I_38 = BitConverter.ToUInt16(rawBytes, offset + 38),
@@ -835,20 +834,20 @@ namespace Xv2CoreLib.TDB
         [YAXSerializeAs("Amount")]
         public ushort I_74 { get; set; }
 
-        public static List<TtlFigureDataList1> ReadAll(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<TtlFigureDataList1> ReadAll(byte[] rawBytes, int offset, int count)
         {
             List<TtlFigureDataList1> enemyData = new List<TtlFigureDataList1>();
 
             for (int i = 0; i < count; i++)
             {
-                enemyData.Add(Read(rawBytes, bytes, offset));
+                enemyData.Add(Read(rawBytes, offset));
                 offset += 76;
             }
 
             return enemyData;
         }
 
-        public static TtlFigureDataList1 Read(byte[] rawBytes, List<byte> bytes, int offset)
+        public static TtlFigureDataList1 Read(byte[] rawBytes, int offset)
         {
             return new TtlFigureDataList1()
             {
@@ -970,20 +969,20 @@ namespace Xv2CoreLib.TDB
         [YAXSerializeAs("UR")]
         public int I_12 { get; set; }
 
-        public static List<TtlFigureDataList2> ReadAll(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<TtlFigureDataList2> ReadAll(byte[] rawBytes, int offset, int count)
         {
             List<TtlFigureDataList2> masterTable = new List<TtlFigureDataList2>();
 
             for (int i = 0; i < count; i++)
             {
-                masterTable.Add(Read(rawBytes, bytes, offset, i));
+                masterTable.Add(Read(rawBytes, offset, i));
                 offset += 20;
             }
 
             return masterTable;
         }
 
-        public static TtlFigureDataList2 Read(byte[] rawBytes, List<byte> bytes, int offset, int index)
+        public static TtlFigureDataList2 Read(byte[] rawBytes, int offset, int index)
         {
             return new TtlFigureDataList2()
             {
@@ -1092,27 +1091,27 @@ namespace Xv2CoreLib.TDB
         [YAXSerializeAs("ID2")]
         public ushort I_54 { get; set; }
 
-        public static List<TtlFigurePoseList> ReadAll(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<TtlFigurePoseList> ReadAll(byte[] rawBytes, int offset, int count)
         {
             List<TtlFigurePoseList> masterTable = new List<TtlFigurePoseList>();
 
             for (int i = 0; i < count; i++)
             {
-                masterTable.Add(Read(rawBytes, bytes, offset));
+                masterTable.Add(Read(rawBytes, offset));
                 offset += 56;
             }
 
             return masterTable;
         }
 
-        public static TtlFigurePoseList Read(byte[] rawBytes, List<byte> bytes, int offset)
+        public static TtlFigurePoseList Read(byte[] rawBytes, int offset)
         {
             return new TtlFigurePoseList()
             {
                 I_00 = BitConverter.ToInt32(rawBytes, offset + 0),
                 I_04 = BitConverter.ToInt32(rawBytes, offset + 4),
                 I_08 = BitConverter.ToInt32(rawBytes, offset + 8),
-                Str_12 = Utils.GetString(bytes, offset + 12, 4),
+                Str_12 = StringEx.GetString(rawBytes, offset + 12, maxSize: 4),
                 I_16 = BitConverter.ToInt32(rawBytes, offset + 16),
                 I_20 = rawBytes[offset + 20],
                 I_21 = rawBytes[offset + 21],
@@ -1305,20 +1304,20 @@ namespace Xv2CoreLib.TDB
         [YAXSerializeAs("value")]
         public int I_152 { get; set; }
 
-        public static List<TTL_skill_list> ReadAll(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<TTL_skill_list> ReadAll(byte[] rawBytes, int offset, int count)
         {
             List<TTL_skill_list> enemyData = new List<TTL_skill_list>();
 
             for (int i = 0; i < count; i++)
             {
-                enemyData.Add(Read(rawBytes, bytes, offset));
+                enemyData.Add(Read(rawBytes, offset));
                 offset += 156;
             }
 
             return enemyData;
         }
 
-        public static TTL_skill_list Read(byte[] rawBytes, List<byte> bytes, int offset)
+        public static TTL_skill_list Read(byte[] rawBytes, int offset)
         {
             return new TTL_skill_list()
             {

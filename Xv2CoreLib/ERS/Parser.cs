@@ -2,17 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace Xv2CoreLib.ERS
 {
     public class Parser
     {
-
         string saveLocation;
-        List<byte> bytes;
         byte[] rawBytes;
         public ERS_File ersFile { get; private set; } = new ERS_File();
 
@@ -20,7 +16,6 @@ namespace Xv2CoreLib.ERS
         {
             saveLocation = location;
             rawBytes = File.ReadAllBytes(location);
-            bytes = rawBytes.ToList();
             ersFile.Entries = new List<ERS_MainTable>();
             ParseMainTable();
             if (writeXml)
@@ -32,7 +27,6 @@ namespace Xv2CoreLib.ERS
         public Parser(byte[] _bytes)
         {
             rawBytes = _bytes;
-            bytes = rawBytes.ToList();
             ersFile.Entries = new List<ERS_MainTable>();
             ParseMainTable();
         }
@@ -42,7 +36,7 @@ namespace Xv2CoreLib.ERS
             List<int> mainTableOffsets = new List<int>(); // "mainTable" lists are in sync 
             int totalEntries = BitConverter.ToInt32(rawBytes, 12);
 
-            for (int i = 0; i < totalEntries * 4; i+=4)
+            for (int i = 0; i < totalEntries * 4; i += 4)
             {
                 if (BitConverter.ToInt32(rawBytes, 24 + i) != 0)
                 {
@@ -52,7 +46,7 @@ namespace Xv2CoreLib.ERS
             
             mainTableOffsets.Sort();
 
-            for (int i = 0; i < mainTableOffsets.Count(); i++)
+            for (int i = 0; i < mainTableOffsets.Count; i++)
             {
                 //iterating over Main Tables
                 ersFile.Entries.Add(new ERS_MainTable() { SubEntries = new List<ERS_MainTableEntry>() });
@@ -73,8 +67,8 @@ namespace Xv2CoreLib.ERS
                         ersFile.Entries[i].SubEntries.Add(new ERS_MainTableEntry()
                         {
                             Index = BitConverter.ToInt32(rawBytes, currentOffset).ToString(),
-                            Str_04 = Utils.GetString(bytes, currentOffset + 4, 8),
-                            FILE_PATH = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, currentOffset + 12) + currentOffset)
+                            Str_04 = StringEx.GetString(rawBytes, currentOffset + 4, false,  maxSize: 8),
+                            FILE_PATH = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, currentOffset + 12) + currentOffset)
                         });
 
                         if(a == numberOfEntries - 1)

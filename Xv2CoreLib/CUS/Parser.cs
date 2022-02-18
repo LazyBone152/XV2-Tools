@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
 using YAXLib;
 
@@ -10,7 +9,6 @@ namespace Xv2CoreLib.CUS
     {
         string saveLocation;
         byte[] rawBytes;
-        List<byte> bytes;
         CUS_File cusFile = new CUS_File();
         
 
@@ -18,7 +16,6 @@ namespace Xv2CoreLib.CUS
         {
             saveLocation = location;
             rawBytes = File.ReadAllBytes(location);
-            bytes = rawBytes.ToList();
             Parse();
             if (_writeXml)
             {
@@ -30,8 +27,7 @@ namespace Xv2CoreLib.CUS
         public Parser(byte[] _bytes)
         {
             rawBytes = _bytes;
-            bytes = rawBytes.ToList();
-            if(bytes != null)
+            if(rawBytes != null)
             {
                 Parse();
             }
@@ -41,11 +37,13 @@ namespace Xv2CoreLib.CUS
             }
         }
 
-        public CUS_File GetCusFile() {
+        public CUS_File GetCusFile() 
+        {
             return cusFile;
         }
         
-        void Parse() {
+        void Parse() 
+        {
             //counts
             int skillsetCount = BitConverter.ToInt32(rawBytes, 8);
             int superCount = BitConverter.ToInt32(rawBytes, 16);
@@ -103,13 +101,15 @@ namespace Xv2CoreLib.CUS
             };
         }
 
-        private List<Skill> GetSkillEntries(int count, int offset) {
+        private List<Skill> GetSkillEntries(int count, int offset) 
+        {
             var skillEntries = new List<Skill>();
+
             for (int i = 0; i < count; i++)
             {
                 skillEntries.Add(new Skill()
                 {
-                    ShortName = Utils.GetString(rawBytes.ToList(), offset),
+                    ShortName = StringEx.GetString(rawBytes, offset, false, StringEx.EncodingType.ASCII, 4),
                     I_04 = BitConverter.ToInt32(rawBytes, offset + 4),
                     ID1 = BitConverter.ToUInt16(rawBytes, offset + 8),
                     ID2 = BitConverter.ToUInt16(rawBytes, offset + 10),
@@ -118,13 +118,13 @@ namespace Xv2CoreLib.CUS
                     FilesLoadedFlags1 = (Skill.FilesLoadedFlags)BitConverter.ToUInt16(rawBytes, offset + 14),
                     I_16 = BitConverter.ToInt16(rawBytes, offset + 16),
                     I_18 = BitConverter.ToUInt16(rawBytes, offset + 18),
-                    EanPath = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 20)),
-                    CamEanPath = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 24)),
-                    EepkPath = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 28)),
-                    SePath = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 32)),
-                    VoxPath = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 36)),
-                    AfterBacPath = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 40)),
-                    AfterBcmPath = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 44)),
+                    EanPath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 20), false),
+                    CamEanPath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 24), false),
+                    EepkPath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 28), false),
+                    SePath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 32), false),
+                    VoxPath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 36), false),
+                    AfterBacPath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 40), false),
+                    AfterBcmPath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 44), false),
                     I_48 = BitConverter.ToUInt16(rawBytes, offset + 48),
                     I_50 = BitConverter.ToUInt16(rawBytes, offset + 50),
                     I_52 = BitConverter.ToUInt16(rawBytes, offset + 52),
@@ -136,6 +136,7 @@ namespace Xv2CoreLib.CUS
                     NumTransformations = BitConverter.ToUInt16(rawBytes, offset + 64),
                     I_66 = BitConverter.ToUInt16(rawBytes, offset + 66)
                 });
+
                 offset += 68;
             }
 

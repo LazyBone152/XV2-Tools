@@ -9,7 +9,6 @@ namespace Xv2CoreLib.QSF
     public class Parser
     {
         string saveLocation;
-        List<byte> bytes;
         byte[] rawBytes;
         QSF_File qsf_File = new QSF_File();
 
@@ -21,7 +20,6 @@ namespace Xv2CoreLib.QSF
             writeXml = _writeXml;
             saveLocation = location;
             rawBytes = File.ReadAllBytes(location);
-            bytes = rawBytes.ToList();
             Parse();
             if (writeXml == true)
             {
@@ -32,7 +30,6 @@ namespace Xv2CoreLib.QSF
         public Parser(byte[] _bytes)
         {
             rawBytes = _bytes;
-            bytes = rawBytes.ToList();
             Parse();
         }
 
@@ -41,23 +38,27 @@ namespace Xv2CoreLib.QSF
             return qsf_File;
         }
 
-        void Parse() {
+        void Parse() 
+        {
             int tableCount = BitConverter.ToInt32(rawBytes, 8);
 
             qsf_File.I_12 = BitConverter.ToInt32(rawBytes, 12);
             qsf_File.Tables = new List<TableSection>();
 
             int offset = 16;
-            for (int i = 0; i < tableCount; i++) {
+            for (int i = 0; i < tableCount; i++) 
+            {
                 qsf_File.Tables.Add(new TableSection());
-                qsf_File.Tables[i].Type = Utils.GetString(rawBytes.ToList(), BitConverter.ToInt32(rawBytes, offset) + offset);
+                qsf_File.Tables[i].Type = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset) + offset);
                 qsf_File.Tables[i].I_12 = BitConverter.ToInt32(rawBytes, offset + 12);
                 int DataCount = BitConverter.ToInt32(rawBytes, offset + 4);
                 int DataOffset = BitConverter.ToInt32(rawBytes, offset + 8) + offset + 8;
 
-                if (DataCount > 0) {
+                if (DataCount > 0) 
+                {
                     qsf_File.Tables[i].TableEntry = new List<DataSection>();
-                    for (int a = 0; a < DataCount; a++) {
+                    for (int a = 0; a < DataCount; a++) 
+                    {
                         qsf_File.Tables[i].TableEntry.Add(new DataSection());
                         int EntryCount = BitConverter.ToInt32(rawBytes, DataOffset + 0);
                         int EntryOffset = BitConverter.ToInt32(rawBytes, DataOffset + 4) + DataOffset + 4;
@@ -70,7 +71,7 @@ namespace Xv2CoreLib.QSF
                             {
                                 qsf_File.Tables[i].TableEntry[a].TableSubEntry.Add(new QuestEntry());
                                 qsf_File.Tables[i].TableEntry[a].TableSubEntry[e].Alias_ID = e + 1;
-                                qsf_File.Tables[i].TableEntry[a].TableSubEntry[e].QuestID = Utils.GetString(rawBytes.ToList(), BitConverter.ToInt32(rawBytes, EntryOffset) + EntryOffset);
+                                qsf_File.Tables[i].TableEntry[a].TableSubEntry[e].QuestID = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, EntryOffset) + EntryOffset);
                                 Console.WriteLine(qsf_File.Tables[i].TableEntry[a].TableSubEntry[e].QuestID);
                                 EntryOffset += 4;
                             }

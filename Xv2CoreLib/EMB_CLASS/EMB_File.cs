@@ -42,7 +42,7 @@ namespace Xv2CoreLib.EMB_CLASS
         public InstallMode installMode { get; set; } = InstallMode.MatchName;
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "EmbEntry")]
-        public AsyncObservableCollection<EmbEntry> Entry { get; set; } = AsyncObservableCollection<EmbEntry>.Create();
+        public AsyncObservableCollection<EmbEntry> Entry { get; set; } = new AsyncObservableCollection<EmbEntry>();
 
         public byte[] SaveToBytes()
         {

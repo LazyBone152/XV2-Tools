@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace Xv2CoreLib.BAS
@@ -41,41 +39,35 @@ namespace Xv2CoreLib.BAS
         {
             List<int> EntryOffsets = new List<int>();
 
-            int count = (basFile.Entries != null) ? basFile.Entries.Count() : 0;
+            int count = (basFile.Entries != null) ? basFile.Entries.Count : 0;
             bytes.AddRange(BitConverter.GetBytes(count));
             bytes.AddRange(BitConverter.GetBytes(16));
 
             if(basFile.Entries != null)
             {
-                for(int i = 0; i < basFile.Entries.Count(); i++)
+                for(int i = 0; i < basFile.Entries.Count; i++)
                 {
-                    int subEntryCount = (basFile.Entries[i].SubEntries != null) ? basFile.Entries[i].SubEntries.Count() : 0;
+                    int subEntryCount = (basFile.Entries[i].SubEntries != null) ? basFile.Entries[i].SubEntries.Count : 0;
                     bytes.AddRange(BitConverter.GetBytes(basFile.Entries[i].I_00));
                     bytes.AddRange(BitConverter.GetBytes(subEntryCount));
                     EntryOffsets.Add(bytes.Count());
                     bytes.AddRange(new byte[4]);
                 }
 
-                for (int i = 0; i < basFile.Entries.Count(); i++)
+                for (int i = 0; i < basFile.Entries.Count; i++)
                 {
                     if(basFile.Entries[i].SubEntries != null)
                     {
-                        bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), EntryOffsets[i]);
+                        bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), EntryOffsets[i]);
 
-                        for(int a = 0; a < basFile.Entries[i].SubEntries.Count(); a++)
+                        for(int a = 0; a < basFile.Entries[i].SubEntries.Count; a++)
                         {
                             //Name Str
-                            if(basFile.Entries[i].SubEntries[a].Name.Count() > 8)
+                            if(basFile.Entries[i].SubEntries[a].Name.Length > 8)
                             {
-                                Console.WriteLine(String.Format("The name \"{0}\" exceeds the maximum length of 8!", basFile.Entries[i].SubEntries[a].Name));
-                                Utils.WaitForInputThenQuit();
+                                throw new InvalidDataException(String.Format("BAS: The name \"{0}\" exceeds the maximum length of 8!", basFile.Entries[i].SubEntries[a].Name));
                             }
-                            bytes.AddRange(Encoding.ASCII.GetBytes(basFile.Entries[i].SubEntries[a].Name));
-                            int remainingSpace = 8 - basFile.Entries[i].SubEntries[a].Name.Count();
-                            for(int z = 0; z < remainingSpace; z++)
-                            {
-                                bytes.Add(0);
-                            }
+                            bytes.AddRange(Utils.GetStringBytes(basFile.Entries[i].SubEntries[a].Name, 8));
 
                             //Data
                             bytes.AddRange(BitConverter_Ex.GetBytes_Bool32(basFile.Entries[i].SubEntries[a].I_08));

@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace Xv2CoreLib.OCT
@@ -12,14 +9,12 @@ namespace Xv2CoreLib.OCT
     {
         string saveLocation;
         byte[] rawBytes;
-        List<byte> bytes;
         private OCT_File octFile = new OCT_File();
 
         public Parser(string path, bool _writeXml)
         {
             saveLocation = path;
             rawBytes = File.ReadAllBytes(path);
-            bytes = rawBytes.ToList();
 
             Parse();
 

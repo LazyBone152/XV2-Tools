@@ -170,44 +170,44 @@ namespace Xv2CoreLib.CUS
             {
                 for(int i = 0; i < skills.Count(); i++)
                 {
-                    if(skills[i].EanPath != "NULL")
+                    if(skills[i].EanPath != "NULL" && !string.IsNullOrWhiteSpace(skills[i].EanPath))
                     {
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), strOffsets[i][0]);
                         bytes.AddRange(Encoding.ASCII.GetBytes(skills[i].EanPath));
                         bytes.Add(0);
                     }
 
-                    if (skills[i].CamEanPath != "NULL")
+                    if (skills[i].CamEanPath != "NULL" && !string.IsNullOrWhiteSpace(skills[i].CamEanPath))
                     {
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), strOffsets[i][1]);
                         bytes.AddRange(Encoding.ASCII.GetBytes(skills[i].CamEanPath));
                         bytes.Add(0);
                     }
-                    if (skills[i].EepkPath != "NULL")
+                    if (skills[i].EepkPath != "NULL" && !string.IsNullOrWhiteSpace(skills[i].EepkPath))
                     {
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), strOffsets[i][2]);
                         bytes.AddRange(Encoding.ASCII.GetBytes(skills[i].EepkPath));
                         bytes.Add(0);
                     }
-                    if (skills[i].SePath != "NULL")
+                    if (skills[i].SePath != "NULL" && !string.IsNullOrWhiteSpace(skills[i].SePath))
                     {
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), strOffsets[i][3]);
                         bytes.AddRange(Encoding.ASCII.GetBytes(skills[i].SePath));
                         bytes.Add(0);
                     }
-                    if (skills[i].VoxPath != "NULL")
+                    if (skills[i].VoxPath != "NULL" && !string.IsNullOrWhiteSpace(skills[i].VoxPath))
                     {
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), strOffsets[i][4]);
                         bytes.AddRange(Encoding.ASCII.GetBytes(skills[i].VoxPath));
                         bytes.Add(0);
                     }
-                    if (skills[i].AfterBacPath != "NULL")
+                    if (skills[i].AfterBacPath != "NULL" && !string.IsNullOrWhiteSpace(skills[i].AfterBacPath))
                     {
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), strOffsets[i][5]);
                         bytes.AddRange(Encoding.ASCII.GetBytes(skills[i].AfterBacPath));
                         bytes.Add(0);
                     }
-                    if (skills[i].AfterBcmPath != "NULL")
+                    if (skills[i].AfterBcmPath != "NULL" && !string.IsNullOrWhiteSpace(skills[i].AfterBcmPath))
                     {
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), strOffsets[i][6]);
                         bytes.AddRange(Encoding.ASCII.GetBytes(skills[i].AfterBcmPath));

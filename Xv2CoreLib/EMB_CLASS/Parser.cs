@@ -19,18 +19,17 @@ namespace Xv2CoreLib.EMB_CLASS
         //Signatures above
         string saveLocation;
         byte[] rawBytes;
-        List<byte> bytes;
 
-        public EMB_File embFile { get; private set; } = new EMB_File() {Entry = AsyncObservableCollection<EmbEntry>.Create() };
+        public EMB_File embFile { get; private set; } = new EMB_File();
 
         //header info
         int totalEntries;
         int contentsOffset;
         int fileNameTableOffset;
 
-        public Parser(string fileLocation, bool writeXml) {
+        public Parser(string fileLocation, bool writeXml) 
+        {
             rawBytes = File.ReadAllBytes(fileLocation);
-            bytes = rawBytes.ToList();
             saveLocation = String.Format("{0}.xml", fileLocation);
             Validation();
             totalEntries = BitConverter.ToInt32(rawBytes, 12);
@@ -48,7 +47,6 @@ namespace Xv2CoreLib.EMB_CLASS
         public Parser(byte[] _rawBytes)
         {
             rawBytes = _rawBytes;
-            bytes = rawBytes.ToList();
             Validation();
             totalEntries = BitConverter.ToInt32(rawBytes, 12);
             contentsOffset = BitConverter.ToInt32(rawBytes, 24);
@@ -102,7 +100,7 @@ namespace Xv2CoreLib.EMB_CLASS
             {
                 //Extracting File
                 
-                string fileName = (fileNameTableOffset != 0) ? Utils.GetString(bytes, stringOffsets[i]) : String.Format("DATA{0}.dds", i);
+                string fileName = (fileNameTableOffset != 0) ? StringEx.GetString(rawBytes, stringOffsets[i]) : String.Format("DATA{0}.dds", i);
                 
                 embFile.Entry.Add(new EmbEntry()
                 {

@@ -67,7 +67,7 @@ namespace Xv2CoreLib.EMA
             {
                 if(Animations.Count > 0)
                 {
-                    return Animations[0].I_08;
+                    return Animations[0].EmaType;
                 }
                 return EmaType.obj;
             }
@@ -188,11 +188,11 @@ namespace Xv2CoreLib.EMA
 
                 List<float> values = anim.GetValues();
 
-                bytes.AddRange(BitConverter.GetBytes(anim.I_00));
+                bytes.AddRange(BitConverter.GetBytes(anim.EndFrame));
                 bytes.AddRange(BitConverter.GetBytes((ushort)anim.CommandCount));
                 bytes.AddRange(BitConverter.GetBytes((int)values.Count));
-                bytes.AddRange(BitConverter.GetBytes((ushort)anim.I_08));
-                bytes.AddRange(BitConverter.GetBytes((ushort)anim.I_10));
+                bytes.AddRange(BitConverter.GetBytes((ushort)anim.EmaType));
+                bytes.AddRange(BitConverter.GetBytes((ushort)anim.FloatPrecision));
                 animNameOffsets.Add(bytes.Count);
                 bytes.AddRange(new byte[4]); //Name offset
                 bytes.AddRange(new byte[4]); //value offset
@@ -273,11 +273,11 @@ namespace Xv2CoreLib.EMA
                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - animStartOffset), animStartOffset + 16);
                 foreach(var value in values)
                 {
-                    if(anim.I_10 == ValueType.Float16)
+                    if(anim.FloatPrecision == ValueType.Float16)
                     {
                         bytes.AddRange(Half.GetBytes((Half)value));
                     }
-                    else if (anim.I_10 == ValueType.Float32 || anim.I_10 == ValueType.Float32_2)
+                    else if (anim.FloatPrecision == ValueType.Float32 || anim.FloatPrecision == ValueType.Float32_2)
                     {
                         bytes.AddRange(BitConverter.GetBytes(value));
                     }
@@ -408,14 +408,14 @@ namespace Xv2CoreLib.EMA
         [YAXSerializeAs("Name")]
         public string Name { get; set; }
         [YAXAttributeForClass]
-        [YAXSerializeAs("Duration")]
-        public ushort I_00 { get; set; }
+        [YAXSerializeAs("EndFrame")]
+        public ushort EndFrame { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("Type")]
-        public EmaType I_08 { get; set; } //ushort
+        public EmaType EmaType { get; set; } //ushort
         [YAXAttributeForClass]
         [YAXSerializeAs("FloatType")]
-        public ValueType I_10 { get; set; }
+        public ValueType FloatPrecision { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Command")]
         public AsyncObservableCollection<EMA_Command> Commands { get; set; }
@@ -424,9 +424,9 @@ namespace Xv2CoreLib.EMA
         {
             EMA_Animation animation = new EMA_Animation();
             animation.Index = index;
-            animation.I_00 = BitConverter.ToUInt16(rawBytes, offset + 0);
-            animation.I_08 = (EmaType)BitConverter.ToUInt16(rawBytes, offset + 8);
-            animation.I_10 = (ValueType)BitConverter.ToUInt16(rawBytes, offset + 10);
+            animation.EndFrame = BitConverter.ToUInt16(rawBytes, offset + 0);
+            animation.EmaType = (EmaType)BitConverter.ToUInt16(rawBytes, offset + 8);
+            animation.FloatPrecision = (ValueType)BitConverter.ToUInt16(rawBytes, offset + 10);
             animation.Commands = AsyncObservableCollection<EMA_Command>.Create();
 
             int commandCount = BitConverter.ToUInt16(rawBytes, offset + 2);
@@ -445,17 +445,17 @@ namespace Xv2CoreLib.EMA
 
             for(int i = 0; i < valueCount; i++)
             {
-                if(animation.I_10 == ValueType.Float16)
+                if(animation.FloatPrecision == ValueType.Float16)
                 {
                     values[i] = Half.ToHalf(rawBytes, valueOffset + (i * 2));
                 }
-                else if (animation.I_10 == ValueType.Float32 || animation.I_10 == ValueType.Float32_2)
+                else if (animation.FloatPrecision == ValueType.Float32 || animation.FloatPrecision == ValueType.Float32_2)
                 {
                     values[i] = BitConverter.ToSingle(rawBytes, valueOffset + (i * 4));
                 }
                 else
                 {
-                    throw new InvalidDataException(String.Format("EMA_Animation: Unknown float type ({0}).", animation.I_10));
+                    throw new InvalidDataException(String.Format("EMA_Animation: Unknown float type ({0}).", animation.FloatPrecision));
                 }
 
                 //Console.WriteLine(string.Format("{1}: {0}", values[i], i));
@@ -469,7 +469,7 @@ namespace Xv2CoreLib.EMA
 
                 if(commandOffset != 0)
                 {
-                    animation.Commands.Add(EMA_Command.Read(rawBytes, commandOffset + offset, values, emaFile, animation.I_08));
+                    animation.Commands.Add(EMA_Command.Read(rawBytes, commandOffset + offset, values, emaFile, animation.EmaType));
                 }
 
             }
@@ -559,7 +559,7 @@ namespace Xv2CoreLib.EMA
         /// </summary>
         public void SyncColorCommands()
         {
-            if (I_08 != EmaType.light) throw new InvalidOperationException("EMA_Animation.SyncColorCommands: Method not valid for type = " + I_08);
+            if (EmaType != EmaType.light) throw new InvalidOperationException("EMA_Animation.SyncColorCommands: Method not valid for type = " + EmaType);
 
             var r_command = GetCommand("Color", "R");
             var g_command = GetCommand("Color", "G");
@@ -574,7 +574,7 @@ namespace Xv2CoreLib.EMA
                     var newCommand = EMA_Command.GetNewLight();
                     newCommand.Component = "R";
                     newCommand.Keyframes.Add(new EMA_Keyframe() { Time = 0, Value = 0 }); //First keyframe
-                    newCommand.Keyframes.Add(new EMA_Keyframe() { Time = I_00, Value = 0 }); //Last keyframe
+                    newCommand.Keyframes.Add(new EMA_Keyframe() { Time = EndFrame, Value = 0 }); //Last keyframe
                     Commands.Add(newCommand);
                 }
 
@@ -583,7 +583,7 @@ namespace Xv2CoreLib.EMA
                     var newCommand = EMA_Command.GetNewLight();
                     newCommand.Component = "G";
                     newCommand.Keyframes.Add(new EMA_Keyframe() { Time = 0, Value = 0 }); //First keyframe
-                    newCommand.Keyframes.Add(new EMA_Keyframe() { Time = I_00, Value = 0 }); //Last keyframe
+                    newCommand.Keyframes.Add(new EMA_Keyframe() { Time = EndFrame, Value = 0 }); //Last keyframe
                     Commands.Add(newCommand);
                 }
 
@@ -592,7 +592,7 @@ namespace Xv2CoreLib.EMA
                     var newCommand = EMA_Command.GetNewLight();
                     newCommand.Component = "B";
                     newCommand.Keyframes.Add(new EMA_Keyframe() { Time = 0, Value = 0 }); //First keyframe
-                    newCommand.Keyframes.Add(new EMA_Keyframe() { Time = I_00, Value = 0 }); //Last keyframe
+                    newCommand.Keyframes.Add(new EMA_Keyframe() { Time = EndFrame, Value = 0 }); //Last keyframe
                     Commands.Add(newCommand);
                 }
 

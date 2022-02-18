@@ -9,7 +9,6 @@ namespace Xv2CoreLib.QBT
     public class Parser
     {
         string saveLocation;
-        List<byte> bytes;
         byte[] rawBytes;
         QBT_File qbt_File;
 
@@ -21,7 +20,6 @@ namespace Xv2CoreLib.QBT
         {
             writeXml = _writeXml;
             rawBytes = File.ReadAllBytes(location);
-            bytes = rawBytes.ToList();
             saveLocation = location;
             ParseFile();
             isFinished = true;
@@ -149,7 +147,7 @@ namespace Xv2CoreLib.QBT
                     I_12 = BitConverter.ToInt16(rawBytes, offset + 12),
                     I_14 = BitConverter.ToInt16(rawBytes, offset + 14),
                     I_16 = BitConverter.ToInt16(rawBytes, offset + 16),
-                    Str_18 = Utils.GetString(bytes, 32 * stringIndex + stringSectionOffset, 32)
+                    Str_18 = StringEx.GetString(rawBytes, 32 * stringIndex + stringSectionOffset, maxSize:32)
                 });
 
                 offset += 20;

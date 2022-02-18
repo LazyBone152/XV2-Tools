@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace Xv2CoreLib.QED
@@ -10,7 +9,6 @@ namespace Xv2CoreLib.QED
     public class Parser
     {
         string saveLocation;
-        List<byte> bytes;
         byte[] rawBytes;
         QED_File qed_File = new QED_File();
         bool writeXml = false;
@@ -19,22 +17,18 @@ namespace Xv2CoreLib.QED
         public Parser(string location, bool _writeXml)
         {
             writeXml = _writeXml;
-            bytes = File.ReadAllBytes(location).ToList();
-            rawBytes = bytes.ToArray();
+            rawBytes = File.ReadAllBytes(location);
             saveLocation = location;
             ParseFile();
             isFinished = true;
-            if (writeXml == true) {
+            if (writeXml == true) 
+            {
                 WriteXmlFile();
             }
         }
 
-        public QED_File GetQedFile() {
-            while (isFinished == false) { }
-            return qed_File;
-        }
-
-        void ParseFile() {
+        void ParseFile() 
+        {
             if (BitConverter.ToInt32(rawBytes, 8) == 0)
             {
                 return;
@@ -397,7 +391,7 @@ namespace Xv2CoreLib.QED
         T GetTemplate2<T>(int offset) where T : ITemplate2, new()
         {
             T Template2 = new T();
-            Template2.Str_00 = Utils.GetString(rawBytes.ToList(), offset);
+            Template2.Str_00 = StringEx.GetString(rawBytes, offset);
             Template2.I_20 = BitConverter.ToInt32(rawBytes, offset + 20);
             Template2.I_24 = BitConverter.ToInt32(rawBytes, offset + 24);
             Template2.I_28 = BitConverter.ToInt32(rawBytes, offset + 28);

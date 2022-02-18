@@ -54,7 +54,7 @@ namespace Xv2CoreLib.EMP
             return new Parser(path, false).GetEmpFile();
         }
 
-        public static EMP_File Load(List<byte> bytes, ParserMode parserMode)
+        public static EMP_File Load(byte[] bytes, ParserMode parserMode)
         {
             return new Parser(bytes, parserMode).GetEmpFile();
         }

@@ -59,7 +59,7 @@ namespace Xv2CoreLib.BAS
                         {
                             basFile.Entries[i].SubEntries.Add(new BAS_SubEntry()
                             {
-                                Name = Utils.GetString(rawBytes.ToList(), subEntryOffset, 8),
+                                Name = StringEx.GetString(rawBytes, subEntryOffset, false, StringEx.EncodingType.ASCII, 8),
                                 I_08 = BitConverter_Ex.ToBooleanFromInt32(rawBytes, subEntryOffset + 8),
                                 I_12 = (BAS_SubEntry.ActivationConditionTarget)BitConverter.ToInt32(rawBytes, subEntryOffset + 12),
                                 I_16 = (BAS_SubEntry.ActivationConditionTarget)BitConverter.ToInt32(rawBytes, subEntryOffset + 16),

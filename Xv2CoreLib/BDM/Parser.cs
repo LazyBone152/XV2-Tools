@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 using System.IO;
 
@@ -13,7 +11,6 @@ namespace Xv2CoreLib.BDM
         public List<string> UsedValues = new List<string>();
 
         string saveLocation;
-        List<byte> bytes;
         byte[] rawBytes;
         public BDM_File bdmFile { get; set; } = new BDM_File();
         private BDM_Type type;
@@ -22,7 +19,6 @@ namespace Xv2CoreLib.BDM
         public Parser(byte[] _rawBytes)
         {
             rawBytes = _rawBytes;
-            bytes = rawBytes.ToList();
             type = GetBdmType();
             bdmFile.BDM_Type = type;
             Parse();
@@ -32,7 +28,6 @@ namespace Xv2CoreLib.BDM
         {
             saveLocation = location;
             rawBytes = File.ReadAllBytes(location);
-            bytes = rawBytes.ToList();
             type = GetBdmType();
             bdmFile.BDM_Type = type;
             Parse();

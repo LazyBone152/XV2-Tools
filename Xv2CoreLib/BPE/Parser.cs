@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace Xv2CoreLib.BPE
@@ -13,13 +10,11 @@ namespace Xv2CoreLib.BPE
         string saveLocation { get; set; }
         private BPE_File bpeFile = new BPE_File();
         byte[] rawBytes { get; set; }
-        List<byte> bytes { get; set; }
 
         public Parser(string location, bool writeXml)
         {
             saveLocation = location;
             rawBytes = File.ReadAllBytes(saveLocation);
-            bytes = rawBytes.ToList();
             
             ParseBpe();
 
@@ -33,7 +28,6 @@ namespace Xv2CoreLib.BPE
         public Parser(byte[] _bytes)
         {
             rawBytes = _bytes;
-            bytes = rawBytes.ToList();
             ParseBpe();
         }
 

@@ -44,7 +44,8 @@ namespace Xv2CoreLib.MSG
 
         void UnicodeCheck()
         {
-            if (msg_File.unicode_names == true) {
+            if (msg_File.unicode_names == true) 
+            {
                 unicode_names = true;
                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes((short)256), 4);
             }
@@ -70,7 +71,7 @@ namespace Xv2CoreLib.MSG
 
             for (int i = 0; i < msg_File.MSG_Entries.Count(); i++)
             {
-                offsetToNameString.Add(bytes.Count());
+                offsetToNameString.Add(bytes.Count);
                 bytes.AddRange(new byte[4]);
                 bytes.AddRange(BitConverter.GetBytes(msg_File.MSG_Entries[i].Name.Length));
                 if (unicode_names == true)

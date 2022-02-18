@@ -1166,7 +1166,7 @@ namespace Xv2CoreLib.BAC
         [YAXSerializeAs("value")]
         public float BlendWeightFrameStep { get; set; } = 0f;
 
-        public static List<BAC_Type0> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type0> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type0> Type0 = new List<BAC_Type0>();
 
@@ -1387,7 +1387,7 @@ namespace Xv2CoreLib.BAC
         public float RotationZ { get; set; }
 
 
-        public static List<BAC_Type1> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type1> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type1> Type1 = new List<BAC_Type1>();
 
@@ -1551,7 +1551,7 @@ namespace Xv2CoreLib.BAC
         [YAXSerializeAs("Z")]
         public float DragZ { get; set; }
 
-        public static List<BAC_Type2> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type2> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type2> Type2 = new List<BAC_Type2>();
 
@@ -1634,7 +1634,7 @@ namespace Xv2CoreLib.BAC
         [YAXSerializeAs("value")]
         public ushort I_10 { get; set; }
 
-        public static List<BAC_Type3> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type3> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type3> Type3 = new List<BAC_Type3>();
 
@@ -1689,7 +1689,7 @@ namespace Xv2CoreLib.BAC
         [YAXSerializeAs("Amount")]
         public float TimeScale { get; set; } = 1f;
 
-        public static List<BAC_Type4> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type4> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type4> Type4 = new List<BAC_Type4>();
 
@@ -1769,7 +1769,7 @@ namespace Xv2CoreLib.BAC
         [YAXSerializeAs("value")]
         public ushort I_14 { get; set; } //always 0
 
-        public static List<BAC_Type5> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type5> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type5> Type5 = new List<BAC_Type5>();
 
@@ -1832,7 +1832,7 @@ namespace Xv2CoreLib.BAC
         [YAXSerializeAs("value")]
         public ushort I_14 { get; set; } //always 0
 
-        public static List<BAC_Type6> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type6> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type6> Type6 = new List<BAC_Type6>();
 
@@ -1915,7 +1915,7 @@ namespace Xv2CoreLib.BAC
         [YAXSerializeAs("value")]
         public BcmCallbackFlagsEnum LinkFlags { get; set; }
 
-        public static List<BAC_Type7> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type7> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type7> Type7 = new List<BAC_Type7>();
 
@@ -2041,7 +2041,7 @@ namespace Xv2CoreLib.BAC
         public float RotationZ { get; set; }
 
 
-        public static List<BAC_Type8> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type8> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type8> Type8 = new List<BAC_Type8>();
 
@@ -2255,7 +2255,7 @@ namespace Xv2CoreLib.BAC
             return false;
         }
 
-        public static List<BAC_Type9> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type9> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type9> Type9 = new List<BAC_Type9>();
 
@@ -2515,7 +2515,7 @@ namespace Xv2CoreLib.BAC
         [YAXSerializeAs("value")]
         public CameraFlags2 cameraFlags2 { get; set; } //Int8
 
-        public static List<BAC_Type10> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type10> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type10> Type10 = new List<BAC_Type10>();
 
@@ -2643,7 +2643,7 @@ namespace Xv2CoreLib.BAC
         public ushort I_14 { get; set; } //always 0
 
 
-        public static List<BAC_Type11> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type11> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type11> Type11 = new List<BAC_Type11>();
 
@@ -2703,7 +2703,7 @@ namespace Xv2CoreLib.BAC
         [YAXSerializeAs("value")]
         public ushort I_10 { get; set; } //always 0
 
-        public static List<BAC_Type12> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type12> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type12> Type12 = new List<BAC_Type12>();
 
@@ -2759,7 +2759,7 @@ namespace Xv2CoreLib.BAC
         [YAXSerializeAs("value")]
         public BcsPartVisibilitySwitch Visibility { get; set; } //uint16
 
-        public static List<BAC_Type13> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type13> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type13> Type13 = new List<BAC_Type13>();
 
@@ -2837,7 +2837,7 @@ namespace Xv2CoreLib.BAC
         [YAXSerializeAs("value")]
         public ushort I_10 { get; set; } //always 0
 
-        public static List<BAC_Type14> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type14> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type14> Type14 = new List<BAC_Type14>();
 
@@ -2923,7 +2923,7 @@ namespace Xv2CoreLib.BAC
         public float Param5 { get; set; }
 
 
-        public static List<BAC_Type15> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type15> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type15> Type15 = new List<BAC_Type15>();
 
@@ -3029,7 +3029,7 @@ namespace Xv2CoreLib.BAC
         [YAXFormat("0.0##########")]
         public float F_28 { get; set; }
 
-        public static List<BAC_Type16> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type16> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type16> Type16 = new List<BAC_Type16>();
 
@@ -3144,7 +3144,7 @@ namespace Xv2CoreLib.BAC
         public float DisplacementZ { get; set; }
 
 
-        public static List<BAC_Type17> Read(byte[] rawBytes, List<byte> bytes, int offset, int count, bool isSmall)
+        public static List<BAC_Type17> Read(byte[] rawBytes, int offset, int count, bool isSmall)
         {
             List<BAC_Type17> Type17 = new List<BAC_Type17>();
 
@@ -3266,7 +3266,7 @@ namespace Xv2CoreLib.BAC
         [YAXSerializeAs("value")]
         public int I_28 { get; set; } //always 0
 
-        public static List<BAC_Type18> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type18> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type18> Type18 = new List<BAC_Type18>();
 
@@ -3360,7 +3360,7 @@ namespace Xv2CoreLib.BAC
         [YAXSerializeAs("value")]
         public int I_12 { get; set; } //always 0
 
-        public static List<BAC_Type19> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type19> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type19> Type19 = new List<BAC_Type19>();
 
@@ -3481,7 +3481,7 @@ namespace Xv2CoreLib.BAC
         [YAXSerializeAs("value")]
         public int I_44 { get; set; } //always 0
 
-        public static List<BAC_Type20> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type20> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type20> Type20 = new List<BAC_Type20>();
 
@@ -3610,7 +3610,7 @@ namespace Xv2CoreLib.BAC
         [YAXSerializeAs("value")]
         public float RightEyeRotationPercent { get; set; }
 
-        public static List<BAC_Type21> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type21> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type21> Type21 = new List<BAC_Type21>();
 
@@ -3686,7 +3686,7 @@ namespace Xv2CoreLib.BAC
         [YAXSerializeAs("value")]
         public string STR_16 { get; set; } //HYPERSHOT_00, HYPERSHOT_return
 
-        public static List<BAC_Type22> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type22> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type22> Type22 = new List<BAC_Type22>();
 
@@ -3701,7 +3701,7 @@ namespace Xv2CoreLib.BAC
                     I_08 = BitConverter.ToUInt16(rawBytes, offset + 8),
                     I_10 = BitConverter.ToUInt16(rawBytes, offset + 10),
                     F_12 = BitConverter.ToSingle(rawBytes, offset + 12),
-                    STR_16 = Utils.GetString(rawBytes.ToList(), offset + 16, 32)
+                    STR_16 = StringEx.GetString(rawBytes, offset + 16, false, StringEx.EncodingType.ASCII, 32)
                 });
 
                 offset += 48;
@@ -3831,7 +3831,7 @@ namespace Xv2CoreLib.BAC
         [YAXSerializeAs("value")]
         public float[] F_52 { get; set; } = new float[3]; //size 3 (values always 0)
 
-        public static List<BAC_Type23> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type23> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type23> Type23 = new List<BAC_Type23>();
 
@@ -3995,7 +3995,7 @@ namespace Xv2CoreLib.BAC
         [YAXSerializeAs("value")]
         public ushort I_54 { get; set; }//0,1,2
 
-        public static List<BAC_Type24> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type24> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type24> Type24 = new List<BAC_Type24>();
 
@@ -4081,7 +4081,7 @@ namespace Xv2CoreLib.BAC
         [YAXSerializeAs("value")]
         public int ChargeTime { get; set; }
 
-        public static List<BAC_Type25> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type25> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type25> Type25 = new List<BAC_Type25>();
 
@@ -4204,7 +4204,7 @@ namespace Xv2CoreLib.BAC
         [YAXHexValue]
         public int I_76 { get; set; }
 
-        public static List<BAC_Type26> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type26> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type26> Type26 = new List<BAC_Type26>();
 
@@ -4315,7 +4315,7 @@ namespace Xv2CoreLib.BAC
         [YAXHexValue]
         public ushort I_22 { get; set; } //always 0
 
-        public static List<BAC_Type27> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type27> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type27> Type26 = new List<BAC_Type27>();
 

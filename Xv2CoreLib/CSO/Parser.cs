@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace Xv2CoreLib.CSO
@@ -12,7 +9,6 @@ namespace Xv2CoreLib.CSO
     {
         string saveLocation;
         byte[] rawBytes;
-        List<byte> bytes;
 
         public CSO_File csoFile { get; private set; } = new CSO_File();
 
@@ -20,14 +16,12 @@ namespace Xv2CoreLib.CSO
         public Parser(byte[] _rawBytes)
         {
             rawBytes = _rawBytes;
-            bytes = rawBytes.ToList();
             ParseFile();
         }
 
         public Parser(string fileLocation, bool writeXml)
         {
             rawBytes = File.ReadAllBytes(fileLocation);
-            bytes = rawBytes.ToList();
             saveLocation = String.Format("{0}.xml", fileLocation);
             ParseFile();
 
@@ -58,10 +52,10 @@ namespace Xv2CoreLib.CSO
                     {
                         CharaID = BitConverter.ToInt32(rawBytes, offset + 0),
                         Costume = BitConverter.ToUInt32(rawBytes, offset + 4),
-                        SePath = StringEx.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 8), false),
-                        VoxPath = StringEx.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 12), false),
-                        AmkPath = StringEx.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 16), false),
-                        SkillCharaCode = StringEx.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 20), false)
+                        SePath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 8), false),
+                        VoxPath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 12), false),
+                        AmkPath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 16), false),
+                        SkillCharaCode = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 20), false)
                     });
                     offset += 32;
                 }

@@ -64,7 +64,7 @@ namespace Xv2CoreLib.BAI
                         {
                             baiFile.Entries[i].SubEntries.Add(new BAI_SubEntry()
                             {
-                                Name = Utils.GetString(rawBytes.ToList(), subEntryOffset, 8),
+                                Name = StringEx.GetString(rawBytes, subEntryOffset, false, maxSize: 8),
                                 I_08 = BitConverter_Ex.ToBooleanFromInt32(rawBytes, subEntryOffset + 8),
                                 I_12 = (BAI_SubEntry.ActivationConditionTarget)BitConverter.ToInt32(rawBytes, subEntryOffset + 12),
                                 I_16 = (BAI_SubEntry.ActivationConditionTarget)BitConverter.ToInt32(rawBytes, subEntryOffset + 16),
@@ -85,6 +85,7 @@ namespace Xv2CoreLib.BAI
                                 F_76 = BitConverter.ToSingle(rawBytes, subEntryOffset + 76),
                                 F_80 = BitConverter.ToSingle(rawBytes, subEntryOffset + 80),
                             });
+
                             if(BitConverter.ToInt32(rawBytes, subEntryOffset + 56) == 10)
                             {
                                 UsedValues.Add(BitConverter.ToInt32(rawBytes, subEntryOffset + 60));

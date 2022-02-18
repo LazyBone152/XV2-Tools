@@ -12,14 +12,12 @@ namespace Xv2CoreLib.OCP
     {
         string saveLocation;
         byte[] rawBytes;
-        List<byte> bytes;
         private OCP_File octFile = new OCP_File();
 
         public Parser(string path, bool _writeXml)
         {
             saveLocation = path;
             rawBytes = File.ReadAllBytes(path);
-            bytes = rawBytes.ToList();
 
             Parse();
 

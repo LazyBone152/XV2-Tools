@@ -12,14 +12,12 @@ namespace Xv2CoreLib.OCO
     {
         string saveLocation;
         byte[] rawBytes;
-        List<byte> bytes;
         private OCO_File octFile = new OCO_File();
 
         public Parser(string path, bool _writeXml)
         {
             saveLocation = path;
             rawBytes = File.ReadAllBytes(path);
-            bytes = rawBytes.ToList();
 
             Parse();
 

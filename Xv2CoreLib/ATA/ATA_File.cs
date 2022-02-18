@@ -53,13 +53,12 @@ namespace Xv2CoreLib.ATA
             
             //Entries
             int strOffset = 16;
-            List<byte> _bytes = rawBytes.ToList();
             
             for(int i = 0; i < count; i++)
             {
                 AtaEntries.Add(new ATA_Entry()
                 {
-                    Name = Utils.GetString(_bytes, strOffset),
+                    Name = StringEx.GetString(rawBytes, strOffset),
                     I_00 = BitConverter.ToInt32(rawBytes, offset + 0),
                     I_04 = BitConverter.ToInt32(rawBytes, offset + 4),
                     I_08 = BitConverter.ToInt32(rawBytes, offset + 8),

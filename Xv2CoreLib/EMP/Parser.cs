@@ -1,22 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 using YAXLib;
 using System.Collections;
-using System.Collections.ObjectModel;
 using Xv2CoreLib.Resource;
 
 namespace Xv2CoreLib.EMP
 {
     public class Parser
     {
-
         string saveLocation;
         byte[] rawBytes;
-        List<byte> bytes;
         public EMP_File empFile { get; private set; } = new EMP_File();
         bool writeXml = false;
 
@@ -34,7 +29,6 @@ namespace Xv2CoreLib.EMP
             writeXml = _writeXml;
             saveLocation = location;
             rawBytes = File.ReadAllBytes(location);
-            bytes = rawBytes.ToList();
             totalMainEntries = BitConverter.ToInt16(rawBytes, 12);
             totalTextureEntries = BitConverter.ToInt16(rawBytes, 14);
             mainEntryOffset = BitConverter.ToInt32(rawBytes, 16);
@@ -45,11 +39,10 @@ namespace Xv2CoreLib.EMP
                 WriteXmlFile();
         }
 
-        public Parser(List<byte> _bytes, ParserMode _parserMode)
+        public Parser(byte[] _bytes, ParserMode _parserMode)
         {
             parserMode = _parserMode;
-            bytes = _bytes;
-            rawBytes = bytes.ToArray();
+            rawBytes = _bytes;
             totalMainEntries = BitConverter.ToInt16(rawBytes, 12);
             totalTextureEntries = BitConverter.ToInt16(rawBytes, 14);
             mainEntryOffset = BitConverter.ToInt32(rawBytes, 16);
@@ -67,14 +60,14 @@ namespace Xv2CoreLib.EMP
         {
             empFile.Version = (VersionEnum)BitConverter.ToUInt16(rawBytes, 8);
 
-            empFile.ParticleEffects = AsyncObservableCollection<ParticleEffect>.Create();
+            empFile.ParticleEffects = new AsyncObservableCollection<ParticleEffect>();
             if (totalMainEntries > 0)
             {
-                int finalParticleEffectEnd = (textureEntryOffset != 0) ? textureEntryOffset : bytes.Count - 1;
+                int finalParticleEffectEnd = (textureEntryOffset != 0) ? textureEntryOffset : rawBytes.Length - 1;
                 empFile.ParticleEffects = SortEffect(mainEntryOffset, finalParticleEffectEnd);
             }
 
-            empFile.Textures = AsyncObservableCollection<EMP_TextureDefinition>.Create();
+            empFile.Textures = new AsyncObservableCollection<EMP_TextureDefinition>();
             if (totalTextureEntries > 0)
             {
                 for (int i = 0; i < totalTextureEntries; i++)
@@ -150,7 +143,7 @@ namespace Xv2CoreLib.EMP
 
             //Main Entry values
             newEffect.Component_Type = ParticleEffect.GetComponentType(new int[2] { FLAG_36, FLAG_37 });
-            newEffect.Name = Utils.GetString(rawBytes.ToList(), mainEntryOffset, 32);
+            newEffect.Name = StringEx.GetString(rawBytes, mainEntryOffset, false, StringEx.EncodingType.ASCII, 32);
 
             BitArray compositeBits_I_32 = new BitArray(new byte[1] { rawBytes[mainEntryOffset + 32] });
             BitArray compositeBits_I_33 = new BitArray(new byte[1] { rawBytes[mainEntryOffset + 33] });
@@ -678,9 +671,8 @@ namespace Xv2CoreLib.EMP
             int emgSize = CalculateEmgSize(BitConverter.ToInt32(rawBytes, StructOffset + 20), mainEntryOffset);
 
 
-            byte[] EmgFile = bytes.GetRange(emgOffset, emgSize).ToArray();
+            byte[] EmgFile = rawBytes.GetRange(emgOffset, emgSize);
             modelStruct.emgBytes = EmgFile.ToList();
-
 
             return modelStruct;
         }

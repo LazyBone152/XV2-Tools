@@ -51,7 +51,7 @@ namespace Xv2CoreLib.BAI
 
             if(baiFile.Entries != null)
             {
-                for(int i = 0; i < baiFile.Entries.Count(); i++)
+                for(int i = 0; i < baiFile.Entries.Count; i++)
                 {
                     int subEntryCount = (baiFile.Entries[i].SubEntries != null) ? baiFile.Entries[i].SubEntries.Count() : 0;
                     bytes.AddRange(BitConverter.GetBytes(baiFile.Entries[i].I_00));
@@ -63,25 +63,20 @@ namespace Xv2CoreLib.BAI
                     bytes.AddRange(new byte[4]);
                 }
 
-                for (int i = 0; i < baiFile.Entries.Count(); i++)
+                for (int i = 0; i < baiFile.Entries.Count; i++)
                 {
-                    bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), EntryOffsets[i]);
+                    bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), EntryOffsets[i]);
                     if (baiFile.Entries[i].SubEntries != null)
                     {
-                        for(int a = 0; a < baiFile.Entries[i].SubEntries.Count(); a++)
+                        for(int a = 0; a < baiFile.Entries[i].SubEntries.Count; a++)
                         {
                             //Name Str
-                            if(baiFile.Entries[i].SubEntries[a].Name.Count() > 8)
+                            if(baiFile.Entries[i].SubEntries[a].Name.Length > 8)
                             {
-                                Console.WriteLine(String.Format("The name \"{0}\" exceeds the maximum length of 8!", baiFile.Entries[i].SubEntries[a].Name));
-                                Utils.WaitForInputThenQuit();
+                                throw new InvalidDataException($"BAI: The name \"{baiFile.Entries[i].SubEntries[a].Name}\" exceeds the maximum length of 8!");
                             }
-                            bytes.AddRange(Encoding.ASCII.GetBytes(baiFile.Entries[i].SubEntries[a].Name));
-                            int remainingSpace = 8 - baiFile.Entries[i].SubEntries[a].Name.Count();
-                            for(int z = 0; z < remainingSpace; z++)
-                            {
-                                bytes.Add(0);
-                            }
+                            
+                            bytes.AddRange(Utils.GetStringBytes(baiFile.Entries[i].SubEntries[a].Name, 8));
 
                             //Data
                             bytes.AddRange(BitConverter_Ex.GetBytes_Bool32(baiFile.Entries[i].SubEntries[a].I_08));

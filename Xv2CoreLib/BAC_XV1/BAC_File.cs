@@ -231,7 +231,7 @@ namespace Xv2CoreLib.BAC_XV1
 
         
 
-        public static List<BAC_Type10> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type10> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type10> Type10 = new List<BAC_Type10>();
 
@@ -330,7 +330,7 @@ namespace Xv2CoreLib.BAC_XV1
         [YAXFormat("0.0########")]
         public float F_12 { get; set; }
 
-        public static List<BAC_Type15> Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        public static List<BAC_Type15> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type15> Type15 = new List<BAC_Type15>();
 

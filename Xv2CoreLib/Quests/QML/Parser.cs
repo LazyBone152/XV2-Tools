@@ -9,7 +9,6 @@ namespace Xv2CoreLib.QML
     public class Parser
     {
         string saveLocation;
-        List<byte> bytes;
         byte[] rawBytes;
         QML_File qml_File = new QML_File();
 
@@ -17,10 +16,10 @@ namespace Xv2CoreLib.QML
         bool writeXml = false;
         bool isFinished = false;
 
-        public Parser(string location, bool _writeXml) {
+        public Parser(string location, bool _writeXml)
+        {
             writeXml = _writeXml;
             rawBytes = File.ReadAllBytes(location);
-            bytes = rawBytes.ToList();
             saveLocation = location;
             ParseFile();
             isFinished = true;
@@ -29,12 +28,8 @@ namespace Xv2CoreLib.QML
             }
         }
 
-        public QML_File GetQmlFile() {
-            while (isFinished == false) { }
-            return qml_File;
-        }
-
-        void ParseFile() {
+        void ParseFile() 
+        {
             int totalEntries = BitConverter.ToInt32(rawBytes, 8);
             int offset = BitConverter.ToInt32(rawBytes, 12);
             qml_File.qml_Entry = new List<QML_Entry>();

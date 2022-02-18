@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using YAXLib;
 using System.IO;
-using System.Threading;
-using System.Globalization;
 
 namespace Xv2CoreLib.QXD
 {
@@ -14,7 +12,6 @@ namespace Xv2CoreLib.QXD
     {
         QXD_File qxd_File = new QXD_File();
         byte[] rawBytes;
-        List<byte> bytes;
         string saveLocation;
         bool writeXml = false;
 
@@ -35,7 +32,6 @@ namespace Xv2CoreLib.QXD
         {
             writeXml = _writeXml;
             rawBytes = File.ReadAllBytes(location);
-            bytes = rawBytes.ToList();
             saveLocation = location;
             chara1Offset = BitConverter.ToInt32(rawBytes, 20);
             chara2Offset = BitConverter.ToInt32(rawBytes, 28);
@@ -66,7 +62,6 @@ namespace Xv2CoreLib.QXD
         public Parser(byte[] _bytes)
         {
             rawBytes = _bytes;
-            bytes = rawBytes.ToList();
             chara1Offset = BitConverter.ToInt32(rawBytes, 20);
             chara2Offset = BitConverter.ToInt32(rawBytes, 28);
             questsOffset = BitConverter.ToInt32(rawBytes, 12);
@@ -103,7 +98,7 @@ namespace Xv2CoreLib.QXD
                 qxd_File.Characters1.Add(new Quest_Characters()
                 {
                     Index = BitConverter.ToInt32(rawBytes, offset).ToString(),
-                    CharaShortName = StringEx.GetString(bytes, offset + 4, false, StringEx.EncodingType.ASCII, 3),
+                    CharaShortName = StringEx.GetString(rawBytes, offset + 4, false, StringEx.EncodingType.ASCII, 3),
                     I_08 = BitConverter.ToInt32(rawBytes, offset + 8),
                     I_12 = BitConverter.ToInt32(rawBytes, offset + 12),
                     I_16 = BitConverter.ToInt32(rawBytes, offset + 16),
@@ -150,7 +145,7 @@ namespace Xv2CoreLib.QXD
                 qxd_File.Characters2.Add(new Quest_Characters()
                 {
                     Index = BitConverter.ToInt32(rawBytes, offset).ToString(),
-                    CharaShortName = StringEx.GetString(bytes, offset + 4, false, StringEx.EncodingType.ASCII),
+                    CharaShortName = StringEx.GetString(rawBytes, offset + 4, false, StringEx.EncodingType.ASCII),
                     I_08 = BitConverter.ToInt32(rawBytes, offset + 8),
                     I_12 = BitConverter.ToInt32(rawBytes, offset + 12),
                     I_16 = BitConverter.ToInt32(rawBytes, offset + 16),
@@ -226,7 +221,7 @@ namespace Xv2CoreLib.QXD
                 int qedFileOffset = BitConverter.ToInt32(rawBytes, offset + 116);
 
                 qxd_File.Quests.Add(new Quest_Data());
-                qxd_File.Quests[i].Name = StringEx.GetString(bytes, offset, false, StringEx.EncodingType.ASCII, 16);
+                qxd_File.Quests[i].Name = StringEx.GetString(rawBytes, offset, false, StringEx.EncodingType.ASCII, 16);
 
                 qxd_File.Quests[i].Index = BitConverter.ToInt32(rawBytes, offset + 16).ToString();
                 qxd_File.Quests[i].I_20 = BitConverter.ToInt32(rawBytes, offset + 20);
@@ -321,51 +316,53 @@ namespace Xv2CoreLib.QXD
                     }
                 }
 
-                    if (skillRewardCount > 0)
+                if (skillRewardCount > 0)
+                {
+                    qxd_File.Quests[i].Skill_Reward = new List<SkillReward>();
+                    int skillOffset = skillRewardOffset;
+                    for (int b = 0; b < skillRewardCount; b++)
                     {
-                        qxd_File.Quests[i].Skill_Reward = new List<SkillReward>();
-                        int skillOffset = skillRewardOffset;
-                        for (int b = 0; b < skillRewardCount; b++)
-                        {
-                            qxd_File.Quests[i].Skill_Reward.Add(new SkillReward() {
-                            I_00 = (QxdSkillType)BitConverter.ToInt32(rawBytes, skillOffset + 0),
-                            I_04 = BitConverter.ToInt32(rawBytes, skillOffset + 4),
-                            I_08 = BitConverter.ToInt32(rawBytes, skillOffset + 8),
-                            I_12 = BitConverter.ToInt32(rawBytes, skillOffset + 12),
-                            F_16 = BitConverter.ToSingle(rawBytes, skillOffset + 16)
-                        });
-                            skillOffset += 20;
-                        }
+                        qxd_File.Quests[i].Skill_Reward.Add(new SkillReward() {
+                        I_00 = (QxdSkillType)BitConverter.ToInt32(rawBytes, skillOffset + 0),
+                        I_04 = BitConverter.ToInt32(rawBytes, skillOffset + 4),
+                        I_08 = BitConverter.ToInt32(rawBytes, skillOffset + 8),
+                        I_12 = BitConverter.ToInt32(rawBytes, skillOffset + 12),
+                        F_16 = BitConverter.ToSingle(rawBytes, skillOffset + 16)
+                    });
+                        skillOffset += 20;
                     }
+                }
 
                 
 
                 if (charaUnlockCount > 0)
+                {
+                    qxd_File.Quests[i].Chara_Unlock = new List<CharaUnlock>();
+                    int charaOffset = charaUnlockOffset;
+                    for (int b = 0; b < charaUnlockCount; b++)
                     {
-                        qxd_File.Quests[i].Chara_Unlock = new List<CharaUnlock>();
-                        int charaOffset = charaUnlockOffset;
-                        for (int b = 0; b < charaUnlockCount; b++)
-                        {
-                            qxd_File.Quests[i].Chara_Unlock.Add(new CharaUnlock() {
-                                ShortName = StringEx.GetString(bytes, charaOffset, false, StringEx.EncodingType.ASCII, 3),
-                                CostumeIndex = BitConverter.ToInt16(rawBytes, charaOffset + 4),
-                                I_06 = BitConverter.ToInt16(rawBytes, charaOffset + 6)
-                             });
-                            charaOffset += 8;
-                        }
+                        qxd_File.Quests[i].Chara_Unlock.Add(new CharaUnlock() {
+                            ShortName = StringEx.GetString(rawBytes, charaOffset, false, StringEx.EncodingType.ASCII, 3),
+                            CostumeIndex = BitConverter.ToInt16(rawBytes, charaOffset + 4),
+                            I_06 = BitConverter.ToInt16(rawBytes, charaOffset + 6)
+                            });
+                        charaOffset += 8;
                     }
+                }
 
                 int portraitOffset = 196;
-                    qxd_File.Quests[i].EnemyPortraitDisplay = new List<EnemyPortrait>();
-                    for (int b = 0; b < 6; b++) {
-                        qxd_File.Quests[i].EnemyPortraitDisplay.Add(new EnemyPortrait());
-                        qxd_File.Quests[i].EnemyPortraitDisplay[b].CharaID = BitConverter.ToInt16(rawBytes, offset + portraitOffset);
-                        qxd_File.Quests[i].EnemyPortraitDisplay[b].CostumeIndex = BitConverter.ToInt16(rawBytes, offset + portraitOffset + 2);
-                        qxd_File.Quests[i].EnemyPortraitDisplay[b].State = BitConverter.ToInt16(rawBytes, offset + portraitOffset + 4);
-                        portraitOffset += 6;
-                    }
+                qxd_File.Quests[i].EnemyPortraitDisplay = new List<EnemyPortrait>();
+                for (int b = 0; b < 6; b++) 
+                {
+                    qxd_File.Quests[i].EnemyPortraitDisplay.Add(new EnemyPortrait());
+                    qxd_File.Quests[i].EnemyPortraitDisplay[b].CharaID = BitConverter.ToInt16(rawBytes, offset + portraitOffset);
+                    qxd_File.Quests[i].EnemyPortraitDisplay[b].CostumeIndex = BitConverter.ToInt16(rawBytes, offset + portraitOffset + 2);
+                    qxd_File.Quests[i].EnemyPortraitDisplay[b].State = BitConverter.ToInt16(rawBytes, offset + portraitOffset + 4);
+                    portraitOffset += 6;
+                }
 
-                if (stagePortraitCount > 0) {
+                if (stagePortraitCount > 0)
+                {
                     qxd_File.Quests[i].StageDisplay = new List<short>();
                     for (int j = 0; j < 32; j += 2) {
                         qxd_File.Quests[i].StageDisplay.Add(BitConverter.ToInt16(rawBytes, stagePortraitOffset + j));
@@ -373,20 +370,22 @@ namespace Xv2CoreLib.QXD
 
                 }
 
-                if (msgEntryCount > 0) {
+                if (msgEntryCount > 0)
+                {
                     qxd_File.Quests[i].MsgFiles = new List<string>();
                     int msgOffset = msgEntryOffset;
                     for (int j = 0; j < msgEntryCount; j++) {
-                        qxd_File.Quests[i].MsgFiles.Add(StringEx.GetString(bytes,msgOffset, false, StringEx.EncodingType.ASCII, 32));
+                        qxd_File.Quests[i].MsgFiles.Add(StringEx.GetString(rawBytes, msgOffset, false, StringEx.EncodingType.ASCII, 32));
                         msgOffset += 32;
                     }
                 }
 
-                if (qedFileCount > 0) {
+                if (qedFileCount > 0) 
+                {
                     qxd_File.Quests[i].QedFiles = new List<string>();
                     int qedOffset = qedFileOffset;
                     for (int j = 0; j < qedFileCount; j++) {
-                        qxd_File.Quests[i].QedFiles.Add(StringEx.GetString(bytes, qedOffset, false, StringEx.EncodingType.ASCII, 32));
+                        qxd_File.Quests[i].QedFiles.Add(StringEx.GetString(rawBytes, qedOffset, false, StringEx.EncodingType.ASCII, 32));
                         qedOffset += 32;
                     }
                 }

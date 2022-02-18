@@ -716,7 +716,7 @@ namespace Xv2CoreLib.EffectContainer
                         switch (file.Extension)
                         {
                             case ".emp":
-                                file.EmpFile = EMP_File.Load(fileBytes.ToList(), ParserMode.Tool);
+                                file.EmpFile = EMP_File.Load(fileBytes, ParserMode.Tool);
                                 file.fileType = EffectFile.FileType.EMP;
                                 break;
                             case ".etr":
@@ -724,7 +724,7 @@ namespace Xv2CoreLib.EffectContainer
                                 file.fileType = EffectFile.FileType.ETR;
                                 break;
                             case ".ecf":
-                                file.EcfFile = ECF_File.Load(fileBytes.ToList());
+                                file.EcfFile = ECF_File.Load(fileBytes);
                                 file.fileType = EffectFile.FileType.ECF;
                                 break;
                             case ".emb":

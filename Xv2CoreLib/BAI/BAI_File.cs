@@ -60,7 +60,7 @@ namespace Xv2CoreLib.BAI
     }
 
     [YAXSerializeAs("Behavior")]
-    public struct BAI_SubEntry
+    public class BAI_SubEntry
     {
         [YAXAttributeForClass]
         public string Name { get; set; }

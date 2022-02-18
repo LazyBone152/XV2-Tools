@@ -36,8 +36,6 @@ namespace Xv2CoreLib.CNS
 
         public static CNS_File Read(byte[] rawBytes)
         {
-            List<byte> bytes = rawBytes.ToList();
-
             //Validation
             if (BitConverter.ToInt32(rawBytes, 0) != CNS_SIGNATURE)
             {
@@ -57,7 +55,7 @@ namespace Xv2CoreLib.CNS
             //Entries
             for (int i = 0; i < count; i++)
             {
-                cnsFile.CnsEntries.Add(CNS_Entry.Read(rawBytes, bytes, offset));
+                cnsFile.CnsEntries.Add(CNS_Entry.Read(rawBytes, offset));
                 offset += 180;
             }
 
@@ -225,11 +223,11 @@ namespace Xv2CoreLib.CNS
         [YAXSerializeAs("value")]
         public ushort I_178 { get; set; }
 
-        public static CNS_Entry Read(byte[] rawBytes, List<byte> bytes, int offset)
+        public static CNS_Entry Read(byte[] rawBytes, int offset)
         {
             return new CNS_Entry()
             {
-                Str_00 = Utils.GetString(bytes, offset),
+                Str_00 = StringEx.GetString(rawBytes, offset, false, StringEx.EncodingType.ASCII, 8),
                 Index = BitConverter.ToUInt16(rawBytes, offset + 8).ToString(),
                 I_10 = BitConverter_Ex.ToUInt16Array(rawBytes, offset + 10, 33),
                 I_76 = BitConverter_Ex.ToUInt16Array(rawBytes, offset + 76, 33),

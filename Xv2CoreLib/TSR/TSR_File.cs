@@ -88,8 +88,8 @@ namespace Xv2CoreLib.TSR
         public static TSR_File Parse(string path, bool writeXml)
         {
             var rawBytes = File.ReadAllBytes(path);
-            var bytes = rawBytes.ToList();
-            var tsr = Parse(new TSR_Reader(path), bytes, rawBytes);
+
+            var tsr = Parse(new TSR_Reader(path), rawBytes);
 
             if (writeXml)
             {
@@ -102,13 +102,12 @@ namespace Xv2CoreLib.TSR
 
         public static TSR_File Parse(byte[] rawBytes)
         {
-            var bytes = rawBytes.ToList();
-            var tsr = Parse(new TSR_Reader(rawBytes), bytes, rawBytes);
+            var tsr = Parse(new TSR_Reader(rawBytes), rawBytes);
             
             return tsr;
         }
 
-        public static TSR_File Parse(TSR_Reader tsrReader, List<byte> bytes, byte[] rawBytes)
+        public static TSR_File Parse(TSR_Reader tsrReader, byte[] rawBytes)
         {
             TSR_File tsrFile = new TSR_File() { Functions = new List<TSR_Function>() };
 

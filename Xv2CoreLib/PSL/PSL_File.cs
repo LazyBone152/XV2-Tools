@@ -22,8 +22,7 @@ namespace Xv2CoreLib.PSL
         public static PSL_File Serialize(string path, bool writeXml)
         {
             byte[] rawBytes = File.ReadAllBytes(path);
-            List<byte> bytes = rawBytes.ToList();
-            PSL_File pslFile = Read(rawBytes, bytes);
+            PSL_File pslFile = Read(rawBytes);
 
             if (writeXml)
             {
@@ -46,7 +45,7 @@ namespace Xv2CoreLib.PSL
         }
 
 
-        public static PSL_File Read(byte[] rawBytes, List<byte> bytes)
+        public static PSL_File Read(byte[] rawBytes)
         {
             PSL_File pflFile = new PSL_File();
             pflFile.PslEntries = new List<PSL_Entry>();
@@ -56,7 +55,7 @@ namespace Xv2CoreLib.PSL
 
             for(int i = 0; i < count; i++)
             {
-                pflFile.PslEntries.Add(PSL_Entry.Read(rawBytes, bytes, offset));
+                pflFile.PslEntries.Add(PSL_Entry.Read(rawBytes, offset));
                 offset += 64;
             }
 
@@ -124,7 +123,7 @@ namespace Xv2CoreLib.PSL
         [YAXSerializeAs("value")]
         public string Str_32 { get; set; } //Length 32
 
-        public static PSL_Entry Read(byte[] rawBytes, List<byte> bytes, int offset)
+        public static PSL_Entry Read(byte[] rawBytes, int offset)
         {
             return new PSL_Entry()
             {
@@ -138,7 +137,7 @@ namespace Xv2CoreLib.PSL
                 I_24 = BitConverter.ToInt32(rawBytes, offset + 24),
                 I_28 = BitConverter.ToUInt16(rawBytes, offset + 28),
                 I_30 = BitConverter.ToUInt16(rawBytes, offset + 30),
-                Str_32 = Utils.GetString(bytes, offset + 32, 32)
+                Str_32 = StringEx.GetString(rawBytes, offset + 32, maxSize: 32)
             };
         }
 

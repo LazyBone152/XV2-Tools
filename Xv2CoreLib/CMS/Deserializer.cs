@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace Xv2CoreLib.CMS
@@ -63,8 +62,7 @@ namespace Xv2CoreLib.CMS
                 {
                     if(cmsFile.CMS_Entries[i].Str_04.Length != 3)
                     {
-                        Console.WriteLine(String.Format("ShortName: \"{0}\" is an invalid length. ShortNames must be exactly 3 letters/numbers!", cmsFile.CMS_Entries[i].Str_04));
-                        Utils.WaitForInputThenQuit();
+                        throw new InvalidDataException($"CMS Entry Name is invalid. Must be 3 characters! ({cmsFile.CMS_Entries[i].ShortName}");
                     }
 
                     strOffsets.Add(new List<int>());
@@ -102,55 +100,55 @@ namespace Xv2CoreLib.CMS
                 //STR Entries
                 for(int i = 0; i < count; i++)
                 {
-                    if(cmsFile.CMS_Entries[i].Str_32 != "NULL")
+                    if(cmsFile.CMS_Entries[i].Str_32 != "NULL" && !string.IsNullOrWhiteSpace(cmsFile.CMS_Entries[i].Str_32))
                     {
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), strOffsets[i][0]);
                         bytes.AddRange(Encoding.ASCII.GetBytes(cmsFile.CMS_Entries[i].Str_32));
                         bytes.Add(0);
                     }
-                    if (cmsFile.CMS_Entries[i].Str_36 != "NULL")
+                    if (cmsFile.CMS_Entries[i].Str_36 != "NULL" && !string.IsNullOrWhiteSpace(cmsFile.CMS_Entries[i].Str_36))
                     {
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), strOffsets[i][1]);
                         bytes.AddRange(Encoding.ASCII.GetBytes(cmsFile.CMS_Entries[i].Str_36));
                         bytes.Add(0);
                     }
-                    if (cmsFile.CMS_Entries[i].Str_44 != "NULL")
+                    if (cmsFile.CMS_Entries[i].Str_44 != "NULL" && !string.IsNullOrWhiteSpace(cmsFile.CMS_Entries[i].Str_44))
                     {
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), strOffsets[i][2]);
                         bytes.AddRange(Encoding.ASCII.GetBytes(cmsFile.CMS_Entries[i].Str_44));
                         bytes.Add(0);
                     }
-                    if (cmsFile.CMS_Entries[i].Str_48 != "NULL")
+                    if (cmsFile.CMS_Entries[i].Str_48 != "NULL" && !string.IsNullOrWhiteSpace(cmsFile.CMS_Entries[i].Str_48))
                     {
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), strOffsets[i][3]);
                         bytes.AddRange(Encoding.ASCII.GetBytes(cmsFile.CMS_Entries[i].Str_48));
                         bytes.Add(0);
                     }
-                    if (cmsFile.CMS_Entries[i].Str_56 != "NULL")
+                    if (cmsFile.CMS_Entries[i].Str_56 != "NULL" && !string.IsNullOrWhiteSpace(cmsFile.CMS_Entries[i].Str_56))
                     {
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), strOffsets[i][4]);
                         bytes.AddRange(Encoding.ASCII.GetBytes(cmsFile.CMS_Entries[i].Str_56));
                         bytes.Add(0);
                     }
-                    if (cmsFile.CMS_Entries[i].Str_60 != "NULL")
+                    if (cmsFile.CMS_Entries[i].Str_60 != "NULL" && !string.IsNullOrWhiteSpace(cmsFile.CMS_Entries[i].Str_60))
                     {
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), strOffsets[i][5]);
                         bytes.AddRange(Encoding.ASCII.GetBytes(cmsFile.CMS_Entries[i].Str_60));
                         bytes.Add(0);
                     }
-                    if (cmsFile.CMS_Entries[i].Str_64 != "NULL")
+                    if (cmsFile.CMS_Entries[i].Str_64 != "NULL" && !string.IsNullOrWhiteSpace(cmsFile.CMS_Entries[i].Str_64))
                     {
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), strOffsets[i][6]);
                         bytes.AddRange(Encoding.ASCII.GetBytes(cmsFile.CMS_Entries[i].Str_64));
                         bytes.Add(0);
                     }
-                    if (cmsFile.CMS_Entries[i].Str_68 != "NULL")
+                    if (cmsFile.CMS_Entries[i].Str_68 != "NULL" && !string.IsNullOrWhiteSpace(cmsFile.CMS_Entries[i].Str_68))
                     {
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), strOffsets[i][7]);
                         bytes.AddRange(Encoding.ASCII.GetBytes(cmsFile.CMS_Entries[i].Str_68));
                         bytes.Add(0);
                     }
-                    if (cmsFile.CMS_Entries[i].Str_80 != "NULL")
+                    if (cmsFile.CMS_Entries[i].Str_80 != "NULL" && !string.IsNullOrWhiteSpace(cmsFile.CMS_Entries[i].Str_80))
                     {
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), strOffsets[i][8]);
                         bytes.AddRange(Encoding.ASCII.GetBytes(cmsFile.CMS_Entries[i].Str_80));

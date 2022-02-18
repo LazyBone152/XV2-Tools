@@ -39,7 +39,6 @@ namespace Xv2CoreLib.DML
             //Init
             DML_File dmlFile = new DML_File() { DML_Entries = new List<DML_Entry>() };
             byte[] rawBytes = File.ReadAllBytes(path);
-            List<byte> bytes = rawBytes.ToList();
 
             //Header
             dmlFile.I_06 = BitConverter.ToUInt16(rawBytes, 6);
@@ -59,10 +58,10 @@ namespace Xv2CoreLib.DML
                     I_10 = BitConverter.ToUInt16(rawBytes, offset + 10),
                     I_12 = BitConverter.ToUInt16(rawBytes, offset + 12),
                     I_14 = BitConverter.ToUInt16(rawBytes, offset + 14),
-                    Str_16 = Utils.GetString(bytes, offset + 16, 32),
-                    Str_48 = Utils.GetString(bytes, offset + 48, 32),
-                    Str_80 = Utils.GetString(bytes, offset + 80, 32),
-                    Str_112 = Utils.GetString(bytes, offset + 112, 32)
+                    Str_16 = StringEx.GetString(rawBytes, offset + 16, false, StringEx.EncodingType.ASCII, 32),
+                    Str_48 = StringEx.GetString(rawBytes, offset + 48, false, StringEx.EncodingType.ASCII, 32),
+                    Str_80 = StringEx.GetString(rawBytes, offset + 80, false, StringEx.EncodingType.ASCII, 32),
+                    Str_112 = StringEx.GetString(rawBytes, offset + 112, false, StringEx.EncodingType.ASCII, 32)
                 });
 
                 offset += 144;

@@ -53,13 +53,12 @@ namespace Xv2CoreLib.AIG
             
             //Entries
             int strOffset = 16;
-            List<byte> _bytes = rawBytes.ToList();
             
             for(int i = 0; i < count; i++)
             {
                 AigEntries.Add(new AIG_Entry()
                 {
-                    Name = Utils.GetString(_bytes, strOffset),
+                    Name = StringEx.GetString(rawBytes, strOffset),
                     I_00 = BitConverter.ToInt32(rawBytes, offset + 0),
                     F_04 = BitConverter.ToSingle(rawBytes, offset + 4),
                     F_08 = BitConverter.ToSingle(rawBytes, offset + 8),
