@@ -53,6 +53,7 @@ namespace Xv2CoreLib.Resource.UndoRedo
                 return $"Redo | {redoStack.First.Value.Message}";
             }
         }
+        public bool IsUndoing { get; private set; }
 
         private UndoManager()
         {
@@ -122,23 +123,44 @@ namespace Xv2CoreLib.Resource.UndoRedo
         public void Undo()
         {
             if (!CanUndo()) return;
+
             IUndoRedo action = undoStack.Pop();
-            action.Undo();
-            redoStack.Push(action);
-            NotifyPropertyChanged(nameof(UndoDescription));
-            NotifyPropertyChanged(nameof(RedoDescription));
-            UndoOrRedoCalled?.Invoke(this, new UndoEventRaisedEventArgs(GetUndoGroup(action)));
+
+            try
+            {
+                IsUndoing = true;
+                action.Undo();
+                redoStack.Push(action);
+                NotifyPropertyChanged(nameof(UndoDescription));
+                NotifyPropertyChanged(nameof(RedoDescription));
+            }
+            finally
+            {
+                IsUndoing = false;
+                UndoOrRedoCalled?.Invoke(this, new UndoEventRaisedEventArgs(GetUndoGroup(action)));
+            }
+
         }
 
         public void Redo()
         {
             if (!CanRedo()) return;
+
             IUndoRedo action = redoStack.Pop();
-            action.Redo();
-            undoStack.Push(action);
-            NotifyPropertyChanged(nameof(UndoDescription));
-            NotifyPropertyChanged(nameof(RedoDescription));
-            UndoOrRedoCalled?.Invoke(this, new UndoEventRaisedEventArgs(GetUndoGroup(action)));
+            try
+            {
+                IsUndoing = true;
+                action.Redo();
+                undoStack.Push(action);
+                NotifyPropertyChanged(nameof(UndoDescription));
+                NotifyPropertyChanged(nameof(RedoDescription));
+            }
+            finally
+            {
+                IsUndoing = false;
+                UndoOrRedoCalled?.Invoke(this, new UndoEventRaisedEventArgs(GetUndoGroup(action)));
+            }
+
         }
 
         public bool CanUndo()
@@ -193,7 +215,8 @@ namespace Xv2CoreLib.Resource.UndoRedo
     {
         Default,
         Animation,
-        Camera
+        Camera,
+        Effect
     }
 
     public delegate void UndoEventRaisedEventHandler(object source, UndoEventRaisedEventArgs e);

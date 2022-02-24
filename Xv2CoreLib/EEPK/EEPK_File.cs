@@ -573,6 +573,15 @@ namespace Xv2CoreLib.EEPK
                 return String.Format("[{1}] {0}", AssetRef.FileNamesPreview, I_02);
             }
         }
+        [YAXDontSerialize]
+        public string EffectPartDetails
+        {
+            get
+            {
+                if (AssetRef == null) return "Unassigned";
+                return !string.IsNullOrWhiteSpace(ESK) ? String.Format("[{1}] {0}  |  {2}", AssetRef.FileNamesPreview, I_02, ESK) : AssetRefDetails;
+            }
+        }
         private Asset _assetRef = null;
         [YAXDontSerialize]
         public Asset AssetRef
@@ -586,8 +595,7 @@ namespace Xv2CoreLib.EEPK
                 if (value != this._assetRef)
                 {
                     this._assetRef = value;
-                    NotifyPropertyChanged("AssetRef");
-                    NotifyPropertyChanged("AssetRefDetails");
+                    AssetRefDetailsRefreash(value);
                 }
             }
         }
@@ -918,9 +926,15 @@ namespace Xv2CoreLib.EEPK
         {
             if(AssetRef == asset)
             {
-                NotifyPropertyChanged("AssetRefDetails");
-                NotifyPropertyChanged("AssetRef");
+                RefreshDetails();
             }
+        }
+
+        public void RefreshDetails()
+        {
+            NotifyPropertyChanged(nameof(AssetRefDetails));
+            NotifyPropertyChanged(nameof(AssetRef));
+            NotifyPropertyChanged(nameof(EffectPartDetails));
         }
 
         public void CopyValues(EffectPart effectPart, List<IUndoRedo> undos)

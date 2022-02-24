@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xv2CoreLib.HslColor;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
@@ -17,7 +14,7 @@ namespace Xv2CoreLib.ECF
     public class ECF_File
     {
         [YAXAttributeForClass]
-        public UInt16 I_12 { get; set; }
+        public ushort I_12 { get; set; }
         //followed by 12 zero bytes
         
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "ColorEffect")]
@@ -66,14 +63,14 @@ namespace Xv2CoreLib.ECF
     public class ECF_Entry
     {
         [YAXAttributeForClass]
-        [YAXSerializeAs("Node")]
-        public string Unk_Str { get; set; }
+        [YAXSerializeAs("MaterialLink")]
+        public string MaterialLink { get; set; } //Material linkage. "Node" seems to be the default value, applying to all materials.
         [YAXSerializeAs("StartFrame")]
         [YAXAttributeFor("Time")]
-        public UInt16 I_56 { get; set; }
+        public ushort I_56 { get; set; }
         [YAXSerializeAs("EndFrame")]
         [YAXAttributeFor("Time")]
-        public UInt16 I_58 { get; set; }
+        public ushort I_58 { get; set; }
 
         [YAXSerializeAs("R")]
         [YAXAttributeFor("DiffuseColor")]
@@ -132,26 +129,26 @@ namespace Xv2CoreLib.ECF
         public PlayMode I_52 { get; set; } //uint16
         [YAXSerializeAs("value")]
         [YAXAttributeFor("I_54")]
-        public UInt16 I_54 { get; set; }
+        public ushort I_54 { get; set; } //always 0
         [YAXSerializeAs("value")]
         [YAXAttributeFor("I_60")]
-        public UInt16 I_60 { get; set; }
+        public ushort I_60 { get; set; } //always 0
         [YAXSerializeAs("value")]
         [YAXAttributeFor("I_62")]
-        public UInt16 I_62 { get; set; }
+        public ushort I_62 { get; set; } //always 0
         [YAXSerializeAs("uint16")]
         [YAXAttributeFor("I_64")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public UInt16[] I_64 { get; set; } // size = 14
+        public ushort[] I_64 { get; set; } // size = 14, all always 0
         [YAXSerializeAs("value")]
         [YAXAttributeFor("I_96")]
-        public UInt16 I_96 { get; set; }
+        public ushort I_96 { get; set; } //always 0
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Animation")]
-        public List<Type0> Type0 { get; set; }
+        public List<Type0> Animations { get; set; } = new List<Type0>();
 
         
-        public enum PlayMode
+        public enum PlayMode : ushort
         {
             NoLoop = 2,
             Loop = 3
@@ -190,11 +187,11 @@ namespace Xv2CoreLib.ECF
             }
 
             //Animations
-            if (Type0 != null)
+            if (Animations != null)
             {
-                InitColorAnimations(ECF.Type0.Parameter.DiffuseColor, F_00, F_04, F_08);
-                InitColorAnimations(ECF.Type0.Parameter.SpecularColor, F_16, F_20, F_24);
-                InitColorAnimations(ECF.Type0.Parameter.AmbientColor, F_32, F_36, F_40);
+                InitColorAnimations(ECF.Type0.ParameterEnum.DiffuseColor, F_00, F_04, F_08);
+                InitColorAnimations(ECF.Type0.ParameterEnum.SpecularColor, F_16, F_20, F_24);
+                InitColorAnimations(ECF.Type0.ParameterEnum.AmbientColor, F_32, F_36, F_40);
             }
 
             return colors;
@@ -203,13 +200,13 @@ namespace Xv2CoreLib.ECF
         /// <summary>
         /// Ensures that an animation exists for each color component.
         /// </summary>
-        public void InitColorAnimations(Type0.Parameter parameter, float defaultR, float defaultG, float defaultB)
+        public void InitColorAnimations(Type0.ParameterEnum parameter, float defaultR, float defaultG, float defaultB)
         {
-            if (Type0 == null) return;
+            if (Animations == null) return;
 
-            var r = GetColorAnimation(parameter, ECF.Type0.Component.R);
-            var g = GetColorAnimation(parameter, ECF.Type0.Component.G);
-            var b = GetColorAnimation(parameter, ECF.Type0.Component.B);
+            var r = GetColorAnimation(parameter, ECF.Type0.ComponentEnum.R);
+            var g = GetColorAnimation(parameter, ECF.Type0.ComponentEnum.G);
+            var b = GetColorAnimation(parameter, ECF.Type0.ComponentEnum.B);
 
             //Create missing animations
             if (r != null || g != null || b != null)
@@ -217,32 +214,32 @@ namespace Xv2CoreLib.ECF
                 if (r == null)
                 {
                     var newR = ECF.Type0.GetNew(defaultR);
-                    newR.I_01_a = ECF.Type0.Component.R;
-                    newR.I_00 = parameter;
-                    Type0.Add(newR);
+                    newR.Component = ECF.Type0.ComponentEnum.R;
+                    newR.Parameter = parameter;
+                    Animations.Add(newR);
                 }
 
                 if (g == null)
                 {
                     var newG = ECF.Type0.GetNew(defaultG);
-                    newG.I_01_a = ECF.Type0.Component.G;
-                    newG.I_00 = parameter;
-                    Type0.Add(newG);
+                    newG.Component = ECF.Type0.ComponentEnum.G;
+                    newG.Parameter = parameter;
+                    Animations.Add(newG);
                 }
 
                 if (b == null)
                 {
                     var newB = ECF.Type0.GetNew(defaultB);
-                    newB.I_01_a = ECF.Type0.Component.B;
-                    newB.I_00 = parameter;
-                    Type0.Add(newB);
+                    newB.Component = ECF.Type0.ComponentEnum.B;
+                    newB.Parameter = parameter;
+                    Animations.Add(newB);
                 }
                 
             }
 
-            r = GetColorAnimation(parameter, ECF.Type0.Component.R);
-            g = GetColorAnimation(parameter, ECF.Type0.Component.G);
-            b = GetColorAnimation(parameter, ECF.Type0.Component.B);
+            r = GetColorAnimation(parameter, ECF.Type0.ComponentEnum.R);
+            g = GetColorAnimation(parameter, ECF.Type0.ComponentEnum.G);
+            b = GetColorAnimation(parameter, ECF.Type0.ComponentEnum.B);
 
             if (r != null && g != null && b != null)
             {
@@ -264,11 +261,11 @@ namespace Xv2CoreLib.ECF
             }
 
             //Add missing keyframes
-            foreach (var anim in Type0)
+            foreach (var anim in Animations)
             {
-                foreach (var anim2 in Type0)
+                foreach (var anim2 in Animations)
                 {
-                    if (anim.I_00 == parameter && anim2.I_00 == parameter && !anim.IsAlpha && !anim2.IsAlpha)
+                    if (anim.Parameter == parameter && anim2.Parameter == parameter && !anim.IsAlpha && !anim2.IsAlpha)
                     {
                         anim.AddKeyframesFromAnim(anim2);
                     }
@@ -276,11 +273,11 @@ namespace Xv2CoreLib.ECF
             }
         }
 
-        public Type0 GetColorAnimation(Type0.Parameter parameter, Type0.Component component)
+        public Type0 GetColorAnimation(Type0.ParameterEnum parameter, Type0.ComponentEnum component)
         {
-            foreach (var anim in Type0)
+            foreach (var anim in Animations)
             {
-                if (anim.I_00 == parameter && anim.I_01_a == component)
+                if (anim.Parameter == parameter && anim.Component == component)
                 {
                     return anim;
                 }
@@ -384,19 +381,19 @@ namespace Xv2CoreLib.ECF
                 }
             }
 
-            if(Type0 != null)
+            if(Animations != null)
             {
-                ChangeHueForAnimations(hue, saturation, lightness, ECF.Type0.Parameter.DiffuseColor, undos, hueSet, variance);
-                ChangeHueForAnimations(hue, saturation, lightness, ECF.Type0.Parameter.SpecularColor, undos, hueSet, variance);
-                ChangeHueForAnimations(hue, saturation, lightness, ECF.Type0.Parameter.AmbientColor, undos, hueSet, variance);
+                ChangeHueForAnimations(hue, saturation, lightness, ECF.Type0.ParameterEnum.DiffuseColor, undos, hueSet, variance);
+                ChangeHueForAnimations(hue, saturation, lightness, ECF.Type0.ParameterEnum.SpecularColor, undos, hueSet, variance);
+                ChangeHueForAnimations(hue, saturation, lightness, ECF.Type0.ParameterEnum.AmbientColor, undos, hueSet, variance);
             }
         }
 
-        private void ChangeHueForAnimations(double hue, double saturation, double lightness, Type0.Parameter parameter, List<IUndoRedo> undos, bool hueSet = false, int variance = 0)
+        private void ChangeHueForAnimations(double hue, double saturation, double lightness, Type0.ParameterEnum parameter, List<IUndoRedo> undos, bool hueSet = false, int variance = 0)
         {
-            Type0 r = Type0.FirstOrDefault(e => e.I_01_a == ECF.Type0.Component.R && e.I_00 == parameter);
-            Type0 g = Type0.FirstOrDefault(e => e.I_01_a == ECF.Type0.Component.G && e.I_00 == parameter);
-            Type0 b = Type0.FirstOrDefault(e => e.I_01_a == ECF.Type0.Component.B && e.I_00 == parameter);
+            Type0 r = Animations.FirstOrDefault(e => e.Component == ECF.Type0.ComponentEnum.R && e.Parameter == parameter);
+            Type0 g = Animations.FirstOrDefault(e => e.Component == ECF.Type0.ComponentEnum.G && e.Parameter == parameter);
+            Type0 b = Animations.FirstOrDefault(e => e.Component == ECF.Type0.ComponentEnum.B && e.Parameter == parameter);
             if (r == null || g == null || b == null) return;
 
             foreach (var r_frame in r.Keyframes)
@@ -441,22 +438,22 @@ namespace Xv2CoreLib.ECF
         {
             get
             {
-                return (I_01_a == Component.A);
+                return (Component == ComponentEnum.A);
             }
         }
 
         [YAXAttributeForClass]
         [YAXSerializeAs("Parameter")]
-        public Parameter I_00 { get; set; } //int8
+        public ParameterEnum Parameter { get; set; } //int8
         [YAXAttributeForClass]
         [YAXSerializeAs("Component")]
-        public Component I_01_a { get; set; } //int4
+        public ComponentEnum Component { get; set; } //int4
         [YAXAttributeForClass]
         [YAXSerializeAs("Interpolated")]
-        public bool I_01_b { get; set; }
+        public bool Interpolated { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("Looped")]
-        public bool I_02 { get; set; }
+        public bool Loop { get; set; }
         [YAXAttributeFor("I_03")]
         [YAXSerializeAs("int8")]
         public byte I_03 { get; set; }
@@ -467,7 +464,7 @@ namespace Xv2CoreLib.ECF
         
         public AsyncObservableCollection<Type0_Keyframe> Keyframes { get; set; }
 
-        public enum Parameter
+        public enum ParameterEnum
         {
             DiffuseColor = 0,
             SpecularColor = 1,
@@ -475,7 +472,7 @@ namespace Xv2CoreLib.ECF
             BlendingFactor = 3
         }
 
-        public enum Component
+        public enum ComponentEnum
         {
             R = 0,
             G = 1,
@@ -484,25 +481,25 @@ namespace Xv2CoreLib.ECF
             Base = 4
         }
         
-        public static Component GetComponent(Parameter parameter, int component)
+        public static ComponentEnum GetComponent(ParameterEnum parameter, int component)
         {
             switch (parameter)
             {
-                case Parameter.BlendingFactor:
-                    return Component.Base;
+                case ParameterEnum.BlendingFactor:
+                    return ComponentEnum.Base;
                 default:
-                    return (Component)component;
+                    return (ComponentEnum)component;
             }
         }
 
         public byte GetComponent()
         {
-            switch (I_00)
+            switch (Parameter)
             {
-                case Parameter.BlendingFactor:
+                case ParameterEnum.BlendingFactor:
                     return 0;
                 default:
-                    return (byte)I_01_a;
+                    return (byte)Component;
             }
         }
 

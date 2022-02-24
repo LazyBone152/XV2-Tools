@@ -90,19 +90,19 @@ namespace Xv2CoreLib.ECF
 
                     if (Type0_Count > 0)
                     {
-                        ecfFile.Entries[i].Type0 = new List<Type0>();
+                        ecfFile.Entries[i].Animations = new List<Type0>();
 
                         for (int a = 0; a < Type0_Count; a++)
                         {
                             int startOffset = BitConverter.ToInt32(rawBytes, Type0_Offset + 8) + Type0_Offset;
                             int floatOffset = BitConverter.ToInt32(rawBytes, Type0_Offset + 12) + Type0_Offset;
 
-                            ecfFile.Entries[i].Type0.Add(new Type0()
+                            ecfFile.Entries[i].Animations.Add(new Type0()
                             {
-                                I_00 = (ECF.Type0.Parameter)rawBytes[Type0_Offset + 0],
-                                I_01_a = Type0.GetComponent((ECF.Type0.Parameter)rawBytes[Type0_Offset + 0], Int4Converter.ToInt4(rawBytes[Type0_Offset + 1])[0]),
-                                I_01_b = BitConverter_Ex.ToBoolean(Int4Converter.ToInt4(rawBytes[Type0_Offset + 1])[1]),
-                                I_02 = (rawBytes[Type0_Offset + 2] == 0)? false : true,
+                                Parameter = (ECF.Type0.ParameterEnum)rawBytes[Type0_Offset + 0],
+                                Component = Type0.GetComponent((ECF.Type0.ParameterEnum)rawBytes[Type0_Offset + 0], Int4Converter.ToInt4(rawBytes[Type0_Offset + 1])[0]),
+                                Interpolated = BitConverter_Ex.ToBoolean(Int4Converter.ToInt4(rawBytes[Type0_Offset + 1])[1]),
+                                Loop = (rawBytes[Type0_Offset + 2] == 0)? false : true,
                                 I_03 = rawBytes[Type0_Offset + 3],
                                 I_04 = BitConverter.ToUInt16(rawBytes, Type0_Offset + 4),
                                 Keyframes = ParseKeyframes(BitConverter.ToInt16(rawBytes, Type0_Offset + 6), startOffset, floatOffset)
@@ -118,11 +118,11 @@ namespace Xv2CoreLib.ECF
 
                     if (Str_Offset != 0)
                     {
-                        ecfFile.Entries[i].Unk_Str = StringEx.GetString(rawBytes, Str_Offset);
+                        ecfFile.Entries[i].MaterialLink = StringEx.GetString(rawBytes, Str_Offset);
                     }
                     else
                     {
-                        ecfFile.Entries[i].Unk_Str = String.Empty;
+                        ecfFile.Entries[i].MaterialLink = String.Empty;
                     }
 
                     mainEntryOffset += 104;

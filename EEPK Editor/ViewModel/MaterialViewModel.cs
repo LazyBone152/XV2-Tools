@@ -9,345 +9,353 @@ namespace EEPK_Organiser.ViewModel
 {
     public class MaterialViewModel : ObservableObject, IDisposable
     {
-        private readonly DecompiledMaterial material;
+        private static readonly DecompiledMaterial DefaultDecompiledMaterial = DecompiledMaterial.Default();
+        private DecompiledMaterial _material;
+        private DecompiledMaterial CurrentMaterial
+        {
+            get => _material != null ? _material : DefaultDecompiledMaterial;
+        }
 
         //Glare
         public int Glare
         {
-            get => material.Glare;
-            set => SetIntValue(value, nameof(material.Glare));
+            get => CurrentMaterial.Glare;
+            set => SetIntValue(value, nameof(CurrentMaterial.Glare));
         }
-        public CustomColor GlareCol => material.GlareCol;
+        public CustomColor GlareCol => CurrentMaterial.GlareCol;
 
         //MatOffsets
-        public CustomVector4 MatOffset0 => material.MatOffset0;
-        public CustomVector4 MatOffset1 => material.MatOffset1;
+        public CustomVector4 MatOffset0 => CurrentMaterial.MatOffset0;
+        public CustomVector4 MatOffset1 => CurrentMaterial.MatOffset1;
 
         //MatScales
-        public CustomVector4 MatScale0 => material.MatScale0;
-        public CustomVector4 MatScale1 => material.MatScale1;
+        public CustomVector4 MatScale0 => CurrentMaterial.MatScale0;
+        public CustomVector4 MatScale1 => CurrentMaterial.MatScale1;
 
         //MatCols
-        public CustomColor MatCol0 => material.MatCol0;
-        public CustomColor MatCol1 => material.MatCol1;
-        public CustomColor MatCol2 => material.MatCol2;
-        public CustomColor MatCol3 => material.MatCol3;
+        public CustomColor MatCol0 => CurrentMaterial.MatCol0;
+        public CustomColor MatCol1 => CurrentMaterial.MatCol1;
+        public CustomColor MatCol2 => CurrentMaterial.MatCol2;
+        public CustomColor MatCol3 => CurrentMaterial.MatCol3;
 
         //Texture
-        public CustomMatUV TexScrl0 => material.TexScrl0;
-        public CustomMatUV TexScrl1 => material.TexScrl1;
-        public CustomMatUV gScroll0 => material.gScroll0;
-        public CustomMatUV gScroll1 => material.gScroll1;
+        public CustomMatUV TexScrl0 => CurrentMaterial.TexScrl0;
+        public CustomMatUV TexScrl1 => CurrentMaterial.TexScrl1;
+        public CustomMatUV gScroll0 => CurrentMaterial.gScroll0;
+        public CustomMatUV gScroll1 => CurrentMaterial.gScroll1;
 
-        public CustomMatRepUV TexRep0 => material.TexRep0;
-        public CustomMatRepUV TexRep1 => material.TexRep1;
-        public CustomMatRepUV TexRep2 => material.TexRep2;
-        public CustomMatRepUV TexRep3 => material.TexRep3;
+        public CustomMatRepUV TexRep0 => CurrentMaterial.TexRep0;
+        public CustomMatRepUV TexRep1 => CurrentMaterial.TexRep1;
+        public CustomMatRepUV TexRep2 => CurrentMaterial.TexRep2;
+        public CustomMatRepUV TexRep3 => CurrentMaterial.TexRep3;
 
         public int TextureFilter0
         {
-            get => material.TextureFilter0;
-            set => SetIntValue(value, nameof(material.TextureFilter0));
+            get => CurrentMaterial.TextureFilter0;
+            set => SetIntValue(value, nameof(CurrentMaterial.TextureFilter0));
         }
         public int TextureFilter1
         {
-            get => material.TextureFilter1;
-            set => SetIntValue(value, nameof(material.TextureFilter1));
+            get => CurrentMaterial.TextureFilter1;
+            set => SetIntValue(value, nameof(CurrentMaterial.TextureFilter1));
         }
         public int TextureFilter2
         {
-            get => material.TextureFilter2;
-            set => SetIntValue(value, nameof(material.TextureFilter2));
+            get => CurrentMaterial.TextureFilter2;
+            set => SetIntValue(value, nameof(CurrentMaterial.TextureFilter2));
         }
         public int TextureFilter3
         {
-            get => material.TextureFilter3;
-            set => SetIntValue(value, nameof(material.TextureFilter3));
+            get => CurrentMaterial.TextureFilter3;
+            set => SetIntValue(value, nameof(CurrentMaterial.TextureFilter3));
         }
 
         public float MipMapLod0
         {
-            get => material.MipMapLod0;
-            set => SetFloatValue(value, nameof(material.MipMapLod0));
+            get => CurrentMaterial.MipMapLod0;
+            set => SetFloatValue(value, nameof(CurrentMaterial.MipMapLod0));
         }
         public float MipMapLod1
         {
-            get => material.MipMapLod1;
-            set => SetFloatValue(value, nameof(material.MipMapLod1));
+            get => CurrentMaterial.MipMapLod1;
+            set => SetFloatValue(value, nameof(CurrentMaterial.MipMapLod1));
         }
         public float MipMapLod2
         {
-            get => material.MipMapLod2;
-            set => SetFloatValue(value, nameof(material.MipMapLod2));
+            get => CurrentMaterial.MipMapLod2;
+            set => SetFloatValue(value, nameof(CurrentMaterial.MipMapLod2));
         }
         public float MipMapLod3
         {
-            get => material.MipMapLod3;
-            set => SetFloatValue(value, nameof(material.MipMapLod3));
+            get => CurrentMaterial.MipMapLod3;
+            set => SetFloatValue(value, nameof(CurrentMaterial.MipMapLod3));
         }
 
         //Other texture shit
         public float gToonTextureWidth
         {
-            get => material.gToonTextureWidth;
-            set => SetFloatValue(value, nameof(material.gToonTextureWidth));
+            get => CurrentMaterial.gToonTextureWidth;
+            set => SetFloatValue(value, nameof(CurrentMaterial.gToonTextureWidth));
         }
         public float gToonTextureHeight
         {
-            get => material.gToonTextureHeight;
-            set => SetFloatValue(value, nameof(material.gToonTextureHeight));
+            get => CurrentMaterial.gToonTextureHeight;
+            set => SetFloatValue(value, nameof(CurrentMaterial.gToonTextureHeight));
         }
-        public CustomMatUV ToonSamplerAddress => material.ToonSamplerAddress;
-        public CustomMatUV MarkSamplerAddress => material.MarkSamplerAddress;
-        public CustomMatUV MaskSamplerAddress => material.MaskSamplerAddress;
+        public CustomMatUV ToonSamplerAddress => CurrentMaterial.ToonSamplerAddress;
+        public CustomMatUV MarkSamplerAddress => CurrentMaterial.MarkSamplerAddress;
+        public CustomMatUV MaskSamplerAddress => CurrentMaterial.MaskSamplerAddress;
 
         //MatDiff/Amb
-        public CustomColor MatDif => material.MatDif;
-        public CustomColor MatAmb => material.MatAmb;
-        public CustomColor MatSpc => material.MatSpc;
+        public CustomColor MatDif => CurrentMaterial.MatDif;
+        public CustomColor MatAmb => CurrentMaterial.MatAmb;
+        public CustomColor MatSpc => CurrentMaterial.MatSpc;
         public float MatDifScale
         {
-            get => material.MatDifScale;
-            set => SetFloatValue(value, nameof(material.MatDifScale));
+            get => CurrentMaterial.MatDifScale;
+            set => SetFloatValue(value, nameof(CurrentMaterial.MatDifScale));
         }
         public float MatAmbScale
         {
-            get => material.MatAmbScale;
-            set => SetFloatValue(value, nameof(material.MatAmbScale));
+            get => CurrentMaterial.MatAmbScale;
+            set => SetFloatValue(value, nameof(CurrentMaterial.MatAmbScale));
         }
         public float SpcCoeff
         {
-            get => material.SpcCoeff;
-            set => SetFloatValue(value, nameof(material.SpcCoeff));
+            get => CurrentMaterial.SpcCoeff;
+            set => SetFloatValue(value, nameof(CurrentMaterial.SpcCoeff));
         }
         public float SpcPower
         {
-            get => material.SpcPower;
-            set => SetFloatValue(value, nameof(material.SpcPower));
+            get => CurrentMaterial.SpcPower;
+            set => SetFloatValue(value, nameof(CurrentMaterial.SpcPower));
         }
 
         //Alpha
         public int AlphaBlend
         {
-            get => material.AlphaBlend;
-            set => SetIntValue(value, nameof(material.AlphaBlend));
+            get => CurrentMaterial.AlphaBlend;
+            set => SetIntValue(value, nameof(CurrentMaterial.AlphaBlend));
         }
         public AlphaBlendType AlphaBlendType
         {
-            get => (AlphaBlendType)material.AlphaBlendType;
-            set => SetIntValue((int)value, nameof(material.AlphaBlendType));
+            get => (AlphaBlendType)CurrentMaterial.AlphaBlendType;
+            set => SetIntValue((int)value, nameof(CurrentMaterial.AlphaBlendType));
         }
         public int AlphaTest
         {
-            get => material.AlphaTest;
-            set => SetIntValue(value, nameof(material.AlphaTest));
+            get => CurrentMaterial.AlphaTest;
+            set => SetIntValue(value, nameof(CurrentMaterial.AlphaTest));
         }
         public bool AlphaTestThreshold
         {
-            get => material.AlphaTestThreshold;
-            set => SetBoolValue(value, nameof(material.AlphaTestThreshold));
+            get => CurrentMaterial.AlphaTestThreshold;
+            set => SetBoolValue(value, nameof(CurrentMaterial.AlphaTestThreshold));
         }
         public bool AlphaRef
         {
-            get => material.AlphaRef;
-            set => SetBoolValue(value, nameof(material.AlphaRef));
+            get => CurrentMaterial.AlphaRef;
+            set => SetBoolValue(value, nameof(CurrentMaterial.AlphaRef));
         }
 
         //Mask
         public int AlphaSortMask
         {
-            get => material.AlphaSortMask;
-            set => SetIntValue(value, nameof(material.AlphaSortMask));
+            get => CurrentMaterial.AlphaSortMask;
+            set => SetIntValue(value, nameof(CurrentMaterial.AlphaSortMask));
         }
         public int ZTestMask
         {
-            get => material.ZTestMask;
-            set => SetIntValue(value, nameof(material.ZTestMask));
+            get => CurrentMaterial.ZTestMask;
+            set => SetIntValue(value, nameof(CurrentMaterial.ZTestMask));
         }
         public int ZWriteMask
         {
-            get => material.ZWriteMask;
-            set => SetIntValue(value, nameof(material.ZWriteMask));
+            get => CurrentMaterial.ZWriteMask;
+            set => SetIntValue(value, nameof(CurrentMaterial.ZWriteMask));
         }
 
 
         //Flags
         public bool VsFlag0
         {
-            get => material.VsFlag0;
-            set => SetBoolValue(value, nameof(material.VsFlag0));
+            get => CurrentMaterial.VsFlag0;
+            set => SetBoolValue(value, nameof(CurrentMaterial.VsFlag0));
         }
         public bool VsFlag1
         {
-            get => material.VsFlag1;
-            set => SetBoolValue(value, nameof(material.VsFlag1));
+            get => CurrentMaterial.VsFlag1;
+            set => SetBoolValue(value, nameof(CurrentMaterial.VsFlag1));
         }
         public bool VsFlag2
         {
-            get => material.VsFlag2;
-            set => SetBoolValue(value, nameof(material.VsFlag2));
+            get => CurrentMaterial.VsFlag2;
+            set => SetBoolValue(value, nameof(CurrentMaterial.VsFlag2));
         }
         public bool VsFlag3
         {
-            get => material.VsFlag3;
-            set => SetBoolValue(value, nameof(material.VsFlag3));
+            get => CurrentMaterial.VsFlag3;
+            set => SetBoolValue(value, nameof(CurrentMaterial.VsFlag3));
         }
         public int CustomFlag
         {
-            get => material.CustomFlag;
-            set => SetIntValue(value, nameof(material.CustomFlag));
+            get => CurrentMaterial.CustomFlag;
+            set => SetIntValue(value, nameof(CurrentMaterial.CustomFlag));
         }
 
         //Culling
         public int BackFace
         {
-            get => material.BackFace;
-            set => SetIntValue(value, nameof(material.BackFace));
+            get => CurrentMaterial.BackFace;
+            set => SetIntValue(value, nameof(CurrentMaterial.BackFace));
         }
         public int TwoSidedRender
         {
-            get => material.TwoSidedRender;
-            set => SetIntValue(value, nameof(material.TwoSidedRender));
+            get => CurrentMaterial.TwoSidedRender;
+            set => SetIntValue(value, nameof(CurrentMaterial.TwoSidedRender));
         }
 
         //LowRez
         public int LowRez
         {
-            get => material.LowRez;
-            set => SetIntValue(value, nameof(material.LowRez));
+            get => CurrentMaterial.LowRez;
+            set => SetIntValue(value, nameof(CurrentMaterial.LowRez));
         }
         public int LowRezSmoke
         {
-            get => material.LowRezSmoke;
-            set => SetIntValue(value, nameof(material.LowRezSmoke));
+            get => CurrentMaterial.LowRezSmoke;
+            set => SetIntValue(value, nameof(CurrentMaterial.LowRezSmoke));
         }
 
         //Incidence
         public float IncidencePower
         {
-            get => material.IncidencePower;
-            set => SetFloatValue(value, nameof(material.IncidencePower));
+            get => CurrentMaterial.IncidencePower;
+            set => SetFloatValue(value, nameof(CurrentMaterial.IncidencePower));
         }
         public float IncidenceAlphaBias
         {
-            get => material.IncidenceAlphaBias;
-            set => SetFloatValue(value, nameof(material.IncidenceAlphaBias));
+            get => CurrentMaterial.IncidenceAlphaBias;
+            set => SetFloatValue(value, nameof(CurrentMaterial.IncidenceAlphaBias));
         }
 
         //Billboard
         public int Billboard
         {
-            get => material.Billboard;
-            set => SetIntValue(value, nameof(material.Billboard));
+            get => CurrentMaterial.Billboard;
+            set => SetIntValue(value, nameof(CurrentMaterial.Billboard));
         }
         public int BillboardType
         {
-            get => material.BillboardType;
-            set => SetIntValue(value, nameof(material.BillboardType));
+            get => CurrentMaterial.BillboardType;
+            set => SetIntValue(value, nameof(CurrentMaterial.BillboardType));
         }
 
         //Reflect
         public float ReflectCoeff
         {
-            get => material.ReflectCoeff;
-            set => SetFloatValue(value, nameof(material.ReflectCoeff));
+            get => CurrentMaterial.ReflectCoeff;
+            set => SetFloatValue(value, nameof(CurrentMaterial.ReflectCoeff));
         }
         public float ReflectFresnelBias
         {
-            get => material.ReflectFresnelBias;
-            set => SetFloatValue(value, nameof(material.ReflectFresnelBias));
+            get => CurrentMaterial.ReflectFresnelBias;
+            set => SetFloatValue(value, nameof(CurrentMaterial.ReflectFresnelBias));
         }
         public float ReflectFresnelCoeff
         {
-            get => material.ReflectFresnelCoeff;
-            set => SetFloatValue(value, nameof(material.ReflectFresnelCoeff));
+            get => CurrentMaterial.ReflectFresnelCoeff;
+            set => SetFloatValue(value, nameof(CurrentMaterial.ReflectFresnelCoeff));
         }
 
         //Other
         public int AnimationChannel
         {
-            get => material.AnimationChannel;
-            set => SetIntValue(value, nameof(material.AnimationChannel));
+            get => CurrentMaterial.AnimationChannel;
+            set => SetIntValue(value, nameof(CurrentMaterial.AnimationChannel));
         }
         public int NoEdge
         {
-            get => material.NoEdge;
-            set => SetIntValue(value, nameof(material.NoEdge));
+            get => CurrentMaterial.NoEdge;
+            set => SetIntValue(value, nameof(CurrentMaterial.NoEdge));
         }
         public int Shimmer
         {
-            get => material.Shimmer;
-            set => SetIntValue(value, nameof(material.Shimmer));
+            get => CurrentMaterial.Shimmer;
+            set => SetIntValue(value, nameof(CurrentMaterial.Shimmer));
         }
         public float gTime
         {
-            get => material.gTime;
-            set => SetFloatValue(value, nameof(material.gTime));
+            get => CurrentMaterial.gTime;
+            set => SetFloatValue(value, nameof(CurrentMaterial.gTime));
         }
 
         //Light
-        public CustomColor gLightDir => material.gLightDir;
-        public CustomColor gLightDif => material.gLightDif;
-        public CustomColor gLightSpc => material.gLightSpc;
-        public CustomColor gLightAmb => material.gLightAmb;
-        public CustomVector4 gCamPos => material.gCamPos;
-        public CustomColor DirLight0Dir => material.DirLight0Dir;
-        public CustomColor DirLight0Col => material.DirLight0Col;
-        public CustomColor AmbLight0Col => material.AmbLight0Col;
+        public CustomColor gLightDir => CurrentMaterial.gLightDir;
+        public CustomColor gLightDif => CurrentMaterial.gLightDif;
+        public CustomColor gLightSpc => CurrentMaterial.gLightSpc;
+        public CustomColor gLightAmb => CurrentMaterial.gLightAmb;
+        public CustomVector4 gCamPos => CurrentMaterial.gCamPos;
+        public CustomColor DirLight0Dir => CurrentMaterial.DirLight0Dir;
+        public CustomColor DirLight0Col => CurrentMaterial.DirLight0Col;
+        public CustomColor AmbLight0Col => CurrentMaterial.AmbLight0Col;
 
         //Other
-        public CustomColor Ambient => material.Ambient;
-        public CustomColor Diffuse => material.Diffuse;
-        public CustomColor Specular => material.Specular;
+        public CustomColor Ambient => CurrentMaterial.Ambient;
+        public CustomColor Diffuse => CurrentMaterial.Diffuse;
+        public CustomColor Specular => CurrentMaterial.Specular;
         public float SpecularPower
         {
-            get => material.SpecularPower;
-            set => SetFloatValue(value, nameof(material.SpecularPower));
+            get => CurrentMaterial.SpecularPower;
+            set => SetFloatValue(value, nameof(CurrentMaterial.SpecularPower));
         }
 
         //Fade/Gradient
         public float FadeInit
         {
-            get => material.FadeInit;
-            set => SetFloatValue(value, nameof(material.FadeInit));
+            get => CurrentMaterial.FadeInit;
+            set => SetFloatValue(value, nameof(CurrentMaterial.FadeInit));
         }
         public float FadeSpeed
         {
-            get => material.FadeSpeed;
-            set => SetFloatValue(value, nameof(material.FadeSpeed));
+            get => CurrentMaterial.FadeSpeed;
+            set => SetFloatValue(value, nameof(CurrentMaterial.FadeSpeed));
         }
         public float GradientInit
         {
-            get => material.GradientInit;
-            set => SetFloatValue(value, nameof(material.GradientInit));
+            get => CurrentMaterial.GradientInit;
+            set => SetFloatValue(value, nameof(CurrentMaterial.GradientInit));
         }
         public float GradientSpeed
         {
-            get => material.GradientSpeed;
-            set => SetFloatValue(value, nameof(material.GradientSpeed));
+            get => CurrentMaterial.GradientSpeed;
+            set => SetFloatValue(value, nameof(CurrentMaterial.GradientSpeed));
         }
-        public CustomColor gGradientCol => material.gGradientCol;
+        public CustomColor gGradientCol => CurrentMaterial.gGradientCol;
 
         //Rim
         public float RimCoeff
         {
-            get => material.RimCoeff;
-            set => SetFloatValue(value, nameof(material.RimCoeff));
+            get => CurrentMaterial.RimCoeff;
+            set => SetFloatValue(value, nameof(CurrentMaterial.RimCoeff));
         }
         public float RimPower
         {
-            get => material.RimPower;
-            set => SetFloatValue(value, nameof(material.RimPower));
+            get => CurrentMaterial.RimPower;
+            set => SetFloatValue(value, nameof(CurrentMaterial.RimPower));
         }
 
 
 
-        public MaterialViewModel(DecompiledMaterial material)
+        public MaterialViewModel()
         {
-            this.material = material;
-
             if (UndoManager.Instance != null)
                 UndoManager.Instance.UndoOrRedoCalled += Instance_UndoOrRedoCalled;
+        }
+
+        public void SetMaterial(DecompiledMaterial material)
+        {
+            _material = material;
         }
 
         private void Instance_UndoOrRedoCalled(object sender, UndoEventRaisedEventArgs e)
@@ -374,37 +382,37 @@ namespace EEPK_Organiser.ViewModel
         #region UndoableSetMethods
         private void SetIntValue(int newValue, string fieldName)
         {
-            int original = (int)material.GetType().GetField(fieldName).GetValue(material);
+            int original = (int)CurrentMaterial.GetType().GetField(fieldName).GetValue(CurrentMaterial);
 
             if(original != newValue)
             {
-                material.GetType().GetField(fieldName).SetValue(material, newValue);
+                CurrentMaterial.GetType().GetField(fieldName).SetValue(CurrentMaterial, newValue);
 
-                UndoManager.Instance.AddUndo(new UndoableField(fieldName, material, original, newValue, $"{fieldName}"));
+                UndoManager.Instance.AddUndo(new UndoableField(fieldName, CurrentMaterial, original, newValue, $"{fieldName}"));
             }
         }
 
         private void SetBoolValue(bool newValue, string fieldName)
         {
-            bool original = (bool)material.GetType().GetField(fieldName).GetValue(material);
+            bool original = (bool)CurrentMaterial.GetType().GetField(fieldName).GetValue(CurrentMaterial);
 
             if (original != newValue)
             {
-                material.GetType().GetField(fieldName).SetValue(material, newValue);
+                CurrentMaterial.GetType().GetField(fieldName).SetValue(CurrentMaterial, newValue);
 
-                UndoManager.Instance.AddUndo(new UndoableField(fieldName, material, original, newValue, $"{fieldName}"));
+                UndoManager.Instance.AddUndo(new UndoableField(fieldName, CurrentMaterial, original, newValue, $"{fieldName}"));
             }
         }
 
         private void SetFloatValue(float newValue, string fieldName)
         {
-            float original = (float)material.GetType().GetField(fieldName).GetValue(material);
+            float original = (float)CurrentMaterial.GetType().GetField(fieldName).GetValue(CurrentMaterial);
 
             if (original != newValue)
             {
-                material.GetType().GetField(fieldName).SetValue(material, newValue);
+                CurrentMaterial.GetType().GetField(fieldName).SetValue(CurrentMaterial, newValue);
 
-                UndoManager.Instance.AddUndo(new UndoableField(fieldName, material, original, newValue, $"{fieldName}"));
+                UndoManager.Instance.AddUndo(new UndoableField(fieldName, CurrentMaterial, original, newValue, $"{fieldName}"));
             }
         }
         

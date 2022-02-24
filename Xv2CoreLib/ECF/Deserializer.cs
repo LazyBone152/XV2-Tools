@@ -34,7 +34,6 @@ namespace Xv2CoreLib.ECF
 
         private void Write()
         {
-
             //offsets
             List<int> StrOffsets = new List<int>();
             List<string> StrToWrite = new List<string>();
@@ -78,18 +77,18 @@ namespace Xv2CoreLib.ECF
                         bytes.AddRange(BitConverter.GetBytes(value));
                     }
 
-                    if (!String.IsNullOrWhiteSpace(ecfFile.Entries[i].Unk_Str))
+                    if (!String.IsNullOrWhiteSpace(ecfFile.Entries[i].MaterialLink))
                     {
                         StrOffsets.Add(bytes.Count());
-                        StrToWrite.Add(ecfFile.Entries[i].Unk_Str);
+                        StrToWrite.Add(ecfFile.Entries[i].MaterialLink);
                     }
                     
                     bytes.AddRange(new byte[4]);
 
                     bytes.AddRange(BitConverter.GetBytes(ecfFile.Entries[i].I_96));
-                    if (ecfFile.Entries[i].Type0 != null)
+                    if (ecfFile.Entries[i].Animations != null)
                     {
-                        bytes.AddRange(BitConverter.GetBytes((short)ecfFile.Entries[i].Type0.Count()));
+                        bytes.AddRange(BitConverter.GetBytes((short)ecfFile.Entries[i].Animations.Count()));
                         Type0_Offsets.Add(bytes.Count());
                         bytes.AddRange(BitConverter.GetBytes(8));
                     } else {
@@ -102,17 +101,17 @@ namespace Xv2CoreLib.ECF
                 //Writing Type0s
                 for(int i = 0; i < ecfFile.Entries.Count(); i++)
                 {
-                    if(ecfFile.Entries[i].Type0 != null)
+                    if(ecfFile.Entries[i].Animations != null)
                     {
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - Type0_Offsets[i] + 4), Type0_Offsets[i]);
 
                         List<int> Type0EntryOffsets = new List<int>();
 
-                        foreach (var e in ecfFile.Entries[i].Type0)
+                        foreach (var e in ecfFile.Entries[i].Animations)
                         {
-                            int I_01_b = (e.I_01_b == true) ? 1 : 0;
-                            int I_02 = (e.I_02 == true) ? 1 : 0;
-                            bytes.AddRange(new byte[4] { (byte)e.I_00, Int4Converter.GetByte((byte)e.GetComponent(), (byte)I_01_b, "Animation: Component", "Animation: Interpolated"), (byte)I_02, e.I_03 });
+                            int I_01_b = (e.Interpolated == true) ? 1 : 0;
+                            int I_02 = (e.Loop == true) ? 1 : 0;
+                            bytes.AddRange(new byte[4] { (byte)e.Parameter, Int4Converter.GetByte((byte)e.GetComponent(), (byte)I_01_b, "Animation: Component", "Animation: Interpolated"), (byte)I_02, e.I_03 });
                             bytes.AddRange(BitConverter.GetBytes(e.I_04));
                             bytes.AddRange(BitConverter.GetBytes((short)e.Keyframes.Count()));
                             Type0EntryOffsets.Add(bytes.Count());
@@ -125,12 +124,12 @@ namespace Xv2CoreLib.ECF
                             }
                         }
 
-                        for (int a = 0; a < ecfFile.Entries[i].Type0.Count(); a++)
+                        for (int a = 0; a < ecfFile.Entries[i].Animations.Count(); a++)
                         {
                             int entryOffset = Type0EntryOffsets[a] - 8;
                             bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - entryOffset), Type0EntryOffsets[a]);
                             
-                            int floatListOffset = WriteKeyframe(ecfFile.Entries[i].Type0[a].Keyframes);
+                            int floatListOffset = WriteKeyframe(ecfFile.Entries[i].Animations[a].Keyframes);
 
                             bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(floatListOffset - entryOffset), Type0EntryOffsets[a] + 4);
                         }

@@ -23,9 +23,9 @@ namespace Xv2CoreLib.ACB
             LoadXml();
         }
 
-        public void ParseFile(UTF_File utfFile)
+        public void ParseFile(UTF_File utfFile, bool suppressErrors = false)
         {
-            AcbFormatHelperMain.ParseFile(utfFile, true);
+            AcbFormatHelperMain.ParseFile(utfFile, true, suppressErrors);
         }
 
         public UTF_File CreateTable(string columnName, string tableName, Version version)
@@ -161,7 +161,7 @@ namespace Xv2CoreLib.ACB
 
         public AcbFormatHelperMain() { }
 
-        public void ParseFile(UTF_File acbFile, bool throwExIfNewColumn)
+        public void ParseFile(UTF_File acbFile, bool throwExIfNewColumn, bool suppressErrors = false)
         {
             Version version = BigEndianConverter.UIntToVersion(acbFile.GetValue<uint>("Version", TypeFlag.UInt32, 0), true);
             AddVersion(version.ToString());
@@ -179,7 +179,7 @@ namespace Xv2CoreLib.ACB
                 {
                     var table = GetTable(column.Name, throwExIfNewColumn);
                     table.SetExists(version);
-                    table.ParseTable(tableColumn, column.Name, version, throwExIfNewColumn);
+                    table.ParseTable(tableColumn, column.Name, version, throwExIfNewColumn, suppressErrors);
                 }
             }
 
@@ -216,12 +216,12 @@ namespace Xv2CoreLib.ACB
                 }
 
                 //Doesn't exist
-                table.SetDoesNotExist(version);
+                table.SetDoesNotExist(version, suppressErrors);
             }
 
 
             //Parse all header columns
-            Header.ParseTable(acbFile, "Header", version, throwExIfNewColumn);
+            Header.ParseTable(acbFile, "Header", version, throwExIfNewColumn, suppressErrors);
 
             //Sort columns
             Sort();
@@ -283,7 +283,7 @@ namespace Xv2CoreLib.ACB
             Name = name;
         }
 
-        public void ParseTable(UTF_File table, string tableName, Version version, bool throwExIfNewColumn)
+        public void ParseTable(UTF_File table, string tableName, Version version, bool throwExIfNewColumn, bool supressErrors)
         {
             if (Name != tableName) throw new InvalidOperationException("AcbFormatHelperTable.ParseTable: table name does not match!");
 
@@ -308,7 +308,7 @@ namespace Xv2CoreLib.ACB
                 }
 
                 //Doesn't exist
-                column.SetDoesNotExist(version);
+                column.SetDoesNotExist(version, supressErrors);
             }
         }
 
@@ -434,7 +434,7 @@ namespace Xv2CoreLib.ACB
 
         }
 
-        public void SetDoesNotExist(Version version)
+        public void SetDoesNotExist(Version version, bool supressErrors)
         {
             if(IsVersionNull(PrimaryLowestVersion) && IsVersionNull(PrimaryHighestVersion))
             {
@@ -457,7 +457,7 @@ namespace Xv2CoreLib.ACB
                 else if (SecondaryLowestVersion < version)
                     SecondaryLowestVersion = version;
             }
-            else if (IsInPrimaryRange(version))
+            else if (IsInPrimaryRange(version) && !supressErrors)
             {
                 throw new InvalidOperationException($"AcbFormatVersions.SetDoesNotExist: Column ({Name}) already exists for the specified version ({version})...");
             }

@@ -110,6 +110,32 @@ namespace EEPK_Organiser.View
         //Effect View
         private bool editModeCancelling = false;
 
+        //Selected Effect
+        private Effect _selectedEffect = null;
+        public Effect SelectedEffect
+        {
+            get => _selectedEffect;
+            set
+            {
+                _selectedEffect = value;
+                NotifyPropertyChanged(nameof(SelectedEffect));
+                NotifyPropertyChanged(nameof(SelectedEffectID));
+            }
+        }
+        public int SelectedEffectID
+        {
+            get => SelectedEffect != null ? SelectedEffect.IndexNum : 0;
+            set
+            {
+                if(SelectedEffect != null && SelectedEffect?.IndexNum != value)
+                {
+
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(SelectedEffect.IndexNum), SelectedEffect, SelectedEffect.IndexNum, (ushort)value, "Effect ID"));
+                    SelectedEffect.IndexNum = (ushort)value;
+                    NotifyPropertyChanged(nameof(SelectedEffectID));
+                }
+            }
+        }
 
         //NameLists
         private NameList.NameListManager _nameListManager = null;
@@ -1066,6 +1092,7 @@ namespace EEPK_Organiser.View
 
         }
 
+        //EMO Files
         public RelayCommand<EffectFile> EMO_DoubleClickCommand => new RelayCommand<EffectFile>(EMO_DoubleClick);
         private void EMO_DoubleClick(EffectFile file)
         {
@@ -3098,63 +3125,6 @@ namespace EEPK_Organiser.View
 
 
         #region EFFECT
-        private void Effect_EffectIdChange_ValueChanged(object sender, DataGridCellEditEndingEventArgs e)
-        {
-            if ((string)e.Column.Header == "Name")
-            {
-                //We only want to do validation for the Effect ID
-                return;
-            }
-
-            if (editModeCancelling)
-            {
-                return;
-            }
-
-            var selectedEffect = effectDataGrid.SelectedItem as Effect;
-
-            if (selectedEffect != null)
-            {
-                string value = ((TextBox)e.EditingElement).Text;
-                ushort ret = 0;
-
-                if (!ushort.TryParse(value, out ret))
-                {
-                    //Value contained invalid text
-                    e.Cancel = true;
-                    try
-                    {
-                        MessageBox.Show(string.Format("The entered Effect ID contained invalid characters. Please enter a number between {0} and {1}.", ushort.MinValue, ushort.MaxValue), "Invalid ID", MessageBoxButton.OK, MessageBoxImage.Error);
-                        editModeCancelling = true;
-                        (sender as DataGrid).CancelEdit();
-                    }
-                    finally
-                    {
-                        editModeCancelling = false;
-                    }
-                }
-                else
-                {
-                    //Value is a valid number.
-
-                    //Now check if it is used by another Effect
-                    if (effectContainerFile.EffectIdUsedByOtherEffects(ret, selectedEffect))
-                    {
-                        e.Cancel = true;
-                        try
-                        {
-                            MessageBox.Show(string.Format("The entered Effect ID is already taken.", ushort.MinValue, ushort.MaxValue), "Invalid ID", MessageBoxButton.OK, MessageBoxImage.Error);
-                            editModeCancelling = true;
-                            (sender as DataGrid).CancelEdit();
-                        }
-                        finally
-                        {
-                            editModeCancelling = false;
-                        }
-                    }
-                }
-            }
-        }
 
         public RelayCommand Effect_AddEffectPart_Command => new RelayCommand(Effect_AddEffectPart, IsEffectSelected);
         private void Effect_AddEffectPart()
@@ -3280,7 +3250,7 @@ namespace EEPK_Organiser.View
         {
             try
             {
-                if (effectContainerFile.SelectedEffect != null)
+                if (SelectedEffect != null)
                 {
                     ObservableCollection<EffectPart> effectParts = (ObservableCollection<EffectPart>)Clipboard.GetData(ClipboardDataTypes.EffectPart);
 
@@ -3296,10 +3266,10 @@ namespace EEPK_Organiser.View
                                     effectPart.AssetRef = effectContainerFile.AddAsset(effectPart.AssetRef, effectPart.I_02, undos);
 
                                 var newEffectPart = effectPart.Clone();
-                                effectContainerFile.SelectedEffect.EffectParts.Add(newEffectPart);
+                                SelectedEffect.EffectParts.Add(newEffectPart);
                                 effectContainerFile.RefreshAssetCounts();
 
-                                undos.Add(new UndoableListAdd<EffectPart>(effectContainerFile.SelectedEffect.EffectParts, newEffectPart));
+                                undos.Add(new UndoableListAdd<EffectPart>(SelectedEffect.EffectParts, newEffectPart));
                             }
 
                             undos.Add(new UndoActionDelegate(effectContainerFile, nameof(effectContainerFile.RefreshAssetCounts), true));
@@ -3324,12 +3294,12 @@ namespace EEPK_Organiser.View
         {
             try
             {
-                if (effectContainerFile.SelectedEffect != null)
+                if (SelectedEffect != null)
                 {
-                    if (effectContainerFile.SelectedEffect.SelectedEffectParts != null)
+                    if (SelectedEffect.SelectedEffectParts != null)
                     {
                         effectContainerFile.SaveDds();
-                        Clipboard.SetData(ClipboardDataTypes.EffectPart, effectContainerFile.SelectedEffect.SelectedEffectParts);
+                        Clipboard.SetData(ClipboardDataTypes.EffectPart, SelectedEffect.SelectedEffectParts);
                     }
                 }
             }
@@ -3345,7 +3315,7 @@ namespace EEPK_Organiser.View
         {
             try
             {
-                var selectedEffect = effectContainerFile.SelectedEffect;
+                var selectedEffect = SelectedEffect;
 
                 if (selectedEffect != null)
                 {
@@ -3374,27 +3344,23 @@ namespace EEPK_Organiser.View
         public RelayCommand EffectPart_Duplicate_Command => new RelayCommand(EffectPart_Duplicate, IsEffectPartSelected);
         private void EffectPart_Duplicate()
         {
-            try
-            {
-                var selectedEffect = effectContainerFile.SelectedEffect;
+            var selectedEffect = SelectedEffect;
 
-                if (selectedEffect != null)
-                {
-                    if (selectedEffect.SelectedEffectParts != null)
-                    {
-                        foreach (var effectPart in selectedEffect.SelectedEffectParts)
-                        {
-                            var clone = effectPart.Clone();
-                            selectedEffect.EffectParts.Add(clone);
-                            UndoManager.Instance.AddUndo(new UndoableListAdd<EffectPart>(selectedEffect.EffectParts, clone, "Duplicate"));
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
+            if (selectedEffect != null)
             {
-                SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured while duplicating the EffectParts.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                if (selectedEffect.SelectedEffectParts != null)
+                {
+                    List<IUndoRedo> undos = new List<IUndoRedo>();
+
+                    foreach (var effectPart in selectedEffect.SelectedEffectParts)
+                    {
+                        var clone = effectPart.Clone();
+                        selectedEffect.EffectParts.Add(clone);
+                        undos.Add(new UndoableListAdd<EffectPart>(selectedEffect.EffectParts, clone));
+                    }
+
+                    UndoManager.Instance.AddCompositeUndo(undos, "EffectPart Duplicate");
+                }
             }
         }
 
@@ -3403,7 +3369,7 @@ namespace EEPK_Organiser.View
         {
             try
             {
-                var selectedEffectPart = effectContainerFile.GetSelectedEffectParts();
+                var selectedEffectPart = GetSelectedEffectParts();
 
                 if (selectedEffectPart != null)
                 {
@@ -3451,18 +3417,18 @@ namespace EEPK_Organiser.View
         public RelayCommand EffectPart_ChangeAsset_Command => new RelayCommand(EffectPart_ChangeAsset, IsEffectPartSelected);
         private void EffectPart_ChangeAsset()
         {
-            if (effectContainerFile.SelectedEffect != null)
+            if (SelectedEffect != null)
             {
-                if (effectContainerFile.SelectedEffect.SelectedEffectPart != null)
+                if (SelectedEffect.SelectedEffectPart != null)
                 {
-                    Forms.AssetSelector assetSel = new Forms.AssetSelector(effectContainerFile, false, false, effectContainerFile.SelectedEffect.SelectedEffectPart.I_02, this, effectContainerFile.SelectedEffect.SelectedEffectPart.AssetRef);
+                    Forms.AssetSelector assetSel = new Forms.AssetSelector(effectContainerFile, false, false, SelectedEffect.SelectedEffectPart.I_02, this, SelectedEffect.SelectedEffectPart.AssetRef);
                     assetSel.ShowDialog();
 
                     if(assetSel.SelectedAsset != null)
                     {
                         List<IUndoRedo> undos = new List<IUndoRedo>();
 
-                        foreach (var effectPart in effectContainerFile.SelectedEffect.SelectedEffectParts)
+                        foreach (var effectPart in SelectedEffect.SelectedEffectParts)
                         {
                             undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.I_02), effectPart, effectPart.I_02, assetSel.SelectedAssetType));
                             undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.AssetRef), effectPart, effectPart.AssetRef, assetSel.SelectedAsset));
@@ -3480,13 +3446,47 @@ namespace EEPK_Organiser.View
             }
         }
 
+        public RelayCommand EffectPart_Rescale_Command => new RelayCommand(EffectPart_Rescale, IsEffectPartSelected);
+        private async void EffectPart_Rescale()
+        {
+            if (SelectedEffect != null)
+            {
+                if (SelectedEffect.SelectedEffectParts != null)
+                {
+                    var result = await DialogCoordinator.Instance.ShowInputAsync(Application.Current.MainWindow, "Rescale Factor", "Rescale the Min and Max values on the selected EffectParts (does not edit the underlying assets at all). \n\nEnter the factor to rescale by:", DialogSettings.Default);
+
+                    if (!float.TryParse(result, out float scaleFactor))
+                    {
+                        await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, "Invalid Input", "Only numbers are valid.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                        return;
+                    }
+
+                    List<IUndoRedo> undos = new List<IUndoRedo>();
+
+                    foreach (var effectPart in SelectedEffect.SelectedEffectParts)
+                    {
+                        float size1 = effectPart.SIZE_1 * scaleFactor;
+                        float size2 = effectPart.SIZE_2 * scaleFactor;
+
+                        undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.SIZE_1), effectPart, effectPart.SIZE_1, size1));
+                        undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.SIZE_2), effectPart, effectPart.SIZE_2, size2));
+
+                        effectPart.SIZE_1 = size1;
+                        effectPart.SIZE_2 = size2;
+                    }
+
+                    UndoManager.Instance.AddCompositeUndo(undos, "Rescale EffectPart");
+                }
+            }
+        }
+
         public RelayCommand EffectPart_PasteValues_Command => new RelayCommand(EffectPart_PasteValues, CanPasteEffectPartValues);
         private void EffectPart_PasteValues()
         {
             try
             {
-                if (effectContainerFile.SelectedEffect == null) return;
-                if (effectContainerFile.SelectedEffect.SelectedEffectPart == null) return;
+                if (SelectedEffect == null) return;
+                if (SelectedEffect.SelectedEffectPart == null) return;
 
                 ObservableCollection<EffectPart> effectParts = (ObservableCollection<EffectPart>)Clipboard.GetData(ClipboardDataTypes.EffectPart);
 
@@ -3496,7 +3496,7 @@ namespace EEPK_Organiser.View
                 List<IUndoRedo> undos = new List<IUndoRedo>();
 
                 effectParts[0].AssetRef = effectContainerFile.AddAsset(effectParts[0].AssetRef, effectParts[0].I_02, undos);
-                effectContainerFile.SelectedEffect.SelectedEffectPart.CopyValues(effectParts[0], undos);
+                SelectedEffect.SelectedEffectPart.CopyValues(effectParts[0], undos);
 
                 UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Paste Values"));
 
@@ -3534,93 +3534,6 @@ namespace EEPK_Organiser.View
                 MessageBox.Show(String.Format("An unknown error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
-        //Relay EffectPart Events (ContextMenu cannot be binded because WPF is stupid and today I do not feel like banging my head against the wall trying to figure it out, so events must be used)
-        private void EffectPart_Paste_Click(object sender, RoutedEventArgs e)
-        {
-            EffectPart_Paste();
-            e.Handled = true;
-        }
-
-        private void EffectPart_PasteValues_Click(object sender, RoutedEventArgs e)
-        {
-            EffectPart_PasteValues();
-            e.Handled = true;
-        }
-
-        private void EffectPart_Copy_Click(object sender, RoutedEventArgs e)
-        {
-            EffectPart_Copy();
-            e.Handled = true;
-        }
-
-        private void EffectPart_Delete_Click(object sender, RoutedEventArgs e)
-        {
-            EffectPart_Delete();
-            e.Handled = true;
-        }
-
-        private void EffectPart_Duplicate_Click(object sender, RoutedEventArgs e)
-        {
-            EffectPart_Duplicate();
-            e.Handled = true;
-        }
-
-        private void EffectPart_GoToAsset_Click(object sender, RoutedEventArgs e)
-        {
-            EffectPart_GoToAsset();
-            e.Handled = true;
-        }
-
-        private void EffectPart_ChangeAsset_Click(object sender, RoutedEventArgs e)
-        {
-            EffectPart_ChangeAsset();
-            e.Handled = true;
-        }
-
-        private async void EffectPart_Rescale_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (effectContainerFile.SelectedEffect != null)
-                {
-                    if (effectContainerFile.SelectedEffect.SelectedEffectParts != null)
-                    {
-                        var result = await DialogCoordinator.Instance.ShowInputAsync(Application.Current.MainWindow, "Rescale Factor", "Rescale the Min and Max values on the selected EffectParts (does not edit the underlying assets at all). \n\nEnter the factor to rescale by:", DialogSettings.Default);
-
-                        if(!float.TryParse(result, out float scaleFactor))
-                        {
-                            await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, "Invalid Input", "Only numbers are valid.", MessageDialogStyle.Affirmative, DialogSettings.Default);
-                            return;
-                        }
-
-                        List<IUndoRedo> undos = new List<IUndoRedo>();
-
-                        foreach(var effectPart in effectContainerFile.SelectedEffect.SelectedEffectParts)
-                        {
-                            float size1 = effectPart.SIZE_1 * scaleFactor;
-                            float size2 = effectPart.SIZE_2 * scaleFactor;
-
-                            undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.SIZE_1), effectPart, effectPart.SIZE_1, size1));
-                            undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.SIZE_2), effectPart, effectPart.SIZE_2, size2));
-
-                            effectPart.SIZE_1 = size1;
-                            effectPart.SIZE_2 = size2;
-                        }
-
-                        UndoManager.Instance.AddCompositeUndo(undos, "Rescale EffectPart");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured while rescaling the EffectParts.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-
-            e.Handled = true;
-        }
-
 
         //Effect Options
         public RelayCommand EffectOptions_AddEffect_Command => new RelayCommand(EffectOptions_AddEffect);
@@ -3945,14 +3858,14 @@ namespace EEPK_Organiser.View
         {
             if (IsEffectPartSelected())
             {
-                return effectContainerFile.SelectedEffect.SelectedEffectPart.AssetRef != null;
+                return SelectedEffect.SelectedEffectPart.AssetRef != null;
             }
             return false;
         }
 
         public bool IsEffectPartSelected()
         {
-            return effectContainerFile?.SelectedEffect?.SelectedEffectPart != null;
+            return SelectedEffect?.SelectedEffectPart != null;
         }
 
         public bool IsEffectSelected()
@@ -4198,11 +4111,11 @@ namespace EEPK_Organiser.View
 
         private void CreateEffectPartViewModel()
         {
-            if (effectContainerFile?.SelectedEffect?.SelectedEffectPart != null)
+            if (SelectedEffect?.SelectedEffectPart != null)
             {
                 if (effectPartViewModel != null) effectPartViewModel.Dispose();
 
-                _effectPartViewModel = new EffectPartViewModel(effectContainerFile?.SelectedEffect?.SelectedEffectPart);
+                _effectPartViewModel = new EffectPartViewModel(SelectedEffect?.SelectedEffectPart);
             }
             else if (effectPartViewModel != null)
             {
@@ -4213,10 +4126,6 @@ namespace EEPK_Organiser.View
             NotifyPropertyChanged(nameof(effectPartViewModel));
         }
 
-
-
-
-        //Hotkeys (to be replaced with commands)
 
         private void PbindDataGrid_Hotkeys_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -4230,12 +4139,12 @@ namespace EEPK_Organiser.View
                 PBIND_AssetContainer_Paste_Click(null, null);
                 e.Handled = true;
             }
-            else if (Keyboard.IsKeyDown(Key.R) && Keyboard.IsKeyDown(Key.LeftCtrl))
+            else if (Keyboard.IsKeyDown(Key.E) && Keyboard.IsKeyDown(Key.LeftCtrl))
             {
                 PBIND_AssetContainer_RenameAsset_Click(null, null);
                 e.Handled = true;
             }
-            else if (Keyboard.IsKeyDown(Key.E) && Keyboard.IsKeyDown(Key.LeftCtrl))
+            else if (Keyboard.IsKeyDown(Key.R) && Keyboard.IsKeyDown(Key.LeftCtrl))
             {
                 PBIND_AssetContainer_Replace_Click(null, null);
                 e.Handled = true;
@@ -4245,7 +4154,7 @@ namespace EEPK_Organiser.View
                 PBIND_AssetContainer_Merge_Click(null, null);
                 e.Handled = true;
             }
-            else if (Keyboard.IsKeyDown(Key.OemQuestion) && Keyboard.IsKeyDown(Key.LeftShift))
+            else if (Keyboard.IsKeyDown(Key.Q) && Keyboard.IsKeyDown(Key.LeftCtrl))
             {
                 PBIND_AssetContainer_UsedBy_Click(null, null);
                 e.Handled = true;
@@ -4258,6 +4167,16 @@ namespace EEPK_Organiser.View
             else if (Keyboard.IsKeyDown(Key.D) && Keyboard.IsKeyDown(Key.LeftCtrl))
             {
                 PBIND_AssetContainer_Duplicate_Click(null, null);
+                e.Handled = true;
+            }
+            else if (Keyboard.IsKeyDown(Key.H) && Keyboard.IsKeyDown(Key.LeftCtrl))
+            {
+                PBIND_AssetContainer_Recolor(null, null);
+                e.Handled = true;
+            }
+            else if (Keyboard.IsKeyDown(Key.H) && Keyboard.IsKeyDown(Key.LeftAlt))
+            {
+                PBIND_AssetContainer_RecolorHueSet(null, null);
                 e.Handled = true;
             }
         }
@@ -4274,12 +4193,12 @@ namespace EEPK_Organiser.View
                 TBIND_AssetContainer_Paste_Click(null, null);
                 e.Handled = true;
             }
-            else if (Keyboard.IsKeyDown(Key.R) && Keyboard.IsKeyDown(Key.LeftCtrl))
+            else if (Keyboard.IsKeyDown(Key.E) && Keyboard.IsKeyDown(Key.LeftCtrl))
             {
                 TBIND_AssetContainer_RenameAsset_Click(null, null);
                 e.Handled = true;
             }
-            else if (Keyboard.IsKeyDown(Key.E) && Keyboard.IsKeyDown(Key.LeftCtrl))
+            else if (Keyboard.IsKeyDown(Key.R) && Keyboard.IsKeyDown(Key.LeftCtrl))
             {
                 TBIND_AssetContainer_Replace_Click(null, null);
                 e.Handled = true;
@@ -4289,7 +4208,7 @@ namespace EEPK_Organiser.View
                 TBIND_AssetContainer_Merge_Click(null, null);
                 e.Handled = true;
             }
-            else if (Keyboard.IsKeyDown(Key.OemQuestion) && Keyboard.IsKeyDown(Key.LeftShift))
+            else if (Keyboard.IsKeyDown(Key.Q) && Keyboard.IsKeyDown(Key.LeftCtrl))
             {
                 TBIND_AssetContainer_UsedBy_Click(null, null);
                 e.Handled = true;
@@ -4302,6 +4221,16 @@ namespace EEPK_Organiser.View
             else if (Keyboard.IsKeyDown(Key.D) && Keyboard.IsKeyDown(Key.LeftCtrl))
             {
                 TBIND_AssetContainer_Duplicate_Click(null, null);
+                e.Handled = true;
+            }
+            else if (Keyboard.IsKeyDown(Key.H) && Keyboard.IsKeyDown(Key.LeftCtrl))
+            {
+                TBIND_AssetContainer_Recolor(null, null);
+                e.Handled = true;
+            }
+            else if (Keyboard.IsKeyDown(Key.H) && Keyboard.IsKeyDown(Key.LeftAlt))
+            {
+                TBIND_AssetContainer_RecolorHueSet(null, null);
                 e.Handled = true;
             }
         }
@@ -4318,12 +4247,12 @@ namespace EEPK_Organiser.View
                 CBIND_AssetContainer_Paste_Click(null, null);
                 e.Handled = true;
             }
-            else if (Keyboard.IsKeyDown(Key.R) && Keyboard.IsKeyDown(Key.LeftCtrl))
+            else if (Keyboard.IsKeyDown(Key.E) && Keyboard.IsKeyDown(Key.LeftCtrl))
             {
                 CBIND_AssetContainer_RenameAsset_Click(null, null);
                 e.Handled = true;
             }
-            else if (Keyboard.IsKeyDown(Key.E) && Keyboard.IsKeyDown(Key.LeftCtrl))
+            else if (Keyboard.IsKeyDown(Key.T) && Keyboard.IsKeyDown(Key.LeftCtrl))
             {
                 CBIND_AssetContainer_Replace_Click(null, null);
                 e.Handled = true;
@@ -4333,7 +4262,7 @@ namespace EEPK_Organiser.View
                 CBIND_AssetContainer_Merge_Click(null, null);
                 e.Handled = true;
             }
-            else if (Keyboard.IsKeyDown(Key.OemQuestion) && Keyboard.IsKeyDown(Key.LeftShift))
+            else if (Keyboard.IsKeyDown(Key.Q) && Keyboard.IsKeyDown(Key.LeftCtrl))
             {
                 CBIND_AssetContainer_UsedBy_Click(null, null);
                 e.Handled = true;
@@ -4346,6 +4275,16 @@ namespace EEPK_Organiser.View
             else if (Keyboard.IsKeyDown(Key.D) && Keyboard.IsKeyDown(Key.LeftCtrl))
             {
                 CBIND_AssetContainer_Duplicate_Click(null, null);
+                e.Handled = true;
+            }
+            else if (Keyboard.IsKeyDown(Key.H) && Keyboard.IsKeyDown(Key.LeftCtrl))
+            {
+                CBIND_AssetContainer_Recolor(null, null);
+                e.Handled = true;
+            }
+            else if (Keyboard.IsKeyDown(Key.H) && Keyboard.IsKeyDown(Key.LeftAlt))
+            {
+                CBIND_AssetContainer_RecolorHueSet(null, null);
                 e.Handled = true;
             }
         }
@@ -4362,7 +4301,7 @@ namespace EEPK_Organiser.View
                 EMO_AssetContainer_Paste_Click(null, null);
                 e.Handled = true;
             }
-            else if (Keyboard.IsKeyDown(Key.E) && Keyboard.IsKeyDown(Key.LeftCtrl))
+            else if (Keyboard.IsKeyDown(Key.R) && Keyboard.IsKeyDown(Key.LeftCtrl))
             {
                 EMO_AssetContainer_Replace_Click(null, null);
                 e.Handled = true;
@@ -4372,7 +4311,7 @@ namespace EEPK_Organiser.View
                 EMO_AssetContainer_Merge_Click(null, null);
                 e.Handled = true;
             }
-            else if (Keyboard.IsKeyDown(Key.OemQuestion) && Keyboard.IsKeyDown(Key.LeftShift))
+            else if (Keyboard.IsKeyDown(Key.Q) && Keyboard.IsKeyDown(Key.LeftCtrl))
             {
                 EMO_AssetContainer_UsedBy_Click(null, null);
                 e.Handled = true;
@@ -4392,6 +4331,16 @@ namespace EEPK_Organiser.View
                 EMO_AssetContainer_AddFile_Click(null, null);
                 e.Handled = true;
             }
+            else if (Keyboard.IsKeyDown(Key.H) && Keyboard.IsKeyDown(Key.LeftCtrl))
+            {
+                EMO_AssetContainer_Recolor(null, null);
+                e.Handled = true;
+            }
+            else if (Keyboard.IsKeyDown(Key.H) && Keyboard.IsKeyDown(Key.LeftAlt))
+            {
+                EMO_AssetContainer_RecolorHueSet(null, null);
+                e.Handled = true;
+            }
         }
 
         private void LightEmaDataGrid_Hotkeys_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -4406,12 +4355,12 @@ namespace EEPK_Organiser.View
                 LIGHT_AssetContainer_Paste_Click(null, null);
                 e.Handled = true;
             }
-            else if (Keyboard.IsKeyDown(Key.R) && Keyboard.IsKeyDown(Key.LeftCtrl))
+            else if (Keyboard.IsKeyDown(Key.E) && Keyboard.IsKeyDown(Key.LeftCtrl))
             {
                 LIGHT_AssetContainer_RenameAsset_Click(null, null);
                 e.Handled = true;
             }
-            else if (Keyboard.IsKeyDown(Key.E) && Keyboard.IsKeyDown(Key.LeftCtrl))
+            else if (Keyboard.IsKeyDown(Key.R) && Keyboard.IsKeyDown(Key.LeftCtrl))
             {
                 LIGHT_AssetContainer_Replace_Click(null, null);
                 e.Handled = true;
@@ -4421,7 +4370,7 @@ namespace EEPK_Organiser.View
                 LIGHT_AssetContainer_Merge_Click(null, null);
                 e.Handled = true;
             }
-            else if (Keyboard.IsKeyDown(Key.OemQuestion) && Keyboard.IsKeyDown(Key.LeftShift))
+            else if (Keyboard.IsKeyDown(Key.Q) && Keyboard.IsKeyDown(Key.LeftCtrl))
             {
                 LIGHT_AssetContainer_UsedBy_Click(null, null);
                 e.Handled = true;
@@ -4434,6 +4383,16 @@ namespace EEPK_Organiser.View
             else if (Keyboard.IsKeyDown(Key.D) && Keyboard.IsKeyDown(Key.LeftCtrl))
             {
                 LIGHT_AssetContainer_Duplicate_Click(null, null);
+                e.Handled = true;
+            }
+            else if (Keyboard.IsKeyDown(Key.H) && Keyboard.IsKeyDown(Key.LeftCtrl))
+            {
+                LIGHT_AssetContainer_Recolor(null, null);
+                e.Handled = true;
+            }
+            else if (Keyboard.IsKeyDown(Key.H) && Keyboard.IsKeyDown(Key.LeftAlt))
+            {
+                LIGHT_AssetContainer_RecolorHueSet(null, null);
                 e.Handled = true;
             }
         }
@@ -4512,6 +4471,21 @@ namespace EEPK_Organiser.View
             }
 #endif
 
+        }
+
+
+        /// <summary>
+        /// Returns the SelectedEffectParts for the first SelectedEffect, if it exists.
+        /// </summary>
+        /// <returns></returns>
+        public ObservableCollection<EffectPart> GetSelectedEffectParts()
+        {
+            if (SelectedEffect != null)
+            {
+                return SelectedEffect.SelectedEffectParts;
+            }
+
+            return null;
         }
     }
 }

@@ -656,7 +656,7 @@ namespace Xv2CoreLib.EMB_CLASS
                 if (Texture != null)
                 {
                     return $"Type: {ImageFormatString}\n" +
-                           $"Dimensions: {Width}x{Height}\n" +
+                           $"Dimensions: {Height}x{Width}\n" +
                            $"Size: {FilesizeString}";
                 }
                 return null;

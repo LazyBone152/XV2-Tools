@@ -1,5 +1,6 @@
 ﻿using GalaSoft.MvvmLight;
 using System;
+using System.Collections.Generic;
 using Xv2CoreLib.EEPK;
 using Xv2CoreLib.Resource.UndoRedo;
 using static Xv2CoreLib.EEPK.EffectPart;
@@ -767,8 +768,14 @@ namespace EEPK_Organiser.ViewModel
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.ESK), effectPart, effectPart.ESK, value, "BoneToAttach"));
+                List<IUndoRedo> undos = new List<IUndoRedo>();
+                undos.Add(new UndoableProperty<EffectPart>(nameof(effectPart.ESK), effectPart, effectPart.ESK, value));
+                undos.Add(new UndoActionDelegate(effectPart, nameof(effectPart.RefreshDetails), true));
+
+                UndoManager.Instance.AddCompositeUndo(undos, "BoneToAttach", UndoGroup.Effect);
                 effectPart.ESK = value;
+
+                effectPart.RefreshDetails();
             }
         }
 

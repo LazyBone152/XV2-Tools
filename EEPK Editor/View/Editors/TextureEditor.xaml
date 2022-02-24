@@ -82,6 +82,13 @@
                 <DataGrid.InputBindings>
                     <KeyBinding Key="C" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=CopyTextureCommand}"/>
                     <KeyBinding Key="V" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=PasteTextureCommand}"/>
+                    <KeyBinding Key="D" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=DuplicateTextureCommand}"/>
+                    <KeyBinding Key="M" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=MergeTexturesCommand}"/>
+                    <KeyBinding Key="Q" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=UsedByCommand}"/>
+                    <KeyBinding Key="R" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=ReplaceTextureCommand}"/>
+                    <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AddTextureFromFileCommand}"/>
+                    <KeyBinding Key="H" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=HueShiftCommand}"/>
+                    <KeyBinding Key="H" Modifiers="Alt" Command="{Binding ElementName=UserControl, Path=HueSetCommand}"/>
                     <KeyBinding Key="Delete" Command="{Binding ElementName=UserControl, Path=DeleteTextureCommand}"/>
                 </DataGrid.InputBindings>
                 <DataGrid.ContextMenu>
@@ -100,7 +107,7 @@
                         <MenuItem Header="Used By?" Command="{Binding UsedByCommand}" IsEnabled="{Binding IsForContainer}" Visibility="{Binding ContainerVisiblility}"/>
                         
                         <Separator/>
-                        <MenuItem Header="Hue Shift" Command="{Binding HueShiftCommand}"/>
+                        <MenuItem Header="Hue Adjustment" Command="{Binding HueShiftCommand}"/>
                         <MenuItem Header="Hue Set" Command="{Binding HueSetCommand}"/>
                     </ContextMenu>
                 </DataGrid.ContextMenu>

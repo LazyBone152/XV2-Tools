@@ -72,20 +72,16 @@ namespace EEPK_Organiser.View
             get => _selectedMaterial;
             set
             {
+
                 _selectedMaterial = value;
-                MaterialViewModel = (_selectedMaterial != null) ? new MaterialViewModel(_selectedMaterial.DecompiledParameters) : null;
-
                 NotifyPropertyChanged(nameof(SelectedMaterial));
-                NotifyPropertyChanged(nameof(MaterialViewModel));
-                NotifyPropertyChanged(nameof(ParameterEditorEnabled));
-
-                ExpanderUpdate();
+                RefreshViewModel();
             }
         }
         public bool ParameterEditorEnabled => _selectedMaterial != null;
 
         //ViewModel
-        public MaterialViewModel MaterialViewModel { get; set; }
+        public MaterialViewModel MaterialViewModel { get; set; } = new MaterialViewModel();
 
         //Selected Material Editing
         public string SelectedMaterialName
@@ -201,6 +197,7 @@ namespace EEPK_Organiser.View
             ExpanderUpdate();
         }
 
+
         #region EventsAndManualUIUpdating
         private void MaterialsEditor_Loaded(object sender, RoutedEventArgs e)
         {
@@ -252,8 +249,16 @@ namespace EEPK_Organiser.View
                 unknownExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Unsorted);
             }
         }
+
+        private void RefreshViewModel()
+        {
+            MaterialViewModel.SetMaterial(SelectedMaterial?.DecompiledParameters);
+            NotifyPropertyChanged(nameof(MaterialViewModel));
+            NotifyPropertyChanged(nameof(ParameterEditorEnabled));
+            ExpanderUpdate();
+        }
         #endregion
-        
+
         #region ContextMenuCommands
         public RelayCommand AddNewMaterialCommand => new RelayCommand(AddNewMaterial);
         private void AddNewMaterial()
@@ -325,21 +330,27 @@ namespace EEPK_Organiser.View
             List<EmmMaterial> selectedMaterials = materialDataGrid.SelectedItems.Cast<EmmMaterial>().ToList();
             List<IUndoRedo> undos = new List<IUndoRedo>();
 
+            EmmMaterial selectedMat = null;
 
-            foreach (var mat in selectedMaterials)
+            try
             {
-                EmmMaterial newMaterial = mat.Copy();
-                newMaterial.Name = EmmFile.GetUnusedName(newMaterial.Name);
-                undos.Add(new UndoableListAdd<EmmMaterial>(EmmFile.Materials, newMaterial));
-                EmmFile.Materials.Add(newMaterial);
+                foreach (var mat in selectedMaterials)
+                {
+                    EmmMaterial newMaterial = mat.Copy();
+                    newMaterial.Name = EmmFile.GetUnusedName(newMaterial.Name);
+                    undos.Add(new UndoableListAdd<EmmMaterial>(EmmFile.Materials, newMaterial));
+                    EmmFile.Materials.Add(newMaterial);
 
-                SelectedMaterial = newMaterial;
+                    selectedMat = newMaterial;
+                }
+
+                SelectedMaterial = selectedMat;
+                materialDataGrid.ScrollIntoView(SelectedMaterial);
             }
-
-            materialDataGrid.ScrollIntoView(SelectedMaterial);
-
-            if (undos.Count > 0)
+            finally
+            {
                 UndoManager.Instance.AddCompositeUndo(undos, "Duplicate Material(s)");
+            }
         }
 
         public RelayCommand MergeMaterialCommand => new RelayCommand(MergeMaterial, IsMaterialSelected);
@@ -440,7 +451,7 @@ namespace EEPK_Organiser.View
             {
                 List<IUndoRedo> undos = new List<IUndoRedo>();
 
-                foreach(var material in copiedMaterials)
+                foreach (var material in copiedMaterials)
                 {
                     material.Name = EmmFile.GetUnusedName(material.Name);
                     EmmFile.Materials.Add(material);

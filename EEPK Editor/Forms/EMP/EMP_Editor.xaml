@@ -44,7 +44,7 @@
                             <KeyBinding Key="C" Modifiers="Ctrl" Command="{Binding Copy_Command}"/>
                             <KeyBinding Key="V" Modifiers="Ctrl" Command="{Binding Paste_Command}"/>
                             <KeyBinding Key="V" Modifiers="Ctrl+Alt" Command="{Binding PasteChild_Command}"/>
-                            <KeyBinding Key="V" Modifiers="Shift" Command="{Binding PasteValues_Command}"/>
+                            <KeyBinding Key="X" Modifiers="Ctrl" Command="{Binding PasteValues_Command}"/>
                             <KeyBinding Key="Up" Modifiers="Ctrl" Command="{Binding MoveUp_Command}"/>
                             <KeyBinding Key="Down" Modifiers="Ctrl" Command="{Binding MoveDown_Command}"/>
                             <KeyBinding Key="H" Modifiers="Ctrl" Command="{Binding HueAdjustment_Command}"/>
@@ -727,7 +727,7 @@
                             <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding TextureAdd_Command}"/>
                             <KeyBinding Key="C" Modifiers="Ctrl" Command="{Binding TextureContextMenu_Copy_Command}"/>
                             <KeyBinding Key="V" Modifiers="Ctrl" Command="{Binding TextureContextMenu_Paste_Command}"/>
-                            <KeyBinding Key="V" Modifiers="Shift" Command="{Binding TextureContextMenu_PasteValues_Command}"/>
+                            <KeyBinding Key="X" Modifiers="Ctrl" Command="{Binding TextureContextMenu_PasteValues_Command}"/>
                             <KeyBinding Key="M" Modifiers="Ctrl" Command="{Binding TextureContextMenu_Merge_Command}"/>
                             <KeyBinding Key="D" Modifiers="Ctrl" Command="{Binding TextureContextMenu_Duplicate_Command}"/>
                         </ListBox.InputBindings>

@@ -83,8 +83,15 @@
             <DataGrid x:Name="materialDataGrid" Style="{StaticResource MahApps.Styles.DataGrid.Azure}" ItemsSource="{Binding ElementName=UserControl, Path=ViewMaterials}" SelectedItem="{Binding ElementName=UserControl, Path=SelectedMaterial}" Controls:ControlsHelper.ContentCharacterCasing="Normal" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
 
                 <DataGrid.InputBindings>
+                    <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=AddNewMaterialCommand}"/>
                     <KeyBinding Key="C" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=CopyMaterialCommand}"/>
                     <KeyBinding Key="V" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=PasteMaterialCommand}"/>
+                    <KeyBinding Key="X" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=PasteMaterialValuesCommand}"/>
+                    <KeyBinding Key="M" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=MergeMaterialCommand}"/>
+                    <KeyBinding Key="D" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=DuplicateMaterialCommand}"/>
+                    <KeyBinding Key="H" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=HueShiftCommand}"/>
+                    <KeyBinding Key="H" Modifiers="Alt" Command="{Binding ElementName=UserControl, Path=HueSetCommand}"/>
+                    <KeyBinding Key="Q" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=UsedByCommand}"/>
                     <KeyBinding Key="Delete" Command="{Binding ElementName=UserControl, Path=DeleteMaterialCommand}"/>
                 </DataGrid.InputBindings>
                 
@@ -102,7 +109,7 @@
                         <MenuItem Header="Used By?" Command="{Binding UsedByCommand}" IsEnabled="{Binding IsForContainer}" Visibility="{Binding ContainerVisiblility}"/>
                         
                         <Separator/>
-                        <MenuItem Header="Hue Shift" Command="{Binding HueShiftCommand}"/>
+                        <MenuItem Header="Hue Adjustment" Command="{Binding HueShiftCommand}"/>
                         <MenuItem Header="Hue Set" Command="{Binding HueSetCommand}"/>
                     </ContextMenu>
                 </DataGrid.ContextMenu>

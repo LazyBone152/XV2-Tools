@@ -71,6 +71,7 @@ namespace Xv2CoreLib.Resource.UndoRedo
                     //Undos qualify for merging
                     if (mergeUndo._field == prevMergeUndo._field && mergeUndo._instance == prevMergeUndo._instance && mergeUndo.doLast == prevMergeUndo.doLast)
                     {
+                        return true;
                     }
                     else
                     {
@@ -79,7 +80,7 @@ namespace Xv2CoreLib.Resource.UndoRedo
                 }
             }
 
-            return true;
+            return false;
         }
     
         public void MergeCompositeUndos(CompositeUndo undoToMerge)

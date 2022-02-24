@@ -118,7 +118,7 @@ namespace EEPK_Organiser
                 {
                     string eepkPath;
 
-                    if(skill.EepkPath == "NULL")
+                    if(!skill.HasEepkPath)
                     {
                         //Get skill folder and files name
                         int skillID2 = skill.ID2;

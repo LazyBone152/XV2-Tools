@@ -3,13 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:EEPK_Organiser"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
              xmlns:lbUtils="clr-namespace:LB_Common.Utils;assembly=LB_Common"
              xmlns:eepk="clr-namespace:Xv2CoreLib.EEPK;assembly=Xv2CoreLib"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
-             xmlns:Themes1="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero"
              xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1050" Dialog:DialogParticipation.Register="{Binding}" Name="UserControl">
@@ -27,6 +25,9 @@
 
     </UserControl.Resources>
     <Grid x:Name="rootGrid">
+        <Grid.Resources>
+            <lbUtils:BindingProxy x:Key="proxy" Data="{Binding}"/>
+        </Grid.Resources>
         
         <TabControl x:Name="tabControl" SelectionChanged="TabControl_SelectionChanged" Controls:TabControlHelper.Underlined="TabItems" IsEnabled="{Binding IsFileLoaded}" Margin="0, 4">
 
@@ -39,7 +40,7 @@
                         <ColumnDefinition Width="*" MinWidth="500" MaxWidth="800"/>
                     </Grid.ColumnDefinitions>
 
-                    <DataGrid x:Name="effectDataGrid" Grid.Column="1" Tag="{Binding DataContext, ElementName=rootGrid}" SelectionChanged="effectPart_SelectionChanged" VirtualizingPanel.ScrollUnit="Pixel" ItemsSource="{Binding effectContainerFile.ViewEffects}" SelectedItem="{Binding effectContainerFile.SelectedEffect, UpdateSourceTrigger=PropertyChanged}" EnableRowVirtualization="True" EnableColumnVirtualization="True" SelectionMode="Extended" RowDetailsVisibilityMode="VisibleWhenSelected" CellEditEnding="Effect_EffectIdChange_ValueChanged" CanUserResizeRows="False" CanUserAddRows="False" AutoGenerateColumns="False" CanUserDeleteRows="False" RowHeaderWidth="0">
+                    <DataGrid x:Name="effectDataGrid" Grid.Column="1" Tag="{Binding DataContext, ElementName=rootGrid}" SelectionChanged="effectPart_SelectionChanged" VirtualizingPanel.ScrollUnit="Pixel" ItemsSource="{Binding effectContainerFile.ViewEffects}" SelectedItem="{Binding SelectedEffect, UpdateSourceTrigger=PropertyChanged}" EnableRowVirtualization="True" EnableColumnVirtualization="True" SelectionMode="Extended" RowDetailsVisibilityMode="VisibleWhenSelected" CanUserResizeRows="False" CanUserAddRows="False" AutoGenerateColumns="False" CanUserDeleteRows="False" RowHeaderWidth="0">
                         
                         <DataGrid.InputBindings>
                             <KeyBinding Key="Delete" Command="{Binding Effect_DeleteEffect_Command}"/>
@@ -63,7 +64,18 @@
                             </ContextMenu>
                         </DataGrid.ContextMenu>
                         <DataGrid.Columns>
-                            <DataGridTextColumn x:Name="effectIdColumn" Header="Effect ID" Width="*" Binding="{Binding IndexNum}"/>
+                            <DataGridTemplateColumn Header="Effect ID" Width="*" >
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding IndexNum}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                                <DataGridTemplateColumn.CellEditingTemplate>
+                                    <DataTemplate>
+                                        <TextBox Text="{Binding ElementName=UserControl, Path=SelectedEffectID}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellEditingTemplate>
+                            </DataGridTemplateColumn>
                             <DataGridTextColumn x:Name="nameListColumn" Header="Name" Width="*" Binding="{Binding NameList, UpdateSourceTrigger=PropertyChanged}"/>
 
                         </DataGrid.Columns>
@@ -72,30 +84,38 @@
                             <DataTemplate>
                                 <ListBox Tag="{Binding DataContext, ElementName=rootGrid}" BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" PreviewMouseWheel="ListBox_PreviewMouseWheel" BorderThickness="1" SelectionChanged="effectPart_SelectionChanged" MouseDoubleClick="EffectPart_DoubleClick" MouseLeftButtonUp="ListBox_MouseLeftButtonUp" MouseRightButtonUp="ListBox_MouseRightButtonUp" VirtualizingPanel.ScrollUnit="Pixel" ItemsSource="{Binding EffectParts.Binding}" SelectionMode="Extended" SelectedItem="{Binding SelectedEffectPart, UpdateSourceTrigger=PropertyChanged}" lbUtils:AttachedProperties.SelectedItems="{Binding SelectedEffectParts}">
 
-
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
                                             <Grid Margin="0,2">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*" />
                                                 </Grid.ColumnDefinitions>
-                                                <TextBlock Text="{Binding AssetRefDetails}"/>
+                                                <TextBlock Text="{Binding EffectPartDetails}"/>
                                             </Grid>
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
 
+                                    <ListBox.InputBindings>
+                                        <KeyBinding Modifiers="Ctrl" Key="N" Command="{Binding Data.Effect_AddEffectPart_Command, Source={StaticResource proxy}}"/>
+                                        <KeyBinding Modifiers="Ctrl" Key="C" Command="{Binding Data.EffectPart_Copy_Command, Source={StaticResource proxy}}"/>
+                                        <KeyBinding Modifiers="Ctrl" Key="V" Command="{Binding Data.EffectPart_Paste_Command, Source={StaticResource proxy}}"/>
+                                        <KeyBinding Modifiers="Ctrl" Key="X" Command="{Binding Data.EffectPart_PasteValues_Command, Source={StaticResource proxy}}"/>
+                                        <KeyBinding Modifiers="Ctrl" Key="D" Command="{Binding Data.EffectPart_Duplicate_Command, Source={StaticResource proxy}}"/>
+                                        <KeyBinding Key="Delete" Command="{Binding Data.EffectPart_Delete_Command, Source={StaticResource proxy}}"/>
+                                    </ListBox.InputBindings>
                                     <ListBox.ContextMenu>
                                         <ContextMenu FontSize="12">
-                                            <MenuItem Header="Delete" Click="EffectPart_Delete_Click"/>
-                                            <MenuItem Header="Duplicate" Click="EffectPart_Duplicate_Click"/>
-                                            <MenuItem Header="Copy" Click="EffectPart_Copy_Click"/>
-                                            <MenuItem Header="Paste" Click="EffectPart_Paste_Click"/>
-                                            <MenuItem Header="Paste Value" Click="EffectPart_PasteValues_Click"/>
+                                            <MenuItem Header="New" Command="{Binding Data.Effect_AddEffectPart_Command, Source={StaticResource proxy}}"/>
+                                            <MenuItem Header="Delete" Command="{Binding Data.EffectPart_Delete_Command, Source={StaticResource proxy}}"/>
+                                            <MenuItem Header="Duplicate" Command="{Binding Data.EffectPart_Duplicate_Command, Source={StaticResource proxy}}"/>
+                                            <MenuItem Header="Copy" Command="{Binding Data.EffectPart_Copy_Command, Source={StaticResource proxy}}"/>
+                                            <MenuItem Header="Paste" Command="{Binding Data.EffectPart_Paste_Command, Source={StaticResource proxy}}"/>
+                                            <MenuItem Header="Paste Value" Command="{Binding Data.EffectPart_PasteValues_Command, Source={StaticResource proxy}}"/>
                                             <Separator/>
-                                            <MenuItem Header="Rescale" Click="EffectPart_Rescale_Click"/>
-                                            <MenuItem Header="Change Asset" Click="EffectPart_ChangeAsset_Click"/>
+                                            <MenuItem Header="Rescale" Command="{Binding Data.EffectPart_Rescale_Command, Source={StaticResource proxy}}"/>
+                                            <MenuItem Header="Change Asset" Command="{Binding Data.EffectPart_ChangeAsset_Command, Source={StaticResource proxy}}"/>
                                             <Separator/>
-                                            <MenuItem Header="Go To Asset" Click="EffectPart_GoToAsset_Click"/>
+                                            <MenuItem Header="Go To Asset" Command="{Binding Data.EffectPart_GoToAsset_Command, Source={StaticResource proxy}}"/>
                                         </ContextMenu>
                                     </ListBox.ContextMenu>
                                 </ListBox>
@@ -129,7 +149,7 @@
                                                     <ColumnDefinition Width="75"/>
                                                 </Grid.ColumnDefinitions>
                                                 <Label Content="Asset"/>
-                                                <TextBox Grid.Column="1" IsEnabled="False" Text="{Binding effectContainerFile.SelectedEffect.SelectedEffectPart.AssetRefDetails, Mode=OneWay}" IsReadOnly="True"  TextWrapping="NoWrap" VerticalAlignment="Top"/>
+                                                <TextBox Grid.Column="1" IsEnabled="False" Text="{Binding SelectedEffect.SelectedEffectPart.AssetRefDetails, Mode=OneWay}" IsReadOnly="True"  TextWrapping="NoWrap" VerticalAlignment="Top"/>
                                                 <Button Grid.Column="2" Margin="5,0" Command="{Binding EffectPart_ChangeAsset_Command}" Content="Change"/>
 
                                             </Grid>
@@ -751,11 +771,7 @@
                         <DataGrid.RowDetailsTemplate>
                             <DataTemplate>
                                 <ListBox x:Name="emoListBox" BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" BorderThickness="1" ItemsSource="{Binding Files.Binding}">
-                                    <ListBox.Resources>
-                                        <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Black"/>
-
-                                    </ListBox.Resources>
-
+                                   
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
                                             <Grid Margin="0,2">

@@ -163,7 +163,8 @@ namespace Xv2CoreLib.EEPK
 
                 int assetContainerIteration = 0;
                 for (int i = 0; i < totalAssetContainers; i++)
-                {//String pointer section (between Asset Container Entries and ID List) 
+                {
+                    //String pointer section (between Asset Container Entries and ID List) 
 
                     if(eepk_File.Assets[i].AssetEntries != null)
                     {
@@ -201,11 +202,14 @@ namespace Xv2CoreLib.EEPK
                 }
 
                 for (int i = 0; i < actualIds; i++)
-                {//Each effect
+                {
+                    //Each effect
                     bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - effectIdActualPosition[i]), effectIdActualPosition[i] + 12);
+                    
                     //Above line: setting offset to Effect Entry Start in the Effect ID Entry
                     for (int a = 0; a < eepk_File.Effects[i].EffectParts.Count(); a++)
-                    {//Each entry/size
+                    {
+                        //Each entry/size
                         BitArray compositeBits_I_32 = new BitArray(new bool[8] { eepk_File.Effects[i].EffectParts[a].I_32_0, eepk_File.Effects[i].EffectParts[a].I_32_1, eepk_File.Effects[i].EffectParts[a].I_32_2, eepk_File.Effects[i].EffectParts[a].I_32_3, eepk_File.Effects[i].EffectParts[a].I_32_4, eepk_File.Effects[i].EffectParts[a].I_32_5, eepk_File.Effects[i].EffectParts[a].I_32_6, eepk_File.Effects[i].EffectParts[a].I_32_7 });
                         BitArray compositeBits_I_39 = new BitArray(new bool[8] { eepk_File.Effects[i].EffectParts[a].I_39_0, eepk_File.Effects[i].EffectParts[a].I_39_1, eepk_File.Effects[i].EffectParts[a].I_39_2, eepk_File.Effects[i].EffectParts[a].I_39_3, eepk_File.Effects[i].EffectParts[a].I_39_4, eepk_File.Effects[i].EffectParts[a].I_39_5, eepk_File.Effects[i].EffectParts[a].I_39_6, eepk_File.Effects[i].EffectParts[a].I_39_7 });
                         BitArray compositeBits_I_36 = new BitArray(new bool[8] { eepk_File.Effects[i].EffectParts[a].I_36_0, eepk_File.Effects[i].EffectParts[a].I_36_1, eepk_File.Effects[i].EffectParts[a].I_36_2, eepk_File.Effects[i].EffectParts[a].I_36_3, eepk_File.Effects[i].EffectParts[a].I_36_4, eepk_File.Effects[i].EffectParts[a].I_36_5, eepk_File.Effects[i].EffectParts[a].I_36_6, eepk_File.Effects[i].EffectParts[a].I_36_6 });
@@ -257,23 +261,27 @@ namespace Xv2CoreLib.EEPK
                 }
             }
 
-            if(totalAssetContainers > 0) { 
-            int strIteration2 = 0;
-            int unkNumberIteration = 0;
-            int strIteration = 0;
+            if(totalAssetContainers > 0) 
+            { 
+
+                int strIteration2 = 0;
+                int unkNumberIteration = 0;
+                int strIteration = 0;
+
                 for (int i = 0; i < totalAssetContainers; i++)
-                {//Writing string section
-                    if (eepk_File.Assets[i].FILES[0] != "NULL")
+                {
+                    //Writing string section
+                    if (eepk_File.Assets[i].FILES[0] != "NULL" && !string.IsNullOrWhiteSpace(eepk_File.Assets[i].FILES[0]))
                     {
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() + 36 - containerOneOffset[i]), containerOneOffset[i]);
                         bytes.AddRange(Encoding.ASCII.GetBytes(eepk_File.Assets[i].FILES[0])); bytes.Add(0);
                     }
-                    if (eepk_File.Assets[i].FILES[1] != "NULL")
+                    if (eepk_File.Assets[i].FILES[1] != "NULL" && !string.IsNullOrWhiteSpace(eepk_File.Assets[i].FILES[1]))
                     {
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() + 40 - containerTwoOffset[i]), containerTwoOffset[i]);
                         bytes.AddRange(Encoding.ASCII.GetBytes(eepk_File.Assets[i].FILES[1])); bytes.Add(0);
                     }
-                    if (eepk_File.Assets[i].FILES[2] != "NULL")
+                    if (eepk_File.Assets[i].FILES[2] != "NULL" && !string.IsNullOrWhiteSpace(eepk_File.Assets[i].FILES[2]))
                     {
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() + 44 - containerThreeOffset[i]), containerThreeOffset[i]);
                         bytes.AddRange(Encoding.ASCII.GetBytes(eepk_File.Assets[i].FILES[2])); bytes.Add(0);
@@ -281,7 +289,7 @@ namespace Xv2CoreLib.EEPK
 
                     if(eepk_File.Assets[i].AssetEntries != null)
                     {
-                        for (int a = 0; a < eepk_File.Assets[i].AssetEntries.Count(); a++)
+                        for (int a = 0; a < eepk_File.Assets[i].AssetEntries.Count; a++)
                         {
                             int actualCountFile = eepk_File.Assets[i].AssetEntries[a].FILES.Where(p => p.Path != "NULL").Count();
 
@@ -290,7 +298,7 @@ namespace Xv2CoreLib.EEPK
                             for (int s = 0; s < actualCountFile; s++)
                             {
                                 //Set number offset here
-                                if (eepk_File.Assets[i].AssetEntries[a].FILES[s].Path == "NULL")
+                                if (eepk_File.Assets[i].AssetEntries[a].FILES[s].Path == "NULL" && !string.IsNullOrWhiteSpace(eepk_File.Assets[i].AssetEntries[a].FILES[s].Path))
                                 {
                                     bytes.Add(255);
                                 }
@@ -303,7 +311,7 @@ namespace Xv2CoreLib.EEPK
                             for (int s = 0; s < actualCountFile; s++)
                             {
                                 //Set string offset here
-                                if (eepk_File.Assets[i].AssetEntries[a].FILES[s].Path != "NULL")
+                                if (eepk_File.Assets[i].AssetEntries[a].FILES[s].Path != "NULL" && !string.IsNullOrWhiteSpace(eepk_File.Assets[i].AssetEntries[a].FILES[s].Path))
                                 {
                                     bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() + 8 - pointerToStringPointerList[strIteration2]), stringPointerListOffsets[strIteration]);
                                     bytes.AddRange(Encoding.ASCII.GetBytes(eepk_File.Assets[i].AssetEntries[a].FILES[s].Path)); bytes.Add(0);
@@ -340,9 +348,11 @@ namespace Xv2CoreLib.EEPK
             {
                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(assetDataBlockOffset[0] - 32), 16); //Pointer to Asset Section
             }
-            if (totalEffects > 0) {
+            if (totalEffects > 0) 
+            {
                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(24),20); //Pointer to Effect Pointer List
             }
+
             bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(eepk_File.I_08), 8); //Unknown data in header
             
         }

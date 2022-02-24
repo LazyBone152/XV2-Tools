@@ -926,7 +926,7 @@ namespace Xv2CoreLib.EMA
                 case 2:
                     return (emaType == EmaType.light) ? "Color" : "Scale";
                 case 3:
-                    return (emaType == EmaType.light) ? "LightScale" : I_02.ToString();
+                    return (emaType == EmaType.light) ? "Light" : I_02.ToString();
                 default:
                     return I_02.ToString();
             }
@@ -976,18 +976,33 @@ namespace Xv2CoreLib.EMA
             }
             else
             {
-                switch (I_03_a)
+                if(I_02 == 3)
                 {
-                    case 0:
-                        return (I_02 == 2) ? "R" : I_03_a.ToString();
-                    case 1:
-                        return (I_02 == 2) ? "G" : I_03_a.ToString();
-                    case 2:
-                        return (I_02 == 2) ? "B" : I_03_a.ToString();
-                    case 3:
-                        return (I_02 == 2) ? "A" : I_03_a.ToString();
-                    default:
-                        return I_03_a.ToString();
+                    switch (I_03_a)
+                    {
+                        case 0:
+                            return "InnerRadius";
+                        case 1:
+                            return "OuterRadius";
+                        default:
+                            return I_03_a.ToString();
+                    }
+                }
+                else
+                {
+                    switch (I_03_a)
+                    {
+                        case 0:
+                            return (I_02 == 2) ? "R" : I_03_a.ToString();
+                        case 1:
+                            return (I_02 == 2) ? "G" : I_03_a.ToString();
+                        case 2:
+                            return (I_02 == 2) ? "B" : I_03_a.ToString();
+                        case 3:
+                            return (I_02 == 2) ? "A" : I_03_a.ToString();
+                        default:
+                            return I_03_a.ToString();
+                    }
                 }
             }
         }

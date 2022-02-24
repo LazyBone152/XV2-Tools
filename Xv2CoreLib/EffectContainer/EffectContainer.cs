@@ -204,25 +204,6 @@ namespace Xv2CoreLib.EffectContainer
         public AsyncObservableCollection<Effect> Effects { get; set; }
 
         #region UiProperties
-        //SelectedEffect
-        [NonSerialized]
-        private Effect _selectedEffect = null;
-        public Effect SelectedEffect
-        {
-            get
-            {
-                return this._selectedEffect;
-            }
-            set
-            {
-                if (value != this._selectedEffect)
-                {
-                    this._selectedEffect = value;
-                    NotifyPropertyChanged("SelectedEffect");
-                }
-            }
-        }
-
         //Filters
         [NonSerialized]
         private string _effectSearchFilter = null;
@@ -2090,20 +2071,6 @@ namespace Xv2CoreLib.EffectContainer
             }
 
             return GetEffectAssociatedWithEffectPart(effectParts[0]);
-        }
-        
-        /// <summary>
-        /// Returns the SelectedEffectParts for the first SelectedEffect, if it exists.
-        /// </summary>
-        /// <returns></returns>
-        public ObservableCollection<EffectPart> GetSelectedEffectParts()
-        {
-            if(SelectedEffect != null)
-            {
-                return SelectedEffect.SelectedEffectParts;
-            }
-
-            return null;
         }
         
         private bool IsAssetIndexUsed(AssetType type, int index)

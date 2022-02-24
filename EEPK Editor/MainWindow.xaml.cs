@@ -481,17 +481,15 @@ namespace EEPK_Organiser
         {
             MessageBox.Show("Ctrl + C = Copy\n" +
                 "Ctrl + V = Paste\n" +
-                "Shift + V = Paste Values\n" +
-                "Ctrl + Del = Delete\n" +
+                "Ctrl + X = Paste Values\n" +
+                "Del = Delete\n" +
                 "Ctrl + N = New\n" +
                 "Ctrl + D = Duplicate\n" +
-                "Ctrl + R = Rename\n" +
-                "Ctrl + E = Replace\n" +
-                "Ctrl + M = Merge\n" +
-                "Shift + ? = Used By?\n" +
+                "Ctrl + Q = Used By?\n" +
                 "Ctrl + Alt + V = Paste As Child (EMP Editor)\n" +
                 "Ctrl + A = Add File (EMO Tab)\n" +
-                "Ctrl + H = Hue Adjustment\n",
+                "Ctrl + H = Hue Adjustment\n" +
+                "Alt + H = Hue Set\n",
                 "Hotkeys", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 

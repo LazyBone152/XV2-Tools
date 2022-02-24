@@ -198,7 +198,6 @@ namespace Xv2CoreLib.EEPK
                     int eskOffset = BitConverter.ToInt32(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 96);
                     if (eskOffset != 0)
                     {
-                        //Get ESK string if it exists, otherwise put it as "NULL"
                         try
                         {
                             eepkFile.Effects[i].EffectParts[a].ESK = StringEx.GetString(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + eskOffset);
@@ -211,7 +210,7 @@ namespace Xv2CoreLib.EEPK
                     }
                     else
                     {
-                        eepkFile.Effects[i].EffectParts[a].ESK = "NULL";
+                        eepkFile.Effects[i].EffectParts[a].ESK = string.Empty;
                     }
                     addedOffset += 100;
                 }

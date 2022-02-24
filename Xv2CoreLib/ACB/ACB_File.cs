@@ -288,7 +288,7 @@ namespace Xv2CoreLib.ACB
             if (!AcbFormatHelper.Instance.AcbFormatHelperMain.ForceLoad)
             {
                 //Analyze the ACB version. This maps out what columns and tables exist in this ACB version, so that they can be read and saved properly.
-                AcbFormatHelper.Instance.ParseFile(utfFile);
+                AcbFormatHelper.Instance.ParseFile(utfFile, true);
             }
 
             AcbFormatHelperTable header = AcbFormatHelper.Instance.AcbFormatHelperMain.Header;

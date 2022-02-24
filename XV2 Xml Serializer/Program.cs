@@ -10,6 +10,7 @@ using Xv2CoreLib.Eternity;
 using YAXLib;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.Windows.Media.Imaging;
 
 namespace XV2_Xml_Serializer
 {
@@ -21,7 +22,7 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
-            args = new string[1] { @"E:\VS_Test\EMO\ALL EMO" };
+            //args = new string[1] { @"parameter_spec_char - Copy.psc" };
 
             DEBUG_MODE = true;
 #endif
@@ -608,6 +609,9 @@ namespace XV2_Xml_Serializer
             }
         }
 
+
+        //Debug/testing code
+#if DEBUG
         private static void MatDecompile(string[] args)
         {
             foreach(var file in args)
@@ -619,8 +623,6 @@ namespace XV2_Xml_Serializer
             }
         }
 
-        //Debug/testing code
-#if DEBUG
         private static void BulkParseInitial(string fileLocation)
         {
             string[] files = Directory.GetFiles(fileLocation);
@@ -1067,17 +1069,19 @@ namespace XV2_Xml_Serializer
 
                         foreach (var particle in particleEffects)
                         {
+                            if(particle.Type_1 != null && particle.Component_Type == Xv2CoreLib.EMP.ParticleEffect.ComponentType.AutoOriented)
+                            {
+                                if(particle.Type_1.Count > 0)
+                                {
+                                    Console.WriteLine($"This: {particle.Name}, Type: {particle.Type_1[0].I_00}");
+                                    Console.ReadLine();
+                                }
+                            }
                             if(particle.FloatPart_02_01 != null)
                             {
-                                if (!values.Contains(particle.FloatPart_02_01.F_44.ToString()))
-                                    values.Add(particle.FloatPart_02_01.F_44.ToString());
+                                //if (!values.Contains(particle.FloatPart_02_01.F_44.ToString()))
+                                //    values.Add(particle.FloatPart_02_01.F_44.ToString());
                                 
-                               // if(!values.Contains(particle.Type_Texture.I_08.ToString()))
-                                 //   values.Add(particle.Type_Texture.I_08.ToString());
-
-                                //if (!values.Contains(HexConverter.GetHexString(particle.Type_Texture.I_08)))
-                                //    values.Add(HexConverter.GetHexString(particle.Type_Texture.I_08));
-
                             }
                         }
 
@@ -1105,27 +1109,41 @@ namespace XV2_Xml_Serializer
         static void BulkParseEcf(string directory)
         {
             string[] files = Directory.GetFiles(directory);
+            List<string> values = new List<string>();
 
             foreach (string s in files)
             {
                 if (Path.GetExtension(s) == ".ecf")
                 {
                     Console.WriteLine(s);
-                    var ecf = new Xv2CoreLib.ECF.Parser(s, true).GetEcfFile();
+                    var ecf = new Xv2CoreLib.ECF.Parser(s, false).GetEcfFile();
 
-                    if(ecf.Entries[0].Type0 != null)
+                    foreach(var entry in ecf.Entries)
                     {
-                        for(int i = 0; i < ecf.Entries[0].Type0.Count(); i++)
+                        if(entry.Animations != null)
                         {
-                            int count = ecf.Entries[0].Type0[i].Keyframes.Count();
-                            
-
+                            foreach (var anim in entry.Animations)
+                            {
+                                if (!values.Contains(anim.Component.ToString()))
+                                    values.Add(anim.Component.ToString());
+                            }
                         }
                     }
 
                 }
             }
 
+            //log
+            StringBuilder str = new StringBuilder();
+
+            foreach (var value in values)
+            {
+                str.AppendLine(value);
+            }
+
+            File.WriteAllText("ecf_log.txt", str.ToString());
+            Process.Start("ecf_log.txt");
+            Environment.Exit(0);
         }
 
         static void BulkParseEepk(string directory)
@@ -1666,12 +1684,12 @@ namespace XV2_Xml_Serializer
             //Extract all of a specific file type
             Xv2CoreLib.CPK.CPK_Reader cpk = new Xv2CoreLib.CPK.CPK_Reader(@"C:\Program Files (x86)\Steam\steamapps\common\DB Xenoverse 2\cpk", false);
 
-            var task = cpk.ExtractAll(@"C:\XV2_MultiThreadExtractTest", ".bcs");
+            var task = cpk.ExtractAll(@"C:\XV2_MultiThreadExtractTest", ".emb");
             task.Wait();
 
             Environment.Exit(0);
         }
 #endif
-        
+
     }
 }
