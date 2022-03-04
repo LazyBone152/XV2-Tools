@@ -146,6 +146,10 @@
     <Compile Include="Installer\MsgComponentInstall.cs" />
     <Compile Include="Installer\ACB\AcbInstaller.cs" />
     <Compile Include="Installer\ACB\AcbUninstaller.cs" />
+    <Compile Include="Installer\Transformation\Defines.cs" />
+    <Compile Include="Installer\Transformation\TransformInstaller.cs" />
+    <Compile Include="Installer\Transformation\TransformPartSet.cs" />
+    <Compile Include="Installer\Transformation\TransformSkill.cs" />
     <Compile Include="Installer\Uninstall.cs" />
     <Compile Include="Tracking\GameDir.cs" />
     <Compile Include="Tracking\Sections.cs" />
