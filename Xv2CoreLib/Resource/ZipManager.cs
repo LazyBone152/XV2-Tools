@@ -3,6 +3,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Windows.Media.Imaging;
 using System.Xml.Linq;
+using Xv2CoreLib.Eternity;
 using YAXLib;
 
 namespace Xv2CoreLib.Resource
@@ -65,8 +66,15 @@ namespace Xv2CoreLib.Resource
         {
             if (xml != null)
             {
-                return (T)new YAXSerializer(typeof(T), YAXSerializationOptions.DontSerializeNullObjects).Deserialize(xml.Root);
+                T result = (T)new YAXSerializer(typeof(T), YAXSerializationOptions.DontSerializeNullObjects).Deserialize(xml.Root);
 
+                //Special handling for prebaked file.
+                if (result is PrebakedFile prebaked)
+                {
+                    prebaked.LoadLists();
+                }
+
+                return result;
                 /*
                 using (var stringWriter = new System.IO.StringWriter())
                 {

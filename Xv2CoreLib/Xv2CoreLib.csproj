@@ -242,6 +242,7 @@
     <Compile Include="MSG\Deserializer.cs" />
     <Compile Include="MSG\MSG_File.cs" />
     <Compile Include="MSG\Parser.cs" />
+    <Compile Include="NSK\NSK_File.cs" />
     <Compile Include="OBL\OBL_File.cs" />
     <Compile Include="OCC\Deserializer.cs" />
     <Compile Include="OCC\OCC_File.cs" />

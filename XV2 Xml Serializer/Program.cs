@@ -301,6 +301,9 @@ namespace XV2_Xml_Serializer
                                 case ".emo":
                                     Xv2CoreLib.EMO.EMO_File.CreateXml(fileLocation);
                                     break;
+                                case ".nsk":
+                                    Xv2CoreLib.NSK.NSK_File.CreateXml(fileLocation);
+                                    break;
                                 case ".xml":
                                     LoadXmlInitial(fileLocation);
                                     break;
@@ -557,6 +560,9 @@ namespace XV2_Xml_Serializer
                         break;
                     case ".emo":
                         Xv2CoreLib.EMO.EMO_File.ConvertFromXml(fileLocation);
+                        break;
+                    case ".nsk":
+                        Xv2CoreLib.NSK.NSK_File.ConvertFromXml(fileLocation);
                         break;
                     default:
                         FileTypeNotSupported(fileLocation);

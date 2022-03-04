@@ -12,6 +12,7 @@ namespace Xv2CoreLib.EMD
 
         private byte[] rawBytes;
         public EMD_File emdFile { get; private set; }
+        private int startAddress = 0;
 
         public Parser(string path, bool writeXml)
         {
@@ -28,11 +29,12 @@ namespace Xv2CoreLib.EMD
             }
         }
 
-        public Parser(byte[] _rawBytes)
+        public Parser(byte[] _rawBytes, int startAddress = 0)
         {
             rawBytes = _rawBytes;
+            this.startAddress = startAddress;
 
-            if (BitConverter.ToInt32(rawBytes, 0) != EMD_SIGNATURE) throw new InvalidDataException("EMD_SIGNATURE not found at offset 0x0. Parse failed.");
+            if (BitConverter.ToInt32(rawBytes, 0 + startAddress) != EMD_SIGNATURE) throw new InvalidDataException("EMD_SIGNATURE not found at offset 0x0. Parse failed.");
 
             ParseEmd();
         }
@@ -43,15 +45,15 @@ namespace Xv2CoreLib.EMD
             emdFile = new EMD_File() { Models = new List<EMD_Model>() };
 
             //Header
-            emdFile.Version = BitConverter.ToUInt32(rawBytes, 8);
-            int modelTableCount = BitConverter.ToUInt16(rawBytes, 18);
-            int modelTableOffset = BitConverter.ToInt32(rawBytes, 20);
-            int modelNameTableOffset = BitConverter.ToInt32(rawBytes, 24);
+            emdFile.Version = BitConverter.ToUInt32(rawBytes, 8 + startAddress);
+            int modelTableCount = BitConverter.ToUInt16(rawBytes, 18 + startAddress);
+            int modelTableOffset = BitConverter.ToInt32(rawBytes, 20 + startAddress) + startAddress;
+            int modelNameTableOffset = BitConverter.ToInt32(rawBytes, 24 + startAddress) + startAddress;
 
             for (int i = 0; i < modelTableCount; i++)
             {
-                int modelOffset = BitConverter.ToInt32(rawBytes, modelTableOffset);
-                int modelNameOffset = BitConverter.ToInt32(rawBytes, modelNameTableOffset);
+                int modelOffset = BitConverter.ToInt32(rawBytes, modelTableOffset) + startAddress;
+                int modelNameOffset = BitConverter.ToInt32(rawBytes, modelNameTableOffset) + startAddress;
 
                 if (modelOffset != 0)
                 {

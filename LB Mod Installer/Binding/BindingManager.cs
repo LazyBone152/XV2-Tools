@@ -66,6 +66,7 @@ namespace LB_Mod_Installer.Binding
         private X2MHelper x2mHelper;
 
         //Assigned IDs (We keep track of all relevant assigned IDs here, so we dont accidently assign the same ID a second time)
+        private List<AutoIdContext> AutoIdContext = new List<AutoIdContext>();
         private List<int> AssignedPartSets = new List<int>();
         private List<int> AssignedCharaIDs = new List<int>();
         private List<string> AssignedCostumes = new List<string>();
@@ -97,7 +98,7 @@ namespace LB_Mod_Installer.Binding
         /// <param name="filePath">The file path. Used for tracking.</param>
         /// <param name="usedIDs">(Optional) A list of all IDs that are used. This overwrites the default behaviour of checking the Index property on installList and binaryList entries when calculating AutoIDs.</param>
         /// 
-        public void ParseProperties<T>(IList<T> installList, IList<T> binaryList, string filePath, List<string> usedIDs = null)
+        public void ParseProperties<T>(IList<T> installList, IList<T> binaryList, string filePath) where T : class
         {
             if (installList == null) return;
 
@@ -107,22 +108,22 @@ namespace LB_Mod_Installer.Binding
             //Parse every single string on classes that implement IInstallable
             foreach (var installEntry in installList)
             {
-                ParseProperties_RecursiveSingle(installEntry, filePath, installList, binaryList, usedIDs, true);
+                ParseProperties_RecursiveSingle(installEntry, filePath, installList, binaryList, true);
             }
 
             RemoveNullTokenEntries(installList);
         }
 
-        private void ParseProperties_RecursiveList<T>(IEnumerable list, string filePath, IList<T> installList, IList<T> binaryList, List<string> usedIDs = null)
+        private void ParseProperties_RecursiveList<T>(IEnumerable list, string filePath, IList<T> installList, IList<T> binaryList) where T : class
         {
             foreach (var obj in list)
             {
                 if (obj != null)
-                    ParseProperties_RecursiveSingle<T>(obj, filePath, installList, binaryList, usedIDs);
+                    ParseProperties_RecursiveSingle<T>(obj, filePath, installList, binaryList);
             }
         }
 
-        private void ParseProperties_RecursiveSingle<T>(object obj, string filePath, IList<T> installList, IList<T> binaryList, List<string> usedIDs = null, bool allowAutoId = false)
+        private void ParseProperties_RecursiveSingle<T>(object obj, string filePath, IList<T> installList, IList<T> binaryList, bool allowAutoId = false) where T : class
         {
             //This property needs to have its props parsed.
             PropertyInfo[] childProps = obj.GetType().GetProperties();
@@ -154,7 +155,7 @@ namespace LB_Mod_Installer.Binding
                             {
                                 //Has BindingAutoId attribute.
                                 if (allowAutoId)
-                                    childProp.SetValue(obj, ParseBinding(str, string.Format("{0}", childProp.Name), filePath, installList, binaryList, true, autoIdAttr[0].MaxId, usedIDs).ToString());
+                                    childProp.SetValue(obj, ParseBinding(str, string.Format("{0}", childProp.Name), filePath, installList, binaryList, true, autoIdAttr[0].MaxId).ToString());
                             }
                         }
                     }
@@ -166,12 +167,12 @@ namespace LB_Mod_Installer.Binding
 
                         if (bindingSubClassAtr.Length > 0 && value != null)
                         {
-                            ParseProperties_RecursiveSingle<T>(value, filePath, installList, binaryList, usedIDs);
+                            ParseProperties_RecursiveSingle<T>(value, filePath, installList, binaryList);
                         }
                         if (bindingSubListAtr.Length > 0 && value != null)
                         {
                             if (value is IEnumerable list)
-                                ParseProperties_RecursiveList<T>(list, filePath, installList, binaryList, usedIDs);
+                                ParseProperties_RecursiveList<T>(list, filePath, installList, binaryList);
                         }
                     }
                 }
@@ -182,7 +183,7 @@ namespace LB_Mod_Installer.Binding
 
         #region Binding
 
-        private string ParseStringBinding<T>(string str, string comment, string filePath, IEnumerable<T> entries1, IEnumerable<T> entries2, bool allowAutoId = true, ushort maxId = ushort.MaxValue, List<string> usedIds = null)
+        private string ParseStringBinding<T>(string str, string comment, string filePath, IEnumerable<T> entries1, IEnumerable<T> entries2, bool allowAutoId = true, ushort maxId = ushort.MaxValue) where T : class
         {
             //New and improved binding processing method.
             //Now supports multiple bindings within a single string
@@ -198,7 +199,7 @@ namespace LB_Mod_Installer.Binding
                 string endStr = str.Substring(endPos + 1);
                 string binding = str.Substring(startPos, endPos - startPos + 1);
 
-                binding = ParseBinding(binding, comment, filePath, entries1, entries2, allowAutoId, maxId, usedIds);
+                binding = ParseBinding(binding, comment, filePath, entries1, entries2, allowAutoId, maxId);
 
                 if (HasBinding(binding))
                     throw new InvalidDataException($"ProcessStringBinding: unexpected result. Binding was not successfuly parsed (binding={binding}).");
@@ -209,7 +210,7 @@ namespace LB_Mod_Installer.Binding
             return str;
         }
 
-        private string ParseBinding<T>(string binding, string comment, string filePath, IEnumerable<T> entries1, IEnumerable<T> entries2, bool secondPass = true, ushort maxId = ushort.MaxValue, List<string> usedIds = null)
+        private string ParseBinding<T>(string binding, string comment, string filePath, IEnumerable<T> entries1, IEnumerable<T> entries2, bool secondPass = true, ushort maxId = ushort.MaxValue) where T : class
         {
             if (IsBinding(binding))
             {
@@ -257,21 +258,26 @@ namespace LB_Mod_Installer.Binding
                             retID = GetCharaId(b.GetArgument1());
                             break;
                         case Function.AutoID:
-                            if (!secondPass) throw new Exception(String.Format("The AutoID binding function is not available for this value. ({0})", comment));
-
-                            int minIndex = (!String.IsNullOrWhiteSpace(b.GetArgument1())) ? int.Parse(b.GetArgument1()) : 0;
-                            int maxIndex = (!String.IsNullOrWhiteSpace(b.GetArgument2())) ? int.Parse(b.GetArgument2()) : maxId;
-                            if (maxIndex > maxId) maxIndex = maxId; //If maxIndex (declared in binding) is greater than maxId (declared on Property), then set maxIndex to maxId (which is the highest possible value)
-
-                            int nextID = GetUnusedIndex(entries1, entries2, minIndex, maxIndex, usedIds);
-
-                            if (nextID == NullTokenInt && errorHandler == ErrorHandling.Stop)
                             {
-                                GeneralInfo.SpecialFailState = GeneralInfo.SpecialFailStates.AutoIdBindingFailed;
-                                throw new Exception(String.Format("An ID could not be allocated in {2}. Install failed. \n\nBinding: {1}\nProperty: {0}", comment, binding, filePath));
-                            }
+                                if (!secondPass) throw new ArgumentException(String.Format("The AutoID binding function is not available for this value. ({0})", comment));
 
-                            retID = nextID;
+                                int minIndex = (b.HasArgument(1)) ? int.Parse(b.GetArgument1()) : 0;
+                                int maxIndex = (b.HasArgument(2)) ? int.Parse(b.GetArgument2()) : maxId;
+                                int sequence = (b.HasArgument(3)) ? int.Parse(b.GetArgument3()) : 1;
+                                if (maxIndex > maxId) maxIndex = maxId; //If maxIndex (declared in binding) is greater than maxId (declared on Property), then set maxIndex to maxId (which is the highest possible value)
+
+                                if (sequence < 1) throw new ArgumentException(String.Format("AutoID: Sequence argument cannot be less than 1. Install failed. \n\nBinding: {1}\nProperty: {0}", comment, binding, filePath));
+
+                                int nextID = GetAutoId(entries1, entries2, minIndex, maxIndex, sequence);
+
+                                if (nextID == NullTokenInt && errorHandler == ErrorHandling.Stop)
+                                {
+                                    GeneralInfo.SpecialFailState = GeneralInfo.SpecialFailStates.AutoIdBindingFailed;
+                                    throw new ArgumentException(String.Format("An ID could not be allocated in {2}. Install failed. \n\nBinding: {1}\nProperty: {0}", comment, binding, filePath));
+                                }
+
+                                retID = nextID;
+                            }
                             break;
                         case Function.Error:
                             errorHandler = b.GetErrorHandlingType();
@@ -287,7 +293,7 @@ namespace LB_Mod_Installer.Binding
                                 if (id1 == NullTokenInt && errorHandler == ErrorHandling.Stop)
                                 {
                                     GeneralInfo.SpecialFailState = GeneralInfo.SpecialFailStates.X2MNotFound;
-                                    throw new Exception(String.Format("Required X2M skill not found. Install failed. \nBinding: {1}\n({0})", comment, binding, filePath));
+                                    throw new ArgumentException(String.Format("Required X2M skill not found. Install failed. \nBinding: {1}\n({0})", comment, binding, filePath));
                                 }
 
                                 retID = id1;
@@ -301,7 +307,7 @@ namespace LB_Mod_Installer.Binding
                                 if (id2 == NullTokenInt && errorHandler == ErrorHandling.Stop)
                                 {
                                     GeneralInfo.SpecialFailState = GeneralInfo.SpecialFailStates.X2MNotFound;
-                                    throw new Exception(String.Format("Required X2M skill not found. Install failed. \nBinding: {1}\n({0})", comment, binding, filePath));
+                                    throw new ArgumentException(String.Format("Required X2M skill not found. Install failed. \nBinding: {1}\n({0})", comment, binding, filePath));
                                 }
 
                                 retID = id2;
@@ -311,12 +317,17 @@ namespace LB_Mod_Installer.Binding
                             {
                                 int min = (b.HasArgument(1)) ? int.Parse(b.GetArgument1()) : 0;
                                 int max = (b.HasArgument(2)) ? int.Parse(b.GetArgument2()) : 999;
-                                int nextId = GetFreePartSet(min, max);
+                                int sequence = (b.HasArgument(3)) ? int.Parse(b.GetArgument3()) : 1;
+
+                                if (sequence < 1)
+                                    throw new ArgumentException(String.Format("AutoPartSet: Sequence argument cannot be less than 1. Install failed. \n\nBinding: {1}\nProperty: {0}", comment, binding, filePath));
+
+                                int nextId = GetFreePartSet(min, max, sequence);
 
                                 if (nextId == NullTokenInt && errorHandler == ErrorHandling.Stop)
                                 {
                                     GeneralInfo.SpecialFailState = GeneralInfo.SpecialFailStates.AutoIdBindingFailed;
-                                    throw new Exception(String.Format("A PartSet ID could not be allocated in {2}. Install failed. \n\nBinding: {1}\nProperty: {0}", comment, binding, filePath));
+                                    throw new ArgumentException(String.Format("A PartSet ID could not be allocated in {2}. Install failed. \n\nBinding: {1}\nProperty: {0}", comment, binding, filePath));
                                 }
 
                                 retID = nextId;
@@ -326,7 +337,7 @@ namespace LB_Mod_Installer.Binding
                             if (!b.HasArgument()) throw new Exception($"No argument found on Increment binding!");
 
                             if(!int.TryParse(b.GetArgument1(), out increment))
-                                throw new Exception($"Error while parsing the argument on Increment binding. (Binding: {binding})");
+                                throw new ArgumentException($"Error while parsing the argument on Increment binding. (Binding: {binding})");
                             
                             break;
                         case Function.X2MSkillPath:
@@ -339,7 +350,7 @@ namespace LB_Mod_Installer.Binding
                                 if (x2mSkillPath == NullTokenStr && errorHandler == ErrorHandling.Stop)
                                 {
                                     GeneralInfo.SpecialFailState = GeneralInfo.SpecialFailStates.X2MNotFound;
-                                    throw new Exception(String.Format("Required X2M skill not found. Install failed. \nBinding: {1}\n({0})", comment, binding, filePath));
+                                    throw new ArgumentException(String.Format("Required X2M skill not found. Install failed. \nBinding: {1}\n({0})", comment, binding, filePath));
                                 }
 
                                 retStr = x2mSkillPath;
@@ -383,7 +394,7 @@ namespace LB_Mod_Installer.Binding
                             if (retID == NullTokenInt && errorHandler == ErrorHandling.Stop)
                             {
                                 GeneralInfo.SpecialFailState = GeneralInfo.SpecialFailStates.X2MNotFound;
-                                throw new Exception(String.Format("Required X2M character not found. Install failed. \nBinding: {1}\n({0})", comment, binding, filePath));
+                                throw new ArgumentException(String.Format("Required X2M character not found. Install failed. \nBinding: {1}\n({0})", comment, binding, filePath));
                             }
 
                             break;
@@ -394,7 +405,7 @@ namespace LB_Mod_Installer.Binding
                             if (retStr == NullTokenStr && errorHandler == ErrorHandling.Stop)
                             {
                                 GeneralInfo.SpecialFailState = GeneralInfo.SpecialFailStates.X2MNotFound;
-                                throw new Exception(String.Format("Required X2M character not found. Install failed. \nBinding: {1}\n({0})", comment, binding, filePath));
+                                throw new ArgumentException(String.Format("Required X2M character not found. Install failed. \nBinding: {1}\n({0})", comment, binding, filePath));
                             }
 
                             break;
@@ -416,6 +427,16 @@ namespace LB_Mod_Installer.Binding
                         case Function.AutoTtbEvent:
                             retID = GetFreeTtbEventId();
                             break;
+                        case Function.AutoCusAura:
+                            {
+                                PrebakedFile prebaked = install.GetPrebakedFile();
+                                int sequenceSize = b.HasArgument(1) ? int.Parse(b.GetArgument1()) : 1;
+
+                                if(sequenceSize < 1) throw new ArgumentException(String.Format("AutoCusAura: Sequence argument cannot be less than 1. Install failed. \n\nBinding: {1}\nProperty: {0}", comment, binding, filePath));
+
+                                retID = prebaked.GetFreeCusAuraID(sequenceSize);
+                            }
+                            break;
                     }
                 }
 
@@ -430,7 +451,7 @@ namespace LB_Mod_Installer.Binding
                 if (retID == NullTokenInt && errorHandler == ErrorHandling.Stop)
                 {
                     GeneralInfo.SpecialFailState = GeneralInfo.SpecialFailStates.BindingFailed;
-                    throw new Exception(String.Format("An ID could not be assigned according to the binding. Install failed. \nBinding: {1}\n({0})", comment, binding));
+                    throw new ArgumentException(String.Format("An ID could not be assigned according to the binding. Install failed. \nBinding: {1}\n({0})", comment, binding));
                 }
                 else if(retID == NullTokenInt && errorHandler == ErrorHandling.UseDefaultValue)
                 {
@@ -579,6 +600,9 @@ namespace LB_Mod_Installer.Binding
                     case "autottbevent":
                         bindings.Add(new BindingValue() { Function = Function.AutoTtbEvent, Arguments = arguments });
                         break;
+                    case "autocusaura":
+                        bindings.Add(new BindingValue() { Function = Function.AutoCusAura, Arguments = arguments });
+                        break;
                     default:
                         throw new FormatException(String.Format("Invalid ID Binding Function (Function = {0}, Argument = {1})\nFull binding: {2}", function, argument, originalBinding));
                 }
@@ -611,34 +635,34 @@ namespace LB_Mod_Installer.Binding
                 switch (bindings[i].Function)
                 {
                     case Function.SetAlias:
-                        if (hasAliasBinding) throw new Exception(String.Format("More than one instance of {0} found. Binding parse failed.\n({1})", Function.SetAlias, comment));
+                        if (hasAliasBinding) throw new ArgumentException(String.Format("More than one instance of {0} found. Binding parse failed.\n({1})", Function.SetAlias, comment));
                         hasAliasBinding = true;
                         break;
                     case Function.Error:
-                        if (hasErrorBinding) throw new Exception(String.Format("More than one instance of {0} found. Binding parse failed.\n({1})", Function.Error, comment));
+                        if (hasErrorBinding) throw new ArgumentException(String.Format("More than one instance of {0} found. Binding parse failed.\n({1})", Function.Error, comment));
                         hasErrorBinding = true;
                         break;
                     case Function.DefaultValue:
-                        if (hasDefaultValueBinding) throw new Exception(String.Format("More than one instance of {0} found. Binding parse failed.\n({1})", Function.DefaultValue, comment));
+                        if (hasDefaultValueBinding) throw new ArgumentException(String.Format("More than one instance of {0} found. Binding parse failed.\n({1})", Function.DefaultValue, comment));
                         hasDefaultValueBinding = true;
                         break;
                     case Function.Format:
-                        if (hasFormatBinding) throw new Exception(String.Format("More than one instance of {0} found. Binding parse failed.\n({1})", Function.Format, comment));
+                        if (hasFormatBinding) throw new ArgumentException(String.Format("More than one instance of {0} found. Binding parse failed.\n({1})", Function.Format, comment));
                         hasFormatBinding = true;
                         break;
                     case Function.Increment:
-                        if (hasIncrementBinding) throw new Exception(String.Format("More than one instance of {0} found. Binding parse failed.\n({1})", Function.Increment, comment));
+                        if (hasIncrementBinding) throw new ArgumentException(String.Format("More than one instance of {0} found. Binding parse failed.\n({1})", Function.Increment, comment));
                         hasIncrementBinding = true;
                         break;
                     default:
-                        if (hasIdBinding) throw new Exception(String.Format("More than one instance of an ID binding found within the same binding. Binding parse failed.\n({0})", comment));
+                        if (hasIdBinding) throw new ArgumentException(String.Format("More than one instance of an ID binding found within the same binding. Binding parse failed.\n({0})", comment));
                         hasIdBinding = true;
                         break;
                 }
             }
 
-            if (hasIdBinding == false && hasAliasBinding == true) throw new Exception("The SetAlias binding cannot be used without also a ID binding.");
-            if (hasIdBinding == false && hasErrorBinding == true) throw new Exception("The Error binding cannot be used without also a ID binding.");
+            if (hasIdBinding == false && hasAliasBinding == true) throw new ArgumentException("The SetAlias binding cannot be used without also a ID binding.");
+            if (hasIdBinding == false && hasErrorBinding == true) throw new ArgumentException("The Error binding cannot be used without also a ID binding.");
 
             //Validate arguments
             for (int i = 0; i < bindings.Count; i++)
@@ -648,7 +672,7 @@ namespace LB_Mod_Installer.Binding
                     case Function.AutoTtbEvent:
                     case Function.Skip:
                         //Cant have arguments
-                        if (bindings[i].HasArgument()) throw new Exception(String.Format("The {0} binding function takes no arguments, but {2} was found\n({1})", bindings[i].Function, comment, bindings[i].Arguments.Length));
+                        if (bindings[i].HasArgument()) throw new ArgumentException(String.Format("The {0} binding function takes no arguments, but {2} was found\n({1})", bindings[i].Function, comment, bindings[i].Arguments.Length));
                         break;
                     case Function.AutoID:
                     case Function.AutoCharaID:
@@ -666,8 +690,9 @@ namespace LB_Mod_Installer.Binding
                     case Function.X2MInstalled:
                     case Function.LocalKey:
                     case Function.IsLanguage:
+                    case Function.AutoCusAura:
                         //Must have an argument
-                        if (!bindings[i].HasArgument()) throw new Exception(String.Format("The {0} binding function takes a string argument, but none was found.\n({1})", bindings[i].Function, comment));
+                        if (!bindings[i].HasArgument()) throw new ArgumentException(String.Format("The {0} binding function takes a string argument, but none was found.\n({1})", bindings[i].Function, comment));
                         break;
                     case Function.SkillID1:
                     case Function.SkillID2:
@@ -676,7 +701,7 @@ namespace LB_Mod_Installer.Binding
                     case Function.X2MSkillPath:
                         if (bindings[i].Arguments.Length < 2)
                         {
-                            throw new Exception(String.Format("The {0} binding function takes 2 string arguments minimum, but only {1} were found. \n({2})", bindings[i].Function, bindings[i].Arguments.Length, comment));
+                            throw new ArgumentException(String.Format("The {0} binding function takes 2 string arguments minimum, but only {1} were found. \n({2})", bindings[i].Function, bindings[i].Arguments.Length, comment));
                         }
                         break;
                 }
@@ -750,89 +775,6 @@ namespace LB_Mod_Installer.Binding
             throw new Exception(String.Format("Could not find the alias: {0}. Binding parse failed. ({1})\n\nThis is most likely caused by using a binding that relies on something to be installed before it. To fix this issue, you can simply add a DoLast=\"True\" tag onto the File entry which will cause the file to be installed last.", alias, comment));
         }
 
-        /// <summary>
-        /// Tries to find a unused ID betwen min and max within the two specified lists. Returns the NullToken if an ID cannot be allocated.
-        /// </summary>
-        /// <returns></returns>
-        public int GetUnusedIndex<T>(IEnumerable<T> entries1, IEnumerable<T> entries2, int minIndex = 0, int maxIndex = -1, List<string> usedIds = null)
-        {
-            //todo: review this code
-            if (maxIndex == -1) maxIndex = UInt16.MaxValue - 1;
-            List<int> UsedIndexes = new List<int>();
-
-            //Create UsedIndexes
-            if(usedIds != null)
-            {
-                foreach (var usedId in usedIds)
-                {
-                    int value = 0;
-                    if (int.TryParse(usedId, out value))
-                    {
-                        UsedIndexes.Add(value);
-                    }
-                }
-            }
-            else
-            {
-                if (entries1 != null)
-                {
-                    foreach (var e in entries1)
-                    {
-                        try
-                        {
-                            if(e is IInstallable installable)
-                                UsedIndexes.Add(installable.SortID);
-                        }
-                        catch
-                        {
-
-                        }
-                    }
-                }
-
-                if (entries2 != null)
-                {
-                    foreach (var e in entries2)
-                    {
-                        try
-                        {
-                            if (e is IInstallable installable)
-                                UsedIndexes.Add(installable.SortID);
-                        }
-                        catch
-                        {
-
-                        }
-                    }
-                }
-
-            }
-            
-
-            //Create UnusedIndexes
-            int idx = 0;
-            while (true)
-            {
-                //If maxIndex has been reached
-                if (idx > maxIndex && maxIndex != -1)
-                {
-                    return NullTokenInt;
-                }
-
-                //If the index is not used the idx is greater than minIndex
-                if (!UsedIndexes.Contains(idx) && idx >= minIndex)
-                {
-                    if(usedIds != null)
-                    {
-                        usedIds.Add(idx.ToString());
-                    }
-                    return idx;
-                }
-                idx++;
-                if (idx > ushort.MaxValue) return -1; //Safe-guard code (very unlikely case)
-            }
-        }
-        
         private CusSkillType GetSkillType(string argument)
         {
             switch (argument.ToLower())
@@ -908,45 +850,6 @@ namespace LB_Mod_Installer.Binding
             return NullTokenInt; //Skill wasn't found
         }
 
-        private int GetCharaId(string shortName)
-        {
-            CMS_File cmsFile = (CMS_File)install.GetParsedFile<CMS_File>(CMS_PATH);
-
-            foreach (var chara in cmsFile.CMS_Entries)
-            {
-                if (chara.Str_04.ToLower() == shortName) return int.Parse(chara.Index);
-            }
-
-            return NullTokenInt; //Chara wasn't found, so defaulting to 0
-        }
-
-        private int GetFreePartSet(int min, int max)
-        {
-            int id = min;
-
-            while (IsPartSetUsed(id) && id < max)
-            {
-                id++;
-            }
-
-            if (IsPartSetUsed(id))
-                return NullTokenInt;
-
-            AssignedPartSets.Add(id);
-            return id;
-        }
-
-        private bool IsPartSetUsed(int partSet)
-        {
-            if (AssignedPartSets.Contains(partSet)) return true;
-            if (((BCS_File)install.GetParsedFile<BCS_File>(HUM_BCS_PATH)).PartSets.Any(x => x.ID == partSet)) return true;
-            if (((BCS_File)install.GetParsedFile<BCS_File>(HUF_BCS_PATH)).PartSets.Any(x => x.ID == partSet)) return true;
-            if (((BCS_File)install.GetParsedFile<BCS_File>(MAM_BCS_PATH)).PartSets.Any(x => x.ID == partSet)) return true;
-            if (((BCS_File)install.GetParsedFile<BCS_File>(MAF_BCS_PATH)).PartSets.Any(x => x.ID == partSet)) return true;
-            if (((BCS_File)install.GetParsedFile<BCS_File>(FRI_BCS_PATH)).PartSets.Any(x => x.ID == partSet)) return true;
-            if (((BCS_File)install.GetParsedFile<BCS_File>(NMC_BCS_PATH)).PartSets.Any(x => x.ID == partSet)) return true;
-            return false;
-        }
         
         private string ApplyFormatting(int value, string formatting)
         {
@@ -1107,6 +1010,121 @@ namespace LB_Mod_Installer.Binding
             }
         }
 
+        #endregion
+
+        #region AutoIdFunctions
+        public AutoIdContext GetAutoIdContext<T>(IEnumerable<T> keyEntries) where T : class
+        {
+            if (keyEntries == null) return null;
+
+            AutoIdContext context = AutoIdContext.FirstOrDefault(x => x.Key == keyEntries);
+
+            if (context == null)
+            {
+                context = new AutoIdContext(keyEntries);
+                AutoIdContext.Add(context);
+            }
+
+            return context;
+        }
+
+        private int GetAutoId<T>(IEnumerable<T> installEntries, IEnumerable<T> destEntries, int min, int max, int sequence) where T : class
+        {
+            AutoIdContext context = GetAutoIdContext<T>(destEntries);
+
+            //Add any static IDs from installEntries into the AutoIdContext.
+            foreach (var installEntry in installEntries)
+            {
+                if(installEntry is IInstallable entry)
+                {
+                    int staticId;
+
+                    if (int.TryParse(entry.Index, out staticId))
+                    {
+                        context.AddId(staticId);
+                    }
+                }
+            }
+
+            //Loop to get ID
+            int id = min;
+
+            while (IsAutoIdUsed(context, id, sequence) && id <= max)
+            {
+                id++;
+            }
+
+            //If ID is used at this point, then it failed to be assigned in the specified range
+            if (IsAutoIdUsed(context, id, sequence))
+            {
+                return NullTokenInt;
+            }
+
+            return id;
+        }
+
+        private bool IsAutoIdUsed(AutoIdContext context, int id, int sequence)
+        {
+            for (int i = 0; i < sequence; i++)
+            {
+                if (context.HasId(id + i)) return true;
+            }
+
+            return false;
+        }
+
+        private int GetCharaId(string shortName)
+        {
+            CMS_File cmsFile = (CMS_File)install.GetParsedFile<CMS_File>(CMS_PATH);
+
+            foreach (var chara in cmsFile.CMS_Entries)
+            {
+                if (chara.Str_04.ToLower() == shortName) return int.Parse(chara.Index);
+            }
+
+            return NullTokenInt; //Chara wasn't found, so defaulting to 0
+        }
+
+        private int GetFreePartSet(int min, int max, int sequence)
+        {
+            int id = min;
+
+            while (IsPartSetSequenceUsed(id, sequence) && id <= max)
+            {
+                id++;
+            }
+
+            if (IsPartSetSequenceUsed(id, sequence))
+                return NullTokenInt;
+
+            for (int i = 0; i < sequence; i++)
+                AssignedPartSets.Add(id + i);
+
+            return id;
+        }
+
+        private bool IsPartSetSequenceUsed(int start, int sequence)
+        {
+            for (int i = 0; i < sequence; i++)
+            {
+                if (IsPartSetUsed(start + i)) return true;
+            }
+
+            return false;
+        }
+
+        private bool IsPartSetUsed(int partSet)
+        {
+            if (AssignedPartSets.Contains(partSet)) return true;
+            if (((BCS_File)install.GetParsedFile<BCS_File>(HUM_BCS_PATH)).PartSets.Any(x => x.ID == partSet)) return true;
+            if (((BCS_File)install.GetParsedFile<BCS_File>(HUF_BCS_PATH)).PartSets.Any(x => x.ID == partSet)) return true;
+            if (((BCS_File)install.GetParsedFile<BCS_File>(MAM_BCS_PATH)).PartSets.Any(x => x.ID == partSet)) return true;
+            if (((BCS_File)install.GetParsedFile<BCS_File>(MAF_BCS_PATH)).PartSets.Any(x => x.ID == partSet)) return true;
+            if (((BCS_File)install.GetParsedFile<BCS_File>(FRI_BCS_PATH)).PartSets.Any(x => x.ID == partSet)) return true;
+            if (((BCS_File)install.GetParsedFile<BCS_File>(NMC_BCS_PATH)).PartSets.Any(x => x.ID == partSet)) return true;
+            return false;
+        }
+
         //Characters:
         private int GetFreeCharacterID(int min, int max)
         {
@@ -1183,7 +1201,7 @@ namespace LB_Mod_Installer.Binding
 
                 if (current >= int.MaxValue) return NullTokenInt;
             }
-            
+
             AssignedTtbEventIDs.Add(current);
 
             return current;
@@ -1243,6 +1261,51 @@ namespace LB_Mod_Installer.Binding
 
     }
 
+    public class AutoIdContext
+    {
+        public IEnumerable<object> Key { get; set; }
+        public List<int> AssignedIds { get; private set; } = new List<int>();
+    
+        public AutoIdContext(IEnumerable<object> key)
+        {
+            Key = key;
+        }
+
+        public void AddId(int id)
+        {
+            if(!HasId(id))
+                AssignedIds.Add(id);
+        }
+
+        public bool HasId(int id)
+        {
+            foreach(var keyEntry in Key)
+            {
+                if(keyEntry is IInstallable entry)
+                {
+                    if (entry.SortID == id) return true;
+                }
+            }
+
+            return AssignedIds.Contains(id);
+        }
+        
+        public void MergeContext(AutoIdContext context)
+        {
+            foreach(var keyEntry in context.Key)
+            {
+                if(keyEntry is IInstallable entry)
+                {
+                    AddId(entry.SortID);
+                }
+            }
+
+            foreach(var id in context.AssignedIds)
+            {
+                AddId(id);
+            }
+        }
+    }
 
     public struct AliasValue
     {
@@ -1307,11 +1370,11 @@ namespace LB_Mod_Installer.Binding
             return String.Empty;
         }
 
-        public bool HasArgument(int arg = 1)
+        public bool HasArgument(int argCount = 1)
         {
             if (Arguments != null)
             {
-                if (Arguments.Length >= arg)
+                if (Arguments.Length >= argCount)
                 {
                     return true;
                 }
@@ -1353,6 +1416,7 @@ namespace LB_Mod_Installer.Binding
         AutoCharaID,
         AutoCostume,
         AutoTtbEvent,
+        AutoCusAura,
         AliasLink,
         SkillID1,
         SkillID2,

@@ -159,14 +159,19 @@ namespace LB_Mod_Installer.Installer
         private void ResolveFileType(string path, _File file)
         {
             //Special cases
-            if (path == ACB.AcbInstaller.DIRECT_INSTALL_TYPE || path == ACB.AcbInstaller.OPTION_INSTALL_TYPE || Path.GetExtension(path) == ".acb")
+            if (path.Equals(ACB.AcbInstaller.DIRECT_INSTALL_TYPE, StringComparison.OrdinalIgnoreCase) || path.Equals(ACB.AcbInstaller.OPTION_INSTALL_TYPE, StringComparison.OrdinalIgnoreCase) || Path.GetExtension(path) == ".acb")
             {
                 Uninstall_ACB(path, file);
                 return;
             }
-            if(path == CharaSlotsFile.FILE_NAME_BIN)
+            if(path.Equals(CharaSlotsFile.FILE_NAME_BIN, StringComparison.OrdinalIgnoreCase))
             {
                 Uninstall_CharaSlots(file);
+                return;
+            }
+            if (path.Equals(PrebakedFile.PATH, StringComparison.OrdinalIgnoreCase))
+            {
+                Uninstall_Prebaked(file);
                 return;
             }
 
@@ -1106,6 +1111,59 @@ namespace LB_Mod_Installer.Installer
             catch (Exception ex)
             {
                 string error = string.Format("Failed at OCS uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
+
+        private void Uninstall_Prebaked(_File file)
+        {
+            try
+            {
+                PrebakedFile prebakedFile = (PrebakedFile)GetParsedFile<PrebakedFile>(PrebakedFile.PATH, false, false);
+
+                if (prebakedFile == null) return;
+
+                //Uninstall entries
+                //Cus Auras:
+                Section cusAuraSection = file.GetSection(Sections.PrebakedCusAura);
+
+                if (cusAuraSection != null)
+                    prebakedFile.UninstallCusAuras(cusAuraSection.IDs);
+
+                //Body Shapes:
+                Section bodyShapeSection = file.GetSection(Sections.PrebakedBodyShape);
+
+                if (bodyShapeSection != null)
+                    prebakedFile.UninstallBodyShapes(bodyShapeSection.IDs);
+
+                //Aliases:
+                Section aliasSection = file.GetSection(Sections.PrebakedAlias);
+
+                if (aliasSection != null)
+                    prebakedFile.UninstallAliases(aliasSection.IDs);
+
+                //Ozarus:
+                Section ozaruSection = file.GetSection(Sections.PrebakedOzarus);
+
+                if (ozaruSection != null)
+                    prebakedFile.UninstallOzarus(ozaruSection.IDs);
+
+                //AutoPortraits:
+                Section autoPortraitSection = file.GetSection(Sections.PrebakedAutoBattlePortrait);
+
+                if (autoPortraitSection != null)
+                    prebakedFile.UninstallAutoBattlePortraits(autoPortraitSection.IDs);
+
+                //AnyDualSkill:
+                Section anyDualSkillSection = file.GetSection(Sections.PrebakedAnyDualSkillList);
+
+                if (anyDualSkillSection != null)
+                    prebakedFile.UninstallAnyDualSkill(anyDualSkillSection.IDs);
+
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at Prebaked uninstall phase ({0}).", PrebakedFile.PATH);
                 throw new Exception(error, ex);
             }
         }

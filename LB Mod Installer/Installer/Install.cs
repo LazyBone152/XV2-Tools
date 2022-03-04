@@ -66,7 +66,7 @@ namespace LB_Mod_Installer.Installer
         private bool useJungle1 = false;
         private bool useJungle2 = false;
 
-        private bool startedSaving = false; //If false and a error happens we dont need to restore files
+        private bool startedSaving = false;
 
 
         public Install(InstallerXml _installerXml, ZipReader _zipManager, MainWindow parent, Xv2FileIO fileIO, FileCacheManager _fileManager)
@@ -223,6 +223,13 @@ namespace LB_Mod_Installer.Installer
         
         private void ResolveFileType(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
+            //Special case: prebaked.xml
+            if(installPath.Equals(PrebakedFile.PATH, StringComparison.OrdinalIgnoreCase))
+            {
+                Install_Prebaked(xmlPath, installPath);
+                return;
+            }
+
             switch (Path.GetExtension(Path.GetFileNameWithoutExtension(xmlPath)))
             {
                 case ".eepk":
@@ -794,6 +801,63 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
+        private void Install_Prebaked(string xmlPath, string installPath)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                //PrebakedFile installFile = PrebakedFile.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                PrebakedFile installFile = zipManager.DeserializeXmlFromArchive_Ext<PrebakedFile>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                PrebakedFile gameFile = GetPrebakedFile();
+
+                //Install entries
+                if (installFile?.CusAuras != null)
+                {
+                    var ids = gameFile.InstallCusAuras(installFile.CusAuras);
+                    GeneralInfo.Tracker.AddIDs(installPath, Sections.PrebakedCusAura, ids);
+                }
+
+                if (installFile?.PreBakedAliases != null)
+                {
+                    var ids = gameFile.InstallAlias(installFile.PreBakedAliases);
+                    GeneralInfo.Tracker.AddIDs(installPath, Sections.PrebakedAlias, ids);
+                }
+
+                if (installFile?.BodyShapes != null)
+                {
+                    var ids = gameFile.InstallBodyShape(installFile.BodyShapes);
+                    GeneralInfo.Tracker.AddIDs(installPath, Sections.PrebakedBodyShape, ids);
+                }
+
+                if (installFile?.Ozarus != null)
+                {
+                    var ids = gameFile.InstallOzarus(installFile.Ozarus);
+                    GeneralInfo.Tracker.AddIDs(installPath, Sections.PrebakedOzarus, ids);
+                }
+
+                if (installFile?.AutoBattlePortraits != null)
+                {
+                    var ids = gameFile.InstallAutoBattlePortraits(installFile.AutoBattlePortraits);
+                    GeneralInfo.Tracker.AddIDs(installPath, Sections.PrebakedAutoBattlePortrait, ids);
+                }
+
+                if (installFile?.AnyDualSkillList != null)
+                {
+                    var ids = gameFile.InstallAnyDualSkill(installFile.AnyDualSkillList);
+                    GeneralInfo.Tracker.AddIDs(installPath, Sections.PrebakedAnyDualSkillList, ids);
+                }
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at Prebaked install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
+
         //Copy-paste generic install methods
         private void Install_BDM(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
@@ -1120,15 +1184,23 @@ namespace LB_Mod_Installer.Installer
                 TNL_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<TNL_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : TNL_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 TNL_File binaryFile = (TNL_File)GetParsedFile<TNL_File>(installPath);
 
-                //Character and Masters share the same IDs, so we must merge the Index list and pass it to ParseProperties, rather than have it check the lists directly.
-                List<string> usedIds = xmlFile.GetAllUsedIDs();
-                usedIds.AddRange(binaryFile.GetAllUsedIDs());
+                //Character and Masters share the same IDs, so the AutoIdContexts for all of them must be merged
+                AutoIdContext charaContext = bindingManager.GetAutoIdContext(binaryFile.Characters);
+                AutoIdContext masterContext = bindingManager.GetAutoIdContext(binaryFile.Teachers);
+                AutoIdContext objectContext = bindingManager.GetAutoIdContext(binaryFile.Objects);
+
+                charaContext.MergeContext(masterContext);
+                charaContext.MergeContext(objectContext);
+                masterContext.MergeContext(charaContext);
+                masterContext.MergeContext(objectContext);
+                objectContext.MergeContext(charaContext);
+                objectContext.MergeContext(masterContext);
 
                 //Parse bindings
                 bindingManager.ParseProperties(xmlFile.Actions, binaryFile.Actions, installPath);
-                bindingManager.ParseProperties(xmlFile.Characters, binaryFile.Characters, installPath, usedIds);
-                bindingManager.ParseProperties(xmlFile.Teachers, binaryFile.Teachers, installPath, usedIds);
-                bindingManager.ParseProperties(xmlFile.Objects, binaryFile.Objects, installPath, usedIds);
+                bindingManager.ParseProperties(xmlFile.Characters, binaryFile.Characters, installPath);
+                bindingManager.ParseProperties(xmlFile.Teachers, binaryFile.Teachers, installPath);
+                bindingManager.ParseProperties(xmlFile.Objects, binaryFile.Objects, installPath);
 
                 //Install entries
                 InstallEntries(xmlFile.Characters, binaryFile.Characters, installPath, Sections.TNL_Character, useSkipBindings);
@@ -1162,18 +1234,21 @@ namespace LB_Mod_Installer.Installer
                 if (binaryFile.Characters2 == null)
                     binaryFile.Characters2 = new List<Quest_Characters>();
 
-                //Used id list for collections/characters
-                List<string> usedColIds = xmlFile.GetAllUsedCollectionIds();
-                usedColIds.AddRange(binaryFile.GetAllUsedCollectionIds());
+                //Merge AutoIdContexts for Character1 and Character2 lists
+                if(binaryFile.Characters2 != null)
+                {
+                    AutoIdContext chara1Context = bindingManager.GetAutoIdContext(binaryFile.Characters1);
+                    AutoIdContext chara2Context = bindingManager.GetAutoIdContext(binaryFile.Characters2);
 
-                List<string> usedCharacterIds = xmlFile.GetAllUsedCharacterIds();
-                usedCharacterIds.AddRange(binaryFile.GetAllUsedCharacterIds());
+                    chara1Context.MergeContext(chara2Context);
+                    chara2Context.MergeContext(chara1Context);
+                }
 
                 //Parse bindings
-                bindingManager.ParseProperties(xmlFile.Collections, binaryFile.Collections, installPath, usedColIds);
+                bindingManager.ParseProperties(xmlFile.Collections, binaryFile.Collections, installPath);
                 bindingManager.ParseProperties(xmlFile.Quests, binaryFile.Quests, installPath);
-                bindingManager.ParseProperties(xmlFile.Characters1, binaryFile.Characters1, installPath, usedCharacterIds);
-                bindingManager.ParseProperties(xmlFile.Characters2, binaryFile.Characters2, installPath, usedCharacterIds);
+                bindingManager.ParseProperties(xmlFile.Characters1, binaryFile.Characters1, installPath);
+                bindingManager.ParseProperties(xmlFile.Characters2, binaryFile.Characters2, installPath);
 
                 //Install entries
                 InstallEntries(xmlFile.Quests, binaryFile.Quests, installPath, Sections.QXD_Quest, useSkipBindings);
@@ -1402,7 +1477,7 @@ namespace LB_Mod_Installer.Installer
             }
         }
 
-        private void InstallSubEntries<T, M>(IList<M> installEntries, IList<M> destEntries, string path, string section, bool useSkipBindings) where T : IInstallable, new() where M : IInstallable_2<T>, IInstallable, new()
+        private void InstallSubEntries<T, M>(IList<M> installEntries, IList<M> destEntries, string path, string section, bool useSkipBindings) where T : class, IInstallable, new() where M : class, IInstallable_2<T>, IInstallable, new()
         {
             if (installEntries == null) return;
             if (destEntries == null) throw new InvalidOperationException(string.Format("InstallSubEntries: destEntries was null. Cannot install entries. ({0})", path));
@@ -1434,6 +1509,7 @@ namespace LB_Mod_Installer.Installer
                 InstallEntries<T>(entryToInstall.SubEntries, destEntries[index].SubEntries, path, $"{section}/{entryToInstall.Index}", useSkipBindings);
             }
         }
+
 
         //MSG Component Writers
         private IDB_Entry IdbMsgWriter(IDB_Entry IdbEntry, string filePath)
@@ -1515,7 +1591,6 @@ namespace LB_Mod_Installer.Installer
         }
 
 
-
         //File Handling. Methods for getting files from the game and parsing them.
         /// <summary>
         /// Gets a parsed file from the game and caches it. If it exists in the cache already then that is returned.
@@ -1541,13 +1616,14 @@ namespace LB_Mod_Installer.Installer
             {
                 //File is not cached. So parse it, add it and then return it.
                 var file = GetParsedFileFromGame(path, FileIO, false, raiseEx);
+
                 if(file != null)
                     fileManager.AddParsedFile(path, file);
+
                 return file;
             }
         }
         
-
         public static object GetParsedFileFromGame(string path, Xv2FileIO fileIO, bool onlyFromCpk, bool raiseEx = true)
         {
             if (onlyFromCpk)
@@ -1564,10 +1640,16 @@ namespace LB_Mod_Installer.Installer
                 return null;
             }
 
-            //Special case: slots file
-            if(path == CharaSlotsFile.FILE_NAME_BIN)
+            //Special case: chara slots file
+            if(path.Equals(CharaSlotsFile.FILE_NAME_BIN, StringComparison.OrdinalIgnoreCase))
             {
                 return CharaSlotsFile.Load(fileIO.GetFileFromGame(path, false, false));
+            }
+
+            //Special case: prebaked.xml
+            if(path.Equals(PrebakedFile.PATH, StringComparison.OrdinalIgnoreCase))
+            {
+                return fileIO.FileExists(path) ? PrebakedFile.Load(fileIO.PathInGameDir(path)) : null;
             }
 
             switch (Path.GetExtension(path))
@@ -1645,6 +1727,12 @@ namespace LB_Mod_Installer.Installer
 
         public static byte[] GetBytesFromParsedFile(string path, object data)
         {
+            //Special case: prebaked.xml
+            if(path.Equals(PrebakedFile.PATH, StringComparison.OrdinalIgnoreCase))
+            {
+                return ((PrebakedFile)data).SaveToBytes();
+            }
+
             switch (Path.GetExtension(path))
             {
                 case ".bac":
@@ -1716,6 +1804,19 @@ namespace LB_Mod_Installer.Installer
             }
         }
 
+        public PrebakedFile GetPrebakedFile()
+        {
+            PrebakedFile prebaked = (PrebakedFile)GetParsedFile<PrebakedFile>(PrebakedFile.PATH);
+
+            //If file doesnt exist in game (because xv2ins hasn't been run yet), then create the file
+            if (prebaked == null)
+            {
+                prebaked = new PrebakedFile();
+                fileManager.AddParsedFile(PrebakedFile.PATH, prebaked);
+            }
+
+            return prebaked;
+        }
 
         //UI
         private void SetProgressBarSteps()

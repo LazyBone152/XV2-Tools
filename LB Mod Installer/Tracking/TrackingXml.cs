@@ -75,6 +75,16 @@ namespace LB_Mod_Installer.Installer
             if (!section.IDs.Contains(ID)) section.IDs.Add(ID);
         }
 
+        public void AddIDs(string filePath, string sectionName, List<string> IDs)
+        {
+            Section section = GetCurrentMod().GetFileEntry(filePath).GetSection(sectionName);
+
+            foreach(var id in IDs)
+            {
+                if (!section.IDs.Contains(id)) section.IDs.Add(id);
+            }
+        }
+
         /// <summary>
         /// Removes a ID for use with this file.
         /// </summary>

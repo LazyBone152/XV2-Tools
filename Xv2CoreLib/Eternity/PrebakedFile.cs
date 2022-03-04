@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 using YAXLib;
 
@@ -12,6 +10,8 @@ namespace Xv2CoreLib.Eternity
     [YAXSerializeAs("Xv2PreBaked")]
     public class PrebakedFile
     {
+        public const string PATH = "pre-baked.xml";
+
         [YAXAttributeFor("OZARUS")]
         [YAXSerializeAs("value")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially)]
@@ -22,12 +22,15 @@ namespace Xv2CoreLib.Eternity
         public string XML_AutoBattlePortraitsString { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BodyShape")]
+        [YAXDontSerializeIfNull]
         public List<PrebakedBodyShape> BodyShapes { get; set; } = new List<PrebakedBodyShape>();
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "CusAuraData")]
+        [YAXDontSerializeIfNull]
         public List<CusAuraData> CusAuras { get; set; } = new List<CusAuraData>();
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Alias")]
+        [YAXDontSerializeIfNull]
         public List<PreBakedAlias> PreBakedAliases { get; set; } = new List<PreBakedAlias>();
 
         [YAXAttributeFor("ANY_DUAL_SKILL")]
@@ -48,14 +51,19 @@ namespace Xv2CoreLib.Eternity
         //Load:
         public static PrebakedFile Load(string path)
         {
-            //Remove invalid comment. Otherwise, XDoc will throw an error.
             string text = File.ReadAllText(path);
-            text = text.Replace("<!------------------------------------------------>", "<!--  -->");
+            return Parse(text);
+        }
+
+        private static PrebakedFile Parse(string xmlText)
+        {
+            //Remove invalid comment. Otherwise, XDoc will throw an error.
+            xmlText = xmlText.Replace("<!------------------------------------------------>", "<!--  -->");
 
             //Read xml
             XDocument xml;
 
-            using (StringReader reader = new StringReader(text))
+            using (StringReader reader = new StringReader(xmlText))
                 xml = XDocument.Load(reader);
 
             //Find BcsColorMaps and remove it (if it exists)
@@ -79,10 +87,15 @@ namespace Xv2CoreLib.Eternity
             }
 
             //Parse int lists
-            prebaked.AutoBattlePortraits = HexConverter.ReadInt32Array(prebaked.XML_AutoBattlePortraitsString);
-            prebaked.AnyDualSkillList = HexConverter.ReadInt32Array(prebaked.XML_AnyDualSkillListString);
+            prebaked.LoadLists();
 
             return prebaked;
+        }
+
+        public void LoadLists()
+        {
+            AutoBattlePortraits = HexConverter.ReadInt32Array(XML_AutoBattlePortraitsString);
+            AnyDualSkillList = HexConverter.ReadInt32Array(XML_AnyDualSkillListString);
         }
 
         //Save:
@@ -108,6 +121,8 @@ namespace Xv2CoreLib.Eternity
 
         private XDocument Write()
         {
+            Sort();
+
             //Create list string values
             XML_AutoBattlePortraitsString = HexConverter.ToSerializedArray(AutoBattlePortraits);
             XML_AnyDualSkillListString = HexConverter.ToSerializedArray(AnyDualSkillList);
@@ -130,6 +145,247 @@ namespace Xv2CoreLib.Eternity
             return xml;
         }
 
+        public void Sort()
+        {
+            AutoBattlePortraits?.Sort();
+            AnyDualSkillList?.Sort();
+            BodyShapes?.Sort((x, y) => (int)x.CmsEntryID - (int)y.CmsEntryID);
+            CusAuras?.Sort((x, y) => x.CusAuraID - y.CusAuraID);
+            PreBakedAliases?.Sort((x, y) => (int)x.CmsEntryID - (int)y.CmsEntryID);
+        }
+        #endregion
+
+        #region CusAura
+        private List<int> ReservedCusAuraIds = new List<int>();
+
+        public int GetFreeCusAuraID(int sequenceSize)
+        {
+            int id = CusAuraData.CUS_DATA_ID_START;
+
+            while(IsCusAuraSequenceUsed(id, sequenceSize))
+            {
+                id++;
+            }
+
+            //Keep track of reserved IDs so they are not re-assigned
+            for (int i = 0; i < sequenceSize; i++)
+                ReservedCusAuraIds.Add(id + i);
+
+            return id;
+        }
+
+        private bool IsCusAuraSequenceUsed(int id, int sequenceSize)
+        {
+            if (CusAuras.Any(x => x.CusAuraID >= id && x.CusAuraID < id + sequenceSize))
+                return true;
+
+            if (ReservedCusAuraIds.Any(x => x >= id && x < id + sequenceSize))
+                return true;
+
+            return false;
+        }
+
+        #endregion
+
+        #region Install
+        public List<string> InstallOzarus(List<string> ozarus)
+        {
+            List<string> ids = new List<string>();
+
+            foreach(var ozaru in ozarus)
+            {
+                if (!Ozarus.Contains(ozaru))
+                {
+                    Ozarus.Add(ozaru);
+                    ids.Add(ozaru);
+                }
+            }
+
+            return ids;
+        }
+
+        public List<string> InstallAutoBattlePortraits(List<int> autoBattlePortraits)
+        {
+            List<string> ids = new List<string>();
+
+            foreach (var auto in autoBattlePortraits)
+            {
+                if (!AutoBattlePortraits.Contains(auto))
+                {
+                    AutoBattlePortraits.Add(auto);
+                    ids.Add(auto.ToString());
+                }
+            }
+
+            return ids;
+        }
+
+        public List<string> InstallAnyDualSkill(List<int> anyDualSkill)
+        {
+            List<string> ids = new List<string>();
+
+            foreach (var dualSkill in anyDualSkill)
+            {
+                if (!AnyDualSkillList.Contains(dualSkill))
+                {
+                    AnyDualSkillList.Add(dualSkill);
+                    ids.Add(dualSkill.ToString());
+                }
+            }
+
+            return ids;
+        }
+        
+        public List<string> InstallCusAuras(List<CusAuraData> cusAuras)
+        {
+            List<string> ids = new List<string>();
+
+            foreach (var cusAura in cusAuras)
+            {
+                InstallCusAura(cusAura);
+                ids.Add(cusAura.CusAuraID.ToString());
+            }
+
+            return ids;
+        }
+
+        public List<string> InstallBodyShape(List<PrebakedBodyShape> bodyShapes)
+        {
+            List<string> ids = new List<string>();
+
+            foreach (var bodyShape in bodyShapes)
+            {
+                InstallBodyShape(bodyShape);
+                ids.Add(bodyShape.CmsEntryID.ToString());
+            }
+
+            return ids;
+        }
+
+        public List<string> InstallAlias(List<PreBakedAlias> aliases)
+        {
+            List<string> ids = new List<string>();
+
+            foreach (var alias in aliases)
+            {
+                InstallAlias(alias);
+                ids.Add(alias.CmsEntryID.ToString());
+            }
+
+            return ids;
+        }
+
+        public void InstallCusAura(CusAuraData cusAura)
+        {
+            int index = CusAuras.IndexOf(CusAuras.FirstOrDefault(x => x.CusAuraID == cusAura.CusAuraID));
+
+            if(index == -1)
+            {
+                CusAuras.Add(cusAura);
+            }
+            else
+            {
+                CusAuras[index] = cusAura;
+            }
+        }
+
+        public void InstallBodyShape(PrebakedBodyShape bodyShape)
+        {
+            int index = BodyShapes.IndexOf(BodyShapes.FirstOrDefault(x => x.CmsEntryID == bodyShape.CmsEntryID));
+
+            if (index == -1)
+            {
+                BodyShapes.Add(bodyShape);
+            }
+            else
+            {
+                BodyShapes[index] = bodyShape;
+            }
+        }
+
+        public void InstallAlias(PreBakedAlias alias)
+        {
+            int index = PreBakedAliases.IndexOf(PreBakedAliases.FirstOrDefault(x => x.CmsEntryID == alias.CmsEntryID));
+
+            if (index == -1)
+            {
+                PreBakedAliases.Add(alias);
+            }
+            else
+            {
+                PreBakedAliases[index] = alias;
+            }
+        }
+
+
+        public void UninstallOzarus(List<string> ids)
+        {
+            Ozarus.RemoveAll(x => ids.Contains(x));
+        }
+
+        public void UninstallAutoBattlePortraits(List<string> ids)
+        {
+            AutoBattlePortraits.RemoveAll(x => ids.Contains(x.ToString()));
+        }
+
+        public void UninstallAnyDualSkill(List<string> ids)
+        {
+            AnyDualSkillList.RemoveAll(x => ids.Contains(x.ToString()));
+        }
+        
+        public void UninstallCusAuras(List<string> ids)
+        {
+            foreach(var stringId in ids)
+            {
+                int id;
+
+                if(int.TryParse(stringId, out id))
+                {
+                    UninstallCusAura(id);
+                }
+            }
+        }
+
+        public void UninstallBodyShapes(List<string> ids)
+        {
+            foreach (var stringId in ids)
+            {
+                int id;
+
+                if (int.TryParse(stringId, out id))
+                {
+                    UninstallBodyShape(id);
+                }
+            }
+        }
+
+        public void UninstallAliases(List<string> ids)
+        {
+            foreach (var stringId in ids)
+            {
+                int id;
+
+                if (int.TryParse(stringId, out id))
+                {
+                    UninstallAlias(id);
+                }
+            }
+        }
+
+        public void UninstallCusAura(int cusAuraId)
+        {
+            CusAuras.RemoveAll(x => x.CusAuraID == cusAuraId);
+        }
+
+        public void UninstallBodyShape(int cmsId)
+        {
+            BodyShapes.RemoveAll(x => x.CmsEntryID == cmsId);
+        }
+
+        public void UninstallAlias(int cmsId)
+        {
+            PreBakedAliases.RemoveAll(x => x.CmsEntryID == cmsId);
+        }
         #endregion
     }
 
@@ -148,6 +404,11 @@ namespace Xv2CoreLib.Eternity
     [YAXSerializeAs("CusAuraData")]
     public class CusAuraData
     {
+        /// <summary>
+        /// Custom CusAura IDs start from this point. Do not allow any IDs below this.
+        /// </summary>
+        public const int CUS_DATA_ID_START = 0x30;
+
         [YAXAttributeForClass]
         [YAXSerializeAs("cus_aura_id")]
         [YAXHexValue]
