@@ -30,6 +30,9 @@ using Xv2CoreLib.Resource.App;
 using Application = System.Windows.Application;
 using Xv2CoreLib.Resource;
 using System.Windows.Media;
+using Xv2CoreLib.EMD;
+using Xv2CoreLib.ESK;
+using Xv2CoreLib.EMO;
 
 #if XenoKit
 using XenoKit;
@@ -398,7 +401,23 @@ namespace EEPK_Organiser.View
             e.Handled = true;
         }
 
-#region EMO
+        #region EMO
+
+        private void EMO_AssetContainer_NewAsset_Click(object sender, RoutedEventArgs e)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            var asset = Asset.Create(AssetType.EMO);
+            effectContainerFile.Emo.AddAsset(asset, undos);
+            effectContainerFile.Emo.RefreshAssetCount();
+            emoDataGrid.SelectedItem = asset;
+            emoDataGrid.ScrollIntoView(asset);
+
+            //Undos
+            undos.Add(new UndoActionDelegate(effectContainerFile.Emo, nameof(effectContainerFile.Emo.UpdateAssetFilter), true));
+            UndoManager.Instance.AddUndo(new CompositeUndo(undos, "New EMO Asset"));
+        }
+
         private void EMO_AssetContainer_Merge_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -919,7 +938,7 @@ namespace EEPK_Organiser.View
                     Asset asset = new Asset()
                     {
                         assetType = AssetType.EMO,
-                        Files = AsyncObservableCollection<EffectFile>.Create()
+                        Files = new AsyncObservableCollection<EffectFile>()
                     };
 
                     foreach (var file in openFile.FileNames)
@@ -935,6 +954,7 @@ namespace EEPK_Organiser.View
                                 asset.AddFile(EMM_File.LoadEmm(file), newName, EffectFile.FileType.EMM);
                                 break;
                             case EffectFile.FileType.Other:
+                            case EffectFile.FileType.EMO:
                                 asset.AddFile(File.ReadAllBytes(file), newName, EffectFile.FileType.Other);
                                 break;
                             default:
@@ -1089,6 +1109,90 @@ namespace EEPK_Organiser.View
                 MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 #endif
+
+        }
+
+        private async void EMO_AssetContainer_AddEmd(object sender, RoutedEventArgs e)
+        {
+            var asset = emoDataGrid.SelectedItem as Asset;
+            if (asset == null) return;
+
+            if (asset.Files.Any(x => x.fileType == EffectFile.FileType.EMB) || asset.Files.Any(x => x.fileType == EffectFile.FileType.EMM) || asset.Files.Any(x => x.fileType == EffectFile.FileType.EMO))
+            {
+                await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, "File Already Exists", $"An EMO, EMB or EMM already exists on the selected asset. Please delete it/them to complete the conversion.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                return;
+            }
+
+            OpenFileDialog openFile = new OpenFileDialog();
+            openFile.Title = "EMD + ESK -> EMO conversion";
+            openFile.Filter = "EMD and ESK | *.emd; *.esk";
+            openFile.Multiselect = true;
+
+            if (openFile.ShowDialog() == true)
+            {
+                ESK_File eskFile = null;
+                List<EMD_File> emdFiles = new List<EMD_File>();
+                List<EMB_File> embFiles = new List<EMB_File>();
+                List<EMM_File> emmFiles = new List<EMM_File>();
+
+                foreach (var file in openFile.FileNames)
+                {
+                    if(Path.GetExtension(file) == ".emd")
+                    {
+                        string emmPath = string.Format("{0}/{1}.emm", Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file));
+                        string embPath = string.Format("{0}/{1}.emb", Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file));
+
+                        if (!File.Exists(emmPath))
+                        {
+                            await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, "File Not Found", $"Could not find \"{emmPath}\".\n\nPlease note that each EMD file must have a EMM and EMB in the same directory.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                            return;
+                        }
+
+                        if (!File.Exists(embPath))
+                        {
+                            await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, "File Not Found", $"Could not find \"{embPath}\".\n\nPlease note that each EMD file must have a EMM and EMB in the same directory.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                            return;
+                        }
+
+                        EMD_File emd = EMD_File.Load(file);
+                        EMB_File emb = EMB_File.LoadEmb(embPath);
+                        EMM_File emm = EMM_File.LoadEmm(emmPath);
+
+                        emdFiles.Add(emd);
+                        embFiles.Add(emb);
+                        emmFiles.Add(emm);
+                    }
+                    else if (Path.GetExtension(file) == ".esk")
+                    {
+                        eskFile = ESK_File.Load(file);
+                    }
+
+                }
+
+                //Validation
+                if(emdFiles.Count == 0)
+                {
+                    await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, "No EMDs", $"No EMD files were selected/loaded, so no EMO can be created.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                    return;
+                }
+
+                if (eskFile == null)
+                {
+                    await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, "No ESK", $"No ESK file was selected/loaded, so no EMO can be created.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                    return;
+                }
+
+                EMB_File mergedEmb;
+                EMM_File mergedEmm;
+                EMO_File emoFile = EMO_File.ConvertToEmo(emdFiles.ToArray(), embFiles.ToArray(), emmFiles.ToArray(), eskFile, out mergedEmb, out mergedEmm);
+
+                List<IUndoRedo> undos = new List<IUndoRedo>();
+                asset.AddFile(emoFile, "convert.emo", EffectFile.FileType.EMO, undos);
+                asset.AddFile(mergedEmb, "convert.emb", EffectFile.FileType.EMB, undos);
+                asset.AddFile(mergedEmm, "convert.emm", EffectFile.FileType.EMM, undos);
+
+                UndoManager.Instance.AddCompositeUndo(undos, "EMD -> EMO Conversion");
+            }
 
         }
 
@@ -4487,5 +4591,6 @@ namespace EEPK_Organiser.View
 
             return null;
         }
+
     }
 }

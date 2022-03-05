@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Numerics;
 using System.Text;
 using YAXLib;
 
@@ -42,7 +43,7 @@ namespace Xv2CoreLib.EMA
         public float F_60 { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Bone")]
-        public List<Bone> Bones { get; set; }
+        public List<Bone> Bones { get; set; } = new List<Bone>();
 
         [YAXDontSerializeIfNull]
         public List<IKEntry> IKEntries { get; set; }
@@ -170,7 +171,7 @@ namespace Xv2CoreLib.EMA
                 {
                     if (Bones[i].AbsoluteMatrix == null)
                     {
-                        bytes.AddRange(new TransformMatrix().Write());
+                        bytes.AddRange(new SkeletonMatrix().Write());
                     }
                     else
                     {
@@ -213,6 +214,17 @@ namespace Xv2CoreLib.EMA
             return bytes;
         }
 
+        public static Skeleton Convert(ESK.ESK_Skeleton eskSkeleton)
+        {
+            Skeleton skeleton = new Skeleton();
+
+            foreach(var bone in eskSkeleton.NonRecursiveBones)
+            {
+                skeleton.Bones.Add(Bone.Convert(bone));
+            }
+
+            return skeleton;
+        }
     }
 
     [Serializable]
@@ -233,10 +245,10 @@ namespace Xv2CoreLib.EMA
         public ushort SiblingIndex { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("EmoPartIndex")]
-        public ushort EmoPartIndex { get; set; } //"EmgIndex" in LibXenoverse, but its actually the emo part index
+        public ushort EmoPartIndex { get; set; } = ushort.MaxValue; //"EmgIndex" in LibXenoverse, but its actually the emo part index
         [YAXAttributeForClass]
         [YAXSerializeAs("UnkIndex")]
-        public ushort I_08 { get; set; }
+        public ushort I_08 { get; set; } = ushort.MaxValue;
         [YAXAttributeFor("IK_Flag")]
         [YAXSerializeAs("value")]
         public ushort IKFlag { get; set; }
@@ -247,11 +259,11 @@ namespace Xv2CoreLib.EMA
         [YAXSerializeAs("value")]
         public ushort I_14 { get; set; }
 
-        public TransformMatrix RelativeMatrix { get; set; }
+        public SkeletonMatrix RelativeMatrix { get; set; }
 
         //Optional Data:
         [YAXDontSerializeIfNull]
-        public TransformMatrix AbsoluteMatrix { get; set; }
+        public SkeletonMatrix AbsoluteMatrix { get; set; }
         [YAXDontSerializeIfNull]
         public UnkSkeletonData UnknownValues { get; set; }
 
@@ -268,11 +280,11 @@ namespace Xv2CoreLib.EMA
             bone.IKFlag = BitConverter.ToUInt16(rawBytes, offset + 10);
             bone.I_12 = BitConverter.ToUInt16(rawBytes, offset + 12);
             bone.I_14 = BitConverter.ToUInt16(rawBytes, offset + 14);
-            bone.RelativeMatrix = TransformMatrix.Read(rawBytes, offset + 16);
+            bone.RelativeMatrix = SkeletonMatrix.Read(rawBytes, offset + 16);
 
             if (absMatrixOffset > 0)
             {
-                bone.AbsoluteMatrix = TransformMatrix.Read(rawBytes, absMatrixOffset + skeletonOffset);
+                bone.AbsoluteMatrix = SkeletonMatrix.Read(rawBytes, absMatrixOffset + skeletonOffset);
             }
 
             if (unkDataOffset > 0)
@@ -301,10 +313,42 @@ namespace Xv2CoreLib.EMA
             return bytes;
         }
         
+        public static Bone Convert(ESK.ESK_Bone eskBone)
+        {
+            Bone bone = new Bone();
+            bone.Name = eskBone.Name;
+            bone.Index = (ushort)eskBone.Index;
+            bone.ParentIndex = (ushort)eskBone.Index1;
+            bone.ChildIndex = (ushort)eskBone.Index2;
+            bone.SiblingIndex = (ushort)eskBone.Index3;
+
+            if(eskBone.RelativeTransform != null)
+            {
+                //Convert RelativeTransform to RelativeMatrix
+
+                Vector3 scale = new Vector3(eskBone.RelativeTransform.ScaleX, eskBone.RelativeTransform.ScaleY, eskBone.RelativeTransform.ScaleZ) * eskBone.RelativeTransform.ScaleW;
+                Quaternion rot = new Quaternion(eskBone.RelativeTransform.RotationX, eskBone.RelativeTransform.RotationY, eskBone.RelativeTransform.RotationZ, eskBone.RelativeTransform.RotationW);
+                Vector3 pos = new Vector3(eskBone.RelativeTransform.PositionX, eskBone.RelativeTransform.PositionY, eskBone.RelativeTransform.PositionZ) * eskBone.RelativeTransform.PositionW;
+
+                Matrix4x4 matrix = Matrix4x4.Identity;
+                matrix *= Matrix4x4.CreateScale(scale);
+                matrix *= Matrix4x4.CreateFromQuaternion(rot);
+                matrix *= Matrix4x4.CreateTranslation(pos);
+
+                bone.RelativeMatrix = SkeletonMatrix.FromMatrix(matrix);
+            }
+
+            if(eskBone.AbsoluteTransform != null)
+            {
+                bone.AbsoluteMatrix = SkeletonMatrix.FromEskMatrix(eskBone.AbsoluteTransform);
+            }
+
+            return bone;
+        }
     }
 
     [Serializable]
-    public class TransformMatrix
+    public class SkeletonMatrix
     {
         [YAXAttributeFor("Row1")]
         [YAXSerializeAs("X")]
@@ -371,9 +415,9 @@ namespace Xv2CoreLib.EMA
         [YAXFormat("0.0##########")]
         public float M44 { get; set; } = 1f;
 
-        public static TransformMatrix Read(byte[] rawBytes, int offset)
+        public static SkeletonMatrix Read(byte[] rawBytes, int offset)
         {
-            return new TransformMatrix()
+            return new SkeletonMatrix()
             {
                 M11 = BitConverter.ToSingle(rawBytes, offset + 0),
                 M12 = BitConverter.ToSingle(rawBytes, offset + 4),
@@ -419,6 +463,53 @@ namespace Xv2CoreLib.EMA
             return bytes;
         }
     
+        public static SkeletonMatrix FromMatrix(Matrix4x4 matrix)
+        {
+            SkeletonMatrix transformMatrix = new SkeletonMatrix();
+
+            transformMatrix.M11 = matrix.M11;
+            transformMatrix.M12 = matrix.M12;
+            transformMatrix.M13 = matrix.M13;
+            transformMatrix.M14 = matrix.M14;
+            transformMatrix.M21 = matrix.M21;
+            transformMatrix.M22 = matrix.M22;
+            transformMatrix.M23 = matrix.M23;
+            transformMatrix.M24 = matrix.M24;
+            transformMatrix.M31 = matrix.M31;
+            transformMatrix.M32 = matrix.M32;
+            transformMatrix.M33 = matrix.M33;
+            transformMatrix.M34 = matrix.M34;
+            transformMatrix.M41 = matrix.M41;
+            transformMatrix.M42 = matrix.M42;
+            transformMatrix.M43 = matrix.M43;
+            transformMatrix.M44 = matrix.M44;
+
+            return transformMatrix;
+        }
+    
+        public static SkeletonMatrix FromEskMatrix(ESK.ESK_AbsoluteTransform matrix)
+        {
+            SkeletonMatrix transformMatrix = new SkeletonMatrix();
+
+            transformMatrix.M11 = matrix.F_00;
+            transformMatrix.M12 = matrix.F_04;
+            transformMatrix.M13 = matrix.F_08;
+            transformMatrix.M14 = matrix.F_12;
+            transformMatrix.M21 = matrix.F_16;
+            transformMatrix.M22 = matrix.F_20;
+            transformMatrix.M23 = matrix.F_24;
+            transformMatrix.M24 = matrix.F_28;
+            transformMatrix.M31 = matrix.F_32;
+            transformMatrix.M32 = matrix.F_36;
+            transformMatrix.M33 = matrix.F_40;
+            transformMatrix.M34 = matrix.F_44;
+            transformMatrix.M41 = matrix.F_48;
+            transformMatrix.M42 = matrix.F_52;
+            transformMatrix.M43 = matrix.F_56;
+            transformMatrix.M44 = matrix.F_60;
+
+            return transformMatrix;
+        }
     }
 
     [Serializable]

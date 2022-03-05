@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Xv2CoreLib.EMA;
+using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.EMD;
 using Xv2CoreLib.EMG;
+using Xv2CoreLib.EMM;
 using YAXLib;
 
 namespace Xv2CoreLib.EMO
@@ -21,7 +23,7 @@ namespace Xv2CoreLib.EMO
         [YAXAttributeFor("Version")]
         [YAXSerializeAs("value")]
         [YAXHexValue]
-        public int Version { get; set; }
+        public int Version { get; set; } = 0x92c0; //DBXV2 default
         [YAXAttributeFor("I_24")]
         [YAXSerializeAs("value")]
         [YAXHexValue]
@@ -189,6 +191,96 @@ namespace Xv2CoreLib.EMO
         }
         #endregion
 
+        /// <summary>
+        /// Convert a group of EMD files into a single EMO file. 
+        /// </summary>
+        /// <param name="emdFiles">All EMD files that will be merged together into an EMO</param>
+        /// <param name="embFiles">Must be in sync with emdFiles. Can have null entries.</param>
+        /// <param name="emmFiles">Must be in sync with emdFiles. Can have null entries.</param>
+        /// <param name="eskFile">The skeleton that the EMD files are based on. This will be converted into an EMO skeleton.</param>
+        /// <param name="mergedEmb">The final merged EMB file that contains all the EMO textures.</param>
+        /// <param name="mergedEmm">The final merged EMM file that contains all the EMO materials.</param>
+        public static EMO_File ConvertToEmo(EMD_File[] emdFiles, EMB_File[] embFiles, EMM_File[] emmFiles, ESK.ESK_File eskFile, out EMB_File mergedEmb, out EMM_File mergedEmm)
+        {
+            if (embFiles.Length != emdFiles.Length)
+                throw new ArgumentException($"EMO_File.ConvertToEmo: There must be an EMB file for each EMD file.");
+
+            if (emmFiles.Length != emdFiles.Length)
+                throw new ArgumentException($"EMO_File.ConvertToEmo: There must be an EMM file for each EMD file.");
+
+            if(eskFile == null)
+                throw new ArgumentException($"EMO_File.ConvertToEmo: ESK_Skeleton cannot be null.");
+
+
+            EMO_File emoFile = new EMO_File();
+            EMB_File embFile = EMB_File.DefaultEmbFile(false);
+            EMM_File emmFile = EMM_File.DefaultEmmFile();
+            emoFile.Skeleton = Skeleton.Convert(eskFile.Skeleton);
+
+            for(int i = 0; i < emdFiles.Length; i++)
+            {
+                //Merge textures
+                int embIndex = embFile.Entry.Count;
+                embFile.MergeEmbFile(embFiles[i]);
+
+                if (embFile.Entry.Count > EMB_File.MAX_EFFECT_TEXTURES)
+                    throw new Exception($"EMO_File.ConvertToEmo: Texture overflow (more than 128). To try to fix, use less models/embs.");
+
+                //Merge materials
+                Dictionary<string, string> matNames = new Dictionary<string, string>();
+
+                foreach(var mat in emmFiles[i].Materials)
+                {
+                    string name = emmFile.GetUnusedName(mat.Name);
+                    EmmMaterial newMat = mat.Copy();
+                    newMat.Name = name;
+                    emmFile.Materials.Add(newMat);
+
+                    matNames.Add(mat.Name, name);
+                }
+
+                emoFile.AddModel(emdFiles[i], eskFile.Skeleton, embIndex, matNames, i);
+
+            }
+
+            emoFile.MaterialsCount = (ushort)emmFile.Materials.Count;
+            mergedEmb = embFile;
+            mergedEmm = emmFile;
+            return emoFile;
+        }
+
+        public void AddModel(EMD_File emdFile, ESK.ESK_Skeleton skeleton, int embIndex, Dictionary<string, string> matNames, int emdIdx)
+        {
+            //Create EMO Part
+            EMO_Part part = new EMO_Part();
+            part.Name = string.IsNullOrWhiteSpace(emdFile.Name) ? $"mesh_{emdIdx}" : Path.GetFileNameWithoutExtension(emdFile.Name);
+
+            Parts.Add(part);
+
+            //Create EMG. The whole EMD will be added onto this.
+            EMG_File emg = EMG_File.Convert(emdFile, skeleton, embIndex, matNames, emdIdx);
+
+            part.EmgFiles.Add(emg);
+
+        }
+    
+        public int CalculateMaterialCount()
+        {
+            int count = 0;
+
+            foreach(var part in Parts)
+            {
+                foreach(var emg in part.EmgFiles)
+                {
+                    foreach(var mesh in emg.Mesh)
+                    {
+                        count += mesh.Submesh.Count;
+                    }
+                }
+            }
+
+            return count;
+        }
     }
 
     [YAXSerializeAs("Part")]

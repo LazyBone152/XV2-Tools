@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using YAXLib;
 using Xv2CoreLib.EMD;
 using System.IO;
+using System.Linq;
 
 namespace Xv2CoreLib.EMG
 {
@@ -65,6 +66,73 @@ namespace Xv2CoreLib.EMG
             }
 
             return bytes.ToArray();
+        }
+   
+        public static EMG_File Convert(EMD_File emdFile, ESK.ESK_Skeleton skeleton, int embIndex, Dictionary<string, string> matNames, int emdIdx)
+        {
+            EMG_File emg = new EMG_File();
+            emg.I_04 = (ushort)emdIdx;
+
+            foreach(var model in emdFile.Models)
+            {
+                foreach(var mesh in model.Meshes)
+                {
+                    foreach(var submesh in mesh.Submeshes)
+                    {
+                        foreach(var triangleList in submesh.Triangles)
+                        {
+                            EMG_Mesh emgMesh = new EMG_Mesh();
+                            emgMesh.AABB = mesh.AABB;
+                            emgMesh.VertexFlags = submesh.VertexFlags;
+
+                            //Texture samplers
+                            EMG_TextureList textureList = new EMG_TextureList();
+                            textureList.TextureSamplerDefs = submesh.TextureSamplerDefs;
+                            emgMesh.TextureLists.Add(textureList);
+
+                            foreach (var textureDef in textureList.TextureSamplerDefs)
+                                textureDef.EmbIndex += (byte)embIndex;
+
+                            //Vertices
+                            emgMesh.Vertices = submesh.Vertexes;
+
+                            //Submesh
+                            EMG_Submesh emgSubmesh = new EMG_Submesh();
+
+                            string newMatName;
+
+                            if (matNames.TryGetValue(submesh.Name, out newMatName))
+                                emgSubmesh.MaterialName = newMatName;
+                            else
+                                emgSubmesh.MaterialName = submesh.Name;
+
+                            //Faces
+                            emgSubmesh.Faces = new short[triangleList.Faces.Count];
+
+                            for (int i = 0; i < emgSubmesh.Faces.Length; i++)
+                                emgSubmesh.Faces[i] = (short)triangleList.Faces[i];
+
+                            //Bones
+                            foreach(var bone in triangleList.Bones)
+                            {
+                                ESK.ESK_Bone eskBone = skeleton.NonRecursiveBones.FirstOrDefault(x => x.Name == bone);
+
+                                if (eskBone != null)
+                                    emgSubmesh.Bones.Add((ushort)eskBone.Index);
+                                else
+                                    emgSubmesh.Bones.Add(0);
+                            }
+
+                            emgMesh.Submesh.Add(emgSubmesh);
+                            emg.Mesh.Add(emgMesh);
+                        }
+
+                    }
+
+                }
+            }
+
+            return emg;
         }
     }
 

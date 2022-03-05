@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
 using System.Text;
-using System.Threading.Tasks;
 using Xv2CoreLib.EAN;
 using Xv2CoreLib.Resource;
+using Xv2CoreLib.Resource.UndoRedo;
 using YAXLib;
 
 namespace Xv2CoreLib.ESK
@@ -68,7 +67,7 @@ namespace Xv2CoreLib.ESK
 
         //Non-hierarchy list - Save it here for better performance when using GetBone. (mostly for XenoKit, since it needs to use this method several dozen times each frame)
         private List<ESK_Bone> _nonRecursiveBones = null;
-        [YAXDontSerializeIfNull]
+        [YAXDontSerialize]
         public List<ESK_Bone> NonRecursiveBones
         {
             get

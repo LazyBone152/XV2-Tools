@@ -30,11 +30,14 @@ namespace Xv2CoreLib.EMD
     {
         public const int EMD_SIGNATURE = 1145914659;
 
+        [YAXDontSerialize]
+        public string Name { get; set; }
+
         [YAXAttributeForClass]
         public uint Version { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Model")]
-        public List<EMD_Model> Models { get; set; }
+        public List<EMD_Model> Models { get; set; } = new List<EMD_Model>();
 
 
         public byte[] SaveToBytes()

@@ -21,6 +21,7 @@ using Xv2CoreLib.Resource;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using System.Windows;
+using Xv2CoreLib.EMO;
 
 namespace Xv2CoreLib.EffectContainer
 {
@@ -720,6 +721,10 @@ namespace Xv2CoreLib.EffectContainer
                             case ".ema":
                                 file.EmaFile = EMA_File.Load(fileBytes);
                                 file.fileType = EffectFile.FileType.EMA;
+                                break;
+                            case ".emo":
+                                file.Bytes = fileBytes;
+                                file.fileType = EffectFile.FileType.EMO;
                                 break;
                             default:
                                 file.Bytes = fileBytes;
@@ -1610,6 +1615,9 @@ namespace Xv2CoreLib.EffectContainer
                                     break;
                                 case ".light.ema":
                                     type = EffectFile.FileType.EMA;
+                                    break;
+                                case ".emo":
+                                    type = EffectFile.FileType.EMO;
                                     break;
                                 default:
                                     type = EffectFile.FileType.Other;
@@ -3761,21 +3769,21 @@ namespace Xv2CoreLib.EffectContainer
         {
             get
             {
-                return Files[0].FileName;
+                return Files.Count > 0 ? Files[0].FileName : "[No Files]";
             }
         }
         public string FileNamesPreviewWithExtension
         {
             get
             {
-                return Files[0].FullFileName;
+                return Files.Count > 0 ? Files[0].FullFileName : "[No Files]";
             }
         }
         public string FileNamePreviewWithAssetType
         {
             get
             {
-                return String.Format("[{1}] {0}", Files[0].FileName, assetType);
+                return Files.Count > 0 ? String.Format("[{1}] {0}", Files[0].FileName, assetType) : $"[{assetType}] [No Files]";
             }
         }
 
@@ -3797,7 +3805,7 @@ namespace Xv2CoreLib.EffectContainer
             }
         }
 
-        private AsyncObservableCollection<EffectFile> _filesValue = null;
+        private AsyncObservableCollection<EffectFile> _filesValue = new AsyncObservableCollection<EffectFile>();
         public AsyncObservableCollection<EffectFile> Files
         {
             get
@@ -3905,6 +3913,12 @@ namespace Xv2CoreLib.EffectContainer
                         OriginalFileName = name
                     };
                     break;
+                case EffectFile.FileType.EMO:
+                    if(data is EMO_File emo)
+                    {
+                        data = emo.Write();
+                    }
+                    goto default;
                 default:
                     if(data as byte[] == null)
                     {
@@ -3926,8 +3940,8 @@ namespace Xv2CoreLib.EffectContainer
             {
                 undos.Add(new UndoableListAdd<EffectFile>(Files, newEffectFile));
             }
-            
-            NotifyPropertyChanged(nameof(FileNamesPreview));
+
+            RefreshNamePreview();
         }
 
         public void RemoveFile(EffectFile file, List<IUndoRedo> undos = null)
@@ -3947,8 +3961,9 @@ namespace Xv2CoreLib.EffectContainer
 
         public void RefreshNamePreview()
         {
-            NotifyPropertyChanged("FileNamesPreview");
-            NotifyPropertyChanged("FileNamesPreviewWithExtension");
+            NotifyPropertyChanged(nameof(FileNamesPreview));
+            NotifyPropertyChanged(nameof(FileNamesPreviewWithExtension));
+            NotifyPropertyChanged(nameof(FileNamePreviewWithAssetType));
         }
         
         /// <summary>
@@ -3960,7 +3975,7 @@ namespace Xv2CoreLib.EffectContainer
         {
             Asset newAsset = new Asset();
             newAsset.I_00 = I_00;
-            newAsset.Files = AsyncObservableCollection<EffectFile>.Create();
+            newAsset.Files = new AsyncObservableCollection<EffectFile>();
 
             foreach(var file in Files)
             {
@@ -3971,6 +3986,10 @@ namespace Xv2CoreLib.EffectContainer
                 newFile.fileType = file.fileType;
 
                 if(newFile.fileType == EffectFile.FileType.Other)
+                {
+                    newFile.Bytes = file.Bytes.Copy();
+                }
+                else if (newFile.fileType == EffectFile.FileType.EMO)
                 {
                     newFile.Bytes = file.Bytes.Copy();
                 }
@@ -4008,6 +4027,17 @@ namespace Xv2CoreLib.EffectContainer
         }
         
         /// <summary>
+        /// Create a new Asset with no files.
+        /// </summary>
+        public static Asset Create(AssetType assetType)
+        {
+            Asset asset = new Asset();
+            asset.assetType = assetType;
+
+            return asset;
+        }
+
+        /// <summary>
         /// Create a new Asset out of a single file.
         /// </summary>
         /// <param name="data"></param>
@@ -4016,7 +4046,6 @@ namespace Xv2CoreLib.EffectContainer
         public static Asset Create(object data, string name, EffectFile.FileType fileType, AssetType assetType)
         {
             Asset asset = new Asset();
-            asset.Files = AsyncObservableCollection<EffectFile>.Create();
             asset.assetType = assetType;
             asset.AddFile(data, name, fileType);
             return asset;
@@ -4108,6 +4137,7 @@ namespace Xv2CoreLib.EffectContainer
             EMB,
             EMM,
             EMA,
+            EMO,
             Other
         }
 
@@ -4231,7 +4261,7 @@ namespace Xv2CoreLib.EffectContainer
             switch (GetExtension(fileName))
             {
                 case ".emo":
-                    return FileType.Other;
+                    return FileType.EMO;
                 case ".emb":
                     return FileType.EMB;
                 case ".emm":
@@ -4375,6 +4405,7 @@ namespace Xv2CoreLib.EffectContainer
                 case FileType.ETR:
                     return EtrFile.Save(false);
                 case FileType.Other:
+                case FileType.EMO:
                     return Bytes;
                 default:
                     throw new Exception(string.Format("EffectFile.GetBytes(): Unknown fileType = {0}", fileType));

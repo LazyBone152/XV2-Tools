@@ -128,7 +128,7 @@ namespace Xv2CoreLib.EMB_CLASS
                     I_08 = 1,
                     I_10 = 1,
                     UseFileNames = true,
-                    Entry = AsyncObservableCollection<EmbEntry>.Create()
+                    Entry = new AsyncObservableCollection<EmbEntry>()
                 };
             }
             else
@@ -138,7 +138,7 @@ namespace Xv2CoreLib.EMB_CLASS
                     I_08 = 37568,
                     I_10 = 0,
                     UseFileNames = true,
-                    Entry = AsyncObservableCollection<EmbEntry>.Create()
+                    Entry = new AsyncObservableCollection<EmbEntry>()
                 };
             }
             
@@ -460,6 +460,20 @@ namespace Xv2CoreLib.EMB_CLASS
             }
 
             return entries;
+        }
+    
+        public void MergeEmbFile(EMB_File embFile)
+        {
+            if (embFile == null) return;
+
+            foreach(var entry in embFile.Entry)
+            {
+                string name = embFile.UseFileNames ? GetUnusedName(entry.Name) : $"DATA{Entry.Count}.dds";
+                EmbEntry newEntry = entry.Clone();
+                newEntry.Name = name;
+
+                Entry.Add(newEntry);
+            }
         }
     }
 

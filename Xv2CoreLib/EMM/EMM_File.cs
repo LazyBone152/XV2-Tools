@@ -219,6 +219,20 @@ namespace Xv2CoreLib.EMM
             foreach (var mat in Materials)
                 mat.CompileParameters();
         }
+   
+        public void MergeEmmFile(EMM_File emmFile)
+        {
+            if (emmFile == null) return;
+
+            foreach (var entry in emmFile.Materials)
+            {
+                string name = GetUnusedName(entry.Name);
+                EmmMaterial newEntry = entry.Copy();
+                newEntry.Name = name;
+
+                Materials.Add(newEntry);
+            }
+        }
     }
 
     [Serializable]

@@ -11,11 +11,12 @@ namespace Xv2CoreLib.EMD
         const int EMD_SIGNATURE = 1145914659;
 
         private byte[] rawBytes;
-        public EMD_File emdFile { get; private set; }
+        public EMD_File emdFile { get; private set; } = new EMD_File();
         private int startAddress = 0;
 
         public Parser(string path, bool writeXml)
         {
+            emdFile.Name = Path.GetFileName(path);
             rawBytes = File.ReadAllBytes(path);
 
             if (BitConverter.ToInt32(rawBytes, 0) != EMD_SIGNATURE) throw new InvalidDataException("EMD_SIGNATURE not found at offset 0x0. Parse failed.");
@@ -42,7 +43,6 @@ namespace Xv2CoreLib.EMD
 
         private void ParseEmd()
         {
-            emdFile = new EMD_File() { Models = new List<EMD_Model>() };
 
             //Header
             emdFile.Version = BitConverter.ToUInt32(rawBytes, 8 + startAddress);
