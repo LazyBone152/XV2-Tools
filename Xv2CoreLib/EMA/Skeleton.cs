@@ -33,14 +33,9 @@ namespace Xv2CoreLib.EMA
         [YAXAttributeFor("I_54")]
         [YAXSerializeAs("value")]
         public ushort I_54 { get; set; }
-        [YAXAttributeFor("F_56")]
+        [YAXAttributeFor("I_56")]
         [YAXSerializeAs("value")]
-        [YAXFormat("0.0##########")]
-        public float F_56 { get; set; }
-        [YAXAttributeFor("F_60")]
-        [YAXSerializeAs("value")]
-        [YAXFormat("0.0##########")]
-        public float F_60 { get; set; }
+        public ulong I_56 { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Bone")]
         public List<Bone> Bones { get; set; } = new List<Bone>();
@@ -66,8 +61,7 @@ namespace Xv2CoreLib.EMA
             skeleton.I_48 = BitConverter.ToInt32(rawBytes, skeletonOffset + 48);
             skeleton.I_52 = BitConverter.ToUInt16(rawBytes, skeletonOffset + 52);
             skeleton.I_54 = BitConverter.ToUInt16(rawBytes, skeletonOffset + 54);
-            skeleton.F_56 = BitConverter.ToSingle(rawBytes, skeletonOffset + 56);
-            skeleton.F_60 = BitConverter.ToSingle(rawBytes, skeletonOffset + 60);
+            skeleton.I_56 = BitConverter.ToUInt64(rawBytes, skeletonOffset + 56);
 
             int boneCount = BitConverter.ToUInt16(rawBytes, skeletonOffset + 0);
             int ikCount = BitConverter.ToUInt16(rawBytes, skeletonOffset + 4);
@@ -117,25 +111,24 @@ namespace Xv2CoreLib.EMA
             bool useAbsMatrix = false;
 
             //Header
-            bytes.AddRange(BitConverter.GetBytes((ushort)boneCount)); //Bone count
-            bytes.AddRange(BitConverter.GetBytes((ushort)0)); //IK2 count
-            bytes.AddRange(BitConverter.GetBytes((ushort)ikCount));//IK count
-            bytes.AddRange(BitConverter.GetBytes(I_06));
-            bytes.AddRange(new byte[4]);//Bone offset
-            bytes.AddRange(new byte[4]);//Names offset
-            bytes.AddRange(BitConverter.GetBytes(0)); //IK2 offset
-            bytes.AddRange(BitConverter.GetBytes(0)); //IK2 names
-            bytes.AddRange(new byte[4]);//UnkSkeletonData offset
-            bytes.AddRange(new byte[4]);//MatrixData offset
-            bytes.AddRange(new byte[4]);//IkData offset
-            bytes.AddRange(BitConverter.GetBytes(I_36));
+            bytes.AddRange(BitConverter.GetBytes((ushort)boneCount)); //Bone count (0)
+            bytes.AddRange(BitConverter.GetBytes((ushort)0)); //IK2 count (2)
+            bytes.AddRange(BitConverter.GetBytes((ushort)ikCount));//IK count (4)
+            bytes.AddRange(BitConverter.GetBytes(I_06)); //(6)
+            bytes.AddRange(new byte[4]);//Bone offset (8)
+            bytes.AddRange(new byte[4]);//Names offset (12)
+            bytes.AddRange(BitConverter.GetBytes(0)); //IK2 offset (16)
+            bytes.AddRange(BitConverter.GetBytes(0)); //IK2 names (20)
+            bytes.AddRange(new byte[4]);//UnkSkeletonData offset (24)
+            bytes.AddRange(new byte[4]);//MatrixData offset (28)
+            bytes.AddRange(new byte[4]);//IkData offset (32)
+            bytes.AddRange(BitConverter.GetBytes(I_36)); 
             bytes.AddRange(BitConverter.GetBytes(I_40));
             bytes.AddRange(BitConverter.GetBytes(I_44));
             bytes.AddRange(BitConverter.GetBytes(I_48));
             bytes.AddRange(BitConverter.GetBytes(I_52));
             bytes.AddRange(BitConverter.GetBytes(I_54));
-            bytes.AddRange(BitConverter.GetBytes(F_56));
-            bytes.AddRange(BitConverter.GetBytes(F_60));
+            bytes.AddRange(BitConverter.GetBytes(I_56));
 
             //Bones
             bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), 8);
@@ -150,33 +143,17 @@ namespace Xv2CoreLib.EMA
             //UnknownSkeletonData
             if (useUnkSkeletonData)
             {
+                bytes.AddRange(new byte[Utils.CalculatePadding(bytes.Count, 16)]);
+
                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), 24);
 
-                for(int i = 0; i < boneCount; i++)
+                for (int i = 0; i < boneCount; i++)
                 {
-                    if(Bones[i].UnknownValues == null)
+                    if (Bones[i].UnknownValues == null)
                     {
                         Bones[i].UnknownValues = UnkSkeletonData.GetDefault();
                     }
                     bytes.AddRange(Bones[i].UnknownValues.Write());
-                }
-            }
-
-            //AbsoluteMatrix
-            if (useAbsMatrix)
-            {
-                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), 28);
-
-                for (int i = 0; i < boneCount; i++)
-                {
-                    if (Bones[i].AbsoluteMatrix == null)
-                    {
-                        bytes.AddRange(new SkeletonMatrix().Write());
-                    }
-                    else
-                    {
-                        bytes.AddRange(Bones[i].AbsoluteMatrix.Write());
-                    }
                 }
             }
 
@@ -196,6 +173,29 @@ namespace Xv2CoreLib.EMA
                 bytes.AddRange(Encoding.ASCII.GetBytes(Bones[i].Name));
                 bytes.Add(0);
             }
+
+
+            //AbsoluteMatrix
+            if (useAbsMatrix)
+            {
+                bytes.AddRange(new byte[Utils.CalculatePadding(bytes.Count, 16)]);
+
+                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), 28);
+
+                for (int i = 0; i < boneCount; i++)
+                {
+                    if (Bones[i].AbsoluteMatrix == null)
+                    {
+                        bytes.AddRange(new SkeletonMatrix().Write());
+                    }
+                    else
+                    {
+                        bytes.AddRange(Bones[i].AbsoluteMatrix.Write());
+                    }
+                }
+            }
+
+
 
             //Padding
             bytes.AddRange(new byte[Utils.CalculatePadding(bytes.Count, 16)]);

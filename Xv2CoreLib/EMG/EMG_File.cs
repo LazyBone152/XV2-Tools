@@ -17,7 +17,7 @@ namespace Xv2CoreLib.EMG
         public ushort I_04 { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Mesh")]
-        public List<EMG_Mesh> Mesh { get; set; } = new List<EMG_Mesh>();
+        public List<EMG_Mesh> EmgMeshes { get; set; } = new List<EMG_Mesh>();
 
         public static EMG_File Read(byte[] bytes, int offset)
         {
@@ -35,7 +35,7 @@ namespace Xv2CoreLib.EMG
             for(int i = 0; i < meshCount; i++)
             {
                 int meshOffset = BitConverter.ToInt32(bytes, offset + 8 + (4 * i)) + offset;
-                emgFile.Mesh.Add(EMG_Mesh.Read(bytes, meshOffset));
+                emgFile.EmgMeshes.Add(EMG_Mesh.Read(bytes, meshOffset));
             }
 
             return emgFile;
@@ -43,7 +43,7 @@ namespace Xv2CoreLib.EMG
 
         public byte[] Write(bool writeVertices = true, int absOffsetInFile = 0)
         {
-            ushort meshCount = (ushort)(Mesh != null ? Mesh.Count : 0);
+            ushort meshCount = (ushort)(EmgMeshes != null ? EmgMeshes.Count : 0);
             List<byte> bytes = new List<byte>();
 
             //EMG Header:
@@ -62,13 +62,13 @@ namespace Xv2CoreLib.EMG
                 //Add offset
                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), 8 + (4 * i));
 
-                bytes.AddRange(Mesh[i].Write(writeVertices, absOffsetInFile + bytes.Count));
+                bytes.AddRange(EmgMeshes[i].Write(writeVertices, absOffsetInFile + bytes.Count));
             }
 
             return bytes.ToArray();
         }
    
-        public static EMG_File Convert(EMD_File emdFile, ESK.ESK_Skeleton skeleton, int embIndex, Dictionary<string, string> matNames, int emdIdx)
+        public static EMG_File Convert(EMD_File emdFile, ESK.ESK_Skeleton skeleton, int embIndex, Dictionary<string, string> matNames, int emdIdx, bool hasDytSamler)
         {
             EMG_File emg = new EMG_File();
             emg.I_04 = (ushort)emdIdx;
@@ -91,7 +91,36 @@ namespace Xv2CoreLib.EMG
                             emgMesh.TextureLists.Add(textureList);
 
                             foreach (var textureDef in textureList.TextureSamplerDefs)
-                                textureDef.EmbIndex += (byte)embIndex;
+                            {
+                                if (hasDytSamler)
+                                {
+                                    textureDef.EmbIndex += (byte)(embIndex + 1);
+                                }
+                                else
+                                {
+                                    textureDef.EmbIndex += (byte)(embIndex);
+                                }
+                            }
+
+                            if (hasDytSamler)
+                            {
+                                var textureSampler = textureList.TextureSamplerDefs[textureList.TextureSamplerDefs.Count - 1];
+                                var dytSampler = new EMD_TextureSamplerDef()
+                                {
+                                    EmbIndex = (byte)embIndex,
+                                    AddressModeU = EMD_TextureSamplerDef.AddressMode.Clamp,
+                                    AddressModeV = EMD_TextureSamplerDef.AddressMode.Clamp,
+                                    FilteringMag = EMD_TextureSamplerDef.Filtering.Linear,
+                                    FilteringMin = EMD_TextureSamplerDef.Filtering.Linear,
+                                    ScaleU = 1,
+                                    ScaleV = 1
+                                };
+
+                                textureList.TextureSamplerDefs.Clear();
+                                textureList.TextureSamplerDefs.Add(dytSampler); //for TOONvfx shaders, the dyt sampler is at index 0
+                                textureList.TextureSamplerDefs.Add(textureSampler); //main texture is at index 1.
+                                
+                            }
 
                             //Vertices
                             emgMesh.Vertices = submesh.Vertexes;
@@ -123,8 +152,8 @@ namespace Xv2CoreLib.EMG
                                     emgSubmesh.Bones.Add(0);
                             }
 
-                            emgMesh.Submesh.Add(emgSubmesh);
-                            emg.Mesh.Add(emgMesh);
+                            emgMesh.Submeshes.Add(emgSubmesh);
+                            emg.EmgMeshes.Add(emgMesh);
                         }
 
                     }
@@ -152,7 +181,7 @@ namespace Xv2CoreLib.EMG
 
         public List<EMG_TextureList> TextureLists { get; set; } = new List<EMG_TextureList>();
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Submesh")]
-        public List<EMG_Submesh> Submesh { get; set; } = new List<EMG_Submesh>();
+        public List<EMG_Submesh> Submeshes { get; set; } = new List<EMG_Submesh>();
         public List<EMD_Vertex> Vertices { get; set; } = new List<EMD_Vertex>();
 
         //Saving values:
@@ -194,7 +223,7 @@ namespace Xv2CoreLib.EMG
             {
                 int submeshOffset = BitConverter.ToInt32(bytes, submeshListOffset + (4 * i)) + offset;
 
-                mesh.Submesh.Add(EMG_Submesh.Read(bytes, submeshOffset));
+                mesh.Submeshes.Add(EMG_Submesh.Read(bytes, submeshOffset));
             }
 
             //Read vertices
@@ -211,7 +240,7 @@ namespace Xv2CoreLib.EMG
             List<byte> bytes = new List<byte>();
 
             int textureListsCount = (TextureLists != null) ? TextureLists.Count : 0;
-            int submeshCount = (Submesh != null) ? Submesh.Count : 0;
+            int submeshCount = (Submeshes != null) ? Submeshes.Count : 0;
             int vertexCount = (Vertices != null) ? Vertices.Count : 0;
 
             //Mesh header:
@@ -255,7 +284,7 @@ namespace Xv2CoreLib.EMG
 
                     //Update offset to point to this entry
                     bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), pointerList + (4 * i));
-                    bytes.AddRange(Submesh[i].Write());
+                    bytes.AddRange(Submeshes[i].Write());
                 }
             }
 

@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ex="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:EEPK_Organiser.Forms.EMP"
+        xmlns:vector="clr-namespace:EEPK_Organiser.View.Vectors"
         xmlns:converters="clr-namespace:LB_Common.Converters;assembly=LB_Common"
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         xmlns:undoRedo="clr-namespace:Xv2CoreLib.Resource.UndoRedo;assembly=Xv2CoreLib"

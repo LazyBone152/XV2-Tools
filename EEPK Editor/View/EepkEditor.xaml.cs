@@ -33,6 +33,7 @@ using System.Windows.Media;
 using Xv2CoreLib.EMD;
 using Xv2CoreLib.ESK;
 using Xv2CoreLib.EMO;
+using Xv2CoreLib.EAN;
 
 #if XenoKit
 using XenoKit;
@@ -1112,7 +1113,7 @@ namespace EEPK_Organiser.View
 
         }
 
-        private async void EMO_AssetContainer_AddEmd(object sender, RoutedEventArgs e)
+        private async void EMO_AssetContainer_AddEmd_Click(object sender, RoutedEventArgs e)
         {
             var asset = emoDataGrid.SelectedItem as Asset;
             if (asset == null) return;
@@ -1133,7 +1134,11 @@ namespace EEPK_Organiser.View
                 ESK_File eskFile = null;
                 List<EMD_File> emdFiles = new List<EMD_File>();
                 List<EMB_File> embFiles = new List<EMB_File>();
+                List<EMB_File> dytFiles = new List<EMB_File>();
                 List<EMM_File> emmFiles = new List<EMM_File>();
+
+                bool hasDyt = false;
+
 
                 foreach (var file in openFile.FileNames)
                 {
@@ -1141,6 +1146,7 @@ namespace EEPK_Organiser.View
                     {
                         string emmPath = string.Format("{0}/{1}.emm", Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file));
                         string embPath = string.Format("{0}/{1}.emb", Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file));
+                        string dytPath = string.Format("{0}/{1}.dyt.emb", Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file));
 
                         if (!File.Exists(emmPath))
                         {
@@ -1154,13 +1160,28 @@ namespace EEPK_Organiser.View
                             return;
                         }
 
+                        if (!File.Exists(dytPath) && hasDyt)
+                        {
+                            await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, "File Not Found", $"Could not find \"{dytPath}\".\n\nIf at least one of the EMD files have a dyt file, then one is required for each EMD.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                            return;
+                        }
+
                         EMD_File emd = EMD_File.Load(file);
                         EMB_File emb = EMB_File.LoadEmb(embPath);
                         EMM_File emm = EMM_File.LoadEmm(emmPath);
+                        EMB_File dyt = null;
 
                         emdFiles.Add(emd);
                         embFiles.Add(emb);
                         emmFiles.Add(emm);
+
+                        if (File.Exists(dytPath))
+                        {
+                            hasDyt = true;
+                            dyt = EMB_File.LoadEmb(dytPath);
+                            dytFiles.Add(dyt);
+                        }
+
                     }
                     else if (Path.GetExtension(file) == ".esk")
                     {
@@ -1184,16 +1205,48 @@ namespace EEPK_Organiser.View
 
                 EMB_File mergedEmb;
                 EMM_File mergedEmm;
-                EMO_File emoFile = EMO_File.ConvertToEmo(emdFiles.ToArray(), embFiles.ToArray(), emmFiles.ToArray(), eskFile, out mergedEmb, out mergedEmm);
+                EMO_File emoFile = EMO_File.ConvertToEmo(emdFiles.ToArray(), embFiles.ToArray(), dytFiles.ToArray(), emmFiles.ToArray(), eskFile, out mergedEmb, out mergedEmm);
 
                 List<IUndoRedo> undos = new List<IUndoRedo>();
-                asset.AddFile(emoFile, "convert.emo", EffectFile.FileType.EMO, undos);
-                asset.AddFile(mergedEmb, "convert.emb", EffectFile.FileType.EMB, undos);
-                asset.AddFile(mergedEmm, "convert.emm", EffectFile.FileType.EMM, undos);
+
+                string name = Path.GetFileNameWithoutExtension(openFile.FileName);
+
+                asset.AddFile(emoFile, $"{name}.emo", EffectFile.FileType.EMO, undos);
+                asset.AddFile(mergedEmb, $"{name}.emb", EffectFile.FileType.EMB, undos);
+                asset.AddFile(mergedEmm, $"{name}.emm", EffectFile.FileType.EMM, undos);
 
                 UndoManager.Instance.AddCompositeUndo(undos, "EMD -> EMO Conversion");
             }
 
+        }
+
+        private async void EMO_AssetContainer_AddEan_Click(object sender, RoutedEventArgs e)
+        {
+            //Not working right now
+
+            var asset = emoDataGrid.SelectedItem as Asset;
+            if (asset == null) return;
+
+            if (asset.Files.Any(x => x.Extension == ".obj.ema"))
+            {
+                await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, "File Already Exists", $"An OBJ.EMA already exists on the selected asset.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                return;
+            }
+
+            OpenFileDialog openFile = new OpenFileDialog();
+            openFile.Title = "EAN -> EMA conversion";
+            openFile.Filter = "EAN files | *.ean";
+
+            if (openFile.ShowDialog() == true)
+            {
+                EAN_File eanFile = EAN_File.Load(openFile.FileName);
+                EMA_File emaFile = EMA_File.ConvertToEma(eanFile);
+
+                List<IUndoRedo> undos = new List<IUndoRedo>();
+                asset.AddFile(emaFile, $"{Path.GetFileNameWithoutExtension(openFile.FileName)}.obj.ema", EffectFile.FileType.EMA, undos);
+
+                UndoManager.Instance.AddCompositeUndo(undos, "EAN -> EMA");
+            }
         }
 
         //EMO Files

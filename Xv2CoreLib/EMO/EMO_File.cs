@@ -134,6 +134,9 @@ namespace Xv2CoreLib.EMO
             {
                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - partsHeaderStart), pointerList + (4 * i));
                 bytes.AddRange(Parts[i].Write(bytes.Count));
+
+                //Pad to 16 byte alignment
+                bytes.AddRange(new byte[Utils.CalculatePadding(bytes.Count, 16)]);
             }
 
             //Write part names
@@ -142,7 +145,7 @@ namespace Xv2CoreLib.EMO
             bytes.AddRange(new byte[partsCount * 4]);
 
             //Add padding to keep alignment
-            bytes.AddRange(new byte[Utils.CalculatePadding(bytes.Count, 16)]);
+            //bytes.AddRange(new byte[Utils.CalculatePadding(bytes.Count, 16)]);
 
             for (int i = 0; i < partsCount; i++)
             {
@@ -155,7 +158,7 @@ namespace Xv2CoreLib.EMO
             //Skeleton:
             if (Skeleton != null)
             {
-                bytes.AddRange(new byte[Utils.CalculatePadding(bytes.Count, 16)]);
+                bytes.AddRange(new byte[Utils.CalculatePadding(bytes.Count, 64)]);
 
                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), 16);
 
@@ -165,7 +168,6 @@ namespace Xv2CoreLib.EMO
             //Vertices:
             if (partsCount > 0)
             {
-                bytes.AddRange(new byte[Utils.CalculatePadding(bytes.Count, 16)]);
 
                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), 20);
 
@@ -173,10 +175,12 @@ namespace Xv2CoreLib.EMO
                 {
                     foreach (var emg in part.EmgFiles)
                     {
-                        foreach (var mesh in emg.Mesh)
+                        foreach (var mesh in emg.EmgMeshes)
                         {
                             bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - mesh.StartOffset), mesh.VertexOffset);
                             bytes.AddRange(EMD_Vertex.GetBytes(mesh.Vertices, mesh.VertexFlags));
+
+                            bytes.AddRange(new byte[Utils.CalculatePadding(bytes.Count, 16)]);
                         }
                     }
                 }
@@ -200,7 +204,7 @@ namespace Xv2CoreLib.EMO
         /// <param name="eskFile">The skeleton that the EMD files are based on. This will be converted into an EMO skeleton.</param>
         /// <param name="mergedEmb">The final merged EMB file that contains all the EMO textures.</param>
         /// <param name="mergedEmm">The final merged EMM file that contains all the EMO materials.</param>
-        public static EMO_File ConvertToEmo(EMD_File[] emdFiles, EMB_File[] embFiles, EMM_File[] emmFiles, ESK.ESK_File eskFile, out EMB_File mergedEmb, out EMM_File mergedEmm)
+        public static EMO_File ConvertToEmo(EMD_File[] emdFiles, EMB_File[] embFiles, EMB_File[] dytFiles, EMM_File[] emmFiles, ESK.ESK_File eskFile, out EMB_File mergedEmb, out EMM_File mergedEmm)
         {
             if (embFiles.Length != emdFiles.Length)
                 throw new ArgumentException($"EMO_File.ConvertToEmo: There must be an EMB file for each EMD file.");
@@ -208,7 +212,10 @@ namespace Xv2CoreLib.EMO
             if (emmFiles.Length != emdFiles.Length)
                 throw new ArgumentException($"EMO_File.ConvertToEmo: There must be an EMM file for each EMD file.");
 
-            if(eskFile == null)
+            if (dytFiles.Length != emdFiles.Length && dytFiles.Length != 0)
+                throw new ArgumentException($"EMO_File.ConvertToEmo: There must be a DYT file for each EMD file, or no DYT files.");
+
+            if (eskFile == null)
                 throw new ArgumentException($"EMO_File.ConvertToEmo: ESK_Skeleton cannot be null.");
 
 
@@ -221,7 +228,16 @@ namespace Xv2CoreLib.EMO
             {
                 //Merge textures
                 int embIndex = embFile.Entry.Count;
+
+                //Add dyt texture to main EMB
+                if (dytFiles.Length > 0)
+                {
+                    embFile.AddEntry(dytFiles[i].Entry[0].Data);
+                }
+
+                //Main textures
                 embFile.MergeEmbFile(embFiles[i]);
+
 
                 if (embFile.Entry.Count > EMB_File.MAX_EFFECT_TEXTURES)
                     throw new Exception($"EMO_File.ConvertToEmo: Texture overflow (more than 128). To try to fix, use less models/embs.");
@@ -237,9 +253,20 @@ namespace Xv2CoreLib.EMO
                     emmFile.Materials.Add(newMat);
 
                     matNames.Add(mat.Name, name);
+
+                    if(dytFiles.Length > 0)
+                    {
+                        //Regular character shaders do not work as effects (game crashes). So they need to be swapped with vfx-specific shaders.
+                        //Luckily the game has some VFX shaders that are for character EMOs which load a dyt as a regular texture (on sampler/texture 0, rather than 4 as regular characters do)
+
+                        if(newMat.ShaderProgram.Contains("TOON_UNIF"))
+                        {
+                            newMat.ShaderProgram = "TOON_UNIFfx_VFX_DFDna_FCM";
+                        }
+                    }
                 }
 
-                emoFile.AddModel(emdFiles[i], eskFile.Skeleton, embIndex, matNames, i);
+                emoFile.AddModel(emdFiles[i], eskFile.Skeleton, embIndex, matNames, i, dytFiles.Length > 0);
 
             }
 
@@ -249,7 +276,7 @@ namespace Xv2CoreLib.EMO
             return emoFile;
         }
 
-        public void AddModel(EMD_File emdFile, ESK.ESK_Skeleton skeleton, int embIndex, Dictionary<string, string> matNames, int emdIdx)
+        public void AddModel(EMD_File emdFile, ESK.ESK_Skeleton skeleton, int embIndex, Dictionary<string, string> matNames, int emdIdx, bool hasDytSamler)
         {
             //Create EMO Part
             EMO_Part part = new EMO_Part();
@@ -258,7 +285,7 @@ namespace Xv2CoreLib.EMO
             Parts.Add(part);
 
             //Create EMG. The whole EMD will be added onto this.
-            EMG_File emg = EMG_File.Convert(emdFile, skeleton, embIndex, matNames, emdIdx);
+            EMG_File emg = EMG_File.Convert(emdFile, skeleton, embIndex, matNames, emdIdx, hasDytSamler);
 
             part.EmgFiles.Add(emg);
 
@@ -272,9 +299,9 @@ namespace Xv2CoreLib.EMO
             {
                 foreach(var emg in part.EmgFiles)
                 {
-                    foreach(var mesh in emg.Mesh)
+                    foreach(var mesh in emg.EmgMeshes)
                     {
-                        count += mesh.Submesh.Count;
+                        count += mesh.Submeshes.Count;
                     }
                 }
             }

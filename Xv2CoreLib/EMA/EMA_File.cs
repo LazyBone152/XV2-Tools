@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using Xv2CoreLib.EAN;
 using Xv2CoreLib.HslColor;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
@@ -89,7 +91,7 @@ namespace Xv2CoreLib.EMA
         public Skeleton skeleton { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Animation")]
-        public AsyncObservableCollection<EMA_Animation> Animations { get; set; }
+        public AsyncObservableCollection<EMA_Animation> Animations { get; set; } = new AsyncObservableCollection<EMA_Animation>();
 
         public static EMA_File Serialize(string path, bool writeXml)
         {
@@ -376,6 +378,47 @@ namespace Xv2CoreLib.EMA
             }
         }
 
+        public static EMA_File ConvertToEma(EAN_File eanFile)
+        {
+            //NOT FINISHED. VERY BUGGY!
+            //General position seem to be broken. Maybe something to do with skeleton.
+            //Rotation conversion also seems broken (Quaternion -> Euler Angles)
+
+
+            EMA_File emaFile = new EMA_File();
+            emaFile.Version = 37568;
+            emaFile.skeleton = Skeleton.Convert(eanFile.Skeleton);
+
+            foreach(var animation in eanFile.Animations)
+            {
+                EMA_Animation emaAnimation = new EMA_Animation();
+                emaAnimation.Name = animation.Name;
+                emaAnimation.EmaType = EmaType.obj;
+                emaAnimation.FloatPrecision = (ValueType)animation.FloatSize;
+                emaAnimation.EndFrame = (ushort)animation.GetLastKeyframe();
+
+                foreach(var node in animation.Nodes)
+                {
+                    foreach(var component in node.AnimationComponents)
+                    {
+                        if(component.Type == EAN_AnimationComponent.ComponentType.Position || component.Type == EAN_AnimationComponent.ComponentType.Scale)
+                        {
+                            emaAnimation.Commands.Add(EMA_Command.ConvertToEma(component, Axis.X, node.BoneName));
+                            emaAnimation.Commands.Add(EMA_Command.ConvertToEma(component, Axis.Y, node.BoneName));
+                            emaAnimation.Commands.Add(EMA_Command.ConvertToEma(component, Axis.Z, node.BoneName));
+                        }
+                        else if(component.Type == EAN_AnimationComponent.ComponentType.Rotation)
+                        {
+                            emaAnimation.Commands.AddRange(EMA_Command.ConvertToEma_Rotation(component, node.BoneName));
+                        }
+                    }
+                }
+
+                emaFile.Animations.Add(emaAnimation);
+            }
+
+            return emaFile;
+        }
     }
 
     [Serializable]
@@ -418,7 +461,7 @@ namespace Xv2CoreLib.EMA
         public ValueType FloatPrecision { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Command")]
-        public AsyncObservableCollection<EMA_Command> Commands { get; set; }
+        public AsyncObservableCollection<EMA_Command> Commands { get; set; } = new AsyncObservableCollection<EMA_Command>();
 
         public static EMA_Animation Read(byte[] rawBytes, int offset, int index, EMA_File emaFile)
         {
@@ -750,8 +793,8 @@ namespace Xv2CoreLib.EMA
         [YAXAttributeFor("Flags")]
         [YAXSerializeAs("Unk5")]
         public bool I_03_a4 { get; set; }
-        
-        public AsyncObservableCollection<EMA_Keyframe> Keyframes { get; set; }
+
+        public AsyncObservableCollection<EMA_Keyframe> Keyframes { get; set; } = new AsyncObservableCollection<EMA_Keyframe>();
 
         public static EMA_Command GetNewLight()
         {
@@ -1151,6 +1194,67 @@ namespace Xv2CoreLib.EMA
             Keyframes = Sorting.SortEntries2(Keyframes);
         }
 
+        public static EMA_Command ConvertToEma(EAN_AnimationComponent eanComponent, Axis axis, string boneName)
+        {
+            EMA_Command command = new EMA_Command();
+            command.BoneName = boneName;
+            command.Component = axis.ToString();
+            command.Parameter = eanComponent.Type.ToString();
+
+            foreach(var keyframe in eanComponent.Keyframes)
+            {
+                var emaKeyframe = new EMA_Keyframe();
+                emaKeyframe.Time = keyframe.FrameIndex;
+
+                switch (axis)
+                {
+                    case Axis.X:
+                        emaKeyframe.Value = keyframe.X * keyframe.W;
+                        break;
+                    case Axis.Y: 
+                        emaKeyframe.Value = keyframe.Y * keyframe.W;
+                        break;
+                    case Axis.Z:
+                        emaKeyframe.Value = keyframe.Z * keyframe.W;
+                        break;
+                }
+
+                command.Keyframes.Add(emaKeyframe);
+            }
+
+            return command;
+        }
+    
+        public static EMA_Command[] ConvertToEma_Rotation(EAN_AnimationComponent eanComponent, string boneName)
+        {
+            EMA_Command command1 = new EMA_Command();
+            command1.BoneName = boneName;
+            command1.Component = "X";
+            command1.Parameter = eanComponent.Type.ToString();
+
+            EMA_Command command2 = new EMA_Command();
+            command2.BoneName = boneName;
+            command2.Component = "Y";
+            command2.Parameter = eanComponent.Type.ToString();
+
+            EMA_Command command3 = new EMA_Command();
+            command3.BoneName = boneName;
+            command3.Component = "Z";
+            command3.Parameter = eanComponent.Type.ToString();
+
+            foreach (var keyframe in eanComponent.Keyframes)
+            {
+                Quaternion rot = new Quaternion(keyframe.X, keyframe.Y, keyframe.Z, keyframe.W);
+                Vector3 angles = MathHelpers.QuaternionToEulerAngles(rot);
+
+                command1.Keyframes.Add(new EMA_Keyframe(keyframe.FrameIndex, angles.X));
+                command2.Keyframes.Add(new EMA_Keyframe(keyframe.FrameIndex, angles.Y));
+                command3.Keyframes.Add(new EMA_Keyframe(keyframe.FrameIndex, angles.Z));
+
+            }
+
+            return new EMA_Command[] { command1, command2, command3 };
+        }
     }
 
     [Serializable]
@@ -1225,7 +1329,13 @@ namespace Xv2CoreLib.EMA
             }
         }
 
+        public EMA_Keyframe() { }
 
+        public EMA_Keyframe(int frame, float value)
+        {
+            Time = (ushort)frame;
+            Value = value;
+        }
     }
 
 

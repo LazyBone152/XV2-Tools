@@ -169,6 +169,17 @@ namespace Xv2CoreLib.EMB_CLASS
             return false;
         }
         
+        public void AddEntry(byte[] data)
+        {
+            string name = GetUnusedName("DATA.dds");
+            Entry.Add(new EmbEntry()
+            {
+                Name = name,
+                Data = data,
+                Index = Entry.Count.ToString()
+            });
+        }
+
         public int AddEntry(string name, byte[] bytes, bool overWrite, int expectedSize = -1)
         {
             if(expectedSize != -1 && Entry.Count != expectedSize)
@@ -812,6 +823,7 @@ namespace Xv2CoreLib.EMB_CLASS
 
             return bitmaps;
         }
+
 
         public static double SelectTextureSize(double maxDimension, int textureCount)
         {

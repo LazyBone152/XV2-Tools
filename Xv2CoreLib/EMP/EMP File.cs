@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Windows;
 using System.Windows.Media;
+using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.EMM;
 using Xv2CoreLib.HslColor;
 using Xv2CoreLib.Resource;
@@ -3944,6 +3945,34 @@ namespace Xv2CoreLib.EMP
             }
 
             return true;
+        }
+    
+        public static bool IsRepeatingTexture(EmbEntry embEntry, EffectContainer.AssetContainerTool assetContainer)
+        {
+            foreach(var emp in assetContainer.Assets)
+            {
+                if(emp.Files?.Count > 0)
+                {
+                    foreach (var textureDef in emp.Files[0].EmpFile.Textures)
+                    {
+                        if(textureDef.TextureRef == embEntry)
+                        {
+                            if(textureDef.SubData2 != null)
+                            {
+                                if (!textureDef.SubData2.useSpeedInsteadOfKeyFrames)
+                                {
+                                    foreach(var keyframe in textureDef.SubData2.Keyframes)
+                                    {
+                                        if (keyframe.ScaleX > 1f || keyframe.ScaleY > 1f) return true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
         }
     }
 

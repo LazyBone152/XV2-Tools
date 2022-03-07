@@ -17,6 +17,7 @@ using EEPK_Organiser.Misc;
 using EEPK_Organiser.Forms;
 using MahApps.Metro.Controls;
 using EEPK_Organiser.Forms.Recolor;
+using Xv2CoreLib.EMP;
 
 namespace EEPK_Organiser.View
 {
@@ -656,6 +657,16 @@ namespace EEPK_Organiser.View
                     return;
                 }
             }
+
+            //Remove all repeating textures
+            selectedTextures.RemoveAll(x => EMP_TextureDefinition.IsRepeatingTexture(x, AssetContainer));
+
+            if (selectedTextures.Count < 2)
+            {
+                MessageBox.Show("Some of the selected textures cannot be merged and were removed from the process, but now only 1 texture remains. Aborting.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
 
             var bitmaps = EmbEntry.GetBitmaps(selectedTextures);
             double maxDimension = EmbEntry.HighestDimension(bitmaps);

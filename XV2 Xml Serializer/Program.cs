@@ -739,13 +739,8 @@ namespace XV2_Xml_Serializer
                             {
                                 foreach(var emg in part.EmgFiles)
                                 {
-                                    foreach(var model in emg.Mesh)
+                                    foreach(var model in emg.EmgMeshes)
                                     {
-                                        if(model.TextureLists.Count != model.Submesh.Count)
-                                        {
-                                            Console.WriteLine("This");
-                                            Console.Read();
-                                        }
                                     }
                                 }
                             }

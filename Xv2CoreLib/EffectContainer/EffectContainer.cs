@@ -2310,8 +2310,13 @@ namespace Xv2CoreLib.EffectContainer
         {
             List<IUndoRedo> undos = new List<IUndoRedo>();
 
+            var embEntries = new List<EmbEntry>(Pbind.File3_Ref.Entry);
+
+            //Remove all repeating textures
+            embEntries.RemoveAll(x => EMP_TextureDefinition.IsRepeatingTexture(x, Pbind));
+
             //All textures, ordered by their highest dimension (lowest first)
-            List<WriteableBitmap> textures = EmbEntry.GetBitmaps(Pbind.File3_Ref.Entry);
+            List<WriteableBitmap> textures = EmbEntry.GetBitmaps(embEntries);
             textures = textures.OrderBy(x => Math.Max(x.Width, x.Height)).ToList();
 
             //Remove any texture that is used by a EMP with SpeedScroll values or is Mirrored (cant merge these)

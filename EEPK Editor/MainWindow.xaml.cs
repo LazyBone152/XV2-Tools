@@ -503,7 +503,7 @@ namespace EEPK_Organiser
                 "AForge.NET (image processing)\n" +
                 "Pfim (primary texture loading)\n" +
                 "CSharpImageLibrary (texture saving and alternative texture loading)\n" +
-                "YAXLib (xml)", "Effect Organiser", SettingsManager.Instance.CurrentVersionString), "About", MessageBoxButton.OK, MessageBoxImage.Information);
+                "YAXLib (xml)", "EEPK Organiser", SettingsManager.Instance.CurrentVersionString), "About", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         
         private void ToolMenu_AssociateEepkExt_Click(object sender, RoutedEventArgs e)
