@@ -172,9 +172,9 @@ namespace LB_Mod_Installer.Binding
                     case BindingManager.SkillFileType.BAC:
                         return string.Format(@"skill/{0}/{1}/{1}.bac", (string)ret[3], (string)ret[4]);
                     case BindingManager.SkillFileType.BDM:
-                        return string.Format(@"skill/{0}/{1}/{1}.bdm", (string)ret[3], (string)ret[4]);
+                        return string.Format(@"skill/{0}/{1}/{1}_PLAYER.bdm", (string)ret[3], (string)ret[4]);
                     case BindingManager.SkillFileType.ShotBDM:
-                        return string.Format(@"skill/{0}/{1}/{1}.shot.bdm", (string)ret[3], (string)ret[4]);
+                        return string.Format(@"skill/{0}/{1}/{1}_PLAYER.shot.bdm", (string)ret[3], (string)ret[4]);
 
                 }
                 
