@@ -2,19 +2,10 @@
 using GalaSoft.MvvmLight.CommandWpf;
 using MahApps.Metro.Controls;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 using Xv2CoreLib.ACB;
 using Xv2CoreLib.HCA;
@@ -49,11 +40,14 @@ namespace AudioCueEditor.View
         public uint LoopEndMs { get { return _loopEndMs; } set { _loopEndMs = value; ValuesChanged(); } }
         public uint TrackLengthMs { get { return _trackLengthMs; } set { _trackLengthMs = value; ValuesChanged(); } }
 
+        public float LoopStartSeconds { get { return _loopStartMs / 1000f; } set { LoopStartMs = (uint)(value * 1000f); ValuesChanged(); } }
+        public float LoopEndSeconds { get { return _loopEndMs / 1000f; } set { _loopEndMs = (uint)(value * 1000f); ValuesChanged(); } }
+
         public string LoopStartString { get { return FormatTime(LoopStartMs); } }
         public string LoopEndString { get { return FormatTime(LoopEndMs); } }
         public string CurrentTimeString { get { return (wavStream != null) ? FormatTime((wavStream.waveStream != null) ? wavStream.waveStream.CurrentTime : new TimeSpan()) : null; } }
         
-        public bool LoopEnabled { get { return _loopEnabled; } set { _loopEnabled = value; NotifyPropertyChanged("LoopEnabled"); } }
+        public bool LoopEnabled { get { return _loopEnabled; } set { _loopEnabled = value; NotifyPropertyChanged(nameof(LoopEnabled)); } }
 
         private WavStream wavStream = null;
         private AudioPlayer audioPlayer;
@@ -78,7 +72,7 @@ namespace AudioCueEditor.View
 
         private void Timer_Tick(object sender, EventArgs e)
         {
-            NotifyPropertyChanged("CurrentTimeString");
+            NotifyPropertyChanged(nameof(CurrentTimeString));
         }
 
         private async void InitValues()
@@ -87,15 +81,17 @@ namespace AudioCueEditor.View
 
             if(awbEntry != null)
             {
-                HcaMetadata metadata = new HcaMetadata(awbEntry.bytes);
-                LoopEnabled = metadata.HasLoopData;
-                LoopStartMs = metadata.LoopStartMs;
-                LoopEndMs = metadata.LoopEndMs;
-                TrackLengthMs = metadata.Milliseconds + 1000; //Declared length can be slightly too short, so extend it by 1 second
-                ValuesChanged();
+                VGAudio.Containers.Hca.HcaReader reader = new VGAudio.Containers.Hca.HcaReader();
+                var header = reader.ParseFile(awbEntry.bytes);
 
-                if (metadata.ValidHcaFile)
+                if (header.Hca != null)
                 {
+                    LoopEnabled = header.Hca.Looping;
+                    LoopStartMs = (uint)header.Hca.LoopStartMs;
+                    LoopEndMs = (uint)header.Hca.LoopEndMs;
+                    TrackLengthMs = (uint)header.Hca.TrackLengthMs;
+                    ValuesChanged();
+
                     awbBytes = awbEntry.bytes;
                     await Task.Run(() => wavStream = HCA.DecodeToWavStream(awbEntry.bytes));
                     SetLoopOnStream();
@@ -111,12 +107,14 @@ namespace AudioCueEditor.View
 
         private void ValuesChanged()
         {
-            NotifyPropertyChanged("LoopStartMs");
-            NotifyPropertyChanged("LoopEndMs");
-            NotifyPropertyChanged("LoopStartString");
-            NotifyPropertyChanged("LoopEndString");
-            NotifyPropertyChanged("TrackLengthMs");
-            NotifyPropertyChanged("CurrentTimeString");
+            NotifyPropertyChanged(nameof(LoopStartMs));
+            NotifyPropertyChanged(nameof(LoopEndMs));
+            NotifyPropertyChanged(nameof(LoopStartString));
+            NotifyPropertyChanged(nameof(LoopEndString));
+            NotifyPropertyChanged(nameof(TrackLengthMs));
+            NotifyPropertyChanged(nameof(CurrentTimeString));
+            NotifyPropertyChanged(nameof(LoopStartSeconds));
+            NotifyPropertyChanged(nameof(LoopEndSeconds));
             SetLoopOnStream();
         }
 

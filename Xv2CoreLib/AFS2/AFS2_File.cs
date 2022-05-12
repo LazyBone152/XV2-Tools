@@ -462,6 +462,7 @@ namespace Xv2CoreLib.AFS2
                 if(_bytes != value)
                 {
                     _bytes = value;
+                    HcaInfo = new TrackMetadata(value);
                     WavBytes = null;
                 }
             }
@@ -469,7 +470,7 @@ namespace Xv2CoreLib.AFS2
 
         //HCA:
         [YAXDontSerialize]
-        public TrackMetadata HcaInfo { get { return new TrackMetadata(bytes); } }
+        public TrackMetadata HcaInfo { get; set; }
 
         //WAV:
         public byte[] WavBytes = null;

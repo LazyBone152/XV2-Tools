@@ -16,7 +16,7 @@ namespace VGAudio.Cli
         public static byte[] ConvertFile(Options options, MemoryStream inputStream, FileType inputFileType, FileType outputFileType)
         {
             if (options.Job != JobType.Convert && options.Job != JobType.Batch) return null;
-            
+
             var converter = new ConvertStream();
 
             AudioFileStream audioFile = new AudioFileStream(inputStream, inputFileType);

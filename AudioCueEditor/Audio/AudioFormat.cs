@@ -55,16 +55,41 @@ namespace AudioCueEditor.Audio
         /// <summary>
         /// Loop the track from the specified start and end.
         /// </summary>
-        public static byte[] EncodeLoop(byte[] hcaBytes, bool loop, double start, double end)
+        public static byte[] EncodeLoop(byte[] hcaBytes, bool loop, int startMs, int endMs)
         {
-            return HcaMetadata.SetLoop(hcaBytes, loop, start, end, 0);
+            using (MemoryStream stream = new MemoryStream(hcaBytes))
+            {
+                var options = new Options();
+
+                if(endMs > startMs)
+                {
+                    options.Loop = loop;
+                    options.LoopStart = startMs;
+                    options.LoopEnd = endMs;
+                }
+
+                return ConvertStream.ConvertFile(options, stream, FileType.Hca, FileType.Hca);
+            }
         }
         
         public static byte[] EncodeLoop(byte[] hcaBytes, bool loop)
         {
-            HcaMetadata metadata = new HcaMetadata(hcaBytes);
-            if (metadata.HasLoopData && loop) return hcaBytes; //Reuse existing loop data
-            return HcaMetadata.SetLoop(hcaBytes, loop, 0, metadata.DurationSeconds, 0);
+            int endMs = 0;
+
+            if (loop)
+            {
+                //Set loop to track duration
+
+                VGAudio.Containers.Hca.HcaReader reader = new VGAudio.Containers.Hca.HcaReader();
+                var header = reader.ParseFile(hcaBytes);
+                endMs = (int)(((header.Hca.FrameCount * 1024.0) / header.Hca.SampleCount) * 1000f);
+            }
+
+            return EncodeLoop(hcaBytes, loop, 0, endMs);
+
+            //HcaMetadata metadata = new HcaMetadata(hcaBytes);
+            //if (metadata.HasLoopData && loop) return hcaBytes; //Reuse existing loop data
+            //return HcaMetadata.SetLoop(hcaBytes, loop, 0, metadata.DurationSeconds, 0);
         }
     }
 

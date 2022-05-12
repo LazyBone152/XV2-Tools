@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xv2CoreLib.EEPK;
 using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.EMM;
@@ -11,7 +9,6 @@ using Xv2CoreLib.ETR;
 using Xv2CoreLib.ECF;
 using System.IO;
 using System.ComponentModel;
-using System.Collections.ObjectModel;
 using System.Windows.Data;
 using Xv2CoreLib.EMA;
 using System.IO.Compression;

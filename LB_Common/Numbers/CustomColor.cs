@@ -1,16 +1,21 @@
 ﻿using System;
+using YAXLib;
 
 namespace LB_Common.Numbers
 {
     [Serializable]
     public class CustomColor
     {
-        public readonly float[] Values = new float[4];
+        public float[] Values = new float[4];
 
-        public float R { get { return Values[0]; } set { Values[0] = value; } }
-        public float G { get { return Values[1]; } set { Values[1] = value; } }
-        public float B { get { return Values[2]; } set { Values[2] = value; } }
-        public float A { get { return Values[3]; } set { Values[3] = value; } }
+        [YAXAttributeForClass]
+        public float R { get { return GetValue(0); } set { SetValue(0, value); } }
+        [YAXAttributeForClass]
+        public float G { get { return GetValue(1); } set { SetValue(1, value); } }
+        [YAXAttributeForClass]
+        public float B { get { return GetValue(2); } set { SetValue(2, value); } }
+        [YAXAttributeForClass]
+        public float A { get { return GetValue(3); } set { SetValue(3, value); } }
 
         public CustomColor() { }
 
@@ -22,20 +27,28 @@ namespace LB_Common.Numbers
             A = a;
         }
 
+
+        public bool IsWhiteOrBlack()
+        {
+            return (R == 0f && G == 0f && B == 0f) || (R == 1f && G == 1f && B == 1f);
+        }
+
+        public void SetValue(int idx, float value)
+        {
+            //Initialization of internal array is required here when using XML serialization
+            if (Values == null) 
+                Values = new float[4];
+
+            Values[idx] = value;
+        }
+
         public float GetValue(int idx)
         {
-            switch (idx)
-            {
-                case 0:
-                    return R;
-                case 1:
-                    return G;
-                case 2:
-                    return B;
-                case 3:
-                    return A;
-            }
-            return 0;
+            //Initialization of internal array is required here when using XML serialization
+            if (Values == null) 
+                Values = new float[4];
+
+            return Values[idx];
         }
 
         #region Operators
@@ -64,6 +77,15 @@ namespace LB_Common.Numbers
         }
 
         public static bool operator !=(CustomColor a, CustomColor b)
+        {
+            return (a == b) ? false : true;
+        }
+        public static bool operator ==(CustomColor a, float b)
+        {
+            return a?.R == b && a?.G == b && a?.B == b && a?.A == b;
+        }
+
+        public static bool operator !=(CustomColor a, float b)
         {
             return (a == b) ? false : true;
         }

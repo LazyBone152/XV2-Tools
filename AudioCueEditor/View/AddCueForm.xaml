@@ -6,7 +6,7 @@
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:local="clr-namespace:AudioCueEditor.View"
         mc:Ignorable="d"
-        Title="Add Cue" TitleCharacterCasing="Normal" Height="303.698" Width="380" ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner" Closing="MetroWindow_Closing">
+        Title="Add Cue" TitleCharacterCasing="Normal" Height="340" Width="380" ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner" Closing="MetroWindow_Closing">
     <Grid>
         <StackPanel>
             <StackPanel Orientation="Horizontal" Margin="10, 5">
@@ -34,6 +34,12 @@
                 <Label Content="Encoding" VerticalAlignment="Center" Width="80"/>
                 <ComboBox ItemsSource="{Binding EncodeTypes}" SelectedItem="{Binding EncodeType, UpdateSourceTrigger=PropertyChanged}" Width="150" Margin="5,0,0,0"/>
             </StackPanel>
+
+            <StackPanel IsEnabled="{Binding CanSetLoop, UpdateSourceTrigger=PropertyChanged}" Margin="10, 5" Orientation="Horizontal">
+                <Label Content="Encrypt Key" VerticalAlignment="Center" Width="80" ToolTip="Encrpytion keys can be added in the Encryption Key Editor (Tools menu)."/>
+                <ComboBox ItemsSource="{Binding HcaKeys}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedHcaKey, UpdateSourceTrigger=PropertyChanged}" Width="150" Margin="5,0,0,0"/>
+            </StackPanel>
+            
             
             <Button Command="{Binding DoneCommand}" Content="Add" HorizontalAlignment="Left" Margin="150,10,0,0" VerticalAlignment="Top" Width="75"/>
 

@@ -96,7 +96,7 @@ namespace Xv2CoreLib.EMP
         private AsyncObservableCollection<ParticleEffect> SortEffect(int entryOffset, int nextParticleEffectOffset_Abs)
         {
 
-            AsyncObservableCollection<ParticleEffect> effectEntries = AsyncObservableCollection<ParticleEffect>.Create();
+            AsyncObservableCollection<ParticleEffect> effectEntries = new AsyncObservableCollection<ParticleEffect>();
 
             int i = 0;
             while (true)
@@ -218,7 +218,7 @@ namespace Xv2CoreLib.EMP
                 //Type0
                 if (Type0_Count > 0)
                 {
-                    newEffect.Type_0 = AsyncObservableCollection<Type0>.Create();
+                    newEffect.Type_0 = new AsyncObservableCollection<Type0>();
 
                     for (int a = 0; a < Type0_Count; a++)
                     {
@@ -243,7 +243,7 @@ namespace Xv2CoreLib.EMP
                 //Type1
                 if (Type1_Count > 0)
                 {
-                    newEffect.Type_1 = AsyncObservableCollection<Type1_Header>.Create();
+                    newEffect.Type_1 = new AsyncObservableCollection<Type1_Header>();
 
                     for (int a = 0; a < Type1_Count; a++)
                     {
@@ -253,7 +253,7 @@ namespace Xv2CoreLib.EMP
                         newEffect.Type_1.Add(new Type1_Header());
                         newEffect.Type_1[a].I_00 = rawBytes[Type1_Offset];
                         newEffect.Type_1[a].I_01 = rawBytes[Type1_Offset + 1];
-                        newEffect.Type_1[a].Entries = AsyncObservableCollection<Type0>.Create();
+                        newEffect.Type_1[a].Entries = new AsyncObservableCollection<Type0>();
 
                         for (int d = 0; d < entryCount; d++)
                         {
@@ -519,18 +519,10 @@ namespace Xv2CoreLib.EMP
             newTexture.F_36 = BitConverter.ToSingle(rawBytes, TextureOffset + 36);
             newTexture.F_40 = BitConverter.ToSingle(rawBytes, TextureOffset + 40);
             newTexture.F_44 = BitConverter.ToSingle(rawBytes, TextureOffset + 44);
-            newTexture.F_48 = BitConverter.ToSingle(rawBytes, TextureOffset + 48);
-            newTexture.F_52 = BitConverter.ToSingle(rawBytes, TextureOffset + 52);
-            newTexture.F_56 = BitConverter.ToSingle(rawBytes, TextureOffset + 56);
-            newTexture.F_60 = BitConverter.ToSingle(rawBytes, TextureOffset + 60);
-            newTexture.F_64 = BitConverter.ToSingle(rawBytes, TextureOffset + 64);
-            newTexture.F_68 = BitConverter.ToSingle(rawBytes, TextureOffset + 68);
-            newTexture.F_72 = BitConverter.ToSingle(rawBytes, TextureOffset + 72);
-            newTexture.F_76 = BitConverter.ToSingle(rawBytes, TextureOffset + 76);
-            newTexture.F_80 = BitConverter.ToSingle(rawBytes, TextureOffset + 80);
-            newTexture.F_84 = BitConverter.ToSingle(rawBytes, TextureOffset + 84);
-            newTexture.F_88 = BitConverter.ToSingle(rawBytes, TextureOffset + 88);
-            newTexture.F_92 = BitConverter.ToSingle(rawBytes, TextureOffset + 92);
+            newTexture.Color1 = new LB_Common.Numbers.CustomColor(BitConverter.ToSingle(rawBytes, TextureOffset + 48), BitConverter.ToSingle(rawBytes, TextureOffset + 52), BitConverter.ToSingle(rawBytes, TextureOffset + 56), BitConverter.ToSingle(rawBytes, TextureOffset + 60));
+            newTexture.Color_Variance = new LB_Common.Numbers.CustomColor(BitConverter.ToSingle(rawBytes, TextureOffset + 64), BitConverter.ToSingle(rawBytes, TextureOffset + 68), BitConverter.ToSingle(rawBytes, TextureOffset + 72), BitConverter.ToSingle(rawBytes, TextureOffset + 76));
+            newTexture.Color2 = new LB_Common.Numbers.CustomColor(BitConverter.ToSingle(rawBytes, TextureOffset + 80), BitConverter.ToSingle(rawBytes, TextureOffset + 84), BitConverter.ToSingle(rawBytes, TextureOffset + 88), BitConverter.ToSingle(rawBytes, TextureOffset + 92));
+            
             newTexture.F_96 = BitConverter.ToSingle(rawBytes, TextureOffset + 96);
             newTexture.F_100 = BitConverter.ToSingle(rawBytes, TextureOffset + 100);
             newTexture.F_104 = BitConverter.ToSingle(rawBytes, TextureOffset + 104);
@@ -539,12 +531,19 @@ namespace Xv2CoreLib.EMP
             if (TexturePointer != 0)
             {
                 int _tempOffset = _textureEntryOffset;
-                newTexture.TextureIndex = AsyncObservableCollection<int>.Create();
+                newTexture.TextureIndex = new AsyncObservableCollection<int>();
 
                 for (int e = 0; e < BitConverter.ToInt16(rawBytes, TextureOffset + 18); e++)
                 {
                     for (int a = 0; a < totalTextureEntries; a++)
                     {
+                        //Null entry
+                        if (TexturePointer == 0)
+                        {
+                            newTexture.TextureIndex.Add(-1);
+                            break;
+                        }
+
                         if (TexturePointer == _tempOffset)
                         {
                             newTexture.TextureIndex.Add(a);
@@ -563,9 +562,6 @@ namespace Xv2CoreLib.EMP
                         }
                     }
                 }
-
-
-
             }
 
             return newTexture;
@@ -853,20 +849,28 @@ namespace Xv2CoreLib.EMP
         {
             foreach(var texture in empFile.Textures)
             {
-                LinkTextureEntries_Recursive(empFile.ParticleEffects, texture.EntryIndex, new TextureEntryRef() { TextureRef = texture });
+                LinkTextureEntries_Recursive(empFile.ParticleEffects, texture.EntryIndex, new TextureEntry_Ref() { TextureRef = texture });
             }
+
         }
 
-        private void LinkTextureEntries_Recursive(IList<ParticleEffect> particleEffects, int id, TextureEntryRef textureRef)
+        private void LinkTextureEntries_Recursive(IList<ParticleEffect> particleEffects, int id, TextureEntry_Ref textureRef)
         {
             foreach(var particleEffect in particleEffects)
             {
                 if(particleEffect.Type_Texture != null)
                 {
-                    if (particleEffect.Type_Texture.TextureIndex.Contains(id))
+                    //Add default empty texture entries
+                    while (particleEffect.Type_Texture.TextureEntryRef.Count < 2)
+                        particleEffect.Type_Texture.TextureEntryRef.Add(new TextureEntry_Ref());
+
+                    int idx = particleEffect.Type_Texture.TextureIndex.IndexOf(id);
+
+                    if (idx != -1)
                     {
-                        particleEffect.Type_Texture.TextureEntryRef.Add(new TextureEntryRef() { TextureRef = textureRef.TextureRef });
+                        particleEffect.Type_Texture.TextureEntryRef[idx] = new TextureEntry_Ref() { TextureRef = textureRef.TextureRef };
                     }
+
                 }
 
                 if(particleEffect.ChildParticleEffects != null)

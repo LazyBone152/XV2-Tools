@@ -42,6 +42,36 @@ namespace VGAudio.Containers.Hca
 
                 Hca.EncryptionType = Configuration.EncryptionKey.KeyType;
             }
+
+            SetLoopData();
+
+        }
+
+        private void SetLoopData()
+        {
+
+            //Set Loop info
+            //Since HCA -> HCA conversions dont allow setting loops, this workaround is used.
+
+            if (ConvertStatics.WasLoopSet)
+            {
+                int endMs = ConvertStatics.LoopEndMs;
+
+                //Reuse existing loop data in this case
+                if (endMs == 0 && Hca.Looping)
+                    return; 
+
+                if (endMs == 0)
+                {
+                    endMs = Hca.TrackLengthMs;
+                }
+
+                Hca.Looping = ConvertStatics.Loop;
+                Hca.LoopStartFrame = (int)(ConvertStatics.LoopStartMs / 1024.0 * Hca.SampleRate / 1000f);
+                Hca.LoopEndFrame = (int)(endMs / 1024.0 * Hca.SampleRate / 1000f);
+
+                ConvertStatics.ResetLoop();
+            }
         }
 
         protected override void WriteStream(Stream stream)

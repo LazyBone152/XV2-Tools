@@ -212,7 +212,11 @@
     <Compile Include="Audio\Helper.cs" />
     <Compile Include="Audio\LoopStream.cs" />
     <Compile Include="Audio\WavStream.cs" />
+    <Compile Include="Data\HcaEncryptionKeys.cs" />
     <Compile Include="DialogSettings.cs" />
+    <Compile Include="Forms\HcaEncryptionKeysEditor.xaml.cs">
+      <DependentUpon>HcaEncryptionKeysEditor.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Forms\Settings.xaml.cs">
       <DependentUpon>Settings.xaml</DependentUpon>
     </Compile>
@@ -243,6 +247,10 @@
     <Compile Include="View\VolumeControl.xaml.cs">
       <DependentUpon>VolumeControl.xaml</DependentUpon>
     </Compile>
+    <Page Include="Forms\HcaEncryptionKeysEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Forms\Settings.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

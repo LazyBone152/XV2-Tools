@@ -17,6 +17,14 @@ namespace VGAudio.Containers.Hca
 
         private static Crc16 Crc { get; } = new Crc16(0x8005);
 
+        public HcaStructure ParseFile(byte[] bytes)
+        {
+            using(MemoryStream ms = new MemoryStream(bytes))
+            {
+                return ReadFile(ms, true);
+            }
+        }
+
         protected override HcaStructure ReadFile(Stream stream, bool readAudioData = true)
         {
             using (BinaryReader reader = GetBinaryReader(stream, Endianness.BigEndian))

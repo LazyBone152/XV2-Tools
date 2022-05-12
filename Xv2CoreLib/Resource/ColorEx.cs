@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LB_Common.Numbers;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows.Media.Imaging;
@@ -168,6 +169,15 @@ namespace Xv2CoreLib.HslColor
             R_int = r;
             G_int = g;
             B_int = b;
+        }
+
+        public RgbColor(CustomColor customColor)
+        {
+            R = customColor.R;
+            G = customColor.G;
+            B = customColor.B;
+
+            
         }
 
         public double R { get; set; }

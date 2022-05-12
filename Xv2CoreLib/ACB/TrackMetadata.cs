@@ -1,88 +1,139 @@
 ﻿using System;
+using System.IO;
+using VGAudio;
+using VGAudio.Cli;
 using Xv2CoreLib.Resource;
 
 namespace Xv2CoreLib.ACB
 {
-    public struct TrackMetadata
+    public class TrackMetadata
     {
-        #region Constants
-        private const int HCA_SIGNATURE = 0x00414348;
         private const ushort ADX_SIGNATURE = 0x80;
-
-        //HCA specific
-        private const int FMT_SIGNATURE = 0x00746D66;
-        #endregion
 
         public bool IsValidAudioFile { get; private set; }
 
+        //Fmt
         public byte Channels { get; private set; }
-        public uint SampleRate { get; private set; }
-        public uint NumSamples { get; private set; }
+        public ushort SampleRate { get; private set; }
+        public int BlockCount { get; private set; }
+        public int NumSamples { get; private set; }
 
-        //Duration
-        public uint DurationSeconds { get { return (NumSamples != 0 && SampleRate != 0) ? NumSamples / SampleRate : 0; } }
+        public uint Milliseconds { get { return (uint)(DurationSeconds * 1000.0); } }
+        public double DurationSeconds { get { return BlocksToSeconds((uint)BlockCount, SampleRate); } } //Seconds
         public TimeSpan Duration { get { return new TimeSpan(0, 0, 0, (int)DurationSeconds); } }
 
-        public TrackMetadata(byte[] bytes)
+        //Loop
+        public bool HasLoopData { get; private set; }
+        public uint LoopStart { get; private set; }
+        public uint LoopEnd { get; private set; }
+
+        public double LoopStartSeconds { get { return BlocksToSeconds(LoopStart, SampleRate); } }
+        public double LoopEndSeconds { get { return BlocksToSeconds(LoopEnd, SampleRate); } }
+
+        public uint LoopStartMs => BlocksToMs(LoopStartMs, SampleRate);
+        public uint LoopEndMs => BlocksToMs(LoopEndMs, SampleRate);
+
+        public uint LoopStartSamples { get { return BlocksToSamples(LoopStart); } }
+        public uint LoopEndSamples { get { return BlocksToSamples(LoopEnd); } }
+
+        public TrackMetadata() { }
+
+        public TrackMetadata(byte[] hcaBytes)
         {
-            IsValidAudioFile = false;
-            Channels = 0;
-            SampleRate = 0;
-            NumSamples = 0;
+            if(hcaBytes?.Length > 100)
+                SetValues(hcaBytes);
+        }
 
-            try
+        private void SetValues(byte[] bytes)
+        {
+            VGAudio.Containers.Hca.HcaReader reader = new VGAudio.Containers.Hca.HcaReader();
+            var hca = reader.ParseFile(bytes);
+
+            if (hca != null)
             {
-                if (BitConverter.ToUInt16(bytes, 0) == ADX_SIGNATURE)
-                {
-                    //Is ADX
-                    IsValidAudioFile = true;
-                    Channels = bytes[7];
-                    SampleRate = BigEndianConverter.ReadUInt32(bytes, 8);
-                    NumSamples = BigEndianConverter.ReadUInt32(bytes, 12);
-                }
-                else if (BitConverter.ToInt32(bytes, 0) == HCA_SIGNATURE)
-                {
-                    IsValidAudioFile = true;
-                    int dataOffset = BigEndianConverter.ReadUInt16(bytes, 6);
-                    int fmtOffset = bytes.IndexOfValue(FMT_SIGNATURE, 0, dataOffset, false);
+                HasLoopData = hca.Hca.Looping;
+                LoopStart = (uint)hca.Hca.LoopStartFrame;
+                LoopEnd = (uint)hca.Hca.LoopEndFrame;
 
-                    if (fmtOffset != -1)
+                BlockCount = hca.Hca.FrameCount;
+                Channels = (byte)hca.Hca.ChannelCount;
+                SampleRate = (ushort)hca.Hca.SampleRate;
+                NumSamples = hca.Hca.SampleCount;
+
+                IsValidAudioFile = true;
+            }
+            else
+            {
+                try
+                {
+                    //Try unencrypted reads of other formats
+
+                    if (BitConverter.ToUInt16(bytes, 0) == ADX_SIGNATURE)
                     {
-                        Channels = bytes[fmtOffset + 4];
-                        SampleRate = BigEndianConverter.ReadUInt16(bytes, fmtOffset + 6);
-                        int blockCount = BigEndianConverter.ReadInt32(bytes, fmtOffset + 8);
-                        NumSamples = (uint)(blockCount * 1024);
+                        //Is ADX
+                        IsValidAudioFile = true;
+                        Channels = bytes[7];
+                        SampleRate = (ushort)BigEndianConverter.ReadUInt32(bytes, 8);
+                        NumSamples = (int)BigEndianConverter.ReadUInt32(bytes, 12);
+                    }
+                    else
+                    {
+                        //For DSP, which has no signature (?)
+
+                        NumSamples = (int)BigEndianConverter.ReadUInt32(bytes, 0);
+                        SampleRate = (ushort)BigEndianConverter.ReadUInt32(bytes, 8);
+                        Channels = (byte)BigEndianConverter.ReadUInt16(bytes, 74);
+
+                        if (Channels == 0)
+                            Channels = 1;
                     }
                 }
-                else
+                catch
                 {
-                    //DSP, which has no signature... thanks nintendo!
-                    NumSamples = BigEndianConverter.ReadUInt32(bytes, 0);
-                    SampleRate = BigEndianConverter.ReadUInt32(bytes, 8);
-                    Channels = (byte)BigEndianConverter.ReadUInt16(bytes, 74);
-
-                    if (Channels == 0)
-                        Channels = 1;
+                    IsValidAudioFile = false;
+                    Channels = 0;
+                    SampleRate = 0;
+                    NumSamples = 0;
                 }
-            }
-            catch
-            {
-                IsValidAudioFile = false;
-                Channels = 0;
-                SampleRate = 0;
-                NumSamples = 0;
-            }
-
-            if(Channels > 10 || SampleRate < 0 || NumSamples < 0)
-            {
-                //Values make no sense
-                IsValidAudioFile = false;
-                Channels = 0;
-                SampleRate = 0;
-                NumSamples = 0;
             }
         }
 
+        //Helpers
+        private static uint BlocksToMs(uint blocks, ushort sampleRate)
+        {
+            return (uint)((blocks * 1024.0) / sampleRate * 1000f);
+        }
+
+        private static double BlocksToSeconds(uint blocks, ushort sampleRate)
+        {
+            return (blocks * 1024.0) / sampleRate;
+        }
+
+        private static uint BlocksToSamples(uint blocks)
+        {
+            return (uint)(blocks * 1024.0);
+        }
+
+
+        /// <summary>
+        /// Loop the track from the specified start and end.
+        /// </summary>
+        public static byte[] EncodeHcaLoop(byte[] hcaBytes, bool loop, int startMs, int endMs)
+        {
+            using (MemoryStream stream = new MemoryStream(hcaBytes))
+            {
+                var options = new Options();
+
+                options.NoLoop = !loop;
+                options.Loop = loop;
+                options.LoopStart = startMs;
+                options.LoopEnd = endMs;
+
+                ConvertStatics.SetLoop(loop, startMs, endMs);
+
+                return ConvertStream.ConvertFile(options, stream, FileType.Hca, FileType.Hca);
+            }
+        }
     }
 
 

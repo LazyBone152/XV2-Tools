@@ -179,7 +179,7 @@ namespace Xv2CoreLib.EMM
             return new EMM_File()
             {
                 Version = 16,
-                Materials = AsyncObservableCollection<EmmMaterial>.Create(),
+                Materials = new AsyncObservableCollection<EmmMaterial>(),
                 Unknown_Data = new UnknownData()
             };
         }

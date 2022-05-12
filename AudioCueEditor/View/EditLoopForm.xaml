@@ -9,58 +9,94 @@
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
         Dialog:DialogParticipation.Register="{Binding}"
-        Title="Edit Loop" TitleCharacterCasing="Normal" Height="250" Width="380" ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner" Closing="MetroWindow_Closing">
+        Title="Edit Loop" TitleCharacterCasing="Normal" Height="210" Width="380" ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner" Closing="MetroWindow_Closing">
     <Grid>
-        <Label Content="Loop Enabled" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="30,21,0,0" VerticalAlignment="Top" Width="95"/>
-        <CheckBox IsChecked="{Binding LoopEnabled}" HorizontalAlignment="Left" Margin="130,27,0,0" VerticalAlignment="Top" Width="172"/>
+        <StackPanel Margin="20, 10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width=" *"/>
+                </Grid.ColumnDefinitions>
 
+                <Label Content="    Loop Enabled:" Grid.Column="0"/>
+                <CheckBox Grid.Column="1" IsChecked="{Binding LoopEnabled}" VerticalContentAlignment="Center"/>
+            </Grid>
+            
+            <StackPanel IsEnabled="{Binding LoopEnabled}">
 
-        <Grid IsEnabled="{Binding LoopEnabled}" Margin="0,51,0.4,-0.455">
-            <Controls:RangeSlider MinRangeWidth="5" Interval="1" UpperValue="{Binding LoopEndMs}" LowerValue="{Binding LoopStartMs}" Maximum="{Binding TrackLengthMs}" Margin="11,3,9,136" RenderTransformOrigin="0.5,0.5">
-                <Controls:RangeSlider.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform ScaleY="1"/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Controls:RangeSlider.RenderTransform>
-            </Controls:RangeSlider>
-            <Label Content="Loop Start:" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="29,33,0,0" VerticalAlignment="Top" Width="95"/>
-            <Label Content="Loop End:" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="29,63,0,0" VerticalAlignment="Top" Width="95"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width=" *"/>
+                        <ColumnDefinition Width="50"/>
+                    </Grid.ColumnDefinitions>
+                    <Controls:RangeSlider Grid.Column="1" MinRangeWidth="5" Interval="1" UpperValue="{Binding LoopEndMs}" LowerValue="{Binding LoopStartMs}" Maximum="{Binding TrackLengthMs}" Height="10" RenderTransformOrigin="0.5,0.5">
+                        <Controls:RangeSlider.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleY="1"/>
+                                <SkewTransform/>
+                                <RotateTransform/>
+                                <TranslateTransform/>
+                            </TransformGroup>
+                        </Controls:RangeSlider.RenderTransform>
+                    </Controls:RangeSlider>
 
-            <Label Content="{Binding LoopStartString}" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Margin="129,33,0,0" VerticalAlignment="Top" Width="95"/>
-            <Label Content="{Binding LoopEndString}" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Margin="129,63,0,0" VerticalAlignment="Top" Width="95"/>
-            <Label Content="Preview:" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="29,98,0,0" VerticalAlignment="Top" Width="95"/>
+                </Grid>
 
-            <Button Command="{Binding PlayPreviewCommand}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="25" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="24" Margin="129,97,0,45">
-                <iconPacks:PackIconMaterialLight Kind="Play" />
-            </Button>
-            <Button Command="{Binding PausePreviewCommand}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="25" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="24" Margin="164,98,0,47">
-                <iconPacks:PackIconMaterialLight Kind="Pause" />
-            </Button>
-            <Button Command="{Binding SkipPreviewCommand}" ToolTip="Skip to 5 seconds before Loop End." HorizontalAlignment="Left" VerticalAlignment="Center" Width="25" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="24" Margin="199,98,0,47">
-                <iconPacks:PackIconMaterialLight Kind="SeekNext" />
-            </Button>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width=" *"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width=" *"/>
+                    </Grid.ColumnDefinitions>
 
-            <Label Content="{Binding CurrentTimeString}" HorizontalContentAlignment="Left" HorizontalAlignment="Left" Margin="234,94,0,0" VerticalAlignment="Top" Width="95"/>
+                    <Label Content="Loop Start (sec):" Grid.Column="0" HorizontalContentAlignment="Right"/>
+                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding LoopStartSeconds}" StringFormat="0.000######" HideUpDownButtons="True" InterceptMouseWheel="True" Interval="0.1"/>
+                    <Label Content="ms:" Grid.Column="2" HorizontalContentAlignment="Right"/>
+                    <Controls:NumericUpDown Grid.Column="3" Value="{Binding LoopStartMs}" HideUpDownButtons="True" InterceptMouseWheel="True"/>
+                </Grid>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width=" *"/>
+                        <ColumnDefinition Width="50"/>
+                        <ColumnDefinition Width=" *"/>
+                    </Grid.ColumnDefinitions>
 
-            <RepeatButton Command="{Binding LoopStartDecreaseCommand}" ClickMode="Press" Interval="1" ToolTip="Allows fine tuning of Loop Start in increments of 1 millisecond." HorizontalAlignment="Left" VerticalAlignment="Center" Width="25" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="24" Margin="234,33,0,115">
-                <iconPacks:PackIconMaterialLight Kind="SeekPrevious" />
-            </RepeatButton>
-            <RepeatButton Command="{Binding LoopStartIncreaseCommand}" ClickMode="Press" Interval="1" ToolTip="Allows fine tuning of Loop Start in increments of 1 millisecond." HorizontalAlignment="Left" VerticalAlignment="Center" Width="25" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="24" Margin="264,33,0,115">
-                <iconPacks:PackIconMaterialLight Kind="SeekNext" />
-            </RepeatButton>
-            <RepeatButton Command="{Binding LoopEndDecreaseCommand}" ClickMode="Press" Interval="1" ToolTip="Allows fine tuning of Loop End in increments of 1 millisecond." HorizontalAlignment="Left" VerticalAlignment="Center" Width="25" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="24" Margin="234,62,0,86">
-                <iconPacks:PackIconMaterialLight Kind="SeekPrevious" />
-            </RepeatButton>
-            <RepeatButton Command="{Binding LoopEndIncreaseCommand}" ClickMode="Press" Interval="1" ToolTip="Allows fine tuning of Loop End in increments of 1 millisecond." HorizontalAlignment="Left" VerticalAlignment="Center" Width="25" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="24" Margin="264,62,0,86">
-                <iconPacks:PackIconMaterialLight Kind="SeekNext" />
-            </RepeatButton>
+                    <Label Content="Loop End (sec):" Grid.Column="0" HorizontalContentAlignment="Right"/>
+                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding LoopEndSeconds}" StringFormat="0.000######" HideUpDownButtons="True" InterceptMouseWheel="True" Interval="0.1"/>
+                    <Label Content="ms:" Grid.Column="2" HorizontalContentAlignment="Right"/>
+                    <Controls:NumericUpDown Grid.Column="3" Value="{Binding LoopEndMs}" HideUpDownButtons="True" InterceptMouseWheel="True"/>
+                </Grid>
+                <Grid Margin="0, 5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="40"/>
+                        <ColumnDefinition Width="40"/>
+                        <ColumnDefinition Width="40"/>
+                        <ColumnDefinition Width="100"/>
+                    </Grid.ColumnDefinitions>
 
-        </Grid>
+                    <Label Content="Preview:" Grid.Column="0" HorizontalContentAlignment="Right"/>
+                    <Button Command="{Binding PlayPreviewCommand}" Grid.Column="1" Width="25" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="24">
+                        <iconPacks:PackIconMaterialLight Kind="Play" />
+                    </Button>
 
-        <Button Command="{Binding ApplyCommand}" Content="Apply" HorizontalAlignment="Left" Margin="147,185,0,0" VerticalAlignment="Top" Width="75"/>
+                    <Button Command="{Binding PausePreviewCommand}" Grid.Column="2" Width="25" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="24">
+                        <iconPacks:PackIconMaterialLight Kind="Pause" />
+                    </Button>
+                    <Button Command="{Binding SkipPreviewCommand}" Grid.Column="3" ToolTip="Skip to 5 seconds before Loop End." Width="25" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="24">
+                        <iconPacks:PackIconMaterialLight Kind="SeekNext" />
+                    </Button>
+                    <Label Content="{Binding CurrentTimeString}" Grid.Column="4" HorizontalContentAlignment="Left"/>
+
+                </Grid>
+            
+            </StackPanel>
+        </StackPanel>
+
+        <Button Command="{Binding ApplyCommand}" Content="Apply" HorizontalAlignment="Left" Margin="146,139,0,0" VerticalAlignment="Top" Width="75"/>
 
     </Grid>
 </Controls:MetroWindow>

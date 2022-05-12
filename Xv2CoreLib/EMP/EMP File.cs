@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LB_Common.Numbers;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -126,7 +127,7 @@ namespace Xv2CoreLib.EMP
                         if (e.TextureRef == textureRef)
                         {
                             if (undos != null)
-                                undos.Add(new UndoableListRemove<TextureEntryRef>(children[i].Type_Texture.TextureEntryRef, e));
+                                undos.Add(new UndoableListRemove<TextureEntry_Ref>(children[i].Type_Texture.TextureEntryRef, e));
 
                             children[i].Type_Texture.TextureEntryRef.Remove(e);
                             goto startPoint;
@@ -159,7 +160,7 @@ namespace Xv2CoreLib.EMP
                     {
                         if (e.TextureRef == oldTextureRef)
                         {
-                            undos.Add(new UndoableProperty<TextureEntryRef>(nameof(e.TextureRef), e, e.TextureRef, newTextureRef));
+                            undos.Add(new UndoableProperty<TextureEntry_Ref>(nameof(e.TextureRef), e, e.TextureRef, newTextureRef));
                             e.TextureRef = newTextureRef;
                         }
                     }
@@ -1100,7 +1101,7 @@ namespace Xv2CoreLib.EMP
                 {
                     Name = "New ParticleEffect",
                     Component_Type = ComponentType.None,
-                    ChildParticleEffects = AsyncObservableCollection<ParticleEffect>.Create(),
+                    ChildParticleEffects = new AsyncObservableCollection<ParticleEffect>(),
                     Type_Texture = TexturePart.GetNew(),
                     FloatPart_00_01 = FloatPart_0_1.GetNew(),
                     FloatPart_00_02 = FloatPart_0_2.GetNew(),
@@ -1112,8 +1113,8 @@ namespace Xv2CoreLib.EMP
                     Type_Struct3 = Struct3.GetNew(),
                     Type_Struct5 = Struct5.GetNew(),
                     I_35 = AutoOrientationType.Camera,
-                    Type_0 = AsyncObservableCollection<Type0>.Create(),
-                    Type_1 = AsyncObservableCollection<Type1_Header>.Create()
+                    Type_0 = new AsyncObservableCollection<Type0>(),
+                    Type_1 = new AsyncObservableCollection<Type1_Header>()
                 };
             }
             else
@@ -1225,9 +1226,9 @@ namespace Xv2CoreLib.EMP
         /// </summary>
         public void InitColor1Animations()
         {
-            float defaultR = (Type_Texture != null) ? Type_Texture.F_48 : 0f;
-            float defaultG = (Type_Texture != null) ? Type_Texture.F_52 : 0f;
-            float defaultB = (Type_Texture != null) ? Type_Texture.F_56 : 0f;
+            float defaultR = (Type_Texture != null) ? Type_Texture.Color1.R : 0f;
+            float defaultG = (Type_Texture != null) ? Type_Texture.Color1.G : 0f;
+            float defaultB = (Type_Texture != null) ? Type_Texture.Color1.B : 0f;
 
             if (Type_0 == null) return;
 
@@ -1305,9 +1306,9 @@ namespace Xv2CoreLib.EMP
 
         public void InitColor2Animations()
         {
-            float defaultR = (Type_Texture != null) ? Type_Texture.F_80 : 0f;
-            float defaultG = (Type_Texture != null) ? Type_Texture.F_84 : 0f;
-            float defaultB = (Type_Texture != null) ? Type_Texture.F_88 : 0f;
+            float defaultR = (Type_Texture != null) ? Type_Texture.Color2.R : 0f;
+            float defaultG = (Type_Texture != null) ? Type_Texture.Color2.G : 0f;
+            float defaultB = (Type_Texture != null) ? Type_Texture.Color2.B : 0f;
 
             if (Type_0 == null) return;
 
@@ -1416,23 +1417,14 @@ namespace Xv2CoreLib.EMP
 
             if (Type_Texture != null)
             {
-                Color? col1 = Type_Texture.Color1;
-                Color? col2 = Type_Texture.Color2;
-
-                if (col1.Value.R != 255 || col1.Value.G != 255 || col1.Value.B != 255)
+                if (!Type_Texture.Color1.IsWhiteOrBlack())
                 {
-                    if(col1.Value.R != 0 || col1.Value.G != 0 || col1.Value.B != 0)
-                    {
-                        colors.Add(new RgbColor(col1.Value.R, col1.Value.G, col1.Value.B));
-                    }
+                    colors.Add(new RgbColor(Type_Texture.Color1));
                 }
 
-                if (col2.Value.R != 255 || col2.Value.G != 255 || col2.Value.B != 255)
+                if (!Type_Texture.Color2.IsWhiteOrBlack())
                 {
-                    if (col2.Value.R != 0 || col2.Value.G != 0 || col2.Value.B != 0)
-                    {
-                        colors.Add(new RgbColor(col2.Value.R, col2.Value.G, col2.Value.B));
-                    }
+                    colors.Add(new RgbColor(Type_Texture.Color2));
                 }
             }
 
@@ -1502,73 +1494,64 @@ namespace Xv2CoreLib.EMP
         {
             if(Type_Texture != null)
             {
-                Color? col1 = Type_Texture.Color1;
-                Color? col2 = Type_Texture.Color2;
-
                 //If its all 255 or 0, then skip the color
-                if (col1.Value.R != 255 || col1.Value.G != 255 || col1.Value.B != 255)
+                if (!Type_Texture.Color1.IsWhiteOrBlack())
                 {
-                    if(col1.Value.R != 0 || col1.Value.G != 0 || col1.Value.B != 0)
+                    HslColor.HslColor newCol1 = new RgbColor(Type_Texture.Color1).ToHsl();
+                    RgbColor convertedColor;
+
+                    if (hueSet)
                     {
-                        HslColor.HslColor newCol1 = new RgbColor(col1.Value.R, col1.Value.G, col1.Value.B).ToHsl();
-                        RgbColor convertedColor;
-
-                        if (hueSet)
-                        {
-                            newCol1.SetHue(hue, variance);
-                        }
-                        else
-                        {
-                            newCol1.ChangeHue(hue);
-                            newCol1.ChangeSaturation(saturation);
-                            newCol1.ChangeLightness(lightness);
-                        }
-
-                        convertedColor = newCol1.ToRgb();
-
-                        undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_48), Type_Texture, Type_Texture.F_48, (float)convertedColor.R));
-                        undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_52), Type_Texture, Type_Texture.F_52, (float)convertedColor.G));
-                        undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_56), Type_Texture, Type_Texture.F_56, (float)convertedColor.B));
-
-                        Type_Texture.F_48 = (float)convertedColor.R;
-                        Type_Texture.F_52 = (float)convertedColor.G;
-                        Type_Texture.F_56 = (float)convertedColor.B;
+                        newCol1.SetHue(hue, variance);
                     }
+                    else
+                    {
+                        newCol1.ChangeHue(hue);
+                        newCol1.ChangeSaturation(saturation);
+                        newCol1.ChangeLightness(lightness);
+                    }
+
+                    convertedColor = newCol1.ToRgb();
+
+                    undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.Color1.R), Type_Texture.Color1, Type_Texture.Color1.R, (float)convertedColor.R));
+                    undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.Color1.G), Type_Texture.Color1, Type_Texture.Color1.G, (float)convertedColor.G));
+                    undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.Color1.B), Type_Texture.Color1, Type_Texture.Color1.B, (float)convertedColor.B));
+
+                    Type_Texture.Color1.R = (float)convertedColor.R;
+                    Type_Texture.Color1.G = (float)convertedColor.G;
+                    Type_Texture.Color1.B = (float)convertedColor.B;
                 }
 
                 //If its all 255 or 0, then skip the color
-                if (col2.Value.R != 255 || col2.Value.G != 255 || col2.Value.B != 255)
+                if (!Type_Texture.Color2.IsWhiteOrBlack())
                 {
-                    if (col2.Value.R != 0 || col2.Value.G != 0 || col2.Value.B != 0)
+                    HslColor.HslColor newCol2 = new RgbColor(Type_Texture.Color2).ToHsl();
+                    RgbColor convertedColor;
+
+                    if (hueSet)
                     {
-                        HslColor.HslColor newCol2 = new RgbColor(col2.Value.R, col2.Value.G, col2.Value.B).ToHsl();
-                        RgbColor convertedColor;
-
-                        if (hueSet)
-                        {
-                            newCol2.SetHue(hue, variance);
-                        }
-                        else
-                        {
-                            newCol2.ChangeHue(hue);
-                            newCol2.ChangeSaturation(saturation);
-                            newCol2.ChangeLightness(lightness);
-                        }
-
-                        convertedColor = newCol2.ToRgb();
-
-                        undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_80), Type_Texture, Type_Texture.F_80, (float)convertedColor.R));
-                        undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_84), Type_Texture, Type_Texture.F_84, (float)convertedColor.G));
-                        undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_88), Type_Texture, Type_Texture.F_88, (float)convertedColor.B));
-
-                        Type_Texture.F_80 = (float)convertedColor.R;
-                        Type_Texture.F_84 = (float)convertedColor.G;
-                        Type_Texture.F_88 = (float)convertedColor.B;
+                        newCol2.SetHue(hue, variance);
                     }
+                    else
+                    {
+                        newCol2.ChangeHue(hue);
+                        newCol2.ChangeSaturation(saturation);
+                        newCol2.ChangeLightness(lightness);
+                    }
+
+                    convertedColor = newCol2.ToRgb();
+
+                    undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.Color2.R), Type_Texture.Color2, Type_Texture.Color2.R, (float)convertedColor.R));
+                    undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.Color2.G), Type_Texture.Color2, Type_Texture.Color2.G, (float)convertedColor.G));
+                    undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.Color2.B), Type_Texture.Color2, Type_Texture.Color2.B, (float)convertedColor.B));
+
+                    Type_Texture.Color2.R = (float)convertedColor.R;
+                    Type_Texture.Color2.G = (float)convertedColor.G;
+                    Type_Texture.Color2.B = (float)convertedColor.B;
                 }
 
                 //Random Range. Change it if any of the values aren't 0.
-                if(Type_Texture.F_64 != 0 || Type_Texture.F_68 != 0 || Type_Texture.F_72 != 0)
+                if(Type_Texture.Color_Variance != 0f)
                 {
                     RgbColor convertedColor;
 
@@ -1579,7 +1562,7 @@ namespace Xv2CoreLib.EMP
                     }
                     else
                     {
-                        HslColor.HslColor newCol = new RgbColor(Type_Texture.F_64, Type_Texture.F_68, Type_Texture.F_72).ToHsl();
+                        HslColor.HslColor newCol = new RgbColor(Type_Texture.Color_Variance).ToHsl();
                         newCol.ChangeHue(hue);
                         newCol.ChangeSaturation(saturation);
                         newCol.ChangeLightness(lightness);
@@ -1587,13 +1570,13 @@ namespace Xv2CoreLib.EMP
                     }
 
 
-                    undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_64), Type_Texture, Type_Texture.F_64, (float)convertedColor.R));
-                    undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_68), Type_Texture, Type_Texture.F_68, (float)convertedColor.G));
-                    undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_72), Type_Texture, Type_Texture.F_72, (float)convertedColor.B));
+                    undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.Color_Variance.R), Type_Texture.Color_Variance, Type_Texture.Color_Variance.R, (float)convertedColor.R));
+                    undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.Color_Variance.G), Type_Texture.Color_Variance, Type_Texture.Color_Variance.G, (float)convertedColor.G));
+                    undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.Color_Variance.B), Type_Texture.Color_Variance, Type_Texture.Color_Variance.B, (float)convertedColor.B));
 
-                    Type_Texture.F_64 = (float)convertedColor.R;
-                    Type_Texture.F_68 = (float)convertedColor.G;
-                    Type_Texture.F_72 = (float)convertedColor.B;
+                    Type_Texture.Color_Variance.R = (float)convertedColor.R;
+                    Type_Texture.Color_Variance.G = (float)convertedColor.G;
+                    Type_Texture.Color_Variance.B = (float)convertedColor.B;
                 }
 
             }
@@ -1696,15 +1679,15 @@ namespace Xv2CoreLib.EMP
         {
             if(Type_Texture != null)
             {
-                if (Type_Texture.F_64 != 0 || Type_Texture.F_68 != 0 || Type_Texture.F_72 != 0)
+                if (Type_Texture.Color_Variance != 0f)
                 {
-                    undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_64), Type_Texture, Type_Texture.F_64, 0f));
-                    undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_68), Type_Texture, Type_Texture.F_68, 0f));
-                    undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.F_72), Type_Texture, Type_Texture.F_72, 0f));
+                    undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.Color_Variance.R), Type_Texture.Color_Variance, Type_Texture.Color_Variance.R, 0f));
+                    undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.Color_Variance.G), Type_Texture.Color_Variance, Type_Texture.Color_Variance.G, 0f));
+                    undos.Add(new UndoableProperty<TexturePart>(nameof(Type_Texture.Color_Variance.B), Type_Texture.Color_Variance, Type_Texture.Color_Variance.B, 0f));
 
-                    Type_Texture.F_64 = 0f;
-                    Type_Texture.F_68 = 0f;
-                    Type_Texture.F_72 = 0f;
+                    Type_Texture.Color_Variance.R = 0f;
+                    Type_Texture.Color_Variance.G = 0f;
+                    Type_Texture.Color_Variance.B = 0f;
                 }
             }
         }
@@ -1754,6 +1737,7 @@ namespace Xv2CoreLib.EMP
     [YAXSerializeAs("TexturePart")]
     public class TexturePart : INotifyPropertyChanged
     {
+        #region NotifyPropertyChanged
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -1767,8 +1751,9 @@ namespace Xv2CoreLib.EMP
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
+        #endregion
 
-        //Ref
+        #region References
         private EmmMaterial _materialRef = null;
         [YAXDontSerialize]
         public EmmMaterial MaterialRef
@@ -1784,65 +1769,10 @@ namespace Xv2CoreLib.EMP
                 NotifyPropertyChanged(nameof(MaterialRef));
             }
         }
-        private AsyncObservableCollection<TextureEntryRef> _textureEntryRef = AsyncObservableCollection<TextureEntryRef>.Create();
         [YAXDontSerialize]
-        public AsyncObservableCollection<TextureEntryRef> TextureEntryRef
-        {
-            get
-            {
-                return _textureEntryRef;
-            }
-            set
-            {
-                if (_textureEntryRef != value)
-                    _textureEntryRef = value;
-                NotifyPropertyChanged(nameof(TextureEntryRef));
-            }
-        }
-
-        [YAXDontSerialize]
-        public Color? Color1
-        {
-            get
-            {
-                return new Color()
-                {
-                    R = RgbConverter.ConvertToByte(F_48),
-                    G = RgbConverter.ConvertToByte(F_52),
-                    B = RgbConverter.ConvertToByte(F_56),
-                    A = RgbConverter.ConvertToByte(F_60)
-                };
-            }
-            set
-            {
-                F_48 = RgbConverter.ConvertToFloat(value.Value.R);
-                F_52 = RgbConverter.ConvertToFloat(value.Value.G);
-                F_56 = RgbConverter.ConvertToFloat(value.Value.B);
-                F_60 = RgbConverter.ConvertToFloat(value.Value.A);
-            }
-        }
-        [YAXDontSerialize]
-        public Color? Color2
-        {
-            get
-            {
-                return new Color()
-                {
-                    R = RgbConverter.ConvertToByte(F_80),
-                    G = RgbConverter.ConvertToByte(F_84),
-                    B = RgbConverter.ConvertToByte(F_88),
-                    A = RgbConverter.ConvertToByte(F_92)
-                };
-            }
-            set
-            {
-                F_80 = RgbConverter.ConvertToFloat(value.Value.R);
-                F_84 = RgbConverter.ConvertToFloat(value.Value.G);
-                F_88 = RgbConverter.ConvertToFloat(value.Value.B);
-                F_92 = RgbConverter.ConvertToFloat(value.Value.A);
-            }
-        }
-
+        public AsyncObservableCollection<TextureEntry_Ref> TextureEntryRef { get; set; } = new AsyncObservableCollection<TextureEntry_Ref>();
+        
+        #endregion
 
         [YAXAttributeForClass]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
@@ -1878,243 +1808,9 @@ namespace Xv2CoreLib.EMP
         public ushort I_16 { get; set; }
 
         //Colors
-        [YAXAttributeFor("Color1")]
-        [YAXSerializeAs("R")]
-        [YAXFormat("0.0########")]
-        public float F_48
-        {
-            get
-            {
-                return this.color1_R;
-            }
-
-            set
-            {
-                if (value != this.color1_R)
-                {
-                    this.color1_R = value;
-                    NotifyPropertyChanged("F_48");
-                    NotifyPropertyChanged("Color1");
-                }
-            }
-        }
-        [YAXAttributeFor("Color1")]
-        [YAXSerializeAs("G")]
-        [YAXFormat("0.0########")]
-        public float F_52
-        {
-            get
-            {
-                return this.color1_G;
-            }
-
-            set
-            {
-                if (value != this.color1_G)
-                {
-                    this.color1_G = value;
-                    NotifyPropertyChanged("F_52");
-                    NotifyPropertyChanged("Color1");
-                }
-            }
-        }
-        [YAXAttributeFor("Color1")]
-        [YAXSerializeAs("B")]
-        [YAXFormat("0.0########")]
-        public float F_56
-        {
-            get
-            {
-                return this.color1_B;
-            }
-
-            set
-            {
-                if (value != this.color1_B)
-                {
-                    this.color1_B = value;
-                    NotifyPropertyChanged("F_56");
-                    NotifyPropertyChanged("Color1");
-                }
-            }
-        }
-        [YAXAttributeFor("Color1")]
-        [YAXSerializeAs("A")]
-        [YAXFormat("0.0########")]
-        public float F_60
-        {
-            get
-            {
-                return this.color1_A;
-            }
-
-            set
-            {
-                if (value != this.color1_A)
-                {
-                    this.color1_A = value;
-                    NotifyPropertyChanged("F_60");
-                    NotifyPropertyChanged("Color1");
-                }
-            }
-        }
-        [YAXAttributeFor("Color2")]
-        [YAXSerializeAs("R")]
-        [YAXFormat("0.0########")]
-        public float F_80
-        {
-            get
-            {
-                return this.color2_R;
-            }
-
-            set
-            {
-                if (value != this.color2_R)
-                {
-                    this.color2_R = value;
-                    NotifyPropertyChanged("F_80");
-                    NotifyPropertyChanged("Color2");
-                }
-            }
-        }
-        [YAXAttributeFor("Color2")]
-        [YAXSerializeAs("G")]
-        [YAXFormat("0.0########")]
-        public float F_84
-        {
-            get
-            {
-                return this.color2_G;
-            }
-
-            set
-            {
-                if (value != this.color2_G)
-                {
-                    this.color2_G = value;
-                    NotifyPropertyChanged("F_84");
-                    NotifyPropertyChanged("Color2");
-                }
-            }
-        }
-        [YAXAttributeFor("Color2")]
-        [YAXSerializeAs("B")]
-        [YAXFormat("0.0########")]
-        public float F_88
-        {
-            get
-            {
-                return this.color2_B;
-            }
-
-            set
-            {
-                if (value != this.color2_B)
-                {
-                    this.color2_B = value;
-                    NotifyPropertyChanged("F_88");
-                    NotifyPropertyChanged("Color2");
-                }
-            }
-        }
-        [YAXAttributeFor("Color2")]
-        [YAXSerializeAs("A")]
-        [YAXFormat("0.0########")]
-        public float F_92
-        {
-            get
-            {
-                return this.color2_A;
-            }
-
-            set
-            {
-                if (value != this.color2_A)
-                {
-                    this.color2_A = value;
-                    NotifyPropertyChanged("F_92");
-                    NotifyPropertyChanged("Color2");
-                }
-            }
-        }
-        [YAXAttributeFor("Color_AddedRandom")]
-        [YAXSerializeAs("R")]
-        [YAXFormat("0.0########")]
-        public float F_64
-        {
-            get
-            {
-                return this.color_Random_R;
-            }
-
-            set
-            {
-                if (value != this.color_Random_R)
-                {
-                    this.color_Random_R = value;
-                    NotifyPropertyChanged("F_64");
-                }
-            }
-        }
-        [YAXAttributeFor("Color_AddedRandom")]
-        [YAXSerializeAs("G")]
-        [YAXFormat("0.0########")]
-        public float F_68
-        {
-            get
-            {
-                return this.color_Random_G;
-            }
-
-            set
-            {
-                if (value != this.color_Random_G)
-                {
-                    this.color_Random_G = value;
-                    NotifyPropertyChanged("F_68");
-                }
-            }
-        }
-        [YAXAttributeFor("Color_AddedRandom")]
-        [YAXSerializeAs("B")]
-        [YAXFormat("0.0########")]
-        public float F_72
-        {
-            get
-            {
-                return this.color_Random_B;
-            }
-
-            set
-            {
-                if (value != this.color_Random_B)
-                {
-                    this.color_Random_B = value;
-                    NotifyPropertyChanged("F_72");
-                }
-            }
-        }
-        [YAXAttributeFor("Color_AddedRandom")]
-        [YAXSerializeAs("A")]
-        [YAXFormat("0.0########")]
-        public float F_76
-        {
-            get
-            {
-                return this.color_Random_A;
-            }
-
-            set
-            {
-                if (value != this.color_Random_A)
-                {
-                    this.color_Random_A = value;
-                    NotifyPropertyChanged("F_76");
-                }
-            }
-        }
-
+        public CustomColor Color1 { get; set; } = new CustomColor();
+        public CustomColor Color2 { get; set; } = new CustomColor();
+        public CustomColor Color_Variance { get; set; } = new CustomColor();
 
         //Remaining floats
         [YAXAttributeFor("Scale1")]
@@ -2158,24 +1854,10 @@ namespace Xv2CoreLib.EMP
         [YAXFormat("0.0########")]
         public float F_108 { get; set; }
 
-
-        private float color1_R = 0;
-        private float color1_G = 0;
-        private float color1_B = 0;
-        private float color1_A = 0;
-        private float color2_R = 0;
-        private float color2_G = 0;
-        private float color2_B = 0;
-        private float color2_A = 0;
-        private float color_Random_R = 0;
-        private float color_Random_G = 0;
-        private float color_Random_B = 0;
-        private float color_Random_A = 0;
-
         public TexturePart Clone()
         {
             AsyncObservableCollection<int> newTexList = AsyncObservableCollection<int>.Create();
-            AsyncObservableCollection<TextureEntryRef> textureRefs = AsyncObservableCollection<TextureEntryRef>.Create();
+            AsyncObservableCollection<TextureEntry_Ref> textureRefs = AsyncObservableCollection<TextureEntry_Ref>.Create();
 
             for (int i = 0; i < TextureIndex.Count; i++)
             {
@@ -2186,7 +1868,7 @@ namespace Xv2CoreLib.EMP
             {
                 foreach(var textRef in TextureEntryRef)
                 {
-                    textureRefs.Add(new EMP.TextureEntryRef() { TextureRef = textRef.TextureRef });
+                    textureRefs.Add(new EMP.TextureEntry_Ref() { TextureRef = textRef.TextureRef });
                 }
             }
 
@@ -2209,18 +1891,9 @@ namespace Xv2CoreLib.EMP
                 F_36 = F_36,
                 F_40 = F_40,
                 F_44 = F_44,
-                F_48 = F_48,
-                F_52 = F_52,
-                F_56 = F_56,
-                F_60 = F_60,
-                F_64 = F_64,
-                F_68 = F_68,
-                F_72 = F_72,
-                F_76 = F_76,
-                F_80 = F_80,
-                F_84 = F_84,
-                F_88 = F_88,
-                F_92 = F_92,
+                Color1 = Color1 != null ? Color1.Copy() : new CustomColor(),
+                Color_Variance = Color_Variance != null ? Color_Variance.Copy() : new CustomColor(),
+                Color2 = Color2 != null ? Color2.Copy() : new CustomColor(),
                 F_96 = F_96,
                 TextureIndex = newTexList,
                 MaterialRef = MaterialRef,
@@ -2232,7 +1905,12 @@ namespace Xv2CoreLib.EMP
         {
             return new TexturePart()
             {
-                TextureIndex = AsyncObservableCollection<int>.Create()
+                TextureIndex = new AsyncObservableCollection<int>(),
+                TextureEntryRef = new AsyncObservableCollection<TextureEntry_Ref>()
+                {
+                    //These are created because EMP Editor relies on there always being 2 texture references. Technically there can be any number of these, but only 2 are ever used by the game EMP files, so thats all that the EMP Editor exposes.
+                    new TextureEntry_Ref(), new TextureEntry_Ref()
+                }
             };
         }
         
@@ -4156,7 +3834,7 @@ namespace Xv2CoreLib.EMP
     }
 
     [Serializable]
-    public class TextureEntryRef : INotifyPropertyChanged
+    public class TextureEntry_Ref : INotifyPropertyChanged
     {
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
@@ -4198,7 +3876,7 @@ namespace Xv2CoreLib.EMP
             {
                 if(TextureRef != value)
                 {
-                    UndoManager.Instance.AddUndo(new UndoableProperty<TextureEntryRef>(nameof(TextureRef), this, TextureRef, value, "Texture Ref"));
+                    UndoManager.Instance.AddUndo(new UndoableProperty<TextureEntry_Ref>(nameof(TextureRef), this, TextureRef, value, "Texture Ref"));
                     TextureRef = value;
                     NotifyPropertyChanged(nameof(TextureRef));
                     NotifyPropertyChanged(nameof(UndoableTextureRef));

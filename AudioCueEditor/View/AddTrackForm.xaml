@@ -6,20 +6,31 @@
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:local="clr-namespace:AudioCueEditor.View"
         mc:Ignorable="d"
-        Title="Add Track" TitleCharacterCasing="Normal" Height="189.333" Width="380" ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner" Closing="MetroWindow_Closing">
+        Title="Add Track" TitleCharacterCasing="Normal" Height="225" Width="380" ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner" Closing="MetroWindow_Closing">
     <Grid>
-        <StackPanel Margin="10,10,10.667,120" Orientation="Horizontal">
-            <Label Content="Path" VerticalAlignment="Center"/>
-            <TextBox Text="{Binding AudioFilePath, UpdateSourceTrigger=PropertyChanged}" Width="250" Margin="5,0,0,0"/>
-            <Button Click="AddTrack_Browse_Click" Content="Browse" Width="60" Margin="5,0,0,0"/>
-        </StackPanel>
-        <Button Command="{Binding DoneCommand}" Content="Add" HorizontalAlignment="Left" Margin="150,131,0,0" VerticalAlignment="Top" Width="75"/>
-        <CheckBox ToolTip="Streaming tracks will be stored in an external AWB and will only be loaded by the game when played (there may be a delay before playing starts, as they are not pre-loaded).&#x0a;&#x0a;This is ideally used for long tracks that are not played repeatedly, such as music. Sound effects or voicelines that need to play on demand should not be streamed." IsChecked="{Binding Streaming, UpdateSourceTrigger=PropertyChanged}" Content="Streaming" HorizontalAlignment="Left" Margin="127,51,0,0" VerticalAlignment="Top" Width="113"/>
-        <CheckBox IsEnabled="{Binding CanSetLoop}" ToolTip="Loop track from start to end (HCA encode only)." IsChecked="{Binding Loop, UpdateSourceTrigger=PropertyChanged}" Content="Loop" HorizontalAlignment="Left" Margin="127,74,0,0" VerticalAlignment="Top" Width="113"/>
+        <StackPanel Margin="0, 5">
+            <StackPanel Margin="10, 0" Orientation="Horizontal">
+                <Label Content="Path" VerticalAlignment="Center"/>
+                <TextBox Text="{Binding AudioFilePath, UpdateSourceTrigger=PropertyChanged}" Width="250" Margin="5,0,0,0"/>
+                <Button Click="AddTrack_Browse_Click" Content="Browse" Width="60" Margin="5,0,0,0"/>
+            </StackPanel>
+            <CheckBox ToolTip="Streaming tracks will be stored in an external AWB and will only be loaded by the game when played (there may be a delay before playing starts, as they are not pre-loaded).&#x0a;&#x0a;This is ideally used for long tracks that are not played repeatedly, such as music. Sound effects or voicelines that need to play on demand should not be streamed." IsChecked="{Binding Streaming, UpdateSourceTrigger=PropertyChanged}" Content="Streaming" Margin="95, 5" HorizontalAlignment="Left" VerticalAlignment="Top" Width="148"/>
+            <CheckBox IsEnabled="{Binding CanSetLoop}" ToolTip="Loop track from start to end (HCA encode only)." IsChecked="{Binding Loop, UpdateSourceTrigger=PropertyChanged}" Content="Loop" Margin="95, 5" HorizontalAlignment="Left" VerticalAlignment="Top" Width="148"/>
 
-        <StackPanel IsEnabled="{Binding AddTrack, UpdateSourceTrigger=PropertyChanged}" Margin="42,95,9.667,40" Orientation="Horizontal">
-            <Label Content="Encoding" VerticalAlignment="Center" Width="80"/>
-            <ComboBox ItemsSource="{Binding EncodeTypes}" SelectedItem="{Binding EncodeType, UpdateSourceTrigger=PropertyChanged}" Width="150" Margin="5,0,0,0"/>
+            <StackPanel IsEnabled="{Binding AddTrack, UpdateSourceTrigger=PropertyChanged}" Margin="10, 0" Orientation="Horizontal">
+                <Label Content="Encoding" VerticalAlignment="Center" Width="80"/>
+                <ComboBox ItemsSource="{Binding EncodeTypes}" SelectedItem="{Binding EncodeType, UpdateSourceTrigger=PropertyChanged}" Width="150" Margin="5,0,0,0"/>
+            </StackPanel>
+
+            <StackPanel IsEnabled="{Binding CanSetLoop, UpdateSourceTrigger=PropertyChanged}" Margin="10, 5" Orientation="Horizontal">
+                <Label Content="Encrypt Key" VerticalAlignment="Center" Width="80" ToolTip="Encrpytion keys can be added in the Encryption Key Editor (Tools menu)."/>
+                <ComboBox ItemsSource="{Binding HcaKeys}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedHcaKey, UpdateSourceTrigger=PropertyChanged}" Width="150" Margin="5,0,0,0"/>
+            </StackPanel>
+            <Button Command="{Binding DoneCommand}" Content="Add" HorizontalAlignment="Left" Margin="150,10,0,0" VerticalAlignment="Top" Width="75"/>
+
         </StackPanel>
+        
+        
+        
     </Grid>
 </Controls:MetroWindow>

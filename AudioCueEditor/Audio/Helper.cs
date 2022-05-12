@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using VGAudio;
 using VGAudio.Cli;
 using Xv2CoreLib.ACB;
 
@@ -16,40 +17,49 @@ namespace AudioCueEditor.Audio
             //AT9 and BCWAV cannot encode correctly
         };
 
-        public static byte[] LoadAndConvertFile(string path, FileType convertToType, bool loop)
+        public static byte[] LoadAndConvertFile(string path, FileType convertToType, bool loop, ulong encrpytionKey = 0)
         {
             switch (Path.GetExtension(path).ToLower())
             {
                 case ".wav":
-                    return ConvertFile(File.ReadAllBytes(path), FileType.Wave, convertToType, loop);
+                    return ConvertFile(File.ReadAllBytes(path), FileType.Wave, convertToType, loop, encrpytionKey);
                 case ".mp3":
                 case ".wma":
                 case ".aac":
-                    return ConvertFile(WAV.ConvertToWav(path), FileType.Wave, convertToType, loop);
+                    return ConvertFile(WAV.ConvertToWav(path), FileType.Wave, convertToType, loop, encrpytionKey);
                 case ".hca":
-                    return ConvertFile(File.ReadAllBytes(path), FileType.Hca, convertToType, loop);
+                    return ConvertFile(File.ReadAllBytes(path), FileType.Hca, convertToType, loop, encrpytionKey);
                 case ".adx":
                     if (convertToType == FileType.Adx) return File.ReadAllBytes(path);
-                    return ConvertFile(File.ReadAllBytes(path), FileType.Adx, convertToType, loop);
+                    return ConvertFile(File.ReadAllBytes(path), FileType.Adx, convertToType, loop, encrpytionKey);
                 case ".at9":
-                    return ConvertFile(File.ReadAllBytes(path), FileType.Atrac9, convertToType, loop);
+                    return ConvertFile(File.ReadAllBytes(path), FileType.Atrac9, convertToType, loop, encrpytionKey);
                 case ".dsp":
-                    return ConvertFile(File.ReadAllBytes(path), FileType.Dsp, convertToType, loop);
+                    return ConvertFile(File.ReadAllBytes(path), FileType.Dsp, convertToType, loop, encrpytionKey);
                 case ".bcwav":
-                    return ConvertFile(File.ReadAllBytes(path), FileType.Bcwav, convertToType, loop);
+                    return ConvertFile(File.ReadAllBytes(path), FileType.Bcwav, convertToType, loop, encrpytionKey);
             }
 
             throw new InvalidDataException($"Filetype of \"{path}\" is not supported.");
         }
 
-        public static byte[] ConvertFile(byte[] bytes, FileType encodeType, FileType convertToType, bool loop)
+        public static byte[] ConvertFile(byte[] bytes, FileType encodeType, FileType convertToType, bool loop, ulong encryptionKey = 0)
         {
+            ConvertStatics.SetLoop(true, 0, 0);
+
             using (var ms = new MemoryStream(bytes))
             {
-                byte[] track = ConvertStream.ConvertFile(new Options(), ms, encodeType, convertToType);
+                var options = new Options();
+                options.KeyCode = encryptionKey;
+                options.Loop = loop;
 
-                if (convertToType == FileType.Hca && loop)
-                    track = HCA.EncodeLoop(track, loop);
+                if(options.Loop)
+                    options.LoopEnd = int.MaxValue;
+
+                byte[] track = ConvertStream.ConvertFile(options, ms, encodeType, convertToType);
+
+                //if (convertToType == FileType.Hca && loop)
+                //    track = HCA.EncodeLoop(track, loop);
 
                 return track;
             }

@@ -15,6 +15,8 @@ namespace System
         /// </summary>
         public static T Copy<T>(this T obj)
         {
+            if (obj == null) return obj;
+
             using (var ms = new MemoryStream())
             {
                 IFormatter formatter = new BinaryFormatter();
@@ -38,7 +40,24 @@ namespace System
                     function.Invoke(instance, new object[] { prop.Name });
             }
         }
-    
+
+        /// <summary>
+        /// Invokes NotifyPropertyChanged for a specific property on this object. NOTE: Requires NotifyPropertyChanged to be public!
+        /// </summary>
+        public static void NotifyPropsChanged(this object instance, string propertyName)
+        {
+            foreach (var prop in instance.GetType().GetProperties())
+            {
+                if(prop.Name == propertyName)
+                {
+                    MethodInfo function = instance.GetType().GetMethod("NotifyPropertyChanged");
+
+                    if (function != null)
+                        function.Invoke(instance, new object[] { prop.Name });
+                }
+            }
+        }
+
         public static bool Compare(this object instance, object compareObj, params string[] exclusions)
         {
             foreach(var prop in instance.GetType().GetProperties())

@@ -24,6 +24,7 @@ using MahApps.Metro.Controls.Dialogs;
 using Xv2CoreLib.Resource.UndoRedo;
 using Xv2CoreLib.HCA;
 using System.Diagnostics;
+using AudioCueEditor.Data;
 
 namespace AudioCueEditor.View
 {
@@ -80,7 +81,6 @@ namespace AudioCueEditor.View
         public bool IsActionsEnabled { get { return (AcbFile != null) ? AcbFormatHelper.Instance.IsActionsEnabled(AcbFile.AcbFile.Version) : false; } }
 
         public AudioPlayer audioPlayer { get; set; } = new AudioPlayer();
-
 
         //Visibilities
         public Visibility SequenceCueNotVisibile
@@ -190,7 +190,7 @@ namespace AudioCueEditor.View
         public RelayCommand AddNewCueCommand => new RelayCommand(AddNewCue, IsFileLoaded);
         private async void AddNewCue()
         {
-            AddCueForm form = new AddCueForm(Application.Current.MainWindow, string.Format("cue_{0}", AcbFile.AcbFile.GetFreeCueId()));
+            AddCueForm form = new AddCueForm(Application.Current.MainWindow, AcbFile.AcbFile, string.Format("cue_{0}", AcbFile.AcbFile.GetFreeCueId()));
             form.ShowDialog();
 
             while (!form.IsDone)
@@ -231,6 +231,10 @@ namespace AudioCueEditor.View
             rootGrid.DataContext = this;
             dataGrid.SelectionChanged += new SelectionChangedEventHandler(CueSelectionChanged);
             AcbChanged += AcbInstanceChanged;
+
+            //Add user defined keys to VGAudio class
+            foreach (var key in HcaEncryptionKeysManager.Instance.EncryptionKeys.Keys)
+                VGAudio.Codecs.CriHca.CriHcaEncryption.AddKey(key.Key);
         }
 
 
@@ -350,7 +354,7 @@ namespace AudioCueEditor.View
                         {
                             if (track.WaveformWrapper.WaveformRef.EncodeType == EncodeType.HCA || track.WaveformWrapper.WaveformRef.EncodeType == EncodeType.HCA_ALT)
                             {
-                                HcaMetadata meta = new HcaMetadata(afs2Entry.bytes);
+                                TrackMetadata meta = new TrackMetadata(afs2Entry.bytes);
 
                                 if (meta.HasLoopData)
                                 {
@@ -384,7 +388,7 @@ namespace AudioCueEditor.View
 
             if (track != null)
             {
-                var trackForm = new AddTrackForm(Application.Current.MainWindow);
+                var trackForm = new AddTrackForm(Application.Current.MainWindow, AcbFile.AcbFile);
                 trackForm.ShowDialog();
 
                 while (!trackForm.IsDone)
@@ -420,7 +424,7 @@ namespace AudioCueEditor.View
         {
             var cue = GetSelectedCue();
 
-            var trackForm = new AddTrackForm(Application.Current.MainWindow);
+            var trackForm = new AddTrackForm(Application.Current.MainWindow, AcbFile.AcbFile);
             trackForm.ShowDialog();
 
             while (!trackForm.IsDone)
@@ -741,7 +745,7 @@ namespace AudioCueEditor.View
                             case ".wma":
                             case ".aac":
                             case ".hca":
-                                AddCueForm form = new AddCueForm(Application.Current.MainWindow, droppedFile, true);
+                                AddCueForm form = new AddCueForm(Application.Current.MainWindow, AcbFile.AcbFile, droppedFile, true);
 
                                 while (!form.IsDone)
                                 {
@@ -792,7 +796,7 @@ namespace AudioCueEditor.View
                             case ".hca":
                                 var cue = GetSelectedCue();
                                 if (cue == null) return;
-                                var trackForm = new AddTrackForm(Application.Current.MainWindow, droppedFile);
+                                var trackForm = new AddTrackForm(Application.Current.MainWindow, droppedFile, AcbFile.AcbFile);
 
                                 while (!trackForm.IsDone)
                                 {

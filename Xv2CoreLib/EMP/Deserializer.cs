@@ -320,8 +320,8 @@ namespace Xv2CoreLib.EMP
             bytes.AddRange(BitConverter.GetBytes(texture.I_08));
             bytes.AddRange(BitConverter.GetBytes(texture.I_12));
             bytes.AddRange(BitConverter.GetBytes(texture.I_16));
-            bytes.AddRange(BitConverter.GetBytes((ushort)texture.TextureIndex.Count()));
-            int textureOffset = bytes.Count();
+            bytes.AddRange(BitConverter.GetBytes((ushort)texture.TextureIndex.Count));
+            int textureOffset = bytes.Count;
             bytes.AddRange(new byte[4]);
             bytes.AddRange(BitConverter.GetBytes(texture.F_24));
             bytes.AddRange(BitConverter.GetBytes(texture.F_28));
@@ -329,18 +329,18 @@ namespace Xv2CoreLib.EMP
             bytes.AddRange(BitConverter.GetBytes(texture.F_36));
             bytes.AddRange(BitConverter.GetBytes(texture.F_40));
             bytes.AddRange(BitConverter.GetBytes(texture.F_44));
-            bytes.AddRange(BitConverter.GetBytes(texture.F_48));
-            bytes.AddRange(BitConverter.GetBytes(texture.F_52));
-            bytes.AddRange(BitConverter.GetBytes(texture.F_56));
-            bytes.AddRange(BitConverter.GetBytes(texture.F_60));
-            bytes.AddRange(BitConverter.GetBytes(texture.F_64));
-            bytes.AddRange(BitConverter.GetBytes(texture.F_68));
-            bytes.AddRange(BitConverter.GetBytes(texture.F_72));
-            bytes.AddRange(BitConverter.GetBytes(texture.F_76));
-            bytes.AddRange(BitConverter.GetBytes(texture.F_80));
-            bytes.AddRange(BitConverter.GetBytes(texture.F_84));
-            bytes.AddRange(BitConverter.GetBytes(texture.F_88));
-            bytes.AddRange(BitConverter.GetBytes(texture.F_92));
+            bytes.AddRange(BitConverter.GetBytes(texture.Color1.R));
+            bytes.AddRange(BitConverter.GetBytes(texture.Color1.G));
+            bytes.AddRange(BitConverter.GetBytes(texture.Color1.B));
+            bytes.AddRange(BitConverter.GetBytes(texture.Color1.A));
+            bytes.AddRange(BitConverter.GetBytes(texture.Color_Variance.R));
+            bytes.AddRange(BitConverter.GetBytes(texture.Color_Variance.G));
+            bytes.AddRange(BitConverter.GetBytes(texture.Color_Variance.B));
+            bytes.AddRange(BitConverter.GetBytes(texture.Color_Variance.A));
+            bytes.AddRange(BitConverter.GetBytes(texture.Color2.R));
+            bytes.AddRange(BitConverter.GetBytes(texture.Color2.G));
+            bytes.AddRange(BitConverter.GetBytes(texture.Color2.B));
+            bytes.AddRange(BitConverter.GetBytes(texture.Color2.A));
             bytes.AddRange(BitConverter.GetBytes(texture.F_96));
             bytes.AddRange(BitConverter.GetBytes(texture.F_100));
             bytes.AddRange(BitConverter.GetBytes(texture.F_104));
@@ -352,13 +352,17 @@ namespace Xv2CoreLib.EMP
 
         private int WriteTexturePartOffsets(TexturePart texture, int offset, int mainEntryOffset)
         {
-            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - mainEntryOffset), offset);
+            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - mainEntryOffset), offset);
             int size = 0;
 
             foreach (var i in texture.TextureIndex)
             {
-                EmbTextureOffsets[i].Add(bytes.Count());
-                EmbTextureOffsets_Minus[i].Add(mainEntryOffset);
+                if(i != -1)
+                {
+                    EmbTextureOffsets[i].Add(bytes.Count);
+                    EmbTextureOffsets_Minus[i].Add(mainEntryOffset);
+                }
+
                 bytes.AddRange(new byte[4]);
                 size += 4;
             }
@@ -1163,7 +1167,20 @@ namespace Xv2CoreLib.EMP
 
                     foreach(var texture in particleEffect.Type_Texture.TextureEntryRef)
                     {
-                        particleEffect.Type_Texture.TextureIndex.Add(texture.TextureRef.EntryIndex);
+                        particleEffect.Type_Texture.TextureIndex.Add(texture.TextureRef != null ? texture.TextureRef.EntryIndex : -1);
+                    }
+
+                    //Remove null entries at the end
+                    for (int i = particleEffect.Type_Texture.TextureIndex.Count - 1; i >= 0; i--)
+                    {
+                        if (particleEffect.Type_Texture.TextureIndex[i] == -1)
+                        {
+                            particleEffect.Type_Texture.TextureIndex.RemoveAt(i);
+                        }
+                        else if (particleEffect.Type_Texture.TextureIndex[i] != -1)
+                        {
+                            break;
+                        }
                     }
                 }
 

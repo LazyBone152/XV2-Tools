@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Xv2CoreLib.Resource.UndoRedo
 {
@@ -14,6 +10,7 @@ namespace Xv2CoreLib.Resource.UndoRedo
         public string Message { get; set; }
         public bool doLast { get; set; }
 
+        private string propName = string.Empty;
         private object instance;
 
         public UndoActionPropNotify(object _instance, bool _doLast, string _message = "")
@@ -23,15 +20,29 @@ namespace Xv2CoreLib.Resource.UndoRedo
             doLast = _doLast;
         }
 
+        public UndoActionPropNotify(object _instance, string propName, bool _doLast, string _message = "")
+        {
+            instance = _instance;
+            this.propName = propName;
+            Message = _message;
+            doLast = _doLast;
+        }
 
         public void Undo()
         {
-            ObjectExtensions.NotifyPropsChanged(instance);
+            if (!string.IsNullOrWhiteSpace(propName))
+            {
+                ObjectExtensions.NotifyPropsChanged(instance, propName);
+            }
+            else
+            {
+                ObjectExtensions.NotifyPropsChanged(instance);
+            }
         }
 
         public void Redo()
         {
-            ObjectExtensions.NotifyPropsChanged(instance);
+            Undo();
         }
     }
 }

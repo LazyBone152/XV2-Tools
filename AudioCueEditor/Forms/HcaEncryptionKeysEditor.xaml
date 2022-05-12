@@ -1,0 +1,51 @@
+﻿<Controls:MetroWindow x:Class="AudioCueEditor.Forms.HcaEncryptionKeysEditor"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:local="clr-namespace:AudioCueEditor.Forms"
+        mc:Ignorable="d"
+        Title="Encryption Keys (HCA)" Height="400" Width="500" ResizeMode="NoResize" Closing="MetroWindow_Closing" Name="Window" WindowStartupLocation="CenterOwner">
+    <Grid Margin="5, 10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="50"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Margin="0, 20">
+            <Button Command="{Binding ElementName=Window, Path=AddNewCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="30" Margin="0, 5">
+                <iconPacks:PackIconMaterialLight Kind="Plus"/>
+            </Button>
+            <Button Command="{Binding ElementName=Window, Path=RemoveCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="30" Margin="0, 5">
+                <iconPacks:PackIconMaterialLight Kind="Delete"/>
+            </Button>
+        </StackPanel>
+
+        <DataGrid Grid.Column="1" ItemsSource="{Binding ElementName=Window, Path=Keys.Keys.Binding}" SelectedItem="{Binding ElementName=Window, Path=SelectedKey}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" Style="{StaticResource MahApps.Styles.DataGrid.Azure}">
+            <DataGrid.InputBindings>
+                <KeyBinding Key="Delete" Command="{Binding ElementName=Window, Path=RemoveCommand}"/>
+            </DataGrid.InputBindings>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name / Desc" Binding="{Binding Name}" MinWidth="200"/>
+                <DataGridTextColumn Header="Key" Binding="{Binding Key}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Grid Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="100"/>
+            </Grid.ColumnDefinitions>
+            <Label Content="{Binding ElementName=Window, Path=ThisAcbKeyText}" VerticalContentAlignment="Center" FontWeight="SemiBold" FontSize="12" ToolTip="This is the encryption key that was found for this ACB. You may add it to the key list to allow for re-encryption when adding new tracks."/>
+            <Button Grid.Column="1" Content="Add To Keys" Height="25" IsEnabled="{Binding ElementName=Window, Path=HasThisKey}" Margin="5, 0" Click="Key_Add"/>
+            <Button Grid.Column="2" Content="Copy" Height="25" IsEnabled="{Binding ElementName=Window, Path=HasThisKey}" Margin="5, 0" Click="Key_Copy"/>
+        </Grid>
+        
+    </Grid>
+</Controls:MetroWindow>

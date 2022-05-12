@@ -41,6 +41,7 @@
                 <MenuItem Header="Associate ACB Extension" Command="{Binding SetAcbFileAssociationCommand}"/>
                 <Separator/>
                 <MenuItem Header="Fix Silent Cues (DBXV2 1.16)" Command="{Binding FixSilentCuesCommand}"/>
+                <MenuItem Header="Encryption Keys (HCA)" Command="{Binding EncryptKeysHcaCommand}"/>
                 <Separator/>
                 <MenuItem Header="DBXV2 Installer">
                     <MenuItem Header="Associate MusicPackage Extension" Command="{Binding SetMusicPackageAssociationCommand}"/>
@@ -58,9 +59,9 @@
                 <MenuItem Header="GitHub" Click="Help_GitHub"/>
             </MenuItem>
         </Menu>
-        <view:CueEditorView Grid.Row="1" AcbFile="{Binding AcbFile}"/>
+        <view:CueEditorView x:Name="cueEditor" Grid.Row="1" AcbFile="{Binding AcbFile}"/>
         <Grid Grid.Row="2" Background="{DynamicResource MahApps.Brushes.Accent2}">
-            <TextBlock Text="{Binding AcbPathDisplay}" VerticalAlignment="Stretch" HorizontalAlignment="Right" FontSize="12" Margin="0,6,-0.2,0.309"/>
+            <TextBlock Text="{Binding AcbPathDisplay}" VerticalAlignment="Stretch" HorizontalAlignment="Right" FontSize="12" Margin="20, 4"/>
         </Grid>
     </Grid>
 </Controls:MetroWindow>

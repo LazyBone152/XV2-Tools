@@ -1012,11 +1012,11 @@ namespace Xv2CoreLib.ACB
             waveform.LoopFlag = Convert.ToByte(loop);
             waveform.NumChannels = trackMetadata.Channels;
             waveform.SamplingRate = (ushort)trackMetadata.SampleRate;
-            waveform.NumSamples = trackMetadata.NumSamples;
+            waveform.NumSamples = (uint)trackMetadata.NumSamples;
 
             if(encodeType == EncodeType.HCA)
             {
-                HcaMetadata hcaMetadata = new HcaMetadata(trackBytes);
+                TrackMetadata hcaMetadata = new TrackMetadata(trackBytes);
                 waveform.LoopStart = (loop) ? hcaMetadata.LoopStart : 0;
                 waveform.LoopEnd = (loop) ? hcaMetadata.LoopEnd : 0;
             }
@@ -1157,9 +1157,9 @@ namespace Xv2CoreLib.ACB
             uint loopStart = 0;
             uint loopEnd = 0;
 
-            if(encodeType == EncodeType.HCA)
+            if(encodeType == EncodeType.HCA || encodeType == EncodeType.HCA_ALT)
             {
-                var hcaMeta = new HcaMetadata(trackBytes);
+                var hcaMeta = new TrackMetadata(trackBytes);
                 hasLoop = hcaMeta.HasLoopData;
                 loopStart = hcaMeta.LoopStartSamples;
                 loopEnd = hcaMeta.LoopEndSamples;
@@ -1216,23 +1216,25 @@ namespace Xv2CoreLib.ACB
             var awbEntry = GetAfs2Entry(waveform.AwbId);
             if (awbEntry == null) return undos;
 
-            double startSeconds = startMs / 1000.0;
-            double endSeconds = endMs / 1000.0;
+            //double startSeconds = startMs / 1000.0;
+            //double endSeconds = endMs / 1000.0;
 
             byte[] originalFile = awbEntry.bytes.DeepCopy();
-            awbEntry.bytes = HcaMetadata.SetLoop(awbEntry.bytes, loop, startSeconds, endSeconds);
-            
-            HcaMetadata metadata = new HcaMetadata(awbEntry.bytes);
+            //awbEntry.bytes = HcaMetadata.SetLoop(awbEntry.bytes, loop, startSeconds, endSeconds);
+            awbEntry.bytes = TrackMetadata.EncodeHcaLoop(awbEntry.bytes, loop, startMs, endMs);
 
+            VGAudio.Containers.Hca.HcaReader reader = new VGAudio.Containers.Hca.HcaReader();
+            var header = reader.ParseFile(awbEntry.bytes);
+            
             undos.Add(new UndoableProperty<AFS2_Entry>("bytes", awbEntry, originalFile, awbEntry.bytes.DeepCopy()));
-            undos.Add(new UndoableProperty<ACB_Waveform>("LoopStart", waveform, waveform.LoopStart, metadata.LoopStartSamples));
-            undos.Add(new UndoableProperty<ACB_Waveform>("LoopEnd", waveform, waveform.LoopEnd, metadata.LoopEndSamples));
-            undos.Add(new UndoableProperty<ACB_Waveform>("LoopFlag", waveform, waveform.LoopFlag, metadata.HasLoopData));
+            undos.Add(new UndoableProperty<ACB_Waveform>("LoopStart", waveform, waveform.LoopStart, (uint)header.Hca.LoopStartSample));
+            undos.Add(new UndoableProperty<ACB_Waveform>("LoopEnd", waveform, waveform.LoopEnd, (uint)header.Hca.LoopEndSample));
+            undos.Add(new UndoableProperty<ACB_Waveform>("LoopFlag", waveform, waveform.LoopFlag, Convert.ToByte(header.Hca.Looping)));
 
             //Update waveform
-            waveform.LoopStart = metadata.LoopStartSamples;
-            waveform.LoopEnd = metadata.LoopEndSamples;
-            waveform.LoopFlag = Convert.ToByte(metadata.HasLoopData);
+            waveform.LoopStart = (uint)header.Hca.LoopStartSample;
+            waveform.LoopEnd = (uint)header.Hca.LoopEndSample;
+            waveform.LoopFlag = Convert.ToByte(header.Hca.Looping);
 
             return undos;
         }
@@ -1391,6 +1393,61 @@ namespace Xv2CoreLib.ACB
             return undos;
         }
         
+        /// <summary>
+        /// Search for an encryption key for any HCA tracks in this ACB, if any.
+        /// </summary>
+        public ulong TryGetEncrpytionKey()
+        {
+            foreach(var track in AudioTracks.Entries)
+            {
+                try
+                {
+                    VGAudio.Containers.Hca.HcaReader reader = new VGAudio.Containers.Hca.HcaReader();
+
+                    if (track.bytes != null)
+                    {
+                        var header = reader.ParseFile(track.bytes);
+
+                        if (header.EncryptionKey == null) continue;
+                        if (header.EncryptionKey.KeyCode != 0) return header.EncryptionKey.KeyCode;
+                    }
+                }
+                catch (InvalidDataException)
+                {
+                    //Not an HCA file
+                }
+
+            }
+
+            return 0;
+        }
+
+        public bool IsStreamingAcb()
+        {
+            int stream = 0;
+
+            foreach(var waveform in Waveforms)
+            {
+                if (waveform.Streaming > 0)
+                    stream++;
+            }
+
+            return (Waveforms.Count - stream) < stream;
+        }
+
+        public bool Is3DAcb()
+        {
+            int _3d = 0;
+
+            foreach(var cue in Cues)
+            {
+                if (DoesCueHave3dDef(cue))
+                    _3d++;
+            }
+
+            return (Cues.Count - _3d) < _3d;
+        }
+
         //3Dvol_def
         public List<IUndoRedo> Add3dDefToCue(ACB_Cue cue)
         {
@@ -5766,6 +5823,7 @@ namespace Xv2CoreLib.ACB
         Unk65 = 0x0041, //4 parameters
         Unk87 = 0x0057, //2 parameters
         Unk105 = 0x0069, //1 parameter. Used in ParameterPallets
+        Unk34 = 0x0022, //2 parameters (1 uint16)
 
     }
 

@@ -7,20 +7,13 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using Xv2CoreLib.ACB;
-using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
+using AudioCueEditor.Data;
+using Xv2CoreLib.Resource;
+using System.Linq;
 
 namespace AudioCueEditor.View
 {
@@ -195,20 +188,26 @@ namespace AudioCueEditor.View
         public bool IsDone { get; private set; }
         public bool Finished { get; private set; }
 
-        public AddCueForm(Window parent, string defaultCueNameOrPath = "", bool dropOperation = false)
+        public AsyncObservableCollection<HcaEncryptionKey> HcaKeys { get; set; } = HcaEncryptionKeysManager.Instance.GetReadOnlyViewEncryptionKeys();
+        public HcaEncryptionKey SelectedHcaKey { get; set; }
+
+        public AddCueForm(Window parent, ACB_File acbFile, string defaultCueNameOrPath = "", bool dropOperation = false)
         {
             CueName = defaultCueNameOrPath;
             InitializeComponent();
             DataContext = this;
             Owner = parent;
+            AutoSetEncryptionKey(acbFile.TryGetEncrpytionKey());
+            AutoSetValues(acbFile);
 
             if (dropOperation)
             {
-                CueName = System.IO.Path.GetFileNameWithoutExtension(defaultCueNameOrPath);
+                CueName = Path.GetFileNameWithoutExtension(defaultCueNameOrPath);
                 AudioFilePath = defaultCueNameOrPath;
                 AddTrack = true;
                 Done();
             }
+
         }
 
         public RelayCommand DoneCommand => new RelayCommand(Done);
@@ -295,7 +294,9 @@ namespace AudioCueEditor.View
         {
             try
             {
-                TrackBytes = Helper.LoadAndConvertFile(AudioFilePath, Helper.GetFileType(EncodeType), Loop);
+                ulong key = SelectedHcaKey != null && EncodeType == EncodeType.HCA ? SelectedHcaKey.Key : 0;
+
+                TrackBytes = Helper.LoadAndConvertFile(AudioFilePath, Helper.GetFileType(EncodeType), Loop, key);
                 ConversionSuccessful = true;
             }
             catch (Exception ex)
@@ -308,6 +309,34 @@ namespace AudioCueEditor.View
         private void MetroWindow_Closing(object sender, CancelEventArgs e)
         {
             IsDone = true;
+        }
+    
+        private void AutoSetEncryptionKey(ulong key)
+        {
+            SelectedHcaKey = HcaKeys.FirstOrDefault(x => x.Key == key);
+
+            if (SelectedHcaKey == null)
+            {
+                if(key != 0)
+                {
+                    //Key doesnt exist in global key list, so we add it and save
+                    HcaEncryptionKeysManager.Instance.AddKey($"Auto Generated Key {HcaEncryptionKeysManager.Instance.EncryptionKeys.Keys.Count + 1}", key);
+                    HcaEncryptionKeysManager.Instance.Save();
+
+                    HcaKeys = HcaEncryptionKeysManager.Instance.GetReadOnlyViewEncryptionKeys();
+                    SelectedHcaKey = HcaKeys.FirstOrDefault(x => x.Key == key);
+                }
+                else
+                {
+                    SelectedHcaKey = HcaKeys[0];
+                }
+            }
+        }
+    
+        private void AutoSetValues(ACB_File acbFile)
+        {
+            Is3DSound = acbFile.Is3DAcb();
+            Streaming = acbFile.IsStreamingAcb();
         }
     }
 }

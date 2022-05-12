@@ -32,8 +32,15 @@ namespace VGAudio.Codecs.CriHca
         public int PreLoopSamples { get; set; }
         public int PostLoopSamples { get; set; }
 
+        public int LoopStartSecond => (int)((LoopStartFrame * 1024.0) / SampleRate);
+        public int LoopEndSecond => (int)((LoopEndFrame * 1024.0) / SampleRate);
+        public int LoopStartMs => (int)((LoopStartFrame * 1024.0) / SampleRate * 1000f);
+        public int LoopEndMs => (int)((LoopEndFrame * 1024.0) / SampleRate * 1000f);
         public int LoopStartSample => LoopStartFrame * 1024 + PreLoopSamples - InsertedSamples;
         public int LoopEndSample => (LoopEndFrame + 1) * 1024 - PostLoopSamples - InsertedSamples;
+
+        public int TrackLengthSecond => (int)((FrameCount * 1024.0) / SampleRate);
+        public int TrackLengthMs => (int)(((FrameCount * 1024.0) / SampleRate) * 1000f);
 
         public bool UseAthCurve { get; set; }
 

@@ -11,7 +11,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.EMM;
 using Xv2CoreLib.EMP;
@@ -55,7 +54,7 @@ namespace EEPK_Organiser.Forms.EMP
 
 
         private EMB_File textureContainer { get; set; }
-        private EMM_File materialFile { get; set; }
+        public EMM_File materialFile { get; set; }
         private EepkEditor mainWindow = null;
 
         public EMP_Editor(EMP_File _empFile, string empName, EMB_File _textureContainer, EMM_File _materialFile, EepkEditor _mainWindow)
@@ -85,24 +84,13 @@ namespace EEPK_Organiser.Forms.EMP
             general_Name.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_Str_Size32);
 
             //Texture Part
-            textBox_R.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_RgbInt);
-            textBox_g.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_RgbInt);
-            textBox_b.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_RgbInt);
-            textBox_a.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_RgbInt);
             texturePart_I_00.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_UInt8);
             texturePart_I_01.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_UInt8);
             texturePart_I_02.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_UInt8);
             texturePart_I_03.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_UInt8);
-            texturePart_F_05.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_Float);
             texturePart_F_100.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_Float);
             texturePart_F_104.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_Float);
             texturePart_F_108.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_Float);
-            texturePart_F_24.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_Float);
-            texturePart_F_28.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_Float);
-            texturePart_F_32.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_Float);
-            texturePart_F_36.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_Float);
-            texturePart_F_40.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_Float);
-            texturePart_F_44.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_Float);
             texturePart_F_96.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_Float);
             texturePart_I_08.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_Int32);
             texturePart_I_12.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_Int32);
@@ -198,10 +186,6 @@ namespace EEPK_Organiser.Forms.EMP
             general_ParticleLifetimeAddRandom.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_Int32);
             general_StartTime.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_Int32);
             general_StartTimeAddRandom.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_Int32);
-            general_Transform_W.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_Float);
-            general_Transform_W1.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_Float);
-            general_Transform_W_AddRandom.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_Float);
-            general_Transform_W_AddRandom1.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_Float);
             general_Transform_X.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_Float);
             general_Transform_X1.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_Float);
             general_Transform_X_AddRandom.TextChanged += new TextChangedEventHandler(Misc.InputValidation.InputValidator_Float);
@@ -394,16 +378,6 @@ namespace EEPK_Organiser.Forms.EMP
 
             empTree.Focus();
 
-        }
-
-        private void TreeViewItem_MouseRightButtonDown(object sender, MouseEventArgs e)
-        {
-            TreeViewItem item = sender as TreeViewItem;
-            if (item != null)
-            {
-                item.Focus();
-                e.Handled = true;
-            }
         }
 
         private bool IsParticleSelected()
@@ -1277,41 +1251,17 @@ namespace EEPK_Organiser.Forms.EMP
         }
 
         //Material
-        private void Material_ChangeMaterial_Click(object sender, RoutedEventArgs e)
+        public RelayCommand TexturePart_RemoveMaterialCommand => new RelayCommand(Material_RemoveMaterialReference);
+        private void Material_RemoveMaterialReference()
         {
             try
             {
                 var particleEffect = empTree.SelectedItem as ParticleEffect;
-                if (particleEffect == null) return;
 
-                var previousMaterialRef = particleEffect.Type_Texture.MaterialRef;
-
-                var materialSelector = new MaterialSelector(materialFile, this, previousMaterialRef);
-                materialSelector.ShowDialog();
-
-                if (materialSelector.SelectedMaterial != null)
+                if (particleEffect != null)
                 {
-                    List<IUndoRedo> undos = new List<IUndoRedo>();
-                    undos.Add(new UndoableProperty<TexturePart>(nameof(TexturePart.MaterialRef), particleEffect.Type_Texture, particleEffect.Type_Texture.MaterialRef, materialSelector.SelectedMaterial));
-                    particleEffect.Type_Texture.MaterialRef = materialSelector.SelectedMaterial;
-
-                    //Get number of other Material Entries that use the previous material ref, and ask if user wants to change those as well
-
-                    var texturePartsThatUsedSameRef = empFile.GetTexturePartsThatUseMaterialRef(previousMaterialRef);
-
-                    if (texturePartsThatUsedSameRef.Count > 0)
-                    {
-                        if (MessageBox.Show(String.Format("Do you also want to change the {0} other TextureParts in this EMP that uses \"{1}\" to use \"{2}\"?.", texturePartsThatUsedSameRef.Count, previousMaterialRef.Name, materialSelector.SelectedMaterial.Name), "Change Texture", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
-                        {
-                            foreach (var texturePart in texturePartsThatUsedSameRef)
-                            {
-                                undos.Add(new UndoableProperty<TexturePart>(nameof(TexturePart.MaterialRef), texturePart, texturePart.MaterialRef, materialSelector.SelectedMaterial));
-                                texturePart.MaterialRef = materialSelector.SelectedMaterial;
-                            }
-                        }
-                    }
-
-                    UndoManager.Instance.AddCompositeUndo(undos, "Change Material");
+                    UndoManager.Instance.AddUndo(new UndoableProperty<TexturePart>(nameof(TexturePart.MaterialRef), particleEffect.Type_Texture, particleEffect.Type_Texture.MaterialRef, null, "Remove Material"));
+                    particleEffect.Type_Texture.MaterialRef = null;
                 }
             }
             catch (Exception ex)
@@ -1319,11 +1269,10 @@ namespace EEPK_Organiser.Forms.EMP
                 mainWindow.SaveExceptionLog(ex.ToString());
                 MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-
-
         }
 
-        private void Material_Goto_Click(object sender, RoutedEventArgs e)
+        public RelayCommand TexturePart_GotoMaterialCommand => new RelayCommand(Material_Goto, CanGotoMaterial);
+        private void Material_Goto()
         {
             try
             {
@@ -1346,77 +1295,44 @@ namespace EEPK_Organiser.Forms.EMP
             }
         }
 
-        private void Material_RemoveMaterialReference_Click(object sender, RoutedEventArgs e)
+        private bool CanGotoMaterial()
         {
-            try
+            if(empTree.SelectedItem is ParticleEffect particleEffect)
             {
-                var particleEffect = empTree.SelectedItem as ParticleEffect;
-
-                if (particleEffect != null)
-                {
-                    UndoManager.Instance.AddUndo(new UndoableProperty<TexturePart>(nameof(TexturePart.MaterialRef), particleEffect.Type_Texture, particleEffect.Type_Texture.MaterialRef, null, "Remove Material"));
-                    particleEffect.Type_Texture.MaterialRef = null;
-                }
+                return particleEffect.Type_Texture.MaterialRef != null;
             }
-            catch (Exception ex)
-            {
-                mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            return false;
         }
-
+        
         //TexturePart
-        public RelayCommand TexturePart_AddTextureCommand => new RelayCommand(TexturePart_AddTextureReference);
-
-        private void TexturePart_AddTextureReference()
+        public RelayCommand<int> TexturePart_RemoveTextureCommand => new RelayCommand<int>(TexturePart_RemoveTexture);
+        private void TexturePart_RemoveTexture(int textureIndex)
         {
-            try
-            {
-                var particleEffect = empTree.SelectedItem as ParticleEffect;
-                if (particleEffect == null) return;
+            var particleEffect = empTree.SelectedItem as ParticleEffect;
 
-                var newTexture = new TextureEntryRef();
-                UndoManager.Instance.AddUndo(new UndoableListAdd<TextureEntryRef>(particleEffect.Type_Texture.TextureEntryRef, newTexture, "Add Texture Ref"));
-                particleEffect.Type_Texture.TextureEntryRef.Add(newTexture);
-            }
-            catch (Exception ex)
+            if (particleEffect != null)
             {
-                mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                TextureEntry_Ref textureRef = particleEffect.Type_Texture.TextureEntryRef[textureIndex];
+                textureRef.UndoableTextureRef = null;
             }
-
         }
 
-        public RelayCommand TexturePart_RemoveTextureCommand => new RelayCommand(TexturePart_RemoveTextureReference, CanRemoveTextureRef);
-
-        private void TexturePart_RemoveTextureReference()
+        public RelayCommand<int> TexturePart_GotoTextureCommand => new RelayCommand<int>(TexturePart_GotoTexture);
+        private void TexturePart_GotoTexture(int textureIndex)
         {
-            try
+            var particleEffect = empTree.SelectedItem as ParticleEffect;
+
+            if (particleEffect != null)
             {
-                var particleEffect = empTree.SelectedItem as ParticleEffect;
-                if (particleEffect == null) return;
-
-                if (textureRefDataGrid.SelectedItem != null)
+                TextureEntry_Ref textureRef = particleEffect.Type_Texture.TextureEntryRef[textureIndex];
+                
+                if(textureRef.TextureRef != null)
                 {
-                    var texture = textureRefDataGrid.SelectedItem as TextureEntryRef;
-
-                    if (texture != null)
-                    {
-                        UndoManager.Instance.AddUndo(new UndoableListRemove<TextureEntryRef>(particleEffect.Type_Texture.TextureEntryRef, texture, "Remove Texture Ref"));
-                        particleEffect.Type_Texture.TextureEntryRef.Remove(texture);
-                    }
+                    mainTabControl.SelectedIndex = 1;
+                    listBox_Textures.SelectedItem = textureRef.TextureRef;
+                    listBox_Textures.ScrollIntoView(textureRef.TextureRef);
                 }
             }
-            catch (Exception ex)
-            {
-                mainWindow.SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private bool CanRemoveTextureRef()
-        {
-            return (textureRefDataGrid.SelectedItem is TextureEntryRef);
         }
 
 

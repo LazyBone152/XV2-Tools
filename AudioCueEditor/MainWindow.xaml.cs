@@ -426,6 +426,15 @@ namespace AudioCueEditor
             if (form.Success)
                 MessageBox.Show($"Installer successfully created at \"{form.InstallInfoPath}\".\n\nThis file must be paired with an LB Mod Installer (v3.4 or greater) executable to be usable, which can be found at the same place as this tool was downloaded from. The executable should be renamed to match the installinfo file.", "Installer Created", MessageBoxButton.OK, MessageBoxImage.Information);
         }
+        
+        public RelayCommand EncryptKeysHcaCommand => new RelayCommand(EncryptKeysHca);
+        private void EncryptKeysHca()
+        {
+            ulong key = IsAcbLoaded() ? AcbFile.AcbFile.TryGetEncrpytionKey() : 0;
+
+            Forms.HcaEncryptionKeysEditor form = new Forms.HcaEncryptionKeysEditor(key, this);
+            form.ShowDialog();
+        }
 
         public RelayCommand RandomizeCueIDsCommand => new RelayCommand(RandomizeCueIDs, IsAcbLoaded);
         private async void RandomizeCueIDs()

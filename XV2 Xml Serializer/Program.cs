@@ -22,7 +22,7 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
-            //args = new string[1] { @"parameter_spec_char - Copy.psc" };
+            args = new string[1] { @"E:\VS_Test\EMP\ALL EMP" };
 
             DEBUG_MODE = true;
 #endif
@@ -1070,20 +1070,21 @@ namespace XV2_Xml_Serializer
 
                         foreach (var particle in particleEffects)
                         {
-                            if(particle.Type_1 != null && particle.Component_Type == Xv2CoreLib.EMP.ParticleEffect.ComponentType.AutoOriented)
+                            if(particle.IsTextureType())
                             {
-                                if(particle.Type_1.Count > 0)
+                                if(particle.Type_Texture.TextureIndex.Count > 1)
                                 {
-                                    Console.WriteLine($"This: {particle.Name}, Type: {particle.Type_1[0].I_00}");
-                                    Console.ReadLine();
+                                    string val = $"{particle.Component_Type}_{particle.Type_Texture.TextureIndex.Count}";
+
+                                    if (!values.Contains(val))
+                                        values.Add(val);
+
+                                    //Console.WriteLine($"This: {particle.Name}, Type: {particle.Component_Type}, TextureCount: {particle.Type_Texture.TextureIndex.Count}");
+                                    //Console.ReadLine();
                                 }
                             }
-                            if(particle.FloatPart_02_01 != null)
-                            {
-                                //if (!values.Contains(particle.FloatPart_02_01.F_44.ToString()))
-                                //    values.Add(particle.FloatPart_02_01.F_44.ToString());
-                                
-                            }
+                            
+
                         }
 
                     }

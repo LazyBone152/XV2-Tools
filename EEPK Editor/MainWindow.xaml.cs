@@ -381,7 +381,9 @@ namespace EEPK_Organiser
         {
             if (effectContainerFile == null) return;
 
+#if !DEBUG
             try
+#endif
             {
                 if(effectContainerFile.saveFormat == SaveFormat.Binary)
                 {
@@ -396,12 +398,14 @@ namespace EEPK_Organiser
 
                 MessageBox.Show("Save successful!", "Save", MessageBoxButton.OK, MessageBoxImage.Information);
             }
+#if !DEBUG
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
                 MessageBox.Show(String.Format("Save failed.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Open", MessageBoxButton.OK, MessageBoxImage.Error);
 
             }
+#endif
         }
 
         private void Menu_SaveAs_Click(object sender, RoutedEventArgs e)
@@ -950,7 +954,7 @@ namespace EEPK_Organiser
 
 
         //"Import" relay events
-        #region Import_relay_Events
+#region Import_relay_Events
         private void EffectOptions_ImportEffectsFromFile_Click(object sender, RoutedEventArgs e)
         {
             eepkEditor.EffectOptions_ImportEffectsFromFile_Click(sender, e);
@@ -1275,7 +1279,7 @@ namespace EEPK_Organiser
         {
             eepkEditor.LIGHT_ImportAsset_MenuItem_FromCachedFiles_Click(sender, e);
         }
-        #endregion
+#endregion
 
         private void Help_GitHub(object sender, RoutedEventArgs e)
         {

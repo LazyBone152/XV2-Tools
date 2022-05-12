@@ -38,7 +38,12 @@
             <Controls:MetroTabItem Header="Particle Effects" Controls:HeaderedControlHelper.HeaderFontSize="16">
                 <Grid Margin="0,0,-6.836,-0.055">
 
-                    <TreeView x:Name="empTree" ItemsSource="{Binding empFile.ParticleEffects.Binding}" BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" BorderThickness="1" HorizontalAlignment="Left" Height="487" Margin="41,15,0,0" VerticalAlignment="Top" Width="282" SelectedItemChanged="empTree_SelectedItemChanged">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="40"/>
+                        <ColumnDefinition Width="290"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TreeView x:Name="empTree" Grid.Column="1" ItemsSource="{Binding empFile.ParticleEffects.Binding}" BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" BorderThickness="1" SelectedItemChanged="empTree_SelectedItemChanged" Margin="3, 5">
                         <TreeView.InputBindings>
                             <KeyBinding Key="Delete" Command="{Binding RemoveParticleEffect_Command}"/>
                             <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding AddParticleEffect_Command}"/>
@@ -50,21 +55,13 @@
                             <KeyBinding Key="Down" Modifiers="Ctrl" Command="{Binding MoveDown_Command}"/>
                             <KeyBinding Key="H" Modifiers="Ctrl" Command="{Binding HueAdjustment_Command}"/>
                         </TreeView.InputBindings>
-                        <TreeView.ItemContainerStyle>
-                            <Style TargetType="TreeViewItem">
-                                <Setter Property="IsExpanded" Value="{Binding Path=IsExpanded, Mode=TwoWay}" />
-                                <Setter Property="IsSelected" Value="{Binding Path=IsSelected, Mode=TwoWay}" />
-                                <EventSetter Event="TreeViewItem.MouseRightButtonDown" Handler="TreeViewItem_MouseRightButtonDown"/>
-                            </Style>
-                        </TreeView.ItemContainerStyle>
                         <TreeView.Resources>
                             <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}" />
                             <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="{DynamicResource {x:Static SystemColors.HighlightTextColorKey}}"/>
-                        </TreeView.Resources>
-                        <TreeView.ItemTemplate>
                             <HierarchicalDataTemplate DataType="{x:Type emp:ParticleEffect}" ItemsSource="{Binding ChildParticleEffects.Binding}">
-                                <TextBlock Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" MinWidth="100" Tag="{Binding DataContext, ElementName=empEditorWindow}">
-                                    <TextBlock.ContextMenu>
+                                <StackPanel Tag="{Binding DataContext, ElementName=empEditorWindow}">
+                                    <TextBlock Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" MinWidth="100" />
+                                    <StackPanel.ContextMenu>
                                         <ContextMenu StaysOpen="true" FontSize="12">
                                             <MenuItem Header="Add New Above" Command="{Binding PlacementTarget.Tag.AddNewAbove_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                             <MenuItem Header="Add New Below" Command="{Binding PlacementTarget.Tag.AddNewBelow_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
@@ -87,13 +84,14 @@
                                             <MenuItem Header="Hide All Selected" Command="{Binding PlacementTarget.Tag.HideAllSelected_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                             <MenuItem Header="Show All Selected" Command="{Binding PlacementTarget.Tag.ShowAllSelected_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                         </ContextMenu>
-                                    </TextBlock.ContextMenu>
-                                </TextBlock>
+                                    </StackPanel.ContextMenu>
+                                </StackPanel>
                             </HierarchicalDataTemplate>
-                        </TreeView.ItemTemplate>
-                    </TreeView>
 
-                    <TabControl x:Name="tabControl_ParticleEffect" BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" BorderThickness="1" HorizontalAlignment="Left" Height="492" Margin="335,10,0,0" VerticalAlignment="Top" Width="753">
+                        </TreeView.Resources>
+                        </TreeView>
+
+                    <TabControl x:Name="tabControl_ParticleEffect" Grid.Column="2" BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" BorderThickness="1" Margin="5, 5">
                         <Controls:MetroTabItem Header="General" Controls:HeaderedControlHelper.HeaderFontSize="16">
                             <Grid Margin="0,0,0.055,0">
                                 <TextBox x:Name="general_Name" Text="{Binding SelectedItem.Name, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="134,57,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="253"/>
@@ -112,7 +110,7 @@
                                 <Label Content="Max Particles (frame)" HorizontalAlignment="Left" Margin="0,207,0,0" VerticalAlignment="Top" Width="134" HorizontalContentAlignment="Right" ToolTip="The maximum amount of particles that can be created from this entry in a single frame. For use with spawner-type particle effects."/>
                                 <TextBox x:Name="general_MaxParticlesPerFrameAddRandom" Text="{Binding SelectedItem.I_54, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="305,211,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="Variance" HorizontalAlignment="Left" Margin="224,207,0,0" VerticalAlignment="Top" Width="81" HorizontalContentAlignment="Right"/>
-                                <GroupBox Header="Position" HorizontalAlignment="Left" Height="167" Margin="479,25,0,0" VerticalAlignment="Top" Width="241">
+                                <GroupBox Header="Position" HorizontalAlignment="Left" Height="141" Margin="479,25,0,0" VerticalAlignment="Top" Width="241">
                                     <Grid>
                                         <TextBox x:Name="general_Transform_X" Text="{Binding SelectedItem.F_64, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="32,12,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="57"/>
                                         <Label Content="X" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="22" HorizontalContentAlignment="Right"/>
@@ -126,14 +124,10 @@
                                         <Label Content="Z" HorizontalAlignment="Left" Margin="10,70,0,0" VerticalAlignment="Top" Width="22" HorizontalContentAlignment="Right"/>
                                         <TextBox x:Name="general_Transform_Z_AddRandom" Text="{Binding SelectedItem.F_88, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="160,72,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="57"/>
                                         <Label Content="Variance" HorizontalAlignment="Left" Margin="96,70,0,0" VerticalAlignment="Top" Width="63" HorizontalContentAlignment="Right"/>
-                                        <TextBox x:Name="general_Transform_W" Text="{Binding SelectedItem.F_76, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="32,102,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="57"/>
-                                        <Label Content="W" HorizontalAlignment="Left" Margin="10,100,0,0" VerticalAlignment="Top" Width="22" HorizontalContentAlignment="Right"/>
-                                        <TextBox x:Name="general_Transform_W_AddRandom" Text="{Binding SelectedItem.F_92, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="160,102,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="57"/>
-                                        <Label Content="Variance" HorizontalAlignment="Left" Margin="96,100,0,0" VerticalAlignment="Top" Width="63" HorizontalContentAlignment="Right"/>
 
                                     </Grid>
                                 </GroupBox>
-                                <GroupBox Header="Rotation" HorizontalAlignment="Left" Height="169" Margin="479,208,0,0" VerticalAlignment="Top" Width="241">
+                                <GroupBox Header="Rotation" HorizontalAlignment="Left" Height="143" Margin="479,177,0,0" VerticalAlignment="Top" Width="241">
                                     <Grid>
                                         <TextBox x:Name="general_Transform_X1" Text="{Binding SelectedItem.F_96, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="32,12,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="57"/>
                                         <Label Content="X" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="22" HorizontalContentAlignment="Right"/>
@@ -147,10 +141,6 @@
                                         <Label Content="Z" HorizontalAlignment="Left" Margin="10,70,0,0" VerticalAlignment="Top" Width="22" HorizontalContentAlignment="Right"/>
                                         <TextBox x:Name="general_Transform_Z_AddRandom1" Text="{Binding SelectedItem.F_120, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="166,72,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="57"/>
                                         <Label Content="Variance" HorizontalAlignment="Left" Margin="99,70,0,0" VerticalAlignment="Top" Width="66" HorizontalContentAlignment="Right"/>
-                                        <TextBox x:Name="general_Transform_W1" Text="{Binding SelectedItem.F_108, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="32,102,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="57"/>
-                                        <Label Content="W" HorizontalAlignment="Left" Margin="10,100,0,0" VerticalAlignment="Top" Width="22" HorizontalContentAlignment="Right"/>
-                                        <TextBox x:Name="general_Transform_W_AddRandom1" Text="{Binding SelectedItem.F_124, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="166,102,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="57"/>
-                                        <Label Content="Variance" HorizontalAlignment="Left" Margin="99,100,0,0" VerticalAlignment="Top" Width="66" HorizontalContentAlignment="Right"/>
 
                                     </Grid>
                                 </GroupBox>
@@ -178,137 +168,155 @@
                             </Grid>
 
                         </Controls:MetroTabItem>
-                        <Controls:MetroTabItem x:Name="tab_TexturePart" Header="Texture Part" Controls:HeaderedControlHelper.HeaderFontSize="16">
+                        <Controls:MetroTabItem x:Name="tab_TexturePart" Header="Texture" Controls:HeaderedControlHelper.HeaderFontSize="14">
                             <TabControl>
-                                <TabItem Header="Color/Material" Controls:HeaderedControlHelper.HeaderFontSize="16">
+                                <TabItem Header="Main" Controls:HeaderedControlHelper.HeaderFontSize="14">
                                     <Grid x:Name="grid_TexturePart" Margin="0,0,-0.055,0">
 
-                                        <ex:ColorCanvas Margin="10,83,0,0" Foreground="Black" HorizontalAlignment="Left" VerticalAlignment="Top" Width="236" Height="311" SelectedColor="{Binding SelectedItem.Type_Texture.Color1, ElementName=empTree}"/>
-                                        <ex:ColorCanvas Margin="251,83,0,0" Foreground="Black" Height="311" Width="236" HorizontalAlignment="Left" VerticalAlignment="Top" SelectedColor="{Binding SelectedItem.Type_Texture.Color2, ElementName=empTree}"/>
+                                        <StackPanel Margin="10, 10" Width="456" HorizontalAlignment="Left">
+
+                                            <TextBlock Text="Texture" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                            <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="120"/>
+                                                    <ColumnDefinition Width="217"/>
+                                                    <ColumnDefinition Width="30"/>
+                                                    <ColumnDefinition Width="30"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="Material"/>
+                                                <ComboBox Grid.Column="1" DisplayMemberPath="Name" SelectedItem="{Binding SelectedItem.Type_Texture.MaterialRef, ElementName=empTree}" ItemsSource="{Binding materialFile.Materials}" Controls:TextBoxHelper.Watermark="No Material Selected"/>
+
+                                                <Button Grid.Column="2" Command="{Binding ElementName=empEditorWindow, Path=TexturePart_RemoveMaterialCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="20" Height="20" ToolTip="Remove the selected material from this particle effect.">
+                                                    <iconPacks:PackIconMaterialDesign Kind="RemoveCircleOutline"/>
+                                                </Button>
+                                                <Button Grid.Column="3" Command="{Binding ElementName=empEditorWindow, Path=TexturePart_GotoMaterialCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="20" Height="20" ToolTip="Jump to the selected material, opening the Materials Editor.">
+                                                    <iconPacks:PackIconMaterialDesign Kind="KeyboardArrowRight"/>
+                                                </Button>
+                                            </Grid>
+
+                                            <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="120"/>
+                                                    <ColumnDefinition Width="217"/>
+                                                    <ColumnDefinition Width="30"/>
+                                                    <ColumnDefinition Width="30"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="Texture"/>
+                                                <ComboBox Grid.Column="1" DisplayMemberPath="ToolName" SelectedItem="{Binding SelectedItem.Type_Texture.TextureEntryRef[0].UndoableTextureRef, ElementName=empTree}" ItemsSource="{Binding empFile.Textures}" Controls:TextBoxHelper.Watermark="No Texture Selected"/>
+                                                <Button Grid.Column="2" Command="{Binding ElementName=empEditorWindow, Path=TexturePart_RemoveTextureCommand}" CommandParameter="0" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="20" Height="20" ToolTip="Remove the selected texture from this particle effect.">
+                                                    <iconPacks:PackIconMaterialDesign Kind="RemoveCircleOutline"/>
+                                                </Button>
+                                                <Button Grid.Column="3" Command="{Binding ElementName=empEditorWindow, Path=TexturePart_GotoTextureCommand}" CommandParameter="0" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="20" Height="20" ToolTip="Jump to the selected texture.">
+                                                    <iconPacks:PackIconMaterialDesign Kind="KeyboardArrowRight"/>
+                                                </Button>
+                                            </Grid>
+                                            <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="120"/>
+                                                    <ColumnDefinition Width="217"/>
+                                                    <ColumnDefinition Width="30"/>
+                                                    <ColumnDefinition Width="30"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="Texture (Secondary)" ToolTip="A secondary texture that particle effects can use in some cases."/>
+                                                <ComboBox Grid.Column="1" DisplayMemberPath="ToolName" SelectedItem="{Binding SelectedItem.Type_Texture.TextureEntryRef[1].UndoableTextureRef, ElementName=empTree}" ItemsSource="{Binding empFile.Textures}" Controls:TextBoxHelper.Watermark="No Texture Selected"/>
+                                                <Button Grid.Column="2" Command="{Binding ElementName=empEditorWindow, Path=TexturePart_RemoveTextureCommand}" CommandParameter="1" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="20" Height="20" ToolTip="Remove the selected texture from this particle effect.">
+                                                    <iconPacks:PackIconMaterialDesign Kind="RemoveCircleOutline"/>
+                                                </Button>
+                                                <Button Grid.Column="3" Command="{Binding ElementName=empEditorWindow, Path=TexturePart_GotoTextureCommand}" CommandParameter="1" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="20" Height="20" ToolTip="Jump to the selected texture.">
+                                                    <iconPacks:PackIconMaterialDesign Kind="KeyboardArrowRight"/>
+                                                </Button>
+                                            </Grid>
 
 
-                                        <TextBlock x:Name="textBlock_AddedRandomSafe" HorizontalAlignment="Left" Margin="998,388,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="67"/>
-                                        <GroupBox Header="Color Random Range" HorizontalAlignment="Left" Height="118" Margin="492,179,0,0" VerticalAlignment="Top" Width="239">
-                                            <Grid>
-                                                <Label Content="R" HorizontalAlignment="Left" Margin="23,21,0,0" VerticalAlignment="Top"/>
-                                                <TextBox x:Name="textBox_R" HorizontalAlignment="Left" Height="23" Margin="45,21,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="55" Text="{Binding SelectedItem.Type_Texture.F_64, Converter={StaticResource RgbConverter}, ElementName=empTree}"/>
-                                                <Label Content="B" HorizontalAlignment="Left" Margin="24,50,0,0" VerticalAlignment="Top"/>
-
-                                                <TextBox x:Name="textBox_b" HorizontalAlignment="Left" Height="23" Margin="45,50,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="55" Text="{Binding SelectedItem.Type_Texture.F_72, Converter={StaticResource RgbConverter}, ElementName=empTree}"/>
-                                                <TextBox x:Name="textBox_g" HorizontalAlignment="Left" Height="23" Margin="132,21,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="55" Text="{Binding SelectedItem.Type_Texture.F_68, Converter={StaticResource RgbConverter}, ElementName=empTree}"/>
-                                                <Label Content="G" HorizontalAlignment="Left" Margin="111,21,0,0" VerticalAlignment="Top"/>
-                                                <TextBox x:Name="textBox_a" HorizontalAlignment="Left" Height="23" Margin="132,50,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="55" Text="{Binding SelectedItem.Type_Texture.F_76, Converter={StaticResource RgbConverter}, ElementName=empTree}"/>
-                                                <Label Content="A" HorizontalAlignment="Left" Margin="111,50,0,0" VerticalAlignment="Top"/>
-                                                <Button Content="Preview" HorizontalAlignment="Left" Margin="65,91,0,0" VerticalAlignment="Top" Width="75" Visibility="Hidden"/>
+                                            <TextBlock Text="Color" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                            <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="Color1"/>
+                                                <vector:CustomColor Grid.Column="1" Value="{Binding SelectedItem.Type_Texture.Color1, ElementName=empTree}"/>
+                                            </Grid>
+                                            <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="Color2"/>
+                                                <vector:CustomColor Grid.Column="1" Value="{Binding SelectedItem.Type_Texture.Color2, ElementName=empTree}"/>
+                                            </Grid>
+                                            <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="Color Variance"/>
+                                                <vector:CustomColor Grid.Column="1" Value="{Binding SelectedItem.Type_Texture.Color_Variance, ElementName=empTree}"/>
+                                            </Grid>
+                                            <TextBlock Text="Scale" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                            <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="60"/>
+                                                    <ColumnDefinition Width="60"/>
+                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition Width="120"/>
+                                                    <ColumnDefinition Width="100"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="Scale"/>
+                                                <Label Grid.Column="1" Content="Base" HorizontalContentAlignment="Right"/>
+                                                <Controls:NumericUpDown Grid.Column="2" HideUpDownButtons="True" InterceptMouseWheel="True" Value="{Binding SelectedItem.Type_Texture.F_24, ElementName=empTree}" Interval="0.025" StringFormat="0.00####"/>
+                                                <Label Grid.Column="3" Content="Variance" HorizontalContentAlignment="Right"/>
+                                                <Controls:NumericUpDown Grid.Column="4" HideUpDownButtons="True" InterceptMouseWheel="True" Value="{Binding SelectedItem.Type_Texture.F_28, ElementName=empTree}" Interval="0.025" StringFormat="0.00####"/>
 
                                             </Grid>
-                                        </GroupBox>
-                                        <TextBox IsReadOnly="True" IsEnabled="False" Text="{Binding SelectedItem.Type_Texture.MaterialRef.Name, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="78,8,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="177"/>
-                                        <Label Content="Material" HorizontalAlignment="Left" Margin="8,7,0,0" VerticalAlignment="Top" Width="64" HorizontalContentAlignment="Right"/>
-                                        <GroupBox Header="Textures" ToolTip="The textures assigned to this Particle Effect." HorizontalAlignment="Left" Height="164" Margin="492,10,-9.636,0" VerticalAlignment="Top" Width="242">
-                                            <Grid Margin="0,0,0.333,-5">
-                                                <DataGrid x:Name="textureRefDataGrid" BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" BorderThickness="1" HorizontalAlignment="Left" Height="121" Margin="35,2,0,0" VerticalAlignment="Top" Width="185" AutoGenerateColumns="False" ItemsSource="{Binding SelectedItem.Type_Texture.TextureEntryRef.Binding, ElementName=empTree}" CanUserDeleteRows="False" CanUserAddRows="False">
-                                                    <DataGrid.Resources>
-                                                        <lbUtils:BindingProxy x:Key="proxy" Data="{Binding}"/>
-                                                    </DataGrid.Resources>
-                                                    <DataGrid.InputBindings>
-                                                        <KeyBinding Key="Delete" Command="{Binding TexturePart_RemoveTextureCommand}"/>
-                                                        <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding TexturePart_AddTextureCommand}"/>
-                                                    </DataGrid.InputBindings>
-
-                                                    <DataGrid.ContextMenu>
-                                                        <ContextMenu Controls:HeaderedControlHelper.HeaderFontSize="12">
-                                                            <MenuItem Header="Add" Command="{Binding TexturePart_RemoveTextureCommand}"/>
-                                                            <MenuItem Header="Delete" Command="{Binding TexturePart_RemoveTextureCommand}"/>
-                                                        </ContextMenu>
-                                                    </DataGrid.ContextMenu>
-                                                    <DataGrid.Columns>
-                                                        <DataGridTemplateColumn Header="Texture Entries" Width="*">
-                                                            <DataGridTemplateColumn.CellTemplate>
-                                                                <DataTemplate>
-                                                                    <ComboBox SelectedItem="{Binding UndoableTextureRef, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="ToolName" ItemsSource="{Binding Data.empFile.Textures, Source={StaticResource proxy}}" />
-                                                                </DataTemplate>
-                                                            </DataGridTemplateColumn.CellTemplate>
-                                                            <DataGridTemplateColumn.CellEditingTemplate>
-                                                                <DataTemplate>
-                                                                    <ComboBox SelectedItem="{Binding UndoableTextureRef, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="ToolName" ItemsSource="{Binding Data.empFile.Textures, Source={StaticResource proxy}}" />
-                                                                </DataTemplate>
-                                                            </DataGridTemplateColumn.CellEditingTemplate>
-
-                                                        </DataGridTemplateColumn>
-                                                        <DataGridTextColumn Width="40"/>
-                                                    </DataGrid.Columns>
-                                                </DataGrid>
-                                                <Button HorizontalAlignment="Left" Margin="4,12,0,0" VerticalAlignment="Top" Width="26" Height="24" Foreground="Black" Style="{StaticResource ButtonNoGlow}" Command="{Binding TexturePart_AddTextureCommand}" ToolTip="Add a texture reference">
-                                                    <Button.Background>
-                                                        <ImageBrush ImageSource="{StaticResource plus}" Stretch="Uniform">
-                                                            <ImageBrush.RelativeTransform>
-                                                                <TransformGroup>
-                                                                    <ScaleTransform CenterY="0.5" CenterX="0.5" ScaleX="0.8" ScaleY="0.8"/>
-                                                                    <SkewTransform CenterY="0.5" CenterX="0.5"/>
-                                                                    <RotateTransform CenterY="0.5" CenterX="0.5"/>
-                                                                    <TranslateTransform Y="-0.0"/>
-                                                                </TransformGroup>
-                                                            </ImageBrush.RelativeTransform>
-                                                        </ImageBrush>
-                                                    </Button.Background>
-                                                </Button>
-                                                <Button HorizontalAlignment="Left" Margin="4,41,0,0" VerticalAlignment="Top" Width="26" Height="24" Foreground="Black" Style="{StaticResource ButtonNoGlow}" Command="{Binding TexturePart_RemoveTextureCommand}" ToolTip="Remove the selected texture reference">
-                                                    <Button.Background>
-                                                        <ImageBrush ImageSource="{StaticResource delete}" Stretch="Uniform">
-                                                            <ImageBrush.RelativeTransform>
-                                                                <TransformGroup>
-                                                                    <ScaleTransform CenterY="0.5" CenterX="0.5" ScaleX="1" ScaleY="1"/>
-                                                                    <SkewTransform CenterY="0.5" CenterX="0.5"/>
-                                                                    <RotateTransform CenterY="0.5" CenterX="0.5"/>
-                                                                    <TranslateTransform Y="-0.0"/>
-                                                                </TransformGroup>
-                                                            </ImageBrush.RelativeTransform>
-                                                        </ImageBrush>
-                                                    </Button.Background>
-                                                </Button>
+                                            <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition Width="20"/>
+                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition Width="20"/>
+                                                    <ColumnDefinition Width="100"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="Scale2"/>
+                                                <Label Grid.Column="1" Content="X"/>
+                                                <Controls:NumericUpDown Grid.Column="2" HideUpDownButtons="True" InterceptMouseWheel="True" Value="{Binding SelectedItem.Type_Texture.F_32, ElementName=empTree}" Interval="0.025" StringFormat="0.00####"/>
+                                                <Label Grid.Column="4" Content="Y"/>
+                                                <Controls:NumericUpDown Grid.Column="5" HideUpDownButtons="True" InterceptMouseWheel="True" Value="{Binding SelectedItem.Type_Texture.F_40, ElementName=empTree}" Interval="0.025" StringFormat="0.00####"/>
 
                                             </Grid>
-                                        </GroupBox>
-                                        <Label Content="Color1" HorizontalAlignment="Left" Margin="61,53,0,0" VerticalAlignment="Top" Width="104" HorizontalContentAlignment="Center" FontWeight="Bold" FontSize="16"/>
-                                        <Label Content="Color2" HorizontalAlignment="Left" Margin="310,53,0,0" VerticalAlignment="Top" Width="104" HorizontalContentAlignment="Center" FontWeight="Bold" FontSize="16"/>
-                                        <Button Click="Material_ChangeMaterial_Click" Content="Change" HorizontalAlignment="Left" Margin="262,8,0,0" VerticalAlignment="Top" Width="70"/>
-                                        <Button Click="Material_Goto_Click" Content="Go To" HorizontalAlignment="Left" Margin="414,8,0,0" VerticalAlignment="Top" Width="70"/>
-                                        <Separator HorizontalAlignment="Left" Height="11" Margin="0,37,0,0" VerticalAlignment="Top" Width="487"/>
-                                        <Button Click="Material_RemoveMaterialReference_Click" Content="Remove" HorizontalAlignment="Left" Margin="337,8,0,0" VerticalAlignment="Top" Width="70"/>
+                                            <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition Width="20"/>
+                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition Width="20"/>
+                                                    <ColumnDefinition Width="100"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="Scale2 Variance"/>
+                                                <Label Grid.Column="1" Content="X"/>
+                                                <Controls:NumericUpDown Grid.Column="2" HideUpDownButtons="True" InterceptMouseWheel="True" Value="{Binding SelectedItem.Type_Texture.F_36, ElementName=empTree}" Interval="0.025" StringFormat="0.00####"/>
+                                                <Label Grid.Column="4" Content="Y"/>
+                                                <Controls:NumericUpDown Grid.Column="5" HideUpDownButtons="True" InterceptMouseWheel="True" Value="{Binding SelectedItem.Type_Texture.F_44, ElementName=empTree}" Interval="0.025" StringFormat="0.00####"/>
 
+                                            </Grid>
+                                            <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="120"/>
+                                                    <ColumnDefinition Width="100"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="Render Depth" ToolTip="Controls the depth at which the particle effect is rendered at.&#x0a;&#x0a;Negative values = closer to the front&#x0a;Positive values = render in the back, behind other objects."/>
+                                                <Controls:NumericUpDown Grid.Column="1" HideUpDownButtons="True" InterceptMouseWheel="True" Value="{Binding SelectedItem.Type_Texture.F_04, ElementName=empTree}" Interval="0.025" StringFormat="0.00####"/>
+
+                                            </Grid>
+                                        </StackPanel>
+                                        
                                     </Grid>
 
                                 </TabItem>
                                 <TabItem Header="Other" Controls:HeaderedControlHelper.HeaderFontSize="16">
                                     <Grid>
-                                        <GroupBox Header="Scale2" HorizontalAlignment="Left" Height="83" Margin="516,121,0,0" VerticalAlignment="Top" Width="215">
-                                            <Grid>
-                                                <TextBox x:Name="texturePart_F_32" Text="{Binding SelectedItem.Type_Texture.F_32, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="34,12,0,-0.667" TextWrapping="Wrap" VerticalAlignment="Top" Width="55"/>
-                                                <Label Content="X" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="19" HorizontalContentAlignment="Right"/>
-                                                <TextBox x:Name="texturePart_F_36" Text="{Binding SelectedItem.Type_Texture.F_40, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="118,12,0,-0.667" TextWrapping="Wrap" VerticalAlignment="Top" Width="55"/>
-                                                <Label Content="Y" HorizontalAlignment="Left" Margin="94,10,0,0" VerticalAlignment="Top" Width="19" HorizontalContentAlignment="Right"/>
-
-                                            </Grid>
-                                        </GroupBox>
-                                        <GroupBox Header="Scale2 Random Range" HorizontalAlignment="Left" Height="82" Margin="516,209,0,0" VerticalAlignment="Top" Width="215">
-                                            <Grid>
-                                                <TextBox x:Name="texturePart_F_40" Text="{Binding SelectedItem.Type_Texture.F_36, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="34,12,0,-0.667" TextWrapping="Wrap" VerticalAlignment="Top" Width="55"/>
-                                                <Label Content="X" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="19" HorizontalContentAlignment="Right"/>
-                                                <TextBox x:Name="texturePart_F_44" Text="{Binding SelectedItem.Type_Texture.F_44, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="118,12,0,-0.667" TextWrapping="Wrap" VerticalAlignment="Top" Width="55"/>
-                                                <Label Content="Y" HorizontalAlignment="Left" Margin="94,10,0,0" VerticalAlignment="Top" Width="19" HorizontalContentAlignment="Right"/>
-
-                                            </Grid>
-                                        </GroupBox>
-                                        <GroupBox Header="Scale1" HorizontalAlignment="Left" Height="106" Margin="516,10,0,0" VerticalAlignment="Top" Width="215">
-                                            <Grid>
-                                                <TextBox x:Name="texturePart_F_24" Text="{Binding SelectedItem.Type_Texture.F_24, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="81,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="90"/>
-                                                <Label Content="Base" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="66" HorizontalContentAlignment="Right"/>
-                                                <TextBox x:Name="texturePart_F_28" Text="{Binding SelectedItem.Type_Texture.F_28, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="81,39,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="90"/>
-                                                <Label Content="Random" HorizontalAlignment="Left" Margin="10,37,0,0" VerticalAlignment="Top" Width="66" HorizontalContentAlignment="Right"/>
-
-                                            </Grid>
-                                        </GroupBox>
                                         <TextBox x:Name="texturePart_I_03" Text="{Binding SelectedItem.Type_Texture.I_03, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="134,134,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                         <Label Content="I__03" HorizontalAlignment="Left" Margin="24,134,0,0" VerticalAlignment="Top" Width="104" HorizontalContentAlignment="Right"/>
                                         <TextBox x:Name="texturePart_I_02" Text="{Binding SelectedItem.Type_Texture.I_02, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="134,104,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
@@ -329,8 +337,7 @@
                                         <Label Content="F__104" HorizontalAlignment="Left" Margin="250,105,0,0" VerticalAlignment="Top" Width="90" HorizontalContentAlignment="Right"/>
                                         <TextBox x:Name="texturePart_F_108" Text="{Binding SelectedItem.Type_Texture.F_108, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="346,134,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                         <Label Content="F__108" HorizontalAlignment="Left" Margin="250,135,0,0" VerticalAlignment="Top" Width="90" HorizontalContentAlignment="Right"/>
-                                        <TextBox x:Name="texturePart_F_05" Text="{Binding SelectedItem.Type_Texture.F_04, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="346,169,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
-                                        <Label Content="Added Depth" HorizontalAlignment="Left" Margin="250,168,0,0" VerticalAlignment="Top" Width="90" HorizontalContentAlignment="Right"/>
+                                       
 
                                     </Grid>
                                 </TabItem>
@@ -479,7 +486,7 @@
                                 <Label Content="I__08" HorizontalAlignment="Left" Margin="12,103,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
                                 <TextBox x:Name="coneExtrude_I_10" Text="{Binding SelectedItem.Type_Struct3.I_10, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="171,135,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                 <Label Content="I__10" HorizontalAlignment="Left" Margin="12,133,0,0" VerticalAlignment="Top" Width="154" HorizontalContentAlignment="Right"/>
-                                <DataGrid x:Name="dataGrid_coneExtrude" BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" BorderThickness="1" HorizontalAlignment="Left" Height="194" Margin="96,191,0,0" VerticalAlignment="Top" Width="609" ItemsSource="{Binding SelectedItem.Type_Struct3.FloatList.Binding, ElementName=empTree}" AutoGenerateColumns="False" CanUserSortColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
+                                <DataGrid x:Name="dataGrid_coneExtrude" BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" Controls:ControlsHelper.ContentCharacterCasing="Normal" HorizontalAlignment="Left" Height="194" Margin="96,191,0,0" VerticalAlignment="Top" Width="609" ItemsSource="{Binding SelectedItem.Type_Struct3.FloatList.Binding, ElementName=empTree}" AutoGenerateColumns="False" CanUserSortColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Binding="{Binding F_00, UpdateSourceTrigger=PropertyChanged}" Header="WorldScaleFactor" Width="*"/>
                                         <DataGridTextColumn Binding="{Binding F_04, UpdateSourceTrigger=PropertyChanged}" Header="WorldScaleAdd" Width="*"/>
@@ -515,7 +522,7 @@
                                         <TextBox x:Name="mesh_F_24" Text="{Binding SelectedItem.Type_Model.F_24, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="35,74,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
                                         <Label Content="Z" HorizontalAlignment="Left" Margin="10,72,0,0" VerticalAlignment="Top" Width="20" HorizontalContentAlignment="Right"/>
                                         <TextBox x:Name="mesh_F_28" Text="{Binding SelectedItem.Type_Model.F_28, ElementName=empTree, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="23" Margin="35,105,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82"/>
-                                        <Label Content="W" HorizontalAlignment="Left" Margin="10,103,0,0" VerticalAlignment="Top" Width="20" HorizontalContentAlignment="Right"/>
+                                        <Label Content="W" HorizontalAlignment="Left" Margin="10,103,0,0" VerticalAlignment="Top" Width="22" HorizontalContentAlignment="Right"/>
 
                                     </Grid>
                                 </GroupBox>

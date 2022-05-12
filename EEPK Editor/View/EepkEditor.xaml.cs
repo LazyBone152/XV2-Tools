@@ -773,48 +773,61 @@ namespace EEPK_Organiser.View
             }
         }
 
-        private void OpenEmoEffectFileEditor(EffectFile selectedFile, bool showError)
+        private async void OpenEmoEffectFileEditor(EffectFile selectedFile, bool showError)
         {
             if (selectedFile != null)
             {
+                bool focus = false;
+                Window window = null;
+
                 switch (selectedFile.fileType)
                 {
                     case EffectFile.FileType.EMB:
                         {
-                            Forms.EmbEditForm embForm = GetActiveEmbForm(selectedFile.EmbFile);
+                            window = GetActiveEmbForm(selectedFile.EmbFile);
 
-                            if (embForm == null)
+                            if (window == null)
                             {
-                                embForm = new Forms.EmbEditForm(selectedFile.EmbFile, null, AssetType.EMO, selectedFile.FullFileName);
+                                window = new Forms.EmbEditForm(selectedFile.EmbFile, null, AssetType.EMO, selectedFile.FullFileName);
                             }
                             else
                             {
-                                embForm.Focus();
+                                focus = true;
                             }
-
-                            embForm.Show();
                         }
                         break;
                     case EffectFile.FileType.EMM:
                         {
-                            Forms.MaterialsEditorForm emmForm = GetActiveEmmForm(selectedFile.EmmFile);
+                            window = GetActiveEmmForm(selectedFile.EmmFile);
 
-                            if (emmForm == null)
+                            if (window == null)
                             {
-                                emmForm = new Forms.MaterialsEditorForm(selectedFile.EmmFile, null, AssetType.EMO, selectedFile.FullFileName);
+                                window = new Forms.MaterialsEditorForm(selectedFile.EmmFile, null, AssetType.EMO, selectedFile.FullFileName);
                             }
                             else
                             {
-                                emmForm.Focus();
+                                focus = true;
                             }
-
-                            emmForm.Show();
                         }
                         break;
                     default:
                         if(showError)
                             MessageBox.Show(string.Format("Edit not possible for {0} files.", selectedFile.Extension), "Edit", MessageBoxButton.OK, MessageBoxImage.Stop);
-                        break;
+                        return;
+                }
+
+                if(window != null)
+                {
+                    await Task.Delay(100);
+
+                    if (focus)
+                    {
+                        window.Focus();
+                    }
+                    else
+                    {
+                        window.Show();
+                    }
                 }
             }
         }

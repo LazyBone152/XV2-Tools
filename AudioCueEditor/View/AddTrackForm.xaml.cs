@@ -21,6 +21,8 @@ using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using System.Threading;
 using Xv2CoreLib.ACB;
+using AudioCueEditor.Data;
+using Xv2CoreLib.Resource;
 
 namespace AudioCueEditor.View
 {
@@ -119,19 +121,27 @@ namespace AudioCueEditor.View
         public bool IsDone { get; private set; } 
         public bool Finished { get; private set; }
 
-        public AddTrackForm(Window parent)
+        public AsyncObservableCollection<HcaEncryptionKey> HcaKeys { get; set; } = HcaEncryptionKeysManager.Instance.GetReadOnlyViewEncryptionKeys();
+        public HcaEncryptionKey SelectedHcaKey { get; set; }
+
+
+        public AddTrackForm(Window parent, ACB_File acbFile)
         {
             InitializeComponent();
             DataContext = this;
             Owner = parent;
+            AutoSetEncryptionKey(acbFile.TryGetEncrpytionKey());
+            AutoSetValues(acbFile);
         }
         
-        public AddTrackForm(Window parent, string path)
+        public AddTrackForm(Window parent, string path, ACB_File acbFile)
         {
             AudioFilePath = path;
             InitializeComponent();
             DataContext = this;
             Owner = parent;
+            AutoSetEncryptionKey(acbFile.TryGetEncrpytionKey());
+            AutoSetValues(acbFile);
             Done();
         }
 
@@ -193,7 +203,9 @@ namespace AudioCueEditor.View
         {
             try
             {
-                TrackBytes = Helper.LoadAndConvertFile(AudioFilePath, Helper.GetFileType(EncodeType), Loop);
+                ulong key = SelectedHcaKey != null && EncodeType == EncodeType.HCA ? SelectedHcaKey.Key : 0;
+
+                TrackBytes = Helper.LoadAndConvertFile(AudioFilePath, Helper.GetFileType(EncodeType), Loop, key);
                 ConversionSuccessful = true;
                 
             }
@@ -207,6 +219,33 @@ namespace AudioCueEditor.View
         private void MetroWindow_Closing(object sender, CancelEventArgs e)
         {
             IsDone = true;
+        }
+
+        private void AutoSetEncryptionKey(ulong key)
+        {
+            SelectedHcaKey = HcaKeys.FirstOrDefault(x => x.Key == key);
+
+            if (SelectedHcaKey == null)
+            {
+                if (key != 0)
+                {
+                    //Key doesnt exist in global key list, so we add it and save
+                    HcaEncryptionKeysManager.Instance.AddKey($"Auto Generated Key {HcaEncryptionKeysManager.Instance.EncryptionKeys.Keys.Count + 1}", key);
+                    HcaEncryptionKeysManager.Instance.Save();
+
+                    HcaKeys = HcaEncryptionKeysManager.Instance.GetReadOnlyViewEncryptionKeys();
+                    SelectedHcaKey = HcaKeys.FirstOrDefault(x => x.Key == key);
+                }
+                else
+                {
+                    SelectedHcaKey = HcaKeys[0];
+                }
+            }
+        }
+
+        private void AutoSetValues(ACB_File acbFile)
+        {
+            Streaming = acbFile.IsStreamingAcb();
         }
     }
 }
