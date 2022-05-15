@@ -25,6 +25,11 @@ namespace Xv2CoreLib.CMS
             CMS_Entries.Sort((x, y) => x.SortID - y.SortID);
         }
 
+        public CMS_Entry GetEntry(int id)
+        {
+            return GetEntry(id.ToString());
+        }
+
         public CMS_Entry GetEntry(string id)
         {
             foreach(var entry in CMS_Entries)

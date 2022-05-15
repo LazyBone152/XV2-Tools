@@ -363,6 +363,10 @@ namespace Xv2CoreLib.EMM
             }
             else if (type == VectorType.Color)
             {
+                if(valueIdx == 3)
+                {
+                    bool test = true;
+                }
                 value = ((CustomColor)currentValue).GetValue(valueIdx);
             }
             else if (type == VectorType.UV && currentValue is CustomMatUV)
@@ -489,6 +493,7 @@ namespace Xv2CoreLib.EMM
 
         private static float[] GetVectorValues(string fieldName, EmmMaterial material, VectorType type, ParameterNameFormat pos2, ParameterNameFormat pos3)
         {
+
             //Check for a parameter without the "index". This should initialize all members of the array to this value, so we need to look no further. (NOTE: array means stuff like MatCol0, MatCol1, MatCol2...)
             Parameter param = material.GetParameter(GetParameterNameWithoutIndex(fieldName));
 
@@ -510,44 +515,59 @@ namespace Xv2CoreLib.EMM
             float y = 0;
             float z = 0;
             float w = 0;
+            bool hasValue = false;
 
             param = material.GetParameter(GetParamterName(fieldName, type, pos2, pos3, 0));
 
             if (param != null)
+            {
+                hasValue = true;
                 x = param.FloatValue;
+            }
 
             param = material.GetParameter(GetParamterName(fieldName, type, pos2, pos3, 1));
 
             if (param != null)
+            {
+                hasValue = true;
                 y = param.FloatValue;
+            }
 
             if (type == VectorType.Color || type == VectorType.Vector4)
             {
                 param = material.GetParameter(GetParamterName(fieldName, type, pos2, pos3, 2));
 
                 if (param != null)
+                {
+                    hasValue = true;
                     z = param.FloatValue;
+                }
 
                 param = material.GetParameter(GetParamterName(fieldName, type, pos2, pos3, 3));
 
                 if (param != null)
+                {
+                    hasValue = true;
                     w = param.FloatValue;
+                }
             }
 
-            if (x != 0 || y != 0 || z != 0 || w != 0)
+            var defaultVector = DefaultMaterialValues.GetDefautVector(fieldName);
+
+            if (defaultVector == null)
+            {
+                defaultVector = new float[4];
+            }
+
+            //if (x != defaultVector[0] || y != defaultVector[1] || z != defaultVector[2] || w != defaultVector[3])
+            if (hasValue)
             {
                 //Values were found, so return here.
                 return new float[4] { x, y, z, w };
             }
             else
             {
-                //No values were found. Set default values here.
-                var vector = DefaultMaterialValues.GetDefautVector(fieldName);
-
-                if (vector == null)
-                    vector = new float[4];
-
-                return vector;
+                return defaultVector.Copy();
             }
 
         }

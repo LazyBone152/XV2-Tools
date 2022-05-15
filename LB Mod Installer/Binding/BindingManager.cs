@@ -1155,9 +1155,10 @@ namespace LB_Mod_Installer.Binding
         //Costumes:
         private int GetFreeCostume(int charaId, string charaCode, int min, int max)
         {
+            BCS_File bcsFile = GetCharaBcsFile(charaId);
             int current = min;
 
-            while (IsCostumeUsed(charaId, charaCode, current))
+            while (IsCostumeUsed(charaId, charaCode, current, bcsFile))
             {
                 current++;
 
@@ -1169,7 +1170,7 @@ namespace LB_Mod_Installer.Binding
             return current;
         }
 
-        private bool IsCostumeUsed(int charaId, string charaCode, int costume)
+        private bool IsCostumeUsed(int charaId, string charaCode, int costume, BCS_File bcsFile)
         {
             //Check if costume is used in the patcher slot file. 
             //We need to check if this exists before we try to use it, since it may not exist and the installer doesn't create it in that case.
@@ -1187,7 +1188,26 @@ namespace LB_Mod_Installer.Binding
             if (AssignedCostumes.Contains($"{charaCode}_{costume}")) return true;
             if (AssignedCostumes.Contains($"{charaId}_{costume}")) return true;
 
+            //Optional check on BCS file, if one could be loaded.
+            if(bcsFile != null)
+            {
+                if (bcsFile.PartSets.Any(x => x.ID == costume)) return true;
+            }
+
             return false;
+        }
+
+        private BCS_File GetCharaBcsFile(int charaId)
+        {
+            CMS_Entry cmsEntry = ((CMS_File)install.GetParsedFile<CMS_File>(CMS_PATH)).GetEntry(charaId);
+
+            if(cmsEntry != null)
+            {
+                string bcsPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.bcs", cmsEntry.ShortName, cmsEntry.BcsPath));
+                return (BCS_File)install.GetParsedFile<BCS_File>(bcsPath, false, false);
+            }
+
+            return null;
         }
 
         //TtbEvent
