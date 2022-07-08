@@ -550,14 +550,14 @@ namespace Xv2CoreLib.BSA
                 {
                     Type.Add(new BSA_Type13()
                     {
-                        F_00 = BitConverter.ToSingle(rawBytes, offset + 0),
+                        I_00 = BitConverter.ToUInt16(rawBytes, offset + 0),
+                        I_02 = BitConverter.ToUInt16(rawBytes, offset + 2),
                         F_04 = BitConverter.ToSingle(rawBytes, offset + 4),
                         F_08 = BitConverter.ToSingle(rawBytes, offset + 8),
                         I_12 = BitConverter.ToInt32(rawBytes, offset + 12),
                         F_16 = BitConverter.ToSingle(rawBytes, offset + 16),
                         I_20 = BitConverter.ToInt32(rawBytes, offset + 20),
                         I_24 = BitConverter.ToInt32(rawBytes, offset + 24),
-                        I_26 = BitConverter.ToInt16(rawBytes, offset + 26),
                         I_28 = BitConverter.ToInt16(rawBytes, offset + 28),
                         StartTime = BitConverter.ToUInt16(rawBytes, hdrOffset + 0),
                         Duration = GetTypeDuration(BitConverter.ToUInt16(rawBytes, hdrOffset + 0), BitConverter.ToUInt16(rawBytes, hdrOffset + 2)),

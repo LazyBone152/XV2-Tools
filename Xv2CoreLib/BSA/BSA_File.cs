@@ -905,10 +905,12 @@ namespace Xv2CoreLib.BSA
         [YAXAttributeFor("Duration")]
         [YAXSerializeAs("frames")]
         public ushort Duration { get; set; }
-        [YAXAttributeFor("F_00")]
+        [YAXAttributeFor("I_00")]
         [YAXSerializeAs("value")]
-        [YAXFormat("0.0##########")]
-        public float F_00 { get; set; }
+        public ushort I_00 { get; set; }
+        [YAXAttributeFor("I_02")]
+        [YAXSerializeAs("value")]
+        public ushort I_02 { get; set; }
         [YAXAttributeFor("F_04")]
         [YAXSerializeAs("value")]
         public float F_04 { get; set; }
@@ -929,12 +931,7 @@ namespace Xv2CoreLib.BSA
         [YAXSerializeAs("value")]
         public int I_24 { get; set; }
         [YAXAttributeFor("I_26")]
-        [YAXSerializeAs("value")]
-        public short I_26 { get; set; }
-
-        [YAXAttributeFor("I_28")]
-        [YAXSerializeAs("value")]
-        public short I_28 { get; set; }
+        public int I_28 { get; set; }
 
 
     }

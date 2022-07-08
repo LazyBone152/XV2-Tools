@@ -636,14 +636,14 @@ namespace Xv2CoreLib.BSA
 
                 for (int i = 0; i < type.Count; i++)
                 {
-                    bytes.AddRange(BitConverter.GetBytes(type[i].F_00));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_00));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_02));
                     bytes.AddRange(BitConverter.GetBytes(type[i].F_04));
                     bytes.AddRange(BitConverter.GetBytes(type[i].F_08));
                     bytes.AddRange(BitConverter.GetBytes(type[i].I_12));
                     bytes.AddRange(BitConverter.GetBytes(type[i].F_16));
                     bytes.AddRange(BitConverter.GetBytes(type[i].I_20));
                     bytes.AddRange(BitConverter.GetBytes(type[i].I_24));
-                    bytes.AddRange(BitConverter.GetBytes(type[i].I_26));
                     bytes.AddRange(BitConverter.GetBytes(type[i].I_28));
 
                 }
