@@ -71,7 +71,7 @@ namespace Xv2CoreLib.Eternity
                     CharaCostumeSlot costumeSlot = new CharaCostumeSlot();
                     
                     string[] parameters = costume.Split(',');
-                    if (parameters.Length != 8) throw new InvalidDataException($"Invalid number of CharaSlot parameters. Expected 8, found {parameters.Length}.");
+                    if (parameters.Length != 9) throw new InvalidDataException($"Invalid number of CharaSlot parameters. Expected 9, found {parameters.Length}.");
 
                     costumeSlot.CharaCode = parameters[0];
                     costumeSlot.Costume = int.Parse(parameters[1]);
@@ -81,6 +81,7 @@ namespace Xv2CoreLib.Eternity
                     costumeSlot.CssVoice1 = int.Parse(parameters[5]);
                     costumeSlot.CssVoice2 = int.Parse(parameters[6]);
                     costumeSlot.DLC = (CstDlcVer)uint.Parse(parameters[7]);
+                    costumeSlot.DLC_Flag2 = (CstDlcVer2)uint.Parse(parameters[8]);
 
                     charaSlot.CostumeSlots.Add(costumeSlot);
                 }
@@ -110,7 +111,8 @@ namespace Xv2CoreLib.Eternity
                     strBuilder.Append((costume.flag_gk2) ? 1 : 0).Append(",");
                     strBuilder.Append(costume.CssVoice1).Append(",");
                     strBuilder.Append(costume.CssVoice2).Append(",");
-                    strBuilder.Append((uint)costume.DLC);
+                    strBuilder.Append((uint)costume.DLC).Append(",");
+                    strBuilder.Append((uint)costume.DLC_Flag2);
 
                     strBuilder.Append("]");
                 }
@@ -327,5 +329,7 @@ namespace Xv2CoreLib.Eternity
         public int CssVoice2 { get; set; }
         [YAXAttributeForClass]
         public CstDlcVer DLC { get; set; }
+        [YAXAttributeForClass]
+        public CstDlcVer2 DLC_Flag2 { get; set; }
     }
 }

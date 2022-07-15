@@ -25,8 +25,14 @@ namespace Xv2CoreLib.CST
         UD7 = 524288,
         PRB = 0x10000000,
         EL0 = 0x20000000,
-        DLC11 = 0x40000000, //Legendary Pack 1
-        DLC12 = 0x80000000, //Legendary Pack 2
+        DLC12 = 0x40000000, //Legendary Pack 1
+        DLC13 = 0x80000000, //Legendary Pack 2
+    }
+
+    [Flags]
+    public enum CstDlcVer2 : uint
+    {
+        DLC14 = 1,
     }
 
     [YAXSerializeAs("CST")]
@@ -239,8 +245,7 @@ namespace Xv2CoreLib.CST
         public CstDlcVer DlcFlag1 { get; set; } // 0x14
         [YAXAttributeFor("DlcFlag2")]
         [YAXSerializeAs("value")]
-        [YAXHexValue]
-        public uint DlcFlag2 { get; set; } // 0x18 - Added in game v 1.16
+        public CstDlcVer2 DlcFlag2 { get; set; } // 0x18 - Added in game v 1.16
         [YAXAttributeFor("IsCustomCostume")]
         [YAXSerializeAs("value")]
         public int IsCustomCostume { get; set; } // 0x1C
@@ -264,7 +269,7 @@ namespace Xv2CoreLib.CST
                 CssVoice1 = BitConverter.ToUInt16(bytes, offset + 0x10),
                 CssVoice2 = BitConverter.ToUInt16(bytes, offset + 0x12),
                 DlcFlag1 = (CstDlcVer)BitConverter.ToUInt32(bytes, offset + 0x14),
-                DlcFlag2 = BitConverter.ToUInt32(bytes, offset + 0x18),
+                DlcFlag2 = (CstDlcVer2)BitConverter.ToUInt32(bytes, offset + 0x18),
                 IsCustomCostume = BitConverter.ToInt32(bytes, offset + 0x1c),
                 CacIndex = BitConverter.ToInt32(bytes, offset + 0x20),
                 var_type_after_TU9_order = BitConverter.ToInt32(bytes, offset + 0x24)
@@ -284,7 +289,7 @@ namespace Xv2CoreLib.CST
             bytes.AddRange(BitConverter.GetBytes(CssVoice1));
             bytes.AddRange(BitConverter.GetBytes(CssVoice2));
             bytes.AddRange(BitConverter.GetBytes((uint)DlcFlag1));
-            bytes.AddRange(BitConverter.GetBytes(DlcFlag2));
+            bytes.AddRange(BitConverter.GetBytes((uint)DlcFlag2));
             bytes.AddRange(BitConverter.GetBytes(IsCustomCostume));
             bytes.AddRange(BitConverter.GetBytes(CacIndex));
             bytes.AddRange(BitConverter.GetBytes(var_type_after_TU9_order));
