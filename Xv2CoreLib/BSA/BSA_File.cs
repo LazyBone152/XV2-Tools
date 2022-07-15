@@ -35,6 +35,7 @@ namespace Xv2CoreLib.BSA
         Off = 1
     }
 
+
     [YAXSerializeAs("BSA")]
     [Serializable]
     public class BSA_File : ISorting, IIsNull
@@ -230,6 +231,10 @@ namespace Xv2CoreLib.BSA
         [BindingSubList]
         public List<BSA_Type12> Type12 { get; set; }
 
+        [YAXDontSerializeIfNull]
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BSA_Type13")]
+        [BindingSubList]
+        public List<BSA_Type13> Type13 { get; set; }
         #region IBsaTypes
         [YAXDontSerialize]
         public AsyncObservableCollection<IBsaType> IBsaTypes { get; set; }
@@ -257,6 +262,8 @@ namespace Xv2CoreLib.BSA
             foreach (var bsaEntry in Type8)
                 IBsaTypes.Add(bsaEntry);
             foreach (var bsaEntry in Type12)
+                IBsaTypes.Add(bsaEntry);
+            foreach (var bsaEntry in Type13)
                 IBsaTypes.Add(bsaEntry);
 
         }
@@ -303,6 +310,10 @@ namespace Xv2CoreLib.BSA
                 {
                     Type12.Add(type12);
                 }
+                else if (bsaEntry is BSA_Type13 type13)
+                {
+                    Type13.Add(type13);
+                }
             }
         }
         
@@ -326,6 +337,8 @@ namespace Xv2CoreLib.BSA
                 Type8 = new List<BSA_Type8>();
             if (Type12 == null)
                 Type12 = new List<BSA_Type12>();
+            if (Type13 == null)
+                Type13 = new List<BSA_Type13>();
         }
 
         private void ClearBsaLists()
@@ -341,6 +354,7 @@ namespace Xv2CoreLib.BSA
             Type7.Clear();
             Type8.Clear();
             Type12.Clear();
+            Type13.Clear();
         }
 
         #endregion
@@ -879,6 +893,47 @@ namespace Xv2CoreLib.BSA
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
         public float F_16 { get; set; }
+    }
+
+    [YAXSerializeAs("BSA_Type13")]
+    [Serializable]
+    public class BSA_Type13 : IBsaType
+    {
+        [YAXAttributeFor("Start_Time")]
+        [YAXSerializeAs("frames")]
+        public ushort StartTime { get; set; }
+        [YAXAttributeFor("Duration")]
+        [YAXSerializeAs("frames")]
+        public ushort Duration { get; set; }
+        [YAXAttributeFor("I_00")]
+        [YAXSerializeAs("value")]
+        public ushort I_00 { get; set; }
+        [YAXAttributeFor("I_02")]
+        [YAXSerializeAs("value")]
+        public ushort I_02 { get; set; }
+        [YAXAttributeFor("F_04")]
+        [YAXSerializeAs("value")]
+        public float F_04 { get; set; }
+        [YAXAttributeFor("F_08")]
+        [YAXSerializeAs("value")]
+        public float F_08 { get; set; }
+        [YAXAttributeFor("I_12")]
+        [YAXSerializeAs("value")]
+        public int I_12 { get; set; } //Effect ID or something?
+        [YAXAttributeFor("F_16")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0##########")]
+        public float F_16 { get; set; }
+        [YAXAttributeFor("I_20")]
+        [YAXSerializeAs("value")]
+        public int I_20 { get; set; }
+        [YAXAttributeFor("I_24")]
+        [YAXSerializeAs("value")]
+        public int I_24 { get; set; }
+        [YAXAttributeFor("I_26")]
+        public int I_28 { get; set; }
+
+
     }
 
     public interface IBsaType
