@@ -63,7 +63,20 @@ namespace Xv2CoreLib.IDB
             int count = (idbFile.Entries != null) ? idbFile.Entries.Count() : 0;
             bytes.AddRange(BitConverter.GetBytes(count));
             bytes.AddRange(BitConverter.GetBytes(16));
-            
+
+            switch (idbFile.Version)
+            {
+                case 0:
+                    WriteEntriesOld(count);
+                    break;
+                case 1:
+                    WriteEntriesNew(count);
+                    break;
+            }
+        }
+
+        private void WriteEntriesOld(int count)
+        {
             for (int i = 0; i < count; i++)
             {
                 bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].ID));
@@ -80,23 +93,22 @@ namespace Xv2CoreLib.IDB
                 bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_28));
                 bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_32));
                 bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_36));
-                bytes.AddRange(BitConverter.GetBytes((UInt16)idbFile.Entries[i].I_38));
+                bytes.AddRange(BitConverter.GetBytes((ushort)idbFile.Entries[i].I_38));
                 bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_40));
                 bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_42));
                 bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_44));
                 bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_46));
+
                 if (idbFile.Entries[i].Effects.Count() != 3)
-                {
-                    Console.WriteLine(String.Format("Effect entry count mismatch. There must be 3. (ID: {0})", idbFile.Entries[i].Index));
-                    Utils.WaitForInputThenQuit();
-                }
-                WriteEffect(idbFile.Entries[i].Effects[0]);
-                WriteEffect(idbFile.Entries[i].Effects[1]);
-                WriteEffect(idbFile.Entries[i].Effects[2]);
+                    throw new InvalidDataException(String.Format("Effect entry count mismatch. There must be 3. (ID: {0})", idbFile.Entries[i].Index));
+
+                WriteEffectOld(idbFile.Entries[i].Effects[0]);
+                WriteEffectOld(idbFile.Entries[i].Effects[1]);
+                WriteEffectOld(idbFile.Entries[i].Effects[2]);
             }
         }
 
-        private void WriteEffect(IBD_Effect effect)
+        private void WriteEffectOld(IBD_Effect effect)
         {
             bytes.AddRange(BitConverter.GetBytes(effect.I_00));
             bytes.AddRange(BitConverter.GetBytes(effect.I_04));
@@ -128,5 +140,81 @@ namespace Xv2CoreLib.IDB
             Assertion.AssertArraySize(effect.F_156, 17, "Effect", "F_156");
             bytes.AddRange(BitConverter_Ex.GetBytes(effect.F_156));
         }
+
+        private void WriteEntriesNew(int count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].ID));
+                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_02));
+                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].NameMsgID));
+                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].DescMsgID));
+                bytes.AddRange(BitConverter.GetBytes((ushort)idbFile.Entries[i].Type));
+                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_10));
+
+                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].NEW_I_12));
+                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].NEW_I_14));
+
+                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_12));
+                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_14));
+                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_16));
+                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_20));
+                bytes.AddRange(BitConverter.GetBytes((int)idbFile.Entries[i].RaceLock));
+                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_28));
+                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_32));
+                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_36));
+                bytes.AddRange(BitConverter.GetBytes((ushort)idbFile.Entries[i].I_38));
+                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_40));
+                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_42));
+                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_44));
+                bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_46));
+
+                if (idbFile.Entries[i].Effects.Count() != 3)
+                    throw new InvalidDataException(String.Format("Effect entry count mismatch. There must be 3. (ID: {0})", idbFile.Entries[i].Index));
+
+                WriteEffectNew(idbFile.Entries[i].Effects[0]);
+                WriteEffectNew(idbFile.Entries[i].Effects[1]);
+                WriteEffectNew(idbFile.Entries[i].Effects[2]);
+            }
+
+        }
+
+        private void WriteEffectNew(IBD_Effect effect)
+        {
+            bytes.AddRange(BitConverter.GetBytes(effect.I_00));
+            bytes.AddRange(BitConverter.GetBytes(effect.I_04));
+            bytes.AddRange(BitConverter.GetBytes(effect.I_08));
+            bytes.AddRange(BitConverter.GetBytes(effect.F_12));
+            Assertion.AssertArraySize(effect.F_16, 6, "Effect", "Ability_Values");
+            bytes.AddRange(BitConverter_Ex.GetBytes(effect.F_16));
+            bytes.AddRange(BitConverter.GetBytes(effect.I_40));
+            bytes.AddRange(BitConverter.GetBytes(effect.I_44));
+
+            bytes.AddRange(BitConverter.GetBytes(effect.NEW_I_48));
+            bytes.AddRange(BitConverter.GetBytes(effect.NEW_I_52));
+
+            Assertion.AssertArraySize(effect.F_48, 6, "Effect", "Multipliers");
+            bytes.AddRange(BitConverter_Ex.GetBytes(effect.F_48));
+            Assertion.AssertArraySize(effect.I_72, 6, "Effect", "I_72");
+            bytes.AddRange(BitConverter_Ex.GetBytes(effect.I_72));
+            bytes.AddRange(BitConverter.GetBytes(effect.F_96));
+            bytes.AddRange(BitConverter.GetBytes(effect.F_100));
+            bytes.AddRange(BitConverter.GetBytes(effect.F_104));
+            bytes.AddRange(BitConverter.GetBytes(effect.F_108));
+            bytes.AddRange(BitConverter.GetBytes(effect.F_112));
+            bytes.AddRange(BitConverter.GetBytes(effect.F_116));
+            bytes.AddRange(BitConverter.GetBytes(effect.F_120));
+            bytes.AddRange(BitConverter.GetBytes(effect.F_124));
+            bytes.AddRange(BitConverter.GetBytes(effect.F_128));
+            bytes.AddRange(BitConverter.GetBytes(effect.F_132));
+            bytes.AddRange(BitConverter.GetBytes(effect.F_136));
+            bytes.AddRange(BitConverter.GetBytes(effect.F_140));
+            bytes.AddRange(BitConverter.GetBytes(effect.F_144));
+            bytes.AddRange(BitConverter.GetBytes(effect.F_148));
+            bytes.AddRange(BitConverter.GetBytes(effect.F_152));
+            Assertion.AssertArraySize(effect.F_156, 17, "Effect", "F_156");
+            bytes.AddRange(BitConverter_Ex.GetBytes(effect.F_156));
+        }
+
     }
 }

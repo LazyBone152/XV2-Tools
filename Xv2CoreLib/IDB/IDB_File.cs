@@ -38,9 +38,18 @@ namespace Xv2CoreLib.IDB
         Awoken = 5
     }
 
+    public enum IDB_Version
+    {
+        First = 0,
+        Second = 1
+    }
+
     [YAXSerializeAs("IDB")]
     public class IDB_File : ISorting
     {
+        [YAXAttributeForClass]
+        public int Version { get; set; }
+
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "IDB_Entry")]
         public List<IDB_Entry> Entries { get; set; }
 
@@ -224,6 +233,9 @@ namespace Xv2CoreLib.IDB
     [YAXSerializeAs("IDB_Entry")]
     public class IDB_Entry : IInstallable
     {
+        public const int OLD_ENTRY_SIZE = 48;
+        public const int NEW_ENTRY_SIZE = 52; //New in 1.18
+
         public const string TALISMAN_NAME_MSG = "msg/proper_noun_talisman_info_";
         public const string TALISMAN_DESCRIPTION_MSG = "msg/proper_noun_talisman_name_";
         public const string TALISMAN_LIMIT_BURST_DESCRIPTION_MSG = "msg/proper_noun_talisman_info_olt_";
@@ -299,6 +311,18 @@ namespace Xv2CoreLib.IDB
         [YAXSerializeAs("ID3")]
         public ushort I_46 { get; set; } //ushort
 
+        //New in 1.18
+        [YAXAttributeFor("NEW_I_12")]
+        [YAXSerializeAs("value")]
+        [YAXHexValue]
+        public ushort NEW_I_12 { get; set; } = ushort.MaxValue;
+        [YAXAttributeFor("NEW_I_14")]
+        [YAXSerializeAs("value")]
+        [YAXHexValue]
+        public ushort NEW_I_14 { get; set; } = ushort.MaxValue;
+
+
+
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Effect")]
         public List<IBD_Effect> Effects { get; set; } // size 3
 
@@ -372,6 +396,9 @@ namespace Xv2CoreLib.IDB
     [YAXSerializeAs("Effect")]
     public class IBD_Effect
     {
+        public const int OLD_ENTRY_SIZE = 224;
+        public const int NEW_ENTRY_SIZE = 232;
+
         [YAXAttributeFor("Type")]
         [YAXSerializeAs("value")]
         public int I_00 { get; set; }
@@ -471,6 +498,15 @@ namespace Xv2CoreLib.IDB
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
         public float[] F_156 { get; set; } //size 13
 
+        //New in 1.18
+        [YAXAttributeFor("NEW_I_48")]
+        [YAXSerializeAs("value")]
+        [YAXHexValue]
+        public int NEW_I_48 { get; set; }
+        [YAXAttributeFor("NEW_I_52")]
+        [YAXSerializeAs("value")]
+        [YAXHexValue]
+        public int NEW_I_52 { get; set; }
     }
 
 
