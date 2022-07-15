@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+
+#if !SaveEditor
 using GalaSoft.MvvmLight.CommandWpf;
+#endif
+
 
 namespace Xv2CoreLib.Resource.UndoRedo
 {
     public sealed class UndoManager : INotifyPropertyChanged
     {
-        #region NotifyPropertyChanged
+#region NotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void NotifyPropertyChanged(String propertyName = "")
@@ -17,7 +21,7 @@ namespace Xv2CoreLib.Resource.UndoRedo
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
-        #endregion
+#endregion
 
         public const int DefaultMaxCapacity = 1000;
         public const int MaximumMaxCapacity = 10000;
@@ -115,10 +119,11 @@ namespace Xv2CoreLib.Resource.UndoRedo
             return false;
         }
 
+#if !SaveEditor
         public RelayCommand RedoCommand => new RelayCommand(Redo, CanRedo);
 
         public RelayCommand UndoCommand => new RelayCommand(Undo, CanUndo);
-
+#endif
 
         public void Undo()
         {

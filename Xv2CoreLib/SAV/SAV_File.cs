@@ -643,6 +643,8 @@ namespace Xv2CoreLib.SAV
                         return "1.17";
                     case 23:
                         return "1.17.01";
+                    case 26:
+                        return "1.18";
                     default:
                         return String.Format("Unknown ({0})", Version);
 
@@ -684,6 +686,7 @@ namespace Xv2CoreLib.SAV
                     case 21:
                     case 22:
                     case 23:
+                    case 26:
                         return null;
                     default:
                         return "This save version is not supported. It is recommened to update the application (if one is available).";
@@ -722,6 +725,7 @@ namespace Xv2CoreLib.SAV
                     case 21:
                     case 22:
                     case 23:
+                    case 26:
                         return Brushes.Blue;
                     default:
                         return Brushes.Red;
@@ -8913,7 +8917,6 @@ namespace Xv2CoreLib.SAV
                 Awoken = cac.Presets[0].I_92
             };
         }
-
 #if SaveEditor
         public static Xv1HeroImport ConvertToXv1HeroImport(Xv1SavFile.CaC cac)
         {
@@ -9135,7 +9138,7 @@ namespace Xv2CoreLib.SAV
     //New 1.15 stuff:
     public class MascotFlag : INotifyPropertyChanged
     {
-        #region NotifyPropChanged
+#region NotifyPropChanged
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -9146,16 +9149,16 @@ namespace Xv2CoreLib.SAV
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
-        #endregion
+#endregion
 
-        #region View
+#region View
         [YAXDontSerialize]
         public int DisplayID { get { return Index + 1; } }
         [YAXDontSerialize]
         public string Name { get; set; }
         [YAXDontSerialize]
         public bool HasName { get { return !string.IsNullOrEmpty(Name); } }
-        #endregion
+#endregion
 
         [YAXAttributeForClass]
         public int Index { get; set; }
@@ -9215,7 +9218,7 @@ namespace Xv2CoreLib.SAV
 
     public class ArtworkFlag : INotifyPropertyChanged
     {
-        #region NotifyPropChanged
+#region NotifyPropChanged
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -9226,16 +9229,16 @@ namespace Xv2CoreLib.SAV
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
-        #endregion
+#endregion
 
-        #region View
+#region View
         [YAXDontSerialize]
         public int DisplayID { get { return Index + 1; } }
         [YAXDontSerialize]
         public string Name { get; set; }
         [YAXDontSerialize]
         public bool HasName { get { return !string.IsNullOrEmpty(Name); } }
-        #endregion
+#endregion
 
         [YAXAttributeForClass]
         public int Index { get; set; }
