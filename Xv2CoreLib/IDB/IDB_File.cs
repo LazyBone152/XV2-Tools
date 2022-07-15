@@ -38,17 +38,14 @@ namespace Xv2CoreLib.IDB
         Awoken = 5
     }
 
-    public enum IDB_Version
-    {
-        First = 0,
-        Second = 1
-    }
-
     [YAXSerializeAs("IDB")]
     public class IDB_File : ISorting
     {
         [YAXAttributeForClass]
-        public int Version { get; set; }
+        [YAXDontSerializeIfNull]
+        public int Version { get; set; } = 1;
+        //0 = original IDB version (used from 1.00 to 1.17)
+        //1 = updated IDB version first used since 1.18
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "IDB_Entry")]
         public List<IDB_Entry> Entries { get; set; }

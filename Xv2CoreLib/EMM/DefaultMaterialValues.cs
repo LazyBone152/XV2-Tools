@@ -24,7 +24,7 @@ namespace Xv2CoreLib.EMM
         public readonly static float[] MatScale1 = MatScale0;
         public readonly static float[] MatCol0 = new float[4] { 0, 0, 0, 1 };
         public readonly static float[] MatCol1 = MatCol0;
-        public readonly static float[] MatCol2 = MatCol0;
+        public readonly static float[] MatCol2 = new float[4] { 1, 1, 1, 1 };
         public readonly static float[] MatCol3 = MatCol0;
 
 

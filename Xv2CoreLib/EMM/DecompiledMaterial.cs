@@ -253,6 +253,8 @@ namespace Xv2CoreLib.EMM
         [VectorFormat(ParameterNameFormat.Name, ParameterNameFormat.Value, ParameterNameFormat.Index)]
         public CustomMatUV gScroll1;
 
+        //Initially set values for this material. When saving back, these values will always be saved regardless of if they are "default".
+        private List<string> InitialParameters = new List<string>();
 
         #region Compile
         public List<Parameter> Compile()
@@ -331,6 +333,8 @@ namespace Xv2CoreLib.EMM
 
         private bool HasParameterInt(FieldInfo fieldInfo)
         {
+            if (InitialParameters.Contains(fieldInfo.Name)) return true;
+
             int defaultValue = DefaultMaterialValues.GetDefautInt(fieldInfo.Name);
             int currentValue = (int)fieldInfo.GetValue(this);
             return defaultValue != currentValue;
@@ -338,6 +342,8 @@ namespace Xv2CoreLib.EMM
 
         private bool HasParameterFloat(FieldInfo fieldInfo)
         {
+            if (InitialParameters.Contains(fieldInfo.Name)) return true;
+
             float defaultValue = DefaultMaterialValues.GetDefautFloat(fieldInfo.Name);
             float currentValue = (float)fieldInfo.GetValue(this);
             return defaultValue != currentValue;
@@ -345,6 +351,8 @@ namespace Xv2CoreLib.EMM
 
         private bool HasParameterBool(FieldInfo fieldInfo)
         {
+            if (InitialParameters.Contains(fieldInfo.Name)) return true;
+
             bool defaultValue = DefaultMaterialValues.GetDefautBool(fieldInfo.Name);
             bool currentValue = (bool)fieldInfo.GetValue(this);
             return defaultValue != currentValue;
@@ -388,6 +396,8 @@ namespace Xv2CoreLib.EMM
 
         private bool HasParameterVector(FieldInfo fieldInfo, VectorType type)
         {
+            if (InitialParameters.Contains(fieldInfo.Name)) return true;
+
             return HasParameterVector(fieldInfo, type, 0) || HasParameterVector(fieldInfo, type, 1) || HasParameterVector(fieldInfo, type, 2) || HasParameterVector(fieldInfo, type, 3);
         }
 
@@ -436,45 +446,68 @@ namespace Xv2CoreLib.EMM
                     Parameter param = material.GetParameter(field.Name);
 
                     if (param != null)
+                    {
                         field.SetValue(decMat, param.IntValue);
+                        decMat.InitialParameters.Add(field.Name);
+                    }
                     else
+                    {
                         field.SetValue(decMat, DefaultMaterialValues.GetDefautInt(field.Name));
+                    }
                 }
                 else if (field.FieldType == typeof(float))
                 {
                     Parameter param = material.GetParameter(field.Name);
 
                     if (param != null)
+                    {
                         field.SetValue(decMat, param.FloatValue);
+                        decMat.InitialParameters.Add(field.Name);
+                    }
                     else
+                    {
                         field.SetValue(decMat, DefaultMaterialValues.GetDefautFloat(field.Name));
+                    }
                 }
                 else if (field.FieldType == typeof(bool))
                 {
                     Parameter param = material.GetParameter(field.Name);
 
                     if (param != null)
+                    {
                         field.SetValue(decMat, param.IntValue > 0);
+                        decMat.InitialParameters.Add(field.Name);
+                    }
                     else
+                    {
                         field.SetValue(decMat, DefaultMaterialValues.GetDefautBool(field.Name));
+                    }
                 }
                 else if (field.FieldType == typeof(CustomMatRepUV))
                 {
+                    decMat.AddVectorInitialParams(field.Name, material);
+
                     float[] vector = GetVectorValues(field.Name, material, VectorType.UV, GetNameFormat(formatAttr, 2), GetNameFormat(formatAttr, 3));
                     field.SetValue(decMat, new CustomMatRepUV(vector[0] >= 1f, vector[1] >= 1f));
                 }
                 else if (field.FieldType == typeof(CustomMatUV))
                 {
+                    decMat.AddVectorInitialParams(field.Name, material);
+
                     float[] vector = GetVectorValues(field.Name, material, VectorType.UV, GetNameFormat(formatAttr, 2), GetNameFormat(formatAttr, 3));
                     field.SetValue(decMat, new CustomMatUV(vector[0], vector[1]));
                 }
                 else if (field.FieldType == typeof(CustomColor))
                 {
+                    decMat.AddVectorInitialParams(field.Name, material);
+
                     float[] vector = GetVectorValues(field.Name, material, VectorType.Color, GetNameFormat(formatAttr, 2), GetNameFormat(formatAttr, 3));
                     field.SetValue(decMat, new CustomColor(vector[0], vector[1], vector[2], vector[3]));
                 }
                 else if (field.FieldType == typeof(CustomVector4))
                 {
+                    decMat.AddVectorInitialParams(field.Name, material);
+
                     float[] vector = GetVectorValues(field.Name, material, VectorType.Vector4, GetNameFormat(formatAttr, 2), GetNameFormat(formatAttr, 3));
                     field.SetValue(decMat, new CustomVector4(vector[0], vector[1], vector[2], vector[3]));
                 }
@@ -767,6 +800,12 @@ namespace Xv2CoreLib.EMM
             }
 
             return false;
+        }
+
+        private void AddVectorInitialParams(string fieldName, EmmMaterial mat)
+        {
+            if (mat.ParameterExists(fieldName))
+                InitialParameters.Add(fieldName);
         }
 
         public static readonly string[] ColorParameters = new string[]

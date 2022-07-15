@@ -407,6 +407,11 @@ namespace Xv2CoreLib.EMM
             return null;
         }
 
+        public bool ParameterExists(string paramName)
+        {
+            return GetParameter(paramName) != null;
+        }
+
         public List<RgbColor> GetUsedColors()
         {
             List<RgbColor> colors = new List<RgbColor>();

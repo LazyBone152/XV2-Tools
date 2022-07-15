@@ -18,7 +18,7 @@ namespace Xv2CoreLib.IDB
         public Deserializer(string location)
         {
             saveLocation = String.Format("{0}/{1}", Path.GetDirectoryName(location), Path.GetFileNameWithoutExtension(location));
-            YAXSerializer serializer = new YAXSerializer(typeof(IDB_File), YAXSerializationOptions.DontSerializeNullObjects);
+            YAXSerializer serializer = new YAXSerializer(typeof(IDB_File), YAXExceptionHandlingPolicies.DoNotThrow, YAXExceptionTypes.Error, YAXSerializationOptions.DontSerializeNullObjects);
             idbFile = (IDB_File)serializer.DeserializeFromFile(location);
             Validation();
             Write();
