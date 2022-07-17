@@ -341,6 +341,13 @@ namespace Xv2CoreLib
     
     public static class Utils
     {
+        public static int TryParseInt(string value)
+        {
+            int val;
+            if (int.TryParse(value, out val))
+                return val;
+            return -1;
+        }
 
         public static bool IsFileWriteLocked(string path)
         {

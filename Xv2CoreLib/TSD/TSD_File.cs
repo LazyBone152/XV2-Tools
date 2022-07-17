@@ -33,7 +33,7 @@ namespace Xv2CoreLib.TSD
     public class TSD_Trigger : IInstallable
     {
         [YAXDontSerialize]
-        public int SortID { get { return int.Parse(Index); } }
+        public int SortID { get { return Utils.TryParseInt(Index); } }
 
         [YAXSerializeAs("ID")]
         [YAXAttributeForClass]
@@ -70,7 +70,7 @@ namespace Xv2CoreLib.TSD
     public class TSD_Event : IInstallable
     {
         [YAXDontSerialize]
-        public int SortID { get { return int.Parse(Index); } }
+        public int SortID { get { return Utils.TryParseInt(Index); } }
 
 
         [YAXSerializeAs("ID")]
@@ -143,7 +143,7 @@ namespace Xv2CoreLib.TSD
     public class TSD_Zone : IInstallable
     {
         [YAXDontSerialize]
-        public int SortID { get { return int.Parse(Index); } }
+        public int SortID { get { return Utils.TryParseInt(Index); } }
 
         [YAXSerializeAs("ID")]
         [YAXAttributeForClass]

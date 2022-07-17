@@ -57,7 +57,7 @@ namespace Xv2CoreLib.TNL
     public class TNL_Character : IInstallable
     {
         [YAXDontSerialize]
-        public int SortID { get { return int.Parse(Index); } }
+        public int SortID { get { return Utils.TryParseInt(I32_1); } }
         [YAXDontSerialize]
         public string Index 
         { 
@@ -120,7 +120,7 @@ namespace Xv2CoreLib.TNL
     public class TNL_Teacher : IInstallable
     {
         [YAXDontSerialize]
-        public int SortID { get { return int.Parse(Index); } }
+        public int SortID { get { return Utils.TryParseInt(I32_1); } }
         [YAXDontSerialize]
         public string Index 
         { 
@@ -183,7 +183,7 @@ namespace Xv2CoreLib.TNL
     public class TNL_Object : IInstallable
     {
         [YAXDontSerialize]
-        public int SortID { get { return int.Parse(Index); } }
+        public int SortID { get { return Utils.TryParseInt(Index); } }
 
         [YAXAttributeForClass]
         [YAXSerializeAs("ID")]
@@ -219,7 +219,7 @@ namespace Xv2CoreLib.TNL
     public class TNL_Action : IInstallable
     {
         [YAXDontSerialize]
-        public int SortID { get { return int.Parse(Index); } }
+        public int SortID { get { return Utils.TryParseInt(Index); } }
 
         [YAXSerializeAs("ID")]
         [YAXAttributeForClass]

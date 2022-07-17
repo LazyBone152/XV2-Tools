@@ -6,6 +6,7 @@ using Xv2CoreLib.Resource;
 
 namespace Xv2CoreLib.ACB
 {
+    [Serializable]
     public class TrackMetadata
     {
         private const ushort ADX_SIGNATURE = 0x80;
