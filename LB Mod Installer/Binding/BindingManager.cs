@@ -13,6 +13,7 @@ using Xv2CoreLib.CSO;
 using Xv2CoreLib.CUS;
 using Xv2CoreLib.Eternity;
 using Xv2CoreLib.HCI;
+using Xv2CoreLib.MSG;
 using Xv2CoreLib.PSC;
 using Xv2CoreLib.TTB;
 using YAXLib;
@@ -260,6 +261,7 @@ namespace LB_Mod_Installer.Binding
                         case Function.AutoID:
                             {
                                 if (!secondPass) throw new ArgumentException(String.Format("The AutoID binding function is not available for this value. ({0})", comment));
+                                //if(entries1.GetType() != typeof(IEnumerable<IInstallable>)) throw new Exception(String.Format("The AutoID function does not support this entry type. ({0})", comment));
 
                                 int minIndex = (b.HasArgument(1)) ? int.Parse(b.GetArgument1()) : 0;
                                 int maxIndex = (b.HasArgument(2)) ? int.Parse(b.GetArgument2()) : maxId;
@@ -268,7 +270,7 @@ namespace LB_Mod_Installer.Binding
 
                                 if (sequence < 1) throw new ArgumentException(String.Format("AutoID: Sequence argument cannot be less than 1. Install failed. \n\nBinding: {1}\nProperty: {0}", comment, binding, filePath));
 
-                                int nextID = GetAutoId(entries1, entries2, minIndex, maxIndex, sequence);
+                                int nextID = GetAutoId(entries1 as IEnumerable<IInstallable>, entries2 as IEnumerable<IInstallable>, minIndex, maxIndex, sequence);
 
                                 if (nextID == NullTokenInt && errorHandler == ErrorHandling.Stop)
                                 {
@@ -1013,7 +1015,7 @@ namespace LB_Mod_Installer.Binding
         #endregion
 
         #region AutoIdFunctions
-        public AutoIdContext GetAutoIdContext<T>(IEnumerable<T> keyEntries) where T : class
+        public AutoIdContext GetAutoIdContext<T>(IEnumerable<T> keyEntries) where T : class, IInstallable
         {
             if (keyEntries == null) return null;
 
@@ -1028,7 +1030,7 @@ namespace LB_Mod_Installer.Binding
             return context;
         }
 
-        private int GetAutoId<T>(IEnumerable<T> installEntries, IEnumerable<T> destEntries, int min, int max, int sequence) where T : class
+        private int GetAutoId<T>(IEnumerable<T> installEntries, IEnumerable<T> destEntries, int min, int max, int sequence) where T : class, IInstallable
         {
             AutoIdContext context = GetAutoIdContext<T>(destEntries);
 
@@ -1047,6 +1049,7 @@ namespace LB_Mod_Installer.Binding
             }
 
             //Loop to get ID
+            //int id = min;
             int id = min;
 
             while (IsAutoIdUsed(context, id, sequence) && id <= max)
@@ -1283,12 +1286,38 @@ namespace LB_Mod_Installer.Binding
 
     public class AutoIdContext
     {
-        public IEnumerable<object> Key { get; set; }
+        public IEnumerable<IInstallable> Key { get; set; }
         public List<int> AssignedIds { get; private set; } = new List<int>();
-    
-        public AutoIdContext(IEnumerable<object> key)
+        private int MinId = 0;
+
+        public AutoIdContext(IEnumerable<IInstallable> Key)
         {
-            Key = key;
+            this.Key = Key;
+
+            foreach(var key in Key)
+            {
+                AssignedIds.Add(key.SortID);
+                //AddId(key.SortID);
+            }
+
+            AssignedIds.Sort();
+
+            //If all IDs are sequential, then we can simply reduce AssignedIds to a single integer (better performance)
+            foreach(var id in AssignedIds)
+            {
+                if(id != MinId)
+                {
+                    MinId = 0;
+                    break;
+                }
+
+                MinId++;
+            }
+
+            if (MinId != 0)
+                AssignedIds.Clear();
+
+            MinId++;
         }
 
         public void AddId(int id)
@@ -1299,13 +1328,13 @@ namespace LB_Mod_Installer.Binding
 
         public bool HasId(int id)
         {
-            foreach(var keyEntry in Key)
-            {
-                if(keyEntry is IInstallable entry)
-                {
-                    if (entry.SortID == id) return true;
-                }
-            }
+            //string idStr = id.ToString();
+
+            //if (Key.Any(x => x.Index == idStr))
+            //   return true;
+
+            if (id < MinId)
+                return true;
 
             return AssignedIds.Contains(id);
         }
@@ -1325,6 +1354,15 @@ namespace LB_Mod_Installer.Binding
                 AddId(id);
             }
         }
+   
+        public int GetMaxUsedID()
+        {
+            int id = Key.Count() > 0 ? Key.Max(x => x.SortID) : 0;
+            int assignedMaxId = AssignedIds.Count() > 0 ? AssignedIds.Max() : 0;
+
+            return id > assignedMaxId ? id : assignedMaxId;
+        }
+
     }
 
     public struct AliasValue
