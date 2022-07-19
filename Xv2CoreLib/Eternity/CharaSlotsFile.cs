@@ -330,6 +330,7 @@ namespace Xv2CoreLib.Eternity
         [YAXAttributeForClass]
         public CstDlcVer DLC { get; set; }
         [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (CstDlcVer2)0)]
         public CstDlcVer2 DLC_Flag2 { get; set; }
     }
 }

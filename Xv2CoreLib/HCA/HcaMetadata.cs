@@ -31,8 +31,8 @@ namespace Xv2CoreLib.HCA
         public double LoopStartSeconds { get { return BlocksToSeconds(LoopStart, SampleRate); } }
         public double LoopEndSeconds { get { return BlocksToSeconds(LoopEnd, SampleRate); } }
 
-        public uint LoopStartMs => BlocksToMs(LoopStartMs, SampleRate);
-        public uint LoopEndMs => BlocksToMs(LoopEndMs, SampleRate);
+        public uint LoopStartMs => BlocksToMs(LoopStart, SampleRate);
+        public uint LoopEndMs => BlocksToMs(LoopEnd, SampleRate);
 
         public uint LoopStartSamples { get { return BlocksToSamples(LoopStart); } }
         public uint LoopEndSamples { get { return BlocksToSamples(LoopEnd); } }

@@ -409,6 +409,8 @@ namespace Xv2CoreLib.EMP
         /// <returns></returns>
         public EMP_TextureDefinition GetTexture(EMP_TextureDefinition texture)
         {
+            if (texture == null) return null;
+
             foreach (var tex in Textures)
             {
                 if (tex.Compare(texture)) return tex;

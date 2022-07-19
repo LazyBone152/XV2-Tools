@@ -598,7 +598,7 @@ namespace EEPK_Organiser.Forms.EMP
         {
             //Add referenced texture entries if they are not found
 
-            foreach (var texture in particleEffect.Type_Texture.TextureEntryRef)
+            foreach (var texture in particleEffect.Type_Texture.TextureEntryRef.Where(x => x.TextureRef != null))
             {
                 var newTex = empFile.GetTexture(texture.TextureRef);
 

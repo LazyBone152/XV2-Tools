@@ -540,6 +540,7 @@ namespace Xv2CoreLib.MSG
         [YAXDontSerialize]
 #endif
         [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public int DebugIndex { get; set; }
 
         [YAXAttributeForClass]

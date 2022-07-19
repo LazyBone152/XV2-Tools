@@ -42,7 +42,7 @@ namespace Xv2CoreLib.IDB
     public class IDB_File : ISorting
     {
         [YAXAttributeForClass]
-        [YAXDontSerializeIfNull]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 1)]
         public int Version { get; set; } = 1;
         //0 = original IDB version (used from 1.00 to 1.17)
         //1 = updated IDB version first used since 1.18
@@ -311,10 +311,12 @@ namespace Xv2CoreLib.IDB
         //New in 1.18
         [YAXAttributeFor("NEW_I_12")]
         [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         [YAXHexValue]
         public ushort NEW_I_12 { get; set; } = ushort.MaxValue;
         [YAXAttributeFor("NEW_I_14")]
         [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         [YAXHexValue]
         public ushort NEW_I_14 { get; set; } = ushort.MaxValue;
 
@@ -498,10 +500,12 @@ namespace Xv2CoreLib.IDB
         //New in 1.18
         [YAXAttributeFor("NEW_I_48")]
         [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         [YAXHexValue]
         public int NEW_I_48 { get; set; }
         [YAXAttributeFor("NEW_I_52")]
         [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         [YAXHexValue]
         public int NEW_I_52 { get; set; }
     }

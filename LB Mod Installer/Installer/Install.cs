@@ -224,7 +224,7 @@ namespace LB_Mod_Installer.Installer
         private void ResolveFileType(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
             //Special case: prebaked.xml
-            if(installPath.Equals(PrebakedFile.PATH, StringComparison.OrdinalIgnoreCase))
+            if(installPath?.Equals(PrebakedFile.PATH, StringComparison.OrdinalIgnoreCase) == true)
             {
                 Install_Prebaked(xmlPath, installPath);
                 return;
