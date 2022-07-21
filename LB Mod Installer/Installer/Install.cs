@@ -43,6 +43,8 @@ using Xv2CoreLib.CML;
 using Xv2CoreLib.Eternity;
 using Xv2CoreLib.CST;
 using Xv2CoreLib.OCS;
+using Xv2CoreLib.QML;
+using Xv2CoreLib.OCO;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -324,6 +326,15 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".ocs":
                     Install_OCS(xmlPath, installPath, isXml);
+                    break;
+                case ".qml":
+                    Install_QML(xmlPath, installPath, isXml, useSkipBindings);
+                    break;
+                case ".cst":
+                    Install_CST(xmlPath, installPath, isXml, useSkipBindings);
+                    break;
+                case ".oco":
+                    Install_OCO(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 default:
                     throw new InvalidDataException(string.Format("The filetype of \"{0}\" is not supported.", xmlPath));
@@ -1443,6 +1454,77 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
+        private void Install_QML(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                QML_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<QML_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : QML_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                QML_File binaryFile = (QML_File)GetParsedFile<QML_File>(installPath);
+
+                //Parse bindings
+                bindingManager.ParseProperties(xmlFile.Entries, binaryFile.Entries, installPath);
+
+                InstallEntries(xmlFile.Entries, binaryFile.Entries, installPath, Sections.QML_Entry, useSkipBindings);
+
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at QML install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
+        private void Install_CST(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                CST_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<CST_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : CST_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                CST_File binaryFile = (CST_File)GetParsedFile<CST_File>(installPath);
+
+                List<string> installIDs = new List<string>();
+                binaryFile.InstallEntries(xmlFile.CharaSlots, installIDs);
+
+                foreach (var id in installIDs)
+                {
+                    GeneralInfo.Tracker.AddID(installPath, Sections.CST_Entry, id);
+                }
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at CST install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
+        private void Install_OCO(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                OCO_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<OCO_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : OCO_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                OCO_File binaryFile = (OCO_File)GetParsedFile<OCO_File>(installPath);
+
+                //Install entries
+                InstallSubEntries<OCO_Costume, OCO_Partner>(xmlFile.Partners, binaryFile.Partners, installPath, Sections.OCO_Entry, useSkipBindings);
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at OCO install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
 
         //Generic Install Methods
         //We need generic methods for IInstallable via List and ObservableCollection. Most file types will be handled with this.
@@ -1728,6 +1810,10 @@ namespace LB_Mod_Installer.Installer
                     return CST_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".ocs":
                     return OCS_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".oco":
+                    return OCO_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".qml":
+                    return QML_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 default:
                     throw new InvalidDataException(String.Format("GetParsedFileFromGame: The filetype of \"{0}\" is not supported.", path));
             }
@@ -1807,6 +1893,10 @@ namespace LB_Mod_Installer.Installer
                     return ((CharaSlotsFile)data).SaveToBytes();
                 case ".ocs":
                     return ((OCS_File)data).SaveToBytes();
+                case ".oco":
+                    return ((OCO_File)data).SaveToBytes();
+                case ".qml":
+                    return ((QML_File)data).SaveToBytes();
                 default:
                     throw new InvalidDataException(String.Format("GetBytesFromParsedFile: The filetype of \"{0}\" is not supported.", path));
             }

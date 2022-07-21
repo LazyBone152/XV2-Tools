@@ -12,7 +12,7 @@ namespace Xv2CoreLib.OCO
     {
         string saveLocation;
         byte[] rawBytes;
-        private OCO_File octFile = new OCO_File();
+        public OCO_File ocoFile = new OCO_File();
 
         public Parser(string path, bool _writeXml)
         {
@@ -24,8 +24,15 @@ namespace Xv2CoreLib.OCO
             if (_writeXml)
             {
                 YAXSerializer serializer = new YAXSerializer(typeof(OCO_File));
-                serializer.SerializeToFile(octFile, saveLocation + ".xml");
+                serializer.SerializeToFile(ocoFile, saveLocation + ".xml");
             }
+        }
+
+        public Parser(byte[] bytes)
+        {
+            rawBytes = bytes;
+
+            Parse();
         }
 
         private void Parse()
@@ -35,27 +42,27 @@ namespace Xv2CoreLib.OCO
 
             if (count > 0)
             {
-                octFile.TableEntries = new List<OCO_TableEntry>();
+                ocoFile.Partners = new List<OCO_Partner>();
 
                 for(int i = 0; i < count; i++)
                 {
                     int subEntryCount = BitConverter.ToInt32(rawBytes, offset);
                     int subDataOffset = BitConverter.ToInt32(rawBytes, offset + 4) + (20 * BitConverter.ToInt32(rawBytes, offset + 8)) + 16;
-                    octFile.TableEntries.Add(new OCO_TableEntry() { Index = BitConverter.ToInt32(rawBytes, offset + 12) });
+                    ocoFile.Partners.Add(new OCO_Partner() { PartnerID = BitConverter.ToInt32(rawBytes, offset + 12) });
                     
                     if(subEntryCount > 0)
                     {
-                        octFile.TableEntries[i].SubEntries = new List<OCO_SubEntry>();
+                        ocoFile.Partners[i].SubEntries = new List<OCO_Costume>();
                     }
 
                     for (int a = 0; a < subEntryCount; a++)
                     {
-                        octFile.TableEntries[i].SubEntries.Add(new OCO_SubEntry()
+                        ocoFile.Partners[i].SubEntries.Add(new OCO_Costume()
                         {
-                            I_04 = BitConverter.ToUInt32(rawBytes, subDataOffset + 4),
+                            I_04 = BitConverter.ToInt32(rawBytes, subDataOffset + 4),
                             I_08 = BitConverter.ToInt32(rawBytes, subDataOffset + 8),
-                            I_12 = BitConverter.ToUInt32(rawBytes, subDataOffset + 12),
-                            I_16 = BitConverter.ToUInt32(rawBytes, subDataOffset + 16)
+                            I_12 = BitConverter.ToInt32(rawBytes, subDataOffset + 12),
+                            I_16 = BitConverter.ToInt32(rawBytes, subDataOffset + 16)
                         });
 
                         subDataOffset += 20;

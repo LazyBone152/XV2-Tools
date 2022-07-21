@@ -40,6 +40,8 @@ using Xv2CoreLib.CML;
 using Xv2CoreLib.Eternity;
 using Xv2CoreLib.CST;
 using Xv2CoreLib.OCS;
+using Xv2CoreLib.QML;
+using Xv2CoreLib.OCO;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -270,6 +272,15 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".ocs":
                     Uninstall_OCS(path, file);
+                    break;
+                case ".qml":
+                    Uninstall_QML(path, file);
+                    break;
+                case ".cst":
+                    Uninstall_CST(path, file);
+                    break;
+                case ".oco":
+                    Uninstall_OCO(path, file);
                     break;
                 default:
                     throw new Exception(string.Format("The filetype of \"{0}\" is unsupported. Uninstall failed.\n\nThis mod was likely installed by a newer version of the installer.", path));
@@ -1169,6 +1180,65 @@ namespace LB_Mod_Installer.Installer
             catch (Exception ex)
             {
                 string error = string.Format("Failed at Prebaked uninstall phase ({0}).", PrebakedFile.PATH);
+                throw new Exception(error, ex);
+            }
+        }
+
+        private void Uninstall_QML(string path, _File file)
+        {
+            try
+            {
+                QML_File binaryFile = (QML_File)GetParsedFile<QML_File>(path, false);
+                QML_File cpkBinFile = (QML_File)GetParsedFile<QML_File>(path, true);
+
+                Section section = file.GetSection(Sections.QML_Entry);
+
+                if (section != null)
+                {
+                    UninstallEntries(binaryFile.Entries, (cpkBinFile != null) ? cpkBinFile.Entries : null, section.IDs);
+                }
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at QML uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
+
+        private void Uninstall_CST(string path, _File file)
+        {
+            try
+            {
+                CST_File binaryCpkFile = (CST_File)GetParsedFile<CST_File>(path, false, false);
+                CST_File cpkCstFile = (CST_File)GetParsedFile<CST_File>(path, true, false);
+
+                Section section = file.GetSection(Sections.CST_Entry);
+
+                if (section != null)
+                {
+                    binaryCpkFile.UninstallEntries(section.IDs, cpkCstFile);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at CST uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
+
+        private void Uninstall_OCO(string path, _File file)
+        {
+            try
+            {
+                OCO_File binaryFile = (OCO_File)GetParsedFile<OCO_File>(path, false);
+                OCO_File cpkBinFile = (OCO_File)GetParsedFile<OCO_File>(path, true);
+
+                UninstallSubEntries<OCO_Costume, OCO_Partner>(binaryFile.Partners, (cpkBinFile != null) ? cpkBinFile.Partners : null, file, true);
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at OCO uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }

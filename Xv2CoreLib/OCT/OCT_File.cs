@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using YAXLib;
 
 namespace Xv2CoreLib.OCT
@@ -26,22 +22,22 @@ namespace Xv2CoreLib.OCT
 
     }
 
-    [YAXSerializeAs("SuperSoul")]
+    [YAXSerializeAs("PartnerSuperSoul")]
     public class OCT_SubEntry
     {
 
         [YAXAttributeForClass]
         [YAXSerializeAs("Order")]
         public int Index { get; set; } //0x4
-        [YAXAttributeFor("TP_Cost_Toggle")]
-        [YAXSerializeAs("value")]
-        public int I_08 { get; set; } // uint32
-        [YAXAttributeFor("TP_Cost")]
-        [YAXSerializeAs("value")]
-        public int I_12 { get; set; }
-        [YAXAttributeFor("Super_Soul")]
-        [YAXSerializeAs("ID")]
+        [YAXAttributeForClass]
+        [YAXSerializeAs("Super_Soul")]
         public int I_16 { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("TP_Cost_Toggle")]
+        public int I_08 { get; set; } // uint32
+        [YAXAttributeForClass]
+        [YAXSerializeAs("TP_Cost")]
+        public int I_12 { get; set; }
 
     }
 }

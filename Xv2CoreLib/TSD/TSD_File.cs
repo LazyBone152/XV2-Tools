@@ -27,6 +27,7 @@ namespace Xv2CoreLib.TSD
             return new Deserializer(this).bytes.ToArray();
         }
 
+
     }
 
     [YAXSerializeAs("Trigger")]
@@ -64,6 +65,33 @@ namespace Xv2CoreLib.TSD
         [YAXSerializeAs("value")]
         [YAXAttributeFor("Conditions")]
         public string Condition { get; set; }
+
+        public static TSD_Trigger GetIdenticalTrigger<T>(IEnumerable<T> entries, TSD_Trigger trigger) where T : class
+        {
+            foreach (var entry in entries)
+            {
+                if(entry is TSD_Trigger _trigger)
+                {
+                    if (_trigger.Compare(trigger)) return _trigger;
+                }
+            }
+
+            return null;
+        }
+
+        public bool Compare(TSD_Trigger trigger)
+        {
+            if (I_04 != trigger.I_04) return false;
+            if (I_08 != trigger.I_08) return false;
+            if (I_12 != trigger.I_12) return false;
+            if (I_16 != trigger.I_16) return false;
+            if (I_20 != trigger.I_20) return false;
+            if (I_24 != trigger.I_24) return false;
+            if (I_28 != trigger.I_28) return false;
+            if (Condition != trigger.Condition) return false;
+
+            return true;
+        }
     }
 
     [YAXSerializeAs("Event")]

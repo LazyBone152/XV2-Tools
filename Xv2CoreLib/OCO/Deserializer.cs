@@ -12,7 +12,7 @@ namespace Xv2CoreLib.OCO
     {
         string saveLocation;
         OCO_File octFile;
-        List<byte> bytes = new List<byte>() { 35, 79, 67, 79, 254, 255, 16, 0 };
+        public List<byte> bytes = new List<byte>() { 35, 79, 67, 79, 254, 255, 16, 0 };
 
         public Deserializer(string location)
         {
@@ -23,9 +23,15 @@ namespace Xv2CoreLib.OCO
             File.WriteAllBytes(saveLocation, bytes.ToArray());
         }
 
+        public Deserializer(OCO_File ocoFile)
+        {
+            this.octFile = ocoFile;
+            Write();
+        }
+
         private void Write()
         {
-            int count = (octFile.TableEntries != null) ? octFile.TableEntries.Count() : 0;
+            int count = (octFile.Partners != null) ? octFile.Partners.Count() : 0;
             bytes.AddRange(BitConverter.GetBytes(count));
             bytes.AddRange(new byte[4]);
 
@@ -35,26 +41,26 @@ namespace Xv2CoreLib.OCO
 
             for(int i = 0; i < count; i++)
             {
-                int subDataCount = (octFile.TableEntries[i].SubEntries != null) ? octFile.TableEntries[i].SubEntries.Count() : 0;
+                int subDataCount = (octFile.Partners[i].SubEntries != null) ? octFile.Partners[i].SubEntries.Count() : 0;
                 bytes.AddRange(BitConverter.GetBytes(subDataCount));
                 bytes.AddRange(BitConverter.GetBytes(dataOffset));
                 bytes.AddRange(BitConverter.GetBytes(currentIndex));
-                bytes.AddRange(BitConverter.GetBytes(octFile.TableEntries[i].Index));
+                bytes.AddRange(BitConverter.GetBytes(octFile.Partners[i].PartnerID));
                 currentIndex += subDataCount;
             }
 
             //Table Entries
             for (int i = 0; i < count; i++)
             {
-                int subDataCount = (octFile.TableEntries[i].SubEntries != null) ? octFile.TableEntries[i].SubEntries.Count() : 0;
+                int subDataCount = (octFile.Partners[i].SubEntries != null) ? octFile.Partners[i].SubEntries.Count() : 0;
 
                 for(int a = 0; a < subDataCount; a++)
                 {
-                    bytes.AddRange(BitConverter.GetBytes(octFile.TableEntries[i].Index));
-                    bytes.AddRange(BitConverter.GetBytes(octFile.TableEntries[i].SubEntries[a].I_04));
-                    bytes.AddRange(BitConverter.GetBytes(octFile.TableEntries[i].SubEntries[a].I_08));
-                    bytes.AddRange(BitConverter.GetBytes(octFile.TableEntries[i].SubEntries[a].I_12));
-                    bytes.AddRange(BitConverter.GetBytes(octFile.TableEntries[i].SubEntries[a].I_16));
+                    bytes.AddRange(BitConverter.GetBytes(octFile.Partners[i].PartnerID));
+                    bytes.AddRange(BitConverter.GetBytes(octFile.Partners[i].SubEntries[a].I_04));
+                    bytes.AddRange(BitConverter.GetBytes(octFile.Partners[i].SubEntries[a].I_08));
+                    bytes.AddRange(BitConverter.GetBytes(octFile.Partners[i].SubEntries[a].I_12));
+                    bytes.AddRange(BitConverter.GetBytes(octFile.Partners[i].SubEntries[a].I_16));
                 }
 
             }

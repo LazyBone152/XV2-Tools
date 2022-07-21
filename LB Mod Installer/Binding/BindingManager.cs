@@ -13,8 +13,8 @@ using Xv2CoreLib.CSO;
 using Xv2CoreLib.CUS;
 using Xv2CoreLib.Eternity;
 using Xv2CoreLib.HCI;
-using Xv2CoreLib.MSG;
 using Xv2CoreLib.PSC;
+using Xv2CoreLib.TSD;
 using Xv2CoreLib.TTB;
 using YAXLib;
 
@@ -41,26 +41,6 @@ namespace LB_Mod_Installer.Binding
         private const string FRI_BCS_PATH = "chara/FRI/FRI.bcs";
         private const string NMC_BCS_PATH = "chara/NMC/NMC.bcs";
         
-        private enum CusIdType
-        {
-            ID1,
-            ID2
-        }
-
-        public enum CusSkillType
-        {
-            Super,
-            Ultimate,
-            Evasive,
-            Blast,
-            Awoken
-        }
-        public enum SkillFileType
-        {
-            BAC,
-            BDM,
-            ShotBDM
-        }
 
         private Install install;
         private List<AliasValue> Aliases = new List<AliasValue>();
@@ -73,6 +53,10 @@ namespace LB_Mod_Installer.Binding
         private List<string> AssignedCostumes = new List<string>();
         private List<int> AssignedTtbEventIDs = new List<int>();
 
+        /// <summary>
+        /// Stores a reference to the current entry during the Memory Pass (second pass). 
+        /// </summary>
+        private object CurrentEntry = null;
 
         public BindingManager(Install install)
         {
@@ -91,7 +75,7 @@ namespace LB_Mod_Installer.Binding
         }
 
         /// <summary>
-        /// Parse the bindings on all string properties.
+        /// Parse the bindings on all string properties. This is the second binding parse, occuring after deserialization.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="installList">The entries that are being installed (that have the bindings).</param>
@@ -126,6 +110,8 @@ namespace LB_Mod_Installer.Binding
 
         private void ParseProperties_RecursiveSingle<T>(object obj, string filePath, IList<T> installList, IList<T> binaryList, bool allowAutoId = false) where T : class
         {
+            CurrentEntry = obj;
+
             //This property needs to have its props parsed.
             PropertyInfo[] childProps = obj.GetType().GetProperties();
 
@@ -240,19 +226,19 @@ namespace LB_Mod_Installer.Binding
                         case Function.SetAlias:
                             AddAlias(retID + increment, b.GetArgument1());
                             break;
-                        case Function.AliasLink:
+                        case Function.GetAlias:
                             retID = GetAliasId(b.GetArgument1(), comment);
                             break;
                         case Function.SkillID1:
                             {
-                                CusSkillType skillType = GetSkillType(b.GetArgument2());
-                                retID = GetSkillId(CusIdType.ID1, skillType, b.GetArgument1());
+                                CUS_File.SkillType skillType = GetSkillType(b.GetArgument2());
+                                retID = GetSkillId(1, skillType, b.GetArgument1());
                                 break;
                             }
                         case Function.SkillID2:
                             {
-                                CusSkillType skillType = GetSkillType(b.GetArgument2());
-                                retID = GetSkillId(CusIdType.ID2, skillType, b.GetArgument1());
+                                CUS_File.SkillType skillType = GetSkillType(b.GetArgument2());
+                                retID = GetSkillId(2, skillType, b.GetArgument1());
                                 break;
                             }
                         case Function.CharaID:
@@ -289,7 +275,7 @@ namespace LB_Mod_Installer.Binding
                             break;
                         case Function.X2MSkillID1:
                             {
-                                CusSkillType skillType = GetSkillType(b.GetArgument2());
+                                CUS_File.SkillType skillType = GetSkillType(b.GetArgument2());
                                 int id1 = x2mHelper.GetX2MSkillID1(b.GetArgument1(), skillType);
 
                                 if (id1 == NullTokenInt && errorHandler == ErrorHandling.Stop)
@@ -303,7 +289,7 @@ namespace LB_Mod_Installer.Binding
                             }
                         case Function.X2MSkillID2:
                             {
-                                CusSkillType skillType = GetSkillType(b.GetArgument2());
+                                CUS_File.SkillType skillType = GetSkillType(b.GetArgument2());
                                 int id2 = x2mHelper.GetX2MSkillID2(b.GetArgument1(), skillType);
 
                                 if (id2 == NullTokenInt && errorHandler == ErrorHandling.Stop)
@@ -345,7 +331,7 @@ namespace LB_Mod_Installer.Binding
                         case Function.X2MSkillPath:
                             {
                                 retIsString = true;
-                                CusSkillType skillType = GetSkillType(b.GetArgument2());
+                                CUS_File.SkillType skillType = GetSkillType(b.GetArgument2());
                                 SkillFileType skillFileType = GetSkillFileType(b.GetArgument3());
                                 string x2mSkillPath = x2mHelper.GetX2MSkillPath(b.GetArgument1(), skillType, skillFileType);
 
@@ -439,6 +425,34 @@ namespace LB_Mod_Installer.Binding
                                 retID = prebaked.GetFreeCusAuraID(sequenceSize);
                             }
                             break;
+                        case Function.GetEntry:
+                            {
+                                string alias = b.GetArgument1();
+
+                                if(CurrentEntry is TSD_Trigger trigger)
+                                {
+                                    TSD_Trigger entry = TSD_Trigger.GetIdenticalTrigger(entries2, trigger);
+
+                                    if(entry != null)
+                                    {
+                                        AddAlias(entry.SortID, alias);
+
+                                        //Entry will be removed and not installed
+                                        retID = NullTokenInt;
+                                        errorHandler = ErrorHandling.Skip;
+                                    }
+                                    else
+                                    {
+                                        throw new Exception(String.Format("GetEntry: Could not find the specified entry.\n\n This could be caused by some missing mod dependency, or possibly a misconfigured mod. \n\nBinding: {1}\nProperty: {0}", comment, binding, filePath));
+                                    }
+                                }
+                                else
+                                {
+                                    throw new ArgumentException("GetEntry: This binding is only available for TSD triggers.");
+                                }
+
+                                break;
+                            }
                     }
                 }
 
@@ -540,7 +554,8 @@ namespace LB_Mod_Installer.Binding
                         bindings.Add(new BindingValue() { Function = Function.SetAlias, Arguments = arguments });
                         break;
                     case "aliaslink":
-                        bindings.Add(new BindingValue() { Function = Function.AliasLink, Arguments = arguments });
+                    case "getalias":
+                        bindings.Add(new BindingValue() { Function = Function.GetAlias, Arguments = arguments });
                         break;
                     case "skillid1":
                         bindings.Add(new BindingValue() { Function = Function.SkillID1, Arguments = arguments });
@@ -604,6 +619,9 @@ namespace LB_Mod_Installer.Binding
                         break;
                     case "autocusaura":
                         bindings.Add(new BindingValue() { Function = Function.AutoCusAura, Arguments = arguments });
+                        break;
+                    case "getentry":
+                        bindings.Add(new BindingValue() { Function = Function.GetEntry, Arguments = arguments });
                         break;
                     default:
                         throw new FormatException(String.Format("Invalid ID Binding Function (Function = {0}, Argument = {1})\nFull binding: {2}", function, argument, originalBinding));
@@ -681,7 +699,7 @@ namespace LB_Mod_Installer.Binding
                     case Function.AutoPartSet:
                         //Can have no arguments or have arguments
                         break;
-                    case Function.AliasLink:
+                    case Function.GetAlias:
                     case Function.SetAlias:
                     case Function.CharaID:
                     case Function.Error:
@@ -693,6 +711,7 @@ namespace LB_Mod_Installer.Binding
                     case Function.LocalKey:
                     case Function.IsLanguage:
                     case Function.AutoCusAura:
+                    case Function.GetEntry:
                         //Must have an argument
                         if (!bindings[i].HasArgument()) throw new ArgumentException(String.Format("The {0} binding function takes a string argument, but none was found.\n({1})", bindings[i].Function, comment));
                         break;
@@ -732,7 +751,9 @@ namespace LB_Mod_Installer.Binding
         private bool DoOnFirstPass(string binding)
         {
             if (string.IsNullOrWhiteSpace(binding)) return false;
-            return (!binding.ToLower().Contains("autoid"));
+
+            //AutoID and GetEntry are only possible to complete during the Memory Pass (after all XMLs are deserialzied into objects)
+            return !(binding.ToLower().Contains("autoid") || binding.ToLower().Contains("getentry"));
         }
 
         private void MoveFunctionToLast(List<BindingValue> bindings, Function func)
@@ -777,22 +798,22 @@ namespace LB_Mod_Installer.Binding
             throw new Exception(String.Format("Could not find the alias: {0}. Binding parse failed. ({1})\n\nThis is most likely caused by using a binding that relies on something to be installed before it. To fix this issue, you can simply add a DoLast=\"True\" tag onto the File entry which will cause the file to be installed last.", alias, comment));
         }
 
-        private CusSkillType GetSkillType(string argument)
+        private CUS_File.SkillType GetSkillType(string argument)
         {
             switch (argument.ToLower())
             {
                 case "super":
-                    return CusSkillType.Super;
+                    return CUS_File.SkillType.Super;
                 case "ultimate":
-                    return CusSkillType.Ultimate;
+                    return CUS_File.SkillType.Ultimate;
                 case "evasive":
-                    return CusSkillType.Evasive;
+                    return CUS_File.SkillType.Evasive;
                 case "blast":
-                    return CusSkillType.Blast;
+                    return CUS_File.SkillType.Blast;
                 case "awoken":
-                    return CusSkillType.Awoken;
+                    return CUS_File.SkillType.Awoken;
                 default:
-                    return CusSkillType.Super;
+                    return CUS_File.SkillType.Super;
             }
         }
 
@@ -811,26 +832,26 @@ namespace LB_Mod_Installer.Binding
             }
         }
 
-        private int GetSkillId(CusIdType idType, CusSkillType skillType, string shortName)
+        private int GetSkillId(int idType, CUS_File.SkillType skillType, string shortName)
         {
             CUS_File cusFile = (CUS_File)install.GetParsedFile<CUS_File>(CUS_PATH);
 
             List<Skill> skills = null;
             switch (skillType)
             {
-                case CusSkillType.Super:
+                case CUS_File.SkillType.Super:
                     skills = cusFile.SuperSkills;
                     break;
-                case CusSkillType.Ultimate:
+                case CUS_File.SkillType.Ultimate:
                     skills = cusFile.UltimateSkills;
                     break;
-                case CusSkillType.Evasive:
+                case CUS_File.SkillType.Evasive:
                     skills = cusFile.EvasiveSkills;
                     break;
-                case CusSkillType.Blast:
+                case CUS_File.SkillType.Blast:
                     skills = cusFile.BlastSkills;
                     break;
-                case CusSkillType.Awoken:
+                case CUS_File.SkillType.Awoken:
                     skills = cusFile.AwokenSkills;
                     break;
             }
@@ -841,9 +862,9 @@ namespace LB_Mod_Installer.Binding
                 {
                     switch (idType)
                     {
-                        case CusIdType.ID1:
+                        case 1:
                             return skill.ID1;
-                        case CusIdType.ID2:
+                        case 2:
                             return skill.ID2;
                     }
                 }
@@ -1284,189 +1305,6 @@ namespace LB_Mod_Installer.Binding
 
     }
 
-    public class AutoIdContext
-    {
-        public IEnumerable<IInstallable> Key { get; set; }
-        public List<int> AssignedIds { get; private set; } = new List<int>();
-        private int MinId = 0;
-
-        public AutoIdContext(IEnumerable<IInstallable> Key)
-        {
-            this.Key = Key;
-
-            foreach(var key in Key)
-            {
-                AssignedIds.Add(key.SortID);
-                //AddId(key.SortID);
-            }
-
-            AssignedIds.Sort();
-
-            //If all IDs are sequential, then we can simply reduce AssignedIds to a single integer (better performance)
-            foreach(var id in AssignedIds)
-            {
-                if(id != MinId)
-                {
-                    MinId = 0;
-                    break;
-                }
-
-                MinId++;
-            }
-
-            if (MinId != 0)
-                AssignedIds.Clear();
-
-            MinId++;
-        }
-
-        public void AddId(int id)
-        {
-            if(!HasId(id))
-                AssignedIds.Add(id);
-        }
-
-        public bool HasId(int id)
-        {
-            //string idStr = id.ToString();
-
-            //if (Key.Any(x => x.Index == idStr))
-            //   return true;
-
-            if (id < MinId)
-                return true;
-
-            return AssignedIds.Contains(id);
-        }
-        
-        public void MergeContext(AutoIdContext context)
-        {
-            foreach(var keyEntry in context.Key)
-            {
-                if(keyEntry is IInstallable entry)
-                {
-                    AddId(entry.SortID);
-                }
-            }
-
-            foreach(var id in context.AssignedIds)
-            {
-                AddId(id);
-            }
-        }
-   
-        public int GetMaxUsedID()
-        {
-            int id = Key.Count() > 0 ? Key.Max(x => x.SortID) : 0;
-            int assignedMaxId = AssignedIds.Count() > 0 ? AssignedIds.Max() : 0;
-
-            return id > assignedMaxId ? id : assignedMaxId;
-        }
-
-    }
-
-    public struct AliasValue
-    {
-        public string Alias { get; set; }
-        public int ID { get; set; }
-    }
-
-    public struct BindingValue
-    {
-        public Function Function { get; set; }
-        public string[] Arguments { get; set; }
-
-        public string GetArgument1()
-        {
-            if (Arguments != null)
-            {
-                if (Arguments.Length > 0)
-                {
-                    return Arguments[0].ToLower().Trim();
-                }
-            }
-
-            return String.Empty;
-        }
-
-        public string GetArgument2()
-        {
-            if (Arguments != null)
-            {
-                if (Arguments.Length > 1)
-                {
-                    return Arguments[1].ToLower().Trim();
-                }
-            }
-
-            return String.Empty;
-        }
-
-        public string GetArgument3()
-        {
-            if (Arguments != null)
-            {
-                if (Arguments.Length > 2)
-                {
-                    return Arguments[2].ToLower().Trim();
-                }
-            }
-
-            return String.Empty;
-        }
-
-        public string GetArgument4()
-        {
-            if (Arguments != null)
-            {
-                if (Arguments.Length > 3)
-                {
-                    return Arguments[3].ToLower().Trim();
-                }
-            }
-
-            return String.Empty;
-        }
-
-        public bool HasArgument(int argCount = 1)
-        {
-            if (Arguments != null)
-            {
-                if (Arguments.Length >= argCount)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public ErrorHandling GetErrorHandlingType()
-        {
-            if (Function == Function.Error)
-            {
-                string args = GetArgument1().ToLower();
-                switch (args)
-                {
-                    case "skip":
-                        return ErrorHandling.Skip;
-                    case "stop":
-                        return ErrorHandling.Stop;
-                    case "usedefaultvalue":
-                    case "default":
-                    case "defaultvalue":
-                        return ErrorHandling.UseDefaultValue;
-                    default:
-                        throw new Exception(String.Format("{0} is not a valid Error argument.", args));
-                }
-
-            }
-            else
-            {
-                throw new Exception(String.Format("Function {0} cannot access the ErrorHandling type.", Function));
-            }
-        }
-    }
-
     public enum Function
     {
         AutoID,
@@ -1475,7 +1313,7 @@ namespace LB_Mod_Installer.Binding
         AutoCostume,
         AutoTtbEvent,
         AutoCusAura,
-        AliasLink,
+        GetAlias,
         SkillID1,
         SkillID2,
         CharaID,
@@ -1484,6 +1322,7 @@ namespace LB_Mod_Installer.Binding
         X2MSkillID1,
         X2MSkillID2,
         Skip,
+        GetEntry,
 
         //For use in InstallerXml:
         X2MSkillPath,
@@ -1506,5 +1345,11 @@ namespace LB_Mod_Installer.Binding
         UseDefaultValue
     }
 
+    public enum SkillFileType
+    {
+        BAC,
+        BDM,
+        ShotBDM
+    }
 
 }

@@ -6,20 +6,13 @@ using System.Xml.Linq;
 using IniParser;
 using LB_Mod_Installer.Installer;
 using Xv2CoreLib.CMS;
+using Xv2CoreLib.CUS;
 using Xv2CoreLib.Resource;
 
 namespace LB_Mod_Installer.Binding
 {
     public class X2MHelper
     {
-        public enum SkillType
-        {
-            Super,
-            Ultimate,
-            Evasive,
-            Blast,
-            Awoken
-        }
 
         public enum X2MType
         {
@@ -123,7 +116,7 @@ namespace LB_Mod_Installer.Binding
         #endregion
 
         #region Skill
-        public int GetX2MSkillID1(string guid, BindingManager.CusSkillType skillType)
+        public int GetX2MSkillID1(string guid, CUS_File.SkillType skillType)
         {
             object[] ret = FindX2MSkill(guid, skillType);
 
@@ -135,7 +128,7 @@ namespace LB_Mod_Installer.Binding
             return BindingManager.NullTokenInt;
         }
 
-        public int GetX2MSkillID2(string guid, BindingManager.CusSkillType skillType)
+        public int GetX2MSkillID2(string guid, CUS_File.SkillType skillType)
         {
             object[] ret = FindX2MSkill(guid, skillType);
 
@@ -147,7 +140,7 @@ namespace LB_Mod_Installer.Binding
             return BindingManager.NullTokenInt;
         }
         
-        public string GetX2MSkillShortName(string guid, BindingManager.CusSkillType skillType)
+        public string GetX2MSkillShortName(string guid, CUS_File.SkillType skillType)
         {
             object[] ret = FindX2MSkill(guid, skillType);
 
@@ -159,9 +152,8 @@ namespace LB_Mod_Installer.Binding
             return null;
         }
 
-        public string GetX2MSkillPath(string guid, BindingManager.CusSkillType skillType, BindingManager.SkillFileType skillFileType)
+        public string GetX2MSkillPath(string guid, CUS_File.SkillType skillType, SkillFileType skillFileType)
         {
-            //added 2 extra params to the returned object
             object[] ret = FindX2MSkill(guid, skillType);
 
             if (ret != null)
@@ -169,11 +161,11 @@ namespace LB_Mod_Installer.Binding
 
                 switch (skillFileType)
                 {
-                    case BindingManager.SkillFileType.BAC:
+                    case SkillFileType.BAC:
                         return string.Format(@"skill/{0}/{1}/{1}.bac", (string)ret[3], (string)ret[4]);
-                    case BindingManager.SkillFileType.BDM:
+                    case SkillFileType.BDM:
                         return string.Format(@"skill/{0}/{1}/{1}_PLAYER.bdm", (string)ret[3], (string)ret[4]);
-                    case BindingManager.SkillFileType.ShotBDM:
+                    case SkillFileType.ShotBDM:
                         return string.Format(@"skill/{0}/{1}/{1}_PLAYER.shot.bdm", (string)ret[3], (string)ret[4]);
 
                 }
@@ -183,7 +175,7 @@ namespace LB_Mod_Installer.Binding
             return null;
         }
         
-        private object[] FindX2MSkill(string guid, BindingManager.CusSkillType skillType)
+        private object[] FindX2MSkill(string guid, CUS_File.SkillType skillType)
         {
             try
             {
@@ -202,19 +194,19 @@ namespace LB_Mod_Installer.Binding
 
                 switch (skillType)
                 {
-                    case BindingManager.CusSkillType.Super:
+                    case CUS_File.SkillType.Super:
                         directory = Path.GetFullPath(String.Format("{0}/skill/SPA", GeneralInfo.GameDataFolder));
                         break;
-                    case BindingManager.CusSkillType.Ultimate:
+                    case CUS_File.SkillType.Ultimate:
                         directory = Path.GetFullPath(String.Format("{0}/skill/ULT", GeneralInfo.GameDataFolder));
                         break;
-                    case BindingManager.CusSkillType.Evasive:
+                    case CUS_File.SkillType.Evasive:
                         directory = Path.GetFullPath(String.Format("{0}/skill/ESC", GeneralInfo.GameDataFolder));
                         break;
-                    case BindingManager.CusSkillType.Blast:
+                    case CUS_File.SkillType.Blast:
                         directory = Path.GetFullPath(String.Format("{0}/skill/BLT", GeneralInfo.GameDataFolder));
                         break;
-                    case BindingManager.CusSkillType.Awoken:
+                    case CUS_File.SkillType.Awoken:
                         directory = Path.GetFullPath(String.Format("{0}/skill/MET", GeneralInfo.GameDataFolder));
                         break;
                 }
@@ -248,23 +240,23 @@ namespace LB_Mod_Installer.Binding
 
                             switch (skillType)
                             {
-                                case BindingManager.CusSkillType.Super:
+                                case CUS_File.SkillType.Super:
                                     ID1 = ID2;
                                     SkillType = "SPA";
                                     break;
-                                case BindingManager.CusSkillType.Ultimate:
+                                case CUS_File.SkillType.Ultimate:
                                     ID1 = ID2 + 5000;
                                     SkillType = "ULT";
                                     break;
-                                case BindingManager.CusSkillType.Evasive:
+                                case CUS_File.SkillType.Evasive:
                                     ID1 = ID2 + 10000;
                                     SkillType = "ESC";
                                     break;
-                                case BindingManager.CusSkillType.Blast:
+                                case CUS_File.SkillType.Blast:
                                     ID1 = ID2 + 20000;
                                     SkillType = "BLT";
                                     break;
-                                case BindingManager.CusSkillType.Awoken:
+                                case CUS_File.SkillType.Awoken:
                                     ID1 = ID2 + 25000;
                                     SkillType = "MET";
                                     break;

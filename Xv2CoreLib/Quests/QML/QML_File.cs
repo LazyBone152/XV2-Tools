@@ -15,13 +15,31 @@ namespace Xv2CoreLib.QML
     {
        
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "QML_Entry")]
-        public List<QML_Entry> qml_Entry { get; set; }
+        public List<QML_Entry> Entries { get; set; }
+
+        public static QML_File Load(byte[] bytes)
+        {
+            return new Parser(bytes).qml_File;
+        }
+
+        public byte[] SaveToBytes()
+        {
+            return new Deserializer(this).bytes.ToArray();
+        }
     }
 
-    public class QML_Entry {
-        [YAXSerializeAs("QML ID")]
+    public class QML_Entry : IInstallable
+    {
+        #region IInstallable
+        [YAXDontSerialize]
+        public int SortID { get { return Utils.TryParseInt(Index); } set { Index = value.ToString(); } }
+
+        #endregion
+
+        [YAXSerializeAs("QML_ID")]
         [YAXAttributeForClass]
-        public int I_00 { get; set; }
+        [BindingAutoId]
+        public string Index { get; set; }
         [YAXSerializeAs("value")]
         [YAXAttributeFor("I_04")]
         public int I_04 { get; set; }
@@ -61,38 +79,38 @@ namespace Xv2CoreLib.QML
         [YAXAttributeFor("I_48")]
         public short[] I_48 { get; set; } // size = 5
         [YAXSerializeAs("Skills")]
-        public Skills _Skills { get; set; }
+        public Skills SkillSet { get; set; }
 
     }
 
-    public struct Skills
+    public class Skills
     {
         [YAXAttributeFor("Super_1")]
         [YAXSerializeAs("ID2")]
-        public UInt16 I_00 { get; set; }
+        public ushort I_00 { get; set; }
         [YAXAttributeFor("Super_2")]
         [YAXSerializeAs("ID2")]
-        public UInt16 I_02 { get; set; }
+        public ushort I_02 { get; set; }
         [YAXAttributeFor("Super_3")]
         [YAXSerializeAs("ID2")]
-        public UInt16 I_04 { get; set; }
+        public ushort I_04 { get; set; }
         [YAXAttributeFor("Super_4")]
         [YAXSerializeAs("ID2")]
-        public UInt16 I_06 { get; set; }
+        public ushort I_06 { get; set; }
         [YAXAttributeFor("Ultimate_1")]
         [YAXSerializeAs("ID2")]
-        public UInt16 I_08 { get; set; }
+        public ushort I_08 { get; set; }
         [YAXAttributeFor("Ultimate_2")]
         [YAXSerializeAs("ID2")]
-        public UInt16 I_10 { get; set; }
+        public ushort I_10 { get; set; }
         [YAXAttributeFor("Evasive")]
         [YAXSerializeAs("ID2")]
-        public UInt16 I_12 { get; set; }
+        public ushort I_12 { get; set; }
         [YAXAttributeFor("Blast_Type")]
         [YAXSerializeAs("ID2")]
-        public UInt16 I_14 { get; set; }
+        public ushort I_14 { get; set; }
         [YAXAttributeFor("Awoken")]
         [YAXSerializeAs("ID2")]
-        public UInt16 I_16 { get; set; }
+        public ushort I_16 { get; set; }
     }
 }

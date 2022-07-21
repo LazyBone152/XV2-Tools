@@ -69,7 +69,7 @@ namespace Xv2CoreLib.CMS
 
         public int CharaCodeToCharaId(string charaCode)
         {
-            CMS_Entry entry = CMS_Entries.FirstOrDefault(x => x.ShortName == charaCode);
+            CMS_Entry entry = CMS_Entries.FirstOrDefault(x => x.ShortName?.Equals(charaCode, StringComparison.OrdinalIgnoreCase) == true);
 
             if (entry != null)
             {

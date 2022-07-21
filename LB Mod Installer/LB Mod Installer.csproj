@@ -133,12 +133,16 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Binding\AliasValue.cs" />
+    <Compile Include="Binding\AutoIdContext.cs" />
     <Compile Include="Binding\BindingManager.cs" />
+    <Compile Include="Binding\BindingValue.cs" />
     <Compile Include="Binding\X2MHelper.cs" />
     <Compile Include="Binding\XML\XmlParser.cs" />
     <Compile Include="Binding\XML\ZipReaderExtensions.cs" />
     <Compile Include="File\FileCacheManager.cs" />
     <Compile Include="Installer\Install.cs" />
+    <Compile Include="Installer\InstallHelpers.cs" />
     <Compile Include="Installer\MsgComponentInstall.cs" />
     <Compile Include="Installer\ACB\AcbInstaller.cs" />
     <Compile Include="Installer\ACB\AcbUninstaller.cs" />

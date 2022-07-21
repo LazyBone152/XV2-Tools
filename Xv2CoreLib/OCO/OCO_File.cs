@@ -1,47 +1,71 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace Xv2CoreLib.OCO
 {
     [YAXSerializeAs("OCO")]
-    class OCO_File
+    public class OCO_File
     {
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Partner")]
-        public List<OCO_TableEntry> TableEntries { get; set; }
+        public List<OCO_Partner> Partners { get; set; }
+
+        #region LoadSave
+        public static OCO_File Load(byte[] bytes)
+        {
+            return new Parser(bytes).ocoFile;
+        }
+
+        public byte[] SaveToBytes()
+        {
+            return new Deserializer(this).bytes.ToArray();
+        }
+        #endregion
     }
 
     [YAXSerializeAs("Partner")]
-    public class OCO_TableEntry
+    public class OCO_Partner : IInstallable_2<OCO_Costume>, IInstallable
     {
+        #region Installer
+        [YAXDontSerialize]
+        public int SortID { get { return PartnerID; } set { PartnerID = value; } }
+        [YAXDontSerialize]
+        public string Index { get { return PartnerID.ToString(); } set { PartnerID = Utils.TryParseInt(value); } }
+        #endregion
+
         [YAXAttributeForClass]
         [YAXSerializeAs("Partner_ID")]
-        public int Index { get; set; }
-        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "ColorData")]
-        public List<OCO_SubEntry> SubEntries { get; set; }
+        public int PartnerID { get; set; }
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Costume")]
+        public List<OCO_Costume> SubEntries { get; set; }
         
 
     }
 
-    [YAXSerializeAs("ColorData")]
-    public class OCO_SubEntry
+    [YAXSerializeAs("Costume")]
+    public class OCO_Costume : IInstallable
     {
 
+        #region Installer
+        [YAXDontSerialize]
+        public int SortID { get { return I_04; } set { I_04 = value; } }
+        [YAXDontSerialize]
+        public string Index { get { return I_04.ToString(); } set { I_04 = Utils.TryParseInt(value); } }
+        #endregion
+
         [YAXAttributeForClass]
-        [YAXSerializeAs("CostumeNumber")]
-        public uint I_04 { get; set; } //0x4
-        [YAXAttributeFor("I_08")]
-        [YAXSerializeAs("value")]
-        public int I_08 { get; set; } // uint32
-        [YAXAttributeFor("I_12")]
-        [YAXSerializeAs("value")]
-        public uint I_12 { get; set; }
-        [YAXAttributeFor("PartSet")]
-        [YAXSerializeAs("value")]
-        public uint I_16 { get; set; }
+        [YAXSerializeAs("ID")]
+        public int I_04 { get; set; } //0x4
+        [YAXAttributeForClass]
+        [YAXSerializeAs("I_08")]
+        public int I_08 { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("I_12")]
+        public int I_12 { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("PartSet")]
+        public int I_16 { get; set; }
 
     }
 }

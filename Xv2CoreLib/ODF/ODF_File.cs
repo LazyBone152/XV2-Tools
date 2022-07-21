@@ -12,8 +12,11 @@ namespace Xv2CoreLib.ODF
     {
         public const int ODF_SIGNATURE = 1178881827;
 
-        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "ODF_Entry")]
-        public List<ODF_Entry> OdfEntries { get; set; }
+        [YAXAttributeForClass]
+        public ushort Version { get; set; }
+
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Header")]
+        public List<ODF_SubHeader> SubHeader { get; set; }
 
         public static ODF_File Serialize(string path, bool writeXml)
         {
@@ -49,13 +52,16 @@ namespace Xv2CoreLib.ODF
 
         public static ODF_File Read(byte[] rawBytes)
         {
-            if (BitConverter.ToUInt16(rawBytes, 6) != 56)
+            ushort version = BitConverter.ToUInt16(rawBytes, 6);
+
+            if (version != 56 && version != 60)
             {
                 throw new InvalidDataException("Unsupported ODF File version.");
             }
 
             ODF_File odfFile = new ODF_File();
-            odfFile.OdfEntries = new List<ODF_Entry>();
+            odfFile.Version = version;
+            odfFile.SubHeader = new List<ODF_SubHeader>();
 
             int count = BitConverter.ToInt32(rawBytes, 8);
             int offset = 16;
@@ -64,16 +70,20 @@ namespace Xv2CoreLib.ODF
             {
                 int subCount = BitConverter.ToInt32(rawBytes, offset + 0);
                 int subOffset = BitConverter.ToInt32(rawBytes, offset + 4) + 16;
-                ODF_Entry odfEntry = new ODF_Entry();
-                odfEntry.OdfSubEntries = new List<ODF_SubEntry>();
+                ODF_SubHeader odfEntry = new ODF_SubHeader();
+                odfEntry.Entries = new List<ODF_Entry>();
 
                 for(int a = 0; a < subCount; a++)
                 {
-                    odfEntry.OdfSubEntries.Add(ODF_SubEntry.Read(rawBytes, subOffset));
-                    subOffset += 56;
+                    odfEntry.Entries.Add(ODF_Entry.Read(rawBytes, subOffset, version));
+
+                    if (version == 56)
+                        subOffset += 56;
+                    else if (version == 60)
+                        subOffset += 64;
                 }
 
-                odfFile.OdfEntries.Add(odfEntry);
+                odfFile.SubHeader.Add(odfEntry);
                 offset += 16;
             }
 
@@ -82,21 +92,24 @@ namespace Xv2CoreLib.ODF
 
         public byte[] Write()
         {
+            if (Version != 56 && Version != 60)
+                throw new ArgumentException("ODF: Invalid Version. Only 56 and 60 are supported.");
+
             List<byte> bytes = new List<byte>();
 
-            int odfEntryCount = (OdfEntries != null) ? OdfEntries.Count : 0;
+            int odfEntryCount = (SubHeader != null) ? SubHeader.Count : 0;
 
             //Header
             bytes.AddRange(BitConverter.GetBytes(ODF_SIGNATURE));
             bytes.AddRange(BitConverter.GetBytes((ushort)65534));
-            bytes.AddRange(BitConverter.GetBytes((ushort)56));
+            bytes.AddRange(BitConverter.GetBytes(Version));
             bytes.AddRange(BitConverter.GetBytes(odfEntryCount));
             bytes.AddRange(BitConverter.GetBytes(0));
 
             //Odf Entries
             for(int i = 0; i < odfEntryCount; i++)
             {
-                int subEntryCount = (OdfEntries[i].OdfSubEntries != null) ? OdfEntries[i].OdfSubEntries.Count : 0;
+                int subEntryCount = (SubHeader[i].Entries != null) ? SubHeader[i].Entries.Count : 0;
                 bytes.AddRange(BitConverter.GetBytes(subEntryCount));
                 bytes.AddRange(BitConverter.GetBytes(0)); //Offset
                 bytes.AddRange(BitConverter.GetBytes((long)0)); //Padding
@@ -105,7 +118,7 @@ namespace Xv2CoreLib.ODF
             //Odf Sub Entries
             for(int i = 0; i < odfEntryCount; i++)
             {
-                int subEntryCount = (OdfEntries[i].OdfSubEntries != null) ? OdfEntries[i].OdfSubEntries.Count : 0;
+                int subEntryCount = (SubHeader[i].Entries != null) ? SubHeader[i].Entries.Count : 0;
 
                 if(subEntryCount > 0)
                 {
@@ -116,7 +129,7 @@ namespace Xv2CoreLib.ODF
 
                 for(int a = 0; a < subEntryCount; a++)
                 {
-                    bytes.AddRange(OdfEntries[i].OdfSubEntries[a].Write());
+                    bytes.AddRange(SubHeader[i].Entries[a].Write(Version));
                 }
             }
 
@@ -124,62 +137,74 @@ namespace Xv2CoreLib.ODF
         }
     }
 
-    public class ODF_Entry
+    [YAXSerializeAs("Header")]
+    public class ODF_SubHeader
     {
-        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "ODF_SubEntry")]
-        public List<ODF_SubEntry> OdfSubEntries { get; set; }
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "PartnerEntry")]
+        public List<ODF_Entry> Entries { get; set; }
 
 
     }
 
-    public class ODF_SubEntry
+    [YAXSerializeAs("PartnerEntry")]
+    public class ODF_Entry
     {
-        [YAXAttributeFor("I_00")]
-        [YAXSerializeAs("value")]
+        [YAXAttributeForClass]
+        [YAXSerializeAs("Partner_ID")]
         public int I_00 { get; set; }
-        [YAXAttributeFor("I_04")]
+        [YAXAttributeFor("DefaultPartSet")]
         [YAXSerializeAs("value")]
         public int I_04 { get; set; }
-        [YAXAttributeFor("I_08")]
+        [YAXAttributeFor("ColorPartSet")]
         [YAXSerializeAs("value")]
         public int I_08 { get; set; }
-        [YAXAttributeFor("I_12")]
+        [YAXAttributeFor("StatSet")]
         [YAXSerializeAs("value")]
         public int I_12 { get; set; }
-        [YAXAttributeFor("I_16")]
+        [YAXAttributeFor("SuperSoul")]
         [YAXSerializeAs("value")]
         public int I_16 { get; set; }
-        [YAXAttributeFor("I_20")]
+        [YAXAttributeFor("SuperSkill1")]
         [YAXSerializeAs("value")]
         public int I_20 { get; set; }
-        [YAXAttributeFor("I_24")]
+        [YAXAttributeFor("SuperSkill2")]
         [YAXSerializeAs("value")]
         public int I_24 { get; set; }
-        [YAXAttributeFor("I_28")]
+        [YAXAttributeFor("SuperSkill3")]
         [YAXSerializeAs("value")]
         public int I_28 { get; set; }
-        [YAXAttributeFor("I_32")]
+        [YAXAttributeFor("SuperSKill4")]
         [YAXSerializeAs("value")]
         public int I_32 { get; set; }
-        [YAXAttributeFor("I_36")]
+        [YAXAttributeFor("UltimateSkill1")]
         [YAXSerializeAs("value")]
         public int I_36 { get; set; }
-        [YAXAttributeFor("I_40")]
+        [YAXAttributeFor("UltimateSkill2")]
         [YAXSerializeAs("value")]
         public int I_40 { get; set; }
-        [YAXAttributeFor("I_44")]
+        [YAXAttributeFor("EvasiveSkill")]
         [YAXSerializeAs("value")]
         public int I_44 { get; set; }
-        [YAXAttributeFor("I_48")]
+        [YAXAttributeFor("AwokenSkill")]
         [YAXSerializeAs("value")]
         public int I_48 { get; set; }
-        [YAXAttributeFor("I_52")]
+        [YAXAttributeFor("Menu_ID")]
         [YAXSerializeAs("value")]
         public int I_52 { get; set; }
 
-        public static ODF_SubEntry Read(byte[] rawBytes, int offset)
+        //The following values are only in OCCDefaultTable.odf (ver 60)
+        [YAXAttributeFor("I_56")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public int I_56 { get; set; }
+        [YAXAttributeFor("I_60")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public int I_60 { get; set; }
+
+        public static ODF_Entry Read(byte[] rawBytes, int offset, ushort version)
         {
-            return new ODF_SubEntry()
+            ODF_Entry entry = new ODF_Entry()
             {
                 I_00 = BitConverter.ToInt32(rawBytes, offset + 0),
                 I_04 = BitConverter.ToInt32(rawBytes, offset + 4),
@@ -196,9 +221,17 @@ namespace Xv2CoreLib.ODF
                 I_48 = BitConverter.ToInt32(rawBytes, offset + 48),
                 I_52 = BitConverter.ToInt32(rawBytes, offset + 52)
             };
+
+            if(version == 60)
+            {
+                entry.I_56 = BitConverter.ToInt32(rawBytes, offset + 56);
+                entry.I_60 = BitConverter.ToInt32(rawBytes, offset + 60);
+            }
+
+            return entry;
         }
 
-        public byte[] Write()
+        public byte[] Write(ushort version)
         {
             List<byte> bytes = new List<byte>();
 
@@ -217,7 +250,14 @@ namespace Xv2CoreLib.ODF
             bytes.AddRange(BitConverter.GetBytes(I_48));
             bytes.AddRange(BitConverter.GetBytes(I_52));
 
-            if (bytes.Count != 56) throw new InvalidDataException("ODF_SubEntry is an invalid size. Expected 56 bytes.");
+            if(version == 60)
+            {
+                bytes.AddRange(BitConverter.GetBytes(I_56));
+                bytes.AddRange(BitConverter.GetBytes(I_60));
+            }
+
+            if (bytes.Count != 56 && version == 56) throw new InvalidDataException("ODF_SubEntry is an invalid size. Expected 56 bytes.");
+            if (bytes.Count != 64 && version == 60) throw new InvalidDataException("ODF_SubEntry is an invalid size. Expected 64 bytes.");
             return bytes.ToArray();
         }
     }
