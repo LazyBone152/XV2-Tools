@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using YAXLib;
 
 namespace Xv2CoreLib.CST
@@ -169,13 +170,150 @@ namespace Xv2CoreLib.CST
         }
         #endregion
 
-        public Eternity.CharaCostumeSlot GetEntry(string installID)
+        #region Install
+
+        public CST_CharaSlot GetCharaSlotFromInstallID(string installID)
+        {
+            foreach (var charaSlot in CharaSlots)
+            {
+                if (charaSlot.CharaCostumeSlots.FirstOrDefault(x => x.InstallID == installID) != null) return charaSlot;
+            }
+
+            return null;
+        }
+
+        public void InstallEntries(List<CST_CharaSlot> installSlots, List<string> installIDs)
+        {
+            if (installSlots == null) return;
+
+            foreach (var installSlot in installSlots)
+            {
+                CST_CharaSlot charaSlot = GetCharaSlotFromInstallID(installSlot.InstallID);
+
+                //Sorting
+                int sortBefore = GetIndexOfSlot(installSlot.SortBefore);
+                int sortAfter = GetIndexAfter(installSlot.SortAfter);
+
+                //Sorting priority. Before -> After
+                int sortIndex = sortBefore != -1 ? sortBefore : sortAfter;
+
+                if (charaSlot == null)
+                {
+                    charaSlot = new CST_CharaSlot();
+
+                    if (sortIndex != -1)
+                        CharaSlots.Insert(sortIndex, charaSlot);
+                    else
+                        CharaSlots.Add(charaSlot);
+                }
+
+                foreach (var installCostume in installSlot.CharaCostumeSlots)
+                {
+                    int slotIdx = charaSlot.IndexOfSlot(installCostume.InstallID);
+
+                    if (slotIdx == -1)
+                    {
+                        //Costume slot doesn't exist
+                        installIDs.Add(installCostume.InstallID);
+                        charaSlot.CharaCostumeSlots.Add(installCostume);
+                    }
+                    else
+                    {
+                        //Costume slot already exists
+                        installIDs.Add(installCostume.InstallID);
+                        charaSlot.CharaCostumeSlots[slotIdx] = installCostume;
+                    }
+                }
+
+            }
+        }
+
+        public void UninstallEntries(List<string> installIDs, CST_File cpkCstFile)
+        {
+            foreach (var charaSlot in CharaSlots)
+            {
+                for (int i = charaSlot.CharaCostumeSlots.Count - 1; i >= 0; i--)
+                {
+                    CST_CharaCostumeSlot existing = cpkCstFile != null ? cpkCstFile.GetEntry(charaSlot.CharaCostumeSlots[i].InstallID) : null;
+
+                    if (installIDs.Contains(charaSlot.CharaCostumeSlots[i].InstallID))
+                    {
+                        if (existing != null)
+                        {
+                            //Restore default entry from the CST
+                            charaSlot.CharaCostumeSlots[i] = existing;
+                        }
+                        else
+                        {
+                            charaSlot.CharaCostumeSlots.RemoveAt(i);
+                            continue;
+                        }
+                    }
+                }
+            }
+
+            RemoveEmptySlots();
+        }
+
+        private void RemoveEmptySlots()
+        {
+            for (int i = CharaSlots.Count - 1; i >= 0; i--)
+            {
+                if (CharaSlots[i].CharaCostumeSlots == null)
+                {
+                    CharaSlots.RemoveAt(i);
+                    continue;
+                }
+                if (CharaSlots[i].CharaCostumeSlots.Count == 0)
+                {
+                    CharaSlots.RemoveAt(i);
+                    continue;
+                }
+            }
+        }
+
+        private int GetIndexOfSlot(string installID)
+        {
+            CST_CharaSlot slot = GetCharaSlotFromInstallID(installID);
+
+            if (slot != null)
+                return CharaSlots.IndexOf(slot);
+
+            return -1;
+        }
+
+        private int GetIndexAfter(string installID)
+        {
+            CST_CharaSlot slot = GetCharaSlotFromInstallID(installID);
+
+            if (slot != null)
+                return CharaSlots.IndexOf(slot) + 1;
+
+            return -1;
+        }
+
+
+        #endregion
+
+        public Eternity.CharaSlotsFile ConvertToPatcherSlotsFile()
+        {
+            Eternity.CharaSlotsFile patcherSlots = new Eternity.CharaSlotsFile();
+
+            foreach(var slot in CharaSlots)
+            {
+                patcherSlots.CharaSlots.Add(new Eternity.CharaSlot(slot));
+            }
+
+            return patcherSlots;
+        }
+
+        public CST_CharaCostumeSlot GetEntry(string installID)
         {
             foreach(var slot in CharaSlots)
             {
                 foreach(var costume in slot.CharaCostumeSlots)
                 {
-                    if (costume.InstallID == installID) return costume.ConvertToEternityFile();
+                    if (costume.InstallID == installID) return costume;
                 }
             }
 
@@ -186,6 +324,20 @@ namespace Xv2CoreLib.CST
     [YAXSerializeAs("CharaSlot")]
     public class CST_CharaSlot
     {
+        [YAXDontSerializeIfNull]
+        [YAXAttributeForClass]
+        public string InstallID { get; set; }
+        [YAXDontSerializeIfNull]
+        [YAXAttributeForClass]
+        public string SortBefore { get; set; }
+        [YAXDontSerializeIfNull]
+        [YAXAttributeForClass]
+        public string SortAfter { get; set; }
+
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "CharaCostumeSlot")]
+        public List<CST_CharaCostumeSlot> CharaCostumeSlots { get; set; } = new List<CST_CharaCostumeSlot>();
+
+
         public CST_CharaSlot() { }
 
         public CST_CharaSlot(CST_CharaCostumeSlot slot)
@@ -193,8 +345,17 @@ namespace Xv2CoreLib.CST
             CharaCostumeSlots.Add(slot);
         }
 
-        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "CharaCostumeSlot")]
-        public List<CST_CharaCostumeSlot> CharaCostumeSlots { get; set; } = new List<CST_CharaCostumeSlot>();
+        public CST_CharaSlot(Eternity.CharaSlot charaSlot)
+        {
+            InstallID = charaSlot.InstallID;
+            SortBefore = charaSlot.SortBefore;
+            SortAfter = charaSlot.SortAfter;
+
+            foreach(var costumeSlot in charaSlot.CostumeSlots)
+            {
+                CharaCostumeSlots.Add(new CST_CharaCostumeSlot(costumeSlot));
+            }
+        }
 
         public void OrderCostumeSlotIDs()
         {
@@ -208,6 +369,12 @@ namespace Xv2CoreLib.CST
             if (CharaCostumeSlots.Count == 0) return true;
             return false;
         }
+
+        public int IndexOfSlot(string installID)
+        {
+            return CharaCostumeSlots.IndexOf(CharaCostumeSlots.FirstOrDefault(x => x.InstallID == installID));
+        }
+
     }
 
     [YAXSerializeAs("CharaCostumeSlot")]
@@ -256,22 +423,37 @@ namespace Xv2CoreLib.CST
         [YAXSerializeAs("value")]
         public int var_type_after_TU9_order { get; set; } // 0x24 - Added in game 1.14. Whatever this shit is, is -1 in all chars, except TU0 ant TU1 where it is 0 and 1 respectively.
 
+        public CST_CharaCostumeSlot() { }
+
+        public CST_CharaCostumeSlot(Eternity.CharaCostumeSlot slot)
+        {
+            CharaCode = slot.CharaCode;
+            Costume = (ushort)slot.Costume;
+            Preset = (ushort)slot.Preset;
+            UnlockIndex = (ushort)slot.UnlockIndex;
+            flag_gk2 = (ushort)(slot.flag_gk2 == true ? 1 : 0);
+            CssVoice1 = slot.CssVoice1 < 0 ? ushort.MaxValue : (ushort)slot.CssVoice1;
+            CssVoice2 = slot.CssVoice2 < 0 ? ushort.MaxValue : (ushort)slot.CssVoice2;
+            DlcFlag1 = slot.DLC_Flag1;
+            DlcFlag2 = slot.DLC_Flag2;
+        }
+
         public static CST_CharaCostumeSlot Read(byte[] bytes, int offset)
         {
             return new CST_CharaCostumeSlot()
             {
                 CostumeSlotID = BitConverter.ToInt32(bytes, offset + 0x0),
                 CharaCode = StringEx.GetString(bytes, offset + 0x4, false, StringEx.EncodingType.ASCII, 4),
-                Costume = BitConverter.ToUInt16(bytes, offset + 0x8),
-                Preset = BitConverter.ToUInt16(bytes, offset + 0xA),
-                UnlockIndex = BitConverter.ToUInt16(bytes, offset + 0xC),
-                flag_gk2 = BitConverter.ToUInt16(bytes, offset + 0xE),
-                CssVoice1 = BitConverter.ToUInt16(bytes, offset + 0x10),
-                CssVoice2 = BitConverter.ToUInt16(bytes, offset + 0x12),
-                DlcFlag1 = (CstDlcVer)BitConverter.ToUInt32(bytes, offset + 0x14),
-                DlcFlag2 = (CstDlcVer2)BitConverter.ToUInt32(bytes, offset + 0x18),
-                IsCustomCostume = BitConverter.ToInt32(bytes, offset + 0x1c),
-                CacIndex = BitConverter.ToInt32(bytes, offset + 0x20),
+                Costume = BitConverter.ToUInt16(bytes, offset + 0x8), 
+                Preset = BitConverter.ToUInt16(bytes, offset + 0xA), 
+                UnlockIndex = BitConverter.ToUInt16(bytes, offset + 0xC), 
+                flag_gk2 = BitConverter.ToUInt16(bytes, offset + 0xE), 
+                CssVoice1 = BitConverter.ToUInt16(bytes, offset + 0x10), 
+                CssVoice2 = BitConverter.ToUInt16(bytes, offset + 0x12), 
+                DlcFlag1 = (CstDlcVer)BitConverter.ToUInt32(bytes, offset + 0x14), 
+                DlcFlag2 = (CstDlcVer2)BitConverter.ToUInt32(bytes, offset + 0x18), 
+                IsCustomCostume = BitConverter.ToInt32(bytes, offset + 0x1c), 
+                CacIndex = BitConverter.ToInt32(bytes, offset + 0x20), 
                 var_type_after_TU9_order = BitConverter.ToInt32(bytes, offset + 0x24)
             };
         }
@@ -281,7 +463,7 @@ namespace Xv2CoreLib.CST
             List<byte> bytes = new List<byte>();
 
             bytes.AddRange(BitConverter.GetBytes(CostumeSlotID));
-            bytes.AddRange(Utils.GetStringBytes(CharaCode, 4));
+            bytes.AddRange(Utils.GetStringBytes(CharaCode, 4, 4));
             bytes.AddRange(BitConverter.GetBytes(Costume));
             bytes.AddRange(BitConverter.GetBytes(Preset));
             bytes.AddRange(BitConverter.GetBytes(UnlockIndex));
@@ -310,7 +492,7 @@ namespace Xv2CoreLib.CST
                 flag_gk2 = (flag_gk2 == 0) ? false : true,
                 CssVoice1 = CssVoice1,
                 CssVoice2 = CssVoice2,
-                DLC = DlcFlag1,
+                DLC_Flag1 = DlcFlag1,
                 Costume = Costume
             };
         }

@@ -751,14 +751,22 @@ namespace LB_Mod_Installer.Installer
 
                 if (slotsFile == null)
                 {
-                    throw new FileNotFoundException($"Could not find {CharaSlotsFile.FILE_NAME_BIN}. This file must exist before install - to create it simply run xv2ins.exe once (the X2M installer).");
+                    throw new FileNotFoundException($"Could not find \"{CharaSlotsFile.FILE_NAME_BIN}\". This file must exist before install - to create it simply run xv2ins.exe once (the X2M installer).");
                 }
 
                 //Parse bindings
                 bindingManager.ParseProperties(xmlFile.CharaSlots, null, xmlPath);
 
+                //Convert to CST
+                CST_File cstXml = xmlFile.ConvertToCst();
+                CST_File cstSlots = slotsFile.ConvertToCst();
+
                 List<string> installIDs = new List<string>();
-                slotsFile.InstallEntries(xmlFile.CharaSlots, installIDs);
+                cstSlots.InstallEntries(cstXml.CharaSlots, installIDs);
+
+                //Convert back to X2S, and preserve original file ref (needed for the file cache manager)
+                CharaSlotsFile tempSlotsFile = cstSlots.ConvertToPatcherSlotsFile();
+                slotsFile.CharaSlots = tempSlotsFile.CharaSlots;
 
                 foreach(var id in installIDs)
                 {

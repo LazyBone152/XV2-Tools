@@ -1076,6 +1076,7 @@ namespace LB_Mod_Installer.Installer
             {
                 CharaSlotsFile charaSlotsFile = (CharaSlotsFile)GetParsedFile<CharaSlotsFile>(CharaSlotsFile.FILE_NAME_BIN, false, false);
                 CST_File cstFile = (CST_File)GetParsedFile<CST_File>(CST_File.CST_PATH, true, true);
+                CST_File x2sFileConverted = charaSlotsFile.ConvertToCst();
 
                 if (charaSlotsFile == null) return;
 
@@ -1083,8 +1084,12 @@ namespace LB_Mod_Installer.Installer
 
                 if (section != null)
                 {
-                    charaSlotsFile.UninstallEntries(section.IDs, cstFile);
+                    x2sFileConverted.UninstallEntries(section.IDs, cstFile);
                 }
+
+                //Convert back to X2S
+                CharaSlotsFile tempCharaSlotsFile = x2sFileConverted.ConvertToPatcherSlotsFile();
+                charaSlotsFile.CharaSlots = tempCharaSlotsFile.CharaSlots;
 
             }
             catch (Exception ex)

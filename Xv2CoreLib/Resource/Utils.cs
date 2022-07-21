@@ -840,7 +840,7 @@ namespace Xv2CoreLib
 
         }
 
-        public static List<byte> GetStringBytes(string str, int minSize = -1)
+        public static List<byte> GetStringBytes(string str, int minSize = -1, int maxSize = -1)
         {
             if(str == null)
             {
@@ -862,6 +862,11 @@ namespace Xv2CoreLib
                 else
                 {
                     strBytes.Add(0);
+                }
+
+                if(strBytes.Count > maxSize && maxSize != -1)
+                {
+                    strBytes.RemoveRange(4, strBytes.Count - 4);
                 }
             }
 

@@ -55,6 +55,8 @@
         public const string HCI_Entry = "HCI_Entry";
         public const string CML_Entry = "CML_Entry";
         public const string OCS_Skill = "OCS_Skill";
+        public const string QML_Entry = "QML_Entry";
+        public const string CST_Entry = "CST_Entry";
         public const string CharaSlotEntry = "CharaSlotEntry";
 
         //Prebaked
