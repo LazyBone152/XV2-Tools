@@ -842,6 +842,17 @@ namespace LB_Mod_Installer
             {
                 ChangeTextBrush(InstallerInfo.UiOverrides.DefaultFontColor);
             }
+
+            if (!string.IsNullOrWhiteSpace(InstallerInfo.UiOverrides.ProgressBarColor))
+            {
+                ProgressBar_Main.Foreground = (Brush)new BrushConverter().ConvertFromString(InstallerInfo.UiOverrides.ProgressBarColor);
+            }
+
+            if (!string.IsNullOrWhiteSpace(InstallerInfo.UiOverrides.ProgressBarBackgroundColor))
+            {
+                ProgressBar_Main.Background = (Brush)new BrushConverter().ConvertFromString(InstallerInfo.UiOverrides.ProgressBarBackgroundColor);
+            }
+
         }
 
         private void SetBrushesForUninstalling()

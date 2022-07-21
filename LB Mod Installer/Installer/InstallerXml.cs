@@ -440,6 +440,16 @@ namespace LB_Mod_Installer.Installer
         [YAXDontSerializeIfNull]
         public string TitleBarFontColor { get; set; }
 
+        [YAXAttributeFor("ProgressBarColor")]
+        [YAXSerializeAs("Brush")]
+        [YAXDontSerializeIfNull]
+        public string ProgressBarColor { get; set; }
+        [YAXAttributeFor("ProgressBarBackgroundColor")]
+        [YAXSerializeAs("Brush")]
+        [YAXDontSerializeIfNull]
+        public string ProgressBarBackgroundColor { get; set; }
+
+
         //Preset InstallStep Overwrites
         [YAXDontSerializeIfNull]
         public InstallStep InstallConfirm { get; set; }

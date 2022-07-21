@@ -59,7 +59,7 @@
 
 
         <Grid x:Name="progressBarGrid" Visibility="{Binding ProgressBarVisibility}">
-            <ProgressBar x:Name="ProgressBar_Main" Grid.ColumnSpan="3" HorizontalAlignment="Left" Height="31" Margin="80,124,0,0" VerticalAlignment="Top" Width="483"/>
+            <Controls:MetroProgressBar x:Name="ProgressBar_Main" Grid.ColumnSpan="3" HorizontalAlignment="Left" Height="31" Margin="80,124,0,0" VerticalAlignment="Top" Width="483"/>
             <Label x:Name="ProgressBar_Label" Foreground="{Binding CurrentTextColor}" Content="" HorizontalAlignment="Left" Margin="80,174,0,0" VerticalAlignment="Top" Grid.ColumnSpan="3" Width="483" HorizontalContentAlignment="Center"/>
             <Label x:Name="Label_MsgUnderProgressBar" Foreground="{Binding CurrentTextColor}" HorizontalAlignment="Left" Margin="258,154,0,0" VerticalAlignment="Top" Width="143" FontSize="14" HorizontalContentAlignment="Center"/>
 
