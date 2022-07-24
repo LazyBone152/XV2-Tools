@@ -949,7 +949,7 @@ namespace Xv2CoreLib
                 moveFiles.CamEanFile.Add(new Xv2File<EAN_File>((EAN_File)FileManager.Instance.GetParsedFileFromGame(camEanPath), fileIO.PathInGameDir(camEanPath), !cmsEntry.IsSelfReference(cmsEntry.CamEanPath), null, false, MoveFileTypes.CAM_EAN, 0, true, MoveType.Character));
 
             //BDM
-            if(cmsEntry.BdmPath != "NULL")
+            if(!string.IsNullOrWhiteSpace(cmsEntry.BdmPath))
             {
                 moveFiles.BdmPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}_PLAYER.bdm", cmsEntry.ShortName, cmsEntry.BdmPath));
 
@@ -1090,7 +1090,7 @@ namespace Xv2CoreLib
                 case CustomCharacter.HUF: 
                     return "Human Female";
                 case CustomCharacter.SYM: 
-                    return "Sayian Male";
+                    return "Saiyan Male";
                 case CustomCharacter.SYF: 
                     return "Saiyan Female";
                 case CustomCharacter.NMC: 

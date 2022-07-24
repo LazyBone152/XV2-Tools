@@ -166,6 +166,11 @@ namespace Xv2CoreLib.EAN
             return -1;
         }
 
+        public bool AnimationExists(int id)
+        {
+            return Animations.Any(x => x.SortID == id);
+        }
+
         public string NameOf(int id)
         {
             if (IndexOf(id) == -1) throw new Exception("Could not find an animation with an ID matching " + id);

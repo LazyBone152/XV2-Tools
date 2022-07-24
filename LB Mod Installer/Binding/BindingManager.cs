@@ -1084,6 +1084,11 @@ namespace LB_Mod_Installer.Binding
                 return NullTokenInt;
             }
 
+            for(int i = 0; i < sequence; i++)
+            {
+                context.AddId(id + i);
+            }
+
             return id;
         }
 
