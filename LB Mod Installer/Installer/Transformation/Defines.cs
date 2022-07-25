@@ -29,6 +29,7 @@ namespace LB_Mod_Installer.Installer.Transformation
         [YAXSerializeAs("Entry")]
         public int BacEntry { get; set; }
 
+        //All skills will share the same VOX/SE ACB
         [YAXAttributeFor("VfxPath")]
         [YAXSerializeAs("value")]
         public string VfxPath { get; set; }
@@ -38,6 +39,9 @@ namespace LB_Mod_Installer.Installer.Transformation
         [YAXAttributeFor("CamEanPath")]
         [YAXSerializeAs("value")]
         public string CamEanPath { get; set; }
+        [YAXAttributeFor("PartSet")]
+        [YAXSerializeAs("value")]
+        public string PartSetKey { get; set; }
         [YAXAttributeFor("NameTexturePath")]
         [YAXSerializeAs("value")]
         public string NameTexturePath { get; set; }

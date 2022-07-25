@@ -181,6 +181,36 @@ namespace Xv2CoreLib.CMS
         {
             return (ShortName == path || path == string.Format("../{0}/{0}", ShortName));
         }
+    
+        public bool IsDummyEntry()
+        {
+            if (!string.IsNullOrWhiteSpace(Str_32)) return false;
+            if (!string.IsNullOrWhiteSpace(Str_36)) return false;
+            if (!string.IsNullOrWhiteSpace(Str_44)) return false;
+            if (!string.IsNullOrWhiteSpace(Str_48)) return false;
+            if (!string.IsNullOrWhiteSpace(Str_56)) return false;
+            if (!string.IsNullOrWhiteSpace(Str_60)) return false;
+            if (!string.IsNullOrWhiteSpace(Str_64)) return false;
+            if (!string.IsNullOrWhiteSpace(Str_68)) return false;
+            if (!string.IsNullOrWhiteSpace(Str_80)) return false;
+
+            return true;
+        }
+
+        public static CMS_Entry CreateDummyEntry(int id = 0, string charaCode = null)
+        {
+            return new CMS_Entry()
+            {
+                ShortName = charaCode,
+                ID = id,
+                I_16 = 47818,
+                I_20 = 47818,
+                I_22 = 47818,
+                I_24 = 47818,
+                I_26 = 47818,
+                I_28 = 0x3fffffff
+            };
+        }
     }
 
 }
