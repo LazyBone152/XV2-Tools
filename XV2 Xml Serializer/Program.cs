@@ -133,7 +133,7 @@ namespace XV2_Xml_Serializer
                                     new Xv2CoreLib.BSA.Parser(fileLocation, true);
                                     break;
                                 case ".bcm":
-                                    new Xv2CoreLib.BCM_XML.Parser(fileLocation, true);
+                                    new Xv2CoreLib.BCM.Parser(fileLocation, true);
                                     break;
                                 case ".bas":
                                     new Xv2CoreLib.BAS.Parser(fileLocation, true);
@@ -425,7 +425,7 @@ namespace XV2_Xml_Serializer
                         new Xv2CoreLib.DEM.Deserializer(fileLocation);
                         break;
                     case ".bcm":
-                        new Xv2CoreLib.BCM_XML.Deserializer(fileLocation);
+                        new Xv2CoreLib.BCM.Deserializer(fileLocation);
                         break;
                     case ".dse":
                         Xv2CoreLib.DSE.DSE_File.LoadXmlAndSave(fileLocation);

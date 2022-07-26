@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using YAXLib;
 using Xv2CoreLib.Eternity;
+using Xv2CoreLib.BAC;
 
 namespace LB_Mod_Installer.Installer.Transformation
 {

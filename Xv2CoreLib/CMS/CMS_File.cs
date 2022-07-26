@@ -40,6 +40,11 @@ namespace Xv2CoreLib.CMS
             return null;
         }
 
+        public CMS_Entry GetEntryByCharaCode(string charaCode)
+        {
+            return CMS_Entries.FirstOrDefault(x => x.ShortName == charaCode);
+        }
+
         public static CMS_File Load(byte[] rawBytes)
         {
             return new Parser(rawBytes).GetCmsFile();
@@ -77,6 +82,49 @@ namespace Xv2CoreLib.CMS
             }
 
             return -1;
+        }
+    
+        public CMS_Entry CreateDummyEntry()
+        {
+            for (int i = 0; i < 0x99; i++)
+            {
+                string format = i < 0x10 ? "0" : "";
+                string dummyName = $"X{format}{i.ToString("x")}";
+
+                if (dummyName.Length != 3)
+                    throw new Exception($"CMS_File.CreateDummyEntry: dummyName is supposed to be 3 characters, but was {dummyName.Length}.");
+
+                if (GetEntryByCharaCode(dummyName) == null)
+                {
+                    CMS_Entry dummy = CMS_Entry.CreateDummyEntry(AssignNewID(), dummyName);
+
+                    if(dummy.ID >= 500)
+                    {
+                        throw new Exception("CMS_File.CreateDummyEntry: A suitable dummy entry could not be created because too many characters are installed!\n\nUninstall some older character mods, and then try again.");
+                    }
+
+                    return dummy;
+                }
+            }
+
+            throw new Exception("CMS_File.CreateDummyEntry: A dummy CMS entry could not be created.");
+        }
+
+        private int AssignNewID()
+        {
+            int id = 150;
+
+            while (true)
+            {
+                if(CMS_Entries.FirstOrDefault(x => x.ID == id) == null)
+                {
+                    break;
+                }
+
+                id++;
+            }
+
+            return id;
         }
     }
 

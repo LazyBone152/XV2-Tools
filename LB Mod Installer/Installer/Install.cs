@@ -45,6 +45,7 @@ using Xv2CoreLib.CST;
 using Xv2CoreLib.OCS;
 using Xv2CoreLib.QML;
 using Xv2CoreLib.OCO;
+using Xv2CoreLib.BCM;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -1814,6 +1815,8 @@ namespace LB_Mod_Installer.Installer
                     return OCO_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".qml":
                     return QML_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".bcm":
+                    return BCM_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 default:
                     throw new InvalidDataException(String.Format("GetParsedFileFromGame: The filetype of \"{0}\" is not supported.", path));
             }
@@ -1897,6 +1900,8 @@ namespace LB_Mod_Installer.Installer
                     return ((OCO_File)data).SaveToBytes();
                 case ".qml":
                     return ((QML_File)data).SaveToBytes();
+                case ".bcm":
+                    return ((BCM_File)data).SaveToBytes();
                 default:
                     throw new InvalidDataException(String.Format("GetBytesFromParsedFile: The filetype of \"{0}\" is not supported.", path));
             }

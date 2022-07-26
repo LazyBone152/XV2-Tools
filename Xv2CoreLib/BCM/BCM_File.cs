@@ -326,6 +326,11 @@ namespace Xv2CoreLib.BCM
             new Deserializer(this, path);
         }
 
+        public byte[] SaveToBytes()
+        {
+            return new Deserializer(this).bytes.ToArray();
+        }
+
         public void IncreaseIds(int increaseAmount)
         {
             if (increaseAmount == 0) return;
@@ -419,9 +424,11 @@ namespace Xv2CoreLib.BCM
         public ButtonInput I_08 { get; set; }
         [YAXAttributeFor("HoldDownConditions")]
         [YAXSerializeAs("value")]
+        [YAXHexValue]
         public UInt32 I_12 { get; set; }
         [YAXAttributeFor("OpponentSizeConditions")]
         [YAXSerializeAs("value")]
+        [YAXHexValue]
         public UInt32 I_16 { get; set; }
         [YAXAttributeFor("MinimumLoopDuration")]
         [YAXSerializeAs("value")]
@@ -431,6 +438,7 @@ namespace Xv2CoreLib.BCM
         public UInt16 I_22 { get; set; }
         [YAXAttributeFor("PrimaryActivatorConditions")]
         [YAXSerializeAs("value")]
+        [YAXHexValue]
         public UInt32 I_24 { get; set; }
         [YAXAttributeFor("ActivatorState")]
         [YAXSerializeAs("value")]

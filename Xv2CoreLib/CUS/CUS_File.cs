@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Xv2CoreLib.CMS;
 using Xv2CoreLib.Eternity;
 using YAXLib;
 
@@ -257,6 +258,36 @@ namespace Xv2CoreLib.CUS
             }
 
         }
+        
+        public bool IsSkillIdRangeUsed(CMS_Entry cmsEntry, SkillType skillType)
+        {
+            int min = cmsEntry.ID;
+            int max = min + 10;
+
+            switch (skillType)
+            {
+                case SkillType.Super:
+                    return SuperSkills.Any(x => x.ID1 >= min && x.ID1 <= max);
+                case SkillType.Ultimate:
+                    min += 5000;
+                    max += 5000;
+                    return UltimateSkills.Any(x => x.ID1 >= min && x.ID1 <= max);
+                case SkillType.Evasive:
+                    min += 10000;
+                    max += 10000;
+                    return EvasiveSkills.Any(x => x.ID1 >= min && x.ID1 <= max);
+                case SkillType.Blast:
+                    min += 20000;
+                    max += 20000;
+                    return BlastSkills.Any(x => x.ID1 >= min && x.ID1 <= max);
+                case SkillType.Awoken:
+                    min += 25000;
+                    max += 25000;
+                    return AwokenSkills.Any(x => x.ID1 >= min && x.ID1 <= max);
+            }
+
+            return true;
+        } 
         #endregion
     }
 

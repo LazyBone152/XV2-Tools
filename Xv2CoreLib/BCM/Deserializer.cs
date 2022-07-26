@@ -12,7 +12,7 @@ namespace Xv2CoreLib.BCM
     public class Deserializer
     {
         BCM_File bcmFile { get; set; }
-        List<byte> bytes = new List<byte>() { 35, 66, 67, 77, 254, 255, 0, 0 };
+        public List<byte> bytes = new List<byte>() { 35, 66, 67, 77, 254, 255, 0, 0 };
         string saveLocation { get; set; }
 
         int TotalEntryCount = 0;
@@ -43,6 +43,15 @@ namespace Xv2CoreLib.BCM
             {
                 WriteBinaryFile();
                 File.WriteAllBytes(saveLocation, bytes.ToArray());
+            }
+        }
+
+        public Deserializer(BCM_File _bcmFile)
+        {
+            bcmFile = _bcmFile;
+            if (Validation())
+            {
+                WriteBinaryFile();
             }
         }
 

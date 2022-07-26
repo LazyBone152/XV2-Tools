@@ -10,10 +10,6 @@ namespace LB_Mod_Installer.Installer.Transformation
 {
     public class TransformSkill
     {
-        [YAXAttributeFor("CusAura")]
-        [YAXSerializeAs("value")]
-        public int CusAura { get; set; }
-
         //Localization keys
         [YAXAttributeFor("Name")]
         [YAXSerializeAs("value")]
@@ -22,6 +18,16 @@ namespace LB_Mod_Installer.Installer.Transformation
         [YAXAttributeFor("Desc")]
         [YAXSerializeAs("value")]
         public string Info { get; set; }
+
+        //Default values. These are overriden by those defined on stages.
+        [YAXAttributeFor("CusAura")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = -1)]
+        public int CusAura { get; set; } = -1;
+        [YAXAttributeFor("PartSet")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = -1)]
+        public int PartSet { get; set; } = -1;
 
         public List<TransformStage> Stages { get; set; }
 

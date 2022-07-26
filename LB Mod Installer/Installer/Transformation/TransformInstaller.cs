@@ -5,6 +5,8 @@ using Xv2CoreLib.Eternity;
 using LB_Mod_Installer.Binding;
 using Xv2CoreLib.CMS;
 using Xv2CoreLib.CUS;
+using Xv2CoreLib.BAC;
+using Xv2CoreLib.Resource;
 
 namespace LB_Mod_Installer.Installer.Transformation
 {
@@ -64,10 +66,13 @@ namespace LB_Mod_Installer.Installer.Transformation
         public void InstallSkill(TransformSkill skill)
         {
             //Create BAC
+            BAC_File bacFile = CreateBacFile(skill);
             //Create BCM
-            //Create EEPK, EAN, CAM.EAN, SE ACB, VOX ACB
+            //Create EEPK
+            //EANs and ACBs will be statically linked, and installed as normal files (for now... and likely forever). 
 
             //Assign ID (generate dummy cms if needed)
+            //Change all BAC Skill IDs into the proper Skill ID
             //Create PUP entries (and talisman)
             //Create skill idb entry
             //Create MSG entries
@@ -75,18 +80,61 @@ namespace LB_Mod_Installer.Installer.Transformation
         }
         #endregion
 
+        #region Install
+        private BAC_File CreateBacFile(TransformSkill skill)
+        {
+            BAC_File bacFile = BAC_File.DefaultBacFile();
+
+            foreach(var stage in skill.Stages)
+            {
+                var defineEntry = TransformationDefines.FirstOrDefault(x => x.Key?.Equals(stage.Key) == true);
+
+                if (defineEntry == null)
+                    throw new Exception($"TransformInstaller.CreateBacFile: Cannot find the BacFile with Key: {stage.Key}");
+
+                BAC_File bacDefines = install.zipManager.DeserializeXmlFromArchive_Ext<BAC_File>(GeneralInfo.GetPathInZipDataDir(defineEntry.BacPath));
+                BAC_Entry bacEntry = bacDefines.GetEntry(defineEntry.BacEntry);
+
+                if(bacEntry == null)
+                    throw new Exception($"TransformInstaller.CreateBacFile: BacEntry with ID: {defineEntry.BacEntry} was not found for Key: {stage.Key}, but the bac file was loaded.\n\nCould be a misconfigured bac file, or a wrong ID/BacPath?");
+
+                bacFile.BacEntries.Add(bacEntry.Copy());
+            }
+
+            //TODO: Add other logic...
+
+            return bacFile;
+        }
 
         private CMS_Entry AssignCmsEntry()
         {
-            //Look for CMS entry above ID 150, starting with "X" and a with null structure (no paths)
-            //If one is found to have a free Awoken skill slot, return it
             CMS_File cmsFile = (CMS_File)install.GetParsedFile<CMS_File>(BindingManager.CMS_PATH);
             CUS_File cusFile = (CUS_File)install.GetParsedFile<CUS_File>(BindingManager.CUS_PATH);
 
+            //Find dummy CMS entry
+            CMS_Entry dummyCmsEntry = null;
 
-            //Create a dummy CMS entry (see eternity code, I want it to be identical)
-            //Return it
-            //This dummy entry wont be uninstalled with the mod. It can safely be left behind, and future reinstalls or X2M mods will just use it.
+            foreach(var cmsEntry in cmsFile.CMS_Entries)
+            {
+                if (cmsEntry.IsDummyEntry())
+                {
+                    if(!cusFile.IsSkillIdRangeUsed(cmsEntry, CUS_File.SkillType.Awoken))
+                    {
+                        dummyCmsEntry = cmsEntry;
+                        break;
+                    }
+                }
+            }
+
+            //If no suitable dummy was found, create a new one
+            if(dummyCmsEntry == null)
+            {
+                dummyCmsEntry = cmsFile.CreateDummyEntry();
+            }
+
+            return dummyCmsEntry;
         }
+
+        #endregion
     }
 }
