@@ -249,9 +249,9 @@ namespace Xv2CoreLib
         /// <summary>
         /// Search for a string at the inputted index and return it. Supports ASCII and UTF8 encoding as well as fixed length strings and null terminated ones.
         /// </summary>
-        public static string GetString(byte[] bytes, int index, bool useNullText = true, EncodingType encodingType = EncodingType.ASCII, int maxSize = int.MaxValue, bool useNullTerminator = true)
+        public static string GetString(byte[] bytes, int index, bool useNullText = true, EncodingType encodingType = EncodingType.ASCII, int maxSize = int.MaxValue, bool useNullTerminator = true, bool allowZeroIndex = false)
         {
-            if (index == 0)
+            if (index == 0 && !allowZeroIndex)
             {
                 return (useNullText) ? "NULL" : "";
             }

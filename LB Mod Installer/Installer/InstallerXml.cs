@@ -387,10 +387,10 @@ namespace LB_Mod_Installer.Installer
                 {
                     return lang.Text;
                 }
-                else if(GeneralInfo.SystemCulture.TwoLetterISOLanguageName != "en")
+                else if(GeneralInfo.SystemCulture.TwoLetterISOLanguageName.ToLower() != "en")
                 {
                     //Localisation not found, try for en
-                    lang = local.LanguageEntries.FirstOrDefault(x => x.Language == "en");
+                    lang = local.LanguageEntries.FirstOrDefault(x => x.Language.ToLower() == "en");
 
                     if (lang != null)
                         return lang.Text;

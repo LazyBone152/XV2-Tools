@@ -22,7 +22,7 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
-            args = new string[1] { @"E:\VS_Test\EMP\ALL EMP" };
+            args = new string[1] { @"proper_noun_skill_esc_info_kr.msg" };
 
             DEBUG_MODE = true;
 #endif
