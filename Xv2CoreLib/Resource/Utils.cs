@@ -299,20 +299,27 @@ namespace Xv2CoreLib
         
         private static int GetStringSize(byte[] bytes, int index, bool unicode = false)
         {
-            for(int i = index; i < bytes.Length; i++)
+            if (unicode)
             {
-                if (bytes[i] == 0)
+                for(int i = index; i < bytes.Length; i += 2)
                 {
-                    if(unicode)
-                    {
-                        if(i + 1 <= bytes.Length)
-                        {
-                            if (bytes[i + 1] == 0) return (i - index) + 1;
-                        }
-                    }
-                    else if (!unicode)
+                    if (i >= bytes.Length) break;
+
+                    if (bytes[i] == 0 && bytes[i + 1] == 0)
                     {
                         return i - index;
+
+                    }
+                }
+            }
+            else
+            {
+                for (int i = index; i < bytes.Length; i++)
+                {
+                    if (bytes[i] == 0)
+                    {
+                        return i - index;
+                        
                     }
                 }
             }

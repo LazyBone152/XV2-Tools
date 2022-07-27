@@ -22,7 +22,7 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
-            args = new string[1] { @"proper_noun_skill_esc_info_kr.msg" };
+            args = new string[1] { @"lobby_text_kr_min.msg" };
 
             DEBUG_MODE = true;
 #endif
