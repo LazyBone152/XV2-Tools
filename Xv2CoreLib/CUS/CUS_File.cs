@@ -288,6 +288,50 @@ namespace Xv2CoreLib.CUS
 
             return true;
         } 
+        
+        /// <summary>
+        /// Assigns a new skill ID (ID1), parented to the assigned CMS entry. If no free IDs are available, -1 will be returned.
+        /// </summary>
+        public int AssignNewSkillId(CMS_Entry cmsEntry, SkillType skillType)
+        {
+            int id = cmsEntry.ID;
+            List<Skill> skills = null;
+
+            switch (skillType)
+            {
+                case SkillType.Super:
+                    skills = SuperSkills;
+                    break;
+                case SkillType.Ultimate:
+                    skills = UltimateSkills;
+                    id += 5000;
+                    break;
+                case SkillType.Evasive:
+                    skills = EvasiveSkills;
+                    id += 10000;
+                    break;
+                case SkillType.Blast:
+                    skills = BlastSkills;
+                    id += 20000;
+                    break;
+                case SkillType.Awoken:
+                    skills = AwokenSkills;
+                    id += 25000;
+                    break;
+            }
+
+            int min = id;
+            int max = id + 10;
+
+            for(int i = 0; i < 10; i++)
+            {
+                if (skills.FirstOrDefault(x => x.ID1 == id) == null) return id;
+                id++;
+            }
+
+            return -1;
+        }
+
         #endregion
     }
 

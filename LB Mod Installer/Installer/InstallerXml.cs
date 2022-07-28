@@ -371,9 +371,14 @@ namespace LB_Mod_Installer.Installer
         {
             NotifyPropertyChanged("CurrentStepString");
         }
-    
+
         //Localisation
         public string GetLocalisedString(string key)
+        {
+            return GetLocalisedString(key, GeneralInfo.SystemCulture.TwoLetterISOLanguageName.ToLower());
+        }
+
+        public string GetLocalisedString(string key, string langCode)
         {
             if (Localisations == null) return string.Empty;
 
@@ -381,16 +386,16 @@ namespace LB_Mod_Installer.Installer
 
             if(local != null)
             {
-                LocalisationLanguage lang = local.LanguageEntries.FirstOrDefault(x => x.Language.ToLower() == GeneralInfo.SystemCulture.TwoLetterISOLanguageName.ToLower());
+                LocalisationLanguage lang = local.LanguageEntries.FirstOrDefault(x => x.Language.Equals(langCode, StringComparison.OrdinalIgnoreCase));
 
                 if(local != null)
                 {
                     return lang.Text;
                 }
-                else if(GeneralInfo.SystemCulture.TwoLetterISOLanguageName != "en")
+                else if(langCode != "en")
                 {
                     //Localisation not found, try for en
-                    lang = local.LanguageEntries.FirstOrDefault(x => x.Language == "en");
+                    lang = local.LanguageEntries.FirstOrDefault(x => x.Language.Equals("en", StringComparison.OrdinalIgnoreCase));
 
                     if (lang != null)
                         return lang.Text;
@@ -398,6 +403,18 @@ namespace LB_Mod_Installer.Installer
             }
 
             return string.Empty;
+        }
+        
+        public string[] GetLocalisedArray(string key)
+        {
+            string[] localizedArray = new string[(int)Xv2CoreLib.Xenoverse2.Language.NumLanguages];
+
+            for(int i = 0; i < localizedArray.Length; i++)
+            {
+                localizedArray[i] = GetLocalisedString(key, Xv2CoreLib.Xenoverse2.LanguageSuffixNoExt[i]);
+            }
+
+            return localizedArray;
         }
     }
     

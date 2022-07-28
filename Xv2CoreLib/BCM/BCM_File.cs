@@ -366,7 +366,7 @@ namespace Xv2CoreLib.BCM
                     TestSearch_Recursive(entry.BCMEntries);
                 }
 
-                if (entry.I_08.HasFlag(ButtonInput.boost))
+                if (entry.ButtonInput.HasFlag(ButtonInput.boost))
                 {
                     Console.WriteLine("This");
                     Console.Read();
@@ -405,116 +405,116 @@ namespace Xv2CoreLib.BCM
         [YAXSerializeAs("Idx")]
         public string Index { get; set; }
         [YAXAttributeForClass]
-        [YAXDontSerializeIfNull]
         [YAXSerializeAs("Child_GoTo_Idx")]
+        [YAXDontSerializeIfNull]
         public string LoopAsChild { get; set; }
         [YAXAttributeForClass]
-        [YAXDontSerializeIfNull]
         [YAXSerializeAs("Sibling_GoTo_Idx")]
+        [YAXDontSerializeIfNull]
         public string LoopAsSibling { get; set; }
 
         [YAXAttributeFor("I_00")]
         [YAXSerializeAs("value")]
-        public UInt32 I_00 { get; set; }
+        public uint I_00 { get; set; }
         [YAXAttributeFor("DirectionalInput")]
         [YAXSerializeAs("value")]
-        public DirectionalInput I_04 { get; set; }
+        public DirectionalInput DirectionalInput { get; set; }
         [YAXAttributeFor("ButtonInput")]
         [YAXSerializeAs("value")]
-        public ButtonInput I_08 { get; set; }
+        public ButtonInput ButtonInput { get; set; }
         [YAXAttributeFor("HoldDownConditions")]
         [YAXSerializeAs("value")]
         [YAXHexValue]
-        public UInt32 I_12 { get; set; }
+        public uint HoldDownConditions { get; set; }
         [YAXAttributeFor("OpponentSizeConditions")]
         [YAXSerializeAs("value")]
         [YAXHexValue]
-        public UInt32 I_16 { get; set; }
+        public uint OpponentSizeConditions { get; set; }
         [YAXAttributeFor("MinimumLoopDuration")]
         [YAXSerializeAs("value")]
-        public UInt16 I_20 { get; set; }
+        public ushort MinimumLoopDuration { get; set; }
         [YAXAttributeFor("MaximumLoopDuration")]
         [YAXSerializeAs("value")]
-        public UInt16 I_22 { get; set; }
+        public ushort MaximumLoopDuration { get; set; }
         [YAXAttributeFor("PrimaryActivatorConditions")]
         [YAXSerializeAs("value")]
         [YAXHexValue]
-        public UInt32 I_24 { get; set; }
+        public uint PrimaryActivatorConditions { get; set; }
         [YAXAttributeFor("ActivatorState")]
         [YAXSerializeAs("value")]
-        public ActivatorState I_28 { get; set; }
+        public ActivatorState ActivatorState { get; set; }
         [YAXAttributeFor("BacEntryPrimary")]
         [YAXSerializeAs("value")]
-        public Int16 I_32 { get; set; }
+        public short BacEntryPrimary { get; set; } = -1;
         [YAXAttributeFor("BacEntryAirborne")]
         [YAXSerializeAs("value")]
-        public Int16 I_42 { get; set; }
+        public short BacEntryAirborne { get; set; } = -1;
         [YAXAttributeFor("BacEntryCharge")]
         [YAXSerializeAs("value")]
-        public Int16 I_34 { get; set; }
+        public short BacEntryCharge { get; set; }
         [YAXAttributeFor("I_36")]
         [YAXSerializeAs("value")]
-        public Int16 I_36 { get; set; }
+        public short I_36 { get; set; }
         [YAXAttributeFor("BacEntryUserConnect")]
         [YAXSerializeAs("value")]
-        public Int16 I_38 { get; set; }
+        public short BacEntryUserConnect { get; set; }
         [YAXAttributeFor("BacEntryVictimConnect")]
         [YAXSerializeAs("value")]
-        public Int16 I_40 { get; set; }
+        public short BacEntryVictimConnect { get; set; }
         [YAXAttributeFor("BacEntryUnknown")]
         [YAXSerializeAs("value")]
-        public UInt16 I_44 { get; set; }
+        public ushort BacEntryUnknown { get; set; } = 65535;
         [YAXAttributeFor("RandomFlag")]
         [YAXSerializeAs("value")]
-        public UInt16 I_46 { get; set; }
+        public ushort RandomFlag { get; set; }
         [YAXAttributeFor("KiCost")]
         [YAXSerializeAs("value")]
-        public UInt32 I_64 { get; set; }
+        public uint I_64 { get; set; }
         [YAXAttributeFor("I_68")]
         [YAXSerializeAs("value")]
-        public UInt32 I_68 { get; set; }
+        public uint I_68 { get; set; }
         [YAXAttributeFor("I_72")]
         [YAXSerializeAs("value")]
-        public UInt32 I_72 { get; set; }
+        public uint I_72 { get; set; }
 
 
         [YAXAttributeFor("Bac_Cases")]
         [YAXSerializeAs("values")]
-        public BacCases I_76 { get; set; }
+        public BacCases BacCase { get; set; }
 
         [YAXAttributeFor("I_80")]
         [YAXSerializeAs("value")]
-        public UInt32 I_80 { get; set; }
+        public uint I_80 { get; set; }
         [YAXAttributeFor("StaminaCost")]
         [YAXSerializeAs("value")]
-        public UInt32 I_84 { get; set; }
+        public uint StaminaCost { get; set; }
         [YAXAttributeFor("I_88")]
         [YAXSerializeAs("value")]
-        public UInt32 I_88 { get; set; }
+        public uint I_88 { get; set; }
         [YAXAttributeFor("KiRequired")]
         [YAXSerializeAs("value")]
-        public UInt32 I_92 { get; set; }
+        public uint KiRequired { get; set; }
         [YAXAttributeFor("HealthRequired")]
         [YAXFormat("0.0#######")]
         [YAXSerializeAs("value")]
-        public float F_96 { get; set; }
+        public float HealthRequired { get; set; }
         [YAXAttributeFor("TransStage")]
         [YAXSerializeAs("value")]
-        public Int16 I_100 { get; set; }
+        public short TransStage { get; set; }
         [YAXAttributeFor("CUS_AURA")]
         [YAXSerializeAs("value")]
-        public Int16 I_102 { get; set; }
+        public short CusAura { get; set; } = -1;
         [YAXAttributeFor("I_104")]
         [YAXSerializeAs("value")]
-        public UInt32 I_104 { get; set; }
+        public uint I_104 { get; set; }
         [YAXAttributeFor("I_108")]
         [YAXSerializeAs("value")]
-        public UInt32 I_108 { get; set; }
+        public uint I_108 { get; set; }
 
-        
+
         [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BCMEntry")]
-        public List<BCM_Entry> BCMEntries { get; set; }
+        public List<BCM_Entry> BCMEntries { get; set; } = new List<BCM_Entry>();
 
         public BCM_Entry Clone()
         {
@@ -522,35 +522,35 @@ namespace Xv2CoreLib.BCM
             {
                 Index = Index,
                 I_00 = I_00,
-                I_04 = I_04,
-                I_08 = I_08,
-                I_100 = I_100,
-                I_102 = I_102,
+                DirectionalInput = DirectionalInput,
+                ButtonInput = ButtonInput,
+                TransStage = TransStage,
+                CusAura = CusAura,
                 I_104 = I_104,
                 I_108 = I_108,
-                I_12 = I_12,
-                I_16 = I_16,
-                I_20 = I_20,
-                I_22 = I_22,
-                I_24 = I_24,
-                I_28 = I_28,
-                I_32 = I_32,
-                I_34 = I_34,
+                HoldDownConditions = HoldDownConditions,
+                OpponentSizeConditions = OpponentSizeConditions,
+                MinimumLoopDuration = MinimumLoopDuration,
+                MaximumLoopDuration = MaximumLoopDuration,
+                PrimaryActivatorConditions = PrimaryActivatorConditions,
+                ActivatorState = ActivatorState,
+                BacEntryPrimary = BacEntryPrimary,
+                BacEntryCharge = BacEntryCharge,
                 I_36 = I_36,
-                I_38 = I_38,
-                I_40 = I_40,
-                I_42 = I_42,
-                I_44 = I_44,
-                I_46 = I_46,
+                BacEntryUserConnect = BacEntryUserConnect,
+                BacEntryVictimConnect = BacEntryVictimConnect,
+                BacEntryAirborne = BacEntryAirborne,
+                BacEntryUnknown = BacEntryUnknown,
+                RandomFlag = RandomFlag,
                 I_64 = I_64,
                 I_68 = I_68,
                 I_72 = I_72,
-                I_76 = I_76,
+                BacCase = BacCase,
                 I_80 = I_80,
-                I_84 = I_84,
+                StaminaCost = StaminaCost,
                 I_88 = I_88,
-                I_92 = I_92,
-                F_96 = F_96,
+                KiRequired = KiRequired,
+                HealthRequired = HealthRequired,
                 BCMEntries = BCMEntries
             };
         }
@@ -561,20 +561,20 @@ namespace Xv2CoreLib.BCM
         /// <returns></returns>
         public bool Compare(BCM_Entry entry)
         {
-            if (I_00 == entry.I_00 && I_04 == entry.I_04 &&
-                I_12 == entry.I_12 && I_16 == entry.I_16 &&
-                I_20 == entry.I_20 && I_22 == entry.I_22 &&
-                I_24 == entry.I_24 && I_28 == entry.I_28 &&
-                I_32 == entry.I_32 && I_34 == entry.I_34 &&
-                I_36 == entry.I_36 && I_38 == entry.I_38 &&
-                I_40 == entry.I_40 && I_42 == entry.I_42 &&
-                I_44 == entry.I_44 && I_46 == entry.I_46 &&
+            if (I_00 == entry.I_00 && DirectionalInput == entry.DirectionalInput &&
+                HoldDownConditions == entry.HoldDownConditions && OpponentSizeConditions == entry.OpponentSizeConditions &&
+                MinimumLoopDuration == entry.MinimumLoopDuration && MaximumLoopDuration == entry.MaximumLoopDuration &&
+                PrimaryActivatorConditions == entry.PrimaryActivatorConditions && ActivatorState == entry.ActivatorState &&
+                BacEntryPrimary == entry.BacEntryPrimary && BacEntryCharge == entry.BacEntryCharge &&
+                I_36 == entry.I_36 && BacEntryUserConnect == entry.BacEntryUserConnect &&
+                BacEntryVictimConnect == entry.BacEntryVictimConnect && BacEntryAirborne == entry.BacEntryAirborne &&
+                BacEntryUnknown == entry.BacEntryUnknown && RandomFlag == entry.RandomFlag &&
                 I_64 == entry.I_64 && I_68 == entry.I_68 &&
                 I_72 == entry.I_72 && I_80 == entry.I_80 &&
-                I_84 == entry.I_84 && I_88 == entry.I_88 &&
-                I_92 == entry.I_92 && I_100 == entry.I_100 &&
-                I_102 == entry.I_102 && I_104 == entry.I_104 &&
-                I_108 == entry.I_108 && I_76 == entry.I_76
+                StaminaCost == entry.StaminaCost && I_88 == entry.I_88 &&
+                KiRequired == entry.KiRequired && TransStage == entry.TransStage &&
+                CusAura == entry.CusAura && I_104 == entry.I_104 &&
+                I_108 == entry.I_108 && BacCase == entry.BacCase
                 )
             {
                 return true;

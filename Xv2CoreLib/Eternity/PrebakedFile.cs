@@ -459,6 +459,13 @@ namespace Xv2CoreLib.Eternity
         [YAXSerializeAs("value")]
         [YAXHexValue]
         public uint BcsEyesColor { get; set; }
+
+        public CusAuraData() { }
+
+        public CusAuraData(int cusAuraId)
+        {
+            CusAuraID = (ushort)cusAuraId;
+        }
     }
 
     [YAXSerializeAs("Alias")]

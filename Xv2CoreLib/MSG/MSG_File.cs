@@ -297,6 +297,20 @@ namespace Xv2CoreLib.MSG
             }
         }
 
+        public void AddEntry(string name, string message, int id)
+        {
+            string strId = id.ToString();
+
+            if(MSG_Entries.Any(x => x.Index == strId))
+            {
+                throw new InvalidOperationException($"MSG_File.AddEntry: Entry already exists at ID {id}");
+            }
+            else
+            {
+                MSG_Entries.Add(new MSG_Entry() { Name = name, Index = id.ToString(), Msg_Content = new List<Msg_Line>() { new Msg_Line() { Text = message } } });
+            }
+        }
+
         public int AddEntry(string name, string message)
         {
             int id = GetLowestUnusedID();

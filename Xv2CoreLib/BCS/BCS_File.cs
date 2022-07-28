@@ -129,6 +129,23 @@ namespace Xv2CoreLib.BCS
 
         }
 
+        public static string GetBcsFilePath(Race race, Gender gender = Gender.Male)
+        {
+            switch (race)
+            {
+                case Race.Human:
+                case Race.Saiyan:
+                    return gender == Gender.Male ? "chara/HUM/HUM.bcs" : "chara/HUF/HUF.bcs";
+                case Race.Majin:
+                    return gender == Gender.Male ? "chara/MAM/MAM.bcs" : "chara/MAF/MAF.bcs";
+                case Race.FriezaRace:
+                    return "chara/FRI/FRI.bcs";
+                case Race.Namekian:
+                    return "chara/NMC/NMC.bcs";
+            }
+
+            return null;
+        }
     }
 
     //PartSet

@@ -343,6 +343,13 @@ namespace Xv2CoreLib.PUP
         [YAXFormat("0.0##########")]
         public float F_148 { get; set; }
 
+        public PUP_Entry() { }
+
+        public PUP_Entry(int id)
+        {
+            ID = id;
+        }
+
         public static PUP_Entry Read(byte[] bytes, int offset)
         {
             return new PUP_Entry()

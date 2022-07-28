@@ -1051,20 +1051,23 @@ namespace LB_Mod_Installer.Binding
             return context;
         }
 
-        private int GetAutoId<T>(IEnumerable<T> installEntries, IEnumerable<T> destEntries, int min, int max, int sequence) where T : class, IInstallable
+        public int GetAutoId<T>(IEnumerable<T> installEntries, IEnumerable<T> destEntries, int min, int max, int sequence) where T : class, IInstallable
         {
             AutoIdContext context = GetAutoIdContext<T>(destEntries);
 
             //Add any static IDs from installEntries into the AutoIdContext.
-            foreach (var installEntry in installEntries)
+            if(installEntries != null)
             {
-                if(installEntry is IInstallable entry)
+                foreach (var installEntry in installEntries)
                 {
-                    int staticId;
-
-                    if (int.TryParse(entry.Index, out staticId))
+                    if (installEntry is IInstallable entry)
                     {
-                        context.AddId(staticId);
+                        int staticId;
+
+                        if (int.TryParse(entry.Index, out staticId))
+                        {
+                            context.AddId(staticId);
+                        }
                     }
                 }
             }
@@ -1114,7 +1117,7 @@ namespace LB_Mod_Installer.Binding
             return NullTokenInt; //Chara wasn't found, so defaulting to 0
         }
 
-        private int GetFreePartSet(int min, int max, int sequence)
+        public int GetFreePartSet(int min, int max, int sequence)
         {
             int id = min;
 
@@ -1155,7 +1158,7 @@ namespace LB_Mod_Installer.Binding
         }
 
         //Characters:
-        private int GetFreeCharacterID(int min, int max)
+        public int GetFreeCharacterID(int min, int max)
         {
             int current = min;
 
@@ -1182,7 +1185,7 @@ namespace LB_Mod_Installer.Binding
         }
 
         //Costumes:
-        private int GetFreeCostume(int charaId, string charaCode, int min, int max)
+        public int GetFreeCostume(int charaId, string charaCode, int min, int max)
         {
             BCS_File bcsFile = GetCharaBcsFile(charaId);
             int current = min;

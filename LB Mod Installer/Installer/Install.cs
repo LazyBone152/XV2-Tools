@@ -46,6 +46,7 @@ using Xv2CoreLib.OCS;
 using Xv2CoreLib.QML;
 using Xv2CoreLib.OCO;
 using Xv2CoreLib.BCM;
+using LB_Mod_Installer.Installer.Transformation;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -62,6 +63,7 @@ namespace LB_Mod_Installer.Installer
         public Xv2FileIO FileIO;
         public FileCacheManager fileManager;
         public MsgComponentInstall msgComponentInstall;
+        public TransformInstaller transformInstaller;
 
         //Needs to be static for Binding.Xml.XmlParser to access it. SHOULD be refactored entirely to be a singleton, but it relies on Install and i dont have time to untangle it all right now.
         public static BindingManager bindingManager;
@@ -82,6 +84,7 @@ namespace LB_Mod_Installer.Installer
             fileManager = _fileManager;
 
             bindingManager = new BindingManager(this);
+            transformInstaller = new TransformInstaller(this);
         }
 
         public void Start()
@@ -338,10 +341,53 @@ namespace LB_Mod_Installer.Installer
                     Install_OCO(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 default:
+                    if (TryTransformationInstall(xmlPath))
+                        break;
+
                     throw new InvalidDataException(string.Format("The filetype of \"{0}\" is not supported.", xmlPath));
             }
         }
         
+        private bool TryTransformationInstall(string xmlPath)
+        {
+            if (xmlPath.Contains("_CusAuraDefine.xml"))
+            {
+                var xml = zipManager.DeserializeXmlFromArchive_Ext<TransformCusAuras>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                transformInstaller.LoadCusAuras(xml);
+                return true;
+            }
+
+            if (xmlPath.Contains("_PartSetDefine.xml"))
+            {
+                var xml = zipManager.DeserializeXmlFromArchive_Ext<TransformPartSets>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                transformInstaller.LoadPartSets(xml);
+                return true;
+            }
+
+            if (xmlPath.Contains("_PowerUpDefine.xml"))
+            {
+                var xml = zipManager.DeserializeXmlFromArchive_Ext<TransformPowerUps>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                transformInstaller.LoadPupEntries(xml);
+                return true;
+            }
+
+            if (xmlPath.Contains("_TransformDefine.xml"))
+            {
+                var xml = zipManager.DeserializeXmlFromArchive_Ext<TransformDefines>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                transformInstaller.LoadTransformations(xml);
+                return true;
+            }
+
+            if (xmlPath.Contains("_TransformSkill.xml"))
+            {
+                var xml = zipManager.DeserializeXmlFromArchive_Ext<TransformSkill>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                transformInstaller.InstallSkill(xml);
+                return true;
+            }
+
+            return false;
+        }
+
         private void JungleCheck()
         {
             if (zipManager.Exists(JUNGLE1 + "/"))
@@ -1615,17 +1661,17 @@ namespace LB_Mod_Installer.Installer
                     if (msgComponent.MsgType == Msg_Component.MsgComponentType.Name)
                     {
                         string nameMsgPath = String.Format("msg/{0}", IDB_File.NameMsgFile(Path.GetFileName(filePath)));
-                        IdbEntry.NameMsgID = (ushort)msgComponentInstall.WriteMsgEntries(msgComponent, nameMsgPath, MsgComponentInstall.Mode.IDB, null, IdbEntry);
+                        IdbEntry.NameMsgID = (ushort)msgComponentInstall.WriteMsgEntries(msgComponent, nameMsgPath, MsgComponentInstall.ComponentMode.IDB, null, IdbEntry);
                     }
                     else if (msgComponent.MsgType == Msg_Component.MsgComponentType.Info)
                     {
                         string infoMsgPath = String.Format("msg/{0}", IDB_File.InfoMsgFile(Path.GetFileName(filePath)));
-                        IdbEntry.DescMsgID = (ushort)msgComponentInstall.WriteMsgEntries(msgComponent, infoMsgPath, MsgComponentInstall.Mode.IDB, null, IdbEntry);
+                        IdbEntry.DescMsgID = (ushort)msgComponentInstall.WriteMsgEntries(msgComponent, infoMsgPath, MsgComponentInstall.ComponentMode.IDB, null, IdbEntry);
                     }
                     else if (msgComponent.MsgType == Msg_Component.MsgComponentType.LimitBurst)
                     {
                         string lbMsgPath = String.Format("msg/{0}", IDB_File.LimitBurstMsgFile(Path.GetFileName(filePath)));
-                        IdbEntry.I_40 = (ushort)msgComponentInstall.WriteMsgEntries(msgComponent, lbMsgPath, MsgComponentInstall.Mode.IDB);
+                        IdbEntry.I_40 = (ushort)msgComponentInstall.WriteMsgEntries(msgComponent, lbMsgPath, MsgComponentInstall.ComponentMode.IDB);
                         limitBurstMsgIndex = IdbEntry.I_40;
                     }
                     else if (msgComponent.MsgType == Msg_Component.MsgComponentType.LimitBurstBattle)
@@ -1646,7 +1692,7 @@ namespace LB_Mod_Installer.Installer
                         if (limitBurstMsgIndex != -1)
                         {
                             string lbMsgPath = String.Format("msg/{0}", IDB_File.LimitBurstHudMsgFile(Path.GetFileName(filePath)));
-                            msgComponentInstall.WriteMsgEntries(msgComponent, lbMsgPath, MsgComponentInstall.Mode.IDB_LB_HUD, limitBurstMsgIndex.ToString());
+                            msgComponentInstall.WriteMsgEntries(msgComponent, lbMsgPath, MsgComponentInstall.ComponentMode.IDB_LB_HUD, limitBurstMsgIndex.ToString());
                         }
                         else
                         {
@@ -1669,7 +1715,7 @@ namespace LB_Mod_Installer.Installer
                     if (msgComponent.MsgType == Msg_Component.MsgComponentType.Name)
                     {
                         string nameMsgPath = "msg/proper_noun_character_name_";
-                        msgComponentInstall.WriteMsgEntries(msgComponent, nameMsgPath, MsgComponentInstall.Mode.CMS, CmsEntry.Str_04);
+                        msgComponentInstall.WriteMsgEntries(msgComponent, nameMsgPath, MsgComponentInstall.ComponentMode.CMS, CmsEntry.Str_04);
                     }
                     else
                     {

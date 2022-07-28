@@ -10,6 +10,11 @@ namespace LB_Mod_Installer.Installer.Transformation
 {
     public class TransformSkill
     {
+        [YAXAttributeForClass]
+        public string ThreeLetterCode { get; set; }
+        [YAXAttributeForClass]
+        public byte RaceLock { get; set; }
+
         //Localization keys
         [YAXAttributeFor("Name")]
         [YAXSerializeAs("value")]
@@ -28,10 +33,84 @@ namespace LB_Mod_Installer.Installer.Transformation
         [YAXSerializeAs("value")]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = -1)]
         public int PartSet { get; set; } = -1;
+        [YAXAttributeFor("CharaSwapId")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = -1)]
+        public int CharaSwapId { get; set; } = -1;
 
+        //Files (path to put in CUS skill entry, the files will need to be installed via the installer normally)
+        [YAXAttributeFor("VfxPath")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public string VfxPath { get; set; }
+        [YAXAttributeFor("EanPath")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Error)]
+        public string EanPath { get; set; }
+        [YAXAttributeFor("CamEanPath")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Error)]
+        public string CamEanPath { get; set; }
+        [YAXAttributeFor("SeAcbPath")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public string SeAcbPath { get; set; }
+        [YAXAttributeFor("VoxAcbPath")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public string VoxAcbPath { get; set; } //Follows the same naming rules as X2M skill vox 
+
+        /// <summary>
+        /// Defines all stages to be used in the skill.
+        /// </summary>
         public List<TransformStage> Stages { get; set; }
 
-        public List<TransformOption> InitialTransformOptions { get; set; }
+        /// <summary>
+        /// Defines how stages are accessed.
+        /// </summary>
+        public List<TransformState> TransformStates { get; set; }
+
+        public int NumStages => HasMoveSkillSetChange() ? Stages.Count + 1 : Stages.Count;
+
+        public int GetMaxKiRequired()
+        {
+            if (TransformStates.Count - 2 < 0) return (int)TransformStates[0].KiRequired;
+
+            return (int)TransformStates[TransformStates.Count - 2].KiRequired;
+        }
+
+        public int IndexOfMoveSkillSetChange()
+        {
+            var movesetChange = Stages.FirstOrDefault(x => x.MovesetChange || x.SkillsetChange != -1);
+
+            if (movesetChange != null)
+                return movesetChange.StageIndex;
+
+            return -1;
+        }
+    
+        public bool HasMoveSkillSetChange()
+        {
+            return IndexOfMoveSkillSetChange() != -1;
+        }
+        
+        public int GetTransStage(int stageIndex)
+        {
+            if (HasMoveSkillSetChange())
+                return stageIndex + 1;
+            else
+                return stageIndex;
+        }
+   
+        public int GetSkillSetChangeId()
+        {
+            int idx = IndexOfMoveSkillSetChange();
+
+            if (idx != -1)
+                return Stages[idx].SkillsetChange;
+
+            return -1;
+        }
     }
 
     public class TransformStage
@@ -50,11 +129,22 @@ namespace LB_Mod_Installer.Installer.Transformation
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = -1)]
         public int SkillsetChange { get; set; } = -1; //Preset ID (-1 = no change)
 
+
+    }
+
+    public class TransformState
+    {
+        [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0)]
+        public uint KiRequired { get; set; }
+        [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0f)]
+        public float HealthRequired { get; set; }
+
         [YAXDontSerializeIfNull]
         public List<TransformOption> TransformOptions { get; set; }
         [YAXDontSerializeIfNull]
         public List<TransformOption> RevertOptions { get; set; }
-
     }
 
     public class TransformOption
@@ -62,9 +152,14 @@ namespace LB_Mod_Installer.Installer.Transformation
         [YAXAttributeForClass]
         public int StageIndex { get; set; }
         [YAXAttributeForClass]
-        public int KiRequired { get; set; }
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0)]
+        public uint KiRequired { get; set; }
         [YAXAttributeForClass]
-        public int KiCost { get; set; }
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0)]
+        public uint KiCost { get; set; }
+        [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0f)]
+        public float HealthRequired { get; set; }
     }
 
 }

@@ -6,20 +6,34 @@ using System.Threading.Tasks;
 using YAXLib;
 using Xv2CoreLib.Eternity;
 using Xv2CoreLib.BAC;
+using Xv2CoreLib.PUP;
 
 namespace LB_Mod_Installer.Installer.Transformation
 {
     [YAXSerializeAs("TransformDefines")]
-    public class TransformationDefines
+    public class TransformDefines
     {
+
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Transformation")]
-        public List<TransformationDefine> Transformations { get; set; } 
+        public List<TransformDefine> Transformations { get; set; } 
 
     }
 
     [YAXSerializeAs("Transformation")]
-    public class TransformationDefine
+    public class TransformDefine
     {
+        //Hard-coded BAC entry keys for entries that are used to create BAC / BCM files.
+        public const string BAC_HOLD_DOWN_LOOP_KEY = "BAC_HOLD_DOWN_LOOP_KEY";
+        public const string BAC_UNTRANSFORM_KEY = "BAC_UNTRANSFORM_KEY";
+        public const string BAC_REVERT_LOOP_KEY = "BAC_REVERT_LOOP_KEY";
+        public const string BAC_CALLBACK_KEY = "BAC_CALLBACK_KEY";
+
+        //BAC Index of hard-coded entries (as skills, 100 is the max amount of entries so they cant be any greater)
+        public const int BAC_HOLD_DOWN_LOOP_IDX = 96;
+        public const int BAC_UNTRANSFORM_IDX = 97;
+        public const int BAC_REVERT_IDX = 98;
+        public const int BAC_CALLBACK_IDX = 99;
+
         [YAXAttributeForClass]
         public string Key { get; set; }
 
@@ -30,16 +44,7 @@ namespace LB_Mod_Installer.Installer.Transformation
         [YAXSerializeAs("Entry")]
         public int BacEntry { get; set; }
 
-        //All skills will share the same VOX/SE ACB
-        [YAXAttributeFor("VfxPath")]
-        [YAXSerializeAs("value")]
-        public string VfxPath { get; set; }
-        [YAXAttributeFor("EanPath")]
-        [YAXSerializeAs("value")]
-        public string EanPath { get; set; }
-        [YAXAttributeFor("CamEanPath")]
-        [YAXSerializeAs("value")]
-        public string CamEanPath { get; set; }
+
         [YAXAttributeFor("PartSet")]
         [YAXSerializeAs("value")]
         public string PartSetKey { get; set; }
@@ -49,5 +54,8 @@ namespace LB_Mod_Installer.Installer.Transformation
 
         [YAXDontSerializeIfNull]
         public CusAuraData CusAuraData { get; set; }
+        
+        [YAXDontSerialize]
+        public BAC_Entry BacEntryInstance = null;
     }
 }

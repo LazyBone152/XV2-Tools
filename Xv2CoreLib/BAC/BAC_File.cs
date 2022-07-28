@@ -294,6 +294,50 @@ namespace Xv2CoreLib.BAC
 
             return null;
         }
+       
+        public void ChangeNeutralSkillId(ushort newId)
+        {
+            foreach(var entry in BacEntries)
+            {
+                if(entry.Type8 != null)
+                {
+                    foreach (var effect in entry.Type8)
+                    {
+                        if (effect.SkillID == 0xBACB)
+                            effect.SkillID = newId;
+                    }
+                }
+                if (entry.Type9 != null)
+                {
+                    foreach (var projectile in entry.Type9)
+                    {
+                        if (projectile.SkillID == 0xBACB)
+                            projectile.SkillID = newId;
+                    }
+                }
+
+                if (entry.Type15 != null)
+                {
+                    foreach (var function in entry.Type15)
+                    {
+                        if (function.Param1 == 0xBACB || function.Param1 == 0xBACABACA)
+                            function.Param1 = newId;
+
+                        if (function.Param2 == 0xBACB || function.Param2 == 0xBACABACA)
+                            function.Param2 = newId;
+
+                        if (function.Param3 == 0xBACB || function.Param3 == 0xBACABACA)
+                            function.Param3 = newId;
+
+                        if (function.Param4 == 0xBACB || function.Param4 == 0xBACABACA)
+                            function.Param4 = newId;
+
+                        if (function.Param5 == 0xBACB || function.Param5 == 0xBACABACA)
+                            function.Param5 = newId;
+                    }
+                }
+            }
+        }
         #endregion
 
     }

@@ -225,6 +225,39 @@ namespace Xv2CoreLib.IDB
             }
         }
 
+        public static string SkillNameMsgFile(CUS.CUS_File.SkillType skillType)
+        {
+            switch (skillType)
+            {
+                case CUS.CUS_File.SkillType.Super:
+                    return "proper_noun_skill_spa_name_";
+                case CUS.CUS_File.SkillType.Ultimate:
+                    return "proper_noun_skill_ult_name_";
+                case CUS.CUS_File.SkillType.Evasive:
+                    return "proper_noun_skill_esc_name_";
+                case CUS.CUS_File.SkillType.Awoken:
+                    return "proper_noun_skill_met_name_";
+            }
+
+            return null;
+        }
+
+        public static string SkillInfoMsgFile(CUS.CUS_File.SkillType skillType)
+        {
+            switch (skillType)
+            {
+                case CUS.CUS_File.SkillType.Super:
+                    return "proper_noun_skill_spa_info_";
+                case CUS.CUS_File.SkillType.Ultimate:
+                    return "proper_noun_skill_ult_info_";
+                case CUS.CUS_File.SkillType.Evasive:
+                    return "proper_noun_skill_esc_info_";
+                case CUS.CUS_File.SkillType.Awoken:
+                    return "proper_noun_skill_met_info_";
+            }
+
+            return null;
+        }
     }
 
     [YAXSerializeAs("IDB_Entry")]
@@ -267,13 +300,13 @@ namespace Xv2CoreLib.IDB
         public ushort Type { get; set; } //ushort
         [YAXAttributeFor("I_10")]
         [YAXSerializeAs("value")]
-        public ushort I_10 { get; set; }
+        public ushort I_10 { get; set; } = ushort.MaxValue;
         [YAXAttributeFor("I_12")]
         [YAXSerializeAs("value")]
         public ushort I_12 { get; set; }
         [YAXAttributeFor("I_14")]
         [YAXSerializeAs("value")]
-        public ushort I_14 { get; set; }
+        public ushort I_14 { get; set; } = ushort.MaxValue;
         [YAXAttributeFor("BuyPrice")]
         [YAXSerializeAs("value")]
         public int I_16 { get; set; }
@@ -291,22 +324,22 @@ namespace Xv2CoreLib.IDB
         public int I_32 { get; set; } //int32
         [YAXAttributeFor("LimitBurst.EEPK_Effect")]
         [YAXSerializeAs("ID")]
-        public ushort I_36 { get; set; }
+        public ushort I_36 { get; set; } = ushort.MaxValue;
         [YAXAttributeFor("LimitBurst.Color")]
         [YAXSerializeAs("value")]
-        public LB_Color I_38 { get; set; }
+        public LB_Color I_38 { get; set; } = (LB_Color)ushort.MaxValue;
         [YAXAttributeFor("LimitBurst.Description")]
         [YAXSerializeAs("MSG_ID")]
         public ushort I_40 { get; set; }
         [YAXAttributeFor("LimitBurst.Talisman")]
         [YAXSerializeAs("ID1")]
-        public ushort I_42 { get; set; } //ushort
+        public ushort I_42 { get; set; } = ushort.MaxValue;
         [YAXAttributeFor("LimitBurst.Talisman")]
         [YAXSerializeAs("ID2")]
-        public ushort I_44 { get; set; } //ushort
+        public ushort I_44 { get; set; } = ushort.MaxValue;
         [YAXAttributeFor("LimitBurst.Talisman")]
         [YAXSerializeAs("ID3")]
-        public ushort I_46 { get; set; } //ushort
+        public ushort I_46 { get; set; } = ushort.MaxValue;
 
         //New in 1.18
         [YAXAttributeFor("NEW_I_12")]
@@ -390,6 +423,25 @@ namespace Xv2CoreLib.IDB
             return str2.ToString();
         }
 
+        public static IDB_Entry GetDefaultSkillEntry(int skillId = 0, int type = 0, int kiCost = 0, int buyCost = 1000)
+        {
+            IDB_Entry idbEntry = new IDB_Entry();
+            idbEntry.ID = (ushort)skillId;
+            idbEntry.Type = (ushort)type;
+            idbEntry.NameMsgID = idbEntry.ID;
+            idbEntry.DescMsgID = idbEntry.ID;
+            idbEntry.I_12 = 32767;
+            idbEntry.I_16 = buyCost;
+
+            idbEntry.Effects = new List<IBD_Effect>();
+            idbEntry.Effects.Add(new IBD_Effect());
+            idbEntry.Effects.Add(new IBD_Effect());
+            idbEntry.Effects.Add(new IBD_Effect());
+
+            idbEntry.Effects[0].F_100 = kiCost;
+
+            return idbEntry;
+        }
     }
 
     [YAXSerializeAs("Effect")]
@@ -400,17 +452,17 @@ namespace Xv2CoreLib.IDB
 
         [YAXAttributeFor("Type")]
         [YAXSerializeAs("value")]
-        public int I_00 { get; set; }
+        public int I_00 { get; set; } = -1;
         [YAXAttributeFor("ActivationType")]
         [YAXSerializeAs("value")]
-        public int I_04 { get; set; }
+        public int I_04 { get; set; } = -1;
         [YAXAttributeFor("NumActTimes")]
         [YAXSerializeAs("value")]
-        public int I_08 { get; set; }
+        public int I_08 { get; set; } = -1;
         [YAXAttributeFor("Timer")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
-        public float F_12 { get; set; }
+        public float F_12 { get; set; } = -1;
         [YAXAttributeFor("AbilityValues")]
         [YAXSerializeAs("values")]
         [YAXFormat("0.0##########")]
