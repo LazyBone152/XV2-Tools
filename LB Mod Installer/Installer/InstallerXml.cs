@@ -382,13 +382,13 @@ namespace LB_Mod_Installer.Installer
         {
             if (Localisations == null) return string.Empty;
 
-            Localisation local = Localisations.FirstOrDefault(x => x.Key.ToLower() == key);
+            Localisation local = Localisations.FirstOrDefault(x => x.Key.Equals(key, StringComparison.OrdinalIgnoreCase));
 
             if(local != null)
             {
                 LocalisationLanguage lang = local.LanguageEntries.FirstOrDefault(x => x.Language.Equals(langCode, StringComparison.OrdinalIgnoreCase));
 
-                if(local != null)
+                if(lang != null)
                 {
                     return lang.Text;
                 }
@@ -1111,9 +1111,22 @@ namespace LB_Mod_Installer.Installer
     {
         [YAXAttributeForClass]
         public string Language { get; set; }
+        [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public string Text { get; set; }
 
+        //Placeholder for old-style XMLs. Without this, they wouldn't load.
         [YAXAttributeFor("Text")]
         [YAXSerializeAs("value")]
-        public string Text { get; set; }
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = null)]
+        public string Text_Old
+        {
+            get { return Text; }
+            set
+            {
+                if (!string.IsNullOrWhiteSpace(value))
+                    Text = value;
+            }
+        }
     }
 }

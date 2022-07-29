@@ -37,23 +37,16 @@ namespace LB_Mod_Installer.Installer.Transformation
         [YAXAttributeForClass]
         public string Key { get; set; }
 
-        [YAXAttributeFor("Bac")]
-        [YAXSerializeAs("Path")]
-        public string BacPath { get; set; }
-        [YAXAttributeFor("Bac")]
-        [YAXSerializeAs("Entry")]
+        [YAXAttributeForClass]
         public int BacEntry { get; set; }
+        [YAXAttributeForClass]
+        public string BacPath { get; set; }
 
 
-        [YAXAttributeFor("PartSet")]
-        [YAXSerializeAs("value")]
-        public string PartSetKey { get; set; }
-        [YAXAttributeFor("NameTexturePath")]
-        [YAXSerializeAs("value")]
+        [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public string NameTexturePath { get; set; }
 
-        [YAXDontSerializeIfNull]
-        public CusAuraData CusAuraData { get; set; }
         
         [YAXDontSerialize]
         public BAC_Entry BacEntryInstance = null;

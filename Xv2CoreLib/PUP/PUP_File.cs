@@ -182,6 +182,7 @@ namespace Xv2CoreLib.PUP
         #endregion
     }
 
+    [Serializable]
     public class PUP_Entry : IInstallable
     {
 

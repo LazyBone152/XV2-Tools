@@ -390,6 +390,7 @@ namespace Xv2CoreLib.Eternity
     }
 
     [YAXSerializeAs("BodyShape")]
+    [Serializable]
     public class PrebakedBodyShape
     {
         [YAXAttributeForClass]
@@ -402,6 +403,7 @@ namespace Xv2CoreLib.Eternity
     }
 
     [YAXSerializeAs("CusAuraData")]
+    [Serializable]
     public class CusAuraData
     {
         /// <summary>

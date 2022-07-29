@@ -149,6 +149,7 @@ namespace Xv2CoreLib.BCS
     }
 
     //PartSet
+    [Serializable]
     public class PartSet : IInstallable
     {
         #region WrappedProps
@@ -272,6 +273,7 @@ namespace Xv2CoreLib.BCS
 #endif
     }
 
+    [Serializable]
     public class Part
     {
         [Flags]
@@ -518,6 +520,7 @@ namespace Xv2CoreLib.BCS
 
     }
 
+    [Serializable]
     public class ColorSelector
     {
         [YAXAttributeFor("PartColors")]
@@ -528,6 +531,7 @@ namespace Xv2CoreLib.BCS
         public short I_02 { get; set; }
     }
 
+    [Serializable]
     public class PhysicsPart
     {
         [YAXAttributeFor("Model1")]
@@ -678,6 +682,7 @@ namespace Xv2CoreLib.BCS
         }
     }
 
+    [Serializable]
     public class Unk3
     {
         [YAXAttributeForClass]
@@ -687,6 +692,7 @@ namespace Xv2CoreLib.BCS
     }
 
     //Color
+    [Serializable]
     public class PartColor : IInstallable
     {
         [YAXDontSerialize]
@@ -734,6 +740,7 @@ namespace Xv2CoreLib.BCS
     }
 
     [YAXSerializeAs("Colors")]
+    [Serializable]
     public class Colors : IInstallable
     {
         [YAXDontSerialize]
@@ -825,6 +832,7 @@ namespace Xv2CoreLib.BCS
     }
 
     //BCS Body
+    [Serializable]
     public class Body : IInstallable
     {
         [YAXDontSerialize]
@@ -844,6 +852,7 @@ namespace Xv2CoreLib.BCS
     }
 
     [YAXSerializeAs("BodyScale")]
+    [Serializable]
     public class BoneScale
     {
         [YAXAttributeForClass]
@@ -861,6 +870,7 @@ namespace Xv2CoreLib.BCS
     }
 
     //Skeleton
+    [Serializable]
     public class SkeletonData
     {
         [YAXAttributeFor("I_00")]
@@ -871,6 +881,7 @@ namespace Xv2CoreLib.BCS
     }
 
     [YAXSerializeAs("Bone")]
+    [Serializable]
     public class Bone
     {
         [YAXAttributeForClass]

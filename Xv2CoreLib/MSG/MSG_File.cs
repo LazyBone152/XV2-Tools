@@ -307,6 +307,11 @@ namespace Xv2CoreLib.MSG
             }
             else
             {
+                MSG_Entry existingEntry = MSG_Entries.FirstOrDefault(x => x.Name == name);
+
+                if (existingEntry != null)
+                    MSG_Entries.Remove(existingEntry);
+
                 MSG_Entries.Add(new MSG_Entry() { Name = name, Index = id.ToString(), Msg_Content = new List<Msg_Line>() { new Msg_Line() { Text = message } } });
             }
         }

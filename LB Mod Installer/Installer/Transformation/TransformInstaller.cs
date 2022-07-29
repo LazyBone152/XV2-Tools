@@ -11,6 +11,7 @@ using Xv2CoreLib.BCM;
 using Xv2CoreLib.PUP;
 using Xv2CoreLib.IDB;
 using Xv2CoreLib.BCS;
+using YAXLib;
 
 namespace LB_Mod_Installer.Installer.Transformation
 {
@@ -125,10 +126,10 @@ namespace LB_Mod_Installer.Installer.Transformation
             //Assign ID (generate dummy cms if needed)
             CUS_File cusFile = (CUS_File)install.GetParsedFile<CUS_File>(BindingManager.CUS_PATH);
             CMS_Entry dummyCms = AssignCmsEntry();
-            int skillID = cusFile.AssignNewSkillId(dummyCms, CUS_File.SkillType.Awoken);
-            int skillID2 = skillID - 20000;
+            int skillID2 = cusFile.AssignNewSkillId(dummyCms, CUS_File.SkillType.Awoken);
+            int skillID1 = skillID2 + 25000;
 
-            if (skillID == -1)
+            if (skillID1 == -1)
                 throw new ArgumentOutOfRangeException($"TransformInstaller.InstallSkill: the assigned skill ID is invalid (shouldn't happen... so something went wrong somewhere else)");
 
             bacFile.ChangeNeutralSkillId((ushort)skillID2);
@@ -150,7 +151,7 @@ namespace LB_Mod_Installer.Installer.Transformation
             //Create CUS entry
             Skill cusEntry = new Skill();
             cusEntry.ShortName = skill.ThreeLetterCode;
-            cusEntry.ID1 = (ushort)skillID;
+            cusEntry.ID1 = (ushort)skillID1;
             cusEntry.ID2 = (ushort)skillID2;
             cusEntry.I_12 = skill.RaceLock;
             cusEntry.I_13 = 0x76; //BAC, BCM, EAN, Awoken Skill
@@ -181,6 +182,9 @@ namespace LB_Mod_Installer.Installer.Transformation
 
             install.fileManager.AddParsedFile(bacPath, bacFile);
             install.fileManager.AddParsedFile(bcmPath, bcmFile);
+
+            GeneralInfo.Tracker.AddJungleFile(bacPath);
+            GeneralInfo.Tracker.AddJungleFile(bcmPath);
         }
         #endregion
 
@@ -345,6 +349,7 @@ namespace LB_Mod_Installer.Installer.Transformation
             if(dummyCmsEntry == null)
             {
                 dummyCmsEntry = cmsFile.CreateDummyEntry();
+                cmsFile.CMS_Entries.Add(dummyCmsEntry);
             }
 
             return dummyCmsEntry;
@@ -489,5 +494,54 @@ namespace LB_Mod_Installer.Installer.Transformation
             throw new ArgumentException($"TransformInstaller.GetButtonInputForSlot: Slot number out of range ({slot}), must be between 0 and 3.");
         }
         
-       }
+        public static void CreateDummyXmls()
+        {
+            TransformCusAuras cusAuras = new TransformCusAuras();
+            cusAuras.CusAuras = new List<TransformCusAura>();
+            cusAuras.CusAuras.Add(new TransformCusAura());
+            cusAuras.CusAuras[0].CusAuraData = new CusAuraData();
+
+            TransformDefines transformDefines = new TransformDefines();
+            transformDefines.Transformations = new List<TransformDefine>();
+            transformDefines.Transformations.Add(new TransformDefine());
+
+            TransformPartSets partSets = new TransformPartSets();
+            partSets.PartSets = new List<TransformPartSet>();
+            partSets.PartSets.Add(new TransformPartSet());
+            partSets.PartSets[0].PartSet = new PartSet();
+
+            TransformPowerUps powerUps = new TransformPowerUps();
+            powerUps.PowerUps = new List<TransformPowerUp>();
+            powerUps.PowerUps.Add(new TransformPowerUp());
+            powerUps.PowerUps[0].PupEntry = new PUP_Entry();
+
+            TransformSkill skill = new TransformSkill();
+            skill.TransformStates = new List<TransformState>();
+            skill.Stages = new List<TransformStage>();
+            skill.Stages.Add(new TransformStage());
+            skill.TransformStates.Add(new TransformState());
+            skill.TransformStates[0].TransformOptions = new List<TransformOption>();
+            skill.TransformStates[0].RevertOptions = new List<TransformOption>();
+            skill.TransformStates[0].TransformOptions.Add(new TransformOption());
+            skill.TransformStates[0].RevertOptions.Add(new TransformOption());
+
+            System.IO.Directory.CreateDirectory("transform");
+
+            YAXSerializer serializer = new YAXSerializer(typeof(TransformCusAuras));
+            serializer.SerializeToFile(cusAuras, "transform/CusAuras_CusAuraDefine.xml");
+
+            YAXSerializer serializer2 = new YAXSerializer(typeof(TransformDefines));
+            serializer2.SerializeToFile(transformDefines, "transform/Transform_TransformDefine.xml");
+
+            YAXSerializer serializer3 = new YAXSerializer(typeof(TransformPartSets));
+            serializer3.SerializeToFile(partSets, "transform/PartSets_PartSetDefine.xml");
+
+            YAXSerializer serializer4 = new YAXSerializer(typeof(TransformPowerUps));
+            serializer4.SerializeToFile(powerUps, "transform/PUP_PowerUpDefine.xml");
+
+            YAXSerializer serializer5 = new YAXSerializer(typeof(TransformSkill));
+            serializer5.SerializeToFile(skill, "transform/Skill_TransformSkill.xml");
+
+        }
+    }
 }

@@ -362,6 +362,7 @@ namespace Xv2CoreLib.IDB
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "MsgComponent")]
         public List<MSG.Msg_Component> MsgComponents { get; set; } //Only for LB Mod Installer
 
+
         public string GetRaceLockAsString()
         {
             if ((ushort)RaceLock == 255) return null;
@@ -547,7 +548,7 @@ namespace Xv2CoreLib.IDB
         [YAXSerializeAs("values")]
         [YAXFormat("0.0##########")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public float[] F_156 { get; set; } //size 13
+        public float[] F_156 { get; set; } //size 17
 
         //New in 1.18
         [YAXAttributeFor("NEW_I_48")]
@@ -560,6 +561,14 @@ namespace Xv2CoreLib.IDB
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         [YAXHexValue]
         public int NEW_I_52 { get; set; }
+
+        public IBD_Effect()
+        {
+            F_16 = new float[6];
+            F_48 = new float[6];
+            I_72 = new int[6];
+            F_156 = new float[17];
+        }
     }
 
 

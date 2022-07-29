@@ -68,8 +68,9 @@ namespace LB_Mod_Installer.Installer.Transformation
         /// <summary>
         /// Defines how stages are accessed.
         /// </summary>
-        public List<TransformState> TransformStates { get; set; }
+        public List<TransformState> TransformStates { get; set; } 
 
+        [YAXDontSerialize]
         public int NumStages => HasMoveSkillSetChange() ? Stages.Count + 1 : Stages.Count;
 
         public int GetMaxKiRequired()
@@ -142,7 +143,7 @@ namespace LB_Mod_Installer.Installer.Transformation
         public float HealthRequired { get; set; }
 
         [YAXDontSerializeIfNull]
-        public List<TransformOption> TransformOptions { get; set; }
+        public List<TransformOption> TransformOptions { get; set; } 
         [YAXDontSerializeIfNull]
         public List<TransformOption> RevertOptions { get; set; }
     }

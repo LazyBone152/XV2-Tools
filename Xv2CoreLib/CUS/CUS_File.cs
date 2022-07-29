@@ -261,71 +261,32 @@ namespace Xv2CoreLib.CUS
         
         public bool IsSkillIdRangeUsed(CMS_Entry cmsEntry, SkillType skillType)
         {
-            int min = cmsEntry.ID;
-            int max = min + 10;
+            int id = cmsEntry.ID * 10;
 
-            switch (skillType)
+            List<Skill> skills = GetSkills(skillType);
+
+            for(int i = 0; i < 10; i++)
             {
-                case SkillType.Super:
-                    return SuperSkills.Any(x => x.ID1 >= min && x.ID1 <= max);
-                case SkillType.Ultimate:
-                    min += 5000;
-                    max += 5000;
-                    return UltimateSkills.Any(x => x.ID1 >= min && x.ID1 <= max);
-                case SkillType.Evasive:
-                    min += 10000;
-                    max += 10000;
-                    return EvasiveSkills.Any(x => x.ID1 >= min && x.ID1 <= max);
-                case SkillType.Blast:
-                    min += 20000;
-                    max += 20000;
-                    return BlastSkills.Any(x => x.ID1 >= min && x.ID1 <= max);
-                case SkillType.Awoken:
-                    min += 25000;
-                    max += 25000;
-                    return AwokenSkills.Any(x => x.ID1 >= min && x.ID1 <= max);
+                if (!skills.Any(x => x.ID2 == id + i)) return false;
             }
 
             return true;
         } 
         
         /// <summary>
-        /// Assigns a new skill ID (ID1), parented to the assigned CMS entry. If no free IDs are available, -1 will be returned.
+        /// Assigns a new skill ID (ID2), parented to the assigned CMS entry. If no free IDs are available, -1 will be returned.
         /// </summary>
         public int AssignNewSkillId(CMS_Entry cmsEntry, SkillType skillType)
         {
-            int id = cmsEntry.ID;
-            List<Skill> skills = null;
-
-            switch (skillType)
-            {
-                case SkillType.Super:
-                    skills = SuperSkills;
-                    break;
-                case SkillType.Ultimate:
-                    skills = UltimateSkills;
-                    id += 5000;
-                    break;
-                case SkillType.Evasive:
-                    skills = EvasiveSkills;
-                    id += 10000;
-                    break;
-                case SkillType.Blast:
-                    skills = BlastSkills;
-                    id += 20000;
-                    break;
-                case SkillType.Awoken:
-                    skills = AwokenSkills;
-                    id += 25000;
-                    break;
-            }
+            int id = cmsEntry.ID * 10;
+            List<Skill> skills = GetSkills(skillType);
 
             int min = id;
             int max = id + 10;
 
             for(int i = 0; i < 10; i++)
             {
-                if (skills.FirstOrDefault(x => x.ID1 == id) == null) return id;
+                if (skills.FirstOrDefault(x => x.ID2 == id) == null) return id;
                 id++;
             }
 

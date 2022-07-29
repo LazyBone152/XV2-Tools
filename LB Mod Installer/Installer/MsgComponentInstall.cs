@@ -135,17 +135,17 @@ namespace LB_Mod_Installer.Installer
                     path = "quest_btlhud_";
                     break;
             }
-
-            MSG_File[] msgFiles = LoadMsgFiles(path);
-            ValidateMsgFiles(msgFiles, path);
+            string fullPath = $"msg/{path}";
+            MSG_File[] msgFiles = LoadMsgFiles(fullPath);
+            ValidateMsgFiles(msgFiles, fullPath);
 
             //Assign ID
             int id = msgFiles[0].NextID();
-            GeneralInfo.Tracker.AddID(path, Sections.MSG_Entries, id.ToString());
+            GeneralInfo.Tracker.AddMsgID(fullPath, Sections.MSG_Entries, id);
 
             for (int i = 0; i < msgFiles.Length; i++)
             {
-                string msgName = GetMsgName(path, "0", skillID2, msgFiles[i], isAwoken: true);
+                string msgName = GetMsgName(fullPath, "0", skillID2, msgFiles[i], isAwoken: true);
                 msgFiles[i].AddEntry(msgName, msg[i], id);
             }
 
