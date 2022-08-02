@@ -172,7 +172,10 @@ namespace LB_Mod_Installer.Installer
                 FileType type = File.GetFileType();
 
                 //Process bindings in InstallPath
-                File.InstallPath = bindingManager.ParseString(File.InstallPath, GeneralInfo.InstallerXml, "InstallPath");
+                if (!string.IsNullOrWhiteSpace(File.InstallPath))
+                {
+                    File.InstallPath = bindingManager.ParseString(File.InstallPath, GeneralInfo.InstallerXml, "InstallPath");
+                }
 
                 switch (type)
                 {
@@ -204,6 +207,9 @@ namespace LB_Mod_Installer.Installer
                     case FileType.CopyDir:
                         UpdateProgessBarText($"_Copying {File.SourcePath}...");
                         ProcessJungle($"{JUNGLE3}/{File.SourcePath}", true, File.InstallPath, true);
+                        break;
+                    case FileType.Binding:
+                        bindingManager.ParseString(File.Binding, GeneralInfo.InstallerXml, "Binding");
                         break;
                     default:
                         MessageBox.Show($"Unknown File.Type: {type}");

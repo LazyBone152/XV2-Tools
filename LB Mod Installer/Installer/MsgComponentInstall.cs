@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using Xv2CoreLib.CUS;
 using Xv2CoreLib.IDB;
 using Xv2CoreLib.MSG;

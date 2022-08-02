@@ -42,12 +42,16 @@ namespace LB_Mod_Installer.Installer.Transformation
         [YAXAttributeForClass]
         public string BacPath { get; set; }
 
-
         [YAXAttributeForClass]
-        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
-        public string NameTexturePath { get; set; }
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (uint)0)]
+        public uint KiRequired { get; set; }
+        [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (uint)0)]
+        public uint KiCost { get; set; }
+        [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0f)]
+        public float HealthRequired { get; set; }
 
-        
         [YAXDontSerialize]
         public BAC_Entry BacEntryInstance = null;
     }

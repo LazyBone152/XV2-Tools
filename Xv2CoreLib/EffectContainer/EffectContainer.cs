@@ -2459,6 +2459,44 @@ namespace Xv2CoreLib.EffectContainer
                 }
             }
         }
+        
+        public int CreateStageSelectorEntry(byte[] texture)
+        {
+            Effect bluerintEffect = Effects.FirstOrDefault(x => x.SortID == 20000);
+
+            if (bluerintEffect == null)
+                throw new Exception("CreateStageSelectorEntry: StageSelector Blueprint effect at ID 20000 not found.");
+
+            Effect newEffect = bluerintEffect.Copy();
+            newEffect.IndexNum = GetUnusedEffectId(20001);
+            Effects.Add(newEffect);
+
+            Asset asset = newEffect.EffectParts[0].AssetRef.Clone();
+            asset.InstanceID = Guid.NewGuid();
+            asset.Files[0].SetName(Pbind.GetUnusedName(asset.Files[0].FullFileName));
+
+            EmbEntry embEntry = new EmbEntry();
+            embEntry.Name = "StageSelector.png";
+            embEntry.Data = texture;
+
+            if(Pbind.File3_Ref.Entry.Count == EMB_File.MAX_EFFECT_TEXTURES)
+            {
+                MergeAllTexturesIntoSuperTextures_PBIND();
+
+                if(Pbind.File3_Ref.Entry.Count == EMB_File.MAX_EFFECT_TEXTURES)
+                {
+                    throw new Exception("CreateStageSelectorEntry: Not enough space for the StageSelector textures.");
+                }
+            }
+
+            asset.Files[0].EmpFile.Textures[0].TextureRef = embEntry;
+            Pbind.AddAsset(asset);
+
+            newEffect.EffectParts[0].AssetRef = asset;
+
+            return newEffect.IndexNum;
+
+        }
         #endregion
 
         public bool IsNull()

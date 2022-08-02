@@ -368,18 +368,21 @@ namespace LB_Mod_Installer
                 InstallerInfo.Init();
                 GeneralInfo.InstallerXmlInfo = InstallerInfo;
 
-                //Load locale.xml, if present
+                //Load localization.xmls, if present
                 if (InstallerInfo.Localisations == null)
                     InstallerInfo.Localisations = new List<Localisation>();
 
-                if (zipManager.Exists(LocaleResource.PATH))
+                foreach(var zipEntry in zipManager.archive.Entries)
                 {
-                    LocaleResource localizations = zipManager.DeserializeXmlFromArchive_Ext<LocaleResource>(LocaleResource.PATH);
-
-                    //Merge localizations
-                    if(localizations.Localisations != null)
+                    if (zipEntry.FullName.Contains(LocaleResource.PATH))
                     {
-                        InstallerInfo.Localisations.AddRange(localizations.Localisations);
+                        LocaleResource localizations = zipManager.DeserializeXmlFromArchive_Ext<LocaleResource>(zipEntry.FullName);
+
+                        //Merge localizations
+                        if (localizations.Localisations != null)
+                        {
+                            InstallerInfo.Localisations.AddRange(localizations.Localisations);
+                        }
                     }
                 }
             }

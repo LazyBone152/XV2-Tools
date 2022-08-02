@@ -12,11 +12,15 @@ using Xv2CoreLib.PUP;
 using Xv2CoreLib.IDB;
 using Xv2CoreLib.BCS;
 using YAXLib;
+using Xv2CoreLib.Resource.Image;
+using System.IO;
+using Xv2CoreLib.EffectContainer;
 
 namespace LB_Mod_Installer.Installer.Transformation
 {
     public class TransformInstaller
     {
+
         private Install install;
 
         private List<TransformDefine> TransformationDefines = new List<TransformDefine>();
@@ -118,10 +122,30 @@ namespace LB_Mod_Installer.Installer.Transformation
 
         public void InstallSkill(TransformSkill skill)
         {
-            BAC_File bacFile = CreateBacFile(skill);
-            BCM_File bcmFile = CreateBcmFile(skill);
+            if (skill.SkillCode?.Length != 3 && skill.SkillCode?.Length != 4)
+                throw new ArgumentException(string.Format("TransformInstaller.InstallSkill: SkillCode \"{0}\" is an invalid size. All SkillCodes must be either 3 or 4 characters.", skill.SkillCode));
 
-            //EEPK, EAN, ACB - all statically linked. Just put the path in cus.
+            UpdateSkillRequirements(skill);
+
+            BAC_File bacFile = CreateBacFile(skill);
+
+            //EEPK file is stored in "data" as a vfxpackage
+            EffectContainerFile eepkFile = null;
+
+            if (!string.IsNullOrWhiteSpace(skill.VfxPath))
+            {
+                if (!install.zipManager.Exists(GeneralInfo.GetPathInZipDataDir(skill.VfxPath)))
+                {
+                    throw new FileNotFoundException(string.Format("InstallSkill: Cant find the VFX file at path \"{0}\", declared on skill \"{1}\".", skill.VfxPath, skill.SkillCode));
+                }
+
+                using (Stream stream = install.zipManager.GetZipEntry(GeneralInfo.GetPathInZipDataDir(skill.VfxPath)).Open())
+                {
+                    eepkFile = EffectContainerFile.LoadVfx2(stream, skill.VfxPath);
+                }
+            }
+
+            //EAN, ACB - all statically linked. Just put the path in cus.
 
             //Assign ID (generate dummy cms if needed)
             CUS_File cusFile = (CUS_File)install.GetParsedFile<CUS_File>(BindingManager.CUS_PATH);
@@ -148,9 +172,63 @@ namespace LB_Mod_Installer.Installer.Transformation
             if (skill.PartSet == -1)
                 skill.PartSet = InstallPartSets(skill);
 
+            //Create StageSelectors
+            int[] transformStageOverlayIds = new int[skill.TransformStates.Count];
+            int[] untransformStageOverlayIds = new int[skill.TransformStates.Count];
+
+            if (install.installerXml.FlagIsSet(NO_AWOKEN_OVERLAY_FLAG))
+            {
+                //No stage selector UI = Use default entry
+                for(int i = 0; i < transformStageOverlayIds.Length; i++)
+                {
+                    transformStageOverlayIds[i] = TransformDefine.BAC_HOLD_DOWN_LOOP_IDX;
+                    untransformStageOverlayIds[i] = TransformDefine.BAC_HOLD_DOWN_LOOP_IDX;
+                }
+            }
+            else
+            {
+                transformStageOverlayIds = CreateStageSelectorEffects(skill, bacFile, eepkFile, skillID2, false);
+                untransformStageOverlayIds = CreateStageSelectorEffects(skill, bacFile, eepkFile, skillID2, true);
+            }
+
+            //Add Overlay Effect disables for every bac entry (immediately cancel overlay upon bac entry change within the skill)
+            for(int i = 0; i < 50; i++)
+            {
+                if(eepkFile.Effects.Any(x => x.IndexNum == 20000 + i))
+                {
+                    foreach(var bacEntry in bacFile.BacEntries)
+                    {
+                        if (!bacEntry.IsBacEntryEmpty())
+                        {
+                            BAC_Type8 disableEffect = new BAC_Type8();
+                            disableEffect.StartTime = 0;
+                            disableEffect.Duration = 1;
+                            disableEffect.EepkType = BAC_Type8.EepkTypeEnum.AwokenSkill;
+                            disableEffect.EffectID = 20000 + i;
+                            disableEffect.SkillID = (ushort)skillID2;
+                            disableEffect.UseSkillId = BAC_Type8.UseSkillIdEnum.True;
+                            disableEffect.EffectFlags = BAC_Type8.EffectFlagsEnum.Off | BAC_Type8.EffectFlagsEnum.Loop | BAC_Type8.EffectFlagsEnum.UserOnly;
+
+                            if (bacEntry.Type8 == null)
+                                bacEntry.Type8 = new List<BAC_Type8>();
+
+                            bacEntry.Type8.Insert(0, disableEffect);
+
+                        }
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            //Create BCM
+            BCM_File bcmFile = CreateBcmFile(skill, transformStageOverlayIds, untransformStageOverlayIds);
+
             //Create CUS entry
             Skill cusEntry = new Skill();
-            cusEntry.ShortName = skill.ThreeLetterCode;
+            cusEntry.ShortName = skill.SkillCode;
             cusEntry.ID1 = (ushort)skillID1;
             cusEntry.ID2 = (ushort)skillID2;
             cusEntry.I_12 = skill.RaceLock;
@@ -160,7 +238,7 @@ namespace LB_Mod_Installer.Installer.Transformation
             cusEntry.I_18 = 65280;
             cusEntry.EanPath = skill.EanPath;
             cusEntry.CamEanPath = skill.CamEanPath;
-            cusEntry.EepkPath = skill.VfxPath;
+            //cusEntry.EepkPath = skill.VfxPath;
             cusEntry.SePath = skill.SeAcbPath;
             cusEntry.VoxPath = skill.VoxAcbPath;
             cusEntry.I_50 = 271;
@@ -176,15 +254,19 @@ namespace LB_Mod_Installer.Installer.Transformation
             GeneralInfo.Tracker.AddID(BindingManager.CUS_PATH, Sections.CUS_AwokenSkills, cusEntry.Index);
 
             //Save files (add to file cache)
-            string folderName = $"{skillID2.ToString("D3")}_{dummyCms.ShortName}_{skill.ThreeLetterCode}";
+            string folderName = $"{skillID2.ToString("D3")}_{dummyCms.ShortName}_{skill.SkillCode}";
             string bacPath = $"skill/MET/{folderName}/{folderName}.bac";
             string bcmPath = $"skill/MET/{folderName}/{folderName}_PLAYER.bcm";
+            string eepkPath = $"skill/MET/{folderName}/{folderName}.eepk";
 
             install.fileManager.AddParsedFile(bacPath, bacFile);
             install.fileManager.AddParsedFile(bcmPath, bcmFile);
+            install.fileManager.AddParsedFile(eepkPath, eepkFile);
 
             GeneralInfo.Tracker.AddJungleFile(bacPath);
             GeneralInfo.Tracker.AddJungleFile(bcmPath);
+            GeneralInfo.Tracker.AddJungleFile(eepkPath);
+            //TODO: Add all other eepk files
         }
         #endregion
 
@@ -245,7 +327,7 @@ namespace LB_Mod_Installer.Installer.Transformation
             return bacFile;
         }
 
-        private BCM_File CreateBcmFile(TransformSkill skill)
+        private BCM_File CreateBcmFile(TransformSkill skill, int[] transformHoldDownIds, int[] untransformHoldDownIds)
         {
             BCM_File bcmFile = new BCM_File();
 
@@ -253,15 +335,16 @@ namespace LB_Mod_Installer.Installer.Transformation
             BCM_Entry root = new BCM_Entry();
             bcmFile.BCMEntries.Add(root);
 
-            //Add "Hold Down" entries
+            //Add root "Hold Down" entries
             for(int i = 0; i < skill.TransformStates.Count; i++)
             {
                 BCM_Entry holdLoop = new BCM_Entry();
+                holdLoop.Index = $"transform_root_{i}";
                 holdLoop.ButtonInput = ButtonInput.ultimateskill2;
                 holdLoop.ActivatorState = ActivatorState.attacking | ActivatorState.idle;
                 holdLoop.BacCase = BacCases.Case3;
                 holdLoop.PrimaryActivatorConditions = (uint)(i == 0 ? 0x80 : 0xd00);
-                holdLoop.BacEntryPrimary = TransformDefine.BAC_HOLD_DOWN_LOOP_IDX;
+                holdLoop.BacEntryPrimary = (short)transformHoldDownIds[i];
                 holdLoop.TransStage = (short)(skill.GetTransStage(i));
                 holdLoop.KiRequired = skill.TransformStates[i].KiRequired;
                 holdLoop.HealthRequired = skill.TransformStates[i].HealthRequired;
@@ -269,7 +352,7 @@ namespace LB_Mod_Installer.Installer.Transformation
                 //Add Transform entries
                 if(skill.TransformStates[i].TransformOptions != null)
                 {
-                    if (skill.TransformStates[i].TransformOptions.Count >= 4)
+                    if (skill.TransformStates[i].TransformOptions.Count > 4)
                         throw new ArgumentException($"TransformInstaller.CreateBcmFile: Number of TransformOption entries ({skill.TransformStates[i].TransformOptions.Count}) exceeds the maximum of 4. ");
 
                     for (int a = 0; a < skill.TransformStates[i].TransformOptions.Count; a++)
@@ -289,37 +372,66 @@ namespace LB_Mod_Installer.Installer.Transformation
                 }
 
                 //Add untransform entry (when not on the 1st stage selector / is in base form)
-                if(i > 0)
+                BCM_Entry untransformHoldDownLoop = null;
+                if (i > 0)
                 {
-                    BCM_Entry untransformRoot = new BCM_Entry();
-                    untransformRoot.ButtonInput = ButtonInput.guard;
-                    untransformRoot.ActivatorState = ActivatorState.attacking | ActivatorState.idle;
-                    untransformRoot.BacCase = BacCases.Case3;
-                    untransformRoot.BacEntryPrimary = TransformDefine.BAC_UNTRANSFORM_IDX;
+                    untransformHoldDownLoop = new BCM_Entry();
+                    untransformHoldDownLoop.ButtonInput = ButtonInput.skillmenu;
+                    untransformHoldDownLoop.ActivatorState = ActivatorState.attacking | ActivatorState.idle;
+                    untransformHoldDownLoop.BacCase = BacCases.Case3;
+                    untransformHoldDownLoop.BacEntryPrimary = (short)untransformHoldDownIds[i];
+                    untransformHoldDownLoop.TransStage = (short)(skill.GetTransStage(i) + 1);
+
+                    //Add untransform entry ([Revert to Base]). Always option 1.
+                    BCM_Entry untransformEntry = new BCM_Entry();
+                    untransformEntry.ButtonInput = ButtonInput.blast;
+                    untransformEntry.ActivatorState = ActivatorState.attacking | ActivatorState.idle;
+                    untransformEntry.BacCase = BacCases.Case3;
+                    untransformEntry.BacEntryPrimary = TransformDefine.BAC_UNTRANSFORM_IDX;
+                    untransformHoldDownLoop.BCMEntries.Add(untransformEntry);
 
                     //Add revert entries
                     if (skill.TransformStates[i].RevertOptions != null)
                     {
-                        if (skill.TransformStates[i].RevertOptions.Count >= 4)
-                            throw new ArgumentException($"TransformInstaller.CreateBcmFile: Number of RevertOptions entries ({skill.TransformStates[i].RevertOptions.Count}) exceeds the maximum of 4. ");
+                        if (skill.TransformStates[i].RevertOptions.Count > 3)
+                            throw new ArgumentException($"TransformInstaller.CreateBcmFile: Number of RevertOptions entries ({skill.TransformStates[i].RevertOptions.Count}) exceeds the maximum of 3. ");
 
                         for (int a = 0; a < skill.TransformStates[i].RevertOptions.Count; a++)
                         {
                             BCM_Entry revertEntry = new BCM_Entry();
-                            revertEntry.ButtonInput = GetButtonInputForSlot(a);
+                            revertEntry.ButtonInput = GetButtonInputForSlot(a + 1);
                             revertEntry.ActivatorState = ActivatorState.attacking | ActivatorState.idle;
-                            revertEntry.BacCase = BacCases.Case3;
-                            revertEntry.BacEntryPrimary = (short)skill.TransformStates[i].RevertOptions[a].StageIndex;
+                            revertEntry.BacEntryPrimary = TransformDefine.BAC_REVERT_IDX;
                             revertEntry.TransStage = (short)skill.GetTransStage(skill.TransformStates[i].RevertOptions[a].StageIndex);
 
-                            untransformRoot.BCMEntries.Add(revertEntry);
+                            untransformHoldDownLoop.BCMEntries.Add(revertEntry);
                         }
                     }
 
-                    holdLoop.BCMEntries.Add(untransformRoot);
+                    if(skill.TransformStates[i].TransformOptions?.Count > 0)
+                    {
+                        //Add callback entry (jump back to root transform hold down loop when button is pressed again)
+                        BCM_Entry callbackEntry = new BCM_Entry();
+                        callbackEntry.ButtonInput = ButtonInput.skillmenu;
+                        callbackEntry.ActivatorState = ActivatorState.attacking | ActivatorState.idle;
+                        callbackEntry.BacEntryPrimary = (short)transformHoldDownIds[i];
+                        untransformHoldDownLoop.BCMEntries.Add(callbackEntry);
+
+                        holdLoop.BCMEntries.Add(untransformHoldDownLoop);
+
+                        holdLoop.BCMEntries[0].Index = $"hold_loop_child_{i}";
+                        callbackEntry.LoopAsChild = $"hold_loop_child_{i}";
+                    }
                 }
 
-                root.BCMEntries.Add(holdLoop);
+                if(skill.TransformStates[i].TransformOptions?.Count > 0)
+                {
+                    root.BCMEntries.Add(holdLoop);
+                }
+                else if(untransformHoldDownLoop != null)
+                {
+                    root.BCMEntries.Add(untransformHoldDownLoop);
+                }
             }
 
             return bcmFile;
@@ -366,12 +478,9 @@ namespace LB_Mod_Installer.Installer.Transformation
 
             for (int i = 0; i < skill.Stages.Count; i++)
             {
-                var pup = PupEntries.FirstOrDefault(x => x.Key == skill.Stages[i].Key);
+                var pup = GetPupDefine(skill.Stages[i].Key);
 
-                if (pup == null)
-                    throw new Exception($"Could not find a PUP entry for Key: {skill.Stages[i].Key}.\n\nNote: All transformations must have an assigned PUP entry!");
-
-                var pupEntry = pup.PupEntry.Copy();
+                var pupEntry = pup.Copy();
                 pupEntry.ID = pupID + skill.GetTransStage(i);
 
                 pupFile.PupEntries.Add(pupEntry);
@@ -398,6 +507,8 @@ namespace LB_Mod_Installer.Installer.Transformation
                     throw new Exception($"Could not find a CusAuraData entry for Key: {skill.Stages[i].Key}.");
 
                 var entry = cusAura.CusAuraData.Copy();
+                entry.Integer_2 = (uint)i;
+                entry.Integer_3 = (uint)(i < 3 ? i + 1 : 0);
                 entry.CusAuraID = (ushort)(auraId + skill.GetTransStage(skill.Stages[i].StageIndex));
 
                 prebaked.CusAuras.Add(entry);
@@ -461,7 +572,7 @@ namespace LB_Mod_Installer.Installer.Transformation
         {
             //Create IDB entry
             IDB_File idbFile = (IDB_File)install.GetParsedFile<IDB_File>(Xv2CoreLib.Xenoverse2.SKILL_IDB_PATH);
-            IDB_Entry idbEntry = IDB_Entry.GetDefaultSkillEntry(skillID2, 5, skill.GetMaxKiRequired());
+            IDB_Entry idbEntry = IDB_Entry.GetDefaultSkillEntry(skillID2, 5, skill.GetMaxKiRequired(), skill.BuyPrice);
 
             idbFile.Entries.Add(idbEntry);
             GeneralInfo.Tracker.AddID(Xv2CoreLib.Xenoverse2.SKILL_IDB_PATH, Sections.IDB_Entries, idbEntry.Index);
@@ -475,6 +586,157 @@ namespace LB_Mod_Installer.Installer.Transformation
             install.msgComponentInstall.WriteSkillMsgEntries(names, skillID2, CUS_File.SkillType.Awoken, MsgComponentInstall.SkillMode.BtlHud);
         }
 
+        private byte[] CreateStageSelectorTexture(TransformSkill skill, List<TransformOption> options, bool isUntransform)
+        {
+            const string ds4Texture = "data/awoken_overlay/ds4.dds";
+            const string xboxTexture = "data/awoken_overlay/xbox.dds";
+            const string kbmTexture = "data/awoken_overlay/kbm.dds";
+            const string noControllerTexture = "data/awoken_overlay/none.dds";
+
+            byte[] bytes;
+
+            if (install.installerXml.FlagIsSet(DS4_FLAG))
+            {
+                bytes = install.zipManager.GetFileFromArchive(ds4Texture);
+            }
+            else if (install.installerXml.FlagIsSet(XBOX_CONTROLLER_FLAG))
+            {
+                bytes = install.zipManager.GetFileFromArchive(xboxTexture);
+            }
+            else if (install.installerXml.FlagIsSet(KEYBOARD_MOUSE_FLAG))
+            {
+                bytes = install.zipManager.GetFileFromArchive(kbmTexture);
+            }
+            else
+            {
+                bytes = install.zipManager.GetFileFromArchive(noControllerTexture);
+            }
+
+            string[] stageNames = new string[4];
+
+            if (isUntransform)
+            {
+                stageNames[0] = install.installerXml.GetLocalisedString("REVERT_TO_BASE");
+
+                for (int i = 0; i < 3; i++)
+                {
+                    if (i < options?.Count)
+                    {
+                        stageNames[i + 1] = GetStageName(skill, options[i].StageIndex);
+                    }
+                    else
+                    {
+                        stageNames[i + 1] = "---";
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    if (i < options?.Count)
+                    {
+                        stageNames[i] = GetStageName(skill, options[i].StageIndex);
+                    }
+                    else
+                    {
+                        stageNames[i] = "---";
+                    }
+                }
+            }
+            
+
+            return TextureHelper.WriteStageNames(bytes, stageNames);
+
+         }
+       
+        private int[] CreateStageSelectorEffects(TransformSkill skill, BAC_File bacFile, EffectContainerFile eepkFile, int skillID2, bool isUntransform)
+        {
+            int[] bacIds = new int[skill.TransformStates.Count];
+
+            for (int i = 0; i < skill.TransformStates.Count; i++)
+            {
+                byte[] texture = isUntransform ? CreateStageSelectorTexture(skill, skill.TransformStates[i].RevertOptions, isUntransform) : CreateStageSelectorTexture(skill, skill.TransformStates[i].TransformOptions, isUntransform);
+
+                int effectId = eepkFile.CreateStageSelectorEntry(texture);
+
+                BAC_Entry newHoldDownEntry = bacFile.GetEntry(TransformDefine.BAC_HOLD_DOWN_LOOP_IDX).Copy();
+                bacIds[i] = bacFile.AddEntry(newHoldDownEntry);
+
+                if (newHoldDownEntry.Type8 == null)
+                    newHoldDownEntry.Type8 = new List<BAC_Type8>();
+
+                //Add Effect Start and Disables every frame. This ensures that the effect wont linger for long if the bac entry is canceled.
+                for (int a = 0; a < 120; a += 1)
+                {
+                    BAC_Type8 disableEffect = new BAC_Type8();
+                    disableEffect.StartTime = (ushort)a;
+                    disableEffect.Duration = 1;
+                    disableEffect.EepkType = BAC_Type8.EepkTypeEnum.AwokenSkill;
+                    disableEffect.EffectID = effectId;
+                    disableEffect.SkillID = (ushort)skillID2;
+                    disableEffect.UseSkillId = BAC_Type8.UseSkillIdEnum.True;
+                    disableEffect.EffectFlags = BAC_Type8.EffectFlagsEnum.Off | BAC_Type8.EffectFlagsEnum.Loop | BAC_Type8.EffectFlagsEnum.UserOnly;
+
+                    //Start
+                    BAC_Type8 effect = new BAC_Type8();
+                    effect.StartTime = (ushort)a;
+                    effect.Duration = 1;
+                    effect.EepkType = BAC_Type8.EepkTypeEnum.AwokenSkill;
+                    effect.EffectID = effectId;
+                    effect.SkillID = (ushort)skillID2;
+                    effect.UseSkillId = BAC_Type8.UseSkillIdEnum.True;
+                    effect.EffectFlags = BAC_Type8.EffectFlagsEnum.Loop | BAC_Type8.EffectFlagsEnum.UserOnly;
+
+                    newHoldDownEntry.Type8.Add(disableEffect.Copy());
+                    newHoldDownEntry.Type8.Add(effect);
+                }
+
+            }
+
+            return bacIds;
+        }
+
+        private void UpdateSkillRequirements(TransformSkill skill)
+        {
+            foreach(var state in skill.TransformStates)
+            {
+                if(state.TransformOptions != null)
+                {
+                    foreach (var option in state.TransformOptions)
+                    {
+                        var define = GetStageDefine(skill, option.StageIndex);
+
+                        if (option.KiCost == 0)
+                            option.KiCost = define.KiCost;
+
+                        if (option.KiRequired == 0)
+                            option.KiRequired = define.KiRequired;
+
+                        if (option.HealthRequired == 0f)
+                            option.HealthRequired = define.HealthRequired;
+                    }
+                }
+            }
+        }
+        #endregion
+
+        #region GetDefine
+        private PUP_Entry GetPupDefine(string key)
+        {
+            var entry = PupEntries.FirstOrDefault(x => x.Key == key);
+
+            if (!string.IsNullOrWhiteSpace(entry.AliasFor))
+            {
+                entry = PupEntries.FirstOrDefault(x => x.Key == entry.AliasFor);
+            }
+
+            if(entry == null)
+                throw new Exception($"Could not find a PUP entry for Key: {key}.\n\nNote: All transformations must have an assigned PUP entry!");
+
+            return entry.PupEntry;
+        }
+
         #endregion
 
         private ButtonInput GetButtonInputForSlot(int slot)
@@ -482,13 +744,13 @@ namespace LB_Mod_Installer.Installer.Transformation
             switch (slot)
             {
                 case 0:
-                    return ButtonInput.awokenskill;
+                    return ButtonInput.blast;
                 case 1:
-                    return ButtonInput.ultimateskill2;
+                    return ButtonInput.heavy;
                 case 2:
-                    return ButtonInput.ultimateskill1;
+                    return ButtonInput.light;
                 case 3:
-                    return ButtonInput.superskill1;
+                    return ButtonInput.jump;
             }
 
             throw new ArgumentException($"TransformInstaller.GetButtonInputForSlot: Slot number out of range ({slot}), must be between 0 and 3.");
@@ -543,5 +805,37 @@ namespace LB_Mod_Installer.Installer.Transformation
             serializer5.SerializeToFile(skill, "transform/Skill_TransformSkill.xml");
 
         }
+        
+        private TransformDefine GetStageDefine(TransformSkill skill, int stageIndex)
+        {
+            TransformStage stage = skill.Stages.FirstOrDefault(x => x.StageIndex == stageIndex);
+
+            if(stage != null)
+            {
+                return TransformationDefines.FirstOrDefault(x => x.Key == stage.Key);
+            }
+
+            throw new Exception($"TransformInstaller.GetStageDefine: Could not find the define entry.");
+        }
+
+        private string GetStageName(TransformSkill skill, int stageIndex)
+        {
+            var stage = skill.Stages.FirstOrDefault(x => x.StageIndex == stageIndex);
+
+            if(stage != null)
+            {
+                return install.installerXml.GetLocalisedString(stage.Key);
+            }
+
+            return string.Empty;
+        }
+
+
+        #region FLAGS
+        private const string DS4_FLAG = "DS4_FLAG";
+        private const string XBOX_CONTROLLER_FLAG = "XBOX_FLAG";
+        private const string KEYBOARD_MOUSE_FLAG = "KEYBOARD_MOUSE_FLAG";
+        private const string NO_AWOKEN_OVERLAY_FLAG = "NO_AWOKEN_OVERLAY_FLAG";
+        #endregion
     }
 }

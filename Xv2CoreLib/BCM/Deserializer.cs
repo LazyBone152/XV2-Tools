@@ -112,7 +112,7 @@ namespace Xv2CoreLib.BCM
 
                 WriteBcmEntry(Entries[i], parentOffset, rootOffset);
 
-                if(Entries[i].BCMEntries != null)
+                if(Entries[i].BCMEntries?.Count > 0)
                 {
                     bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), ChilfOffsetToFill);
                     if(useRoot == true)
@@ -230,7 +230,7 @@ namespace Xv2CoreLib.BCM
         private void ValidateEntry(BCM_Entry entry)
         {
             //Checks for children if it has a Child GoTo
-            if (entry.LoopAsChild != null && entry.BCMEntries != null)
+            if (entry.LoopAsChild != null && entry.BCMEntries?.Count > 0)
             {
                 throw new InvalidDataException(String.Format("Invalid Loop_As_Child tag on Idx {0}.\nCannot set the tag (Loop_As_Child=\"{1}\") as the BCM Entry at Idx {0} has actual child entries.", entry.Index, entry.LoopAsChild));
             }

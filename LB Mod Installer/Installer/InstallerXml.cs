@@ -136,8 +136,8 @@ namespace LB_Mod_Installer.Installer
                 files.AddRange(InstallFiles.Where(x => x.GetDoLast()));
             }
 
-            //Remove all files with empty SourcePaths
-            files.RemoveAll(x => string.IsNullOrWhiteSpace(x.SourcePath));
+            //Remove all files with empty SourcePath, and without a Binding
+            files.RemoveAll(x => string.IsNullOrWhiteSpace(x.SourcePath) && string.IsNullOrWhiteSpace(x.Binding));
 
             //Remove files that have a invalid flag or are otherwise disabled
             files.RemoveAll(x => !FlagsIsSet(x.HasFlag) || !x.GetIsEnabled());
@@ -205,7 +205,10 @@ namespace LB_Mod_Installer.Installer
 
             foreach (var step in InstallOptionSteps)
             {
-                if(step.OptionList != null)
+                //Newline replace
+                step.Message = step.Message.Replace("\\n", "\n");
+
+                if (step.OptionList != null)
                 {
                     if (step.SelectedOptions == null)
                         step.SelectedOptions = new List<int>();
@@ -221,6 +224,12 @@ namespace LB_Mod_Installer.Installer
                                 step.SetSelectedOptions(step.SelectedOptions);
                                 break;
                         }
+                    }
+
+                    //Newline replace
+                    foreach (var option in step.OptionList)
+                    {
+                        option.Tooltip = option.Tooltip.Replace("\\n", "\n");
                     }
                 }
             }
@@ -318,7 +327,7 @@ namespace LB_Mod_Installer.Installer
             return true;
         }
 
-        private bool FlagIsSet(string flag)
+        public bool FlagIsSet(string flag)
         {
             if (string.IsNullOrWhiteSpace(flag)) return true;
 
@@ -383,6 +392,7 @@ namespace LB_Mod_Installer.Installer
             if (Localisations == null) return string.Empty;
 
             Localisation local = Localisations.FirstOrDefault(x => x.Key.Equals(key, StringComparison.OrdinalIgnoreCase));
+            string result = string.Empty;
 
             if(local != null)
             {
@@ -390,7 +400,7 @@ namespace LB_Mod_Installer.Installer
 
                 if(lang != null)
                 {
-                    return lang.Text;
+                    result = lang.Text;
                 }
                 else if(langCode != "en")
                 {
@@ -398,11 +408,15 @@ namespace LB_Mod_Installer.Installer
                     lang = local.LanguageEntries.FirstOrDefault(x => x.Language.Equals("en", StringComparison.OrdinalIgnoreCase));
 
                     if (lang != null)
-                        return lang.Text;
+                        result = lang.Text;
                 }
             }
 
-            return string.Empty;
+            //Newline replace
+            //result = result.Replace("\n", "&#x0a;");
+            result = result.Replace("\\n", "\n");
+
+            return result;
         }
         
         public string[] GetLocalisedArray(string key)
@@ -988,6 +1002,9 @@ namespace LB_Mod_Installer.Installer
         //optional:
         [YAXAttributeForClass]
         [YAXDontSerializeIfNull]
+        public string Binding { get; set; }
+        [YAXAttributeForClass]
+        [YAXDontSerializeIfNull]
         public string HasFlag { get; set; }
         [YAXAttributeForClass]
         [YAXDontSerializeIfNull]
@@ -1024,6 +1041,7 @@ namespace LB_Mod_Installer.Installer
         public FileType GetFileType()
         {
             FileType type = ParseFileTypeValue();
+            if (type == FileType.Binding) return type;
 
             //If SourcePath is for a special file type, then return that type.
             if(Path.GetExtension(SourcePath) == Xv2CoreLib.EffectContainer.EffectContainerFile.ZipExtension)
@@ -1092,7 +1110,8 @@ namespace LB_Mod_Installer.Installer
         CopyFile,
         CopyDir,
         VfxPackage,
-        MusicPackage
+        MusicPackage,
+        Binding
     }
 
     //Localisation

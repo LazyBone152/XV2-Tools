@@ -6,7 +6,7 @@ namespace LB_Mod_Installer.Installer
     [YAXSerializeAs("Localisations")]
     public class LocaleResource
     {
-        public const string PATH = "locale.xml";
+        public const string PATH = "localization.xml";
 
         [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Local")]

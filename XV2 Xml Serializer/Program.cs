@@ -22,7 +22,7 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
-            args = new string[1] { @"E:\VS_Test\EMP\ALL EMP" };
+            args = new string[1] { @"1591_X5K_SST_PLAYER.bcm" };
 
             DEBUG_MODE = true;
 #endif

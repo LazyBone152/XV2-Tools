@@ -14,6 +14,10 @@ namespace LB_Mod_Installer.Installer.Transformation
     {
         [YAXAttributeForClass]
         public string Key { get; set; }
+        [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = null)]
+        public string AliasFor { get; set; }
+
         public PUP_Entry PupEntry { get; set; }
     }
 

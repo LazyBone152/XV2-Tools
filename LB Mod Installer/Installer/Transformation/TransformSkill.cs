@@ -1,19 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
-using Xv2CoreLib.Eternity;
+using Xv2CoreLib.CUS;
 
 namespace LB_Mod_Installer.Installer.Transformation
 {
     public class TransformSkill
     {
         [YAXAttributeForClass]
-        public string ThreeLetterCode { get; set; }
+        public string SkillCode { get; set; }
         [YAXAttributeForClass]
-        public byte RaceLock { get; set; }
+        public Skill.RaceLock RaceLock { get; set; }
 
         //Localization keys
         [YAXAttributeFor("Name")]
@@ -23,6 +21,12 @@ namespace LB_Mod_Installer.Installer.Transformation
         [YAXAttributeFor("Desc")]
         [YAXSerializeAs("value")]
         public string Info { get; set; }
+
+
+        [YAXAttributeFor("BuyPrice")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 1000)]
+        public int BuyPrice { get; set; } = -1;
 
         //Default values. These are overriden by those defined on stages.
         [YAXAttributeFor("CusAura")]
@@ -75,9 +79,21 @@ namespace LB_Mod_Installer.Installer.Transformation
 
         public int GetMaxKiRequired()
         {
-            if (TransformStates.Count - 2 < 0) return (int)TransformStates[0].KiRequired;
+            int ki = 0;
 
-            return (int)TransformStates[TransformStates.Count - 2].KiRequired;
+            foreach(var state in TransformStates)
+            {
+                if(state.TransformOptions != null)
+                {
+                    foreach (var stage in state.TransformOptions)
+                    {
+                        if (stage.KiRequired > ki)
+                            ki = (int)stage.KiRequired;
+                    }
+                }
+            }
+
+            return ki;
         }
 
         public int IndexOfMoveSkillSetChange()
@@ -112,6 +128,7 @@ namespace LB_Mod_Installer.Installer.Transformation
 
             return -1;
         }
+        
     }
 
     public class TransformStage
@@ -136,7 +153,7 @@ namespace LB_Mod_Installer.Installer.Transformation
     public class TransformState
     {
         [YAXAttributeForClass]
-        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0)]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (uint)0)]
         public uint KiRequired { get; set; }
         [YAXAttributeForClass]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0f)]
@@ -153,10 +170,10 @@ namespace LB_Mod_Installer.Installer.Transformation
         [YAXAttributeForClass]
         public int StageIndex { get; set; }
         [YAXAttributeForClass]
-        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0)]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (uint)0)]
         public uint KiRequired { get; set; }
         [YAXAttributeForClass]
-        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0)]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (uint)0)]
         public uint KiCost { get; set; }
         [YAXAttributeForClass]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0f)]

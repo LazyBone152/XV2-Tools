@@ -128,7 +128,7 @@ namespace Xv2CoreLib.CUS
                     bytes.AddRange(BitConverter.GetBytes(skills[i].I_04));
                     bytes.AddRange(BitConverter.GetBytes((ushort)skills[i].ID1));
                     bytes.AddRange(BitConverter.GetBytes((ushort)skills[i].ID2));
-                    bytes.Add(skills[i].I_12);
+                    bytes.Add((byte)skills[i].I_12);
                     bytes.Add(skills[i].I_13);
                     bytes.AddRange(BitConverter.GetBytes((ushort)skills[i].FilesLoadedFlags1));
                     bytes.AddRange(BitConverter.GetBytes(skills[i].I_16));
