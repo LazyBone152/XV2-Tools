@@ -295,14 +295,22 @@ namespace LB_Mod_Installer.Installer
 
                 if (currentMod.JungleFiles == null) return;
 
-                foreach (var file in currentMod.JungleFiles)
+                for (int i = currentMod.JungleFiles.Count - 1; i >= 0; i--)
                 {
-                    if (File.Exists(GeneralInfo.GetPathInGameDir(file.filePath)))
-                        File.Delete(GeneralInfo.GetPathInGameDir(file.filePath));
-                }
+                    if (!currentMod.JungleFiles[i].InstalledThisRun)
+                    {
+                        if (Directory.Exists(GeneralInfo.GetPathInGameDir(currentMod.JungleFiles[i].filePath)))
+                        {
+                            Directory.Delete(GeneralInfo.GetPathInGameDir(currentMod.JungleFiles[i].filePath), true);
+                        }
+                        else if (File.Exists(GeneralInfo.GetPathInGameDir(currentMod.JungleFiles[i].filePath)))
+                        {
+                            File.Delete(GeneralInfo.GetPathInGameDir(currentMod.JungleFiles[i].filePath));
+                        }
 
-                //Clear tracker
-                currentMod.JungleFiles.Clear();
+                        currentMod.JungleFiles.RemoveAt(i);
+                    }
+                }
 
             }
             catch (Exception ex)

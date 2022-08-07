@@ -3,7 +3,8 @@
     public struct AliasValue
     {
         public string Alias { get; set; }
-        public int ID { get; set; }
+        public string ID { get; set; }
+
     }
 
 

@@ -367,6 +367,24 @@ namespace LB_Mod_Installer
                 InstallerInfo = zipManager.DeserializeXmlFromArchive_Ext<InstallerXml>(GeneralInfo.InstallerXml);
                 InstallerInfo.Init();
                 GeneralInfo.InstallerXmlInfo = InstallerInfo;
+
+                //Load localization.xmls, if present
+                if (InstallerInfo.Localisations == null)
+                    InstallerInfo.Localisations = new List<Localisation>();
+
+                foreach(var zipEntry in zipManager.archive.Entries)
+                {
+                    if (zipEntry.FullName.Contains(LocaleResource.PATH))
+                    {
+                        LocaleResource localizations = zipManager.DeserializeXmlFromArchive_Ext<LocaleResource>(zipEntry.FullName);
+
+                        //Merge localizations
+                        if (localizations.Localisations != null)
+                        {
+                            InstallerInfo.Localisations.AddRange(localizations.Localisations);
+                        }
+                    }
+                }
             }
 #if !DEBUG
             catch (Exception ex)
@@ -747,9 +765,6 @@ namespace LB_Mod_Installer
 
         private async Task StartInstall()
         {
-            //todo: for release build, make installer.Start call async
-            //non-async call is for easy debuging
-
             try
             {
                 //Reload tracker.
@@ -760,11 +775,28 @@ namespace LB_Mod_Installer
                 {
                     Uninstall uninstall = new Uninstall(this, FileIO, fileManager);
                     await Task.Run(uninstall.Start);
-                    //Do not uninstall jungle files. In the event of an error there would be no way to restore them.
                 }
 
                 //installer.Start();
                 await Task.Run(new Action(installer.Start));
+
+                //Uninstall jungle files that were not included in the new install.
+                if (isInstalled)
+                {
+                    Uninstall uninstall = new Uninstall(this, FileIO, fileManager);
+                    await Task.Run(uninstall.Uninstall_JungleFiles);
+                }
+
+                try
+                {
+                    GeneralInfo.SaveTracker();
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Failed at tracker xml save phase.", ex);
+                }
+
+                MessageBox.Show("The mod was successfully installed.", GeneralInfo.InstallerXmlInfo.InstallerName, MessageBoxButton.OK, MessageBoxImage.Information);
 
                 ShutdownApp();
             }

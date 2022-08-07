@@ -390,6 +390,7 @@ namespace Xv2CoreLib.Eternity
     }
 
     [YAXSerializeAs("BodyShape")]
+    [Serializable]
     public class PrebakedBodyShape
     {
         [YAXAttributeForClass]
@@ -402,6 +403,7 @@ namespace Xv2CoreLib.Eternity
     }
 
     [YAXSerializeAs("CusAuraData")]
+    [Serializable]
     public class CusAuraData
     {
         /// <summary>
@@ -424,6 +426,7 @@ namespace Xv2CoreLib.Eternity
         public byte Behaviour_11 { get; set; }
         [YAXAttributeFor("INTEGER_2")]
         [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (uint)0)]
         public uint Integer_2 { get; set; }
 
         [YAXAttributeFor("BEHAVIOUR_10")]
@@ -432,6 +435,7 @@ namespace Xv2CoreLib.Eternity
         public byte Behaviour_10 { get; set; }
         [YAXAttributeFor("INTEGER_3")]
         [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (uint)0)]
         public uint Integer_3 { get; set; }
 
         [YAXAttributeFor("FORCE_TELEPORT")]
@@ -444,8 +448,8 @@ namespace Xv2CoreLib.Eternity
 
         [YAXAttributeFor("BEHAVIOUR_66")]
         [YAXSerializeAs("value")]
-        [YAXDontSerializeIfNull]
-        public string Behaviour_66 { get; set; } //byte. Optional
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = byte.MaxValue)]
+        public byte Behaviour_66 { get; set; } //byte. Optional
         [YAXAttributeFor("REMOVE_HAIR_ACCESSORIES")]
         [YAXSerializeAs("value")]
         [YAXHexValue]
@@ -459,6 +463,13 @@ namespace Xv2CoreLib.Eternity
         [YAXSerializeAs("value")]
         [YAXHexValue]
         public uint BcsEyesColor { get; set; }
+
+        public CusAuraData() { }
+
+        public CusAuraData(int cusAuraId)
+        {
+            CusAuraID = (ushort)cusAuraId;
+        }
     }
 
     [YAXSerializeAs("Alias")]

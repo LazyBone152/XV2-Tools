@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Xv2CoreLib.CMS;
 using Xv2CoreLib.Eternity;
 using YAXLib;
 
@@ -257,6 +258,41 @@ namespace Xv2CoreLib.CUS
             }
 
         }
+        
+        public bool IsSkillIdRangeUsed(CMS_Entry cmsEntry, SkillType skillType)
+        {
+            int id = cmsEntry.ID * 10;
+
+            List<Skill> skills = GetSkills(skillType);
+
+            for(int i = 0; i < 10; i++)
+            {
+                if (!skills.Any(x => x.ID2 == id + i)) return false;
+            }
+
+            return true;
+        } 
+        
+        /// <summary>
+        /// Assigns a new skill ID (ID2), parented to the assigned CMS entry. If no free IDs are available, -1 will be returned.
+        /// </summary>
+        public int AssignNewSkillId(CMS_Entry cmsEntry, SkillType skillType)
+        {
+            int id = cmsEntry.ID * 10;
+            List<Skill> skills = GetSkills(skillType);
+
+            int min = id;
+            int max = id + 10;
+
+            for(int i = 0; i < 10; i++)
+            {
+                if (skills.FirstOrDefault(x => x.ID2 == id) == null) return id;
+                id++;
+            }
+
+            return -1;
+        }
+
         #endregion
     }
 
@@ -358,6 +394,7 @@ namespace Xv2CoreLib.CUS
             Flag7 = 0x80
         }
 
+
         #region WrapperProperties
         [YAXDontSerialize]
         public int SortID { get { return ID1; } }
@@ -415,7 +452,7 @@ namespace Xv2CoreLib.CUS
         public ushort ID2 { get; set; } //uint16
         [YAXAttributeFor("Race_Lock")]
         [YAXSerializeAs("value")]
-        public byte I_12 { get; set; }
+        public CusRaceLock I_12 { get; set; }
         [YAXAttributeFor("Type")]
         [YAXSerializeAs("value")]
         public byte I_13 { get; set; }
@@ -498,4 +535,16 @@ namespace Xv2CoreLib.CUS
         #endregion
     }
 
+    [Flags]
+    public enum CusRaceLock : byte
+    {
+        HUM = 1,
+        SYM = 0x2,
+        NMC = 0x4,
+        FRI = 0x8,
+        MAM = 0x10,
+        HUF = 0x20,
+        SYF = 0x40,
+        MAF = 0x80
+    }
 }

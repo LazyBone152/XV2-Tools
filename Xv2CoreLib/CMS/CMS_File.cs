@@ -40,6 +40,11 @@ namespace Xv2CoreLib.CMS
             return null;
         }
 
+        public CMS_Entry GetEntryByCharaCode(string charaCode)
+        {
+            return CMS_Entries.FirstOrDefault(x => x.ShortName == charaCode);
+        }
+
         public static CMS_File Load(byte[] rawBytes)
         {
             return new Parser(rawBytes).GetCmsFile();
@@ -77,6 +82,49 @@ namespace Xv2CoreLib.CMS
             }
 
             return -1;
+        }
+    
+        public CMS_Entry CreateDummyEntry()
+        {
+            for (int i = 0; i < 0x99; i++)
+            {
+                string format = i < 0x10 ? "0" : "";
+                string dummyName = $"X{format}{i.ToString("x")}";
+
+                if (dummyName.Length != 3)
+                    throw new Exception($"CMS_File.CreateDummyEntry: dummyName is supposed to be 3 characters, but was {dummyName.Length}.");
+
+                if (GetEntryByCharaCode(dummyName) == null)
+                {
+                    CMS_Entry dummy = CMS_Entry.CreateDummyEntry(AssignNewID(), dummyName);
+
+                    if(dummy.ID >= 500)
+                    {
+                        throw new Exception("CMS_File.CreateDummyEntry: A suitable dummy entry could not be created because too many characters are installed!\n\nUninstall some older character mods, and then try again.");
+                    }
+
+                    return dummy;
+                }
+            }
+
+            throw new Exception("CMS_File.CreateDummyEntry: A dummy CMS entry could not be created.");
+        }
+
+        private int AssignNewID()
+        {
+            int id = 150;
+
+            while (true)
+            {
+                if(CMS_Entries.FirstOrDefault(x => x.ID == id) == null)
+                {
+                    break;
+                }
+
+                id++;
+            }
+
+            return id;
         }
     }
 
@@ -180,6 +228,36 @@ namespace Xv2CoreLib.CMS
         public bool IsSelfReference(string path)
         {
             return (ShortName == path || path == string.Format("../{0}/{0}", ShortName));
+        }
+    
+        public bool IsDummyEntry()
+        {
+            if (!string.IsNullOrWhiteSpace(Str_32)) return false;
+            if (!string.IsNullOrWhiteSpace(Str_36)) return false;
+            if (!string.IsNullOrWhiteSpace(Str_44)) return false;
+            if (!string.IsNullOrWhiteSpace(Str_48)) return false;
+            if (!string.IsNullOrWhiteSpace(Str_56)) return false;
+            if (!string.IsNullOrWhiteSpace(Str_60)) return false;
+            if (!string.IsNullOrWhiteSpace(Str_64)) return false;
+            if (!string.IsNullOrWhiteSpace(Str_68)) return false;
+            if (!string.IsNullOrWhiteSpace(Str_80)) return false;
+
+            return true;
+        }
+
+        public static CMS_Entry CreateDummyEntry(int id = 0, string charaCode = null)
+        {
+            return new CMS_Entry()
+            {
+                ShortName = charaCode,
+                ID = id,
+                I_16 = 47818,
+                I_20 = 47818,
+                I_22 = 47818,
+                I_24 = 47818,
+                I_26 = 47818,
+                I_28 = 0x3fffffff
+            };
         }
     }
 

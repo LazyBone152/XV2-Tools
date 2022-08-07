@@ -120,24 +120,32 @@ namespace LB_Mod_Installer.Installer
         {
             List<FilePath> files = new List<FilePath>();
 
-            //Get all entries without DoLast flag
-            GetOptionInstallFiles(files, false);
+            //Get all entries with DoFirst flag
+            GetOptionInstallFiles(files, 0);
 
             if (InstallFiles != null)
             {
-                files.AddRange(InstallFiles.Where(x => !x.GetDoLast()));
+                files.AddRange(InstallFiles.Where(x => x.GetInstallPriority() == 0));
+            }
+
+            //Get entries without either DoFirst or DoLast
+            GetOptionInstallFiles(files, 1);
+
+            if (InstallFiles != null)
+            {
+                files.AddRange(InstallFiles.Where(x => x.GetInstallPriority() == 1));
             }
 
             //Get entries with DoLast flag
-            GetOptionInstallFiles(files, true);
+            GetOptionInstallFiles(files, 2);
 
             if (InstallFiles != null)
             {
-                files.AddRange(InstallFiles.Where(x => x.GetDoLast()));
+                files.AddRange(InstallFiles.Where(x => x.GetInstallPriority() == 2));
             }
 
-            //Remove all files with empty SourcePaths
-            files.RemoveAll(x => string.IsNullOrWhiteSpace(x.SourcePath));
+            //Remove all files with empty SourcePath, and without a Binding
+            files.RemoveAll(x => string.IsNullOrWhiteSpace(x.SourcePath) && string.IsNullOrWhiteSpace(x.Binding));
 
             //Remove files that have a invalid flag or are otherwise disabled
             files.RemoveAll(x => !FlagsIsSet(x.HasFlag) || !x.GetIsEnabled());
@@ -145,7 +153,7 @@ namespace LB_Mod_Installer.Installer
             return files;
         }
 
-        private void GetOptionInstallFiles(List<FilePath> files, bool doLast)
+        private void GetOptionInstallFiles(List<FilePath> files, int priority)
         {
             //Create a list of all files that are to be installed, based on what the user selected.
             for (int i = 0; i < InstallOptionSteps.Count; i++)
@@ -161,7 +169,7 @@ namespace LB_Mod_Installer.Installer
                             {
                                 foreach(var file in InstallOptionSteps[i].OptionList[InstallOptionSteps[i].SelectedOptionBinding].Paths)
                                 {
-                                    if(file.GetDoLast() == doLast)
+                                    if(file.GetInstallPriority() == priority)
                                     {
                                         files.Add(file);
                                     }
@@ -177,7 +185,7 @@ namespace LB_Mod_Installer.Installer
                             {
                                 foreach (var file in option.Paths)
                                 {
-                                    if (file.GetDoLast() == doLast)
+                                    if (file.GetInstallPriority() == priority)
                                     {
                                         files.Add(file);
                                     }
@@ -205,7 +213,10 @@ namespace LB_Mod_Installer.Installer
 
             foreach (var step in InstallOptionSteps)
             {
-                if(step.OptionList != null)
+                //Newline replace
+                step.Message = step.Message.Replace("\\n", "\n");
+
+                if (step.OptionList != null)
                 {
                     if (step.SelectedOptions == null)
                         step.SelectedOptions = new List<int>();
@@ -221,6 +232,12 @@ namespace LB_Mod_Installer.Installer
                                 step.SetSelectedOptions(step.SelectedOptions);
                                 break;
                         }
+                    }
+
+                    //Newline replace
+                    foreach (var option in step.OptionList)
+                    {
+                        option.Tooltip = option.Tooltip.Replace("\\n", "\n");
                     }
                 }
             }
@@ -318,7 +335,7 @@ namespace LB_Mod_Installer.Installer
             return true;
         }
 
-        private bool FlagIsSet(string flag)
+        public bool FlagIsSet(string flag)
         {
             if (string.IsNullOrWhiteSpace(flag)) return true;
 
@@ -371,33 +388,56 @@ namespace LB_Mod_Installer.Installer
         {
             NotifyPropertyChanged("CurrentStepString");
         }
-    
+
         //Localisation
         public string GetLocalisedString(string key)
         {
+            return GetLocalisedString(key, GeneralInfo.SystemCulture.TwoLetterISOLanguageName.ToLower());
+        }
+
+        public string GetLocalisedString(string key, string langCode)
+        {
             if (Localisations == null) return string.Empty;
 
-            Localisation local = Localisations.FirstOrDefault(x => x.Key.ToLower() == key);
+            Localisation local = Localisations.FirstOrDefault(x => x.Key.Equals(key, StringComparison.OrdinalIgnoreCase));
+            string result = key;
 
             if(local != null)
             {
-                LocalisationLanguage lang = local.LanguageEntries.FirstOrDefault(x => x.Language.ToLower() == GeneralInfo.SystemCulture.TwoLetterISOLanguageName.ToLower());
+                LocalisationLanguage lang = local.LanguageEntries.FirstOrDefault(x => x.Language.Equals(langCode, StringComparison.OrdinalIgnoreCase));
 
-                if(local != null)
+                if(lang != null)
                 {
-                    return lang.Text;
+                    result = lang.Text;
                 }
-                else if(GeneralInfo.SystemCulture.TwoLetterISOLanguageName.ToLower() != "en")
+
+                else if(langCode != "en")
                 {
                     //Localisation not found, try for en
-                    lang = local.LanguageEntries.FirstOrDefault(x => x.Language.ToLower() == "en");
+                    lang = local.LanguageEntries.FirstOrDefault(x => x.Language.Equals("en", StringComparison.OrdinalIgnoreCase));
 
                     if (lang != null)
-                        return lang.Text;
+                        result = lang.Text;
                 }
             }
 
-            return string.Empty;
+            //Newline replace
+            //result = result.Replace("\n", "&#x0a;");
+            result = result.Replace("\\n", "\n");
+
+            return result;
+        }
+        
+        public string[] GetLocalisedArray(string key)
+        {
+            string[] localizedArray = new string[(int)Xv2CoreLib.Xenoverse2.Language.NumLanguages];
+
+            for(int i = 0; i < localizedArray.Length; i++)
+            {
+                localizedArray[i] = GetLocalisedString(key, Xv2CoreLib.Xenoverse2.LanguageSuffixNoExt[i]);
+            }
+
+            return localizedArray;
         }
     }
     
@@ -968,46 +1008,34 @@ namespace LB_Mod_Installer.Installer
         [YAXDontSerializeIfNull]
         public string InstallPath { get; set; }
 
-        //optional:
+        //Optional Parameters:
         [YAXAttributeForClass]
-        [YAXDontSerializeIfNull]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = null)]
+        public string Binding { get; set; }
+        [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = null)]
         public string HasFlag { get; set; }
         [YAXAttributeForClass]
-        [YAXDontSerializeIfNull]
-        public string Overwrite { get; set; }
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = false)]
+        public bool Overwrite { get; set; }
         [YAXAttributeForClass]
-        [YAXDontSerializeIfNull]
-        public string Type { get; set; }
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = FileType.Default)]
+        public FileType Type { get; set; }
         [YAXAttributeForClass]
-        [YAXDontSerializeIfNull]
-        public string DoLast { get; set; }
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = false)]
+        public bool DoFirst { get; set; }
         [YAXAttributeForClass]
-        [YAXDontSerializeIfNull]
-        public string UseSkipBinding { get; set; }
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = false)]
+        public bool DoLast { get; set; }
         [YAXAttributeForClass]
-        [YAXDontSerializeIfNull]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = false)]
+        public bool UseSkipBinding { get; set; }
+        [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = "True")]
         public string IsEnabled { get; set; }
 
-        public bool AllowOverwrite()
-        {
-            if(String.IsNullOrWhiteSpace(Overwrite))
-            {
-                return false;
-            }
-            else if(Overwrite.Equals("true", StringComparison.InvariantCultureIgnoreCase))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-    
         public FileType GetFileType()
         {
-            FileType type = ParseFileTypeValue();
-
             //If SourcePath is for a special file type, then return that type.
             if(Path.GetExtension(SourcePath) == Xv2CoreLib.EffectContainer.EffectContainerFile.ZipExtension)
             {
@@ -1018,7 +1046,7 @@ namespace LB_Mod_Installer.Installer
                 return FileType.MusicPackage;
             }
 
-            if (type == FileType.Default)
+            if (Type == FileType.Default)
             {
                 //Simulates the original behavior before FileType was added. Will infer type from SourcePath.
 
@@ -1027,44 +1055,25 @@ namespace LB_Mod_Installer.Installer
             }
             else
             {
-                return type;
+                return Type;
             }
-        }
-
-        private FileType ParseFileTypeValue()
-        {
-            if (string.IsNullOrWhiteSpace(Type)) return FileType.Default;
-
-            FileType type;
-            
-            if(!Enum.TryParse(Type, out type))
-            {
-                return FileType.Default;
-            }
-
-            return type;
-        }
-        
-        public bool GetDoLast()
-        {
-            if (String.IsNullOrWhiteSpace(DoLast)) return false;
-            return (DoLast.ToLower() == "true");
-        }
-
-        public bool GetUseSkipBinding()
-        {
-            if (String.IsNullOrWhiteSpace(UseSkipBinding)) return false;
-            return (UseSkipBinding.ToLower() == "true");
         }
 
         public bool GetIsEnabled()
         {
             if (string.IsNullOrWhiteSpace(IsEnabled)) return true;
-            if (IsEnabled.ToLower() == "false") return false;
-
-            return true;
+            return IsEnabled.Equals("true", StringComparison.OrdinalIgnoreCase) ? true : false;
         }
 
+        public int GetInstallPriority()
+        {
+            if (DoFirst && DoLast)
+                throw new ArgumentException($"File: DoLast and DoFirst cannot both be true ({SourcePath}).");
+
+            if (DoFirst) return 0;
+            if (DoLast) return 2;
+            return 1;
+        }
     }
 
     public enum FileType
@@ -1075,7 +1084,8 @@ namespace LB_Mod_Installer.Installer
         CopyFile,
         CopyDir,
         VfxPackage,
-        MusicPackage
+        MusicPackage,
+        Binding
     }
 
     //Localisation
@@ -1094,9 +1104,22 @@ namespace LB_Mod_Installer.Installer
     {
         [YAXAttributeForClass]
         public string Language { get; set; }
+        [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public string Text { get; set; }
 
+        //Placeholder for old-style XMLs. Without this, they wouldn't load.
         [YAXAttributeFor("Text")]
         [YAXSerializeAs("value")]
-        public string Text { get; set; }
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = null)]
+        public string Text_Old
+        {
+            get { return Text; }
+            set
+            {
+                if (!string.IsNullOrWhiteSpace(value))
+                    Text = value;
+            }
+        }
     }
 }

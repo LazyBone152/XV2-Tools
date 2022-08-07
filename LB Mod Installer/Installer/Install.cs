@@ -45,6 +45,8 @@ using Xv2CoreLib.CST;
 using Xv2CoreLib.OCS;
 using Xv2CoreLib.QML;
 using Xv2CoreLib.OCO;
+using Xv2CoreLib.BCM;
+using LB_Mod_Installer.Installer.Transformation;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -61,6 +63,7 @@ namespace LB_Mod_Installer.Installer
         public Xv2FileIO FileIO;
         public FileCacheManager fileManager;
         public MsgComponentInstall msgComponentInstall;
+        public TransformInstaller transformInstaller;
 
         //Needs to be static for Binding.Xml.XmlParser to access it. SHOULD be refactored entirely to be a singleton, but it relies on Install and i dont have time to untangle it all right now.
         public static BindingManager bindingManager;
@@ -81,6 +84,7 @@ namespace LB_Mod_Installer.Installer
             fileManager = _fileManager;
 
             bindingManager = new BindingManager(this);
+            transformInstaller = new TransformInstaller(this);
         }
 
         public void Start()
@@ -101,16 +105,6 @@ namespace LB_Mod_Installer.Installer
                 //Finalize
                 SaveFiles();
 
-                try
-                {
-                    GeneralInfo.SaveTracker();
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception("Failed at tracker xml save phase.", ex);
-                }
-
-                MessageBox.Show("The mod was successfully installed.", GeneralInfo.InstallerXmlInfo.InstallerName, MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
@@ -168,7 +162,10 @@ namespace LB_Mod_Installer.Installer
                 FileType type = File.GetFileType();
 
                 //Process bindings in InstallPath
-                File.InstallPath = bindingManager.ParseString(File.InstallPath, GeneralInfo.InstallerXml, "InstallPath");
+                if (!string.IsNullOrWhiteSpace(File.InstallPath))
+                {
+                    File.InstallPath = bindingManager.ParseString(File.InstallPath, GeneralInfo.InstallerXml, "InstallPath");
+                }
 
                 switch (type)
                 {
@@ -176,7 +173,7 @@ namespace LB_Mod_Installer.Installer
                     case FileType.XML:
                         //Install XML or Binary
                         UpdateProgessBarText(String.Format("_Installing \"{0}\"...", Path.GetFileName(File.InstallPath)));
-                        ResolveFileType(File.SourcePath, File.InstallPath, type == FileType.XML, File.GetUseSkipBinding());
+                        ResolveFileType(File.SourcePath, File.InstallPath, type == FileType.XML, File.UseSkipBinding);
                         break;
                     case FileType.VfxPackage:
                         //Install effects
@@ -194,12 +191,15 @@ namespace LB_Mod_Installer.Installer
 
                         if (!IsJungleFileBlacklisted(File.InstallPath))
                         {
-                            fileManager.AddStreamFile(File.InstallPath, zipManager.GetZipEntry(string.Format("data/{0}", File.SourcePath)), File.AllowOverwrite());
+                            fileManager.AddStreamFile(File.InstallPath, zipManager.GetZipEntry(string.Format("data/{0}", File.SourcePath)), File.Overwrite);
                         }
                         break;
                     case FileType.CopyDir:
                         UpdateProgessBarText($"_Copying {File.SourcePath}...");
                         ProcessJungle($"{JUNGLE3}/{File.SourcePath}", true, File.InstallPath, true);
+                        break;
+                    case FileType.Binding:
+                        bindingManager.ParseString(File.Binding, GeneralInfo.InstallerXml, "Binding");
                         break;
                     default:
                         MessageBox.Show($"Unknown File.Type: {type}");
@@ -337,10 +337,87 @@ namespace LB_Mod_Installer.Installer
                     Install_OCO(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 default:
+                    if (TryTransformationInstall(xmlPath))
+                        break;
+
                     throw new InvalidDataException(string.Format("The filetype of \"{0}\" is not supported.", xmlPath));
             }
         }
         
+        private bool TryTransformationInstall(string xmlPath)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                if (xmlPath.Contains("_CusAuraDefine.xml"))
+                {
+                    UpdateProgessBarText("_Loading CusAuraDefines...", false);
+
+                    var xml = zipManager.DeserializeXmlFromArchive_Ext<TransformCusAuras>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                    transformInstaller.LoadCusAuras(xml);
+                    return true;
+                }
+
+                if (xmlPath.Contains("_PartSetDefine.xml"))
+                {
+                    UpdateProgessBarText("_Loading PartSetDefines...", false);
+
+                    var xml = zipManager.DeserializeXmlFromArchive_Ext<TransformPartSets>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                    transformInstaller.LoadPartSets(xml);
+                    return true;
+                }
+
+                if (xmlPath.Contains("_PowerUpDefine.xml"))
+                {
+                    UpdateProgessBarText("_Loading PowerUpDefines...", false);
+
+                    var xml = zipManager.DeserializeXmlFromArchive_Ext<TransformPowerUps>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                    transformInstaller.LoadPupEntries(xml);
+                    return true;
+                }
+
+                if (xmlPath.Contains("_TransformDefine.xml"))
+                {
+                    UpdateProgessBarText("_Loading TransformDefines...", false);
+
+                    var xml = zipManager.DeserializeXmlFromArchive_Ext<TransformDefines>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                    transformInstaller.LoadTransformations(xml);
+                    return true;
+                }
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                    string error = string.Format("Failed at Awoken Skill Defines load phase ({0}).", xmlPath);
+                    throw new Exception(error, ex);
+            }
+#endif
+
+            if (xmlPath.Contains("_TransformSkill.xml"))
+            {
+                UpdateProgessBarText("_Installing Awoken Skill...", false);
+                TransformSkill xml = null;
+#if !DEBUG
+                try
+#endif
+                {
+                    xml = zipManager.DeserializeXmlFromArchive_Ext<TransformSkill>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                    transformInstaller.InstallSkill(xml);
+                    return true;
+                }
+#if !DEBUG
+                catch (Exception ex)
+                {
+                    string error = string.Format("Failed at Awoken Skill ({1}) install phase ({0}).", xmlPath, xml != null ? installerXml.GetLocalisedString(xml.Name) : "Load Failed");
+                    throw new Exception(error, ex);
+                }
+#endif
+            }
+
+            return false;
+        }
+
         private void JungleCheck()
         {
             if (zipManager.Exists(JUNGLE1 + "/"))
@@ -1614,17 +1691,17 @@ namespace LB_Mod_Installer.Installer
                     if (msgComponent.MsgType == Msg_Component.MsgComponentType.Name)
                     {
                         string nameMsgPath = String.Format("msg/{0}", IDB_File.NameMsgFile(Path.GetFileName(filePath)));
-                        IdbEntry.NameMsgID = (ushort)msgComponentInstall.WriteMsgEntries(msgComponent, nameMsgPath, MsgComponentInstall.Mode.IDB, null, IdbEntry);
+                        IdbEntry.NameMsgID = (ushort)msgComponentInstall.WriteMsgEntries(msgComponent, nameMsgPath, MsgComponentInstall.ComponentMode.IDB, null, IdbEntry);
                     }
                     else if (msgComponent.MsgType == Msg_Component.MsgComponentType.Info)
                     {
                         string infoMsgPath = String.Format("msg/{0}", IDB_File.InfoMsgFile(Path.GetFileName(filePath)));
-                        IdbEntry.DescMsgID = (ushort)msgComponentInstall.WriteMsgEntries(msgComponent, infoMsgPath, MsgComponentInstall.Mode.IDB, null, IdbEntry);
+                        IdbEntry.DescMsgID = (ushort)msgComponentInstall.WriteMsgEntries(msgComponent, infoMsgPath, MsgComponentInstall.ComponentMode.IDB, null, IdbEntry);
                     }
                     else if (msgComponent.MsgType == Msg_Component.MsgComponentType.LimitBurst)
                     {
                         string lbMsgPath = String.Format("msg/{0}", IDB_File.LimitBurstMsgFile(Path.GetFileName(filePath)));
-                        IdbEntry.I_40 = (ushort)msgComponentInstall.WriteMsgEntries(msgComponent, lbMsgPath, MsgComponentInstall.Mode.IDB);
+                        IdbEntry.I_40 = (ushort)msgComponentInstall.WriteMsgEntries(msgComponent, lbMsgPath, MsgComponentInstall.ComponentMode.IDB);
                         limitBurstMsgIndex = IdbEntry.I_40;
                     }
                     else if (msgComponent.MsgType == Msg_Component.MsgComponentType.LimitBurstBattle)
@@ -1645,7 +1722,7 @@ namespace LB_Mod_Installer.Installer
                         if (limitBurstMsgIndex != -1)
                         {
                             string lbMsgPath = String.Format("msg/{0}", IDB_File.LimitBurstHudMsgFile(Path.GetFileName(filePath)));
-                            msgComponentInstall.WriteMsgEntries(msgComponent, lbMsgPath, MsgComponentInstall.Mode.IDB_LB_HUD, limitBurstMsgIndex.ToString());
+                            msgComponentInstall.WriteMsgEntries(msgComponent, lbMsgPath, MsgComponentInstall.ComponentMode.IDB_LB_HUD, limitBurstMsgIndex.ToString());
                         }
                         else
                         {
@@ -1668,7 +1745,7 @@ namespace LB_Mod_Installer.Installer
                     if (msgComponent.MsgType == Msg_Component.MsgComponentType.Name)
                     {
                         string nameMsgPath = "msg/proper_noun_character_name_";
-                        msgComponentInstall.WriteMsgEntries(msgComponent, nameMsgPath, MsgComponentInstall.Mode.CMS, CmsEntry.Str_04);
+                        msgComponentInstall.WriteMsgEntries(msgComponent, nameMsgPath, MsgComponentInstall.ComponentMode.CMS, CmsEntry.Str_04);
                     }
                     else
                     {
@@ -1814,6 +1891,8 @@ namespace LB_Mod_Installer.Installer
                     return OCO_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".qml":
                     return QML_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".bcm":
+                    return BCM_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 default:
                     throw new InvalidDataException(String.Format("GetParsedFileFromGame: The filetype of \"{0}\" is not supported.", path));
             }
@@ -1897,6 +1976,8 @@ namespace LB_Mod_Installer.Installer
                     return ((OCO_File)data).SaveToBytes();
                 case ".qml":
                     return ((QML_File)data).SaveToBytes();
+                case ".bcm":
+                    return ((BCM_File)data).SaveToBytes();
                 default:
                     throw new InvalidDataException(String.Format("GetBytesFromParsedFile: The filetype of \"{0}\" is not supported.", path));
             }

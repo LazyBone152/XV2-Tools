@@ -4,6 +4,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Pfim;
 using CSharpImageLibrary;
+using System.Drawing;
+using System.Windows.Forms;
+using System.Text;
 
 namespace Xv2CoreLib.Resource.Image
 {
@@ -96,6 +99,46 @@ namespace Xv2CoreLib.Resource.Image
         {
             return BitmapSource.Create(image.Width, image.Height, 96.0, 96.0, GetPixelFormat(image), null, image.Data, image.Stride);
         }
+
+
+        /// <summary>
+        /// Load a texture as a <see cref="Bitmap"/>. Supports DDS and PNG.
+        /// </summary>
+        public static Bitmap GetGDIBitmap(byte[] bytes)
+        {
+            if (bytes == null || bytes?.Length < 16)
+            {
+                return null;
+            }
+
+            Bitmap bitmap;
+
+            using (var imageSource = new ImageEngineImage(bytes))
+            {
+                bitmap = new Bitmap(imageSource.GetGDIBitmap(false, false));
+
+                if (imageSource.NumMipMaps > 1)
+                    throw new InvalidDataException("More than 1 mipmaps found.");
+
+            }
+
+            return bitmap;
+        }
+
+        public static byte[] SaveToBytes(Bitmap bitmap)
+        {
+            ImageEngineImage newImage;
+            byte[] data;
+
+            using (MemoryStream image = new MemoryStream())
+            {
+                bitmap.Save(image, System.Drawing.Imaging.ImageFormat.Png);
+                newImage = new ImageEngineImage(image);
+                data = newImage.Save(ImageEngineFormat.PNG, MipHandling.KeepTopOnly, 0, 0, false);
+            }
+
+            return data;
+        }
         #endregion
 
         #region FormatHelper
@@ -169,6 +212,100 @@ namespace Xv2CoreLib.Resource.Image
             return ImageEngineFormat.DDS_DXT5;
         }
         #endregion
+
+        private static Font[] Fonts = null;
+        private static SizeF MaxStageSelectorTextSize = new SizeF(325f, 35f);
+
+        public static byte[] WriteStageNames(byte[] textureBytes, string[] names)
+        {
+            
+            //Create fonts if first time this method has been called
+            if(Fonts == null)
+            {
+                Fonts = new Font[10];
+
+                for(int i = 0; i < 10; i++)
+                {
+                    Fonts[i] = new Font("Calibri", 20 - i);
+                }
+            }
+
+            //Pad names to always have 21 characters, adding empty spaces in front as required
+            for (int i = 0; i < names.Length; i++) 
+            {
+                int padding = 21 - names[i].Length;
+
+                if (padding <= 0) continue;
+
+                StringBuilder strBuilder = new StringBuilder();
+
+                for(int a = 0; a < padding; a++)
+                {
+                    strBuilder.Append(" ");
+                }
+
+                strBuilder.Append(names[i]);
+                names[i] = strBuilder.ToString();
+            }
+
+            Bitmap texture = GetGDIBitmap(textureBytes);
+
+            using (Graphics graphics = Graphics.FromImage(texture))
+            {
+                graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+                graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+
+                for (int i = 0; i < 4; i++)
+                {
+                    int x = 0, y = 0;
+
+                    switch (i)
+                    {
+                        case 0:
+                            x = 546;
+                            y = 116;
+                            break;
+                        case 1:
+                            x = 298;
+                            y = 51;
+                            break;
+                        case 2:
+                            x = 92;
+                            y = 116;
+                            break;
+                        case 3:
+                            x = 285;
+                            y = 181;
+                            break;
+                    }
+
+                    y -= 24;
+
+                    string name = i < names.Length ? names[i] : "-----------------";
+
+                    //Auto-adjust font size based on length
+                    int fontIdx = 0;
+                    for(int a = 0; a < 10; a++)
+                    {
+                        SizeF size = graphics.MeasureString(name, Fonts[a]);
+                        if (size.Width < MaxStageSelectorTextSize.Width) break;
+
+                        fontIdx = a;
+                    }
+
+                    graphics.DrawString(name, Fonts[fontIdx], System.Drawing.Brushes.White, new PointF(x, y + fontIdx));
+                }
+            }
+
+            return SaveToBytes(texture);
+
+            //byte[] newTexture = SaveToBytes(texture);
+            //File.WriteAllBytes("test.png", newTexture);
+            //return null;
+        }
 
     }
 

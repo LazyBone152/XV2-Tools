@@ -102,7 +102,6 @@
     <Reference Include="System.Threading.Tasks.Dataflow, Version=4.5.24.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Tpl.Dataflow.4.5.24\lib\portable-net45+win8+wpa81\System.Threading.Tasks.Dataflow.dll</HintPath>
     </Reference>
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\ControlzEx.3.0.2.4\lib\net462\System.Windows.Interactivity.dll</HintPath>
     </Reference>
@@ -143,9 +142,16 @@
     <Compile Include="File\FileCacheManager.cs" />
     <Compile Include="Installer\Install.cs" />
     <Compile Include="Installer\InstallHelpers.cs" />
+    <Compile Include="Installer\LocaleResource.cs" />
     <Compile Include="Installer\MsgComponentInstall.cs" />
     <Compile Include="Installer\ACB\AcbInstaller.cs" />
     <Compile Include="Installer\ACB\AcbUninstaller.cs" />
+    <Compile Include="Installer\Transformation\TransformDefines.cs" />
+    <Compile Include="Installer\Transformation\TransformCusAuras.cs" />
+    <Compile Include="Installer\Transformation\TransformInstaller.cs" />
+    <Compile Include="Installer\Transformation\TransformPartSet.cs" />
+    <Compile Include="Installer\Transformation\TransformPowerUps.cs" />
+    <Compile Include="Installer\Transformation\TransformSkill.cs" />
     <Compile Include="Installer\Uninstall.cs" />
     <Compile Include="Tracking\GameDir.cs" />
     <Compile Include="Tracking\Sections.cs" />

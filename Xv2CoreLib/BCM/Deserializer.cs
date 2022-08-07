@@ -12,7 +12,7 @@ namespace Xv2CoreLib.BCM
     public class Deserializer
     {
         BCM_File bcmFile { get; set; }
-        List<byte> bytes = new List<byte>() { 35, 66, 67, 77, 254, 255, 0, 0 };
+        public List<byte> bytes = new List<byte>() { 35, 66, 67, 77, 254, 255, 0, 0 };
         string saveLocation { get; set; }
 
         int TotalEntryCount = 0;
@@ -43,6 +43,15 @@ namespace Xv2CoreLib.BCM
             {
                 WriteBinaryFile();
                 File.WriteAllBytes(saveLocation, bytes.ToArray());
+            }
+        }
+
+        public Deserializer(BCM_File _bcmFile)
+        {
+            bcmFile = _bcmFile;
+            if (Validation())
+            {
+                WriteBinaryFile();
             }
         }
 
@@ -103,7 +112,7 @@ namespace Xv2CoreLib.BCM
 
                 WriteBcmEntry(Entries[i], parentOffset, rootOffset);
 
-                if(Entries[i].BCMEntries != null)
+                if(Entries[i].BCMEntries?.Count > 0)
                 {
                     bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), ChilfOffsetToFill);
                     if(useRoot == true)
@@ -129,22 +138,22 @@ namespace Xv2CoreLib.BCM
             ValidateEntry(bcmEntry);
             IndexList.Add(bcmEntry.Index);
             bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_00));
-            bytes.AddRange(BitConverter.GetBytes((uint)bcmEntry.I_04));
-            bytes.AddRange(BitConverter.GetBytes((uint)bcmEntry.I_08));
-            bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_12));
-            bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_16));
-            bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_20));
-            bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_22));
-            bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_24));
-            bytes.AddRange(BitConverter.GetBytes((uint)bcmEntry.I_28));
-            bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_32));
-            bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_34));
+            bytes.AddRange(BitConverter.GetBytes((uint)bcmEntry.DirectionalInput));
+            bytes.AddRange(BitConverter.GetBytes((uint)bcmEntry.ButtonInput));
+            bytes.AddRange(BitConverter.GetBytes(bcmEntry.HoldDownConditions));
+            bytes.AddRange(BitConverter.GetBytes(bcmEntry.OpponentSizeConditions));
+            bytes.AddRange(BitConverter.GetBytes(bcmEntry.MinimumLoopDuration));
+            bytes.AddRange(BitConverter.GetBytes(bcmEntry.MaximumLoopDuration));
+            bytes.AddRange(BitConverter.GetBytes(bcmEntry.PrimaryActivatorConditions));
+            bytes.AddRange(BitConverter.GetBytes((uint)bcmEntry.ActivatorState));
+            bytes.AddRange(BitConverter.GetBytes(bcmEntry.BacEntryPrimary));
+            bytes.AddRange(BitConverter.GetBytes(bcmEntry.BacEntryCharge));
             bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_36));
-            bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_38));
-            bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_40));
-            bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_42));
-            bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_44));
-            bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_46));
+            bytes.AddRange(BitConverter.GetBytes(bcmEntry.BacEntryUserConnect));
+            bytes.AddRange(BitConverter.GetBytes(bcmEntry.BacEntryVictimConnect));
+            bytes.AddRange(BitConverter.GetBytes(bcmEntry.BacEntryAirborne));
+            bytes.AddRange(BitConverter.GetBytes(bcmEntry.BacEntryUnknown));
+            bytes.AddRange(BitConverter.GetBytes(bcmEntry.RandomFlag));
 
             if (bcmEntry.LoopAsSibling != null)
             {
@@ -173,14 +182,14 @@ namespace Xv2CoreLib.BCM
             bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_64));
             bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_68));
             bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_72));
-            bytes.AddRange(BitConverter.GetBytes((int)bcmEntry.I_76));
+            bytes.AddRange(BitConverter.GetBytes((int)bcmEntry.BacCase));
             bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_80));
-            bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_84));
+            bytes.AddRange(BitConverter.GetBytes(bcmEntry.StaminaCost));
             bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_88));
-            bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_92));
-            bytes.AddRange(BitConverter.GetBytes(bcmEntry.F_96));
-            bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_100));
-            bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_102));
+            bytes.AddRange(BitConverter.GetBytes(bcmEntry.KiRequired));
+            bytes.AddRange(BitConverter.GetBytes(bcmEntry.HealthRequired));
+            bytes.AddRange(BitConverter.GetBytes(bcmEntry.TransStage));
+            bytes.AddRange(BitConverter.GetBytes(bcmEntry.CusAura));
             bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_104));
             bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_108));
 
@@ -221,7 +230,7 @@ namespace Xv2CoreLib.BCM
         private void ValidateEntry(BCM_Entry entry)
         {
             //Checks for children if it has a Child GoTo
-            if (entry.LoopAsChild != null && entry.BCMEntries != null)
+            if (entry.LoopAsChild != null && entry.BCMEntries?.Count > 0)
             {
                 throw new InvalidDataException(String.Format("Invalid Loop_As_Child tag on Idx {0}.\nCannot set the tag (Loop_As_Child=\"{1}\") as the BCM Entry at Idx {0} has actual child entries.", entry.Index, entry.LoopAsChild));
             }

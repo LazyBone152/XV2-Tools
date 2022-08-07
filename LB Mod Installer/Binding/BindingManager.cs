@@ -224,10 +224,30 @@ namespace LB_Mod_Installer.Binding
                             formating = b.GetArgument1();
                             break;
                         case Function.SetAlias:
-                            AddAlias(retID + increment, b.GetArgument1());
+                            if(retIsString)
+                                AddAlias(retStr, b.GetArgument1());
+                            else
+                                AddAlias((retID + increment).ToString(), b.GetArgument1());
                             break;
                         case Function.GetAlias:
-                            retID = GetAliasId(b.GetArgument1(), comment);
+                            {
+                                if(b.GetArgument1().Equals("UltraInstinctSignHealthReq", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    bool tre = true;
+                                }
+                                string valStr = GetAliasId(b.GetArgument1(), comment);
+                                int val;
+
+                                if(int.TryParse(valStr, out val))
+                                {
+                                    retID = val;
+                                }
+                                else
+                                {
+                                    retIsString = true;
+                                    retStr = valStr;
+                                }
+                            }
                             break;
                         case Function.SkillID1:
                             {
@@ -435,7 +455,7 @@ namespace LB_Mod_Installer.Binding
 
                                     if(entry != null)
                                     {
-                                        AddAlias(entry.SortID, alias);
+                                        AddAlias(entry.SortID.ToString(), alias);
 
                                         //Entry will be removed and not installed
                                         retID = NullTokenInt;
@@ -451,6 +471,12 @@ namespace LB_Mod_Installer.Binding
                                     throw new ArgumentException("GetEntry: This binding is only available for TSD triggers.");
                                 }
 
+                                break;
+                            }
+                        case Function.SetValue:
+                            {
+                                retIsString = true;
+                                retStr = b.GetArgument1();
                                 break;
                             }
                     }
@@ -491,7 +517,7 @@ namespace LB_Mod_Installer.Binding
             }
         }
 
-        public void AddAlias(int ID, string alias)
+        public void AddAlias(string ID, string alias)
         {
             Aliases.Add(new AliasValue() { ID = ID, Alias = alias.ToLower() });
         }
@@ -623,6 +649,9 @@ namespace LB_Mod_Installer.Binding
                     case "getentry":
                         bindings.Add(new BindingValue() { Function = Function.GetEntry, Arguments = arguments });
                         break;
+                    case "setvalue":
+                        bindings.Add(new BindingValue() { Function = Function.SetValue, Arguments = arguments });
+                        break;
                     default:
                         throw new FormatException(String.Format("Invalid ID Binding Function (Function = {0}, Argument = {1})\nFull binding: {2}", function, argument, originalBinding));
                 }
@@ -712,6 +741,7 @@ namespace LB_Mod_Installer.Binding
                     case Function.IsLanguage:
                     case Function.AutoCusAura:
                     case Function.GetEntry:
+                    case Function.SetValue:
                         //Must have an argument
                         if (!bindings[i].HasArgument()) throw new ArgumentException(String.Format("The {0} binding function takes a string argument, but none was found.\n({1})", bindings[i].Function, comment));
                         break;
@@ -788,7 +818,7 @@ namespace LB_Mod_Installer.Binding
         #endregion
 
         #region Function Helpers
-        private int GetAliasId(string alias, string comment)
+        private string GetAliasId(string alias, string comment)
         {
             foreach(var a in Aliases)
             {
@@ -1051,20 +1081,23 @@ namespace LB_Mod_Installer.Binding
             return context;
         }
 
-        private int GetAutoId<T>(IEnumerable<T> installEntries, IEnumerable<T> destEntries, int min, int max, int sequence) where T : class, IInstallable
+        public int GetAutoId<T>(IEnumerable<T> installEntries, IEnumerable<T> destEntries, int min, int max, int sequence) where T : class, IInstallable
         {
             AutoIdContext context = GetAutoIdContext<T>(destEntries);
 
             //Add any static IDs from installEntries into the AutoIdContext.
-            foreach (var installEntry in installEntries)
+            if(installEntries != null)
             {
-                if(installEntry is IInstallable entry)
+                foreach (var installEntry in installEntries)
                 {
-                    int staticId;
-
-                    if (int.TryParse(entry.Index, out staticId))
+                    if (installEntry is IInstallable entry)
                     {
-                        context.AddId(staticId);
+                        int staticId;
+
+                        if (int.TryParse(entry.Index, out staticId))
+                        {
+                            context.AddId(staticId);
+                        }
                     }
                 }
             }
@@ -1114,7 +1147,7 @@ namespace LB_Mod_Installer.Binding
             return NullTokenInt; //Chara wasn't found, so defaulting to 0
         }
 
-        private int GetFreePartSet(int min, int max, int sequence)
+        public int GetFreePartSet(int min, int max, int sequence)
         {
             int id = min;
 
@@ -1155,7 +1188,7 @@ namespace LB_Mod_Installer.Binding
         }
 
         //Characters:
-        private int GetFreeCharacterID(int min, int max)
+        public int GetFreeCharacterID(int min, int max)
         {
             int current = min;
 
@@ -1182,7 +1215,7 @@ namespace LB_Mod_Installer.Binding
         }
 
         //Costumes:
-        private int GetFreeCostume(int charaId, string charaCode, int min, int max)
+        public int GetFreeCostume(int charaId, string charaCode, int min, int max)
         {
             BCS_File bcsFile = GetCharaBcsFile(charaId);
             int current = min;
@@ -1328,6 +1361,7 @@ namespace LB_Mod_Installer.Binding
         X2MSkillID2,
         Skip,
         GetEntry,
+        SetValue,
 
         //For use in InstallerXml:
         X2MSkillPath,

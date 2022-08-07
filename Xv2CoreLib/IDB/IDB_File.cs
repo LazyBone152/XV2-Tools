@@ -10,7 +10,7 @@ namespace Xv2CoreLib.IDB
 {
 
     [Flags]
-    public enum RaceLock
+    public enum IdbRaceLock
     {
         HUM = 1,
         HUF = 2,
@@ -225,6 +225,39 @@ namespace Xv2CoreLib.IDB
             }
         }
 
+        public static string SkillNameMsgFile(CUS.CUS_File.SkillType skillType)
+        {
+            switch (skillType)
+            {
+                case CUS.CUS_File.SkillType.Super:
+                    return "proper_noun_skill_spa_name_";
+                case CUS.CUS_File.SkillType.Ultimate:
+                    return "proper_noun_skill_ult_name_";
+                case CUS.CUS_File.SkillType.Evasive:
+                    return "proper_noun_skill_esc_name_";
+                case CUS.CUS_File.SkillType.Awoken:
+                    return "proper_noun_skill_met_name_";
+            }
+
+            return null;
+        }
+
+        public static string SkillInfoMsgFile(CUS.CUS_File.SkillType skillType)
+        {
+            switch (skillType)
+            {
+                case CUS.CUS_File.SkillType.Super:
+                    return "proper_noun_skill_spa_info_";
+                case CUS.CUS_File.SkillType.Ultimate:
+                    return "proper_noun_skill_ult_info_";
+                case CUS.CUS_File.SkillType.Evasive:
+                    return "proper_noun_skill_esc_info_";
+                case CUS.CUS_File.SkillType.Awoken:
+                    return "proper_noun_skill_met_info_";
+            }
+
+            return null;
+        }
     }
 
     [YAXSerializeAs("IDB_Entry")]
@@ -267,13 +300,13 @@ namespace Xv2CoreLib.IDB
         public ushort Type { get; set; } //ushort
         [YAXAttributeFor("I_10")]
         [YAXSerializeAs("value")]
-        public ushort I_10 { get; set; }
+        public ushort I_10 { get; set; } = ushort.MaxValue;
         [YAXAttributeFor("I_12")]
         [YAXSerializeAs("value")]
         public ushort I_12 { get; set; }
         [YAXAttributeFor("I_14")]
         [YAXSerializeAs("value")]
-        public ushort I_14 { get; set; }
+        public ushort I_14 { get; set; } = ushort.MaxValue;
         [YAXAttributeFor("BuyPrice")]
         [YAXSerializeAs("value")]
         public int I_16 { get; set; }
@@ -282,7 +315,7 @@ namespace Xv2CoreLib.IDB
         public int I_20 { get; set; }
         [YAXAttributeFor("RaceLock")]
         [YAXSerializeAs("value")]
-        public RaceLock RaceLock { get; set; } //int
+        public IdbRaceLock RaceLock { get; set; } //int
         [YAXAttributeFor("TPMedals")]
         [YAXSerializeAs("value")]
         public int I_28 { get; set; }
@@ -291,22 +324,22 @@ namespace Xv2CoreLib.IDB
         public int I_32 { get; set; } //int32
         [YAXAttributeFor("LimitBurst.EEPK_Effect")]
         [YAXSerializeAs("ID")]
-        public ushort I_36 { get; set; }
+        public ushort I_36 { get; set; } = ushort.MaxValue;
         [YAXAttributeFor("LimitBurst.Color")]
         [YAXSerializeAs("value")]
-        public LB_Color I_38 { get; set; }
+        public LB_Color I_38 { get; set; } = (LB_Color)ushort.MaxValue;
         [YAXAttributeFor("LimitBurst.Description")]
         [YAXSerializeAs("MSG_ID")]
         public ushort I_40 { get; set; }
         [YAXAttributeFor("LimitBurst.Talisman")]
         [YAXSerializeAs("ID1")]
-        public ushort I_42 { get; set; } //ushort
+        public ushort I_42 { get; set; } = ushort.MaxValue;
         [YAXAttributeFor("LimitBurst.Talisman")]
         [YAXSerializeAs("ID2")]
-        public ushort I_44 { get; set; } //ushort
+        public ushort I_44 { get; set; } = ushort.MaxValue;
         [YAXAttributeFor("LimitBurst.Talisman")]
         [YAXSerializeAs("ID3")]
-        public ushort I_46 { get; set; } //ushort
+        public ushort I_46 { get; set; } = ushort.MaxValue;
 
         //New in 1.18
         [YAXAttributeFor("NEW_I_12")]
@@ -329,6 +362,37 @@ namespace Xv2CoreLib.IDB
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "MsgComponent")]
         public List<MSG.Msg_Component> MsgComponents { get; set; } //Only for LB Mod Installer
 
+        public static IdbRaceLock GetIdbRaceLock(CUS.CusRaceLock cusRaceLock)
+        {
+            IdbRaceLock raceLock = 0;
+
+            if (cusRaceLock.HasFlag(CUS.CusRaceLock.HUF))
+                raceLock = raceLock | IdbRaceLock.HUF;
+
+            if (cusRaceLock.HasFlag(CUS.CusRaceLock.HUM))
+                raceLock = raceLock | IdbRaceLock.HUM;
+
+            if (cusRaceLock.HasFlag(CUS.CusRaceLock.SYF))
+                raceLock = raceLock | IdbRaceLock.SYF;
+
+            if (cusRaceLock.HasFlag(CUS.CusRaceLock.SYM))
+                raceLock = raceLock | IdbRaceLock.SYM;
+
+            if (cusRaceLock.HasFlag(CUS.CusRaceLock.FRI))
+                raceLock = raceLock | IdbRaceLock.FRI;
+
+            if (cusRaceLock.HasFlag(CUS.CusRaceLock.NMC))
+                raceLock = raceLock | IdbRaceLock.NMC;
+
+            if (cusRaceLock.HasFlag(CUS.CusRaceLock.MAM))
+                raceLock = raceLock | IdbRaceLock.MAM;
+
+            if (cusRaceLock.HasFlag(CUS.CusRaceLock.MAF))
+                raceLock = raceLock | IdbRaceLock.MAF;
+
+            return raceLock;
+        }
+
         public string GetRaceLockAsString()
         {
             if ((ushort)RaceLock == 255) return null;
@@ -336,37 +400,37 @@ namespace Xv2CoreLib.IDB
 
             bool first = true;
             List<string> str = new List<string>();
-            RaceLock raceLock = (RaceLock)RaceLock;
+            IdbRaceLock raceLock = (IdbRaceLock)RaceLock;
 
-            if (raceLock.HasFlag(RaceLock.HUM))
+            if (raceLock.HasFlag(IdbRaceLock.HUM))
             {
                 str.Add("HUM");
             }
-            if (raceLock.HasFlag(RaceLock.HUF))
+            if (raceLock.HasFlag(IdbRaceLock.HUF))
             {
                 str.Add("HUF");
             }
-            if (raceLock.HasFlag(RaceLock.SYM))
+            if (raceLock.HasFlag(IdbRaceLock.SYM))
             {
                 str.Add("SYM");
             }
-            if (raceLock.HasFlag(RaceLock.SYF))
+            if (raceLock.HasFlag(IdbRaceLock.SYF))
             {
                 str.Add("SYF");
             }
-            if (raceLock.HasFlag(RaceLock.NMC))
+            if (raceLock.HasFlag(IdbRaceLock.NMC))
             {
                 str.Add("NMC");
             }
-            if (raceLock.HasFlag(RaceLock.FRI))
+            if (raceLock.HasFlag(IdbRaceLock.FRI))
             {
                 str.Add("FRI");
             }
-            if (raceLock.HasFlag(RaceLock.MAM))
+            if (raceLock.HasFlag(IdbRaceLock.MAM))
             {
                 str.Add("MAM");
             }
-            if (raceLock.HasFlag(RaceLock.MAF))
+            if (raceLock.HasFlag(IdbRaceLock.MAF))
             {
                 str.Add("MAF");
             }
@@ -390,6 +454,25 @@ namespace Xv2CoreLib.IDB
             return str2.ToString();
         }
 
+        public static IDB_Entry GetDefaultSkillEntry(int skillId = 0, int type = 0, int kiCost = 0, int buyCost = 1000)
+        {
+            IDB_Entry idbEntry = new IDB_Entry();
+            idbEntry.ID = (ushort)skillId;
+            idbEntry.Type = (ushort)type;
+            idbEntry.NameMsgID = idbEntry.ID;
+            idbEntry.DescMsgID = idbEntry.ID;
+            idbEntry.I_12 = 32767;
+            idbEntry.I_16 = buyCost;
+
+            idbEntry.Effects = new List<IBD_Effect>();
+            idbEntry.Effects.Add(new IBD_Effect());
+            idbEntry.Effects.Add(new IBD_Effect());
+            idbEntry.Effects.Add(new IBD_Effect());
+
+            idbEntry.Effects[0].F_100 = kiCost;
+
+            return idbEntry;
+        }
     }
 
     [YAXSerializeAs("Effect")]
@@ -400,17 +483,17 @@ namespace Xv2CoreLib.IDB
 
         [YAXAttributeFor("Type")]
         [YAXSerializeAs("value")]
-        public int I_00 { get; set; }
+        public int I_00 { get; set; } = -1;
         [YAXAttributeFor("ActivationType")]
         [YAXSerializeAs("value")]
-        public int I_04 { get; set; }
+        public int I_04 { get; set; } = -1;
         [YAXAttributeFor("NumActTimes")]
         [YAXSerializeAs("value")]
-        public int I_08 { get; set; }
+        public int I_08 { get; set; } = -1;
         [YAXAttributeFor("Timer")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
-        public float F_12 { get; set; }
+        public float F_12 { get; set; } = -1;
         [YAXAttributeFor("AbilityValues")]
         [YAXSerializeAs("values")]
         [YAXFormat("0.0##########")]
@@ -495,7 +578,7 @@ namespace Xv2CoreLib.IDB
         [YAXSerializeAs("values")]
         [YAXFormat("0.0##########")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public float[] F_156 { get; set; } //size 13
+        public float[] F_156 { get; set; } //size 17
 
         //New in 1.18
         [YAXAttributeFor("NEW_I_48")]
@@ -508,6 +591,14 @@ namespace Xv2CoreLib.IDB
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         [YAXHexValue]
         public int NEW_I_52 { get; set; }
+
+        public IBD_Effect()
+        {
+            F_16 = new float[6];
+            F_48 = new float[6];
+            I_72 = new int[6];
+            F_156 = new float[17];
+        }
     }
 
 

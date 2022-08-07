@@ -182,6 +182,7 @@ namespace Xv2CoreLib.PUP
         #endregion
     }
 
+    [Serializable]
     public class PUP_Entry : IInstallable
     {
 
@@ -342,6 +343,13 @@ namespace Xv2CoreLib.PUP
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
         public float F_148 { get; set; }
+
+        public PUP_Entry() { }
+
+        public PUP_Entry(int id)
+        {
+            ID = id;
+        }
 
         public static PUP_Entry Read(byte[] bytes, int offset)
         {
