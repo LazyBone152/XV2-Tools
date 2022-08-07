@@ -105,16 +105,6 @@ namespace LB_Mod_Installer.Installer
                 //Finalize
                 SaveFiles();
 
-                try
-                {
-                    GeneralInfo.SaveTracker();
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception("Failed at tracker xml save phase.", ex);
-                }
-
-                MessageBox.Show("The mod was successfully installed.", GeneralInfo.InstallerXmlInfo.InstallerName, MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
@@ -183,7 +173,7 @@ namespace LB_Mod_Installer.Installer
                     case FileType.XML:
                         //Install XML or Binary
                         UpdateProgessBarText(String.Format("_Installing \"{0}\"...", Path.GetFileName(File.InstallPath)));
-                        ResolveFileType(File.SourcePath, File.InstallPath, type == FileType.XML, File.GetUseSkipBinding());
+                        ResolveFileType(File.SourcePath, File.InstallPath, type == FileType.XML, File.UseSkipBinding);
                         break;
                     case FileType.VfxPackage:
                         //Install effects
@@ -201,7 +191,7 @@ namespace LB_Mod_Installer.Installer
 
                         if (!IsJungleFileBlacklisted(File.InstallPath))
                         {
-                            fileManager.AddStreamFile(File.InstallPath, zipManager.GetZipEntry(string.Format("data/{0}", File.SourcePath)), File.AllowOverwrite());
+                            fileManager.AddStreamFile(File.InstallPath, zipManager.GetZipEntry(string.Format("data/{0}", File.SourcePath)), File.Overwrite);
                         }
                         break;
                     case FileType.CopyDir:
@@ -356,39 +346,73 @@ namespace LB_Mod_Installer.Installer
         
         private bool TryTransformationInstall(string xmlPath)
         {
-            if (xmlPath.Contains("_CusAuraDefine.xml"))
+#if !DEBUG
+            try
+#endif
             {
-                var xml = zipManager.DeserializeXmlFromArchive_Ext<TransformCusAuras>(GeneralInfo.GetPathInZipDataDir(xmlPath));
-                transformInstaller.LoadCusAuras(xml);
-                return true;
-            }
+                if (xmlPath.Contains("_CusAuraDefine.xml"))
+                {
+                    UpdateProgessBarText("_Loading CusAuraDefines...", false);
 
-            if (xmlPath.Contains("_PartSetDefine.xml"))
-            {
-                var xml = zipManager.DeserializeXmlFromArchive_Ext<TransformPartSets>(GeneralInfo.GetPathInZipDataDir(xmlPath));
-                transformInstaller.LoadPartSets(xml);
-                return true;
-            }
+                    var xml = zipManager.DeserializeXmlFromArchive_Ext<TransformCusAuras>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                    transformInstaller.LoadCusAuras(xml);
+                    return true;
+                }
 
-            if (xmlPath.Contains("_PowerUpDefine.xml"))
-            {
-                var xml = zipManager.DeserializeXmlFromArchive_Ext<TransformPowerUps>(GeneralInfo.GetPathInZipDataDir(xmlPath));
-                transformInstaller.LoadPupEntries(xml);
-                return true;
-            }
+                if (xmlPath.Contains("_PartSetDefine.xml"))
+                {
+                    UpdateProgessBarText("_Loading PartSetDefines...", false);
 
-            if (xmlPath.Contains("_TransformDefine.xml"))
-            {
-                var xml = zipManager.DeserializeXmlFromArchive_Ext<TransformDefines>(GeneralInfo.GetPathInZipDataDir(xmlPath));
-                transformInstaller.LoadTransformations(xml);
-                return true;
+                    var xml = zipManager.DeserializeXmlFromArchive_Ext<TransformPartSets>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                    transformInstaller.LoadPartSets(xml);
+                    return true;
+                }
+
+                if (xmlPath.Contains("_PowerUpDefine.xml"))
+                {
+                    UpdateProgessBarText("_Loading PowerUpDefines...", false);
+
+                    var xml = zipManager.DeserializeXmlFromArchive_Ext<TransformPowerUps>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                    transformInstaller.LoadPupEntries(xml);
+                    return true;
+                }
+
+                if (xmlPath.Contains("_TransformDefine.xml"))
+                {
+                    UpdateProgessBarText("_Loading TransformDefines...", false);
+
+                    var xml = zipManager.DeserializeXmlFromArchive_Ext<TransformDefines>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                    transformInstaller.LoadTransformations(xml);
+                    return true;
+                }
             }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                    string error = string.Format("Failed at Awoken Skill Defines load phase ({0}).", xmlPath);
+                    throw new Exception(error, ex);
+            }
+#endif
 
             if (xmlPath.Contains("_TransformSkill.xml"))
             {
-                var xml = zipManager.DeserializeXmlFromArchive_Ext<TransformSkill>(GeneralInfo.GetPathInZipDataDir(xmlPath));
-                transformInstaller.InstallSkill(xml);
-                return true;
+                UpdateProgessBarText("_Installing Awoken Skill...", false);
+                TransformSkill xml = null;
+#if !DEBUG
+                try
+#endif
+                {
+                    xml = zipManager.DeserializeXmlFromArchive_Ext<TransformSkill>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                    transformInstaller.InstallSkill(xml);
+                    return true;
+                }
+#if !DEBUG
+                catch (Exception ex)
+                {
+                    string error = string.Format("Failed at Awoken Skill ({1}) install phase ({0}).", xmlPath, xml != null ? installerXml.GetLocalisedString(xml.Name) : "Load Failed");
+                    throw new Exception(error, ex);
+                }
+#endif
             }
 
             return false;

@@ -238,7 +238,6 @@ namespace LB_Mod_Installer.Installer.Transformation
             cusEntry.I_18 = 65280;
             cusEntry.EanPath = skill.EanPath;
             cusEntry.CamEanPath = skill.CamEanPath;
-            //cusEntry.EepkPath = skill.VfxPath;
             cusEntry.SePath = skill.SeAcbPath;
             cusEntry.VoxPath = skill.VoxAcbPath;
             cusEntry.I_50 = 271;
@@ -255,6 +254,7 @@ namespace LB_Mod_Installer.Installer.Transformation
 
             //Save files (add to file cache)
             string folderName = $"{skillID2.ToString("D3")}_{dummyCms.ShortName}_{skill.SkillCode}";
+            string skillDir = $"skill/MET/{folderName}";
             string bacPath = $"skill/MET/{folderName}/{folderName}.bac";
             string bcmPath = $"skill/MET/{folderName}/{folderName}_PLAYER.bcm";
             string eepkPath = $"skill/MET/{folderName}/{folderName}.eepk";
@@ -263,10 +263,8 @@ namespace LB_Mod_Installer.Installer.Transformation
             install.fileManager.AddParsedFile(bcmPath, bcmFile);
             install.fileManager.AddParsedFile(eepkPath, eepkFile);
 
-            GeneralInfo.Tracker.AddJungleFile(bacPath);
-            GeneralInfo.Tracker.AddJungleFile(bcmPath);
-            GeneralInfo.Tracker.AddJungleFile(eepkPath);
-            //TODO: Add all other eepk files
+            //Just track the whole directory instead of individual files. Much less clutter.
+            GeneralInfo.Tracker.AddJungleFile(skillDir);
         }
         #endregion
 
@@ -289,15 +287,37 @@ namespace LB_Mod_Installer.Installer.Transformation
                 entry.SortID = stage.StageIndex;
 
                 bacFile.BacEntries.Add(entry);
+
+                //Add awoken deactivation commands before the stage is activated. This is needed to workaround some undesired behaviour, such as PartSet changes, PUP souls, CusAuras and moveset changes persisting
+                //In some cases we will want the changes to persist, so this must be optional
+                if (stage.DeactivateFirst)
+                {
+                    if(!entry.Type15.Any(x => x.FunctionType == 14))
+                    {
+                        var transformActivator = entry.Type15.FirstOrDefault(x => x.FunctionType == 13);
+
+                        if (transformActivator != null)
+                        {
+                            BAC_Type15 transformDeactivator = new BAC_Type15();
+                            transformDeactivator.StartTime = transformActivator.StartTime;
+                            transformDeactivator.Duration = 1;
+                            transformDeactivator.FunctionType = 14;
+
+                            //Insert it before the activator entry, so that it is executed first.
+                            entry.Type15.Insert(0, transformDeactivator);
+                        }
+                    }
+                }
             }
 
             //Add transform / revert mechanic entries
             var holdDownEntryDefine = TransformationDefines.FirstOrDefault(x => x.Key?.Equals(TransformDefine.BAC_HOLD_DOWN_LOOP_KEY) == true);
             var untransformDefine = TransformationDefines.FirstOrDefault(x => x.Key?.Equals(TransformDefine.BAC_UNTRANSFORM_KEY) == true);
             var revertDefine = TransformationDefines.FirstOrDefault(x => x.Key?.Equals(TransformDefine.BAC_REVERT_LOOP_KEY) == true);
-            var callbackDefine = TransformationDefines.FirstOrDefault(x => x.Key?.Equals(TransformDefine.BAC_CALLBACK_KEY) == true);
+            var notAllowedSeDefine = TransformationDefines.FirstOrDefault(x => x.Key?.Equals(TransformDefine.BAC_NOT_ALLOWED_SE_CALLBACK_KEY) == true);
+            var pageChangeSeDefine = TransformationDefines.FirstOrDefault(x => x.Key?.Equals(TransformDefine.BAC_PAGE_SE_CALLBACK_KEY) == true);
 
-            if(holdDownEntryDefine == null)
+            if (holdDownEntryDefine == null)
                 throw new Exception(string.Format("TransformInstaller.CreateBacFile: Cannot find the define entry for \"{0}\"", TransformDefine.BAC_HOLD_DOWN_LOOP_KEY));
 
             if (untransformDefine == null)
@@ -306,135 +326,36 @@ namespace LB_Mod_Installer.Installer.Transformation
             if (revertDefine == null)
                 throw new Exception(string.Format("TransformInstaller.CreateBacFile: Cannot find the define entry for \"{0}\"", TransformDefine.BAC_REVERT_LOOP_KEY));
 
-            if (callbackDefine == null)
-                throw new Exception(string.Format("TransformInstaller.CreateBacFile: Cannot find the define entry for \"{0}\"", TransformDefine.BAC_CALLBACK_KEY));
+            if (notAllowedSeDefine == null)
+                throw new Exception(string.Format("TransformInstaller.CreateBacFile: Cannot find the define entry for \"{0}\"", TransformDefine.BAC_NOT_ALLOWED_SE_CALLBACK_KEY));
+
+            if (pageChangeSeDefine == null)
+                throw new Exception(string.Format("TransformInstaller.CreateBacFile: Cannot find the define entry for \"{0}\"", TransformDefine.BAC_PAGE_SE_CALLBACK_KEY));
 
             var holdDownEntry = holdDownEntryDefine.BacEntryInstance.Copy();
             var untransformEntry = untransformDefine.BacEntryInstance.Copy();
             var revertEntry = revertDefine.BacEntryInstance.Copy();
-            var callbackEntry = callbackDefine.BacEntryInstance.Copy();
+            var notAllowedEntry = notAllowedSeDefine.BacEntryInstance.Copy();
+            var pageChangeSeEntry = pageChangeSeDefine.BacEntryInstance.Copy();
 
             holdDownEntry.SortID = TransformDefine.BAC_HOLD_DOWN_LOOP_IDX;
             untransformEntry.SortID = TransformDefine.BAC_UNTRANSFORM_IDX;
             revertEntry.SortID = TransformDefine.BAC_REVERT_IDX;
-            callbackEntry.SortID = TransformDefine.BAC_CALLBACK_IDX;
+            notAllowedEntry.SortID = TransformDefine.BAC_NOT_ALLOWED_SE_CALLBACK_IDX;
+            pageChangeSeEntry.SortID = TransformDefine.BAC_PAGE_SE_CALLBACK_IDX;
 
             bacFile.BacEntries.Add(holdDownEntry);
             bacFile.BacEntries.Add(untransformEntry);
             bacFile.BacEntries.Add(revertEntry);
-            bacFile.BacEntries.Add(callbackEntry);
+            bacFile.BacEntries.Add(notAllowedEntry);
+            bacFile.BacEntries.Add(pageChangeSeEntry);
 
             return bacFile;
         }
 
         private BCM_File CreateBcmFile(TransformSkill skill, int[] transformHoldDownIds, int[] untransformHoldDownIds)
         {
-            BCM_File bcmFile = new BCM_File();
-
-            //Add root entry
-            BCM_Entry root = new BCM_Entry();
-            bcmFile.BCMEntries.Add(root);
-
-            //Add root "Hold Down" entries
-            for(int i = 0; i < skill.TransformStates.Count; i++)
-            {
-                BCM_Entry holdLoop = new BCM_Entry();
-                holdLoop.Index = $"transform_root_{i}";
-                holdLoop.ButtonInput = ButtonInput.ultimateskill2;
-                holdLoop.ActivatorState = ActivatorState.attacking | ActivatorState.idle;
-                holdLoop.BacCase = BacCases.Case3;
-                holdLoop.PrimaryActivatorConditions = (uint)(i == 0 ? 0x80 : 0xd00);
-                holdLoop.BacEntryPrimary = (short)transformHoldDownIds[i];
-                holdLoop.TransStage = (short)(skill.GetTransStage(i));
-                holdLoop.KiRequired = skill.TransformStates[i].KiRequired;
-                holdLoop.HealthRequired = skill.TransformStates[i].HealthRequired;
-
-                //Add Transform entries
-                if(skill.TransformStates[i].TransformOptions != null)
-                {
-                    if (skill.TransformStates[i].TransformOptions.Count > 4)
-                        throw new ArgumentException($"TransformInstaller.CreateBcmFile: Number of TransformOption entries ({skill.TransformStates[i].TransformOptions.Count}) exceeds the maximum of 4. ");
-
-                    for (int a = 0; a < skill.TransformStates[i].TransformOptions.Count; a++)
-                    {
-                        BCM_Entry transformEntry = new BCM_Entry();
-
-                        transformEntry.ButtonInput = GetButtonInputForSlot(a);
-                        transformEntry.ActivatorState = ActivatorState.attacking | ActivatorState.idle;
-                        transformEntry.BacCase = BacCases.Case3;
-                        transformEntry.BacEntryPrimary = (short)skill.TransformStates[i].TransformOptions[a].StageIndex;
-                        transformEntry.TransStage = (short)skill.GetTransStage(skill.TransformStates[i].TransformOptions[a].StageIndex);
-                        transformEntry.KiRequired = skill.TransformStates[i].TransformOptions[a].KiRequired;
-                        transformEntry.HealthRequired = skill.TransformStates[i].TransformOptions[a].HealthRequired;
-
-                        holdLoop.BCMEntries.Add(transformEntry);
-                    }
-                }
-
-                //Add untransform entry (when not on the 1st stage selector / is in base form)
-                BCM_Entry untransformHoldDownLoop = null;
-                if (i > 0)
-                {
-                    untransformHoldDownLoop = new BCM_Entry();
-                    untransformHoldDownLoop.ButtonInput = ButtonInput.skillmenu;
-                    untransformHoldDownLoop.ActivatorState = ActivatorState.attacking | ActivatorState.idle;
-                    untransformHoldDownLoop.BacCase = BacCases.Case3;
-                    untransformHoldDownLoop.BacEntryPrimary = (short)untransformHoldDownIds[i];
-                    untransformHoldDownLoop.TransStage = (short)(skill.GetTransStage(i) + 1);
-
-                    //Add untransform entry ([Revert to Base]). Always option 1.
-                    BCM_Entry untransformEntry = new BCM_Entry();
-                    untransformEntry.ButtonInput = ButtonInput.blast;
-                    untransformEntry.ActivatorState = ActivatorState.attacking | ActivatorState.idle;
-                    untransformEntry.BacCase = BacCases.Case3;
-                    untransformEntry.BacEntryPrimary = TransformDefine.BAC_UNTRANSFORM_IDX;
-                    untransformHoldDownLoop.BCMEntries.Add(untransformEntry);
-
-                    //Add revert entries
-                    if (skill.TransformStates[i].RevertOptions != null)
-                    {
-                        if (skill.TransformStates[i].RevertOptions.Count > 3)
-                            throw new ArgumentException($"TransformInstaller.CreateBcmFile: Number of RevertOptions entries ({skill.TransformStates[i].RevertOptions.Count}) exceeds the maximum of 3. ");
-
-                        for (int a = 0; a < skill.TransformStates[i].RevertOptions.Count; a++)
-                        {
-                            BCM_Entry revertEntry = new BCM_Entry();
-                            revertEntry.ButtonInput = GetButtonInputForSlot(a + 1);
-                            revertEntry.ActivatorState = ActivatorState.attacking | ActivatorState.idle;
-                            revertEntry.BacEntryPrimary = TransformDefine.BAC_REVERT_IDX;
-                            revertEntry.TransStage = (short)skill.GetTransStage(skill.TransformStates[i].RevertOptions[a].StageIndex);
-
-                            untransformHoldDownLoop.BCMEntries.Add(revertEntry);
-                        }
-                    }
-
-                    if(skill.TransformStates[i].TransformOptions?.Count > 0)
-                    {
-                        //Add callback entry (jump back to root transform hold down loop when button is pressed again)
-                        BCM_Entry callbackEntry = new BCM_Entry();
-                        callbackEntry.ButtonInput = ButtonInput.skillmenu;
-                        callbackEntry.ActivatorState = ActivatorState.attacking | ActivatorState.idle;
-                        callbackEntry.BacEntryPrimary = (short)transformHoldDownIds[i];
-                        untransformHoldDownLoop.BCMEntries.Add(callbackEntry);
-
-                        holdLoop.BCMEntries.Add(untransformHoldDownLoop);
-
-                        holdLoop.BCMEntries[0].Index = $"hold_loop_child_{i}";
-                        callbackEntry.LoopAsChild = $"hold_loop_child_{i}";
-                    }
-                }
-
-                if(skill.TransformStates[i].TransformOptions?.Count > 0)
-                {
-                    root.BCMEntries.Add(holdLoop);
-                }
-                else if(untransformHoldDownLoop != null)
-                {
-                    root.BCMEntries.Add(untransformHoldDownLoop);
-                }
-            }
-
-            return bcmFile;
+            return null;
         }
 
         private CMS_Entry AssignCmsEntry()
@@ -579,11 +500,19 @@ namespace LB_Mod_Installer.Installer.Transformation
 
             //Create MSG entries
             string[] names = install.installerXml.GetLocalisedArray(skill.Name);
-            string[] descs = install.installerXml.GetLocalisedArray(skill.Info);
+            string[] descs = !string.IsNullOrWhiteSpace(skill.Info) ? install.installerXml.GetLocalisedArray(skill.Info) : null;
 
             install.msgComponentInstall.WriteSkillMsgEntries(names, skillID2, CUS_File.SkillType.Awoken, MsgComponentInstall.SkillMode.Name);
-            install.msgComponentInstall.WriteSkillMsgEntries(descs, skillID2, CUS_File.SkillType.Awoken, MsgComponentInstall.SkillMode.Info);
             install.msgComponentInstall.WriteSkillMsgEntries(names, skillID2, CUS_File.SkillType.Awoken, MsgComponentInstall.SkillMode.BtlHud);
+
+            if (descs != null)
+            {
+                install.msgComponentInstall.WriteSkillMsgEntries(descs, skillID2, CUS_File.SkillType.Awoken, MsgComponentInstall.SkillMode.Info);
+            }
+            else
+            {
+                idbEntry.DescMsgID = 0;
+            }
         }
 
         private byte[] CreateStageSelectorTexture(TransformSkill skill, List<TransformOption> options, bool isUntransform)
@@ -754,56 +683,6 @@ namespace LB_Mod_Installer.Installer.Transformation
             }
 
             throw new ArgumentException($"TransformInstaller.GetButtonInputForSlot: Slot number out of range ({slot}), must be between 0 and 3.");
-        }
-        
-        public static void CreateDummyXmls()
-        {
-            TransformCusAuras cusAuras = new TransformCusAuras();
-            cusAuras.CusAuras = new List<TransformCusAura>();
-            cusAuras.CusAuras.Add(new TransformCusAura());
-            cusAuras.CusAuras[0].CusAuraData = new CusAuraData();
-
-            TransformDefines transformDefines = new TransformDefines();
-            transformDefines.Transformations = new List<TransformDefine>();
-            transformDefines.Transformations.Add(new TransformDefine());
-
-            TransformPartSets partSets = new TransformPartSets();
-            partSets.PartSets = new List<TransformPartSet>();
-            partSets.PartSets.Add(new TransformPartSet());
-            partSets.PartSets[0].PartSet = new PartSet();
-
-            TransformPowerUps powerUps = new TransformPowerUps();
-            powerUps.PowerUps = new List<TransformPowerUp>();
-            powerUps.PowerUps.Add(new TransformPowerUp());
-            powerUps.PowerUps[0].PupEntry = new PUP_Entry();
-
-            TransformSkill skill = new TransformSkill();
-            skill.TransformStates = new List<TransformState>();
-            skill.Stages = new List<TransformStage>();
-            skill.Stages.Add(new TransformStage());
-            skill.TransformStates.Add(new TransformState());
-            skill.TransformStates[0].TransformOptions = new List<TransformOption>();
-            skill.TransformStates[0].RevertOptions = new List<TransformOption>();
-            skill.TransformStates[0].TransformOptions.Add(new TransformOption());
-            skill.TransformStates[0].RevertOptions.Add(new TransformOption());
-
-            System.IO.Directory.CreateDirectory("transform");
-
-            YAXSerializer serializer = new YAXSerializer(typeof(TransformCusAuras));
-            serializer.SerializeToFile(cusAuras, "transform/CusAuras_CusAuraDefine.xml");
-
-            YAXSerializer serializer2 = new YAXSerializer(typeof(TransformDefines));
-            serializer2.SerializeToFile(transformDefines, "transform/Transform_TransformDefine.xml");
-
-            YAXSerializer serializer3 = new YAXSerializer(typeof(TransformPartSets));
-            serializer3.SerializeToFile(partSets, "transform/PartSets_PartSetDefine.xml");
-
-            YAXSerializer serializer4 = new YAXSerializer(typeof(TransformPowerUps));
-            serializer4.SerializeToFile(powerUps, "transform/PUP_PowerUpDefine.xml");
-
-            YAXSerializer serializer5 = new YAXSerializer(typeof(TransformSkill));
-            serializer5.SerializeToFile(skill, "transform/Skill_TransformSkill.xml");
-
         }
         
         private TransformDefine GetStageDefine(TransformSkill skill, int stageIndex)

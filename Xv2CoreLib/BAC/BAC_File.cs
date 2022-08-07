@@ -2003,7 +2003,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type8 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type { get { return $"Effect ({EepkType})"; } }
+        public string Type { get { return CalculateTypeString(); } }
         [YAXDontSerialize]
         public override int TypeID => 8;
 
@@ -2174,6 +2174,11 @@ namespace Xv2CoreLib.BAC
             return false;
         }
 
+        public string CalculateTypeString()
+        {
+            string enable = EffectFlags.HasFlag(EffectFlagsEnum.Off) ? "Disable" : "Enable";
+            return $"Effect ({EepkType}, {EffectID}, {enable})";
+        }
     }
 
     [YAXSerializeAs("Projectile")]
@@ -3020,7 +3025,17 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type16 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type { get { return "ScreenEffect"; } }
+        public string Type
+        {
+            get
+            {
+                string ret;
+                if (!ValuesDictionary.BAC.ScreenEffectIds.TryGetValue(BpeIndex, out ret))
+                    ret = BpeIndex.ToString();
+
+                return $"PostEffect ({ret})";
+            }
+        }
         [YAXDontSerialize]
         public override int TypeID => 16;
 

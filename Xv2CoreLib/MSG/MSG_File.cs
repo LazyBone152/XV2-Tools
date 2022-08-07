@@ -599,31 +599,31 @@ namespace Xv2CoreLib.MSG
         {
             string str = "wear_";
 
-            if (idb.RaceLock == RaceLock.HUM || idb.RaceLock == RaceLock.SYM || idb.RaceLock == (RaceLock.HUM | RaceLock.SYM))
+            if (idb.RaceLock == IdbRaceLock.HUM || idb.RaceLock == IdbRaceLock.SYM || idb.RaceLock == (IdbRaceLock.HUM | IdbRaceLock.SYM))
             {
                 str += "hum_";
             }
-            else if (idb.RaceLock == RaceLock.HUF || idb.RaceLock == RaceLock.SYF || idb.RaceLock == (RaceLock.HUF | RaceLock.SYF))
+            else if (idb.RaceLock == IdbRaceLock.HUF || idb.RaceLock == IdbRaceLock.SYF || idb.RaceLock == (IdbRaceLock.HUF | IdbRaceLock.SYF))
             {
                 str += "huf_";
             }
-            else if (idb.RaceLock == RaceLock.NMC)
+            else if (idb.RaceLock == IdbRaceLock.NMC)
             {
                 str += "nmc_";
             }
-            else if (idb.RaceLock == RaceLock.FRI)
+            else if (idb.RaceLock == IdbRaceLock.FRI)
             {
                 str += "fri_";
             }
-            else if (idb.RaceLock == RaceLock.MAM)
+            else if (idb.RaceLock == IdbRaceLock.MAM)
             {
                 str += "mam_";
             }
-            else if (idb.RaceLock == RaceLock.MAF)
+            else if (idb.RaceLock == IdbRaceLock.MAF)
             {
                 str += "maf_";
             }
-            else if (idb.RaceLock == (RaceLock.MAM | RaceLock.MAF))
+            else if (idb.RaceLock == (IdbRaceLock.MAM | IdbRaceLock.MAF))
             {
                 str += "mar_";
             }

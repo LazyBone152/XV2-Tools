@@ -11,7 +11,7 @@ namespace LB_Mod_Installer.Installer.Transformation
         [YAXAttributeForClass]
         public string SkillCode { get; set; }
         [YAXAttributeForClass]
-        public Skill.RaceLock RaceLock { get; set; }
+        public CusRaceLock RaceLock { get; set; }
 
         //Localization keys
         [YAXAttributeFor("Name")]
@@ -146,6 +146,9 @@ namespace LB_Mod_Installer.Installer.Transformation
         [YAXAttributeForClass]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = -1)]
         public int SkillsetChange { get; set; } = -1; //Preset ID (-1 = no change)
+        [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = true)]
+        public bool DeactivateFirst { get; set; } = true;
 
 
     }
@@ -163,6 +166,16 @@ namespace LB_Mod_Installer.Installer.Transformation
         public List<TransformOption> TransformOptions { get; set; } 
         [YAXDontSerializeIfNull]
         public List<TransformOption> RevertOptions { get; set; }
+
+        public bool HasTransformOptions()
+        {
+            return TransformOptions?.Count > 0;
+        }
+
+        public bool HasRevertOptions()
+        {
+            return RevertOptions?.Count > 0;
+        }
     }
 
     public class TransformOption

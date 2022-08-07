@@ -113,7 +113,7 @@ namespace Xv2CoreLib.CUS
                     I_04 = BitConverter.ToInt32(rawBytes, offset + 4),
                     ID1 = BitConverter.ToUInt16(rawBytes, offset + 8),
                     ID2 = BitConverter.ToUInt16(rawBytes, offset + 10),
-                    I_12 = (Skill.RaceLock)rawBytes[offset + 12],
+                    I_12 = (CusRaceLock)rawBytes[offset + 12],
                     I_13 = rawBytes[offset + 13],
                     FilesLoadedFlags1 = (Skill.FilesLoadedFlags)BitConverter.ToUInt16(rawBytes, offset + 14),
                     I_16 = BitConverter.ToInt16(rawBytes, offset + 16),

@@ -10,7 +10,7 @@ namespace Xv2CoreLib.IDB
 {
 
     [Flags]
-    public enum RaceLock
+    public enum IdbRaceLock
     {
         HUM = 1,
         HUF = 2,
@@ -315,7 +315,7 @@ namespace Xv2CoreLib.IDB
         public int I_20 { get; set; }
         [YAXAttributeFor("RaceLock")]
         [YAXSerializeAs("value")]
-        public RaceLock RaceLock { get; set; } //int
+        public IdbRaceLock RaceLock { get; set; } //int
         [YAXAttributeFor("TPMedals")]
         [YAXSerializeAs("value")]
         public int I_28 { get; set; }
@@ -362,6 +362,36 @@ namespace Xv2CoreLib.IDB
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "MsgComponent")]
         public List<MSG.Msg_Component> MsgComponents { get; set; } //Only for LB Mod Installer
 
+        public static IdbRaceLock GetIdbRaceLock(CUS.CusRaceLock cusRaceLock)
+        {
+            IdbRaceLock raceLock = 0;
+
+            if (cusRaceLock.HasFlag(CUS.CusRaceLock.HUF))
+                raceLock = raceLock | IdbRaceLock.HUF;
+
+            if (cusRaceLock.HasFlag(CUS.CusRaceLock.HUM))
+                raceLock = raceLock | IdbRaceLock.HUM;
+
+            if (cusRaceLock.HasFlag(CUS.CusRaceLock.SYF))
+                raceLock = raceLock | IdbRaceLock.SYF;
+
+            if (cusRaceLock.HasFlag(CUS.CusRaceLock.SYM))
+                raceLock = raceLock | IdbRaceLock.SYM;
+
+            if (cusRaceLock.HasFlag(CUS.CusRaceLock.FRI))
+                raceLock = raceLock | IdbRaceLock.FRI;
+
+            if (cusRaceLock.HasFlag(CUS.CusRaceLock.NMC))
+                raceLock = raceLock | IdbRaceLock.NMC;
+
+            if (cusRaceLock.HasFlag(CUS.CusRaceLock.MAM))
+                raceLock = raceLock | IdbRaceLock.MAM;
+
+            if (cusRaceLock.HasFlag(CUS.CusRaceLock.MAF))
+                raceLock = raceLock | IdbRaceLock.MAF;
+
+            return raceLock;
+        }
 
         public string GetRaceLockAsString()
         {
@@ -370,37 +400,37 @@ namespace Xv2CoreLib.IDB
 
             bool first = true;
             List<string> str = new List<string>();
-            RaceLock raceLock = (RaceLock)RaceLock;
+            IdbRaceLock raceLock = (IdbRaceLock)RaceLock;
 
-            if (raceLock.HasFlag(RaceLock.HUM))
+            if (raceLock.HasFlag(IdbRaceLock.HUM))
             {
                 str.Add("HUM");
             }
-            if (raceLock.HasFlag(RaceLock.HUF))
+            if (raceLock.HasFlag(IdbRaceLock.HUF))
             {
                 str.Add("HUF");
             }
-            if (raceLock.HasFlag(RaceLock.SYM))
+            if (raceLock.HasFlag(IdbRaceLock.SYM))
             {
                 str.Add("SYM");
             }
-            if (raceLock.HasFlag(RaceLock.SYF))
+            if (raceLock.HasFlag(IdbRaceLock.SYF))
             {
                 str.Add("SYF");
             }
-            if (raceLock.HasFlag(RaceLock.NMC))
+            if (raceLock.HasFlag(IdbRaceLock.NMC))
             {
                 str.Add("NMC");
             }
-            if (raceLock.HasFlag(RaceLock.FRI))
+            if (raceLock.HasFlag(IdbRaceLock.FRI))
             {
                 str.Add("FRI");
             }
-            if (raceLock.HasFlag(RaceLock.MAM))
+            if (raceLock.HasFlag(IdbRaceLock.MAM))
             {
                 str.Add("MAM");
             }
-            if (raceLock.HasFlag(RaceLock.MAF))
+            if (raceLock.HasFlag(IdbRaceLock.MAF))
             {
                 str.Add("MAF");
             }

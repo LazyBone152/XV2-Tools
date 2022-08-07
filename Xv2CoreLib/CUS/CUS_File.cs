@@ -394,18 +394,6 @@ namespace Xv2CoreLib.CUS
             Flag7 = 0x80
         }
 
-        [Flags]
-        public enum RaceLock : byte
-        {
-            HUM = 1,
-            SYM = 0x2,
-            NMC = 0x4,
-            FRI = 0x8,
-            MAM = 0x10,
-            HUF = 0x20,
-            SYF = 0x40,
-            MAF = 0x80
-        }
 
         #region WrapperProperties
         [YAXDontSerialize]
@@ -464,7 +452,7 @@ namespace Xv2CoreLib.CUS
         public ushort ID2 { get; set; } //uint16
         [YAXAttributeFor("Race_Lock")]
         [YAXSerializeAs("value")]
-        public RaceLock I_12 { get; set; }
+        public CusRaceLock I_12 { get; set; }
         [YAXAttributeFor("Type")]
         [YAXSerializeAs("value")]
         public byte I_13 { get; set; }
@@ -547,4 +535,16 @@ namespace Xv2CoreLib.CUS
         #endregion
     }
 
+    [Flags]
+    public enum CusRaceLock : byte
+    {
+        HUM = 1,
+        SYM = 0x2,
+        NMC = 0x4,
+        FRI = 0x8,
+        MAM = 0x10,
+        HUF = 0x20,
+        SYF = 0x40,
+        MAF = 0x80
+    }
 }

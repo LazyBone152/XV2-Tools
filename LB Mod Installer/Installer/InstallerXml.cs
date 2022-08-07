@@ -120,20 +120,28 @@ namespace LB_Mod_Installer.Installer
         {
             List<FilePath> files = new List<FilePath>();
 
-            //Get all entries without DoLast flag
-            GetOptionInstallFiles(files, false);
+            //Get all entries with DoFirst flag
+            GetOptionInstallFiles(files, 0);
 
             if (InstallFiles != null)
             {
-                files.AddRange(InstallFiles.Where(x => !x.GetDoLast()));
+                files.AddRange(InstallFiles.Where(x => x.GetInstallPriority() == 0));
+            }
+
+            //Get entries without either DoFirst or DoLast
+            GetOptionInstallFiles(files, 1);
+
+            if (InstallFiles != null)
+            {
+                files.AddRange(InstallFiles.Where(x => x.GetInstallPriority() == 1));
             }
 
             //Get entries with DoLast flag
-            GetOptionInstallFiles(files, true);
+            GetOptionInstallFiles(files, 2);
 
             if (InstallFiles != null)
             {
-                files.AddRange(InstallFiles.Where(x => x.GetDoLast()));
+                files.AddRange(InstallFiles.Where(x => x.GetInstallPriority() == 2));
             }
 
             //Remove all files with empty SourcePath, and without a Binding
@@ -145,7 +153,7 @@ namespace LB_Mod_Installer.Installer
             return files;
         }
 
-        private void GetOptionInstallFiles(List<FilePath> files, bool doLast)
+        private void GetOptionInstallFiles(List<FilePath> files, int priority)
         {
             //Create a list of all files that are to be installed, based on what the user selected.
             for (int i = 0; i < InstallOptionSteps.Count; i++)
@@ -161,7 +169,7 @@ namespace LB_Mod_Installer.Installer
                             {
                                 foreach(var file in InstallOptionSteps[i].OptionList[InstallOptionSteps[i].SelectedOptionBinding].Paths)
                                 {
-                                    if(file.GetDoLast() == doLast)
+                                    if(file.GetInstallPriority() == priority)
                                     {
                                         files.Add(file);
                                     }
@@ -177,7 +185,7 @@ namespace LB_Mod_Installer.Installer
                             {
                                 foreach (var file in option.Paths)
                                 {
-                                    if (file.GetDoLast() == doLast)
+                                    if (file.GetInstallPriority() == priority)
                                     {
                                         files.Add(file);
                                     }
@@ -392,7 +400,7 @@ namespace LB_Mod_Installer.Installer
             if (Localisations == null) return string.Empty;
 
             Localisation local = Localisations.FirstOrDefault(x => x.Key.Equals(key, StringComparison.OrdinalIgnoreCase));
-            string result = string.Empty;
+            string result = key;
 
             if(local != null)
             {
@@ -999,50 +1007,34 @@ namespace LB_Mod_Installer.Installer
         [YAXDontSerializeIfNull]
         public string InstallPath { get; set; }
 
-        //optional:
+        //Optional Parameters:
         [YAXAttributeForClass]
-        [YAXDontSerializeIfNull]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = null)]
         public string Binding { get; set; }
         [YAXAttributeForClass]
-        [YAXDontSerializeIfNull]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = null)]
         public string HasFlag { get; set; }
         [YAXAttributeForClass]
-        [YAXDontSerializeIfNull]
-        public string Overwrite { get; set; }
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = false)]
+        public bool Overwrite { get; set; }
         [YAXAttributeForClass]
-        [YAXDontSerializeIfNull]
-        public string Type { get; set; }
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = FileType.Default)]
+        public FileType Type { get; set; }
         [YAXAttributeForClass]
-        [YAXDontSerializeIfNull]
-        public string DoLast { get; set; }
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = false)]
+        public bool DoFirst { get; set; }
         [YAXAttributeForClass]
-        [YAXDontSerializeIfNull]
-        public string UseSkipBinding { get; set; }
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = false)]
+        public bool DoLast { get; set; }
         [YAXAttributeForClass]
-        [YAXDontSerializeIfNull]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = false)]
+        public bool UseSkipBinding { get; set; }
+        [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = "True")]
         public string IsEnabled { get; set; }
 
-        public bool AllowOverwrite()
-        {
-            if(String.IsNullOrWhiteSpace(Overwrite))
-            {
-                return false;
-            }
-            else if(Overwrite.Equals("true", StringComparison.InvariantCultureIgnoreCase))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-    
         public FileType GetFileType()
         {
-            FileType type = ParseFileTypeValue();
-            if (type == FileType.Binding) return type;
-
             //If SourcePath is for a special file type, then return that type.
             if(Path.GetExtension(SourcePath) == Xv2CoreLib.EffectContainer.EffectContainerFile.ZipExtension)
             {
@@ -1053,7 +1045,7 @@ namespace LB_Mod_Installer.Installer
                 return FileType.MusicPackage;
             }
 
-            if (type == FileType.Default)
+            if (Type == FileType.Default)
             {
                 //Simulates the original behavior before FileType was added. Will infer type from SourcePath.
 
@@ -1062,44 +1054,25 @@ namespace LB_Mod_Installer.Installer
             }
             else
             {
-                return type;
+                return Type;
             }
-        }
-
-        private FileType ParseFileTypeValue()
-        {
-            if (string.IsNullOrWhiteSpace(Type)) return FileType.Default;
-
-            FileType type;
-            
-            if(!Enum.TryParse(Type, out type))
-            {
-                return FileType.Default;
-            }
-
-            return type;
-        }
-        
-        public bool GetDoLast()
-        {
-            if (String.IsNullOrWhiteSpace(DoLast)) return false;
-            return (DoLast.ToLower() == "true");
-        }
-
-        public bool GetUseSkipBinding()
-        {
-            if (String.IsNullOrWhiteSpace(UseSkipBinding)) return false;
-            return (UseSkipBinding.ToLower() == "true");
         }
 
         public bool GetIsEnabled()
         {
             if (string.IsNullOrWhiteSpace(IsEnabled)) return true;
-            if (IsEnabled.ToLower() == "false") return false;
-
-            return true;
+            return IsEnabled.Equals("true", StringComparison.OrdinalIgnoreCase) ? true : false;
         }
 
+        public int GetInstallPriority()
+        {
+            if (DoFirst && DoLast)
+                throw new ArgumentException($"File: DoLast and DoFirst cannot both be true ({SourcePath}).");
+
+            if (DoFirst) return 0;
+            if (DoLast) return 2;
+            return 1;
+        }
     }
 
     public enum FileType

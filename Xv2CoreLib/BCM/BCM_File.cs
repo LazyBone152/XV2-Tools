@@ -516,6 +516,19 @@ namespace Xv2CoreLib.BCM
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BCMEntry")]
         public List<BCM_Entry> BCMEntries { get; set; } = new List<BCM_Entry>();
 
+        public BCM_Entry() { }
+
+        public static BCM_Entry CreateAwokenEntry(ButtonInput buttonInput, int bacIdPrimary, BacCases cases = BacCases.Case3, ActivatorState activatorState = ActivatorState.attacking | ActivatorState.idle)
+        {
+            return new BCM_Entry()
+            {
+                ButtonInput = buttonInput,
+                BacEntryPrimary = (short)bacIdPrimary,
+                BacCase = cases,
+                ActivatorState = activatorState
+            };
+        }
+
         public BCM_Entry Clone()
         {
             return new BCM_Entry()

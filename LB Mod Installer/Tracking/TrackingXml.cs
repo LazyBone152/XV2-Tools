@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace LB_Mod_Installer.Installer
@@ -46,8 +44,16 @@ namespace LB_Mod_Installer.Installer
         {
             Mod mod = GetCurrentMod();
 
-            if(!mod.JungleFiles.Any(e => e.filePath == path))
+            _File jungleFile = mod.JungleFiles.FirstOrDefault(x => x.filePath == path);
+
+            if(jungleFile == null)
+            {
                 mod.JungleFiles.Add(new _File(path));
+            }
+            else
+            {
+                jungleFile.InstalledThisRun = true;
+            }
         }
         
         /// <summary>
@@ -191,7 +197,6 @@ namespace LB_Mod_Installer.Installer
         [YAXCollection(YAXCollectionSerializationTypes.Recursive, EachElementName = "File")]
         public List<_File> JungleFiles { get; set; } = new List<_File>();
 
-
         public _File GetFileEntry(string fileName)
         {
             if (Files == null) Files = new List<_File>();
@@ -237,7 +242,7 @@ namespace LB_Mod_Installer.Installer
 
             return newFile;
         }
-        
+
     }
 
     [YAXSerializeAs("File")]
@@ -248,11 +253,14 @@ namespace LB_Mod_Installer.Installer
         public _File(string path)
         {
             filePath = path;
+            InstalledThisRun = true;
         }
 
         [YAXSerializeAs("FilePath")]
         [YAXAttributeForClass]
         public string filePath { get; set; }
+        [YAXDontSerialize]
+        public bool InstalledThisRun { get; set; }
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Section")]
         public List<Section> Sections { get; set; } = new List<Section>();
 
