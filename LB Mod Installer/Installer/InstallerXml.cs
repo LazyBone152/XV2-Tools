@@ -410,6 +410,7 @@ namespace LB_Mod_Installer.Installer
                 {
                     result = lang.Text;
                 }
+
                 else if(langCode != "en")
                 {
                     //Localisation not found, try for en
