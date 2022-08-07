@@ -127,8 +127,11 @@ namespace Xv2CoreLib.EAN
                 }
             }
 
-            animation.Name = StringEx.GetString(rawBytes, nameOffset);
+            animation.Name = StringEx.GetString(rawBytes, nameOffset, false);
             animation.IndexNumeric = animIndex;
+
+            if (string.IsNullOrWhiteSpace(animation.Name))
+                animation.Name = animation.IndexNumeric.ToString();
 
             return animation;
         }
