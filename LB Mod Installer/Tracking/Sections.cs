@@ -17,6 +17,7 @@
         public const string BCS_PartSets = "BCS_PartSets";
         public const string BCS_PartColors = "BCS_PartColor_";
         public const string BCS_Bodies = "BCS_Bodies";
+        public const string BCS_SkeletonData = "BCS_SkeletonData";
         public const string BDM_Entries = "BDM_Entries";
         public const string BEV_Entries = "BEV_Entries";
         public const string BPE_Entries = "BPE_Entries";

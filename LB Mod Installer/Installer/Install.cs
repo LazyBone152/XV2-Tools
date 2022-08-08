@@ -619,6 +619,19 @@ namespace LB_Mod_Installer.Installer
                         }
                     }
                 }
+
+                //Install SkeletonData
+                if(xmlFile.SkeletonData1 != null)
+                {
+                    binaryFile.SkeletonData1 = xmlFile.SkeletonData1;
+                    GeneralInfo.Tracker.AddID(installPath, Sections.BCS_SkeletonData, "0");
+                }
+
+                if (xmlFile.SkeletonData2 != null)
+                {
+                    binaryFile.SkeletonData2 = xmlFile.SkeletonData2;
+                    GeneralInfo.Tracker.AddID(installPath, Sections.BCS_SkeletonData, "1");
+                }
             }
 #if !DEBUG
             catch (Exception ex)

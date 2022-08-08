@@ -388,6 +388,7 @@ namespace LB_Mod_Installer.Installer
 
                 Section partSetSection = file.GetSection(Sections.BCS_PartSets);
                 Section bodiesSection = file.GetSection(Sections.BCS_Bodies);
+                Section skeletonDataSection = file.GetSection(Sections.BCS_SkeletonData);
 
                 if (partSetSection != null)
                     UninstallEntries(binaryFile.PartSets, (cpkBinFile != null) ? cpkBinFile.PartSets : null, partSetSection.IDs);
@@ -409,6 +410,29 @@ namespace LB_Mod_Installer.Installer
                 if (bodiesSection != null)
                     UninstallEntries(binaryFile.Bodies, (cpkBinFile != null) ? cpkBinFile.Bodies : null, bodiesSection.IDs);
 
+                if(skeletonDataSection != null)
+                {
+                    foreach(var _idStr in skeletonDataSection.IDs)
+                    {
+                        int id;
+
+                        if(int.TryParse(_idStr, out id))
+                        {
+                            if(id == 0)
+                            {
+                                binaryFile.SkeletonData1 = (cpkBinFile != null) ? cpkBinFile.SkeletonData1 : null;
+                            }
+                            else if (id == 1)
+                            {
+                                binaryFile.SkeletonData2 = (cpkBinFile != null) ? cpkBinFile.SkeletonData2 : null;
+                            }
+
+                        }
+                    }
+
+                    skeletonDataSection.IDs.Clear();
+                }
+                
             }
             catch (Exception ex)
             {
@@ -633,7 +657,7 @@ namespace LB_Mod_Installer.Installer
             try
             {
                 EAN_File binaryFile = (EAN_File)GetParsedFile<EAN_File>(path, false);
-                EAN_File cpkBinFile = (EAN_File)GetParsedFile<EAN_File>(path, true);
+                EAN_File cpkBinFile = (EAN_File)GetParsedFile<EAN_File>(path, true, false);
 
                 Section section = file.GetSection(Sections.EAN_Entries);
 
@@ -718,7 +742,7 @@ namespace LB_Mod_Installer.Installer
                 EepkToolInterlop.AssetReuseMatchName = true;
 
                 EffectContainerFile binaryFile = (EffectContainerFile)GetParsedFile<EffectContainerFile>(path, false);
-                EffectContainerFile cpkBinFile = (EffectContainerFile)GetParsedFile<EffectContainerFile>(path, true);
+                EffectContainerFile cpkBinFile = (EffectContainerFile)GetParsedFile<EffectContainerFile>(path, true, false);
 
                 Section section = file.GetSection(Sections.EEPK_Effect);
 
@@ -888,7 +912,7 @@ namespace LB_Mod_Installer.Installer
             try
             {
                 EMB_File binaryFile = (EMB_File)GetParsedFile<EMB_File>(path, false);
-                EMB_File cpkBinFile = (EMB_File)GetParsedFile<EMB_File>(path, true);
+                EMB_File cpkBinFile = (EMB_File)GetParsedFile<EMB_File>(path, true, false);
 
                 Section section = file.GetSection(Sections.EMB_Entry);
 
@@ -1197,7 +1221,7 @@ namespace LB_Mod_Installer.Installer
             try
             {
                 QML_File binaryFile = (QML_File)GetParsedFile<QML_File>(path, false);
-                QML_File cpkBinFile = (QML_File)GetParsedFile<QML_File>(path, true);
+                QML_File cpkBinFile = (QML_File)GetParsedFile<QML_File>(path, true, false);
 
                 Section section = file.GetSection(Sections.QML_Entry);
 

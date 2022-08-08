@@ -2424,7 +2424,7 @@ namespace Xv2CoreLib.EffectContainer
             //Uninstall effects
             foreach(var id in ids)
             {
-                Effect originalEffect = originalEepk.Effects.FirstOrDefault(e => e.Index == id);
+                Effect originalEffect = originalEepk != null ? originalEepk.Effects.FirstOrDefault(e => e.Index == id) : null;
                 Effect effect = Effects.FirstOrDefault(e => e.Index == id);
 
                 if(effect != null)
