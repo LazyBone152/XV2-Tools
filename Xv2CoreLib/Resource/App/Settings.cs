@@ -554,6 +554,7 @@ namespace Xv2CoreLib.Resource.App
         public bool XenoKit_RenderBoneNames { get; set; } = true;
         public bool XenoKit_RenderBoneNamesMouseOverOnly { get; set; } = true;
         public bool XenoKit_RimLightingEnabled { get; set; } = true;
+        public bool XenoKit_AutoResolvePasteReferences { get; set; } = false;
         internal int XenoKit_BacTypeSortMode { get; set; }
 
         //Enums, which are not-serialized directly

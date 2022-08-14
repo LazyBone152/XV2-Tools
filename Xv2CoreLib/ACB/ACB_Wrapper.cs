@@ -35,62 +35,62 @@ namespace Xv2CoreLib.ACB
         }
         #endregion
 
-        public bool MusicPackage_IsNewOptions
+        public bool AudioPackage_IsNewOptions
         {
             get
             {
-                return AcbFile.MusicPackageType == MusicPackageType.BGM_NewOption;
+                return AcbFile.AudioPackageType == AudioPackageType.BGM_NewOption;
             }
             set
             {
-                var oldValue = AcbFile.MusicPackageType;
-                AcbFile.MusicPackageType = (value) ? MusicPackageType.BGM_NewOption : MusicPackageType.BGM_Direct;
-                NotifyPropertyChanged(nameof(MusicPackage_IsNewOptions));
-                NotifyPropertyChanged(nameof(MusicPackage_IsDirect));
-                NotifyPropertyChanged(nameof(MusicPackage_IsCss));
+                var oldValue = AcbFile.AudioPackageType;
+                AcbFile.AudioPackageType = (value) ? AudioPackageType.BGM_NewOption : AudioPackageType.BGM_Direct;
+                NotifyPropertyChanged(nameof(AudioPackage_IsNewOptions));
+                NotifyPropertyChanged(nameof(AudioPackage_IsDirect));
+                NotifyPropertyChanged(nameof(AudioPackage_IsAutoVoice));
 
-                if (oldValue != AcbFile.MusicPackageType)
-                    UndoManager.Instance.AddUndo(new UndoableProperty<ACB_File>(nameof(AcbFile.MusicPackageType), AcbFile, oldValue, AcbFile.MusicPackageType, "MusicPackage Type"));
+                if (oldValue != AcbFile.AudioPackageType)
+                    UndoManager.Instance.AddUndo(new UndoableProperty<ACB_File>(nameof(AcbFile.AudioPackageType), AcbFile, oldValue, AcbFile.AudioPackageType, "AudioPackage Type"));
             }
         }
-        public bool MusicPackage_IsDirect
+        public bool AudioPackage_IsDirect
         {
             get
             {
-                return AcbFile.MusicPackageType == MusicPackageType.BGM_Direct;
+                return AcbFile.AudioPackageType == AudioPackageType.BGM_Direct;
             }
             set
             {
-                var oldValue = AcbFile.MusicPackageType;
-                AcbFile.MusicPackageType = (value) ? MusicPackageType.BGM_Direct : MusicPackageType.BGM_NewOption;
-                NotifyPropertyChanged(nameof(MusicPackage_IsNewOptions));
-                NotifyPropertyChanged(nameof(MusicPackage_IsDirect));
-                NotifyPropertyChanged(nameof(MusicPackage_IsCss));
+                var oldValue = AcbFile.AudioPackageType;
+                AcbFile.AudioPackageType = (value) ? AudioPackageType.BGM_Direct : AudioPackageType.BGM_NewOption;
+                NotifyPropertyChanged(nameof(AudioPackage_IsNewOptions));
+                NotifyPropertyChanged(nameof(AudioPackage_IsDirect));
+                NotifyPropertyChanged(nameof(AudioPackage_IsAutoVoice));
 
-                if (oldValue != AcbFile.MusicPackageType)
-                    UndoManager.Instance.AddUndo(new UndoableProperty<ACB_File>(nameof(AcbFile.MusicPackageType), AcbFile, oldValue, AcbFile.MusicPackageType, "MusicPackage Type"));
+                if (oldValue != AcbFile.AudioPackageType)
+                    UndoManager.Instance.AddUndo(new UndoableProperty<ACB_File>(nameof(AcbFile.AudioPackageType), AcbFile, oldValue, AcbFile.AudioPackageType, "AudioPackage Type"));
             }
         }
-        public bool MusicPackage_IsCss
+        public bool AudioPackage_IsAutoVoice
         {
             get
             {
-                return AcbFile.MusicPackageType == MusicPackageType.CSS_Voice;
+                return AcbFile.AudioPackageType == AudioPackageType.AutoVoice;
             }
             set
             {
-                var oldValue = AcbFile.MusicPackageType;
+                var oldValue = AcbFile.AudioPackageType;
 
                 if (value)
                 {
-                    AcbFile.MusicPackageType = MusicPackageType.CSS_Voice;
+                    AcbFile.AudioPackageType = AudioPackageType.AutoVoice;
 
-                    NotifyPropertyChanged(nameof(MusicPackage_IsNewOptions));
-                    NotifyPropertyChanged(nameof(MusicPackage_IsDirect));
-                    NotifyPropertyChanged(nameof(MusicPackage_IsCss));
+                    NotifyPropertyChanged(nameof(AudioPackage_IsNewOptions));
+                    NotifyPropertyChanged(nameof(AudioPackage_IsDirect));
+                    NotifyPropertyChanged(nameof(AudioPackage_IsAutoVoice));
 
-                    if (oldValue != AcbFile.MusicPackageType)
-                        UndoManager.Instance.AddUndo(new UndoableProperty<ACB_File>(nameof(AcbFile.MusicPackageType), AcbFile, oldValue, AcbFile.MusicPackageType, "MusicPackage Type"));
+                    if (oldValue != AcbFile.AudioPackageType)
+                        UndoManager.Instance.AddUndo(new UndoableProperty<ACB_File>(nameof(AcbFile.AudioPackageType), AcbFile, oldValue, AcbFile.AudioPackageType, "AudioPackage Type"));
                 }
 
             }
@@ -479,13 +479,50 @@ namespace Xv2CoreLib.ACB
             }
         }
 
+        //AudioPackage values
+        public string UndoableAlias
+        {
+            get
+            {
+                return CueRef.AliasBinding;
+            }
+            set
+            {
+                UndoManager.Instance.AddUndo(new CompositeUndo(new List<IUndoRedo>()
+                {
+                    new UndoableProperty<ACB_Cue>(nameof(ACB_Cue.AliasBinding), CueRef, CueRef.AliasBinding, value),
+                    new UndoActionDelegate(this, "UpdateProperties", true)
+                }, "Cue AliasBinding"));
+                CueRef.AliasBinding = value;
+                NotifyPropertyChanged(nameof(UndoableAlias));
+            }
+        }
+        public VoiceLanguageEnum UndoableVoiceLanguage
+        {
+            get
+            {
+                return CueRef.VoiceLanguage;
+            }
+            set
+            {
+                UndoManager.Instance.AddUndo(new CompositeUndo(new List<IUndoRedo>()
+                {
+                    new UndoableProperty<ACB_Cue>(nameof(ACB_Cue.VoiceLanguage), CueRef, CueRef.VoiceLanguage, value),
+                    new UndoActionDelegate(this, "UpdateProperties", true)
+                }, "Cue VoiceLanguage"));
+                CueRef.VoiceLanguage = value;
+                NotifyPropertyChanged(nameof(UndoableVoiceLanguage));
+            }
+        }
+
+
         //Props
         public int NumTracks { get { return Tracks.Where(t => t.Type == TrackType.Track).Count(); } }
         public int NumActionTracks { get { return Tracks.Where(t => t.Type == TrackType.ActionTrack).Count(); } }
 
         #region ViewBinding
         [NonSerialized]
-        private AsyncObservableCollection<Track_Wrapper> _selectedTracks = AsyncObservableCollection<Track_Wrapper>.Create();
+        private AsyncObservableCollection<Track_Wrapper> _selectedTracks = new AsyncObservableCollection<Track_Wrapper>();
         public AsyncObservableCollection<Track_Wrapper> SelectedTracks
         {
             get
@@ -522,10 +559,12 @@ namespace Xv2CoreLib.ACB
             NotifyPropertyChanged("ActionTrackSelectedVisibility");
             NotifyPropertyChanged("SequenceCueNotVisibile");
             NotifyPropertyChanged("SequenceCueVisibile");
-            NotifyPropertyChanged("NumTracks");
-            NotifyPropertyChanged("NumActionTracks");
-            NotifyPropertyChanged("UndoableCueId");
+            NotifyPropertyChanged(nameof(NumTracks));
+            NotifyPropertyChanged(nameof(NumActionTracks));
+            NotifyPropertyChanged(nameof(UndoableCueId));
             NotifyPropertyChanged(nameof(UndoableIs3DSound));
+            NotifyPropertyChanged(nameof(UndoableAlias));
+            NotifyPropertyChanged(nameof(UndoableVoiceLanguage));
         }
 
         public void UpdateProperties()

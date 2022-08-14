@@ -43,8 +43,6 @@ namespace LB_Mod_Installer.Binding
             {
                 AssignedIds.RemoveAll(x => x < MinId);
             }
-
-            MinId++;
         }
 
         public void AddId(int id)

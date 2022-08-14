@@ -290,7 +290,12 @@ namespace Xv2CoreLib.ACB
             //Check if they exist
             foreach (var utfColumn in table.Columns)
             {
-                if (utfColumn.Name == "MusicPackageType" && utfColumn.TypeFlag == TypeFlag.Int32) continue; //Is MusicPackage, a column added by ACE. Skip this.
+                //AudioPackage / MusicPackage values. These values should always be skipped.
+                if (utfColumn.Name == "MusicPackageType" && utfColumn.TypeFlag == TypeFlag.Int32) continue;
+                if (utfColumn.Name == "AudioPackageType" && utfColumn.TypeFlag == TypeFlag.Int32) continue;
+                if (utfColumn.Name == "AudioPackageVersion" && utfColumn.TypeFlag == TypeFlag.Int32) continue; 
+                if (utfColumn.Name == "LB_AliasBinding" && utfColumn.TypeFlag == TypeFlag.String) continue; 
+                if (utfColumn.Name == "LB_VoiceLanguage" && utfColumn.TypeFlag == TypeFlag.Int32) continue; 
 
                 var column = GetColumn(utfColumn.Name, utfColumn.TypeFlag, throwExIfNewColumn, table.Columns.IndexOf(utfColumn));
                 column.SetExists(version);

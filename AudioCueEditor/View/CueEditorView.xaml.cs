@@ -235,6 +235,7 @@ namespace AudioCueEditor.View
             //Add user defined keys to VGAudio class
             foreach (var key in HcaEncryptionKeysManager.Instance.EncryptionKeys.Keys)
                 VGAudio.Codecs.CriHca.CriHcaEncryption.AddKey(key.Key);
+
         }
 
 
@@ -652,6 +653,43 @@ namespace AudioCueEditor.View
             }
         }
 
+        public async void UpdateCueDataGridVisibilities()
+        {
+            UpdateCueDataGrid();
+
+            //Do a second, delayed update. Gets around some thread fuckery where the acb isn't loaded before the update (?)
+            await Task.Delay(1000);
+            UpdateCueDataGrid();
+        }
+
+        public void UpdateCueDataGrid()
+        {
+            //Changes the visible columns based on the music package type
+            if(AcbFile != null)
+            {
+                if(AcbFile.AcbFile.AudioPackageType == AudioPackageType.AutoVoice)
+                {
+                    //Show Alias and Language column, hide Cue ID
+                    aliasColumn.Visibility = Visibility.Visible;
+                    langColumn.Visibility = Visibility.Visible;
+                    cueIdColumn.Visibility = Visibility.Collapsed;
+                }
+                else if (AcbFile.AcbFile.AudioPackageType == AudioPackageType.BGM_NewOption && AcbFile.AcbFile.SaveFormat == SaveFormat.AudioPackage)
+                {
+                    //Hide Cue ID, show Alias
+                    aliasColumn.Visibility = Visibility.Visible;
+                    langColumn.Visibility = Visibility.Collapsed;
+                    cueIdColumn.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    //Return to normal
+                    aliasColumn.Visibility = Visibility.Collapsed;
+                    langColumn.Visibility = Visibility.Collapsed;
+                    cueIdColumn.Visibility = Visibility.Visible;
+                }
+            }
+        }
 
         //Track Events (cant use commands on a DataTemplated listbox... so this is needed)
         private void ListBoxEvent_PlaySelectedTrack(object sender, RoutedEventArgs e)

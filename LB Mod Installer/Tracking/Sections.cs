@@ -48,7 +48,10 @@
         public const string QXD_Character2 = "QXD_Character2";
         public const string QXD_Collection = "QXD_Collection";
         public const string ACB_Cue = "ACB_Cue";
+        public const string ACB_Voice_Cue = "ACB_Voice_Cue";
         public const string PAL_Entry = "PAL_Entry";
+        public const string QSF_Entry = "QSF_Entry";
+        public const string DML_Entry = "DML_Entry";
 
         public const string TTB_Entry = "TTB_Entry";
         public const string TTC_Entry = "TTC_Entry";

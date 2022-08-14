@@ -138,6 +138,7 @@ namespace Xv2CoreLib.BAC
             return null;
 
         }
+        
         #endregion
 
         #region IBacTypesMethods
@@ -968,6 +969,11 @@ namespace Xv2CoreLib.BAC
                 return new UndoableListInsert<IBacType>(IBacTypes, insertIdx, bacType, $"New BacType {bacType}");
             }
         }
+        
+        public void RefreshIBacTypes()
+        {
+            NotifyPropertyChanged(nameof(IBacTypes));
+        }
         #endregion
 
         public bool IsBacEntryEmpty()
@@ -1132,13 +1138,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type0 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type
-        {
-            get
-            {
-                return $"Animation ({EanType})";
-            }
-        }
+        public string Type => $"Animation ({EanType}, {EanIndex})";
         [YAXDontSerialize]
         public override int TypeID => 0;
 
@@ -1723,7 +1723,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type4 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type { get { return "TimeScale"; } }
+        public string Type { get { return $"TimeScale ({TimeScale})"; } }
         [YAXDontSerialize]
         public override int TypeID => 4;
 
@@ -2422,7 +2422,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type10 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type { get { return $"Camera ({EanType})"; } }
+        public string Type { get { return $"Camera ({EanType}, {EanIndex})"; } }
         [YAXDontSerialize]
         public override int TypeID => 10;
 
@@ -2669,7 +2669,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type11 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type { get { return $"Sound ({AcbType})"; } }
+        public string Type => $"Sound ({AcbType}, {CueId})";
         [YAXDontSerialize]
         public override int TypeID => 11;
 

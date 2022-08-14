@@ -63,7 +63,7 @@ namespace AudioCueEditor.View
             DataContext = this;
             Owner = parent;
             acbFile = musicPackage;
-            MusicPackageType = (int)acbFile.MusicPackageType;
+            MusicPackageType = (int)acbFile.AudioPackageType;
             
             InitializeComponent();
         }
@@ -74,20 +74,20 @@ namespace AudioCueEditor.View
             if (string.IsNullOrWhiteSpace(savePath)) return;
             
             //Change acbFile saveFormat if needed (undoable action)
-            if (acbFile.SaveFormat != SaveFormat.MusicPackage)
+            if (acbFile.SaveFormat != SaveFormat.AudioPackage)
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<ACB_File>(nameof(acbFile.SaveFormat), acbFile, acbFile.SaveFormat, SaveFormat.MusicPackage, "Save Format"));
-                acbFile.SaveFormat = SaveFormat.MusicPackage;
+                UndoManager.Instance.AddUndo(new UndoableProperty<ACB_File>(nameof(acbFile.SaveFormat), acbFile, acbFile.SaveFormat, SaveFormat.AudioPackage, "Save Format"));
+                acbFile.SaveFormat = SaveFormat.AudioPackage;
             }
 
-            if((int)acbFile.MusicPackageType != (MusicPackageType))
+            if((int)acbFile.AudioPackageType != (MusicPackageType))
             {
-                acbFile.MusicPackageType = (MusicPackageType)MusicPackageType;
+                acbFile.AudioPackageType = (AudioPackageType)MusicPackageType;
             }
 
             //Create MusicPackage
-            byte[] musicPackageBytes = acbFile.SaveMusicPackageToBytes();
-            string musicPackagePath = $"CAR_BGM{ACB_File.MUSIC_PACKAGE_EXTENSION}";
+            byte[] audioPackageBytes = acbFile.SaveAudioPackageToBytes();
+            string audioPackagePath = $"CAR_BGM{ACB_File.AUDIO_PACKAGE_EXTENSION}";
 
             //Create InstallerXml
             InstallerXml installerXml = new InstallerXml();
@@ -107,7 +107,7 @@ namespace AudioCueEditor.View
             }
 
             FilePath file = new FilePath();
-            file.SourcePath = musicPackagePath;
+            file.SourcePath = audioPackagePath;
             installerXml.InstallFiles.Add(file);
 
 
@@ -122,7 +122,7 @@ namespace AudioCueEditor.View
                 {
                     ZipWriter zipWriter = new ZipWriter(zip);
                     zipWriter.AddFile("InstallerXml.xml", xmlBytes, CompressionLevel.Optimal, true);
-                    zipWriter.AddFile("data/" + musicPackagePath, musicPackageBytes, CompressionLevel.Optimal, true);
+                    zipWriter.AddFile("data/" + audioPackagePath, audioPackageBytes, CompressionLevel.Optimal, true);
                 }
             }
 

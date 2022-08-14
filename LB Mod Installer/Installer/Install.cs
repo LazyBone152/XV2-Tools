@@ -47,6 +47,8 @@ using Xv2CoreLib.QML;
 using Xv2CoreLib.OCO;
 using Xv2CoreLib.BCM;
 using LB_Mod_Installer.Installer.Transformation;
+using Xv2CoreLib.QSF;
+using Xv2CoreLib.DML;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -180,7 +182,7 @@ namespace LB_Mod_Installer.Installer
                         UpdateProgessBarText(String.Format("_Installing \"{0}\"...", Path.GetFileName(File.InstallPath)));
                         Install_EEPK(File.SourcePath, File.InstallPath);
                         break;
-                    case FileType.MusicPackage:
+                    case FileType.AudioPackage:
                         //Install new BGM or CSS tracks
                         UpdateProgessBarText("_Installing Audio...");
                         Install_ACB(File.SourcePath, File.InstallPath);
@@ -331,14 +333,20 @@ namespace LB_Mod_Installer.Installer
                     Install_QML(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".cst":
-                    Install_CST(xmlPath, installPath, isXml, useSkipBindings);
+                    Install_CST(xmlPath, installPath, isXml);
                     break;
                 case ".oco":
                     Install_OCO(xmlPath, installPath, isXml, useSkipBindings);
                     break;
+                case ".dml":
+                    Install_DML(xmlPath, installPath, isXml, useSkipBindings);
+                    break;
+                case ".qsf":
+                    Install_QSF(xmlPath, installPath, isXml);
+                    break;
                 default:
-                    if (TryTransformationInstall(xmlPath))
-                        break;
+                    //if (TryTransformationInstall(xmlPath))
+                    //    break;
 
                     throw new InvalidDataException(string.Format("The filetype of \"{0}\" is not supported.", xmlPath));
             }
@@ -1568,7 +1576,7 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_CST(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
+        private void Install_CST(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
             try
@@ -1610,6 +1618,55 @@ namespace LB_Mod_Installer.Installer
             catch (Exception ex)
             {
                 string error = string.Format("Failed at OCO install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
+        private void Install_DML(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                DML_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<DML_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : DML_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                DML_File binaryFile = (DML_File)GetParsedFile<DML_File>(installPath);
+
+                //Parse bindings
+                bindingManager.ParseProperties(xmlFile.DML_Entries, binaryFile.DML_Entries, installPath);
+
+                //Install entries
+                InstallEntries(xmlFile.DML_Entries, binaryFile.DML_Entries, installPath, Sections.DML_Entry, useSkipBindings);
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at DML install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
+        private void Install_QSF(string xmlPath, string installPath, bool isXml)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                QSF_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<QSF_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : QSF_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                QSF_File binaryFile = (QSF_File)GetParsedFile<QSF_File>(installPath);
+
+                List<string> installIDs = binaryFile.InstallEntries(xmlFile.QuestTypes);
+
+                foreach (var id in installIDs)
+                {
+                    GeneralInfo.Tracker.AddID(installPath, Sections.QSF_Entry, id);
+                }
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at QSF install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
@@ -1906,6 +1963,10 @@ namespace LB_Mod_Installer.Installer
                     return QML_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".bcm":
                     return BCM_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".qsf":
+                    return QSF_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".dml":
+                    return DML_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 default:
                     throw new InvalidDataException(String.Format("GetParsedFileFromGame: The filetype of \"{0}\" is not supported.", path));
             }
@@ -1991,6 +2052,10 @@ namespace LB_Mod_Installer.Installer
                     return ((QML_File)data).SaveToBytes();
                 case ".bcm":
                     return ((BCM_File)data).SaveToBytes();
+                case ".qsf":
+                    return ((QSF_File)data).SaveToBytes();
+                case ".dml":
+                    return ((DML_File)data).SaveToBytes();
                 default:
                     throw new InvalidDataException(String.Format("GetBytesFromParsedFile: The filetype of \"{0}\" is not supported.", path));
             }

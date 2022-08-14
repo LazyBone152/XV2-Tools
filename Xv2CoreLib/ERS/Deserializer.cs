@@ -150,7 +150,7 @@ namespace Xv2CoreLib.ERS
                         bytes.AddRange(BitConverter.GetBytes(int.Parse(ers_File.Entries[i].SubEntries[a].Index)));
 
                         //Name
-                        if(ers_File.Entries[i].SubEntries[a].Str_04 == "NULL")
+                        if(ers_File.Entries[i].SubEntries[a].Str_04 == "NULL" || string.IsNullOrWhiteSpace(ers_File.Entries[i].SubEntries[a].Str_04))
                         {
                             bytes.AddRange(new byte[8]);
                         }

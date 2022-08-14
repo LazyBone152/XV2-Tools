@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace Xv2CoreLib.DML
@@ -36,9 +33,13 @@ namespace Xv2CoreLib.DML
 
         public static DML_File Load(string path)
         {
+            return Load(File.ReadAllBytes(path));
+        }
+
+        public static DML_File Load(byte[] rawBytes)
+        {
             //Init
             DML_File dmlFile = new DML_File() { DML_Entries = new List<DML_Entry>() };
-            byte[] rawBytes = File.ReadAllBytes(path);
 
             //Header
             dmlFile.I_06 = BitConverter.ToUInt16(rawBytes, 6);
@@ -50,18 +51,18 @@ namespace Xv2CoreLib.DML
             {
                 dmlFile.DML_Entries.Add(new DML_Entry()
                 {
-                    I_00 = BitConverter.ToUInt16(rawBytes, offset + 0),
-                    I_02 = BitConverter.ToUInt16(rawBytes, offset + 2),
-                    I_04 = BitConverter.ToUInt16(rawBytes, offset + 4),
+                    Index = BitConverter.ToUInt16(rawBytes, offset + 0).ToString(),
+                    Chapter_ID = BitConverter.ToUInt16(rawBytes, offset + 2),
+                    StageRimlightID = BitConverter.ToUInt16(rawBytes, offset + 4),
                     I_06 = BitConverter.ToUInt16(rawBytes, offset + 6),
                     I_08 = BitConverter.ToUInt16(rawBytes, offset + 8),
                     I_10 = BitConverter.ToUInt16(rawBytes, offset + 10),
                     I_12 = BitConverter.ToUInt16(rawBytes, offset + 12),
                     I_14 = BitConverter.ToUInt16(rawBytes, offset + 14),
-                    Str_16 = StringEx.GetString(rawBytes, offset + 16, false, StringEx.EncodingType.ASCII, 32),
-                    Str_48 = StringEx.GetString(rawBytes, offset + 48, false, StringEx.EncodingType.ASCII, 32),
+                    DemoNameMsgID = StringEx.GetString(rawBytes, offset + 16, false, StringEx.EncodingType.ASCII, 32),
+                    DemoID = StringEx.GetString(rawBytes, offset + 48, false, StringEx.EncodingType.ASCII, 32),
                     Str_80 = StringEx.GetString(rawBytes, offset + 80, false, StringEx.EncodingType.ASCII, 32),
-                    Str_112 = StringEx.GetString(rawBytes, offset + 112, false, StringEx.EncodingType.ASCII, 32)
+                    QuestID = StringEx.GetString(rawBytes, offset + 112, false, StringEx.EncodingType.ASCII, 32)
                 });
 
                 offset += 144;
@@ -85,35 +86,50 @@ namespace Xv2CoreLib.DML
 
             for(int i = 0; i < count; i++)
             {
-                bytes.AddRange(BitConverter.GetBytes(DML_Entries[i].I_00));
-                bytes.AddRange(BitConverter.GetBytes(DML_Entries[i].I_02));
-                bytes.AddRange(BitConverter.GetBytes(DML_Entries[i].I_04));
+                bytes.AddRange(BitConverter.GetBytes(ushort.Parse(DML_Entries[i].Index)));
+                bytes.AddRange(BitConverter.GetBytes(DML_Entries[i].Chapter_ID));
+                bytes.AddRange(BitConverter.GetBytes(DML_Entries[i].StageRimlightID));
                 bytes.AddRange(BitConverter.GetBytes(DML_Entries[i].I_06));
                 bytes.AddRange(BitConverter.GetBytes(DML_Entries[i].I_08));
                 bytes.AddRange(BitConverter.GetBytes(DML_Entries[i].I_10));
                 bytes.AddRange(BitConverter.GetBytes(DML_Entries[i].I_12));
                 bytes.AddRange(BitConverter.GetBytes(DML_Entries[i].I_14));
-                bytes.AddRange(Utils.GetStringBytes(DML_Entries[i].Str_16, 32));
-                bytes.AddRange(Utils.GetStringBytes(DML_Entries[i].Str_48, 32));
+                bytes.AddRange(Utils.GetStringBytes(DML_Entries[i].DemoNameMsgID, 32));
+                bytes.AddRange(Utils.GetStringBytes(DML_Entries[i].DemoID, 32));
                 bytes.AddRange(Utils.GetStringBytes(DML_Entries[i].Str_80, 32));
-                bytes.AddRange(Utils.GetStringBytes(DML_Entries[i].Str_112, 32));
+                bytes.AddRange(Utils.GetStringBytes(DML_Entries[i].QuestID, 32));
             }
 
             return bytes.ToArray();
         }
+    
+        public byte[] SaveToBytes()
+        {
+            return GetBytes();
+        }
     }
 
-    public class DML_Entry
+    public class DML_Entry : IInstallable
     {
+        #region Install
+        [YAXDontSerialize]
+        public int SortID
+        {
+            get => Utils.TryParseInt(Index);
+            set => Index = value.ToString();
+        }
+        #endregion
+
         [YAXAttributeForClass]
         [YAXSerializeAs("ID")]
-        public ushort I_00 { get; set; }
-        [YAXAttributeFor("I_02")]
+        [BindingAutoId]
+        public string Index { get; set; } //Ushort
+        [YAXAttributeForClass]
+        [YAXSerializeAs("Chapter_ID")]
+        public ushort Chapter_ID { get; set; }
+        [YAXAttributeFor("StageRimlightID")]
         [YAXSerializeAs("value")]
-        public ushort I_02 { get; set; }
-        [YAXAttributeFor("I_04")]
-        [YAXSerializeAs("value")]
-        public ushort I_04 { get; set; }
+        public ushort StageRimlightID { get; set; }
         [YAXAttributeFor("I_06")]
         [YAXSerializeAs("value")]
         public ushort I_06 { get; set; }
@@ -129,17 +145,17 @@ namespace Xv2CoreLib.DML
         [YAXAttributeFor("I_14")]
         [YAXSerializeAs("value")]
         public ushort I_14 { get; set; }
-        [YAXAttributeFor("Str_16")]
+        [YAXAttributeFor("DemoNameMsgId")]
         [YAXSerializeAs("value")]
-        public string Str_16 { get; set; }
-        [YAXAttributeFor("Str_48")]
+        public string DemoNameMsgID { get; set; }
+        [YAXAttributeFor("DemoID")]
         [YAXSerializeAs("value")]
-        public string Str_48 { get; set; }
+        public string DemoID { get; set; }
         [YAXAttributeFor("Str_80")]
         [YAXSerializeAs("value")]
         public string Str_80 { get; set; }
-        [YAXAttributeFor("Str_112")]
+        [YAXAttributeFor("QuestID")]
         [YAXSerializeAs("value")]
-        public string Str_112 { get; set; }
+        public string QuestID { get; set; }
     }
 }

@@ -213,6 +213,9 @@ namespace Xv2CoreLib.EAN
             Animations.Add(anim);
             anim.LinkEskData(Skeleton);
 
+            //Sort animation list by ID.
+            Animations.Sort((x, y) => x.IndexNumeric - y.IndexNumeric);
+
             if (undos != null) undos.Add(new UndoableListAdd<EAN_Animation>(Animations, anim));
 
             return newId;
@@ -227,6 +230,9 @@ namespace Xv2CoreLib.EAN
             anim.LinkEskData(Skeleton);
 
             Animations.Add(anim);
+
+            //Sort animation list by ID.
+            Animations.Sort((x, y) => x.IndexNumeric - y.IndexNumeric);
 
             if (undos != null)
                 undos.Add(new UndoableListAdd<EAN_Animation>(Animations, anim));
@@ -262,6 +268,9 @@ namespace Xv2CoreLib.EAN
             node.AnimationComponents.Add(camera);
 
             Animations.Add(anim);
+
+            //Sort animation list by ID.
+            Animations.Sort((x, y) => x.IndexNumeric - y.IndexNumeric);
 
             if (undos != null)
                 undos.Add(new UndoableListAdd<EAN_Animation>(Animations, anim));

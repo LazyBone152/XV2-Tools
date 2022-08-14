@@ -26,6 +26,12 @@
                 <x:Type TypeName="acb:SequenceType"/>
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
+        <ObjectDataProvider x:Key="LanguageEnum" MethodName="GetValues"
+                        ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="acb:VoiceLanguageEnum"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
 
     </UserControl.Resources>
     <Grid x:Name="rootGrid">
@@ -98,9 +104,25 @@
                 <KeyBinding Key="Return" Command="{Binding PlaySelectedTrackCommand}"/>
                 <KeyBinding Key="C" Modifiers="Ctrl" Command="{Binding CopyCuesCommand}"/>
                 <KeyBinding Key="V" Modifiers="Ctrl" Command="{Binding PasteCuesCommand}"/>
+                <KeyBinding Key="Delete" Command="{Binding DeleteCueCommand}"/>
             </DataGrid.InputBindings>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Cue ID" Width="*" Binding="{Binding UndoableCueId, UpdateSourceTrigger=LostFocus}" IsReadOnly="False"/>
+                <DataGridTextColumn x:Name="aliasColumn" Header="Alias" Width="*" Binding="{Binding UndoableAlias, UpdateSourceTrigger=LostFocus}" IsReadOnly="False" Visibility="Collapsed"/>
+
+                <DataGridTemplateColumn x:Name="langColumn" Header="Language" Width="*" Visibility="Collapsed">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding UndoableVoiceLanguage}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <ComboBox SelectedItem="{Binding Path=SelectedItem.UndoableVoiceLanguage, ElementName=dataGrid}" ItemsSource="{Binding Source={StaticResource LanguageEnum}}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+                
+                <DataGridTextColumn x:Name="cueIdColumn" Header="Cue ID" Width="*" Binding="{Binding UndoableCueId, UpdateSourceTrigger=LostFocus}" IsReadOnly="False"/>
                 <DataGridTextColumn Header="Name" Width="*" Binding="{Binding CueRef.UndoableName, UpdateSourceTrigger=LostFocus}" IsReadOnly="False"/>
                 <DataGridTextColumn Header="Type" Width="*" Binding="{Binding CueRef.ReferenceType}" IsReadOnly="True"/>
                 <DataGridTextColumn Header="Num Tracks" Width="*" Binding="{Binding NumTracks}" IsReadOnly="True"/>

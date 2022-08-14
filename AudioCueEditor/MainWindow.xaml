@@ -44,12 +44,12 @@
                 <MenuItem Header="Encryption Keys (HCA)" Command="{Binding EncryptKeysHcaCommand}"/>
                 <Separator/>
                 <MenuItem Header="DBXV2 Installer">
-                    <MenuItem Header="Associate MusicPackage Extension" Command="{Binding SetMusicPackageAssociationCommand}"/>
-                    <MenuItem Header="Create Music Installer" Command="{Binding CreateMusicInstallerCommand}"/>
-                    <MenuItem Header="MusicPackage Type">
-                        <MenuItem Header="New Option" IsCheckable="True" IsChecked="{Binding AcbFile.MusicPackage_IsNewOptions, UpdateSourceTrigger=PropertyChanged}"/>
-                        <MenuItem Header="Direct" IsCheckable="True" IsChecked="{Binding AcbFile.MusicPackage_IsDirect, UpdateSourceTrigger=PropertyChanged}"/>
-                        <MenuItem Header="CSS Voice" IsCheckable="True" IsChecked="{Binding AcbFile.MusicPackage_IsCss, UpdateSourceTrigger=PropertyChanged}"/>
+                    <MenuItem Header="Associate AudioPackage Extension" Command="{Binding SetAudioPackageAssociationCommand}"/>
+                    <MenuItem Header="Create Audio Installer" Command="{Binding CreateAudioInstallerCommand}"/>
+                    <MenuItem Header="AudioPackage Type" SubmenuClosed="MenuItem_SubmenuClosed">
+                        <MenuItem Header="New Option (BGM)" IsCheckable="True" IsChecked="{Binding AcbFile.AudioPackage_IsNewOptions, UpdateSourceTrigger=PropertyChanged}"/>
+                        <MenuItem Header="Direct (BGM)" IsCheckable="True" IsChecked="{Binding AcbFile.AudioPackage_IsDirect, UpdateSourceTrigger=PropertyChanged}"/>
+                        <MenuItem Header="Auto Voice" IsCheckable="True" IsChecked="{Binding AcbFile.AudioPackage_IsAutoVoice, UpdateSourceTrigger=PropertyChanged}"/>
                     </MenuItem>
                     <MenuItem Header="Randomize Cue IDs" Command="{Binding RandomizeCueIDsCommand}"/>
                 </MenuItem>

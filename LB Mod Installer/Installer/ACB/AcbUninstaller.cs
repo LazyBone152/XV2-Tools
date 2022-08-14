@@ -29,24 +29,29 @@ namespace LB_Mod_Installer.Installer.ACB
                 LoadBgm();
                 UninstallBgm();
             }
-            else if(Utils.SanitizePath(file.filePath) == AcbInstaller.CSS_VOICE_EN_PATH || Utils.SanitizePath(file.filePath) == AcbInstaller.CSS_VOICE_JPN_PATH)
+            else if(Utils.SanitizePath(file.filePath) == AcbInstaller.CSS_VOICE_EN_PATH || Utils.SanitizePath(file.filePath) == AcbInstaller.CSS_VOICE_JPN_PATH || file.GetSection(Sections.ACB_Voice_Cue) != null)
             {
-                //CSS
-                CssUninstall();
+                //Voice
+                VoiceUninstall();
             }
             else
             {
-                throw new Exception($"Cannot uninstall file \"{file.filePath}\". It is not recognized.\n\nOnly BGM and CSS ACB files are supported.");
+                throw new Exception($"Cannot uninstall file \"{file.filePath}\". It is not recognized.\n\nOnly BGM and Voice ACB files are supported.");
             }
         }
 
         #region CSS
-        private void CssUninstall()
+        private void VoiceUninstall()
         {
             acbFile = (ACB_File)uninstall.GetParsedFile<ACB_File>(file.filePath, false);
+            ACB_File cpkAcbFile = (ACB_File)uninstall.GetParsedFile<ACB_File>(file.filePath, true, false);
             acbFile.CleanTablesOnSave = false; //Too slow on CS_ALL
 
-            Section section = file.GetSection(Sections.ACB_Cue);
+            Section section = file.GetSection(Sections.ACB_Voice_Cue);
+
+            //Backwards compat with older "CSS_Voice" types
+            if (section == null)
+                section = file.GetSection(Sections.ACB_Cue);
 
             foreach (string id in section.IDs)
             {
@@ -54,44 +59,42 @@ namespace LB_Mod_Installer.Installer.ACB
 
                 if (uint.TryParse(id, out intId))
                 {
-                    ACB_Cue cue = acbFile.Cues.FirstOrDefault(x => x.ID == intId);
+                    ACB_Cue cue = acbFile.GetCue((int)intId);
+                    ACB_Cue originalCue = cpkAcbFile != null ? cpkAcbFile.GetCue((int)intId) : null;
 
                     if(cue != null)
                     {
-                        //Mark cue as free, in same manner as xv2ins
-                        cue.Name = "X2_FREE";
-
-                        var waveforms = acbFile.GetWaveformsFromCue(cue);
-
-                        if(waveforms.Count == 1)
+                        if(originalCue != null)
                         {
-                            var awbEntry = acbFile.GetAfs2Entry(waveforms[0].AwbId);
-
-                            if(awbEntry != null)
+                            //Restore OG cue
+                            var waveforms = cpkAcbFile.GetWaveformsFromCue(originalCue);
+                            
+                            if(waveforms.Count > 0)
                             {
-                                awbEntry.bytes = Properties.Resources.silence;
+                                byte[] trackBytes = cpkAcbFile.GetAfs2Entry(waveforms[0].AwbId)?.bytes;
+                                acbFile.ReplaceTrackOnCue(cue, trackBytes, acbFile.IsStreamingAcb(), EncodeType.HCA);
+                            }
+                        }
+                        else
+                        {
+                            //Mark cue as free, in same manner as xv2ins
+                            cue.Name = "X2_FREE";
+
+                            var waveforms = acbFile.GetWaveformsFromCue(cue);
+
+                            if (waveforms.Count == 1)
+                            {
+                                var awbEntry = acbFile.GetAfs2Entry(waveforms[0].AwbId);
+
+                                if (awbEntry != null)
+                                {
+                                    awbEntry.bytes = Properties.Resources.silence;
+                                }
                             }
                         }
                     }
                 }
             }
-
-            /*
-             //Removed. As above, this is too slow to do on CS_ALL
-
-            //Delete all trailing free cues
-            for (int i = acbFile.Cues.Count - 1; i >= 0; i--)
-            {
-                if(acbFile.Cues[i].Name == "X2_FREE")
-                {
-                    acbFile.Cues.RemoveAt(i);
-                }
-                else
-                {
-                    break;
-                }
-            }
-            */
         }
 
         #endregion

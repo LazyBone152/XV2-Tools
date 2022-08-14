@@ -42,6 +42,8 @@ using Xv2CoreLib.CST;
 using Xv2CoreLib.OCS;
 using Xv2CoreLib.QML;
 using Xv2CoreLib.OCO;
+using Xv2CoreLib.DML;
+using Xv2CoreLib.QSF;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -281,6 +283,12 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".oco":
                     Uninstall_OCO(path, file);
+                    break;
+                case ".dml":
+                    Uninstall_DML(path, file);
+                    break;
+                case ".qsf":
+                    Uninstall_QSF(path, file);
                     break;
                 default:
                     throw new Exception(string.Format("The filetype of \"{0}\" is unsupported. Uninstall failed.\n\nThis mod was likely installed by a newer version of the installer.", path));
@@ -1271,6 +1279,49 @@ namespace LB_Mod_Installer.Installer
             catch (Exception ex)
             {
                 string error = string.Format("Failed at OCO uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
+
+        private void Uninstall_DML(string path, _File file)
+        {
+            try
+            {
+                DML_File binaryFile = (DML_File)GetParsedFile<DML_File>(path, false);
+                DML_File cpkBinFile = (DML_File)GetParsedFile<DML_File>(path, true, false);
+
+                Section section = file.GetSection(Sections.DML_Entry);
+
+                if (section != null)
+                {
+                    UninstallEntries(binaryFile.DML_Entries, (cpkBinFile != null) ? cpkBinFile.DML_Entries : null, section.IDs);
+                }
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at DML uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
+
+        private void Uninstall_QSF(string path, _File file)
+        {
+            try
+            {
+                QSF_File binaryCpkFile = (QSF_File)GetParsedFile<QSF_File>(path, false, false);
+                QSF_File cpkQsfFile = (QSF_File)GetParsedFile<QSF_File>(path, true, false);
+
+                Section section = file.GetSection(Sections.QSF_Entry);
+
+                if (section != null)
+                {
+                    binaryCpkFile.UninstallEntries(section.IDs, cpkQsfFile);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at QSF uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }

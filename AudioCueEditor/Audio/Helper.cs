@@ -45,7 +45,7 @@ namespace AudioCueEditor.Audio
 
         public static byte[] ConvertFile(byte[] bytes, FileType encodeType, FileType convertToType, bool loop, ulong encryptionKey = 0)
         {
-            ConvertStatics.SetLoop(true, 0, 0);
+            ConvertStatics.SetLoop(loop, 0, 0);
 
             using (var ms = new MemoryStream(bytes))
             {

@@ -50,7 +50,7 @@ namespace LB_Common.Utils
         #endregion
 
         #region ACE
-        private const string MUSIC_PACKAGE_EXTENSION = ".musicpackage";
+        private const string AUDIO_PACKAGE_EXTENSION = ".audiopackage";
 
         public static void ACE_EnsureAssociationsSetForAcb()
         {
@@ -65,15 +65,15 @@ namespace LB_Common.Utils
                 });
         }
 
-        public static void ACE_EnsureAssociationsSetForMusicPackage()
+        public static void ACE_EnsureAssociationsSetForAudioPackage()
         {
             var filePath = Process.GetCurrentProcess().MainModule.FileName;
             EnsureAssociationsSet(
                 new FileAssociation
                 {
-                    Extension = MUSIC_PACKAGE_EXTENSION,
-                    ProgId = "MusicPackage",
-                    FileTypeDescription = "Installable XV2 MusicPackage",
+                    Extension = AUDIO_PACKAGE_EXTENSION,
+                    ProgId = "AudioPackage",
+                    FileTypeDescription = "Installable XV2 AudioPackage",
                     ExecutableFilePath = filePath
                 });
         }

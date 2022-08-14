@@ -41,7 +41,7 @@
                     <ColumnDefinition Width="100"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <Label Content="Type" ToolTip="New Options: Add tracks to the in-game selectable music list. Cue IDs will be automatically generated when installed to avoid conflicts.
+                <Label Content="Type" ToolTip="New Options: Add tracks to the in-game selectable music list. Cue IDs will be automatically generated when installed, and can optionally be assigned to an alias.
                                          &#x0a;Direct: Directly add or replace a cue to CAR_BGM with the specified Cue ID. Will not add track to in-game music list. (recommended to use the ID Randomizer function when adding new cues, to minimize possible ID conflicts with other mods)"/>
                 <ComboBox Grid.Column="1" SelectedIndex="{Binding MusicPackageType}">
                     <ComboBoxItem Content="New Options"/>

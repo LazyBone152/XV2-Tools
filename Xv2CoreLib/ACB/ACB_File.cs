@@ -18,23 +18,37 @@ namespace Xv2CoreLib.ACB
     public enum SaveFormat
     {
         Default,
-        MusicPackage //Same as Default, except different extension (.musicpackage) and no external awb (all streaming tracks are stored internally). Used by LB Mod Installer for installing music/CssVoices.
+        AudioPackage //Same as Default, except different extension (.audiopackage) and no external awb (all streaming tracks are stored internally). Used by LB Mod Installer for installing new cues (just music and voices, currently).
     }
 
-    public enum MusicPackageType : int
+    public enum AudioPackageType : int
     {
+        None = -1,
         BGM_NewOption = 0,
         BGM_Direct = 1,
-        CSS_Voice = 2
+        AutoVoice = 2 //CSS_Voice in prev versions
     }
 
+    public enum AudioPackageVersionEnum : int
+    {
+        OriginalMusicPackage = 0, //old MusicPackage format
+        Expanded = 1, //Adds Alias and Language values in Cue, changes extension/name
+        UnsupportedVersion 
+    }
+
+    public enum VoiceLanguageEnum : int
+    {
+        English = 0,
+        Japanese = 1
+    }
 
     [YAXSerializeAs("ACB")]
     [Serializable]
     public class ACB_File
     {
         #region Constants
-        public const string MUSIC_PACKAGE_EXTENSION = ".musicpackage";
+        public const string AUDIO_PACKAGE_EXTENSION_OLD = ".musicpackage";
+        public const string AUDIO_PACKAGE_EXTENSION = ".audiopackage";
 
         //Clipboard Constants
         public const string CLIPBOARD_ACB_CUES = "ACB_CUES";
@@ -129,7 +143,9 @@ namespace Xv2CoreLib.ACB
         [YAXDontSerialize]
         public SaveFormat SaveFormat { get; set; } = SaveFormat.Default;
         [YAXDontSerialize]
-        public MusicPackageType MusicPackageType { get; set; } = MusicPackageType.BGM_NewOption;
+        public AudioPackageType AudioPackageType { get; set; } = AudioPackageType.None;
+        [YAXDontSerialize]
+        public AudioPackageVersionEnum AudioPackageVersion = AudioPackageVersionEnum.Expanded;
         /// <summary>
         /// Save the ACB in a way that Eternity Audio Tool and associated tools can still load it, ommiting some features.
         /// </summary>
@@ -254,20 +270,20 @@ namespace Xv2CoreLib.ACB
             string awbPath = string.Format("{0}/{1}.awb", Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
             string altAwbPath = string.Format("{0}/{1}_streamfiles.awb", Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
             bool altPath = false;
-            bool isMusicPackage = Path.GetExtension(path).ToLower() == MUSIC_PACKAGE_EXTENSION;
+            bool isAudioPackage = Path.GetExtension(path).Equals(AUDIO_PACKAGE_EXTENSION, StringComparison.OrdinalIgnoreCase) || Path.GetExtension(path).Equals(AUDIO_PACKAGE_EXTENSION_OLD, StringComparison.OrdinalIgnoreCase);
 
-            if (File.Exists(awbPath) && !isMusicPackage)
+            if (File.Exists(awbPath) && !isAudioPackage)
             {
                 awbFile = File.ReadAllBytes(awbPath);
             }
-            else if (File.Exists(altAwbPath) && !isMusicPackage)
+            else if (File.Exists(altAwbPath) && !isAudioPackage)
             {
                 awbFile = File.ReadAllBytes(altAwbPath);
                 altPath = true;
             }
 
 
-            var file = Load(File.ReadAllBytes(path), awbFile, writeXml, isMusicPackage, altPath);
+            var file = Load(File.ReadAllBytes(path), awbFile, writeXml, isAudioPackage, altPath);
 
             if (writeXml)
             {
@@ -278,14 +294,14 @@ namespace Xv2CoreLib.ACB
             return file;
         }
 
-        public static ACB_File Load(byte[] acbBytes, byte[] awbBytes, bool loadUnknownCommands = false, bool isMusicPackage = false, bool altAwbPath = false)
+        public static ACB_File Load(byte[] acbBytes, byte[] awbBytes, bool loadUnknownCommands = false, bool isAudioPackage = false, bool altAwbPath = false)
         {
-            return Load(UTF_File.LoadUtfTable(acbBytes, acbBytes.Length), awbBytes, loadUnknownCommands, isMusicPackage, true, altAwbPath);
+            return Load(UTF_File.LoadUtfTable(acbBytes, acbBytes.Length), awbBytes, loadUnknownCommands, isAudioPackage, true, altAwbPath);
         }
 
-        public static ACB_File Load(UTF_File utfFile, byte[] awbBytes, bool loadUnknownCommands = false, bool isMusicPackage = false, bool eternityCompatibility = true, bool altAwbPath = false)
+        public static ACB_File Load(UTF_File utfFile, byte[] awbBytes, bool loadUnknownCommands = false, bool isAudioPackage = false, bool eternityCompatibility = true, bool altAwbPath = false)
         {
-            if (!AcbFormatHelper.Instance.AcbFormatHelperMain.ForceLoad)
+            if (!AcbFormatHelper.Instance.AcbFormatHelperMain.ForceLoad && !isAudioPackage)
             {
                 //Analyze the ACB version. This maps out what columns and tables exist in this ACB version, so that they can be read and saved properly.
                 AcbFormatHelper.Instance.ParseFile(utfFile, true);
@@ -373,19 +389,61 @@ namespace Xv2CoreLib.ACB
                 }
             }
 
-            if (awbBytes == null && acbFile.Waveforms.Any(x => x.IsStreaming) && !isMusicPackage)
+            if (awbBytes == null && acbFile.Waveforms.Any(x => x.IsStreaming) && !isAudioPackage)
                 acbFile.ExternalAwbError = true;
 
-            //MusicPackage values
+            //AudioPackage values
             if (utfFile.ColumnExists("MusicPackageType"))
             {
-                acbFile.MusicPackageType = (MusicPackageType)utfFile.GetValue<int>("MusicPackageType", TypeFlag.Int32, 0);
+                acbFile.AudioPackageType = (AudioPackageType)utfFile.GetValue<int>("MusicPackageType", TypeFlag.Int32, 0);
+            }
+            else if (utfFile.ColumnExists("AudioPackageType"))
+            {
+                acbFile.AudioPackageType = (AudioPackageType)utfFile.GetValue<int>("AudioPackageType", TypeFlag.Int32, 0);
+            }
+
+            if (utfFile.ColumnExists("AudioPackageVersion"))
+            {
+                acbFile.AudioPackageVersion = (AudioPackageVersionEnum)utfFile.GetValue<int>("AudioPackageVersion", TypeFlag.Int32, 0);
+
+                if (acbFile.AudioPackageVersion >= AudioPackageVersionEnum.UnsupportedVersion)
+                    throw new ArgumentException("ACB_File.Load: AudioPackage version is not supported. Please update your tools.");
+            }
+            else
+            {
+                //if no AudioPackageVersion column exists, then its an old MusicPackage
+                acbFile.AudioPackageVersion = AudioPackageVersionEnum.OriginalMusicPackage;
             }
 
             //Finalization
             acbFile.SetCommandTableVersion();
             acbFile.LinkTableGuids();
-            acbFile.SaveFormat = (isMusicPackage) ? SaveFormat.MusicPackage : SaveFormat.Default;
+            acbFile.SaveFormat = (isAudioPackage) ? SaveFormat.AudioPackage : SaveFormat.Default;
+
+            //Update older MusicPackages 
+            if(acbFile.SaveFormat == SaveFormat.AudioPackage && acbFile.AudioPackageVersion == AudioPackageVersionEnum.OriginalMusicPackage)
+            {
+                if(acbFile.AudioPackageType == AudioPackageType.AutoVoice)
+                {
+                    foreach (var cue in acbFile.Cues)
+                    {
+                        string[] split = cue.Name.Split('_');
+
+                        if (split.Length == 2)
+                        {
+                            cue.Name = split[0];
+                            cue.AliasBinding = split[0];
+
+                            if (split[1] == "en")
+                                cue.VoiceLanguage = VoiceLanguageEnum.English;
+                            else if (split[1] == "jpn")
+                                cue.VoiceLanguage = VoiceLanguageEnum.Japanese;
+                        }
+                    }
+                }
+
+                acbFile.AudioPackageVersion = AudioPackageVersionEnum.Expanded;
+            }
 
             return acbFile;
         }
@@ -609,13 +667,12 @@ namespace Xv2CoreLib.ACB
 
             if(SaveFormat == SaveFormat.Default)
                 utfFile.Save(path + ".acb");
-            else if (SaveFormat == SaveFormat.MusicPackage)
-                utfFile.Save(path + MUSIC_PACKAGE_EXTENSION);
+            else if (SaveFormat == SaveFormat.AudioPackage)
+                utfFile.Save(path + AUDIO_PACKAGE_EXTENSION);
 
             if (awbBytes != null)
                 File.WriteAllBytes((IsUsingAltAwbPath) ? path + "_streamfiles.awb" : path + ".awb", awbBytes);
             
-
             if(undos != null)
             {
                 CompositeUndo undo = new CompositeUndo(undos, "");
@@ -797,14 +854,18 @@ namespace Xv2CoreLib.ACB
                 utfFile.AddData("StreamAwbAfs2Header", 0, streamAwbHeader);
             }
 
-            //MusicPackage values
-            if(SaveFormat == SaveFormat.MusicPackage)
+            //AudioPackage values
+            if(SaveFormat == SaveFormat.AudioPackage)
             {
-                utfFile.AddValue("MusicPackageType", TypeFlag.Int32, 0, ((int)MusicPackageType).ToString());
+                utfFile.AddValue("AudioPackageType", TypeFlag.Int32, 0, ((int)AudioPackageType).ToString());
+            }
+            if (SaveFormat == SaveFormat.AudioPackage && AudioPackageVersion >= AudioPackageVersionEnum.Expanded)
+            {
+                utfFile.AddValue("AudioPackageVersion", TypeFlag.Int32, 0, ((int)AudioPackageVersion).ToString());
             }
 
             //Now set all of the "R_" columns
-            foreach(var column in utfFile.Columns.Where(x => x.Rows.Count == 0))
+            foreach (var column in utfFile.Columns.Where(x => x.Rows.Count == 0))
             {
                 if(column.Name[0] == 'R')
                 {
@@ -819,7 +880,7 @@ namespace Xv2CoreLib.ACB
             return utfFile;
         }
         
-        public byte[] SaveMusicPackageToBytes()
+        public byte[] SaveAudioPackageToBytes()
         {
             TrimSequenceTrackPercentages();
             LinkTableIndexes();
@@ -1446,6 +1507,11 @@ namespace Xv2CoreLib.ACB
             }
 
             return (Cues.Count - _3d) < _3d;
+        }
+
+        public bool IsCueNameUsed(string cueName)
+        {
+            return Cues.Any(x => x.Name == cueName);
         }
 
         //3Dvol_def
@@ -2240,7 +2306,7 @@ namespace Xv2CoreLib.ACB
                 foreach (var waveforms in Waveforms.Where(w => w.IsStreaming == streamingAwb && w.AwbId != ushort.MaxValue))
                     tracks.Add(waveforms.AwbId);
             }
-            else if(SaveFormat == SaveFormat.MusicPackage && !streamingAwb)
+            else if(SaveFormat == SaveFormat.AudioPackage && !streamingAwb)
             {
                 //All tracks are stored internally, ignoring the streaming flag.
                 foreach (var waveforms in Waveforms.Where(w => w.AwbId != ushort.MaxValue))
@@ -2712,16 +2778,27 @@ namespace Xv2CoreLib.ACB
         {
             UTF_File utfFile = AcbFormatHelper.Instance.AcbFormatHelperMain.Header.CreateTable(Version, "Header");
 
-            //Added for MusicPackage
-            if(SaveFormat == SaveFormat.MusicPackage && !utfFile.ColumnExists("MusicPackageType"))
-                utfFile.Columns.Add(new UTF_Column("MusicPackageType", TypeFlag.Int32));
+            //Added for AudioPackage
+            if(SaveFormat == SaveFormat.AudioPackage && !utfFile.ColumnExists("AudioPackageType"))
+                utfFile.Columns.Add(new UTF_Column("AudioPackageType", TypeFlag.Int32));
+
+            if (SaveFormat == SaveFormat.AudioPackage && AudioPackageVersion >= AudioPackageVersionEnum.Expanded && !utfFile.ColumnExists("AudioPackageVersion"))
+                utfFile.Columns.Add(new UTF_Column("AudioPackageVersion", TypeFlag.Int32));
 
             return utfFile;
         }
 
         internal UTF_File CreateDefaultCueTable()
         {
-            return AcbFormatHelper.Instance.CreateTable("CueTable", "Cue", Version);
+            UTF_File utfFile = AcbFormatHelper.Instance.CreateTable("CueTable", "Cue", Version);
+
+            if(SaveFormat == SaveFormat.AudioPackage && AudioPackageVersion >= AudioPackageVersionEnum.Expanded && !utfFile.ColumnExists("LB_AliasBinding"))
+                utfFile.Columns.Add(new UTF_Column("LB_AliasBinding", TypeFlag.String));
+            
+            if (SaveFormat == SaveFormat.AudioPackage && AudioPackageVersion >= AudioPackageVersionEnum.Expanded && !utfFile.ColumnExists("LB_VoiceLanguage"))
+                utfFile.Columns.Add(new UTF_Column("LB_VoiceLanguage", TypeFlag.Int32));
+            
+            return utfFile;
         }
 
         internal UTF_File CreateDefaultCueNameTable()
@@ -3152,6 +3229,17 @@ namespace Xv2CoreLib.ACB
         [YAXSerializeAs("value")]
         public byte HeaderVisibility { get; set; }
 
+        //AudioPackage / Install:
+        [YAXDontSerialize]
+        public string AliasBinding { get; set; }
+        [YAXDontSerialize]
+        public VoiceLanguageEnum VoiceLanguage { get; set; } = VoiceLanguageEnum.English;
+        [YAXDontSerialize]
+        public string InstallID => $"{AliasBinding}_{Name}";
+        [YAXDontSerialize]
+        public string InstallID_Lang => $"{AliasBinding}_{Name}_{VoiceLanguage}";
+
+
         public void Initialize()
         {
             if (ReferenceIndex == null) ReferenceIndex = new AcbTableReference();
@@ -3200,6 +3288,12 @@ namespace Xv2CoreLib.ACB
             cue.ReferenceType = (ReferenceType)cueTable.GetValue<byte>("ReferenceType", TypeFlag.UInt8, index, tableHelper, ParseVersion);
             cue.ReferenceIndex = new AcbTableReference(cueTable.GetValue<ushort>("ReferenceIndex", TypeFlag.UInt16, index, tableHelper, ParseVersion));
 
+            if (cueTable.ColumnExists("LB_AliasBinding"))
+                cue.AliasBinding = cueTable.GetValue<string>("LB_AliasBinding", TypeFlag.String, index);
+
+            if (cueTable.ColumnExists("LB_VoiceLanguage"))
+                cue.VoiceLanguage = (VoiceLanguageEnum)cueTable.GetValue<int>("LB_VoiceLanguage", TypeFlag.Int32, index);
+
             return cue;
         }
 
@@ -3243,6 +3337,11 @@ namespace Xv2CoreLib.ACB
                 utfTable.AddValue("NumRelatedWaveforms", TypeFlag.UInt16, index, waveforms.Count.ToString());
             }
 
+            if(acbFile.AudioPackageVersion >= AudioPackageVersionEnum.Expanded && acbFile.SaveFormat == SaveFormat.AudioPackage)
+            {
+                utfTable.AddValue("LB_AliasBinding", TypeFlag.String, index, AliasBinding);
+                utfTable.AddValue("LB_VoiceLanguage", TypeFlag.Int32, index, ((int)VoiceLanguage).ToString());
+            }
 
         }
     }

@@ -221,7 +221,8 @@ namespace Xv2CoreLib.Resource.UndoRedo
         Default,
         Animation,
         Camera,
-        Effect
+        Effect,
+        Action
     }
 
     public delegate void UndoEventRaisedEventHandler(object source, UndoEventRaisedEventArgs e);

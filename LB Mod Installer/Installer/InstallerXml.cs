@@ -214,7 +214,8 @@ namespace LB_Mod_Installer.Installer
             foreach (var step in InstallOptionSteps)
             {
                 //Newline replace
-                step.Message = step.Message.Replace("\\n", "\n");
+                if(step.Message != null)
+                    step.Message = step.Message.Replace("\\n", "\n");
 
                 if (step.OptionList != null)
                 {
@@ -237,7 +238,8 @@ namespace LB_Mod_Installer.Installer
                     //Newline replace
                     foreach (var option in step.OptionList)
                     {
-                        option.Tooltip = option.Tooltip.Replace("\\n", "\n");
+                        if(option.Tooltip != null)
+                            option.Tooltip = option.Tooltip.Replace("\\n", "\n");
                     }
                 }
             }
@@ -523,7 +525,7 @@ namespace LB_Mod_Installer.Installer
             OptionsMultiSelect
         }
 
-        //Preset InstallSteps
+        #region Preset InstallSteps
         public static InstallStep InstallConfirm
         {
             get
@@ -644,7 +646,7 @@ namespace LB_Mod_Installer.Installer
                 };
             }
         }
-
+        #endregion
 
         //View/UI
         [YAXDontSerialize]
@@ -1041,9 +1043,10 @@ namespace LB_Mod_Installer.Installer
             {
                 return FileType.VfxPackage;
             }
-            else if (Path.GetExtension(SourcePath) == Xv2CoreLib.ACB.ACB_File.MUSIC_PACKAGE_EXTENSION)
+            else if (Path.GetExtension(SourcePath).Equals(Xv2CoreLib.ACB.ACB_File.AUDIO_PACKAGE_EXTENSION, StringComparison.OrdinalIgnoreCase) || 
+                     Path.GetExtension(SourcePath).Equals(Xv2CoreLib.ACB.ACB_File.AUDIO_PACKAGE_EXTENSION_OLD, StringComparison.OrdinalIgnoreCase))
             {
-                return FileType.MusicPackage;
+                return FileType.AudioPackage;
             }
 
             if (Type == FileType.Default)
@@ -1084,7 +1087,7 @@ namespace LB_Mod_Installer.Installer
         CopyFile,
         CopyDir,
         VfxPackage,
-        MusicPackage,
+        AudioPackage,
         Binding
     }
 

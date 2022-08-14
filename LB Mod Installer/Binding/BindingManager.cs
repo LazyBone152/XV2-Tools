@@ -231,10 +231,6 @@ namespace LB_Mod_Installer.Binding
                             break;
                         case Function.GetAlias:
                             {
-                                if(b.GetArgument1().Equals("UltraInstinctSignHealthReq", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    bool tre = true;
-                                }
                                 string valStr = GetAliasId(b.GetArgument1(), comment);
                                 int val;
 
@@ -519,7 +515,8 @@ namespace LB_Mod_Installer.Binding
 
         public void AddAlias(string ID, string alias)
         {
-            Aliases.Add(new AliasValue() { ID = ID, Alias = alias.ToLower() });
+            if(!string.IsNullOrWhiteSpace(alias))
+                Aliases.Add(new AliasValue() { ID = ID, Alias = alias.ToLower() });
         }
 
         private List<BindingValue> ProcessBinding(string binding, string comment, string originalBinding)
