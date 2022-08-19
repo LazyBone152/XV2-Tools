@@ -4875,6 +4875,9 @@ namespace Xv2CoreLib.SAV
         public int SortedID { get; set; }
         [YAXDontSerialize]
         public string DisplayName { get; set; }
+        [YAXDontSerialize]
+        public bool IsMod { get; set; }
+
         [YAXAttributeForClass]
         [YAXSerializeAs("Type")]
         public QuestType I_00 { get; set; }
@@ -5931,6 +5934,16 @@ namespace Xv2CoreLib.SAV
                     return 149; //Jiren
                 case 61:
                     return 152; //Kefla
+                case 64:
+                    return 3; //Goku (SSG)
+                case 65:
+                    return 51; //Gogeta (SS4)
+                case 66:
+                    return 158; //Vegeta SSG
+                case 67:
+                    return 153; //Super Baby 2
+                case 68:
+                    return 131; //Goku Black
                 case 255:
                     return -2; //No mentor
                 default:

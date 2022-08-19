@@ -761,7 +761,7 @@ namespace LB_Mod_Installer.Installer
 
                 using (Stream stream = zipManager.GetZipEntry(GeneralInfo.GetPathInZipDataDir(xmlPath)).Open())
                 {
-                    installFile = EffectContainerFile.LoadVfx2(stream, xmlPath);
+                    installFile = EffectContainerFile.LoadVfxPackage(stream, xmlPath);
                 }
 
                 EffectContainerFile binaryFile = (EffectContainerFile)GetParsedFile<EffectContainerFile>(installPath);
