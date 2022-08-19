@@ -56,7 +56,7 @@
                 <Separator/>
                 <MenuItem Header="Version" IsEnabled="{Binding IsFileLoaded}">
                     <MenuItem IsChecked="{Binding IsVerDBXV2, UpdateSourceTrigger=PropertyChanged}" IsCheckable="True" Header="DRAGON BALL XENOVERSE 2"/>
-                    <MenuItem IsChecked="{Binding IsVerSDBH, UpdateSourceTrigger=PropertyChanged}" IsCheckable="True" Header="SUPER DRAGON BALL HEROES"/>
+                    <MenuItem IsChecked="{Binding IsVerSDBH, UpdateSourceTrigger=PropertyChanged}" IsCheckable="True" Header="SDBH / DB BREAKERS"/>
                 </MenuItem>
                 <Separator/>
                 <MenuItem Header="Settings" Click="Menu_Settings_Click"/>

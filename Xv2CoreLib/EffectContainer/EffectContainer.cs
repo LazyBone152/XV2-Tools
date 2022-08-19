@@ -579,9 +579,9 @@ namespace Xv2CoreLib.EffectContainer
             return effectContainerFile;
         }
         
-        public static EffectContainerFile LoadVfx2(Stream stream, string path)
+        public static EffectContainerFile LoadVfxPackage(Stream stream, string path)
         {
-            using (Resource.ZipReader reader = new Resource.ZipReader(new ZipArchive(stream, ZipArchiveMode.Read)))
+            using (ZipReader reader = new ZipReader(new ZipArchive(stream, ZipArchiveMode.Read)))
             {
                 var vfxFile = Load(path, reader);
                 vfxFile.zipReader = null;
@@ -589,9 +589,9 @@ namespace Xv2CoreLib.EffectContainer
             }
         }
 
-        public static EffectContainerFile LoadVfx2(string path)
+        public static EffectContainerFile LoadVfxPackage(string path)
         {
-            using (Resource.ZipReader reader = new Resource.ZipReader(ZipFile.Open(path, ZipArchiveMode.Read)))
+            using (ZipReader reader = new ZipReader(ZipFile.Open(path, ZipArchiveMode.Read)))
             {
                 var vfxFile = Load(path, reader);
                 vfxFile.zipReader = null;
@@ -791,18 +791,29 @@ namespace Xv2CoreLib.EffectContainer
         }
 
         //Save
-        public bool SaveVfx2()
+        public bool SaveVfxPackage()
         {
-            if (saveFormat != SaveFormat.ZIP) throw new InvalidOperationException("SaveVfx2: saveFormat is not set to VFX2.");
+            if (saveFormat != SaveFormat.ZIP) throw new InvalidOperationException("SaveVfxPackage: SaveFormat is not set to VfxPackage.");
 
             bool result;
+            string vfxPackagePath = string.Format("{0}{1}", Directory, ZipExtension);
+            string tempVfxPackagePath = vfxPackagePath + "_temp";
 
-            using (Resource.ZipWriter writer = new Resource.ZipWriter(ZipFile.Open(string.Format("{0}{1}", Directory, ZipExtension), ZipArchiveMode.Update)))
+            if (File.Exists(tempVfxPackagePath))
+                File.Delete(tempVfxPackagePath);
+
+            using (ZipWriter writer = new ZipWriter(ZipFile.Open(tempVfxPackagePath, ZipArchiveMode.Update)))
             {
                 zipWriter = writer;
                 result = Save();
                 zipWriter = null;
             }
+
+            //Overwrite original vfxPackage with the newly created one
+            if (File.Exists(vfxPackagePath))
+                File.Delete(vfxPackagePath);
+
+            File.Move(tempVfxPackagePath, vfxPackagePath);
 
             return result;
         }

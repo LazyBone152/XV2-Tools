@@ -392,7 +392,7 @@ namespace EEPK_Organiser
                 }
                 else if(effectContainerFile.saveFormat == SaveFormat.ZIP)
                 {
-                    effectContainerFile.SaveVfx2();
+                    effectContainerFile.SaveVfxPackage();
                     FileCleanUp();
                 }
 
@@ -427,7 +427,7 @@ namespace EEPK_Organiser
                     {
                         effectContainerFile.Directory = string.Format("{0}/{1}", System.IO.Path.GetDirectoryName(saveDialog.FileName), System.IO.Path.GetFileNameWithoutExtension(saveDialog.FileName));
                         effectContainerFile.saveFormat = SaveFormat.ZIP;
-                        effectContainerFile.SaveVfx2();
+                        effectContainerFile.SaveVfxPackage();
                     }
                     else if (System.IO.Path.GetExtension(saveDialog.FileName) == ".eepk")
                     {

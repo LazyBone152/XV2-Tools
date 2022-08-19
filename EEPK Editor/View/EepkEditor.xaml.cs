@@ -353,7 +353,7 @@ namespace EEPK_Organiser.View
                         }
                         else if (Path.GetExtension(path) == EffectContainerFile.ZipExtension)
                         {
-                            loadedFile = EffectContainerFile.LoadVfx2(path);
+                            loadedFile = EffectContainerFile.LoadVfxPackage(path);
                         }
                     }
                     else
@@ -4176,7 +4176,7 @@ namespace EEPK_Organiser.View
                     {
                         vfxPackage.Directory = string.Format("{0}/{1}", System.IO.Path.GetDirectoryName(saveDialog.FileName), System.IO.Path.GetFileNameWithoutExtension(saveDialog.FileName));
                         vfxPackage.Name = System.IO.Path.GetFileNameWithoutExtension(saveDialog.FileName);
-                        vfxPackage.SaveVfx2();
+                        vfxPackage.SaveVfxPackage();
 
                         MessageBox.Show("Export successful.", "Export", MessageBoxButton.OK, MessageBoxImage.Information);
                     }

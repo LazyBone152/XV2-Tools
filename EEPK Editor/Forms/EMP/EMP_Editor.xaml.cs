@@ -67,7 +67,7 @@ namespace EEPK_Organiser.Forms.EMP
             textureContainer = _textureContainer;
             empFile = _empFile;
             InitializeComponent();
-            InputValidationRegister();
+            //InputValidationRegister();
             DataContext = this;
 
             //Set window name

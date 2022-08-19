@@ -64,7 +64,7 @@
                             </ContextMenu>
                         </DataGrid.ContextMenu>
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="Effect ID" Width="*" >
+                            <DataGridTemplateColumn Header="Effect ID" Width="*" SortMemberPath="IndexNum">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding IndexNum}"/>
@@ -376,6 +376,13 @@
                                             <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_32_7, UpdateSourceTrigger=PropertyChanged}" Content="SceneCenterToBoneDir"/>
                                         </WrapPanel>
 
+                                        <Label Content="Light Flags" ToolTip="By default all these flags are active, but if any of them are enabled here then the others will become inactive." Margin="0, 3" HorizontalContentAlignment="Center" VerticalContentAlignment="Top" FontSize="10" FontWeight="SemiBold"/>
+                                        <WrapPanel>
+                                            <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_36_4, UpdateSourceTrigger=PropertyChanged}" Content="_Apply to Characters"/>
+                                            <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_36_5, UpdateSourceTrigger=PropertyChanged}" Content="_Apply to Stages"/>
+                                            <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_36_6, UpdateSourceTrigger=PropertyChanged}" Content="_Unk 6" ToolTip="Related to the other light flags somehow. Likely for the light affecting something else."/>
+                                        </WrapPanel>
+                                        
                                         <Label Content="Link Flags" Margin="0, 3" HorizontalContentAlignment="Center" VerticalContentAlignment="Top" FontSize="10" FontWeight="SemiBold"/>
                                         <WrapPanel>
                                             <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_39_3, UpdateSourceTrigger=PropertyChanged}" Content="_RelativePosZ_To_AbsPosZ"/>
@@ -401,9 +408,6 @@
                                         <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_36_1, UpdateSourceTrigger=PropertyChanged}" Content="Flag__36__Unk1"/>
                                         <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_36_2, UpdateSourceTrigger=PropertyChanged}" Content="Flag__36__Unk2"/>
                                         <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_36_3, UpdateSourceTrigger=PropertyChanged}" Content="Flag__36__Unk3"/>
-                                        <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_36_4, UpdateSourceTrigger=PropertyChanged}" Content="Flag__36__Unk4"/>
-                                        <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_36_5, UpdateSourceTrigger=PropertyChanged}" Content="Flag__36__Unk5"/>
-                                        <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_36_6, UpdateSourceTrigger=PropertyChanged}" Content="Flag__36__Unk6"/>
                                         <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_36_7, UpdateSourceTrigger=PropertyChanged}" Content="Flag__36__Unk7"/>
 
                                         <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_37_0, UpdateSourceTrigger=PropertyChanged}" Content="Flag__37__Unk0"/>
@@ -753,7 +757,7 @@
                                 <MenuItem Header="New Asset" Click="EMO_AssetContainer_NewAsset_Click"/>
                                 <MenuItem Header="Add File" Click="EMO_AssetContainer_AddFile_Click"/>
                                 <MenuItem Header="Add File (EMD + ESK -> EMO)" Click="EMO_AssetContainer_AddEmd_Click"/>
-                                <MenuItem Header="Add File (EAN -> OBJ.EMA)" Click="EMO_AssetContainer_AddEan_Click" Visibility="Hidden"/>
+                                <MenuItem Header="Add File (EAN -> OBJ.EMA)" Click="EMO_AssetContainer_AddEan_Click" Visibility="Collapsed"/>
                                 <Separator/>
                                 <MenuItem Header="Paste Over (Replace)" Click="EMO_AssetContainer_Replace_Click"/>
                                 <MenuItem Header="Merge" Click="EMO_AssetContainer_Merge_Click"/>

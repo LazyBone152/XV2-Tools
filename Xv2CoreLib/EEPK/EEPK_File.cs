@@ -810,7 +810,7 @@ namespace Xv2CoreLib.EEPK
         public float F_88 { get; set; }
         [YAXAttributeFor("EMA_Animation")]
         [YAXSerializeAs("Index")]
-        public ushort I_30 { get; set; } //modifies size and duration (links with a mode in the emo perhaps?)
+        public ushort I_30 { get; set; } 
         [YAXAttributeFor("EMA_Animation")]
         [YAXSerializeAs("LoopStartFrame")]
         public ushort I_92 { get; set; }

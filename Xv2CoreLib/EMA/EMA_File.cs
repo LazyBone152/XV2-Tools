@@ -987,7 +987,7 @@ namespace Xv2CoreLib.EMA
                 case "scale":
                 case "color":
                     return 2;
-                case "lightscale":
+                case "light":
                     return 3;
                 default:
                     try
@@ -1056,9 +1056,11 @@ namespace Xv2CoreLib.EMA
             {
                 case "x":
                 case "r":
+                case "innerradius":
                     return 0;
                 case "g":
                 case "y":
+                case "outerradius":
                     return 1;
                 case "b":
                 case "z":

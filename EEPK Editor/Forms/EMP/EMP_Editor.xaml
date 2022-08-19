@@ -168,9 +168,9 @@
                             </Grid>
 
                         </Controls:MetroTabItem>
-                        <Controls:MetroTabItem x:Name="tab_TexturePart" Header="Texture" Controls:HeaderedControlHelper.HeaderFontSize="14">
+                        <Controls:MetroTabItem x:Name="tab_TexturePart" Header="Texture" Controls:HeaderedControlHelper.HeaderFontSize="16">
                             <TabControl>
-                                <TabItem Header="Main" Controls:HeaderedControlHelper.HeaderFontSize="14">
+                                <TabItem Header="Main" Controls:HeaderedControlHelper.HeaderFontSize="16">
                                     <Grid x:Name="grid_TexturePart" Margin="0,0,-0.055,0">
 
                                         <StackPanel Margin="10, 10" Width="456" HorizontalAlignment="Left">
