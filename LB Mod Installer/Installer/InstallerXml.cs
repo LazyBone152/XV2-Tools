@@ -327,14 +327,36 @@ namespace LB_Mod_Installer.Installer
         {
             if (string.IsNullOrWhiteSpace(flags)) return true;
 
-            foreach(var flag in flags.Split(','))
+            string[] orFlags = flags.Split('|');
+            bool isTrue = true;
+
+            foreach(var orBlock in orFlags)
             {
-                if (!FlagIsSet(flag.Trim()))
-                    return false;
+                //Assume true by default
+                isTrue = true;
+
+                foreach (var flag in orBlock.Split(','))
+                {
+                    if (!FlagIsSet(flag.Trim()))
+                    {
+                        isTrue = false;
+                        break;
+                    }
+                }
+
             }
 
+            return isTrue;
+
+            //Old code without the OR
+            //foreach(var flag in flags.Split(','))
+            //{
+            //    if (!FlagIsSet(flag.Trim()))
+            //        return false;
+            //}
+
             //Either all flags are true or there are none, so default to true anyway
-            return true;
+            //return true;
         }
 
         public bool FlagIsSet(string flag)
