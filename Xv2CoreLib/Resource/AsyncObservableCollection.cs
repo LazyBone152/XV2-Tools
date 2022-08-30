@@ -9,6 +9,77 @@ using YAXLib;
 
 namespace Xv2CoreLib.Resource
 {
+    /// <summary>
+    /// A composite, read-only version of <see cref="AsyncObservableCollection{T}"/>, that automatically updates to reflect changes to the underlying collections. For displaying mixed-type lists in UI elements.
+    /// </summary>
+    [Serializable]
+    public class CompositeReadOnlyAsyncObservableCollection : AsyncObservableCollection<object>
+    {
+        private List<IEnumerable> lists = new List<IEnumerable>();
+        private System.Timers.Timer delayedUpdateTimer;
+
+        public CompositeReadOnlyAsyncObservableCollection(int refreshDelayMs = 500)
+        {
+            delayedUpdateTimer = new System.Timers.Timer(refreshDelayMs);
+            delayedUpdateTimer.Elapsed += Timer_Elapsed;
+            delayedUpdateTimer.AutoReset = true;
+        }
+
+        private void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            delayedUpdateTimer.Stop();
+            SyncLists();
+        }
+
+        private void FirstCollection_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            /*
+            if(e?.Action == NotifyCollectionChangedAction.Remove)
+            {
+                if(e.OldItems != null)
+                {
+                    foreach (var item in e.OldItems)
+                        Remove(item);
+                }
+            }
+            else if(e?.Action == NotifyCollectionChangedAction.Add)
+            {
+                if (e.NewItems != null)
+                {
+                    foreach (var item in e.NewItems)
+                        Add(item);
+                }
+            }
+            else
+            {
+                //All other list changes will recreate the whole list - but on a delayed timer to avoid doing so excessively
+                delayedUpdateTimer.Start();
+            }
+            */
+            delayedUpdateTimer.Start();
+        }
+
+        public void SyncLists()
+        {
+            Clear();
+
+            foreach (var list in lists)
+            {
+                foreach(var entry in list)
+                    Add(entry);
+            }
+        }
+
+        public void AddList<T>(AsyncObservableCollection<T> list, IEnumerable generic)
+        {
+            if (!lists.Contains(list))
+            {
+                list.CollectionChanged += FirstCollection_CollectionChanged;
+                lists.Add(generic);
+            }
+        }
+    }
+
     [Serializable]
     public class AsyncObservableCollection<T> : IList<T>
     {
@@ -87,7 +158,7 @@ namespace Xv2CoreLib.Resource
                 }
             }
 
-            CollectionChanged?.Invoke(this, null);
+            CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item));
         }
 
         public void AddRange(IEnumerable<T> items)
@@ -133,6 +204,13 @@ namespace Xv2CoreLib.Resource
 
         public void RemoveAt(int index)
         {
+            object item;
+
+            if (list.Count > index)
+                item = list[index];
+            else
+                item = null;
+
             lock (lockObj)
             {
                 list.RemoveAt(index);
@@ -143,7 +221,7 @@ namespace Xv2CoreLib.Resource
                 }
             }
 
-            CollectionChanged?.Invoke(this, null);
+            CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item));
         }
 
         public void Move(int oldIndex, int newIndex)
@@ -158,9 +236,9 @@ namespace Xv2CoreLib.Resource
                 {
                     _observableList.Move(oldIndex, newIndex);
                 }
-            }
 
-            CollectionChanged?.Invoke(this, null);
+                CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move, item, newIndex, oldIndex));
+            }
         }
 
         public void Insert(int index, T item)
@@ -276,6 +354,10 @@ namespace Xv2CoreLib.Resource
             }
         }
 
+        internal bool HasObservableList()
+        {
+            return _observableList != null;
+        }
 
         [Obsolete("Not required anymore. Just create a new instance directly.")]
         public static AsyncObservableCollection<T> Create()

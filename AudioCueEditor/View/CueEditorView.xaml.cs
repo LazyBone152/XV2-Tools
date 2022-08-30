@@ -3,17 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Xv2CoreLib.ACB;
 using Xv2CoreLib.AFS2;
 using VGAudio.Cli;
@@ -22,8 +16,6 @@ using Microsoft.Win32;
 using GalaSoft.MvvmLight.CommandWpf;
 using MahApps.Metro.Controls.Dialogs;
 using Xv2CoreLib.Resource.UndoRedo;
-using Xv2CoreLib.HCA;
-using System.Diagnostics;
 using AudioCueEditor.Data;
 
 namespace AudioCueEditor.View

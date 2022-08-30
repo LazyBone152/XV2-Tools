@@ -595,11 +595,11 @@ namespace LB_Mod_Installer.Installer
 
                 //Init if needed
                 if (binaryFile.PartSets == null && xmlFile.PartColors != null)
-                    binaryFile.PartSets = new List<PartSet>();
+                    binaryFile.PartSets = new AsyncObservableCollection<PartSet>();
                 if (binaryFile.PartColors == null && xmlFile.PartColors != null)
-                    binaryFile.PartColors = new List<PartColor>();
+                    binaryFile.PartColors = new AsyncObservableCollection<PartColor>();
                 if (binaryFile.Bodies == null && xmlFile.Bodies != null)
-                    binaryFile.Bodies = new List<Body>();
+                    binaryFile.Bodies = new AsyncObservableCollection<Body>();
 
                 //Parse bindings
                 bindingManager.ParseProperties(xmlFile.PartSets, binaryFile.PartSets, installPath);
@@ -770,12 +770,6 @@ namespace LB_Mod_Installer.Installer
                 binaryFile.Pbind.I_08 = 0x9C40;
                 binaryFile.Pbind.I_12 = 0x9C40;
 
-                //Add effect IDs to tracker
-                foreach (var effect in installFile.Effects)
-                {
-                    GeneralInfo.Tracker.AddID(installPath, Sections.EEPK_Effect, effect.Index);
-                }
-
                 //Cleanup the VFXPACKAGE before install
                 installFile.MergeDuplicateTextures(Xv2CoreLib.EEPK.AssetType.PBIND);
                 installFile.MergeDuplicateTextures(Xv2CoreLib.EEPK.AssetType.TBIND);
@@ -783,6 +777,16 @@ namespace LB_Mod_Installer.Installer
                 //Install effects
                 binaryFile.InstallEffects(installFile.Effects);
 
+                //Add effect IDs to tracker, and any aliases for AutoIds
+                foreach (var effect in installFile.Effects)
+                {
+                    GeneralInfo.Tracker.AddID(installPath, Sections.EEPK_Effect, effect.Index);
+
+                    if(effect.ExtendedEffectData?.AutoIdEnabled == true)
+                    {
+                        bindingManager.AddAlias(effect.IndexNum.ToString(), effect.ExtendedEffectData.Alias);
+                    }
+                }
 
             }
 #if !DEBUG

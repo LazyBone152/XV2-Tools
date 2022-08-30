@@ -6,6 +6,7 @@ using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
 using LB_Common.Numbers;
 using YAXLib;
+using System.Linq;
 
 namespace Xv2CoreLib.EMM
 {
@@ -126,6 +127,16 @@ namespace Xv2CoreLib.EMM
             }
 
             return newName;
+        }
+
+        public int GetNewID()
+        {
+            int id = 0;
+
+            while (Materials.Any(x => x.Index == id))
+                id++;
+
+            return id;
         }
 
         public List<RgbColor> GetUsedColors()

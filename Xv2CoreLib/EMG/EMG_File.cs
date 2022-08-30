@@ -4,6 +4,7 @@ using YAXLib;
 using Xv2CoreLib.EMD;
 using System.IO;
 using System.Linq;
+using Xv2CoreLib.Resource;
 
 namespace Xv2CoreLib.EMG
 {
@@ -308,7 +309,7 @@ namespace Xv2CoreLib.EMG
     public class EMG_TextureList
     {
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "TextureSamplerDef")]
-        public List<EMD_TextureSamplerDef> TextureSamplerDefs { get; set; } = new List<EMD_TextureSamplerDef>();
+        public AsyncObservableCollection<EMD_TextureSamplerDef> TextureSamplerDefs { get; set; } = new AsyncObservableCollection<EMD_TextureSamplerDef>();
 
         public static EMG_TextureList Read(byte[] bytes, int offset)
         {

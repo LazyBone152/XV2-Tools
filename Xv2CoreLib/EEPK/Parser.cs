@@ -2,13 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
 using YAXLib;
-using System.Xml;
 using System.Collections;
-using System.Collections.ObjectModel;
 using Xv2CoreLib.Resource;
 
 namespace Xv2CoreLib.EEPK
@@ -17,9 +12,8 @@ namespace Xv2CoreLib.EEPK
     {
         //Bad code. Should really rewrite it...
 
-        private byte[] rawBytes;
+        private readonly byte[] rawBytes;
         public EEPK_File eepkFile { get; private set; } = new EEPK_File();
-        private string saveLocation;
 
         //Offsets
         private int assetSectionLocation;
@@ -32,64 +26,47 @@ namespace Xv2CoreLib.EEPK
         public Parser(string fileLocation, bool writeXml)
         {
             rawBytes = File.ReadAllBytes(fileLocation);
-            totalAssetContainerEntries = BitConverter.ToUInt16(rawBytes, 12);
-            totalEffects = BitConverter.ToUInt16(rawBytes, 14);
-            assetSectionLocation = BitConverter.ToInt32(rawBytes, 16);
-            pointerSectionLocation = BitConverter.ToInt32(rawBytes, 20);
-            saveLocation = fileLocation;
-            Header();
+            ParseHeader();
 
             if (writeXml)
             {
-                WriteXmlFile();
+                YAXSerializer serializer = new YAXSerializer(typeof(EEPK_File));
+                serializer.SerializeToFile(eepkFile, fileLocation + ".xml");
             }
         }
 
         public Parser(byte[] _rawBytes)
         {
             rawBytes = _rawBytes;
+            ParseHeader();
+        }
+
+        private void ParseHeader()
+        {
+            //Header
+            eepkFile.Version = BitConverter.ToInt32(rawBytes, 8);
             totalAssetContainerEntries = BitConverter.ToUInt16(rawBytes, 12);
             totalEffects = BitConverter.ToUInt16(rawBytes, 14);
             assetSectionLocation = BitConverter.ToInt32(rawBytes, 16);
             pointerSectionLocation = BitConverter.ToInt32(rawBytes, 20);
-            Header();
-        }
 
-        void Header()
-        {
-            //Header
-            eepkFile.I_08 = BitConverter.ToInt32(rawBytes, 8);
-
-            if (BitConverter.ToInt32(rawBytes, 0) != EEPK_File.EEPK_SIGNATURE) {
-                Console.WriteLine("#EPK signature not found.\nLoad failed.");
-                Console.ReadLine();
-                Environment.Exit(0);
-            }
+            if (BitConverter.ToInt32(rawBytes, 0) != EEPK_File.EEPK_SIGNATURE)
+                throw new InvalidDataException("#EPK signature not found.\nLoad failed.");
 
             //Assets
-            if (BitConverter.ToUInt16(rawBytes, 12) > 0)
+            if (totalAssetContainerEntries > 0)
             {
-                AssetParser();
+                ParseAssets();
             }
 
             //Effects
-            if(BitConverter.ToUInt16(rawBytes, 14) > 0) { 
-                EffectParser();
+            if(totalEffects > 0) 
+            { 
+                ParseEffects();
             }
-
-            if(eepkFile.Assets == null)
-            {
-                eepkFile.Assets = new List<AssetContainer>();
-            }
-
-            if(eepkFile.Effects == null)
-            {
-                eepkFile.Effects = new List<Effect>();
-            }
-            
         }
 
-        void EffectParser()
+        private void ParseEffects()
         {
             eepkFile.Effects = new List<Effect>();
             List<ushort> effectIds = new List<ushort>(); //all lists are in sync with each other
@@ -218,7 +195,7 @@ namespace Xv2CoreLib.EEPK
             }
         }
 
-        void AssetParser()
+        private void ParseAssets()
         {
             eepkFile.Assets = new List<AssetContainer>();
             int addedOffset = 0;
@@ -228,17 +205,17 @@ namespace Xv2CoreLib.EEPK
             for (int i = 0; i < totalAssetContainerEntries; i++)
             {
                 eepkFile.Assets.Add(new AssetContainer());
-                eepkFile.Assets[i].I_00 = HexConverter.GetHexString(BitConverter.ToInt32(rawBytes, assetSectionLocation + addedOffset));
-                eepkFile.Assets[i].I_04 = HexConverter.GetHexString(rawBytes[assetSectionLocation + addedOffset + 4]);
-                eepkFile.Assets[i].I_05 = HexConverter.GetHexString(rawBytes[assetSectionLocation + addedOffset + 5]);
-                eepkFile.Assets[i].I_06 = HexConverter.GetHexString(rawBytes[assetSectionLocation + addedOffset + 6]);
-                eepkFile.Assets[i].I_07 = HexConverter.GetHexString(rawBytes[assetSectionLocation + addedOffset + 7]);
-                eepkFile.Assets[i].I_08 = HexConverter.GetHexString(BitConverter.ToInt32(rawBytes, assetSectionLocation + addedOffset + 8));
-                eepkFile.Assets[i].I_12 = HexConverter.GetHexString(BitConverter.ToInt32(rawBytes, assetSectionLocation + addedOffset + 12));
+                eepkFile.Assets[i].I_00 = BitConverter.ToInt32(rawBytes, assetSectionLocation + addedOffset);
+                eepkFile.Assets[i].I_04 = rawBytes[assetSectionLocation + addedOffset + 4];
+                eepkFile.Assets[i].I_05 = rawBytes[assetSectionLocation + addedOffset + 5];
+                eepkFile.Assets[i].I_06 = rawBytes[assetSectionLocation + addedOffset + 6];
+                eepkFile.Assets[i].I_07 = rawBytes[assetSectionLocation + addedOffset + 7];
+                eepkFile.Assets[i].AssetLimit = BitConverter.ToInt32(rawBytes, assetSectionLocation + addedOffset + 8);
+                eepkFile.Assets[i].I_12 = BitConverter.ToInt32(rawBytes, assetSectionLocation + addedOffset + 12);
                 eepkFile.Assets[i].I_16 = (AssetType)BitConverter.ToUInt16(rawBytes, assetSectionLocation + addedOffset + 16);
                 eepkFile.Assets[i].FILES = new string[3];
                 int count = 0;
-                for (int e = 0; e < 3 * 4; e+=4)
+                for (int e = 0; e < 3 * 4; e += 4)
                 {
                     //Getting the file string if it exists, and assigning it to the correct field
                     int fileOffset = BitConverter.ToInt32(rawBytes, assetSectionLocation + addedOffset + 36 + e);
@@ -252,13 +229,15 @@ namespace Xv2CoreLib.EEPK
                         //If no string, then set it to null
                         eepkFile.Assets[i].FILES[count] = "NULL";
                     }
+
                     count++;
                 }
                 assetEntrySize.Add(BitConverter.ToInt16(rawBytes, assetSectionLocation + addedOffset + 30));
                 assetEntryStartOffset.Add(BitConverter.ToInt32(rawBytes, assetSectionLocation + addedOffset + 32) + assetSectionLocation + addedOffset);
                 addedOffset += 48;
             }
-            for (int i = 0; i < assetEntrySize.Count(); i++)
+
+            for (int i = 0; i < assetEntrySize.Count; i++)
             {
                 //iterate over the Asset Containers
                 addedOffset = 0;
@@ -307,12 +286,6 @@ namespace Xv2CoreLib.EEPK
                     
                 }
             }
-        }
-
-        void WriteXmlFile()
-        {
-            YAXSerializer serializer = new YAXSerializer(typeof(EEPK_File));
-            serializer.SerializeToFile(eepkFile, saveLocation + ".xml");
         }
 
         public EEPK_File GetEepkFile()

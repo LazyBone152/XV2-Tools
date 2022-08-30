@@ -201,6 +201,7 @@
     <Compile Include="EEPK\Parser.cs" />
     <Compile Include="EffectContainer\EepkToolInterlop.cs" />
     <Compile Include="EffectContainer\EffectContainer.cs" />
+    <Compile Include="EffectContainer\VfxPackageExtension.cs" />
     <Compile Include="EMA\EMA_File.cs" />
     <Compile Include="EMA\Skeleton.cs" />
     <Compile Include="EMB\EmbIndex.cs" />
@@ -231,6 +232,8 @@
     <Compile Include="ESK\Parser.cs" />
     <Compile Include="Eternity\CharaSlotsFile.cs" />
     <Compile Include="Eternity\PrebakedFile.cs" />
+    <Compile Include="Eternity\StageDefFile.cs" />
+    <Compile Include="Eternity\StageSlotsFile.cs" />
     <Compile Include="ETR\ETR_File.cs" />
     <Compile Include="FPF\FPF_File.cs" />
     <Compile Include="HCA\HcaMetadata.cs" />
@@ -311,6 +314,7 @@
     <Compile Include="Resource\UndoRedo\UndoablePropertyGeneric.cs" />
     <Compile Include="Resource\UndoRedo\UndoActionDelegate.cs" />
     <Compile Include="Resource\UndoRedo\UndoActionPropNotify.cs" />
+    <Compile Include="Resource\UndoRedo\UndoGroupContainer.cs" />
     <Compile Include="Resource\Utils.cs" />
     <Compile Include="Resource\ObjectExtensions.cs" />
     <Compile Include="Resource\RgbConverter.cs" />
@@ -344,6 +348,7 @@
     <Compile Include="TTC\TTC_File.cs" />
     <Compile Include="UTF\UTF_File.cs" />
     <Compile Include="ValuesDictionary\BAC.cs" />
+    <Compile Include="ValuesDictionary\BCS.cs" />
     <Compile Include="Xenoverse2\FileManager.cs" />
     <Compile Include="Xenoverse2\FileWatcher.cs" />
     <Compile Include="Xenoverse2\Xenoverse2.cs" />

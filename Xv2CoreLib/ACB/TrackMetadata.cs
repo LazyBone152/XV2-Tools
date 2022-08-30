@@ -47,11 +47,11 @@ namespace Xv2CoreLib.ACB
 
         private void SetValues(byte[] bytes)
         {
-            VGAudio.Containers.Hca.HcaReader reader = new VGAudio.Containers.Hca.HcaReader();
-            var hca = reader.ParseFile(bytes);
-
-            if (hca != null)
+            try
             {
+                VGAudio.Containers.Hca.HcaReader reader = new VGAudio.Containers.Hca.HcaReader();
+                var hca = reader.ParseFile(bytes);
+
                 HasLoopData = hca.Hca.Looping;
                 LoopStart = (uint)hca.Hca.LoopStartFrame;
                 LoopEnd = (uint)hca.Hca.LoopEndFrame;
@@ -63,7 +63,7 @@ namespace Xv2CoreLib.ACB
 
                 IsValidAudioFile = true;
             }
-            else
+            catch (InvalidDataException)
             {
                 try
                 {
@@ -96,6 +96,7 @@ namespace Xv2CoreLib.ACB
                     SampleRate = 0;
                     NumSamples = 0;
                 }
+
             }
         }
 

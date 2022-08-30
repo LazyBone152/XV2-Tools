@@ -70,15 +70,18 @@ namespace Xv2CoreLib.BCS
 
             //PartSets
             int actualIndex = 0;
+
             if(partsetCount > 0)
             {
-                bcsFile.PartSets = new List<PartSet>();
                 for (int i = 0; i < partsetCount; i++)
                 {
                     int thisPartsetOffset = BitConverter.ToInt32(rawBytes, partsetOffset);
+
                     if(thisPartsetOffset != 0)
                     {
-                        bcsFile.PartSets.Add(new PartSet() { Index = i.ToString() });
+                        bcsFile.PartSets.Add(new PartSet());
+                        bcsFile.PartSets[actualIndex].ID = i;
+
                         if (BitConverter.ToInt32(rawBytes, thisPartsetOffset + 20) != 10)
                         {
                             throw new Exception(string.Format("Part count mismatch on PartSet {0} (Expected 10, but found {1})\nThis BCS file cannot be parsed.", i, BitConverter.ToInt32(rawBytes, thisPartsetOffset + 20)));
@@ -99,6 +102,7 @@ namespace Xv2CoreLib.BCS
 
                         actualIndex++;
                     }
+
                     partsetOffset += 4;
                 }
             }
@@ -106,8 +110,6 @@ namespace Xv2CoreLib.BCS
             //PartColors
             if(partcolorsCount > 0)
             {
-                bcsFile.PartColors = new List<PartColor>();
-
                 for(int i = 0; i < partcolorsCount; i++)
                 {
                     int thisPartColorOffset = BitConverter.ToInt32(rawBytes, partcolorsOffset);
@@ -126,19 +128,21 @@ namespace Xv2CoreLib.BCS
                 }
             }
 
-
             //BodyScales
             if(bodyCount > 0)
             {
-                bcsFile.Bodies = new List<Body>();
-
                 for(int i = 0; i < bodyCount; i++)
                 {
                     int thisBodyScaleOffset = BitConverter.ToInt32(rawBytes, bodyOffset);
+
                     if(thisBodyScaleOffset != 0)
                     {
-                        bcsFile.Bodies.Add(ParseBody(thisBodyScaleOffset, i));
+                        Body body = ParseBody(thisBodyScaleOffset, i);
+
+                        if(body?.BodyScales?.Count > 0)
+                            bcsFile.Bodies.Add(body);
                     }
+
                     bodyOffset += 4;
                 }
 
@@ -148,13 +152,11 @@ namespace Xv2CoreLib.BCS
             {
                 bcsFile.SkeletonData1 = ParseSkeleton(BitConverter.ToInt32(rawBytes, skeleton1Offset));
             }
+
             if(skeleton2Offset != 0)
             {
                 bcsFile.SkeletonData2 = ParseSkeleton(BitConverter.ToInt32(rawBytes, skeleton2Offset));
             }
-            
-            
-
         }
 
 
@@ -165,8 +167,6 @@ namespace Xv2CoreLib.BCS
             {
                 offset += partOffset;
                 
-                BitArray _I_28 = new BitArray(rawBytes.GetRange(offset + 28, 4));
-                BitArray _I_32 = new BitArray(rawBytes.GetRange(offset + 32, 4));
                 //validation
                 int i_28 = BitConverter.ToInt32(rawBytes, offset + 28);
                 int i_32 = BitConverter.ToInt32(rawBytes, offset + 32);
@@ -184,26 +184,8 @@ namespace Xv2CoreLib.BCS
                     Texture = BitConverter.ToInt16(rawBytes, offset + 4),
                     Shader = BitConverter.ToInt16(rawBytes, offset + 16),
                     Flags = (Part.PartFlags)BitConverter.ToUInt32(rawBytes, offset + 24),
-                    Hide_FaceBase = _I_28[0],
-                    Hide_Forehead = _I_28[1],
-                    Hide_Eye = _I_28[2],
-                    Hide_Nose = _I_28[3],
-                    Hide_Ear = _I_28[4],
-                    Hide_Hair = _I_28[5],
-                    Hide_Bust = _I_28[6],
-                    Hide_Pants = _I_28[7],
-                    Hide_Rist = _I_28[8],
-                    Hide_Boots = _I_28[9],
-                    HideMat_FaceBase = _I_32[0],
-                    HideMat_Forehead = _I_32[1],
-                    HideMat_Eye = _I_32[2],
-                    HideMat_Nose = _I_32[3],
-                    HideMat_Ear = _I_32[4],
-                    HideMat_Hair = _I_32[5],
-                    HideMat_Bust = _I_32[6],
-                    HideMat_Pants = _I_32[7],
-                    HideMat_Rist = _I_32[8],
-                    HideMat_Boots = _I_32[9],
+                    HideFlags = (PartTypeFlags)BitConverter.ToInt32(rawBytes, offset + 28),
+                    HideMatFlags = (PartTypeFlags)BitConverter.ToInt32(rawBytes, offset + 32),
                     F_36 = BitConverter.ToSingle(rawBytes, offset + 36),
                     F_40 = BitConverter.ToSingle(rawBytes, offset + 40),
                     I_44 = BitConverter.ToInt32(rawBytes, offset + 44),
@@ -226,42 +208,34 @@ namespace Xv2CoreLib.BCS
             
         }
 
-        private List<ColorSelector> ParseColorSelector(int offset, int count)
+        private AsyncObservableCollection<ColorSelector> ParseColorSelector(int offset, int count)
         {
-            if(count > 0)
-            {
-                List<ColorSelector> colorSelectors = new List<ColorSelector>();
+            AsyncObservableCollection<ColorSelector> colorSelectors = new AsyncObservableCollection<ColorSelector>();
 
+            if (count > 0)
+            {
                 for (int i = 0; i < count; i++)
                 {
                     colorSelectors.Add(new ColorSelector()
                     {
-                        I_00 = BitConverter.ToInt16(rawBytes, offset + 0),
-                        I_02 = BitConverter.ToInt16(rawBytes, offset + 2)
+                        PartColorGroup = BitConverter.ToUInt16(rawBytes, offset + 0),
+                        ColorIndex = BitConverter.ToUInt16(rawBytes, offset + 2)
                     });
                     offset += 4;
                 }
-                return colorSelectors;
             }
-            else
-            {
-                return null;
-            }
-            
+
+            return colorSelectors;
         }
 
         private AsyncObservableCollection<PhysicsPart> ParsePhysicsObject(int offset, int count)
         {
+            AsyncObservableCollection<PhysicsPart> physicsObjects = new AsyncObservableCollection<PhysicsPart>();
+
             if (count > 0)
             {
-                AsyncObservableCollection<PhysicsPart> physicsObjects = new AsyncObservableCollection<PhysicsPart>();
-
                 for (int i = 0; i < count; i++)
                 {
-
-                    BitArray _I_28 = new BitArray(rawBytes.GetRange(offset + 28, 4));
-                    BitArray _I_32 = new BitArray(rawBytes.GetRange(offset + 32, 4));
-
                     //validation
                     int i_28 = BitConverter.ToInt32(rawBytes, offset + 28);
                     int i_32 = BitConverter.ToInt32(rawBytes, offset + 32);
@@ -278,26 +252,8 @@ namespace Xv2CoreLib.BCS
                         Model2 = BitConverter.ToInt16(rawBytes, offset + 2),
                         Texture = BitConverter.ToInt16(rawBytes, offset + 4),
                         Flags = (Part.PartFlags)BitConverter.ToInt32(rawBytes, offset + 24),
-                        Hide_FaceBase = _I_28[0],
-                        Hide_Forehead = _I_28[1],
-                        Hide_Eye = _I_28[2],
-                        Hide_Nose = _I_28[3],
-                        Hide_Ear = _I_28[4],
-                        Hide_Hair = _I_28[5],
-                        Hide_Bust = _I_28[6],
-                        Hide_Pants = _I_28[7],
-                        Hide_Rist = _I_28[8],
-                        Hide_Boots = _I_28[9],
-                        HideMat_FaceBase = _I_32[0],
-                        HideMat_Forehead = _I_32[1],
-                        HideMat_Eye = _I_32[2],
-                        HideMat_Nose = _I_32[3],
-                        HideMat_Ear = _I_32[4],
-                        HideMat_Hair = _I_32[5],
-                        HideMat_Bust = _I_32[6],
-                        HideMat_Pants = _I_32[7],
-                        HideMat_Rist = _I_32[8],
-                        HideMat_Boots = _I_32[9],
+                        HideFlags = (PartTypeFlags)BitConverter.ToInt32(rawBytes, offset + 28),
+                        HideMatFlags = (PartTypeFlags)BitConverter.ToInt32(rawBytes, offset + 32),
                         CharaCode = StringEx.GetString(rawBytes, offset + 36, false, StringEx.EncodingType.ASCII, 4),
                         EmdPath = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 40), offset),
                         EmmPath = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 44), offset),
@@ -308,13 +264,9 @@ namespace Xv2CoreLib.BCS
                     });
                     offset += 72;
                 }
-                return physicsObjects;
-            }
-            else
-            {
-                return null;
             }
 
+            return physicsObjects;
         }
         
         private List<Unk3> ParseUnk3(int offset, int count)
@@ -342,54 +294,51 @@ namespace Xv2CoreLib.BCS
         }
 
         //Color Parsers
-        private List<Colors> ParseColors (int offset, int count)
+        private AsyncObservableCollection<Colors> ParseColors (int offset, int count)
         {
-            if(count > 0)
-            {
-                List<Colors> colors = new List<Colors>();
+            AsyncObservableCollection<Colors> colors = new AsyncObservableCollection<Colors>();
 
+            if (count > 0)
+            {
                 for(int i = 0; i < count; i++)
                 {
-                    colors.Add(new Colors()
+                    Colors entry = new Colors()
                     {
-                        Index = i.ToString(),
-                        Color1_R = BitConverter.ToSingle(rawBytes, offset + 0),
-                        Color1_G = BitConverter.ToSingle(rawBytes, offset + 4),
-                        Color1_B = BitConverter.ToSingle(rawBytes, offset + 8),
-                        Color1_A = BitConverter.ToSingle(rawBytes, offset + 12),
-                        Color2_R = BitConverter.ToSingle(rawBytes, offset + 16),
-                        Color2_G = BitConverter.ToSingle(rawBytes, offset + 20),
-                        Color2_B = BitConverter.ToSingle(rawBytes, offset + 24),
-                        Color2_A = BitConverter.ToSingle(rawBytes, offset + 28),
-                        Color3_R = BitConverter.ToSingle(rawBytes, offset + 32),
-                        Color3_G = BitConverter.ToSingle(rawBytes, offset + 36),
-                        Color3_B = BitConverter.ToSingle(rawBytes, offset + 40),
-                        Color3_A = BitConverter.ToSingle(rawBytes, offset + 44),
-                        Color4_R = BitConverter.ToSingle(rawBytes, offset + 48),
-                        Color4_G = BitConverter.ToSingle(rawBytes, offset + 52),
-                        Color4_B = BitConverter.ToSingle(rawBytes, offset + 56),
-                        Color4_A = BitConverter.ToSingle(rawBytes, offset + 60),
-                        Color5_R = BitConverter.ToSingle(rawBytes, offset + 64),
-                        Color5_G = BitConverter.ToSingle(rawBytes, offset + 68),
-                        Color5_B = BitConverter.ToSingle(rawBytes, offset + 72),
-                        Color5_A = BitConverter.ToSingle(rawBytes, offset + 76)
-                    });
+                        ID = i,
+                        Color1 = new LB_Common.Numbers.CustomColor(BitConverter.ToSingle(rawBytes, offset + 0),
+                                                                   BitConverter.ToSingle(rawBytes, offset + 4),
+                                                                   BitConverter.ToSingle(rawBytes, offset + 8),
+                                                                   BitConverter.ToSingle(rawBytes, offset + 12)),
+                        Color2 = new LB_Common.Numbers.CustomColor(BitConverter.ToSingle(rawBytes, offset + 16),
+                                                                   BitConverter.ToSingle(rawBytes, offset + 20),
+                                                                   BitConverter.ToSingle(rawBytes, offset + 24),
+                                                                   BitConverter.ToSingle(rawBytes, offset + 28)),
+                        Color3 = new LB_Common.Numbers.CustomColor(BitConverter.ToSingle(rawBytes, offset + 32),
+                                                                   BitConverter.ToSingle(rawBytes, offset + 36),
+                                                                   BitConverter.ToSingle(rawBytes, offset + 40),
+                                                                   BitConverter.ToSingle(rawBytes, offset + 44)),
+                        Color4 = new LB_Common.Numbers.CustomColor(BitConverter.ToSingle(rawBytes, offset + 48),
+                                                                   BitConverter.ToSingle(rawBytes, offset + 52),
+                                                                   BitConverter.ToSingle(rawBytes, offset + 56),
+                                                                   BitConverter.ToSingle(rawBytes, offset + 60))
+                    };
+
+                    if(!entry.IsNull())
+                        colors.Add(entry);
 
                     offset += 80;
                 }
+            }
 
-                return colors;
-            }
-            else
-            {
-                return null;
-            }
+            return colors;
         }
         
         //Body Parsers
         private Body ParseBody(int offset, int _index)
         {
-            Body body = new Body() { BodyScales = new List<BoneScale>(), Index = _index.ToString() };
+            Body body = new Body();
+            body.ID = _index;
+
             int bodyCount = BitConverter.ToInt16(rawBytes, offset + 2);
             int bodyOffset = BitConverter.ToInt32(rawBytes, offset + 4) + offset;
             
@@ -400,7 +349,7 @@ namespace Xv2CoreLib.BCS
                     ScaleX = BitConverter.ToSingle(rawBytes, bodyOffset + 0),
                     ScaleY = BitConverter.ToSingle(rawBytes, bodyOffset + 4),
                     ScaleZ = BitConverter.ToSingle(rawBytes, bodyOffset + 8),
-                    Str_12 = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, bodyOffset + 12) + bodyOffset, false)
+                    BoneName = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, bodyOffset + 12) + bodyOffset, false)
                 });
                 bodyOffset += 16;
             }
@@ -411,16 +360,17 @@ namespace Xv2CoreLib.BCS
         //Skeleton Parsers
         private SkeletonData ParseSkeleton (int offset)
         {
-            if(offset != 0)
+            SkeletonData skeleton = new SkeletonData();
+
+            if (offset != 0)
             {
-                SkeletonData skeleton = new SkeletonData();
                 skeleton.I_00 = BitConverter.ToInt16(rawBytes, offset);
                 int boneCount = BitConverter.ToInt16(rawBytes, offset + 2);
                 int boneOffset = BitConverter.ToInt32(rawBytes, offset + 4) + offset;
 
                 if (boneCount > 0)
                 {
-                    skeleton.Bones = new List<Bone>();
+                    skeleton.Bones = new AsyncObservableCollection<Bone>();
 
                     for (int i = 0; i < boneCount; i++)
                     {
@@ -443,13 +393,9 @@ namespace Xv2CoreLib.BCS
                         boneOffset += 52;
                     }
                 }
+            }
 
-                return skeleton;
-            }
-            else
-            {
-                return null;
-            }
+            return skeleton;
         }
 
         //Utility

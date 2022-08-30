@@ -9,16 +9,20 @@ namespace Xv2CoreLib.Resource.UndoRedo
         internal List<IUndoRedo> undos;
         public string Message { get; set; }
         public UndoGroup UndoGroup { get; set; }
+        public string UndoArg { get; set; }
+        public object UndoContext { get; set; }
 
         /// <summary>
         /// A composition undoable step encapsulating multiple undoable actions.
         /// </summary>
         /// <param name="_undos">The actions to undo.</param>
-        public CompositeUndo(List<IUndoRedo> _undos, string message, UndoGroup undoGroup = UndoGroup.Default)
+        public CompositeUndo(List<IUndoRedo> _undos, string message, UndoGroup undoGroup = UndoGroup.Default, string undoArg = null, object undoContext = null)
         {
             undos = (_undos != null) ? _undos : new List<IUndoRedo>();
             Message = message;
             UndoGroup = undoGroup;
+            UndoArg = undoArg;
+            UndoContext = undoContext;
 
             //Remove duplicate doLast actions
             List<int> existing = new List<int>();

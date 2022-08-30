@@ -78,6 +78,7 @@ namespace Xv2CoreLib.EffectContainer
                 }
             }
         }
+        public VfxPackageExtension VfxPackageExtension { get; set; } = new VfxPackageExtension();
 
         //Name/Directory 
         private string _name = null;
@@ -576,6 +577,12 @@ namespace Xv2CoreLib.EffectContainer
             effectContainerFile.ValidateTextureContainers(AssetType.PBIND);
             effectContainerFile.ValidateTextureContainers(AssetType.TBIND);
 
+            //Load VfxPackageExtension
+            if(_saveFormat == SaveFormat.ZIP)
+            {
+                effectContainerFile.VfxPackageExtension = VfxPackageExtension.Load(_zipReader, effectContainerFile);
+            }
+
             return effectContainerFile;
         }
         
@@ -806,6 +813,7 @@ namespace Xv2CoreLib.EffectContainer
             {
                 zipWriter = writer;
                 result = Save();
+                VfxPackageExtension.Save(writer, this);
                 zipWriter = null;
             }
 
@@ -820,7 +828,6 @@ namespace Xv2CoreLib.EffectContainer
         
         public bool Save()
         {
-
             //Convert all loaded dds textures back into a byte array
             Pbind.File3_Ref.SaveDdsImages();
             Tbind.File3_Ref.SaveDdsImages();
@@ -1569,7 +1576,7 @@ namespace Xv2CoreLib.EffectContainer
         public static EffectContainerFile CreateEffectContainerFile(EEPK_File eepkFile)
         {
             EffectContainerFile effectContainer = new EffectContainerFile();
-            effectContainer.Version = (VersionEnum)eepkFile.I_08;
+            effectContainer.Version = (VersionEnum)eepkFile.Version;
             effectContainer.Effects = new AsyncObservableCollection<Effect>(eepkFile.Effects);
 
             foreach(var container in eepkFile.Assets)
@@ -1577,23 +1584,23 @@ namespace Xv2CoreLib.EffectContainer
                 AssetContainerTool assetContainer = new AssetContainerTool();
 
                 assetContainer.LooseFiles = (container.FILES[0] == "NULL") ? true : false;
-                assetContainer.I_00 = HexConverter.ToInt32(container.I_00);
-                assetContainer.I_04 = HexConverter.ToInt8(container.I_04);
-                assetContainer.I_05 = HexConverter.ToInt8(container.I_05);
-                assetContainer.I_06 = HexConverter.ToInt8(container.I_06);
-                assetContainer.I_07 = HexConverter.ToInt8(container.I_07);
-                assetContainer.I_08 = HexConverter.ToInt32(container.I_08);
-                assetContainer.I_12 = HexConverter.ToInt32(container.I_12);
+                assetContainer.I_00 = container.I_00;
+                assetContainer.I_04 = container.I_04;
+                assetContainer.I_05 = container.I_05;
+                assetContainer.I_06 = container.I_06;
+                assetContainer.I_07 = container.I_07;
+                assetContainer.I_08 = container.AssetLimit;
+                assetContainer.I_12 = container.I_12;
                 assetContainer.ContainerAssetType = container.I_16;
                 
                 assetContainer.File1_Name = container.FILES[0];
                 assetContainer.File2_Name = container.FILES[1];
                 assetContainer.File3_Name = container.FILES[2];
-                assetContainer.Assets = AsyncObservableCollection<Asset>.Create();
+                assetContainer.Assets = new AsyncObservableCollection<Asset>();
 
                 foreach(var assets in container.AssetEntries)
                 {
-                    AsyncObservableCollection<EffectFile> files = AsyncObservableCollection<EffectFile>.Create();
+                    AsyncObservableCollection<EffectFile> files = new AsyncObservableCollection<EffectFile>();
 
                     foreach(Asset_File filename in assets.FILES)
                     {
@@ -1678,7 +1685,7 @@ namespace Xv2CoreLib.EffectContainer
         public static EEPK_File CreateEepk(EffectContainerFile effectContainer)
         {
             EEPK_File eepkFile = new EEPK_File();
-            eepkFile.I_08 = (int)effectContainer.Version;
+            eepkFile.Version = (int)effectContainer.Version;
             eepkFile.Assets = new List<AssetContainer>();
             eepkFile.Effects = effectContainer.Effects.ToList();
 
@@ -1713,13 +1720,13 @@ namespace Xv2CoreLib.EffectContainer
         private static AssetContainer CreateEepkAssetContainer(AssetContainerTool assetContainer, AssetType type)
         {
             AssetContainer newAssetContainer = new AssetContainer();
-            newAssetContainer.I_00 = HexConverter.GetHexString(assetContainer.I_00);
-            newAssetContainer.I_04 = HexConverter.GetHexString(assetContainer.I_04);
-            newAssetContainer.I_05 = HexConverter.GetHexString(assetContainer.I_05);
-            newAssetContainer.I_06 = HexConverter.GetHexString(assetContainer.I_06);
-            newAssetContainer.I_07 = HexConverter.GetHexString(assetContainer.I_07);
-            newAssetContainer.I_08 = HexConverter.GetHexString(assetContainer.I_08);
-            newAssetContainer.I_12 = HexConverter.GetHexString(assetContainer.I_12);
+            newAssetContainer.I_00 = assetContainer.I_00;
+            newAssetContainer.I_04 = assetContainer.I_04;
+            newAssetContainer.I_05 = assetContainer.I_05;
+            newAssetContainer.I_06 = assetContainer.I_06;
+            newAssetContainer.I_07 = assetContainer.I_07;
+            newAssetContainer.AssetLimit = assetContainer.I_08;
+            newAssetContainer.I_12 = assetContainer.I_12;
             newAssetContainer.I_16 = type;
 
             if (assetContainer.LooseFiles)
@@ -2407,6 +2414,8 @@ namespace Xv2CoreLib.EffectContainer
 
         public void InstallEffects(IList<Effect> effects)
         {
+            ProcessVfxExtensions(effects);
+
             //Remove effects (clears out potential duplicate and unneeded data)
             foreach(var effect in effects)
             {
@@ -2470,8 +2479,67 @@ namespace Xv2CoreLib.EffectContainer
                 }
             }
         }
-        
-        public int CreateStageSelectorEntry(byte[] texture)
+
+        private void ProcessVfxExtensions(IList<Effect> effects)
+        {
+            foreach (var effect in effects)
+            {
+                if(effect.ExtendedEffectData != null)
+                {
+                    //AutoID
+                    if (effect.ExtendedEffectData.AutoIdEnabled)
+                    {
+                        effect.ExtendedEffectData.EffectID = AssignAutoId(effects);
+                    }
+
+                    //CopyFrom
+                    if(effect.ExtendedEffectData.CopyFrom != -1)
+                    {
+                        //First try to find effect in VfxPackage
+                        Effect copyEffect = effects.FirstOrDefault(x => x.IndexNum == effect.ExtendedEffectData.CopyFrom);
+
+                        //No effect found in VfxPackage, now check EEPK
+                        if (copyEffect == null)
+                        {
+                            copyEffect = Effects.FirstOrDefault(x => x.IndexNum == effect.ExtendedEffectData.CopyFrom);
+
+                            if (copyEffect == null)
+                                throw new Exception($"ProcessVfxExtensions: CopyFrom cannot be completed. No Effect ID of {effect.ExtendedEffectData.CopyFrom} was found in either the VfxPackage or EEPK.");
+
+                        }
+
+                        effect.EffectParts.AddRange(copyEffect.EffectParts);
+                    }
+                }
+            }
+        }
+
+        private int AssignAutoId(IList<Effect> effectsToInstall)
+        {
+            int id = 2000;
+
+            while(IsEffectIdUsed(id, effectsToInstall))
+            {
+                id++;
+
+                if(id > ushort.MaxValue)
+                {
+                    throw new Exception("AssignAutoId: Cannot assign a ID within the EEPK file. There are no suitable IDs.");
+                }
+            }
+
+            return id;
+        }
+
+        private bool IsEffectIdUsed(int id, IList<Effect> effectsToInstall)
+        {
+            if (Effects.Any(x => x.IndexNum == id)) return true;
+            if (effectsToInstall.Any(x => x.IndexNum == id && x.ExtendedEffectData?.AutoIdEnabled == false)) return true;
+
+            return false;
+        }
+
+        public int CreateAwokenOverlayEntry(byte[] texture)
         {
             Effect bluerintEffect = Effects.FirstOrDefault(x => x.SortID == 20000);
 
@@ -2509,6 +2577,8 @@ namespace Xv2CoreLib.EffectContainer
 
         }
         #endregion
+
+
 
         public bool IsNull()
         {

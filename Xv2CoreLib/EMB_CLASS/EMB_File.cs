@@ -279,6 +279,15 @@ namespace Xv2CoreLib.EMB_CLASS
             return embEntry;
         }
 
+        public int GetNewID()
+        {
+            int id = 0;
+
+            while (Entry.Any(x => x.ID == id))
+                id++;
+
+            return id;
+        }
 
         public string GetUnusedName(string name)
         {
@@ -509,18 +518,14 @@ namespace Xv2CoreLib.EMB_CLASS
         [YAXDontSerialize]
         public int SortID
         {
-            get
-            {
-                int num;
-                if (int.TryParse(Index, out num))
-                    return num;
-
-                return -1;
-            }
-            set
-            {
-                Index = value.ToString();
-            }
+            get => ID;
+            set => ID = value;
+        }
+        [YAXDontSerialize]
+        public int ID
+        {
+            get => Utils.TryParseInt(Index);
+            set => Index = value.ToString();
         }
 
         [YAXAttributeForClass]

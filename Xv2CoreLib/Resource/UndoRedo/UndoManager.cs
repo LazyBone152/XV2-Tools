@@ -82,9 +82,14 @@ namespace Xv2CoreLib.Resource.UndoRedo
             LastAddition = DateTime.Now;
         }
 
-        public void AddCompositeUndo(List<IUndoRedo> undos, string message, UndoGroup undoGroup = UndoGroup.Default)
+        public void AddUndo(IUndoRedo undo, UndoGroup undoGroup, string undoArg = null, object undoContext = null)
         {
-            AddUndo(new CompositeUndo(undos, message, undoGroup));
+            AddUndo(new UndoGroupContainer(undo, undoGroup, undoArg, undoContext));
+        }
+
+        public void AddCompositeUndo(List<IUndoRedo> undos, string message, UndoGroup undoGroup = UndoGroup.Default, string undoArg = null, object undoContext = null)
+        {
+            AddUndo(new CompositeUndo(undos, message, undoGroup, undoArg, undoContext));
         }
 
         /// <summary>
@@ -142,7 +147,7 @@ namespace Xv2CoreLib.Resource.UndoRedo
             finally
             {
                 IsUndoing = false;
-                UndoOrRedoCalled?.Invoke(this, new UndoEventRaisedEventArgs(GetUndoGroup(action)));
+                UndoOrRedoCalled?.Invoke(this, new UndoEventRaisedEventArgs(GetUndoGroup(action), GetUndoArg(action), GetUndoContext(action)));
             }
 
         }
@@ -163,7 +168,7 @@ namespace Xv2CoreLib.Resource.UndoRedo
             finally
             {
                 IsUndoing = false;
-                UndoOrRedoCalled?.Invoke(this, new UndoEventRaisedEventArgs(GetUndoGroup(action)));
+                UndoOrRedoCalled?.Invoke(this, new UndoEventRaisedEventArgs(GetUndoGroup(action), GetUndoArg(action), GetUndoContext(action)));
             }
 
         }
@@ -197,9 +202,9 @@ namespace Xv2CoreLib.Resource.UndoRedo
         /// Force invoke <see cref="UndoOrRedoCalled"/>.
         /// </summary>
         /// <param name="undoGroup">The UndoGroup attached to the event. This can be used to conditionally respond when the event is raised.</param>
-        public void ForceEventCall(UndoGroup undoGroup = UndoGroup.Default)
+        public void ForceEventCall(UndoGroup undoGroup = UndoGroup.Default, string undoArg = null, object undoContext = null)
         {
-            UndoOrRedoCalled?.Invoke(this, new UndoEventRaisedEventArgs(undoGroup));
+            UndoOrRedoCalled?.Invoke(this, new UndoEventRaisedEventArgs(undoGroup, undoArg, undoContext));
         }
 
 
@@ -214,6 +219,30 @@ namespace Xv2CoreLib.Resource.UndoRedo
 
             return UndoGroup.Default;
         }
+
+        private string GetUndoArg(IUndoRedo undo)
+        {
+            var prop = undo.GetType().GetProperty(nameof(CompositeUndo.UndoArg));
+
+            if (prop != null)
+            {
+                return (string)prop.GetValue(undo);
+            }
+
+            return null;
+        }
+
+        private object GetUndoContext(IUndoRedo undo)
+        {
+            var prop = undo.GetType().GetProperty(nameof(CompositeUndo.UndoContext));
+
+            if (prop != null)
+            {
+                return prop.GetValue(undo);
+            }
+
+            return null;
+        }
     }
 
     public enum UndoGroup
@@ -222,7 +251,9 @@ namespace Xv2CoreLib.Resource.UndoRedo
         Animation,
         Camera,
         Effect,
-        Action
+        Action,
+        BCS,
+        EMD
     }
 
     public delegate void UndoEventRaisedEventHandler(object source, UndoEventRaisedEventArgs e);
@@ -230,10 +261,14 @@ namespace Xv2CoreLib.Resource.UndoRedo
     public class UndoEventRaisedEventArgs : EventArgs
     {
         public UndoGroup UndoGroup { get; private set; }
+        public string UndoArg { get; private set; }
+        public object UndoContext { get; private set; }
 
-        public UndoEventRaisedEventArgs(UndoGroup undoGroup)
+        public UndoEventRaisedEventArgs(UndoGroup undoGroup, string undoArg, object undoContext)
         {
             UndoGroup = undoGroup;
+            UndoArg = undoArg;
+            UndoContext = undoContext;
         }
     }
 }

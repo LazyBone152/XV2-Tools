@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
 using Xv2CoreLib.Resource;
 using YAXLib;
 
@@ -119,10 +117,10 @@ namespace Xv2CoreLib.EEPK
                 {
                     ushort assetCount = (ushort)((eepk_File.Assets[i].AssetEntries != null) ? eepk_File.Assets[i].AssetEntries.Count() : 0);
 
-                    bytes.AddRange(BitConverter.GetBytes(HexConverter.ToInt32(eepk_File.Assets[i].I_00)));
-                    bytes.AddRange(new byte[4] { HexConverter.ToInt8(eepk_File.Assets[i].I_04), HexConverter.ToInt8(eepk_File.Assets[i].I_05), HexConverter.ToInt8(eepk_File.Assets[i].I_06), HexConverter.ToInt8(eepk_File.Assets[i].I_07) });
-                    bytes.AddRange(BitConverter.GetBytes(HexConverter.ToInt32(eepk_File.Assets[i].I_08)));
-                    bytes.AddRange(BitConverter.GetBytes(HexConverter.ToInt32(eepk_File.Assets[i].I_12)));
+                    bytes.AddRange(BitConverter.GetBytes(eepk_File.Assets[i].I_00));
+                    bytes.AddRange(new byte[4] { eepk_File.Assets[i].I_04, eepk_File.Assets[i].I_05,eepk_File.Assets[i].I_06, eepk_File.Assets[i].I_07 });
+                    bytes.AddRange(BitConverter.GetBytes(eepk_File.Assets[i].AssetLimit));
+                    bytes.AddRange(BitConverter.GetBytes(eepk_File.Assets[i].I_12));
                     bytes.AddRange(BitConverter.GetBytes((ushort)eepk_File.Assets[i].I_16));
                     bytes.AddRange(new byte[12]);
                     bytes.AddRange(BitConverter.GetBytes(assetCount));
@@ -353,7 +351,7 @@ namespace Xv2CoreLib.EEPK
                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(24),20); //Pointer to Effect Pointer List
             }
 
-            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(eepk_File.I_08), 8); //Unknown data in header
+            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(eepk_File.Version), 8); //Unknown data in header
             
         }
     }

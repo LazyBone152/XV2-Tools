@@ -260,13 +260,15 @@ namespace Xv2CoreLib
             string dyt = part.GetDytPath(type);
             string ean = part.GetEanPath();
 
-            LoadPartSetFile(emd, part.CharaCode, null);
-            LoadPartSetFile(emb, part.CharaCode, null);
-            LoadPartSetFile(emm, part.CharaCode, null);
-            LoadPartSetFile(ean, part.CharaCode, null);
-            LoadPartSetFile(dyt, part.CharaCode, null);
+            LoadPartSetFile(emd, part.CharaCode, type, null);
+            LoadPartSetFile(emb, part.CharaCode, type, null);
+            LoadPartSetFile(emm, part.CharaCode, type, null);
+            LoadPartSetFile(dyt, part.CharaCode, type, null);
 
-            if(part.PhysicsParts != null)
+            if(!string.IsNullOrWhiteSpace(ean))
+                LoadPartSetFile(ean, part.CharaCode, type, null);
+
+            if (part.PhysicsParts != null)
             {
                 foreach (var physicsPart in part.PhysicsParts)
                 {
@@ -278,38 +280,50 @@ namespace Xv2CoreLib
                     string physicsEan = physicsPart.GetEanPath();
                     string physicsScd = physicsPart.GetScdPath();
 
-                    LoadPartSetFile(physicsEmd, physicsPart.CharaCode, null);
-                    LoadPartSetFile(physicsEmb, physicsPart.CharaCode, emb);
-                    LoadPartSetFile(physicsEmm, physicsPart.CharaCode, emm);
-                    LoadPartSetFile(physicsDyt, physicsPart.CharaCode, dyt);
-                    LoadPartSetFile(physicsEan, physicsPart.CharaCode, null);
-                    LoadPartSetFile(physicsScd, physicsPart.CharaCode, null);
-                    LoadPartSetFile(physicsEsk, physicsPart.CharaCode, null);
+                    LoadPartSetFile(physicsEmd, physicsPart.CharaCode, type, null);
+                    LoadPartSetFile(physicsEmb, physicsPart.CharaCode, type, emb);
+                    LoadPartSetFile(physicsEmm, physicsPart.CharaCode, type, emm);
+                    LoadPartSetFile(physicsDyt, physicsPart.CharaCode, type, dyt);
+                    LoadPartSetFile(physicsEan, physicsPart.CharaCode, type, null);
+                    LoadPartSetFile(physicsScd, physicsPart.CharaCode, type, null);
+                    LoadPartSetFile(physicsEsk, physicsPart.CharaCode, type, null);
                 }
             }
         }
 
-        private void LoadPartSetFile(string path, string charaCode, string altPath = null)
+        private void LoadPartSetFile(string path, string charaCode, PartType type, string altPath = null)
         {
             if (charaCode != CmsEntry.ShortName) return; //Dont load files belonging to another character
 
             string name = Path.GetFileName(path);
 
             if (string.IsNullOrWhiteSpace(path)) return; //Nothing to load
-            if (PartSetFiles.Any(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase))) return; //File already loaded
+            if (PartSetFiles.Any(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
+            {
+                //File loaded already. We just need to add the part type to the existing instance.
+                Xv2PartSetFile file = PartSetFiles.FirstOrDefault(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+                file.PartTypes = file.PartTypes.SetFlag(Part.GetPartTypeFlags(type));
+
+                return;
+            }
 
             path = Utils.SanitizePath(path);
 
             //Special case: EMB, EMM and DYT for physics parts can use the parents files if none are found
             if (!FileManager.Instance.fileIO.FileExists(path))
+            {
                 path = altPath;
+                name = Path.GetFileName(altPath);
+            }
 
             //Exit if no file is found
             if (!FileManager.Instance.fileIO.FileExists(path))
-                return; 
+                return;
 
+            Xv2PartSetFile charaFile = new Xv2PartSetFile(name, this);
+            charaFile.PartTypes = charaFile.PartTypes.SetFlag(Part.GetPartTypeFlags(type));
 
-            PartSetFiles.Add(new Xv2PartSetFile(name, this));
+            PartSetFiles.Add(charaFile);
         }
 
         public object GetPartSetFile(string name)
@@ -325,6 +339,51 @@ namespace Xv2CoreLib
             }
 
             return null;
+        }
+
+        //PartSet Editing
+        public string GetUnusedCharaFileName(string path)
+        {
+            //IF the name is unused, then just return it
+            if (PartSetFiles.FirstOrDefault(x => x.Name.Equals(path, StringComparison.OrdinalIgnoreCase)) == null) return path;
+
+            //Else, add a number suffix at the end
+            string name = Path.GetFileNameWithoutExtension(path);
+            string ext = Path.GetExtension(path);
+            int suffix = 1;
+
+            while(PartSetFiles.Any(x => x.Name.Equals($"{name}_{suffix}{ext}", StringComparison.OrdinalIgnoreCase)))
+            {
+                suffix++;
+            }
+
+            return $"{name}_{suffix}{ext}";
+        }
+
+        public bool CheckCharaFilePathIsReserved(string path)
+        {
+            if (path.Equals($"{CmsEntry?.ShortName}_000.esk", StringComparison.OrdinalIgnoreCase)) return true;
+            if (path.Equals($"{CmsEntry?.ShortName}.ean", StringComparison.OrdinalIgnoreCase)) return true;
+            if (path.Equals($"{CmsEntry?.ShortName}.cam.ean", StringComparison.OrdinalIgnoreCase)) return true;
+
+            return false;
+        }
+
+        public IUndoRedo AddCharaFile(string absolutePath, bool forceLoad)
+        {
+            string relativePath = Path.GetFileName(absolutePath);
+
+            Xv2PartSetFile file = new Xv2PartSetFile(relativePath, this, absolutePath);
+
+            if (file.FileType == Xv2PartSetFile.Type.Unknown)
+                throw new InvalidDataException(string.Format("AddCharaFile: File type of \"{0}\" is not supported.\n\nOnly EMD, EMB, DYT.EMB, EMM, EAN and SCD files can be added.", relativePath));
+
+            if (forceLoad)
+                file.Load();
+
+            PartSetFiles.Add(file);
+
+            return new UndoableListAdd<Xv2PartSetFile>(PartSetFiles, file, "Add Chara File");
         }
 
         //Costumes
@@ -353,9 +412,11 @@ namespace Xv2CoreLib
         }
     }
 
+    [Serializable]
     public class Xv2CharaCostume : INotifyPropertyChanged
     {
         #region NotifyPropertyChanged
+        [field:NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void NotifyPropertyChanged(String propertyName = "")
@@ -428,10 +489,25 @@ namespace Xv2CoreLib
 
     }
 
-    public class Xv2PartSetFile
+    [Serializable]
+    public class Xv2PartSetFile : INotifyPropertyChanged
     {
+        #region NotifyPropertyChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+        #endregion
+
         public enum Type
         {
+            Unknown = 0,
             //Main types
             EMD,
             EMB,
@@ -449,21 +525,27 @@ namespace Xv2CoreLib
         /// The complete name of the file, including the extension.
         /// </summary>
         public string Name { get; set; }
+        public string NameNoExt => Path.GetFileNameWithoutExtension(Name);
         private string RelativePath => $"chara/{Owner.CmsEntry.ShortName}/{Name}";
-        public Xv2Character Owner { get; set; } 
+        [NonSerialized]
+        public Xv2Character Owner;
 
         //Type:
         public Type FileType { get; private set; }
-        /// <summary>
-        /// When true, <see cref="File"/> will contain the parsed file of the type specified in <see cref="FileType"/>. Otherwise, the raw bytes of the file will be stored in <see cref="Bytes"/>
-        /// </summary>
+        public PartTypeFlags PartTypes { get; set; }
 
         //Data:
         public bool IsLoaded { get; private set; }
         public object File { get; private set; }
+        //Used for unsupported file types like SCD that have no parser. Otherwise, its null
         public byte[] Bytes { get; private set; }
 
-        //Constructor:
+        //Constructors:
+        /// <summary>
+        /// Initalize a Xv2PartSetFile from a file that exists in the game. The file will not be loaded upon creation, just when requested.
+        /// </summary>
+        /// <param name="name">Name of the file, including extension. Relative to owner.</param>
+        /// <param name="owner">The owner of this file.</param>
         public Xv2PartSetFile(string name, Xv2Character owner)
         {
             Name = name;
@@ -471,8 +553,24 @@ namespace Xv2CoreLib
             FileType = GetFileType(name);
         }
 
-        public void Load()
+        /// <summary>
+        /// Manually load a file directly.
+        /// </summary>
+        /// <param name="name">Name of the file, including extension. Relative to owner.</param>
+        /// <param name="owner">The owner of this file.</param>
+        /// <param name="filePathToLoad">Absolute path to file. This will be loaded immediately upon creation.</param>
+        public Xv2PartSetFile(string name, Xv2Character owner, string filePathToLoad)
         {
+            Name = name;
+            Owner = owner;
+            FileType = GetFileType(name);
+            LoadManual(filePathToLoad);
+        }
+
+        public void Load(bool allowReload = true)
+        {
+            if (IsLoaded && !allowReload) return;
+
             switch (FileType)
             {
                 case Type.EMD:
@@ -491,6 +589,38 @@ namespace Xv2CoreLib
             }
 
             IsLoaded = true;
+            NotifyPropertyChanged(nameof(IsLoaded));
+        }
+
+        private void LoadManual(string path)
+        {
+            switch (FileType)
+            {
+                case Type.EMD:
+                    File = EMD_File.Load(path);
+                    break;
+                case Type.EMB:
+                case Type.DYT_EMB:
+                    File = EMB_File.LoadEmb(path);
+                    break;
+                case Type.EMM:
+                    File = EMM_File.LoadEmm(path);
+                    break;
+                case Type.EAN:
+                    File = EAN_File.Load(path);
+                    break;
+                case Type.SCD_ESK:
+                    File = ESK_File.Load(path);
+                    break;
+                case Type.SCD:
+                    Bytes = System.IO.File.ReadAllBytes(path);
+                    break;
+                default:
+                    throw new ArgumentException($"Xv2PartSetFile.LoadManual: File type not supported here ({FileType}).");
+            }
+
+            IsLoaded = true;
+            NotifyPropertyChanged(nameof(IsLoaded));
         }
 
         public void Save()
@@ -526,8 +656,45 @@ namespace Xv2CoreLib
             if (path.Contains(".scd")) return Type.SCD;
             if (path.Contains(".esk")) return Type.SCD_ESK;
 
-            return 0;
+            return Type.Unknown;
         }
+    
+        public void RefreshValues()
+        {
+            NotifyPropertyChanged(nameof(Name));
+            NotifyPropertyChanged(nameof(NameNoExt));
+            NotifyPropertyChanged(nameof(IsLoaded));
+        }
+    
+        /// <summary>
+        /// Creates a shallow copy of the object, but leaves Owner null.
+        /// </summary>
+        public Xv2PartSetFile SoftCopy()
+        {
+            return new Xv2PartSetFile(Name, null)
+            {
+                File = File,
+                Bytes = Bytes,
+                IsLoaded = IsLoaded,
+                PartTypes = PartTypes
+            };
+        }
+        
+        /// <summary>
+        /// Creates a hard copy of the object, but leaves Owner null.
+        /// </summary>
+        public Xv2PartSetFile HardCopy()
+        {
+            return new Xv2PartSetFile(Name, null)
+            {
+                File = File != null ? File.Copy() : null,
+                Bytes = Bytes != null ? Bytes.Copy() : null,
+                IsLoaded = IsLoaded,
+                PartTypes = PartTypes
+            };
+        }
+
+
     }
 
 }

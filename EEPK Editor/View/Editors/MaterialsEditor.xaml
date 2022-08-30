@@ -12,7 +12,7 @@
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
              Dialog:DialogParticipation.Register="{Binding}"
-             d:DesignHeight="600" d:DesignWidth="900" Name="UserControl">
+             d:DesignHeight="600" d:DesignWidth="920" Name="UserControl">
     <Grid>
         <Grid.Resources>
             <ObjectDataProvider x:Key="alphaBlendTypeEnum" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
@@ -29,7 +29,7 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="40"/>
-            <ColumnDefinition Width="320"/>
+            <ColumnDefinition Width="340"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         
@@ -113,8 +113,21 @@
                         <MenuItem Header="Hue Set" Command="{Binding HueSetCommand}"/>
                     </ContextMenu>
                 </DataGrid.ContextMenu>
-                
+
                 <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="ID" Width="50" SortMemberPath="Index" Visibility="{Binding ElementName=UserControl, Path=InverseContainerVisiblility}">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Index}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <Controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=SelectedMaterialID, UpdateSourceTrigger=LostFocus}" Minimum="0" HideUpDownButtons="True" HorizontalContentAlignment="Left"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
+                    
                     <DataGridTemplateColumn Header="Name" Width="150">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>

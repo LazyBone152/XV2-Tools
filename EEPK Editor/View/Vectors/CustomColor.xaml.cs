@@ -60,6 +60,8 @@ namespace EEPK_Organiser.View.Vectors
 
         #endregion
 
+        public event EventHandler ColorChangedEvent;
+
         public float R
         {
             get => Value != null ? Value.R : 0;
@@ -142,13 +144,15 @@ namespace EEPK_Organiser.View.Vectors
 
                 if (addUndo)
                     UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(propName, Value, original, newValue, $"{propName}"));
+
+                ColorChangedEvent?.Invoke(this, EventArgs.Empty);
             }
             return (!addUndo) ? new UndoablePropertyGeneric(propName, Value, original, newValue, $"{propName}") : null;
         }
 
         private void SetColorValue(Color? newValue)
         {
-            if (newValue.Value == null) return;
+            if (newValue.Value == null || Value == null) return;
 
             List<IUndoRedo> undos = new List<IUndoRedo>();
             undos.Add(SetFloatValue(newValue.Value.ScR, "R", false));

@@ -30,12 +30,12 @@ namespace Xv2CoreLib.EEPK
     {
         public const int EEPK_SIGNATURE = 1263551779;
         
-        public int I_08 = 37568;
+        public int Version = 37568;
         [YAXSerializeAs("Containers")]
         [YAXDontSerializeIfNull]
-        public List<AssetContainer> Assets { get; set; }
+        public List<AssetContainer> Assets { get; set; } = new List<AssetContainer>();
         [YAXDontSerializeIfNull]
-        public List<Effect> Effects { get; set; }
+        public List<Effect> Effects { get; set; } = new List<Effect>();
         
         public void SortEntries()
         {
@@ -167,27 +167,32 @@ namespace Xv2CoreLib.EEPK
         //lots of the data types are guesses, as they lack actual data in the files I've looked. Might actually be padding.
         [YAXAttributeFor("I_00")]
         [YAXSerializeAs("value")]
-        public string I_00 { get; set; } //int32
+        [YAXHexValue]
+        public int I_00 { get; set; } //int32
 
         [YAXAttributeFor("I_04")]
         [YAXSerializeAs("value")]
-        public string I_04 { get; set; } // int8
+        [YAXHexValue]
+        public byte I_04 { get; set; } // int8
         [YAXAttributeFor("I_05")]
         [YAXSerializeAs("value")]
-        public string I_05 { get; set; } // int8
+        [YAXHexValue]
+        public byte I_05 { get; set; } // int8
         [YAXAttributeFor("I_06")]
         [YAXSerializeAs("value")]
-        public string I_06 { get; set; } // int8
+        [YAXHexValue]
+        public byte I_06 { get; set; } // int8
         [YAXAttributeFor("I_07")]
         [YAXSerializeAs("value")]
-        public string I_07 { get; set; } // int8
+        [YAXHexValue]
+        public byte I_07 { get; set; } // int8
 
         [YAXAttributeFor("AssetLimit")]
         [YAXSerializeAs("value")]
-        public string I_08 { get; set; }  // int32. This somehow limits the amount of assets, but not by the amount. Perhaps size?
+        public int AssetLimit { get; set; }  // int32. This somehow limits the amount of assets, but not by the amount. Perhaps size?
         [YAXAttributeFor("I_12")]
         [YAXSerializeAs("value")]
-        public string I_12 { get; set; }  // int32
+        public int I_12 { get; set; }  // int32
         [YAXAttributeForClass]
         [YAXSerializeAs("Type")]
         public AssetType I_16 { get; set; }  // int16
@@ -217,7 +222,7 @@ namespace Xv2CoreLib.EEPK
                 I_05 = I_05,
                 I_06 = I_06,
                 I_07 = I_07,
-                I_08 = I_08,
+                AssetLimit = AssetLimit,
                 I_12 = I_12,
                 I_16 = I_16,
                 FILES = FILES,
@@ -245,13 +250,7 @@ namespace Xv2CoreLib.EEPK
         {
             return new AssetContainer()
             {
-                I_00 = "0x0",
-                I_04 = "0x0",
-                I_05 = "0x0",
-                I_06 = "0x0",
-                I_07 = "0x0",
-                I_08 = "0x9c40",
-                I_12 = "0x0",
+                AssetLimit = 0x9c40,
                 AssetEntries = new List<Asset_Entry>(),
                 FILES = new string[3] { "NULL", "NULL", "NULL" }
             };
@@ -445,6 +444,10 @@ namespace Xv2CoreLib.EEPK
                 }
             }
         }
+
+        //Installer
+        [YAXDontSerialize]
+        public VfxPackageExtendedEffect ExtendedEffectData { get; set; }
 
         #region Undoable
         [YAXDontSerialize]

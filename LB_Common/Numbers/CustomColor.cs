@@ -33,6 +33,11 @@ namespace LB_Common.Numbers
             return (R == 0f && G == 0f && B == 0f) || (R == 1f && G == 1f && B == 1f);
         }
 
+        public bool IsBlack()
+        {
+            return (R == 0f && G == 0f && B == 0f);
+        }
+
         public void SetValue(int idx, float value)
         {
             //Initialization of internal array is required here when using XML serialization

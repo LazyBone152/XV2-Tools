@@ -1,8 +1,13 @@
-﻿using System;
+﻿using LB_Common.Numbers;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Windows.Data;
+using System.Windows.Media;
 using Xv2CoreLib.Resource;
+using Xv2CoreLib.Resource.UndoRedo;
 using YAXLib;
 
 namespace Xv2CoreLib.BCS
@@ -19,6 +24,22 @@ namespace Xv2CoreLib.BCS
         Pants,
         Rist,
         Boots
+    }
+
+    [Flags]
+    public enum PartTypeFlags : int
+    {
+        None = 0x0,
+        FaceBase = 0x1,
+        FaceForehead = 0x2,
+        FaceEye = 0x4,
+        FaceNose = 0x8,
+        FaceEar = 0x10,
+        Hair = 0x20,
+        Bust = 0x40,
+        Pants = 0x80,
+        Rist = 0x100,
+        Boots = 0x200
     }
 
     public enum Race : byte
@@ -38,6 +59,7 @@ namespace Xv2CoreLib.BCS
     }
 
     [YAXSerializeAs("BCS")]
+    [Serializable]
     public class BCS_File : ISorting
     {
 
@@ -52,17 +74,17 @@ namespace Xv2CoreLib.BCS
         [YAXFormat("0.0###########")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
         public float[] F_48 { get; set; } = new float[7]; // size 7
-        
+
         [YAXDontSerializeIfNull]
-        public List<PartSet> PartSets { get; set; }
+        public AsyncObservableCollection<PartSet> PartSets { get; set; } = new AsyncObservableCollection<PartSet>();
         [YAXDontSerializeIfNull]
-        public List<PartColor> PartColors { get; set; }
+        public AsyncObservableCollection<PartColor> PartColors { get; set; } = new AsyncObservableCollection<PartColor>();
         [YAXDontSerializeIfNull]
-        public List<Body> Bodies { get; set; }
+        public AsyncObservableCollection<Body> Bodies { get; set; } = new AsyncObservableCollection<Body>();
         [YAXDontSerializeIfNull]
-        public SkeletonData SkeletonData1 { get; set; }
+        public SkeletonData SkeletonData1 { get; set; } = new SkeletonData();
         [YAXDontSerializeIfNull]
-        public SkeletonData SkeletonData2 { get; set; }
+        public SkeletonData SkeletonData2 { get; set; } = new SkeletonData();
 
 
 
@@ -112,9 +134,9 @@ namespace Xv2CoreLib.BCS
 
         public PartColor GetPartColors(string id, string name)
         {
-            if (PartColors == null) PartColors = new List<PartColor>();
+            if (PartColors == null) PartColors = new AsyncObservableCollection<PartColor>();
 
-            int index = PartColors.FindIndex(p => (p.Index == id));
+            int index = PartColors.IndexOf(PartColors.FirstOrDefault(x => x.Index == id));
 
             if(index != -1)
             {
@@ -122,11 +144,23 @@ namespace Xv2CoreLib.BCS
             }
             else
             {
-                PartColor newPartColor = new PartColor() { Index = id, Name = name, ColorsList = new List<Colors>() };
+                PartColor newPartColor = new PartColor() { Index = id, Name = name, ColorsList = new AsyncObservableCollection<Colors>() };
                 PartColors.Add(newPartColor);
                 return newPartColor;
             }
 
+        }
+
+        public Colors GetColor(int groupId, int colorIndex)
+        {
+            PartColor partColor = PartColors.FirstOrDefault(x => x.ID == groupId);
+
+            if(partColor != null)
+            {
+                return partColor.ColorsList.FirstOrDefault(x => x.ID == colorIndex);
+            }
+
+            return null;
         }
 
         public static string GetBcsFilePath(Race race, Gender gender = Gender.Male)
@@ -146,12 +180,168 @@ namespace Xv2CoreLib.BCS
 
             return null;
         }
+        
+        public int NewPartColorGroupID()
+        {
+            int id = 0;
+
+            while(PartColors.Any(x => x.SortID == id))
+            {
+                id++;
+            }
+
+            return id;
+        }
+
+        public int NewBodyID()
+        {
+            int id = 0;
+
+            while (Bodies.Any(x => x.ID == id))
+            {
+                id++;
+            }
+
+            return id;
+        }
+
+        public int NewPartSetID()
+        {
+            int id = 0;
+
+            while (PartSets.Any(x => x.ID == id))
+            {
+                id++;
+            }
+
+            return id;
+        }
+
+        public PartSet GetParentPartSet(PhysicsPart physicsPart)
+        {
+            foreach (var partSet in PartSets)
+            {
+                foreach (var _part in partSet.Parts)
+                {
+                    foreach(var _physicsPart in _part.PhysicsParts)
+                    {
+                        if (_physicsPart == physicsPart) return partSet;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        public PartSet GetParentPartSet(Part part)
+        {
+            foreach (var partSet in PartSets)
+            {
+                foreach (var _part in partSet.Parts)
+                {
+                    if (_part == part) return partSet;
+                }
+            }
+
+            return null;
+        }
+
+        public PartSet GetParentPartSet(ColorSelector colSel)
+        {
+            foreach(var partSet in PartSets)
+            {
+                foreach(var part in partSet.Parts)
+                {
+                    foreach(var colorSel in part.ColorSelectors)
+                    {
+                        if (colorSel == colSel) return partSet;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        public Part GetParentPart(PhysicsPart physicsPart)
+        {
+            foreach (var partSet in PartSets)
+            {
+                foreach (var part in partSet.Parts)
+                {
+                    foreach (var _physicsPart in part.PhysicsParts)
+                    {
+                        if (_physicsPart == physicsPart) return part;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        public Part GetParentPart(ColorSelector colSel)
+        {
+            foreach (var partSet in PartSets)
+            {
+                foreach (var part in partSet.Parts)
+                {
+                    foreach (var colorSel in part.ColorSelectors)
+                    {
+                        if (colorSel == colSel) return part;
+                    }
+                }
+            }
+
+            return null;
+        }
+        
+        public Part GetPartWithEmdPath(string emdPath)
+        {
+            foreach(var partSet in PartSets)
+            {
+                foreach(var part in partSet.Parts)
+                {
+                    if (Path.GetFileName(part.GetModelPath(part.PartType)) == emdPath) return part;
+                }
+            }
+
+            return null;
+        }
+
+        public PhysicsPart GetPhysicsPartWithEmdPath(string emdPath)
+        {
+            foreach (var partSet in PartSets)
+            {
+                foreach (var part in partSet.Parts)
+                {
+                    foreach(var physicsPart in part.PhysicsParts)
+                    {
+                        if (Path.GetFileNameWithoutExtension(physicsPart.GetEmbPath()) == emdPath) return physicsPart;
+                    }
+                }
+            }
+
+            return null;
+        }
     }
 
     //PartSet
     [Serializable]
-    public class PartSet : IInstallable
+    public class PartSet : IInstallable, INotifyPropertyChanged
     {
+        #region NotifyPropertyChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        #endregion
+
         #region WrappedProps
         [YAXDontSerialize]
         public int SortID
@@ -166,7 +356,7 @@ namespace Xv2CoreLib.BCS
         #endregion
 
         [YAXAttributeForClass]
-        [BindingAutoId(999)]
+        [BindingAutoId()]
         public string Index { get; set; } //uint16
 
         //Parts
@@ -223,7 +413,7 @@ namespace Xv2CoreLib.BCS
             }
         }
 
-        public void SetPart(Part part, PartType type)
+        public void SetPart(Part part, PartType type, List<IUndoRedo> undos = null)
         {
             if (part == null) return;
             if (Parts == null) Parts = new AsyncObservableCollection<Part>();
@@ -236,13 +426,33 @@ namespace Xv2CoreLib.BCS
                 int insetIdx = (int)type;
 
                 if (insetIdx <= Parts.Count)
+                {
                     Parts.Insert(insetIdx, part);
+
+                    if (undos != null)
+                        undos.Add(new UndoableListInsert<Part>(Parts, insetIdx, part));
+                }
                 else
+                {
                     Parts.Add(part);
+
+                    if (undos != null)
+                        undos.Add(new UndoableListAdd<Part>(Parts, part));
+                }
             }
             else
             {
-                Parts[Parts.IndexOf(entry)] = part;
+                int replaceIdx = Parts.IndexOf(entry);
+
+                if (undos != null)
+                {
+                    undos.Add(new UndoableListRemove<Part>(Parts, Parts[replaceIdx], replaceIdx));
+                    undos.Add(new UndoableListInsert<Part>(Parts, replaceIdx,  part));
+                }
+
+                Parts.RemoveAt(replaceIdx);
+                Parts.Insert(replaceIdx, part);
+                //Parts[replaceIdx] = part;
             }
         }
 
@@ -252,25 +462,29 @@ namespace Xv2CoreLib.BCS
             return Parts.FirstOrDefault(x => x.PartType == type);
         }
 
-#if DEBUG
-        public List<Part> GetAllParts_DEBUG()
+        public bool HasPart(PartType type)
         {
-            List<Part> parts = new List<Part>();
-
-            if (FaceBase != null) parts.Add(FaceBase);
-            if (FaceForehead != null) parts.Add(FaceForehead);
-            if (FaceEye != null) parts.Add(FaceEye);
-            if (FaceNose != null) parts.Add(FaceNose);
-            if (FaceEar != null) parts.Add(FaceEar);
-            if (Hair != null) parts.Add(Hair);
-            if (Bust != null) parts.Add(Bust);
-            if (Pants != null) parts.Add(Pants);
-            if (Rist != null) parts.Add(Rist);
-            if (Boots != null) parts.Add(Boots);
-
-            return parts;
+            return GetPart(type) != null;
         }
-#endif
+
+        public Part GetParentPart(PhysicsPart physicsPart)
+        {
+            foreach(var part in Parts)
+            {
+                if(part.PhysicsParts != null)
+                {
+                    if (part.PhysicsParts.Contains(physicsPart)) return part;
+                }
+            }
+
+            return null;
+        }
+
+        public void RefreshValues()
+        {
+            NotifyPropertyChanged(nameof(ID));
+        }
+    
     }
 
     [Serializable]
@@ -280,7 +494,7 @@ namespace Xv2CoreLib.BCS
         public enum PartFlags : int
         {
             Unk1 = 0x1, //Seemingly does nothing
-            DytFromTextureEmb = 0x2, //Both Model2 and Files_EMB
+            DytFromTextureEmb = 0x2, //Takes DYT path from the main EMB (Model2 and Files_EMB)
             DytRampsFromTextureEmb = 0x4, //Untested
             GreenScouterOverlay = 0x8,
             RedScouterOverlay = 0x10,
@@ -311,69 +525,73 @@ namespace Xv2CoreLib.BCS
         public PartFlags Flags { get; set; }
 
         //Flags
+        [YAXDontSerialize]
+        public PartTypeFlags HideFlags { get; set; }
         [YAXAttributeFor("HideParts")]
         [YAXSerializeAs("FaceBase")]
-        public bool Hide_FaceBase { get; set; }
+        public bool Hide_FaceBase { get => HideFlags.HasFlag(PartTypeFlags.FaceBase); set => HideFlags = HideFlags.SetFlag(PartTypeFlags.FaceBase, value); }
         [YAXAttributeFor("HideParts")]
         [YAXSerializeAs("Forehead")]
-        public bool Hide_Forehead { get; set; }
+        public bool Hide_Forehead { get => HideFlags.HasFlag(PartTypeFlags.FaceForehead); set => HideFlags = HideFlags.SetFlag(PartTypeFlags.FaceForehead, value); }
         [YAXAttributeFor("HideParts")]
         [YAXSerializeAs("Eye")]
-        public bool Hide_Eye { get; set; }
+        public bool Hide_Eye { get => HideFlags.HasFlag(PartTypeFlags.FaceEye); set => HideFlags = HideFlags.SetFlag(PartTypeFlags.FaceEye, value); }
         [YAXAttributeFor("HideParts")]
         [YAXSerializeAs("Nose")]
-        public bool Hide_Nose { get; set; }
+        public bool Hide_Nose { get => HideFlags.HasFlag(PartTypeFlags.FaceNose); set => HideFlags = HideFlags.SetFlag(PartTypeFlags.FaceNose, value); }
         [YAXAttributeFor("HideParts")]
         [YAXSerializeAs("Ear")]
-        public bool Hide_Ear { get; set; }
+        public bool Hide_Ear { get => HideFlags.HasFlag(PartTypeFlags.FaceEar); set => HideFlags = HideFlags.SetFlag(PartTypeFlags.FaceEar, value); }
         [YAXAttributeFor("HideParts")]
         [YAXSerializeAs("Hair")]
-        public bool Hide_Hair { get; set; }
+        public bool Hide_Hair { get => HideFlags.HasFlag(PartTypeFlags.Hair); set => HideFlags = HideFlags.SetFlag(PartTypeFlags.Hair, value); }
         [YAXAttributeFor("HideParts")]
         [YAXSerializeAs("Bust")]
-        public bool Hide_Bust { get; set; }
+        public bool Hide_Bust { get => HideFlags.HasFlag(PartTypeFlags.Bust); set => HideFlags = HideFlags.SetFlag(PartTypeFlags.Bust, value); }
         [YAXAttributeFor("HideParts")]
         [YAXSerializeAs("Pants")]
-        public bool Hide_Pants { get; set; }
+        public bool Hide_Pants { get => HideFlags.HasFlag(PartTypeFlags.Pants); set => HideFlags = HideFlags.SetFlag(PartTypeFlags.Pants, value); }
         [YAXAttributeFor("HideParts")]
         [YAXSerializeAs("Rist")]
-        public bool Hide_Rist { get; set; }
+        public bool Hide_Rist { get => HideFlags.HasFlag(PartTypeFlags.Rist); set => HideFlags = HideFlags.SetFlag(PartTypeFlags.Rist, value); }
         [YAXAttributeFor("HideParts")]
         [YAXSerializeAs("Boots")]
-        public bool Hide_Boots { get; set; }
+        public bool Hide_Boots { get => HideFlags.HasFlag(PartTypeFlags.Boots); set => HideFlags = HideFlags.SetFlag(PartTypeFlags.Boots, value); }
 
+        [YAXDontSerialize]
+        public PartTypeFlags HideMatFlags { get; set; }
         [YAXAttributeFor("HideMats")]
         [YAXSerializeAs("FaceBase")]
-        public bool HideMat_FaceBase { get; set; }
+        public bool HideMat_FaceBase { get => HideMatFlags.HasFlag(PartTypeFlags.FaceBase); set => HideMatFlags = HideMatFlags.SetFlag(PartTypeFlags.FaceBase, value); }
         [YAXAttributeFor("HideMats")]
         [YAXSerializeAs("Forehead")]
-        public bool HideMat_Forehead { get; set; }
+        public bool HideMat_Forehead { get => HideMatFlags.HasFlag(PartTypeFlags.FaceForehead); set => HideMatFlags = HideMatFlags.SetFlag(PartTypeFlags.FaceForehead, value); }
         [YAXAttributeFor("HideMats")]
         [YAXSerializeAs("Eye")]
-        public bool HideMat_Eye { get; set; }
+        public bool HideMat_Eye { get => HideMatFlags.HasFlag(PartTypeFlags.FaceEye); set => HideMatFlags = HideMatFlags.SetFlag(PartTypeFlags.FaceEye, value); }
         [YAXAttributeFor("HideMats")]
         [YAXSerializeAs("Nose")]
-        public bool HideMat_Nose { get; set; }
+        public bool HideMat_Nose { get => HideMatFlags.HasFlag(PartTypeFlags.FaceNose); set => HideMatFlags = HideMatFlags.SetFlag(PartTypeFlags.FaceNose, value); }
         [YAXAttributeFor("HideMats")]
         [YAXSerializeAs("Ear")]
-        public bool HideMat_Ear { get; set; }
+        public bool HideMat_Ear { get => HideMatFlags.HasFlag(PartTypeFlags.FaceEar); set => HideMatFlags = HideMatFlags.SetFlag(PartTypeFlags.FaceEar, value); }
         [YAXAttributeFor("HideMats")]
         [YAXSerializeAs("Hair")]
-        public bool HideMat_Hair { get; set; }
+        public bool HideMat_Hair { get => HideMatFlags.HasFlag(PartTypeFlags.Hair); set => HideMatFlags = HideMatFlags.SetFlag(PartTypeFlags.Hair, value); }
         [YAXAttributeFor("HideMats")]
         [YAXSerializeAs("Bust")]
-        public bool HideMat_Bust { get; set; }
+        public bool HideMat_Bust { get => HideMatFlags.HasFlag(PartTypeFlags.Bust); set => HideMatFlags = HideMatFlags.SetFlag(PartTypeFlags.Bust, value); }
         [YAXAttributeFor("HideMats")]
         [YAXSerializeAs("Pants")]
-        public bool HideMat_Pants { get; set; }
+        public bool HideMat_Pants { get => HideMatFlags.HasFlag(PartTypeFlags.Pants); set => HideMatFlags = HideMatFlags.SetFlag(PartTypeFlags.Pants, value); }
         [YAXAttributeFor("HideMats")]
         [YAXSerializeAs("Rist")]
-        public bool HideMat_Rist { get; set; }
+        public bool HideMat_Rist { get => HideMatFlags.HasFlag(PartTypeFlags.Rist); set => HideMatFlags = HideMatFlags.SetFlag(PartTypeFlags.Rist, value); }
         [YAXAttributeFor("HideMats")]
         [YAXSerializeAs("Boots")]
-        public bool HideMat_Boots { get; set; }
+        public bool HideMat_Boots { get => HideMatFlags.HasFlag(PartTypeFlags.Boots); set => HideMatFlags = HideMatFlags.SetFlag(PartTypeFlags.Boots, value); }
 
-        
+
         [YAXAttributeFor("F_36")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
@@ -407,13 +625,33 @@ namespace Xv2CoreLib.BCS
 
         [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "ColorSelector")]
-        public List<ColorSelector> ColorSelectors { get; set; }
+        public AsyncObservableCollection<ColorSelector> ColorSelectors { get; set; } = new AsyncObservableCollection<ColorSelector>();
         [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "PhysicsObject")]
-        public AsyncObservableCollection<PhysicsPart> PhysicsParts { get; set; }
+        public AsyncObservableCollection<PhysicsPart> PhysicsParts { get; set; } = new AsyncObservableCollection<PhysicsPart>();
         [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Unk3")]
         public List<Unk3> Unk_3 { get; set; }
+
+
+        //XenoKit
+        [field: NonSerialized]
+        private CompositeReadOnlyAsyncObservableCollection _mergedList = null;
+        [YAXDontSerialize]
+        public CompositeReadOnlyAsyncObservableCollection MergedList
+        {
+            get
+            {
+                if(_mergedList == null)
+                {
+                    _mergedList = new CompositeReadOnlyAsyncObservableCollection();
+                    _mergedList.AddList(PhysicsParts, PhysicsParts);
+                    _mergedList.AddList(ColorSelectors, ColorSelectors);
+                    _mergedList.SyncLists();
+                }
+                return _mergedList;
+            }
+        }
 
         public string GetModelPath(PartType partType)
         {
@@ -486,6 +724,7 @@ namespace Xv2CoreLib.BCS
 
         public string GetEanPath()
         {
+            if (string.IsNullOrWhiteSpace(EanPath)) return null;
             return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.ean", CharaCode, EanPath));
         }
 
@@ -518,6 +757,68 @@ namespace Xv2CoreLib.BCS
             }
         }
 
+        public PartTypeFlags GetPartTypeFlags()
+        {
+            return GetPartTypeFlags(PartType);
+        }
+
+        public static PartTypeFlags GetPartTypeFlags(PartType type)
+        {
+            switch (type)
+            {
+                case PartType.FaceBase:
+                    return PartTypeFlags.FaceBase;
+                case PartType.FaceEar:
+                    return PartTypeFlags.FaceEar;
+                case PartType.FaceEye:
+                    return PartTypeFlags.FaceEye;
+                case PartType.FaceForehead:
+                    return PartTypeFlags.FaceForehead;
+                case PartType.FaceNose:
+                    return PartTypeFlags.FaceNose;
+                case PartType.Hair:
+                    return PartTypeFlags.Hair;
+                case PartType.Bust:
+                    return PartTypeFlags.Bust;
+                case PartType.Rist:
+                    return PartTypeFlags.Rist;
+                case PartType.Boots:
+                    return PartTypeFlags.Boots;
+                case PartType.Pants:
+                    return PartTypeFlags.Pants;
+                default:
+                    return 0;
+            }
+        }
+
+        public static PartType GetPartType(PartTypeFlags type)
+        {
+            switch (type)
+            {
+                case PartTypeFlags.FaceBase:
+                    return PartType.FaceBase;
+                case PartTypeFlags.FaceEar:
+                    return PartType.FaceEar;
+                case PartTypeFlags.FaceEye:
+                    return PartType.FaceEye;
+                case PartTypeFlags.FaceForehead:
+                    return PartType.FaceForehead;
+                case PartTypeFlags.FaceNose:
+                    return PartType.FaceNose;
+                case PartTypeFlags.Hair:
+                    return PartType.Hair;
+                case PartTypeFlags.Bust:
+                    return PartType.Bust;
+                case PartTypeFlags.Rist:
+                    return PartType.Rist;
+                case PartTypeFlags.Boots:
+                    return PartType.Boots;
+                case PartTypeFlags.Pants:
+                    return PartType.Pants;
+                default:
+                    return 0;
+            }
+        }
     }
 
     [Serializable]
@@ -525,10 +826,11 @@ namespace Xv2CoreLib.BCS
     {
         [YAXAttributeFor("PartColors")]
         [YAXSerializeAs("value")]
-        public short I_00 { get; set; }
+        public ushort PartColorGroup { get; set; }
         [YAXAttributeFor("Color")]
         [YAXSerializeAs("value")]
-        public short I_02 { get; set; }
+        public ushort ColorIndex { get; set; }
+
     }
 
     [Serializable]
@@ -549,67 +851,71 @@ namespace Xv2CoreLib.BCS
 
 
         //Flags
+        [YAXDontSerialize]
+        public PartTypeFlags HideFlags { get; set; }
         [YAXAttributeFor("HideParts")]
         [YAXSerializeAs("FaceBase")]
-        public bool Hide_FaceBase { get; set; }
+        public bool Hide_FaceBase { get => HideFlags.HasFlag(PartTypeFlags.FaceBase); set => HideFlags = HideFlags.SetFlag(PartTypeFlags.FaceBase, value); }
         [YAXAttributeFor("HideParts")]
         [YAXSerializeAs("Forehead")]
-        public bool Hide_Forehead { get; set; }
+        public bool Hide_Forehead { get => HideFlags.HasFlag(PartTypeFlags.FaceForehead); set => HideFlags = HideFlags.SetFlag(PartTypeFlags.FaceForehead, value); }
         [YAXAttributeFor("HideParts")]
         [YAXSerializeAs("Eye")]
-        public bool Hide_Eye { get; set; }
+        public bool Hide_Eye { get => HideFlags.HasFlag(PartTypeFlags.FaceEye); set => HideFlags = HideFlags.SetFlag(PartTypeFlags.FaceEye, value); }
         [YAXAttributeFor("HideParts")]
         [YAXSerializeAs("Nose")]
-        public bool Hide_Nose { get; set; }
+        public bool Hide_Nose { get => HideFlags.HasFlag(PartTypeFlags.FaceNose); set => HideFlags = HideFlags.SetFlag(PartTypeFlags.FaceNose, value); }
         [YAXAttributeFor("HideParts")]
         [YAXSerializeAs("Ear")]
-        public bool Hide_Ear { get; set; }
+        public bool Hide_Ear { get => HideFlags.HasFlag(PartTypeFlags.FaceEar); set => HideFlags = HideFlags.SetFlag(PartTypeFlags.FaceEar, value); }
         [YAXAttributeFor("HideParts")]
         [YAXSerializeAs("Hair")]
-        public bool Hide_Hair { get; set; }
+        public bool Hide_Hair { get => HideFlags.HasFlag(PartTypeFlags.Hair); set => HideFlags = HideFlags.SetFlag(PartTypeFlags.Hair, value); }
         [YAXAttributeFor("HideParts")]
         [YAXSerializeAs("Bust")]
-        public bool Hide_Bust { get; set; }
+        public bool Hide_Bust { get => HideFlags.HasFlag(PartTypeFlags.Bust); set => HideFlags = HideFlags.SetFlag(PartTypeFlags.Bust, value); }
         [YAXAttributeFor("HideParts")]
         [YAXSerializeAs("Pants")]
-        public bool Hide_Pants { get; set; }
+        public bool Hide_Pants { get => HideFlags.HasFlag(PartTypeFlags.Pants); set => HideFlags = HideFlags.SetFlag(PartTypeFlags.Pants, value); }
         [YAXAttributeFor("HideParts")]
         [YAXSerializeAs("Rist")]
-        public bool Hide_Rist { get; set; }
+        public bool Hide_Rist { get => HideFlags.HasFlag(PartTypeFlags.Rist); set => HideFlags = HideFlags.SetFlag(PartTypeFlags.Rist, value); }
         [YAXAttributeFor("HideParts")]
         [YAXSerializeAs("Boots")]
-        public bool Hide_Boots { get; set; }
+        public bool Hide_Boots { get => HideFlags.HasFlag(PartTypeFlags.Boots); set => HideFlags = HideFlags.SetFlag(PartTypeFlags.Boots, value); }
 
+        [YAXDontSerialize]
+        public PartTypeFlags HideMatFlags { get; set; }
         [YAXAttributeFor("HideMats")]
         [YAXSerializeAs("FaceBase")]
-        public bool HideMat_FaceBase { get; set; }
+        public bool HideMat_FaceBase { get => HideMatFlags.HasFlag(PartTypeFlags.FaceBase); set => HideMatFlags = HideMatFlags.SetFlag(PartTypeFlags.FaceBase, value); }
         [YAXAttributeFor("HideMats")]
         [YAXSerializeAs("Forehead")]
-        public bool HideMat_Forehead { get; set; }
+        public bool HideMat_Forehead { get => HideMatFlags.HasFlag(PartTypeFlags.FaceForehead); set => HideMatFlags = HideMatFlags.SetFlag(PartTypeFlags.FaceForehead, value); }
         [YAXAttributeFor("HideMats")]
         [YAXSerializeAs("Eye")]
-        public bool HideMat_Eye { get; set; }
+        public bool HideMat_Eye { get => HideMatFlags.HasFlag(PartTypeFlags.FaceEye); set => HideMatFlags = HideMatFlags.SetFlag(PartTypeFlags.FaceEye, value); }
         [YAXAttributeFor("HideMats")]
         [YAXSerializeAs("Nose")]
-        public bool HideMat_Nose { get; set; }
+        public bool HideMat_Nose { get => HideMatFlags.HasFlag(PartTypeFlags.FaceNose); set => HideMatFlags = HideMatFlags.SetFlag(PartTypeFlags.FaceNose, value); }
         [YAXAttributeFor("HideMats")]
         [YAXSerializeAs("Ear")]
-        public bool HideMat_Ear { get; set; }
+        public bool HideMat_Ear { get => HideMatFlags.HasFlag(PartTypeFlags.FaceEar); set => HideMatFlags = HideMatFlags.SetFlag(PartTypeFlags.FaceEar, value); }
         [YAXAttributeFor("HideMats")]
         [YAXSerializeAs("Hair")]
-        public bool HideMat_Hair { get; set; }
+        public bool HideMat_Hair { get => HideMatFlags.HasFlag(PartTypeFlags.Hair); set => HideMatFlags = HideMatFlags.SetFlag(PartTypeFlags.Hair, value); }
         [YAXAttributeFor("HideMats")]
         [YAXSerializeAs("Bust")]
-        public bool HideMat_Bust { get; set; }
+        public bool HideMat_Bust { get => HideMatFlags.HasFlag(PartTypeFlags.Bust); set => HideMatFlags = HideMatFlags.SetFlag(PartTypeFlags.Bust, value); }
         [YAXAttributeFor("HideMats")]
         [YAXSerializeAs("Pants")]
-        public bool HideMat_Pants { get; set; }
+        public bool HideMat_Pants { get => HideMatFlags.HasFlag(PartTypeFlags.Pants); set => HideMatFlags = HideMatFlags.SetFlag(PartTypeFlags.Pants, value); }
         [YAXAttributeFor("HideMats")]
         [YAXSerializeAs("Rist")]
-        public bool HideMat_Rist { get; set; }
+        public bool HideMat_Rist { get => HideMatFlags.HasFlag(PartTypeFlags.Rist); set => HideMatFlags = HideMatFlags.SetFlag(PartTypeFlags.Rist, value); }
         [YAXAttributeFor("HideMats")]
         [YAXSerializeAs("Boots")]
-        public bool HideMat_Boots { get; set; }
+        public bool HideMat_Boots { get => HideMatFlags.HasFlag(PartTypeFlags.Boots); set => HideMatFlags = HideMatFlags.SetFlag(PartTypeFlags.Boots, value); }
 
         [YAXAttributeFor("Name")]
         [YAXSerializeAs("value")]
@@ -693,8 +999,22 @@ namespace Xv2CoreLib.BCS
 
     //Color
     [Serializable]
-    public class PartColor : IInstallable
+    public class PartColor : IInstallable, INotifyPropertyChanged
     {
+        #region NotifyPropertyChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        #endregion
+        
         [YAXDontSerialize]
         public int SortID
         {
@@ -702,6 +1022,12 @@ namespace Xv2CoreLib.BCS
             {
                 return int.Parse(Index);
             }
+        }
+        [YAXDontSerialize]
+        public ushort ID
+        {
+            get => (ushort)Utils.TryParseInt(Index);
+            set => Index = value.ToString();
         }
 
         [YAXAttributeForClass]
@@ -711,14 +1037,28 @@ namespace Xv2CoreLib.BCS
         public string Name { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Colors")]
-        public List<Colors> ColorsList { get; set; }
+        public AsyncObservableCollection<Colors> ColorsList { get; set; } = new AsyncObservableCollection<Colors>();
+
+        public int NewColorID()
+        {
+            int id = 0;
+
+            while (ColorsList.Any(x => x.ID == id))
+            {
+                id++;
+            }
+
+            return id;
+        }
 
         public void AddColor(Colors color)
         {
-            if (ColorsList == null) ColorsList = new List<Colors>();
-            int idx = int.Parse(color.Index);
+            if (ColorsList == null) 
+                ColorsList = new AsyncObservableCollection<Colors>();
 
-            int existingIndex = ColorsList.FindIndex(p => p.Index == color.Index);
+            int idx = color.SortID;
+
+            int existingIndex = ColorsList.IndexOf(ColorsList.FirstOrDefault(p => p.Index == color.Index));
 
             if(existingIndex != -1)
             {
@@ -726,115 +1066,200 @@ namespace Xv2CoreLib.BCS
             }
             else
             {
-                //Index doesnt exist. Pad entries until index is reached then add entry.
-
-                while ((ColorsList.Count - 1) < (idx - 1))
-                {
-                    ColorsList.Add(new Colors() { Index = ColorsList.Count.ToString() });
-                }
-
                 ColorsList.Add(color);
             }
         }
         
+        public void RefreshValues()
+        {
+            NotifyPropertyChanged(nameof(Index));
+            NotifyPropertyChanged(nameof(Name));
+
+            if(ColorsList != null)
+            {
+                foreach (var color in ColorsList)
+                {
+                    color.RefreshValues();
+                }
+            }
+        }
     }
 
     [YAXSerializeAs("Colors")]
     [Serializable]
-    public class Colors : IInstallable
+    public class Colors : IInstallable, INotifyPropertyChanged
     {
+        #region NotifyPropertyChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        #endregion
+
         [YAXDontSerialize]
-        public int SortID { get { int value; if (int.TryParse(Index, out value)) return value; return 0; } }
+        public int SortID => Utils.TryParseInt(Index);
+        [YAXDontSerialize]
+        public int ID
+        {
+            get => Utils.TryParseInt(Index);
+            set
+            {
+                Index = value.ToString();
+                NotifyPropertyChanged(nameof(ID));
+                NotifyPropertyChanged(nameof(ToolTip));
+            }
+        }
 
         [YAXAttributeForClass]
         [BindingAutoId]
         public string Index { get; set; }
-        [YAXAttributeFor("Color1")]
-        [YAXSerializeAs("R")]
-        [YAXFormat("0.0###########")]
-        public float Color1_R { get; set; }
-        [YAXAttributeFor("Color1")]
-        [YAXSerializeAs("G")]
-        [YAXFormat("0.0###########")]
-        public float Color1_G { get; set; }
-        [YAXAttributeFor("Color1")]
-        [YAXSerializeAs("B")]
-        [YAXFormat("0.0###########")]
-        public float Color1_B { get; set; }
-        [YAXAttributeFor("Color1")]
-        [YAXSerializeAs("A")]
-        [YAXFormat("0.0###########")]
-        public float Color1_A { get; set; }
-        [YAXAttributeFor("Color2")]
-        [YAXSerializeAs("R")]
-        [YAXFormat("0.0###########")]
-        public float Color2_R { get; set; }
-        [YAXAttributeFor("Color2")]
-        [YAXSerializeAs("G")]
-        [YAXFormat("0.0###########")]
-        public float Color2_G { get; set; }
-        [YAXAttributeFor("Color2")]
-        [YAXSerializeAs("B")]
-        [YAXFormat("0.0###########")]
-        public float Color2_B { get; set; }
-        [YAXAttributeFor("Color2")]
-        [YAXSerializeAs("A")]
-        [YAXFormat("0.0###########")]
-        public float Color2_A { get; set; }
-        [YAXAttributeFor("Color3")]
-        [YAXSerializeAs("R")]
-        [YAXFormat("0.0###########")]
-        public float Color3_R { get; set; }
-        [YAXAttributeFor("Color3")]
-        [YAXSerializeAs("G")]
-        [YAXFormat("0.0###########")]
-        public float Color3_G { get; set; }
-        [YAXAttributeFor("Color3")]
-        [YAXSerializeAs("B")]
-        [YAXFormat("0.0###########")]
-        public float Color3_B { get; set; }
-        [YAXAttributeFor("Color3")]
-        [YAXSerializeAs("A")]
-        [YAXFormat("0.0###########")]
-        public float Color3_A { get; set; }
-        [YAXAttributeFor("Color4")]
-        [YAXSerializeAs("R")]
-        [YAXFormat("0.0###########")]
-        public float Color4_R { get; set; }
-        [YAXAttributeFor("Color4")]
-        [YAXSerializeAs("G")]
-        [YAXFormat("0.0###########")]
-        public float Color4_G { get; set; }
-        [YAXAttributeFor("Color4")]
-        [YAXSerializeAs("B")]
-        [YAXFormat("0.0###########")]
-        public float Color4_B { get; set; }
-        [YAXAttributeFor("Color4")]
-        [YAXSerializeAs("A")]
-        [YAXFormat("0.0###########")]
-        public float Color4_A { get; set; }
-        [YAXAttributeFor("Color5")]
-        [YAXSerializeAs("R")]
-        [YAXFormat("0.0###########")]
-        public float Color5_R { get; set; }
-        [YAXAttributeFor("Color5")]
-        [YAXSerializeAs("G")]
-        [YAXFormat("0.0###########")]
-        public float Color5_G { get; set; }
-        [YAXAttributeFor("Color5")]
-        [YAXSerializeAs("B")]
-        [YAXFormat("0.0###########")]
-        public float Color5_B { get; set; }
-        [YAXAttributeFor("Color5")]
-        [YAXSerializeAs("A")]
-        [YAXFormat("0.0###########")]
-        public float Color5_A { get; set; }
+
+        public CustomColor Color1 { get; set; } = new CustomColor();
+        public CustomColor Color2 { get; set; } = new CustomColor();
+        public CustomColor Color3 { get; set; } = new CustomColor();
+        public CustomColor Color4 { get; set; } = new CustomColor();
+
+        //Present for older XMLs only. Doesn't actually do anything.
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public CustomColor Color5 { get; set; }
+
+        public CustomColor GetColor(int colorIndex)
+        {
+            switch (colorIndex)
+            {
+                case 0:
+                    return Color1;
+                case 1:
+                    return Color2;
+                case 2:
+                    return Color3;
+                case 3:
+                    return Color4;
+                default:
+                    return null;
+            }
+        }
+
+        public bool IsNull()
+        {
+            return Color1.R == 0f && Color1.G == 0f && Color1.B == 0f && Color1.A == 0f &&
+                   Color2.R == 0f && Color2.G == 0f && Color2.B == 0f && Color2.A == 0f &&
+                   Color3.R == 0f && Color3.G == 0f && Color3.B == 0f && Color3.A == 0f &&
+                   Color4.R == 0f && Color4.G == 0f && Color4.B == 0f && Color4.A == 0f;
+        }
+
+        public List<IUndoRedo> PasteValues(Colors color)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            undos.Add(new UndoableProperty<Colors>(nameof(Color1.R), this, Color1.R, color.Color1.R));
+            undos.Add(new UndoableProperty<Colors>(nameof(Color1.G), this, Color1.G, color.Color1.G));
+            undos.Add(new UndoableProperty<Colors>(nameof(Color1.B), this, Color1.B, color.Color1.B));
+            undos.Add(new UndoableProperty<Colors>(nameof(Color1.A), this, Color1.A, color.Color1.A));
+            undos.Add(new UndoableProperty<Colors>(nameof(Color2.R), this, Color1.R, color.Color2.R));
+            undos.Add(new UndoableProperty<Colors>(nameof(Color2.G), this, Color1.G, color.Color2.G));
+            undos.Add(new UndoableProperty<Colors>(nameof(Color2.B), this, Color1.B, color.Color2.B));
+            undos.Add(new UndoableProperty<Colors>(nameof(Color2.A), this, Color1.A, color.Color2.A));
+            undos.Add(new UndoableProperty<Colors>(nameof(Color3.R), this, Color1.R, color.Color3.R));
+            undos.Add(new UndoableProperty<Colors>(nameof(Color3.G), this, Color1.G, color.Color3.G));
+            undos.Add(new UndoableProperty<Colors>(nameof(Color3.B), this, Color1.B, color.Color3.B));
+            undos.Add(new UndoableProperty<Colors>(nameof(Color3.A), this, Color1.A, color.Color3.A));
+            undos.Add(new UndoableProperty<Colors>(nameof(Color4.R), this, Color1.R, color.Color4.R));
+            undos.Add(new UndoableProperty<Colors>(nameof(Color4.G), this, Color1.G, color.Color4.G));
+            undos.Add(new UndoableProperty<Colors>(nameof(Color4.B), this, Color1.B, color.Color4.B));
+            undos.Add(new UndoableProperty<Colors>(nameof(Color4.A), this, Color1.A, color.Color4.A));
+
+            Color1.R = color.Color1.R;
+            Color1.G = color.Color1.G;
+            Color1.B = color.Color1.B;
+            Color1.A = color.Color1.A;
+            Color2.R = color.Color2.R;
+            Color2.G = color.Color2.G;
+            Color2.B = color.Color2.B;
+            Color2.A = color.Color2.A;
+            Color3.R = color.Color3.R;
+            Color3.G = color.Color3.G;
+            Color3.B = color.Color3.B;
+            Color3.A = color.Color3.A;
+            Color4.R = color.Color4.R;
+            Color4.G = color.Color4.G;
+            Color4.B = color.Color4.B;
+            Color4.A = color.Color4.A;
+
+            RefreshColorValues();
+
+            return undos;
+        }
+
+        public void RefreshValues()
+        {
+            NotifyPropertyChanged(nameof(ID));
+            NotifyPropertyChanged(nameof(ToolTip));
+            NotifyPropertyChanged(nameof(ColorPreview));
+        }
+
+        public void RefreshColorValues()
+        {
+            NotifyPropertyChanged(nameof(Color1));
+            NotifyPropertyChanged(nameof(Color2));
+            NotifyPropertyChanged(nameof(Color3));
+            NotifyPropertyChanged(nameof(Color4));
+        }
+
+        #region Preview
+        [YAXDontSerialize]
+        public Brush ColorPreview => CreateColorPreview();
+
+        [YAXDontSerialize]
+        public string ToolTip => $"#{Index}";
+
+        private SolidColorBrush CreateColorPreview()
+        {
+            if (!Color1.IsBlack())
+                return new SolidColorBrush(Color.FromArgb(255, RgbConverter.ConvertToByte(Color1.R), RgbConverter.ConvertToByte(Color1.G), RgbConverter.ConvertToByte(Color1.B)));
+
+            if (!Color4.IsBlack())
+                return new SolidColorBrush(Color.FromArgb(255, RgbConverter.ConvertToByte(Color4.R), RgbConverter.ConvertToByte(Color4.G), RgbConverter.ConvertToByte(Color4.B)));
+
+            if (!Color2.IsBlack())
+                return new SolidColorBrush(Color.FromArgb(255, RgbConverter.ConvertToByte(Color2.R), RgbConverter.ConvertToByte(Color2.G), RgbConverter.ConvertToByte(Color2.B)));
+
+            return new SolidColorBrush(Color.FromArgb(255, RgbConverter.ConvertToByte(Color3.R), RgbConverter.ConvertToByte(Color3.G), RgbConverter.ConvertToByte(Color3.B)));
+        }
+
+        public void RefreshPreview()
+        {
+            NotifyPropertyChanged(nameof(ColorPreview));
+        }
+
+        #endregion
     }
 
     //BCS Body
     [Serializable]
-    public class Body : IInstallable
+    public class Body : IInstallable, INotifyPropertyChanged
     {
+        #region NotifyPropertyChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        #endregion
+
         [YAXDontSerialize]
         public int SortID
         {
@@ -843,21 +1268,49 @@ namespace Xv2CoreLib.BCS
                 return int.Parse(Index);
             }
         }
+        [YAXDontSerialize]
+        public int ID
+        {
+            get => Utils.TryParseInt(Index);
+            set => Index = value.ToString();
+        }
 
         [YAXAttributeForClass]
         [BindingAutoId]
         public string Index { get; set; } //int16
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BodyScale")]
-        public List<BoneScale> BodyScales { get; set; }
+        public AsyncObservableCollection<BoneScale> BodyScales { get; set; } = new AsyncObservableCollection<BoneScale>();
+
+        public void RefreshValues()
+        {
+            NotifyPropertyChanged(nameof(ID));
+        }
     }
 
     [YAXSerializeAs("BodyScale")]
     [Serializable]
-    public class BoneScale
+    public class BoneScale : INotifyPropertyChanged
     {
+        #region NotifyPropertyChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        #endregion
+
+        [YAXDontSerialize]
+        public string DisplayName => $"{BoneName} ({ScaleX}, {ScaleY}, {ScaleZ})";
+
         [YAXAttributeForClass]
         [YAXSerializeAs("Bone")]
-        public string Str_12 { get; set; }
+        public string BoneName { get; set; }
         [YAXAttributeFor("Scale")]
         [YAXSerializeAs("X")]
         public float ScaleX { get; set; }
@@ -867,6 +1320,11 @@ namespace Xv2CoreLib.BCS
         [YAXAttributeFor("Scale")]
         [YAXSerializeAs("Z")]
         public float ScaleZ { get; set; }
+
+        public void RefreshValues()
+        {
+            NotifyPropertyChanged(nameof(DisplayName));
+        }
     }
 
     //Skeleton
@@ -877,13 +1335,27 @@ namespace Xv2CoreLib.BCS
         [YAXSerializeAs("value")]
         public short I_00 { get; set; }
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Bone")]
-        public List<Bone> Bones { get; set; }
+        public AsyncObservableCollection<Bone> Bones { get; set; } = new AsyncObservableCollection<Bone>();
     }
 
     [YAXSerializeAs("Bone")]
     [Serializable]
-    public class Bone
+    public class Bone : INotifyPropertyChanged
     {
+        #region NotifyPropertyChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        #endregion
+        
         [YAXAttributeForClass]
         [YAXSerializeAs("Name")]
         public string BoneName { get; set; }
@@ -929,6 +1401,12 @@ namespace Xv2CoreLib.BCS
         [YAXSerializeAs("value")]
         [YAXFormat("0.0###########")]
         public float F_44 { get; set; }
+
+        public void RefreshValues()
+        {
+            NotifyPropertyChanged(nameof(BoneName));
+        }
+
     }
 
 }

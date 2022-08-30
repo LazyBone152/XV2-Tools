@@ -84,6 +84,18 @@ namespace EEPK_Organiser.View
         public MaterialViewModel MaterialViewModel { get; set; } = new MaterialViewModel();
 
         //Selected Material Editing
+        public int SelectedMaterialID
+        {
+            get => _selectedMaterial != null ? _selectedMaterial.Index : -1;
+            set
+            {
+                if(value != _selectedMaterial.Index)
+                {
+                    SetID(value);
+                }
+            }
+        }
+        
         public string SelectedMaterialName
         {
             get => _selectedMaterial?.Name;
@@ -110,6 +122,7 @@ namespace EEPK_Organiser.View
         //Properties for disabling and hiding elements that aren't needed in the current context. (e.g: dont show merge/used by options when editing a emm file for a emo or character as those are only useful for PBIND/TBIND assets)
         public bool IsForContainer => AssetContainer != null;
         public Visibility ContainerVisiblility => IsForContainer ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility InverseContainerVisiblility => IsForContainer ? Visibility.Collapsed : Visibility.Visible;
 
         #endregion
 
@@ -265,6 +278,7 @@ namespace EEPK_Organiser.View
         {
             EmmMaterial material = EmmMaterial.NewMaterial();
             material.Name = EmmFile.GetUnusedName(material.Name);
+            material.Index = EmmFile.GetNewID();
 
             EmmFile.Materials.Add(material);
             SelectedMaterial = material;
@@ -337,6 +351,7 @@ namespace EEPK_Organiser.View
                 foreach (var mat in selectedMaterials)
                 {
                     EmmMaterial newMaterial = mat.Copy();
+                    newMaterial.Index = EmmFile.GetNewID();
                     newMaterial.Name = EmmFile.GetUnusedName(newMaterial.Name);
                     undos.Add(new UndoableListAdd<EmmMaterial>(EmmFile.Materials, newMaterial));
                     EmmFile.Materials.Add(newMaterial);
@@ -454,6 +469,7 @@ namespace EEPK_Organiser.View
                 foreach (var material in copiedMaterials)
                 {
                     material.Name = EmmFile.GetUnusedName(material.Name);
+                    material.Index = EmmFile.GetNewID();
                     EmmFile.Materials.Add(material);
 
                     undos.Add(new UndoableListAdd<EmmMaterial>(EmmFile.Materials, material));
@@ -563,6 +579,20 @@ namespace EEPK_Organiser.View
         {
             Loaded -= MaterialsEditor_Loaded;
             UndoManager.Instance.UndoOrRedoCalled -= Instance_UndoOrRedoCalled;
+        }
+
+        private async void SetID(int newId)
+        {
+            if (EmmFile.Materials.Any(x => x.Index == newId && x != _selectedMaterial))
+            {
+                await DialogCoordinator.Instance.ShowMessageAsync(this, "ID Already Used", $"Another material is already using ID \"{newId}\".", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                NotifyPropertyChanged(nameof(SelectedMaterialID));
+                return;
+            }
+
+            UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(_selectedMaterial.Index), _selectedMaterial, _selectedMaterial.Index, newId, "Material ID"));
+            _selectedMaterial.Index = newId;
+            NotifyPropertyChanged(nameof(SelectedMaterialID));
         }
 
         private async void SetName(string name)

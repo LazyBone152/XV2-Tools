@@ -22,7 +22,7 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
-            args = new string[1] { @"1591_X5K_SST_PLAYER.bcm" };
+            args = new string[1] { @"E:\VS_Test\BCS\ALL BCS" };
 
             DEBUG_MODE = true;
 #endif
@@ -66,19 +66,6 @@ namespace XV2_Xml_Serializer
                     try
 #endif
                     {
-                        
-                        if(Path.GetFileName(fileLocation) == CharaSlotsFile.FILE_NAME_BIN)
-                        {
-                            CharaSlotsFile.CreateXml(fileLocation);
-                            continue;
-                        }
-                        if (Path.GetFileName(fileLocation) == CharaSlotsFile.FILE_NAME_XML)
-                        {
-                            CharaSlotsFile.ConvertFromXml(fileLocation);
-                            continue;
-                        }
-
-
                         if (!LoadBinaryInitial_Debug(fileLocation))
                         {
                             switch (Path.GetExtension(fileLocation))
@@ -303,6 +290,20 @@ namespace XV2_Xml_Serializer
                                     break;
                                 case ".nsk":
                                     Xv2CoreLib.NSK.NSK_File.CreateXml(fileLocation);
+                                    break;
+                                case ".x2s":
+                                    {
+                                        switch (Path.GetFileName(fileLocation))
+                                        {
+                                            case CharaSlotsFile.FILE_NAME_BIN:
+                                                CharaSlotsFile.CreateXml(fileLocation);
+                                                break;
+                                            case StageSlotsFile.FILE_NAME_BIN:
+                                            case StageSlotsFile.FILE_NAME_LOCAL_BIN:
+                                                StageSlotsFile.CreateXml(fileLocation);
+                                                break;
+                                        }
+                                    }
                                     break;
                                 case ".xml":
                                     LoadXmlInitial(fileLocation);
@@ -564,6 +565,20 @@ namespace XV2_Xml_Serializer
                     case ".nsk":
                         Xv2CoreLib.NSK.NSK_File.ConvertFromXml(fileLocation);
                         break;
+                    case ".x2s":
+                        {
+                            switch (Path.GetFileName(fileLocation))
+                            {
+                                case CharaSlotsFile.FILE_NAME_XML:
+                                    CharaSlotsFile.ConvertFromXml(fileLocation);
+                                    break;
+                                case StageSlotsFile.FILE_NAME_XML:
+                                case StageSlotsFile.FILE_NAME_LOCAL_XML:
+                                    StageSlotsFile.ConvertFromXml(fileLocation);
+                                    break;
+                            }
+                            break;
+                        }
                     default:
                         FileTypeNotSupported(fileLocation);
                         break;
@@ -1151,29 +1166,45 @@ namespace XV2_Xml_Serializer
         static void BulkParseEepk(string directory)
         {
             string[] files = Directory.GetFiles(directory);
-            List<string> bones = new List<string>();
+            List<string> values = new List<string>();
 
             foreach (string s in files)
             {
                 if (Path.GetExtension(s) == ".eepk")
                 {
                     Console.WriteLine(s);
-                    var eepk = new Xv2CoreLib.EEPK.Parser(s, false).GetEepkFile();
-                    
-                    if(eepk.Effects != null)
+                    try
                     {
-                        foreach(var effect in eepk.Effects)
+                        var eepk = new Xv2CoreLib.EEPK.Parser(s, false).GetEepkFile();
+
+                        if (eepk.Effects != null)
                         {
-                            if(effect.EffectParts != null)
+                            foreach (var effect in eepk.Effects)
                             {
-                                foreach (var effectPart in effect.EffectParts)
+                                if (effect.EffectParts != null)
                                 {
-                                    string bone = $"\"{effectPart.ESK}\",";
-                                    if (!bones.Contains(bone))
-                                        bones.Add(bone);
+                                    foreach (var effectPart in effect.EffectParts)
+                                    {
+                                        if (!values.Contains(effectPart.I_03.ToString()))
+                                            values.Add(effectPart.I_03.ToString());
+
+
+                                        if (effectPart.I_02 != Xv2CoreLib.EEPK.AssetType.LIGHT)
+                                        {
+                                            if (effectPart.I_36_1 || effectPart.I_36_2 || effectPart.I_36_3 || effectPart.I_36_4 || effectPart.I_36_5 || effectPart.I_36_6 || effectPart.I_36_7)
+                                            {
+                                                //Console.WriteLine("Here: ");
+                                                //Console.ReadLine();
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
+                    }
+                    catch
+                    {
+
                     }
                     
                 }
@@ -1181,13 +1212,14 @@ namespace XV2_Xml_Serializer
 
             StringBuilder str = new StringBuilder();
 
-            foreach(var bone in bones)
+            foreach(var value in values)
             {
-                str.AppendLine(bone);
+                str.AppendLine(value);
             }
 
-            File.WriteAllText("eepk_bones.txt", str.ToString());
-
+            File.WriteAllText("eepk_values.txt", str.ToString());
+            Process.Start("eepk_values.txt");
+            Environment.Exit(0);
         }
         
 
@@ -1220,21 +1252,18 @@ namespace XV2_Xml_Serializer
                     if (Path.GetExtension(s) == ".bcs")
                     {
                         Console.WriteLine(s);
-                        var bcs = new Xv2CoreLib.BCS.Parser(s, true).bcsFile;
+                        var bcs = new Xv2CoreLib.BCS.Parser(s).bcsFile;
 
-                        foreach (var partSet in bcs.PartSets)
+                        foreach (var bone in bcs.SkeletonData1.Bones)
                         {
-                            foreach (var part in partSet.GetAllParts_DEBUG())
-                            {
-                                if (!string.IsNullOrWhiteSpace(part.EanPath))
-                                {
-                                    //Console.WriteLine(part.EanPath);
-                                    //Console.ReadLine();
-                                }
+                            if (!stuff.Contains(bone.BoneName))
+                                stuff.Add(bone.BoneName);
+                        }
 
-                                if (!stuff.Contains(part.EanPath))
-                                    stuff.Add(part.EanPath);
-                            }
+                        foreach (var bone in bcs.SkeletonData2.Bones)
+                        {
+                            if (!stuff.Contains(bone.BoneName))
+                                stuff.Add(bone.BoneName);
                         }
 
                     }
@@ -1250,7 +1279,7 @@ namespace XV2_Xml_Serializer
 
             foreach (var val in stuff)
             {
-                str.Append(val).AppendLine();
+                str.Append(string.Format("\"{0}\",", val)).AppendLine();
                 //str.Append(HexConverter.GetHexString(val)).AppendLine();
             }
 

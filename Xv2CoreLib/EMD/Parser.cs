@@ -57,7 +57,7 @@ namespace Xv2CoreLib.EMD
 
                 if (modelOffset != 0)
                 {
-                    EMD_Model model = new EMD_Model() { Meshes = new List<EMD_Mesh>() };
+                    EMD_Model model = new EMD_Model();
                     model.I_00 = BitConverter.ToUInt16(rawBytes, modelOffset);
 
                     //Name
@@ -79,7 +79,7 @@ namespace Xv2CoreLib.EMD
                         int meshOffset = BitConverter.ToInt32(rawBytes, meshTableOffset) + modelOffset;
 
                         //Mesh data
-                        EMD_Mesh mesh = new EMD_Mesh() { Submeshes = new List<EMD_Submesh>() };
+                        EMD_Mesh mesh = new EMD_Mesh();
                         mesh.AABB = EMD_AABB.Read(rawBytes, meshOffset);
                         mesh.I_52 = BitConverter.ToUInt16(rawBytes, meshOffset + 52);
 
@@ -100,7 +100,7 @@ namespace Xv2CoreLib.EMD
                         {
                             int submeshOffset = BitConverter.ToInt32(rawBytes, submeshTableOffset) + meshOffset;
 
-                            EMD_Submesh submesh = new EMD_Submesh() { TextureSamplerDefs = new List<EMD_TextureSamplerDef>(), Triangles = new List<EMD_Triangle>(), Vertexes = new List<EMD_Vertex>() };
+                            EMD_Submesh submesh = new EMD_Submesh();
                             submesh.AABB = EMD_AABB.Read(rawBytes, submeshOffset);
 
                             //Vertex

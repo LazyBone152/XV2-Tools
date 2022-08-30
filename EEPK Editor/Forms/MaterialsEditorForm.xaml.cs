@@ -43,6 +43,19 @@ namespace EEPK_Organiser.Forms
             }
         }
 
+        public MaterialsEditorForm(EMM_File _emmFile, string windowTitle)
+        {
+            EmmFile = _emmFile;
+
+            InitializeComponent();
+            Closing += MaterialsEditorForm_Closing;
+
+            if (windowTitle != null)
+            {
+                Title += string.Format(" ({0})", windowTitle);
+            }
+        }
+
         private void MaterialsEditorForm_Closing(object sender, CancelEventArgs e)
         {
             Closing -= MaterialsEditorForm_Closing;

@@ -117,10 +117,23 @@ namespace EEPK_Organiser.View
                 }
             }
         }
-        
+        public int SelectedTextureID
+        {
+            get => _selectedTexture != null ? _selectedTexture.ID : -1;
+            set
+            {
+                if (value != _selectedTexture.ID)
+                {
+                    SetID(value);
+                    NotifyPropertyChanged(nameof(SelectedTextureID));
+                }
+            }
+        }
+
         //Properties for disabling and hiding elements that aren't needed in the current context. (e.g: dont show merge/used by options when editing a emm file for a emo or character as those are only useful for PBIND/TBIND assets)
         public bool IsForContainer => TextureEditorType == TextureEditorType.Pbind || TextureEditorType == TextureEditorType.Tbind;
         public Visibility ContainerVisiblility => IsForContainer ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility InverseContainerVisiblility => IsForContainer ? Visibility.Collapsed : Visibility.Visible;
         public Visibility PbindVisiblility => TextureEditorType == TextureEditorType.Pbind ? Visibility.Visible : Visibility.Collapsed;
         #endregion
 
@@ -203,9 +216,13 @@ namespace EEPK_Organiser.View
         private void TextureEditor_Loaded(object sender, RoutedEventArgs e)
         {
             NotifyPropertyChanged(nameof(ContainerVisiblility));
+            NotifyPropertyChanged(nameof(InverseContainerVisiblility));
             NotifyPropertyChanged(nameof(PbindVisiblility));
             RefreshViewTextures();
             UpdateProperties();
+
+            if(EmbFile?.UseFileNames == false)
+                nameColumn.Visibility = Visibility.Hidden;
         }
 
         private void Instance_UndoOrRedoCalled(object sender, UndoEventRaisedEventArgs e)
@@ -247,28 +264,21 @@ namespace EEPK_Organiser.View
             }
         }
 
-        /*
         public async void SetID(int newId)
         {
-            //ID feature removed. Will keep this function incase I want to revive it.
-
-            string strId = newId.ToString();
-
             if(SelectedTexture != null)
             {
-                if(EmbFile.Entry.Any(x => x.Index == strId && x != SelectedTexture))
+                if(EmbFile.Entry.Any(x => x.ID == newId && x != SelectedTexture))
                 {
                     await DialogCoordinator.Instance.ShowMessageAsync(this, "ID Already Used", $"Another texture already has ID \"{newId}\".", MessageDialogStyle.Affirmative, DialogSettings.Default);
                     return;
                 }
 
-                string oldId = SelectedTexture.Index;
-                SelectedTexture.Index = strId;
-
-                UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(_selectedTexture.Index), _selectedTexture, oldId, strId, "Texture ID"));
+                UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(_selectedTexture.ID), _selectedTexture, SelectedTexture.ID, newId, "Texture ID"));
+                SelectedTexture.ID = newId;
             }
         }
-        */
+        
 
         #region TextureCommands
         public RelayCommand AddTextureFromFileCommand => new RelayCommand(AddTextureFromFile);
@@ -307,6 +317,7 @@ namespace EEPK_Organiser.View
                     string fileName = Path.GetFileName(file);
 
                     EmbEntry newEntry = new EmbEntry();
+                    newEntry.ID = EmbFile.GetNewID();
                     newEntry.Data = bytes;
                     newEntry.Name = EmbFile.GetUnusedName(fileName);
                     newEntry.LoadDds();
@@ -441,6 +452,7 @@ namespace EEPK_Organiser.View
                 }
 
                 var newTexture = texture.Clone();
+                newTexture.ID = EmbFile.GetNewID();
                 newTexture.Name = EmbFile.GetUnusedName(newTexture.Name);
                 undos.Add(new UndoableListAdd<EmbEntry>(EmbFile.Entry, newTexture));
                 EmbFile.Add(newTexture);
@@ -486,6 +498,7 @@ namespace EEPK_Organiser.View
                     }
 
                     var newTexture = texture.Copy();
+                    newTexture.ID = EmbFile.GetNewID();
                     newTexture.Name = EmbFile.GetUnusedName(newTexture.Name);
                     EmbFile.Add(newTexture);
 
@@ -618,7 +631,7 @@ namespace EEPK_Organiser.View
                 byte[] bytes = File.ReadAllBytes(openFile.FileName);
                 string name = Path.GetFileName(openFile.FileName);
 
-                if (name != SelectedTexture.Name)
+                if (name != SelectedTexture.Name && (TextureEditorType == TextureEditorType.Pbind || TextureEditorType == TextureEditorType.Tbind))
                 {
                     string newName = AssetContainer.File3_Ref.GetUnusedName(name);
                     undos.Add(new UndoableProperty<EmbEntry>(nameof(SelectedTexture.Name), SelectedTexture, SelectedTexture.Name, newName));

@@ -130,7 +130,19 @@
                         </DataGridTemplateColumn.CellEditingTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Header="Name" Width="*">
+                    <DataGridTemplateColumn Header="ID" Width="70" SortMemberPath="ID" Visibility="{Binding ElementName=UserControl, Path=InverseContainerVisiblility}">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding ID}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <Controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=SelectedTextureID, UpdateSourceTrigger=Default}" Minimum="0" HideUpDownButtons="True" HorizontalContentAlignment="Left"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn x:Name="nameColumn" Header="Name" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Name}" ToolTip="{Binding TextureToolTip}"/>
@@ -138,7 +150,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                         <DataGridTemplateColumn.CellEditingTemplate>
                             <DataTemplate>
-                                <TextBox Text="{Binding ElementName=UserControl, Path=SelectedTextureName, UpdateSourceTrigger=Default}"/>
+                                <TextBox Text="{Binding ElementName=UserControl, Path=SelectedTextureName, UpdateSourceTrigger=LostFocus}"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>
                     </DataGridTemplateColumn>

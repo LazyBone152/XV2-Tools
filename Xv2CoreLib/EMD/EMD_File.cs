@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
+using Xv2CoreLib.Resource;
 using YAXLib;
 
 namespace Xv2CoreLib.EMD
@@ -26,6 +28,7 @@ namespace Xv2CoreLib.EMD
         CompressedFormat = 0x8000, //Use float16
     }
 
+    [Serializable]
     public class EMD_File
     {
         public const int EMD_SIGNATURE = 1145914659;
@@ -37,7 +40,7 @@ namespace Xv2CoreLib.EMD
         public uint Version { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Model")]
-        public List<EMD_Model> Models { get; set; } = new List<EMD_Model>();
+        public AsyncObservableCollection<EMD_Model> Models { get; set; } = new AsyncObservableCollection<EMD_Model>();
 
 
         public byte[] SaveToBytes()
@@ -59,22 +62,67 @@ namespace Xv2CoreLib.EMD
         {
             new Deserializer(this, path);
         }
+
+        public void RefreshValues()
+        {
+            foreach(var model in Models)
+            {
+                model.RefreshValues();
+
+                foreach(var mesh in model.Meshes)
+                {
+                    mesh.RefreshValues();
+
+                    foreach(var submesh in mesh.Submeshes)
+                    {
+                        submesh.RefreshValues();
+                    }
+                }
+            }
+        }
     }
 
     [YAXSerializeAs("Model")]
-    public class EMD_Model
+    [Serializable]
+    public class EMD_Model : INotifyPropertyChanged
     {
+        #region NotifyPropertyChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(String propertyName = "")
+        {
+             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        #endregion
+
         [YAXAttributeForClass]
         public string Name { get; set; }
         [YAXAttributeForClass]
         public ushort I_00 { get; set; }
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Mesh")]
-        public List<EMD_Mesh> Meshes { get; set; }
+        public AsyncObservableCollection<EMD_Mesh> Meshes { get; set; } = new AsyncObservableCollection<EMD_Mesh>();
+
+        public void RefreshValues()
+        {
+            NotifyPropertyChanged(nameof(Name));
+        }
     }
 
     [YAXSerializeAs("Mesh")]
-    public class EMD_Mesh
+    [Serializable]
+    public class EMD_Mesh : INotifyPropertyChanged
     {
+        #region NotifyPropertyChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(String propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        #endregion
+
         [YAXAttributeForClass]
         public string Name { get; set; }
         [YAXAttributeForClass]
@@ -83,7 +131,7 @@ namespace Xv2CoreLib.EMD
         public EMD_AABB AABB { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Submesh")]
-        public List<EMD_Submesh> Submeshes { get; set; }
+        public AsyncObservableCollection<EMD_Submesh> Submeshes { get; set; } = new AsyncObservableCollection<EMD_Submesh>();
 
         [YAXDontSerialize]
         public int VertexCount
@@ -98,8 +146,14 @@ namespace Xv2CoreLib.EMD
                 return count;
             }
         }
+
+        public void RefreshValues()
+        {
+            NotifyPropertyChanged(nameof(Name));
+        }
     }
 
+    [Serializable]
     public class EMD_AABB
     {
         [YAXAttributeFor("AABB_Center")]
@@ -180,8 +234,19 @@ namespace Xv2CoreLib.EMD
     }
 
     [YAXSerializeAs("Submesh")]
-    public class EMD_Submesh
+    [Serializable]
+    public class EMD_Submesh : INotifyPropertyChanged
     {
+        #region NotifyPropertyChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(String propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        #endregion
+
         [YAXAttributeFor("VertexFlags")]
         [YAXSerializeAs("values")]
         public VertexFlags VertexFlags { get; set; }
@@ -244,9 +309,9 @@ namespace Xv2CoreLib.EMD
 
         [YAXComment("Sampler entries depend on the shader defined in EMM. Usually if there are duplicate entries then only the last one matters, the earlier ones are just there to maintain the sampler index. (Dont delete them) \n" +
             "There is a max of 4 possible entries that the shaders will accept, but no actual (vanilla) EMD shader uses more than 3.")]
-        public List<EMD_TextureSamplerDef> TextureSamplerDefs { get; set; }
-        public List<EMD_Triangle> Triangles { get; set; }
-        public List<EMD_Vertex> Vertexes { get; set; }
+        public AsyncObservableCollection<EMD_TextureSamplerDef> TextureSamplerDefs { get; set; } = new AsyncObservableCollection<EMD_TextureSamplerDef>();
+        public List<EMD_Triangle> Triangles { get; set; } = new List<EMD_Triangle>();
+        public List<EMD_Vertex> Vertexes { get; set; } = new List<EMD_Vertex>();
 
 
         public string GetBoneName(int vertexIdx, int boneIdx)
@@ -264,9 +329,15 @@ namespace Xv2CoreLib.EMD
 
             throw new InvalidDataException(String.Format("Could not get the bone name for boneIndex: {0} on vertex: {1}", boneIdx, vertexIdx));
         }
+
+        public void RefreshValues()
+        {
+            NotifyPropertyChanged(nameof(Name));
+        }
     }
 
     [YAXSerializeAs("TextureSamplerDef")]
+    [Serializable]
     public class EMD_TextureSamplerDef
     {
         public enum AddressMode : byte
@@ -313,9 +384,9 @@ namespace Xv2CoreLib.EMD
         [YAXSerializeAs("ScaleV")]
         public float ScaleV { get; set; }
 
-        public static List<EMD_TextureSamplerDef> Read(byte[] bytes, int offset, int count)
+        public static AsyncObservableCollection<EMD_TextureSamplerDef> Read(byte[] bytes, int offset, int count)
         {
-            List<EMD_TextureSamplerDef> samplerDefs = new List<EMD_TextureSamplerDef>();
+            AsyncObservableCollection<EMD_TextureSamplerDef> samplerDefs = new AsyncObservableCollection<EMD_TextureSamplerDef>();
 
             for(int i = 0; i < count; i++)
             {
@@ -347,7 +418,7 @@ namespace Xv2CoreLib.EMD
             return samplerDef;
         }
     
-        public static byte[] Write(List<EMD_TextureSamplerDef> samplerDefs)
+        public static byte[] Write(IList<EMD_TextureSamplerDef> samplerDefs)
         {
             List<byte> bytes = new List<byte>();
 
@@ -373,6 +444,7 @@ namespace Xv2CoreLib.EMD
     }
 
     [YAXSerializeAs("Triangle")]
+    [Serializable]
     public class EMD_Triangle
     {
         [YAXDontSerialize]
@@ -394,11 +466,12 @@ namespace Xv2CoreLib.EMD
             }
         }
 
-        public List<ushort> Faces { get; set; }
-        public List<string> Bones { get; set; }
+        public List<ushort> Faces { get; set; } = new List<ushort>();
+        public List<string> Bones { get; set; } = new List<string>();
     }
 
     [YAXSerializeAs("Vertex")]
+    [Serializable]
     public class EMD_Vertex
     {
         [YAXAttributeFor("Position")]
