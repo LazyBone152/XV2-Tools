@@ -141,7 +141,7 @@ namespace LB_Mod_Installer.Installer.Transformation
 
                 using (Stream stream = install.zipManager.GetZipEntry(GeneralInfo.GetPathInZipDataDir(skill.VfxPath)).Open())
                 {
-                    eepkFile = EffectContainerFile.LoadVfx2(stream, skill.VfxPath);
+                    eepkFile = EffectContainerFile.LoadVfxPackage(stream, skill.VfxPath);
                 }
             }
 
@@ -587,7 +587,7 @@ namespace LB_Mod_Installer.Installer.Transformation
             {
                 byte[] texture = isUntransform ? CreateStageSelectorTexture(skill, skill.TransformStates[i].RevertOptions, isUntransform) : CreateStageSelectorTexture(skill, skill.TransformStates[i].TransformOptions, isUntransform);
 
-                int effectId = eepkFile.CreateStageSelectorEntry(texture);
+                int effectId = eepkFile.CreateAwokenOverlayEntry(texture);
 
                 BAC_Entry newHoldDownEntry = bacFile.GetEntry(TransformDefine.BAC_HOLD_DOWN_LOOP_IDX).Copy();
                 bacIds[i] = bacFile.AddEntry(newHoldDownEntry);
