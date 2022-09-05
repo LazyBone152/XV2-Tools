@@ -29,8 +29,33 @@ namespace Xv2CoreLib.EMD
     }
 
     [Serializable]
-    public class EMD_File
+    public class EMD_File : INotifyPropertyChanged
     {
+        #region NotifyPropertyChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(String propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        [YAXDontSerialize]
+        public bool ModelChanged { get; set; }
+        [YAXDontSerialize]
+        public bool TextureSamplersChanged { get; set; }
+
+        public void TriggerModelChanged()
+        {
+            NotifyPropertyChanged(nameof(ModelChanged));
+        }
+
+        public void TriggerTexturesChanged()
+        {
+            NotifyPropertyChanged(nameof(TextureSamplersChanged));
+        }
+        #endregion
+
         public const int EMD_SIGNATURE = 1145914659;
 
         [YAXDontSerialize]
@@ -80,6 +105,45 @@ namespace Xv2CoreLib.EMD
                 }
             }
         }
+    
+        public EMD_Model GetParentModel(EMD_Mesh mesh)
+        {
+            foreach(var model in Models)
+            {
+                if (model.Meshes.Contains(mesh)) return model;
+            }
+
+            return null;
+        }
+
+        public EMD_Mesh GetParentMesh(EMD_Submesh submesh)
+        {
+            foreach (var model in Models)
+            {
+                foreach(var mesh in model.Meshes)
+                {
+                    if (mesh.Submeshes.Contains(submesh)) return mesh;
+                }
+            }
+
+            return null;
+        }
+
+        public EMD_Submesh GetParentSubmesh(EMD_TextureSamplerDef textureSampler)
+        {
+            foreach (var model in Models)
+            {
+                foreach (var mesh in model.Meshes)
+                {
+                    foreach(var submesh in mesh.Submeshes)
+                    {
+                        if (submesh.TextureSamplerDefs.Contains(textureSampler)) return submesh;
+                    }
+                }
+            }
+
+            return null;
+        }
     }
 
     [YAXSerializeAs("Model")]
@@ -106,6 +170,18 @@ namespace Xv2CoreLib.EMD
         public void RefreshValues()
         {
             NotifyPropertyChanged(nameof(Name));
+        }
+        
+        public List<EMD_Submesh> GetAllSubmeshes()
+        {
+            List<EMD_Submesh> submeshes = new List<EMD_Submesh>();
+
+            foreach(var mesh in Meshes)
+            {
+                submeshes.AddRange(mesh.Submeshes);
+            }
+
+            return submeshes;
         }
     }
 

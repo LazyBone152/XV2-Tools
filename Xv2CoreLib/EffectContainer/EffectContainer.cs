@@ -3497,7 +3497,7 @@ namespace Xv2CoreLib.EffectContainer
                 throw new InvalidOperationException("DeleteTexture: AssetType is not PBIND or TBIND, cannot continue.");
 
             if (undos != null && File3_Ref.Entry.Contains(embEntry))
-                undos.Add(new UndoableListRemove<EmbEntry>(File3_Ref.Entry, embEntry));
+                undos.Add(new UndoableListRemove<EmbEntry>(File3_Ref.Entry, embEntry, File3_Ref.Entry.IndexOf(embEntry)));
 
             File3_Ref.Entry.Remove(embEntry);
         }
@@ -3508,7 +3508,7 @@ namespace Xv2CoreLib.EffectContainer
                 throw new InvalidOperationException("DeleteMaterial: AssetType is not PBIND or TBIND, cannot continue.");
 
             if (undos != null && File2_Ref.Materials.Contains(material))
-                undos.Add(new UndoableListRemove<EmmMaterial>(File2_Ref.Materials, material));
+                undos.Add(new UndoableListRemove<EmmMaterial>(File2_Ref.Materials, material, File2_Ref.Materials.IndexOf(material)));
 
             File2_Ref.Materials.Remove(material);
         }

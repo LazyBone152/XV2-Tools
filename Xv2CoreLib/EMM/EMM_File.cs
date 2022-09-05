@@ -7,6 +7,7 @@ using Xv2CoreLib.Resource.UndoRedo;
 using LB_Common.Numbers;
 using YAXLib;
 using System.Linq;
+using System.ComponentModel;
 
 namespace Xv2CoreLib.EMM
 {
@@ -248,8 +249,18 @@ namespace Xv2CoreLib.EMM
 
     [Serializable]
     [YAXSerializeAs("Material")]
-    public class EmmMaterial
+    public class EmmMaterial : INotifyPropertyChanged
     {
+        #region NotifyPropChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        #endregion
+
         //todo: split between characters/effects
         public static readonly string[] CommonShaderPrograms = new string[]
         {
@@ -281,6 +292,8 @@ namespace Xv2CoreLib.EMM
             "T1_SM_DYN_MTN",
         };
 
+        private string shaderProgram = null;
+
         [YAXAttributeForClass]
         public int Index { get; set; }
         [YAXAttributeForClass]
@@ -288,7 +301,18 @@ namespace Xv2CoreLib.EMM
         public string Name { get; set; } //max 32
         [YAXAttributeForClass]
         [YAXSerializeAs("Shader")]
-        public string ShaderProgram { get; set; } //max 32
+        public string ShaderProgram
+        {
+            get => shaderProgram;
+            set
+            {
+                if(shaderProgram != value)
+                {
+                    shaderProgram = value;
+                    NotifyPropertyChanged(nameof(ShaderProgram));
+                }
+            }
+        }
         [YAXAttributeFor("I_66")]
         [YAXSerializeAs("value")]
         public ushort I_66 { get; set; }

@@ -14,9 +14,9 @@
             <ColumnDefinition Width="59*"/>
             <ColumnDefinition Width="18"/>
             <ColumnDefinition Width="60*"/>
-            <ColumnDefinition Width="17.333"/>
-            <ColumnDefinition Width="57*"/>
-            <ColumnDefinition Width="40"/>
+            <ColumnDefinition Width="20"/>
+            <ColumnDefinition Width="60*"/>
+            <ColumnDefinition Width="35"/>
         </Grid.ColumnDefinitions>
         <Label Content="R" FontSize="10" VerticalContentAlignment="Center"/>
         <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=R}" Grid.Column="1" TrackMouseWheelWhenMouseOver="True" HideUpDownButtons="True" StringFormat="0.0##" Grid.ColumnSpan="2" Margin="0,0,16,0"/>

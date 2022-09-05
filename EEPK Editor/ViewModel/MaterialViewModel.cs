@@ -388,7 +388,13 @@ namespace EEPK_Organiser.ViewModel
             {
                 CurrentMaterial.GetType().GetField(fieldName).SetValue(CurrentMaterial, newValue);
 
-                UndoManager.Instance.AddUndo(new UndoableField(fieldName, CurrentMaterial, original, newValue, $"{fieldName}"));
+                UndoManager.Instance.AddCompositeUndo(new System.Collections.Generic.List<IUndoRedo>()
+                {
+                    new UndoableField(fieldName, CurrentMaterial, original, newValue),
+                    new UndoActionDelegate(CurrentMaterial, nameof(CurrentMaterial.TriggerParametersChangedEvent), true)
+                }, $"{fieldName}");
+
+                CurrentMaterial.TriggerParametersChangedEvent();
             }
         }
 
@@ -400,7 +406,13 @@ namespace EEPK_Organiser.ViewModel
             {
                 CurrentMaterial.GetType().GetField(fieldName).SetValue(CurrentMaterial, newValue);
 
-                UndoManager.Instance.AddUndo(new UndoableField(fieldName, CurrentMaterial, original, newValue, $"{fieldName}"));
+                UndoManager.Instance.AddCompositeUndo(new System.Collections.Generic.List<IUndoRedo>()
+                {
+                    new UndoableField(fieldName, CurrentMaterial, original, newValue),
+                    new UndoActionDelegate(CurrentMaterial, nameof(CurrentMaterial.TriggerParametersChangedEvent), true)
+                }, $"{fieldName}");
+
+                CurrentMaterial.TriggerParametersChangedEvent();
             }
         }
 
@@ -412,7 +424,13 @@ namespace EEPK_Organiser.ViewModel
             {
                 CurrentMaterial.GetType().GetField(fieldName).SetValue(CurrentMaterial, newValue);
 
-                UndoManager.Instance.AddUndo(new UndoableField(fieldName, CurrentMaterial, original, newValue, $"{fieldName}"));
+                UndoManager.Instance.AddCompositeUndo(new System.Collections.Generic.List<IUndoRedo>()
+                {
+                    new UndoableField(fieldName, CurrentMaterial, original, newValue),
+                    new UndoActionDelegate(CurrentMaterial, nameof(CurrentMaterial.TriggerParametersChangedEvent), true)
+                }, $"{fieldName}");
+
+                CurrentMaterial.TriggerParametersChangedEvent();
             }
         }
         

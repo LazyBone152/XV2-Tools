@@ -1,11 +1,22 @@
 ﻿using System;
+using System.ComponentModel;
 using YAXLib;
 
 namespace LB_Common.Numbers
 {
     [Serializable]
-    public class CustomColor
+    public class CustomColor : INotifyPropertyChanged
     {
+        #region NotifyPropChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        #endregion
+
         public float[] Values = new float[4];
 
         [YAXAttributeForClass]
@@ -45,6 +56,22 @@ namespace LB_Common.Numbers
                 Values = new float[4];
 
             Values[idx] = value;
+
+            switch (idx)
+            {
+                case 0:
+                    NotifyPropertyChanged(nameof(R));
+                    break;
+                case 1:
+                    NotifyPropertyChanged(nameof(G));
+                    break;
+                case 2:
+                    NotifyPropertyChanged(nameof(B));
+                    break;
+                case 3:
+                    NotifyPropertyChanged(nameof(A));
+                    break;
+            }
         }
 
         public float GetValue(int idx)

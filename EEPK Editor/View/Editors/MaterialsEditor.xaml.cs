@@ -58,6 +58,7 @@ namespace EEPK_Organiser.View
                 SetValue(AssetContainerProperty, value);
                 NotifyPropertyChanged(nameof(AssetContainer));
                 NotifyPropertyChanged(nameof(ContainerVisiblility));
+                NotifyPropertyChanged(nameof(InverseContainerVisiblility));
                 NotifyPropertyChanged(nameof(IsForContainer));
             }
         }
@@ -215,6 +216,7 @@ namespace EEPK_Organiser.View
         private void MaterialsEditor_Loaded(object sender, RoutedEventArgs e)
         {
             NotifyPropertyChanged(nameof(ContainerVisiblility));
+            NotifyPropertyChanged(nameof(InverseContainerVisiblility));
             RefreshViewMaterials();
         }
 
@@ -326,8 +328,8 @@ namespace EEPK_Organiser.View
                     foreach (var material in selectedMaterials)
                     {
                         removed++;
+                        undos.Add(new UndoableListRemove<EmmMaterial>(EmmFile.Materials, material, EmmFile.Materials.IndexOf(material)));
                         EmmFile.Materials.Remove(material);
-                        undos.Add(new UndoableListRemove<EmmMaterial>(EmmFile.Materials, material));
                     }
                 }
 

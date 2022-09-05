@@ -62,6 +62,7 @@ namespace EEPK_Organiser.View
                 SetValue(AssetContainerProperty, value);
                 NotifyPropertyChanged(nameof(AssetContainer));
                 NotifyPropertyChanged(nameof(ContainerVisiblility));
+                NotifyPropertyChanged(nameof(InverseContainerVisiblility));
                 NotifyPropertyChanged(nameof(PbindVisiblility));
                 NotifyPropertyChanged(nameof(IsForContainer));
             }

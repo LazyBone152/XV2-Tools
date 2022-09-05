@@ -1,14 +1,25 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace LB_Common.Numbers
 {
     [Serializable]
-    public class CustomMatUV
+    public class CustomMatUV : INotifyPropertyChanged
     {
-        public readonly float[] Values = new float[4];
+        #region NotifyPropChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
 
-        public float U { get { return Values[0]; } set { Values[0] = value; } }
-        public float V { get { return Values[1]; } set { Values[1] = value; } }
+        private void NotifyPropertyChanged(string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        #endregion
+
+        public float[] Values = new float[4];
+
+        public float U { get { return GetValue(0); } set { SetValue(0, value); } }
+        public float V { get { return GetValue(1); } set { SetValue(1, value); } }
 
         public CustomMatUV() { }
 
@@ -18,16 +29,32 @@ namespace LB_Common.Numbers
             V = v;
         }
 
-        public float GetValue(int idx)
+        public void SetValue(int idx, float value)
         {
+            //Initialization of internal array is required here when using XML serialization
+            if (Values == null)
+                Values = new float[4];
+
+            Values[idx] = value;
+
             switch (idx)
             {
                 case 0:
-                    return U;
+                    NotifyPropertyChanged(nameof(U));
+                    break;
                 case 1:
-                    return V;
+                    NotifyPropertyChanged(nameof(U));
+                    break;
             }
-            return 0;
+        }
+
+        public float GetValue(int idx)
+        {
+            //Initialization of internal array is required here when using XML serialization
+            if (Values == null)
+                Values = new float[4];
+
+            return Values[idx];
         }
 
         #region Operators

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.ComponentModel;
 using System.Collections.Generic;
 using LB_Common.Numbers;
 using Xv2CoreLib.Resource.UndoRedo;
@@ -27,8 +28,18 @@ namespace Xv2CoreLib.EMM
 
     */
     [Serializable]
-    public class DecompiledMaterial
+    public class DecompiledMaterial : INotifyPropertyChanged
     {
+        #region NotifyPropChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        #endregion
+
         #region CachedValues
         /// <summary>
         /// Used for creating default <see cref="DecompiledMaterial"/> objects. Cached here for performance reasons.
@@ -255,6 +266,9 @@ namespace Xv2CoreLib.EMM
 
         //Initially set values for this material. When saving back, these values will always be saved regardless of if they are "default".
         private List<string> InitialParameters = new List<string>();
+
+        //Notify
+        public bool ParametersChanged { get; set; }
 
         #region Compile
         public List<Parameter> Compile()
@@ -521,7 +535,49 @@ namespace Xv2CoreLib.EMM
                 decMat.MatOffset0 = new CustomVector4(parameter.FloatValue);
             }
 
+            //Register PropertyChanged events for all vectors. This is needed so that XenoKit can automnatically update shaders upon any user edits.
+            decMat.RegisterEvents();
+
             return decMat;
+        }
+
+        private void RegisterEvents()
+        {
+            GlareCol.PropertyChanged += VectorValuesChangedEvent;
+            MatOffset0.PropertyChanged += VectorValuesChangedEvent;
+            MatOffset1.PropertyChanged += VectorValuesChangedEvent;
+            MatScale0.PropertyChanged += VectorValuesChangedEvent;
+            MatScale1.PropertyChanged += VectorValuesChangedEvent;
+            MatCol0.PropertyChanged += VectorValuesChangedEvent;
+            MatCol1.PropertyChanged += VectorValuesChangedEvent;
+            MatCol2.PropertyChanged += VectorValuesChangedEvent;
+            MatCol3.PropertyChanged += VectorValuesChangedEvent;
+            TexScrl0.PropertyChanged += VectorValuesChangedEvent;
+            TexScrl1.PropertyChanged += VectorValuesChangedEvent;
+            TexRep0.PropertyChanged += VectorValuesChangedEvent;
+            TexRep1.PropertyChanged += VectorValuesChangedEvent;
+            TexRep2.PropertyChanged += VectorValuesChangedEvent;
+            TexRep3.PropertyChanged += VectorValuesChangedEvent;
+            ToonSamplerAddress.PropertyChanged += VectorValuesChangedEvent;
+            MarkSamplerAddress.PropertyChanged += VectorValuesChangedEvent;
+            MaskSamplerAddress.PropertyChanged += VectorValuesChangedEvent;
+            gCamPos.PropertyChanged += VectorValuesChangedEvent;
+            MatDif.PropertyChanged += VectorValuesChangedEvent;
+            MatAmb.PropertyChanged += VectorValuesChangedEvent;
+            MatSpc.PropertyChanged += VectorValuesChangedEvent;
+            gLightDir.PropertyChanged += VectorValuesChangedEvent;
+            gLightDif.PropertyChanged += VectorValuesChangedEvent;
+            gLightSpc.PropertyChanged += VectorValuesChangedEvent;
+            gLightAmb.PropertyChanged += VectorValuesChangedEvent;
+            DirLight0Dir.PropertyChanged += VectorValuesChangedEvent;
+            DirLight0Col.PropertyChanged += VectorValuesChangedEvent;
+            AmbLight0Col.PropertyChanged += VectorValuesChangedEvent;
+            Ambient.PropertyChanged += VectorValuesChangedEvent;
+            Diffuse.PropertyChanged += VectorValuesChangedEvent;
+            Specular.PropertyChanged += VectorValuesChangedEvent;
+            gGradientCol.PropertyChanged += VectorValuesChangedEvent;
+            gScroll0.PropertyChanged += VectorValuesChangedEvent;
+            gScroll1.PropertyChanged += VectorValuesChangedEvent;
         }
 
         private static float[] GetVectorValues(string fieldName, EmmMaterial material, VectorType type, ParameterNameFormat pos2, ParameterNameFormat pos3)
@@ -844,6 +900,15 @@ namespace Xv2CoreLib.EMM
 
         #endregion
 
+        private void VectorValuesChangedEvent(object sender, PropertyChangedEventArgs e)
+        {
+            TriggerParametersChangedEvent();
+        }
+
+        public void TriggerParametersChangedEvent()
+        {
+            NotifyPropertyChanged(nameof(ParametersChanged));
+        }
     }
 
     public enum AlphaBlendType : int

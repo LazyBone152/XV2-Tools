@@ -1,16 +1,27 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace LB_Common.Numbers
 {
     [Serializable]
-    public class CustomVector4
+    public class CustomVector4 : INotifyPropertyChanged
     {
-        public readonly float[] Values = new float[4];
+        #region NotifyPropChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
 
-        public float X { get { return Values[0]; } set { Values[0] = value; } }
-        public float Y { get { return Values[1]; } set { Values[1] = value; } }
-        public float Z { get { return Values[2]; } set { Values[2] = value; } }
-        public float W { get { return Values[3]; } set { Values[3] = value; } }
+        private void NotifyPropertyChanged(string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        #endregion
+
+        public float[] Values = new float[4];
+
+        public float X { get { return GetValue(0); } set { SetValue(0, value); } }
+        public float Y { get { return GetValue(1); } set { SetValue(1, value); } }
+        public float Z { get { return GetValue(02); } set { SetValue(2, value); } }
+        public float W { get { return GetValue(3); } set { SetValue(3, value); } }
 
         public CustomVector4() { }
 
@@ -27,20 +38,38 @@ namespace LB_Common.Numbers
             W = w;
         }
 
-        public float GetValue(int idx)
+        public void SetValue(int idx, float value)
         {
+            //Initialization of internal array is required here when using XML serialization
+            if (Values == null)
+                Values = new float[4];
+
+            Values[idx] = value;
+
             switch (idx)
             {
                 case 0:
-                    return X;
+                    NotifyPropertyChanged(nameof(X));
+                    break;
                 case 1:
-                    return Y;
+                    NotifyPropertyChanged(nameof(Y));
+                    break;
                 case 2:
-                    return Z;
+                    NotifyPropertyChanged(nameof(Z));
+                    break;
                 case 3:
-                    return W;
+                    NotifyPropertyChanged(nameof(W));
+                    break;
             }
-            return 0;
+        }
+
+        public float GetValue(int idx)
+        {
+            //Initialization of internal array is required here when using XML serialization
+            if (Values == null)
+                Values = new float[4];
+
+            return Values[idx];
         }
 
         #region Operators
