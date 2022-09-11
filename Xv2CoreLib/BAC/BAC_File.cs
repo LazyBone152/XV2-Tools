@@ -1339,10 +1339,10 @@ namespace Xv2CoreLib.BAC
 
     [YAXSerializeAs("Hitbox")]
     [Serializable]
-    public class BAC_Type1 : BAC_TypeBase
+    public class BAC_Type1 : BAC_TypeBase, IBacBone, IBacTypeMatrix
     {
         [YAXDontSerialize]
-        public string Type { get { return $"Hitbox ({bdmFile})"; } }
+        public string Type => $"Hitbox ({bdmFile})";
         [YAXDontSerialize]
         public override int TypeID => 1;
 
@@ -1353,6 +1353,16 @@ namespace Xv2CoreLib.BAC
             Skill = 2
         }
 
+        public enum BoundingBoxTypeEnum : byte
+        {
+            Uniform = 0,
+            MinMax = 1,
+            Unk2 = 2,
+            Unk3 = 3,
+            Unk4 = 4
+        }
+
+
         [YAXAttributeFor("BDM")]
         [YAXSerializeAs("File")]
         public BdmType bdmFile { get; set; }
@@ -1361,7 +1371,18 @@ namespace Xv2CoreLib.BAC
         public ushort BdmEntryID { get; set; } //ushort
         [YAXAttributeFor("Flag_18")]
         [YAXSerializeAs("A")]
-        public byte I_18_a { get; set; } //0,1,2,3,4
+        public BoundingBoxTypeEnum BoundingBoxType
+        {
+            get => _boundingBoxType;
+            set
+            {
+                if (value != _boundingBoxType)
+                {
+                    _boundingBoxType = value;
+                    NotifyPropertyChanged(nameof(BoundingBoxType));
+                }
+            }
+        }
         [YAXAttributeFor("Flag_18")]
         [YAXSerializeAs("B")]
         public byte I_18_b { get; set; } //always 0
@@ -1383,53 +1404,197 @@ namespace Xv2CoreLib.BAC
         public ushort StaminaTakenWhenBlocked { get; set; }
         [YAXAttributeFor("I_20")]
         [YAXSerializeAs("value")]
-        public ushort I_20 { get; set; } // HitboxProperties?
+        public ushort I_20 { get; set; } 
         [YAXAttributeFor("I_22")]
         [YAXSerializeAs("value")]
-        public ushort I_22 { get; set; }
+        public BoneLinks BoneLink
+        {
+            get => _boneLinks;
+            set
+            {
+                if (value != _boneLinks)
+                {
+                    _boneLinks = value;
+                    NotifyPropertyChanged(nameof(BoneLink));
+                }
+            }
+        }
         [YAXAttributeFor("F_24")]
         [YAXFormat("0.0########")]
         [YAXSerializeAs("value")]
-        public float F_24 { get; set; }
+        public float PositionX
+        {
+            get => _posX;
+            set
+            {
+                if (value != _posX)
+                {
+                    _posX = value;
+                    NotifyPropertyChanged(nameof(PositionX));
+                }
+            }
+        }
 
-
+        //The XML names are wrong, but updating them would break old XMLs and cause installer trouble. Best to leave them as is.
         [YAXAttributeFor("Position")]
         [YAXFormat("0.0########")]
         [YAXSerializeAs("X")]
-        public float PositionX { get; set; }
+        public float PositionY
+        {
+            get => _posY;
+            set
+            {
+                if(value != _posY)
+                {
+                    _posY = value;
+                    NotifyPropertyChanged(nameof(PositionY));
+                }
+            }
+        }
         [YAXAttributeFor("Position")]
         [YAXFormat("0.0########")]
         [YAXSerializeAs("Y")]
-        public float PositionY { get; set; }
+        public float PositionZ
+        {
+            get => _posZ;
+            set
+            {
+                if (value != _posZ)
+                {
+                    _posZ = value;
+                    NotifyPropertyChanged(nameof(PositionZ));
+                }
+            }
+        }
         [YAXAttributeFor("Position")]
         [YAXFormat("0.0########")]
         [YAXSerializeAs("Z")]
-        public float PositionZ { get; set; }
+        public float Size
+        {
+            get => _size;
+            set
+            {
+                if (value != _size)
+                {
+                    _size = value;
+                    NotifyPropertyChanged(nameof(Size));
+                }
+            }
+        }
         [YAXAttributeFor("Scale")]
         [YAXFormat("0.0########")]
         [YAXSerializeAs("X")]
-        public float ScaleX { get; set; }
+        public float MinX
+        {
+            get => _minX;
+            set
+            {
+                if (value != _minX)
+                {
+                    _minX = value;
+                    NotifyPropertyChanged(nameof(MinX));
+                }
+            }
+        }
         [YAXAttributeFor("Scale")]
         [YAXFormat("0.0########")]
         [YAXSerializeAs("Y")]
-        public float ScaleY { get; set; }
+        public float MinY
+        {
+            get => _minY;
+            set
+            {
+                if (value != _minY)
+                {
+                    _minY = value;
+                    NotifyPropertyChanged(nameof(MinY));
+                }
+            }
+        }
         [YAXAttributeFor("Scale")]
         [YAXFormat("0.0########")]
         [YAXSerializeAs("Z")]
-        public float ScaleZ { get; set; }
+        public float MinZ
+        {
+            get => _minZ;
+            set
+            {
+                if (value != _minZ)
+                {
+                    _minZ = value;
+                    NotifyPropertyChanged(nameof(MinZ));
+                }
+            }
+        }
         [YAXAttributeFor("Rotation")]
         [YAXFormat("0.0########")]
         [YAXSerializeAs("X")]
+        public float MaxX
+        {
+            get => _maxX;
+            set
+            {
+                if (value != _maxX)
+                {
+                    _maxX = value;
+                    NotifyPropertyChanged(nameof(MaxX));
+                }
+            }
+        }
+        [YAXAttributeFor("Rotation")]
+        [YAXFormat("0.0########")]
+        [YAXSerializeAs("Y")]
+        public float MaxY
+        {
+            get => _maxY;
+            set
+            {
+                if (value != _maxY)
+                {
+                    _maxY = value;
+                    NotifyPropertyChanged(nameof(MaxY));
+                }
+            }
+        }
+        [YAXAttributeFor("Rotation")]
+        [YAXFormat("0.0########")]
+        [YAXSerializeAs("Z")]
+        public float MaxZ
+        {
+            get => _maxZ;
+            set
+            {
+                if (value != _maxZ)
+                {
+                    _maxZ = value;
+                    NotifyPropertyChanged(nameof(_maxZ));
+                }
+            }
+        }
+
+        private BoneLinks _boneLinks = 0;
+        private BoundingBoxTypeEnum _boundingBoxType = 0;
+        private float _posX = 0f;
+        private float _posY = 0f;
+        private float _posZ = 0f;
+        private float _size = 0f;
+        private float _minX = 0f;
+        private float _minY = 0f;
+        private float _minZ = 0f;
+        private float _maxX = 0f;
+        private float _maxY = 0f;
+        private float _maxZ = 0f;
+
+        #region IBacMatrix
+        //Placeholders
+
+        [YAXDontSerialize]
         public float RotationX { get; set; }
-        [YAXAttributeFor("Rotation")]
-        [YAXFormat("0.0########")]
-        [YAXSerializeAs("Y")]
+        [YAXDontSerialize]
         public float RotationY { get; set; }
-        [YAXAttributeFor("Rotation")]
-        [YAXFormat("0.0########")]
-        [YAXSerializeAs("Z")]
+        [YAXDontSerialize]
         public float RotationZ { get; set; }
-
+        #endregion
 
         public static List<BAC_Type1> Read(byte[] rawBytes, int offset, int count)
         {
@@ -1448,22 +1613,22 @@ namespace Xv2CoreLib.BAC
                     Damage = BitConverter.ToUInt16(rawBytes, offset + 12),
                     DamageWhenBlocked = BitConverter.ToUInt16(rawBytes, offset + 14),
                     StaminaTakenWhenBlocked = BitConverter.ToUInt16(rawBytes, offset + 16),
-                    I_18_a = Int4Converter.ToInt4(rawBytes[offset + 18])[0],
+                    BoundingBoxType = (BoundingBoxTypeEnum)Int4Converter.ToInt4(rawBytes[offset + 18])[0],
                     I_18_b = Int4Converter.ToInt4(rawBytes[offset + 18])[1],
                     bdmFile = (BdmType)Int4Converter.ToInt4(rawBytes[offset + 19])[0],
                     I_18_d = Int4Converter.ToInt4(rawBytes[offset + 19])[1],
                     I_20 = BitConverter.ToUInt16(rawBytes, offset + 20),
-                    I_22 = BitConverter.ToUInt16(rawBytes, offset + 22),
-                    F_24 = BitConverter.ToSingle(rawBytes, offset + 24),
-                    PositionX = BitConverter.ToSingle(rawBytes, offset + 28),
-                    PositionY = BitConverter.ToSingle(rawBytes, offset + 32),
-                    PositionZ = BitConverter.ToSingle(rawBytes, offset + 36),
-                    ScaleX = BitConverter.ToSingle(rawBytes, offset + 40),
-                    ScaleY = BitConverter.ToSingle(rawBytes, offset + 44),
-                    ScaleZ = BitConverter.ToSingle(rawBytes, offset + 48),
-                    RotationX = BitConverter.ToSingle(rawBytes, offset + 52),
-                    RotationY = BitConverter.ToSingle(rawBytes, offset + 56),
-                    RotationZ = BitConverter.ToSingle(rawBytes, offset + 60),
+                    BoneLink = (BoneLinks)BitConverter.ToUInt16(rawBytes, offset + 22),
+                    PositionX = BitConverter.ToSingle(rawBytes, offset + 24),
+                    PositionY = BitConverter.ToSingle(rawBytes, offset + 28),
+                    PositionZ = BitConverter.ToSingle(rawBytes, offset + 32),
+                    Size = BitConverter.ToSingle(rawBytes, offset + 36),
+                    MinX = BitConverter.ToSingle(rawBytes, offset + 40),
+                    MinY = BitConverter.ToSingle(rawBytes, offset + 44),
+                    MinZ = BitConverter.ToSingle(rawBytes, offset + 48),
+                    MaxX = BitConverter.ToSingle(rawBytes, offset + 52),
+                    MaxY = BitConverter.ToSingle(rawBytes, offset + 56),
+                    MaxZ = BitConverter.ToSingle(rawBytes, offset + 60),
                 });
 
                 offset += 64;
@@ -1487,20 +1652,20 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.Damage));
                 bytes.AddRange(BitConverter.GetBytes(type.DamageWhenBlocked));
                 bytes.AddRange(BitConverter.GetBytes(type.StaminaTakenWhenBlocked));
-                bytes.Add(Int4Converter.GetByte(type.I_18_a, type.I_18_b, "Hitbox > Flag_18 > A", "Hitbox > Flag_18 > B"));
+                bytes.Add(Int4Converter.GetByte((byte)type.BoundingBoxType, type.I_18_b, "Hitbox > Flag_18 > A", "Hitbox > Flag_18 > B"));
                 bytes.Add(Int4Converter.GetByte((byte)type.bdmFile, type.I_18_d, "Hitbox > BDM File", "Hitbox > Flag_18 > D"));
                 bytes.AddRange(BitConverter.GetBytes(type.I_20));
-                bytes.AddRange(BitConverter.GetBytes(type.I_22));
-                bytes.AddRange(BitConverter.GetBytes(type.F_24));
+                bytes.AddRange(BitConverter.GetBytes((ushort)type.BoneLink));
                 bytes.AddRange(BitConverter.GetBytes(type.PositionX));
                 bytes.AddRange(BitConverter.GetBytes(type.PositionY));
                 bytes.AddRange(BitConverter.GetBytes(type.PositionZ));
-                bytes.AddRange(BitConverter.GetBytes(type.ScaleX));
-                bytes.AddRange(BitConverter.GetBytes(type.ScaleY));
-                bytes.AddRange(BitConverter.GetBytes(type.ScaleZ));
-                bytes.AddRange(BitConverter.GetBytes(type.RotationX));
-                bytes.AddRange(BitConverter.GetBytes(type.RotationY));
-                bytes.AddRange(BitConverter.GetBytes(type.RotationZ));
+                bytes.AddRange(BitConverter.GetBytes(type.Size));
+                bytes.AddRange(BitConverter.GetBytes(type.MinX));
+                bytes.AddRange(BitConverter.GetBytes(type.MinY));
+                bytes.AddRange(BitConverter.GetBytes(type.MinZ));
+                bytes.AddRange(BitConverter.GetBytes(type.MaxX));
+                bytes.AddRange(BitConverter.GetBytes(type.MaxY));
+                bytes.AddRange(BitConverter.GetBytes(type.MaxZ));
             }
 
             return bytes;
@@ -1524,8 +1689,8 @@ namespace Xv2CoreLib.BAC
         {
             return new BAC_Type1()
             {
-                PositionX = PositionX,
                 PositionY = PositionY,
+                PositionZ = PositionZ,
                 StartTime = StartTime,
                 Duration = Duration,
                 I_04 = I_04,
@@ -1536,17 +1701,17 @@ namespace Xv2CoreLib.BAC
                 DamageWhenBlocked = DamageWhenBlocked,
                 StaminaTakenWhenBlocked = StaminaTakenWhenBlocked,
                 I_20 = I_20,
-                I_18_a = I_18_a,
+                BoundingBoxType = BoundingBoxType,
                 I_18_b = I_18_b,
                 bdmFile = bdmFile,
                 I_18_d = I_18_d,
-                PositionZ = PositionZ,
-                ScaleX = ScaleX,
-                ScaleY = ScaleY,
-                ScaleZ = ScaleZ,
-                RotationX = RotationX,
-                RotationY = RotationY,
-                RotationZ = RotationZ
+                Size = Size,
+                MinX = MinX,
+                MinY = MinY,
+                MinZ = MinZ,
+                MaxX = MaxX,
+                MaxY = MaxY,
+                MaxZ = MaxZ
             };
 
         }
@@ -1555,10 +1720,10 @@ namespace Xv2CoreLib.BAC
 
     [YAXSerializeAs("Movement")]
     [Serializable]
-    public class BAC_Type2 : BAC_TypeBase
+    public class BAC_Type2 : BAC_TypeBase, IBacTypeMatrix
     {
         [YAXDontSerialize]
-        public string Type { get { return $"Movement"; } }
+        public string Type => $"Movement";
         [YAXDontSerialize]
         public override int TypeID => 2;
 
@@ -1594,6 +1759,34 @@ namespace Xv2CoreLib.BAC
         [YAXFormat("0.0########")]
         [YAXSerializeAs("Z")]
         public float DragZ { get; set; }
+
+        #region IBacMatrix
+        [YAXDontSerialize]
+        public float PositionX
+        {
+            get => DirectionX;
+            set => DirectionX = value;
+        }
+        [YAXDontSerialize]
+        public float PositionY
+        {
+            get => DirectionY;
+            set => DirectionY = value;
+        }
+        [YAXDontSerialize]
+        public float PositionZ
+        {
+            get => DirectionZ;
+            set => DirectionZ = value;
+        }
+
+        [YAXDontSerialize]
+        public float RotationX { get; set; }
+        [YAXDontSerialize]
+        public float RotationY { get; set; }
+        [YAXDontSerialize]
+        public float RotationZ { get; set; }
+        #endregion
 
         public static List<BAC_Type2> Read(byte[] rawBytes, int offset, int count)
         {
@@ -1652,21 +1845,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type3 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type
-        { 
-            get
-            {
-                return $"Invulnerability";
-
-                /*
-                string ret;
-                if (!ValuesDictionary.BAC.InvulnerabilityTypes.TryGetValue(InvulnerabilityType, out ret))
-                    ret = InvulnerabilityType.ToString();
-
-                return $"Invulnerability ({ret})";
-                */
-            } 
-        }
+        public string Type => $"Invulnerability";
         [YAXDontSerialize]
         public override int TypeID => 3;
 
@@ -1723,7 +1902,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type4 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type { get { return $"TimeScale ({TimeScale})"; } }
+        public string Type => $"TimeScale ({TimeScale})";
         [YAXDontSerialize]
         public override int TypeID => 4;
 
@@ -1777,7 +1956,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type5 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type { get { return "Tracking"; } }
+        public string Type => "Tracking";
         [YAXDontSerialize]
         public override int TypeID => 5;
 
@@ -1861,7 +2040,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type6 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type { get { return "ChargeControl"; } }
+        public string Type => "ChargeControl";
         [YAXDontSerialize]
         public override int TypeID => 6;
 
@@ -1924,7 +2103,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type7 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type { get { return "BcmCallback"; } }
+        public string Type => "BcmCallback";
         [YAXDontSerialize]
         public override int TypeID => 7;
 
@@ -2000,10 +2179,10 @@ namespace Xv2CoreLib.BAC
 
     [YAXSerializeAs("Effect")]
     [Serializable]
-    public class BAC_Type8 : BAC_TypeBase
+    public class BAC_Type8 : BAC_TypeBase, IBacTypeMatrix, IBacBone
     {
         [YAXDontSerialize]
-        public string Type { get { return CalculateTypeString(); } }
+        public string Type => CalculateTypeString();
         [YAXDontSerialize]
         public override int TypeID => 8;
 
@@ -2083,7 +2262,6 @@ namespace Xv2CoreLib.BAC
         [YAXSerializeAs("Z")]
         [YAXFormat("0.0#########")]
         public float RotationZ { get; set; }
-
 
         public static List<BAC_Type8> Read(byte[] rawBytes, int offset, int count)
         {
@@ -2183,10 +2361,10 @@ namespace Xv2CoreLib.BAC
 
     [YAXSerializeAs("Projectile")]
     [Serializable]
-    public class BAC_Type9 : BAC_TypeBase
+    public class BAC_Type9 : BAC_TypeBase, IBacTypeMatrix, IBacBone
     {
         [YAXDontSerialize]
-        public string Type { get { return $"Projectile ({BsaType})"; } }
+        public string Type => $"Projectile ({BsaType})";
         [YAXDontSerialize]
         public override int TypeID => 9;
 
@@ -2242,7 +2420,7 @@ namespace Xv2CoreLib.BAC
         public int EntryID { get; set; }
         [YAXAttributeFor("Bone")]
         [YAXSerializeAs("value")]
-        public BoneLinks Bone { get; set; }
+        public BoneLinks BoneLink { get; set; }
         [YAXAttributeFor("SpawnSource")]
         [YAXSerializeAs("value")]
         public byte SpawnSource { get; set; }
@@ -2294,6 +2472,7 @@ namespace Xv2CoreLib.BAC
         [YAXSerializeAs("value")]
         public int I_60 { get; set; } //always 0
 
+
         public bool IsSkillBsa()
         {
             if (BsaType == BsaTypeEnum.SuperSkill || BsaType == BsaTypeEnum.UltimateSkill || BsaType == BsaTypeEnum.EvasiveSkill || BsaType == BsaTypeEnum.AwokenSkill || BsaType == BsaTypeEnum.KiBlastSkill)
@@ -2336,7 +2515,7 @@ namespace Xv2CoreLib.BAC
                     SkillID = BitConverter.ToUInt16(rawBytes, offset + 8),
                     CanUseCmnBsa = (CanUseCmnBsaEnum)BitConverter.ToUInt16(rawBytes, offset + 10),
                     EntryID = BitConverter.ToInt32(rawBytes, offset + 12),
-                    Bone = (BoneLinks)BitConverter.ToUInt16(rawBytes, offset + 16),
+                    BoneLink = (BoneLinks)BitConverter.ToUInt16(rawBytes, offset + 16),
                     SpawnSource = rawBytes[offset + 18],
                     SpawnOrientation = rawBytes[offset + 19],
                     PositionX = BitConverter.ToSingle(rawBytes, offset + 20),
@@ -2373,7 +2552,7 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.SkillID));
                 bytes.AddRange(BitConverter.GetBytes((ushort)type.CanUseCmnBsa));
                 bytes.AddRange(BitConverter.GetBytes(type.EntryID));
-                bytes.AddRange(BitConverter.GetBytes((ushort)type.Bone));
+                bytes.AddRange(BitConverter.GetBytes((ushort)type.BoneLink));
                 bytes.Add(type.SpawnSource);
                 bytes.Add(type.SpawnOrientation);
                 bytes.AddRange(BitConverter.GetBytes(type.PositionX));
@@ -2419,10 +2598,10 @@ namespace Xv2CoreLib.BAC
 
     [YAXSerializeAs("Camera")]
     [Serializable]
-    public class BAC_Type10 : BAC_TypeBase
+    public class BAC_Type10 : BAC_TypeBase, IBacBone
     {
         [YAXDontSerialize]
-        public string Type { get { return $"Camera ({EanType}, {EanIndex})"; } }
+        public string Type => $"Camera ({EanType}, {EanIndex})";
         [YAXDontSerialize]
         public override int TypeID => 10;
 
@@ -3022,7 +3201,7 @@ namespace Xv2CoreLib.BAC
 
     [YAXSerializeAs("ScreenEffect")]
     [Serializable]
-    public class BAC_Type16 : BAC_TypeBase
+    public class BAC_Type16 : BAC_TypeBase, IBacBone, IBacTypeMatrix
     {
         [YAXDontSerialize]
         public string Type
@@ -3068,7 +3247,7 @@ namespace Xv2CoreLib.BAC
         public ushort I_10 { get; set; } //always 0
         [YAXAttributeFor("I_12")]
         [YAXSerializeAs("value")]
-        public BoneLinks Bone { get; set; }
+        public BoneLinks BoneLink { get; set; }
         [YAXAttributeFor("I_14")]
         [YAXSerializeAs("value")]
         public ScreenEffectFlagsEnum ScreenEffectFlags { get; set; }
@@ -3078,15 +3257,25 @@ namespace Xv2CoreLib.BAC
         [YAXAttributeFor("F_20")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
-        public float F_20 { get; set; }
+        public float PositionX { get; set; }
         [YAXAttributeFor("F_24")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
-        public float F_24 { get; set; }
+        public float PositionY { get; set; }
         [YAXAttributeFor("F_28")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
-        public float F_28 { get; set; }
+        public float PositionZ { get; set; }
+
+        #region IBacMatrix
+        //Placeholder
+        [YAXDontSerialize]
+        public float RotationX { get; set; }
+        [YAXDontSerialize]
+        public float RotationY { get; set; }
+        [YAXDontSerialize]
+        public float RotationZ { get; set; }
+        #endregion
 
         public static List<BAC_Type16> Read(byte[] rawBytes, int offset, int count)
         {
@@ -3102,12 +3291,12 @@ namespace Xv2CoreLib.BAC
                     Flags = BitConverter.ToUInt16(rawBytes, offset + 6),
                     BpeIndex = BitConverter.ToUInt16(rawBytes, offset + 8),
                     I_10 = BitConverter.ToUInt16(rawBytes, offset + 10),
-                    Bone = (BoneLinks)BitConverter.ToUInt16(rawBytes, offset + 12),
+                    BoneLink = (BoneLinks)BitConverter.ToUInt16(rawBytes, offset + 12),
                     ScreenEffectFlags = (ScreenEffectFlagsEnum)BitConverter.ToUInt16(rawBytes, offset + 14),
                     I_16 = BitConverter.ToInt32(rawBytes, offset + 16),
-                    F_20 = BitConverter.ToSingle(rawBytes, offset + 20),
-                    F_24 = BitConverter.ToSingle(rawBytes, offset + 24),
-                    F_28 = BitConverter.ToSingle(rawBytes, offset + 28),
+                    PositionX = BitConverter.ToSingle(rawBytes, offset + 20),
+                    PositionY = BitConverter.ToSingle(rawBytes, offset + 24),
+                    PositionZ = BitConverter.ToSingle(rawBytes, offset + 28),
                 });
 
                 offset += 32;
@@ -3128,12 +3317,12 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.Flags));
                 bytes.AddRange(BitConverter.GetBytes(type.BpeIndex));
                 bytes.AddRange(BitConverter.GetBytes(type.I_10));
-                bytes.AddRange(BitConverter.GetBytes((ushort)type.Bone));
+                bytes.AddRange(BitConverter.GetBytes((ushort)type.BoneLink));
                 bytes.AddRange(BitConverter.GetBytes((ushort)type.ScreenEffectFlags));
                 bytes.AddRange(BitConverter.GetBytes(type.I_16));
-                bytes.AddRange(BitConverter.GetBytes(type.F_20));
-                bytes.AddRange(BitConverter.GetBytes(type.F_24));
-                bytes.AddRange(BitConverter.GetBytes(type.F_28));
+                bytes.AddRange(BitConverter.GetBytes(type.PositionX));
+                bytes.AddRange(BitConverter.GetBytes(type.PositionY));
+                bytes.AddRange(BitConverter.GetBytes(type.PositionZ));
             }
 
             return bytes;
@@ -3143,7 +3332,7 @@ namespace Xv2CoreLib.BAC
 
     [YAXSerializeAs("ThrowHandler")]
     [Serializable]
-    public class BAC_Type17 : BAC_TypeBase
+    public class BAC_Type17 : BAC_TypeBase, IBacBone
     {
         [YAXDontSerialize]
         public string Type { get { return "ThrowHandler"; } }
@@ -3181,7 +3370,7 @@ namespace Xv2CoreLib.BAC
         public ushort I_10 { get; set; } //0 or 1
         [YAXAttributeFor("UserBone")]
         [YAXSerializeAs("value")]
-        public BoneLinks UserBone { get; set; }
+        public BoneLinks BoneLink { get; set; }
         [YAXAttributeFor("VictimBone")]
         [YAXSerializeAs("value")]
         public BoneLinks VictimBone { get; set; }
@@ -3219,7 +3408,7 @@ namespace Xv2CoreLib.BAC
                         Flags = BitConverter.ToUInt16(rawBytes, offset + 6),
                         ThrowHandlerFlags = (ThrowHandlerFlagsEnum)BitConverter.ToUInt16(rawBytes, offset + 8),
                         I_10 = BitConverter.ToUInt16(rawBytes, offset + 10),
-                        UserBone = (BoneLinks)BitConverter.ToUInt16(rawBytes, offset + 12),
+                        BoneLink = (BoneLinks)BitConverter.ToUInt16(rawBytes, offset + 12),
                         VictimBone = (BoneLinks)BitConverter.ToUInt16(rawBytes, offset + 14),
                         BacEntryId = BitConverter.ToUInt16(rawBytes, offset + 16),
                         I_18 = BitConverter.ToUInt16(rawBytes, offset + 18),
@@ -3239,7 +3428,7 @@ namespace Xv2CoreLib.BAC
                         Flags = BitConverter.ToUInt16(rawBytes, offset + 6),
                         ThrowHandlerFlags = (ThrowHandlerFlagsEnum)BitConverter.ToUInt16(rawBytes, offset + 8),
                         I_10 = BitConverter.ToUInt16(rawBytes, offset + 10),
-                        UserBone = (BoneLinks)BitConverter.ToUInt16(rawBytes, offset + 12),
+                        BoneLink = (BoneLinks)BitConverter.ToUInt16(rawBytes, offset + 12),
                         VictimBone = (BoneLinks)BitConverter.ToUInt16(rawBytes, offset + 14),
                         BacEntryId = BitConverter.ToUInt16(rawBytes, offset + 16),
                         I_18 = BitConverter.ToUInt16(rawBytes, offset + 18)
@@ -3266,7 +3455,7 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.Flags));
                 bytes.AddRange(BitConverter.GetBytes((ushort)type.ThrowHandlerFlags));
                 bytes.AddRange(BitConverter.GetBytes(type.I_10));
-                bytes.AddRange(BitConverter.GetBytes((ushort)type.UserBone));
+                bytes.AddRange(BitConverter.GetBytes((ushort)type.BoneLink));
                 bytes.AddRange(BitConverter.GetBytes((ushort)type.VictimBone));
                 bytes.AddRange(BitConverter.GetBytes(type.BacEntryId));
                 bytes.AddRange(BitConverter.GetBytes(type.I_18));
@@ -3287,7 +3476,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type18 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type { get { return $"PhysicsObject ({Function})"; } }
+        public string Type { get { return $"PhysicsPartControl ({Function})"; } }
         [YAXDontSerialize]
         public override int TypeID => 18;
 
@@ -3464,7 +3653,7 @@ namespace Xv2CoreLib.BAC
 
     [YAXSerializeAs("HomingMovement")]
     [Serializable]
-    public class BAC_Type20 : BAC_TypeBase
+    public class BAC_Type20 : BAC_TypeBase, IBacBone
     {
         [YAXDontSerialize]
         public string Type { get { return $"HomingMovement ({HomingMovementType})"; } }
@@ -3529,7 +3718,7 @@ namespace Xv2CoreLib.BAC
         public float DisplacementZ { get; set; }
         [YAXAttributeFor("UserBone")]
         [YAXSerializeAs("value")]
-        public BoneLinks UserBone { get; set; } //Inverted
+        public BoneLinks BoneLink { get; set; } //Inverted
         [YAXAttributeFor("TargetBone")]
         [YAXSerializeAs("value")]
         public BoneLinks TargetBone { get; set; } //This one works normally
@@ -3571,7 +3760,7 @@ namespace Xv2CoreLib.BAC
                     DisplacementX = BitConverter.ToSingle(rawBytes, offset + 20),
                     DisplacementY = BitConverter.ToSingle(rawBytes, offset + 24),
                     DisplacementZ = BitConverter.ToSingle(rawBytes, offset + 28),
-                    UserBone = (BoneLinks)BitConverter.ToInt16(rawBytes, offset + 32),
+                    BoneLink = (BoneLinks)BitConverter.ToInt16(rawBytes, offset + 32),
                     TargetBone = (BoneLinks)BitConverter.ToInt16(rawBytes, offset + 36),
                     I_40 = BitConverter.ToInt32(rawBytes, offset + 40),
                     I_44 = BitConverter.ToInt32(rawBytes, offset + 44),
@@ -3609,7 +3798,7 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.DisplacementX));
                 bytes.AddRange(BitConverter.GetBytes(type.DisplacementY));
                 bytes.AddRange(BitConverter.GetBytes(type.DisplacementZ));
-                bytes.AddRange(BitConverter.GetBytes((int)type.UserBone));
+                bytes.AddRange(BitConverter.GetBytes((int)type.BoneLink));
                 bytes.AddRange(BitConverter.GetBytes((int)type.TargetBone));
                 bytes.AddRange(BitConverter.GetBytes(type.I_40));
                 bytes.AddRange(BitConverter.GetBytes(type.I_44));
@@ -4510,8 +4699,8 @@ namespace Xv2CoreLib.BAC
         b_C_Spine2 = 0x6,
         b_R_Hand = 0x7,
         b_L_Hand = 0x8,
-        b_R_Arm = 0x9,
-        b_L_Arm = 0xA,
+        b_R_Arm1 = 0x9,
+        b_L_Arm1 = 0xA,
         b_R_Shoulder = 0xB,
         b_L_Shoulder = 0xC,
         b_R_Foot = 0xD,
@@ -4529,4 +4718,18 @@ namespace Xv2CoreLib.BAC
     }
 #endregion
 
+    public interface IBacTypeMatrix
+    {
+        float PositionX { get; set; }
+        float PositionY { get; set; }
+        float PositionZ { get; set; }
+        float RotationX { get; set; }
+        float RotationY { get; set; }
+        float RotationZ { get; set; }
+    }
+
+    public interface IBacBone
+    {
+        BoneLinks BoneLink { get; set; }
+    }
 }

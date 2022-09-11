@@ -14,6 +14,9 @@ namespace Xv2CoreLib.ESK
     [Serializable]
     public class ESK_File
     {
+        public const string BaseBone = "b_C_Base";
+        public const string PelvisBone = "b_C_Pelvis";
+
         [YAXAttributeForClass]
         public int I_12 { get; set; }
         [YAXAttributeForClass]

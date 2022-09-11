@@ -276,8 +276,8 @@ namespace Xv2CoreLib.ValuesDictionary
             { BoneLinks.b_C_Spine2 , "b_C_Spine2" },
             { BoneLinks.b_R_Hand , "b_R_Hand" },
             { BoneLinks.b_L_Hand , "b_L_Hand" },
-            { BoneLinks.b_R_Arm , "b_R_Arm" },
-            { BoneLinks.b_L_Arm , "b_L_Arm" },
+            { BoneLinks.b_R_Arm1 , "b_R_Arm" },
+            { BoneLinks.b_L_Arm1 , "b_L_Arm" },
             { BoneLinks.b_R_Shoulder , "b_R_Shoulder" },
             { BoneLinks.b_L_Shoulder , "b_L_Shoulder" },
             { BoneLinks.b_R_Foot , "b_R_Foot" },
@@ -337,11 +337,12 @@ namespace Xv2CoreLib.ValuesDictionary
             { 0x3d , "Force End BAC Loop" },
             { 0x3f , "Activate Limit Burst" },
             { 0x40 , "Auto Lock-On" },
-            { 0x43 , "UI Function" },
+            { 0x43 , "Auto-Dodge 1" },
             { 0x44 , "Damages User (x10)" },
             { 0x4a , "Skill Cooldown" },
             { 0x4c , "Activate Talisman" },
             { 0x4e , "Skill Upgrade" },
+            { 0x5f , "Auto-Dodge 2" }
         };
 
         //Param1 Names
@@ -369,6 +370,7 @@ namespace Xv2CoreLib.ValuesDictionary
             { 0x4a , "Cooldown Duration" },
             { 0x4c , "Talisman ID" },
             { 0x4e , "Skill ID" },
+            { 0x5f , "Stamina Cost" },
         };
 
         //Param2 Names
@@ -377,6 +379,7 @@ namespace Xv2CoreLib.ValuesDictionary
             { 0x25 , "Skill Type" },
             { 0x26 , "Skill Type" },
             { 0x4e , "Skill Type" },
+            { 0x5f , "Health Requirement" },
         };
 
         //Param3 Names
@@ -503,6 +506,7 @@ namespace Xv2CoreLib.ValuesDictionary
             { 91 , 0 },
             { 92 , 0 },
             { 94 , 0 },
+            { 95 , 2 },
         };
 
         //BacFunctionSkillType

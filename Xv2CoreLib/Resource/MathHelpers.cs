@@ -162,5 +162,6 @@ namespace Xv2CoreLib.Resource
             m2[1] = fTyz + fTwx;
             m2[2] = 1.0 - (fTxx + fTyy);
         }
+    
     }
 }

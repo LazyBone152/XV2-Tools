@@ -2491,6 +2491,11 @@ namespace Xv2CoreLib.EAN
             return 0f;
         }
 
+        public override string ToString()
+        {
+            return $"{FrameIndex}: {X} {Y} {Z} {W}";
+        }
+
         #region Convert
         internal Vector3 ToVector3()
         {

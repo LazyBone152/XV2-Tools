@@ -718,6 +718,10 @@ namespace Xv2CoreLib.BCS
                 //Uses Model1
                 return string.Format("{0}.dyt.emb", GetPath(Model, partType));
             }
+            else if(!string.IsNullOrWhiteSpace(EmdPath))
+            {
+                return string.Format("{0}.dyt.emb", EmdPath);
+            }
 
             return null;
         }

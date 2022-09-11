@@ -536,6 +536,7 @@ namespace Xv2CoreLib
 
         //Data:
         public bool IsLoaded { get; private set; }
+        private bool WasManualLoaded { get; set; }
         public object File { get; private set; }
         //Used for unsupported file types like SCD that have no parser. Otherwise, its null
         public byte[] Bytes { get; private set; }
@@ -565,11 +566,12 @@ namespace Xv2CoreLib
             Owner = owner;
             FileType = GetFileType(name);
             LoadManual(filePathToLoad);
+            WasManualLoaded = true;
         }
 
         public void Load(bool allowReload = true)
         {
-            if (IsLoaded && !allowReload) return;
+            if (IsLoaded && !allowReload || WasManualLoaded) return;
 
             switch (FileType)
             {
@@ -641,6 +643,8 @@ namespace Xv2CoreLib
                         System.IO.File.WriteAllBytes(FileManager.Instance.fileIO.PathInGameDir(RelativePath), Bytes);
                         break;
                 }
+
+                WasManualLoaded = false;
             }
         }
 
