@@ -87,6 +87,19 @@ namespace Xv2CoreLib.EAN
             Animations.Sort((x, y) => x.IndexNumeric - y.IndexNumeric);
         }
 
+        /// <summary>
+        /// Order animation nodes by bone index.
+        /// </summary>
+        public void SortAnimationNodes()
+        {
+            if (Skeleton == null) return;
+
+            foreach(var animation in Animations)
+            {
+                animation.Nodes.Sort((x, y) => Skeleton.GetBoneIndex(x.BoneName) - Skeleton.GetBoneIndex(y.BoneName));
+            }
+        }
+
         public bool ValidateAnimationIndexes()
         {
             if (Animations == null) return true;
@@ -571,9 +584,9 @@ namespace Xv2CoreLib.EAN
             if (existing != null) return existing;
 
             EAN_Node node = new EAN_Node();
-            node.AnimationComponents = AsyncObservableCollection<EAN_AnimationComponent>.Create();
+            node.AnimationComponents = new AsyncObservableCollection<EAN_AnimationComponent>();
             node.BoneName = bone;
-            node.EskRelativeTransform = eskSkeleton.GetBone(bone)?.RelativeTransform;
+            node.EskRelativeTransform = eskSkeleton?.GetBone(bone)?.RelativeTransform;
 
             Nodes.Add(node);
             undos.Add(new UndoableListAdd<EAN_Node>(Nodes, node));
@@ -1021,6 +1034,10 @@ namespace Xv2CoreLib.EAN
 
         #endregion
 
+        private static float CalculateBlendFactor(float blendFactor, float blendStep, int startFrame, int currentFrame)
+        {
+            return MathHelpers.Clamp(0f, 1f, blendFactor * (blendStep * (currentFrame - startFrame)));
+        }
     }
 
     [YAXSerializeAs("AnimationNode")]
@@ -2544,7 +2561,7 @@ namespace Xv2CoreLib.EAN
             SerializedBone.SetNeutralBindPose(Bones, bindPose);
         }
 
-        public static List<SerializedAnimation> Serialize(List<EAN_Animation> animations, ESK_Skeleton bindPose)
+        public static List<SerializedAnimation> Serialize(IList<EAN_Animation> animations, ESK_Skeleton bindPose)
         {
             List<SerializedAnimation> serializedAnims = new List<SerializedAnimation>();
 
@@ -2554,7 +2571,7 @@ namespace Xv2CoreLib.EAN
             return serializedAnims;
         }
 
-        public static List<EAN_Animation> Deserialize(List<SerializedAnimation> serialziedAnimations, ESK_Skeleton bindPose)
+        public static List<EAN_Animation> Deserialize(IList<SerializedAnimation> serialziedAnimations, ESK_Skeleton bindPose)
         {
             List<EAN_Animation> animations = new List<EAN_Animation>();
 
@@ -2720,6 +2737,8 @@ namespace Xv2CoreLib.EAN
 
         private static void SetBindPoseState(List<SerializedBone> serialziedBones, ESK_Skeleton bindPose, bool invert)
         {
+            if (bindPose == null) return;
+
             //Nuke all nodes that dont exist in the target skeleton
             serialziedBones.RemoveAll(x => !bindPose.Exists(x.Name));
 

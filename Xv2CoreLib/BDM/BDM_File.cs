@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace Xv2CoreLib.BDM
@@ -19,35 +16,6 @@ namespace Xv2CoreLib.BDM
     //15 = 17 (+2)
     //16 = 18 (+2)
 
-    public enum BDM_Type
-    {
-        XV2_0, //Just auto-convert all BDMs to this
-        XV2_1,
-        XV1
-    }
-
-    public enum AcbType : ushort
-    {
-        Common = 0,
-        Character_SE = 2,
-        Character_VOX = 3,
-        Skill_SE = 10,
-        Skill_VOX = 11
-    }
-
-    public enum EepkType : ushort
-    {
-        Common = 0,
-        StageBG = 1,
-        Character = 2,
-        AwokenSkill = 3,
-        SuperSkill = 5,
-        UltimateSkill = 6,
-        EvasiveSkill = 7,
-        KiBlastSkill = 9,
-        Stage = 11
-    }
-
 
     [YAXSerializeAs("BDM")]
     [Serializable]
@@ -59,7 +27,7 @@ namespace Xv2CoreLib.BDM
 
         [YAXComment("[XV2 Types only] Each BDM SubEntry is for a different activation condition, all known ones are as follows (by Index):" +
             "\n0 = default struck" +
-            "\n1 = Unknown" +
+            "\n1 = struck while using a skill" +
             "\n2 = struck while in floating hit animation" +
             "\n3 = struck in back" +
             "\n4 = struck while in rolling hit animation" +
@@ -131,7 +99,7 @@ namespace Xv2CoreLib.BDM
         {
             for (int i = 0; i < BDM_Entries.Count; i++)
             {
-                if (BDM_Entries[i].I_00 == id)
+                if (BDM_Entries[i].ID == id)
                 {
                     BDM_Entries[i] = entry;
                     return;
@@ -170,17 +138,17 @@ namespace Xv2CoreLib.BDM
                 foreach(var entry in BDM_Entries)
                 {
                     int idx = newEntries.Count;
-                    newEntries.Add(new BDM_Entry() { Type0Entries = new List<Type0SubEntry>(), I_00 = entry.I_00 });
+                    newEntries.Add(new BDM_Entry() { Type0Entries = new List<Type0SubEntry>(), ID = entry.ID });
 
                     foreach(var subEntry in entry.Type1Entries)
                     {
                         newEntries[idx].Type0Entries.Add(new Type0SubEntry()
                         {
                             Index = subEntry.Index,
-                            I_00 = subEntry.I_00,
-                            I_102 = subEntry.I_94,
-                            I_04 = subEntry.I_04,
-                            I_94 = subEntry.I_86,
+                            DamageType = subEntry.I_00,
+                            DamageSecondaryType = subEntry.I_94,
+                            DamageAmount = subEntry.I_04,
+                            DamageSpecial = subEntry.I_86,
                             AcbType = (AcbType)subEntry.I_12,
                             CueId = subEntry.I_14,
                             Effect1_ID = subEntry.I_16,
@@ -191,27 +159,27 @@ namespace Xv2CoreLib.BDM
                             Effect2_SkillID = (ushort)subEntry.I_26,
                             Effect2_EepkType = (EepkType)subEntry.I_28,
                             Effect3_ID = -1,
-                            F_40 = subEntry.F_32,
-                            F_44 = subEntry.F_36,
-                            I_48 = subEntry.I_40,
-                            I_50 = subEntry.I_42,
-                            I_52 = subEntry.I_44,
-                            I_56 = subEntry.I_48,
-                            I_54 = subEntry.I_46,
-                            I_78 = subEntry.I_70,
-                            F_60 = subEntry.F_52,
-                            F_64 = subEntry.F_56,
-                            F_68 = subEntry.F_60,
-                            F_72 = subEntry.F_64,
-                            I_80 = subEntry.I_72,
-                            I_86 = subEntry.I_78,
-                            I_104 = subEntry.I_96,
-                            I_106 = subEntry.I_98,
-                            I_108 = subEntry.I_100,
-                            I_110 = subEntry.I_102,
+                            PushbackStrength = subEntry.F_32,
+                            PushbackAcceleration = subEntry.F_36,
+                            UserStun = subEntry.I_40,
+                            VictimStun = subEntry.I_42,
+                            KnockbackDuration = subEntry.I_44,
+                            KnockbackGroundImpactTime = subEntry.I_48,
+                            KnockbackRecoveryAfterImpactTime = subEntry.I_46,
+                            KnockbackGravityTime = subEntry.I_70,
+                            KnockbackStrengthX = subEntry.F_52,
+                            KnockbackStrengthY = subEntry.F_56,
+                            KnockbackStrengthZ = subEntry.F_60,
+                            KnockbackDragY = subEntry.F_64,
+                            VictimInvincibilityTime = subEntry.I_72,
+                            AlimentType = subEntry.I_78,
+                            CameraShakeType = subEntry.I_96,
+                            CameraShakeTime = subEntry.I_98,
+                            UserBpeID = subEntry.I_100,
+                            VictimBpeID = subEntry.I_102,
                             StaminaBrokenOverrideBdmId = -1,
-                            I_84 = subEntry.I_76,
-                            I_100 = subEntry.I_92,
+                            TransformationType = subEntry.I_76,
+                            StumbleType = subEntry.I_92,
                             I_58 = subEntry.I_50,
                             I_76 = subEntry.I_68,
                             I_02 = subEntry.I_02,
@@ -244,17 +212,17 @@ namespace Xv2CoreLib.BDM
                 foreach (var entry in BDM_Entries)
                 {
                     int idx = newEntries.Count;
-                    newEntries.Add(new BDM_Entry() { Type0Entries = new List<Type0SubEntry>(), I_00 = entry.I_00 });
+                    newEntries.Add(new BDM_Entry() { Type0Entries = new List<Type0SubEntry>(), ID = entry.ID });
                     
                     foreach (var subEntry in entry.Type1Entries)
                     {
                         newEntries[idx].Type0Entries.Add(new Type0SubEntry()
                         {
                             Index = subEntry.Index,
-                            I_00 = DamageTypeXv1ToXv2(subEntry.I_00),
-                            I_102 = subEntry.I_94,
-                            I_04 = subEntry.I_04,
-                            I_94 = subEntry.I_86,
+                            DamageType = (DamageType)DamageTypeXv1ToXv2((ushort)subEntry.I_00),
+                            DamageSecondaryType = subEntry.I_94,
+                            DamageAmount = subEntry.I_04,
+                            DamageSpecial = subEntry.I_86,
                             AcbType = (AcbType)subEntry.I_12,
                             CueId = subEntry.I_14,
                             Effect1_ID = subEntry.I_16,
@@ -265,27 +233,27 @@ namespace Xv2CoreLib.BDM
                             Effect2_SkillID = (ushort)subEntry.I_26,
                             Effect2_EepkType = (EepkType)subEntry.I_28,
                             Effect3_ID = -1,
-                            F_40 = subEntry.F_32,
-                            F_44 = subEntry.F_36,
-                            I_48 = subEntry.I_40,
-                            I_50 = subEntry.I_42,
-                            I_52 = subEntry.I_44,
-                            I_56 = subEntry.I_48,
-                            I_54 = subEntry.I_46,
-                            I_78 = subEntry.I_70,
-                            F_60 = subEntry.F_52,
-                            F_64 = subEntry.F_56,
-                            F_68 = subEntry.F_60,
-                            F_72 = subEntry.F_64,
-                            I_80 = subEntry.I_72,
-                            I_86 = subEntry.I_78,
-                            I_104 = subEntry.I_96,
-                            I_106 = subEntry.I_98,
-                            I_108 = subEntry.I_100,
-                            I_110 = subEntry.I_102,
+                            PushbackStrength = subEntry.F_32,
+                            PushbackAcceleration = subEntry.F_36,
+                            UserStun = subEntry.I_40,
+                            VictimStun = subEntry.I_42,
+                            KnockbackDuration = subEntry.I_44,
+                            KnockbackGroundImpactTime = subEntry.I_48,
+                            KnockbackRecoveryAfterImpactTime = subEntry.I_46,
+                            KnockbackGravityTime = subEntry.I_70,
+                            KnockbackStrengthX = subEntry.F_52,
+                            KnockbackStrengthY = subEntry.F_56,
+                            KnockbackStrengthZ = subEntry.F_60,
+                            KnockbackDragY = subEntry.F_64,
+                            VictimInvincibilityTime = subEntry.I_72,
+                            AlimentType = subEntry.I_78,
+                            CameraShakeType = subEntry.I_96,
+                            CameraShakeTime = subEntry.I_98,
+                            UserBpeID = subEntry.I_100,
+                            VictimBpeID = subEntry.I_102,
                             StaminaBrokenOverrideBdmId = -1,
-                            I_84 = subEntry.I_76,
-                            I_100 = subEntry.I_92,
+                            TransformationType = subEntry.I_76,
+                            StumbleType = subEntry.I_92,
                             I_58 = subEntry.I_50,
                             I_76 = subEntry.I_68,
                             I_02 = subEntry.I_02,
@@ -325,7 +293,7 @@ namespace Xv2CoreLib.BDM
                 foreach (var entry in BDM_Entries)
                 {
                     int idx = newEntries.Count;
-                    newEntries.Add(new BDM_Entry() { Type0Entries = new List<Type0SubEntry>(), I_00 = entry.I_00 });
+                    newEntries.Add(new BDM_Entry() { Type0Entries = new List<Type0SubEntry>(), ID = entry.ID });
 
                     foreach (var subEntry in entry.Type1Entries)
                     {
@@ -347,10 +315,10 @@ namespace Xv2CoreLib.BDM
                         newEntries[idx].Type0Entries.Add(new Type0SubEntry()
                         {
                             Index = subEntry.Index,
-                            I_00 = subEntry.I_00,
-                            I_102 = subEntry.I_94,
-                            I_04 = subEntry.I_04,
-                            I_94 = subEntry.I_86,
+                            DamageType = subEntry.I_00,
+                            DamageSecondaryType = subEntry.I_94,
+                            DamageAmount = subEntry.I_04,
+                            DamageSpecial = subEntry.I_86,
                             AcbType = (AcbType)subEntry.I_12,
                             CueId = subEntry.I_14,
                             Effect1_ID = (short)skillID1,
@@ -361,27 +329,27 @@ namespace Xv2CoreLib.BDM
                             Effect2_SkillID = (ushort)subEntry.I_26,
                             Effect2_EepkType = (EepkType)subEntry.I_28,
                             Effect3_ID = -1,
-                            F_40 = subEntry.F_32,
-                            F_44 = subEntry.F_36,
-                            I_48 = subEntry.I_40,
-                            I_50 = subEntry.I_42,
-                            I_52 = subEntry.I_44,
-                            I_56 = subEntry.I_48,
-                            I_54 = subEntry.I_46,
-                            I_78 = subEntry.I_70,
-                            F_60 = subEntry.F_52,
-                            F_64 = subEntry.F_56,
-                            F_68 = subEntry.F_60,
-                            F_72 = subEntry.F_64,
-                            I_80 = subEntry.I_72,
-                            I_86 = subEntry.I_78,
-                            I_104 = subEntry.I_96,
-                            I_106 = subEntry.I_98,
-                            I_108 = subEntry.I_100,
-                            I_110 = subEntry.I_102,
+                            PushbackStrength = subEntry.F_32,
+                            PushbackAcceleration = subEntry.F_36,
+                            UserStun = subEntry.I_40,
+                            VictimStun = subEntry.I_42,
+                            KnockbackDuration = subEntry.I_44,
+                            KnockbackGroundImpactTime = subEntry.I_48,
+                            KnockbackRecoveryAfterImpactTime = subEntry.I_46,
+                            KnockbackGravityTime = subEntry.I_70,
+                            KnockbackStrengthX = subEntry.F_52,
+                            KnockbackStrengthY = subEntry.F_56,
+                            KnockbackStrengthZ = subEntry.F_60,
+                            KnockbackDragY = subEntry.F_64,
+                            VictimInvincibilityTime = subEntry.I_72,
+                            AlimentType = subEntry.I_78,
+                            CameraShakeType = subEntry.I_96,
+                            CameraShakeTime = subEntry.I_98,
+                            UserBpeID = subEntry.I_100,
+                            VictimBpeID = subEntry.I_102,
                             StaminaBrokenOverrideBdmId = -1,
-                            I_84 = subEntry.I_76,
-                            I_100 = subEntry.I_92,
+                            TransformationType = subEntry.I_76,
+                            StumbleType = subEntry.I_92,
                             I_58 = subEntry.I_50,
                             I_76 = subEntry.I_68,
                             I_02 = subEntry.I_02,
@@ -417,7 +385,7 @@ namespace Xv2CoreLib.BDM
             {
                 for(int i = 0; i < BDM_Entries.Count; i++)
                 {
-                    if(BDM_Entries[i].I_00 == ID)
+                    if(BDM_Entries[i].ID == ID)
                     {
                         return i;
                     }
@@ -427,7 +395,7 @@ namespace Xv2CoreLib.BDM
             return -1;
         }
 
-        private static UInt16 DamageTypeXv1ToXv2(UInt16 damageType)
+        private static ushort DamageTypeXv1ToXv2(ushort damageType)
         {
             int _type = damageType;
 
@@ -443,7 +411,7 @@ namespace Xv2CoreLib.BDM
 
             foreach(var entry in BDM_Entries)
             {
-                if (entry.I_00 == id) return entry.CloneType0();
+                if (entry.ID == id) return entry.CloneType0();
             }
 
             throw new Exception("Could not find the BDM_Entry with ID " + id);
@@ -502,15 +470,21 @@ namespace Xv2CoreLib.BDM
 
         #region WrapperProperties
         [YAXDontSerialize]
-        public int SortID
+        public int SortID => ID;
+        [YAXDontSerialize]
+        public int ID
         {
-            get
+            get => Utils.TryParseInt(Index);
+            set
             {
-                return int.Parse(Index);
+                string newId = ID.ToString();
+
+                if(Index != newId)
+                {
+                    Index = newId;
+                }
             }
         }
-        [YAXDontSerialize]
-        public int ID { get { return int.Parse(Index); } set { Index = value.ToString(); NotifyPropertyChanged("ID"); } }
         
         #endregion
 
@@ -519,31 +493,13 @@ namespace Xv2CoreLib.BDM
         [BindingAutoId]
         public string Index { get; set; } //Wrapper for I_00
 
-        [YAXDontSerialize]
-        public int I_00
-        {
-            get
-            {
-                int value;
-                if(int.TryParse(Index, out value))
-                {
-                    return value;
-                }
-                else
-                {
-                    throw new FormatException("BDM_Entry.Index is not a numeric value. Get failed.");
-                }
-            }
-            set
-            {
-                Index = value.ToString();
-            }
-        }
         [YAXDontSerializeIfNull]
         [YAXSerializeAs("BDM_Type0_Entries")]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "T0_SubEntry")]
         [BindingSubList]
         public List<Type0SubEntry> Type0Entries { get; set; }
+
+        //Legacy BDMs. These will be automatically converted into the newer XV2 format.
         [YAXDontSerializeIfNull]
         [YAXSerializeAs("BDM_Type1_Entries")]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "T1_SubEntry")]
@@ -561,7 +517,7 @@ namespace Xv2CoreLib.BDM
 
             return new BDM_Entry()
             {
-                I_00 = I_00,
+                ID = ID,
                 Type0Entries = subs
             };
         }
@@ -576,17 +532,17 @@ namespace Xv2CoreLib.BDM
         public int Index { get; set; }
         [YAXAttributeFor("Damage")]
         [YAXSerializeAs("Type")]
-        public UInt16 I_00 { get; set; }
+        public DamageType DamageType { get; set; }
         [YAXAttributeFor("Damage")]
         [YAXSerializeAs("Secondary_Type")]
         [YAXHexValue]
-        public ushort I_102 { get; set; } //uint16
+        public SecondaryTypeFlags DamageSecondaryType { get; set; }
         [YAXAttributeFor("Damage")]
         [YAXSerializeAs("Amount")]
-        public UInt16 I_04 { get; set; }
+        public ushort DamageAmount { get; set; }
         [YAXAttributeFor("Damage")]
         [YAXSerializeAs("Special")]
-        public UInt16 I_94 { get; set; }
+        public ushort DamageSpecial { get; set; }
         [YAXAttributeFor("Sound")]
         [YAXSerializeAs("AcbType")]
         public AcbType AcbType { get; set; }
@@ -626,131 +582,131 @@ namespace Xv2CoreLib.BDM
         [YAXAttributeFor("Pushback")]
         [YAXSerializeAs("Strength")]
         [YAXFormat("0.0###########")]
-        public float F_40 { get; set; }
+        public float PushbackStrength { get; set; }
         [YAXAttributeFor("Pushback")]
         [YAXSerializeAs("Acceleration")]
         [YAXFormat("0.0###########")]
-        public float F_44 { get; set; }
+        public float PushbackAcceleration { get; set; }
         [YAXAttributeFor("User_Stun")]
         [YAXSerializeAs("value")]
-        public UInt16 I_48 { get; set; }
+        public ushort UserStun { get; set; }
         [YAXAttributeFor("Victim_Stun")]
         [YAXSerializeAs("value")]
-        public UInt16 I_50 { get; set; }
+        public ushort VictimStun { get; set; }
         [YAXAttributeFor("Knockback_Time")]
         [YAXSerializeAs("Duration")]
-        public UInt16 I_52 { get; set; }
+        public ushort KnockbackDuration { get; set; }
         [YAXAttributeFor("Knockback_Time")]
         [YAXSerializeAs("Ground_Impact")]
-        public UInt16 I_56 { get; set; }
+        public ushort KnockbackGroundImpactTime { get; set; }
         [YAXAttributeFor("Knockback_Time")]
         [YAXSerializeAs("Recovery_After_Impact")]
-        public UInt16 I_54 { get; set; }
+        public ushort KnockbackRecoveryAfterImpactTime { get; set; }
         [YAXAttributeFor("Knockback_Time")]
         [YAXSerializeAs("Gravity")]
-        public UInt16 I_78 { get; set; }
+        public ushort KnockbackGravityTime { get; set; }
         [YAXAttributeFor("Knockback_Strength")]
         [YAXSerializeAs("X")]
         [YAXFormat("0.0###########")]
-        public float F_60 { get; set; }
+        public float KnockbackStrengthX { get; set; }
         [YAXAttributeFor("Knockback_Strength")]
         [YAXSerializeAs("Y")]
         [YAXFormat("0.0###########")]
-        public float F_64 { get; set; }
+        public float KnockbackStrengthY { get; set; }
         [YAXAttributeFor("Knockback_Strength")]
         [YAXSerializeAs("Z")]
         [YAXFormat("0.0###########")]
-        public float F_68 { get; set; }
+        public float KnockbackStrengthZ { get; set; }
         [YAXAttributeFor("Knockback_Drag")]
         [YAXSerializeAs("Y")]
         [YAXFormat("0.0###########")]
-        public float F_72 { get; set; }
+        public float KnockbackDragY { get; set; }
 
 
         [YAXAttributeFor("Victim_Invincibility")]
         [YAXSerializeAs("Time")]
-        public short I_80 { get; set; }
+        public short VictimInvincibilityTime { get; set; }
         [YAXAttributeFor("Aliment_Type")]
         [YAXSerializeAs("value")]
-        public short I_86 { get; set; }
+        public AlimentFlags AlimentType { get; set; }
         [YAXAttributeFor("Camera_Shake")]
         [YAXSerializeAs("Type")]
-        public SByte I_104 { get; set; } //Flag?
+        public SByte CameraShakeType { get; set; } //Flag?
         [YAXAttributeFor("Camera_Shake")]
         [YAXSerializeAs("Time")]
-        public UInt16 I_106 { get; set; }
+        public ushort CameraShakeTime { get; set; }
         [YAXAttributeFor("User Screen Flash Transperancy")]
         [YAXSerializeAs("value")]
-        public short I_108 { get; set; }
+        public short UserBpeID { get; set; }
         [YAXAttributeFor("Victim Screen Flash Transparency")]
         [YAXSerializeAs("value")]
-        public short I_110 { get; set; }
+        public short VictimBpeID { get; set; }
         [YAXAttributeFor("Stamina Broken BDM ID Override")]
         [YAXSerializeAs("value")]
         public short StaminaBrokenOverrideBdmId { get; set; }
         [YAXAttributeFor("Time Before Z-Vanish Enabled")]
         [YAXSerializeAs("value")]
-        public UInt16 I_114 { get; set; }
+        public ushort ZVanishEnableTime { get; set; }
         [YAXAttributeFor("User Animation")]
         [YAXSerializeAs("Time")]
-        public UInt16 I_116 { get; set; }
+        public ushort UserAnimationTIme { get; set; }
         [YAXAttributeFor("Victim Animation")]
         [YAXSerializeAs("Time")]
-        public UInt16 I_118 { get; set; }
+        public ushort VictimAnimationTime { get; set; }
         [YAXAttributeFor("User Animation")]
         [YAXSerializeAs("Speed")]
         [YAXFormat("0.0###########")]
-        public float F_120 { get; set; }
+        public float UserAnimationSpeed { get; set; }
         [YAXAttributeFor("Victim Animation")]
         [YAXSerializeAs("Speed")]
         [YAXFormat("0.0###########")]
-        public float F_124 { get; set; }
+        public float VictimAnimationSpeed { get; set; }
         [YAXAttributeFor("Transformation")]
         [YAXSerializeAs("value")]
-        public UInt16 I_84 { get; set; }
+        public ushort TransformationType { get; set; }
         [YAXAttributeFor("Stumble")]
         [YAXSerializeAs("value")]
-        public UInt16 I_100 { get; set; }
+        public ushort StumbleType { get; set; }
 
 
         [YAXAttributeFor("I_02")]
         [YAXSerializeAs("value")]
-        public UInt16 I_02 { get; set; }
+        public ushort I_02 { get; set; }
         [YAXAttributeFor("I_06")]
         [YAXSerializeAs("value")]
-        public UInt16 I_06 { get; set; }
+        public ushort I_06 { get; set; }
         [YAXAttributeFor("F_08")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0###########")]
         public float F_08 { get; set; }
         [YAXAttributeFor("I_22")]
         [YAXSerializeAs("value")]
-        public UInt16 I_22 { get; set; }
+        public ushort I_22 { get; set; }
         [YAXAttributeFor("I_30")]
         [YAXSerializeAs("value")]
-        public UInt16 I_30 { get; set; }
+        public ushort I_30 { get; set; }
         [YAXAttributeFor("I_38")]
         [YAXSerializeAs("value")]
-        public UInt16 I_38 { get; set; }
+        public ushort I_38 { get; set; }
         [YAXAttributeFor("I_58")]
         [YAXSerializeAs("value")]
-        public UInt16 I_58 { get; set; }
+        public ushort I_58 { get; set; }
 
 
         [YAXAttributeFor("I_76")]
         [YAXSerializeAs("value")]
-        public UInt16 I_76 { get; set; }
+        public ushort I_76 { get; set; }
         [YAXAttributeFor("I_82")]
         [YAXSerializeAs("value")]
-        public UInt16 I_82 { get; set; }
+        public ushort I_82 { get; set; }
         [YAXAttributeFor("I_88")]
         [YAXSerializeAs("int16")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public UInt16[] I_88 { get; set; } //Size 3
+        public ushort[] I_88 { get; set; } //Size 3
         [YAXAttributeFor("I_96")]
         [YAXSerializeAs("int16")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public UInt16[] I_96 { get; set; } //size 2
+        public ushort[] I_96 { get; set; } //size 2
 
         public Type0SubEntry Clone(int index = -1)
         {
@@ -762,13 +718,13 @@ namespace Xv2CoreLib.BDM
             return new Type0SubEntry()
             {
                 Index = index,
-                I_00 = I_00,
+                DamageType = DamageType,
                 I_02 = I_02,
-                I_04 = I_04,
+                DamageAmount = DamageAmount,
                 I_06 = I_06,
-                I_100 = I_100,
-                I_102 = I_102,
-                I_104 = I_104,
+                StumbleType = StumbleType,
+                DamageSecondaryType = DamageSecondaryType,
+                CameraShakeType = CameraShakeType,
                 AcbType = AcbType,
                 CueId = CueId,
                 Effect1_ID = Effect1_ID,
@@ -779,41 +735,41 @@ namespace Xv2CoreLib.BDM
                 Effect2_SkillID = Effect2_SkillID,
                 Effect2_EepkType = Effect2_EepkType,
                 I_30 = I_30,
-                I_50 = I_50,
+                VictimStun = VictimStun,
                 I_76 = I_76,
-                I_78 = I_78,
-                I_80 = I_80,
-                I_86 = I_86,
+                KnockbackGravityTime = KnockbackGravityTime,
+                VictimInvincibilityTime = VictimInvincibilityTime,
+                AlimentType = AlimentType,
                 I_88 = I_88,
-                I_94 = I_94,
+                DamageSpecial = DamageSpecial,
                 I_96 = I_96,
                 F_08 = F_08,
-                F_60 = F_60,
-                F_64 = F_64,
-                I_106 = I_106,
-                I_108 = I_108,
-                I_110 = I_110,
+                KnockbackStrengthX = KnockbackStrengthX,
+                KnockbackStrengthY = KnockbackStrengthY,
+                CameraShakeTime = CameraShakeTime,
+                UserBpeID = UserBpeID,
+                VictimBpeID = VictimBpeID,
                 StaminaBrokenOverrideBdmId = StaminaBrokenOverrideBdmId,
-                I_114 = I_114,
-                I_116 = I_116,
-                I_118 = I_118,
+                ZVanishEnableTime = ZVanishEnableTime,
+                UserAnimationTIme = UserAnimationTIme,
+                VictimAnimationTime = VictimAnimationTime,
                 Effect3_ID = Effect3_ID,
                 Effect3_SkillID = Effect3_SkillID,
                 Effect3_EepkType = Effect3_EepkType,
                 I_38 = I_38,
-                I_52 = I_52,
-                I_54 = I_54,
-                I_56 = I_56,
+                KnockbackDuration = KnockbackDuration,
+                KnockbackRecoveryAfterImpactTime = KnockbackRecoveryAfterImpactTime,
+                KnockbackGroundImpactTime = KnockbackGroundImpactTime,
                 I_58 = I_58,
                 I_82 = I_82,
-                I_84 = I_84,
-                F_120 = F_120,
-                F_124 = F_124,
-                F_40 = F_40,
-                F_44 = F_44,
-                I_48 = I_48,
-                F_68 = F_68,
-                F_72 = F_72
+                TransformationType = TransformationType,
+                UserAnimationSpeed = UserAnimationSpeed,
+                VictimAnimationSpeed = VictimAnimationSpeed,
+                PushbackStrength = PushbackStrength,
+                PushbackAcceleration = PushbackAcceleration,
+                UserStun = UserStun,
+                KnockbackStrengthZ = KnockbackStrengthZ,
+                KnockbackDragY = KnockbackDragY
             };
         }
 
@@ -830,20 +786,19 @@ namespace Xv2CoreLib.BDM
         public int Index { get; set; }
         [YAXAttributeFor("Damage")]
         [YAXSerializeAs("Type")]
-        public UInt16 I_00 { get; set; }
+        public DamageType I_00 { get; set; }
         [YAXAttributeFor("Damage")]
         [YAXSerializeAs("Secondary_Type")]
-        [YAXHexValue]
-        public ushort I_94 { get; set; } //uint16
+        public SecondaryTypeFlags I_94 { get; set; } //uint16
         [YAXAttributeFor("Damage")]
         [YAXSerializeAs("Amount")]
-        public UInt16 I_04 { get; set; }
+        public ushort I_04 { get; set; }
         [YAXAttributeFor("Damage")]
         [YAXSerializeAs("Special")]
-        public UInt16 I_86 { get; set; }
+        public ushort I_86 { get; set; }
         [YAXAttributeFor("Sound")]
         [YAXSerializeAs("Type")]
-        public UInt16 I_12 { get; set; }
+        public ushort I_12 { get; set; }
         [YAXAttributeFor("Sound")]
         [YAXSerializeAs("CueID")]
         public short I_14 { get; set; }
@@ -914,7 +869,7 @@ namespace Xv2CoreLib.BDM
         public short I_72 { get; set; }
         [YAXAttributeFor("Aliment_Type")]
         [YAXSerializeAs("value")]
-        public short I_78 { get; set; }
+        public AlimentFlags I_78 { get; set; }
         [YAXAttributeFor("Camera_Shake_Type")]
         [YAXSerializeAs("value")]
         public SByte I_96 { get; set; } //Flag?
@@ -1029,4 +984,117 @@ namespace Xv2CoreLib.BDM
         }
     }
 
+
+    public enum BDM_Type
+    {
+        XV2_0, //Just auto-convert all BDMs to this
+        XV2_1,
+        XV1
+    }
+
+    public enum AcbType : ushort
+    {
+        Common = 0,
+        Character_SE = 2,
+        Character_VOX = 3,
+        Skill_SE = 10,
+        Skill_VOX = 11
+    }
+
+    public enum EepkType : ushort
+    {
+        Common = 0,
+        StageBG = 1,
+        Character = 2,
+        AwokenSkill = 3,
+        SuperSkill = 5,
+        UltimateSkill = 6,
+        EvasiveSkill = 7,
+        KiBlastSkill = 9,
+        Stage = 11
+    }
+
+    public enum DamageType : ushort
+    {
+        None = 0,
+        Block = 1,
+        GuardBreak = 2,
+        Standard = 3,
+        Heavy = 4,
+        Knockback = 5,
+        Knockback1 = 6,
+        Knockback2 = 7,
+        Knockback3 = 8,
+        Knockback4 = 9,
+        Grab = 10,
+        HoldStomach = 11,
+        HoldEyes = 12,
+        Knockback5 = 13,
+        Electric = 14,
+        Dazed = 15,
+        Paralysis = 16,
+        Freeze = 17,
+        Wildcard = 18,
+        //19 is never used in the game
+        HeavyStaminaBreak = 20,
+        LightStaminaBreak = 21,
+        GiantKiBlastPush = 22,
+        Brainwash = 23,
+        GiantKiBlastReturn = 24,
+        Knockback6 = 25,
+        Knockback7 = 26,
+        Knockback8 = 27,
+        Knockback9 = 28,
+        SlowOpponent = 29,
+        Brainwash2 = 30,
+        TimeStop = 31
+    }
+
+    public enum HitboxState
+    {
+        Default = 0,
+        Skill = 1,
+        PrimaryKnockback = 2,
+        Back = 3,
+        GroundImpact = 4,
+        Guarding = 5,
+        Stumble = 6,
+        Unknown = 7,
+        FloatingKnockback = 8,
+        KnockedDown = 9
+    }
+
+    [Flags]
+    public enum SecondaryTypeFlags : ushort
+    {
+        RestoreHealth = 0x1,
+        Unk2 = 0x2,
+        Unk3 = 0x4,
+        Unk4 = 0x8,
+        Unk5 = 0x10,
+        Unk6 = 0x20,
+        Unk7 = 0x40,
+        Unk8 = 0x80,
+        DisableEvasiveUsage = 0x100,
+        Unk10 = 0x200,
+        BypassTimeStopDamage = 0x400,
+        BypassSuperArmor = 0x800,
+        FaceOpponentAlways = 0x1000,
+        Unk14 = 0x2000,
+        Unk15 = 0x4000,
+        Unk16 = 0x8000
+    }
+
+    [Flags]
+    public enum AlimentFlags : ushort
+    {
+        Unk1 = 0x1,
+        HP_DEF = 0x2,
+        SPD = 0x4,
+        Target = 0x8,
+        SealAwokenSkill = 0x10,
+        Unk6 = 0x20,
+        Unk7 = 0x40,
+        Unk8 = 0x80
+    }
 }

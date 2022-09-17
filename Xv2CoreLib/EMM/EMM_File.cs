@@ -293,12 +293,36 @@ namespace Xv2CoreLib.EMM
         };
 
         private string shaderProgram = null;
+        private int _index = 0;
+        private string _name = null;
 
         [YAXAttributeForClass]
-        public int Index { get; set; }
+        public int Index
+        {
+            get => _index;
+            set
+            {
+                if (_index != value)
+                {
+                    _index = value;
+                    NotifyPropertyChanged(nameof(Index));
+                }
+            }
+        }
         [YAXAttributeForClass]
         [YAXSerializeAs("Name")]
-        public string Name { get; set; } //max 32
+        public string Name
+        {
+            get => _name;
+            set
+            {
+                if (_name != value && value.Length <= 32)
+                {
+                    _name = value;
+                    NotifyPropertyChanged(nameof(Name));
+                }
+            }
+        }
         [YAXAttributeForClass]
         [YAXSerializeAs("Shader")]
         public string ShaderProgram

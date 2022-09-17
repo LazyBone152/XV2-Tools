@@ -151,7 +151,7 @@ namespace LB_Mod_Installer.Installer
                     EffectContainerFile ecf = (EffectContainerFile)file.Data;
                     ecf.Directory = Path.GetDirectoryName(savePath);
                     ecf.Name = Path.GetFileNameWithoutExtension(savePath);
-                    ecf.saveFormat = Xv2CoreLib.EffectContainer.SaveFormat.Binary;
+                    ecf.saveFormat = Xv2CoreLib.EffectContainer.SaveFormat.EEPK;
                     ecf.Save();
                 }
                 else if (file.FileType == CachedFileType.Parsed && file.Data.GetType() == typeof(ACB_File))
@@ -213,7 +213,7 @@ namespace LB_Mod_Installer.Installer
                     string savePath = GeneralInfo.GetPathInGameDir(file.Path);
                     file.backupEffectContainerFile.Directory = Path.GetDirectoryName(savePath);
                     file.backupEffectContainerFile.Name = Path.GetFileNameWithoutExtension(savePath);
-                    file.backupEffectContainerFile.saveFormat = Xv2CoreLib.EffectContainer.SaveFormat.Binary;
+                    file.backupEffectContainerFile.saveFormat = Xv2CoreLib.EffectContainer.SaveFormat.EEPK;
                     file.backupEffectContainerFile.Save();
                 }
                 else if(file.backupBgmFile != null)

@@ -79,7 +79,7 @@ namespace Xv2CoreLib.EMB_CLASS
                         I_08 = 37568,
                         I_10 = 0,
                         UseFileNames = true,
-                        Entry = AsyncObservableCollection<EmbEntry>.Create()
+                        Entry = new AsyncObservableCollection<EmbEntry>()
                     };
                 }
                 else
@@ -515,6 +515,9 @@ namespace Xv2CoreLib.EMB_CLASS
         #endregion
         public const int DDS_SIGNATURE = 542327876;
 
+        private string _name = null;
+        private byte[] _dataValue = new byte[0];
+
         [YAXDontSerialize]
         public int SortID
         {
@@ -525,19 +528,35 @@ namespace Xv2CoreLib.EMB_CLASS
         public int ID
         {
             get => Utils.TryParseInt(Index);
-            set => Index = value.ToString();
+            set
+            {
+                Index = value.ToString();
+                NotifyPropertyChanged(nameof(ID));
+                NotifyPropertyChanged(nameof(Index));
+            }
         }
+
 
         [YAXAttributeForClass]
         [YAXSerializeAs("Name")]
-        public string Name { get; set; }
+        public string Name
+        {
+            get => _name;
+            set
+            {
+                if(_name != value)
+                {
+                    _name = value;
+                    NotifyPropertyChanged(nameof(Name));
+                }
+            }
+        }
         [YAXAttributeForClass]
         [YAXSerializeAs("UseLocalCopy")]
         public bool LocalCopy { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("Index")]
         public string Index { get; set; }
-        private byte[] _dataValue = new byte[0];
         [YAXAttributeFor("Data")]
         [YAXSerializeAs("bytes")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]

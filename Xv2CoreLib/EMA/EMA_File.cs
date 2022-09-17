@@ -384,11 +384,43 @@ namespace Xv2CoreLib.EMA
             //General position seem to be broken. Maybe something to do with skeleton.
             //Rotation conversion also seems broken (Quaternion -> Euler Angles)
 
+            //Remove skeleton from keyframe values (test)
+            List<SerializedAnimation> deskinnedAnims = SerializedAnimation.Serialize(eanFile.Animations, eanFile.Skeleton);
+            List<EAN_Animation> deskinnedEan = SerializedAnimation.Deserialize(deskinnedAnims, null);
 
             EMA_File emaFile = new EMA_File();
             emaFile.Version = 37568;
             emaFile.skeleton = Skeleton.Convert(eanFile.Skeleton);
 
+            foreach(var animation in deskinnedEan)
+            {
+                EMA_Animation emaAnimation = new EMA_Animation();
+                emaAnimation.Name = animation.Name;
+                emaAnimation.EmaType = EmaType.obj;
+                emaAnimation.FloatPrecision = (ValueType)animation.FloatType;
+                emaAnimation.EndFrame = (ushort)animation.GetLastKeyframe();
+
+                foreach(var node in animation.Nodes)
+                {
+                    foreach(var component in node.AnimationComponents)
+                    {
+                        if(component.Type == EAN_AnimationComponent.ComponentType.Position || component.Type == EAN_AnimationComponent.ComponentType.Scale)
+                        {
+                            emaAnimation.Commands.Add(EMA_Command.ConvertToEma(component, Axis.X, node.BoneName));
+                            emaAnimation.Commands.Add(EMA_Command.ConvertToEma(component, Axis.Y, node.BoneName));
+                            emaAnimation.Commands.Add(EMA_Command.ConvertToEma(component, Axis.Z, node.BoneName));
+                        }
+                        else if(component.Type == EAN_AnimationComponent.ComponentType.Rotation)
+                        {
+                            //emaAnimation.Commands.AddRange(EMA_Command.ConvertToEma_Rotation(component, node.BoneName));
+                        }
+                    }
+                }
+
+                emaFile.Animations.Add(emaAnimation);
+            }
+            /*
+             * 
             foreach(var animation in eanFile.Animations)
             {
                 EMA_Animation emaAnimation = new EMA_Animation();
@@ -409,13 +441,14 @@ namespace Xv2CoreLib.EMA
                         }
                         else if(component.Type == EAN_AnimationComponent.ComponentType.Rotation)
                         {
-                            emaAnimation.Commands.AddRange(EMA_Command.ConvertToEma_Rotation(component, node.BoneName));
+                            //emaAnimation.Commands.AddRange(EMA_Command.ConvertToEma_Rotation(component, node.BoneName));
                         }
                     }
                 }
 
                 emaFile.Animations.Add(emaAnimation);
             }
+            */
 
             return emaFile;
         }

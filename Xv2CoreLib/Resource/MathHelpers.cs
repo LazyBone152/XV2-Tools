@@ -44,7 +44,73 @@ namespace Xv2CoreLib.Resource
             return value;
         }
 
-        public static Vector3 QuaternionToEulerAngles(Quaternion rot)
+        /// <summary>
+        /// Returns a value with the magnitude of x and the sign of y.
+        /// </summary>
+        /// <param name="x">A number whose magnitude is used in the result.</param>
+        /// <param name="y">A number whose sign is the used in the result.</param>
+        /// <returns>A value with the magnitude of x and the sign of y.</returns>
+        public static double CopySign(double x, double y)
+        {
+            //Implements Math.CopySign from newer .NET versions
+            if ((x > 0.0 && y > 0.0) || (x < 0.0 && y < 0.0))
+                return x;
+
+            return -x;
+        }
+
+        public static Quaternion EulerAnglesToQuaternion(Vector3 eulerAngles)
+        {
+            //https://stackoverflow.com/questions/70462758/c-sharp-how-to-convert-quaternions-to-euler-angles-xyz
+
+            float cy = (float)Math.Cos(eulerAngles.Z * 0.5);
+            float sy = (float)Math.Sin(eulerAngles.Z * 0.5);
+            float cp = (float)Math.Cos(eulerAngles.Y * 0.5);
+            float sp = (float)Math.Sin(eulerAngles.Y * 0.5);
+            float cr = (float)Math.Cos(eulerAngles.X * 0.5);
+            float sr = (float)Math.Sin(eulerAngles.X * 0.5);
+
+            return new Quaternion
+            {
+                W = (cr * cp * cy + sr * sp * sy),
+                X = (sr * cp * cy - cr * sp * sy),
+                Y = (cr * sp * cy + sr * cp * sy),
+                Z = (cr * cp * sy - sr * sp * cy)
+            };
+
+        }
+
+        public static Vector3 QuaternionToEulerAngles(Quaternion quaternion)
+        {
+            //https://stackoverflow.com/questions/70462758/c-sharp-how-to-convert-quaternions-to-euler-angles-xyz
+
+            Vector3 angles = new Vector3();
+
+            // roll / x
+            double sinr_cosp = 2 * (quaternion.W * quaternion.X + quaternion.Y * quaternion.Z);
+            double cosr_cosp = 1 - 2 * (quaternion.X * quaternion.X + quaternion.Y * quaternion.Y);
+            angles.X = (float)Math.Atan2(sinr_cosp, cosr_cosp);
+
+            // pitch / y
+            double sinp = 2 * (quaternion.W * quaternion.Y - quaternion.Z * quaternion.X);
+            if (Math.Abs(sinp) >= 1)
+            {
+                angles.Y = (float)CopySign(Math.PI / 2, sinp);
+            }
+            else
+            {
+                angles.Y = (float)Math.Asin(sinp);
+            }
+
+            // yaw / z
+            double siny_cosp = 2 * (quaternion.W * quaternion.Z + quaternion.X * quaternion.Y);
+            double cosy_cosp = 1 - 2 * (quaternion.Y * quaternion.Y + quaternion.Z * quaternion.Z);
+            angles.Z = (float)Math.Atan2(siny_cosp, cosy_cosp);
+
+            return angles;
+        }
+
+        public static Vector3 QuaternionToEulerAngles_OLD(Quaternion rot)
         {
             //convert into a matrix3x3
             double[] m0 = new double[3];

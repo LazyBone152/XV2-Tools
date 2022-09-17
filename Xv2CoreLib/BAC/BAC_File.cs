@@ -1210,6 +1210,9 @@ namespace Xv2CoreLib.BAC
         [YAXSerializeAs("value")]
         public float BlendWeightFrameStep { get; set; } = 0f;
 
+        //Cached values
+        public int CachedActualDuration = 0;
+
         public static List<BAC_Type0> Read(byte[] rawBytes, int offset, int count)
         {
             List<BAC_Type0> Type0 = new List<BAC_Type0>();
@@ -1319,11 +1322,11 @@ namespace Xv2CoreLib.BAC
                     {
                         if (anim.EanIndex != ushort.MaxValue && anim.BlendWeight < 1f && anim.BlendWeightFrameStep > 0f)
                         {
-                            float blendWeight = anim.BlendWeight * (10 ^ 2);
-                            float blendWeightIncrease = anim.BlendWeightFrameStep * (10 ^ 2);
-                            float maxBlendWeight = 1f * (10 ^ 2);
+                            float blendFactor = anim.BlendWeight * 100f;
+                            float blendFactorStep = anim.BlendWeightFrameStep * 100f;
+                            float maxBlendWeight = 1f * 100f;
 
-                            int blendAmount = (int)((maxBlendWeight - blendWeight) / blendWeightIncrease);
+                            int blendAmount = (int)((maxBlendWeight - blendFactor) / blendFactorStep);
 
                             if (blendAmount > blendingFrames)
                                 blendingFrames = blendAmount;

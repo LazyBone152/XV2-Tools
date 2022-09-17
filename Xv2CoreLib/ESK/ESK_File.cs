@@ -701,6 +701,11 @@ namespace Xv2CoreLib.ESK
             return false;
         }
 
+        public int GetBoneIndex(string boneName)
+        {
+            return NonRecursiveBones.IndexOf(NonRecursiveBones.FirstOrDefault(x => x.Name == boneName));
+        }
+
         public ESK_Skeleton Clone()
         {
             AsyncObservableCollection<ESK_Bone> bones = AsyncObservableCollection<ESK_Bone>.Create();

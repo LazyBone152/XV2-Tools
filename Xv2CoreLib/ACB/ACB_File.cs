@@ -151,6 +151,8 @@ namespace Xv2CoreLib.ACB
         /// </summary>
         [YAXDontSerialize]
         public bool EternityCompatibility = true;
+        [YAXDontSerialize]
+        public bool SequenceTrackPadding = false;
         #endregion
 
 
@@ -342,7 +344,7 @@ namespace Xv2CoreLib.ACB
             acbFile.SoundGeneratorTable = utfFile.GetColumnTable("SoundGeneratorTable", true, header, acbFile.Version);
             acbFile.Cues = ACB_Cue.Load(utfFile.GetColumnTable("CueTable", true), utfFile.GetColumnTable("CueNameTable", true), acbFile.Version);
             acbFile.Synths = ACB_Synth.Load(utfFile.GetColumnTable("SynthTable", false), acbFile.Version);
-            acbFile.Sequences = ACB_Sequence.Load(utfFile.GetColumnTable("SequenceTable", false), acbFile.Version);
+            acbFile.Sequences = ACB_Sequence.Load(utfFile.GetColumnTable("SequenceTable", false), acbFile, acbFile.Version);
             acbFile.Tracks = ACB_Track.Load(utfFile.GetColumnTable("TrackTable", false), acbFile.Version, acbFile.Name, false);
             acbFile.GlobalAisacReferences = ACB_GlobalAisacReference.Load(utfFile.GetColumnTable("GlobalAisacReferenceTable", false, header, acbFile.Version), acbFile.Version);
             acbFile.Waveforms = ACB_Waveform.Load(utfFile.GetColumnTable("WaveformTable", false), utfFile.GetColumnTable("WaveformExtensionDataTable", false, header, acbFile.Version), acbFile.Version);
@@ -726,7 +728,7 @@ namespace Xv2CoreLib.ACB
             ACB_Aisac.WriteToTable(Aisacs, Version, aisacTable, aisacControlNameTable);
             ACB_GlobalAisacReference.WriteToTable(GlobalAisacReferences, Version, globalAisacRefTable);
             ACB_Synth.WriteToTable(Synths, Version, synthTable);
-            ACB_Sequence.WriteToTable(Sequences, Version, sequenceTable);
+            ACB_Sequence.WriteToTable(Sequences, Version, sequenceTable, SequenceTrackPadding);
             ACB_Waveform.WriteToTable(Waveforms, Version, waveformTable, waveformExtensionTable, EternityCompatibility);
             ACB_Track.WriteToTable(Tracks, Version, trackTable, Name, false);
             ACB_Track.WriteToTable(ActionTracks, Version, actionTrackTable, Name, true);
@@ -3597,20 +3599,20 @@ namespace Xv2CoreLib.ACB
             if (GlobalAisacRefs == null) GlobalAisacRefs = new List<AcbTableReference>();
         }
 
-        public static List<ACB_Sequence> Load(UTF_File table, Version ParseVersion)
+        public static List<ACB_Sequence> Load(UTF_File table, ACB_File acbFile, Version ParseVersion)
         {
             List<ACB_Sequence> rows = new List<ACB_Sequence>();
             if (table == null) return rows;
 
             for (int i = 0; i < table.DefaultRowCount; i++)
             {
-                rows.Add(Load(table, i, ParseVersion));
+                rows.Add(Load(table, i,  acbFile, ParseVersion));
             }
 
             return rows;
         }
 
-        public static ACB_Sequence Load(UTF_File sequenceTable, int index, Version ParseVersion)
+        public static ACB_Sequence Load(UTF_File sequenceTable, int index, ACB_File acbFile, Version ParseVersion)
         {
             AcbFormatHelperTable tableHelper = AcbFormatHelper.Instance.GetTableHelper("SequenceTable");
 
@@ -3657,50 +3659,53 @@ namespace Xv2CoreLib.ACB
             }
 
             //Tracks
+            ushort numTracks = sequenceTable.GetValue<ushort>("NumTracks", TypeFlag.UInt16, index);
             var tracks = BigEndianConverter.ToUInt16Array(sequenceTable.GetData("TrackIndex", index)).ToList();
             List<ushort> trackValues = new ushort[tracks.Count].ToList();
-            sequence.Tracks = AsyncObservableCollection<ACB_SequenceTrack>.Create();
+            sequence.Tracks = new AsyncObservableCollection<ACB_SequenceTrack>();
             
             if(tableHelper.ColumnExists("TrackValues", TypeFlag.Data, ParseVersion))
             {
                 trackValues = BigEndianConverter.ToUInt16Array(sequenceTable.GetData("TrackValues", index)).ToList();
 
                 //Add TrackValues to match Tracks, if they were not in the acb file (needed for non-Random/RandomNoRepeat types, as they dont have or need the values)
-                while (trackValues.Count < tracks.Count)
+                while (trackValues.Count < numTracks)
                 {
                     trackValues.Add((ushort)(100 / tracks.Count));
                 }
 
                 //Delete TrackValues remainder (will be added in on rebuild, if needed)
-                if (trackValues.Count == tracks.Count + 1 && trackValues.Count > 0)
+                if (trackValues.Count == numTracks + 1 && trackValues.Count > 0)
                 {
                     trackValues.RemoveAt(trackValues.Count - 1);
                 }
 
-                if (trackValues.Count > tracks.Count)
+                if (trackValues.Count > numTracks)
                 {
                     throw new Exception("ACB_Sequence.Load: TrackValues count is greater than Tracks count. Load failed.");
                 }
             }
 
-            for (int i = 0; i < tracks.Count; i++)
+            for (int i = 0; i < numTracks; i++)
             {
                 sequence.Tracks.Add(new ACB_SequenceTrack() { Index = new AcbTableReference(tracks[i]), Percentage = trackValues[i] });
             }
-            
-            
+
+            if (tracks.Count != numTracks)
+                acbFile.SequenceTrackPadding = true;
+
             return sequence;
         }
 
-        public static void WriteToTable(IList<ACB_Sequence> entries, Version ParseVersion, UTF_File utfTable)
+        public static void WriteToTable(IList<ACB_Sequence> entries, Version ParseVersion, UTF_File utfTable, bool sequencePadding)
         {
             for (int i = 0; i < entries.Count; i++)
             {
-                entries[i].WriteToTable(utfTable, i, ParseVersion);
+                entries[i].WriteToTable(utfTable, i, ParseVersion, sequencePadding);
             }
         }
 
-        public void WriteToTable(UTF_File utfTable, int index, Version ParseVersion)
+        public void WriteToTable(UTF_File utfTable, int index, Version ParseVersion, bool sequencePadding)
         {
             AcbFormatHelperTable tableHelper = AcbFormatHelper.Instance.GetTableHelper("SequenceTable");
 
@@ -3714,6 +3719,15 @@ namespace Xv2CoreLib.ACB
                 trackValues.Add(track.Percentage);
                 trackIndexes.Add(track.Index.TableIndex_Ushort);
                 total += track.Percentage;
+            }
+
+            //Some ACBs require TrackIndex to be padded up to 4 values (?)
+            if (sequencePadding && trackIndexes.Count < 4 && trackIndexes.Count > 0)
+            {
+                while(trackIndexes.Count < 4)
+                {
+                    trackIndexes.Add(0);
+                }
             }
 
             //Add remainder value to TrackValues IF they do not all add up to 100.
@@ -4021,7 +4035,7 @@ namespace Xv2CoreLib.ACB
             return sequenceBlock;
         }
 
-        public static void WriteToTable(IList<ACB_Sequence> entries, Version ParseVersion, UTF_File utfTable)
+        public static void WriteToTable(IList<ACB_SequenceBlock> entries, Version ParseVersion, UTF_File utfTable)
         {
             for (int i = 0; i < entries.Count; i++)
             {
@@ -5530,7 +5544,7 @@ namespace Xv2CoreLib.ACB
         public int Index { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Command")]
-        public AsyncObservableCollection<ACB_Command> Commands { get; set; } = AsyncObservableCollection<ACB_Command>.Create();
+        public AsyncObservableCollection<ACB_Command> Commands { get; set; } = new AsyncObservableCollection<ACB_Command>();
 
         public static ACB_CommandGroup Load(UTF_File commandTable, int index, bool loadUnknownCommands)
         {
@@ -5548,10 +5562,29 @@ namespace Xv2CoreLib.ACB
                 ACB_Command command = new ACB_Command();
                 command.CommandType = (CommandType)BigEndianConverter.ReadUInt16(commandBytes, offset);
                 command.Parameters = commandBytes.GetRange(offset + 3, commandBytes[offset + 2]).ToList();
-                
+
+                bool isKnownType = Enum.IsDefined(typeof(CommandType), command.CommandType);
+                bool safeUnknownType = false;
+
+                if (!isKnownType)
+                {
+                    //Attempt to find types that are safe to keep, even if they are unknown
+                    //Any unknown type that has a reference on it must be purged, as the ACB will be rebuilt on save and that reference might not be valid anymore.
+                    if (command.Parameters?.Count == 4)
+                    {
+                        safeUnknownType = command.Param1 == 0 && command.Param2 == 0;
+                    }
+
+                    if (command.Parameters?.Count == 2)
+                    {
+                        //Many commands have a single parameter of 10000. It's some kind of scale, not a reference.
+                        safeUnknownType = command.Param1 == 0 || command.Param1 == 10000;
+                    }
+                }
+
                 //Dont load unknown commands with more than 0 parameters unless loadUnknownCommands is true
                 //For XML we want to load all commands, but otherwise they can cause issues when copying cues and rearanging tables so it's best to ignore them
-                if ((Enum.IsDefined(typeof(CommandType), command.CommandType) || command.NumParameters == 0) || loadUnknownCommands)
+                if ((isKnownType || command.NumParameters == 0) || loadUnknownCommands || safeUnknownType)
                     commandGroup.Commands.Add(command);
 
                 offset += 3 + command.NumParameters;
@@ -5923,6 +5956,11 @@ namespace Xv2CoreLib.ACB
         Unk87 = 0x0057, //2 parameters
         Unk105 = 0x0069, //1 parameter. Used in ParameterPallets
         Unk34 = 0x0022, //2 parameters (1 uint16)
+        Unk51 = 0x0033, //2 params
+        Unk53 = 0x0035, //2 params
+        Unk55 = 0x0037, //2 params
+        Unk57 = 0x0039, //2 params
+        Unk59 = 0x003b, //2 params
 
     }
 

@@ -71,6 +71,9 @@ namespace Xv2CoreLib.EAN
 
             }
 
+            //Sorting the bones isn't actually needed, but it is more convienent when editing
+            eanFile.SortAnimationNodes();
+
             if(linkEsk)
                 eanFile.LinkEskData();
         }

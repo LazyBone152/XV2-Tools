@@ -61,10 +61,7 @@ namespace Xv2CoreLib.BDM
                     ValidateType1_Xv1();
                     break;
                 default:
-                    Console.WriteLine("Unknown BDM_Type.\nDeserialization failed.");
-                    Console.ReadLine();
-                    Environment.Exit(0);
-                    break;
+                    throw new Exception("Unknown BDM_Type.\nDeserialization failed.");
             }
         }
 
@@ -82,9 +79,7 @@ namespace Xv2CoreLib.BDM
 
             if (count != bdm_File.BDM_Entries.Count())
             {
-                Console.WriteLine("The BDM type is declared as of Type XV2_0, but the data does not represent that of a Type XV2_0 BDM.\nDeserialization failed.");
-                Console.ReadLine();
-                Environment.Exit(0);
+                throw new Exception("The BDM type is declared as of Type XV2_0, but the data does not represent that of a Type XV2_0 BDM.\nDeserialization failed.");
             }
 
         }
@@ -103,9 +98,7 @@ namespace Xv2CoreLib.BDM
 
             if (count != bdm_File.BDM_Entries.Count())
             {
-                Console.WriteLine("The BDM type is declared as of Type XV2_1, but the data does not represent that of a Type XV2_1 BDM.\nDeserialization failed.");
-                Console.ReadLine();
-                Environment.Exit(0);
+                throw new Exception("The BDM type is declared as of Type XV2_1, but the data does not represent that of a Type XV2_1 BDM.\nDeserialization failed.");
             }
         }
 
@@ -116,10 +109,9 @@ namespace Xv2CoreLib.BDM
 
             for (int i = 0; i < bdm_File.BDM_Entries.Count(); i++)
             {
-                if(prevID + 1 != bdm_File.BDM_Entries[i].I_00 )
+                if(prevID + 1 != bdm_File.BDM_Entries[i].ID)
                 {
-                    Console.WriteLine(String.Format("BDM_Entry ID {0} is out of range. For Type XV1, the ID parameter must be consecutive.", bdm_File.BDM_Entries[i].I_00));
-                    Utils.WaitForInputThenQuit();
+                    throw new Exception(String.Format("BDM_Entry ID {0} is out of range. For Type XV1, the ID parameter must be consecutive.", bdm_File.BDM_Entries[i].ID));
                 }
                 if (bdm_File.BDM_Entries[i].Type1Entries != null)
                 {
@@ -130,16 +122,15 @@ namespace Xv2CoreLib.BDM
 
             if (count != bdm_File.BDM_Entries.Count())
             {
-                Console.WriteLine("The BDM type is declared as of Type XV1 , but the data does not represent that of a Type XV1.\nDeserialization failed.");
-                Console.ReadLine();
-                Environment.Exit(0);
+                throw new Exception("The BDM type is declared as of Type XV1 , but the data does not represent that of a Type XV1.\nDeserialization failed.");
             }
         }
 
 
         //validation end
 
-        void WriteFile() {
+        void WriteFile() 
+        {
             bytes.AddRange(BitConverter.GetBytes(count));
             bytes.AddRange(BitConverter.GetBytes(16));
 
@@ -148,15 +139,15 @@ namespace Xv2CoreLib.BDM
                 switch (type)
                 {
                     case BDM_Type.XV2_0:
-                        bytes.AddRange(BitConverter.GetBytes(bdm_File.BDM_Entries[i].I_00));
-                        WriteType0_Xv2(bdm_File.BDM_Entries[i].Type0Entries, bdm_File.BDM_Entries[i].I_00);
+                        bytes.AddRange(BitConverter.GetBytes(bdm_File.BDM_Entries[i].ID));
+                        WriteType0_Xv2(bdm_File.BDM_Entries[i].Type0Entries, bdm_File.BDM_Entries[i].ID);
                         break;
                     case BDM_Type.XV2_1:
-                        bytes.AddRange(BitConverter.GetBytes(bdm_File.BDM_Entries[i].I_00));
-                        WriteType1_Xv2(bdm_File.BDM_Entries[i].Type1Entries, bdm_File.BDM_Entries[i].I_00);
+                        bytes.AddRange(BitConverter.GetBytes(bdm_File.BDM_Entries[i].ID));
+                        WriteType1_Xv2(bdm_File.BDM_Entries[i].Type1Entries, bdm_File.BDM_Entries[i].ID);
                         break;
                     case BDM_Type.XV1:
-                        WriteType1_Xv1(bdm_File.BDM_Entries[i].Type1Entries, bdm_File.BDM_Entries[i].I_00);
+                        WriteType1_Xv1(bdm_File.BDM_Entries[i].Type1Entries, bdm_File.BDM_Entries[i].ID);
                         break;
                 }
             }
@@ -235,9 +226,9 @@ namespace Xv2CoreLib.BDM
 
                 passedIndex.Add(properOrder[i]);
                 
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_00));
+                bytes.AddRange(BitConverter.GetBytes((ushort)type0[properOrder[i]].DamageType));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_02));
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_04));
+                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].DamageAmount));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_06));
                 bytes.AddRange(BitConverter.GetBytes(Convert.ToSingle(type0[properOrder[i]].F_08)));
                 bytes.AddRange(BitConverter.GetBytes((ushort)type0[properOrder[i]].AcbType));
@@ -254,43 +245,43 @@ namespace Xv2CoreLib.BDM
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].Effect3_SkillID));
                 bytes.AddRange(BitConverter.GetBytes((ushort)type0[properOrder[i]].Effect3_EepkType));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_38));
-                bytes.AddRange(BitConverter.GetBytes(Convert.ToSingle(type0[properOrder[i]].F_40)));
-                bytes.AddRange(BitConverter.GetBytes(Convert.ToSingle(type0[properOrder[i]].F_44)));
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_48));
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_50));
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_52));
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_54));
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_56));
+                bytes.AddRange(BitConverter.GetBytes(Convert.ToSingle(type0[properOrder[i]].PushbackStrength)));
+                bytes.AddRange(BitConverter.GetBytes(Convert.ToSingle(type0[properOrder[i]].PushbackAcceleration)));
+                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].UserStun));
+                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].VictimStun));
+                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].KnockbackDuration));
+                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].KnockbackRecoveryAfterImpactTime));
+                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].KnockbackGroundImpactTime));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_58));
-                bytes.AddRange(BitConverter.GetBytes(Convert.ToSingle(type0[properOrder[i]].F_60)));
-                bytes.AddRange(BitConverter.GetBytes(Convert.ToSingle(type0[properOrder[i]].F_64)));
-                bytes.AddRange(BitConverter.GetBytes(Convert.ToSingle(type0[properOrder[i]].F_68)));
-                bytes.AddRange(BitConverter.GetBytes(Convert.ToSingle(type0[properOrder[i]].F_72)));
+                bytes.AddRange(BitConverter.GetBytes(Convert.ToSingle(type0[properOrder[i]].KnockbackStrengthX)));
+                bytes.AddRange(BitConverter.GetBytes(Convert.ToSingle(type0[properOrder[i]].KnockbackStrengthY)));
+                bytes.AddRange(BitConverter.GetBytes(Convert.ToSingle(type0[properOrder[i]].KnockbackStrengthZ)));
+                bytes.AddRange(BitConverter.GetBytes(Convert.ToSingle(type0[properOrder[i]].KnockbackDragY)));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_76));
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_78));
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_80));
+                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].KnockbackGravityTime));
+                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].VictimInvincibilityTime));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_82));
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_84));
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_86));
+                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].TransformationType));
+                bytes.AddRange(BitConverter.GetBytes((ushort)type0[properOrder[i]].AlimentType));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_88[0]));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_88[1]));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_88[2]));
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_94));
+                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].DamageSpecial));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_96[0]));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_96[1]));
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_100));
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_102));
-                bytes.Add((Byte)type0[properOrder[i]].I_104);
+                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].StumbleType));
+                bytes.AddRange(BitConverter.GetBytes((ushort)type0[properOrder[i]].DamageSecondaryType));
+                bytes.Add((Byte)type0[properOrder[i]].CameraShakeType);
                 bytes.Add(0);
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_106));
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_108));
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_110));
+                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].CameraShakeTime));
+                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].UserBpeID));
+                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].VictimBpeID));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].StaminaBrokenOverrideBdmId));
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_114));
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_116));
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_118));
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].F_120));
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].F_124));
+                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].ZVanishEnableTime));
+                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].UserAnimationTIme));
+                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].VictimAnimationTime));
+                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].UserAnimationSpeed));
+                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].VictimAnimationSpeed));
                 Assertion.AssertArraySize(type0[properOrder[i]].I_88, 3, "BDM_Entry", "I_88");
                 Assertion.AssertArraySize(type0[properOrder[i]].I_96, 2, "BDM_Entry", "I_96");
 
@@ -340,7 +331,7 @@ namespace Xv2CoreLib.BDM
 
                 passedIndex.Add(properOrder[i]);
 
-                bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_00));
+                bytes.AddRange(BitConverter.GetBytes((ushort)type[properOrder[i]].I_00));
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_02));
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_04));
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_06));
@@ -372,7 +363,7 @@ namespace Xv2CoreLib.BDM
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_72));
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_74));
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_76));
-                bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_78));
+                bytes.AddRange(BitConverter.GetBytes((ushort)type[properOrder[i]].I_78));
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_80[0]));
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_80[1]));
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_80[2]));
@@ -380,7 +371,7 @@ namespace Xv2CoreLib.BDM
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_88[0]));
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_88[1]));
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_92));
-                bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_94));
+                bytes.AddRange(BitConverter.GetBytes((ushort)type[properOrder[i]].I_94));
                 bytes.Add((Byte)type[properOrder[i]].I_96);
                 bytes.Add(0);
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_98));
@@ -433,7 +424,7 @@ namespace Xv2CoreLib.BDM
 
                 passedIndex.Add(properOrder[i]);
 
-                bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_00));
+                bytes.AddRange(BitConverter.GetBytes((ushort)type[properOrder[i]].I_00));
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_02));
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_04));
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_06));
@@ -465,7 +456,7 @@ namespace Xv2CoreLib.BDM
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_72));
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_74));
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_76));
-                bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_78));
+                bytes.AddRange(BitConverter.GetBytes((ushort)type[properOrder[i]].I_78));
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_80[0]));
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_80[1]));
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_80[2]));
@@ -473,7 +464,7 @@ namespace Xv2CoreLib.BDM
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_88[0]));
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_88[1]));
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_92));
-                bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_94));
+                bytes.AddRange(BitConverter.GetBytes((ushort)type[properOrder[i]].I_94));
                 bytes.Add((Byte)type[properOrder[i]].I_96);
                 bytes.Add(0);
                 bytes.AddRange(BitConverter.GetBytes(type[properOrder[i]].I_98));
