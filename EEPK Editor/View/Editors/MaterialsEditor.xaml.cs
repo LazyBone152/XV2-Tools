@@ -218,6 +218,9 @@ namespace EEPK_Organiser.View
             NotifyPropertyChanged(nameof(ContainerVisiblility));
             NotifyPropertyChanged(nameof(InverseContainerVisiblility));
             RefreshViewMaterials();
+
+            if (AssetContainer != null)
+                idColumn.Visibility = Visibility.Collapsed;
         }
 
         private void Instance_UndoOrRedoCalled(object sender, UndoEventRaisedEventArgs e)
@@ -625,6 +628,5 @@ namespace EEPK_Organiser.View
             _selectedMaterial.ShaderProgram = shader;
             NotifyPropertyChanged(nameof(SelectedMaterialShaderProgram));
         }
-
     }
 }

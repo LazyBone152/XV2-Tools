@@ -117,9 +117,9 @@ namespace Xv2CoreLib.EEPK
                 {
                     ushort assetCount = (ushort)((eepk_File.Assets[i].AssetEntries != null) ? eepk_File.Assets[i].AssetEntries.Count() : 0);
 
-                    bytes.AddRange(BitConverter.GetBytes(eepk_File.Assets[i].I_00));
+                    bytes.AddRange(BitConverter.GetBytes(eepk_File.Assets[i].AssetSpawnLimit));
                     bytes.AddRange(new byte[4] { eepk_File.Assets[i].I_04, eepk_File.Assets[i].I_05,eepk_File.Assets[i].I_06, eepk_File.Assets[i].I_07 });
-                    bytes.AddRange(BitConverter.GetBytes(eepk_File.Assets[i].AssetLimit));
+                    bytes.AddRange(BitConverter.GetBytes(eepk_File.Assets[i].AssetListLimit));
                     bytes.AddRange(BitConverter.GetBytes(eepk_File.Assets[i].I_12));
                     bytes.AddRange(BitConverter.GetBytes((ushort)eepk_File.Assets[i].I_16));
                     bytes.AddRange(new byte[12]);

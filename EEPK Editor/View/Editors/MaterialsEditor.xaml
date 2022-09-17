@@ -115,7 +115,7 @@
                 </DataGrid.ContextMenu>
 
                 <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="ID" Width="50" SortMemberPath="Index" Visibility="{Binding ElementName=UserControl, Path=InverseContainerVisiblility}">
+                    <DataGridTemplateColumn x:Name="idColumn" Header="ID" Width="70" SortMemberPath="Index">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Index}"/>
@@ -123,7 +123,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                         <DataGridTemplateColumn.CellEditingTemplate>
                             <DataTemplate>
-                                <Controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=SelectedMaterialID, UpdateSourceTrigger=LostFocus}" Minimum="0" HideUpDownButtons="True" HorizontalContentAlignment="Left"/>
+                                <Controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=SelectedMaterialID, UpdateSourceTrigger=LostFocus}" Minimum="0" HideUpDownButtons="True" HorizontalContentAlignment="Left" TextAlignment="Left"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>
                     </DataGridTemplateColumn>

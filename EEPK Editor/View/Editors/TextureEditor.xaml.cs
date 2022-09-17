@@ -223,7 +223,10 @@ namespace EEPK_Organiser.View
             UpdateProperties();
 
             if(EmbFile?.UseFileNames == false)
-                nameColumn.Visibility = Visibility.Hidden;
+                nameColumn.Visibility = Visibility.Collapsed;
+
+            if (AssetContainer != null)
+                idColumn.Visibility = Visibility.Collapsed;
         }
 
         private void Instance_UndoOrRedoCalled(object sender, UndoEventRaisedEventArgs e)

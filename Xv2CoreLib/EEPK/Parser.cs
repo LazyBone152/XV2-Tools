@@ -205,12 +205,12 @@ namespace Xv2CoreLib.EEPK
             for (int i = 0; i < totalAssetContainerEntries; i++)
             {
                 eepkFile.Assets.Add(new AssetContainer());
-                eepkFile.Assets[i].I_00 = BitConverter.ToInt32(rawBytes, assetSectionLocation + addedOffset);
+                eepkFile.Assets[i].AssetSpawnLimit = BitConverter.ToInt32(rawBytes, assetSectionLocation + addedOffset);
                 eepkFile.Assets[i].I_04 = rawBytes[assetSectionLocation + addedOffset + 4];
                 eepkFile.Assets[i].I_05 = rawBytes[assetSectionLocation + addedOffset + 5];
                 eepkFile.Assets[i].I_06 = rawBytes[assetSectionLocation + addedOffset + 6];
                 eepkFile.Assets[i].I_07 = rawBytes[assetSectionLocation + addedOffset + 7];
-                eepkFile.Assets[i].AssetLimit = BitConverter.ToInt32(rawBytes, assetSectionLocation + addedOffset + 8);
+                eepkFile.Assets[i].AssetListLimit = BitConverter.ToInt32(rawBytes, assetSectionLocation + addedOffset + 8);
                 eepkFile.Assets[i].I_12 = BitConverter.ToInt32(rawBytes, assetSectionLocation + addedOffset + 12);
                 eepkFile.Assets[i].I_16 = (AssetType)BitConverter.ToUInt16(rawBytes, assetSectionLocation + addedOffset + 16);
                 eepkFile.Assets[i].FILES = new string[3];

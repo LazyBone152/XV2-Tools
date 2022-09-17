@@ -24,8 +24,8 @@ namespace Xv2CoreLib.EffectContainer
 {
     public enum SaveFormat
     {
-        Binary,
-        ZIP
+        EEPK,
+        VfxPackage
     }
 
     [Serializable]
@@ -60,7 +60,7 @@ namespace Xv2CoreLib.EffectContainer
         public const string ZipExtension = ".vfxpackage";
 
         //Format
-        private SaveFormat _saveFormat = SaveFormat.Binary;
+        private SaveFormat _saveFormat = SaveFormat.EEPK;
         public SaveFormat saveFormat
         {
             get
@@ -130,11 +130,11 @@ namespace Xv2CoreLib.EffectContainer
                 string hasDir = (String.IsNullOrWhiteSpace(Directory)) ? null : "/";
                 if (Path.IsPathRooted(Directory))
                 {
-                    return (saveFormat == SaveFormat.Binary) ? String.Format("_{0}{1}{2}.eepk", Directory, hasDir, Name) : String.Format("_{0}{1}", Directory, ZipExtension);
+                    return (saveFormat == SaveFormat.EEPK) ? String.Format("_{0}{1}{2}.eepk", Directory, hasDir, Name) : String.Format("_{0}{1}", Directory, ZipExtension);
                 }
                 else
                 {
-                    return (saveFormat == SaveFormat.Binary) ? String.Format("<_{0}{1}{2}.eepk>", Directory, hasDir, Name) : String.Format("<_{0}{1}>", Directory, ZipExtension);
+                    return (saveFormat == SaveFormat.EEPK) ? String.Format("<_{0}{1}{2}.eepk>", Directory, hasDir, Name) : String.Format("<_{0}{1}>", Directory, ZipExtension);
                 }
             }
         }
@@ -149,7 +149,7 @@ namespace Xv2CoreLib.EffectContainer
         {
             get
             {
-                if(saveFormat == SaveFormat.ZIP)
+                if(saveFormat == SaveFormat.VfxPackage)
                 {
                     return string.Format("{0}{1}", Directory, ZipExtension);
                 }
@@ -458,7 +458,7 @@ namespace Xv2CoreLib.EffectContainer
         /// <returns></returns>
         public static EffectContainerFile Load(string path)
         {
-            return Load(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path), null, false, null, SaveFormat.Binary);
+            return Load(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path), null, false, null, SaveFormat.EEPK);
         }
 
         /// <summary>
@@ -469,7 +469,7 @@ namespace Xv2CoreLib.EffectContainer
         /// <returns></returns>
         public static EffectContainerFile Load(string path, Resource.Xv2FileIO _fileIO, bool onlyFromCpk)
         {
-            return Load(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path), _fileIO, onlyFromCpk, null, SaveFormat.Binary);
+            return Load(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path), _fileIO, onlyFromCpk, null, SaveFormat.EEPK);
         }
 
         /// <summary>
@@ -484,7 +484,7 @@ namespace Xv2CoreLib.EffectContainer
             if (eepkPath == null) throw new InvalidDataException("EffectContainerFile.Load(string path, ZipReader zipReader): The vfx2 file does not contain a .eepk file.");
             string dir = string.Format("{0}/{1}", Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
 
-            return Load(dir, Path.GetFileNameWithoutExtension(eepkPath), null, false, zipReader, SaveFormat.ZIP);
+            return Load(dir, Path.GetFileNameWithoutExtension(eepkPath), null, false, zipReader, SaveFormat.VfxPackage);
         }
 
         /// <summary>
@@ -493,7 +493,7 @@ namespace Xv2CoreLib.EffectContainer
         /// <param name="path">An absolute path to the eepk or a relative path from the game data folder (used with _fileIO).</param>
         /// <param name="_fileIO">Pass this in if loading from the game. Leave null if loading a eepk directly.</param>
         /// <returns></returns>
-        private static EffectContainerFile Load(string dir, string name, Resource.Xv2FileIO _fileIO = null, bool onlyFromCpk = false, Resource.ZipReader _zipReader = null, SaveFormat _saveFormat = SaveFormat.Binary)
+        private static EffectContainerFile Load(string dir, string name, Resource.Xv2FileIO _fileIO = null, bool onlyFromCpk = false, Resource.ZipReader _zipReader = null, SaveFormat _saveFormat = SaveFormat.EEPK)
         {
 
             //Path shouldn't include directory if its loading from a zip file
@@ -578,7 +578,7 @@ namespace Xv2CoreLib.EffectContainer
             effectContainerFile.ValidateTextureContainers(AssetType.TBIND);
 
             //Load VfxPackageExtension
-            if(_saveFormat == SaveFormat.ZIP)
+            if(_saveFormat == SaveFormat.VfxPackage)
             {
                 effectContainerFile.VfxPackageExtension = VfxPackageExtension.Load(_zipReader, effectContainerFile);
             }
@@ -800,7 +800,7 @@ namespace Xv2CoreLib.EffectContainer
         //Save
         public bool SaveVfxPackage()
         {
-            if (saveFormat != SaveFormat.ZIP) throw new InvalidOperationException("SaveVfxPackage: SaveFormat is not set to VfxPackage.");
+            if (saveFormat != SaveFormat.VfxPackage) throw new InvalidOperationException("SaveVfxPackage: SaveFormat is not set to VfxPackage.");
 
             bool result;
             string vfxPackagePath = string.Format("{0}{1}", Directory, ZipExtension);
@@ -1171,7 +1171,7 @@ namespace Xv2CoreLib.EffectContainer
         //Loading
         private byte[] LoadExternalFile(string path, bool log = true)
         {
-            if(log && saveFormat != SaveFormat.ZIP)
+            if(log && saveFormat != SaveFormat.VfxPackage)
                 LoadedExternalFiles.Add(path);
 
             return GetFile(path, xv2FileIO, OnlyLoadFromCpk, zipReader);
@@ -1179,7 +1179,7 @@ namespace Xv2CoreLib.EffectContainer
 
         private void ExternalFileSaved(string path)
         {
-            if (saveFormat == SaveFormat.ZIP) return;
+            if (saveFormat == SaveFormat.VfxPackage) return;
 
             LoadedExternalFilesNotSaved.Remove(path);
             LoadedExternalFiles.Add(path);
@@ -1215,12 +1215,12 @@ namespace Xv2CoreLib.EffectContainer
         //Saving
         private void SaveFile(byte[] bytes, string path)
         {
-            if(saveFormat == SaveFormat.Binary)
+            if(saveFormat == SaveFormat.EEPK)
             {
                 System.IO.Directory.CreateDirectory(Path.GetDirectoryName(path));
                 File.WriteAllBytes(path, bytes);
             }
-            else if (saveFormat == SaveFormat.ZIP)
+            else if (saveFormat == SaveFormat.VfxPackage)
             {
                 zipWriter.AddFile(Path.GetFileName(path), bytes);
             }
@@ -1584,12 +1584,12 @@ namespace Xv2CoreLib.EffectContainer
                 AssetContainerTool assetContainer = new AssetContainerTool();
 
                 assetContainer.LooseFiles = (container.FILES[0] == "NULL") ? true : false;
-                assetContainer.I_00 = container.I_00;
+                assetContainer.I_00 = container.AssetSpawnLimit;
                 assetContainer.I_04 = container.I_04;
                 assetContainer.I_05 = container.I_05;
                 assetContainer.I_06 = container.I_06;
                 assetContainer.I_07 = container.I_07;
-                assetContainer.I_08 = container.AssetLimit;
+                assetContainer.I_08 = container.AssetListLimit;
                 assetContainer.I_12 = container.I_12;
                 assetContainer.ContainerAssetType = container.I_16;
                 
@@ -1720,12 +1720,12 @@ namespace Xv2CoreLib.EffectContainer
         private static AssetContainer CreateEepkAssetContainer(AssetContainerTool assetContainer, AssetType type)
         {
             AssetContainer newAssetContainer = new AssetContainer();
-            newAssetContainer.I_00 = assetContainer.I_00;
+            newAssetContainer.AssetSpawnLimit = assetContainer.I_00;
             newAssetContainer.I_04 = assetContainer.I_04;
             newAssetContainer.I_05 = assetContainer.I_05;
             newAssetContainer.I_06 = assetContainer.I_06;
             newAssetContainer.I_07 = assetContainer.I_07;
-            newAssetContainer.AssetLimit = assetContainer.I_08;
+            newAssetContainer.AssetListLimit = assetContainer.I_08;
             newAssetContainer.I_12 = assetContainer.I_12;
             newAssetContainer.I_16 = type;
 
@@ -2240,6 +2240,37 @@ namespace Xv2CoreLib.EffectContainer
         #endregion
 
         #region Operations
+        public int[] RemoveAllUnusedOrDuplicates(List<IUndoRedo> undos)
+        {
+            int total;
+            int emp = 0;
+            int etr = 0;
+            int ecf = 0;
+            int emo = 0;
+            int light = 0;
+            int textures = 0;
+            int materials = 0;
+            int empTextures = 0;
+
+            emp += RemoveUnusedAssets(AssetType.PBIND, undos);
+            etr += RemoveUnusedAssets(AssetType.TBIND, undos);
+            ecf += RemoveUnusedAssets(AssetType.CBIND, undos);
+            emo += RemoveUnusedAssets(AssetType.EMO, undos);
+            light += RemoveUnusedAssets(AssetType.LIGHT, undos);
+
+            int[] pbindRet = Pbind.CleanAllUnusedAndDuplicates(undos);
+            int[] tbindRet = Tbind.CleanAllUnusedAndDuplicates(undos);
+
+            empTextures += pbindRet[0];
+            textures += pbindRet[1];
+            textures += tbindRet[1];
+            materials += pbindRet[2];
+            materials += tbindRet[2];
+            total = emp + etr + ecf + emo + light + empTextures + textures + materials;
+
+            return new int[9] { emp, etr, ecf, emo, light, empTextures, textures, materials, total };
+        }
+
         /// <summary>
         /// Removes all assets that are not used by an Effect.
         /// </summary>
@@ -2274,6 +2305,10 @@ namespace Xv2CoreLib.EffectContainer
             if (undos == null) undos = new List<IUndoRedo>();
 
             AssetContainerTool container = GetAssetContainer(type);
+
+            if(type == AssetType.PBIND)
+                _ = container.RemoveUnusedEmpTextures();
+
             return container.RemoveUnusedTextures(undos);
         }
 
@@ -3741,6 +3776,52 @@ namespace Xv2CoreLib.EffectContainer
 
         }
 
+        public int[] CleanAllUnusedAndDuplicates(List<IUndoRedo> undos = null)
+        {
+            //ret = textures, materials
+            int empTextures = 0;
+            int textures = 0;
+            int materials = 0;
+
+            if (ContainerAssetType == AssetType.PBIND)
+                empTextures += RemoveUnusedEmpTextures(undos);
+
+            materials += MergeDuplicateMaterials(undos);
+            textures += MergeDuplicateTextures(undos);
+            materials += RemoveUnusedMaterials(undos);
+            textures += RemoveUnusedTextures(undos);
+
+            return new int[] { empTextures, textures, materials };
+        }
+
+        public int RemoveUnusedEmpTextures(List<IUndoRedo> undos = null)
+        {
+            int total = 0;
+
+            foreach(var asset in Assets)
+            {
+                if (asset.Files.Count == 0) continue;
+                if (asset.Files[0].EmpFile == null) continue;
+
+                EMP_File empFile = asset.Files[0].EmpFile;
+
+                for (int i = empFile.Textures.Count - 1; i >= 0; i--)
+                {
+                    if(empFile.GetTexturePartsThatUseEmbEntryRef(empFile.Textures[i]).Count == 0)
+                    {
+                        if (undos != null)
+                        {
+                            undos.Add(new UndoableListRemove<EMP_TextureDefinition>(empFile.Textures, empFile.Textures[i]));
+                        }
+
+                        total++;
+                        empFile.Textures.RemoveAt(i);
+                    }
+                }
+            }
+
+            return total;
+        }
 
         //Refactoring
         public void RefactorTextureRef(EMB_CLASS.EmbEntry oldRef, EMB_CLASS.EmbEntry newRef, List<IUndoRedo> undos = null)

@@ -164,11 +164,10 @@ namespace Xv2CoreLib.EEPK
     [YAXSerializeAs("Container")]
     public class AssetContainer
     {
-        //lots of the data types are guesses, as they lack actual data in the files I've looked. Might actually be padding.
-        [YAXAttributeFor("I_00")]
+
+        [YAXAttributeFor("AssetSpawnLimit")]
         [YAXSerializeAs("value")]
-        [YAXHexValue]
-        public int I_00 { get; set; } //int32
+        public int AssetSpawnLimit { get; set; } //Limits how many assets of this type that can be spawned. The number doesn't equal an exact amount of assets, and multiple users of an EEPK increase the limit. But generally, higher number = more assets.
 
         [YAXAttributeFor("I_04")]
         [YAXSerializeAs("value")]
@@ -187,9 +186,9 @@ namespace Xv2CoreLib.EEPK
         [YAXHexValue]
         public byte I_07 { get; set; } // int8
 
-        [YAXAttributeFor("AssetLimit")]
+        [YAXAttributeFor("AssetListLimit")]
         [YAXSerializeAs("value")]
-        public int AssetLimit { get; set; }  // int32. This somehow limits the amount of assets, but not by the amount. Perhaps size?
+        public int AssetListLimit { get; set; }  // Limits the amount of assets that can be loaded by the game before crashing.
         [YAXAttributeFor("I_12")]
         [YAXSerializeAs("value")]
         public int I_12 { get; set; }  // int32
@@ -217,12 +216,12 @@ namespace Xv2CoreLib.EEPK
         {
             return new AssetContainer()
             {
-                I_00 = I_00,
+                AssetSpawnLimit = AssetSpawnLimit,
                 I_04 = I_04,
                 I_05 = I_05,
                 I_06 = I_06,
                 I_07 = I_07,
-                AssetLimit = AssetLimit,
+                AssetListLimit = AssetListLimit,
                 I_12 = I_12,
                 I_16 = I_16,
                 FILES = FILES,
@@ -250,7 +249,7 @@ namespace Xv2CoreLib.EEPK
         {
             return new AssetContainer()
             {
-                AssetLimit = 0x9c40,
+                AssetListLimit = 0x9c40,
                 AssetEntries = new List<Asset_Entry>(),
                 FILES = new string[3] { "NULL", "NULL", "NULL" }
             };

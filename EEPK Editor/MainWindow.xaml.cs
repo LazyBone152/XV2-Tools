@@ -19,6 +19,7 @@ using Xv2CoreLib.Resource.App;
 using System.Diagnostics;
 using LB_Common.Utils;
 using ControlzEx.Theming;
+using System.Collections.Generic;
 
 namespace EEPK_Organiser
 {
@@ -385,12 +386,12 @@ namespace EEPK_Organiser
             try
 #endif
             {
-                if(effectContainerFile.saveFormat == SaveFormat.Binary)
+                if(effectContainerFile.saveFormat == SaveFormat.EEPK)
                 {
                     effectContainerFile.Save();
                     FileCleanUp();
                 }
-                else if(effectContainerFile.saveFormat == SaveFormat.ZIP)
+                else if(effectContainerFile.saveFormat == SaveFormat.VfxPackage)
                 {
                     effectContainerFile.SaveVfxPackage();
                     FileCleanUp();
@@ -426,14 +427,14 @@ namespace EEPK_Organiser
                     if(System.IO.Path.GetExtension(saveDialog.FileName) == EffectContainerFile.ZipExtension)
                     {
                         effectContainerFile.Directory = string.Format("{0}/{1}", System.IO.Path.GetDirectoryName(saveDialog.FileName), System.IO.Path.GetFileNameWithoutExtension(saveDialog.FileName));
-                        effectContainerFile.saveFormat = SaveFormat.ZIP;
+                        effectContainerFile.saveFormat = SaveFormat.VfxPackage;
                         effectContainerFile.SaveVfxPackage();
                     }
                     else if (System.IO.Path.GetExtension(saveDialog.FileName) == ".eepk")
                     {
                         effectContainerFile.Directory = System.IO.Path.GetDirectoryName(saveDialog.FileName);
                         effectContainerFile.Name = System.IO.Path.GetFileNameWithoutExtension(saveDialog.FileName);
-                        effectContainerFile.saveFormat = SaveFormat.Binary;
+                        effectContainerFile.saveFormat = SaveFormat.EEPK;
                         effectContainerFile.Save();
                     }
                     else
@@ -610,8 +611,7 @@ namespace EEPK_Organiser
             try
 #endif
             {
-
-                var messageResult = await this.ShowMessageAsync("Optimize Textures (SuperTexture)", $"This feature will attempt to optimize the number of textures used by this EEPK by combining them together. The result will be fewer, but larger individual textures. This should significantly increase the amount of textures that can be used.\n\nWARNING: This is an EXPERIMENTAL feature and has a high chance of messing up somewhere! Make backups of your files before using this!", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.Default);
+                var messageResult = await this.ShowMessageAsync("Optimize Textures (SuperTexture)", $"This feature will attempt to optimize the number of textures used by this EEPK by combining them together. The result will be fewer, but larger individual textures. This should significantly increase the amount of textures that can be used.\n\nIt is advised to make backups of your files before using this feature.", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.Default);
 
                 if(messageResult == MessageDialogResult.Affirmative)
                 {
@@ -628,6 +628,31 @@ namespace EEPK_Organiser
                 MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 #endif
+        }
+
+        private async void ToolMenu_CleanAll_Click(object sender, RoutedEventArgs e)
+        {
+            var messageResult = await this.ShowMessageAsync("Clean All", $"Delete all unused or duplicate assets, texture and material from this {effectContainerFile.saveFormat}?", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.Default);
+
+            if (messageResult == MessageDialogResult.Affirmative)
+            {
+                List<IUndoRedo> undos = new List<IUndoRedo>();
+                int[] totals = effectContainerFile.RemoveAllUnusedOrDuplicates(undos);
+
+                int emp = totals[0];
+                int etr = totals[1];
+                int ecf = totals[2];
+                int emo = totals[3];
+                int light = totals[4];
+                int empTextures = totals[5];
+                int textures = totals[6];
+                int materials = totals[7];
+                int total = totals[8];
+
+                UndoManager.Instance.AddCompositeUndo(undos, $"Clean All ({total})");
+
+                await this.ShowMessageAsync("Clean All", $"{total} duplicate or unused references were purged.\n\nBreakdown by type:\nEMP: {emp}\nETR: {etr}\nECF: {ecf}\nEMO: {emo}\nLIGHT: {light}\nEMP Textures: {empTextures}\nTextures: {textures}\nMaterials: {materials}", MessageDialogStyle.Affirmative, DialogSettings.Default);
+            }
         }
 
         private void UpdateSelectedVersion()

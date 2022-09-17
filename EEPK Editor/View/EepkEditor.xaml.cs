@@ -1235,7 +1235,7 @@ namespace EEPK_Organiser.View
 
         private async void EMO_AssetContainer_AddEan_Click(object sender, RoutedEventArgs e)
         {
-            //Not working right now
+            //Completely fucked
 
             var asset = emoDataGrid.SelectedItem as Asset;
             if (asset == null) return;
@@ -4157,7 +4157,7 @@ namespace EEPK_Organiser.View
                 if (effectSelector.SelectedEffects != null)
                 {
                     EffectContainerFile vfxPackage = EffectContainerFile.New();
-                    vfxPackage.saveFormat = SaveFormat.ZIP;
+                    vfxPackage.saveFormat = SaveFormat.VfxPackage;
 
                     foreach (var effect in effectSelector.SelectedEffects)
                     {

@@ -130,7 +130,7 @@
                         </DataGridTemplateColumn.CellEditingTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Header="ID" Width="70" SortMemberPath="ID" Visibility="{Binding ElementName=UserControl, Path=InverseContainerVisiblility}">
+                    <DataGridTemplateColumn x:Name="idColumn" Header="ID" Width="70" SortMemberPath="ID">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding ID}"/>
@@ -138,7 +138,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                         <DataGridTemplateColumn.CellEditingTemplate>
                             <DataTemplate>
-                                <Controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=SelectedTextureID, UpdateSourceTrigger=Default}" Minimum="0" HideUpDownButtons="True" HorizontalContentAlignment="Left"/>
+                                <Controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=SelectedTextureID, UpdateSourceTrigger=Default}" Minimum="0" HideUpDownButtons="True" HorizontalContentAlignment="Left" TextAlignment="Left"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>
                     </DataGridTemplateColumn>
