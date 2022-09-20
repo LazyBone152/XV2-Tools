@@ -261,41 +261,46 @@ namespace EEPK_Organiser
 
             //Check for updates silently
 #if !DEBUG
-            if (SettingsManager.Instance.Settings.UpdateNotifications)
-            {
-                CheckForUpdate(false);
-            }
+            CheckForUpdate(false);
 #endif
 
         }
 
         private async void CheckForUpdate(bool userInitiated)
         {
-            //GitHub Settings
-            Update.APP_TAG = "EEPK";
-            Update.GITHUB_ACCOUNT = "LazyBone152";
-            Update.GITHUB_REPO = "EEPKOrganiser";
-            Update.DEFAULT_APP_NAME = "EEPK Organiser.exe";
-
             //Check for update
-            object[] ret = null;
+            AppUpdate appUpdate = default;
 
             await Task.Run(() =>
             {
-                ret = Update.CheckForUpdate();
+                appUpdate = Update.CheckForUpdate(AutoUpdater.App.EEPK_Organiser);
             });
-
-            //Return values
-            bool isUpdateAvailable = (bool)ret[0];
-            Version latestVersion = (Version)ret[1];
-            string changelog = (string)ret[2];
-            int numUpdates = (int)ret[3];
 
             await Task.Delay(1000);
 
-            if (isUpdateAvailable)
+            if(Update.UpdateState == UpdateState.XmlDownloadFailed && userInitiated)
             {
-                var messageResult = await this.ShowMessageAsync("Update Available", $"An update is available ({latestVersion}). Do you want to download and install it?\n\nNote: All instances of the application will be closed and any unsaved work will be lost.\n\nChangelog:\n{changelog}", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.ScrollDialog);
+                await this.ShowMessageAsync("Update Failed", "The AppUpdate XML file failed to download.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                return;
+            }
+
+            if (Update.UpdateState == UpdateState.XmlParseFailed && userInitiated)
+            {
+                await this.ShowMessageAsync("Update Failed", $"The AppUpdate XML file could not be parsed.\n\n{Update.FailedErrorMessage}", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                return;
+            }
+
+            if (!appUpdate.ForceUpdate && !SettingsManager.settings.UpdateNotifications && !userInitiated)
+            {
+                return;
+            }
+
+            if (appUpdate.HasUpdate)
+            {
+                //Update is forced to appear even if notifications are disabled. Only to be used for the most vital updates.
+                bool updateIsForced = appUpdate.ForceUpdate && !SettingsManager.settings.UpdateNotifications;
+
+                var messageResult = await this.ShowMessageAsync(updateIsForced ? "Update Available (Forced)" : "Update Available", $"An update is available ({appUpdate.Version}). Do you want to download and install it?\n\nNote: All instances of the application will be closed and any unsaved work will be lost.\n\nChangelog:\n{appUpdate.Changelog}", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.ScrollDialog);
 
                 if(messageResult == MessageDialogResult.Affirmative)
                 {
@@ -314,13 +319,13 @@ namespace EEPK_Organiser
                         await controller.CloseAsync();
                     }
 
-                    if (Update.IsDownloadSuccessful)
+                    if (Update.UpdateState == UpdateState.DownloadSuccess)
                     {
                         Update.UpdateApplication();
-                    }
-                    else
+                    } 
+                    else if (Update.UpdateState == UpdateState.DownloadFail)
                     {
-                        await this.ShowMessageAsync("Update Failed", Update.DownloadFailedText, MessageDialogStyle.AffirmativeAndNegative, DialogSettings.Default);
+                        await this.ShowMessageAsync("Download Failed", Update.FailedErrorMessage, MessageDialogStyle.Affirmative, DialogSettings.Default);
                     }
 
                 }
