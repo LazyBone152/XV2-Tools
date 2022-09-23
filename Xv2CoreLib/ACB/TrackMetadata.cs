@@ -63,7 +63,8 @@ namespace Xv2CoreLib.ACB
 
                 IsValidAudioFile = true;
             }
-            catch (InvalidDataException)
+            //catch (InvalidDataException)
+            catch
             {
                 try
                 {
