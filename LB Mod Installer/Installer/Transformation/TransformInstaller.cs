@@ -20,13 +20,12 @@ namespace LB_Mod_Installer.Installer.Transformation
 {
     public class TransformInstaller
     {
+        private readonly Install install;
 
-        private Install install;
-
-        private List<TransformDefine> TransformationDefines = new List<TransformDefine>();
-        private List<TransformPartSet> PartSets = new List<TransformPartSet>();
-        private List<TransformPowerUp> PupEntries = new List<TransformPowerUp>();
-        private List<TransformCusAura> CusAuras = new List<TransformCusAura>();
+        private readonly List<TransformDefine> TransformationDefines = new List<TransformDefine>();
+        private readonly List<TransformPartSet> PartSets = new List<TransformPartSet>();
+        private readonly List<TransformPowerUp> PupEntries = new List<TransformPowerUp>();
+        private readonly List<TransformCusAura> CusAuras = new List<TransformCusAura>();
 
         public TransformInstaller(Install install)
         {
@@ -59,7 +58,7 @@ namespace LB_Mod_Installer.Installer.Transformation
                 }
             }
         }
-    
+
         public void LoadPartSets(TransformPartSets partSets)
         {
             if(partSets?.PartSets != null)
@@ -79,7 +78,7 @@ namespace LB_Mod_Installer.Installer.Transformation
                 }
             }
         }
-        
+
         public void LoadPupEntries(TransformPowerUps powerUps)
         {
             if (powerUps?.PowerUps != null)
@@ -191,38 +190,6 @@ namespace LB_Mod_Installer.Installer.Transformation
                 untransformStageOverlayIds = CreateStageSelectorEffects(skill, bacFile, eepkFile, skillID2, true);
             }
 
-            //Add Overlay Effect disables for every bac entry (immediately cancel overlay upon bac entry change within the skill)
-            for(int i = 0; i < 50; i++)
-            {
-                if(eepkFile.Effects.Any(x => x.IndexNum == 20000 + i))
-                {
-                    foreach(var bacEntry in bacFile.BacEntries)
-                    {
-                        if (!bacEntry.IsBacEntryEmpty())
-                        {
-                            BAC_Type8 disableEffect = new BAC_Type8();
-                            disableEffect.StartTime = 0;
-                            disableEffect.Duration = 1;
-                            disableEffect.EepkType = BAC_Type8.EepkTypeEnum.AwokenSkill;
-                            disableEffect.EffectID = 20000 + i;
-                            disableEffect.SkillID = (ushort)skillID2;
-                            disableEffect.UseSkillId = BAC_Type8.UseSkillIdEnum.True;
-                            disableEffect.EffectFlags = BAC_Type8.EffectFlagsEnum.Off | BAC_Type8.EffectFlagsEnum.Loop | BAC_Type8.EffectFlagsEnum.UserOnly;
-
-                            if (bacEntry.Type8 == null)
-                                bacEntry.Type8 = new List<BAC_Type8>();
-
-                            bacEntry.Type8.Insert(0, disableEffect);
-
-                        }
-                    }
-                }
-                else
-                {
-                    break;
-                }
-            }
-
             //Create BCM
             BCM_File bcmFile = CreateBcmFile(skill, transformStageOverlayIds, untransformStageOverlayIds);
 
@@ -272,19 +239,17 @@ namespace LB_Mod_Installer.Installer.Transformation
         private BAC_File CreateBacFile(TransformSkill skill)
         {
             BAC_File bacFile = BAC_File.DefaultBacFile();
-            
+            int stageIdx = 0;
+
             foreach(var stage in skill.Stages)
             {
-                var defineEntry = TransformationDefines.FirstOrDefault(x => x.Key?.Equals(stage.Key, StringComparison.OrdinalIgnoreCase) == true);
+                TransformDefine defineEntry = TransformationDefines.FirstOrDefault(x => x.Key?.Equals(stage.Key, StringComparison.OrdinalIgnoreCase) == true);
 
                 if (defineEntry == null)
                     throw new Exception($"TransformInstaller.CreateBacFile: Cannot find the BacFile with Key: {stage.Key}");
 
-                if (bacFile.GetEntry(stage.StageIndex) != null)
-                    throw new Exception($"TransformInstaller.CreateBacFile: Duplicate StageIndex encountered.");
-
-                var entry = defineEntry.BacEntryInstance.Copy();
-                entry.SortID = stage.StageIndex;
+                BAC_Entry entry = defineEntry.BacEntryInstance.Copy();
+                entry.SortID = stageIdx;
 
                 bacFile.BacEntries.Add(entry);
 
@@ -294,7 +259,7 @@ namespace LB_Mod_Installer.Installer.Transformation
                 {
                     if(!entry.Type15.Any(x => x.FunctionType == 14))
                     {
-                        var transformActivator = entry.Type15.FirstOrDefault(x => x.FunctionType == 13);
+                        BAC_Type15 transformActivator = entry.Type15.FirstOrDefault(x => x.FunctionType == 13);
 
                         if (transformActivator != null)
                         {
@@ -308,14 +273,16 @@ namespace LB_Mod_Installer.Installer.Transformation
                         }
                     }
                 }
+
+                stageIdx++;
             }
 
             //Add transform / revert mechanic entries
-            var holdDownEntryDefine = TransformationDefines.FirstOrDefault(x => x.Key?.Equals(TransformDefine.BAC_HOLD_DOWN_LOOP_KEY) == true);
-            var untransformDefine = TransformationDefines.FirstOrDefault(x => x.Key?.Equals(TransformDefine.BAC_UNTRANSFORM_KEY) == true);
-            var revertDefine = TransformationDefines.FirstOrDefault(x => x.Key?.Equals(TransformDefine.BAC_REVERT_LOOP_KEY) == true);
-            var notAllowedSeDefine = TransformationDefines.FirstOrDefault(x => x.Key?.Equals(TransformDefine.BAC_NOT_ALLOWED_SE_CALLBACK_KEY) == true);
-            var pageChangeSeDefine = TransformationDefines.FirstOrDefault(x => x.Key?.Equals(TransformDefine.BAC_PAGE_SE_CALLBACK_KEY) == true);
+            TransformDefine holdDownEntryDefine = TransformationDefines.FirstOrDefault(x => x.Key?.Equals(TransformDefine.BAC_HOLD_DOWN_LOOP_KEY) == true);
+            TransformDefine untransformDefine = TransformationDefines.FirstOrDefault(x => x.Key?.Equals(TransformDefine.BAC_UNTRANSFORM_KEY) == true);
+            TransformDefine revertDefine = TransformationDefines.FirstOrDefault(x => x.Key?.Equals(TransformDefine.BAC_REVERT_LOOP_KEY) == true);
+            TransformDefine notAllowedSeDefine = TransformationDefines.FirstOrDefault(x => x.Key?.Equals(TransformDefine.BAC_NOT_ALLOWED_SE_CALLBACK_KEY) == true);
+            TransformDefine pageChangeSeDefine = TransformationDefines.FirstOrDefault(x => x.Key?.Equals(TransformDefine.BAC_PAGE_SE_CALLBACK_KEY) == true);
 
             if (holdDownEntryDefine == null)
                 throw new Exception(string.Format("TransformInstaller.CreateBacFile: Cannot find the define entry for \"{0}\"", TransformDefine.BAC_HOLD_DOWN_LOOP_KEY));
@@ -332,11 +299,11 @@ namespace LB_Mod_Installer.Installer.Transformation
             if (pageChangeSeDefine == null)
                 throw new Exception(string.Format("TransformInstaller.CreateBacFile: Cannot find the define entry for \"{0}\"", TransformDefine.BAC_PAGE_SE_CALLBACK_KEY));
 
-            var holdDownEntry = holdDownEntryDefine.BacEntryInstance.Copy();
-            var untransformEntry = untransformDefine.BacEntryInstance.Copy();
-            var revertEntry = revertDefine.BacEntryInstance.Copy();
-            var notAllowedEntry = notAllowedSeDefine.BacEntryInstance.Copy();
-            var pageChangeSeEntry = pageChangeSeDefine.BacEntryInstance.Copy();
+            BAC_Entry holdDownEntry = holdDownEntryDefine.BacEntryInstance.Copy();
+            BAC_Entry untransformEntry = untransformDefine.BacEntryInstance.Copy();
+            BAC_Entry revertEntry = revertDefine.BacEntryInstance.Copy();
+            BAC_Entry notAllowedEntry = notAllowedSeDefine.BacEntryInstance.Copy();
+            BAC_Entry pageChangeSeEntry = pageChangeSeDefine.BacEntryInstance.Copy();
 
             holdDownEntry.SortID = TransformDefine.BAC_HOLD_DOWN_LOOP_IDX;
             untransformEntry.SortID = TransformDefine.BAC_UNTRANSFORM_IDX;
@@ -387,7 +354,7 @@ namespace LB_Mod_Installer.Installer.Transformation
 
             return dummyCmsEntry;
         }
-        
+
         private int InstallPupEntries(TransformSkill skill)
         {
             PUP_File pupFile = (PUP_File)install.GetParsedFile<PUP_File>(Xv2CoreLib.Xenoverse2.PUP_PATH);
@@ -397,9 +364,12 @@ namespace LB_Mod_Installer.Installer.Transformation
             if(skill.HasMoveSkillSetChange())
                 pupFile.PupEntries.Add(new PUP_Entry(pupID));
 
-            for (int i = 0; i < skill.Stages.Count; i++)
+            int stageCount = skill.Stages.Max(x => x.StageIndex) + 1;
+
+            for (int i = 0; i < stageCount; i++)
             {
-                var pup = GetPupDefine(skill.Stages[i].Key);
+                TransformStage stage = skill.Stages.FirstOrDefault(x => x.StageIndex == i);
+                var pup = GetPupDefine(GetAliasKey(stage.Key));
 
                 var pupEntry = pup.Copy();
                 pupEntry.ID = pupID + skill.GetTransStage(i);
@@ -420,17 +390,21 @@ namespace LB_Mod_Installer.Installer.Transformation
             if(skill.HasMoveSkillSetChange())
                 prebaked.CusAuras.Add(new CusAuraData(auraId));
 
-            for (int i = 0; i < skill.Stages.Count; i++)
+            int stageCount = skill.Stages.Max(x => x.StageIndex) + 1;
+
+            for (int i = 0; i < stageCount; i++)
             {
-                var cusAura = CusAuras.FirstOrDefault(x => x.Key == skill.Stages[i].Key);
+                TransformStage stage = skill.Stages.FirstOrDefault(x => x.StageIndex == i);
+                string key = GetAliasKey(stage.Key);
+                var cusAura = CusAuras.FirstOrDefault(x => x.Key == key);
 
                 if (cusAura == null)
-                    throw new Exception($"Could not find a CusAuraData entry for Key: {skill.Stages[i].Key}.");
+                    throw new Exception($"Could not find a CusAuraData entry for Key: {stage.Key}.");
 
                 var entry = cusAura.CusAuraData.Copy();
                 entry.Integer_2 = (uint)i;
                 entry.Integer_3 = (uint)(i < 3 ? i + 1 : 0);
-                entry.CusAuraID = (ushort)(auraId + skill.GetTransStage(skill.Stages[i].StageIndex));
+                entry.CusAuraID = (ushort)(auraId + skill.GetTransStage(skill.GetStageIndex(stage.Key)));
 
                 prebaked.CusAuras.Add(entry);
                 GeneralInfo.Tracker.AddID(PrebakedFile.PATH, Sections.PrebakedCusAura, entry.CusAuraID.ToString());
@@ -447,15 +421,20 @@ namespace LB_Mod_Installer.Installer.Transformation
             List<BCS_File> bcsFiles = new List<BCS_File>();
             List<PartSet> dummyPartSets = new List<PartSet>();
 
-            for(int i = 0; i < skill.Stages.Count; i++)
+            int stageCount = skill.Stages.Max(x => x.StageIndex) + 1;
+
+            for(int i = 0; i < stageCount; i++)
             {
-                foreach (var partSet in PartSets.Where(x => x.Key == skill.Stages[i].Key))
+                TransformStage stage = skill.Stages.FirstOrDefault(x => x.StageIndex == i);
+                string key = GetAliasKey(stage.Key);
+
+                foreach (var partSet in PartSets.Where(x => x.Key == key))
                 {
                     string path = BCS_File.GetBcsFilePath(partSet.Race, partSet.Gender);
                     BCS_File bcsFile = (BCS_File)install.GetParsedFile<BCS_File>(path);
 
                     PartSet newPartSet = partSet.PartSet.Copy();
-                    newPartSet.ID = id + skill.GetTransStage(skill.Stages[i].StageIndex);
+                    newPartSet.ID = id + skill.GetTransStage(skill.GetStageIndex(stage.Key));
                     bcsFile.PartSets.Add(newPartSet);
 
                     GeneralInfo.Tracker.AddID(path, Sections.BCS_PartSets, newPartSet.ID.ToString());
@@ -551,7 +530,7 @@ namespace LB_Mod_Installer.Installer.Transformation
                 {
                     if (i < options?.Count)
                     {
-                        stageNames[i + 1] = GetStageName(skill, options[i].StageIndex);
+                        stageNames[i + 1] = GetStageName(skill, options[i].Key);
                     }
                     else
                     {
@@ -565,7 +544,7 @@ namespace LB_Mod_Installer.Installer.Transformation
                 {
                     if (i < options?.Count)
                     {
-                        stageNames[i] = GetStageName(skill, options[i].StageIndex);
+                        stageNames[i] = GetStageName(skill, options[i].Key);
                     }
                     else
                     {
@@ -578,7 +557,7 @@ namespace LB_Mod_Installer.Installer.Transformation
             return TextureHelper.WriteStageNames(bytes, stageNames);
 
          }
-       
+
         private int[] CreateStageSelectorEffects(TransformSkill skill, BAC_File bacFile, EffectContainerFile eepkFile, int skillID2, bool isUntransform)
         {
             int[] bacIds = new int[skill.TransformStates.Count];
@@ -594,6 +573,19 @@ namespace LB_Mod_Installer.Installer.Transformation
 
                 if (newHoldDownEntry.Type8 == null)
                     newHoldDownEntry.Type8 = new List<BAC_Type8>();
+
+                //Add the floating rocks when a stance change is active
+                if(i > 0 && HasStanceChange(i - 1, skill) && skill.AllowFloatingRocks)
+                {
+                    if (newHoldDownEntry.Type15 == null)
+                        newHoldDownEntry.Type15 = new List<BAC_Type15>();
+
+                    BAC_Type15 function = new BAC_Type15();
+                    function.Duration = 120;
+                    function.FunctionType = 0x23;
+
+                    newHoldDownEntry.Type15.Add(function);
+                }
 
                 //Add Effect Start and Disables every frame. This ensures that the effect wont linger for long if the bac entry is canceled.
                 for (int a = 0; a < 120; a += 1)
@@ -634,7 +626,7 @@ namespace LB_Mod_Installer.Installer.Transformation
                 {
                     foreach (var option in state.TransformOptions)
                     {
-                        var define = GetStageDefine(skill, option.StageIndex);
+                        var define = GetStageDefine(skill, option.Key);
 
                         if (option.KiCost == 0)
                             option.KiCost = define.KiCost;
@@ -665,7 +657,7 @@ namespace LB_Mod_Installer.Installer.Transformation
 
             return entry.PupEntry;
         }
-
+        
         #endregion
 
         private ButtonInput GetButtonInputForSlot(int slot)
@@ -684,10 +676,10 @@ namespace LB_Mod_Installer.Installer.Transformation
 
             throw new ArgumentException($"TransformInstaller.GetButtonInputForSlot: Slot number out of range ({slot}), must be between 0 and 3.");
         }
-        
-        private TransformDefine GetStageDefine(TransformSkill skill, int stageIndex)
+
+        private TransformDefine GetStageDefine(TransformSkill skill, string stageKey)
         {
-            TransformStage stage = skill.Stages.FirstOrDefault(x => x.StageIndex == stageIndex);
+            TransformStage stage = skill.Stages.FirstOrDefault(x => x.Key == stageKey);
 
             if(stage != null)
             {
@@ -697,18 +689,36 @@ namespace LB_Mod_Installer.Installer.Transformation
             throw new Exception($"TransformInstaller.GetStageDefine: Could not find the define entry.");
         }
 
-        private string GetStageName(TransformSkill skill, int stageIndex)
+        private string GetStageName(TransformSkill skill, string stageKey)
         {
-            var stage = skill.Stages.FirstOrDefault(x => x.StageIndex == stageIndex);
+            var stage = skill.Stages.FirstOrDefault(x => x.Key == stageKey);
 
             if(stage != null)
             {
-                return install.installerXml.GetLocalisedString(stage.Key);
+                return install.installerXml.GetLocalisedString(GetAliasKey(stage.Key));
             }
 
             return string.Empty;
         }
 
+        private string GetAliasKey(string key)
+        {
+            var define = TransformationDefines.FirstOrDefault(x => x.Key == key);
+
+            if (define != null)
+                return define.GetActualKey();
+
+            return key;
+        }
+
+        private bool HasStanceChange(int stageIndex, TransformSkill skill)
+        {
+            TransformStage stage = skill.Stages.FirstOrDefault(x => x.StageIndex == stageIndex);
+            string key = GetAliasKey(stage.Key);
+            TransformCusAura cusData = CusAuras.FirstOrDefault(x => x.Key == key);
+
+            return cusData.CusAuraData.Behaviour_11 == 2;
+        }
 
         #region FLAGS
         private const string DS4_FLAG = "DS4_FLAG";

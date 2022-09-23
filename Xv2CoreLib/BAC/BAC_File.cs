@@ -404,6 +404,18 @@ namespace Xv2CoreLib.BAC
         public int SortID { get { return int.Parse(Index); } set { Index = value.ToString(); NotifyPropertyChanged(nameof(Index)); } }
         [YAXDontSerialize]
         public string FlagStr => HexConverter.GetHexString((uint)Flag);
+        [YAXDontSerialize]
+        public string MovesetBacEntryName
+        {
+            get
+            {
+                string name;
+                if (ValuesDictionary.BAC.MovesetBacEntry.TryGetValue(SortID, out name))
+                    return name;
+
+                return null;
+            }
+        }
 
         private Flags _flag = 0;
         #endregion
@@ -524,7 +536,7 @@ namespace Xv2CoreLib.BAC
         public List<int> TypeDummy { get; set; }
 
         [YAXDontSerialize]
-        public AsyncObservableCollection<IBacType> IBacTypes { get; set; } = AsyncObservableCollection<IBacType>.Create();
+        public AsyncObservableCollection<IBacType> IBacTypes { get; set; } = new AsyncObservableCollection<IBacType>();
 
         #region IBacTypeMethods
         public void InitializeIBacTypes()
@@ -1043,6 +1055,11 @@ namespace Xv2CoreLib.BAC
                 Flag = Flags.Empty,
                 SortID = id
             };
+        }
+        
+        public void UpdateEntryName()
+        {
+            NotifyPropertyChanged(nameof(MovesetBacEntryName));
         }
     }
 

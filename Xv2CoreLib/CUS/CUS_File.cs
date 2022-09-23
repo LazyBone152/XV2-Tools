@@ -258,7 +258,26 @@ namespace Xv2CoreLib.CUS
             }
 
         }
-        
+
+        public static int ConvertToID2(int ID1, SkillType type)
+        {
+            switch (type)
+            {
+                case SkillType.Ultimate:
+                    return ID1 - 5000;
+                case SkillType.Evasive:
+                    return ID1 - 10000;
+                case SkillType.Blast:
+                    return ID1 - 20000;
+                case SkillType.Awoken:
+                    return ID1 - 25000;
+                case SkillType.Super:
+                default:
+                    return ID1;
+            }
+
+        }
+
         public bool IsSkillIdRangeUsed(CMS_Entry cmsEntry, SkillType skillType)
         {
             int id = cmsEntry.ID * 10;

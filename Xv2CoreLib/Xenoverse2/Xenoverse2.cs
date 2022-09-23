@@ -29,6 +29,7 @@ using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.Resource;
 using static Xv2CoreLib.CUS.CUS_File;
+using System.Threading.Tasks;
 
 namespace Xv2CoreLib
 {
@@ -910,7 +911,25 @@ namespace Xv2CoreLib
 
             return names;
         }
-        
+
+        public string[] GetCharacterName(int id)
+        {
+            if (!loadCharacters) throw new InvalidOperationException("Xenoverse2.GetCharacterName: Characters have not been loaded.");
+
+            string shortName = cmsFile.CMS_Entries.FirstOrDefault(x => x.ID == id)?.ShortName;
+            return GetCharacterName(shortName);
+        }
+
+        public string GetCharacterName(int id, Language language)
+        {
+            return GetCharacterName(id)[(int)language];
+        }
+
+        public string GetCharacterName(string shortName, Language language)
+        {
+            return GetCharacterName(shortName)[(int)language];
+        }
+
         private Xv2MoveFiles GetCharacterMoveFiles(CMS_Entry cmsEntry, ERS_MainTableEntry ersEntry, IList<CSO_Entry> csoEntries, bool loadFiles)
         {
             List<string> loadedFiles = new List<string>();
@@ -941,15 +960,18 @@ namespace Xv2CoreLib
                 moveFiles.EanFile.Add(new Xv2File<EAN_File>((EAN_File)FileManager.Instance.GetParsedFileFromGame(eanPath), fileIO.PathInGameDir(eanPath), !cmsEntry.IsSelfReference(cmsEntry.EanPath), null, false, MoveFileTypes.EAN, 0, true, MoveType.Character));
 
             //CAM
-            string camEanPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.cam.ean", cmsEntry.ShortName, cmsEntry.CamEanPath));
-            moveFiles.CamPaths.Add(camEanPath);
-            moveFiles.CamEanFile.Clear();
+            if (!string.IsNullOrWhiteSpace(cmsEntry.CamEanPath))
+            {
+                string camEanPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.cam.ean", cmsEntry.ShortName, cmsEntry.CamEanPath));
+                moveFiles.CamPaths.Add(camEanPath);
+                moveFiles.CamEanFile.Clear();
 
-            if(loadFiles)
-                moveFiles.CamEanFile.Add(new Xv2File<EAN_File>((EAN_File)FileManager.Instance.GetParsedFileFromGame(camEanPath), fileIO.PathInGameDir(camEanPath), !cmsEntry.IsSelfReference(cmsEntry.CamEanPath), null, false, MoveFileTypes.CAM_EAN, 0, true, MoveType.Character));
+                if (loadFiles)
+                    moveFiles.CamEanFile.Add(new Xv2File<EAN_File>((EAN_File)FileManager.Instance.GetParsedFileFromGame(camEanPath), fileIO.PathInGameDir(camEanPath), !cmsEntry.IsSelfReference(cmsEntry.CamEanPath), null, false, MoveFileTypes.CAM_EAN, 0, true, MoveType.Character));
+            }
 
             //BDM
-            if(!string.IsNullOrWhiteSpace(cmsEntry.BdmPath))
+            if (!string.IsNullOrWhiteSpace(cmsEntry.BdmPath))
             {
                 moveFiles.BdmPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}_PLAYER.bdm", cmsEntry.ShortName, cmsEntry.BdmPath));
 
@@ -1021,7 +1043,6 @@ namespace Xv2CoreLib
 
                             }
                         }
-
                     }
                     else
                     {
@@ -1076,7 +1097,9 @@ namespace Xv2CoreLib
             moveFiles.VoxAcbPath.Add(acbPath);
 
             if (loadFiles)
+            {
                 moveFiles.VoxAcbFile.Add(new Xv2File<ACB_Wrapper>((ACB_Wrapper)FileManager.Instance.GetParsedFileFromGame(acbPath), fileIO.PathInGameDir(acbPath), false, "HUM", english, MoveFileTypes.VOX_ACB, id, true, MoveType.Character));
+            }
 
             loadedFiles.Add(acbPath);
         }

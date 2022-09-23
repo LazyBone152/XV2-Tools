@@ -726,5 +726,76 @@ namespace Xv2CoreLib.ValuesDictionary
             { 8 , "Right Down" }
         };
 
+        //Moveset Entry
+        public static Dictionary<int, string> MovesetBacEntry { get; private set; } = new Dictionary<int, string>()
+        {
+            { 0 , "Stance" },
+            { 1 , "Stance (Air)" },
+            { 2 , "Run" },
+            { 210 , "Battle Intro" },
+            { 190 , "Floating Angled Stance 1" },
+            { 191 , "Floating Angled Stance 2" },
+            { 224, "Stance Change 1" },
+            { 225, "Stance Change 1 (Air)" },
+            { 450, "Stance Change 2" },
+            { 451, "Stance Change 2 (Air)" },
+            { 460, "Light Stamina Break" },
+            { 461, "Heavy Stamina Break" },
+            { 470, "Limit Burst" },
+
+            //Grabs
+            { 600, "Grab" },
+            { 601, "Grab Connect (User)" },
+            { 602, "Grab Connect (Victim)" },
+            { 603, "Grab Auxiliary" },
+            { 604, "Grab Auxiliary" },
+            { 610, "Grab Alt" },
+            { 611, "Grab Alt Connect (User)" },
+            { 612, "Grab Alt Connect (Victim)" },
+            { 613, "Grab Alt Auxiliary" },
+            { 614, "Grab Alt Auxiliary" },
+
+            //Light Attacks
+            { 300, "Light 1" },
+            { 301, "Light 2" },
+            { 302, "Light 3" },
+            { 303, "Light 4" },
+            { 304, "Light 5" },
+            { 340, "Light 6" },
+            { 341, "Light 7" },
+            { 342, "Light 8" },
+            { 343, "Light 9" },
+            { 344, "Light 10" },
+
+            //Light Alts
+            { 320, "Light 1 -> Heavy 1 (0%)" },
+            { 321, "Light 1 -> Heavy 1 (50%)" },
+            { 322, "Light 1 -> Heavy 1 (100%)" },
+            { 325, "Light 1 -> Heavy 2" },
+            { 310, "Light 5 -> Heavy 1" },
+            { 311, "Light 5 -> Heavy 2" },
+            { 312, "Light 5 -> Heavy 3" },
+
+
+            //Heavy Attacks
+            { 330, "Heavy 1 (0%)" },
+            { 331, "Heavy 1 (50%)" },
+            { 332, "Heavy 1 (100%)" },
+            { 335, "Heavy 2" },
+            { 336, "Heavy 3" },
+            { 337, "Heavy 4" },
+            { 338, "Heavy 5" },
+
+            //Heavy Alts
+            { 350, "H > L > H" },
+            { 351, "H > L > H > L" },
+            { 352, "H > L > H > L > H" },
+
+            //Other attacks
+            { 360, "Turn Back Attack" },
+            { 361, "Turn Back Attack" },
+            { 362, "Turn Back Attack" },
+
+        };
     }
 }

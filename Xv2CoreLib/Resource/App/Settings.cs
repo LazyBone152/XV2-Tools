@@ -556,6 +556,7 @@ namespace Xv2CoreLib.Resource.App
         public bool XenoKit_RenderBoneNames { get; set; } = true;
         public bool XenoKit_RenderBoneNamesMouseOverOnly { get; set; } = true;
         public bool XenoKit_RimLightingEnabled { get; set; } = true;
+        public bool XenoKit_EnableDynamicLighting { get; set; } = false;
         public bool XenoKit_WireframeMode { get; set; } = false;
         public bool XenoKit_HideLessImportantBones { get; set; } = true;
         public bool XenoKit_AutoResolvePasteReferences { get; set; } = false;
