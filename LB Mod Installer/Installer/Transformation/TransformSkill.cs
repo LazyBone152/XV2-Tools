@@ -64,6 +64,12 @@ namespace LB_Mod_Installer.Installer.Transformation
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public string VoxAcbPath { get; set; } //Follows the same naming rules as X2M skill vox 
 
+        //Allow floating rocks to be spawned during the "hold down" bac entries. They will be dynamically added based on whether a stance change is active. If they should never be added, make this false.
+        [YAXAttributeFor("AllowFloatingRocks")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = true)]
+        public bool AllowFloatingRocks { get; set; } = true;
+
         /// <summary>
         /// Defines all stages to be used in the skill.
         /// </summary>
@@ -72,10 +78,16 @@ namespace LB_Mod_Installer.Installer.Transformation
         /// <summary>
         /// Defines how stages are accessed.
         /// </summary>
-        public List<TransformState> TransformStates { get; set; } 
+        public List<TransformState> TransformStates { get; set; }
 
         [YAXDontSerialize]
-        public int NumStages => HasMoveSkillSetChange() ? Stages.Count + 1 : Stages.Count;
+        public int NumStages => GetStageCount();
+
+        private int GetStageCount()
+        {
+            int count = Stages.Max(x => x.StageIndex) + 1;
+            return HasMoveSkillSetChange() ? count + 1 : count;
+        }
 
         public int GetMaxKiRequired()
         {
@@ -100,10 +112,7 @@ namespace LB_Mod_Installer.Installer.Transformation
         {
             var movesetChange = Stages.FirstOrDefault(x => x.MovesetChange || x.SkillsetChange != -1);
 
-            if (movesetChange != null)
-                return movesetChange.StageIndex;
-
-            return -1;
+            return Stages.IndexOf(movesetChange);
         }
     
         public bool HasMoveSkillSetChange()
@@ -129,6 +138,25 @@ namespace LB_Mod_Installer.Installer.Transformation
             return -1;
         }
         
+        public int GetStageBacIndex(string key)
+        {
+            var stage = Stages.FirstOrDefault(x => x.Key == key);
+
+            if (stage == null)
+                throw new Exception($"Mod configuration error. No matching Stage entry found for Key = {key}.\n\nAny keys referenced in TransformState must first be define in Stages!");
+
+            return Stages.IndexOf(stage);
+        }
+
+        public int GetStageIndex(string key)
+        {
+            var stage = Stages.FirstOrDefault(x => x.Key == key);
+
+            if (stage == null)
+                throw new Exception($"Mod configuration error. No matching Stage entry found for Key = {key}.\n\nAny keys referenced in TransformState must first be define in Stages!");
+
+            return stage != null ? stage.StageIndex : 0;
+        }
     }
 
     public class TransformStage
@@ -181,7 +209,8 @@ namespace LB_Mod_Installer.Installer.Transformation
     public class TransformOption
     {
         [YAXAttributeForClass]
-        public int StageIndex { get; set; }
+        public string Key { get; set; }
+
         [YAXAttributeForClass]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (uint)0)]
         public uint KiRequired { get; set; }

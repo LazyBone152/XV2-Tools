@@ -328,26 +328,19 @@ namespace LB_Mod_Installer.Installer
             if (string.IsNullOrWhiteSpace(flags)) return true;
 
             string[] orFlags = flags.Split('|');
-            bool isTrue = true;
 
             foreach(var orBlock in orFlags)
             {
-                //Assume true by default
-                isTrue = true;
-
                 foreach (var flag in orBlock.Split(','))
                 {
-                    if (!FlagIsSet(flag.Trim()))
+                    if (FlagIsSet(flag.Trim()))
                     {
-                        isTrue = false;
-                        break;
+                        return true;
                     }
                 }
-
             }
 
-            return isTrue;
-
+            return false;
             //Old code without the OR
             //foreach(var flag in flags.Split(','))
             //{
@@ -918,7 +911,7 @@ namespace LB_Mod_Installer.Installer
             {
                 foreach(var option in OptionList)
                 {
-                    if ((option.IsSelected_OptionMultiSelect && StepType == StepTypes.OptionsMultiSelect || option.IsSelected_Option && StepType == StepTypes.Options) && !string.IsNullOrWhiteSpace(option.SetFlag))
+                    if (((option.IsSelected_OptionMultiSelect && StepType == StepTypes.OptionsMultiSelect) || option.IsSelected_Option && StepType == StepTypes.Options) && !string.IsNullOrWhiteSpace(option.SetFlag))
                     {
                         foreach(var setFlag in option.SetFlag.Split(','))
                         {
@@ -1060,6 +1053,8 @@ namespace LB_Mod_Installer.Installer
 
         public FileType GetFileType()
         {
+            if (Type == FileType.Binding) return Type;
+
             //If SourcePath is for a special file type, then return that type.
             if(Path.GetExtension(SourcePath) == Xv2CoreLib.EffectContainer.EffectContainerFile.ZipExtension)
             {

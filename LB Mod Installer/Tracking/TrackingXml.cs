@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LB_Mod_Installer.Binding;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using YAXLib;
@@ -117,9 +118,18 @@ namespace LB_Mod_Installer.Installer
             if (fileEntry.IDs.Contains(idStr)) fileEntry.IDs.Remove(idStr);
         }
 
+        public void AddAliases(List<AliasValue> aliases)
+        {
+            if (Mod.Aliases == null)
+                Mod.Aliases = new List<SerializedAlias>();
+
+            foreach(var alias in aliases)
+            {
+                Mod.Aliases.Add(new SerializedAlias(alias.Alias, alias.ID));
+            }
+        }
     }
     
-    //New
     public class Mod
     {
         public Mod()
@@ -196,6 +206,9 @@ namespace LB_Mod_Installer.Installer
         public List<_File> MsgComponents { get; set; } = new List<_File>();
         [YAXCollection(YAXCollectionSerializationTypes.Recursive, EachElementName = "File")]
         public List<_File> JungleFiles { get; set; } = new List<_File>();
+        [YAXCollection(YAXCollectionSerializationTypes.Recursive, EachElementName = "Alias")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public List<SerializedAlias> Aliases { get; set; } = new List<SerializedAlias>();
 
         public _File GetFileEntry(string fileName)
         {
@@ -301,5 +314,19 @@ namespace LB_Mod_Installer.Installer
         
     }
 
+    public class SerializedAlias
+    {
+        [YAXAttributeForClass]
+        public string Name { get; set; }
+        [YAXAttributeForClass]
+        public string Value { get; set; }
 
+        public SerializedAlias() { }
+
+        public SerializedAlias(string name, string value)
+        {
+            Name = name;
+            Value = value;
+        }
+    }
 }

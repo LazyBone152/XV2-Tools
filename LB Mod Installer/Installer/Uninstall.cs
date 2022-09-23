@@ -109,6 +109,7 @@ namespace LB_Mod_Installer.Installer
             //Clear trackers
             currentMod.Files.Clear();
             currentMod.MsgComponents.Clear();
+            currentMod.Aliases.Clear();
         }
 
         private void SaveErrorLog(string ex)

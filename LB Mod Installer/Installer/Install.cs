@@ -101,10 +101,10 @@ namespace LB_Mod_Installer.Installer
                 JungleCheck();
                 SetProgressBarSteps();
 
-
                 StartInstall();
 
                 //Finalize
+                GeneralInfo.Tracker.AddAliases(bindingManager.Aliases);
                 SaveFiles();
 
                 return;
@@ -1867,6 +1867,13 @@ namespace LB_Mod_Installer.Installer
         
         public static object GetParsedFileFromGame(string path, Xv2FileIO fileIO, bool onlyFromCpk, bool raiseEx = true)
         {
+
+            //Special case: prebaked.xml
+            if (path.Equals(PrebakedFile.PATH, StringComparison.OrdinalIgnoreCase))
+            {
+                return fileIO.FileExists(path) ? PrebakedFile.Load(fileIO.PathInGameDir(path)) : new PrebakedFile();
+            }
+
             if (onlyFromCpk)
             {
                 if (!fileIO.FileExistsInCpk(path) && !raiseEx)
@@ -1885,12 +1892,6 @@ namespace LB_Mod_Installer.Installer
             if(path.Equals(CharaSlotsFile.FILE_NAME_BIN, StringComparison.OrdinalIgnoreCase))
             {
                 return CharaSlotsFile.Load(fileIO.GetFileFromGame(path, false, false));
-            }
-
-            //Special case: prebaked.xml
-            if(path.Equals(PrebakedFile.PATH, StringComparison.OrdinalIgnoreCase))
-            {
-                return fileIO.FileExists(path) ? PrebakedFile.Load(fileIO.PathInGameDir(path)) : null;
             }
 
             switch (Path.GetExtension(path))

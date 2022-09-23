@@ -132,7 +132,6 @@ namespace Xv2CoreLib.BDM
         {
             if(BDM_Type == BDM_Type.XV2_1)
             {
-
                 List<BDM_Entry> newEntries = new List<BDM_Entry>();
 
                 foreach(var entry in BDM_Entries)
@@ -206,7 +205,6 @@ namespace Xv2CoreLib.BDM
         {
             if (BDM_Type == BDM_Type.XV1)
             {
-
                 List<BDM_Entry> newEntries = new List<BDM_Entry>();
 
                 foreach (var entry in BDM_Entries)
@@ -475,15 +473,7 @@ namespace Xv2CoreLib.BDM
         public int ID
         {
             get => Utils.TryParseInt(Index);
-            set
-            {
-                string newId = ID.ToString();
-
-                if(Index != newId)
-                {
-                    Index = newId;
-                }
-            }
+            set => Index = value.ToString();
         }
         
         #endregion

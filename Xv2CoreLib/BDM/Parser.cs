@@ -42,7 +42,7 @@ namespace Xv2CoreLib.BDM
             return bdmFile;
         }
 
-        void Parse()
+        private void Parse()
         {
             int count = BitConverter.ToInt32(rawBytes, 8);
             int offset = BitConverter.ToInt32(rawBytes, 12);
@@ -87,8 +87,6 @@ namespace Xv2CoreLib.BDM
                         }
                         break;
                 }
-
-                
             }
 
             //Auto-convert
@@ -195,7 +193,6 @@ namespace Xv2CoreLib.BDM
 
                 offset += 128;
             }
-
 
             return type0;
         }

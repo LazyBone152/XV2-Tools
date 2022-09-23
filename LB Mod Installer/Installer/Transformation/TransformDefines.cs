@@ -38,6 +38,9 @@ namespace LB_Mod_Installer.Installer.Transformation
 
         [YAXAttributeForClass]
         public string Key { get; set; }
+        [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public string AliasFor { get; set; }
 
         [YAXAttributeForClass]
         public int BacEntry { get; set; }
@@ -56,5 +59,10 @@ namespace LB_Mod_Installer.Installer.Transformation
 
         [YAXDontSerialize]
         public BAC_Entry BacEntryInstance = null;
+
+        public string GetActualKey()
+        {
+            return string.IsNullOrWhiteSpace(AliasFor) ? Key : AliasFor;
+        }
     }
 }

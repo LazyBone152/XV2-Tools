@@ -257,7 +257,7 @@ namespace LB_Mod_Installer
         public static void SaveTracker()
         {
             Directory.CreateDirectory(Path.GetDirectoryName(TrackerPath));
-            
+
             //Update version
             Tracker.GetCurrentMod().VersionString = InstallerXmlInfo.VersionString;
 

@@ -43,7 +43,7 @@ namespace LB_Mod_Installer.Binding
         
 
         private Install install;
-        private List<AliasValue> Aliases = new List<AliasValue>();
+        public List<AliasValue> Aliases { get; private set; } = new List<AliasValue>();
         private X2MHelper x2mHelper;
 
         //Assigned IDs (We keep track of all relevant assigned IDs here, so we dont accidently assign the same ID a second time)
@@ -515,8 +515,20 @@ namespace LB_Mod_Installer.Binding
 
         public void AddAlias(string ID, string alias)
         {
-            if(!string.IsNullOrWhiteSpace(alias))
-                Aliases.Add(new AliasValue() { ID = ID, Alias = alias.ToLower() });
+            if (!string.IsNullOrWhiteSpace(alias))
+            {
+                AliasValue existingAlias = Aliases.FirstOrDefault(x => x.Alias == alias);
+
+                if (existingAlias != null)
+                {
+                    existingAlias.ID = ID;
+                }
+                else
+                {
+                    Aliases.Add(new AliasValue(alias, ID));
+                }
+
+            }
         }
 
         private List<BindingValue> ProcessBinding(string binding, string comment, string originalBinding)
