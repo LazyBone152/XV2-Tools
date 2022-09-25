@@ -196,22 +196,22 @@
     <Column Name="Name2" ValueType="String" Index="2" PrimaryLowestVersion="1.21.1.0" PrimaryHighestVersion="1.35.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
     <Column Name="Id" ValueType="UInt32" Index="3" PrimaryLowestVersion="1.21.1.0" PrimaryHighestVersion="1.35.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
   </Column>
-  <Column Name="StreamAwbHash" PrimaryLowestVersion="1.26.0.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="1.23.1.0" SecondaryHighestVersion="0.0.0.0">
-    <Column Name="Name" ValueType="String" Index="0" PrimaryLowestVersion="1.26.0.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
-    <Column Name="Hash" ValueType="Data" Index="1" PrimaryLowestVersion="1.26.0.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
+  <Column Name="StreamAwbHash" PrimaryLowestVersion="1.26.0.0" PrimaryHighestVersion="1.35.0.0" SecondaryLowestVersion="1.23.1.0" SecondaryHighestVersion="0.0.0.0">
+    <Column Name="Name" ValueType="String" Index="0" PrimaryLowestVersion="1.26.0.0" PrimaryHighestVersion="1.35.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
+    <Column Name="Hash" ValueType="Data" Index="1" PrimaryLowestVersion="1.26.0.0" PrimaryHighestVersion="1.35.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
   </Column>
   <Column Name="StringValueTable" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.35.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0">
     <Column Name="StringValue" ValueType="String" Index="0" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.35.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
   </Column>
-  <Column Name="StreamAwbAfs2Header" PrimaryLowestVersion="1.26.0.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="1.23.1.0" SecondaryHighestVersion="0.0.0.0">
-    <Column Name="Header" ValueType="Data" Index="0" PrimaryLowestVersion="1.26.0.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
+  <Column Name="StreamAwbAfs2Header" PrimaryLowestVersion="1.26.0.0" PrimaryHighestVersion="1.35.0.0" SecondaryLowestVersion="1.23.1.0" SecondaryHighestVersion="0.0.0.0">
+    <Column Name="Header" ValueType="Data" Index="0" PrimaryLowestVersion="1.26.0.0" PrimaryHighestVersion="1.35.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
   </Column>
-  <Column Name="GlobalAisacReferenceTable" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.27.7.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0">
-    <Column Name="Name" ValueType="String" Index="0" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.27.7.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
+  <Column Name="GlobalAisacReferenceTable" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.35.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0">
+    <Column Name="Name" ValueType="String" Index="0" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.35.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
   </Column>
-  <Column Name="WaveformExtensionDataTable" PrimaryLowestVersion="1.22.4.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="1.21.1.0" SecondaryHighestVersion="0.0.0.0">
-    <Column Name="LoopStart" ValueType="UInt32" Index="0" PrimaryLowestVersion="1.22.4.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
-    <Column Name="LoopEnd" ValueType="UInt32" Index="1" PrimaryLowestVersion="1.22.4.0" PrimaryHighestVersion="1.30.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
+  <Column Name="WaveformExtensionDataTable" PrimaryLowestVersion="1.22.4.0" PrimaryHighestVersion="1.35.0.0" SecondaryLowestVersion="1.21.1.0" SecondaryHighestVersion="0.0.0.0">
+    <Column Name="LoopStart" ValueType="UInt32" Index="0" PrimaryLowestVersion="1.22.4.0" PrimaryHighestVersion="1.35.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
+    <Column Name="LoopEnd" ValueType="UInt32" Index="1" PrimaryLowestVersion="1.22.4.0" PrimaryHighestVersion="1.35.0.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />
   </Column>
   <Column Name="AisacTable" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.29.2.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0">
     <Column Name="Id" ValueType="Int16" Index="0" PrimaryLowestVersion="0.81.1.0" PrimaryHighestVersion="1.29.2.0" SecondaryLowestVersion="0.0.0.0" SecondaryHighestVersion="0.0.0.0" />

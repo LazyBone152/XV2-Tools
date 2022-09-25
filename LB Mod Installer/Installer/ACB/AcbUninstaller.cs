@@ -5,6 +5,7 @@ using Xv2CoreLib;
 using Xv2CoreLib.ACB;
 using Xv2CoreLib.MSG;
 using Xv2CoreLib.OBL;
+using Xv2CoreLib.UTF;
 
 namespace LB_Mod_Installer.Installer.ACB
 {
@@ -23,7 +24,10 @@ namespace LB_Mod_Installer.Installer.ACB
             file = _file;
             uninstall = _uninstall;
 
-            if(file.filePath == AcbInstaller.OPTION_INSTALL_TYPE || file.filePath == AcbInstaller.DIRECT_INSTALL_TYPE)
+            //Required for compatibility with eternitys tools
+            UTF_File.CompressDataRows = false;
+
+            if (file.filePath == AcbInstaller.OPTION_INSTALL_TYPE || file.filePath == AcbInstaller.DIRECT_INSTALL_TYPE)
             {
                 //BGM
                 LoadBgm();

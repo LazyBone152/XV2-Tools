@@ -5,6 +5,7 @@ using System.Linq;
 using Xv2CoreLib.ACB;
 using Xv2CoreLib.MSG;
 using Xv2CoreLib.OBL;
+using Xv2CoreLib.UTF;
 
 namespace LB_Mod_Installer.Installer.ACB
 {
@@ -52,6 +53,9 @@ namespace LB_Mod_Installer.Installer.ACB
             audioPackage = ACB_File.Load(install.zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(audioPackagePath)), null, false, true);
             installPath = !string.IsNullOrWhiteSpace(_installPath) ? Xv2CoreLib.Utils.SanitizePath(_installPath) : string.Empty;
             this.audioPackagePath = audioPackagePath;
+
+            //Required for compatibility with eternitys tools
+            UTF_File.CompressDataRows = false;
 
             if(audioPackage.AudioPackageType == AudioPackageType.BGM_Direct || audioPackage.AudioPackageType == AudioPackageType.BGM_NewOption)
             {

@@ -238,7 +238,8 @@ namespace Xv2CoreLib.AFS2
                 }
             }
 
-            int headerEnd = bytes.Count;
+            //int headerEnd = bytes.Count;
+            int headerEnd = bytes.Count + CalculatePadding(bytes.Count, afs2File.ByteAlignment);
 
             for (int i = 0; i < count; i++)
             {
@@ -270,6 +271,10 @@ namespace Xv2CoreLib.AFS2
                     bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), finalPointer);
                     break;
             }
+
+            //Validate header size
+            if (bytes.Count <= headerEnd)
+                headerEnd = bytes.Count - 1;
 
             header = bytes.GetRange(0, headerEnd).ToArray();
 

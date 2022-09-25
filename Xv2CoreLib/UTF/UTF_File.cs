@@ -18,6 +18,10 @@ namespace Xv2CoreLib.UTF
     [Serializable]
     public class UTF_File
     {
+        public static bool CompressValueRows = true;
+        public static bool CompressDataRows = true;
+        public bool CompressRowsOnSave = true;
+
         public UTF_File()
         {
             EncodingType = _EncodingType.UTF8;
@@ -539,9 +543,16 @@ namespace Xv2CoreLib.UTF
             List<StringWriteObject> stringWriter = new List<StringWriteObject>();
             List<DataWriteObject> dataWriter = new List<DataWriteObject>();
 
-            //Validate
-            if(!usePadding)
+            //Row Compression
+            if(utfFile.TableName == "AcfReference")
+            {
+                utfFile.CompressRowsOnSave = false;
+            }
+            
+            if (!usePadding)
+            {
                 utfFile.CompressRows();
+            }
 
             //Header (size 8)
             bytes.AddRange(BigEndianConverter.GetBytes(UTF_SIGNATURE));
@@ -885,9 +896,11 @@ namespace Xv2CoreLib.UTF
 
         private void CompressRows()
         {
+            if (!CompressRowsOnSave) return;
+
             //If all rows are the same value, make it a constant
 
-            foreach(var column in Columns)
+            foreach (var column in Columns)
             {
                 if(column.Rows?.Count > 0)
                 {
@@ -896,9 +909,19 @@ namespace Xv2CoreLib.UTF
                         if (column.Rows[0].Afs2File != null || column.Rows[0].UtfTable != null) continue;
 
                         //Special case. Due to a bug with some old UTF code, compressing this column will break old versions of the installer that attempt to load it. (This is because that old code expected it to be PerRow)
-                        if (column.Name == "AisacControlId") continue; 
+                        if (column.Name == "AisacControlId") continue;
 
-                        if (!string.IsNullOrWhiteSpace(column.Rows[0].Value))
+                        if(column.TypeFlag == TypeFlag.Data && CompressDataRows)
+                        {
+                            if (column.Rows.All(x => Utils.CompareArray(x.Bytes, column.Rows[0].Bytes)))
+                            {
+                                column.StorageFlag = StorageFlag.Constant;
+                                column.Bytes = column.Rows[0].Bytes;
+                                column.Rows.Clear();
+                            }
+                        }
+
+                        if (column.TypeFlag != TypeFlag.Data && CompressValueRows)
                         {
                             if (column.Rows.All(x => x.Value == column.Rows[0].Value))
                             {
@@ -907,19 +930,6 @@ namespace Xv2CoreLib.UTF
                                 column.Rows.Clear();
                             }
                         }
-
-                        //Removed for EAT Compatibility
-                        /*
-                        else if (column.Rows[0].Bytes != null)
-                        {
-                            if (column.Rows.All(x => x.Bytes == column.Rows[0].Bytes))
-                            {
-                                column.StorageFlag = StorageFlag.Constant;
-                                column.Bytes = column.Rows[0].Bytes;
-                                column.Rows.Clear();
-                            }
-                        }
-                        */
                     }
                 }
             }

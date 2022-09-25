@@ -20,7 +20,7 @@
         </Grid.RowDefinitions>
         <Menu Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0, 2" FontSize="12">
             <MenuItem Header="File">
-                <MenuItem Header="New" Command="{Binding NewAcbCommand}"/>
+                <MenuItem Header="New (XV2)" Command="{Binding NewAcbCommand}"/>
                 <MenuItem Header="Open" Command="{Binding LoadAcbCommand}"/>
                 <MenuItem Header="Force Open" Command="{Binding ForceLoadAcbCommand}"/>
                 <MenuItem Header="Save" Command="{Binding SaveAcbCommand}"/>

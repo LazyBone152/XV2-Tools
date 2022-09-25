@@ -346,7 +346,7 @@ namespace AudioCueEditor
                 });
 
                 await task;
-                await this.ShowMessageAsync("Save successful", "The acb file was successfully saved!", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                //await this.ShowMessageAsync("Save successful", "The acb file was successfully saved!", MessageDialogStyle.Affirmative, DialogSettings.Default);
             }
             finally
             {

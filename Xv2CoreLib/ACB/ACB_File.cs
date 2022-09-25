@@ -91,14 +91,14 @@ namespace Xv2CoreLib.ACB
             {
                 string tooltip = "This is the version of the ACB file. Depending on the version, some features may not be available.\n";
 
-                if (Version > _1_30_0_0)
+                if (Version > _1_35_0_0)
                 {
                     tooltip += "\n-This is a newer, unknown ACB version. Compatibility is not guaranteed.";
                 }
 
-                if (Version >= _1_16_0_0 && Version <= _1_30_0_0)
+                if (Version >= _1_16_0_0 && Version <= _1_35_0_0)
                 {
-                    tooltip += "\n-This version should be very stable and support most/all features.";
+                    tooltip += "\n-This version should be very stable and support most features.";
                 }
 
                 if (Version > _1_6_0_0 && Version < _1_16_0_0)
@@ -113,7 +113,7 @@ namespace Xv2CoreLib.ACB
 
                 if (Version < _1_0_0_0)
                 {
-                    tooltip += "\n-This is quite an ACB old version. Compatibility is not guaranteed.";
+                    tooltip += "\n-This is quite an old ACB version. Compatibility is not guaranteed.";
                 }
 
                 //list unsupported features
@@ -153,6 +153,8 @@ namespace Xv2CoreLib.ACB
         public bool EternityCompatibility = true;
         [YAXDontSerialize]
         public bool SequenceTrackPadding = false;
+        [YAXDontSerialize]
+        public bool HasCueLimitTable = true;
         #endregion
 
 
@@ -250,7 +252,7 @@ namespace Xv2CoreLib.ACB
         /// </summary>
         public bool IsUsingAltAwbPath { get; set; } = false;
         public AFS2_File AudioTracks { get; set; } = AFS2_File.CreateNewAwbFile();
-        
+
         public UTF_File OutsideLinkTable { get; set; } // No need to parse this
         public UTF_File AcfReferenceTable { get; set; } // No need to parse this
         public UTF_File SoundGeneratorTable { get; set; } // No need to parse this
@@ -355,13 +357,16 @@ namespace Xv2CoreLib.ACB
             acbFile.StringValues = ACB_StringValue.Load(utfFile.GetColumnTable("StringValueTable", false, header, acbFile.Version), acbFile.Version);
             acbFile.BeatSyncInfo = ACB_BeatSyncInfo.Load(utfFile.GetColumnTable("BeatSyncInfoTable", false, header, acbFile.Version), acbFile.Version);
 
+            if(utfFile.ColumnExists("CueLimitWorkTable"))
+                acbFile.HasCueLimitTable = utfFile.GetData("CueLimitWorkTable", 0)?.Length > 0;
+
             //Added in 1.35.0.0
             acbFile.InstrumentPluginTrackTable = utfFile.GetColumnTable("InstrumentPluginTrackTable", true, header, acbFile.Version);
             acbFile.InstrumentPluginParameterTable = utfFile.GetColumnTable("InstrumentPluginParameterTable", true, header, acbFile.Version);
 
             //If no StringValueTable exists, then use default table. (this is required for some commands)
-            if (acbFile.StringValues.Count == 0)
-                acbFile.StringValues = ACB_StringValue.DefaultStringTable();
+            //if (acbFile.StringValues.Count == 0)
+            //    acbFile.StringValues = ACB_StringValue.DefaultStringTable();
 
             //AWB
             //Check for both a CPK or AFS2 based AWB
@@ -719,6 +724,9 @@ namespace Xv2CoreLib.ACB
             UTF_File stringValueTable = CreateDefaultStringValueTable();
             UTF_File beatSyncTable = CreateDefaultBeatSyncInfoTable();
 
+            if(AcfReferenceTable != null)
+                AcfReferenceTable.CompressRowsOnSave = false;
+
             //Reordering
             SortActionTracks(); //Sort them to be sequential, as in the UTF file ActionTracks are specified with a StartIndex and Count
             SortGlobalAisacRefs();
@@ -793,14 +801,24 @@ namespace Xv2CoreLib.ACB
             }
 
             
-            //CueLimitWorkTable is populated by null bytes (?) according to the 2 following values. The logic behind them is unknown, but idealy they should be equal to the amount of cues. The Command for "CueLimit" requires this to function correctly.
-            //-Header = 8 bytes
-            //-List Entry = 48 bytes
-            //-Node Entry = 16 bytes
-            //Not all ACBs actually have this table, but it should be safe to generate it even when its not needed.
-            utfFile.AddData("CueLimitWorkTable", 0, new byte[8 + (64 * Cues.Count)], tableHelper, Version); 
-            utfFile.AddValue("NumCueLimitListWorks", TypeFlag.UInt16, 0, Cues.Count.ToString(), tableHelper, Version);
-            utfFile.AddValue("NumCueLimitNodeWorks", TypeFlag.UInt16, 0, Cues.Count.ToString(), tableHelper, Version);
+            if(HasCueLimitTable || CommandTables.HasCommand(CommandType.CueLimit))
+            {
+                //CueLimitWorkTable is populated by null bytes (?) according to the 2 following values. The logic behind them is unknown, but idealy they should be equal to the amount of cues. The Command for "CueLimit" requires this to function correctly.
+                //-Header = 8 bytes
+                //-List Entry = 48 bytes
+                //-Node Entry = 16 bytes
+
+                utfFile.AddData("CueLimitWorkTable", 0, new byte[8 + (64 * Cues.Count)], tableHelper, Version);
+                utfFile.AddValue("NumCueLimitListWorks", TypeFlag.UInt16, 0, Cues.Count.ToString(), tableHelper, Version);
+                utfFile.AddValue("NumCueLimitNodeWorks", TypeFlag.UInt16, 0, Cues.Count.ToString(), tableHelper, Version);
+            }
+            else
+            {
+                utfFile.AddData("CueLimitWorkTable", 0, null, tableHelper, Version);
+                utfFile.AddValue("NumCueLimitListWorks", TypeFlag.UInt16, 0, "0", tableHelper, Version);
+                utfFile.AddValue("NumCueLimitNodeWorks", TypeFlag.UInt16, 0, "0", tableHelper, Version);
+            }
+
 
             //External AWB hash
             var hashHelper = AcbFormatHelper.Instance.GetTableHelper("StreamAwbHash");
@@ -3206,6 +3224,9 @@ namespace Xv2CoreLib.ACB
         private string _cueName = string.Empty;
         [YAXAttributeForClass]
         public string Name { get { return _cueName; } set { _cueName = value; NotifyPropertyChanged("UndoableName"); } }
+        [YAXAttributeForClass]
+        public int CueNameIndex { get; set; } = -1;
+
         [YAXAttributeFor("UserData")]
         [YAXSerializeAs("value")]
         public string UserData { get; set; } = string.Empty;
@@ -3274,11 +3295,11 @@ namespace Xv2CoreLib.ACB
             cue.HeaderVisibility = cueTable.GetValue<byte>("HeaderVisibility", TypeFlag.UInt8, index, tableHelper, ParseVersion);
 
             //Name
-            int nameIdx = nameTable.IndexOfRow("CueIndex", index.ToString());
+            cue.CueNameIndex = nameTable.IndexOfRow("CueIndex", index.ToString());
 
-            if (nameIdx != -1)
+            if (cue.CueNameIndex != -1)
             {
-                cue.Name = nameTable.GetValue<string>("CueName", TypeFlag.String, nameIdx);
+                cue.Name = nameTable.GetValue<string>("CueName", TypeFlag.String, cue.CueNameIndex);
             }
             else
             {
@@ -3303,11 +3324,32 @@ namespace Xv2CoreLib.ACB
         {
             for(int i = 0; i < cues.Count; i++)
             {
-                cues[i].WriteToTable(utfTable, i, ParseVersion, nameTable, acbFile);
+                cues[i].WriteToTable(utfTable, i, ParseVersion, acbFile);
             }
+
+            //Cue Names:
+            //First, add all cue names that have an index defined. This ensures the original index is preserved, which some games rely on.
+
+            foreach(var cue in cues.Where(x => x.CueNameIndex != -1).OrderBy(x => x.CueNameIndex))
+            {
+                int newRowIdx = nameTable.RowCount();
+
+                nameTable.AddValue("CueName", TypeFlag.String, newRowIdx, cue.Name);
+                nameTable.AddValue("CueIndex", TypeFlag.UInt16, newRowIdx, cues.IndexOf(cue).ToString());
+            }
+
+            //Add all cues without a name index defined (all newly added ones)
+            foreach (var cue in cues.Where(x => x.CueNameIndex == -1))
+            {
+                int newRowIdx = nameTable.RowCount();
+
+                nameTable.AddValue("CueName", TypeFlag.String, newRowIdx, cue.Name);
+                nameTable.AddValue("CueIndex", TypeFlag.UInt16, newRowIdx, cues.IndexOf(cue).ToString());
+            }
+
         }
 
-        public void WriteToTable(UTF_File utfTable, int index, Version ParseVersion, UTF_File nameTable, ACB_File acbFile)
+        public void WriteToTable(UTF_File utfTable, int index, Version ParseVersion, ACB_File acbFile)
         {
             AcbFormatHelperTable tableHelper = AcbFormatHelper.Instance.GetTableHelper("CueTable");
 
@@ -3327,11 +3369,6 @@ namespace Xv2CoreLib.ACB
             if (string.IsNullOrWhiteSpace(Name))
                 Name = "cue_" + index;
             
-            int newRowIdx = nameTable.RowCount();
-
-            nameTable.AddValue("CueName", TypeFlag.String, newRowIdx, Name);
-            nameTable.AddValue("CueIndex", TypeFlag.UInt16, newRowIdx, index.ToString());
-
             //NumWaveforms
             if(tableHelper.ColumnExists("NumRelatedWaveforms", TypeFlag.UInt16, ParseVersion))
             {
@@ -5366,6 +5403,24 @@ namespace Xv2CoreLib.ACB
             return ACB_CommandTable.CreateEmptyTable(AcbVersion, type);
         }
 
+        /// <summary>
+        /// Checks if a particular <see cref="CommandType"/> is used.
+        /// </summary>
+        public bool HasCommand(CommandType commandType)
+        {
+            foreach(var table in CommandTables)
+            {
+                foreach(var group in table.CommandGroups)
+                {
+                    foreach(var command in group.Commands)
+                    {
+                        if (command.CommandType == commandType) return true;
+                    }
+                }
+            }
+
+            return false;
+        }
 
         //AcbTableReference linking
         public void LinkGuids(ACB_File root)
@@ -5454,6 +5509,7 @@ namespace Xv2CoreLib.ACB
                 }
             }
         }
+    
     }
 
     [Serializable]
