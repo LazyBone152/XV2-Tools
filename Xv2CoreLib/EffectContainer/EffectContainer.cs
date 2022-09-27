@@ -1584,12 +1584,12 @@ namespace Xv2CoreLib.EffectContainer
                 AssetContainerTool assetContainer = new AssetContainerTool();
 
                 assetContainer.LooseFiles = (container.FILES[0] == "NULL") ? true : false;
-                assetContainer.I_00 = container.AssetSpawnLimit;
+                assetContainer.AssetSpawnLimit = container.AssetSpawnLimit;
                 assetContainer.I_04 = container.I_04;
                 assetContainer.I_05 = container.I_05;
                 assetContainer.I_06 = container.I_06;
                 assetContainer.I_07 = container.I_07;
-                assetContainer.I_08 = container.AssetListLimit;
+                assetContainer.AssetListLimit = container.AssetListLimit;
                 assetContainer.I_12 = container.I_12;
                 assetContainer.ContainerAssetType = container.I_16;
                 
@@ -1720,12 +1720,12 @@ namespace Xv2CoreLib.EffectContainer
         private static AssetContainer CreateEepkAssetContainer(AssetContainerTool assetContainer, AssetType type)
         {
             AssetContainer newAssetContainer = new AssetContainer();
-            newAssetContainer.AssetSpawnLimit = assetContainer.I_00;
+            newAssetContainer.AssetSpawnLimit = assetContainer.AssetSpawnLimit;
             newAssetContainer.I_04 = assetContainer.I_04;
             newAssetContainer.I_05 = assetContainer.I_05;
             newAssetContainer.I_06 = assetContainer.I_06;
             newAssetContainer.I_07 = assetContainer.I_07;
-            newAssetContainer.AssetListLimit = assetContainer.I_08;
+            newAssetContainer.AssetListLimit = assetContainer.AssetListLimit;
             newAssetContainer.I_12 = assetContainer.I_12;
             newAssetContainer.I_16 = type;
 
@@ -2637,7 +2637,7 @@ namespace Xv2CoreLib.EffectContainer
         }
         #endregion
 
-        internal AssetType ContainerAssetType { get; set; }
+        public AssetType ContainerAssetType { get; internal set; }
 
         private bool _looseFilesValue = false;
         public bool LooseFiles  //true = File1_Name is == NULL, meaning the assets are not stored in a emb (EMO will always be true)
@@ -2673,122 +2673,15 @@ namespace Xv2CoreLib.EffectContainer
             }
         }
 
-        //EEPK parameters
-        //Will crash if set wrong
-        private int _I_00_value = 128;
-        private byte _I_04_value = 255;
-        private byte _I_05_value = 255;
-        private byte _I_06_value = 255;
-        private byte _I_07_value = 255;
-        private int _I_08_value = -1;
-        private int _I_12_value = -1;
 
-        public int I_00
-        {
-            get
-            {
-                return this._I_00_value;
-            }
-            set
-            {
-                if (value != this._I_00_value)
-                {
-                    this._I_00_value = value;
-                    NotifyPropertyChanged("I_00");
-                }
-            }
-        }
-        public byte I_04
-        {
-            get
-            {
-                return this._I_04_value;
-            }
-            set
-            {
-                if (value != this._I_04_value)
-                {
-                    this._I_04_value = value;
-                    NotifyPropertyChanged("I_04");
-                }
-            }
-        }
-        public byte I_05
-        {
-            get
-            {
-                return this._I_05_value;
-            }
-            set
-            {
-                if (value != this._I_05_value)
-                {
-                    this._I_05_value = value;
-                    NotifyPropertyChanged("I_05");
-                }
-            }
-        }
-        public byte I_06
-        {
-            get
-            {
-                return this._I_06_value;
-            }
-            set
-            {
-                if (value != this._I_06_value)
-                {
-                    this._I_06_value = value;
-                    NotifyPropertyChanged("I_06");
-                }
-            }
-        }
-        public byte I_07
-        {
-            get
-            {
-                return this._I_07_value;
-            }
-            set
-            {
-                if (value != this._I_07_value)
-                {
-                    this._I_07_value = value;
-                    NotifyPropertyChanged("I_07");
-                }
-            }
-        }
-        public int I_08
-        {
-            get
-            {
-                return this._I_08_value;
-            }
-            set
-            {
-                if (value != this._I_08_value)
-                {
-                    this._I_08_value = value;
-                    NotifyPropertyChanged("I_08");
-                }
-            }
-        }
-        public int I_12
-        {
-            get
-            {
-                return this._I_12_value;
-            }
-            set
-            {
-                if (value != this._I_12_value)
-                {
-                    this._I_12_value = value;
-                    NotifyPropertyChanged("I_12");
-                }
-            }
-        }
-        
+        public int AssetSpawnLimit { get; set; } = 128;
+        public byte I_04 { get; set; } = 255;
+        public byte I_05 { get; set; } = 255;
+        public byte I_06 { get; set; } = 255;
+        public byte I_07 { get; set; } = 255;
+        public int AssetListLimit { get; set; } = -1;
+        public int I_12 { get; set; } = -1;
+
         public string File1_Name { get; set; } //Main container emb (pbind, tbind, cbind, light)
         public string File2_Name { get; set; } //Material .emm
         public string File3_Name { get; set; } //Texture emb (trc, ptcl)
@@ -4614,8 +4507,5 @@ namespace Xv2CoreLib.EffectContainer
             }
         }
     }
-
-
-
 
 }

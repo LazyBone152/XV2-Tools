@@ -34,6 +34,7 @@ using Xv2CoreLib.EMD;
 using Xv2CoreLib.ESK;
 using Xv2CoreLib.EMO;
 using Xv2CoreLib.EAN;
+using EEPK_Organiser.Forms;
 
 #if XenoKit
 using XenoKit;
@@ -1262,6 +1263,11 @@ namespace EEPK_Organiser.View
             }
         }
 
+        private void EMO_OpenSettings_Click(object sender, RoutedEventArgs e)
+        {
+            AssetContainer_OpenSettings(effectContainerFile.Emo);
+        }
+
         //EMO Files
         public RelayCommand<EffectFile> EMO_DoubleClickCommand => new RelayCommand<EffectFile>(EMO_DoubleClick);
         private void EMO_DoubleClick(EffectFile file)
@@ -1733,9 +1739,13 @@ namespace EEPK_Organiser.View
             }
         }
 
-#endregion
+        private void PBIND_OpenSettings_Click(object sender, RoutedEventArgs e)
+        {
+            AssetContainer_OpenSettings(effectContainerFile.Pbind);
+        }
+        #endregion
 
-#region TBIND
+        #region TBIND
         public void TBIND_AssetContainer_AddAsset_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -2102,6 +2112,7 @@ namespace EEPK_Organiser.View
 #endif
 
         }
+        
         private void TBIND_AssetContainer_Scale(object sender, RoutedEventArgs e)
         {
 #if !DEBUG
@@ -2125,9 +2136,13 @@ namespace EEPK_Organiser.View
 #endif
         }
 
-#endregion
+        private void TBIND_OpenSettings_Click(object sender, RoutedEventArgs e)
+        {
+            AssetContainer_OpenSettings(effectContainerFile.Tbind);
+        }
+        #endregion
 
-#region CBIND
+        #region CBIND
         public void CBIND_AssetContainer_AddAsset_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -2513,9 +2528,14 @@ namespace EEPK_Organiser.View
 #endif
 
         }
-#endregion
 
-#region LIGHT
+        private void CBIND_OpenSettings_Click(object sender, RoutedEventArgs e)
+        {
+            AssetContainer_OpenSettings(effectContainerFile.Cbind);
+        }
+        #endregion
+
+        #region LIGHT
         public void LIGHT_AssetContainer_AddAsset_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -2904,9 +2924,14 @@ namespace EEPK_Organiser.View
 #endif
 
         }
-#endregion
 
-#region Asset_Containers_General
+        private void LIGHT_OpenSettings_Click(object sender, RoutedEventArgs e)
+        {
+            AssetContainer_OpenSettings(effectContainerFile.LightEma);
+        }
+        #endregion
+
+        #region Asset_Containers_General
         private async Task AssetContainer_ImportAssets(AssetContainerTool container, AssetType type, EffectContainerFile importFile = null)
         {
             if (importFile == null)
@@ -3280,6 +3305,12 @@ namespace EEPK_Organiser.View
             {
                 MessageBox.Show("There are no unused assets.", "Remove Unused", MessageBoxButton.OK, MessageBoxImage.Information);
             }
+        }
+
+        private void AssetContainer_OpenSettings(AssetContainerTool container)
+        {
+            AssetContainerSettings assetSettings = new AssetContainerSettings(container);
+            assetSettings.ShowDialog();
         }
 
         private void RefreshCounts()

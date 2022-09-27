@@ -159,6 +159,9 @@
     </ApplicationDefinition>
     <Compile Include="DialogSettings.cs" />
     <Compile Include="Extensions\EMB\EmbExtensions.cs" />
+    <Compile Include="Forms\AssetContainerSettings.xaml.cs">
+      <DependentUpon>AssetContainerSettings.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Forms\EffectSelector.xaml.cs">
       <DependentUpon>EffectSelector.xaml</DependentUpon>
     </Compile>
@@ -198,6 +201,7 @@
     <Compile Include="Name\NameListManager.cs" />
     <Compile Include="Misc\CacheManager.cs" />
     <Compile Include="Misc\LoadFromGameHelper.cs" />
+    <Compile Include="ViewModel\AssetContainerViewModel.cs" />
     <Compile Include="ViewModel\EffectPartViewModel.cs" />
     <Compile Include="ViewModel\MaterialViewModel.cs" />
     <Compile Include="View\EepkEditor.xaml.cs">
@@ -221,6 +225,10 @@
     <Compile Include="View\Vectors\CustomVector4.xaml.cs">
       <DependentUpon>CustomVector4.xaml</DependentUpon>
     </Compile>
+    <Page Include="Forms\AssetContainerSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Forms\AssetSelector.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
