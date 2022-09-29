@@ -1305,12 +1305,12 @@ namespace Xv2CoreLib.ACB
             awbEntry.bytes = TrackMetadata.EncodeHcaLoop(awbEntry.bytes, loop, startMs, endMs);
 
             VGAudio.Containers.Hca.HcaReader reader = new VGAudio.Containers.Hca.HcaReader();
-            var header = reader.ParseFile(awbEntry.bytes);
+            VGAudio.Containers.Hca.HcaStructure header = reader.ParseFile(awbEntry.bytes);
             
-            undos.Add(new UndoableProperty<AFS2_Entry>("bytes", awbEntry, originalFile, awbEntry.bytes.DeepCopy()));
-            undos.Add(new UndoableProperty<ACB_Waveform>("LoopStart", waveform, waveform.LoopStart, (uint)header.Hca.LoopStartSample));
-            undos.Add(new UndoableProperty<ACB_Waveform>("LoopEnd", waveform, waveform.LoopEnd, (uint)header.Hca.LoopEndSample));
-            undos.Add(new UndoableProperty<ACB_Waveform>("LoopFlag", waveform, waveform.LoopFlag, Convert.ToByte(header.Hca.Looping)));
+            undos.Add(new UndoableProperty<AFS2_Entry>(nameof(awbEntry.bytes), awbEntry, originalFile, awbEntry.bytes.DeepCopy()));
+            undos.Add(new UndoableProperty<ACB_Waveform>(nameof(ACB_Waveform.LoopStart), waveform, waveform.LoopStart, (uint)header.Hca.LoopStartSample));
+            undos.Add(new UndoableProperty<ACB_Waveform>(nameof(ACB_Waveform.LoopEnd), waveform, waveform.LoopEnd, (uint)header.Hca.LoopEndSample));
+            undos.Add(new UndoableProperty<ACB_Waveform>(nameof(ACB_Waveform.LoopFlag), waveform, waveform.LoopFlag, Convert.ToByte(header.Hca.Looping)));
 
             //Update waveform
             waveform.LoopStart = (uint)header.Hca.LoopStartSample;

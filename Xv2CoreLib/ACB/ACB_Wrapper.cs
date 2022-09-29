@@ -221,13 +221,10 @@ namespace Xv2CoreLib.ACB
             return undos;
         }
         
-
-
-#endregion
+        #endregion
 
 
         #region AddFunctions
-
 
         /// <summary>
         /// Add a AWB entry.

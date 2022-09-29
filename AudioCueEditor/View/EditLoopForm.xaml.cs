@@ -40,13 +40,33 @@ namespace AudioCueEditor.View
         public uint LoopEndMs { get { return _loopEndMs; } set { _loopEndMs = value; ValuesChanged(); } }
         public uint TrackLengthMs { get { return _trackLengthMs; } set { _trackLengthMs = value; ValuesChanged(); } }
 
-        public float LoopStartSeconds { get { return _loopStartMs / 1000f; } set { LoopStartMs = (uint)(value * 1000f); ValuesChanged(); } }
-        public float LoopEndSeconds { get { return _loopEndMs / 1000f; } set { _loopEndMs = (uint)(value * 1000f); ValuesChanged(); } }
-
         public string LoopStartString { get { return FormatTime(LoopStartMs); } }
         public string LoopEndString { get { return FormatTime(LoopEndMs); } }
         public string CurrentTimeString { get { return (wavStream != null) ? FormatTime((wavStream.waveStream != null) ? wavStream.waveStream.CurrentTime : new TimeSpan()) : null; } }
         
+        public TimeSpan StartLoopTime
+        {
+            get => new TimeSpan(0, 0, 0, 0, (int)LoopStartMs);
+            set
+            {
+                if(value.TotalMilliseconds < LoopEndMs)
+                    LoopStartMs = (uint)value.TotalMilliseconds;
+
+                ValuesChanged();
+            }
+        }
+        public TimeSpan EndLoopTime
+        {
+            get => new TimeSpan(0, 0, 0, 0, (int)LoopEndMs);
+            set
+            {
+                if (value.TotalMilliseconds <= TrackLengthMs)
+                    LoopEndMs = (uint)value.TotalMilliseconds;
+
+                ValuesChanged();
+            }
+        }
+
         public bool LoopEnabled { get { return _loopEnabled; } set { _loopEnabled = value; NotifyPropertyChanged(nameof(LoopEnabled)); } }
 
         private WavStream wavStream = null;
@@ -113,8 +133,9 @@ namespace AudioCueEditor.View
             NotifyPropertyChanged(nameof(LoopEndString));
             NotifyPropertyChanged(nameof(TrackLengthMs));
             NotifyPropertyChanged(nameof(CurrentTimeString));
-            NotifyPropertyChanged(nameof(LoopStartSeconds));
-            NotifyPropertyChanged(nameof(LoopEndSeconds));
+
+            NotifyPropertyChanged(nameof(StartLoopTime));
+            NotifyPropertyChanged(nameof(EndLoopTime));
             SetLoopOnStream();
         }
 

@@ -9,19 +9,19 @@
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
         Dialog:DialogParticipation.Register="{Binding}"
-        Title="Edit Loop" TitleCharacterCasing="Normal" Height="210" Width="380" ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner" Closing="MetroWindow_Closing">
+        Title="Edit Loop" TitleCharacterCasing="Normal" Height="230" Width="420" ResizeMode="NoResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner" Closing="MetroWindow_Closing">
     <Grid>
         <StackPanel Margin="20, 10">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="150"/>
                     <ColumnDefinition Width=" *"/>
                 </Grid.ColumnDefinitions>
 
                 <Label Content="    Loop Enabled:" Grid.Column="0"/>
                 <CheckBox Grid.Column="1" IsChecked="{Binding LoopEnabled}" VerticalContentAlignment="Center"/>
             </Grid>
-            
+
             <StackPanel IsEnabled="{Binding LoopEnabled}">
 
                 <Grid>
@@ -45,33 +45,25 @@
 
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="100"/>
-                        <ColumnDefinition Width=" *"/>
-                        <ColumnDefinition Width="50"/>
-                        <ColumnDefinition Width=" *"/>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width=" 150"/>
                     </Grid.ColumnDefinitions>
 
-                    <Label Content="Loop Start (sec):" Grid.Column="0" HorizontalContentAlignment="Right"/>
-                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding LoopStartSeconds}" StringFormat="0.000######" HideUpDownButtons="True" InterceptMouseWheel="True" Interval="0.1"/>
-                    <Label Content="ms:" Grid.Column="2" HorizontalContentAlignment="Right"/>
-                    <Controls:NumericUpDown Grid.Column="3" Value="{Binding LoopStartMs}" HideUpDownButtons="True" InterceptMouseWheel="True"/>
+                    <Label Content="Loop Start (hh:mm:ss:ms):" Grid.Column="0" HorizontalContentAlignment="Right"/>
+                    <TextBox Grid.Column="1" Text="{Binding StartLoopTime}"/>
                 </Grid>
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="100"/>
-                        <ColumnDefinition Width=" *"/>
-                        <ColumnDefinition Width="50"/>
-                        <ColumnDefinition Width=" *"/>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="150"/>
                     </Grid.ColumnDefinitions>
 
-                    <Label Content="Loop End (sec):" Grid.Column="0" HorizontalContentAlignment="Right"/>
-                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding LoopEndSeconds}" StringFormat="0.000######" HideUpDownButtons="True" InterceptMouseWheel="True" Interval="0.1"/>
-                    <Label Content="ms:" Grid.Column="2" HorizontalContentAlignment="Right"/>
-                    <Controls:NumericUpDown Grid.Column="3" Value="{Binding LoopEndMs}" HideUpDownButtons="True" InterceptMouseWheel="True"/>
+                    <Label Content="Loop End (hh:mm:ss:ms):" Grid.Column="0" HorizontalContentAlignment="Right"/>
+                    <TextBox Grid.Column="1" Text="{Binding EndLoopTime}"/>
                 </Grid>
                 <Grid Margin="0, 5">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="150"/>
                         <ColumnDefinition Width="40"/>
                         <ColumnDefinition Width="40"/>
                         <ColumnDefinition Width="40"/>
@@ -92,11 +84,11 @@
                     <Label Content="{Binding CurrentTimeString}" Grid.Column="4" HorizontalContentAlignment="Left"/>
 
                 </Grid>
-            
-            </StackPanel>
-        </StackPanel>
 
-        <Button Command="{Binding ApplyCommand}" Content="Apply" HorizontalAlignment="Left" Margin="146,139,0,0" VerticalAlignment="Top" Width="75"/>
+            </StackPanel>
+
+            <Button Command="{Binding ApplyCommand}" Content="Apply" HorizontalAlignment="Center" VerticalAlignment="Top" Width="75" Margin="0, 10, 0, 0"/>
+        </StackPanel>
 
     </Grid>
 </Controls:MetroWindow>

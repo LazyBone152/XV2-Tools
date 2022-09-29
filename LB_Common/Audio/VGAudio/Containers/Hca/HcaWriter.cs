@@ -49,26 +49,34 @@ namespace VGAudio.Containers.Hca
 
         private void SetLoopData()
         {
-
             //Set Loop info
             //Since HCA -> HCA conversions dont allow setting loops, this workaround is used.
 
             if (ConvertStatics.WasLoopSet)
             {
+                int startMs = ConvertStatics.LoopStartMs;
                 int endMs = ConvertStatics.LoopEndMs;
 
                 //Reuse existing loop data in this case
                 if (endMs == 0 && Hca.Looping)
-                    return; 
+                    return;
 
+                //Auto-set end loop point to end of track if its not set properly
                 if (endMs == 0)
-                {
                     endMs = Hca.TrackLengthMs;
-                }
+                
+                if (startMs >= endMs)
+                    startMs = 0;
 
                 Hca.Looping = ConvertStatics.Loop;
-                Hca.LoopStartFrame = (int)(ConvertStatics.LoopStartMs / 1024.0 * Hca.SampleRate / 1000f);
-                Hca.LoopEndFrame = (int)(endMs / 1024.0 * Hca.SampleRate / 1000f);
+                //Hca.LoopStartFrame = (int)(ConvertStatics.LoopStartMs / 1024.0 * Hca.SampleRate / 1000f);
+                //Hca.LoopEndFrame = (int)(endMs / 1024.0 * Hca.SampleRate / 1000f);
+
+                Hca.LoopStartFrame = (int)(startMs / 1000.0 * (Hca.SampleRate / 1024f));
+                Hca.LoopEndFrame = (int)(endMs / 1000.0 * (Hca.SampleRate / 1024f));
+
+                if (Hca.LoopEndFrame >= Hca.FrameCount)
+                    Hca.LoopEndFrame = Hca.FrameCount - 1;
 
                 ConvertStatics.ResetLoop();
             }

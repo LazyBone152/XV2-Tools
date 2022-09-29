@@ -78,11 +78,17 @@ namespace AudioCueEditor.Audio
             EnableLooping = true;
         }
 
-        public void SetLoop(float startMs, float endMs)
+        public void SetLoop(uint startMs, uint endMs)
         {
             LoopStart = new TimeSpan(0, 0, 0, 0, (int)startMs);
             LoopEnd = new TimeSpan(0, 0, 0, 0, (int)endMs);
             EnableLooping = true;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            sourceStream.Dispose();
         }
     }
 }

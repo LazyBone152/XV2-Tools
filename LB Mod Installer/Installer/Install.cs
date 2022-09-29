@@ -767,7 +767,7 @@ namespace LB_Mod_Installer.Installer
                 EffectContainerFile binaryFile = (EffectContainerFile)GetParsedFile<EffectContainerFile>(installPath);
 
                 //Crash fix for when too many auras are installed.
-                binaryFile.Pbind.I_08 = 0x9C40;
+                binaryFile.Pbind.AssetListLimit = 0x9C40;
                 binaryFile.Pbind.I_12 = 0x9C40;
 
                 //Cleanup the VFXPACKAGE before install

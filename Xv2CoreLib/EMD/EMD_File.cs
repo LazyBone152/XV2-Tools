@@ -389,12 +389,13 @@ namespace Xv2CoreLib.EMD
         public List<EMD_Triangle> Triangles { get; set; } = new List<EMD_Triangle>();
         public List<EMD_Vertex> Vertexes { get; set; } = new List<EMD_Vertex>();
 
-
         public string GetBoneName(int vertexIdx, int boneIdx)
         {
+            //Gets the name of a bone linked on a EMD_Vertex
+
             for (int i = 0; i < Triangles.Count; i++)
             {
-                foreach (var vertex in Triangles[i].Faces)
+                foreach (ushort vertex in Triangles[i].Faces)
                 {
                     if (vertex == vertexIdx)
                     {

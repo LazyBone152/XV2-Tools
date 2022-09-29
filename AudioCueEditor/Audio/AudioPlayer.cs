@@ -112,7 +112,7 @@ namespace AudioCueEditor.Audio
             wavePlayer.Volume = vol;
         }
 
-        public void SetLoop(float start, float end)
+        public void SetLoop(uint start, uint end)
         {
             CurrentWav?.waveStream.SetLoop(start, end);
         }
