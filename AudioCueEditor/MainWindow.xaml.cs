@@ -48,18 +48,20 @@ namespace AudioCueEditor
             {
                 return this._acbFile;
             }
-
             set
             {
                 if (value != this._acbFile)
                 {
                     this._acbFile = value;
-                    NotifyPropertyChanged("AcbFile");
-                    NotifyPropertyChanged("AcbPath");
-                    NotifyPropertyChanged("AcbPathDisplay");
+                    NotifyPropertyChanged(nameof(AcbFile));
+                    NotifyPropertyChanged(nameof(AcbPath));
+                    NotifyPropertyChanged(nameof(AcbPathDisplay));
                 }
             }
         }
+
+        public bool IsAcbFileLoaded => AcbFile != null ? !AcbFile.IsAwbWrapper : false;
+        public bool IsAwbFileLoaded => AcbFile != null ? AcbFile.IsAwbWrapper : false;
 
         private string _acbPath = null;
         public string AcbPath
@@ -71,8 +73,8 @@ namespace AudioCueEditor
             set
             {
                 _acbPath = value;
-                NotifyPropertyChanged("AcbPath");
-                NotifyPropertyChanged("AcbPathDisplay");
+                NotifyPropertyChanged(nameof(AcbPath));
+                NotifyPropertyChanged(nameof(AcbPathDisplay));
             }
         }
 
@@ -191,7 +193,7 @@ namespace AudioCueEditor
                 ThemeManager.Current.ChangeTheme(System.Windows.Application.Current, SettingsManager.Instance.GetTheme());
             }));
         }
-        
+
         private void LoadOnStartUp()
         {
             string[] args = Environment.GetCommandLineArgs();
@@ -203,6 +205,11 @@ namespace AudioCueEditor
                     Path.GetExtension(arg).Equals(ACB_File.AUDIO_PACKAGE_EXTENSION_OLD, StringComparison.OrdinalIgnoreCase))
                 {
                     LoadAcb(arg);
+                    return;
+                }
+                else if(Path.GetExtension(arg).Equals(".awb", StringComparison.OrdinalIgnoreCase))
+                {
+                    LoadAwb(arg);
                     return;
                 }
             }
@@ -257,12 +264,80 @@ namespace AudioCueEditor
             }
         }
 
+        public RelayCommand LoadAwbCommand => new RelayCommand(LoadAwb);
+        private async void LoadAwb()
+        {
+            OpenFileDialog openFile = new OpenFileDialog();
+            openFile.Title = "Open AWB file...";
+            openFile.Filter = string.Format("AWB File | *.awb; *.acb");
+
+            openFile.ShowDialog(this);
+
+            if (!string.IsNullOrWhiteSpace(openFile.FileName))
+            {
+                bool isInternalAwb = Path.GetExtension(openFile.FileName) == ".acb";
+                LoadAwb(openFile.FileName, isInternalAwb);
+            }
+        }
+
+        private async void LoadAwb(string path, bool isInternalAwb = false)
+        {
+            //Check for a matching ACB and offer to load that, if it exists
+            string acbPath = string.Format("{0}/{1}.acb", Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
+
+            if (File.Exists(acbPath) && !isInternalAwb)
+            {
+                var ret = await this.ShowMessageAsync("ACB Found", "A matching ACB was found for this AWB. Do you want to load that instead?\n\nEditing is very limited when loading just the AWB. To unlock all the editing features of ACE, an ACB is required.", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.DefaultYesNo);
+
+                if(ret == MessageDialogResult.Affirmative)
+                {
+                    LoadAcb(acbPath);
+                    return;
+                }
+            }
+
+            var controller = await this.ShowProgressAsync($"Loading \"{Path.GetFileName(path)}\"...", $"", false, DialogSettings.Default);
+            controller.SetIndeterminate();
+
+            try
+            {
+                AWB_Wrapper awbFile = null;
+
+                await Task.Run(() =>
+                {
+                    awbFile = new AWB_Wrapper(path);
+                });
+
+                if (awbFile != null)
+                {
+                    if (awbFile.Type == AwbType.CpkUnsupported)
+                    {
+                        await this.ShowMessageAsync("Unsupported AWB", "This is an older, unsupported type of AWB file (CPK based). Load failed.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                        return;
+                    }
+
+                    if (awbFile.Type == AwbType.None)
+                    {
+                        await this.ShowMessageAsync("Nothing Found", "No internal AWB file was found.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                        return;
+                    }
+
+                    AcbPath = path;
+                    AcbFile = new ACB_Wrapper(awbFile);
+                    UndoManager.Instance.Clear();
+                }
+            }
+            finally
+            {
+                await controller.CloseAsync();
+            }
+        }
 
         private async void LoadAcb(string path, bool forceLoad = false)
         {
             AcbFormatHelper.Instance.AcbFormatHelperMain.ForceLoad = forceLoad;
 
-            var controller = await this.ShowProgressAsync($"Loading \"{System.IO.Path.GetFileName(path)}\"...", $"", false, DialogSettings.Default);
+            var controller = await this.ShowProgressAsync($"Loading \"{System.IO.Path.GetFileName(path)}\"...", $"", false, DialogSettings.Create(14));
             controller.SetIndeterminate();
 
             try
@@ -297,7 +372,7 @@ namespace AudioCueEditor
             cueEditor.UpdateCueDataGridVisibilities();
         }
 
-        public RelayCommand SaveAcbCommand => new RelayCommand(SaveAcb, CanSaveAcb);
+        public RelayCommand SaveAcbCommand => new RelayCommand(SaveAcb, CanSave);
         private void SaveAcb()
         {
             Save(AcbPath);
@@ -325,7 +400,7 @@ namespace AudioCueEditor
 
         private async void Save(string path)
         {
-            if(AcbFile.AcbFile.SaveFormat == SaveFormat.AudioPackage)
+            if(AcbFile?.AcbFile?.SaveFormat == SaveFormat.AudioPackage)
             {
                 bool validate = await AudioPackageValidation();
 
@@ -333,7 +408,7 @@ namespace AudioCueEditor
                     return;
             }
 
-            var controller = await this.ShowProgressAsync($"Saving \"{System.IO.Path.GetFileName(path)}\"...", $"", false, DialogSettings.Default);
+            var controller = await this.ShowProgressAsync($"Saving \"{Path.GetFileName(path)}\"...", $"", false, DialogSettings.Create(14));
             controller.SetIndeterminate();
 
             Task task = null;
@@ -342,7 +417,15 @@ namespace AudioCueEditor
             {
                 task = Task.Run(() =>
                 {
-                    AcbFile.AcbFile.Save(xv2Utils.GetPathWithoutExtension(path));
+                    if (IsAwbFileLoaded)
+                    {
+                        AcbFile.AwbWrapper.Save();
+                    }
+                    else
+                    {
+                        //Is ACB
+                        AcbFile.AcbFile.Save(xv2Utils.GetPathWithoutExtension(path));
+                    }
                 });
 
                 await task;
@@ -386,7 +469,7 @@ namespace AudioCueEditor
         }
 
         public RelayCommand SetAcbFileAssociationCommand => new RelayCommand(SetAcbFileAssociation);
-        private async void SetAcbFileAssociation()
+        private void SetAcbFileAssociation()
         {
             if (MessageBox.Show(String.Format("This will associate the .acb extension with Audio Cue Editor and make that the default application for those files.\n\nPlease note that the association will be with \"{0}\" and if the executable is moved anywhere else you will have to re-associate it.", System.Reflection.Assembly.GetEntryAssembly().Location), "Associate Extension?", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
@@ -395,8 +478,18 @@ namespace AudioCueEditor
             }
         }
 
+        public RelayCommand SetAwbFileAssociationCommand => new RelayCommand(SetAwbFileAssociation);
+        private void SetAwbFileAssociation()
+        {
+            if (MessageBox.Show(String.Format("This will associate the .awb extension with Audio Cue Editor and make that the default application for those files.\n\nPlease note that the association will be with \"{0}\" and if the executable is moved anywhere else you will have to re-associate it.", System.Reflection.Assembly.GetEntryAssembly().Location), "Associate Extension?", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            {
+                FileAssociations.ACE_EnsureAssociationsSetForAwb();
+                MessageBox.Show(".awb extension successfully associated!\n\nNote: If for some reason it did not work then you may need to go into the properties and change the default program manually.", "Associate Extension", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
         public RelayCommand SetAudioPackageAssociationCommand => new RelayCommand(SetAudioPackageAssociation);
-        private async void SetAudioPackageAssociation()
+        private void SetAudioPackageAssociation()
         {
             if (MessageBox.Show(String.Format("This will associate the {1} extension with Audio Cue Editor and make that the default application for those files.\n\nPlease note that the association will be with \"{0}\" and if the executable is moved anywhere else you will have to re-associate it.", System.Reflection.Assembly.GetEntryAssembly().Location, ACB_File.AUDIO_PACKAGE_EXTENSION.ToLower()), "Associate Extension?", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
@@ -405,7 +498,7 @@ namespace AudioCueEditor
             }
         }
         
-        public RelayCommand ExtractAllTracksRawCommand => new RelayCommand(ExtractAllTracksRaw, IsAcbLoaded);
+        public RelayCommand ExtractAllTracksRawCommand => new RelayCommand(ExtractAllTracksRaw, IsAcbOrAwbLoaded);
         private async void ExtractAllTracksRaw()
         {
             var _browser = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
@@ -416,7 +509,7 @@ namespace AudioCueEditor
             }
         }
 
-        public RelayCommand ExtractAllTracksWavCommand => new RelayCommand(ExtractAllTracksWav, IsAcbLoaded);
+        public RelayCommand ExtractAllTracksWavCommand => new RelayCommand(ExtractAllTracksWav, IsAcbOrAwbLoaded);
         private async void ExtractAllTracksWav()
         {
             var _browser = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
@@ -481,67 +574,114 @@ namespace AudioCueEditor
 
         private bool IsAcbLoaded()
         {
-            return AcbFile != null;
+            return IsAcbFileLoaded;
         }
 
-        private bool CanSaveAcb()
+        private bool IsAcbOrAwbLoaded()
         {
-            if (IsAcbLoaded() == false) return false;
+            return IsAcbFileLoaded || IsAwbFileLoaded;
+        }
+
+        private bool CanSave()
+        {
+            if (IsAcbFileLoaded == false && IsAwbFileLoaded == false) return false;
             return !string.IsNullOrWhiteSpace(AcbPath);
         }
         
         private async Task ExtractAllTracks(string extractDirectory, bool convertToWav)
         {
-            if (!IsAcbLoaded()) return;
+            if (!IsAcbOrAwbLoaded()) return;
             List<AFS2_Entry> extractedAwbEntries = new List<AFS2_Entry>();
 
-            var controller = await this.ShowProgressAsync("Extracting all tracks (this may take a while)", "", true, DialogSettings.Default);
-            controller.Maximum =  AcbFile.AcbFile.Cues.Count;
+            var controller = await this.ShowProgressAsync("Extract All", "This may take a while.", true, DialogSettings.Default);
+            controller.Maximum = IsAcbFileLoaded ? AcbFile.AcbFile.Cues.Count : AcbFile.AwbWrapper.AwbFile.Entries.Count;
 
             try
             {
                 await Task.Run(() =>
                 {
                     int progress = 0;
-                    foreach (var cue in AcbFile.AcbFile.Cues)
+
+                    if (IsAcbFileLoaded)
                     {
-                        if (controller.IsCanceled)
-                            break;
-
-                        controller.SetMessage($"Extracting \"{cue.Name}\" (Cue ID: {cue.ID})...");
-                        var waveforms = AcbFile.AcbFile.GetWaveformsFromCue(cue);
-
-                        foreach (var waveform in waveforms)
+                        foreach (var cue in AcbFile.AcbFile.Cues)
                         {
-                            if (waveform.AwbId != ushort.MaxValue)
+                            if (controller.IsCanceled)
+                                break;
+
+                            controller.SetMessage($"Extracting \"{cue.Name}\" (Cue ID: {cue.ID})...\n\nThis may take a while.");
+                            var waveforms = AcbFile.AcbFile.GetWaveformsFromCue(cue);
+
+                            foreach (var waveform in waveforms)
                             {
-                                var awbEntry = AcbFile.AcbFile.GetAfs2Entry(waveform.AwbId);
-
-                                if (!extractedAwbEntries.Contains(awbEntry))
+                                if (waveform.AwbId != ushort.MaxValue)
                                 {
-                                    string trackName = $"{cue.ID}_{cue.Name}_({waveform.AwbId})";
-                                    byte[] trackBytes;
+                                    var awbEntry = AcbFile.AcbFile.GetAfs2Entry(waveform.AwbId);
 
-                                    if (convertToWav)
+                                    if (!extractedAwbEntries.Contains(awbEntry))
                                     {
-                                        using (MemoryStream stream = new MemoryStream(awbEntry.bytes))
+                                        string trackName = $"{cue.ID}_{cue.Name}_({waveform.AwbId})";
+                                        byte[] trackBytes;
+
+                                        if (convertToWav)
                                         {
-                                            trackBytes = ConvertStream.ConvertFile(new Options(), stream, Helper.GetFileType(waveform.EncodeType), FileType.Wave);
-                                        }
+                                            using (MemoryStream stream = new MemoryStream(awbEntry.bytes))
+                                            {
+                                                trackBytes = ConvertStream.ConvertFile(new Options(), stream, Helper.GetFileType(waveform.EncodeType), FileType.Wave);
+                                            }
 
-                                        File.WriteAllBytes($"{extractDirectory}/{trackName}.wav", trackBytes);
+                                            File.WriteAllBytes($"{extractDirectory}/{trackName}.wav", trackBytes);
+                                        }
+                                        else
+                                        {
+                                            File.WriteAllBytes($"{extractDirectory}/{trackName}.{waveform.EncodeType.ToString().ToLower()}", awbEntry.bytes);
+                                        }
+                                        extractedAwbEntries.Add(awbEntry);
                                     }
-                                    else
-                                    {
-                                        File.WriteAllBytes($"{extractDirectory}/{trackName}.{waveform.EncodeType}", awbEntry.bytes);
-                                    }
-                                    extractedAwbEntries.Add(awbEntry);
                                 }
                             }
+
+                            progress++;
+                            controller.SetProgress(progress);
                         }
 
-                        progress++;
-                        controller.SetProgress(progress);
+                    }
+                    else if (IsAwbFileLoaded)
+                    {
+                        foreach(var awbEntry in AcbFile.AwbWrapper.AwbFile.Entries)
+                        {
+                            if (controller.IsCanceled)
+                                break;
+
+                            controller.SetMessage($"Extracting \"{awbEntry.ID}\"...\n\nThis may take a while.");
+
+                            string trackName = $"{awbEntry.ID}";
+                            byte[] trackBytes = awbEntry.bytes;
+
+                            if (convertToWav && awbEntry.HcaInfo.EncodeType != EncodeType.None)
+                            {
+                                using (MemoryStream stream = new MemoryStream(awbEntry.bytes))
+                                {
+                                    trackBytes = ConvertStream.ConvertFile(new Options(), stream, Helper.GetFileType(awbEntry.HcaInfo.EncodeType), FileType.Wave);
+                                }
+
+                                File.WriteAllBytes($"{extractDirectory}/{trackName}.wav", trackBytes);
+                            }
+                            else
+                            {
+                                if(awbEntry.HcaInfo.EncodeType != EncodeType.None)
+                                {
+                                    File.WriteAllBytes($"{extractDirectory}/{trackName}.{awbEntry.HcaInfo.EncodeType.ToString().ToLower()}", awbEntry.bytes);
+                                }
+                                else
+                                {
+                                    File.WriteAllBytes($"{extractDirectory}/{trackName}.bin", awbEntry.bytes);
+                                }
+                            }
+
+                            progress++;
+                            controller.SetProgress(progress);
+                        }
                     }
                 });
             }
@@ -578,8 +718,12 @@ namespace AudioCueEditor
                         LoadAcb(droppedFilePaths[0]);
                         e.Handled = true;
                     }
+                    if (Path.GetExtension(droppedFilePaths[0]) == ".awb")
+                    {
+                        LoadAwb(droppedFilePaths[0]);
+                        e.Handled = true;
+                    }
                 }
-
             }
         }
     

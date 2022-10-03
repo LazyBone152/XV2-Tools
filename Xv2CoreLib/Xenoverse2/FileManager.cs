@@ -30,6 +30,7 @@ using Xv2CoreLib.Resource;
 using static Xv2CoreLib.CUS.CUS_File;
 using System.IO;
 using Xv2CoreLib.Resource.App;
+using Xv2CoreLib.AFS2;
 
 namespace Xv2CoreLib
 {
@@ -246,10 +247,14 @@ namespace Xv2CoreLib
                     file = EffectContainerFile.Load(path, fileIO, onlyFromCpk);
                     break;
                 case ".acb":
-                    file = new ACB_Wrapper(ACB_File.Load(GetBytesFromGame(path), fileIO.GetFileFromGame(string.Format("{0}/{1}.awb", Path.GetFileNameWithoutExtension(path), Path.GetDirectoryName(path)), false)));
+                    {
+                        byte[] awbBytes = fileIO.GetFileFromGame(string.Format("{0}/{1}.awb", Path.GetFileNameWithoutExtension(path), Path.GetDirectoryName(path)), false);
+                        AFS2_File awbFile = awbBytes != null ? AFS2_File.LoadFromArray(awbBytes) : null;
+                        file = new ACB_Wrapper(ACB_File.Load(GetBytesFromGame(path), awbFile));
+                    }
                     break;
                 default:
-                    throw new InvalidDataException(String.Format("FileManager.GetParsedFileFromGame: The filetype of \"{0}\" is not supported.", path));
+                    throw new InvalidDataException(string.Format("FileManager.GetParsedFileFromGame: The filetype of \"{0}\" is not supported.", path));
             }
 
             if(!onlyFromCpk)

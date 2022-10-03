@@ -65,6 +65,19 @@ namespace LB_Common.Utils
                 });
         }
 
+        public static void ACE_EnsureAssociationsSetForAwb()
+        {
+            var filePath = Process.GetCurrentProcess().MainModule.FileName;
+            EnsureAssociationsSet(
+                new FileAssociation
+                {
+                    Extension = ".awb",
+                    ProgId = "AWB_File",
+                    FileTypeDescription = "CRIWARE AWB File",
+                    ExecutableFilePath = filePath
+                });
+        }
+
         public static void ACE_EnsureAssociationsSetForAudioPackage()
         {
             var filePath = Process.GetCurrentProcess().MainModule.FileName;

@@ -13,6 +13,8 @@ namespace Xv2CoreLib.ACB
 
         public bool IsValidAudioFile { get; private set; }
 
+        public EncodeType EncodeType { get; set; } = EncodeType.None;
+
         //Fmt
         public byte Channels { get; private set; }
         public ushort SampleRate { get; private set; }
@@ -60,6 +62,7 @@ namespace Xv2CoreLib.ACB
                 Channels = (byte)hca.Hca.ChannelCount;
                 SampleRate = (ushort)hca.Hca.SampleRate;
                 NumSamples = hca.Hca.SampleCount;
+                EncodeType = EncodeType.HCA;
 
                 IsValidAudioFile = true;
             }
@@ -77,6 +80,7 @@ namespace Xv2CoreLib.ACB
                         Channels = bytes[7];
                         SampleRate = (ushort)BigEndianConverter.ReadUInt32(bytes, 8);
                         NumSamples = (int)BigEndianConverter.ReadUInt32(bytes, 12);
+                        EncodeType = EncodeType.ADX;
                     }
                     else
                     {

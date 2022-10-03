@@ -478,11 +478,11 @@ namespace Xv2CoreLib.UTF
                         //Data is AFS2 file (awb) on column "AwbFile"
                         if (utfFile.Columns[dataInfo[i].ColumnIndex].StorageFlag == StorageFlag.PerRow)
                         {
-                            utfFile.Columns[dataInfo[i].ColumnIndex].Rows[dataInfo[i].RowIndex].Afs2File = AFS2_File.LoadAfs2File(rawBytes, dataInfo[i].Offset, dataInfo[i].Length);
+                            utfFile.Columns[dataInfo[i].ColumnIndex].Rows[dataInfo[i].RowIndex].Afs2File = AFS2_File.LoadFromArray(rawBytes, dataInfo[i].Offset, dataInfo[i].Length);
                         }
                         else
                         {
-                            utfFile.Columns[dataInfo[i].ColumnIndex].Afs2File = AFS2_File.LoadAfs2File(rawBytes, dataInfo[i].Offset, dataInfo[i].Length);
+                            utfFile.Columns[dataInfo[i].ColumnIndex].Afs2File = AFS2_File.LoadFromArray(rawBytes, dataInfo[i].Offset, dataInfo[i].Length);
                         }
                     }
                     else if (BitConverter.ToInt32(rawBytes, dataInfo[i].Offset) == AWB_CPK.CPK_SIGNATURE && utfFile.Columns[dataInfo[i].ColumnIndex].Name == "AwbFile")
@@ -913,7 +913,8 @@ namespace Xv2CoreLib.UTF
 
                         if(column.TypeFlag == TypeFlag.Data && CompressDataRows)
                         {
-                            if (column.Rows.All(x => Utils.CompareArray(x.Bytes, column.Rows[0].Bytes)))
+                            //Data[] can only be constant when null. Or.. crash crash crash...
+                            if (column.Rows.All(x => x.Bytes == null))
                             {
                                 column.StorageFlag = StorageFlag.Constant;
                                 column.Bytes = column.Rows[0].Bytes;

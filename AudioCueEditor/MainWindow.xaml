@@ -21,8 +21,10 @@
         <Menu Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0, 2" FontSize="12">
             <MenuItem Header="File">
                 <MenuItem Header="New (XV2)" Command="{Binding NewAcbCommand}"/>
-                <MenuItem Header="Open" Command="{Binding LoadAcbCommand}"/>
-                <MenuItem Header="Force Open" Command="{Binding ForceLoadAcbCommand}"/>
+                <MenuItem Header="Load" Command="{Binding LoadAcbCommand}"/>
+                <MenuItem Header="Load (Force)" Command="{Binding ForceLoadAcbCommand}"/>
+                <MenuItem Header="Load (AWB)" Command="{Binding LoadAwbCommand}"/>
+                <Separator/>
                 <MenuItem Header="Save" Command="{Binding SaveAcbCommand}"/>
                 <MenuItem Header="Save As.." Command="{Binding SaveAsAcbCommand}"/>
                 <Separator/>
@@ -39,6 +41,7 @@
                 <MenuItem Header="Extract All (wav)" Command="{Binding ExtractAllTracksWavCommand}"/>
                 <Separator/>
                 <MenuItem Header="Associate ACB Extension" Command="{Binding SetAcbFileAssociationCommand}"/>
+                <MenuItem Header="Associate AWB Extension" Command="{Binding SetAwbFileAssociationCommand}"/>
                 <Separator/>
                 <MenuItem Header="Fix Silent Cues (DBXV2 1.16)" Command="{Binding FixSilentCuesCommand}"/>
                 <MenuItem Header="Encryption Keys (HCA)" Command="{Binding EncryptKeysHcaCommand}"/>
@@ -59,7 +62,7 @@
                 <MenuItem Header="GitHub" Click="Help_GitHub"/>
             </MenuItem>
         </Menu>
-        <view:CueEditorView x:Name="cueEditor" Grid.Row="1" AcbFile="{Binding AcbFile}"/>
+        <view:CueEditorView x:Name="cueEditor" Grid.Row="1" AcbWrapperDP="{Binding AcbFile}"/>
         <Grid Grid.Row="2" Background="{DynamicResource MahApps.Brushes.Accent2}">
             <TextBlock Text="{Binding AcbPathDisplay}" VerticalAlignment="Stretch" HorizontalAlignment="Right" FontSize="12" Margin="20, 4"/>
         </Grid>

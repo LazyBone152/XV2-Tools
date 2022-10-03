@@ -42,7 +42,28 @@
         </Grid.ColumnDefinitions>
         <Grid Grid.Column="1" HorizontalAlignment="Stretch" Background="{DynamicResource MahApps.Brushes.Accent4}" Margin="0,0,0.236,0.564"/>
 
-        <DataGrid x:Name="dataGrid" Grid.Column="0" ItemsSource="{Binding AcbFile.Cues.Binding}" Drop="DataGrid_Drop" AllowDrop="True" VirtualizingPanel.ScrollUnit="Pixel" EnableRowVirtualization="True" EnableColumnVirtualization="True" SelectionMode="Extended" RowDetailsVisibilityMode="VisibleWhenSelected" Margin="10,64,6.927,10.327" CanUserResizeRows="False" CanUserAddRows="False" AutoGenerateColumns="False" CanUserDeleteRows="False" RowHeaderWidth="0">
+        <!-- AWB DataGrid. Only show when AWB is loaded. -->
+        <DataGrid x:Name="awbDataGrid" Grid.Column="0" MouseDoubleClick="awbDataGrid_MouseDoubleClick" Visibility="{Binding AwbLoadedAwbVisibility}" ItemsSource="{Binding AwbFile.AwbFile.Entries.Binding}" SelectedItem="{Binding SelectedAwbEntry}" Margin="10,64,6.927,10.327" SelectionMode="Extended" CanUserAddRows="False" CanUserDeleteRows="False" AutoGenerateColumns="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="ID" Binding="{Binding ID}" IsReadOnly="True" Width="*"/>
+                <DataGridTextColumn Header="Encoding" Binding="{Binding HcaInfo.EncodeType}" IsReadOnly="True" Width="*"/>
+                <DataGridTextColumn Header="Channels" Binding="{Binding HcaInfo.Channels}" IsReadOnly="True" Width="*"/>
+                <DataGridTextColumn Header="Duration" Binding="{Binding HcaInfo.Duration}" IsReadOnly="True" Width="*"/>
+            </DataGrid.Columns>
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Extract" Command="{Binding ExtractAwbTrackCommand}"/>
+                    <MenuItem Header="Replace" Command="{Binding ReplaceSelectedAwbTrackCommand}"/>
+                    <MenuItem Header="Edit Loop" Command="{Binding EditLoopAwbCommand}"/>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+            <DataGrid.InputBindings>
+                <KeyBinding Key="Return" Command="{Binding PlaySelectedAwbTrackCommand}"/>
+            </DataGrid.InputBindings>
+        </DataGrid>
+        
+        <!-- ACB DataGrid. Hide when AWB is loaded. -->
+        <DataGrid x:Name="dataGrid" Grid.Column="0" Visibility="{Binding AwbLoadedAcbVisibility}" ItemsSource="{Binding AcbFile.Cues.Binding}" Drop="DataGrid_Drop" AllowDrop="True" VirtualizingPanel.ScrollUnit="Pixel" EnableRowVirtualization="True" EnableColumnVirtualization="True" SelectionMode="Extended" RowDetailsVisibilityMode="VisibleWhenSelected" Margin="10,64,6.927,10.327" CanUserResizeRows="False" CanUserAddRows="False" AutoGenerateColumns="False" CanUserDeleteRows="False" RowHeaderWidth="0">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="SteelBlue"/>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightColorKey}" Color="SteelBlue"/>
@@ -187,6 +208,8 @@
             </DataGrid.RowDetailsTemplate>
 
         </DataGrid>
+        
+        <!-- Audio playback controls. -->
         <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left" Height="50" Margin="10,9,0,0" VerticalAlignment="Top" Width="370">
             <StackPanel.Resources>
                 <Style TargetType="{x:Type StackPanel}">
@@ -266,10 +289,8 @@
             </StackPanel>
         </StackPanel>
 
-
+        <!-- Side bar where some ACB data can be edited. -->
         <Grid Grid.Column="2">
-
-
             <ScrollViewer Margin="0,65,-0.255,10.327">
                 <StackPanel>
 
@@ -350,6 +371,7 @@
             </ScrollViewer>
             <Label Content="{Binding AcbFile.AcbFile._versionStrProp}" ToolTip="{Binding AcbFile.AcbFile.VersionToolTip}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-24,0,0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" Width="111" Height="25"/>
         </Grid>
+       
         <Label Content="{Binding audioPlayer.PlaybackTime}" HorizontalContentAlignment="Right" HorizontalAlignment="Stretch" Margin="380,17,9.927,0" VerticalAlignment="Top" Height="27"/>
 
     </Grid>

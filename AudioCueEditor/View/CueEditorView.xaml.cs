@@ -39,7 +39,7 @@ namespace AudioCueEditor.View
 
         #region DependencyProperty
         public static readonly DependencyProperty AcbFileProperty = DependencyProperty.Register(
-            "AcbFile", typeof(ACB_Wrapper), typeof(CueEditorView), new PropertyMetadata(OnAcbChanged));
+            nameof(AcbWrapperDP), typeof(ACB_Wrapper), typeof(CueEditorView), new PropertyMetadata(OnAcbChanged));
 
         private static DependencyPropertyChangedEventHandler AcbChanged;
 
@@ -49,26 +49,42 @@ namespace AudioCueEditor.View
                 AcbChanged.Invoke(sender, e);
         }
 
-
         private void AcbInstanceChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
+            NotifyPropertyChanged(nameof(AcbWrapperDP));
             NotifyPropertyChanged(nameof(AcbFile));
-            NotifyPropertyChanged(nameof(IsFileLoadedProp));
+            NotifyPropertyChanged(nameof(AwbFile));
+            NotifyPropertyChanged(nameof(IsAcbLoaded));
+            NotifyPropertyChanged(nameof(IsAwbLoaded));
+            NotifyPropertyChanged(nameof(IsSequenceTypeEnabled));
+            NotifyPropertyChanged(nameof(IsActionsEnabled));
+            NotifyPropertyChanged(nameof(AwbLoadedAwbVisibility));
+            NotifyPropertyChanged(nameof(AwbLoadedAcbVisibility));
         }
         #endregion
 
-        public ACB_Wrapper AcbFile
+        public ACB_Wrapper AcbWrapperDP
         {
             get { return (ACB_Wrapper)GetValue(AcbFileProperty); }
             set
             {
                 SetValue(AcbFileProperty, value);
+                NotifyPropertyChanged(nameof(AcbWrapperDP));
                 NotifyPropertyChanged(nameof(AcbFile));
+                NotifyPropertyChanged(nameof(AwbFile));
                 NotifyPropertyChanged(nameof(IsSequenceTypeEnabled));
                 NotifyPropertyChanged(nameof(IsActionsEnabled));
+                NotifyPropertyChanged(nameof(AwbLoadedAwbVisibility));
+                NotifyPropertyChanged(nameof(AwbLoadedAcbVisibility));
             }
         }
-        public bool IsFileLoadedProp { get { return AcbFile != null; } }
+
+        //Determine what ACB_Wrapper contains: an actual ACB or just an AWB.
+        public ACB_Wrapper AcbFile => AcbWrapperDP?.IsAwbWrapper == true ? null : AcbWrapperDP;
+        public AWB_Wrapper AwbFile => AcbWrapperDP?.IsAwbWrapper == true ? AcbWrapperDP.AwbWrapper : null;
+
+        public bool IsAcbLoaded => AcbFile != null;
+        public bool IsAwbLoaded => AwbFile != null;
         public bool IsSequenceTypeEnabled { get { return (AcbFile != null) ? AcbFormatHelper.Instance.IsSequenceTypeEnabled(AcbFile.AcbFile.Version) : false; } }
         public bool IsActionsEnabled { get { return (AcbFile != null) ? AcbFormatHelper.Instance.IsActionsEnabled(AcbFile.AcbFile.Version) : false; } }
 
@@ -128,6 +144,8 @@ namespace AudioCueEditor.View
                 return (actionComboBox.SelectedItem is ACB_Command) ? Visibility.Visible : Visibility.Collapsed;
             }
         }
+        public Visibility AwbLoadedAwbVisibility => IsAwbLoaded ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility AwbLoadedAcbVisibility => IsAwbLoaded ? Visibility.Collapsed : Visibility.Visible;
 
         //Props
         public Cue_Wrapper SelectedCue
@@ -463,7 +481,7 @@ namespace AudioCueEditor.View
 
             if(selectedCues != null)
             {
-                AcbFile.CopyCues(selectedCues);
+                AcbWrapperDP.CopyCues(selectedCues);
             }
         }
 
@@ -740,7 +758,6 @@ namespace AudioCueEditor.View
                 ActionCommandRemove();
         }
 
-
         private void TrackListBox_DoubleMouseClick(object sender, MouseButtonEventArgs e)
         {
             PlaySelectedTrack();
@@ -874,5 +891,89 @@ namespace AudioCueEditor.View
             //var parent = control.Parent as UIElement;
             parent?.RaiseEvent(wheelArgs);
         }
+
+        #region AWB 
+        public AFS2_Entry SelectedAwbEntry { get; set; }
+
+        public RelayCommand PlaySelectedAwbTrackCommand => new RelayCommand(PlaySelectedAwbTrack, IsAwbTrackSelected);
+        private async void PlaySelectedAwbTrack()
+        {
+            if (SelectedAwbEntry?.HcaInfo == null || SelectedAwbEntry == null) return;
+
+            switch (SelectedAwbEntry.HcaInfo.EncodeType)
+            {
+                case EncodeType.HCA:
+                    audioPlayer.SetAudio(HCA.DecodeToWavStream(SelectedAwbEntry.bytes));
+                    break;
+                case EncodeType.ADX:
+                    audioPlayer.SetAudio(ADX.Decode(SelectedAwbEntry.bytes));
+                    break;
+                default:
+                    return;
+            }
+
+            audioPlayer.SetVolume(1f);
+            audioPlayer.Play();
+        }
+
+        public RelayCommand ExtractAwbTrackCommand => new RelayCommand(ExtractSelectedAwbTrack, IsAwbTrackSelected);
+        private async void ExtractSelectedAwbTrack()
+        {
+            await Task.Run(() => ExtractTrack(SelectedAwbEntry, string.Format("{0}.{1}", SelectedAwbEntry.ID, SelectedAwbEntry.HcaInfo.EncodeType.ToString().ToLower()), Helper.GetFileType(SelectedAwbEntry.HcaInfo.EncodeType)));
+        }
+
+        public RelayCommand ReplaceSelectedAwbTrackCommand => new RelayCommand(ReplaceSelectedAwbTrack, IsAwbTrackSelected);
+        private async void ReplaceSelectedAwbTrack()
+        {
+            var trackForm = new AddTrackForm(Application.Current.MainWindow, AwbFile.AwbFile);
+            trackForm.ShowDialog();
+
+            while (!trackForm.IsDone)
+            {
+                await Task.Delay(50);
+            }
+
+            if (trackForm.Finished)
+            {
+                UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(AFS2_Entry.bytes), SelectedAwbEntry, SelectedAwbEntry.bytes, trackForm.TrackBytes, "Replace Track"));
+                SelectedAwbEntry.bytes = trackForm.TrackBytes;
+            }
+        }
+
+        public RelayCommand EditLoopAwbCommand => new RelayCommand(EditLoopOnSelectedAwbTrack, CanEditAwbLoop);
+        private async void EditLoopOnSelectedAwbTrack()
+        {
+            if (SelectedAwbEntry.HcaInfo.EncodeType != EncodeType.HCA)
+            {
+                await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, $"Unsupported operation", $"Edit Loop is only possible on HCA encoded tracks.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                return;
+            }
+
+            audioPlayer.Stop();
+            var trackForm = new EditLoopForm(Application.Current.MainWindow, SelectedAwbEntry, audioPlayer);
+            trackForm.ShowDialog();
+        }
+
+        private void awbDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            PlaySelectedAwbTrack();
+        }
+
+        private bool IsAwbTrackSelected()
+        {
+            return SelectedAwbEntry != null && IsAwbLoaded;
+        }
+        
+        private bool CanEditAwbLoop()
+        {
+            if (!IsAwbTrackSelected())
+                return false;
+
+            if (SelectedAwbEntry.HcaInfo == null) return false;
+
+            return SelectedAwbEntry.HcaInfo.EncodeType == EncodeType.HCA;
+        }
+        #endregion
+
     }
 }

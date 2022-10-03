@@ -49,6 +49,7 @@ using Xv2CoreLib.BCM;
 using LB_Mod_Installer.Installer.Transformation;
 using Xv2CoreLib.QSF;
 using Xv2CoreLib.DML;
+using Xv2CoreLib.AFS2;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -1947,7 +1948,11 @@ namespace LB_Mod_Installer.Installer
                 case ".pal":
                     return PAL_File.Parse(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".acb":
-                    return ACB_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk), fileIO.GetFileFromGame(string.Format("{0}/{1}.awb", Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path)), false, onlyFromCpk));
+                    {
+                        byte[] awbBytes = fileIO.GetFileFromGame(string.Format("{0}/{1}.awb", Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path)), false, onlyFromCpk);
+                        AFS2_File awbFile = awbBytes != null ? AFS2_File.LoadFromArray(awbBytes) : null;
+                        return ACB_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk), awbFile);
+                    }
                 case ".ttb":
                     return TTB_File.Parse(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".ttc":

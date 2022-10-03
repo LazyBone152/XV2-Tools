@@ -2,13 +2,16 @@
 using GalaSoft.MvvmLight.CommandWpf;
 using MahApps.Metro.Controls;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using Xv2CoreLib.ACB;
+using Xv2CoreLib.AFS2;
 using Xv2CoreLib.HCA;
+using Xv2CoreLib.Resource.UndoRedo;
 
 namespace AudioCueEditor.View
 {
@@ -29,6 +32,7 @@ namespace AudioCueEditor.View
         #endregion
 
         public Waveform_Wrapper WaveformWrapper { get; set; }
+        public AFS2_Entry AwbEntry { get; set; }
 
         private uint _loopStartMs = 0;
         private uint _loopEndMs = 50;
@@ -73,7 +77,21 @@ namespace AudioCueEditor.View
         private AudioPlayer audioPlayer;
 
         private DispatcherTimer timer = new DispatcherTimer();
-        
+
+        public EditLoopForm(Window parent, AFS2_Entry awbEntry, AudioPlayer _audioPlayer)
+        {
+            _audioPlayer?.Stop();
+
+            AwbEntry = awbEntry;
+            InitializeComponent();
+            DataContext = this;
+            audioPlayer = _audioPlayer;
+            Owner = parent;
+            InitValues();
+            timer.Interval = new TimeSpan(0, 0, 0, 0, 10);
+            timer.Tick += Timer_Tick;
+            timer.Start();
+        }
 
         public EditLoopForm(Window parent, Waveform_Wrapper waveformWrapper, AudioPlayer _audioPlayer)
         {
@@ -97,12 +115,13 @@ namespace AudioCueEditor.View
 
         private async void InitValues()
         {
-            var awbEntry = WaveformWrapper.WrapperRoot.AcbFile.GetAfs2Entry(WaveformWrapper.WaveformRef.AwbId);
+            if(AwbEntry == null)
+                AwbEntry = WaveformWrapper.WrapperRoot.AcbFile.GetAfs2Entry(WaveformWrapper.WaveformRef.AwbId);
 
-            if(awbEntry != null)
+            if(AwbEntry != null)
             {
                 VGAudio.Containers.Hca.HcaReader reader = new VGAudio.Containers.Hca.HcaReader();
-                var header = reader.ParseFile(awbEntry.bytes);
+                var header = reader.ParseFile(AwbEntry.bytes);
 
                 if (header.Hca != null)
                 {
@@ -112,8 +131,8 @@ namespace AudioCueEditor.View
                     TrackLengthMs = (uint)header.Hca.TrackLengthMs;
                     ValuesChanged();
 
-                    awbBytes = awbEntry.bytes;
-                    await Task.Run(() => wavStream = HCA.DecodeToWavStream(awbEntry.bytes));
+                    awbBytes = AwbEntry.bytes;
+                    await Task.Run(() => wavStream = HCA.DecodeToWavStream(AwbEntry.bytes));
                     SetLoopOnStream();
 
                     CommandManager.InvalidateRequerySuggested();
@@ -166,7 +185,16 @@ namespace AudioCueEditor.View
         {
             try
             {
-                WaveformWrapper.UndoableEditLoop(LoopEnabled, (int)LoopStartMs, (int)LoopEndMs);
+                if(WaveformWrapper != null)
+                {
+                    WaveformWrapper.UndoableEditLoop(LoopEnabled, (int)LoopStartMs, (int)LoopEndMs);
+                }
+                else
+                {
+                    //Just apply loop to HCA file directly
+                    List<IUndoRedo> undos = AwbEntry.SetLoop(LoopEnabled, (int)LoopStartMs, (int)LoopEndMs);
+                    UndoManager.Instance.AddCompositeUndo(undos, "Edit Loop");
+                }
             }
 #if !DEBUG
             catch (Exception ex)

@@ -8,13 +8,15 @@ using Xv2CoreLib.UTF;
 using Xv2CoreLib.AFS2;
 using YAXLib;
 using _cpk = CriPakTools.CPK;
+using Xv2CoreLib.ACB;
+using Xv2CoreLib.Resource;
 
 namespace Xv2CoreLib.CPK
 {
     //CPK Parser solely for cpk-based AWB files.
     //These only use ITOC table, so TOC + ETOC can be ignored.
 
-    public class AWB_CPK
+    public class AWB_CPK : IAwbFile
     {
         public const int CPK_SIGNATURE = 0x204B5043;
         private const int TOC_SIGNATURE = 0x20434F54;
@@ -33,7 +35,7 @@ namespace Xv2CoreLib.CPK
         public int ITOC_Unk1 { get; set; } = 255;
 
         //Files
-        public List<CPK_Entry> Entries { get; set; } = new List<CPK_Entry>();
+        public AsyncObservableCollection<CPK_Entry> Entries { get; set; } = new AsyncObservableCollection<CPK_Entry>();
 
         public AWB_CPK() { }
 
@@ -41,9 +43,9 @@ namespace Xv2CoreLib.CPK
         {
             CPK_Header = cpkHeader;
 
-            foreach(var entry in afs2File.Entries.OrderBy(x => x.AwbId))
+            foreach(var entry in afs2File.Entries.OrderBy(x => x.ID))
             {
-                Entries.Add(new CPK_Entry(entry.AwbId, entry.bytes));
+                Entries.Add(new CPK_Entry(entry.ID, entry.bytes));
             }
         }
 
@@ -368,13 +370,13 @@ namespace Xv2CoreLib.CPK
     public class CPK_Entry
     {
         [YAXAttributeForClass]
-        public int ID { get; set; }
+        public ushort ID { get; set; }
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]
         public byte[] Data { get; set; }
 
         public CPK_Entry(int id, byte[] data)
         {
-            ID = id;
+            ID = (ushort)id;
             Data = data;
         }
     }

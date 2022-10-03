@@ -39,52 +39,14 @@ namespace Xv2CoreLib.ACB
         {
             get
             {
-                return AcbFile.AudioPackageType == AudioPackageType.BGM_NewOption;
+                return !IsAwbWrapper ? AcbFile.AudioPackageType == AudioPackageType.BGM_NewOption : false;
             }
             set
             {
-                var oldValue = AcbFile.AudioPackageType;
-                AcbFile.AudioPackageType = (value) ? AudioPackageType.BGM_NewOption : AudioPackageType.BGM_Direct;
-                NotifyPropertyChanged(nameof(AudioPackage_IsNewOptions));
-                NotifyPropertyChanged(nameof(AudioPackage_IsDirect));
-                NotifyPropertyChanged(nameof(AudioPackage_IsAutoVoice));
-
-                if (oldValue != AcbFile.AudioPackageType)
-                    UndoManager.Instance.AddUndo(new UndoableProperty<ACB_File>(nameof(AcbFile.AudioPackageType), AcbFile, oldValue, AcbFile.AudioPackageType, "AudioPackage Type"));
-            }
-        }
-        public bool AudioPackage_IsDirect
-        {
-            get
-            {
-                return AcbFile.AudioPackageType == AudioPackageType.BGM_Direct;
-            }
-            set
-            {
-                var oldValue = AcbFile.AudioPackageType;
-                AcbFile.AudioPackageType = (value) ? AudioPackageType.BGM_Direct : AudioPackageType.BGM_NewOption;
-                NotifyPropertyChanged(nameof(AudioPackage_IsNewOptions));
-                NotifyPropertyChanged(nameof(AudioPackage_IsDirect));
-                NotifyPropertyChanged(nameof(AudioPackage_IsAutoVoice));
-
-                if (oldValue != AcbFile.AudioPackageType)
-                    UndoManager.Instance.AddUndo(new UndoableProperty<ACB_File>(nameof(AcbFile.AudioPackageType), AcbFile, oldValue, AcbFile.AudioPackageType, "AudioPackage Type"));
-            }
-        }
-        public bool AudioPackage_IsAutoVoice
-        {
-            get
-            {
-                return AcbFile.AudioPackageType == AudioPackageType.AutoVoice;
-            }
-            set
-            {
-                var oldValue = AcbFile.AudioPackageType;
-
-                if (value)
+                if (!IsAwbWrapper)
                 {
-                    AcbFile.AudioPackageType = AudioPackageType.AutoVoice;
-
+                    var oldValue = AcbFile.AudioPackageType;
+                    AcbFile.AudioPackageType = (value) ? AudioPackageType.BGM_NewOption : AudioPackageType.BGM_Direct;
                     NotifyPropertyChanged(nameof(AudioPackage_IsNewOptions));
                     NotifyPropertyChanged(nameof(AudioPackage_IsDirect));
                     NotifyPropertyChanged(nameof(AudioPackage_IsAutoVoice));
@@ -92,11 +54,60 @@ namespace Xv2CoreLib.ACB
                     if (oldValue != AcbFile.AudioPackageType)
                         UndoManager.Instance.AddUndo(new UndoableProperty<ACB_File>(nameof(AcbFile.AudioPackageType), AcbFile, oldValue, AcbFile.AudioPackageType, "AudioPackage Type"));
                 }
+            }
+        }
+        public bool AudioPackage_IsDirect
+        {
+            get
+            {
+                return !IsAwbWrapper ? AcbFile.AudioPackageType == AudioPackageType.BGM_Direct : false;
+            }
+            set
+            {
+                if (!IsAwbWrapper)
+                {
+                    var oldValue = AcbFile.AudioPackageType;
+                    AcbFile.AudioPackageType = (value) ? AudioPackageType.BGM_Direct : AudioPackageType.BGM_NewOption;
+                    NotifyPropertyChanged(nameof(AudioPackage_IsNewOptions));
+                    NotifyPropertyChanged(nameof(AudioPackage_IsDirect));
+                    NotifyPropertyChanged(nameof(AudioPackage_IsAutoVoice));
+
+                    if (oldValue != AcbFile.AudioPackageType)
+                        UndoManager.Instance.AddUndo(new UndoableProperty<ACB_File>(nameof(AcbFile.AudioPackageType), AcbFile, oldValue, AcbFile.AudioPackageType, "AudioPackage Type"));
+                }
+            }
+        }
+        public bool AudioPackage_IsAutoVoice
+        {
+            get
+            {
+                return !IsAwbWrapper ? AcbFile.AudioPackageType == AudioPackageType.AutoVoice : false;
+            }
+            set
+            {
+                if (!IsAwbWrapper)
+                {
+                    var oldValue = AcbFile.AudioPackageType;
+
+                    if (value)
+                    {
+                        AcbFile.AudioPackageType = AudioPackageType.AutoVoice;
+
+                        NotifyPropertyChanged(nameof(AudioPackage_IsNewOptions));
+                        NotifyPropertyChanged(nameof(AudioPackage_IsDirect));
+                        NotifyPropertyChanged(nameof(AudioPackage_IsAutoVoice));
+
+                        if (oldValue != AcbFile.AudioPackageType)
+                            UndoManager.Instance.AddUndo(new UndoableProperty<ACB_File>(nameof(AcbFile.AudioPackageType), AcbFile, oldValue, AcbFile.AudioPackageType, "AudioPackage Type"));
+                    }
+                }
 
             }
         }
+        public bool IsAwbWrapper => AwbWrapper != null;
 
         public ACB_File AcbFile { get; set; }
+        public AWB_Wrapper AwbWrapper { get; set; }
         public AsyncObservableCollection<Cue_Wrapper> Cues { get; set; } = new AsyncObservableCollection<Cue_Wrapper>();
         
         
@@ -108,10 +119,21 @@ namespace Xv2CoreLib.ACB
         }
         
         /// <summary>
+        /// Initialse an ACB_Wrapper from an AWB_Wrapper. This disables all normal functions of the class. 
+        /// Intended for solo-loading AWBs within ACE.
+        /// </summary>
+        public ACB_Wrapper(AWB_Wrapper awbWraper)
+        {
+            AwbWrapper = awbWraper;
+        }
+
+        /// <summary>
         /// Refresh the wrapper.
         /// </summary>
         public void Refresh()
         {
+            if (IsAwbWrapper) return;
+
             Cues.Clear();
 
             foreach (var cue in AcbFile.Cues)

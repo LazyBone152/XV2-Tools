@@ -23,6 +23,7 @@ using System.Threading;
 using Xv2CoreLib.ACB;
 using AudioCueEditor.Data;
 using Xv2CoreLib.Resource;
+using Xv2CoreLib.AFS2;
 
 namespace AudioCueEditor.View
 {
@@ -124,6 +125,17 @@ namespace AudioCueEditor.View
         public AsyncObservableCollection<HcaEncryptionKey> HcaKeys { get; set; } = HcaEncryptionKeysManager.Instance.GetReadOnlyViewEncryptionKeys();
         public HcaEncryptionKey SelectedHcaKey { get; set; }
 
+
+        public AddTrackForm(Window parent, AFS2_File awbFile)
+        {
+            InitializeComponent();
+            DataContext = this;
+            Owner = parent;
+            AutoSetEncryptionKey(awbFile.TryGetEncrpytionKey());
+
+            //Disabled when just an AWB is loaded
+            streamingCheckbox.IsEnabled = false;
+        }
 
         public AddTrackForm(Window parent, ACB_File acbFile)
         {

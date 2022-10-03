@@ -267,25 +267,34 @@ namespace Xv2CoreLib.ACB
         #endregion
 
         #region LoadFunctions
+        public static ACB_File Load(string path, Xv2FileIO fileIO, bool onlyLoadFromCpk)
+        {
+            byte[] awbBytes = fileIO.GetFileFromGame(string.Format("{0}/{1}.awb", Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path)), false, onlyLoadFromCpk);
+            AFS2_File awbFile = awbBytes != null ? AFS2_File.LoadFromArray(awbBytes) : null;
+
+            return Load(fileIO.GetFileFromGame(path, true, onlyLoadFromCpk), awbFile);
+        }
+
         public static ACB_File Load(string path, bool writeXml = false)
         {
             //Check for external awb file
-            byte[] awbFile = null;
             string awbPath = string.Format("{0}/{1}.awb", Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
             string altAwbPath = string.Format("{0}/{1}_streamfiles.awb", Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
             bool altPath = false;
             bool isAudioPackage = Path.GetExtension(path).Equals(AUDIO_PACKAGE_EXTENSION, StringComparison.OrdinalIgnoreCase) || Path.GetExtension(path).Equals(AUDIO_PACKAGE_EXTENSION_OLD, StringComparison.OrdinalIgnoreCase);
+            IAwbFile awbFile = null;
 
             if (File.Exists(awbPath) && !isAudioPackage)
             {
-                awbFile = File.ReadAllBytes(awbPath);
+                //awbFile = File.ReadAllBytes(awbPath);
+                awbFile = LoadStreamAwb(awbPath);
             }
             else if (File.Exists(altAwbPath) && !isAudioPackage)
             {
-                awbFile = File.ReadAllBytes(altAwbPath);
+                //awbFile = File.ReadAllBytes(altAwbPath);
+                awbFile = LoadStreamAwb(altAwbPath);
                 altPath = true;
             }
-
 
             var file = Load(File.ReadAllBytes(path), awbFile, writeXml, isAudioPackage, altPath);
 
@@ -298,12 +307,12 @@ namespace Xv2CoreLib.ACB
             return file;
         }
 
-        public static ACB_File Load(byte[] acbBytes, byte[] awbBytes, bool loadUnknownCommands = false, bool isAudioPackage = false, bool altAwbPath = false)
+        public static ACB_File Load(byte[] acbBytes, IAwbFile awbFile, bool loadUnknownCommands = false, bool isAudioPackage = false, bool altAwbPath = false)
         {
-            return Load(UTF_File.LoadUtfTable(acbBytes, acbBytes.Length), awbBytes, loadUnknownCommands, isAudioPackage, true, altAwbPath);
+            return Load(UTF_File.LoadUtfTable(acbBytes, acbBytes.Length), awbFile, loadUnknownCommands, isAudioPackage, true, altAwbPath);
         }
 
-        public static ACB_File Load(UTF_File utfFile, byte[] awbBytes, bool loadUnknownCommands = false, bool isAudioPackage = false, bool eternityCompatibility = true, bool altAwbPath = false)
+        public static ACB_File Load(UTF_File utfFile, IAwbFile awbFile, bool loadUnknownCommands = false, bool isAudioPackage = false, bool eternityCompatibility = true, bool altAwbPath = false)
         {
             if (!AcbFormatHelper.Instance.AcbFormatHelperMain.ForceLoad && !isAudioPackage)
             {
@@ -383,20 +392,20 @@ namespace Xv2CoreLib.ACB
                 acbFile.LoadAwbFile(internalAfs2Awb, false);
             }
 
-            if(awbBytes != null)
+            if(awbFile != null)
             {
-                if(BitConverter.ToInt32(awbBytes, 0) == AFS2_File.AFS2_SIGNATURE)
+                if(awbFile is AFS2_File afs2)
                 {
-                    acbFile.LoadAwbFile(AFS2_File.LoadAfs2File(awbBytes), true);
+                    acbFile.LoadAwbFile(afs2, true);
                 }
-                else if (BitConverter.ToInt32(awbBytes, 0) == AWB_CPK.CPK_SIGNATURE)
+                else if (awbFile is AWB_CPK cpk)
                 {
                     acbFile.IsAwbCpk = true;
-                    acbFile.LoadAwbFile(AWB_CPK.Load(awbBytes), true);
+                    acbFile.LoadAwbFile(cpk, true);
                 }
             }
 
-            if (awbBytes == null && acbFile.Waveforms.Any(x => x.IsStreaming) && !isAudioPackage)
+            if (awbFile == null && acbFile.Waveforms.Any(x => x.IsStreaming) && !isAudioPackage)
                 acbFile.ExternalAwbError = true;
 
             //AudioPackage values
@@ -585,7 +594,7 @@ namespace Xv2CoreLib.ACB
 
             foreach (var entry in afs2File.Entries.Where(x => !x.BytesIsNullOrEmpty()))
             {
-                int oldId = entry.AwbId;
+                int oldId = entry.ID;
                 int newId = AudioTracks.AddEntry(entry, true);
 
                 if (oldId != newId)
@@ -612,6 +621,34 @@ namespace Xv2CoreLib.ACB
                 CommandTables.AcbVersion = Version;
         }
 
+        public static IAwbFile LoadStreamAwb(string path)
+        {
+            if (!File.Exists(path)) return null;
+
+            bool isAfs2 = false;
+            bool isCpk = false;
+
+            using (FileStream fs = new FileStream(path, FileMode.Open))
+            {
+                using (BinaryReader stream = new BinaryReader(fs))
+                {
+                    int signature = stream.ReadInt32();
+
+                    if (signature == AWB_CPK.CPK_SIGNATURE)
+                        isCpk = true;
+                    if (signature == AFS2_File.AFS2_SIGNATURE)
+                        isAfs2 = true;
+                }
+            }
+
+            if (isCpk)
+                return AWB_CPK.Load(File.ReadAllBytes(path));
+
+            if (isAfs2)
+                return AFS2_File.LoadFromStream(path);
+
+            return null;
+        }
         #endregion
 
         #region SaveFunctions
@@ -645,28 +682,19 @@ namespace Xv2CoreLib.ACB
 
             AFS2_File externalAwb = GenerateAwbFile(true);
             byte[] awbHeader = null;
-            byte[] awbBytes = null;
+            byte[] streamAwbHash = null;
+            string awbPath = (IsUsingAltAwbPath) ? path + "_streamfiles.awb" : path + ".awb";
 
             if (externalAwb != null)
             {
                 if (IsAwbCpk)
                 {
-                    awbBytes = new AWB_CPK(externalAwb, CpkHeader).Write();
+                    byte[] awbBytes = new AWB_CPK(externalAwb, CpkHeader).Write();
+                    File.WriteAllBytes(awbPath, awbBytes);
                 }
                 else
                 {
-                    awbBytes = externalAwb.WriteAfs2File(out awbHeader);
-                }
-            }
-
-            //Calculate hash
-            byte[] streamAwbHash = null;
-
-            if(awbBytes != null)
-            {
-                using(MD5Cng md5 = new MD5Cng())
-                {
-                    streamAwbHash = md5.ComputeHash(awbBytes);
+                    externalAwb.SaveToStream(awbPath, out awbHeader, out streamAwbHash);
                 }
             }
 
@@ -677,9 +705,6 @@ namespace Xv2CoreLib.ACB
             else if (SaveFormat == SaveFormat.AudioPackage)
                 utfFile.Save(path + AUDIO_PACKAGE_EXTENSION);
 
-            if (awbBytes != null)
-                File.WriteAllBytes((IsUsingAltAwbPath) ? path + "_streamfiles.awb" : path + ".awb", awbBytes);
-            
             if(undos != null)
             {
                 CompositeUndo undo = new CompositeUndo(undos, "");
@@ -1272,7 +1297,7 @@ namespace Xv2CoreLib.ACB
             //Remove previous AWB entry if nothing else uses it.
             if(Waveforms.All(x=> x.AwbId != oldAwbId))
             {
-                var entry = AudioTracks.Entries.FirstOrDefault(x => x.AwbId == oldAwbId);
+                var entry = AudioTracks.Entries.FirstOrDefault(x => x.ID == oldAwbId);
                 if(entry != null)
                 {
                     undos.Add(new UndoableListRemove<AFS2_Entry>(AudioTracks.Entries, entry, AudioTracks.Entries.IndexOf(entry)));
@@ -1479,28 +1504,7 @@ namespace Xv2CoreLib.ACB
         /// </summary>
         public ulong TryGetEncrpytionKey()
         {
-            foreach(var track in AudioTracks.Entries)
-            {
-                try
-                {
-                    VGAudio.Containers.Hca.HcaReader reader = new VGAudio.Containers.Hca.HcaReader();
-
-                    if (track.bytes != null)
-                    {
-                        var header = reader.ParseFile(track.bytes);
-
-                        if (header.EncryptionKey == null) continue;
-                        if (header.EncryptionKey.KeyCode != 0) return header.EncryptionKey.KeyCode;
-                    }
-                }
-                catch (InvalidDataException)
-                {
-                    //Not an HCA file
-                }
-
-            }
-
-            return 0;
+            return AudioTracks.TryGetEncrpytionKey();
         }
 
         public bool IsStreamingAcb()
@@ -1811,7 +1815,7 @@ namespace Xv2CoreLib.ACB
                 //Awb entry doesn't exist, adding it..
                 awbEntry = awbEntry.Copy();
                 id = (ushort)AudioTracks.NextID();
-                awbEntry.AwbId = id;
+                awbEntry.ID = id;
                 AudioTracks.Entries.Add(awbEntry);
                 undos.Add(new UndoableListAdd<AFS2_Entry>(AudioTracks.Entries, awbEntry));
             }
@@ -2342,7 +2346,7 @@ namespace Xv2CoreLib.ACB
 
             foreach(var track in AudioTracks.Entries)
             {
-                if (tracks.Contains(track.AwbId))
+                if (tracks.Contains(track.ID))
                 {
                     awbFile.Entries.Add(track);
                 }

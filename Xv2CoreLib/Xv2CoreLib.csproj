@@ -123,9 +123,11 @@
   <ItemGroup>
     <Compile Include="ACB\ACB_File.cs" />
     <Compile Include="ACB\ACB_Wrapper.cs" />
+    <Compile Include="ACB\IAwbFile.cs" />
     <Compile Include="ACB\TrackMetadata.cs" />
     <Compile Include="ACB\FormatHelper.cs" />
     <Compile Include="AFS2\AFS2_File.cs" />
+    <Compile Include="AFS2\AWB_Wrapper.cs" />
     <Compile Include="AGD\AGD_File.cs" />
     <Compile Include="AIG\AIG_File.cs" />
     <Compile Include="AIT\AIT_File.cs" />
