@@ -1,13 +1,9 @@
 ﻿using LB_Common.Numbers;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Windows;
-using System.Windows.Media;
 using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.EMM;
 using Xv2CoreLib.HslColor;
@@ -17,6 +13,8 @@ using YAXLib;
 
 namespace Xv2CoreLib.EMP
 {
+    //This EMP parser is obsolete and only kept here for XML serialization since the newer one is incapable of that (intentionally).
+
     public enum ParserMode
     {
         [Description("The resulting EMP_File object will be optimzied for XML output.")]
@@ -33,6 +31,7 @@ namespace Xv2CoreLib.EMP
 
     [Serializable]
     [YAXSerializeAs("EMP")]
+    [Obsolete("This EMP parser is obsolete and only used for XML now. Use Xv2CoreLib.EMP instead!")]
     public class EMP_File
     {
         public const int EMP_SIGNATURE = 1347241251;
@@ -996,19 +995,27 @@ namespace Xv2CoreLib.EMP
 
         public ParticleEffect Clone(bool ignoreChildren = false)
         {
-            AsyncObservableCollection<Type0> _type0 = AsyncObservableCollection<Type0>.Create();
-            AsyncObservableCollection<Type1_Header> _type1 = AsyncObservableCollection<Type1_Header>.Create();
-            AsyncObservableCollection<ParticleEffect> _children = AsyncObservableCollection<ParticleEffect>.Create();
-            foreach (var e in Type_0)
+            AsyncObservableCollection<Type0> _type0 = new AsyncObservableCollection<Type0>();
+            AsyncObservableCollection<Type1_Header> _type1 = new AsyncObservableCollection<Type1_Header>();
+            AsyncObservableCollection<ParticleEffect> _children = new AsyncObservableCollection<ParticleEffect>();
+
+            if(Type_0 != null)
             {
-                _type0.Add(e.Clone());
-            }
-            foreach (var e in Type_1)
-            {
-                _type1.Add(e.Clone());
+                foreach (var e in Type_0)
+                {
+                    _type0.Add(e.Clone());
+                }
             }
 
-            if (!ignoreChildren)
+            if(Type_1 != null)
+            {
+                foreach (var e in Type_1)
+                {
+                    _type1.Add(e.Clone());
+                }
+            }
+
+            if (!ignoreChildren && ChildParticleEffects != null)
             {
                 foreach (var e in ChildParticleEffects)
                 {

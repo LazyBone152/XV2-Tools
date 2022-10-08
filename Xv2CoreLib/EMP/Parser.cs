@@ -56,7 +56,7 @@ namespace Xv2CoreLib.EMP
             return empFile;
         }
 
-        void Parse()
+        private void Parse()
         {
             empFile.Version = (VersionEnum)BitConverter.ToUInt16(rawBytes, 8);
 
@@ -91,7 +91,6 @@ namespace Xv2CoreLib.EMP
                 LinkTextureEntries();
             }
         }
-        
 
         private AsyncObservableCollection<ParticleEffect> SortEffect(int entryOffset, int nextParticleEffectOffset_Abs)
         {
@@ -127,7 +126,6 @@ namespace Xv2CoreLib.EMP
             return effectEntries;
 
         }
-
 
         private ParticleEffect ParseEffect(int mainEntryOffset)
         {

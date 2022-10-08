@@ -646,6 +646,8 @@ namespace Xv2CoreLib
 
         public static int CalculatePadding(int fileSize, int byteAlignment)
         {
+            //return (byteAlignment - (fileSize % byteAlignment)) % byteAlignment;
+
             //Using floats results in overflows when dealing with large files
             double f_offset = fileSize;
             int padding = 0;
@@ -656,6 +658,7 @@ namespace Xv2CoreLib
                 padding += 1;
             }
             return (int)padding;
+            
         }
 
         public static byte[] PadBytes(byte[] bytes, int minSize)

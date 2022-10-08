@@ -226,6 +226,14 @@
     <Compile Include="EMP\Deserializer.cs" />
     <Compile Include="EMP\EMP File.cs" />
     <Compile Include="EMP\Parser.cs" />
+    <Compile Include="EMP_NEW\Deserializer.cs" />
+    <Compile Include="EMP_NEW\EMP File.cs" />
+    <Compile Include="EMP_NEW\Keyframes\KeyframedFloatValue.cs" />
+    <Compile Include="EMP_NEW\Keyframes\KeyframedColorValue.cs" />
+    <Compile Include="EMP_NEW\Keyframes\KeyframedVector2Value.cs" />
+    <Compile Include="EMP_NEW\Keyframes\KeyframedVector3Value.cs" />
+    <Compile Include="EMP_NEW\Keyframes\KeyframedBaseValue.cs" />
+    <Compile Include="EMP_NEW\Parser.cs" />
     <Compile Include="ERS\Deserializer.cs" />
     <Compile Include="ERS\ERS_File.cs" />
     <Compile Include="ERS\Parser.cs" />

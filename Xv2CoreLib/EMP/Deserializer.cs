@@ -94,9 +94,6 @@ namespace Xv2CoreLib.EMP
             int particleEffectCount = (empFile.ParticleEffects != null) ? empFile.ParticleEffects.Count() : 0;
             int textureEntryCount = (empFile.Textures != null) ? empFile.Textures.Count() : 0;
 
-            //Create copy of empFile and work of that, so the original isn't altered
-            empFile = empFile.Clone();
-
             //Header
             bytes.AddRange(BitConverter.GetBytes(EMP_File.EMP_SIGNATURE));
             bytes.AddRange(BitConverter.GetBytes((ushort)65534));
@@ -118,8 +115,6 @@ namespace Xv2CoreLib.EMP
                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), 20);
                 WriteEmbEntries(empFile.Textures);
             }
-
-
         }
 
         private void SortEntry(IList<ParticleEffect> effectEntries)

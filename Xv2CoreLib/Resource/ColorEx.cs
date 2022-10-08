@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows.Media.Imaging;
+using Xv2CoreLib.Resource.UndoRedo;
 
 namespace Xv2CoreLib.HslColor
 {
@@ -258,6 +259,36 @@ namespace Xv2CoreLib.HslColor
 
     public static class ColorEx
     {
+        public static void ChangeHue(this CustomColor color, double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet, int variance)
+        {
+            if (!color.IsWhiteOrBlack())
+            {
+                HslColor newCol = new RgbColor(color).ToHsl();
+                RgbColor convertedColor;
+
+                if (hueSet)
+                {
+                    newCol.SetHue(hue, variance);
+                }
+                else
+                {
+                    newCol.ChangeHue(hue);
+                    newCol.ChangeSaturation(saturation);
+                    newCol.ChangeLightness(lightness);
+                }
+
+                convertedColor = newCol.ToRgb();
+
+                undos.Add(new UndoableProperty<CustomColor>(nameof(color.R), color, color.R, (float)convertedColor.R));
+                undos.Add(new UndoableProperty<CustomColor>(nameof(color.G), color, color.G, (float)convertedColor.G));
+                undos.Add(new UndoableProperty<CustomColor>(nameof(color.B), color, color.B, (float)convertedColor.B));
+
+                color.R = (float)convertedColor.R;
+                color.G = (float)convertedColor.G;
+                color.B = (float)convertedColor.B;
+            }
+        }
+
         public static WriteableBitmap HueAdjust(WriteableBitmap bitmap, int hue)
         {
             //Does not work for whatever reason...
