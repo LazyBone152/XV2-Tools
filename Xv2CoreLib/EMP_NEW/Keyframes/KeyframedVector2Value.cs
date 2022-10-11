@@ -13,7 +13,6 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
         public CustomVector4 Constant { get; set; }
         public AsyncObservableCollection<KeyframeVector2Value> Keyframes { get; set; } = new AsyncObservableCollection<KeyframeVector2Value>();
 
-        public override bool IsConstant => Keyframes.Count == 0;
         private readonly bool IsScale;
 
         #region Init
@@ -29,14 +28,8 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             if (empKeyframes.Length != 2)
                 throw new ArgumentException($"KeyframedVector2Value.DecompileKeyframes: Invalid number of keyframed values. Expected 2, but there are {empKeyframes.Length}!");
 
-            bool interpolate;
-            bool loop;
-
             //Returns array of 3: X, Y
-            List<KeyframedGenericValue>[] tempKeyframes = Decompile(Constant.Values, out interpolate, out loop, empKeyframes);
-
-            Interpolate = interpolate;
-            Loop = loop;
+            List<KeyframedGenericValue>[] tempKeyframes = Decompile(Constant.Values, empKeyframes);
 
             if (Keyframes.Count > 0)
                 Keyframes.Clear();

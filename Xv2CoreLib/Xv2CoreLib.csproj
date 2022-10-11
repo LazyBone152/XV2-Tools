@@ -228,6 +228,7 @@
     <Compile Include="EMP\Parser.cs" />
     <Compile Include="EMP_NEW\Deserializer.cs" />
     <Compile Include="EMP_NEW\EMP File.cs" />
+    <Compile Include="EMP_NEW\Events.cs" />
     <Compile Include="EMP_NEW\Keyframes\KeyframedFloatValue.cs" />
     <Compile Include="EMP_NEW\Keyframes\KeyframedColorValue.cs" />
     <Compile Include="EMP_NEW\Keyframes\KeyframedVector2Value.cs" />
@@ -359,6 +360,7 @@
     <Compile Include="UTF\UTF_File.cs" />
     <Compile Include="ValuesDictionary\BAC.cs" />
     <Compile Include="ValuesDictionary\BCS.cs" />
+    <Compile Include="ValuesDictionary\EMP.cs" />
     <Compile Include="Xenoverse2\FileManager.cs" />
     <Compile Include="Xenoverse2\FileWatcher.cs" />
     <Compile Include="Xenoverse2\Xenoverse2.cs" />

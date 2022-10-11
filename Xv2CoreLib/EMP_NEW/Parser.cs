@@ -145,17 +145,17 @@ namespace Xv2CoreLib.EMP_NEW
             node.EnableRandomUpVectorOnVirtualCone = compositeBits_I_34[6];
             node.I_34_7 = compositeBits_I_34[7];
             node.AutoRotationType = (ParticleAutoRotationType)rawBytes[mainNodeOffset + 35];
-            node.ParticleCount = BitConverter.ToInt16(rawBytes, mainNodeOffset + 38);
-            node.Lifetime = BitConverter.ToInt16(rawBytes, mainNodeOffset + 40);
+            node.MaxInstances = BitConverter.ToInt16(rawBytes, mainNodeOffset + 38);
+            node.Lifetime = BitConverter.ToUInt16(rawBytes, mainNodeOffset + 40);
             node.Lifetime_Variance = BitConverter.ToUInt16(rawBytes, mainNodeOffset + 42);
             node.StartTime = rawBytes[mainNodeOffset + 44];
             node.StartTime_Variance = rawBytes[mainNodeOffset + 45];
-            node.CreateDelay = rawBytes[mainNodeOffset + 46];
-            node.CreateDelay_Variance = rawBytes[mainNodeOffset + 47];
+            node.BurstFrequency = rawBytes[mainNodeOffset + 46];
+            node.BurstFrequency_Variance = rawBytes[mainNodeOffset + 47];
             node.I_48 = BitConverter.ToUInt16(rawBytes, mainNodeOffset + 48);
             node.I_50 = BitConverter.ToUInt16(rawBytes, mainNodeOffset + 50);
-            node.MaxParticlesPerFrame = BitConverter.ToUInt16(rawBytes, mainNodeOffset + 52);
-            node.MaxParticlesPerFrame_Variance = BitConverter.ToUInt16(rawBytes, mainNodeOffset + 54);
+            node.Burst = BitConverter.ToUInt16(rawBytes, mainNodeOffset + 52);
+            node.Burst_Variance = BitConverter.ToUInt16(rawBytes, mainNodeOffset + 54);
             node.I_56 = BitConverter.ToUInt16(rawBytes, mainNodeOffset + 56);
             node.I_58 = BitConverter.ToUInt16(rawBytes, mainNodeOffset + 58);
             node.I_60 = BitConverter.ToUInt16(rawBytes, mainNodeOffset + 60);
@@ -202,7 +202,7 @@ namespace Xv2CoreLib.EMP_NEW
                         case 1:
                         case 2:
                         case 3:
-                            node.Emitter = ParticleEmitter.Parse(rawBytes, mainNodeOffset);
+                            node.EmitterNode = ParticleEmitter.Parse(rawBytes, mainNodeOffset);
                             break;
                         default:
                             throw new InvalidDataException($"EMP_File: EmitterType {secondaryNodeType} is not recognized!");
@@ -218,7 +218,7 @@ namespace Xv2CoreLib.EMP_NEW
                         case 3:
                         case 4:
                         case 5:
-                            node.Emission = ParticleEmission.Parse(rawBytes, mainNodeOffset, this);
+                            node.EmissionNode = ParticleEmission.Parse(rawBytes, mainNodeOffset, this);
                             break;
                         default:
                             throw new InvalidDataException($"EMP_File: EmissionType {secondaryNodeType} is not recognized!");
@@ -311,18 +311,18 @@ namespace Xv2CoreLib.EMP_NEW
                         EMP_KeyframedValue[] scale2Keyframes = node.GetKeyframedValues(EMP_KeyframedValue.VALUE_SCALE, EMP_KeyframedValue.COMPONENT_X, EMP_KeyframedValue.COMPONENT_Y);
                         scaleBaseKeyframes = node.GetKeyframedValues(EMP_KeyframedValue.VALUE_SCALE, EMP_KeyframedValue.COMPONENT_Z);
 
-                        node.Emission.Texture.ScaleXY.DecompileKeyframes(scale2Keyframes);
+                        node.EmissionNode.Texture.ScaleXY.DecompileKeyframes(scale2Keyframes);
                     }
                     else
                     {
                         scaleBaseKeyframes = node.GetKeyframedValues(EMP_KeyframedValue.VALUE_SCALE, EMP_KeyframedValue.COMPONENT_X);
                     }
 
-                    node.Emission.Texture.Color1.DecompileKeyframes(color1Keyframes);
-                    node.Emission.Texture.Color2.DecompileKeyframes(color2Keyframes);
-                    node.Emission.Texture.Color1_Transparency.DecompileKeyframes(color1AlphaKeyframes);
-                    node.Emission.Texture.Color2_Transparency.DecompileKeyframes(color2AlphaKeyframes);
-                    node.Emission.Texture.ScaleBase.DecompileKeyframes(scaleBaseKeyframes);
+                    node.EmissionNode.Texture.Color1.DecompileKeyframes(color1Keyframes);
+                    node.EmissionNode.Texture.Color2.DecompileKeyframes(color2Keyframes);
+                    node.EmissionNode.Texture.Color1_Transparency.DecompileKeyframes(color1AlphaKeyframes);
+                    node.EmissionNode.Texture.Color2_Transparency.DecompileKeyframes(color2AlphaKeyframes);
+                    node.EmissionNode.Texture.ScaleBase.DecompileKeyframes(scaleBaseKeyframes);
 
                 }
 
@@ -330,27 +330,27 @@ namespace Xv2CoreLib.EMP_NEW
                 switch (node.NodeSpecificType)
                 {
                     case NodeSpecificType.SphericalDistribution:
-                        node.Emitter.Size.DecompileKeyframes(node.GetKeyframedValues(2, 0));
-                        node.Emitter.Velocity.DecompileKeyframes(node.GetKeyframedValues(2, 1));
+                        node.EmitterNode.Size.DecompileKeyframes(node.GetKeyframedValues(2, 0));
+                        node.EmitterNode.Velocity.DecompileKeyframes(node.GetKeyframedValues(2, 1));
                         break;
                     case NodeSpecificType.VerticalDistribution:
-                        node.Emitter.Position.DecompileKeyframes(node.GetKeyframedValues(2, 0));
-                        node.Emitter.Velocity.DecompileKeyframes(node.GetKeyframedValues(2, 1));
-                        node.Emitter.Angle.DecompileKeyframes(node.GetKeyframedValues(2, 2));
+                        node.EmitterNode.Position.DecompileKeyframes(node.GetKeyframedValues(2, 0));
+                        node.EmitterNode.Velocity.DecompileKeyframes(node.GetKeyframedValues(2, 1));
+                        node.EmitterNode.Angle.DecompileKeyframes(node.GetKeyframedValues(2, 2));
                         break;
                     case NodeSpecificType.ShapeAreaDistribution:
                     case NodeSpecificType.ShapePerimeterDistribution:
-                        node.Emitter.Position.DecompileKeyframes(node.GetKeyframedValues(2, 0));
-                        node.Emitter.Velocity.DecompileKeyframes(node.GetKeyframedValues(2, 1));
-                        node.Emitter.Angle.DecompileKeyframes(node.GetKeyframedValues(2, 2));
-                        node.Emitter.Size.DecompileKeyframes(node.GetKeyframedValues(3, 0));
-                        node.Emitter.Size2.DecompileKeyframes(node.GetKeyframedValues(3, 1));
+                        node.EmitterNode.Position.DecompileKeyframes(node.GetKeyframedValues(2, 0));
+                        node.EmitterNode.Velocity.DecompileKeyframes(node.GetKeyframedValues(2, 1));
+                        node.EmitterNode.Angle.DecompileKeyframes(node.GetKeyframedValues(2, 2));
+                        node.EmitterNode.Size.DecompileKeyframes(node.GetKeyframedValues(3, 0));
+                        node.EmitterNode.Size2.DecompileKeyframes(node.GetKeyframedValues(3, 1));
                         break;
                     case NodeSpecificType.AutoOriented:
                     case NodeSpecificType.Default:
                     case NodeSpecificType.Mesh:
                     case NodeSpecificType.ShapeDraw:
-                        node.Emission.ActiveRotation.DecompileKeyframes(node.GetKeyframedValues(1, 3));
+                        node.EmissionNode.ActiveRotation.DecompileKeyframes(node.GetKeyframedValues(1, 3));
                         break;
                 }
 

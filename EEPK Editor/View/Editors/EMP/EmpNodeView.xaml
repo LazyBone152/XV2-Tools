@@ -1,0 +1,291 @@
+﻿<UserControl x:Class="EEPK_Organiser.View.Editors.EMP.EmpNodeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:EEPK_Organiser.View.Editors.EMP"
+             xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+             xmlns:vector="clr-namespace:EEPK_Organiser.View.Vectors"
+             xmlns:empDic="clr-namespace:Xv2CoreLib.ValuesDictionary;assembly=Xv2CoreLib"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
+             mc:Ignorable="d" 
+             Dialog:DialogParticipation.Register="{Binding}"
+             d:DesignHeight="4500" d:DesignWidth="800" Name="UserControl">
+    <Grid>
+        <Controls:MetroTabControl x:Name="tabControl" Controls:TabControlHelper.Underlined="TabItems">
+            <Controls:MetroTabItem Header="General" Controls:HeaderedControlHelper.HeaderFontSize="16">
+                <StackPanel>
+                    <Expander Header="Node" IsExpanded="True">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Grid Margin="3,5,0,0" Width="380">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="125"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Name"/>
+                                    <TextBox Grid.Column="1" Text="{Binding ElementName=UserControl, Path=NodeViewModel.Name}"/>
+                                </Grid>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Grid Margin="3,5,0,0" Width="250">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="125"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Node Type"/>
+                                    <ComboBox Grid.Column="1" ItemsSource="{x:Static empDic:EMP.NodeType}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding ElementName=UserControl, Path=NodeViewModel.NodeType}"/>
+                                </Grid>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Grid Margin="3,5,0,0" Width="250">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Start Time"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.StartTime}" Minimum="0" Maximum="255"/>
+                                </Grid>
+                                <Grid Margin="3,5,0,0" Width="250">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Variance"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.StartTime_Variance}" Minimum="0" Maximum="255"/>
+                                </Grid>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Grid Margin="3,5,0,0" Width="250">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Lifetime"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Lifetime}" Minimum="0" Maximum="20000"/>
+                                </Grid>
+                                <Grid Margin="3,5,0,0" Width="250">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Variance"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Lifetime_Variance}" Minimum="0" Maximum="20000"/>
+                                </Grid>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Grid Margin="3,5,0,0" Width="250">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Burst"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Burst}" Minimum="0" Maximum="1000"/>
+                                </Grid>
+                                <Grid Margin="3,5,0,0" Width="250">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Variance"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Burst_Variance}" Minimum="0" Maximum="1000"/>
+                                </Grid>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Grid Margin="3,5,0,0" Width="250">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Burst Frequency"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.BurstFrequency}" Minimum="0" Maximum="255"/>
+                                </Grid>
+                                <Grid Margin="3,5,0,0" Width="250">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Variance"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.BurstFrequency}" Minimum="0" Maximum="255"/>
+                                </Grid>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Grid Margin="3,5,0,0" Width="250">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Max Instances"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.MaxInstances}" Minimum="-1" Maximum="10000"/>
+                                </Grid>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Grid Margin="3,5,0,0" Width="500">
+                                    <local:KeyframedValueView ValueName="Position" KeyframedValue="{Binding ElementName=UserControl, Path=NodeViewModel.Position}"/>
+                                </Grid>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Grid Margin="3,5,0,0" Width="500">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="125"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Position Variance"/>
+                                    <vector:CustomVector3 Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Position_Variance}"/>
+                                </Grid>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Grid Margin="3,5,0,0" Width="500">
+                                    <local:KeyframedValueView ValueName="Rotation" KeyframedValue="{Binding ElementName=UserControl, Path=NodeViewModel.Rotation}"/>
+                                </Grid>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Grid Margin="3,5,0,0" Width="500">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="125"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Rotation Variance"/>
+                                    <vector:CustomVector3 Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Rotation_Variance}"/>
+                                </Grid>
+                            </StackPanel>
+                            
+                            <Grid Margin="3,5,0,0" Width="250" HorizontalAlignment="Left">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Content="Loop"/>
+                                <CheckBox Grid.Row="1" IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.Loop}"/>
+                            </Grid>
+                            <Grid Margin="3,5,0,0" Width="250" HorizontalAlignment="Left">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="125"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Content="Random Rotation Dir"/>
+                                <CheckBox Grid.Row="1" IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.RandomRotationDirection}"/>
+                            </Grid>
+                        </StackPanel>
+                    </Expander>
+                    <Expander Header="Emitter" IsExpanded="True">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Grid Margin="3,5,0,0" Width="250">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="125"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Shape"/>
+                                    <ComboBox Grid.Column="1" ItemsSource="{x:Static empDic:EMP.EmitterShapes}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding ElementName=UserControl, Path=NodeViewModel.Shape}"/>
+                                </Grid>
+                            </StackPanel>
+                            <Grid Margin="3,5,0,0" Width="250" HorizontalAlignment="Left" Visibility="{Binding ElementName=UserControl, Path=EmitterFromAreaVisibility}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Content="Emit From Area"/>
+                                <CheckBox Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.EmitFromArea}"/>
+                            </Grid>
+                            <StackPanel Orientation="Horizontal" Visibility="{Binding ElementName=UserControl, Path=EmitterPositionVisibility}">
+                                <Grid Margin="3,5,0,0" Width="250">
+                                    <local:KeyframedValueView ValueName="Position Offset" KeyframedValue="{Binding ElementName=UserControl, Path=NodeViewModel.EmitterPositionY}"/>
+                                </Grid>
+                                <Grid Margin="3,5,0,0" Width="250">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Variance"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.EmitterPositionY_Variance}" StringFormat="0.0###" Interval="0.05"/>
+                                </Grid>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Grid Margin="3,5,0,0" Width="250">
+                                    <local:KeyframedValueView ValueName="Velocity" KeyframedValue="{Binding ElementName=UserControl, Path=NodeViewModel.EmitterVelocity}"/>
+                                </Grid>
+                                <Grid Margin="3,5,0,0" Width="250">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Variance"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.EmitterVelocity_Variance}" StringFormat="0.0###" Interval="0.05"/>
+                                </Grid>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Visibility="{Binding ElementName=UserControl, Path=EmitterSizeVisibility}">
+                                <Grid Margin="3,5,0,0" Width="250">
+                                    <local:KeyframedValueView ValueName="Size" KeyframedValue="{Binding ElementName=UserControl, Path=NodeViewModel.EmitterSize}"/>
+                                </Grid>
+                                <Grid Margin="3,5,0,0" Width="250">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Variance"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.EmitterSize_Variance}" StringFormat="0.0###" Interval="0.05"/>
+                                </Grid>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Visibility="{Binding ElementName=UserControl, Path=EmitterSize2Visibility}">
+                                <Grid Margin="3,5,0,0" Width="250">
+                                    <local:KeyframedValueView ValueName="Size 2" KeyframedValue="{Binding ElementName=UserControl, Path=NodeViewModel.EmitterSize2}"/>
+                                </Grid>
+                                <Grid Margin="3,5,0,0" Width="250">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Variance"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.EmitterSize2_Variance}" StringFormat="0.0###" Interval="0.05"/>
+                                </Grid>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Visibility="{Binding ElementName=UserControl, Path=EmitterAngleVisibility}">
+                                <Grid Margin="3,5,0,0" Width="250">
+                                    <local:KeyframedValueView ValueName="Angle" KeyframedValue="{Binding ElementName=UserControl, Path=NodeViewModel.EmitterAngle}"/>
+                                </Grid>
+                                <Grid Margin="3,5,0,0" Width="250">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Variance"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.EmitterAngle_Variance}" StringFormat="0.0####" Interval="0.05"/>
+                                </Grid>
+                            </StackPanel>
+                            <Grid Margin="3,5,0,0" Width="250" HorizontalAlignment="Left" Visibility="{Binding ElementName=UserControl, Path=EmitterF1Visibility}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Content="F__1"/>
+                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Emitter_F1}" StringFormat="0.0####" Interval="0.05"/>
+                            </Grid>
+                            <Grid Margin="3,5,0,0" Width="250" HorizontalAlignment="Left" Visibility="{Binding ElementName=UserControl, Path=EmitterF2Visibility}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Content="F__2"/>
+                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Emitter_F2}" StringFormat="0.0####" Interval="0.05"/>
+                            </Grid>
+
+                        </StackPanel>
+                    </Expander>
+                </StackPanel>
+                
+            </Controls:MetroTabItem>
+            <Controls:MetroTabItem Header="Animations" Controls:HeaderedControlHelper.HeaderFontSize="16">
+
+            </Controls:MetroTabItem>
+            <Controls:MetroTabItem Header="Group" Controls:HeaderedControlHelper.HeaderFontSize="16">
+
+            </Controls:MetroTabItem>
+            <Controls:MetroTabItem Header="Unknown" Controls:HeaderedControlHelper.HeaderFontSize="16">
+
+            </Controls:MetroTabItem>
+        </Controls:MetroTabControl>
+    </Grid>
+</UserControl>

@@ -6,5 +6,6 @@
         public static bool LoadTextures = true;
         public static bool AutoRenameContainers = true;
         public static bool AssetReuseMatchName = false;
+        public static bool FullDecompile = true;
     }
 }

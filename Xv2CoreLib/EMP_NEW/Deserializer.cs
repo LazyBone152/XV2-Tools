@@ -138,17 +138,17 @@ namespace Xv2CoreLib.EMP_NEW
 
             bytes.AddRange(new byte[6] { Utils.ConvertToByte(compositeBits_I_32), Utils.ConvertToByte(compositeBits_I_33), Utils.ConvertToByte(compositeBits_I_34), (byte)node.AutoRotationType, (byte)0, (byte)node.NodeType });
 
-            bytes.AddRange(BitConverter.GetBytes(node.ParticleCount));
+            bytes.AddRange(BitConverter.GetBytes(node.MaxInstances));
             bytes.AddRange(BitConverter.GetBytes(node.Lifetime));
             bytes.AddRange(BitConverter.GetBytes(node.Lifetime_Variance));
             bytes.Add(node.StartTime);
             bytes.Add(node.StartTime_Variance);
-            bytes.Add(node.CreateDelay);
-            bytes.Add(node.CreateDelay_Variance);
+            bytes.Add(node.BurstFrequency);
+            bytes.Add(node.BurstFrequency_Variance);
             bytes.AddRange(BitConverter.GetBytes(node.I_48));
             bytes.AddRange(BitConverter.GetBytes(node.I_50));
-            bytes.AddRange(BitConverter.GetBytes(node.MaxParticlesPerFrame));
-            bytes.AddRange(BitConverter.GetBytes(node.MaxParticlesPerFrame_Variance));
+            bytes.AddRange(BitConverter.GetBytes(node.Burst));
+            bytes.AddRange(BitConverter.GetBytes(node.Burst_Variance));
             bytes.AddRange(BitConverter.GetBytes(node.I_56));
             bytes.AddRange(BitConverter.GetBytes(node.I_58));
             bytes.AddRange(BitConverter.GetBytes(node.I_60));
@@ -187,10 +187,10 @@ namespace Xv2CoreLib.EMP_NEW
                 case ParticleNodeType.Null:
                     break;
                 case ParticleNodeType.Emitter:
-                    bytes.AddRange(node.Emitter.Write(ref secondaryNodeType));
+                    bytes.AddRange(node.EmitterNode.Write(ref secondaryNodeType));
                     break;
                 case ParticleNodeType.Emission:
-                    bytes.AddRange(node.Emission.Write(ref secondaryNodeType, nodeOffset, this));
+                    bytes.AddRange(node.EmissionNode.Write(ref secondaryNodeType, nodeOffset, this));
                     break;
                 default:
                     throw new InvalidDataException($"EMP_File: NodeType {node.NodeType} not recognized! Save failed.");

@@ -162,6 +162,9 @@
     <Compile Include="Forms\AssetContainerSettings.xaml.cs">
       <DependentUpon>AssetContainerSettings.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Forms\Editors\EmpEditorWindow.xaml.cs">
+      <DependentUpon>EmpEditorWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Forms\EffectSelector.xaml.cs">
       <DependentUpon>EffectSelector.xaml</DependentUpon>
     </Compile>
@@ -175,7 +178,7 @@
     <Compile Include="Forms\LogPrompt.xaml.cs">
       <DependentUpon>LogPrompt.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Forms\MaterialsEditorForm.xaml.cs">
+    <Compile Include="Forms\Editors\MaterialsEditorForm.xaml.cs">
       <DependentUpon>MaterialsEditorForm.xaml</DependentUpon>
     </Compile>
     <Compile Include="Forms\Recolor\RecolorAll.xaml.cs">
@@ -203,7 +206,14 @@
     <Compile Include="Misc\LoadFromGameHelper.cs" />
     <Compile Include="ViewModel\AssetContainerViewModel.cs" />
     <Compile Include="ViewModel\EffectPartViewModel.cs" />
+    <Compile Include="ViewModel\EmpNodeViewModel.cs" />
     <Compile Include="ViewModel\MaterialViewModel.cs" />
+    <Compile Include="View\Editors\EMP\EmpNodeView.xaml.cs">
+      <DependentUpon>EmpNodeView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Editors\EMP\KeyframedValueView.xaml.cs">
+      <DependentUpon>KeyframedValueView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\EepkEditor.xaml.cs">
       <DependentUpon>EepkEditor.xaml</DependentUpon>
     </Compile>
@@ -222,6 +232,15 @@
     <Compile Include="View\Vectors\CustomMatUV.xaml.cs">
       <DependentUpon>CustomMatUV.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\Vectors\CustomRgbColor.xaml.cs">
+      <DependentUpon>CustomRgbColor.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Vectors\CustomVector2.xaml.cs">
+      <DependentUpon>CustomVector2.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Vectors\CustomVector3.xaml.cs">
+      <DependentUpon>CustomVector3.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\Vectors\CustomVector4.xaml.cs">
       <DependentUpon>CustomVector4.xaml</DependentUpon>
     </Compile>
@@ -233,11 +252,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Forms\Editors\EmpEditorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Forms\EffectSelector.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Forms\EmbEditForm.xaml">
+    <Page Include="Forms\Editors\EmbEditForm.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -261,7 +284,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Forms\MaterialsEditorForm.xaml">
+    <Page Include="Forms\Editors\MaterialsEditorForm.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -308,7 +331,7 @@
     <Compile Include="Forms\AssetSelector.xaml.cs">
       <DependentUpon>AssetSelector.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Forms\EmbEditForm.xaml.cs">
+    <Compile Include="Forms\Editors\EmbEditForm.xaml.cs">
       <DependentUpon>EmbEditForm.xaml</DependentUpon>
     </Compile>
     <Compile Include="Forms\LogForm.xaml.cs">
@@ -321,6 +344,14 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="View\Editors\EMP\EmpNodeView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Editors\EMP\KeyframedValueView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="View\EepkEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -342,6 +373,18 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Vectors\CustomMatUV.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Vectors\CustomRgbColor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Vectors\CustomVector2.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Vectors\CustomVector3.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -413,6 +456,7 @@
   <ItemGroup>
     <Resource Include="Resources\transparent_checkerboard.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Fody.3.3.2\build\Fody.targets" Condition="Exists('..\packages\Fody.3.3.2\build\Fody.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

@@ -14,8 +14,6 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
         public CustomColor Constant { get; set; }
         public AsyncObservableCollection<KeyframeColorValue> Keyframes { get; set; } = new AsyncObservableCollection<KeyframeColorValue>();
 
-        public override bool IsConstant => Keyframes.Count == 0;
-
         #region Init
         public KeyframedColorValue(float r, float g, float b, KeyframedValueType valueType)
         {
@@ -28,14 +26,8 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             if (empKeyframes.Length != 3)
                 throw new ArgumentException($"KeyframedColorValue.DecompileKeyframes: Invalid number of keyframed values. Expected 3, but there are {empKeyframes.Length}!");
 
-            bool interpolate;
-            bool loop;
-
             //Returns array of 3: R, G, B
-            List<KeyframedGenericValue>[] tempKeyframes = Decompile(Constant.Values, out interpolate, out loop, empKeyframes);
-
-            Interpolate = interpolate;
-            Loop = loop;
+            List<KeyframedGenericValue>[] tempKeyframes = Decompile(Constant.Values, empKeyframes);
 
             if (Keyframes.Count > 0)
                 Keyframes.Clear();

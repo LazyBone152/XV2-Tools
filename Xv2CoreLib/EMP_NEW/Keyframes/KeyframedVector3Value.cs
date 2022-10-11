@@ -13,8 +13,6 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
         public CustomVector4 Constant { get; set; }
         public AsyncObservableCollection<KeyframeVector3Value> Keyframes { get; set; } = new AsyncObservableCollection<KeyframeVector3Value>();
 
-        public override bool IsConstant => Keyframes.Count == 0;
-
         #region Init
         public KeyframedVector3Value(float x, float y, float z, KeyframedValueType valueType)
         {
@@ -29,14 +27,8 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
 
             SetParameterAndComponents();
 
-            bool interpolate;
-            bool loop;
-
             //Returns array of 3: X, Y, Z
-            List<KeyframedGenericValue>[] tempKeyframes = Decompile(Constant.Values, out interpolate, out loop, empKeyframes);
-
-            Interpolate = interpolate;
-            Loop = loop;
+            List<KeyframedGenericValue>[] tempKeyframes = Decompile(Constant.Values, empKeyframes);
 
             if (Keyframes.Count > 0)
                 Keyframes.Clear();

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using Xv2CoreLib.Resource.UndoRedo;
 
 namespace Xv2CoreLib.EMP_NEW.Keyframes
 {
@@ -22,7 +23,20 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
         private bool _loop = false;
         private bool _interpolate = true;
 
-        public virtual bool IsConstant => true;
+        public bool IsAnimated { get; set; }
+        public bool UndoableIsAnimated
+        {
+            get => IsAnimated;
+            set
+            {
+                if(IsAnimated != value)
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(IsAnimated), this, IsAnimated, value, value ? $"{ValueType} animation enabled" : $"{ValueType} animation disabled"));
+                    IsAnimated = value;
+                    NotifyPropertyChanged(nameof(UndoableIsAnimated));
+                }
+            }
+        }
         public bool Loop
         {
             get => _loop;
@@ -47,23 +61,29 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
                 }
             }
         }
-        protected virtual KeyframedValueType ValueType { get; set; }
+        public virtual KeyframedValueType ValueType { get; protected set; }
         protected byte Parameter { get; set; }
         public byte[] Components { get; set; }
 
         /// <summary>
         /// Decompiles an array of <see cref="EMP_KeyframedValue"/> into an array of keyframes with synchronized timings. 
         /// </summary>
-        protected List<KeyframedGenericValue>[] Decompile(float[] constant, out bool interpolation, out bool loop, params EMP_KeyframedValue[] keyframeValues)
+        protected List<KeyframedGenericValue>[] Decompile(float[] constant, params EMP_KeyframedValue[] keyframeValues)
         {
             //Interpolation setting should be shared between all EMP_KeyframedValues for the same parameter/value (and it is the case in all vanilla EMP files for XV2, SDBH and Breakers)
-            interpolation = keyframeValues[0].Interpolate;
+            Interpolate = keyframeValues[0].Interpolate;
+            IsAnimated = false;
 
             List<KeyframedGenericValue>[] values = new List<KeyframedGenericValue>[keyframeValues.Length];
 
             //Add all keyframes from EMP
             for(int i = 0; i < keyframeValues.Length; i++)
             {
+                if (!keyframeValues[i].IsDefault)
+                {
+                    IsAnimated = true;
+                }
+
                 values[i] = new List<KeyframedGenericValue>();
 
                 if(keyframeValues[i].Keyframes.Count == 0 || keyframeValues[i].IsDefault)
@@ -92,12 +112,11 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             }
 
             //Handle loops
-            loop = false;
-            bool wasLooping = false;
+            Loop = false;
 
             if(keyframeValues.All(x => x.Loop))
             {
-                loop = true;
+                Loop = true;
             }
             else if (keyframeValues.Any(x => x.Loop))
             {
@@ -105,7 +124,6 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
                 //The way we're decompiling the keyframes doesn't allow mixed-loops like this, so we must manually add looped keyframes to fill out the duration.
                 //The duration must be a minimum of 101 (the particles whole life time). This also means that non-looped values will need to be extended as well, if they are less than that.
                 int newDuration = keyframeValues.Max(x => x.Duration) > 101 ? keyframeValues.Max(x => x.Duration) : 101;
-                wasLooping = true;
 
                 for(int i = 0; i < values.Length; i++)
                 {
@@ -138,7 +156,7 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
                     //Check if keyframe exists at this time in the current values
                     if (values[i].FirstOrDefault(x => x.Time == keyframe) == null)
                     {
-                        values[i].Add(new KeyframedGenericValue(keyframe, EMP_Keyframe.GetInterpolatedKeyframe(values[i], keyframe, interpolation)));
+                        values[i].Add(new KeyframedGenericValue(keyframe, EMP_Keyframe.GetInterpolatedKeyframe(values[i], keyframe, Interpolate)));
                     }
                 }
             }
@@ -164,23 +182,26 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
         {
             EMP_KeyframedValue[] empKeyframes = new EMP_KeyframedValue[keyframes.Length];
 
-            for(int i = 0; i < keyframes.Length; i++)
+            if (IsAnimated)
             {
-                if(keyframes[i].All(x => x.Value != constant[i]))
+                for (int i = 0; i < keyframes.Length; i++)
                 {
-                    empKeyframes[i] = new EMP_KeyframedValue();
-                    empKeyframes[i].Loop = Loop;
-                    empKeyframes[i].Interpolate = Interpolate;
-                    empKeyframes[i].Value = Parameter;
-                    empKeyframes[i].Component = Components[i];
-
-                    for (int a = 0; a < keyframes[i].Count; a++)
+                    if (keyframes[i].All(x => x.Value != constant[i]))
                     {
-                        empKeyframes[i].Keyframes.Add(new EMP_Keyframe()
+                        empKeyframes[i] = new EMP_KeyframedValue();
+                        empKeyframes[i].Loop = Loop;
+                        empKeyframes[i].Interpolate = Interpolate;
+                        empKeyframes[i].Value = Parameter;
+                        empKeyframes[i].Component = Components[i];
+
+                        for (int a = 0; a < keyframes[i].Count; a++)
                         {
-                            Time = keyframes[i][a].Time,
-                            Value = keyframes[i][a].Value
-                        });
+                            empKeyframes[i].Keyframes.Add(new EMP_Keyframe()
+                            {
+                                Time = keyframes[i][a].Time,
+                                Value = keyframes[i][a].Value
+                            });
+                        }
                     }
                 }
             }

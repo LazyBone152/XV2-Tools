@@ -8,10 +8,7 @@ using Xv2CoreLib.Resource.UndoRedo;
 
 namespace EEPK_Organiser.View.Vectors
 {
-    /// <summary>
-    /// Interaction logic for MatVector4.xaml
-    /// </summary>
-    public partial class CustomColor : UserControl, INotifyPropertyChanged, IDisposable
+    public partial class CustomRgbColor : UserControl, INotifyPropertyChanged, IDisposable
     {
         #region NotifyPropChanged
         public event PropertyChangedEventHandler PropertyChanged;
@@ -24,7 +21,7 @@ namespace EEPK_Organiser.View.Vectors
 
         #region DP
         public static readonly DependencyProperty ValueProperty = DependencyProperty.Register(
-            "Value", typeof(LB_Common.Numbers.CustomColor), typeof(CustomColor), new PropertyMetadata(OnDpChanged));
+            "Value", typeof(LB_Common.Numbers.CustomColor), typeof(CustomRgbColor), new PropertyMetadata(OnDpChanged));
 
         public LB_Common.Numbers.CustomColor Value
         {
@@ -33,7 +30,7 @@ namespace EEPK_Organiser.View.Vectors
         }
 
         public static readonly DependencyProperty IntervalProperty = DependencyProperty.Register(
-            "Interval", typeof(float), typeof(CustomColor), new PropertyMetadata(0.05f));
+            "Interval", typeof(float), typeof(CustomRgbColor), new PropertyMetadata(0.05f));
 
         public float Interval
         {
@@ -89,32 +86,16 @@ namespace EEPK_Organiser.View.Vectors
                 NotifyPropertyChanged(nameof(CurrentColor));
             }
         }
-        public float A
-        {
-            get => Value != null ? Value.A : 0;
-            set
-            {
-                if (Value != null) SetFloatValue(value, nameof(Value.A));
-                NotifyPropertyChanged(nameof(CurrentColor));
-            }
-        }
 
         public Color? CurrentColor
         {
-            get
-            {
-                return Color.FromScRgb(NormalizedFloatColor(A), NormalizedFloatColor(R), NormalizedFloatColor(G), NormalizedFloatColor(B));
-                //return Color.FromArgb((byte)(NormalizedFloatColor(A) * 255), (byte)(NormalizedFloatColor(R) * 255), (byte)(NormalizedFloatColor(G) * 255), (byte)(NormalizedFloatColor(B) * 255));
-            }
-            set
-            {
-                SetColorValue(value);
-            }
+            get => Color.FromScRgb(1f, NormalizedFloatColor(R), NormalizedFloatColor(G), NormalizedFloatColor(B));
+            set => SetColorValue(value);
         }
 
         public Brush Preview => CalculateColorPreview();
 
-        public CustomColor()
+        public CustomRgbColor()
         {
             InitializeComponent();
             DpChanged += ValueInstanceChanged;
@@ -155,7 +136,6 @@ namespace EEPK_Organiser.View.Vectors
             undos.Add(SetFloatValue(newValue.Value.ScR, "R", false));
             undos.Add(SetFloatValue(newValue.Value.ScG, "G", false));
             undos.Add(SetFloatValue(newValue.Value.ScB, "B", false));
-            undos.Add(SetFloatValue(newValue.Value.ScA, "A", false));
 
             UndoManager.Instance.AddCompositeUndo(undos, "Color");
             UpdateProperties();
@@ -166,11 +146,10 @@ namespace EEPK_Organiser.View.Vectors
             NotifyPropertyChanged(nameof(R));
             NotifyPropertyChanged(nameof(G));
             NotifyPropertyChanged(nameof(B));
-            NotifyPropertyChanged(nameof(A));
             NotifyPropertyChanged(nameof(CurrentColor));
             NotifyPropertyChanged(nameof(Preview));
         }
-    
+
         private Brush CalculateColorPreview()
         {
             float r = NormalizedFloatColor(R);

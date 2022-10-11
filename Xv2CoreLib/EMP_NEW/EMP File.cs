@@ -89,14 +89,14 @@ namespace Xv2CoreLib.EMP_NEW
                 if (children[i].NodeType == ParticleNodeType.Emission)
                 {
                 startPoint:
-                    foreach (var e in children[i].Emission.Texture.TextureEntryRef)
+                    foreach (var e in children[i].EmissionNode.Texture.TextureEntryRef)
                     {
                         if (e.TextureRef == textureRef)
                         {
                             if (undos != null)
-                                undos.Add(new UndoableListRemove<TextureEntry_Ref>(children[i].Emission.Texture.TextureEntryRef, e));
+                                undos.Add(new UndoableListRemove<TextureEntry_Ref>(children[i].EmissionNode.Texture.TextureEntryRef, e));
 
-                            children[i].Emission.Texture.TextureEntryRef.Remove(e);
+                            children[i].EmissionNode.Texture.TextureEntryRef.Remove(e);
                             goto startPoint;
                         }
                     }
@@ -123,7 +123,7 @@ namespace Xv2CoreLib.EMP_NEW
 
                 if (children[i].NodeType == ParticleNodeType.Emission)
                 {
-                    foreach (var e in children[i].Emission.Texture.TextureEntryRef)
+                    foreach (var e in children[i].EmissionNode.Texture.TextureEntryRef)
                     {
                         if (e.TextureRef == oldTextureRef)
                         {
@@ -287,9 +287,9 @@ namespace Xv2CoreLib.EMP_NEW
 
             foreach (var particleEffect in ParticleNodes)
             {
-                if (particleEffect.Emission.Texture.MaterialRef == materialRef)
+                if (particleEffect.EmissionNode.Texture.MaterialRef == materialRef)
                 {
-                    textureParts.Add(particleEffect.Emission.Texture);
+                    textureParts.Add(particleEffect.EmissionNode.Texture);
                 }
 
                 if (particleEffect.ChildParticleNodes != null)
@@ -306,9 +306,9 @@ namespace Xv2CoreLib.EMP_NEW
         {
             foreach (var particleEffect in particleEffects)
             {
-                if (particleEffect.Emission.Texture.MaterialRef == materialRef)
+                if (particleEffect.EmissionNode.Texture.MaterialRef == materialRef)
                 {
-                    textureParts.Add(particleEffect.Emission.Texture);
+                    textureParts.Add(particleEffect.EmissionNode.Texture);
                 }
 
                 if (particleEffect.ChildParticleNodes != null)
@@ -327,11 +327,11 @@ namespace Xv2CoreLib.EMP_NEW
 
             foreach (var particleEffect in ParticleNodes)
             {
-                foreach (var textureEntry in particleEffect.Emission.Texture.TextureEntryRef)
+                foreach (var textureEntry in particleEffect.EmissionNode.Texture.TextureEntryRef)
                 {
                     if (textureEntry.TextureRef == embEntryRef)
                     {
-                        textureParts.Add(particleEffect.Emission.Texture);
+                        textureParts.Add(particleEffect.EmissionNode.Texture);
                         break;
                     }
                 }
@@ -350,11 +350,11 @@ namespace Xv2CoreLib.EMP_NEW
         {
             foreach (var particleEffect in particleEffects)
             {
-                foreach (var textureEntry in particleEffect.Emission.Texture.TextureEntryRef)
+                foreach (var textureEntry in particleEffect.EmissionNode.Texture.TextureEntryRef)
                 {
                     if (textureEntry.TextureRef == embEntryRef)
                     {
-                        textureParts.Add(particleEffect.Emission.Texture);
+                        textureParts.Add(particleEffect.EmissionNode.Texture);
                         break;
                     }
                 }
@@ -422,8 +422,8 @@ namespace Xv2CoreLib.EMP_NEW
 
             foreach (var particleEffect in particleEffects)
             {
-                undos.AddRange(particleEffect.Emission.Texture.Color1.RemoveAllKeyframes());
-                undos.AddRange(particleEffect.Emission.Texture.Color2.RemoveAllKeyframes());
+                undos.AddRange(particleEffect.EmissionNode.Texture.Color1.RemoveAllKeyframes());
+                undos.AddRange(particleEffect.EmissionNode.Texture.Color2.RemoveAllKeyframes());
 
                 if (particleEffect.ChildParticleNodes != null)
                     undos.AddRange(RemoveColorAnimations(particleEffect.ChildParticleNodes, false));
@@ -510,6 +510,21 @@ namespace Xv2CoreLib.EMP_NEW
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        [NonSerialized]
+        private KeyframedBaseValue _selectedKeyframedValue = null;
+        public KeyframedBaseValue SelectedKeyframedValue
+        {
+            get => _selectedKeyframedValue;
+            set
+            {
+                if(_selectedKeyframedValue != value)
+                {
+                    SelectedKeyframedValue = value;
+                    NotifyPropertyChanged(nameof(SelectedKeyframedValue));
+                }
+            }
+        }
+
         #endregion
 
         private string _name = null;
@@ -527,6 +542,9 @@ namespace Xv2CoreLib.EMP_NEW
         }
 
         public ParticleNodeType NodeType { get; set; }
+        /// <summary>
+        /// Returns the old "ComponentType" that was used in the old EMP parser, and are how the node types are saved to binary. Read-only.
+        /// </summary>
         public NodeSpecificType NodeSpecificType
         {
             get
@@ -536,9 +554,9 @@ namespace Xv2CoreLib.EMP_NEW
                     case ParticleNodeType.Null:
                         return NodeSpecificType.Null;
                     case ParticleNodeType.Emission:
-                        return Emission.GetNodeType();
+                        return EmissionNode.GetNodeType();
                     case ParticleNodeType.Emitter:
-                        return Emitter.GetNodeType();
+                        return EmitterNode.GetNodeType();
                 }
 
                 return NodeSpecificType.Null;
@@ -549,17 +567,17 @@ namespace Xv2CoreLib.EMP_NEW
         public byte StartTime_Variance { get; set; } //I_45
         public bool Loop { get; set; } //I_32_1
         public bool FlashOnGeneration { get; set; } //I_32_3
-        public short ParticleCount { get; set; } //I_38
-        public short Lifetime { get; set; } //I_40
+        public short MaxInstances { get; set; } //I_38
+        public ushort Lifetime { get; set; } //I_40
         public ushort Lifetime_Variance { get; set; } //I_42
         public bool Hide { get; set; } //I_33_3
         public bool UseScaleXY { get; set; } //I_33_4
         public bool UseColor2 { get; set; } //I_33_6
         public ParticleAutoRotationType AutoRotationType { get; set; } //int8, I_35
-        public byte CreateDelay { get; set; } //I_46
-        public byte CreateDelay_Variance { get; set; } //I_47
-        public ushort MaxParticlesPerFrame { get; set; }
-        public ushort MaxParticlesPerFrame_Variance { get; set; } //I_54
+        public byte BurstFrequency { get; set; } //I_46
+        public byte BurstFrequency_Variance { get; set; } //I_47
+        public ushort Burst { get; set; }
+        public ushort Burst_Variance { get; set; } //I_54
 
         public KeyframedVector3Value Position { get; set; } = new KeyframedVector3Value(0, 0, 0, KeyframedValueType.Position);
         public KeyframedVector3Value Rotation { get; set; } = new KeyframedVector3Value(0, 0, 0, KeyframedValueType.Rotation);
@@ -596,8 +614,8 @@ namespace Xv2CoreLib.EMP_NEW
         public ushort I_60 { get; set; }
         public ushort I_62 { get; set; }
 
-        public ParticleEmitter Emitter { get; set; } = new ParticleEmitter();
-        public ParticleEmission Emission { get; set; } = new ParticleEmission();
+        public ParticleEmitter EmitterNode { get; set; } = new ParticleEmitter();
+        public ParticleEmission EmissionNode { get; set; } = new ParticleEmission();
 
         public AsyncObservableCollection<EMP_KeyframedValue> KeyframedValues { get; set; } = new AsyncObservableCollection<EMP_KeyframedValue>();
         public AsyncObservableCollection<EMP_KeyframeGroup> GroupKeyframedValues { get; set; } = new AsyncObservableCollection<EMP_KeyframeGroup>();
@@ -644,17 +662,17 @@ namespace Xv2CoreLib.EMP_NEW
                 EnableRandomUpVectorOnVirtualCone = EnableRandomUpVectorOnVirtualCone,
                 I_34_7 = I_34_7,
                 AutoRotationType = AutoRotationType,
-                ParticleCount = ParticleCount,
+                MaxInstances = MaxInstances,
                 Lifetime = Lifetime,
                 Lifetime_Variance = Lifetime_Variance,
                 StartTime = StartTime,
                 StartTime_Variance = StartTime_Variance,
-                CreateDelay = CreateDelay,
-                CreateDelay_Variance = CreateDelay_Variance,
+                BurstFrequency = BurstFrequency,
+                BurstFrequency_Variance = BurstFrequency_Variance,
                 I_48 = I_48,
                 I_50 = I_50,
-                MaxParticlesPerFrame = MaxParticlesPerFrame,
-                MaxParticlesPerFrame_Variance = MaxParticlesPerFrame_Variance,
+                Burst = Burst,
+                Burst_Variance = Burst_Variance,
                 I_56 = I_56,
                 I_58 = I_58,
                 I_60 = I_60,
@@ -668,8 +686,8 @@ namespace Xv2CoreLib.EMP_NEW
                 Name = Utils.CloneString(Name),
                 KeyframedValues = KeyframedValues.Copy(),
                 GroupKeyframedValues = GroupKeyframedValues.Copy(),
-                Emission = Emission.Clone(),
-                Emitter = Emitter.Copy(),
+                EmissionNode = EmissionNode.Clone(),
+                EmitterNode = EmitterNode.Copy(),
                 NodeType = NodeType,
                 ChildParticleNodes = _children
             };
@@ -717,19 +735,19 @@ namespace Xv2CoreLib.EMP_NEW
 
             undos.AddRange(Utils.CopyValues(this, particleEffect));
 
-            var emitter = particleEffect.Emitter.Copy();
-            var emission = particleEffect.Emission.Clone(); //Clone keeps texture and material references intact
+            var emitter = particleEffect.EmitterNode.Copy();
+            var emission = particleEffect.EmissionNode.Clone(); //Clone keeps texture and material references intact
             var type_0 = particleEffect.KeyframedValues.Copy();
             var type_1 = particleEffect.GroupKeyframedValues.Copy();
 
-            undos.Add(new UndoableProperty<ParticleNode>(nameof(Emitter), this, Emitter, emitter));
-            undos.Add(new UndoableProperty<ParticleNode>(nameof(Emission), this, Emission, emission));
+            undos.Add(new UndoableProperty<ParticleNode>(nameof(EmitterNode), this, EmitterNode, emitter));
+            undos.Add(new UndoableProperty<ParticleNode>(nameof(EmissionNode), this, EmissionNode, emission));
             undos.Add(new UndoableProperty<ParticleNode>(nameof(KeyframedValues), this, KeyframedValues, type_0));
             undos.Add(new UndoableProperty<ParticleNode>(nameof(GroupKeyframedValues), this, GroupKeyframedValues, type_1));
             undos.Add(new UndoActionPropNotify(this, true));
 
-            Emitter = emitter;
-            Emission = emission;
+            EmitterNode = emitter;
+            EmissionNode = emission;
             KeyframedValues = type_0;
             GroupKeyframedValues = type_1;
 
@@ -740,8 +758,8 @@ namespace Xv2CoreLib.EMP_NEW
         {
             List<RgbColor> colors = new List<RgbColor>();
 
-            RgbColor color1 = Emission.Texture.Color1.GetAverageColor();
-            RgbColor color2 = Emission.Texture.Color2.GetAverageColor();
+            RgbColor color1 = EmissionNode.Texture.Color1.GetAverageColor();
+            RgbColor color2 = EmissionNode.Texture.Color2.GetAverageColor();
 
             if (!color1.IsWhiteOrBlack)
                 colors.Add(color1);
@@ -765,9 +783,9 @@ namespace Xv2CoreLib.EMP_NEW
         {
             if(NodeType == ParticleNodeType.Emission)
             {
-                Emission.Texture.Color1.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
-                Emission.Texture.Color2.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
-                Emission.Texture.Color_Variance.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
+                EmissionNode.Texture.Color1.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
+                EmissionNode.Texture.Color2.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
+                EmissionNode.Texture.Color_Variance.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
             }
 
             //Children
@@ -782,17 +800,17 @@ namespace Xv2CoreLib.EMP_NEW
 
         public void RemoveColorRandomRange(List<IUndoRedo> undos)
         {
-            if(Emission?.Texture != null)
+            if(EmissionNode?.Texture != null)
             {
-                if (Emission.Texture.Color_Variance != 0f)
+                if (EmissionNode.Texture.Color_Variance != 0f)
                 {
-                    undos.Add(new UndoableProperty<CustomColor>(nameof(Emission.Texture.Color_Variance.R), Emission.Texture.Color_Variance, Emission.Texture.Color_Variance.R, 0f));
-                    undos.Add(new UndoableProperty<CustomColor>(nameof(Emission.Texture.Color_Variance.G), Emission.Texture.Color_Variance, Emission.Texture.Color_Variance.G, 0f));
-                    undos.Add(new UndoableProperty<CustomColor>(nameof(Emission.Texture.Color_Variance.B), Emission.Texture.Color_Variance, Emission.Texture.Color_Variance.B, 0f));
+                    undos.Add(new UndoableProperty<CustomColor>(nameof(EmissionNode.Texture.Color_Variance.R), EmissionNode.Texture.Color_Variance, EmissionNode.Texture.Color_Variance.R, 0f));
+                    undos.Add(new UndoableProperty<CustomColor>(nameof(EmissionNode.Texture.Color_Variance.G), EmissionNode.Texture.Color_Variance, EmissionNode.Texture.Color_Variance.G, 0f));
+                    undos.Add(new UndoableProperty<CustomColor>(nameof(EmissionNode.Texture.Color_Variance.B), EmissionNode.Texture.Color_Variance, EmissionNode.Texture.Color_Variance.B, 0f));
 
-                    Emission.Texture.Color_Variance.R = 0f;
-                    Emission.Texture.Color_Variance.G = 0f;
-                    Emission.Texture.Color_Variance.B = 0f;
+                    EmissionNode.Texture.Color_Variance.R = 0f;
+                    EmissionNode.Texture.Color_Variance.G = 0f;
+                    EmissionNode.Texture.Color_Variance.B = 0f;
                 }
             }
         }
@@ -825,19 +843,19 @@ namespace Xv2CoreLib.EMP_NEW
             //Emission types always have Scale, Color1 and Color2 values (since they all have a ParticleTexture)
             if(NodeType == ParticleNodeType.Emission)
             {
-                AddKeyframedValues(Emission.Texture.Color1.CompileKeyframes());
-                AddKeyframedValues(Emission.Texture.Color2.CompileKeyframes());
-                AddKeyframedValues(Emission.Texture.Color1_Transparency.CompileKeyframes());
-                AddKeyframedValues(Emission.Texture.Color2_Transparency.CompileKeyframes());
+                AddKeyframedValues(EmissionNode.Texture.Color1.CompileKeyframes());
+                AddKeyframedValues(EmissionNode.Texture.Color2.CompileKeyframes());
+                AddKeyframedValues(EmissionNode.Texture.Color1_Transparency.CompileKeyframes());
+                AddKeyframedValues(EmissionNode.Texture.Color2_Transparency.CompileKeyframes());
 
                 if (UseScaleXY)
                 {
-                    AddKeyframedValues(Emission.Texture.ScaleXY.CompileKeyframes(true));
-                    AddKeyframedValues(Emission.Texture.ScaleBase.CompileKeyframes(true));
+                    AddKeyframedValues(EmissionNode.Texture.ScaleXY.CompileKeyframes(true));
+                    AddKeyframedValues(EmissionNode.Texture.ScaleBase.CompileKeyframes(true));
                 }
                 else
                 {
-                    AddKeyframedValues(Emission.Texture.ScaleBase.CompileKeyframes(false));
+                    AddKeyframedValues(EmissionNode.Texture.ScaleBase.CompileKeyframes(false));
                 }
             }
 
@@ -845,27 +863,27 @@ namespace Xv2CoreLib.EMP_NEW
             switch (NodeSpecificType)
             {
                 case NodeSpecificType.SphericalDistribution:
-                    AddKeyframedValues(Emitter.Size.CompileKeyframes(isSphere: true));
-                    AddKeyframedValues(Emitter.Velocity.CompileKeyframes());
+                    AddKeyframedValues(EmitterNode.Size.CompileKeyframes(isSphere: true));
+                    AddKeyframedValues(EmitterNode.Velocity.CompileKeyframes());
                     break;
                 case NodeSpecificType.VerticalDistribution:
-                    AddKeyframedValues(Emitter.Position.CompileKeyframes());
-                    AddKeyframedValues(Emitter.Velocity.CompileKeyframes());
-                    AddKeyframedValues(Emitter.Angle.CompileKeyframes());
+                    AddKeyframedValues(EmitterNode.Position.CompileKeyframes());
+                    AddKeyframedValues(EmitterNode.Velocity.CompileKeyframes());
+                    AddKeyframedValues(EmitterNode.Angle.CompileKeyframes());
                     break;
                 case NodeSpecificType.ShapeAreaDistribution:
                 case NodeSpecificType.ShapePerimeterDistribution:
-                    AddKeyframedValues(Emitter.Position.CompileKeyframes());
-                    AddKeyframedValues(Emitter.Velocity.CompileKeyframes());
-                    AddKeyframedValues(Emitter.Angle.CompileKeyframes());
-                    AddKeyframedValues(Emitter.Size.CompileKeyframes());
-                    AddKeyframedValues(Emitter.Size2.CompileKeyframes());
+                    AddKeyframedValues(EmitterNode.Position.CompileKeyframes());
+                    AddKeyframedValues(EmitterNode.Velocity.CompileKeyframes());
+                    AddKeyframedValues(EmitterNode.Angle.CompileKeyframes());
+                    AddKeyframedValues(EmitterNode.Size.CompileKeyframes());
+                    AddKeyframedValues(EmitterNode.Size2.CompileKeyframes());
                     break;
                 case NodeSpecificType.AutoOriented:
                 case NodeSpecificType.Default:
                 case NodeSpecificType.Mesh:
                 case NodeSpecificType.ShapeDraw:
-                    AddKeyframedValues(Emission.ActiveRotation.CompileKeyframes());
+                    AddKeyframedValues(EmissionNode.ActiveRotation.CompileKeyframes());
                     break;
             }
         }
@@ -1286,9 +1304,7 @@ namespace Xv2CoreLib.EMP_NEW
         public float ActiveRotation_Variance { get; set; }
 
         //Defines a RotationAxis to be used. Only used in Mesh or when AutoRotation is disabled
-        public float RotationAxisX { get; set; }
-        public float RotationAxisY { get; set; }
-        public float RotationAxisZ { get; set; }
+        public CustomVector4 RotationAxis { get; set; } = new CustomVector4();
 
         //Specialised types:
         public ConeExtrude ConeExtrude { get; set; } = new ConeExtrude();
@@ -1334,9 +1350,9 @@ namespace Xv2CoreLib.EMP_NEW
                 emission.StartRotation_Variance = BitConverter.ToSingle(bytes, offset + 4);
                 emission.ActiveRotation.Constant = BitConverter.ToSingle(bytes, offset + 8);
                 emission.ActiveRotation_Variance = BitConverter.ToSingle(bytes, offset + 12);
-                emission.RotationAxisX = BitConverter.ToSingle(bytes, offset + 16);
-                emission.RotationAxisY = BitConverter.ToSingle(bytes, offset + 20);
-                emission.RotationAxisZ = BitConverter.ToSingle(bytes, offset + 24);
+                emission.RotationAxis.X = BitConverter.ToSingle(bytes, offset + 16);
+                emission.RotationAxis.Y = BitConverter.ToSingle(bytes, offset + 20);
+                emission.RotationAxis.Z = BitConverter.ToSingle(bytes, offset + 24);
             }
             else if(emissionType == 3)
             {
@@ -1373,9 +1389,9 @@ namespace Xv2CoreLib.EMP_NEW
                 emission.ActiveRotation.Constant = BitConverter.ToSingle(bytes, offset + 8);
                 emission.ActiveRotation_Variance = BitConverter.ToSingle(bytes, offset + 12);
 
-                emission.RotationAxisX = BitConverter.ToSingle(bytes, offset + 16);
-                emission.RotationAxisY = BitConverter.ToSingle(bytes, offset + 20);
-                emission.RotationAxisZ = BitConverter.ToSingle(bytes, offset + 24);
+                emission.RotationAxis.X = BitConverter.ToSingle(bytes, offset + 16);
+                emission.RotationAxis.Y = BitConverter.ToSingle(bytes, offset + 20);
+                emission.RotationAxis.Z = BitConverter.ToSingle(bytes, offset + 24);
                 emission.Mesh.I_32 = BitConverter.ToInt32(bytes, offset + 32);
                 emission.Mesh.I_40 = BitConverter.ToInt32(bytes, offset + 40);
                 emission.Mesh.I_44 = BitConverter.ToInt32(bytes, offset + 44);
@@ -1462,9 +1478,9 @@ namespace Xv2CoreLib.EMP_NEW
                         bytes.AddRange(BitConverter.GetBytes(StartRotation_Variance));
                         bytes.AddRange(BitConverter.GetBytes(ActiveRotation.Constant));
                         bytes.AddRange(BitConverter.GetBytes(ActiveRotation_Variance));
-                        bytes.AddRange(BitConverter.GetBytes(RotationAxisX));
-                        bytes.AddRange(BitConverter.GetBytes(RotationAxisY));
-                        bytes.AddRange(BitConverter.GetBytes(RotationAxisZ));
+                        bytes.AddRange(BitConverter.GetBytes(RotationAxis.X));
+                        bytes.AddRange(BitConverter.GetBytes(RotationAxis.Y));
+                        bytes.AddRange(BitConverter.GetBytes(RotationAxis.Z));
                         bytes.AddRange(BitConverter.GetBytes(0f)); //W is never used
                         currentRelativeOffset += 32;
                     }
@@ -1485,9 +1501,9 @@ namespace Xv2CoreLib.EMP_NEW
                     bytes.AddRange(BitConverter.GetBytes(StartRotation_Variance));
                     bytes.AddRange(BitConverter.GetBytes(ActiveRotation.Constant));
                     bytes.AddRange(BitConverter.GetBytes(ActiveRotation_Variance));
-                    bytes.AddRange(BitConverter.GetBytes(RotationAxisX));
-                    bytes.AddRange(BitConverter.GetBytes(RotationAxisY));
-                    bytes.AddRange(BitConverter.GetBytes(RotationAxisZ));
+                    bytes.AddRange(BitConverter.GetBytes(RotationAxis.X));
+                    bytes.AddRange(BitConverter.GetBytes(RotationAxis.Y));
+                    bytes.AddRange(BitConverter.GetBytes(RotationAxis.Z));
                     bytes.AddRange(BitConverter.GetBytes(0f));
                     bytes.AddRange(BitConverter.GetBytes(Mesh.I_32));
                     bytes.AddRange(new byte[4]);
@@ -1590,11 +1606,9 @@ namespace Xv2CoreLib.EMP_NEW
                 VisibleOnlyOnMotion = VisibleOnlyOnMotion,
                 StartRotation = StartRotation,
                 StartRotation_Variance = StartRotation_Variance,
-                ActiveRotation = ActiveRotation,
+                ActiveRotation = ActiveRotation.Copy(),
                 ActiveRotation_Variance = ActiveRotation_Variance,
-                RotationAxisX = RotationAxisX,
-                RotationAxisY = RotationAxisY,
-                RotationAxisZ = RotationAxisZ,
+                RotationAxis = RotationAxis.Copy(),
                 ConeExtrude = ConeExtrude.Copy(),
                 ShapeDraw = ShapeDraw.Copy(),
                 Mesh = Mesh.Copy(),

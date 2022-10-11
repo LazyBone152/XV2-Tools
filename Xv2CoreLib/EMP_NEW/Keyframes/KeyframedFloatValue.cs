@@ -10,9 +10,19 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
     public class KeyframedFloatValue : KeyframedBaseValue
     {
         public float Constant { get; set; }
+        public float UndoableConstant
+        {
+            get => Constant;
+            set
+            {
+                if(Constant != value)
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(Constant), this, Constant, value, ValueType.ToString()));
+                    Constant = value;
+                }
+            }
+        }
         public AsyncObservableCollection<KeyframeFloatValue> Keyframes { get; set; } = new AsyncObservableCollection<KeyframeFloatValue>();
-
-        public override bool IsConstant => Keyframes.Count == 0;
 
         //The EMP_KeyframedValue ID values. These will be used when re-compiling the keyframes.
         private readonly bool IsScale;
@@ -30,14 +40,8 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             if (empKeyframes.Length != 1)
                 throw new ArgumentException($"KeyframedFloatValue.DecompileKeyframes: Invalid number of keyframed values. Expected 1, but there are {empKeyframes.Length}!");
 
-            bool interpolate;
-            bool loop;
-
             //Returns array of 1
-            List<KeyframedGenericValue>[] tempKeyframes = Decompile(new float[] { Constant } ,out interpolate, out loop, empKeyframes);
-
-            Interpolate = interpolate;
-            Loop = loop;
+            List<KeyframedGenericValue>[] tempKeyframes = Decompile(new float[] { Constant }, empKeyframes);
 
             if (Keyframes.Count > 0)
                 Keyframes.Clear();
