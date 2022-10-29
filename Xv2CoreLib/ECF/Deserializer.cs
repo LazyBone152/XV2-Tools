@@ -24,7 +24,7 @@ namespace Xv2CoreLib.ECF
             ecfFile = (ECF_File)serializer.DeserializeFromFile(location);
             Write();
         }
-        
+
         public Deserializer(ECF_File _ecfFile)
         {
             writeToDisk = false;
@@ -46,11 +46,11 @@ namespace Xv2CoreLib.ECF
 
             if (ecfFile.Entries != null)
             {
-                bytes.AddRange(BitConverter.GetBytes((short)ecfFile.Entries.Count()));
+                bytes.AddRange(BitConverter.GetBytes((short)ecfFile.Entries.Count));
                 bytes.AddRange(BitConverter.GetBytes(32));
 
 
-                for (int i = 0; i < ecfFile.Entries.Count(); i++)
+                for (int i = 0; i < ecfFile.Entries.Count; i++)
                 {
                     bytes.AddRange(BitConverter.GetBytes(ecfFile.Entries[i].F_00));
                     bytes.AddRange(BitConverter.GetBytes(ecfFile.Entries[i].F_04));
@@ -72,38 +72,40 @@ namespace Xv2CoreLib.ECF
                     bytes.AddRange(BitConverter.GetBytes(ecfFile.Entries[i].I_60));
                     bytes.AddRange(BitConverter.GetBytes(ecfFile.Entries[i].I_62));
 
-                    foreach (UInt16 value in ecfFile.Entries[i].I_64)
+                    foreach (ushort value in ecfFile.Entries[i].I_64)
                     {
                         bytes.AddRange(BitConverter.GetBytes(value));
                     }
 
-                    if (!String.IsNullOrWhiteSpace(ecfFile.Entries[i].MaterialLink))
+                    if (!string.IsNullOrWhiteSpace(ecfFile.Entries[i].MaterialLink))
                     {
-                        StrOffsets.Add(bytes.Count());
+                        StrOffsets.Add(bytes.Count);
                         StrToWrite.Add(ecfFile.Entries[i].MaterialLink);
                     }
-                    
+
                     bytes.AddRange(new byte[4]);
 
                     bytes.AddRange(BitConverter.GetBytes(ecfFile.Entries[i].I_96));
                     if (ecfFile.Entries[i].Animations != null)
                     {
-                        bytes.AddRange(BitConverter.GetBytes((short)ecfFile.Entries[i].Animations.Count()));
-                        Type0_Offsets.Add(bytes.Count());
+                        bytes.AddRange(BitConverter.GetBytes((short)ecfFile.Entries[i].Animations.Count));
+                        Type0_Offsets.Add(bytes.Count);
                         bytes.AddRange(BitConverter.GetBytes(8));
-                    } else {
-                        Type0_Offsets.Add(bytes.Count());
+                    }
+                    else
+                    {
+                        Type0_Offsets.Add(bytes.Count);
                         bytes.AddRange(new byte[6]);
                     }
                 }
 
 
-                //Writing Type0s
-                for(int i = 0; i < ecfFile.Entries.Count(); i++)
+                //Writing Keyframed Values
+                for (int i = 0; i < ecfFile.Entries.Count; i++)
                 {
-                    if(ecfFile.Entries[i].Animations != null)
+                    if (ecfFile.Entries[i].Animations != null)
                     {
-                        bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - Type0_Offsets[i] + 4), Type0_Offsets[i]);
+                        bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - Type0_Offsets[i] + 4), Type0_Offsets[i]);
 
                         List<int> Type0EntryOffsets = new List<int>();
 
@@ -114,7 +116,7 @@ namespace Xv2CoreLib.ECF
                             bytes.AddRange(new byte[4] { (byte)e.Parameter, Int4Converter.GetByte((byte)e.GetComponent(), (byte)I_01_b, "Animation: Component", "Animation: Interpolated"), (byte)I_02, e.I_03 });
                             bytes.AddRange(BitConverter.GetBytes(e.I_04));
                             bytes.AddRange(BitConverter.GetBytes((short)e.Keyframes.Count()));
-                            Type0EntryOffsets.Add(bytes.Count());
+                            Type0EntryOffsets.Add(bytes.Count);
                             bytes.AddRange(new byte[8]);
 
                             //Sort keyframes
@@ -124,38 +126,34 @@ namespace Xv2CoreLib.ECF
                             }
                         }
 
-                        for (int a = 0; a < ecfFile.Entries[i].Animations.Count(); a++)
+                        for (int a = 0; a < ecfFile.Entries[i].Animations.Count; a++)
                         {
                             int entryOffset = Type0EntryOffsets[a] - 8;
                             bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - entryOffset), Type0EntryOffsets[a]);
-                            
+
                             int floatListOffset = WriteKeyframe(ecfFile.Entries[i].Animations[a].Keyframes);
 
                             bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(floatListOffset - entryOffset), Type0EntryOffsets[a] + 4);
                         }
                     }
-                    
+
 
                 }
 
-
-
                 //Writing Strings
-                for (int i = 0; i < StrToWrite.Count(); i++)
+                for (int i = 0; i < StrToWrite.Count; i++)
                 {
                     int entryOffset = StrOffsets[i] - 92;
-                    bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - entryOffset), StrOffsets[i]);
+                    bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - entryOffset), StrOffsets[i]);
                     bytes.AddRange(Encoding.ASCII.GetBytes(StrToWrite[i]));
                     bytes.Add(0);
                 }
 
             }
-            else {
+            else
+            {
                 bytes.AddRange(new byte[8]);
             }
-
-
-
 
             if (writeToDisk)
             {
@@ -165,9 +163,8 @@ namespace Xv2CoreLib.ECF
 
         private int WriteKeyframe(IList<Type0_Keyframe> keyframes)
         {
-            
             //Determines the size of the keyframe list (adds padding if its not in 32 bit blocks)
-            float fCount = keyframes.Count();
+            float fCount = keyframes.Count;
 
             if (Math.Floor(fCount / 2) != fCount / 2)
             {
@@ -196,7 +193,8 @@ namespace Xv2CoreLib.ECF
 
             //Checking to make sure there are more than 1 keyframes (else, no index list)
             bool specialCase_FirstKeyFrameIsNotZero = (keyframes[0].Index == 0) ? false : true;
-            if (keyframes.Count() > 1) {
+            if (keyframes.Count() > 1)
+            {
                 //Writing IndexList
                 float totalIndex = 0;
                 for (int i = 0; i < keyframes.Count(); i++)

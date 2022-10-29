@@ -24,7 +24,7 @@ namespace Xv2CoreLib.ECF
             totalMainEntries = BitConverter.ToInt16(rawBytes, 26);
             mainEntryOffset = BitConverter.ToInt32(rawBytes, 28);
             Parse();
-            
+
             if (writeXml)
             {
                 WriteXmlFile();
@@ -43,7 +43,7 @@ namespace Xv2CoreLib.ECF
         {
             return ecfFile;
         }
-        
+
         private void Parse()
         {
             ecfFile.I_12 = BitConverter.ToUInt16(rawBytes, 12);
@@ -55,7 +55,7 @@ namespace Xv2CoreLib.ECF
                 for (int i = 0; i < totalMainEntries; i++)
                 {
                     ecfFile.Entries.Add(new ECF_Entry());
-                    
+
                     ecfFile.Entries[i].I_52 = (PlayMode)BitConverter.ToInt16(rawBytes, mainEntryOffset + 52);
                     ecfFile.Entries[i].F_00 = BitConverter.ToSingle(rawBytes, mainEntryOffset + 0);
                     ecfFile.Entries[i].F_04 = BitConverter.ToSingle(rawBytes, mainEntryOffset + 4);
@@ -75,11 +75,11 @@ namespace Xv2CoreLib.ECF
                     ecfFile.Entries[i].I_58 = BitConverter.ToUInt16(rawBytes, mainEntryOffset + 58);
                     ecfFile.Entries[i].I_60 = BitConverter.ToUInt16(rawBytes, mainEntryOffset + 60);
                     ecfFile.Entries[i].I_62 = BitConverter.ToUInt16(rawBytes, mainEntryOffset + 62);
-                    ecfFile.Entries[i].I_64 = new UInt16[14];
+                    ecfFile.Entries[i].I_64 = new ushort[14];
 
                     for (int a = 0; a < 28; a += 2)
                     {
-                        ecfFile.Entries[i].I_64[a/2] = BitConverter.ToUInt16(rawBytes, mainEntryOffset + 64 + a);
+                        ecfFile.Entries[i].I_64[a / 2] = BitConverter.ToUInt16(rawBytes, mainEntryOffset + 64 + a);
                     }
 
                     ecfFile.Entries[i].I_96 = BitConverter.ToUInt16(rawBytes, mainEntryOffset + 96);
@@ -99,26 +99,32 @@ namespace Xv2CoreLib.ECF
 
                             ecfFile.Entries[i].Animations.Add(new Type0()
                             {
-                                Parameter = (ECF.Type0.ParameterEnum)rawBytes[Type0_Offset + 0],
+                                Parameter = (Type0.ParameterEnum)rawBytes[Type0_Offset + 0],
                                 Component = Type0.GetComponent((ECF.Type0.ParameterEnum)rawBytes[Type0_Offset + 0], Int4Converter.ToInt4(rawBytes[Type0_Offset + 1])[0]),
                                 Interpolated = BitConverter_Ex.ToBoolean(Int4Converter.ToInt4(rawBytes[Type0_Offset + 1])[1]),
-                                Loop = (rawBytes[Type0_Offset + 2] == 0)? false : true,
+                                Loop = (rawBytes[Type0_Offset + 2] == 0) ? false : true,
                                 I_03 = rawBytes[Type0_Offset + 3],
                                 I_04 = BitConverter.ToUInt16(rawBytes, Type0_Offset + 4),
                                 Keyframes = ParseKeyframes(BitConverter.ToInt16(rawBytes, Type0_Offset + 6), startOffset, floatOffset)
                             });
-                            
+
 
                             Type0_Offset += 16;
                         }
                     }
 
-                    //Unk_Str
-                    int Str_Offset = BitConverter.ToInt32(rawBytes, mainEntryOffset + 92) + mainEntryOffset;
+                    //Material
+                    int materialNameOffset = BitConverter.ToInt32(rawBytes, mainEntryOffset + 92);
 
-                    if (Str_Offset != 0)
+                    //There is only one ECF file in the game with more than 1 entry (currently) and it has a werid offset for the second material name. A negative number that adds up to 0 when adding the current entry position, supposed to point to a string just after the entry.
+                    if(materialNameOffset < 0)
                     {
-                        ecfFile.Entries[i].MaterialLink = StringEx.GetString(rawBytes, Str_Offset);
+                        materialNameOffset = 104;
+                    } 
+
+                    if (materialNameOffset != 0)
+                    {
+                        ecfFile.Entries[i].MaterialLink = StringEx.GetString(rawBytes, materialNameOffset + mainEntryOffset);
                     }
                     else
                     {
@@ -130,14 +136,11 @@ namespace Xv2CoreLib.ECF
                 }
 
             }
-            
-
-
         }
 
         private AsyncObservableCollection<Type0_Keyframe> ParseKeyframes(int keyframeCount, int keyframeListOffset, int floatOffset)
         {
-            AsyncObservableCollection<Type0_Keyframe> keyframes = AsyncObservableCollection<Type0_Keyframe>.Create();
+            AsyncObservableCollection<Type0_Keyframe> keyframes = new AsyncObservableCollection<Type0_Keyframe>();
 
             for (int i = 0; i < keyframeCount; i++)
             {
@@ -151,15 +154,12 @@ namespace Xv2CoreLib.ECF
             }
 
             return keyframes;
-
         }
-        
+
         private void WriteXmlFile()
         {
             YAXSerializer serializer = new YAXSerializer(typeof(ECF_File));
             serializer.SerializeToFile(ecfFile, saveLocation + ".xml");
         }
-
-
     }
 }
