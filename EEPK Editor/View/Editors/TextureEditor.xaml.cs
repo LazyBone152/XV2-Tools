@@ -17,7 +17,7 @@ using EEPK_Organiser.Misc;
 using EEPK_Organiser.Forms;
 using MahApps.Metro.Controls;
 using EEPK_Organiser.Forms.Recolor;
-using Xv2CoreLib.EMP;
+using Xv2CoreLib.EMP_NEW;
 
 namespace EEPK_Organiser.View
 {
@@ -668,7 +668,7 @@ namespace EEPK_Organiser.View
             foreach (var entry in selectedTextures)
             {
 
-                if (AssetContainer.GetAllTextureDefinitions(entry).Any(x => x.TextureType == Xv2CoreLib.EMP.EMP_TextureDefinition.TextureAnimationType.Speed || x.I_06_byte == Xv2CoreLib.EMP.EMP_TextureDefinition.TextureRepitition.Mirror || x.I_07_byte == Xv2CoreLib.EMP.EMP_TextureDefinition.TextureRepitition.Mirror))
+                if (AssetContainer.GetAllTextureDefinitions(entry).Any(x => x.ScrollState.ScrollType == EMP_ScrollState.ScrollTypeEnum.Speed || x.RepetitionU == EMP_TextureSamplerDef.TextureRepitition.Mirror || x.RepetitionV == EMP_TextureSamplerDef.TextureRepitition.Mirror))
                 {
                     MessageBox.Show("One of the selected textures is used by an EMP with an unallowed type. These can't be merged.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
@@ -676,7 +676,7 @@ namespace EEPK_Organiser.View
             }
 
             //Remove all repeating textures
-            selectedTextures.RemoveAll(x => EMP_TextureDefinition.IsRepeatingTexture(x, AssetContainer));
+            selectedTextures.RemoveAll(x => EMP_TextureSamplerDef.IsRepeatingTexture(x, AssetContainer));
 
             if (selectedTextures.Count < 2)
             {
@@ -685,7 +685,7 @@ namespace EEPK_Organiser.View
             }
 
 
-            var bitmaps = EmbEntry.GetBitmaps(selectedTextures);
+            List<System.Windows.Media.Imaging.WriteableBitmap> bitmaps = EmbEntry.GetBitmaps(selectedTextures);
             double maxDimension = EmbEntry.HighestDimension(bitmaps);
             int textureSize = (int)EmbEntry.SelectTextureSize(maxDimension, bitmaps.Count);
 

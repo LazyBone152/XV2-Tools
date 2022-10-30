@@ -429,10 +429,10 @@
     <Compile Include="Utils\FileAssociation.cs" />
     <Compile Include="Utils\LeftClickContextMenu.cs" />
     <Compile Include="Utils\ListBoxSelectedItemsBinding.cs" />
+    <Compile Include="Utils\DragInsideCanvasBehavior.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="readme.txt" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

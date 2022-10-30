@@ -13,17 +13,29 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void NotifyPropertyChanged(String propertyName = "")
+        protected void NotifyPropertyChanged(String propertyName = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         #endregion
 
+        private bool _isAnimated = false;
         private bool _loop = false;
         private bool _interpolate = true;
 
-        public bool IsAnimated { get; set; }
+        public bool IsAnimated
+        {
+            get => _isAnimated;
+            set
+            {
+                if(value != _isAnimated)
+                {
+                    _isAnimated = value;
+                    NotifyPropertyChanged(nameof(IsAnimated));
+                }
+            }
+        }
         public bool UndoableIsAnimated
         {
             get => IsAnimated;
@@ -214,6 +226,35 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             Parameter = EMP_KeyframedValue.GetParameter(ValueType, isSphere);
             Components = EMP_KeyframedValue.GetComponent(ValueType, isScaleXyEnabled);
         }
+    
+        public string GetValueName()
+        {
+            switch (ValueType)
+            {
+                case KeyframedValueType.ActiveRotation:
+                    return "Active Rotation";
+                case KeyframedValueType.Color1:
+                    return "Color (Primary)";
+                case KeyframedValueType.Color2:
+                    return "Color (Secondary)";
+                case KeyframedValueType.Color1_Transparency:
+                    return "Alpha (Primary)";
+                case KeyframedValueType.Color2_Transparency:
+                    return "Alpha (Secondary)";
+                case KeyframedValueType.PositionY:
+                    return "Position Y";
+                case KeyframedValueType.ScaleBase:
+                    return "Scale";
+                case KeyframedValueType.ScaleXY:
+                    return "Scale XY";
+                case KeyframedValueType.Size1:
+                    return "Size 1";
+                case KeyframedValueType.Size2:
+                    return "Size 2";
+                default:
+                    return ValueType.ToString();
+            }
+        }
     }
 
     public class KeyframedGenericValue : IKeyframe
@@ -244,6 +285,44 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
                     if (current.Contains(values[i][a].Time)) continue;
                     current.Add(values[i][a].Time);
                     yield return values[i][a].Time;
+                }
+            }
+        }
+    }
+
+    [Serializable]
+    public abstract class KeyframeBaseValue : INotifyPropertyChanged
+    {
+        #region NotifyPropChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void NotifyPropertyChanged(string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        #endregion
+
+        private float _time = 0f;
+        public float Time
+        {
+            get => _time;
+            set
+            {
+                _time = value;
+                NotifyPropertyChanged(nameof(Time));
+                NotifyPropertyChanged(nameof(UndoableTime));
+            }
+        }
+        public float UndoableTime
+        {
+            get => _time;
+            set
+            {
+                if(_time != value)
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(Time), this, Time, value, "Keyframe Time"));
+                    Time = value;
                 }
             }
         }

@@ -19,36 +19,66 @@ namespace EEPK_Organiser.View.Vectors
 
         #region DP
         public static readonly DependencyProperty ValueProperty = DependencyProperty.Register(
-            "Value", typeof(LB_Common.Numbers.CustomVector4), typeof(CustomVector3), new PropertyMetadata(OnDpChanged));
+            nameof(Value), typeof(LB_Common.Numbers.CustomVector4), typeof(CustomVector3), new PropertyMetadata(ValueChangedCallback));
 
         public LB_Common.Numbers.CustomVector4 Value
         {
-            get { return (LB_Common.Numbers.CustomVector4)GetValue(ValueProperty); }
-            set { SetValue(ValueProperty, value); }
+            get => (LB_Common.Numbers.CustomVector4)GetValue(ValueProperty);
+            set => SetValue(ValueProperty, value);
         }
 
         public static readonly DependencyProperty IntervalProperty = DependencyProperty.Register(
-            "Interval", typeof(float), typeof(CustomVector3), new PropertyMetadata(0.05f));
+            nameof(Interval), typeof(float), typeof(CustomVector3), new PropertyMetadata(0.05f));
 
         public float Interval
         {
-            get { return (float)GetValue(IntervalProperty); }
-            set { SetValue(IntervalProperty, value); }
+            get => (float)GetValue(IntervalProperty);
+            set => SetValue(IntervalProperty, value);
         }
 
-        private static DependencyPropertyChangedEventHandler DpChanged;
+        public static readonly DependencyProperty HideUpDownButtonsProperty = DependencyProperty.Register(
+            nameof(HideUpDownButtons), typeof(bool), typeof(CustomVector3), new PropertyMetadata(false));
 
-        private static void OnDpChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        public bool HideUpDownButtons
         {
-            if (DpChanged != null)
-                DpChanged.Invoke(sender, e);
+            get => (bool)GetValue(HideUpDownButtonsProperty);
+            set => SetValue(HideUpDownButtonsProperty, value);
         }
 
-        private void ValueInstanceChanged(object sender, DependencyPropertyChangedEventArgs e)
+        public static readonly DependencyProperty AllowUndoProperty = DependencyProperty.Register(
+            nameof(AllowUndo), typeof(bool), typeof(CustomVector3), new PropertyMetadata(true));
+
+        public bool AllowUndo
         {
-            UpdateProperties();
+            get => (bool)GetValue(AllowUndoProperty);
+            set => SetValue(AllowUndoProperty, value);
         }
 
+        public static readonly DependencyProperty MinValueProperty = DependencyProperty.Register(
+            nameof(MinValue), typeof(double), typeof(CustomVector3), new PropertyMetadata(double.MinValue));
+
+        public double MinValue
+        {
+            get => (double)GetValue(MinValueProperty);
+            set => SetValue(MinValueProperty, value);
+        }
+
+        public static readonly DependencyProperty MaxValueProperty = DependencyProperty.Register(
+            nameof(MaxValue), typeof(double), typeof(CustomVector3), new PropertyMetadata(double.MaxValue));
+
+        public double MaxValue
+        {
+            get => (double)GetValue(MaxValueProperty);
+            set => SetValue(MaxValueProperty, value);
+        }
+
+        private static void ValueChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            if(sender is CustomVector3 view)
+            {
+                view.UpdateProperties();
+            }
+        }
         #endregion
 
         public float X
@@ -79,7 +109,6 @@ namespace EEPK_Organiser.View.Vectors
         public CustomVector3()
         {
             InitializeComponent();
-            DpChanged += ValueInstanceChanged;
             UndoManager.Instance.UndoOrRedoCalled += Instance_UndoOrRedoCalled;
         }
 
@@ -101,7 +130,8 @@ namespace EEPK_Organiser.View.Vectors
             {
                 Value.GetType().GetProperty(propName).SetValue(Value, newValue);
 
-                UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(propName, Value, original, newValue, $"{propName}"));
+                if(AllowUndo)
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(propName, Value, original, newValue, $"{propName}"));
             }
         }
 

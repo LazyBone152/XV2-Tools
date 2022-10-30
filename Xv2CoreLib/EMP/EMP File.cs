@@ -3634,6 +3634,7 @@ namespace Xv2CoreLib.EMP
             return true;
         }
     
+        /*
         public static bool IsRepeatingTexture(EmbEntry embEntry, EffectContainer.AssetContainerTool assetContainer)
         {
             foreach(var emp in assetContainer.Assets)
@@ -3661,6 +3662,7 @@ namespace Xv2CoreLib.EMP
 
             return false;
         }
+        */
     }
 
     [Serializable]

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
@@ -9,7 +10,19 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
     [Serializable]
     public class KeyframedFloatValue : KeyframedBaseValue
     {
-        public float Constant { get; set; }
+        public const string CLIPBOARD_ID = "EMP_KeyframedFloatValue";
+
+        private float _constant = 0;
+        public float Constant
+        {
+            get => _constant;
+            set
+            {
+                _constant = value;
+                NotifyPropertyChanged(nameof(Constant));
+                NotifyPropertyChanged(nameof(UndoableConstant));
+            }
+        }
         public float UndoableConstant
         {
             get => Constant;
@@ -19,6 +32,7 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
                 {
                     UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(Constant), this, Constant, value, ValueType.ToString()));
                     Constant = value;
+                    NotifyPropertyChanged(nameof(UndoableConstant));
                 }
             }
         }
@@ -40,8 +54,10 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             if (empKeyframes.Length != 1)
                 throw new ArgumentException($"KeyframedFloatValue.DecompileKeyframes: Invalid number of keyframed values. Expected 1, but there are {empKeyframes.Length}!");
 
+            float constant = IsScale ? Constant / 2 : Constant;
+
             //Returns array of 1
-            List<KeyframedGenericValue>[] tempKeyframes = Decompile(new float[] { Constant }, empKeyframes);
+            List<KeyframedGenericValue>[] tempKeyframes = Decompile(new float[] { constant }, empKeyframes);
 
             if (Keyframes.Count > 0)
                 Keyframes.Clear();
@@ -90,10 +106,21 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
 
         public IUndoRedo AddKeyframe(float time, float value)
         {
-            KeyframeFloatValue keyframe = new KeyframeFloatValue(time, value);
-            Keyframes.Add(keyframe);
+            KeyframeFloatValue keyframe = Keyframes.FirstOrDefault(x => x.Time == time);
 
-            return new UndoableListAdd<KeyframeFloatValue>(Keyframes, keyframe);
+            if(keyframe == null)
+            {
+                keyframe = new KeyframeFloatValue(time, value);
+                Keyframes.Add(keyframe);
+                return new UndoableListAdd<KeyframeFloatValue>(Keyframes, keyframe, "Add Keyframe");
+            }
+            else
+            {
+                IUndoRedo undo = new UndoablePropertyGeneric(nameof(keyframe.Value), keyframe, keyframe.Value, value, "Add Keyframe");
+                keyframe.Value = value;
+                return undo;
+            }
+
         }
 
         public IUndoRedo RemoveKeyframe(float time)
@@ -112,10 +139,32 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
     }
 
     [Serializable]
-    public class KeyframeFloatValue
+    public class KeyframeFloatValue : KeyframeBaseValue
     {
-        public float Time { get; set; }
-        public float Value { get; set; }
+        private float _value = 0f;
+        public float Value
+        {
+            get => _value;
+            set
+            {
+                _value = value;
+                NotifyPropertyChanged(nameof(Value));
+                NotifyPropertyChanged(nameof(UndoableValue));
+            }
+        }
+        public float UndoableValue
+        {
+            get => Value;
+            set
+            {
+                if(value != Value)
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(Value), this, Value, value, "Keyframed Float Value"));
+                    Value = value;
+                }
+            }
+        }
+
 
         public KeyframeFloatValue(float time, float value)
         {

@@ -21,35 +21,49 @@ namespace EEPK_Organiser.View.Vectors
 
         #region DP
         public static readonly DependencyProperty ValueProperty = DependencyProperty.Register(
-            "Value", typeof(LB_Common.Numbers.CustomColor), typeof(CustomRgbColor), new PropertyMetadata(OnDpChanged));
+            nameof(Value), typeof(LB_Common.Numbers.CustomColor), typeof(CustomRgbColor), new PropertyMetadata(ValueChangedCallback));
 
         public LB_Common.Numbers.CustomColor Value
         {
-            get { return (LB_Common.Numbers.CustomColor)GetValue(ValueProperty); }
-            set { SetValue(ValueProperty, value); }
+            get => (LB_Common.Numbers.CustomColor)GetValue(ValueProperty);
+            set => SetValue(ValueProperty, value);
         }
 
         public static readonly DependencyProperty IntervalProperty = DependencyProperty.Register(
-            "Interval", typeof(float), typeof(CustomRgbColor), new PropertyMetadata(0.05f));
+            nameof(Interval), typeof(float), typeof(CustomRgbColor), new PropertyMetadata(0.05f));
 
         public float Interval
         {
-            get { return (float)GetValue(IntervalProperty); }
-            set { SetValue(IntervalProperty, value); }
+            get => (float)GetValue(IntervalProperty);
+            set => SetValue(IntervalProperty, value);
         }
 
+        //Hide UpDownButtons
+        public static readonly DependencyProperty HideUpDownButtonsProperty = DependencyProperty.Register(
+            nameof(HideUpDownButtons), typeof(bool), typeof(CustomRgbColor), new PropertyMetadata(false));
 
-        private static DependencyPropertyChangedEventHandler DpChanged;
-
-        private static void OnDpChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        public bool HideUpDownButtons
         {
-            if (DpChanged != null)
-                DpChanged.Invoke(sender, e);
+            get => (bool)GetValue(HideUpDownButtonsProperty);
+            set => SetValue(HideUpDownButtonsProperty, value);
         }
 
-        private void ValueInstanceChanged(object sender, DependencyPropertyChangedEventArgs e)
+        //Allow Undo
+        public static readonly DependencyProperty AllowUndoProperty = DependencyProperty.Register(
+            nameof(AllowUndo), typeof(bool), typeof(CustomRgbColor), new PropertyMetadata(true));
+
+        public bool AllowUndo
         {
-            UpdateProperties();
+            get => (bool)GetValue(AllowUndoProperty);
+            set => SetValue(AllowUndoProperty, value);
+        }
+
+        private static void ValueChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            if(sender is CustomRgbColor view)
+            {
+                view.UpdateProperties();
+            }
         }
 
         #endregion
@@ -98,7 +112,6 @@ namespace EEPK_Organiser.View.Vectors
         public CustomRgbColor()
         {
             InitializeComponent();
-            DpChanged += ValueInstanceChanged;
             UndoManager.Instance.UndoOrRedoCalled += Instance_UndoOrRedoCalled;
         }
 
@@ -120,7 +133,7 @@ namespace EEPK_Organiser.View.Vectors
             {
                 Value.GetType().GetProperty(propName).SetValue(Value, newValue);
 
-                if (addUndo)
+                if (addUndo && AllowUndo)
                     UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(propName, Value, original, newValue, $"{propName}"));
 
                 ColorChangedEvent?.Invoke(this, EventArgs.Empty);
@@ -137,7 +150,9 @@ namespace EEPK_Organiser.View.Vectors
             undos.Add(SetFloatValue(newValue.Value.ScG, "G", false));
             undos.Add(SetFloatValue(newValue.Value.ScB, "B", false));
 
-            UndoManager.Instance.AddCompositeUndo(undos, "Color");
+            if(AllowUndo)
+                UndoManager.Instance.AddCompositeUndo(undos, "Color");
+
             UpdateProperties();
         }
 

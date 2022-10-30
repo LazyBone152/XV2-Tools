@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using YAXLib;
-using Xv2CoreLib.EMD;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
+using Xv2CoreLib.EMD;
 using Xv2CoreLib.Resource;
+using YAXLib;
 
 namespace Xv2CoreLib.EMG
 {
@@ -12,13 +12,43 @@ namespace Xv2CoreLib.EMG
     [Serializable]
     public class EMG_File
     {
-        private const int EMG_SIGNATURE = 1196246307;
+        public const int EMG_SIGNATURE = 1196246307;
+        public const string CLIPBOARD_ID = "XV2_EMG_FILE";
 
         [YAXAttributeForClass]
         public ushort I_04 { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Mesh")]
         public List<EMG_Mesh> EmgMeshes { get; set; } = new List<EMG_Mesh>();
+
+        #region LoadSave
+        public static void CreateXml(string path)
+        {
+            var file = Read(File.ReadAllBytes(path), 0);
+
+            YAXSerializer serializer = new YAXSerializer(typeof(EMG_File));
+            serializer.SerializeToFile(file, path + ".xml");
+        }
+
+        public static void ConvertFromXml(string xmlPath)
+        {
+            string saveLocation = String.Format("{0}/{1}", Path.GetDirectoryName(xmlPath), Path.GetFileNameWithoutExtension(xmlPath));
+
+            YAXSerializer serializer = new YAXSerializer(typeof(EMG_File), YAXSerializationOptions.DontSerializeNullObjects);
+            var file = (EMG_File)serializer.DeserializeFromFile(xmlPath);
+
+            File.WriteAllBytes(saveLocation, file.Write());
+        }
+
+        public static EMG_File Load(string path)
+        {
+            return Read(File.ReadAllBytes(path), 0);
+        }
+
+        public void Save(string path)
+        {
+            File.WriteAllBytes(path, Write());
+        }
 
         public static EMG_File Read(byte[] bytes, int offset)
         {
@@ -33,7 +63,7 @@ namespace Xv2CoreLib.EMG
             ushort meshCount = BitConverter.ToUInt16(bytes, offset + 6);
 
             //Parse all meshes
-            for(int i = 0; i < meshCount; i++)
+            for (int i = 0; i < meshCount; i++)
             {
                 int meshOffset = BitConverter.ToInt32(bytes, offset + 8 + (4 * i)) + offset;
                 emgFile.EmgMeshes.Add(EMG_Mesh.Read(bytes, meshOffset));
@@ -55,7 +85,7 @@ namespace Xv2CoreLib.EMG
             //Mesh offsets
             bytes.AddRange(new byte[4 * meshCount]);
 
-            for(int i = 0; i < meshCount; i++)
+            for (int i = 0; i < meshCount; i++)
             {
                 //Pad file to be in alignment
                 bytes.AddRange(new byte[Utils.CalculatePadding(bytes.Count, 16)]);
@@ -68,19 +98,30 @@ namespace Xv2CoreLib.EMG
 
             return bytes.ToArray();
         }
-   
+
+        #endregion
+
+        /// <summary>
+        /// Converts a <see cref="EMD_File"/> instance into a <see cref="EMG_File"/> instance, with additional support for merging EMB, DYTs and EMMs.
+        /// </summary>
+        /// <param name="emdFile">The EMD file to convert.</param>
+        /// <param name="skeleton">The skeleton to go with the EMD file, if one exists. If the EMD file has any bone weights then an exception will be thrown if no skeleton is provided.</param>
+        /// <param name="embIndex">The current merged EMB index. All texture references will be increased by this.</param>
+        /// <param name="matNames">Dictionary containing the new material names. Submeshes will be renamed according to this (needed for when a merged EMM has multiple materials with the same name).</param>
+        /// <param name="emdIdx">Sets the <see cref="EMG_File.I_04"/> value. Unknown function. </param>
+        /// <returns></returns>
         public static EMG_File Convert(EMD_File emdFile, ESK.ESK_Skeleton skeleton, int embIndex, Dictionary<string, string> matNames, int emdIdx, bool hasDytSamler)
         {
             EMG_File emg = new EMG_File();
             emg.I_04 = (ushort)emdIdx;
 
-            foreach(var model in emdFile.Models)
+            foreach (var model in emdFile.Models)
             {
-                foreach(var mesh in model.Meshes)
+                foreach (var mesh in model.Meshes)
                 {
-                    foreach(var submesh in mesh.Submeshes)
+                    foreach (var submesh in mesh.Submeshes)
                     {
-                        foreach(var triangleList in submesh.Triangles)
+                        foreach (var triangleList in submesh.Triangles)
                         {
                             EMG_Mesh emgMesh = new EMG_Mesh();
                             emgMesh.AABB = mesh.AABB;
@@ -120,7 +161,7 @@ namespace Xv2CoreLib.EMG
                                 textureList.TextureSamplerDefs.Clear();
                                 textureList.TextureSamplerDefs.Add(dytSampler); //for TOONvfx shaders, the dyt sampler is at index 0
                                 textureList.TextureSamplerDefs.Add(textureSampler); //main texture is at index 1.
-                                
+
                             }
 
                             //Vertices
@@ -143,15 +184,49 @@ namespace Xv2CoreLib.EMG
                                 emgSubmesh.Faces[i] = (short)triangleList.Faces[i];
 
                             //Bones
-                            foreach(var bone in triangleList.Bones)
+                            if(skeleton != null)
                             {
-                                ESK.ESK_Bone eskBone = skeleton.NonRecursiveBones.FirstOrDefault(x => x.Name == bone);
+                                foreach (var bone in triangleList.Bones)
+                                {
 
-                                if (eskBone != null)
-                                    emgSubmesh.Bones.Add((ushort)eskBone.Index);
-                                else
-                                    emgSubmesh.Bones.Add(0);
+                                    ESK.ESK_Bone eskBone = skeleton.NonRecursiveBones.FirstOrDefault(x => x.Name == bone);
+
+                                    if (eskBone != null)
+                                        emgSubmesh.Bones.Add((ushort)eskBone.Index);
+                                    else
+                                        emgSubmesh.Bones.Add(0);
+                                }
                             }
+                            else if(emgMesh.VertexFlags.HasFlag(VertexFlags.BlendWeight))
+                            {
+                                emgMesh.VertexFlags = emgMesh.VertexFlags.RemoveFlag(VertexFlags.BlendWeight);
+                            }
+
+                            //Calc barycenter (LibXenoverse)
+                            for (int i = 0; i < emgSubmesh.Faces.Length; i++)
+                            {
+                                if (emgSubmesh.Faces[i] >= emgMesh.Vertices.Count)
+                                    continue;
+
+                                EMD_Vertex vertex = emgMesh.Vertices[emgSubmesh.Faces[i]];
+
+                                if (i == 0)
+                                {
+                                    emgSubmesh.BarycenterX = vertex.PositionX;
+                                    emgSubmesh.BarycenterY = vertex.PositionY;
+                                    emgSubmesh.BarycenterZ = vertex.PositionZ;
+                                }
+                                else
+                                {
+
+                                    emgSubmesh.BarycenterX *= (i / ((float)(i + 1))) + (vertex.PositionX / (i + 1));
+                                    emgSubmesh.BarycenterY *= (i / ((float)(i + 1))) + (vertex.PositionY / (i + 1));
+                                    emgSubmesh.BarycenterZ *= (i / ((float)(i + 1))) + (vertex.PositionZ / (i + 1));
+                                }
+
+                            }
+
+                            emgSubmesh.BarycenterW = 1f;
 
                             emgMesh.Submeshes.Add(emgSubmesh);
                             emg.EmgMeshes.Add(emgMesh);
@@ -163,6 +238,68 @@ namespace Xv2CoreLib.EMG
             }
 
             return emg;
+        }
+
+        /// <summary>
+        /// Convert a <see cref="EMD_File"/> instance into a <see cref="EMG_File"/> instance.
+        /// </summary>
+        public static EMG_File ConvertToEmg(EMD_File emdFile, ESK.ESK_Skeleton skeleton = null)
+        {
+            return Convert(emdFile, skeleton, 0, new Dictionary<string, string>(), 0, false);
+        }
+
+        /// <summary>
+        /// Converts this <see cref="EMG_File"/> instance to a <see cref="EMD_File"/> instance. 
+        /// DOES NOT SUPPORT SKINNING / ANIMATIONS.
+        /// </summary>
+        public EMD_File ConvertToEmd()
+        {
+            EMD_File emdFile = new EMD_File();
+            emdFile.Version = 37507;
+
+            //Root model entry. The entie EMG will be added onto this.
+            EMD_Model emdModel = new EMD_Model();
+            emdModel.Name = "EMG";
+            emdFile.Models.Add(emdModel);
+
+            foreach (EMG_Mesh mesh in EmgMeshes)
+            {
+                if (mesh.Submeshes.Count == 0) continue;
+
+                foreach (EMG_Submesh submesh in mesh.Submeshes)
+                {
+                    EMD_Mesh emdMesh = new EMD_Mesh();
+                    emdMesh.Name = submesh.MaterialName;
+                    emdMesh.AABB = mesh.AABB;
+
+                    EMD_Submesh emdSubmesh = new EMD_Submesh();
+                    emdSubmesh.Name = submesh.MaterialName;
+                    emdSubmesh.AABB = new EMD_AABB();
+
+                    emdSubmesh.TextureSamplerDefs = (submesh.TextureListIndex >= mesh.TextureLists.Count) ? new AsyncObservableCollection<EMD_TextureSamplerDef>() : mesh.TextureLists[submesh.TextureListIndex].TextureSamplerDefs;
+                    emdSubmesh.Vertexes = mesh.Vertices;
+                    emdSubmesh.VertexFlags = mesh.VertexFlags;
+
+                    //Blend weights are not currently supported by this method. Any weights will be removed upon conversion.
+                    if (emdSubmesh.VertexFlags.HasFlag(VertexFlags.BlendWeight))
+                    {
+                        emdSubmesh.VertexFlags = emdSubmesh.VertexFlags.RemoveFlag(VertexFlags.BlendWeight);
+                    }
+
+                    EMD_Triangle triangleList = new EMD_Triangle();
+
+                    foreach(short face in submesh.Faces)
+                    {
+                        triangleList.Faces.Add((ushort)face);
+                    }
+
+                    emdSubmesh.Triangles.Add(triangleList);
+                    emdMesh.Submeshes.Add(emdSubmesh);
+                    emdModel.Meshes.Add(emdMesh);
+                }
+            }
+
+            return emdFile;
         }
     }
 
@@ -187,7 +324,7 @@ namespace Xv2CoreLib.EMG
 
         //Saving values:
         [YAXDontSerialize]
-        public int VertexOffset { get; private set; } 
+        public int VertexOffset { get; private set; }
         [YAXDontSerialize]
         public int StartOffset { get; private set; }
 
@@ -208,7 +345,7 @@ namespace Xv2CoreLib.EMG
             int submeshListOffset = BitConverter.ToInt32(bytes, offset + 28) + offset;
 
             //Textures
-            for(int i = 0; i < textureListsCount; i++)
+            for (int i = 0; i < textureListsCount; i++)
             {
                 int texOffset = BitConverter.ToInt32(bytes, textureListsOffset + (4 * i)) + offset;
 
@@ -220,7 +357,7 @@ namespace Xv2CoreLib.EMG
             }
 
             //Submesh
-            for(int i = 0; i < submeshCount; i++)
+            for (int i = 0; i < submeshCount; i++)
             {
                 int submeshOffset = BitConverter.ToInt32(bytes, submeshListOffset + (4 * i)) + offset;
 
@@ -233,7 +370,7 @@ namespace Xv2CoreLib.EMG
 
             return mesh;
         }
-        
+
         public List<byte> Write(bool writeVertices, int absOffsetInFile)
         {
             StartOffset = absOffsetInFile;
@@ -262,7 +399,7 @@ namespace Xv2CoreLib.EMG
             int pointerList = bytes.Count;
             bytes.AddRange(new byte[4 * textureListsCount]); //Write null bytes that will be replaced with the actual pointers 
 
-            for(int i = 0; i < textureListsCount; i++)
+            for (int i = 0; i < textureListsCount; i++)
             {
                 //Update offset to point to this entry
                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), pointerList + (4 * i));
@@ -278,7 +415,7 @@ namespace Xv2CoreLib.EMG
                 bytes.AddRange(new byte[4 * submeshCount]); //Write null bytes that will be replaced with the actual pointers 
 
 
-                for(int i = 0; i < submeshCount; i++)
+                for (int i = 0; i < submeshCount; i++)
                 {
                     //Pad file to 16-byte alignment
                     bytes.AddRange(new byte[Utils.CalculatePadding(bytes.Count, 16)]);
@@ -301,7 +438,7 @@ namespace Xv2CoreLib.EMG
 
             return bytes;
         }
-    
+
     }
 
     [YAXSerializeAs("TextureList")]
@@ -351,7 +488,7 @@ namespace Xv2CoreLib.EMG
         public float BarycenterZ { get; set; }
         [YAXAttributeFor("Barycenter")]
         [YAXSerializeAs("W")]
-        public float BarycenterW { get; set; }
+        public float BarycenterW { get; set; } = 1f;
 
         public short[] Faces { get; set; }
         public List<ushort> Bones { get; set; } = new List<ushort>();
@@ -373,7 +510,7 @@ namespace Xv2CoreLib.EMG
             //Faces
             submesh.Faces = new short[faceCount];
 
-            for(int i = 0; i < faceCount; i++)
+            for (int i = 0; i < faceCount; i++)
             {
                 submesh.Faces[i] = BitConverter.ToInt16(bytes, offset + 54 + (i * 2));
             }

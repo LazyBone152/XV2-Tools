@@ -7,27 +7,28 @@
              xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d" 
-             d:DesignHeight="30" d:DesignWidth="250" MaxWidth="500" Name="UserControl">
+             d:DesignHeight="30" d:DesignWidth="250" MaxWidth="500" MaxHeight="30" Name="UserControl">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="100"/>
             <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="5"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <TextBlock Text="{Binding ElementName=UserControl, Path=ValueName}"/>
-        
         <!-- Value controls, depending on type -->
-        <vector:CustomVector2 Grid.Column="1" Visibility="{Binding ElementName=UserControl, Path=Vector2Visibile}" Value="{Binding ElementName=UserControl, Path=Vector2Value.Constant}" Interval="0.05"/>
-        <vector:CustomVector3 Grid.Column="1" Visibility="{Binding ElementName=UserControl, Path=Vector3Visibile}" Value="{Binding ElementName=UserControl, Path=Vector3Value.Constant}" Interval="0.05"/>
-        <vector:CustomRgbColor Grid.Column="1" Visibility="{Binding ElementName=UserControl, Path=ColorVisibile}" Value="{Binding ElementName=UserControl, Path=ColorValue.Constant}" Interval="0.01"/>
-        <controls:NumericUpDown Grid.Column="1" Visibility="{Binding ElementName=UserControl, Path=FloatVisibile}" Value="{Binding ElementName=UserControl, Path=FloatValue.UndoableConstant}" Interval="0.01"/>
+        <vector:CustomVector2 Visibility="{Binding ElementName=UserControl, Path=Vector2Visibile}" Value="{Binding ElementName=UserControl, Path=Vector2Value.Constant}" Interval="0.05" HideUpDownButtons="{Binding ElementName=UserControl, Path=HideUpDownButtons}"/>
+        <vector:CustomVector3 Visibility="{Binding ElementName=UserControl, Path=Vector3Visibile}" Value="{Binding ElementName=UserControl, Path=Vector3Value.Constant}" Interval="0.05" HideUpDownButtons="{Binding ElementName=UserControl, Path=HideUpDownButtons}"/>
+        <vector:CustomRgbColor Visibility="{Binding ElementName=UserControl, Path=ColorVisibile}" Value="{Binding ElementName=UserControl, Path=ColorValue.Constant}" Interval="0.01" HideUpDownButtons="{Binding ElementName=UserControl, Path=HideUpDownButtons}"/>
+        <controls:NumericUpDown Visibility="{Binding ElementName=UserControl, Path=FloatVisibile}" Value="{Binding ElementName=UserControl, Path=FloatValue.UndoableConstant}" Interval="0.01" StringFormat="0.0###" HideUpDownButtons="{Binding ElementName=UserControl, Path=HideUpDownButtons}" InterceptMouseWheel="{Binding ElementName=UserControl, Path=HideUpDownButtons}" TrackMouseWheelWhenMouseOver="False" Margin="0,0,-2,0"/>
         
-        <!-- Button. Goto anim tab and select this (internally just fires an event). Hidden if control is used on anim tab. -->
-        <Button Grid.Column="2" Visibility="{Binding ElementName=UserControl, Path=AnimButtonVisible}" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="Transparent" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="25" Height="25" ToolTip="{Binding ElementName=UserControl, Path=ValueToolTip}">
+        <!-- Button: Opens KeyframedValue in the Keyframe Tab -->
+        <Button Grid.Column="2" Command="{Binding ElementName=UserControl, Path=GoToKeyframedValueCommand}" Visibility="{Binding ElementName=UserControl, Path=NotAnimButtonVisible}" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="Transparent" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="20" Height="20" ToolTip="Not currently keyframed. Click to open in the Keyframe Editor.">
             <iconPacks:PackIconMaterialLight Kind="Clock"/>
         </Button>
         
-        <!-- IsAnimated checkbox. Will only appear when on the animation tab. -->
-        <CheckBox Grid.Column="2" Visibility="{Binding ElementName=UserControl, Path=AnimCheckBoxVisible}" VerticalAlignment="Center" HorizontalAlignment="Center" IsChecked="{Binding ElementName=UserControl, Path=KeyframedValue.UndoableIsAnimated}" ToolTip="{Binding ElementName=UserControl, Path=ValueToolTip}"/>
-    </Grid>
+        <!-- Duplicate button with different background color. Replaces above button when value is animated. -->
+        <Button Grid.Column="2" Command="{Binding ElementName=UserControl, Path=GoToKeyframedValueCommand}" Foreground="{DynamicResource MahApps.Brushes.AccentBase}" Visibility="{Binding ElementName=UserControl, Path=AnimButtonVisible}" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="Transparent" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="20" Height="20" ToolTip="This value is currently keyframed. Click to open in the Keyframe Editor.">
+            <iconPacks:PackIconMaterialLight Kind="Clock" />
+        </Button>
+        
+        </Grid>
 </UserControl>

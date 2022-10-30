@@ -11,6 +11,8 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
     [Serializable]
     public class KeyframedColorValue : KeyframedBaseValue
     {
+        public const string CLIPBOARD_ID = "EMP_KeyframedColorValue";
+
         public CustomColor Constant { get; set; }
         public AsyncObservableCollection<KeyframeColorValue> Keyframes { get; set; } = new AsyncObservableCollection<KeyframeColorValue>();
 
@@ -68,10 +70,23 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
 
         public IUndoRedo AddKeyframe(float time, float r, float g, float b)
         {
-            KeyframeColorValue keyframe = new KeyframeColorValue(time, r, g, b);
-            Keyframes.Add(keyframe);
+            KeyframeColorValue keyframe = Keyframes.FirstOrDefault(a => a.Time == time);
 
-            return new UndoableListAdd<KeyframeColorValue>(Keyframes, keyframe);
+            if (keyframe == null)
+            {
+                keyframe = new KeyframeColorValue(time, r, g, b);
+                Keyframes.Add(keyframe);
+
+                return new UndoableListAdd<KeyframeColorValue>(Keyframes, keyframe, "Add Keyframe");
+            }
+            else
+            {
+                CustomColor color = new CustomColor(r, g, b, 1f);
+                IUndoRedo undo = new UndoablePropertyGeneric(nameof(keyframe.Value), keyframe, keyframe.Value, color, "Add Keyframe");
+                keyframe.Value = color;
+
+                return undo;
+            }
         }
 
         public IUndoRedo RemoveKeyframe(float time)
@@ -132,9 +147,8 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
     }
 
     [Serializable]
-    public class KeyframeColorValue
+    public class KeyframeColorValue : KeyframeBaseValue
     {
-        public float Time { get; set; }
         public CustomColor Value { get; set; }
 
         public KeyframeColorValue(float time, float r, float g, float b)

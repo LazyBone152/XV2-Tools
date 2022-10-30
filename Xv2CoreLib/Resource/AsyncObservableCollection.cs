@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Threading;
+using Xv2CoreLib.Resource.UndoRedo;
 using YAXLib;
 
 namespace Xv2CoreLib.Resource
@@ -83,10 +84,12 @@ namespace Xv2CoreLib.Resource
     [Serializable]
     public class AsyncObservableCollection<T> : IList<T>
     {
+
         private object lockObj = new object();
+        private bool IsListBeingModified = false;
 
         //Primary list
-        private List<T> list;
+        private readonly List<T> list;
 
         //The observable collection. This is only created when the property requests it (via a binding). This ensures that is will always be created in the UI thread.
         [field: NonSerialized]
@@ -104,12 +107,13 @@ namespace Xv2CoreLib.Resource
                     lock (lockObj)
                     {
                         _observableList = new ROACollection<T>(this);
+                        _observableList.CollectionChanged += _observableList_CollectionChanged;
                     }
                 }
                 return _observableList;
             }
         }
-        
+
         [YAXDontSerialize]
         public int Count => list.Count;
         [YAXDontSerialize]
@@ -154,7 +158,9 @@ namespace Xv2CoreLib.Resource
 
                 if (_observableList != null)
                 {
+                    IsListBeingModified = true;
                     _observableList.Add(item);
+                    IsListBeingModified = false;
                 }
             }
 
@@ -171,12 +177,14 @@ namespace Xv2CoreLib.Resource
                 {
                     foreach (var item in items)
                     {
+                        IsListBeingModified = true;
                         _observableList.Add(item);
+                        IsListBeingModified = false;
                     }
                 }
             }
 
-            CollectionChanged?.Invoke(this, null);
+            CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, items));
         }
 
         public bool Remove(T item)
@@ -186,6 +194,8 @@ namespace Xv2CoreLib.Resource
 
         public void RemoveRange(int index, int count)
         {
+            List<T> removedItems = list.GetRange(index, count);
+
             lock (lockObj)
             {
                 list.RemoveRange(index, count);
@@ -194,12 +204,14 @@ namespace Xv2CoreLib.Resource
                 {
                     for (int i = index; i < index + count; i++)
                     {
+                        IsListBeingModified = true;
                         _observableList.RemoveAt(i);
+                        IsListBeingModified = false;
                     }
                 }
             }
 
-            CollectionChanged?.Invoke(this, null);
+            CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, removedItems));
         }
 
         public void RemoveAt(int index)
@@ -217,7 +229,9 @@ namespace Xv2CoreLib.Resource
 
                 if (_observableList != null)
                 {
+                    IsListBeingModified = true;
                     _observableList.RemoveAt(index);
+                    IsListBeingModified = false;
                 }
             }
 
@@ -226,20 +240,28 @@ namespace Xv2CoreLib.Resource
 
         public void Move(int oldIndex, int newIndex)
         {
+            Move(oldIndex, newIndex, false);
+        }
+        private void Move(int oldIndex, int newIndex, bool suppressEvent)
+        {
             lock (lockObj)
             {
                 T item = this[oldIndex];
                 list.RemoveAt(oldIndex);
                 list.Insert(newIndex, item);
 
-                if (_observableList != null)
+                if (_observableList != null && !suppressEvent)
                 {
+                    IsListBeingModified = true;
                     _observableList.Move(oldIndex, newIndex);
+                    IsListBeingModified = false;
                 }
 
-                CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move, item, newIndex, oldIndex));
+                if(!suppressEvent)
+                    CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move, item, newIndex, oldIndex));
             }
         }
+
 
         public void Insert(int index, T item)
         {
@@ -249,11 +271,13 @@ namespace Xv2CoreLib.Resource
 
                 if (_observableList != null)
                 {
+                    IsListBeingModified = true;
                     _observableList.Insert(index, item);
+                    IsListBeingModified = false;
                 }
             }
 
-            CollectionChanged?.Invoke(this, null);
+            CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, index));
         }
 
         public void Clear()
@@ -264,7 +288,9 @@ namespace Xv2CoreLib.Resource
 
                 if (_observableList != null)
                 {
+                    IsListBeingModified = true;
                     _observableList.Clear();
+                    IsListBeingModified = false;
                 }
             }
         }
@@ -309,12 +335,14 @@ namespace Xv2CoreLib.Resource
 
                 if (_observableList != null)
                 {
+                    IsListBeingModified = true;
                     _observableList.Remove(item);
+                    IsListBeingModified = false;
                 }
             }
 
             if (wasRemoved)
-                CollectionChanged?.Invoke(this, null);
+                CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item));
 
             return wasRemoved;
         }
@@ -348,7 +376,9 @@ namespace Xv2CoreLib.Resource
 
                     foreach (var item in this)
                     {
+                        IsListBeingModified = true;
                         _observableList.Add(item);
+                        IsListBeingModified = false;
                     }
                 }
             }
@@ -365,6 +395,60 @@ namespace Xv2CoreLib.Resource
             return new AsyncObservableCollection<T>();
         }
 
+        #region UndoableChanges
+        //Mirror changes to the observable collection back to the main one
+        //Add undoable steps
+
+        private void _observableList_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (IsListBeingModified) return;
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    if(e.NewStartingIndex != -1)
+                    {
+                        //Insert
+                        if (e.NewItems[0] is T value)
+                        {
+                            list.Insert(e.NewStartingIndex, value);
+                            undos.Add(new UndoableListInsert<T>(this, e.NewStartingIndex, value));
+                        }
+                    }
+                    else
+                    {
+                        foreach(object item in e.NewItems)
+                        {
+                            if(item is T value)
+                            {
+                                list.Add(value);
+                                undos.Add(new UndoableListAdd<T>(this, value));
+                            }
+                        }
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    foreach(var item in e.OldItems)
+                    {
+                        if(item is T value)
+                        {
+                            undos.Add(new UndoableListRemove<T>(this, value));
+                            list.Remove(value);
+                        }
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Move:
+                    undos.Add(new UndoableListMove<T>(this, e.OldStartingIndex, e.NewStartingIndex));
+                    Move(e.OldStartingIndex, e.NewStartingIndex, true);
+                    break;
+
+            }
+
+            UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Item Move", allowCompositeMerging: true));
+        }
+
+        #endregion
     }
 
     public class ROACollection<T> : ObservableCollection<T>

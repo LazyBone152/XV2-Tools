@@ -346,8 +346,8 @@ namespace LB_Mod_Installer.Installer
                     Install_QSF(xmlPath, installPath, isXml);
                     break;
                 default:
-                    //if (TryTransformationInstall(xmlPath))
-                    //    break;
+                    if (TryTransformationInstall(xmlPath))
+                        break;
 
                     throw new InvalidDataException(string.Format("The filetype of \"{0}\" is not supported.", xmlPath));
             }
@@ -756,6 +756,12 @@ namespace LB_Mod_Installer.Installer
                 //Allows the eepk installer to reuse textures and assets by matching names.
                 EepkToolInterlop.TextureImportMatchNames = true;
                 EepkToolInterlop.AssetReuseMatchName = true;
+
+                //Avoids decompiling materials and keyframed values (emp). Not only is that not required for installing, its whole another avenue of potential bugs.
+                EepkToolInterlop.FullDecompile = false;
+
+                //Specific error messages
+                EepkToolInterlop.IsInstaller = true;
 
                 //Load files
                 EffectContainerFile installFile;

@@ -1,5 +1,4 @@
-﻿using Microsoft.Win32;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.ExceptionServices;
@@ -8,18 +7,19 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Xv2CoreLib.EffectContainer;
+using System.Diagnostics;
+using System.Collections.Generic;
+using Microsoft.Win32;
+using ControlzEx.Theming;
 using MahApps.Metro.Controls;
-using xv2 = Xv2CoreLib.Xenoverse2;
 using MahApps.Metro.Controls.Dialogs;
 using Xv2CoreLib.Resource.UndoRedo;
-using EEPK_Organiser.Forms.Recolor;
-using AutoUpdater;
+using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.Resource.App;
-using System.Diagnostics;
 using LB_Common.Utils;
-using ControlzEx.Theming;
-using System.Collections.Generic;
+using AutoUpdater;
+using EEPK_Organiser.Forms.Recolor;
+using xv2 = Xv2CoreLib.Xenoverse2;
 
 namespace EEPK_Organiser
 {
@@ -79,13 +79,13 @@ namespace EEPK_Organiser
             get
             {
                 if (effectContainerFile == null) return false;
-                return (effectContainerFile.Version == Xv2CoreLib.EMP.VersionEnum.DBXV2);
+                return (effectContainerFile.Version == Xv2CoreLib.EMP_NEW.VersionEnum.DBXV2);
             }
             set
             {
                 if (effectContainerFile != null)
                 {
-                    effectContainerFile.Version = Xv2CoreLib.EMP.VersionEnum.DBXV2;
+                    effectContainerFile.Version = Xv2CoreLib.EMP_NEW.VersionEnum.DBXV2;
                     UpdateSelectedVersion();
                 }
             }
@@ -95,13 +95,13 @@ namespace EEPK_Organiser
             get
             {
                 if (effectContainerFile == null) return false;
-                return (effectContainerFile.Version == Xv2CoreLib.EMP.VersionEnum.SDBH);
+                return (effectContainerFile.Version == Xv2CoreLib.EMP_NEW.VersionEnum.SDBH);
             }
             set
             {
                 if (effectContainerFile != null)
                 {
-                    effectContainerFile.Version = Xv2CoreLib.EMP.VersionEnum.SDBH;
+                    effectContainerFile.Version = Xv2CoreLib.EMP_NEW.VersionEnum.SDBH;
                     UpdateSelectedVersion();
                 }
             }

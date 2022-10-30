@@ -5,6 +5,7 @@ namespace Xv2CoreLib.Resource.UndoRedo
 {
     public class CompositeUndo : IUndoRedo
     {
+        public bool AllowCompositeMerging { get; private set; }
         public bool doLast { get; set; }
         internal List<IUndoRedo> undos;
         public string Message { get; set; }
@@ -16,13 +17,14 @@ namespace Xv2CoreLib.Resource.UndoRedo
         /// A composition undoable step encapsulating multiple undoable actions.
         /// </summary>
         /// <param name="_undos">The actions to undo.</param>
-        public CompositeUndo(List<IUndoRedo> _undos, string message, UndoGroup undoGroup = UndoGroup.Default, string undoArg = null, object undoContext = null)
+        public CompositeUndo(List<IUndoRedo> _undos, string message, UndoGroup undoGroup = UndoGroup.Default, string undoArg = null, object undoContext = null, bool allowCompositeMerging = false)
         {
             undos = (_undos != null) ? _undos : new List<IUndoRedo>();
             Message = message;
             UndoGroup = undoGroup;
             UndoArg = undoArg;
             UndoContext = undoContext;
+            AllowCompositeMerging = allowCompositeMerging;
 
             //Remove duplicate doLast actions
             List<int> existing = new List<int>();
@@ -66,6 +68,7 @@ namespace Xv2CoreLib.Resource.UndoRedo
 
         public bool CanMerge(CompositeUndo undo)
         {
+            if (AllowCompositeMerging) return true;
             if (undo.undos.Count != undos.Count) return false;
 
             for(int i = 0; i < undos.Count; i++)
@@ -86,17 +89,24 @@ namespace Xv2CoreLib.Resource.UndoRedo
 
             return false;
         }
-    
+
         public void MergeCompositeUndos(CompositeUndo undoToMerge)
         {
-            for (int i = 0; i < undos.Count; i++)
+            if (AllowCompositeMerging)
             {
-                if (undoToMerge.undos[i] is IMergableUndo mergeUndo && undos[i] is IMergableUndo prevMergeUndo)
+                undos.AddRange(undoToMerge.undos);
+            }
+            else
+            {
+                for (int i = 0; i < undos.Count; i++)
                 {
-                    //Undos qualify for merging
-                    if (mergeUndo._field == prevMergeUndo._field && mergeUndo._instance == prevMergeUndo._instance && mergeUndo.doLast == prevMergeUndo.doLast)
+                    if (undoToMerge.undos[i] is IMergableUndo mergeUndo && undos[i] is IMergableUndo prevMergeUndo)
                     {
-                        prevMergeUndo._newValue = mergeUndo._newValue;
+                        //Undos qualify for merging
+                        if (mergeUndo._field == prevMergeUndo._field && mergeUndo._instance == prevMergeUndo._instance && mergeUndo.doLast == prevMergeUndo.doLast)
+                        {
+                            prevMergeUndo._newValue = mergeUndo._newValue;
+                        }
                     }
                 }
             }

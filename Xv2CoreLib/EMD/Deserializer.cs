@@ -93,7 +93,7 @@ namespace Xv2CoreLib.EMD
                 {
                     //Fill in pointer
                     bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - meshPtrs[a].RelativeTo), meshPtrs[a].Offset);
-                    
+
                     ushort submeshCount = (ushort)((emdFile.Models[i].Meshes[a].Submeshes != null) ? emdFile.Models[i].Meshes[a].Submeshes.Count : 0);
                     int meshStart = bytes.Count;
 

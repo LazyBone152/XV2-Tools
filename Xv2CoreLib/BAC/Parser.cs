@@ -28,7 +28,6 @@ namespace Xv2CoreLib.BAC
             ParseBac();
         }
 
-
         public Parser(string location, bool writeXml)
         {
             UsedValues = new List<string>();
@@ -112,8 +111,13 @@ namespace Xv2CoreLib.BAC
             bacFile.I_20 = BitConverter_Ex.ToInt32Array(rawBytes, 20, 3);
             bacFile.F_32 = BitConverter_Ex.ToFloat32Array(rawBytes, 32, 12);
             bacFile.I_80 = BitConverter_Ex.ToInt32Array(rawBytes, 80, 4);
-            bacFile.BacEntries = AsyncObservableCollection<BAC_Entry>.Create();
-            
+            bacFile.BacEntries = new AsyncObservableCollection<BAC_Entry>();
+
+            //Debug stuff
+            bool hasUnknownType = false;
+            string errorMessage = null;
+            int unknownTypeOffset = 0;
+
             for (int i = 0; i < count; i++)
             {
                 int typeListOffset = BitConverter.ToInt32(rawBytes, offset + 8);
@@ -130,7 +134,11 @@ namespace Xv2CoreLib.BAC
                     int thisType = BitConverter.ToInt16(rawBytes, typeListOffset + 0);
                     int thisTypeCount = BitConverter.ToInt16(rawBytes, typeListOffset + 2);
                     int thisTypeOffset = BitConverter.ToInt32(rawBytes, typeListOffset + 8);
-                    
+
+                    if (hasUnknownType)
+                    {
+                        throw new InvalidDataException($"{errorMessage}\nNext Offset = {thisTypeOffset - unknownTypeOffset}");
+                    }
                     
                     if(thisTypeOffset != 0)
                     {
@@ -220,10 +228,25 @@ namespace Xv2CoreLib.BAC
                             case 27:
                                 bacFile.BacEntries[i].Type27 = BAC_Type27.Read(rawBytes, thisTypeOffset, thisTypeCount);
                                 break;
+
+                                //DB Breakers:
+                            //case 29:
+                            //    bacFile.BacEntries[i].Type29 = BAC_Type29.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                           //     break;
+                           // case 31:
+                           //     bacFile.BacEntries[i].Type31 = BAC_Type31.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                           //     break;
                             default:
-                                throw new InvalidDataException(String.Format("Parse failed. Unknown BacType encountered ({0})\nOffset: {1}\nCount: {2}.", thisType, thisTypeOffset, thisTypeCount));
+                                //Wait until we reach the next bac type before throwing, so we can calc the size
+
+                                hasUnknownType = true;
+                                errorMessage = String.Format("Parse failed. Unknown BacType encountered ({0})\nOffset: {1}\nCount: {2}", thisType, thisTypeOffset, thisTypeCount);
+                                unknownTypeOffset = thisTypeOffset;
+                                break;
+                                //throw new InvalidDataException(String.Format("Parse failed. Unknown BacType encountered ({0})\nOffset: {1}\nCount: {2}.", thisType, thisTypeOffset, thisTypeCount));
                         }
-                    } else
+                    } 
+                    else
                     {
                         if(bacFile.BacEntries[i].TypeDummy == null)
                         {
@@ -240,7 +263,10 @@ namespace Xv2CoreLib.BAC
                 offset += 16;
             }
 
-
+            if (hasUnknownType)
+            {
+                throw new InvalidDataException(errorMessage);
+            }
         }
 
         //Utility

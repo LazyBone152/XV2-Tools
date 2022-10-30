@@ -675,10 +675,10 @@ namespace EEPK_Organiser.Forms.EMP
                 ParticleEffect _particleEffect = empTree.SelectedItem as ParticleEffect;
                 if (_particleEffect == null) return;
 
-                Forms.RecolorAll recolor = new Forms.RecolorAll(_particleEffect, this);
+                //Forms.RecolorAll recolor = new Forms.RecolorAll(_particleEffect, this);
 
-                if (recolor.Initialize())
-                    recolor.ShowDialog();
+                //if (recolor.Initialize())
+                //    recolor.ShowDialog();
             }
 #if !DEBUG
             catch (Exception ex)
@@ -699,10 +699,10 @@ namespace EEPK_Organiser.Forms.EMP
                 ParticleEffect _particleEffect = empTree.SelectedItem as ParticleEffect;
                 if (_particleEffect == null) return;
 
-                RecolorAll_HueSet recolor = new RecolorAll_HueSet(_particleEffect, this);
+                //RecolorAll_HueSet recolor = new RecolorAll_HueSet(_particleEffect, this);
 
-                if (recolor.Initialize())
-                    recolor.ShowDialog();
+                //if (recolor.Initialize())
+                //    recolor.ShowDialog();
             }
 #if !DEBUG
             catch (Exception ex)
@@ -1204,6 +1204,7 @@ namespace EEPK_Organiser.Forms.EMP
         public RelayCommand TextureTab_GoToTexture_Command => new RelayCommand(TextureTab_GoToTexture, IsTextureSelected);
         private void TextureTab_GoToTexture()
         {
+            /*
             try
             {
                 var texture = listBox_Textures.SelectedItem as EMP_TextureDefinition;
@@ -1223,6 +1224,7 @@ namespace EEPK_Organiser.Forms.EMP
                 mainWindow.SaveExceptionLog(ex.ToString());
                 MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+            */
         }
 
         public RelayCommand TextureTab_RemoveTexture_Command => new RelayCommand(TextureTab_RemoveTexture, IsTextureSelected);
@@ -1274,6 +1276,7 @@ namespace EEPK_Organiser.Forms.EMP
         public RelayCommand TexturePart_GotoMaterialCommand => new RelayCommand(Material_Goto, CanGotoMaterial);
         private void Material_Goto()
         {
+            /*
             try
             {
                 var particleEffect = empTree.SelectedItem as ParticleEffect;
@@ -1293,6 +1296,7 @@ namespace EEPK_Organiser.Forms.EMP
                 mainWindow.SaveExceptionLog(ex.ToString());
                 MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+            */
         }
 
         private bool CanGotoMaterial()

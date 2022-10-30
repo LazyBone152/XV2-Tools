@@ -9,6 +9,7 @@ namespace Xv2CoreLib.Resource
     public static class MathHelpers
     {
         private const double FBXSDK_180_DIV_PI = 180.0 / Math.PI;
+        public const double Epsilon = 0.00001;
 
         public static double ConvertRadiansToDegrees(double radians)
         {
@@ -59,6 +60,12 @@ namespace Xv2CoreLib.Resource
             return -x;
         }
 
+        public static bool FloatEquals(float value1, float value2)
+        {
+            return Math.Abs(value1 - value2) < Epsilon;
+        }
+
+        //Testing for EMA. Not good to use
         public static Quaternion EulerAnglesToQuaternion(Vector3 eulerAngles)
         {
             //https://stackoverflow.com/questions/70462758/c-sharp-how-to-convert-quaternions-to-euler-angles-xyz

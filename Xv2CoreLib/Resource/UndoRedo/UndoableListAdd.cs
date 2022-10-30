@@ -6,7 +6,7 @@ namespace Xv2CoreLib.Resource.UndoRedo
     /// <summary>
     /// Undo/Redo functionality for adding an object from an IList.
     /// </summary>
-    public class UndoableListAdd<T> : IUndoRedo where T : class
+    public class UndoableListAdd<T> : IUndoRedo
     {
         public bool doLast { get; set; }
         public string Message { get; private set; }

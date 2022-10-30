@@ -17,11 +17,11 @@
             <ColumnDefinition Width="35"/>
         </Grid.ColumnDefinitions>
         <Label Content="R" FontSize="10" VerticalContentAlignment="Center"/>
-        <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=R}" Grid.Column="1" TrackMouseWheelWhenMouseOver="True" HideUpDownButtons="True" StringFormat="0.0##"/>
+        <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=R}" Grid.Column="1" InterceptMouseWheel="{Binding ElementName=UserControl, Path=HideUpDownButtons}" HideUpDownButtons="{Binding ElementName=UserControl, Path=HideUpDownButtons}" TrackMouseWheelWhenMouseOver="False" StringFormat="0.0###" Margin="0, 0,-2, 0"/>
         <Label Content="G" FontSize="10" VerticalContentAlignment="Center" Grid.Column="2" Margin="1,0,0,0"/>
-        <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=G}" Grid.Column="3" TrackMouseWheelWhenMouseOver="True" HideUpDownButtons="True" StringFormat="0.0##"/>
+        <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=G}" Grid.Column="3" InterceptMouseWheel="{Binding ElementName=UserControl, Path=HideUpDownButtons}" HideUpDownButtons="{Binding ElementName=UserControl, Path=HideUpDownButtons}" TrackMouseWheelWhenMouseOver="False" StringFormat="0.0###" Margin="0, 0,-2, 0"/>
         <Label Content="B" FontSize="10" VerticalContentAlignment="Center" Grid.Column="4"/>
-        <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=B}" Grid.Column="5" TrackMouseWheelWhenMouseOver="True" HideUpDownButtons="True" StringFormat="0.0##"/>
+        <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=B}" Grid.Column="5" InterceptMouseWheel="{Binding ElementName=UserControl, Path=HideUpDownButtons}" HideUpDownButtons="{Binding ElementName=UserControl, Path=HideUpDownButtons}" TrackMouseWheelWhenMouseOver="False" StringFormat="0.0###" Margin="0, 0,-2, 0"/>
 
         <Grid Background="{Binding ElementName=UserControl, Path=Preview}" Grid.Column="6" Margin="10,0,3,0">
             <controls:ColorPicker SelectedColor="{Binding ElementName=UserControl, Path=CurrentColor}" Background="Transparent" BorderBrush="Transparent" Foreground="Transparent" IsColorPalettesTabVisible="False"/>

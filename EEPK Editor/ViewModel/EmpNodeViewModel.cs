@@ -1,26 +1,28 @@
-﻿using LB_Common.Numbers;
+﻿using Xv2CoreLib;
 using Xv2CoreLib.EMP_NEW;
 using Xv2CoreLib.EMP_NEW.Keyframes;
 using Xv2CoreLib.Resource.UndoRedo;
+using LB_Common.Numbers;
 using GalaSoft.MvvmLight;
 
 namespace EEPK_Organiser.ViewModel
 {
     public class EmpNodeViewModel : ObservableObject
     {
-        private readonly ParticleNode node;
+        private ParticleNode node;
 
         public string Name
         {
             get => node.Name;
             set
             {
-                if(node.Name != value)
+                if(node.Name != value && value?.Length <= 32)
                 {
                     UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.Name), node, node.Name, value, "Node Name"));
                     node.Name = value;
-                    RaisePropertyChanged(nameof(Name));
                 }
+
+                RaisePropertyChanged(nameof(Name));
             }
         }
         public ParticleNodeType NodeType
@@ -150,97 +152,6 @@ namespace EEPK_Organiser.ViewModel
                     UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.Burst_Variance), node, node.Burst_Variance, value, "Node Burst_Variance"));
                     node.Burst_Variance = value;
                     RaisePropertyChanged(nameof(Burst_Variance));
-                }
-            }
-        }
-        public ParticleAutoRotationType AutoRotationType
-        {
-            get => node.AutoRotationType;
-            set
-            {
-                if (node.AutoRotationType != value)
-                {
-                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.AutoRotationType), node, node.AutoRotationType, value, "Node AutoRotationType"));
-                    node.AutoRotationType = value;
-                    RaisePropertyChanged(nameof(AutoRotationType));
-                }
-            }
-        }
-        public bool Loop
-        {
-            get => node.Loop;
-            set
-            {
-                if (node.Loop != value)
-                {
-                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.Loop), node, node.Loop, value, "Node Loop"));
-                    node.Loop = value;
-                    RaisePropertyChanged(nameof(Loop));
-                }
-            }
-        }
-        public bool Hide
-        {
-            get => node.Hide;
-            set
-            {
-                if (node.Hide != value)
-                {
-                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.Hide), node, node.Hide, value, "Node Hide"));
-                    node.Hide = value;
-                    RaisePropertyChanged(nameof(Hide));
-                }
-            }
-        }
-        public bool UseColor2
-        {
-            get => node.UseColor2;
-            set
-            {
-                if (node.UseColor2 != value)
-                {
-                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.UseColor2), node, node.UseColor2, value, "Node UseColor2"));
-                    node.UseColor2 = value;
-                    RaisePropertyChanged(nameof(UseColor2));
-                }
-            }
-        }
-        public bool UseScaleXY
-        {
-            get => node.UseScaleXY;
-            set
-            {
-                if (node.UseScaleXY != value)
-                {
-                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.UseScaleXY), node, node.UseScaleXY, value, "Node UseScaleXY"));
-                    node.UseScaleXY = value;
-                    RaisePropertyChanged(nameof(UseScaleXY));
-                }
-            }
-        }
-        public bool RandomRotationDirection
-        {
-            get => node.EnableRandomRotationDirection;
-            set
-            {
-                if (node.EnableRandomRotationDirection != value)
-                {
-                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EnableRandomRotationDirection), node, node.EnableRandomRotationDirection, value, "Node RandomRotationDirection"));
-                    node.EnableRandomRotationDirection = value;
-                    RaisePropertyChanged(nameof(RandomRotationDirection));
-                }
-            }
-        }
-        public bool RandomUpVector
-        {
-            get => node.EnableRandomUpVectorOnVirtualCone;
-            set
-            {
-                if (node.EnableRandomUpVectorOnVirtualCone != value)
-                {
-                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EnableRandomUpVectorOnVirtualCone), node, node.EnableRandomUpVectorOnVirtualCone, value, "Node RandomUpVector"));
-                    node.EnableRandomUpVectorOnVirtualCone = value;
-                    RaisePropertyChanged(nameof(RandomUpVector));
                 }
             }
         }
@@ -387,19 +298,20 @@ namespace EEPK_Organiser.ViewModel
                 }
             }
         }
-        public bool AutoRotationEnabled
+        public ParticleBillboardType BillboardType
         {
-            get => node.EmissionNode.AutoRotation;
+            get => node.EmissionNode.BillboardType;
             set
             {
-                if (node.EmissionNode.AutoRotation != value)
+                if (node.EmissionNode.BillboardType != value)
                 {
-                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.AutoRotation), node.EmissionNode, node.EmissionNode.AutoRotation, value, "Emission AutoRotation"));
-                    node.EmissionNode.AutoRotation = value;
-                    RaisePropertyChanged(nameof(AutoRotationEnabled));
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.BillboardType), node.EmissionNode, node.EmissionNode.BillboardType, value, "BillboardType"));
+                    node.EmissionNode.BillboardType = value;
+                    RaisePropertyChanged(nameof(BillboardType));
                 }
             }
         }
+        public bool BillboardEnabled => BillboardType != ParticleBillboardType.Front;
         public bool VisibleOnlyOnMotion
         {
             get => node.EmissionNode.VisibleOnlyOnMotion;
@@ -453,7 +365,7 @@ namespace EEPK_Organiser.ViewModel
                 }
             }
         }
-        public CustomVector4 EmissionRotationAxis => node.EmissionNode.RotationAxis; //I think, defines an up-vector?
+        public CustomVector4 EmissionRotationAxis => node.EmissionNode.RotationAxis;
 
         //ConeExtrude
         public ushort ConeExtrude_Duration
@@ -484,13 +396,13 @@ namespace EEPK_Organiser.ViewModel
         }
         public ushort ConeExtrude_TimeBetweenTwoStep
         {
-            get => node.EmissionNode.ConeExtrude.TimeBetweenTwoStep;
+            get => node.EmissionNode.ConeExtrude.StepDuration;
             set
             {
-                if (node.EmissionNode.ConeExtrude.TimeBetweenTwoStep != value)
+                if (node.EmissionNode.ConeExtrude.StepDuration != value)
                 {
-                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.ConeExtrude.TimeBetweenTwoStep), node.EmissionNode.ConeExtrude, node.EmissionNode.ConeExtrude.TimeBetweenTwoStep, value, "ConeExtrude TimeBetweenTwoStep"));
-                    node.EmissionNode.ConeExtrude.TimeBetweenTwoStep = value;
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.ConeExtrude.StepDuration), node.EmissionNode.ConeExtrude, node.EmissionNode.ConeExtrude.StepDuration, value, "ConeExtrude TimeBetweenTwoStep"));
+                    node.EmissionNode.ConeExtrude.StepDuration = value;
                     RaisePropertyChanged(nameof(ConeExtrude_TimeBetweenTwoStep));
                 }
             }
@@ -523,120 +435,507 @@ namespace EEPK_Organiser.ViewModel
         }
 
         //Mesh
-        public int Mesh_I_32
-        {
-            get => node.EmissionNode.Mesh.I_32;
-            set
-            {
-                if (node.EmissionNode.Mesh.I_32 != value)
-                {
-                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.Mesh.I_32), node.EmissionNode.Mesh, node.EmissionNode.Mesh.I_32, value, "Mesh I_32"));
-                    node.EmissionNode.Mesh.I_32 = value;
-                    RaisePropertyChanged(nameof(Mesh_I_32));
-                }
-            }
-        }
-        public int Mesh_I_40
-        {
-            get => node.EmissionNode.Mesh.I_40;
-            set
-            {
-                if (node.EmissionNode.Mesh.I_40 != value)
-                {
-                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.Mesh.I_40), node.EmissionNode.Mesh, node.EmissionNode.Mesh.I_40, value, "Mesh I_40"));
-                    node.EmissionNode.Mesh.I_40 = value;
-                    RaisePropertyChanged(nameof(Mesh_I_40));
-                }
-            }
-        }
-        public int Mesh_I_44
-        {
-            get => node.EmissionNode.Mesh.I_44;
-            set
-            {
-                if (node.EmissionNode.Mesh.I_44 != value)
-                {
-                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.Mesh.I_44), node.EmissionNode.Mesh, node.EmissionNode.Mesh.I_44, value, "Mesh I_44"));
-                    node.EmissionNode.Mesh.I_44 = value;
-                    RaisePropertyChanged(nameof(Mesh_I_44));
-                }
-            }
-        }
+        public string Mesh_HasMesh => node.EmissionNode.Mesh.EmgFile != null ? "Has mesh data" : "Has NO mesh data";
 
-        //ShapeDraw
-        public ParticleAutoRotationType ShapeDraw_AutoRotationType
-        {
-            get => node.EmissionNode.ShapeDraw.AutoRotationType;
-            set
-            {
-                if (node.EmissionNode.ShapeDraw.AutoRotationType != value)
-                {
-                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.ShapeDraw.AutoRotationType), node.EmissionNode.ShapeDraw, node.EmissionNode.ShapeDraw.AutoRotationType, value, "ShapwDraw AutoRotationType"));
-                    node.EmissionNode.ShapeDraw.AutoRotationType = value;
-                    RaisePropertyChanged(nameof(ShapeDraw_AutoRotationType));
-                }
-            }
-        }
-        public ushort ShapwDraw_I_24
-        {
-            get => node.EmissionNode.ShapeDraw.I_24;
-            set
-            {
-                if (node.EmissionNode.ShapeDraw.I_24 != value)
-                {
-                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.ShapeDraw.I_24), node.EmissionNode.ShapeDraw, node.EmissionNode.ShapeDraw.I_24, value, "ShapeDraw I_24"));
-                    node.EmissionNode.ShapeDraw.I_24 = value;
-                    RaisePropertyChanged(nameof(ShapwDraw_I_24));
-                }
-            }
-        }
-        public ushort ShapwDraw_I_26
-        {
-            get => node.EmissionNode.ShapeDraw.I_26;
-            set
-            {
-                if (node.EmissionNode.ShapeDraw.I_26 != value)
-                {
-                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.ShapeDraw.I_26), node.EmissionNode.ShapeDraw, node.EmissionNode.ShapeDraw.I_26, value, "ShapeDraw I_26"));
-                    node.EmissionNode.ShapeDraw.I_26 = value;
-                    RaisePropertyChanged(nameof(ShapwDraw_I_26));
-                }
-            }
-        }
-        public ushort ShapwDraw_I_28
-        {
-            get => node.EmissionNode.ShapeDraw.I_28;
-            set
-            {
-                if (node.EmissionNode.ShapeDraw.I_28 != value)
-                {
-                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.ShapeDraw.I_28), node.EmissionNode.ShapeDraw, node.EmissionNode.ShapeDraw.I_28, value, "ShapeDraw I_28"));
-                    node.EmissionNode.ShapeDraw.I_28 = value;
-                    RaisePropertyChanged(nameof(ShapwDraw_I_28));
-                }
-            }
-        }
-        public ushort ShapwDraw_I_30
-        {
-            get => node.EmissionNode.ShapeDraw.I_30;
-            set
-            {
-                if (node.EmissionNode.ShapeDraw.I_30 != value)
-                {
-                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.ShapeDraw.I_30), node.EmissionNode.ShapeDraw, node.EmissionNode.ShapeDraw.I_30, value, "ShapeDraw I_30"));
-                    node.EmissionNode.ShapeDraw.I_30 = value;
-                    RaisePropertyChanged(nameof(ShapwDraw_I_30));
-                }
-            }
-        }
 
         //ParticleTexture
-
-
-        public EmpNodeViewModel(ParticleNode node)
+        public KeyframedColorValue Color1 => node.EmissionNode.Texture.Color1;
+        public KeyframedColorValue Color2 => node.EmissionNode.Texture.Color2;
+        public KeyframedFloatValue Color1_Transparency => node.EmissionNode.Texture.Color1_Transparency;
+        public KeyframedFloatValue Color2_Transparency => node.EmissionNode.Texture.Color2_Transparency;
+        public CustomColor Color_Variance => node.EmissionNode.Texture.Color_Variance;
+        public float ColorVariance_Transparency
         {
-            this.node = node;
+            get => node.EmissionNode.Texture.Color_Variance.A;
+            set
+            {
+                if (node.EmissionNode.Texture.Color_Variance.A != value)
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.Texture.Color_Variance.A), node.EmissionNode.Texture.Color_Variance, node.EmissionNode.Texture.Color_Variance.A, value, "Color Variance Alpha"));
+                    node.EmissionNode.Texture.Color_Variance.A = value;
+                    RaisePropertyChanged(nameof(ColorVariance_Transparency));
+                }
+            }
         }
+        public KeyframedFloatValue ScaleBase => node.EmissionNode.Texture.ScaleBase;
+        public float ScaleBase_Variance
+        {
+            get => node.EmissionNode.Texture.ScaleBase_Variance;
+            set
+            {
+                if (node.EmissionNode.Texture.ScaleBase_Variance != value)
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.Texture.ScaleBase_Variance), node.EmissionNode.Texture, node.EmissionNode.Texture.ScaleBase_Variance, value, "ScaleBase Variance"));
+                    node.EmissionNode.Texture.ScaleBase_Variance = value;
+                    RaisePropertyChanged(nameof(ScaleBase_Variance));
+                }
+            }
+        }
+        public KeyframedVector2Value ScaleXY => node.EmissionNode.Texture.ScaleXY;
+        public CustomVector4 ScaleXY_Variance => node.EmissionNode.Texture.ScaleXY_Variance;
+        public byte Texture_I_00
+        {
+            get => node.EmissionNode.Texture.I_00;
+            set
+            {
+                if (node.EmissionNode.Texture.I_00 != value)
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.Texture.I_00), node.EmissionNode.Texture, node.EmissionNode.Texture.I_00, value, "Texture I_00"));
+                    node.EmissionNode.Texture.I_00 = value;
+                    RaisePropertyChanged(nameof(Texture_I_00));
+                }
+            }
+        }
+        public byte Texture_I_01
+        {
+            get => node.EmissionNode.Texture.I_01;
+            set
+            {
+                if (node.EmissionNode.Texture.I_01 != value)
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.Texture.I_01), node.EmissionNode.Texture, node.EmissionNode.Texture.I_01, value, "Texture I_01"));
+                    node.EmissionNode.Texture.I_01 = value;
+                    RaisePropertyChanged(nameof(Texture_I_01));
+                }
+            }
+        }
+        public byte Texture_I_02
+        {
+            get => node.EmissionNode.Texture.I_02;
+            set
+            {
+                if (node.EmissionNode.Texture.I_02 != value)
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.Texture.I_02), node.EmissionNode.Texture, node.EmissionNode.Texture.I_02, value, "Texture I_02"));
+                    node.EmissionNode.Texture.I_02 = value;
+                    RaisePropertyChanged(nameof(Texture_I_02));
+                }
+            }
+        }
+        public byte Texture_I_03
+        {
+            get => node.EmissionNode.Texture.I_03;
+            set
+            {
+                if (node.EmissionNode.Texture.I_03 != value)
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.Texture.I_03), node.EmissionNode.Texture, node.EmissionNode.Texture.I_03, value, "Texture I_03"));
+                    node.EmissionNode.Texture.I_03 = value;
+                    RaisePropertyChanged(nameof(Texture_I_03));
+                }
+            }
+        }
+        public int Texture_I_08
+        {
+            get => node.EmissionNode.Texture.I_08;
+            set
+            {
+                if (node.EmissionNode.Texture.I_08 != value)
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.Texture.I_08), node.EmissionNode.Texture, node.EmissionNode.Texture.I_08, value, "Texture I_08"));
+                    node.EmissionNode.Texture.I_08 = value;
+                    RaisePropertyChanged(nameof(Texture_I_08));
+                }
+            }
+        }
+        public int Texture_I_12
+        {
+            get => node.EmissionNode.Texture.I_12;
+            set
+            {
+                if (node.EmissionNode.Texture.I_12 != value)
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.Texture.I_12), node.EmissionNode.Texture, node.EmissionNode.Texture.I_12, value, "Texture I_12"));
+                    node.EmissionNode.Texture.I_12 = value;
+                    RaisePropertyChanged(nameof(Texture_I_12));
+                }
+            }
+        }
+        public float Texture_F_96
+        {
+            get => node.EmissionNode.Texture.F_96;
+            set
+            {
+                if (node.EmissionNode.Texture.F_96 != value)
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.Texture.F_96), node.EmissionNode.Texture, node.EmissionNode.Texture.F_96, value, "Texture F_96"));
+                    node.EmissionNode.Texture.F_96 = value;
+                    RaisePropertyChanged(nameof(Texture_F_96));
+                }
+            }
+        }
+        public float Texture_F_100
+        {
+            get => node.EmissionNode.Texture.F_100;
+            set
+            {
+                if (node.EmissionNode.Texture.F_100 != value)
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.Texture.F_100), node.EmissionNode.Texture, node.EmissionNode.Texture.F_100, value, "Texture F_100"));
+                    node.EmissionNode.Texture.F_100 = value;
+                    RaisePropertyChanged(nameof(Texture_F_100));
+                }
+            }
+        }
+        public float Texture_F_104
+        {
+            get => node.EmissionNode.Texture.F_104;
+            set
+            {
+                if (node.EmissionNode.Texture.F_104 != value)
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.Texture.F_104), node.EmissionNode.Texture, node.EmissionNode.Texture.F_104, value, "Texture F_104"));
+                    node.EmissionNode.Texture.F_104 = value;
+                    RaisePropertyChanged(nameof(Texture_F_104));
+                }
+            }
+        }
+        public float Texture_F_108
+        {
+            get => node.EmissionNode.Texture.F_108;
+            set
+            {
+                if (node.EmissionNode.Texture.F_108 != value)
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.Texture.F_108), node.EmissionNode.Texture, node.EmissionNode.Texture.F_108, value, "Texture F_108"));
+                    node.EmissionNode.Texture.F_108 = value;
+                    RaisePropertyChanged(nameof(Texture_F_108));
+                }
+            }
+        }
+        public float Texture_RenderDepth
+        {
+            get => node.EmissionNode.Texture.RenderDepth;
+            set
+            {
+                if (node.EmissionNode.Texture.RenderDepth != value)
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.Texture.RenderDepth), node.EmissionNode.Texture, node.EmissionNode.Texture.RenderDepth, value, "Texture RenderDepth"));
+                    node.EmissionNode.Texture.RenderDepth = value;
+                    RaisePropertyChanged(nameof(Texture_RenderDepth));
+                }
+            }
+        }
+
+        //Node Flags:
+        public bool NodeFlags_Unk1
+        {
+            get
+            {
+                return node.NodeFlags.HasFlag(NodeFlags1.Unk1);
+            }
+            set
+            {
+                SetNodeFlags(NodeFlags1.Unk1, value);
+                RaisePropertyChanged(() => NodeFlags_Unk1);
+            }
+        }
+        public bool NodeFlags_Loop
+        {
+            get
+            {
+                return node.NodeFlags.HasFlag(NodeFlags1.Loop);
+            }
+            set
+            {
+                SetNodeFlags(NodeFlags1.Loop, value);
+                RaisePropertyChanged(() => NodeFlags_Loop);
+            }
+        }
+        public bool NodeFlags_FlashOnGen
+        {
+            get
+            {
+                return node.NodeFlags.HasFlag(NodeFlags1.FlashOnGen);
+            }
+            set
+            {
+                SetNodeFlags(NodeFlags1.FlashOnGen, value);
+                RaisePropertyChanged(() => NodeFlags_FlashOnGen);
+            }
+        }
+        public bool NodeFlags_Unk3
+        {
+            get
+            {
+                return node.NodeFlags.HasFlag(NodeFlags1.Unk3);
+            }
+            set
+            {
+                SetNodeFlags(NodeFlags1.Unk3, value);
+                RaisePropertyChanged(() => NodeFlags_Unk3);
+            }
+        }
+        public bool NodeFlags_Unk5
+        {
+            get
+            {
+                return node.NodeFlags.HasFlag(NodeFlags1.Unk5);
+            }
+            set
+            {
+                SetNodeFlags(NodeFlags1.Unk5, value);
+                RaisePropertyChanged(() => NodeFlags_Unk5);
+            }
+        }
+        public bool NodeFlags_Unk6
+        {
+            get
+            {
+                return node.NodeFlags.HasFlag(NodeFlags1.Unk6);
+            }
+            set
+            {
+                SetNodeFlags(NodeFlags1.Unk6, value);
+                RaisePropertyChanged(() => NodeFlags_Unk6);
+            }
+        }
+        public bool NodeFlags_Unk7
+        {
+            get
+            {
+                return node.NodeFlags.HasFlag(NodeFlags1.Unk7);
+            }
+            set
+            {
+                SetNodeFlags(NodeFlags1.Unk7, value);
+                RaisePropertyChanged(() => NodeFlags_Unk7);
+            }
+        }
+        public bool NodeFlags_Unk8
+        {
+            get
+            {
+                return node.NodeFlags.HasFlag(NodeFlags1.Unk7);
+            }
+            set
+            {
+                SetNodeFlags(NodeFlags1.Unk8, value);
+                RaisePropertyChanged(() => NodeFlags_Unk8);
+            }
+        }
+        public bool NodeFlags_Unk9
+        {
+            get
+            {
+                return node.NodeFlags.HasFlag(NodeFlags1.Unk9);
+            }
+            set
+            {
+                SetNodeFlags(NodeFlags1.Unk9, value);
+                RaisePropertyChanged(() => NodeFlags_Unk9);
+            }
+        }
+        public bool NodeFlags_Unk10
+        {
+            get
+            {
+                return node.NodeFlags.HasFlag(NodeFlags1.Unk10);
+            }
+            set
+            {
+                SetNodeFlags(NodeFlags1.Unk10, value);
+                RaisePropertyChanged(() => NodeFlags_Unk10);
+            }
+        }
+        public bool NodeFlags_Unk11
+        {
+            get
+            {
+                return node.NodeFlags.HasFlag(NodeFlags1.Unk11);
+            }
+            set
+            {
+                SetNodeFlags(NodeFlags1.Unk11, value);
+                RaisePropertyChanged(() => NodeFlags_Unk11);
+            }
+        }
+        public bool NodeFlags_Hide
+        {
+            get
+            {
+                return node.NodeFlags.HasFlag(NodeFlags1.Hide);
+            }
+            set
+            {
+                SetNodeFlags(NodeFlags1.Hide, value);
+                RaisePropertyChanged(() => NodeFlags_Hide);
+            }
+        }
+        public bool NodeFlags_ScaleXY
+        {
+            get
+            {
+                return node.NodeFlags.HasFlag(NodeFlags1.EnableScaleXY);
+            }
+            set
+            {
+                SetNodeFlags(NodeFlags1.EnableScaleXY, value);
+                RaisePropertyChanged(() => NodeFlags_ScaleXY);
+            }
+        }
+        public bool NodeFlags_Unk14
+        {
+            get
+            {
+                return node.NodeFlags.HasFlag(NodeFlags1.Unk14);
+            }
+            set
+            {
+                SetNodeFlags(NodeFlags1.Unk14, value);
+                RaisePropertyChanged(() => NodeFlags_Unk14);
+            }
+        }
+        public bool NodeFlags_SecondaryColor
+        {
+            get
+            {
+                return node.NodeFlags.HasFlag(NodeFlags1.EnableSecondaryColor);
+            }
+            set
+            {
+                SetNodeFlags(NodeFlags1.EnableSecondaryColor, value);
+                RaisePropertyChanged(() => NodeFlags_SecondaryColor);
+            }
+        }
+        public bool NodeFlags_Unk16
+        {
+            get
+            {
+                return node.NodeFlags.HasFlag(NodeFlags1.Unk16);
+            }
+            set
+            {
+                SetNodeFlags(NodeFlags1.Unk16, value);
+                RaisePropertyChanged(() => NodeFlags_Unk16);
+            }
+        }
+
+        public bool NodeFlags2_Unk1
+        {
+            get
+            {
+                return node.NodeFlags2.HasFlag(NodeFlags2.Unk1);
+            }
+            set
+            {
+                SetNodeFlags2(NodeFlags2.Unk1, value);
+                RaisePropertyChanged(() => NodeFlags2_Unk1);
+            }
+        }
+        public bool NodeFlags2_Unk2
+        {
+            get
+            {
+                return node.NodeFlags2.HasFlag(NodeFlags2.Unk2);
+            }
+            set
+            {
+                SetNodeFlags2(NodeFlags2.Unk2, value);
+                RaisePropertyChanged(() => NodeFlags2_Unk2);
+            }
+        }
+        public bool NodeFlags2_Unk3
+        {
+            get
+            {
+                return node.NodeFlags2.HasFlag(NodeFlags2.Unk3);
+            }
+            set
+            {
+                SetNodeFlags2(NodeFlags2.Unk3, value);
+                RaisePropertyChanged(() => NodeFlags2_Unk3);
+            }
+        }
+        public bool NodeFlags2_Unk4
+        {
+            get
+            {
+                return node.NodeFlags2.HasFlag(NodeFlags2.Unk4);
+            }
+            set
+            {
+                SetNodeFlags2(NodeFlags2.Unk4, value);
+                RaisePropertyChanged(() => NodeFlags2_Unk4);
+            }
+        }
+        public bool NodeFlags2_RandomRotationDir
+        {
+            get
+            {
+                return node.NodeFlags2.HasFlag(NodeFlags2.RandomRotationDir);
+            }
+            set
+            {
+                SetNodeFlags2(NodeFlags2.RandomRotationDir, value);
+                RaisePropertyChanged(() => NodeFlags2_RandomRotationDir);
+            }
+        }
+        public bool NodeFlags2_Unk6
+        {
+            get
+            {
+                return node.NodeFlags2.HasFlag(NodeFlags2.Unk6);
+            }
+            set
+            {
+                SetNodeFlags2(NodeFlags2.Unk6, value);
+                RaisePropertyChanged(() => NodeFlags2_Unk6);
+            }
+        }
+        public bool NodeFlags2_RandomUpVector
+        {
+            get
+            {
+                return node.NodeFlags2.HasFlag(NodeFlags2.RandomUpVector);
+            }
+            set
+            {
+                SetNodeFlags2(NodeFlags2.RandomUpVector, value);
+                RaisePropertyChanged(() => NodeFlags2_RandomUpVector);
+            }
+        }
+        public bool NodeFlags2_Unk8
+        {
+            get
+            {
+                return node.NodeFlags2.HasFlag(NodeFlags2.Unk8);
+            }
+            set
+            {
+                SetNodeFlags2(NodeFlags2.Unk8, value);
+                RaisePropertyChanged(() => NodeFlags2_Unk8);
+            }
+        }
+
+        //Node Unknown:
+        public ushort Node_I_128
+        {
+            get => node.I_128;
+            set
+            {
+                if (node.I_128 != value)
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.I_128), node, node.I_128, value, "Node I_128"));
+                    node.I_128 = value;
+                    RaisePropertyChanged(nameof(Node_I_128));
+                }
+            }
+        }
+        public float Node_F_132
+        {
+            get => node.F_132;
+            set
+            {
+                if (node.F_132 != value)
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.F_132), node, node.F_132, value, "Node F_132"));
+                    node.F_132 = value;
+                    RaisePropertyChanged(nameof(Node_F_132));
+                }
+            }
+        }
+
 
         public void UpdateProperties()
         {
@@ -652,13 +951,7 @@ namespace EEPK_Organiser.ViewModel
             RaisePropertyChanged(nameof(BurstFrequency_Variance));
             RaisePropertyChanged(nameof(Burst));
             RaisePropertyChanged(nameof(Burst_Variance));
-            RaisePropertyChanged(nameof(AutoRotationType));
-            RaisePropertyChanged(nameof(Loop));
-            RaisePropertyChanged(nameof(Hide));
-            RaisePropertyChanged(nameof(UseColor2));
-            RaisePropertyChanged(nameof(UseScaleXY));
-            RaisePropertyChanged(nameof(RandomRotationDirection));
-            RaisePropertyChanged(nameof(RandomUpVector));
+            RaisePropertyChanged(nameof(BillboardType));
             RaisePropertyChanged(nameof(Position));
             RaisePropertyChanged(nameof(Rotation));
             RaisePropertyChanged(nameof(Position_Variance));
@@ -682,7 +975,7 @@ namespace EEPK_Organiser.ViewModel
 
             //Emission base
             RaisePropertyChanged(nameof(EmissionType));
-            RaisePropertyChanged(nameof(AutoRotationEnabled));
+            RaisePropertyChanged(nameof(BillboardEnabled));
             RaisePropertyChanged(nameof(VisibleOnlyOnMotion));
             RaisePropertyChanged(nameof(StartRotation));
             RaisePropertyChanged(nameof(StartRotation_Variance));
@@ -698,18 +991,95 @@ namespace EEPK_Organiser.ViewModel
             RaisePropertyChanged(nameof(ConeExtrude_I_10));
 
             //Mesh
-            RaisePropertyChanged(nameof(Mesh_I_32));
-            RaisePropertyChanged(nameof(Mesh_I_40));
-            RaisePropertyChanged(nameof(Mesh_I_44));
+            RaisePropertyChanged(nameof(Mesh_HasMesh));
 
-            //ShapeDraw
-            RaisePropertyChanged(nameof(ShapeDraw_AutoRotationType));
-            RaisePropertyChanged(nameof(ShapwDraw_I_24));
-            RaisePropertyChanged(nameof(ShapwDraw_I_26));
-            RaisePropertyChanged(nameof(ShapwDraw_I_28));
-            RaisePropertyChanged(nameof(ShapwDraw_I_30));
+            //Texture
+            RaisePropertyChanged(nameof(Color1));
+            RaisePropertyChanged(nameof(Color2));
+            RaisePropertyChanged(nameof(Color1_Transparency));
+            RaisePropertyChanged(nameof(Color2_Transparency));
+            RaisePropertyChanged(nameof(Color_Variance));
+            RaisePropertyChanged(nameof(ColorVariance_Transparency));
+            RaisePropertyChanged(nameof(ScaleBase));
+            RaisePropertyChanged(nameof(ScaleBase_Variance));
+            RaisePropertyChanged(nameof(ScaleXY));
+            RaisePropertyChanged(nameof(ScaleXY_Variance));
+            RaisePropertyChanged(nameof(Texture_I_00));
+            RaisePropertyChanged(nameof(Texture_I_01));
+            RaisePropertyChanged(nameof(Texture_I_02));
+            RaisePropertyChanged(nameof(Texture_I_03));
+            RaisePropertyChanged(nameof(Texture_I_08));
+            RaisePropertyChanged(nameof(Texture_I_12));
+            RaisePropertyChanged(nameof(Texture_F_96));
+            RaisePropertyChanged(nameof(Texture_F_100));
+            RaisePropertyChanged(nameof(Texture_F_104));
+            RaisePropertyChanged(nameof(Texture_F_108));
+            RaisePropertyChanged(nameof(Texture_RenderDepth));
+
+
+            RaisePropertyChanged(nameof(NodeFlags_Unk1));
+            RaisePropertyChanged(nameof(NodeFlags_Loop));
+            RaisePropertyChanged(nameof(NodeFlags_FlashOnGen));
+            RaisePropertyChanged(nameof(NodeFlags_Unk3));
+            RaisePropertyChanged(nameof(NodeFlags_Unk5));
+            RaisePropertyChanged(nameof(NodeFlags_Unk6));
+            RaisePropertyChanged(nameof(NodeFlags_Unk7));
+            RaisePropertyChanged(nameof(NodeFlags_Unk8));
+            RaisePropertyChanged(nameof(NodeFlags_Unk9));
+            RaisePropertyChanged(nameof(NodeFlags_Unk10));
+            RaisePropertyChanged(nameof(NodeFlags_Unk11));
+            RaisePropertyChanged(nameof(NodeFlags_Hide));
+            RaisePropertyChanged(nameof(NodeFlags_ScaleXY));
+            RaisePropertyChanged(nameof(NodeFlags_Unk14));
+            RaisePropertyChanged(nameof(NodeFlags_SecondaryColor));
+            RaisePropertyChanged(nameof(NodeFlags_Unk16));
+
+            RaisePropertyChanged(nameof(NodeFlags2_Unk1));
+            RaisePropertyChanged(nameof(NodeFlags2_Unk2));
+            RaisePropertyChanged(nameof(NodeFlags2_Unk3));
+            RaisePropertyChanged(nameof(NodeFlags2_Unk4));
+            RaisePropertyChanged(nameof(NodeFlags2_RandomRotationDir));
+            RaisePropertyChanged(nameof(NodeFlags2_Unk6));
+            RaisePropertyChanged(nameof(NodeFlags2_RandomUpVector));
+            RaisePropertyChanged(nameof(NodeFlags2_Unk8));
+
+            RaisePropertyChanged(nameof(Node_I_128));
+            RaisePropertyChanged(nameof(Node_F_132));
 
         }
 
+        public void SetContext(ParticleNode node)
+        {
+           this.node = node;
+           UpdateProperties();
+        }
+
+
+        private void SetNodeFlags(NodeFlags1 flag, bool state)
+        {
+            var newFlag = node.NodeFlags.SetFlag(flag, state);
+
+            if (node.NodeFlags != newFlag)
+            {
+                UndoManager.Instance.AddUndo(new UndoableProperty<ParticleNode>(nameof(ParticleNode.NodeFlags), node, node.NodeFlags, newFlag, "Node Flags"));
+                node.NodeFlags = newFlag;
+            }
+        }
+
+        private void SetNodeFlags2(NodeFlags2 flag, bool state)
+        {
+            var newFlag = node.NodeFlags2.SetFlag(flag, state);
+
+            if (node.NodeFlags2 != newFlag)
+            {
+                UndoManager.Instance.AddUndo(new UndoableProperty<ParticleNode>(nameof(ParticleNode.NodeFlags2), node, node.NodeFlags, newFlag, "Node Flags"));
+                node.NodeFlags2 = newFlag;
+            }
+        }
+
+        private void AddUndo(IUndoRedo undo, string desc)
+        {
+            //todo: implement particle update event
+        }
     }
 }

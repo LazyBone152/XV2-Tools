@@ -8,7 +8,7 @@ using Xv2CoreLib.EEPK;
 using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.EMM;
-using Xv2CoreLib.EMP;
+using Xv2CoreLib.EMP_NEW;
 using Xv2CoreLib.HslColor;
 using Xv2CoreLib.Resource.App;
 using Xv2CoreLib.Resource.UndoRedo;
@@ -42,7 +42,7 @@ namespace EEPK_Organiser.Forms.Recolor
         private Asset asset = null;
         private EmmMaterial material = null;
         private EffectContainerFile effectContainerFile = null;
-        private ParticleEffect particleEffect = null;
+        private ParticleNode particleNode = null;
 
         private Mode currentMode = Mode.Asset;
 
@@ -131,7 +131,7 @@ namespace EEPK_Organiser.Forms.Recolor
         #endregion
 
         /// <summary>
-        /// Hue shift a asset.
+        /// Hue set a asset.
         /// </summary>
         public RecolorAll_HueSet(AssetType _assetType, Asset _asset, Window parent)
         {
@@ -145,7 +145,7 @@ namespace EEPK_Organiser.Forms.Recolor
         }
 
         /// <summary>
-        /// Hue shift a material.
+        /// Hue set a material.
         /// </summary>
         /// <param name="_material"></param>
         public RecolorAll_HueSet(EmmMaterial _material, Window parent)
@@ -159,7 +159,7 @@ namespace EEPK_Organiser.Forms.Recolor
         }
 
         /// <summary>
-        /// Hue shift all assets, materials and textures in a EffectContainerFile.
+        /// Hue set all assets, materials and textures in a EffectContainerFile.
         /// </summary>
         public RecolorAll_HueSet(EffectContainerFile _effectContainerFile, Window parent)
         {
@@ -171,12 +171,12 @@ namespace EEPK_Organiser.Forms.Recolor
         }
 
         /// <summary>
-        /// Hue shift a ParticleEffect.
+        /// Hue set a ParticleEffect.
         /// </summary>
-        public RecolorAll_HueSet(ParticleEffect _particleEffect, Window parent)
+        public RecolorAll_HueSet(ParticleNode node, Window parent)
         {
             currentMode = Mode.ParticleEffect;
-            particleEffect = _particleEffect;
+            particleNode = node;
 
             InitializeComponent();
             Owner = parent;
@@ -207,7 +207,7 @@ namespace EEPK_Organiser.Forms.Recolor
             }
             else if (currentMode == Mode.ParticleEffect)
             {
-                colors = particleEffect.GetUsedColors();
+                colors = particleNode.GetUsedColors();
             }
 
 
@@ -266,7 +266,7 @@ namespace EEPK_Organiser.Forms.Recolor
             }
             else if (currentMode == Mode.ParticleEffect)
             {
-                particleEffect.ChangeHue(hueChange, 0f, 0f, undos, true, Variance);
+                particleNode.ChangeHue(hueChange, 0f, 0f, undos, true, Variance);
             }
 
             UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Hue Set"));

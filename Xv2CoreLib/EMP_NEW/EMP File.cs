@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using Xv2CoreLib.EMB_CLASS;
+using Xv2CoreLib.EMG;
 using Xv2CoreLib.EMM;
 using Xv2CoreLib.EMP_NEW.Keyframes;
 using Xv2CoreLib.HslColor;
@@ -25,17 +26,58 @@ namespace Xv2CoreLib.EMP_NEW
         Emission = 2
     }
 
-    public enum ParticleAutoRotationType : ushort
+    public enum ParticleBillboardType : ushort
     {
         Camera = 0,
         Front = 1,
         None = 2
     }
 
+    [Flags]
+    public enum NodeFlags1 : ushort
+    {
+        Unk1 = 0x1, //Not used
+        Loop = 0x2, //Emission, emitter
+        Unk3 = 0x4, //Not used
+        FlashOnGen = 0x8, //Appears on all node types
+        Unk5 = 0x10, //Appears on all node types
+        Unk6 = 0x20, //Not used
+        Unk7 = 0x40, //Not used
+        Unk8 = 0x80, //Not used
+        Unk9 = 0x100, //Not used
+        Unk10 = 0x200, //Not used
+        Unk11 = 0x400, //Not used
+        Hide = 0x800, //Never used by any vanilla EMP file. Hides any emission node, no effect on emitters or nulls.
+        EnableScaleXY = 0x1000, //Appears on emission and null types
+        Unk14 = 0x2000, //Appears on all node types
+        EnableSecondaryColor = 0x4000, //Emission only
+        Unk16 = 0x8000 //Appears on all node types
+    }
+
+    [Flags]
+    public enum NodeFlags2 : byte
+    {
+        Unk1 = 0x1, //Only appears on Emissions
+        Unk2 = 0x2, //Only appears on Emissions
+        Unk3 = 0x4, //Not used
+        Unk4 = 0x8, //Not used
+        RandomRotationDir = 0x10, //Only appears on emissions with rotation values, or emitters with angles
+        Unk6 = 0x20, //Only appears on ConeExtrude
+        RandomUpVector = 0x40, //Only appears on Default and Mesh (these are the only 2 node types that use a manually defined Rotation Axis)
+        Unk8 = 0x80 //Not used
+    }
+
     [Serializable]
     public class EMP_File
     {
         public const int EMP_SIGNATURE = 1347241251;
+        public const string CLIPBOARD_NODE = "EMP_NODE";
+        public const string CLIPBOARD_TEXTURE_SAMPLER = "EMP_TEXTURE_SAMPLER";
+        public const string CLIPBOARD_TEXTURE_KEYFRAME = "EMP_TEXTURE_KEYFRAME";
+        public const string CLIPBOARD_KEYFRAMED_VALUE = "EMP_KEYFRAMED_VALUE";
+        public const string CLIPBOARD_KEYFRAME = "EMP_KEYFRAME";
+        public const string CLIPBOARD_SHAP_DRAW_POINT = "EMP_SHAPW_DRAW_POINT";
+        public const string CLIPBOARD_CONE_EXTRUSION = "EMP_CONE_EXTRUSION";
 
         public VersionEnum Version { get; set; } = VersionEnum.DBXV2;
         /// <summary>
@@ -215,22 +257,76 @@ namespace Xv2CoreLib.EMP_NEW
         #endregion
 
         #region Get
-        public AsyncObservableCollection<ParticleNode> GetParentList(ParticleNode particleEffect)
+        public bool NodeExists(ParticleNode node)
         {
-            foreach (var e in ParticleNodes)
+            return NodeExists(node, ParticleNodes);
+        }
+
+        private bool NodeExists(ParticleNode node, IList<ParticleNode> nodes)
+        {
+            foreach(var _node in nodes)
+            {
+                if (_node == node) return true;
+                if (NodeExists(node, _node.ChildParticleNodes)) return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Get the parent of this node. If this node is at the root level, then nullwill be returned.
+        /// </summary>
+        public ParticleNode GetParent(ParticleNode node)
+        {
+            if (ParticleNodes.Contains(node))
+                return null;
+
+            foreach(var _node in ParticleNodes)
+            {
+                ParticleNode result = GetParent_Recursive(node, _node);
+
+                if (result != null)
+                    return result;
+            }
+
+            return null;
+
+        }
+
+        private ParticleNode GetParent_Recursive(ParticleNode node, ParticleNode nodeToSearch)
+        {
+            foreach(var childNode in nodeToSearch.ChildParticleNodes)
+            {
+                if (childNode == node) return childNode;
+
+                ParticleNode result = GetParent_Recursive(node, childNode);
+
+                if (result != null)
+                    return result;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Get the collection that this node belongs to.
+        /// </summary>
+        public AsyncObservableCollection<ParticleNode> GetParentList(ParticleNode particleNode)
+        {
+            foreach (ParticleNode node in ParticleNodes)
             {
                 AsyncObservableCollection<ParticleNode> result = null;
 
-                if (e.ChildParticleNodes.Count > 0)
+                if (node.ChildParticleNodes.Count > 0)
                 {
-                    result = GetParentList_Recursive(e.ChildParticleNodes, particleEffect);
+                    result = GetParentList_Recursive(node.ChildParticleNodes, particleNode);
                 }
                 if (result != null)
                 {
                     return result;
                 }
 
-                if (e == particleEffect)
+                if (node == particleNode)
                 {
                     return ParticleNodes;
                 }
@@ -497,7 +593,7 @@ namespace Xv2CoreLib.EMP_NEW
     }
 
     [Serializable]
-    public class ParticleNode : INotifyPropertyChanged
+    public class ParticleNode : INotifyPropertyChanged, IName
     {
         public const int ENTRY_SIZE = 160;
 
@@ -510,6 +606,7 @@ namespace Xv2CoreLib.EMP_NEW
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        //Selected KeyframedValue is binded here for the Keyframe Editor to access
         [NonSerialized]
         private KeyframedBaseValue _selectedKeyframedValue = null;
         public KeyframedBaseValue SelectedKeyframedValue
@@ -519,15 +616,37 @@ namespace Xv2CoreLib.EMP_NEW
             {
                 if(_selectedKeyframedValue != value)
                 {
-                    SelectedKeyframedValue = value;
+                    _selectedKeyframedValue = value;
                     NotifyPropertyChanged(nameof(SelectedKeyframedValue));
                 }
             }
         }
 
+        public bool IsEmitter => NodeType == ParticleNodeType.Emitter;
+        public bool IsEmission => NodeType == ParticleNodeType.Emission;
+        public bool IsNull => NodeType == ParticleNodeType.Null;
+
+        //Exposed directly to TreeView.
+        public bool UndoableIsVisible
+        {
+            get => !NodeFlags.HasFlag(NodeFlags1.Hide);
+            set
+            {
+                if(value != UndoableIsVisible)
+                {
+                    NodeFlags1 flag = NodeFlags.SetFlag(NodeFlags1.Hide, !value);
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(NodeFlags), this, NodeFlags, flag, "Node Visibility"));
+                    NodeFlags = flag;
+                }
+            }
+        }
         #endregion
 
+        //Prop values
         private string _name = null;
+        private ParticleNodeType _nodeType = 0;
+        private NodeFlags1 _nodeFlags = 0;
+
         public string Name
         {
             get => _name;
@@ -541,7 +660,21 @@ namespace Xv2CoreLib.EMP_NEW
             }
         }
 
-        public ParticleNodeType NodeType { get; set; }
+        public ParticleNodeType NodeType
+        {
+            get => _nodeType;
+            set
+            {
+                if (value != _nodeType)
+                {
+                    _nodeType = value;
+                    NotifyPropertyChanged(nameof(NodeType));
+                    NotifyPropertyChanged(nameof(IsEmitter));
+                    NotifyPropertyChanged(nameof(IsEmission));
+                    NotifyPropertyChanged(nameof(IsNull));
+                }
+            }
+        }
         /// <summary>
         /// Returns the old "ComponentType" that was used in the old EMP parser, and are how the node types are saved to binary. Read-only.
         /// </summary>
@@ -563,62 +696,52 @@ namespace Xv2CoreLib.EMP_NEW
             }
         }
 
-        public byte StartTime { get; set; } //I_44
-        public byte StartTime_Variance { get; set; } //I_45
-        public bool Loop { get; set; } //I_32_1
-        public bool FlashOnGeneration { get; set; } //I_32_3
-        public short MaxInstances { get; set; } //I_38
-        public ushort Lifetime { get; set; } //I_40
-        public ushort Lifetime_Variance { get; set; } //I_42
-        public bool Hide { get; set; } //I_33_3
-        public bool UseScaleXY { get; set; } //I_33_4
-        public bool UseColor2 { get; set; } //I_33_6
-        public ParticleAutoRotationType AutoRotationType { get; set; } //int8, I_35
-        public byte BurstFrequency { get; set; } //I_46
-        public byte BurstFrequency_Variance { get; set; } //I_47
+        public NodeFlags1 NodeFlags
+        {
+            get => _nodeFlags;
+            set
+            {
+                if (value != _nodeFlags)
+                {
+                    _nodeFlags = value;
+                    NotifyPropertyChanged(nameof(NodeFlags));
+                    NotifyPropertyChanged(nameof(UndoableIsVisible));
+                }
+            }
+        }
+        public NodeFlags2 NodeFlags2 { get; set; }
+
+        public byte StartTime { get; set; }
+        public byte StartTime_Variance { get; set; }
+        public short MaxInstances { get; set; }
+        public ushort Lifetime { get; set; }
+        public ushort Lifetime_Variance { get; set; }
+        public byte BurstFrequency { get; set; }
+        public byte BurstFrequency_Variance { get; set; }
         public ushort Burst { get; set; }
-        public ushort Burst_Variance { get; set; } //I_54
+        public ushort Burst_Variance { get; set; }
 
         public KeyframedVector3Value Position { get; set; } = new KeyframedVector3Value(0, 0, 0, KeyframedValueType.Position);
         public KeyframedVector3Value Rotation { get; set; } = new KeyframedVector3Value(0, 0, 0, KeyframedValueType.Rotation);
         public CustomVector4 Position_Variance { get; set; } = new CustomVector4();
         public CustomVector4 Rotation_Variance { get; set; } = new CustomVector4();
-        public bool EnableRandomRotationDirection { get; set; } //I_34_4
-        public bool EnableRandomUpVectorOnVirtualCone { get; set; } //I_34_6
-        public float F_128 { get; set; }
-        public float F_132 { get; set; }
-        public ushort I_136 { get; set; }
 
         //Unknown values
-        public bool I_32_0 { get; set; }
-        public bool I_32_2 { get; set; }
-        public bool I_32_4 { get; set; }
-        public bool I_32_5 { get; set; }
-        public bool I_32_6 { get; set; }
-        public bool I_32_7 { get; set; }
-        public bool I_33_0 { get; set; }
-        public bool I_33_1 { get; set; }
-        public bool I_33_2 { get; set; }
-        public bool I_33_5 { get; set; }
-        public bool I_33_7 { get; set; }
-        public bool I_34_0 { get; set; }
-        public bool I_34_1 { get; set; }
-        public bool I_34_2 { get; set; }
-        public bool I_34_3 { get; set; }
-        public bool I_34_5 { get; set; }
-        public bool I_34_7 { get; set; }
-        public ushort I_48 { get; set; }
-        public ushort I_50 { get; set; }
-        public ushort I_56 { get; set; }
-        public ushort I_58 { get; set; }
-        public ushort I_60 { get; set; }
-        public ushort I_62 { get; set; }
+        public ushort I_48 { get; set; } = 1; //always 1
+        public ushort I_50 { get; set; } //always 0
+        public ushort I_56 { get; set; } //always 0
+        public ushort I_58 { get; set; } //always 0
+        public ushort I_60 { get; set; } //always 0
+        public ushort I_62 { get; set; } //always 0
+        public ushort I_128 { get; set; } //0, 512
+        public ushort I_130 { get; set; } //always 0
+        public float F_132 { get; set; } //0, 1, 2
 
         public ParticleEmitter EmitterNode { get; set; } = new ParticleEmitter();
         public ParticleEmission EmissionNode { get; set; } = new ParticleEmission();
 
         public AsyncObservableCollection<EMP_KeyframedValue> KeyframedValues { get; set; } = new AsyncObservableCollection<EMP_KeyframedValue>();
-        public AsyncObservableCollection<EMP_KeyframeGroup> GroupKeyframedValues { get; set; } = new AsyncObservableCollection<EMP_KeyframeGroup>();
+        public AsyncObservableCollection<EMP_Modifier> GroupKeyframedValues { get; set; } = new AsyncObservableCollection<EMP_Modifier>();
         public AsyncObservableCollection<ParticleNode> ChildParticleNodes { get; set; } = new AsyncObservableCollection<ParticleNode>();
 
 
@@ -636,32 +759,8 @@ namespace Xv2CoreLib.EMP_NEW
 
             return new ParticleNode()
             {
-                I_136 = I_136,
-                I_32_0 = I_32_0,
-                Loop = Loop,
-                I_32_2 = I_32_2,
-                FlashOnGeneration = FlashOnGeneration,
-                I_32_4 = I_32_4,
-                I_32_5 = I_32_5,
-                I_32_6 = I_32_6,
-                I_32_7 = I_32_7,
-                I_33_0 = I_33_0,
-                I_33_1 = I_33_1,
-                I_33_2 = I_33_2,
-                Hide = Hide,
-                UseScaleXY = UseScaleXY,
-                I_33_5 = I_33_5,
-                UseColor2 = UseColor2,
-                I_33_7 = I_33_7,
-                I_34_0 = I_34_0,
-                I_34_1 = I_34_1,
-                I_34_2 = I_34_2,
-                I_34_3 = I_34_3,
-                EnableRandomRotationDirection = EnableRandomRotationDirection,
-                I_34_5 = I_34_5,
-                EnableRandomUpVectorOnVirtualCone = EnableRandomUpVectorOnVirtualCone,
-                I_34_7 = I_34_7,
-                AutoRotationType = AutoRotationType,
+                NodeFlags = NodeFlags,
+                NodeFlags2 = NodeFlags2,
                 MaxInstances = MaxInstances,
                 Lifetime = Lifetime,
                 Lifetime_Variance = Lifetime_Variance,
@@ -679,7 +778,7 @@ namespace Xv2CoreLib.EMP_NEW
                 I_62 = I_62,
                 Rotation = Rotation.Copy(),
                 Rotation_Variance = Rotation_Variance.Copy(),
-                F_128 = F_128,
+                I_128 = I_128,
                 F_132 = F_132,
                 Position = Position.Copy(),
                 Position_Variance = Position_Variance.Copy(),
@@ -697,10 +796,77 @@ namespace Xv2CoreLib.EMP_NEW
         {
             return new ParticleNode()
             {
-                Name = "New Node",
-                NodeType = ParticleNodeType.Null,
-                AutoRotationType = ParticleAutoRotationType.Camera
+                Name = "NewEmpty",
+                NodeType = ParticleNodeType.Null
             };
+        }
+
+        public static ParticleNode GetNew(NewNodeType type, IList<ParticleNode> siblingNodes)
+        {
+            ParticleNode node = new ParticleNode();
+            node.Lifetime = 60;
+            node.Burst = 1;
+            node.MaxInstances = 1;
+
+            if(type == NewNodeType.Plane)
+            {
+                node.Name = NameHelper.GetUniqueName("Plane", siblingNodes);
+                node.NodeType = ParticleNodeType.Emission;
+                node.EmissionNode.BillboardType = ParticleBillboardType.Camera;
+                node.EmissionNode.EmissionType = ParticleEmission.ParticleEmissionType.Plane;
+            }
+            else if (type == NewNodeType.Shape)
+            {
+                node.Name = NameHelper.GetUniqueName("Shape", siblingNodes);
+                node.NodeType = ParticleNodeType.Emission;
+                node.EmissionNode.BillboardType = ParticleBillboardType.None;
+                node.EmissionNode.EmissionType = ParticleEmission.ParticleEmissionType.ShapeDraw;
+            }
+            else if (type == NewNodeType.Mesh)
+            {
+                node.Name = NameHelper.GetUniqueName("StaticMesh", siblingNodes);
+                node.NodeType = ParticleNodeType.Emission;
+                node.EmissionNode.BillboardType = ParticleBillboardType.None;
+                node.EmissionNode.EmissionType = ParticleEmission.ParticleEmissionType.Mesh;
+            }
+            else if (type == NewNodeType.Extrude)
+            {
+                node.Name = NameHelper.GetUniqueName("ConeExtrude", siblingNodes);
+                node.NodeType = ParticleNodeType.Emission;
+                node.EmissionNode.BillboardType = ParticleBillboardType.None;
+                node.EmissionNode.EmissionType = ParticleEmission.ParticleEmissionType.ConeExtrude;
+            }
+            else if (type == NewNodeType.EmitterCirlce)
+            {
+                node.Name = NameHelper.GetUniqueName("EmitterCircle", siblingNodes);
+                node.NodeType = ParticleNodeType.Emitter;
+                node.EmitterNode.Shape = ParticleEmitter.ParticleEmitterShape.Circle;
+            }
+            else if (type == NewNodeType.EmitterSquare)
+            {
+                node.Name = NameHelper.GetUniqueName("EmitterSquare", siblingNodes);
+                node.NodeType = ParticleNodeType.Emitter;
+                node.EmitterNode.Shape = ParticleEmitter.ParticleEmitterShape.Square;
+            }
+            else if (type == NewNodeType.EmitterSphere)
+            {
+                node.Name = NameHelper.GetUniqueName("EmitterSphere", siblingNodes);
+                node.NodeType = ParticleNodeType.Emitter;
+                node.EmitterNode.Shape = ParticleEmitter.ParticleEmitterShape.Sphere;
+            }
+            else if (type == NewNodeType.EmitterPoint)
+            {
+                node.Name = NameHelper.GetUniqueName("EmitterPoint", siblingNodes);
+                node.NodeType = ParticleNodeType.Emitter;
+                node.EmitterNode.Shape = ParticleEmitter.ParticleEmitterShape.Point;
+            }
+            else
+            {
+                node.Name = NameHelper.GetUniqueName("NewEmpty", siblingNodes);
+                node.NodeType = ParticleNodeType.Null;
+            }
+
+            return node;
         }
 
         /// <summary>
@@ -848,7 +1014,7 @@ namespace Xv2CoreLib.EMP_NEW
                 AddKeyframedValues(EmissionNode.Texture.Color1_Transparency.CompileKeyframes());
                 AddKeyframedValues(EmissionNode.Texture.Color2_Transparency.CompileKeyframes());
 
-                if (UseScaleXY)
+                if (NodeFlags.HasFlag(NodeFlags1.EnableScaleXY))
                 {
                     AddKeyframedValues(EmissionNode.Texture.ScaleXY.CompileKeyframes(true));
                     AddKeyframedValues(EmissionNode.Texture.ScaleBase.CompileKeyframes(true));
@@ -908,20 +1074,15 @@ namespace Xv2CoreLib.EMP_NEW
     [Serializable]
     public class ParticleTexture : INotifyPropertyChanged
     {
-        #region NotifyPropertyChanged
+        #region NotifyPropChanged
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
 
-        // This method is called by the Set accessor of each property.
-        // The CallerMemberName attribute that is applied to the optional propertyName
-        // parameter causes the property name of the caller to be substituted as an argument.
-        private void NotifyPropertyChanged(String propertyName = "")
+        protected void NotifyPropertyChanged(String propertyName = "")
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
         #endregion
 
         public const int ENTRY_SIZE = 112;
@@ -1010,7 +1171,7 @@ namespace Xv2CoreLib.EMP_NEW
 
             if (texturePointerList != particleNodeOffset)
             {
-                int textureEntrySize = parser.EmpFile.Version == VersionEnum.SDBH ? EMP_TextureSamplerDef.ENTRY_SIZE_NEW : EMP_TextureSamplerDef.ENTRY_SIZE;
+                int textureEntrySize = EMP_TextureSamplerDef.GetSize(parser.EmpFile.Version);
 
                 for (int e = 0; e < textureSamplerCount; e++)
                 {
@@ -1028,6 +1189,12 @@ namespace Xv2CoreLib.EMP_NEW
                 }
             }
 
+            //Full out texture list to size 2
+            while(newTexture.TextureEntryRef.Count < 2)
+            {
+                newTexture.TextureEntryRef.Add(new TextureEntry_Ref());
+            }
+
             return newTexture;
         }
 
@@ -1035,12 +1202,14 @@ namespace Xv2CoreLib.EMP_NEW
         {
             List<byte> bytes = new List<byte>(ENTRY_SIZE);
 
+            int textureCount = GetTextureCount();
+
             bytes.AddRange(new byte[4] { I_00, I_01, I_02, I_03 });
             bytes.AddRange(BitConverter.GetBytes(RenderDepth));
             bytes.AddRange(BitConverter.GetBytes(I_08));
             bytes.AddRange(BitConverter.GetBytes(I_12));
             bytes.AddRange(BitConverter.GetBytes(MaterialID));
-            bytes.AddRange(BitConverter.GetBytes((ushort)TextureEntryRef.Count));
+            bytes.AddRange(BitConverter.GetBytes((ushort)textureCount));
             bytes.AddRange(BitConverter.GetBytes((int)0)); //Offset, fill with 0 for now
 
             bytes.AddRange(BitConverter.GetBytes(ScaleBase.Constant / 2));
@@ -1068,7 +1237,7 @@ namespace Xv2CoreLib.EMP_NEW
 
             return bytes.ToArray();
         }
-       
+
         public ParticleTexture Clone()
         {
             AsyncObservableCollection<TextureEntry_Ref> textureRefs = new AsyncObservableCollection<TextureEntry_Ref>();
@@ -1119,6 +1288,20 @@ namespace Xv2CoreLib.EMP_NEW
                 }
             };
         }
+    
+        /// <summary>
+        /// Returns the amount of textures to write back to binary. Any nulls at the end will be removed, but nulls inbetween will be preserved.
+        /// </summary>
+        public int GetTextureCount()
+        {
+            for (int i = TextureEntryRef.Count - 1; i >= 0; i--)
+            {
+                if (TextureEntryRef[i].TextureRef != null)
+                    return i + 1;
+            }
+
+            return 0;
+        }
     }
 
     [Serializable]
@@ -1129,7 +1312,7 @@ namespace Xv2CoreLib.EMP_NEW
             Circle = 0, //"ShapePerimeterDistribution" or "ShapeAreaDistribution"
             Square = 1, //"ShapePerimeterDistribution" or "ShapeAreaDistribution"
             Sphere, //"SphericalDistribution"
-            Cone //"VerticalDistribution"
+            Point //"VerticalDistribution"
         }
 
         public ParticleEmitterShape Shape { get; set; }
@@ -1171,7 +1354,7 @@ namespace Xv2CoreLib.EMP_NEW
             if(emitterType == 0)
             {
                 //Cone
-                emitter.Shape = ParticleEmitterShape.Cone;
+                emitter.Shape = ParticleEmitterShape.Point;
                 emitter.Position.Constant = BitConverter.ToSingle(bytes, offset + 0);
                 emitter.Position_Variance = BitConverter.ToSingle(bytes, offset + 4);
                 emitter.Velocity.Constant = BitConverter.ToSingle(bytes, offset + 8);
@@ -1220,7 +1403,7 @@ namespace Xv2CoreLib.EMP_NEW
         {
             List<byte> bytes = new List<byte>();
 
-            if(Shape == ParticleEmitterShape.Cone)
+            if(Shape == ParticleEmitterShape.Point)
             {
                 emitterType = 0;
                 bytes.AddRange(BitConverter.GetBytes(Position.Constant));
@@ -1266,7 +1449,7 @@ namespace Xv2CoreLib.EMP_NEW
             {
                 case ParticleEmitterShape.Sphere:
                     return NodeSpecificType.SphericalDistribution;
-                case ParticleEmitterShape.Cone:
+                case ParticleEmitterShape.Point:
                     return NodeSpecificType.VerticalDistribution;
                 case ParticleEmitterShape.Circle:
                 case ParticleEmitterShape.Square:
@@ -1282,17 +1465,18 @@ namespace Xv2CoreLib.EMP_NEW
     {
         public enum ParticleEmissionType
         {
-            Default,
+            Plane,
             ConeExtrude,
             ShapeDraw,
             Mesh
         }
 
         public ParticleEmissionType EmissionType { get; set; }
+        public ParticleBillboardType BillboardType { get; set; }
         public ParticleTexture Texture { get; set; } = ParticleTexture.GetNew();
 
         //Default:
-        public bool AutoRotation { get; set; }
+        public bool BillboardEnabled => BillboardType != ParticleBillboardType.None;
         public bool VisibleOnlyOnMotion { get; set; } //Requires AutoRotation
 
         //Particle starts at this angle
@@ -1309,11 +1493,12 @@ namespace Xv2CoreLib.EMP_NEW
         //Specialised types:
         public ConeExtrude ConeExtrude { get; set; } = new ConeExtrude();
         public ShapeDraw ShapeDraw { get; set; } = new ShapeDraw();
-        public ParticleEmgMesh Mesh { get; set; } = new ParticleEmgMesh();
+        public ParticleStaticMesh Mesh { get; set; } = new ParticleStaticMesh();
 
         internal static ParticleEmission Parse(byte[] bytes, int offset, Parser parser)
         {
             ParticleEmission emission = new ParticleEmission();
+            emission.BillboardType = (ParticleBillboardType)bytes[offset + 35];
             byte emissionType = bytes[offset + 36];
             int nodeOffset = offset;
 
@@ -1327,8 +1512,7 @@ namespace Xv2CoreLib.EMP_NEW
             if(emissionType == 0)
             {
                 //AutoOriented
-                emission.EmissionType = ParticleEmissionType.Default;
-                emission.AutoRotation = true;
+                emission.EmissionType = ParticleEmissionType.Plane;
                 emission.VisibleOnlyOnMotion = false;
                 emission.StartRotation = BitConverter.ToSingle(bytes, offset + 0);
                 emission.StartRotation_Variance = BitConverter.ToSingle(bytes, offset + 4);
@@ -1337,14 +1521,13 @@ namespace Xv2CoreLib.EMP_NEW
             }
             else if(emissionType == 1)
             {
-                emission.EmissionType = ParticleEmissionType.Default;
-                emission.AutoRotation = true;
+                emission.EmissionType = ParticleEmissionType.Plane;
                 emission.VisibleOnlyOnMotion = true;
             }
             else if(emissionType == 2)
             {
-                emission.EmissionType = ParticleEmissionType.Default;
-                emission.AutoRotation = false;
+                emission.EmissionType = ParticleEmissionType.Plane;
+                emission.BillboardType = ParticleBillboardType.None;
                 emission.VisibleOnlyOnMotion = false;
                 emission.StartRotation = BitConverter.ToSingle(bytes, offset + 0);
                 emission.StartRotation_Variance = BitConverter.ToSingle(bytes, offset + 4);
@@ -1357,19 +1540,22 @@ namespace Xv2CoreLib.EMP_NEW
             else if(emissionType == 3)
             {
                 emission.EmissionType = ParticleEmissionType.ConeExtrude;
+                emission.BillboardType = ParticleBillboardType.None;
 
                 emission.ConeExtrude.Duration = BitConverter.ToUInt16(bytes, offset + 0);
                 emission.ConeExtrude.Duration_Variance = BitConverter.ToUInt16(bytes, offset + 2);
-                emission.ConeExtrude.TimeBetweenTwoStep = BitConverter.ToUInt16(bytes, offset + 4);
+                emission.ConeExtrude.StepDuration = BitConverter.ToUInt16(bytes, offset + 4);
                 emission.ConeExtrude.I_08 = BitConverter.ToUInt16(bytes, offset + 8);
                 emission.ConeExtrude.I_10 = BitConverter.ToUInt16(bytes, offset + 10);
 
                 int count = BitConverter.ToInt16(bytes, offset + 6) + 1;
                 int listOffset = BitConverter.ToInt32(bytes, offset + 12) + nodeOffset;
 
+                emission.ConeExtrude.Points.Clear();
+
                 for (int i = 0; i < count; i++)
                 {
-                    emission.ConeExtrude.Points.Add(new ConeExtrudePoints()
+                    emission.ConeExtrude.Points.Add(new ConeExtrudePoint()
                     {
                         WorldScaleFactor = BitConverter.ToSingle(bytes, listOffset + 0),
                         WorldScaleAdd = BitConverter.ToSingle(bytes, listOffset + 4),
@@ -1379,10 +1565,18 @@ namespace Xv2CoreLib.EMP_NEW
 
                     listOffset += 16;
                 }
+
+                //Validation of the first point. This must always be 1, 0, 0, 0
+                if(!MathHelpers.FloatEquals(emission.ConeExtrude.Points[0].WorldScaleFactor, 1f) && !MathHelpers.FloatEquals(emission.ConeExtrude.Points[0].WorldScaleAdd, 0f) &&
+                   !MathHelpers.FloatEquals(emission.ConeExtrude.Points[0].WorldOffsetFactor, 0f) && !MathHelpers.FloatEquals(emission.ConeExtrude.Points[0].WorldOffsetFactor2, 0f))
+                {
+                    emission.ConeExtrude.Points.Insert(0, new ConeExtrudePoint(1, 0, 0, 0));
+                }
             }
             else if(emissionType == 4)
             {
                 emission.EmissionType = ParticleEmissionType.Mesh;
+                emission.BillboardType = ParticleBillboardType.None;
 
                 emission.StartRotation = BitConverter.ToSingle(bytes, offset + 0);
                 emission.StartRotation_Variance = BitConverter.ToSingle(bytes, offset + 4);
@@ -1397,11 +1591,13 @@ namespace Xv2CoreLib.EMP_NEW
                 emission.Mesh.I_44 = BitConverter.ToInt32(bytes, offset + 44);
 
                 int emgOffset = BitConverter.ToInt32(bytes, offset + 36) + nodeOffset;
-                //emission.Mesh.EmgFile = EMG.EMG_File.Read(bytes, emgOffset);
+
+                if(BitConverter.ToInt32(bytes, emgOffset) == EMG_File.EMG_SIGNATURE)
+                    emission.Mesh.EmgFile = EMG_File.Read(bytes, emgOffset);
 
                 //For testing purposes, keep using the old EMG code path for now. Parsing and saving the EMG file will produce a different binary result, which isn't good for comparisons
-                int emgSize = parser.CalculateEmgSize(emgOffset - nodeOffset, nodeOffset);
-                emission.Mesh.EmgBytes = bytes.GetRange(emgOffset, emgSize);
+                //int emgSize = parser.CalculateEmgSize(emgOffset - nodeOffset, nodeOffset);
+                //emission.Mesh.EmgBytes = bytes.GetRange(emgOffset, emgSize);
 
             }
             else if (emissionType == 5)
@@ -1412,7 +1608,7 @@ namespace Xv2CoreLib.EMP_NEW
                 emission.ActiveRotation.Constant = BitConverter.ToSingle(bytes, offset + 8);
                 emission.ActiveRotation_Variance = BitConverter.ToSingle(bytes, offset + 12);
 
-                emission.ShapeDraw.AutoRotationType = (ParticleAutoRotationType)BitConverter.ToUInt16(bytes, offset + 18);
+                emission.BillboardType = (ParticleBillboardType)BitConverter.ToUInt16(bytes, offset + 18);
                 emission.ShapeDraw.I_24 = BitConverter.ToUInt16(bytes, offset + 24);
                 emission.ShapeDraw.I_26 = BitConverter.ToUInt16(bytes, offset + 26);
                 emission.ShapeDraw.I_28 = BitConverter.ToUInt16(bytes, offset + 28);
@@ -1423,7 +1619,7 @@ namespace Xv2CoreLib.EMP_NEW
 
                 for (int i = 0; i < pointCount; i++)
                 {
-                    emission.ShapeDraw.Points.Add(new ShapeDrawPoints()
+                    emission.ShapeDraw.Points.Add(new ShapeDrawPoint()
                     {
                         X = BitConverter.ToSingle(bytes, pointsOffset + 0),
                         Y = BitConverter.ToSingle(bytes, pointsOffset + 4)
@@ -1454,13 +1650,13 @@ namespace Xv2CoreLib.EMP_NEW
             //Write emission data
             switch (EmissionType)
             {
-                case ParticleEmissionType.Default:
-                    if(AutoRotation && VisibleOnlyOnMotion)
+                case ParticleEmissionType.Plane:
+                    if(BillboardEnabled && VisibleOnlyOnMotion)
                     {
                         //"VisibleOnSpeed"
                         emissionType = 1;
                     }
-                    else if (AutoRotation)
+                    else if (BillboardEnabled)
                     {
                         //"AutoOriented"
                         emissionType = 0;
@@ -1523,7 +1719,7 @@ namespace Xv2CoreLib.EMP_NEW
                     int indexCount = ShapeDraw.Points.Count - 1;
 
                     bytes.AddRange(BitConverter.GetBytes((ushort)indexCount));
-                    bytes.AddRange(BitConverter.GetBytes((ushort)ShapeDraw.AutoRotationType));
+                    bytes.AddRange(BitConverter.GetBytes((ushort)BillboardType));
                     bytes.AddRange(BitConverter.GetBytes(currentRelativeOffset + 32));
                     bytes.AddRange(BitConverter.GetBytes(ShapeDraw.I_24));
                     bytes.AddRange(BitConverter.GetBytes(ShapeDraw.I_26));
@@ -1531,11 +1727,11 @@ namespace Xv2CoreLib.EMP_NEW
                     bytes.AddRange(BitConverter.GetBytes(ShapeDraw.I_30));
                     currentRelativeOffset += 32;
 
-                    foreach (ShapeDrawPoints point in ShapeDraw.Points)
+                    foreach (ShapeDrawPoint point in ShapeDraw.Points)
                     {
                         bytes.AddRange(BitConverter.GetBytes(point.X));
                         bytes.AddRange(BitConverter.GetBytes(point.Y));
-                        currentRelativeOffset += 4;
+                        currentRelativeOffset += 8;
                     }
                     break;
             }
@@ -1543,17 +1739,19 @@ namespace Xv2CoreLib.EMP_NEW
             //Write texture offsets
             Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count + ParticleNode.ENTRY_SIZE), 20);
 
-            foreach (TextureEntry_Ref samplers in Texture.TextureEntryRef)
+            int textureCount = Texture.GetTextureCount();
+
+            for (int i = 0; i < textureCount; i++)
             {
-                if (samplers.TextureRef != null)
+                if (Texture.TextureEntryRef[i].TextureRef != null)
                 {
-                    int textureIdx = writer.EmpFile.Textures.IndexOf(samplers.TextureRef);
+                    int textureIdx = writer.EmpFile.Textures.IndexOf(Texture.TextureEntryRef[i].TextureRef);
                     
                     //Just a safe-guard - this idealy shouldn't happen
                     if(textureIdx == -1)
                     {
                         textureIdx = writer.EmpFile.Textures.Count;
-                        writer.EmpFile.Textures.Add(samplers.TextureRef);
+                        writer.EmpFile.Textures.Add(Texture.TextureEntryRef[i].TextureRef);
 
                         writer.EmbTextureOffsets.Add(new List<int>());
                         writer.EmbTextureOffsets_Minus.Add(new List<int>());
@@ -1582,7 +1780,7 @@ namespace Xv2CoreLib.EMP_NEW
                 }
                 else
                 {
-                    emgBytes = null;
+                    emgBytes = new EMG_File().Write();
                 }
 
                 if(emgBytes != null)
@@ -1596,13 +1794,12 @@ namespace Xv2CoreLib.EMP_NEW
 
             return bytes.ToArray();
         }
-    
+
         public ParticleEmission Clone()
         {
             return new ParticleEmission()
             {
                 EmissionType = EmissionType,
-                AutoRotation = AutoRotation,
                 VisibleOnlyOnMotion = VisibleOnlyOnMotion,
                 StartRotation = StartRotation,
                 StartRotation_Variance = StartRotation_Variance,
@@ -1615,17 +1812,17 @@ namespace Xv2CoreLib.EMP_NEW
                 Texture = Texture.Clone()
             };
         }
-   
+
         internal NodeSpecificType GetNodeType()
         {
             switch (EmissionType)
             {
-                case ParticleEmissionType.Default:
-                    if (AutoRotation && VisibleOnlyOnMotion)
+                case ParticleEmissionType.Plane:
+                    if (BillboardEnabled && VisibleOnlyOnMotion)
                     {
                         return NodeSpecificType.AutoOriented_VisibleOnSpeed;
                     }
-                    else if (AutoRotation)
+                    else if (BillboardEnabled)
                     {
                         return NodeSpecificType.AutoOriented;
                     }
@@ -1651,10 +1848,15 @@ namespace Xv2CoreLib.EMP_NEW
     {
         public ushort Duration { get; set; }
         public ushort Duration_Variance { get; set; }
-        public ushort TimeBetweenTwoStep { get; set; }
-        public ushort I_08 { get; set; }
-        public ushort I_10 { get; set; }
-        public AsyncObservableCollection<ConeExtrudePoints> Points { get; set; } = new AsyncObservableCollection<ConeExtrudePoints>();
+        public ushort StepDuration { get; set; }
+        public ushort I_08 { get; set; } //0, 1
+        public ushort I_10 { get; set; } //always 0
+        public AsyncObservableCollection<ConeExtrudePoint> Points { get; set; } = new AsyncObservableCollection<ConeExtrudePoint>();
+
+        public ConeExtrude()
+        {
+            Points.Add(new ConeExtrudePoint(1, 0, 0, 0));
+        }
 
         internal byte[] Write(int currentRelativeOffset)
         {
@@ -1664,13 +1866,13 @@ namespace Xv2CoreLib.EMP_NEW
 
             bytes.AddRange(BitConverter.GetBytes(Duration));
             bytes.AddRange(BitConverter.GetBytes(Duration_Variance));
-            bytes.AddRange(BitConverter.GetBytes(TimeBetweenTwoStep));
+            bytes.AddRange(BitConverter.GetBytes(StepDuration));
             bytes.AddRange(BitConverter.GetBytes((ushort)indexCount));
             bytes.AddRange(BitConverter.GetBytes(I_08));
             bytes.AddRange(BitConverter.GetBytes(I_10));
             bytes.AddRange(BitConverter.GetBytes(currentRelativeOffset + 16));
 
-            foreach (ConeExtrudePoints entry in Points)
+            foreach (ConeExtrudePoint entry in Points)
             {
                 bytes.AddRange(BitConverter.GetBytes(entry.WorldScaleFactor));
                 bytes.AddRange(BitConverter.GetBytes(entry.WorldScaleAdd));
@@ -1684,43 +1886,323 @@ namespace Xv2CoreLib.EMP_NEW
     }
 
     [Serializable]
-    public class ConeExtrudePoints
+    public class ConeExtrudePoint : INotifyPropertyChanged
     {
-        public float WorldScaleFactor { get; set; }
-        public float WorldScaleAdd { get; set; }
-        public float WorldOffsetFactor { get; set; }
-        public float WorldOffsetFactor2 { get; set; }
+        #region NotifyPropChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void NotifyPropertyChanged(String propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        #endregion
+
+        private float _scaleFactor = 0;
+        private float _scaleAdd = 0;
+        private float _offsetFactor = 0;
+        private float _offsetFactor2;
+
+        public float WorldScaleFactor
+        {
+            get => _scaleFactor;
+            set
+            {
+                if (value != _scaleFactor)
+                {
+                    _scaleFactor = value;
+                    NotifyPropertyChanged(nameof(WorldScaleFactor));
+                    NotifyPropertyChanged(nameof(UndoableWorldScaleFactor));
+                }
+            }
+        }
+        public float WorldScaleAdd
+        {
+            get => _scaleAdd;
+            set
+            {
+                if (value != _scaleAdd)
+                {
+                    _scaleAdd = value;
+                    NotifyPropertyChanged(nameof(WorldScaleAdd));
+                    NotifyPropertyChanged(nameof(UndoableWorldScaleAdd));
+                }
+            }
+        }
+        public float WorldOffsetFactor
+        {
+            get => _offsetFactor;
+            set
+            {
+                if (value != _offsetFactor)
+                {
+                    _offsetFactor = value;
+                    NotifyPropertyChanged(nameof(WorldOffsetFactor));
+                    NotifyPropertyChanged(nameof(UndoableWorldOffsetFactor));
+                }
+            }
+        }
+        public float WorldOffsetFactor2
+        {
+            get => _offsetFactor2;
+            set
+            {
+                if (value != _offsetFactor2)
+                {
+                    _offsetFactor2 = value;
+                    NotifyPropertyChanged(nameof(WorldOffsetFactor2));
+                    NotifyPropertyChanged(nameof(UndoableWorldOffsetFactor2));
+                }
+            }
+        }
+
+        #region Undoable
+        public float UndoableWorldScaleFactor
+        {
+            get => WorldScaleFactor;
+            set
+            {
+                if (!MathHelpers.FloatEquals(value, WorldScaleFactor))
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(WorldScaleFactor), this, WorldScaleFactor, value, "Cone Extrude -> WorldScaleFactor"));
+                    WorldScaleFactor = value;
+                }
+            }
+        }
+        public float UndoableWorldScaleAdd
+        {
+            get => WorldScaleAdd;
+            set
+            {
+                if (!MathHelpers.FloatEquals(value, WorldScaleAdd))
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(WorldScaleAdd), this, WorldScaleAdd, value, "Cone Extrude -> WorldScaleAdd"));
+                    WorldScaleAdd = value;
+                }
+            }
+        }
+        public float UndoableWorldOffsetFactor
+        {
+            get => WorldOffsetFactor;
+            set
+            {
+                if (!MathHelpers.FloatEquals(value, WorldOffsetFactor))
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(WorldOffsetFactor), this, WorldOffsetFactor, value, "Cone Extrude -> WorldOffsetFactor"));
+                    WorldOffsetFactor = value;
+                }
+            }
+        }
+        public float UndoableWorldOffsetFactor2
+        {
+            get => WorldOffsetFactor2;
+            set
+            {
+                if (!MathHelpers.FloatEquals(value, WorldOffsetFactor2))
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(WorldOffsetFactor2), this, WorldOffsetFactor2, value, "Cone Extrude -> WorldOffsetFactor2"));
+                    WorldOffsetFactor2 = value;
+                }
+            }
+        }
+
+        #endregion
+
+        public ConeExtrudePoint() { }
+
+        public ConeExtrudePoint(float worldScaleFactor, float worldScaleAdd, float worldOffsetFactor, float worldOffsetFactor2)
+        {
+            WorldScaleFactor = worldScaleFactor;
+            WorldScaleAdd = worldScaleAdd;
+            WorldOffsetFactor = worldOffsetFactor;
+            WorldOffsetFactor2 = worldOffsetFactor2;
+        }
+
+        public override string ToString()
+        {
+            return $"{WorldScaleFactor}, {WorldScaleAdd}, {WorldOffsetFactor}, {WorldOffsetFactor2}";
+        }
 
     }
 
     [Serializable]
     public class ShapeDraw
     {
-        public ParticleAutoRotationType AutoRotationType { get; set; } //uint16
-        public ushort I_24 { get; set; }
-        public ushort I_26 { get; set; }
-        public ushort I_28 { get; set; }
-        public ushort I_30 { get; set; }
+        public ushort I_24 { get; set; } //always 0
+        public ushort I_26 { get; set; } //always 0
+        public ushort I_28 { get; set; } //always 0
+        public ushort I_30 { get; set; } //always 0
 
-        public AsyncObservableCollection<ShapeDrawPoints> Points { get; set; } = new AsyncObservableCollection<ShapeDrawPoints>();
+        public AsyncObservableCollection<ShapeDrawPoint> Points { get; set; } = new AsyncObservableCollection<ShapeDrawPoint>();
 
+        /// <summary>
+        /// Removes each second <see cref="ShapeDrawPoint"/>, cutting the total amount in half. Will always keep the last 4 points.
+        /// </summary>
+        public List<IUndoRedo> ReducePoints()
+        {
+            return ReducePoints(Points);
+        }
+
+        public static List<IUndoRedo> ReducePoints(IList<ShapeDrawPoint> Points)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            const int MinPoints = 4;
+
+            if (Points.Count > MinPoints)
+            {
+                for (int i = Points.Count - 2; i >= 0; i -= 2)
+                {
+                    if (Points.Count <= MinPoints || i < 0) break;
+
+                    undos.Add(new UndoableListRemove<ShapeDrawPoint>(Points, Points[i], i));
+                    Points.RemoveAt(i);
+                }
+            }
+
+            return undos;
+        }
     }
 
     [Serializable]
-    public class ShapeDrawPoints
+    public class ShapeDrawPoint : INotifyPropertyChanged
     {
-        public float X { get; set; }
-        public float Y { get; set; }
+        #region NotifyPropChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void NotifyPropertyChanged(String propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        #endregion
+
+        private float _x = 0f;
+        private float _y = 0f;
+
+        public float X
+        {
+            get => _x;
+            set
+            {
+                if(value != _x)
+                {
+                    _x = value;
+                    NotifyPropertyChanged(nameof(X));
+                    NotifyPropertyChanged(nameof(UndoablePixelSpaceX));
+                    NotifyPropertyChanged(nameof(UndoableX));
+                }
+            }
+        }
+        public float Y
+        {
+            get => _y;
+            set
+            {
+                if (value != _y)
+                {
+                    _y = value;
+                    NotifyPropertyChanged(nameof(Y));
+                    NotifyPropertyChanged(nameof(UndoablePixelSpaceY));
+                    NotifyPropertyChanged(nameof(UndoableY));
+                }
+            }
+        }
+
+        #region Undoable
+        //Size of the shape draw control in the editor.
+        public const int SHAPE_DRAW_CONTROL_SIZE = 500;
+
+        public float UndoablePixelSpaceX
+        {
+            get => ConvertPointToPixelSpace(X);
+            set
+            {
+                float val = ConvertPointFromPixelSpace(value);
+                if (!MathHelpers.FloatEquals(val, X))
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(X), this, X, val, "Shape Draw -> X"));
+                    X = val;
+                }
+            }
+        }
+        public float UndoablePixelSpaceY
+        {
+            get => ConvertPointToPixelSpace(Y);
+            set
+            {
+                float val = ConvertPointFromPixelSpace(value);
+                if (!MathHelpers.FloatEquals(val, Y))
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(Y), this, Y, val, "Shape Draw -> Y"));
+                    Y = val;
+                }
+            }
+        }
+        public float UndoableX
+        {
+            get => X;
+            set
+            {
+                if (!MathHelpers.FloatEquals(value, X))
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(X), this, X, value, "Shape Draw -> X"));
+                    X = value;
+                }
+            }
+        }
+        public float UndoableY
+        {
+            get => Y;
+            set
+            {
+                if (!MathHelpers.FloatEquals(value, Y))
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(Y), this, Y, value, "Shape Draw -> Y"));
+                    Y = value;
+                }
+            }
+        }
+        #endregion
+
+        public static float ConvertPointToPixelSpace(float point)
+        {
+            return (point + 1) / 2 * SHAPE_DRAW_CONTROL_SIZE;
+        }
+
+        public static float ConvertPointFromPixelSpace(float point)
+        {
+            return (point / SHAPE_DRAW_CONTROL_SIZE * 2) - 1;
+        }
+    
+        public void PasteValues(ShapeDrawPoint point, List<IUndoRedo> undos = null)
+        {
+            if(undos != null)
+            {
+                undos.Add(new UndoablePropertyGeneric(nameof(X), this, X, point.X));
+                undos.Add(new UndoablePropertyGeneric(nameof(Y), this, Y, point.Y));
+            }
+
+            X = point.X;
+            Y = point.Y;
+        }
+
+        public override string ToString()
+        {
+            return $"X: {X}, Y: {Y}";
+        }
     }
 
     [Serializable]
-    public class ParticleEmgMesh
+    public class ParticleStaticMesh
     {
-        public int I_32 { get; set; }
-        public int I_40 { get; set; }
-        public int I_44 { get; set; }
+        public int I_32 { get; set; } //always 0
+        public int I_40 { get; set; } //always 0
+        public int I_44 { get; set; } //always 0
 
-        public EMG.EMG_File EmgFile { get; set; }
+        public EMG_File EmgFile { get; set; }
         public byte[] EmgBytes { get; set; }
 
     }
@@ -1755,7 +2237,7 @@ namespace Xv2CoreLib.EMP_NEW
         public bool Interpolate { get; set; }
         public bool Loop { get; set; }
         public byte I_03 { get; set; }
-        public float F_04 { get; set; }
+        public float DefaultValue { get; set; } //Only used in KeyframeGroups.
         public ushort Duration => (ushort)(Keyframes.Count > 1 ? Keyframes.Max(x => x.Time) + 1 : 0);
         public AsyncObservableCollection<EMP_Keyframe> Keyframes { get; set; } = new AsyncObservableCollection<EMP_Keyframe>();
 
@@ -1910,38 +2392,40 @@ namespace Xv2CoreLib.EMP_NEW
 
             return interpolationEnabled ? MathHelpers.Lerp(prevKeyframe, nextKeyframe, factor) : prevKeyframe;
         }
+
+        public override string ToString()
+        {
+            return $"Time: {Time}, Value: {Value}";
+        }
     }
 
     [Serializable]
-    public class EMP_KeyframeGroup
+    public class EMP_Modifier
     {
-        public byte I_00 { get; set; }
-        public byte I_01 { get; set; }
+        public enum ModifierType : byte
+        {
+            Translation = 4,
+            Acceleration = 5,
+            AngleTranslation = 6,
+            AngleAcceleration = 7,
+            PointLoop = 8,
+            PivotRotate = 9,
+            Jitter = 10,
+            Unk11 = 11,
+            Acceleration2 = 12
+        }
+
+        [Flags]
+        public enum ModifierFlags : byte
+        {
+            Unk1 = 0x1,
+            Unk2 = 0x2
+        }
+
+        public ModifierType Type { get; set; }
+        public ModifierFlags Flags { get; set; }
         public AsyncObservableCollection<EMP_KeyframedValue> KeyframedValues { get; set; }
 
-        public EMP_KeyframeGroup Clone()
-        {
-            AsyncObservableCollection<EMP_KeyframedValue> _Entries = AsyncObservableCollection<EMP_KeyframedValue>.Create();
-            foreach (var e in KeyframedValues)
-            {
-                _Entries.Add(e.Clone());
-            }
-
-            return new EMP_KeyframeGroup()
-            {
-                I_00 = I_00,
-                I_01 = I_01,
-                KeyframedValues = _Entries
-            };
-        }
-
-        public static EMP_KeyframeGroup GetNew()
-        {
-            return new EMP_KeyframeGroup()
-            {
-                KeyframedValues = AsyncObservableCollection<EMP_KeyframedValue>.Create()
-            };
-        }
     }
 
     [Serializable]
@@ -1957,63 +2441,51 @@ namespace Xv2CoreLib.EMP_NEW
         }
         #endregion
 
-        internal const int ENTRY_SIZE = 28;
-        internal const int ENTRY_SIZE_NEW = 36;
+        public enum TextureRepitition : byte
+        {
+            Wrap = 0,
+            Mirror = 1,
+            Clamp = 2,
+            Border = 3
+        }
+
+        public enum TextureFiltering : byte
+        {
+            None = 0,
+            Point = 1,
+            Linear = 2
+        }
+
+        public string TextureName => _textureRef != null ? TextureRef.Name : "No Texture Assigned";
 
         private EmbEntry _textureRef = null;
         public EmbEntry TextureRef
         {
-            get
-            {
-                return this._textureRef;
-            }
+            get => _textureRef;
             set
             {
-                if (value != this._textureRef)
+                if (value != _textureRef)
                 {
-                    this._textureRef = value;
+                    _textureRef = value;
                     NotifyPropertyChanged(nameof(TextureRef));
-                    NotifyPropertyChanged(nameof(ToolName));
+                    NotifyPropertyChanged(nameof(TextureName));
                 }
             }
         }
-
-        public string ToolName => _textureRef != null ? TextureRef.Name : "No Texture Assigned";
-
-        private TextureAnimationType TextureTypeValue = TextureAnimationType.Static;
-        public TextureAnimationType TextureType
-        {
-            get
-            {
-                return this.TextureTypeValue;
-            }
-
-            set
-            {
-                if (value != this.TextureTypeValue)
-                {
-                    this.TextureTypeValue = value;
-                    NotifyPropertyChanged("TextureType");
-                    NotifyPropertyChanged("IsType0Visible");
-                    NotifyPropertyChanged("IsType1Visible");
-                    NotifyPropertyChanged("IsType2Visible");
-                }
-            }
-        }
-
 
         public byte EmbIndex { get; set; } = byte.MaxValue;
         public byte I_00 { get; set; }
         public byte I_02 { get; set; }
         public byte I_03 { get; set; }
-        public byte FilteringMin { get; set; } //int8
-        public byte FilteringMax { get; set; } //int8
-        public TextureRepitition RepitionX { get; set; } //int8
-        public TextureRepitition RepetitionY { get; set; } //int8
-        public byte RandomSymetryX { get; set; } //int8
-        public byte RandomSymetryY { get; set; } //int8
+        public TextureFiltering FilteringMin { get; set; }
+        public TextureFiltering FilteringMag { get; set; }
+        public TextureRepitition RepetitionU { get; set; }
+        public TextureRepitition RepetitionV { get; set; }
+        public byte RandomSymetryU { get; set; }
+        public byte RandomSymetryV { get; set; }
 
-        public EMP_ScrollAnimation ScrollAnimation { get; set; }
+        public EMP_ScrollState ScrollState { get; set; } = new EMP_ScrollState();
+
 
         public void ReplaceValues(EMP_TextureSamplerDef newValues, List<IUndoRedo> undos = null)
         {
@@ -2023,17 +2495,17 @@ namespace Xv2CoreLib.EMP_NEW
             undos.Add(new UndoableProperty<EMP_TextureSamplerDef>(nameof(TextureRef), this, TextureRef, newValues.TextureRef));
             TextureRef = newValues.TextureRef;
 
-            if(newValues.ScrollAnimation != null && ScrollAnimation != null)
+            if(newValues.ScrollState != null && ScrollState != null)
             {
-                undos.Add(new UndoableProperty<EMP_ScrollAnimation>(nameof(ScrollAnimation.ScrollSpeed_U), ScrollAnimation, ScrollAnimation.ScrollSpeed_U, newValues.ScrollAnimation.ScrollSpeed_U));
-                undos.Add(new UndoableProperty<EMP_ScrollAnimation>(nameof(ScrollAnimation.ScrollSpeed_V), ScrollAnimation, ScrollAnimation.ScrollSpeed_V, newValues.ScrollAnimation.ScrollSpeed_V));
-                undos.Add(new UndoableProperty<EMP_ScrollAnimation>(nameof(ScrollAnimation.Keyframes), ScrollAnimation, ScrollAnimation.Keyframes, newValues.ScrollAnimation.Keyframes));
-                undos.Add(new UndoableProperty<EMP_ScrollAnimation>(nameof(ScrollAnimation.UseSpeedInsteadOfKeyFrames), ScrollAnimation, ScrollAnimation.UseSpeedInsteadOfKeyFrames, newValues.ScrollAnimation.UseSpeedInsteadOfKeyFrames));
+                undos.Add(new UndoableProperty<EMP_ScrollState>(nameof(ScrollState.ScrollSpeed_U), ScrollState, ScrollState.ScrollSpeed_U, newValues.ScrollState.ScrollSpeed_U));
+                undos.Add(new UndoableProperty<EMP_ScrollState>(nameof(ScrollState.ScrollSpeed_V), ScrollState, ScrollState.ScrollSpeed_V, newValues.ScrollState.ScrollSpeed_V));
+                undos.Add(new UndoableProperty<EMP_ScrollState>(nameof(ScrollState.Keyframes), ScrollState, ScrollState.Keyframes, newValues.ScrollState.Keyframes));
+                undos.Add(new UndoableProperty<EMP_ScrollState>(nameof(ScrollState.ScrollType), ScrollState, ScrollState.ScrollType, newValues.ScrollState.ScrollType));
 
-                ScrollAnimation.ScrollSpeed_U = newValues.ScrollAnimation.ScrollSpeed_U;
-                ScrollAnimation.ScrollSpeed_V = newValues.ScrollAnimation.ScrollSpeed_V;
-                ScrollAnimation.Keyframes = newValues.ScrollAnimation.Keyframes;
-                ScrollAnimation.UseSpeedInsteadOfKeyFrames = newValues.ScrollAnimation.UseSpeedInsteadOfKeyFrames;
+                ScrollState.ScrollSpeed_U = newValues.ScrollState.ScrollSpeed_U;
+                ScrollState.ScrollSpeed_V = newValues.ScrollState.ScrollSpeed_V;
+                ScrollState.Keyframes = newValues.ScrollState.Keyframes;
+                ScrollState.ScrollType = newValues.ScrollState.ScrollType;
             }
 
             //Copy remaining values
@@ -2042,72 +2514,6 @@ namespace Xv2CoreLib.EMP_NEW
             undos.Add(new UndoActionPropNotify(this, true));
             this.NotifyPropsChanged();
         }
-        
-        public IEnumerable<TextureAnimationType> TextureAnimationTypes
-        {
-            get
-            {
-                return Enum.GetValues(typeof(TextureAnimationType))
-                    .Cast<TextureAnimationType>();
-            }
-        }
-
-        public IEnumerable<TextureRepitition> TextureRepititions
-        {
-            get
-            {
-                return Enum.GetValues(typeof(TextureRepitition))
-                    .Cast<TextureRepitition>();
-            }
-        }
-
-        public Visibility IsType0Visible
-        {
-            get { return (TextureType == TextureAnimationType.Static) ? Visibility.Visible : Visibility.Hidden; }
-        }
-
-        public Visibility IsType1Visible
-        {
-            get { return (TextureType == TextureAnimationType.Speed) ? Visibility.Visible : Visibility.Hidden; }
-        }
-
-        public Visibility IsType2Visible
-        {
-            get { return (TextureType == TextureAnimationType.SpriteSheet) ? Visibility.Visible : Visibility.Hidden; }
-        }
-
-
-        public enum TextureAnimationType
-        {
-            Static = 0,
-            Speed = 1,
-            SpriteSheet = 2
-        }
-
-        public enum TextureRepitition
-        {
-            Wrap = 0,
-            Mirror = 1,
-            Clamp = 2,
-            Border = 3
-        }
-
-        public TextureAnimationType CalculateTextureType()
-        {
-            if (ScrollAnimation.UseSpeedInsteadOfKeyFrames == true)
-            {
-                return EMP_TextureSamplerDef.TextureAnimationType.Speed;
-            }
-            if (ScrollAnimation.Keyframes.Count() == 1 && ScrollAnimation.Keyframes[0].Time == -1)
-            {
-                return EMP_TextureSamplerDef.TextureAnimationType.Static;
-            }
-            else
-            {
-                return EMP_TextureSamplerDef.TextureAnimationType.SpriteSheet;
-            }
-        }
-        
 
         public EMP_TextureSamplerDef Clone()
         {
@@ -2118,35 +2524,34 @@ namespace Xv2CoreLib.EMP_NEW
                 I_02 = I_02,
                 I_03 = I_03,
                 FilteringMin = FilteringMin,
-                FilteringMax = FilteringMax,
-                RepitionX = RepitionX,
-                RepetitionY = RepetitionY,
-                RandomSymetryX = RandomSymetryX,
-                RandomSymetryY = RandomSymetryY,
-                ScrollAnimation = ScrollAnimation.Clone(),
-                TextureTypeValue = TextureTypeValue,
+                FilteringMag = FilteringMag,
+                RepetitionU = RepetitionU,
+                RepetitionV = RepetitionV,
+                RandomSymetryU = RandomSymetryU,
+                RandomSymetryV = RandomSymetryV,
+                ScrollState = ScrollState.Copy(),
                 TextureRef = TextureRef
             };
         }
 
         public static EMP_TextureSamplerDef GetNew()
         {
-            AsyncObservableCollection<EMP_ScrollKeyframe> keyframes = new AsyncObservableCollection<EMP_ScrollKeyframe>();
-            keyframes.Add(new EMP_ScrollKeyframe());
+            AsyncObservableCollection<EMP_ScrollKeyframe> keyframes = new AsyncObservableCollection<EMP_ScrollKeyframe>
+            {
+                new EMP_ScrollKeyframe()
+            };
 
             return new EMP_TextureSamplerDef()
             {
-                TextureType = TextureAnimationType.Static,
-                RepitionX = TextureRepitition.Wrap,
-                RepetitionY = TextureRepitition.Wrap,
-                ScrollAnimation = new EMP_ScrollAnimation()
+                RepetitionU = TextureRepitition.Wrap,
+                RepetitionV = TextureRepitition.Wrap,
+                ScrollState = new EMP_ScrollState()
                 {
                     Keyframes = keyframes,
-                    UseSpeedInsteadOfKeyFrames = false
                 }
             };
         }
-        
+
         public bool Compare(EMP_TextureSamplerDef obj2)
         {
             return Compare(this, obj2);
@@ -2159,16 +2564,15 @@ namespace Xv2CoreLib.EMP_NEW
             if (obj1.I_02 != obj2.I_02) return false;
             if (obj1.I_03 != obj2.I_03) return false;
             if (obj1.FilteringMin != obj2.FilteringMin) return false;
-            if (obj1.FilteringMax != obj2.FilteringMax) return false;
-            if (obj1.RandomSymetryX != obj2.RandomSymetryX) return false;
-            if (obj1.RepitionX != obj2.RepitionX) return false;
-            if (obj1.RepetitionY != obj2.RepetitionY) return false;
-            if (obj1.RandomSymetryY != obj2.RandomSymetryY) return false;
-            if (obj1.TextureType != obj2.TextureType) return false;
+            if (obj1.FilteringMag != obj2.FilteringMag) return false;
+            if (obj1.RandomSymetryU != obj2.RandomSymetryU) return false;
+            if (obj1.RepetitionU != obj2.RepetitionU) return false;
+            if (obj1.RepetitionV != obj2.RepetitionV) return false;
+            if (obj1.RandomSymetryV != obj2.RandomSymetryV) return false;
 
-            if(obj1.ScrollAnimation != null)
+            if(obj1.ScrollState != null)
             {
-                if (!obj1.ScrollAnimation.Compare(obj2.ScrollAnimation)) return false;
+                if (!obj1.ScrollState.Compare(obj2.ScrollState)) return false;
             }
 
             if(obj1.TextureRef != null && obj2.TextureRef != null)
@@ -2186,10 +2590,10 @@ namespace Xv2CoreLib.EMP_NEW
 
             return true;
         }
-    
+
         public static bool IsRepeatingTexture(EmbEntry embEntry, EffectContainer.AssetContainerTool assetContainer)
         {
-            foreach(var emp in assetContainer.Assets)
+            foreach(EffectContainer.Asset emp in assetContainer.Assets)
             {
                 if(emp.Files?.Count > 0)
                 {
@@ -2197,13 +2601,13 @@ namespace Xv2CoreLib.EMP_NEW
                     {
                         if(textureDef.TextureRef == embEntry)
                         {
-                            if(textureDef.SubData2 != null)
+                            if(textureDef.ScrollState != null)
                             {
-                                if (!textureDef.SubData2.useSpeedInsteadOfKeyFrames)
+                                if (textureDef.ScrollState.ScrollType != EMP_ScrollState.ScrollTypeEnum.Speed)
                                 {
-                                    foreach(var keyframe in textureDef.SubData2.Keyframes)
+                                    foreach(EMP_ScrollKeyframe keyframe in textureDef.ScrollState.Keyframes)
                                     {
-                                        if (keyframe.ScaleX > 1f || keyframe.ScaleY > 1f) return true;
+                                        if (keyframe.ScaleU > 1f || keyframe.ScaleV > 1f) return true;
                                     }
                                 }
                             }
@@ -2214,59 +2618,45 @@ namespace Xv2CoreLib.EMP_NEW
 
             return false;
         }
-    
+
         public static int GetSize(VersionEnum version)
         {
-            return version == VersionEnum.SDBH ? ENTRY_SIZE_NEW : ENTRY_SIZE;
+            return version == VersionEnum.SDBH ? 36 : 28;
         }
     }
 
     [Serializable]
-    public class EMP_ScrollAnimation
+    public class EMP_ScrollState
     {
-        public bool UseSpeedInsteadOfKeyFrames { get; set; }
+        public enum ScrollTypeEnum : ushort
+        {
+            Static = 0,
+            Speed = 1,
+            SpriteSheet = 2
+        }
+
+        public ScrollTypeEnum ScrollType { get; set; }
         public float ScrollSpeed_U { get; set; }
         public float ScrollSpeed_V { get; set; }
 
-        public AsyncObservableCollection<EMP_ScrollKeyframe> Keyframes { get; set; }
+        public AsyncObservableCollection<EMP_ScrollKeyframe> Keyframes { get; set; } = new AsyncObservableCollection<EMP_ScrollKeyframe>();
 
-        public EMP_ScrollAnimation Clone()
-        {
-            AsyncObservableCollection<EMP_ScrollKeyframe> _Keyframes = AsyncObservableCollection<EMP_ScrollKeyframe>.Create();
-
-            if(Keyframes != null)
-            {
-                foreach (var e in Keyframes)
-                {
-                    _Keyframes.Add(e.Clone());
-                }
-            }
-
-            return new EMP_ScrollAnimation()
-            {
-                UseSpeedInsteadOfKeyFrames = UseSpeedInsteadOfKeyFrames,
-                ScrollSpeed_U = ScrollSpeed_U,
-                ScrollSpeed_V = ScrollSpeed_V,
-                Keyframes = _Keyframes
-            };
-        }
-
-        public bool Compare(EMP_ScrollAnimation obj2)
+        public bool Compare(EMP_ScrollState obj2)
         {
             return Compare(this, obj2);
         }
 
-        public static bool Compare(EMP_ScrollAnimation obj1, EMP_ScrollAnimation obj2)
+        public static bool Compare(EMP_ScrollState obj1, EMP_ScrollState obj2)
         {
             if (obj2 == null && obj1 == null) return true;
             if (obj1 != null && obj2 == null) return false;
             if (obj2 != null && obj1 == null) return false;
 
-            if (obj1.UseSpeedInsteadOfKeyFrames != obj2.UseSpeedInsteadOfKeyFrames) return false;
             if (obj1.ScrollSpeed_U != obj2.ScrollSpeed_U) return false;
             if (obj1.ScrollSpeed_V != obj2.ScrollSpeed_V) return false;
+            if (obj1.ScrollType != obj2.ScrollType) return false;
 
-            if(obj1.Keyframes != null && obj2.Keyframes != null)
+            if (obj1.Keyframes != null && obj2.Keyframes != null)
             {
                 if (obj1.Keyframes.Count != obj2.Keyframes.Count) return false;
 
@@ -2290,38 +2680,127 @@ namespace Xv2CoreLib.EMP_NEW
     }
 
     [Serializable]
-    public class EMP_ScrollKeyframe
+    public class EMP_ScrollKeyframe : INotifyPropertyChanged
     {
-        public int Time { get; set; }
-        public float ScrollX { get; set; }
-        public float ScrollY { get; set; }
-        public float ScaleX { get; set; }
-        public float ScaleY { get; set; }
+        #region NotifyPropChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public void NotifyPropertyChanged(string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        #endregion
+
+        private int _time = 0;
+        private float _scrollU = 0f;
+        private float _scrollV = 0f;
+        private float _scaleU = 0f;
+        private float _scaleV = 0f;
+
+        public int Time
+        {
+            get => _time;
+            set
+            {
+                if(value != _time)
+                {
+                    _time = value;
+                    NotifyPropertyChanged(nameof(Time));
+                }
+            }
+        }
+        public float ScrollU
+        {
+            get => _scrollU;
+            set
+            {
+                if (value != _scrollU)
+                {
+                    _scrollU = value;
+                    NotifyPropertyChanged(nameof(ScrollU));
+                }
+            }
+        }
+        public float ScrollV
+        {
+            get => _scrollV;
+            set
+            {
+                if (value != _scrollV)
+                {
+                    _scrollV = value;
+                    NotifyPropertyChanged(nameof(ScrollV));
+                }
+            }
+        }
+        public float ScaleU
+        {
+            get => _scaleU;
+            set
+            {
+                if (value != _scaleU)
+                {
+                    _scaleU = value;
+                    NotifyPropertyChanged(nameof(ScaleU));
+                }
+            }
+        }
+        public float ScaleV
+        {
+            get => _scaleV;
+            set
+            {
+                if (value != _scaleV)
+                {
+                    _scaleV = value;
+                    NotifyPropertyChanged(nameof(ScaleV));
+                }
+            }
+        }
 
         //Added in newer versions of EMP (SDBH and Breakers)
-        public string F_20 { get; set; } //float
-        public string F_24 { get; set; } //float
+        public int I_20 { get; set; } //0, 3
+        public int I_24 { get; set; } //0, 60
+
+        /// <summary>
+        /// Create sprite sheet keyframes out of the specified columns and rows.
+        /// </summary>
+        /// <param name="max">The maximum amount of keyframes.</param>
+        public static List<EMP_ScrollKeyframe> GenerateSpriteSheet(int columns, int rows, int max = -1, int defaultTime = 50)
+        {
+            List<EMP_ScrollKeyframe> keyframes = new List<EMP_ScrollKeyframe>();
+
+            for(int column = 0; column < columns; column++)
+            {
+                for (int row = 0; row < rows; row++)
+                {
+                    if (keyframes.Count == max) return keyframes;
+
+                    keyframes.Add(new EMP_ScrollKeyframe
+                    {
+                        Time = defaultTime,
+                        ScrollU = column / columns,
+                        ScrollV = row / rows,
+                        ScaleU = 1f / columns,
+                        ScaleV = 1f / rows
+                    });
+                }
+            }
+
+            return keyframes;
+        }
 
         public EMP_ScrollKeyframe Clone()
         {
             return new EMP_ScrollKeyframe()
             {
                 Time = Time,
-                ScaleX = ScaleX,
-                ScrollY = ScrollY,
-                ScrollX = ScrollX,
-                ScaleY = ScaleY,
-                F_20 = "0.0",
-                F_24 = "0.0"
+                ScaleU = ScaleU,
+                ScrollV = ScrollV,
+                ScrollU = ScrollU,
+                ScaleV = ScaleV
             };
-        }
-
-        public void SetDefaultValuesForSDBH()
-        {
-            if (F_20 == null)
-                F_20 = "0.0";
-            if (F_24 == null)
-                F_24 = "0.0";
         }
 
         public bool Compare(EMP_ScrollKeyframe obj2)
@@ -2332,14 +2811,24 @@ namespace Xv2CoreLib.EMP_NEW
         public static bool Compare(EMP_ScrollKeyframe obj1, EMP_ScrollKeyframe obj2)
         {
             if (obj1.Time != obj2.Time) return false;
-            if (obj1.ScrollX != obj2.ScrollX) return false;
-            if (obj1.ScrollY != obj2.ScrollY) return false;
-            if (obj1.ScaleX != obj2.ScaleX) return false;
-            if (obj1.ScaleY != obj2.ScaleY) return false;
-            if (obj1.F_20 != obj2.F_20) return false;
-            if (obj1.F_24 != obj2.F_24) return false;
+            if (obj1.ScrollU != obj2.ScrollU) return false;
+            if (obj1.ScrollV != obj2.ScrollV) return false;
+            if (obj1.ScaleU != obj2.ScaleU) return false;
+            if (obj1.ScaleV != obj2.ScaleV) return false;
+            if (obj1.I_20 != obj2.I_20) return false;
+            if (obj1.I_24 != obj2.I_24) return false;
 
             return true;
+        }
+
+        public static int GetSize(VersionEnum version)
+        {
+            return version == VersionEnum.SDBH ? 28 : 20;
+        }
+
+        public override string ToString()
+        {
+            return $"{Time}: {ScrollU}, {ScrollV}, {ScaleU}, {ScaleV}, {I_20}, {I_24}";
         }
     }
 
@@ -2350,7 +2839,7 @@ namespace Xv2CoreLib.EMP_NEW
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public void NotifyPropertyChanged(String propertyName = "")
+        public void NotifyPropertyChanged(string propertyName = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
@@ -2425,6 +2914,24 @@ namespace Xv2CoreLib.EMP_NEW
         ShapeDraw
     }
 
+    /// <summary>
+    /// Used by the <see cref="ParticleNode.GetNew(NewNodeType, IList{ParticleNode})"/> method for creating new nodes.
+    /// </summary>
+    public enum NewNodeType
+    {
+        Empty = 0,
+        //Emissions:
+        Plane = 1,
+        Shape = 2,
+        Extrude = 3,
+        Mesh = 4,
+        //Emitters:
+        EmitterCirlce = 5,
+        EmitterSquare = 6,
+        EmitterSphere = 7,
+        EmitterPoint = 8
+    }
+
     public enum KeyframedValueType
     {
         //All known keyframed values and their associated Parameter/Component values. These apply to main KeyframedValues only, not the groups (which are unknown so far).
@@ -2445,4 +2952,5 @@ namespace Xv2CoreLib.EMP_NEW
         Size1, //3, 0 (ShapeAreaDist, ShapePerimeterDist) OR 2, 0 (SphereDist)
         Size2, //3, 1 (ShapeAreaDist, ShapePerimeterDist)
     }
+
 }

@@ -15,7 +15,7 @@ using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.EEPK;
 using Xv2CoreLib.ECF;
 using Xv2CoreLib.EMA;
-using Xv2CoreLib.EMP;
+using Xv2CoreLib.EMP_NEW;
 using Xv2CoreLib.EMM;
 using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.Resource.UndoRedo;
@@ -35,6 +35,7 @@ using Xv2CoreLib.ESK;
 using Xv2CoreLib.EMO;
 using Xv2CoreLib.EAN;
 using EEPK_Organiser.Forms;
+using EEPK_Organiser.Forms.Editors;
 
 #if XenoKit
 using XenoKit;
@@ -1418,7 +1419,7 @@ namespace EEPK_Organiser.View
 
         private void PBIND_AssetContainer_EmmEdit_Click(object sender, RoutedEventArgs e)
         {
-            Forms.MaterialsEditorForm emmForm = GetActiveEmmForm(effectContainerFile.Pbind.File2_Ref);
+            MaterialsEditorForm emmForm = GetActiveEmmForm(effectContainerFile.Pbind.File2_Ref);
 
             if (emmForm == null)
             {
@@ -1434,45 +1435,50 @@ namespace EEPK_Organiser.View
 
         private void PBIND_AssetContainer_Edit_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                var selectedAsset = pbindDataGrid.SelectedItem as Asset;
+            Asset selectedAsset = pbindDataGrid.SelectedItem as Asset;
 
-                if (selectedAsset != null)
+            if (selectedAsset != null)
+            {
+                EmpEditorWindow empEditor = GetActiveEmpForm(selectedAsset.Files[0].EmpFile);
+
+                if (empEditor == null)
                 {
-                    Forms.EMP.EMP_Editor empEditor = GetActiveEmpForm(selectedAsset.Files[0].EmpFile);
-
-                    if (empEditor == null)
-                    {
-                        empEditor = new Forms.EMP.EMP_Editor(selectedAsset.Files[0].EmpFile, selectedAsset.Files[0].FullFileName, effectContainerFile.Pbind.File3_Ref, effectContainerFile.Pbind.File2_Ref, this);
-                    }
-                    else
-                    {
-                        empEditor.Focus();
-                    }
-
-                    empEditor.Show();
+                    //empEditor = new Forms.EMP.EMP_Editor(selectedAsset.Files[0].EmpFile, selectedAsset.Files[0].FullFileName, effectContainerFile.Pbind.File3_Ref, effectContainerFile.Pbind.File2_Ref, this);
+                    empEditor = new EmpEditorWindow(selectedAsset.Files[0].EmpFile, effectContainerFile.Pbind, selectedAsset.Files[0].FullFileName);
                 }
-            }
-            catch (Exception ex)
-            {
-                SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                else
+                {
+                    empEditor.Focus();
+                }
+
+                empEditor.Show();
             }
         }
 
-        public Forms.EmbEditForm PBIND_OpenTextureViewer()
+        public static EmbEditForm PBIND_OpenTextureViewer(AssetContainerTool assetContainer, AssetType assetType)
         {
-            PBIND_AssetContainer_EmbEdit_Click(null, null);
-            var form = GetActiveEmbForm(effectContainerFile.Pbind.File3_Ref);
+            EmbEditForm form = GetActiveEmbForm(assetContainer.File3_Ref);
+
+            if (form == null)
+            {
+                form = new EmbEditForm(assetContainer.File3_Ref, assetContainer, assetType, assetType.ToString());
+                form.Show();
+            }
+
             form.Focus();
             return form;
         }
 
-        public Forms.MaterialsEditorForm PBIND_OpenMaterialEditor()
+        public static MaterialsEditorForm PBIND_OpenMaterialEditor(AssetContainerTool assetContainer, AssetType assetType)
         {
-            PBIND_AssetContainer_EmmEdit_Click(null, null);
-            var form = GetActiveEmmForm(effectContainerFile.Pbind.File2_Ref);
+            MaterialsEditorForm form = GetActiveEmmForm(assetContainer.File2_Ref);
+
+            if(form == null)
+            {
+                form = new MaterialsEditorForm(assetContainer.File2_Ref, assetContainer, assetType, assetType.ToString());
+                form.Show();
+            }
+
             form.Focus();
             return form;
         }
@@ -4093,68 +4099,49 @@ namespace EEPK_Organiser.View
 
 
         //Window Finding
-        public Window GetActiveForm<T>() where T : Window
+        public static EmbEditForm GetActiveEmbForm(EMB_File _embFile)
         {
-            foreach (var window in App.Current.Windows)
+            foreach (object window in Application.Current.Windows)
             {
-                if (window is T)
+                if (window is EmbEditForm textureViewer)
                 {
-                    return (Window)window;
+                    if (textureViewer.EmbFile == _embFile)
+                        return textureViewer;
                 }
             }
 
             return null;
         }
 
-        public Forms.EmbEditForm GetActiveEmbForm(EMB_File _embFile)
+        public static MaterialsEditorForm GetActiveEmmForm(EMM_File _emmFile)
         {
-            foreach (var window in App.Current.Windows)
+            foreach (object window in Application.Current.Windows)
             {
-                if (window is Forms.EmbEditForm)
+                if (window is MaterialsEditorForm materialsEditor)
                 {
-                    Forms.EmbEditForm _form = (Forms.EmbEditForm)window;
-
-                    if (_form.EmbFile == _embFile)
-                        return _form;
+                    if (materialsEditor.EmmFile == _emmFile)
+                        return materialsEditor;
                 }
             }
 
             return null;
         }
 
-        public Forms.MaterialsEditorForm GetActiveEmmForm(EMM_File _emmFile)
+        public static EmpEditorWindow GetActiveEmpForm(EMP_File _empFile)
         {
-            foreach (var window in App.Current.Windows)
+            foreach (object window in Application.Current.Windows)
             {
-                if (window is Forms.MaterialsEditorForm)
+                if (window is EmpEditorWindow empEditor)
                 {
-                    Forms.MaterialsEditorForm _form = (Forms.MaterialsEditorForm)window;
-
-                    if (_form.EmmFile == _emmFile)
-                        return _form;
+                    if (empEditor.EmpFile == _empFile)
+                        return empEditor;
                 }
             }
 
             return null;
         }
 
-        public Forms.EMP.EMP_Editor GetActiveEmpForm(EMP_File _empFile)
-        {
-            foreach (var window in App.Current.Windows)
-            {
-                if (window is Forms.EMP.EMP_Editor)
-                {
-                    Forms.EMP.EMP_Editor _form = (Forms.EMP.EMP_Editor)window;
-
-                    if (_form.empFile == _empFile)
-                        return _form;
-                }
-            }
-
-            return null;
-        }
-
-        public void CloseEmpForm(EMP_File empFile)
+        public static void CloseEmpForm(EMP_File empFile)
         {
             var form = GetActiveEmpForm(empFile);
 

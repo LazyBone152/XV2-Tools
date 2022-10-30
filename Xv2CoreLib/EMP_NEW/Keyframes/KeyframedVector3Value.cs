@@ -10,6 +10,8 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
     [Serializable]
     public class KeyframedVector3Value : KeyframedBaseValue
     {
+        public const string CLIPBOARD_ID = "EMP_KeyframedVector3Value";
+
         public CustomVector4 Constant { get; set; }
         public AsyncObservableCollection<KeyframeVector3Value> Keyframes { get; set; } = new AsyncObservableCollection<KeyframeVector3Value>();
 
@@ -68,10 +70,23 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
 
         public IUndoRedo AddKeyframe(float time, float x, float y, float z)
         {
-            KeyframeVector3Value keyframe = new KeyframeVector3Value(time, x, y, z);
-            Keyframes.Add(keyframe);
+            KeyframeVector3Value keyframe = Keyframes.FirstOrDefault(a => a.Time == time);
 
-            return new UndoableListAdd<KeyframeVector3Value>(Keyframes, keyframe);
+            if(keyframe == null)
+            {
+                keyframe = new KeyframeVector3Value(time, x, y, z);
+                Keyframes.Add(keyframe);
+
+                return new UndoableListAdd<KeyframeVector3Value>(Keyframes, keyframe, "Add Keyframe");
+            }
+            else
+            {
+                CustomVector4 vector = new CustomVector4(x, y, z, 0f);
+                IUndoRedo undo = new UndoablePropertyGeneric(nameof(keyframe.Value), keyframe, keyframe.Value, vector, "Add Keyframe");
+                keyframe.Value = vector;
+
+                return undo;
+            }
         }
 
         public IUndoRedo RemoveKeyframe(float time)
@@ -90,9 +105,8 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
     }
 
     [Serializable]
-    public class KeyframeVector3Value
+    public class KeyframeVector3Value : KeyframeBaseValue
     {
-        public float Time { get; set; }
         public CustomVector4 Value { get; set; }
 
         public KeyframeVector3Value(float time, float x, float y, float z)

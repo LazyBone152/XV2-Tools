@@ -191,6 +191,13 @@ namespace Xv2CoreLib.BAC
                             case 27:
                                 bytes.AddRange(BAC_Type27.Write(bacFile.BacEntries[i].Type27));
                                 break;
+
+                            //case 29:
+                            //    bytes.AddRange(BAC_Type29.Write(bacFile.BacEntries[i].Type29));
+                            //    break;
+                            //case 31:
+                            //    bytes.AddRange(BAC_Type31.Write(bacFile.BacEntries[i].Type31));
+                            //   break;
                         }
                     }
                 }
@@ -374,7 +381,18 @@ namespace Xv2CoreLib.BAC
                 bacEntry.TypeDummy.Remove(27);
                 count++;
             }
-
+            /*
+            if (bacEntry.Type29?.Count > 0)
+            {
+                bacEntry.TypeDummy.Remove(29);
+                count++;
+            }
+            if (bacEntry.Type31?.Count > 0)
+            {
+                bacEntry.TypeDummy.Remove(31);
+                count++;
+            }
+            */
             if (bacEntry.TypeDummy != null)
             {
                 count += bacEntry.TypeDummy.Count();
@@ -499,6 +517,16 @@ namespace Xv2CoreLib.BAC
             {
                 types.Add(27);
             }
+            /*
+            if (bacEntry.Type29?.Count > 0)
+            {
+                types.Add(29);
+            }
+            if (bacEntry.Type31?.Count > 0)
+            {
+                types.Add(31);
+            }
+            */
             if (bacEntry.TypeDummy != null)
             {
                 foreach(var i in bacEntry.TypeDummy)
@@ -634,6 +662,16 @@ namespace Xv2CoreLib.BAC
             {
                 return (bacEntry.Type27 != null) ? bacEntry.Type27.Count() : 0;
             }
+            /*
+            else if (type == 29)
+            {
+                return (bacEntry.Type29 != null) ? bacEntry.Type29.Count() : 0;
+            }
+            else if (type == 31)
+            {
+                return (bacEntry.Type31 != null) ? bacEntry.Type31.Count() : 0;
+            }
+            */
             else
             {
                 return 0;

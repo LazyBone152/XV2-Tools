@@ -11,40 +11,125 @@
              xmlns:emm="clr-namespace:Xv2CoreLib.EMM;assembly=Xv2CoreLib"
              xmlns:emp="clr-namespace:Xv2CoreLib.EMP_NEW;assembly=Xv2CoreLib"
              xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
-             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib" 
+             xmlns:dd="clr-namespace:GongSolutions.Wpf.DragDrop;assembly=GongSolutions.Wpf.DragDrop"
+             xmlns:converters="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              mc:Ignorable="d" 
              Dialog:DialogParticipation.Register="{Binding}"
              d:DesignHeight="720" d:DesignWidth="1200" Name="UserControl">
+    <UserControl.Resources>
+        <lbUtils:BindingProxy x:Key="Proxy" Data="{Binding}" />
+        <converters:BooleanToVisibilityConverter x:Key="visibilityConverter" />
+    </UserControl.Resources>
     <Grid>
-        <Grid.Resources>
-            <lbUtils:BindingProxy x:Key="Proxy" Data="{Binding}" />
-        </Grid.Resources>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="40"/>
-            <ColumnDefinition Width="400" MinWidth="300" MaxWidth="500"/>
-            <ColumnDefinition Width="Auto"/>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="580" MinHeight="500"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="140" MinHeight="100"/>
-        </Grid.RowDefinitions>
-        <GridSplitter Grid.Column="2" Width="3" ResizeDirection="Columns" ResizeBehavior="PreviousAndNext" Background="{DynamicResource MahApps.Brushes.Accent}"/>
-        <GridSplitter Grid.Column="3" Grid.Row="1" Height="3" ResizeDirection="Rows" ResizeBehavior="PreviousAndNext" Background="{DynamicResource MahApps.Brushes.Accent}" HorizontalAlignment="Stretch"/>
+        <Controls:MetroTabControl Controls:TabControlHelper.Underlined="TabPanel" Controls:TabControlHelper.UnderlineBrush="{DynamicResource MahApps.Brushes.Gray.SemiTransparent}">
+            <Controls:MetroTabItem Header="Particle Nodes" Controls:HeaderedControlHelper.HeaderFontSize="16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="40"/>
+                        <ColumnDefinition Width="400" MinWidth="300" MaxWidth="500"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <GridSplitter Grid.Column="2" Grid.RowSpan="3" Margin="0, 20, 0, 20" Width="3" ResizeDirection="Columns" ResizeBehavior="PreviousAndNext" Background="{DynamicResource MahApps.Brushes.Accent}"/>
 
-        <TreeView Grid.Column="1" ItemsSource="{Binding ElementName=UserControl, Path=EmpFile.ParticleNodes.Binding}">
-            <TreeView.Resources>
-                <HierarchicalDataTemplate DataType="{x:Type emp:ParticleNode}" ItemsSource="{Binding ChildParticleNodes.Binding}">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="TYPE" Foreground="{DynamicResource MahApps.Brushes.Badged.Background}" Background="{DynamicResource MahApps.Brushes.Accent}" Margin="0,0,0,5"/>
-                        <TextBlock Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" MinWidth="100" Tag="{Binding DataContext, ElementName=UserControl}"/>
-                        
-                    </StackPanel>
-                </HierarchicalDataTemplate>
+                    <TreeView Margin="5, 20, 5, 20" Grid.Column="1" Grid.RowSpan="3" Style="{DynamicResource MahApps.Styles.TreeView.Virtualized}" BorderBrush="{DynamicResource MahApps.Brushes.SemiTransparent}" BorderThickness="1" ItemsSource="{Binding ElementName=UserControl, Path=EmpFile.ParticleNodes.Binding}" SelectedItemChanged="TreeView_SelectedItemChanged"
+                                  dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" dd:DragDrop.UseDefaultDragAdorner="True" PreviewDrop="TreeView_PreviewDrop" AllowDrop="True">
+                        <TreeView.Resources>
+                            <HierarchicalDataTemplate DataType="{x:Type emp:ParticleNode}" ItemsSource="{Binding ChildParticleNodes.Binding}">
+                                <StackPanel Orientation="Horizontal">
+                                    <StackPanel Background="{DynamicResource MahApps.Brushes.Accent2}" Margin="0,0,5,0" Visibility="{Binding IsEmitter, Converter={StaticResource visibilityConverter}}" Orientation="Horizontal">
+                                        <TextBlock Text="EMITTER" Margin="5, 0"/>
+                                    </StackPanel>
+                                    <StackPanel Background="{DynamicResource MahApps.Brushes.AccentBase}" Margin="0,0,5,0" Visibility="{Binding IsEmission, Converter={StaticResource visibilityConverter}}" Orientation="Horizontal">
+                                        <TextBlock Text="EMISSION" Margin="5, 0"/>
+                                    </StackPanel>
+                                    <Grid Background="{DynamicResource MahApps.Brushes.Gray.SemiTransparent}" Margin="0,0,5,0" Visibility="{Binding IsNull, Converter={StaticResource visibilityConverter}}">
+                                        <TextBlock Text="NULL" Margin="5, 0"/>
+                                    </Grid>
 
-            </TreeView.Resources>
-        </TreeView>
+                                    <TextBlock Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" MinWidth="100" Tag="{Binding DataContext, ElementName=UserControl}"/>
 
-        <views:EmpNodeView x:Name="nodeView" Grid.Column="2"/>
+                                </StackPanel>
+                            </HierarchicalDataTemplate>
+
+                        </TreeView.Resources>
+                        <TreeView.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="New Node">
+                                    <MenuItem Header="Empty" Command="{Binding Source={StaticResource Proxy}, Path=Data.NewNodeCommand}" CommandParameter="0"/>
+                                    <Separator/>
+                                    <MenuItem Header="Emission -> Plane" Command="{Binding Source={StaticResource Proxy}, Path=Data.NewNodeCommand}" CommandParameter="1"/>
+                                    <MenuItem Header="Emission -> Shape" Command="{Binding Source={StaticResource Proxy}, Path=Data.NewNodeCommand}" CommandParameter="2"/>
+                                    <MenuItem Header="Emission -> Extrude" Command="{Binding Source={StaticResource Proxy}, Path=Data.NewNodeCommand}" CommandParameter="3"/>
+                                    <MenuItem Header="Emission -> Mesh" Command="{Binding Source={StaticResource Proxy}, Path=Data.NewNodeCommand}" CommandParameter="4"/>
+                                    <Separator/>
+                                    <MenuItem Header="Emitter -> Circle" Command="{Binding Source={StaticResource Proxy}, Path=Data.NewNodeCommand}" CommandParameter="5"/>
+                                    <MenuItem Header="Emitter -> Square" Command="{Binding Source={StaticResource Proxy}, Path=Data.NewNodeCommand}" CommandParameter="6"/>
+                                    <MenuItem Header="Emitter -> Sphere" Command="{Binding Source={StaticResource Proxy}, Path=Data.NewNodeCommand}" CommandParameter="7"/>
+                                    <MenuItem Header="Emitter -> Point" Command="{Binding Source={StaticResource Proxy}, Path=Data.NewNodeCommand}" CommandParameter="8"/>
+                                </MenuItem>
+                                <MenuItem Header="New Node (child)">
+                                    <MenuItem Header="Empty" Command="{Binding Source={StaticResource Proxy}, Path=Data.NewNodeChildCommand}" CommandParameter="0"/>
+                                    <Separator/>
+                                    <MenuItem Header="Emission -> Plane" Command="{Binding Source={StaticResource Proxy}, Path=Data.NewNodeChildCommand}" CommandParameter="1"/>
+                                    <MenuItem Header="Emission -> Shape" Command="{Binding Source={StaticResource Proxy}, Path=Data.NewNodeChildCommand}" CommandParameter="2"/>
+                                    <MenuItem Header="Emission -> Extrude" Command="{Binding Source={StaticResource Proxy}, Path=Data.NewNodeChildCommand}" CommandParameter="3"/>
+                                    <MenuItem Header="Emission -> Mesh" Command="{Binding Source={StaticResource Proxy}, Path=Data.NewNodeChildCommand}" CommandParameter="4"/>
+                                    <Separator/>
+                                    <MenuItem Header="Emitter -> Circle" Command="{Binding Source={StaticResource Proxy}, Path=Data.NewNodeChildCommand}" CommandParameter="5"/>
+                                    <MenuItem Header="Emitter -> Square" Command="{Binding Source={StaticResource Proxy}, Path=Data.NewNodeChildCommand}" CommandParameter="6"/>
+                                    <MenuItem Header="Emitter -> Sphere" Command="{Binding Source={StaticResource Proxy}, Path=Data.NewNodeChildCommand}" CommandParameter="7"/>
+                                    <MenuItem Header="Emitter -> Point" Command="{Binding Source={StaticResource Proxy}, Path=Data.NewNodeChildCommand}" CommandParameter="8"/>
+                                </MenuItem>
+                                <MenuItem Header="Duplicate" Command="{Binding Source={StaticResource Proxy}, Path=Data.DuplicateNodeCommand}"/>
+                                <MenuItem Header="Delete" Command="{Binding Source={StaticResource Proxy}, Path=Data.DeleteNodeCommand}"/>
+                                <Separator/>
+                                <MenuItem Header="Copy" Command="{Binding Source={StaticResource Proxy}, Path=Data.CopyNodeCommand}"/>
+                                <MenuItem Header="Paste" Command="{Binding Source={StaticResource Proxy}, Path=Data.PasteNodeCommand}"/>
+                                <MenuItem Header="Paste (child)" Command="{Binding Source={StaticResource Proxy}, Path=Data.PasteNodeChildCommand}"/>
+                                <MenuItem Header="Paste Values" Command="{Binding Source={StaticResource Proxy}, Path=Data.PasteNodeValuesCommand}"/>
+                                <Separator/>
+                                <MenuItem Header="Hue Adjustment" Command="{Binding Source={StaticResource Proxy}, Path=Data.HueAdjustment_Command}"/>
+                                <MenuItem Header="Hue Set" Command="{Binding Source={StaticResource Proxy}, Path=Data.HueSet_Command}"/>
+                                
+                                <Separator/>
+                                <MenuItem Header="Hide" Command="{Binding Source={StaticResource Proxy}, Path=Data.HideAllSelected_Command}"/>
+                                <MenuItem Header="Show" Command="{Binding Source={StaticResource Proxy}, Path=Data.ShowAllSelected_Command}"/>
+                                <MenuItem Header="Hide All" Command="{Binding Source={StaticResource Proxy}, Path=Data.HideAll_Command}"/>
+                                <MenuItem Header="Show All" Command="{Binding Source={StaticResource Proxy}, Path=Data.ShowAll_Command}"/>
+                                
+                            </ContextMenu>
+                        </TreeView.ContextMenu>
+                        <TreeView.InputBindings>
+                            <KeyBinding Key="Delete" Command="{Binding ElementName=UserControl, Path=DeleteNodeCommand}"/>
+                            <KeyBinding Modifiers="Ctrl" Key="C" Command="{Binding ElementName=UserControl, Path=CopyNodeCommand}"/>
+                            <KeyBinding Modifiers="Ctrl" Key="V" Command="{Binding ElementName=UserControl, Path=PasteNodeCommand}"/>
+                            <KeyBinding Modifiers="Ctrl" Key="D" Command="{Binding ElementName=UserControl, Path=DuplicateNodeCommand}"/>
+                        </TreeView.InputBindings>
+                    </TreeView>
+
+
+                    <Grid Grid.Column="3" Margin="0, 20, 0, 20">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="580*" MinHeight="500"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="140*" MinHeight="100"/>
+                            <RowDefinition Height="2"/>
+                        </Grid.RowDefinitions>
+                        <GridSplitter Grid.Row="1" Height="3" ResizeDirection="Rows" Background="{DynamicResource MahApps.Brushes.Accent}" HorizontalAlignment="Stretch"/>
+                        <views:EmpNodeView x:Name="nodeView" Node="{Binding ElementName=UserControl, Path=SelectedNode}" AssetContainer="{Binding ElementName=UserControl, Path=AssetContainer}" EmpFile="{Binding ElementName=UserControl, Path=EmpFile}"/>
+                        <views:EmpKeyframesView Grid.Row="2" KeyframedValue="{Binding ElementName=UserControl, Path=SelectedNode.SelectedKeyframedValue}" Node="{Binding ElementName=UserControl, Path=SelectedNode}" Margin="0, 0, 0, 5"/>
+                        <Grid Grid.Row="3" Background="{DynamicResource MahApps.Brushes.SemiTransparent}"/>
+                    </Grid>
+                </Grid>
+
+            </Controls:MetroTabItem>
+            <Controls:MetroTabItem Header="Textures" Controls:HeaderedControlHelper.HeaderFontSize="16">
+                <Grid>
+                    <views:EmpTextureView EmpFile="{Binding ElementName=UserControl, Path=EmpFile}" AssetContainer="{Binding ElementName=UserControl, Path=AssetContainer}"/>
+                </Grid>
+            </Controls:MetroTabItem>
+        </Controls:MetroTabControl>
     </Grid>
-</UserControl>
+    </UserControl>

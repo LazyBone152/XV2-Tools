@@ -198,7 +198,7 @@ namespace Xv2CoreLib.EMM
 
         public EmmMaterial Compare(EmmMaterial emmEntry2, bool compareName = false)
         {
-            foreach (var entry in Materials)
+            foreach (EmmMaterial entry in Materials)
             {
                 if (entry.Compare(emmEntry2, compareName))
                 {
@@ -370,19 +370,6 @@ namespace Xv2CoreLib.EMM
 
             if (!DecompiledParameters.Compare(material2.DecompiledParameters))
                 return false;
-
-            /*
-              Parameters are now in DecompiledParameters!
-
-            if (material2.Parameters.Count != Parameters.Count)
-                return false;
-
-            for(int i = 0; i < Parameters.Count; i++)
-            {
-                if (!Parameters[i].Compare(material2.Parameters[i]))
-                    return false;
-            }
-            */
 
             return true;
         }

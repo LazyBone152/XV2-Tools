@@ -1,14 +1,10 @@
-﻿using GalaSoft.MvvmLight.CommandWpf;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using Xv2CoreLib.EMP_NEW;
 using Xv2CoreLib.EMP_NEW.Keyframes;
+using GalaSoft.MvvmLight.CommandWpf;
+using System.Windows.Media;
 
 namespace EEPK_Organiser.View.Editors.EMP
 {
@@ -45,38 +41,43 @@ namespace EEPK_Organiser.View.Editors.EMP
             set { SetValue(NodeProperty, value); }
         }
 
+        public static readonly DependencyProperty HideUpDownButtonsProperty = DependencyProperty.Register(
+            nameof(HideUpDownButtons), typeof(bool), typeof(KeyframedValueView), new PropertyMetadata(false));
 
-        public static readonly DependencyProperty ValueNameProperty = DependencyProperty.Register(
-            nameof(ValueName), typeof(string), typeof(KeyframedValueView), new PropertyMetadata(null));
-
-        public string ValueName
+        public bool HideUpDownButtons
         {
-            get { return (string)GetValue(ValueNameProperty); }
-            set { SetValue(ValueNameProperty, value); }
+            get { return (bool)GetValue(HideUpDownButtonsProperty); }
+            set { SetValue(HideUpDownButtonsProperty, value); }
         }
-
-        public static readonly DependencyProperty IsOnAnimTabProperty = DependencyProperty.Register(
-            nameof(IsOnAnimTab), typeof(bool), typeof(KeyframedValueView), new PropertyMetadata(null));
-
-        public bool IsOnAnimTab
-        {
-            get { return (bool)GetValue(IsOnAnimTabProperty); }
-            set { SetValue(IsOnAnimTabProperty, value); }
-        }
-
-
-        private static DependencyPropertyChangedEventHandler DpChanged;
 
         private static void OnDpChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            if (DpChanged != null)
-                DpChanged.Invoke(sender, e);
+            if(sender is KeyframedValueView view)
+            {
+                //Handle event subscriptions
+                if(e.NewValue is KeyframedBaseValue newValue)
+                {
+                    newValue.PropertyChanged += view.KeyframedValue_PropertyChanged;
+                }
+
+                if (e.OldValue is KeyframedBaseValue oldValue)
+                {
+                    oldValue.PropertyChanged -= view.KeyframedValue_PropertyChanged;
+                }
+
+                view.UpdateProperties();
+            }
         }
 
-        private void ValueInstanceChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private void KeyframedValue_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            UpdateProperties();
+            if(e.PropertyName == nameof(KeyframedBaseValue.IsAnimated))
+            {
+                NotifyPropertyChanged(nameof(AnimButtonVisible));
+                NotifyPropertyChanged(nameof(NotAnimButtonVisible));
+            }
         }
+
 
         #endregion
 
@@ -84,34 +85,18 @@ namespace EEPK_Organiser.View.Editors.EMP
         public Visibility Vector3Visibile => KeyframedValue is KeyframedVector3Value ? Visibility.Visible : Visibility.Collapsed;
         public Visibility ColorVisibile => KeyframedValue is KeyframedColorValue ? Visibility.Visible : Visibility.Collapsed;
         public Visibility FloatVisibile => KeyframedValue is KeyframedFloatValue ? Visibility.Visible : Visibility.Collapsed;
-        public Visibility AnimButtonVisible => !IsOnAnimTab ? Visibility.Visible : Visibility.Collapsed;
-        public Visibility AnimCheckBoxVisible => IsOnAnimTab ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility NotAnimButtonVisible => !IsAnimated() ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility AnimButtonVisible => IsAnimated() ? Visibility.Visible : Visibility.Collapsed;
 
         public KeyframedVector2Value Vector2Value => KeyframedValue as KeyframedVector2Value;
         public KeyframedVector3Value Vector3Value => KeyframedValue as KeyframedVector3Value;
         public KeyframedColorValue ColorValue => KeyframedValue as KeyframedColorValue;
         public KeyframedFloatValue FloatValue => KeyframedValue as KeyframedFloatValue;
 
-        public string ValueToolTip
-        {
-            get
-            {
-                if (KeyframedValue == null) return null;
-
-                if (KeyframedValue.IsAnimated && !IsOnAnimTab)
-                    return "This value is currently keyframed and can only be edited from the Animation Tab.";
-
-                if (!KeyframedValue.IsAnimated && IsOnAnimTab)
-                    return "This value is not currently keyframed. Click the checkbox if you wish to enable keyframing.";
-
-                return null;
-            }
-        }
 
         public KeyframedValueView()
         {
             InitializeComponent();
-            DpChanged += ValueInstanceChanged;
         }
 
         public void UpdateProperties()
@@ -127,6 +112,8 @@ namespace EEPK_Organiser.View.Editors.EMP
             NotifyPropertyChanged(nameof(Vector3Value));
             NotifyPropertyChanged(nameof(ColorValue));
             NotifyPropertyChanged(nameof(FloatValue));
+            NotifyPropertyChanged(nameof(AnimButtonVisible));
+            NotifyPropertyChanged(nameof(NotAnimButtonVisible));
         }
 
         public RelayCommand GoToKeyframedValueCommand => new RelayCommand(GoToKeyframedValue, IsNodeSelected);
@@ -138,6 +125,12 @@ namespace EEPK_Organiser.View.Editors.EMP
         private bool IsNodeSelected()
         {
             return Node != null;
+        }
+
+        private bool IsAnimated()
+        {
+            if (KeyframedValue == null) return false;
+            return KeyframedValue.IsAnimated;
         }
     }
 }

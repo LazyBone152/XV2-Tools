@@ -1,24 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.IO;
+using System.IO.Compression;
+using System.ComponentModel;
+using System.Collections.Generic;
+using System.Windows;
+using System.Windows.Data;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Xv2CoreLib.EEPK;
 using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.EMM;
-using Xv2CoreLib.EMP;
+using Xv2CoreLib.EMP_NEW;
 using Xv2CoreLib.ETR;
 using Xv2CoreLib.ECF;
-using System.IO;
-using System.ComponentModel;
-using System.Windows.Data;
 using Xv2CoreLib.EMA;
-using System.IO.Compression;
-using Xv2CoreLib.HslColor;
-using Xv2CoreLib.Resource.UndoRedo;
-using Xv2CoreLib.Resource;
-using System.Windows.Media.Imaging;
-using System.Windows.Media;
-using System.Windows;
 using Xv2CoreLib.EMO;
+using Xv2CoreLib.HslColor;
+using Xv2CoreLib.Resource;
+using Xv2CoreLib.Resource.UndoRedo;
 
 namespace Xv2CoreLib.EffectContainer
 {
@@ -35,12 +35,9 @@ namespace Xv2CoreLib.EffectContainer
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void NotifyPropertyChanged(String propertyName = "")
+        private void NotifyPropertyChanged(string propertyName = "")
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         #endregion
 
@@ -63,18 +60,15 @@ namespace Xv2CoreLib.EffectContainer
         private SaveFormat _saveFormat = SaveFormat.EEPK;
         public SaveFormat saveFormat
         {
-            get
-            {
-                return this._saveFormat;
-            }
+            get => _saveFormat;
             set
             {
-                if (value != this._saveFormat)
+                if (value != _saveFormat)
                 {
-                    this._saveFormat = value;
-                    NotifyPropertyChanged("Name");
-                    NotifyPropertyChanged("DisplayName");
-                    NotifyPropertyChanged("saveFormat");
+                    _saveFormat = value;
+                    NotifyPropertyChanged(nameof(Name));
+                    NotifyPropertyChanged(nameof(DisplayName));
+                    NotifyPropertyChanged(nameof(saveFormat));
                 }
             }
         }
@@ -89,17 +83,14 @@ namespace Xv2CoreLib.EffectContainer
         /// </summary>
         public string Name
         {
-            get
-            {
-                return this._name;
-            }
+            get => _name;
             set
             {
-                if (value != this._name)
+                if (value != _name)
                 {
-                    this._name = value;
-                    NotifyPropertyChanged("Name");
-                    NotifyPropertyChanged("DisplayName");
+                    _name = value;
+                    NotifyPropertyChanged(nameof(Name));
+                    NotifyPropertyChanged(nameof(DisplayName));
                 }
             }
         }
@@ -108,18 +99,15 @@ namespace Xv2CoreLib.EffectContainer
         /// </summary>
         public string Directory
         {
-            get
-            {
-                return this._directory;
-            }
+            get => _directory;
             set
             {
-                if (value != this._directory)
+                if (value != _directory)
                 {
-                    this._directory = value;
-                    NotifyPropertyChanged("Directory");
-                    NotifyPropertyChanged("DisplayName");
-                    NotifyPropertyChanged("CanSave");
+                    _directory = value;
+                    NotifyPropertyChanged(nameof(Directory));
+                    NotifyPropertyChanged(nameof(DisplayName));
+                    NotifyPropertyChanged(nameof(CanSave));
                 }
             }
         }
@@ -138,13 +126,7 @@ namespace Xv2CoreLib.EffectContainer
                 }
             }
         }
-        public bool CanSave
-        {
-            get
-            {
-                return Path.IsPathRooted(Directory);
-            }
-        }
+        public bool CanSave => Path.IsPathRooted(Directory);
         public string FullFilePath
         {
             get
@@ -172,7 +154,7 @@ namespace Xv2CoreLib.EffectContainer
                 if (value != this._versionValue)
                 {
                     this._versionValue = value;
-                    NotifyPropertyChanged("Version");
+                    NotifyPropertyChanged(nameof(Version));
                 }
             }
         }
@@ -185,12 +167,12 @@ namespace Xv2CoreLib.EffectContainer
 
         //File IO
         [NonSerialized]
-        private Resource.Xv2FileIO xv2FileIO = null;
+        private Xv2FileIO xv2FileIO = null;
         private bool OnlyLoadFromCpk = false;
         [NonSerialized]
-        private Resource.ZipReader zipReader = null;
+        private ZipReader zipReader = null;
         [NonSerialized]
-        private Resource.ZipWriter zipWriter = null;
+        private ZipWriter zipWriter = null;
 
         //Asset containers
         public AssetContainerTool Pbind { get; set; }
@@ -208,16 +190,13 @@ namespace Xv2CoreLib.EffectContainer
         private string _effectSearchFilter = null;
         public string EffectSearchFilter
         {
-            get
-            {
-                return this._effectSearchFilter;
-            }
+            get => _effectSearchFilter;
             set
             {
-                if (value != this._effectSearchFilter)
+                if (value != _effectSearchFilter)
                 {
-                    this._effectSearchFilter = value;
-                    NotifyPropertyChanged("EffectSearchFilter");
+                    _effectSearchFilter = value;
+                    NotifyPropertyChanged(nameof(EffectSearchFilter));
                 }
             }
         }
@@ -241,7 +220,7 @@ namespace Xv2CoreLib.EffectContainer
                 if (value != _viewEffects)
                 {
                     _viewEffects = value;
-                    NotifyPropertyChanged("ViewEffects");
+                    NotifyPropertyChanged(nameof(ViewEffects));
                 }
             }
         }
@@ -620,7 +599,7 @@ namespace Xv2CoreLib.EffectContainer
                 case AssetType.TBIND:
                     if (!container.LooseFiles)
                     {
-                        container.File1_Ref = EMB_File.LoadEmb(LoadExternalFile(String.Format("{0}/{1}", Directory, container.File1_Name)));
+                        container.File1_Ref = EMB_File.LoadEmb(LoadExternalFile(string.Format("{0}/{1}", Directory, container.File1_Name)));
                     }
 
                     if ((Version == VersionEnum.SDBH || Version == (VersionEnum)1) && type == AssetType.PBIND)
@@ -659,21 +638,21 @@ namespace Xv2CoreLib.EffectContainer
                     else
                     {
                         //Regular XV2 EEPK
-                        container.File2_Ref = EMM_File.LoadEmm(LoadExternalFile(String.Format("{0}/{1}", Directory, container.File2_Name)));
-                        container.File3_Ref = EMB_File.LoadEmb(LoadExternalFile(String.Format("{0}/{1}", Directory, container.File3_Name)));
+                        container.File2_Ref = EMM_File.LoadEmm(LoadExternalFile(string.Format("{0}/{1}", Directory, container.File2_Name)));
+                        container.File3_Ref = EMB_File.LoadEmb(LoadExternalFile(string.Format("{0}/{1}", Directory, container.File3_Name)));
                     }
                     break;
                 case AssetType.CBIND:
                 case AssetType.LIGHT:
                     if (!container.LooseFiles)
                     {
-                        container.File1_Ref = EMB_File.LoadEmb(LoadExternalFile(String.Format("{0}/{1}", Directory, container.File1_Name)));
+                        container.File1_Ref = EMB_File.LoadEmb(LoadExternalFile(string.Format("{0}/{1}", Directory, container.File1_Name)));
                     }
                     break;
                 case AssetType.EMO:
                     break;
                 default:
-                    throw new InvalidOperationException(String.Format("LoadAssetContainer: Unrecognized asset type: {0}", type));
+                    throw new InvalidOperationException(string.Format("LoadAssetContainer: Unrecognized asset type: {0}", type));
             }
 
             //Load the actual assets and link them (if needed)
@@ -688,7 +667,7 @@ namespace Xv2CoreLib.EffectContainer
 
                         if (container.LooseFiles || type == AssetType.EMO)
                         {
-                            fileBytes = LoadExternalFile(String.Format("{0}/{1}", Directory, file.FullFileName));
+                            fileBytes = LoadExternalFile(string.Format("{0}/{1}", Directory, file.FullFileName));
                         }
                         else
                         {
@@ -702,7 +681,7 @@ namespace Xv2CoreLib.EffectContainer
                         switch (file.Extension)
                         {
                             case ".emp":
-                                file.EmpFile = EMP_File.Load(fileBytes, ParserMode.Tool);
+                                file.EmpFile = EMP_File.Load(fileBytes, EepkToolInterlop.FullDecompile);
                                 file.fileType = EffectFile.FileType.EMP;
                                 break;
                             case ".etr":
@@ -845,7 +824,7 @@ namespace Xv2CoreLib.EffectContainer
 
             //Save eepk
             EEPK_File eepkFile = CreateEepk();
-            SaveFile(eepkFile.SaveToBytes(), String.Format("{0}/{1}.eepk", Directory, Name));
+            SaveFile(eepkFile.SaveToBytes(), string.Format("{0}/{1}.eepk", Directory, Name));
 
             //Save containers
             //If a container has no assets, it will be ignored. The binary eepk also omits it.
@@ -853,21 +832,21 @@ namespace Xv2CoreLib.EffectContainer
             {
                 if (!Pbind.LooseFiles)
                 {
-                    ExternalFileSaved(String.Format("{0}/{1}", Directory, Pbind.File1_Name));
-                    SaveFile(Pbind.File1_Ref.SaveToBytes(), String.Format("{0}/{1}", Directory, Pbind.File1_Name));
+                    ExternalFileSaved(string.Format("{0}/{1}", Directory, Pbind.File1_Name));
+                    SaveFile(Pbind.File1_Ref.SaveToBytes(), string.Format("{0}/{1}", Directory, Pbind.File1_Name));
                 }
-                ExternalFileSaved(String.Format("{0}/{1}", Directory, Pbind.File2_Name));
-                ExternalFileSaved(String.Format("{0}/{1}", Directory, Pbind.File3_Name));
-                SaveFile(Pbind.File2_Ref.SaveToBytes(), String.Format("{0}/{1}", Directory, Pbind.File2_Name));
-                SaveFile(Pbind.File3_Ref.SaveToBytes(), String.Format("{0}/{1}", Directory, Pbind.File3_Name));
+                ExternalFileSaved(string.Format("{0}/{1}", Directory, Pbind.File2_Name));
+                ExternalFileSaved(string.Format("{0}/{1}", Directory, Pbind.File3_Name));
+                SaveFile(Pbind.File2_Ref.SaveToBytes(), string.Format("{0}/{1}", Directory, Pbind.File2_Name));
+                SaveFile(Pbind.File3_Ref.SaveToBytes(), string.Format("{0}/{1}", Directory, Pbind.File3_Name));
 
                 //Lose files
                 if (Pbind.LooseFiles)
                 {
-                    foreach(var asset in Pbind.Assets)
+                    foreach(Asset asset in Pbind.Assets)
                     {
                         ExternalFileSaved(String.Format("{0}/{1}", Directory, asset.Files[0].FullFileName));
-                        SaveFile(asset.Files[0].EmpFile.SaveToBytes(ParserMode.Tool), String.Format("{0}/{1}", Directory, asset.Files[0].FullFileName));
+                        SaveFile(asset.Files[0].EmpFile.SaveToBytes(), string.Format("{0}/{1}", Directory, asset.Files[0].FullFileName));
                     }
                 }
 
@@ -877,21 +856,21 @@ namespace Xv2CoreLib.EffectContainer
             {
                 if (!Tbind.LooseFiles)
                 {
-                    ExternalFileSaved(String.Format("{0}/{1}", Directory, Tbind.File1_Name));
-                    SaveFile(Tbind.File1_Ref.SaveToBytes(), String.Format("{0}/{1}", Directory, Tbind.File1_Name));
+                    ExternalFileSaved(string.Format("{0}/{1}", Directory, Tbind.File1_Name));
+                    SaveFile(Tbind.File1_Ref.SaveToBytes(), string.Format("{0}/{1}", Directory, Tbind.File1_Name));
                 }
-                ExternalFileSaved(String.Format("{0}/{1}", Directory, Tbind.File2_Name));
-                ExternalFileSaved(String.Format("{0}/{1}", Directory, Tbind.File3_Name));
-                SaveFile(Tbind.File2_Ref.SaveToBytes(), String.Format("{0}/{1}", Directory, Tbind.File2_Name));
-                SaveFile(Tbind.File3_Ref.SaveToBytes(), String.Format("{0}/{1}", Directory, Tbind.File3_Name));
+                ExternalFileSaved(string.Format("{0}/{1}", Directory, Tbind.File2_Name));
+                ExternalFileSaved(string.Format("{0}/{1}", Directory, Tbind.File3_Name));
+                SaveFile(Tbind.File2_Ref.SaveToBytes(), string.Format("{0}/{1}", Directory, Tbind.File2_Name));
+                SaveFile(Tbind.File3_Ref.SaveToBytes(), string.Format("{0}/{1}", Directory, Tbind.File3_Name));
                 
                 //Lose files
                 if (Tbind.LooseFiles)
                 {
-                    foreach (var asset in Tbind.Assets)
+                    foreach (Asset asset in Tbind.Assets)
                     {
-                        ExternalFileSaved(String.Format("{0}/{1}", Directory, asset.Files[0].FullFileName));
-                        SaveFile(asset.Files[0].EtrFile.Save(false), String.Format("{0}/{1}", Directory, asset.Files[0].FullFileName));
+                        ExternalFileSaved(string.Format("{0}/{1}", Directory, asset.Files[0].FullFileName));
+                        SaveFile(asset.Files[0].EtrFile.Save(false), string.Format("{0}/{1}", Directory, asset.Files[0].FullFileName));
                     }
                 }
             }
@@ -900,17 +879,17 @@ namespace Xv2CoreLib.EffectContainer
             {
                 if (!Cbind.LooseFiles)
                 {
-                    ExternalFileSaved(String.Format("{0}/{1}", Directory, Cbind.File1_Name));
-                    SaveFile(Cbind.File1_Ref.SaveToBytes(), String.Format("{0}/{1}", Directory, Cbind.File1_Name));
+                    ExternalFileSaved(string.Format("{0}/{1}", Directory, Cbind.File1_Name));
+                    SaveFile(Cbind.File1_Ref.SaveToBytes(), string.Format("{0}/{1}", Directory, Cbind.File1_Name));
                 }
 
                 //Lose files
                 if (Cbind.LooseFiles)
                 {
-                    foreach (var asset in Cbind.Assets)
+                    foreach (Asset asset in Cbind.Assets)
                     {
-                        ExternalFileSaved(String.Format("{0}/{1}", Directory, asset.Files[0].FullFileName));
-                        SaveFile(asset.Files[0].EcfFile.SaveToBytes(), String.Format("{0}/{1}", Directory, asset.Files[0].FullFileName));
+                        ExternalFileSaved(string.Format("{0}/{1}", Directory, asset.Files[0].FullFileName));
+                        SaveFile(asset.Files[0].EcfFile.SaveToBytes(), string.Format("{0}/{1}", Directory, asset.Files[0].FullFileName));
                     }
                 }
             }
@@ -919,27 +898,27 @@ namespace Xv2CoreLib.EffectContainer
             {
                 if (Emo.LooseFiles)
                 {
-                    foreach(var asset in Emo.Assets)
+                    foreach(Asset asset in Emo.Assets)
                     {
                         foreach(var file in asset.Files)
                         {
                             if(file.HasValidData() && file.FullFileName != "NULL")
                             {
-                                ExternalFileSaved(String.Format("{0}/{1}", Directory, file.FullFileName));
+                                ExternalFileSaved(string.Format("{0}/{1}", Directory, file.FullFileName));
 
                                 switch (file.fileType)
                                 {
                                     case EffectFile.FileType.EMM:
-                                        SaveFile(file.EmmFile.SaveToBytes(), String.Format("{0}/{1}", Directory, file.FullFileName));
+                                        SaveFile(file.EmmFile.SaveToBytes(), string.Format("{0}/{1}", Directory, file.FullFileName));
                                         break;
                                     case EffectFile.FileType.EMB:
-                                        SaveFile(file.EmbFile.SaveToBytes(), String.Format("{0}/{1}", Directory, file.FullFileName));
+                                        SaveFile(file.EmbFile.SaveToBytes(), string.Format("{0}/{1}", Directory, file.FullFileName));
                                         break;
                                     case EffectFile.FileType.EMA:
-                                        SaveFile(file.EmaFile.Write(), String.Format("{0}/{1}", Directory, file.FullFileName));
+                                        SaveFile(file.EmaFile.Write(), string.Format("{0}/{1}", Directory, file.FullFileName));
                                         break;
                                     default:
-                                        SaveFile(file.Bytes, String.Format("{0}/{1}", Directory, file.FullFileName));
+                                        SaveFile(file.Bytes, string.Format("{0}/{1}", Directory, file.FullFileName));
                                         break;
                                 }
                             }
@@ -956,27 +935,27 @@ namespace Xv2CoreLib.EffectContainer
             {
                 if (LightEma.LooseFiles)
                 {
-                    foreach (var asset in LightEma.Assets)
+                    foreach (Asset asset in LightEma.Assets)
                     {
-                        foreach (var file in asset.Files)
+                        foreach (EffectFile file in asset.Files)
                         {
                             if(file.fileType == EffectFile.FileType.EMA)
                             {
-                                ExternalFileSaved(String.Format("{0}/{1}", Directory, file.FullFileName));
-                                SaveFile(file.EmaFile.Write(), String.Format("{0}/{1}", Directory, file.FullFileName));
+                                ExternalFileSaved(string.Format("{0}/{1}", Directory, file.FullFileName));
+                                SaveFile(file.EmaFile.Write(), string.Format("{0}/{1}", Directory, file.FullFileName));
                             }
                             else if (file.Bytes != null && file.FullFileName != "NULL")
                             {
-                                ExternalFileSaved(String.Format("{0}/{1}", Directory, file.FullFileName));
-                                SaveFile(file.Bytes, String.Format("{0}/{1}", Directory, file.FullFileName));
+                                ExternalFileSaved(string.Format("{0}/{1}", Directory, file.FullFileName));
+                                SaveFile(file.Bytes, string.Format("{0}/{1}", Directory, file.FullFileName));
                             }
                         }
                     }
                 }
                 else if(!LightEma.LooseFiles)
                 {
-                    ExternalFileSaved(String.Format("{0}/{1}", Directory, LightEma.File1_Name));
-                    SaveFile(LightEma.File1_Ref.SaveToBytes(), String.Format("{0}/{1}", Directory, LightEma.File1_Name));
+                    ExternalFileSaved(string.Format("{0}/{1}", Directory, LightEma.File1_Name));
+                    SaveFile(LightEma.File1_Ref.SaveToBytes(), string.Format("{0}/{1}", Directory, LightEma.File1_Name));
                 }
             }
 
@@ -992,8 +971,8 @@ namespace Xv2CoreLib.EffectContainer
 
                 foreach(var asset in Pbind.Assets)
                 {
-                    byte[] bytes = asset.Files[0].EmpFile.SaveToBytes(ParserMode.Tool);
-                    Pbind.File1_Ref.Entry.Add(new EMB_CLASS.EmbEntry()
+                    byte[] bytes = asset.Files[0].EmpFile.SaveToBytes();
+                    Pbind.File1_Ref.Entry.Add(new EmbEntry()
                     {
                         Data = bytes,
                         Name = asset.Files[0].FullFileName
@@ -1009,7 +988,7 @@ namespace Xv2CoreLib.EffectContainer
                 foreach (var asset in Tbind.Assets)
                 {
                     byte[] bytes = asset.Files[0].EtrFile.Save(false);
-                    Tbind.File1_Ref.Entry.Add(new EMB_CLASS.EmbEntry()
+                    Tbind.File1_Ref.Entry.Add(new EmbEntry()
                     {
                         Data = bytes,
                         Name = asset.Files[0].FullFileName
@@ -1025,7 +1004,7 @@ namespace Xv2CoreLib.EffectContainer
                 foreach (var asset in Cbind.Assets)
                 {
                     byte[] bytes = asset.Files[0].EcfFile.SaveToBytes();
-                    Cbind.File1_Ref.Entry.Add(new EMB_CLASS.EmbEntry()
+                    Cbind.File1_Ref.Entry.Add(new EmbEntry()
                     {
                         Data = bytes,
                         Name = asset.Files[0].FullFileName
@@ -1042,7 +1021,7 @@ namespace Xv2CoreLib.EffectContainer
                 {
                     if(asset.Files[0].fileType == EffectFile.FileType.EMA)
                     {
-                        LightEma.File1_Ref.Entry.Add(new EMB_CLASS.EmbEntry()
+                        LightEma.File1_Ref.Entry.Add(new EmbEntry()
                         {
                             Data = asset.Files[0].EmaFile.Write(),
                             Name = asset.Files[0].FullFileName
@@ -1051,7 +1030,7 @@ namespace Xv2CoreLib.EffectContainer
                     else
                     {
                         byte[] bytes = asset.Files[0].Bytes;
-                        LightEma.File1_Ref.Entry.Add(new EMB_CLASS.EmbEntry()
+                        LightEma.File1_Ref.Entry.Add(new EmbEntry()
                         {
                             Data = bytes,
                             Name = asset.Files[0].FullFileName
@@ -1248,30 +1227,18 @@ namespace Xv2CoreLib.EffectContainer
                     EMP_File empFile = empAsset.Files[0].EmpFile;
 
                     //Materials
-                    foreach(var empEntry in empFile.ParticleEffects)
-                    {
-                        if(empEntry.Type_Texture != null)
-                        {
-                            empEntry.Type_Texture.MaterialRef = (empEntry.Type_Texture.I_16 != ushort.MaxValue) ? Pbind.File2_Ref.GetEntry(empEntry.Type_Texture.I_16) : null;
-                        }
-
-                        if(empEntry.ChildParticleEffects != null)
-                        {
-                            PbindLinkTextureAndMaterial_Recursive(empEntry.ChildParticleEffects);
-                        }
-
-                    }
+                    PbindLinkTextureAndMaterial_Recursive(empFile.ParticleNodes);
 
                     //Textures
-                    foreach (var empTexture in empFile.Textures)
+                    foreach (EMP_TextureSamplerDef empTexture in empFile.Textures)
                     {
-                        if(empTexture.I_01 >= byte.MinValue && empTexture.I_01 < sbyte.MaxValue + 1)
+                        if(empTexture.EmbIndex >= byte.MinValue && empTexture.EmbIndex < sbyte.MaxValue + 1)
                         {
-                            empTexture.TextureRef = Pbind.File3_Ref.GetEntry(empTexture.I_01);
+                            empTexture.TextureRef = Pbind.File3_Ref.GetEntry(empTexture.EmbIndex);
                         }
-                        else if(empTexture.I_01 != byte.MaxValue)
+                        else if(empTexture.EmbIndex != byte.MaxValue)
                         {
-                            throw new IndexOutOfRangeException(String.Format("PbindLinkTextureAndMaterial: EMB_Index is out of range ({0}).\n\nptcl.emb can only have a maximum of 128 textures.", empTexture.I_01));
+                            throw new IndexOutOfRangeException(String.Format("PbindLinkTextureAndMaterial: EMB_Index is out of range ({0}).\n\nptcl.emb can only have a maximum of 128 textures.", empTexture.EmbIndex));
                         }
                     }
                     
@@ -1280,18 +1247,18 @@ namespace Xv2CoreLib.EffectContainer
             }
         }
 
-        private void PbindLinkTextureAndMaterial_Recursive(IList<ParticleEffect> childrenParticleEffects)
+        private void PbindLinkTextureAndMaterial_Recursive(IList<ParticleNode> particleNodes)
         {
-            foreach (var empEntry in childrenParticleEffects)
+            foreach (ParticleNode empEntry in particleNodes)
             {
-                if (empEntry.Type_Texture != null)
+                if (empEntry.NodeType == ParticleNodeType.Emission)
                 {
-                    empEntry.Type_Texture.MaterialRef = (empEntry.Type_Texture.I_16 != ushort.MaxValue) ? Pbind.File2_Ref.GetEntry(empEntry.Type_Texture.I_16) : null;
+                    empEntry.EmissionNode.Texture.MaterialRef = (empEntry.EmissionNode.Texture.MaterialID != ushort.MaxValue) ? Pbind.File2_Ref.GetEntry(empEntry.EmissionNode.Texture.MaterialID) : null;
                 }
 
-                if (empEntry.ChildParticleEffects != null)
+                if (empEntry.ChildParticleNodes != null)
                 {
-                    PbindLinkTextureAndMaterial_Recursive(empEntry.ChildParticleEffects);
+                    PbindLinkTextureAndMaterial_Recursive(empEntry.ChildParticleNodes);
                 }
             }
         }
@@ -1359,26 +1326,7 @@ namespace Xv2CoreLib.EffectContainer
                     EMP_File empFile = empAsset.Files[0].EmpFile;
 
                     //Materials
-                    foreach (var empEntry in empFile.ParticleEffects)
-                    {
-                        if (empEntry.Type_Texture != null)
-                        {
-                            int matIdx = Pbind.File2_Ref.Materials.IndexOf(empEntry.Type_Texture.MaterialRef);
-
-                            if(matIdx == -1 && empEntry.Type_Texture.MaterialRef != null)
-                            {
-                                throw new InvalidOperationException("PbindSetTextureAndMaterialIndex: material not found.");
-                            }
-
-                            empEntry.Type_Texture.I_16 = (matIdx != -1) ? (ushort)matIdx : ushort.MaxValue;
-                        }
-
-                        if (empEntry.ChildParticleEffects != null)
-                        {
-                            PbindSetTextureAndMaterialIndex_Recursive(empEntry.ChildParticleEffects);
-                        }
-
-                    }
+                    PbindSetTextureAndMaterialIndex_Recursive(empFile.ParticleNodes);
 
                     //Textures
                     foreach (var empTexture in empFile.Textures)
@@ -1393,12 +1341,12 @@ namespace Xv2CoreLib.EffectContainer
                                 throw new InvalidOperationException("PbindSetTextureAndMaterialIndex: texture not found.");
                             }
 
-                            empTexture.I_01 = (byte)textureIdx;
+                            empTexture.EmbIndex = (byte)textureIdx;
                         }
                         else
                         {
                             //No assigned texture. 
-                            empTexture.I_01 = byte.MaxValue;
+                            empTexture.EmbIndex = byte.MaxValue;
                         }
                     }
 
@@ -1407,25 +1355,25 @@ namespace Xv2CoreLib.EffectContainer
             }
         }
 
-        private void PbindSetTextureAndMaterialIndex_Recursive(IList<ParticleEffect> childrenParticleEffects)
+        private void PbindSetTextureAndMaterialIndex_Recursive(IList<ParticleNode> childrenParticleEffects)
         {
-            foreach (var empEntry in childrenParticleEffects)
+            foreach (ParticleNode empEntry in childrenParticleEffects)
             {
-                if (empEntry.Type_Texture != null)
+                if (empEntry.NodeType == ParticleNodeType.Emission)
                 {
-                    int matIdx = Pbind.File2_Ref.Materials.IndexOf(empEntry.Type_Texture.MaterialRef);
+                    int matIdx = Pbind.File2_Ref.Materials.IndexOf(empEntry.EmissionNode.Texture.MaterialRef);
 
-                    if (matIdx == -1 && empEntry.Type_Texture.MaterialRef != null)
+                    if (matIdx == -1 && empEntry.EmissionNode.Texture.MaterialRef != null)
                     {
                         throw new InvalidOperationException("PbindSetTextureAndMaterialIndex_Recursive: material not found.");
                     }
 
-                    empEntry.Type_Texture.I_16 = (matIdx != -1) ? (ushort)matIdx : ushort.MaxValue;
+                    empEntry.EmissionNode.Texture.MaterialID = (matIdx != -1) ? (ushort)matIdx : ushort.MaxValue;
                 }
 
-                if (empEntry.ChildParticleEffects != null)
+                if (empEntry.ChildParticleNodes != null)
                 {
-                    PbindSetTextureAndMaterialIndex_Recursive(empEntry.ChildParticleEffects);
+                    PbindSetTextureAndMaterialIndex_Recursive(empEntry.ChildParticleNodes);
                 }
             }
         }
@@ -2164,7 +2112,7 @@ namespace Xv2CoreLib.EffectContainer
             if (Pbind != null)
             {
                 int index = 0;
-                foreach (var empAsset in Pbind.Assets)
+                foreach (Asset empAsset in Pbind.Assets)
                 {
                     //Validation
                     if (empAsset.Files.Count < 1)
@@ -2190,30 +2138,18 @@ namespace Xv2CoreLib.EffectContainer
                     EMB_File embFile = Pbind.File3_Ref;
 
                     //Materials
-                    foreach (var empEntry in empFile.ParticleEffects)
-                    {
-                        if (empEntry.Type_Texture != null)
-                        {
-                            empEntry.Type_Texture.MaterialRef = (empEntry.Type_Texture.I_16 != ushort.MaxValue) ? emmFile.GetEntry(empEntry.Type_Texture.I_16) : null;
-                        }
-
-                        if (empEntry.ChildParticleEffects != null)
-                        {
-                            SDBH_PbindLinkTextureAndMaterial_Recursive(empEntry.ChildParticleEffects, emmFile);
-                        }
-
-                    }
+                    SDBH_PbindLinkTextureAndMaterial_Recursive(empFile.ParticleNodes, emmFile);
 
                     //Textures
                     foreach (var empTexture in empFile.Textures)
                     {
-                        if (empTexture.I_01 >= byte.MinValue && empTexture.I_01 < sbyte.MaxValue + 1)
+                        if (empTexture.EmbIndex >= byte.MinValue && empTexture.EmbIndex < sbyte.MaxValue + 1)
                         {
-                            empTexture.TextureRef = embFile.GetEntry(empTexture.I_01);
+                            empTexture.TextureRef = embFile.GetEntry(empTexture.EmbIndex);
                         }
-                        else if (empTexture.I_01 != byte.MaxValue)
+                        else if (empTexture.EmbIndex != byte.MaxValue)
                         {
-                            throw new IndexOutOfRangeException(String.Format("SDBH_PbindLinkTextureAndMaterial: EMB_Index is out of range ({0}).\n\nptcl.emb can only have a maximum of 128 textures.", empTexture.I_01));
+                            throw new IndexOutOfRangeException(String.Format("SDBH_PbindLinkTextureAndMaterial: EMB_Index is out of range ({0}).\n\nptcl.emb can only have a maximum of 128 textures.", empTexture.EmbIndex));
                         }
                     }
 
@@ -2222,18 +2158,18 @@ namespace Xv2CoreLib.EffectContainer
             }
         }
 
-        private void SDBH_PbindLinkTextureAndMaterial_Recursive(AsyncObservableCollection<ParticleEffect> childrenParticleEffects, EMM_File emmFile)
+        private void SDBH_PbindLinkTextureAndMaterial_Recursive(AsyncObservableCollection<ParticleNode> particleNodes, EMM_File emmFile)
         {
-            foreach (var empEntry in childrenParticleEffects)
+            foreach (ParticleNode empEntry in particleNodes)
             {
-                if (empEntry.Type_Texture != null)
+                if (empEntry.NodeType == ParticleNodeType.Emission)
                 {
-                    empEntry.Type_Texture.MaterialRef = (empEntry.Type_Texture.I_16 != ushort.MaxValue) ? emmFile.GetEntry(empEntry.Type_Texture.I_16) : null;
+                    empEntry.EmissionNode.Texture.MaterialRef = (empEntry.EmissionNode.Texture.MaterialID != ushort.MaxValue) ? emmFile.GetEntry(empEntry.EmissionNode.Texture.MaterialID) : null;
                 }
 
-                if (empEntry.ChildParticleEffects != null)
+                if (empEntry.ChildParticleNodes != null)
                 {
-                    SDBH_PbindLinkTextureAndMaterial_Recursive(empEntry.ChildParticleEffects, emmFile);
+                    SDBH_PbindLinkTextureAndMaterial_Recursive(empEntry.ChildParticleNodes, emmFile);
                 }
             }
         }
@@ -2349,7 +2285,7 @@ namespace Xv2CoreLib.EffectContainer
 
             container.Assets.Remove(asset);
         }
-        
+
 
         //SUPER TEXTURES:
         /// <summary>
@@ -2363,7 +2299,7 @@ namespace Xv2CoreLib.EffectContainer
             var embEntries = new List<EmbEntry>(Pbind.File3_Ref.Entry);
 
             //Remove all repeating textures
-            embEntries.RemoveAll(x => EMP_TextureDefinition.IsRepeatingTexture(x, Pbind));
+            embEntries.RemoveAll(x => EMP_TextureSamplerDef.IsRepeatingTexture(x, Pbind));
 
             //All textures, ordered by their highest dimension (lowest first)
             List<WriteableBitmap> textures = EmbEntry.GetBitmaps(embEntries);
@@ -2687,9 +2623,9 @@ namespace Xv2CoreLib.EffectContainer
         public string File3_Name { get; set; } //Texture emb (trc, ptcl)
 
         //References to the emb/emm files (for pbind, tbind and cbind only)
-        public EMB_File File1_Ref = null;
-        public EMM_File File2_Ref = null;
-        public EMB_File File3_Ref = null;
+        public EMB_File File1_Ref { get; set; }
+        public EMM_File File2_Ref { get; set; }
+        public EMB_File File3_Ref { get; set; }
 
         private AsyncObservableCollection<Asset> _assetsValue = null;
         public AsyncObservableCollection<Asset> Assets
@@ -2944,24 +2880,7 @@ namespace Xv2CoreLib.EffectContainer
             {
                 if (ContainerAssetType == AssetType.PBIND)
                 {
-                    foreach (var particle in asset.Files[0].EmpFile.ParticleEffects)
-                    {
-                        if (particle.Type_Texture != null)
-                        {
-                            if (particle.Type_Texture.MaterialRef == material)
-                            {
-                                if (!materialUsedBy.Contains(asset.FileNamesPreviewWithExtension))
-                                {
-                                    materialUsedBy.Add(asset.FileNamesPreviewWithExtension);
-                                }
-                            }
-                        }
-
-                        if (particle.ChildParticleEffects != null)
-                        {
-                            MaterialUsedBy_Recursive(particle.ChildParticleEffects, material, materialUsedBy, asset.FileNamesPreviewWithExtension);
-                        }
-                    }
+                    MaterialUsedBy_Recursive(asset.Files[0].EmpFile.ParticleNodes, material, materialUsedBy, asset.FileNamesPreviewWithExtension);
                 }
                 else if (ContainerAssetType == AssetType.TBIND)
                 {
@@ -2981,13 +2900,13 @@ namespace Xv2CoreLib.EffectContainer
             return materialUsedBy;
         }
 
-        private void MaterialUsedBy_Recursive(IList<ParticleEffect> childParticleEffects, EmmMaterial material, List<string> textureUsedBy, string fileName)
+        private void MaterialUsedBy_Recursive(IList<ParticleNode> childParticleEffects, EmmMaterial material, List<string> textureUsedBy, string fileName)
         {
             foreach (var particle in childParticleEffects)
             {
-                if (particle.Type_Texture != null)
+                if (particle.NodeType == ParticleNodeType.Emission)
                 {
-                    if (particle.Type_Texture.MaterialRef == material)
+                    if (particle.EmissionNode.Texture.MaterialRef == material)
                     {
                         if (!textureUsedBy.Contains(fileName))
                         {
@@ -2996,9 +2915,9 @@ namespace Xv2CoreLib.EffectContainer
                     }
                 }
 
-                if (particle.ChildParticleEffects != null)
+                if (particle.ChildParticleNodes != null)
                 {
-                    MaterialUsedBy_Recursive(particle.ChildParticleEffects, material, textureUsedBy, fileName);
+                    MaterialUsedBy_Recursive(particle.ChildParticleNodes, material, textureUsedBy, fileName);
                 }
             }
         }
@@ -3044,23 +2963,8 @@ namespace Xv2CoreLib.EffectContainer
             {
                 if (ContainerAssetType == AssetType.PBIND)
                 {
-                    foreach (var mat in asset.Files[0].EmpFile.ParticleEffects)
-                    {
-                        if (mat.Type_Texture != null)
-                        {
-                            if (mat.Type_Texture.MaterialRef == material)
-                            {
-                                return true;
-                            }
-                        }
-                        if (mat.ChildParticleEffects != null)
-                        {
-                            if (IsMaterialUsed_Recursive(mat.ChildParticleEffects, material))
-                            {
-                                return true;
-                            }
-                        }
-                    }
+                    if (IsMaterialUsed_Recursive(asset.Files[0].EmpFile.ParticleNodes, material))
+                        return true;
                 }
                 else if (ContainerAssetType == AssetType.TBIND)
                 {
@@ -3077,21 +2981,18 @@ namespace Xv2CoreLib.EffectContainer
             return false;
         }
 
-        private bool IsMaterialUsed_Recursive(IList<ParticleEffect> childParticleEffects, EmmMaterial material)
+        private bool IsMaterialUsed_Recursive(IList<ParticleNode> childParticleEffects, EmmMaterial material)
         {
             foreach (var mat in childParticleEffects)
             {
-                if (mat.Type_Texture != null)
+                if (mat.EmissionNode.Texture.MaterialRef == material)
                 {
-                    if (mat.Type_Texture.MaterialRef == material)
-                    {
-                        return true;
-                    }
+                    return true;
                 }
 
-                if (mat.ChildParticleEffects != null)
+                if (mat.ChildParticleNodes != null)
                 {
-                    if (IsMaterialUsed_Recursive(mat.ChildParticleEffects, material))
+                    if (IsMaterialUsed_Recursive(mat.ChildParticleNodes, material))
                     {
                         return true;
                     }
@@ -3128,9 +3029,9 @@ namespace Xv2CoreLib.EffectContainer
             return null;
         }
 
-        public List<EMP_TextureDefinition> GetAllTextureDefinitions(EmbEntry embEntry)
+        public List<EMP_TextureSamplerDef> GetAllTextureDefinitions(EmbEntry embEntry)
         {
-            List<EMP_TextureDefinition> textures = new List<EMP_TextureDefinition>();
+            List<EMP_TextureSamplerDef> textures = new List<EMP_TextureSamplerDef>();
 
             foreach(var asset in Assets)
             {
@@ -3146,7 +3047,7 @@ namespace Xv2CoreLib.EffectContainer
 
             return textures;
         }
-        
+
         public bool SuperTexture_IsTextureUsedByUnallowedType(WriteableBitmap bitmap)
         {
             foreach (var asset in Assets)
@@ -3157,9 +3058,9 @@ namespace Xv2CoreLib.EffectContainer
                     {
                         if (textureDef.TextureRef?.Texture == bitmap)
                         {
-                            if (textureDef.TextureType == EMP_TextureDefinition.TextureAnimationType.Speed 
-                                || textureDef.I_06_byte == EMP_TextureDefinition.TextureRepitition.Mirror || textureDef.I_07_byte == EMP_TextureDefinition.TextureRepitition.Mirror 
-                                || textureDef.I_06_byte == EMP_TextureDefinition.TextureRepitition.Clamp || textureDef.I_07_byte == EMP_TextureDefinition.TextureRepitition.Clamp)
+                            if (textureDef.ScrollState.ScrollType == EMP_ScrollState.ScrollTypeEnum.Speed
+                                || textureDef.RepetitionU == EMP_TextureSamplerDef.TextureRepitition.Mirror || textureDef.RepetitionV == EMP_TextureSamplerDef.TextureRepitition.Mirror
+                                || textureDef.RepetitionU == EMP_TextureSamplerDef.TextureRepitition.Clamp || textureDef.RepetitionV == EMP_TextureSamplerDef.TextureRepitition.Clamp)
                             {
                                 return true;
                             }
@@ -3287,7 +3188,7 @@ namespace Xv2CoreLib.EffectContainer
                 throw new InvalidOperationException("AddPbindDependencies(EMP_File empFile): empFile was null.");
             }
 
-            foreach (var texture in empFile.Textures)
+            foreach (EMP_TextureSamplerDef texture in empFile.Textures)
             {
                 if (texture.TextureRef != null)
                 {
@@ -3319,38 +3220,38 @@ namespace Xv2CoreLib.EffectContainer
             }
 
             //Particle effects (recursive)
-            AddPbindDependencies_Recursive(empFile.ParticleEffects, undos);
+            AddPbindDependencies_Recursive(empFile.ParticleNodes, undos);
 
         }
 
-        private void AddPbindDependencies_Recursive(IList<ParticleEffect> childrenParticleEffects, List<IUndoRedo> undos)
+        private void AddPbindDependencies_Recursive(IList<ParticleNode> childrenParticleEffects, List<IUndoRedo> undos)
         {
-            foreach (var particleEffect in childrenParticleEffects)
+            foreach (ParticleNode particleEffect in childrenParticleEffects)
             {
-                if (particleEffect.Type_Texture != null)
+                if (particleEffect.NodeType == ParticleNodeType.Emission)
                 {
-                    if (particleEffect.Type_Texture.MaterialRef != null)
+                    if (particleEffect.EmissionNode.Texture.MaterialRef != null)
                     {
-                        var ret = File2_Ref.Compare(particleEffect.Type_Texture.MaterialRef);
+                        EmmMaterial ret = File2_Ref.Compare(particleEffect.EmissionNode.Texture.MaterialRef);
 
                         if (ret == null)
                         {
                             //No identical material was found, so add it
-                            particleEffect.Type_Texture.MaterialRef.Name = File2_Ref.GetUnusedName(particleEffect.Type_Texture.MaterialRef.Name); //Regenerate the name
-                            File2_Ref.Materials.Add(particleEffect.Type_Texture.MaterialRef);
-                            undos?.Add(new UndoableListAdd<EmmMaterial>(File2_Ref.Materials, particleEffect.Type_Texture.MaterialRef));
+                            particleEffect.EmissionNode.Texture.MaterialRef.Name = File2_Ref.GetUnusedName(particleEffect.EmissionNode.Texture.MaterialRef.Name); //Regenerate the name
+                            File2_Ref.Materials.Add(particleEffect.EmissionNode.Texture.MaterialRef);
+                            undos?.Add(new UndoableListAdd<EmmMaterial>(File2_Ref.Materials, particleEffect.EmissionNode.Texture.MaterialRef));
                         }
                         else
                         {
                             //An identical material was found, so use that instead
-                            particleEffect.Type_Texture.MaterialRef = ret;
+                            particleEffect.EmissionNode.Texture.MaterialRef = ret;
                         }
                     }
                 }
 
-                if (particleEffect.ChildParticleEffects != null)
+                if (particleEffect.ChildParticleNodes != null)
                 {
-                    AddPbindDependencies_Recursive(particleEffect.ChildParticleEffects, undos);
+                    AddPbindDependencies_Recursive(particleEffect.ChildParticleNodes, undos);
                 }
             }
         }
@@ -3416,6 +3317,67 @@ namespace Xv2CoreLib.EffectContainer
             }
         }
 
+        public void AddPbindDependencies(ParticleNode node, EMP_File empFile, List<IUndoRedo> undos)
+        {
+            //Import Materials
+            if(node.EmissionNode.Texture.MaterialRef != null)
+            {
+                if (!File2_Ref.Materials.Contains(node.EmissionNode.Texture.MaterialRef))
+                {
+                    EmmMaterial result = File2_Ref.Compare(node.EmissionNode.Texture.MaterialRef, true);
+
+                    if (result == null)
+                    {
+                        //Material didn't exist so we have to add it
+                        node.EmissionNode.Texture.MaterialRef.Name = File2_Ref.GetUnusedName(node.EmissionNode.Texture.MaterialRef.Name);
+                        undos.Add(new UndoableListAdd<EmmMaterial>(File2_Ref.Materials, node.EmissionNode.Texture.MaterialRef));
+                        File2_Ref.Materials.Add(node.EmissionNode.Texture.MaterialRef);
+                    }
+                    else if (result != node.EmissionNode.Texture.MaterialRef)
+                    {
+                        //A identical material already existed but it was a different instance.
+                        //Change the referenced material to this.
+                        node.EmissionNode.Texture.MaterialRef = result;
+                    }
+                }
+            }
+
+            //Import Textures
+            foreach (TextureEntry_Ref texture in node.EmissionNode.Texture.TextureEntryRef.Where(x => x.TextureRef != null))
+            {
+                EMP_TextureSamplerDef newTex = empFile.GetTexture(texture.TextureRef);
+
+                if (newTex == null)
+                {
+                    //Create new texture entry:
+                    //Clone texture def - needed to break link with any instances in other EMP files
+                    newTex = texture.TextureRef.Clone();
+                    undos.Add(new UndoablePropertyGeneric(nameof(texture.TextureRef), texture, texture.TextureRef, newTex));
+                    texture.TextureRef = newTex;
+
+                    undos.Add(new UndoableListAdd<EmbEntry>(File3_Ref.Entry, texture.TextureRef.TextureRef));
+                    texture.TextureRef.TextureRef = File3_Ref.Add(texture.TextureRef.TextureRef);
+
+                    //Add the texture
+                    undos.Add(new UndoableListAdd<EMP_TextureSamplerDef>(empFile.Textures, texture.TextureRef));
+                    empFile.Textures.Add(texture.TextureRef);
+                }
+                else
+                {
+                    //An identical texture was found, so set that as the ref
+                    texture.TextureRef = newTex;
+                }
+            }
+
+            //Recursively call this method again if this node has children
+            if (node.ChildParticleNodes != null)
+            {
+                foreach (ParticleNode child in node.ChildParticleNodes)
+                {
+                    AddPbindDependencies(child, empFile, undos);
+                }
+            }
+        }
         #endregion
 
         #region Editor
@@ -3567,11 +3529,11 @@ namespace Xv2CoreLib.EffectContainer
             if (ContainerAssetType != AssetType.PBIND) throw new InvalidOperationException("MergeIntoSuperTexture_PBIND: SuperTexture feature is only available for PBIND container type.");
             if (undos == null) undos = new List<IUndoRedo>();
 
-            var bitmaps = EmbEntry.GetBitmaps(embEntries);
+            List<WriteableBitmap> bitmaps = EmbEntry.GetBitmaps(embEntries);
             double maxDimension = EmbEntry.HighestDimension(bitmaps);
             int textureSize = (int)EmbEntry.SelectTextureSize(maxDimension, bitmaps.Count);
 
-            var superTexture = new WriteableBitmap(textureSize, textureSize, 96, 96, PixelFormats.Bgra32, null);
+            WriteableBitmap superTexture = new WriteableBitmap(textureSize, textureSize, 96, 96, PixelFormats.Bgra32, null);
             EmbEntry newEmbEntry = new EmbEntry();
             newEmbEntry.ImageFormat = CSharpImageLibrary.ImageEngineFormat.DDS_DXT5;
             newEmbEntry.Texture = superTexture;
@@ -3593,52 +3555,52 @@ namespace Xv2CoreLib.EffectContainer
                 superTexture.Blit(destRect, bitmaps[i], sourceRect);
 
                 //Update EMP Texture cordinates
-                List<EMP_TextureDefinition> textureDefs = GetAllTextureDefinitions(embEntries[i]);
+                List<EMP_TextureSamplerDef> textureDefs = GetAllTextureDefinitions(embEntries[i]);
 
                 double a = textureSize / maxDimension;
 
-                foreach (var textureDef in textureDefs)
+                foreach (EMP_TextureSamplerDef textureDef in textureDefs)
                 {
-                    undos.Add(new UndoableProperty<EMP_TextureDefinition>(nameof(EMP_TextureDefinition.TextureRef), textureDef, textureDef.TextureRef, newEmbEntry));
+                    undos.Add(new UndoableProperty<EMP_TextureSamplerDef>(nameof(EMP_TextureSamplerDef.TextureRef), textureDef, textureDef.TextureRef, newEmbEntry));
                     textureDef.TextureRef = newEmbEntry;
 
                     //If SpriteSheet or Static and not TextureRepetition == Mirror
-                    if ((textureDef.TextureType == EMP_TextureDefinition.TextureAnimationType.SpriteSheet || textureDef.TextureType == EMP_TextureDefinition.TextureAnimationType.Static) &&
-                        (textureDef.I_06_byte != EMP_TextureDefinition.TextureRepitition.Mirror && textureDef.I_07_byte != EMP_TextureDefinition.TextureRepitition.Mirror))
+                    if ((textureDef.ScrollState.ScrollType == EMP_ScrollState.ScrollTypeEnum.SpriteSheet || textureDef.ScrollState.ScrollType == EMP_ScrollState.ScrollTypeEnum.Static) &&
+                        textureDef.RepetitionU != EMP_TextureSamplerDef.TextureRepitition.Mirror && textureDef.RepetitionV != EMP_TextureSamplerDef.TextureRepitition.Mirror)
                     {
 
                         //If no keyframe exists, then create a default one. (Some EMPs are like this, for some weird reason????)
-                        if (textureDef.SubData2.Keyframes.Count == 0)
+                        if (textureDef.ScrollState.Keyframes.Count == 0)
                         {
-                            SubData_2_Entry newKeyframe = new SubData_2_Entry();
-                            newKeyframe.ScaleX = 1f;
-                            newKeyframe.ScaleY = 1f;
-                            textureDef.SubData2.Keyframes.Add(newKeyframe);
-                            undos.Add(new UndoableListAdd<SubData_2_Entry>(textureDef.SubData2.Keyframes, newKeyframe));
+                            EMP_ScrollKeyframe newKeyframe = new EMP_ScrollKeyframe();
+                            newKeyframe.ScaleU = 1f;
+                            newKeyframe.ScaleV = 1f;
+                            textureDef.ScrollState.Keyframes.Add(newKeyframe);
+                            undos.Add(new UndoableListAdd<EMP_ScrollKeyframe>(textureDef.ScrollState.Keyframes, newKeyframe));
 
-                            if (textureDef.TextureType == EMP_TextureDefinition.TextureAnimationType.SpriteSheet)
+                            if (textureDef.ScrollState.ScrollType == EMP_ScrollState.ScrollTypeEnum.SpriteSheet)
                             {
-                                textureDef.TextureType = EMP_TextureDefinition.TextureAnimationType.Static;
-                                undos.Add(new UndoableProperty<EMP_TextureDefinition>(nameof(EMP_TextureDefinition.TextureType), textureDef, EMP_TextureDefinition.TextureAnimationType.SpriteSheet, EMP_TextureDefinition.TextureAnimationType.Static));
+                                textureDef.ScrollState.ScrollType = EMP_ScrollState.ScrollTypeEnum.Static;
+                                undos.Add(new UndoableProperty<EMP_TextureSamplerDef>(nameof(EMP_ScrollState.ScrollType), textureDef, EMP_ScrollState.ScrollTypeEnum.SpriteSheet, EMP_ScrollState.ScrollTypeEnum.Static));
                             }
                         }
 
-                        foreach (var keyframe in textureDef.SubData2.Keyframes)
+                        foreach (EMP_ScrollKeyframe keyframe in textureDef.ScrollState.Keyframes)
                         {
-                            float newScaleX = (float)(keyframe.ScaleX / a * (bitmaps[i].Width / maxDimension));
-                            float newScaleY = (float)(keyframe.ScaleY / a * (bitmaps[i].Height / maxDimension));
-                            float newScrollX = (float)((keyframe.ScrollX / a * (bitmaps[i].Width / maxDimension)) + position);
-                            float newScrollY = (float)((keyframe.ScrollY / a * (bitmaps[i].Height / maxDimension)) + (row / a));
+                            float newScaleX = (float)(keyframe.ScaleU / a * (bitmaps[i].Width / maxDimension));
+                            float newScaleY = (float)(keyframe.ScaleV / a * (bitmaps[i].Height / maxDimension));
+                            float newScrollX = (float)((keyframe.ScrollU / a * (bitmaps[i].Width / maxDimension)) + position);
+                            float newScrollY = (float)((keyframe.ScrollV / a * (bitmaps[i].Height / maxDimension)) + (row / a));
 
-                            undos.Add(new UndoableProperty<SubData_2_Entry>(nameof(SubData_2_Entry.ScrollX), keyframe, keyframe.ScrollX, newScrollX));
-                            undos.Add(new UndoableProperty<SubData_2_Entry>(nameof(SubData_2_Entry.ScrollY), keyframe, keyframe.ScrollY, newScrollY));
-                            undos.Add(new UndoableProperty<SubData_2_Entry>(nameof(SubData_2_Entry.ScaleX), keyframe, keyframe.ScaleX, newScaleX));
-                            undos.Add(new UndoableProperty<SubData_2_Entry>(nameof(SubData_2_Entry.ScaleY), keyframe, keyframe.ScaleY, newScaleY));
+                            undos.Add(new UndoableProperty<EMP_ScrollKeyframe>(nameof(EMP_ScrollKeyframe.ScrollU), keyframe, keyframe.ScrollU, newScrollX));
+                            undos.Add(new UndoableProperty<EMP_ScrollKeyframe>(nameof(EMP_ScrollKeyframe.ScrollV), keyframe, keyframe.ScrollV, newScrollY));
+                            undos.Add(new UndoableProperty<EMP_ScrollKeyframe>(nameof(EMP_ScrollKeyframe.ScaleU), keyframe, keyframe.ScaleU, newScaleX));
+                            undos.Add(new UndoableProperty<EMP_ScrollKeyframe>(nameof(EMP_ScrollKeyframe.ScaleV), keyframe, keyframe.ScaleV, newScaleY));
 
-                            keyframe.ScrollX = newScrollX;
-                            keyframe.ScrollY = newScrollY;
-                            keyframe.ScaleX = newScaleX;
-                            keyframe.ScaleY = newScaleY;
+                            keyframe.ScrollU = newScrollX;
+                            keyframe.ScrollV = newScrollY;
+                            keyframe.ScaleU = newScaleX;
+                            keyframe.ScaleV = newScaleY;
                         }
                     }
                 }
@@ -3691,7 +3653,7 @@ namespace Xv2CoreLib.EffectContainer
         {
             int total = 0;
 
-            foreach(var asset in Assets)
+            foreach(Asset asset in Assets)
             {
                 if (asset.Files.Count == 0) continue;
                 if (asset.Files[0].EmpFile == null) continue;
@@ -3704,7 +3666,7 @@ namespace Xv2CoreLib.EffectContainer
                     {
                         if (undos != null)
                         {
-                            undos.Add(new UndoableListRemove<EMP_TextureDefinition>(empFile.Textures, empFile.Textures[i]));
+                            undos.Add(new UndoableListRemove<EMP_TextureSamplerDef>(empFile.Textures, empFile.Textures[i]));
                         }
 
                         total++;
@@ -3717,7 +3679,7 @@ namespace Xv2CoreLib.EffectContainer
         }
 
         //Refactoring
-        public void RefactorTextureRef(EMB_CLASS.EmbEntry oldRef, EMB_CLASS.EmbEntry newRef, List<IUndoRedo> undos = null)
+        public void RefactorTextureRef(EmbEntry oldRef, EmbEntry newRef, List<IUndoRedo> undos = null)
         {
             if (ContainerAssetType != AssetType.PBIND && ContainerAssetType != AssetType.TBIND)
                 throw new InvalidOperationException("RefactorTextureRef: AssetType is not PBIND or TBIND, cannot continue.");
@@ -3732,7 +3694,7 @@ namespace Xv2CoreLib.EffectContainer
                     {
                         if (texture.TextureRef == oldRef)
                         {
-                            undos.Add(new UndoableProperty<EMP_TextureDefinition>(nameof(EMP_TextureDefinition.TextureRef), texture, oldRef, newRef));
+                            undos.Add(new UndoableProperty<EMP_TextureSamplerDef>(nameof(EMP_TextureSamplerDef.TextureRef), texture, oldRef, newRef));
                             texture.TextureRef = newRef;
                         }
                     }
@@ -3750,7 +3712,7 @@ namespace Xv2CoreLib.EffectContainer
                 }
             }
         }
-        
+
         public void RefactorMaterialRef(EmmMaterial oldRef, EmmMaterial newRef, List<IUndoRedo> undos = null)
         {
             if (ContainerAssetType != AssetType.PBIND && ContainerAssetType != AssetType.TBIND)
@@ -3762,22 +3724,7 @@ namespace Xv2CoreLib.EffectContainer
             {
                 if (ContainerAssetType == AssetType.PBIND)
                 {
-                    foreach (var particleEffect in asset.Files[0].EmpFile.ParticleEffects)
-                    {
-                        if(particleEffect.Type_Texture != null)
-                        {
-                            if (particleEffect.Type_Texture.MaterialRef == oldRef)
-                            {
-                                undos.Add(new UndoableProperty<TexturePart>(nameof(particleEffect.Type_Texture.MaterialRef), particleEffect.Type_Texture, oldRef, newRef));
-                                particleEffect.Type_Texture.MaterialRef = newRef;
-                            }
-                        }
-
-                        if(particleEffect.ChildParticleEffects != null)
-                        {
-                            RefactorMaterialRef_Recursive(particleEffect.ChildParticleEffects, oldRef, newRef, undos);
-                        }
-                    }
+                    RefactorMaterialRef_Recursive(asset.Files[0].EmpFile.ParticleNodes, oldRef, newRef, undos);
                 }
                 else if (ContainerAssetType == AssetType.TBIND)
                 {
@@ -3793,22 +3740,22 @@ namespace Xv2CoreLib.EffectContainer
             }
         }
 
-        private void RefactorMaterialRef_Recursive(IList<ParticleEffect> childParticleEffects, EmmMaterial oldRef, EmmMaterial newRef, List<IUndoRedo> undos)
+        private void RefactorMaterialRef_Recursive(IList<ParticleNode> childParticleEffects, EmmMaterial oldRef, EmmMaterial newRef, List<IUndoRedo> undos)
         {
-            foreach (var particleEffect in childParticleEffects)
+            foreach (ParticleNode particleEffect in childParticleEffects)
             {
-                if (particleEffect.Type_Texture != null)
+                if (particleEffect.NodeType == ParticleNodeType.Emission)
                 {
-                    if (particleEffect.Type_Texture.MaterialRef == oldRef)
+                    if (particleEffect.EmissionNode.Texture.MaterialRef == oldRef)
                     {
-                        undos.Add(new UndoableProperty<TexturePart>(nameof(particleEffect.Type_Texture.MaterialRef), particleEffect.Type_Texture, oldRef, newRef));
-                        particleEffect.Type_Texture.MaterialRef = newRef;
+                        undos.Add(new UndoableProperty<ParticleTexture>(nameof(particleEffect.EmissionNode.Texture.MaterialRef), particleEffect.EmissionNode.Texture, oldRef, newRef));
+                        particleEffect.EmissionNode.Texture.MaterialRef = newRef;
                     }
                 }
 
-                if (particleEffect.ChildParticleEffects != null)
+                if (particleEffect.ChildParticleNodes != null)
                 {
-                    RefactorMaterialRef_Recursive(particleEffect.ChildParticleEffects, oldRef, newRef, undos);
+                    RefactorMaterialRef_Recursive(particleEffect.ChildParticleNodes, oldRef, newRef, undos);
                 }
             }
 
@@ -4350,7 +4297,7 @@ namespace Xv2CoreLib.EffectContainer
 
             return null;
         }
-        
+
         public static FileType GetFileType(string fileName)
         {
             switch (GetExtension(fileName))
@@ -4385,47 +4332,36 @@ namespace Xv2CoreLib.EffectContainer
         /// </summary>
         public static void CopyEmpRef(EMP_File oldFile, EMP_File newFile)
         {
-            if (oldFile.ParticleEffects.Count != newFile.ParticleEffects.Count)
-                throw new InvalidDataException("CopyEmpRef: oldFile and newFile ParticleEffect count is out of sync.");
+            if (oldFile.ParticleNodes.Count != newFile.ParticleNodes.Count)
+                throw new InvalidDataException("CopyEmpRef: oldFile and newFile ParticleNode count is out of sync.");
             if (oldFile.Textures.Count != newFile.Textures.Count)
                 throw new InvalidDataException("CopyEmpRef: oldFile and newFile Texture count is out of sync.");
 
             //Copy particle effect material references
-            for (int i = 0; i < oldFile.ParticleEffects.Count; i++)
-            {
-                if(oldFile.ParticleEffects[i].Type_Texture != null)
-                {
-                    newFile.ParticleEffects[i].Type_Texture.MaterialRef = oldFile.ParticleEffects[i].Type_Texture.MaterialRef;
-                }
-
-                if(oldFile.ParticleEffects[i].ChildParticleEffects != null)
-                {
-                    CopyEmpRef_Recursive(oldFile.ParticleEffects[i].ChildParticleEffects, newFile.ParticleEffects[i].ChildParticleEffects);
-                }
-            }
+            CopyEmpRef_Recursive(oldFile.ParticleNodes, newFile.ParticleNodes);
 
             //Copy texture EmbEntry references
-            for(int i = 0; i <oldFile.Textures.Count; i++)
+            for(int i = 0; i < oldFile.Textures.Count; i++)
             {
                 newFile.Textures[i].TextureRef = oldFile.Textures[i].TextureRef;
             }
         }
 
-        private static void CopyEmpRef_Recursive(AsyncObservableCollection<ParticleEffect> oldFile, AsyncObservableCollection<ParticleEffect> newFile)
+        private static void CopyEmpRef_Recursive(AsyncObservableCollection<ParticleNode> oldFile, AsyncObservableCollection<ParticleNode> newFile)
         {
             if (oldFile.Count != newFile.Count)
-                throw new InvalidDataException("CopyEmpRef_Recursive: oldFile and newFile ParticleEffect count is out of sync.");
+                throw new InvalidDataException("CopyEmpRef_Recursive: oldFile and newFile ParticleNode count is out of sync.");
 
             for (int i = 0; i < oldFile.Count; i++)
             {
-                if (oldFile[i].Type_Texture != null)
+                if (oldFile[i].NodeType == ParticleNodeType.Emission)
                 {
-                    newFile[i].Type_Texture.MaterialRef = oldFile[i].Type_Texture.MaterialRef;
+                    newFile[i].EmissionNode.Texture.MaterialRef = oldFile[i].EmissionNode.Texture.MaterialRef;
                 }
 
-                if (oldFile[i].ChildParticleEffects != null)
+                if (oldFile[i].ChildParticleNodes != null)
                 {
-                    CopyEmpRef_Recursive(oldFile[i].ChildParticleEffects, newFile[i].ChildParticleEffects);
+                    CopyEmpRef_Recursive(oldFile[i].ChildParticleNodes, newFile[i].ChildParticleNodes);
                 }
             }
         }
@@ -4496,7 +4432,7 @@ namespace Xv2CoreLib.EffectContainer
                 case FileType.EMM:
                     return EmmFile.SaveToBytes();
                 case FileType.EMP:
-                    return EmpFile.SaveToBytes(ParserMode.Tool);
+                    return EmpFile.SaveToBytes();
                 case FileType.ETR:
                     return EtrFile.Save(false);
                 case FileType.Other:

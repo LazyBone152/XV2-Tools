@@ -19,13 +19,13 @@
             <ColumnDefinition Width="35"/>
         </Grid.ColumnDefinitions>
         <Label Content="X" FontSize="10" VerticalContentAlignment="Center"/>
-        <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=X}" Grid.Column="1" TrackMouseWheelWhenMouseOver="True" HideUpDownButtons="True" StringFormat="0.0##" Grid.ColumnSpan="2" Margin="0,0,16,0"/>
+        <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=X}" Grid.Column="1" InterceptMouseWheel="True" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="False" StringFormat="0.0##" Grid.ColumnSpan="2" Margin="0,0,16,0"/>
         <Label Content="Y" FontSize="10" VerticalContentAlignment="Center" Grid.Column="2" Margin="1,0,0,0"/>
-        <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=Y}" Grid.Column="3" TrackMouseWheelWhenMouseOver="True" HideUpDownButtons="True" StringFormat="0.0##" Grid.ColumnSpan="2" Margin="0,0,15.333,0"/>
+        <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=Y}" Grid.Column="3" InterceptMouseWheel="True" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="False" StringFormat="0.0##" Grid.ColumnSpan="2" Margin="0,0,15.333,0"/>
         <Label Content="Z" FontSize="10" VerticalContentAlignment="Center" Grid.Column="4" Margin="0.667,0,0.333,0"/>
-        <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=Z}" Grid.Column="5" TrackMouseWheelWhenMouseOver="True" HideUpDownButtons="True" StringFormat="0.0##" Grid.ColumnSpan="2" Margin="0.667,0,14.667,0"/>
+        <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=Z}" Grid.Column="5" InterceptMouseWheel="True" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="False" StringFormat="0.0##" Grid.ColumnSpan="2" Margin="0.667,0,14.667,0"/>
         <Label Content="W" FontSize="10" VerticalContentAlignment="Center" Grid.Column="6" Grid.ColumnSpan="2" Margin="0.667,0,57,0"/>
-        <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=W}" Grid.Column="7" TrackMouseWheelWhenMouseOver="True" HideUpDownButtons="True" StringFormat="0.0##" Grid.ColumnSpan="2" Margin="0.333,0,35,0"/>
+        <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=W}" Grid.Column="7" InterceptMouseWheel="True" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="False" StringFormat="0.0##" Grid.ColumnSpan="2" Margin="0.333,0,35,0"/>
 
         <Grid Grid.Column="8" Margin="10,0,3,0"/>
     </Grid>

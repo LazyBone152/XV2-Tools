@@ -6,7 +6,7 @@ namespace Xv2CoreLib.Resource.UndoRedo
     /// <summary>
     /// Undo/Redo functionality for removing an object from an IList.
     /// </summary>
-    public class UndoableListRemove<T> : IUndoRedo where T :class
+    public class UndoableListRemove<T> : IUndoRedo
     {
         public bool doLast { get; set; }
         public string Message { get; set; }

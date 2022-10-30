@@ -749,6 +749,8 @@ namespace LB_Mod_Installer.Installer
             {
                 EepkToolInterlop.TextureImportMatchNames = true;
                 EepkToolInterlop.AssetReuseMatchName = true;
+                EepkToolInterlop.FullDecompile = false;
+                EepkToolInterlop.IsInstaller = true;
 
                 EffectContainerFile binaryFile = (EffectContainerFile)GetParsedFile<EffectContainerFile>(path, false);
                 EffectContainerFile cpkBinFile = (EffectContainerFile)GetParsedFile<EffectContainerFile>(path, true, false);

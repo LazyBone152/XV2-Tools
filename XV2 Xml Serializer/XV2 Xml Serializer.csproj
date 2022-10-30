@@ -146,6 +146,10 @@
     <EmbeddedResource Include="costura32\AesCtrLibrary.dll" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\LB_Common\LB_Common.csproj">
+      <Project>{513B1851-4576-45EC-8F8E-400A38B05502}</Project>
+      <Name>LB_Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Xv2CoreLib\Xv2CoreLib.csproj">
       <Project>{fdb88e51-0d73-47b9-a342-e574ec0ba583}</Project>
       <Name>Xv2CoreLib</Name>

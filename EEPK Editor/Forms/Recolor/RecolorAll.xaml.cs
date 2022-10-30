@@ -8,7 +8,7 @@ using Xv2CoreLib.EEPK;
 using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.EMM;
-using Xv2CoreLib.EMP;
+using Xv2CoreLib.EMP_NEW;
 using Xv2CoreLib.HslColor;
 using Xv2CoreLib.Resource.App;
 using Xv2CoreLib.Resource.UndoRedo;
@@ -35,14 +35,14 @@ namespace EEPK_Organiser.Forms
             Asset,
             Material,
             Global,
-            ParticleEffect
+            ParticleNode
         }
 
         private AssetType assetType = AssetType.EMO;
         private Asset asset = null;
         private EmmMaterial material = null;
         private EffectContainerFile effectContainerFile = null;
-        private ParticleEffect particleEffect = null;
+        private ParticleNode particleNode = null;
 
         private Mode currentMode = Mode.Asset;
 
@@ -96,7 +96,7 @@ namespace EEPK_Organiser.Forms
                 }
             }
         }
-        
+
         public Brush preview
         {
             get
@@ -106,10 +106,10 @@ namespace EEPK_Organiser.Forms
         }
 
         #region Tooltips
-        public string HueRevertTooltip { get { return string.Format("Revert to original value of {0}", initialHue); } }
-        public string SaturationRevertTooltip { get { return string.Format("Revert to original value of {0}", initialSaturation); } }
-        public string LightnessRevertTooltip { get { return string.Format("Revert to original value of {0}", initialLightness); } }
-        public string RgbPreviewTooltip { get { return string.Format("R: {0} ({3}), G: {1} ({4}), B: {2} ({5})", rgbColor.R, rgbColor.G, rgbColor.B, rgbColor.R_int, rgbColor.G_int, rgbColor.B_int); } }
+        public string HueRevertTooltip => string.Format("Revert to original value of {0}", initialHue);
+        public string SaturationRevertTooltip => string.Format("Revert to original value of {0}", initialSaturation);
+        public string LightnessRevertTooltip => string.Format("Revert to original value of {0}", initialLightness);
+        public string RgbPreviewTooltip => string.Format("R: {0} ({3}), G: {1} ({4}), B: {2} ({5})", rgbColor.R, rgbColor.G, rgbColor.B, rgbColor.R_int, rgbColor.G_int, rgbColor.B_int);
         #endregion
 
         /// <summary>
@@ -155,10 +155,10 @@ namespace EEPK_Organiser.Forms
         /// <summary>
         /// Hue shift a ParticleEffect.
         /// </summary>
-        public RecolorAll(ParticleEffect _particleEffect, Window parent)
+        public RecolorAll(ParticleNode node, Window parent)
         {
-            currentMode = Mode.ParticleEffect;
-            particleEffect = _particleEffect;
+            currentMode = Mode.ParticleNode;
+            particleNode = node;
 
             InitializeComponent();
             Owner = parent;
@@ -187,9 +187,9 @@ namespace EEPK_Organiser.Forms
             {
                 colors = GetUsedColorsByEverything();
             }
-            else if (currentMode == Mode.ParticleEffect)
+            else if (currentMode == Mode.ParticleNode)
             {
-                colors = particleEffect.GetUsedColors();
+                colors = particleNode.GetUsedColors();
             }
             
 
@@ -252,9 +252,9 @@ namespace EEPK_Organiser.Forms
             {
                 ChangeHueForEverything(hueChange, _saturationChangeMulti, lightnessChange, undos);
             }
-            else if (currentMode == Mode.ParticleEffect)
+            else if (currentMode == Mode.ParticleNode)
             {
-                particleEffect.ChangeHue(hueChange, saturationChange, lightnessChange, undos);
+                particleNode.ChangeHue(hueChange, saturationChange, lightnessChange, undos);
             }
 
             UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Hue Adjustment"));

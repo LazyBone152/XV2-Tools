@@ -19,7 +19,7 @@ namespace EEPK_Organiser.View.Vectors
 
         #region DP
         public static readonly DependencyProperty ValueProperty = DependencyProperty.Register(
-            "Value", typeof(LB_Common.Numbers.CustomVector4), typeof(CustomVector2), new PropertyMetadata(OnDpChanged));
+            nameof(Value), typeof(LB_Common.Numbers.CustomVector4), typeof(CustomVector2), new PropertyMetadata(ValueChangedCallback));
 
         public LB_Common.Numbers.CustomVector4 Value
         {
@@ -28,7 +28,7 @@ namespace EEPK_Organiser.View.Vectors
         }
 
         public static readonly DependencyProperty IntervalProperty = DependencyProperty.Register(
-            "Interval", typeof(float), typeof(CustomVector2), new PropertyMetadata(0.05f));
+            nameof(Interval), typeof(float), typeof(CustomVector2), new PropertyMetadata(0.05f));
 
         public float Interval
         {
@@ -36,18 +36,32 @@ namespace EEPK_Organiser.View.Vectors
             set { SetValue(IntervalProperty, value); }
         }
 
-        private static DependencyPropertyChangedEventHandler DpChanged;
+        public static readonly DependencyProperty HideUpDownButtonsProperty = DependencyProperty.Register(
+            nameof(HideUpDownButtons), typeof(bool), typeof(CustomVector2), new PropertyMetadata(false));
 
-        private static void OnDpChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        public bool HideUpDownButtons
         {
-            if (DpChanged != null)
-                DpChanged.Invoke(sender, e);
+            get { return (bool)GetValue(HideUpDownButtonsProperty); }
+            set { SetValue(HideUpDownButtonsProperty, value); }
         }
 
-        private void ValueInstanceChanged(object sender, DependencyPropertyChangedEventArgs e)
+        public static readonly DependencyProperty AllowUndoProperty = DependencyProperty.Register(
+            nameof(AllowUndo), typeof(bool), typeof(CustomVector2), new PropertyMetadata(true));
+
+        public bool AllowUndo
         {
-            UpdateProperties();
+            get { return (bool)GetValue(AllowUndoProperty); }
+            set { SetValue(AllowUndoProperty, value); }
         }
+
+        private static void ValueChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            if(sender is CustomVector2 view)
+            {
+                view.UpdateProperties();
+            }
+        }
+
 
         #endregion
 
@@ -71,7 +85,6 @@ namespace EEPK_Organiser.View.Vectors
         public CustomVector2()
         {
             InitializeComponent();
-            DpChanged += ValueInstanceChanged;
             UndoManager.Instance.UndoOrRedoCalled += Instance_UndoOrRedoCalled;
         }
 
@@ -93,7 +106,8 @@ namespace EEPK_Organiser.View.Vectors
             {
                 Value.GetType().GetProperty(propName).SetValue(Value, newValue);
 
-                UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(propName, Value, original, newValue, $"{propName}"));
+                if(AllowUndo)
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(propName, Value, original, newValue, $"{propName}"));
             }
         }
 

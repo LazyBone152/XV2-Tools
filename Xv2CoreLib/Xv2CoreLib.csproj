@@ -315,6 +315,7 @@
     <Compile Include="Resource\ColorEx.cs" />
     <Compile Include="Resource\Image\TextureHelper.cs" />
     <Compile Include="Resource\MathHelpers.cs" />
+    <Compile Include="Resource\NameHelper.cs" />
     <Compile Include="Resource\Random.cs" />
     <Compile Include="Resource\ReflectionHelper.cs" />
     <Compile Include="Resource\UndoRedo\IMergableUndo.cs" />

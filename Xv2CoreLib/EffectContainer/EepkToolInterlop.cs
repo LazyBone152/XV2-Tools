@@ -2,6 +2,7 @@
 {
     public static class EepkToolInterlop
     {
+        public static bool IsInstaller = false;
         public static bool TextureImportMatchNames = false;
         public static bool LoadTextures = true;
         public static bool AutoRenameContainers = true;

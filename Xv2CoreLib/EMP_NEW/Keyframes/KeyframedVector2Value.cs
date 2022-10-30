@@ -10,6 +10,8 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
     [Serializable]
     public class KeyframedVector2Value : KeyframedBaseValue
     {
+        public const string CLIPBOARD_ID = "EMP_KeyframedVector2Value";
+
         public CustomVector4 Constant { get; set; }
         public AsyncObservableCollection<KeyframeVector2Value> Keyframes { get; set; } = new AsyncObservableCollection<KeyframeVector2Value>();
 
@@ -28,8 +30,17 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             if (empKeyframes.Length != 2)
                 throw new ArgumentException($"KeyframedVector2Value.DecompileKeyframes: Invalid number of keyframed values. Expected 2, but there are {empKeyframes.Length}!");
 
+            float[] constantValue = Constant.Values;
+
+            if (IsScale)
+            {
+                constantValue = new float[4];
+                constantValue[0] = Constant.Values[0] / 2f;
+                constantValue[1] = Constant.Values[1] / 2f;
+            }
+
             //Returns array of 3: X, Y
-            List<KeyframedGenericValue>[] tempKeyframes = Decompile(Constant.Values, empKeyframes);
+            List<KeyframedGenericValue>[] tempKeyframes = Decompile(constantValue, empKeyframes);
 
             if (Keyframes.Count > 0)
                 Keyframes.Clear();
@@ -82,12 +93,25 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
 
         #endregion
 
-        public IUndoRedo AddKeyframe(float time, float x, float y, float z)
+        public IUndoRedo AddKeyframe(float time, float x, float y)
         {
-            KeyframeVector2Value keyframe = new KeyframeVector2Value(time, x, y);
-            Keyframes.Add(keyframe);
+            KeyframeVector2Value keyframe = Keyframes.FirstOrDefault(a => a.Time == time);
 
-            return new UndoableListAdd<KeyframeVector2Value>(Keyframes, keyframe);
+            if (keyframe == null)
+            {
+                keyframe = new KeyframeVector2Value(time, x, y);
+                Keyframes.Add(keyframe);
+
+                return new UndoableListAdd<KeyframeVector2Value>(Keyframes, keyframe, "Add Keyframe");
+            }
+            else
+            {
+                CustomVector4 vector = new CustomVector4(x, y, 0f, 0f);
+                IUndoRedo undo = new UndoablePropertyGeneric(nameof(keyframe.Value), keyframe, keyframe.Value, vector, "Add Keyframe");
+                keyframe.Value = vector;
+
+                return undo;
+            }
         }
 
         public IUndoRedo RemoveKeyframe(float time)
@@ -106,9 +130,8 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
     }
 
     [Serializable]
-    public class KeyframeVector2Value
+    public class KeyframeVector2Value : KeyframeBaseValue
     {
-        public float Time { get; set; }
         public CustomVector4 Value { get; set; }
 
         public KeyframeVector2Value(float time, float x, float y)

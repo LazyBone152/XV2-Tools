@@ -22,7 +22,8 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
-            args = new string[1] { @"E:\VS_Test\BCS\ALL BCS" };
+            args = new string[1] { @"E:\VS_Test\EMP\ALL EMP" };
+            //args = new string[1] { @"E:\VS_Test\QXD" };
 
             DEBUG_MODE = true;
 #endif
@@ -290,6 +291,9 @@ namespace XV2_Xml_Serializer
                                     break;
                                 case ".nsk":
                                     Xv2CoreLib.NSK.NSK_File.CreateXml(fileLocation);
+                                    break;
+                                case ".emg":
+                                    Xv2CoreLib.EMG.EMG_File.CreateXml(fileLocation);
                                     break;
                                 case ".x2s":
                                     {
@@ -564,6 +568,9 @@ namespace XV2_Xml_Serializer
                         break;
                     case ".nsk":
                         Xv2CoreLib.NSK.NSK_File.ConvertFromXml(fileLocation);
+                        break;
+                    case ".emg":
+                        Xv2CoreLib.EMG.EMG_File.ConvertFromXml(fileLocation);
                         break;
                     case ".x2s":
                         {
@@ -854,8 +861,8 @@ namespace XV2_Xml_Serializer
             //BacHomingParse(files);
             
 
-            List<uint> values = new List<uint>();
-            List<uint> valuesTotal = new List<uint>();
+            List<ushort> values = new List<ushort>();
+            List<ushort> valuesTotal = new List<ushort>();
 
             foreach (string s in files)
             {
@@ -870,23 +877,26 @@ namespace XV2_Xml_Serializer
                         {
                             foreach (var entry in bac.BacEntries)
                             {
-
                                 if (entry.Type1 != null)
                                 {
                                     foreach (var type in entry.Type1)
                                     {
-                                        //int flag = type.MovementFlags & 0xFFFb;
+                                        //if(type.DragX != 0f || type.DragY != 0f || type.DragZ != 0f)
+                                        //{
+                                        //    Console.WriteLine($"{type.DragX} {type.DragY} {type.DragZ}");
+                                        //   Console.ReadLine();
+                                        //}
 
-                                        if(type.I_22 != 0)
+                                        //if ((type.MinX > 0f || type.MinY > 0f || type.MinZ > 0f) && (type.MaxX > 0f || type.MaxY > 0f || type.MaxZ > 0f))
                                         {
-                                            Console.WriteLine($"this: {entry.Index}");
-                                            Console.ReadLine();
+                                            //Console.WriteLine($"MatrixFlags: {type.BoundingBoxType}\nHitboxFlags: {HexConverter.GetHexString(type.HitboxFlags)}\nI_20: {type.I_20}\nSize: {type.Size}\nPos:{type.PositionX} {type.PositionY} {type.PositionZ}\nMin:{type.MinX} {type.MinY} {type.MinZ}\nMax: {type.MaxX} {type.MaxY} {type.MaxZ}");
+                                            //Console.ReadLine();
                                         }
 
-                                        //if (!values.Contains((ushort)type.I_08))
-                                         //   values.Add((ushort)type.I_08);
-
-                                       // valuesTotal.Add((ushort)type.I_08);
+                                        if (!values.Contains((ushort)(type.HitboxFlags & 0x000F)))
+                                        {
+                                            values.Add((ushort)(type.HitboxFlags & 0x000F));
+                                        }
                                     }
                                 }
                             }
@@ -907,8 +917,8 @@ namespace XV2_Xml_Serializer
             foreach(var value in values)
             {
                 //str.AppendLine($"{value.ToString()} ({valuesTotal.Count(x => x == value)})");
-                str.AppendLine($"{HexConverter.GetHexString(value)} ({valuesTotal.Count(x => x == value)})");
-
+                //str.AppendLine($"{HexConverter.GetHexString(value)} ({valuesTotal.Count(x => x == value)})");
+                str.AppendLine($"{value}");
                 //str.AppendLine($"{Convert.ToSingle(value)} ({valuesTotal.Count(x => x == value)})");
             }
 
@@ -1067,12 +1077,33 @@ namespace XV2_Xml_Serializer
 
 
         }
+        class KeyframeGroups
+        {
+            public int Group;
+            public int Parameter;
+            public int Component;
+            public List<float> Values = new List<float>();
+
+            public KeyframeGroups(int group, int parameter, int component)
+            {
+                Group = group;
+                Parameter = parameter;
+                Component = component;
+            }
+
+            public void AddValue(float value)
+            {
+                if (!Values.Contains(value))
+                    Values.Add(value);
+            }
+        }
 
         static void BulkParseEmp(string directory)
         {
             string[] files = Directory.GetFiles(directory);
-            List<string> values = new List<string>();
-
+            List<int> values = new List<int>();
+            List<KeyframeGroups> groups = new List<KeyframeGroups>();
+            
             foreach (string s in files)
             {
                 //try
@@ -1080,26 +1111,47 @@ namespace XV2_Xml_Serializer
                     if (Path.GetExtension(s) == ".emp")
                     {
                         Console.WriteLine(s);
-                        var emp = new Xv2CoreLib.EMP.Parser(s, false).empFile;
+                        var emp = new Xv2CoreLib.EMP_NEW.Parser(s, false).EmpFile;
+                        //var emp = new Xv2CoreLib.EMP.Parser(s, false).empFile;
                         var particleEffects = emp.GetAllParticleEffects_DEBUG();
+
+                        foreach(var texture in emp.Textures)
+                        {
+                            foreach (var keyframe in texture.ScrollState.Keyframes)
+                            {
+                                if(keyframe.I_20 != 0f || keyframe.I_24 != 0f)
+                                {
+                                    Console.WriteLine(keyframe.ToString());
+                                    Console.ReadLine();
+                                }
+                            }
+                        }
 
                         foreach (var particle in particleEffects)
                         {
-                            if(particle.IsTextureType())
+                            /*
+                            if(particle.GroupKeyframedValues.Count > 0)
                             {
-                                if(particle.Type_Texture.TextureIndex.Count > 1)
+                                foreach(var group in particle.GroupKeyframedValues)
                                 {
-                                    string val = $"{particle.Component_Type}_{particle.Type_Texture.TextureIndex.Count}";
+                                    foreach(var value in group.KeyframedValues)
+                                    {
+                                        KeyframeGroups keyframeGroup = groups.FirstOrDefault(x => x.Group == group.Type && x.Parameter == value.Value && x.Component == value.Component);
 
-                                    if (!values.Contains(val))
-                                        values.Add(val);
+                                        if (keyframeGroup == null)
+                                        {
+                                            keyframeGroup = new KeyframeGroups(group.Type, value.Value, value.Component);
+                                            groups.Add(keyframeGroup);
+                                        }
 
-                                    //Console.WriteLine($"This: {particle.Name}, Type: {particle.Component_Type}, TextureCount: {particle.Type_Texture.TextureIndex.Count}");
-                                    //Console.ReadLine();
+                                        foreach(var keyframe in value.Keyframes)
+                                        {
+                                            keyframeGroup.AddValue(keyframe.Value);
+                                        }
+                                    }
                                 }
                             }
-                            
-
+                            */
                         }
 
                     }
@@ -1110,12 +1162,16 @@ namespace XV2_Xml_Serializer
                 }
             }
 
+            //Console.WriteLine(values.Max());
+            //Console.ReadLine();
+
             //log
             StringBuilder str = new StringBuilder();
+            values.Sort();
 
-            foreach (var value in values)
+            foreach (var value in groups.OrderBy(x => x.Group))
             {
-                str.AppendLine(value);
+                str.AppendLine($"Group: {value.Group}, Param/Comp: {value.Parameter}/{value.Component} = ({value.Values.Min()} - {value.Values.Max()})");
             }
 
             File.WriteAllText("emp_test.txt", str.ToString());
@@ -1225,6 +1281,7 @@ namespace XV2_Xml_Serializer
 
         static void BulkParseBsa(string directory)
         {
+            List<int> values = new List<int>();
             string[] files = Directory.GetFiles(directory);
 
             foreach (string s in files)
@@ -1232,12 +1289,34 @@ namespace XV2_Xml_Serializer
                 if (Path.GetExtension(s) == ".bsa")
                 {
                     Console.WriteLine(s);
-                    var bsaFile = new Xv2CoreLib.BSA.Parser(s, true).GetBsaFile();
+                    var bsaFile = new Xv2CoreLib.BSA.Parser(s, false).GetBsaFile();
                     
-
+                    foreach(var entry in bsaFile.BSA_Entries)
+                    {
+                        if(entry.Type8 != null)
+                        {
+                            foreach (var type in entry.Type8)
+                            {
+                                if (!values.Contains(type.I_02))
+                                    values.Add(type.I_02);
+                            }
+                        }
+                    }
                 }
             }
 
+
+            values.Sort();
+            StringBuilder str = new StringBuilder();
+
+            foreach (var value in values)
+            {
+                str.AppendLine(value.ToString());
+            }
+
+            File.WriteAllText("bsa_values.txt", str.ToString());
+            Process.Start("bsa_values.txt");
+            Environment.Exit(0);
         }
 
         static void BulkParseBcs(string directory)
@@ -1397,6 +1476,7 @@ namespace XV2_Xml_Serializer
 
         static void BulkParseQxd(string directory)
         {
+            List<int> values = new List<int>();
             string[] files = Directory.GetFiles(directory);
 
             foreach (string s in files)
@@ -1406,14 +1486,33 @@ namespace XV2_Xml_Serializer
                     Console.WriteLine(s);
                     var qxd = new Xv2CoreLib.QXD.Parser(s, false).GetQxdFile();
 
-                    foreach (var e in qxd.Quests)
+                    foreach (var quest in qxd.Quests)
                     {
-                        
+                        if(quest.EquipReward != null)
+                        {
+                            foreach(var equipment in quest.EquipReward)
+                            {
+                                if (!values.Contains(equipment.I_28))
+                                    values.Add(equipment.I_28);
+                            }
+                        }
                     }
 
 
                 }
             }
+            StringBuilder str = new StringBuilder();
+            values.Sort();
+
+            foreach (var value in values)
+            {
+                str.AppendLine($"{value}");
+            }
+
+            File.WriteAllText("qxd_test.txt", str.ToString());
+
+            Process.Start("qxd_test.txt");
+            Environment.Exit(0);
 
         }
 
@@ -1579,38 +1678,53 @@ namespace XV2_Xml_Serializer
         static void BulkParseBdm(string directory)
         {
             string[] files = Directory.GetFiles(directory);
-            List<string> UsedValues = new List<string>();
+            List<ushort> values = new List<ushort>();
 
             foreach (string s in files)
             {
-                if (Path.GetExtension(s) == ".bdm")
+                try
                 {
-
-                    Console.WriteLine(s);
-                    var bdm = new Xv2CoreLib.BDM.Parser(s, false);
-                    
-                    foreach(string value in bdm.UsedValues)
+                    if (Path.GetExtension(s) == ".bdm")
                     {
-                        if (UsedValues.IndexOf(value) == -1)
+                        Console.WriteLine(s);
+                        var bdm = new Xv2CoreLib.BDM.Parser(s, false).bdmFile;
+
+                        if (bdm.BDM_Type == Xv2CoreLib.BDM.BDM_Type.XV2_1)
+                            bdm.ConvertToXv2_0();
+
+                        if (bdm.BDM_Type == Xv2CoreLib.BDM.BDM_Type.XV1)
+                            continue;
+
+                        foreach (var entry in bdm.BDM_Entries)
                         {
-                            UsedValues.Add(value);
+                            foreach (var subEntry in entry.Type0Entries)
+                            {
+                                //if (!values.Contains(subEntry.DamageType))
+                                //    values.Add(subEntry.DamageType);
+                            }
                         }
                     }
                 }
-
-                UsedValues.Sort();
-                //Log
-                StringBuilder log = new StringBuilder();
-
-                foreach (string e in UsedValues)
+                catch
                 {
-                    log.Append(e);
-                    log.AppendLine();
+
                 }
 
-                File.WriteAllText("debug_bdm_log.txt", log.ToString());
             }
 
+            values.Sort();
+            //Log
+            StringBuilder log = new StringBuilder();
+
+            foreach (var val in values)
+            {
+                log.AppendLine(val.ToString());
+            }
+
+            File.WriteAllText("bdm_test.txt", log.ToString());
+
+            Process.Start("bdm_test.txt");
+            Environment.Exit(0);
         }
 
         static void BulkParseFpf(string directory)

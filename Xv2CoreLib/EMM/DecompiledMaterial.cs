@@ -782,6 +782,9 @@ namespace Xv2CoreLib.EMM
         {
             foreach (var field in Fields)
             {
+                //Skip non-parameters
+                if (field.Name == nameof(InitialParameters)) continue;
+
                 object oldValue = field.GetValue(this);
                 object newValue = field.GetValue(material);
 
@@ -790,7 +793,8 @@ namespace Xv2CoreLib.EMM
                 if ((oldValue == null && newValue != null) || (oldValue != null && newValue == null)) return false;
 
                 //Compare the values
-                if (!oldValue.Equals(newValue)) return false;
+                if (!oldValue.Equals(newValue)) 
+                    return false;
             }
 
             return true;

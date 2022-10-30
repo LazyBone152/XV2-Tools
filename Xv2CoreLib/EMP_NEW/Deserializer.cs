@@ -122,7 +122,7 @@ namespace Xv2CoreLib.EMP_NEW
                 node.Name = node.Name.Substring(0, 32);
             }
 
-            //Write name, and padd it out to 32 bytes
+            //Write name, and pad it out to 32 bytes
             bytes.AddRange(Encoding.ASCII.GetBytes(node.Name));
             bytes.AddRange(new byte[32 - node.Name.Length]);
 
@@ -131,13 +131,23 @@ namespace Xv2CoreLib.EMP_NEW
             int groupKeyframedValuesCount = (node.GroupKeyframedValues != null) ? node.GroupKeyframedValues.Count : 0;
             int childNodeCount = (node.ChildParticleNodes != null) ? node.ChildParticleNodes.Count : 0;
 
-            //Base Entry
-            BitArray compositeBits_I_32 = new BitArray(new bool[8] { node.I_32_0, node.Loop, node.I_32_2, node.FlashOnGeneration, node.I_32_4, node.I_32_5, node.I_32_6, node.I_32_7 });
-            BitArray compositeBits_I_33 = new BitArray(new bool[8] { node.I_33_0, node.I_33_1, node.I_33_2, node.Hide, node.UseScaleXY, node.I_33_5, node.UseColor2, node.I_33_7, });
-            BitArray compositeBits_I_34 = new BitArray(new bool[8] { node.I_34_0, node.I_34_1, node.I_34_2, node.I_34_3, node.EnableRandomRotationDirection, node.I_34_5, node.EnableRandomUpVectorOnVirtualCone, node.I_34_7, });
+            bytes.AddRange(BitConverter.GetBytes((ushort)node.NodeFlags));
+            bytes.Add((byte)node.NodeFlags2);
 
-            bytes.AddRange(new byte[6] { Utils.ConvertToByte(compositeBits_I_32), Utils.ConvertToByte(compositeBits_I_33), Utils.ConvertToByte(compositeBits_I_34), (byte)node.AutoRotationType, (byte)0, (byte)node.NodeType });
+            if(node.NodeSpecificType == NodeSpecificType.AutoOriented || node.NodeSpecificType == NodeSpecificType.AutoOriented_VisibleOnSpeed)
+            {
+                if(node.EmissionNode.BillboardType != ParticleBillboardType.Camera && node.EmissionNode.BillboardType != ParticleBillboardType.Front)
+                    node.EmissionNode.BillboardType = ParticleBillboardType.Camera;
 
+                bytes.Add((byte)node.EmissionNode.BillboardType);
+            }
+            else
+            {
+                bytes.Add((byte)ParticleBillboardType.Camera);
+            }
+
+            bytes.Add(0); //Emission | Emitter type
+            bytes.Add((byte)node.NodeType);
             bytes.AddRange(BitConverter.GetBytes(node.MaxInstances));
             bytes.AddRange(BitConverter.GetBytes(node.Lifetime));
             bytes.AddRange(BitConverter.GetBytes(node.Lifetime_Variance));
@@ -169,10 +179,27 @@ namespace Xv2CoreLib.EMP_NEW
             bytes.AddRange(BitConverter.GetBytes(node.Rotation_Variance.Y));
             bytes.AddRange(BitConverter.GetBytes(node.Rotation_Variance.Z));
             bytes.AddRange(BitConverter.GetBytes(0f));
-            bytes.AddRange(BitConverter.GetBytes(node.F_128));
+            bytes.AddRange(BitConverter.GetBytes(node.I_128));
+            bytes.AddRange(BitConverter.GetBytes(node.I_130));
             bytes.AddRange(BitConverter.GetBytes(node.F_132));
 
-            bytes.AddRange(BitConverter.GetBytes(node.I_136));
+            //I_136 depends on the node type. 
+            //0 = ShapeDraw, ConeExtrude or Null
+            //1 = Emitters
+            //2 = Emissions, other than ShapeDraw or ConeExtrude
+            if(node.NodeSpecificType == NodeSpecificType.ShapeDraw || node.NodeSpecificType == NodeSpecificType.ConeExtrude || node.NodeSpecificType == NodeSpecificType.Null)
+            {
+                bytes.AddRange(BitConverter.GetBytes((ushort)0));
+            }
+            else if(node.NodeType == ParticleNodeType.Emitter)
+            {
+                bytes.AddRange(BitConverter.GetBytes((ushort)1));
+            }
+            else
+            {
+                bytes.AddRange(BitConverter.GetBytes((ushort)2));
+            }
+
             bytes.AddRange(BitConverter.GetBytes(Convert.ToUInt16(keyframedValuesCount)));
             bytes.AddRange(new byte[4]);
             bytes.AddRange(BitConverter.GetBytes(Convert.ToUInt16(groupKeyframedValuesCount)));
@@ -220,7 +247,7 @@ namespace Xv2CoreLib.EMP_NEW
             {
                 bytes.AddRange(BitConverter.GetBytes(type0[i].GetParameters()));
                 bytes.AddRange(new byte[2] { BitConverter_Ex.GetBytes(type0[i].Loop), type0[i].I_03 });
-                bytes.AddRange(BitConverter.GetBytes(type0[i].F_04));
+                bytes.AddRange(BitConverter.GetBytes(type0[i].DefaultValue));
                 bytes.AddRange(BitConverter.GetBytes(type0[i].Duration));
                 bytes.AddRange(BitConverter.GetBytes((short)type0[i].Keyframes.Count()));
                 entryOffsets.Add(bytes.Count());
@@ -299,48 +326,50 @@ namespace Xv2CoreLib.EMP_NEW
 
         }
 
-        private void WriteGroupKeyframedValues(IList<EMP_KeyframeGroup> type1, int Type1_Offset, int mainEntryOffset)
+        private void WriteGroupKeyframedValues(IList<EMP_Modifier> modifiers, int modifiersOffset, int mainEntryOffset)
         {
-            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - mainEntryOffset), Type1_Offset);
+            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - mainEntryOffset), modifiersOffset);
 
             //Offsets to replace
             List<int> HeaderOffsets = new List<int>();
 
-            for (int i = 0; i < type1.Count(); i++)
+            for (int i = 0; i < modifiers.Count; i++)
             {
-                int subEntryCount = (type1[i].KeyframedValues == null) ? 0 : type1[i].KeyframedValues.Count();
-                bytes.AddRange(new byte[2] { type1[i].I_00, type1[i].I_01 });
-                bytes.AddRange(BitConverter.GetBytes((ushort)subEntryCount));
-                HeaderOffsets.Add(bytes.Count());
+                int keyframedValuesCount = (modifiers[i].KeyframedValues == null) ? 0 : modifiers[i].KeyframedValues.Count;
+
+                bytes.Add((byte)modifiers[i].Type);
+                bytes.Add((byte)modifiers[i].Flags);
+                bytes.AddRange(BitConverter.GetBytes((ushort)keyframedValuesCount));
+                HeaderOffsets.Add(bytes.Count);
                 bytes.AddRange(new byte[4]);
             }
 
-            for (int i = 0; i < type1.Count(); i++)
+            for (int i = 0; i < modifiers.Count; i++)
             {
-                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - HeaderOffsets[i] + 4), HeaderOffsets[i]);
+                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - HeaderOffsets[i] + 4), HeaderOffsets[i]);
                 List<int> EntryOffsets = new List<int>();
 
-                if (type1[i].KeyframedValues != null)
+                if (modifiers[i].KeyframedValues != null)
                 {
-                    for (int a = 0; a < type1[i].KeyframedValues.Count(); a++)
+                    for (int a = 0; a < modifiers[i].KeyframedValues.Count; a++)
                     {
-                        bytes.AddRange(BitConverter.GetBytes(type1[i].KeyframedValues[a].GetParameters()));
-                        bytes.AddRange(new byte[2] { BitConverter_Ex.GetBytes(type1[i].KeyframedValues[a].Loop), type1[i].KeyframedValues[a].I_03 });
-                        bytes.AddRange(BitConverter.GetBytes(type1[i].KeyframedValues[a].F_04));
-                        bytes.AddRange(BitConverter.GetBytes(type1[i].KeyframedValues[a].Duration));
-                        bytes.AddRange(BitConverter.GetBytes((ushort)type1[i].KeyframedValues[a].Keyframes.Count()));
-                        EntryOffsets.Add(bytes.Count());
+                        bytes.AddRange(BitConverter.GetBytes(modifiers[i].KeyframedValues[a].GetParameters()));
+                        bytes.AddRange(new byte[2] { BitConverter_Ex.GetBytes(modifiers[i].KeyframedValues[a].Loop), modifiers[i].KeyframedValues[a].I_03 });
+                        bytes.AddRange(BitConverter.GetBytes(modifiers[i].KeyframedValues[a].DefaultValue));
+                        bytes.AddRange(BitConverter.GetBytes(modifiers[i].KeyframedValues[a].Duration));
+                        bytes.AddRange(BitConverter.GetBytes((ushort)modifiers[i].KeyframedValues[a].Keyframes.Count));
+                        EntryOffsets.Add(bytes.Count);
                         bytes.AddRange(new byte[4]);
                     }
 
-                    for (int a = 0; a < type1[i].KeyframedValues.Count(); a++)
+                    for (int a = 0; a < modifiers[i].KeyframedValues.Count(); a++)
                     {
-                        bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - EntryOffsets[a] + 12), EntryOffsets[a]);
+                        bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - EntryOffsets[a] + 12), EntryOffsets[a]);
 
                         float keyframeSize = 0;
 
                         //Keyframes
-                        foreach (var e in type1[i].KeyframedValues[a].Keyframes)
+                        foreach (EMP_Keyframe e in modifiers[i].KeyframedValues[a].Keyframes)
                         {
                             bytes.AddRange(BitConverter.GetBytes(e.Time));
                             keyframeSize += 2;
@@ -351,32 +380,32 @@ namespace Xv2CoreLib.EMP_NEW
                         }
 
                         //Floats
-                        foreach (var e in type1[i].KeyframedValues[a].Keyframes)
+                        foreach (var e in modifiers[i].KeyframedValues[a].Keyframes)
                         {
                             bytes.AddRange(BitConverter.GetBytes(e.Value));
                         }
 
                         //Index List
-                        if (type1[i].KeyframedValues[a].Keyframes.Count() > 1)
+                        if (modifiers[i].KeyframedValues[a].Keyframes.Count > 1)
                         {
                             //Writing IndexList
-                            bool specialCase_FirstKeyFrameIsNotZero = (type1[i].KeyframedValues[a].Keyframes[0].Time == 0) ? false : true;
+                            bool specialCase_FirstKeyFrameIsNotZero = (modifiers[i].KeyframedValues[a].Keyframes[0].Time == 0) ? false : true;
                             float totalIndex = 0;
-                            for (int s = 0; s < type1[i].KeyframedValues[a].Keyframes.Count(); s++)
+                            for (int s = 0; s < modifiers[i].KeyframedValues[a].Keyframes.Count; s++)
                             {
                                 int thisFrameLength = 0;
-                                if (type1[i].KeyframedValues[a].Keyframes.Count() - 1 == s)
+                                if (modifiers[i].KeyframedValues[a].Keyframes.Count - 1 == s)
                                 {
                                     thisFrameLength = 1;
                                 }
                                 else if (specialCase_FirstKeyFrameIsNotZero == true && s == 0)
                                 {
-                                    thisFrameLength = type1[i].KeyframedValues[a].Keyframes[s].Time;
-                                    thisFrameLength += type1[i].KeyframedValues[a].Keyframes[s + 1].Time - type1[i].KeyframedValues[a].Keyframes[s].Time;
+                                    thisFrameLength = modifiers[i].KeyframedValues[a].Keyframes[s].Time;
+                                    thisFrameLength += modifiers[i].KeyframedValues[a].Keyframes[s + 1].Time - modifiers[i].KeyframedValues[a].Keyframes[s].Time;
                                 }
                                 else
                                 {
-                                    thisFrameLength = type1[i].KeyframedValues[a].Keyframes[s + 1].Time - type1[i].KeyframedValues[a].Keyframes[s].Time;
+                                    thisFrameLength = modifiers[i].KeyframedValues[a].Keyframes[s + 1].Time - modifiers[i].KeyframedValues[a].Keyframes[s].Time;
                                 }
 
                                 for (int e = 0; e < thisFrameLength; e++)
@@ -398,48 +427,40 @@ namespace Xv2CoreLib.EMP_NEW
         }
 
         //Writers (Section 2)
-        private void WriteTextureSamplers(IList<EMP_TextureSamplerDef> embEntries)
+        private void WriteTextureSamplers(IList<EMP_TextureSamplerDef> textures)
         {
             List<int> subData2Offsets_ToReplace = new List<int>();
 
-
-            for (int i = 0; i < embEntries.Count; i++)
+            for (int i = 0; i < textures.Count; i++)
             {
-
                 //Filling in offsets
                 for (int a = 0; a < EmbTextureOffsets[i].Count; a++)
                 {
                     bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - EmbTextureOffsets_Minus[i][a]), EmbTextureOffsets[i][a]);
                 }
 
-                //getting subdata type, and defaulting it if it doesn't exist
+                bytes.AddRange(new byte[10] { textures[i].I_00, textures[i].EmbIndex, textures[i].I_02, textures[i].I_03, (byte)textures[i].FilteringMin, (byte)textures[i].FilteringMag, (byte)textures[i].RepetitionU, (byte)textures[i].RepetitionV, textures[i].RandomSymetryU, textures[i].RandomSymetryV });
+                bytes.AddRange(BitConverter.GetBytes((ushort)textures[i].ScrollState.ScrollType));
 
-                EMP_TextureSamplerDef.TextureAnimationType textureType = embEntries[i].TextureType;
-
-                bytes.AddRange(new byte[10] { embEntries[i].I_00, embEntries[i].EmbIndex, embEntries[i].I_02, embEntries[i].I_03, embEntries[i].FilteringMin, embEntries[i].FilteringMax, (byte)embEntries[i].RepitionX, (byte)embEntries[i].RepetitionY, embEntries[i].RandomSymetryX, embEntries[i].RandomSymetryY });
-                bytes.AddRange(BitConverter.GetBytes((ushort)textureType));
-
-
-                switch (textureType)
+                switch (textures[i].ScrollState.ScrollType)
                 {
-                    case EMP_TextureSamplerDef.TextureAnimationType.Static:
-                        bytes.AddRange(BitConverter.GetBytes(embEntries[i].ScrollAnimation.Keyframes[0].ScrollX));
-                        bytes.AddRange(BitConverter.GetBytes(embEntries[i].ScrollAnimation.Keyframes[0].ScrollY));
-                        bytes.AddRange(BitConverter.GetBytes(embEntries[i].ScrollAnimation.Keyframes[0].ScaleX));
-                        bytes.AddRange(BitConverter.GetBytes(embEntries[i].ScrollAnimation.Keyframes[0].ScaleY));
+                    case EMP_ScrollState.ScrollTypeEnum.Static:
+                        bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.Keyframes[0].ScrollU));
+                        bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.Keyframes[0].ScrollV));
+                        bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.Keyframes[0].ScaleU));
+                        bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.Keyframes[0].ScaleV));
 
                         if (EmpFile.Version == VersionEnum.SDBH)
                         {
-                            embEntries[i].ScrollAnimation.Keyframes[0].SetDefaultValuesForSDBH();
-                            bytes.AddRange(BitConverter.GetBytes(float.Parse(embEntries[i].ScrollAnimation.Keyframes[0].F_20)));
-                            bytes.AddRange(BitConverter.GetBytes(float.Parse(embEntries[i].ScrollAnimation.Keyframes[0].F_24)));
+                            bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.Keyframes[0].I_20));
+                            bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.Keyframes[0].I_24));
                         }
 
                         subData2Offsets_ToReplace.Add(bytes.Count());
                         break;
-                    case EMP_TextureSamplerDef.TextureAnimationType.Speed:
-                        bytes.AddRange(BitConverter.GetBytes(embEntries[i].ScrollAnimation.ScrollSpeed_U));
-                        bytes.AddRange(BitConverter.GetBytes(embEntries[i].ScrollAnimation.ScrollSpeed_V));
+                    case EMP_ScrollState.ScrollTypeEnum.Speed:
+                        bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.ScrollSpeed_U));
+                        bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.ScrollSpeed_V));
                         bytes.AddRange(new byte[8]);
 
                         if (EmpFile.Version == VersionEnum.SDBH)
@@ -449,9 +470,9 @@ namespace Xv2CoreLib.EMP_NEW
 
                         subData2Offsets_ToReplace.Add(bytes.Count());
                         break;
-                    case EMP_TextureSamplerDef.TextureAnimationType.SpriteSheet:
+                    case EMP_ScrollState.ScrollTypeEnum.SpriteSheet:
                         bytes.AddRange(new byte[10]);
-                        int animationCount = (embEntries[i].ScrollAnimation.Keyframes != null) ? embEntries[i].ScrollAnimation.Keyframes.Count() : 0;
+                        int animationCount = (textures[i].ScrollState.Keyframes != null) ? textures[i].ScrollState.Keyframes.Count() : 0;
                         bytes.AddRange(BitConverter.GetBytes((short)animationCount));
 
                         subData2Offsets_ToReplace.Add(bytes.Count());
@@ -463,58 +484,36 @@ namespace Xv2CoreLib.EMP_NEW
                         }
                         break;
                     default:
-                        throw new InvalidDataException("Unknown EmbEntry.TextureAnimationType: " + textureType);
+                        throw new InvalidDataException("Unknown ScrollState.ScrollType: " + textures[i].ScrollState.ScrollType);
                 }
-
-
             }
 
-            for (int i = 0; i < embEntries.Count; i++)
+            for (int i = 0; i < textures.Count; i++)
             {
-                if (embEntries[i].ScrollAnimation != null)
+                if (textures[i].ScrollState != null)
                 {
-                    EMP_TextureSamplerDef.TextureAnimationType textureType = embEntries[i].TextureType;
-
-                    if (textureType == EMP_TextureSamplerDef.TextureAnimationType.SpriteSheet)
+                    if (textures[i].ScrollState.ScrollType == EMP_ScrollState.ScrollTypeEnum.SpriteSheet)
                     {
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - subData2Offsets_ToReplace[i] + 12), subData2Offsets_ToReplace[i]);
 
-                        for (int a = 0; a < embEntries[i].ScrollAnimation.Keyframes.Count; a++)
+                        for (int a = 0; a < textures[i].ScrollState.Keyframes.Count; a++)
                         {
-                            bytes.AddRange(BitConverter.GetBytes(embEntries[i].ScrollAnimation.Keyframes[a].Time));
-                            bytes.AddRange(BitConverter.GetBytes(embEntries[i].ScrollAnimation.Keyframes[a].ScrollX));
-                            bytes.AddRange(BitConverter.GetBytes(embEntries[i].ScrollAnimation.Keyframes[a].ScrollY));
-                            bytes.AddRange(BitConverter.GetBytes(embEntries[i].ScrollAnimation.Keyframes[a].ScaleX));
-                            bytes.AddRange(BitConverter.GetBytes(embEntries[i].ScrollAnimation.Keyframes[a].ScaleY));
+                            bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.Keyframes[a].Time));
+                            bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.Keyframes[a].ScrollU));
+                            bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.Keyframes[a].ScrollV));
+                            bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.Keyframes[a].ScaleU));
+                            bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.Keyframes[a].ScaleV));
 
                             if (EmpFile.Version == VersionEnum.SDBH)
                             {
-                                embEntries[i].ScrollAnimation.Keyframes[a].SetDefaultValuesForSDBH();
-                                bytes.AddRange(BitConverter.GetBytes(float.Parse(embEntries[i].ScrollAnimation.Keyframes[a].F_20)));
-                                bytes.AddRange(BitConverter.GetBytes(float.Parse(embEntries[i].ScrollAnimation.Keyframes[a].F_24)));
+                                bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.Keyframes[a].I_20));
+                                bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.Keyframes[a].I_24));
                             }
                         }
                     }
                 }
             }
 
-        }
-
-        //Utility
-        private bool TextureScrollAnimationIsType0Check(ObservableCollection<EMP_ScrollKeyframe> keyframes)
-        {
-            if (keyframes != null)
-            {
-                if (keyframes.Count() == 1)
-                {
-                    if (keyframes[0].Time == -1)
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
         }
 
         private int CalculatePaddingAfterMainEntry()

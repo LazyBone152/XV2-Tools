@@ -310,7 +310,7 @@ namespace Xv2CoreLib.EMB_CLASS
             foreach (var entry in Entry)
             {
                 if (entry.Name.Equals(name, StringComparison.OrdinalIgnoreCase)) return true;
-                
+
             }
 
             return false;

@@ -23,7 +23,7 @@ namespace Xv2CoreLib.ETR
 
         public List<ETR_MainEntry> ETR_Entries { get; set; }
         public List<ETR_TextureEntry> ETR_TextureEntries { get; set; }
-        
+
 
         public static ETR_File Load(byte[] bytes)
         {
@@ -31,7 +31,7 @@ namespace Xv2CoreLib.ETR
             etrFile.Bytes = bytes;
             etrFile.ETR_Entries = new List<ETR_MainEntry>();
             etrFile.ETR_TextureEntries = new List<ETR_TextureEntry>();
-            
+
             int section1Count = BitConverter.ToInt16(bytes, 12);
             int section2Count = BitConverter.ToInt16(bytes, 14);
             int section1Offset = BitConverter.ToInt32(bytes, 16);
