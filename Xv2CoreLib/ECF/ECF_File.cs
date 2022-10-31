@@ -1,24 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Xv2CoreLib.EMP_NEW;
+using Xv2CoreLib.EMP_NEW.Keyframes;
 using Xv2CoreLib.HslColor;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
-using YAXLib;
 
 namespace Xv2CoreLib.ECF
 {
 
     [Serializable]
-    [YAXSerializeAs("ECF")]
     public class ECF_File
     {
-        [YAXAttributeForClass]
         public ushort I_12 { get; set; }
         //followed by 12 zero bytes
-        
-        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "ColorEffect")]
-        public List<ECF_Entry> Entries { get; set; }
+
+        public AsyncObservableCollection<ECF_Node> Nodes { get; set; } = new AsyncObservableCollection<ECF_Node>();
 
         public byte[] SaveToBytes()
         {
@@ -27,9 +25,9 @@ namespace Xv2CoreLib.ECF
 
         public static ECF_File Load(string path)
         {
-            return new Parser(path, false).GetEcfFile();
+            return Load(System.IO.File.ReadAllBytes(path));
         }
-        
+
         public static ECF_File Load(byte[] bytes)
         {
             return new Parser(bytes).GetEcfFile();
@@ -38,9 +36,9 @@ namespace Xv2CoreLib.ECF
         public List<RgbColor> GetUsedColors()
         {
             List<RgbColor> colors = new List<RgbColor>();
-            if (Entries == null) return colors;
+            if (Nodes == null) return colors;
 
-            foreach(var entry in Entries)
+            foreach (var entry in Nodes)
             {
                 colors.AddRange(entry.GetUsedColors());
             }
@@ -49,9 +47,9 @@ namespace Xv2CoreLib.ECF
 
         public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet = false, int variance = 0)
         {
-            if (Entries == null) return;
+            if (Nodes == null) return;
 
-            foreach (var entry in Entries)
+            foreach (var entry in Nodes)
             {
                 entry.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
             }
@@ -59,376 +57,116 @@ namespace Xv2CoreLib.ECF
     }
 
     [Serializable]
-    [YAXSerializeAs("ColorEffect")]
-    public class ECF_Entry
+    public class ECF_Node
     {
-        [YAXAttributeForClass]
-        [YAXSerializeAs("MaterialLink")]
-        public string MaterialLink { get; set; } //Material linkage. "Node" seems to be the default value, applying to all materials.
-        [YAXSerializeAs("StartFrame")]
-        [YAXAttributeFor("Time")]
-        public ushort I_56 { get; set; }
-        [YAXSerializeAs("EndFrame")]
-        [YAXAttributeFor("Time")]
-        public ushort I_58 { get; set; }
-
-        [YAXSerializeAs("R")]
-        [YAXAttributeFor("DiffuseColor")]
-        [YAXFormat("0.0######")]
-        public float F_00 { get; set; }
-        [YAXSerializeAs("G")]
-        [YAXAttributeFor("DiffuseColor")]
-        [YAXFormat("0.0######")]
-        public float F_04 { get; set; }
-        [YAXSerializeAs("B")]
-        [YAXAttributeFor("DiffuseColor")]
-        [YAXFormat("0.0######")]
-        public float F_08 { get; set; }
-        [YAXSerializeAs("A")]
-        [YAXAttributeFor("DiffuseColor")]
-        [YAXFormat("0.0######")]
-        public float F_12 { get; set; }
-        [YAXSerializeAs("R")]
-        [YAXAttributeFor("SpecularColor")]
-        [YAXFormat("0.0######")]
-        public float F_16 { get; set; }
-        [YAXSerializeAs("G")]
-        [YAXAttributeFor("SpecularColor")]
-        [YAXFormat("0.0######")]
-        public float F_20 { get; set; }
-        [YAXSerializeAs("B")]
-        [YAXAttributeFor("SpecularColor")]
-        [YAXFormat("0.0######")]
-        public float F_24 { get; set; }
-        [YAXSerializeAs("A")]
-        [YAXAttributeFor("SpecularColor")]
-        [YAXFormat("0.0######")]
-        public float F_28 { get; set; }
-        [YAXSerializeAs("R")]
-        [YAXAttributeFor("AmbientColor")]
-        [YAXFormat("0.0######")]
-        public float F_32 { get; set; }
-        [YAXSerializeAs("G")]
-        [YAXAttributeFor("AmbientColor")]
-        [YAXFormat("0.0######")]
-        public float F_36 { get; set; }
-        [YAXSerializeAs("B")]
-        [YAXAttributeFor("AmbientColor")]
-        [YAXFormat("0.0######")]
-        public float F_40 { get; set; }
-        [YAXSerializeAs("A")]
-        [YAXAttributeFor("AmbientColor")]
-        [YAXFormat("0.0######")]
-        public float F_44 { get; set; }
-        [YAXSerializeAs("value")]
-        [YAXAttributeFor("BlendingFactor")]
-        [YAXFormat("0.0######")]
-        public float F_48 { get; set; }
-        [YAXSerializeAs("Mode")]
-        [YAXAttributeFor("Loop")]
-        public PlayMode I_52 { get; set; } //uint16
-        [YAXSerializeAs("value")]
-        [YAXAttributeFor("I_54")]
-        public ushort I_54 { get; set; } //always 0
-        [YAXSerializeAs("value")]
-        [YAXAttributeFor("I_60")]
-        public ushort I_60 { get; set; } //always 0
-        [YAXSerializeAs("value")]
-        [YAXAttributeFor("I_62")]
-        public ushort I_62 { get; set; } //always 0
-        [YAXSerializeAs("uint16")]
-        [YAXAttributeFor("I_64")]
-        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public ushort[] I_64 { get; set; } // size = 14, all always 0
-        [YAXSerializeAs("value")]
-        [YAXAttributeFor("I_96")]
-        public ushort I_96 { get; set; } //always 0
-
-        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Animation")]
-        public List<Type0> Animations { get; set; } = new List<Type0>();
-
-        
         public enum PlayMode : ushort
         {
+            Unk0 = 0,
+            Unk1 = 1,
             NoLoop = 2,
             Loop = 3
         }
 
+        public string Material { get; set; } //Material linkage. "Node" seems to be the default value, applying to all materials.
+        public ushort StartTime { get; set; }
+        public ushort EndTime { get; set; }
+        public PlayMode LoopMode { get; set; } //uint16
+
+        public KeyframedColorValue DiffuseColor { get; set; } = new KeyframedColorValue(0, 0, 0, KeyframedValueType.ECF_DiffuseColor);
+        public KeyframedColorValue SpecularColor { get; set; } = new KeyframedColorValue(0, 0, 0, KeyframedValueType.ECF_SpecularColor);
+        public KeyframedColorValue AmbientColor { get; set; } = new KeyframedColorValue(0, 0, 0, KeyframedValueType.ECF_AmbientColor);
+        public KeyframedFloatValue DiffuseColor_Transparency { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.ECF_DiffuseTransparency);
+        public KeyframedFloatValue SpecularColor_Transparency { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.ECF_SpecularTransparency);
+        public KeyframedFloatValue AmbientColor_Transparency { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.ECF_AmbientTransparency);
+        public KeyframedFloatValue BlendingFactor { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.ECF_BlendingFactor);
+
+        public ushort I_54 { get; set; } //always 0
+        public ushort I_60 { get; set; } //always 0
+        public ushort I_62 { get; set; } //always 0
+        public ulong I_64 { get; set; } //always 0
+        public ulong I_72 { get; set; } //always 0
+        public ulong I_80 { get; set; } //always 0
+        public int I_88 { get; set; } //always 0
+        public ushort I_96 { get; set; } //always 0
+
+        public List<EMP_KeyframedValue> KeyframedValues { get; set; } = new List<EMP_KeyframedValue>();
 
         public List<RgbColor> GetUsedColors()
         {
             List<RgbColor> colors = new List<RgbColor>();
-            
-            //Diffuse Color
-            if (F_00 != 0 || F_04 != 0 || F_08 != 0)
-            {
-                if (F_00 != 1 || F_04 != 1 || F_08 != 1)
-                {
-                    colors.Add(new RgbColor(F_00, F_04, F_08));
-                }
-            }
 
-            //Specular Color
-            if (F_16 != 0 || F_20 != 0 || F_24 != 0)
-            {
-                if (F_16 != 1 || F_20 != 1 || F_24 != 1)
-                {
-                    colors.Add(new RgbColor(F_16, F_20, F_24));
-                }
-            }
+            RgbColor diffuse = DiffuseColor.GetAverageColor();
+            RgbColor specular = SpecularColor.GetAverageColor();
+            RgbColor ambient = AmbientColor.GetAverageColor();
 
-            //Ambient Color
-            if (F_32 != 0 || F_36 != 0 || F_40 != 0)
-            {
-                if (F_32 != 1 || F_36 != 1 || F_40 != 1)
-                {
-                    colors.Add(new RgbColor(F_32, F_36, F_40));
-                }
-            }
+            if (!diffuse.IsWhiteOrBlack)
+                colors.Add(diffuse);
 
-            //Animations
-            if (Animations != null)
-            {
-                InitColorAnimations(ECF.Type0.ParameterEnum.DiffuseColor, F_00, F_04, F_08);
-                InitColorAnimations(ECF.Type0.ParameterEnum.SpecularColor, F_16, F_20, F_24);
-                InitColorAnimations(ECF.Type0.ParameterEnum.AmbientColor, F_32, F_36, F_40);
-            }
+            if (!specular.IsWhiteOrBlack)
+                colors.Add(specular);
+
+            if (!ambient.IsWhiteOrBlack)
+                colors.Add(ambient);
 
             return colors;
         }
 
-        /// <summary>
-        /// Ensures that an animation exists for each color component.
-        /// </summary>
-        public void InitColorAnimations(Type0.ParameterEnum parameter, float defaultR, float defaultG, float defaultB)
-        {
-            if (Animations == null) return;
-
-            var r = GetColorAnimation(parameter, ECF.Type0.ComponentEnum.R);
-            var g = GetColorAnimation(parameter, ECF.Type0.ComponentEnum.G);
-            var b = GetColorAnimation(parameter, ECF.Type0.ComponentEnum.B);
-
-            //Create missing animations
-            if (r != null || g != null || b != null)
-            {
-                if (r == null)
-                {
-                    var newR = ECF.Type0.GetNew(defaultR);
-                    newR.Component = ECF.Type0.ComponentEnum.R;
-                    newR.Parameter = parameter;
-                    Animations.Add(newR);
-                }
-
-                if (g == null)
-                {
-                    var newG = ECF.Type0.GetNew(defaultG);
-                    newG.Component = ECF.Type0.ComponentEnum.G;
-                    newG.Parameter = parameter;
-                    Animations.Add(newG);
-                }
-
-                if (b == null)
-                {
-                    var newB = ECF.Type0.GetNew(defaultB);
-                    newB.Component = ECF.Type0.ComponentEnum.B;
-                    newB.Parameter = parameter;
-                    Animations.Add(newB);
-                }
-                
-            }
-
-            r = GetColorAnimation(parameter, ECF.Type0.ComponentEnum.R);
-            g = GetColorAnimation(parameter, ECF.Type0.ComponentEnum.G);
-            b = GetColorAnimation(parameter, ECF.Type0.ComponentEnum.B);
-
-            if (r != null && g != null && b != null)
-            {
-                //Add keyframe at frame 0, if it doesn't exist
-                if (r.GetKeyframe(0) == null)
-                {
-                    r.SetValue(0, defaultR);
-                }
-
-                if (g.GetKeyframe(0) == null)
-                {
-                    g.SetValue(0, defaultG);
-                }
-
-                if (b.GetKeyframe(0) == null)
-                {
-                    b.SetValue(0, defaultB);
-                }
-            }
-
-            //Add missing keyframes
-            foreach (var anim in Animations)
-            {
-                foreach (var anim2 in Animations)
-                {
-                    if (anim.Parameter == parameter && anim2.Parameter == parameter && !anim.IsAlpha && !anim2.IsAlpha)
-                    {
-                        anim.AddKeyframesFromAnim(anim2);
-                    }
-                }
-            }
-        }
-
-        public Type0 GetColorAnimation(Type0.ParameterEnum parameter, Type0.ComponentEnum component)
-        {
-            foreach (var anim in Animations)
-            {
-                if (anim.Parameter == parameter && anim.Component == component)
-                {
-                    return anim;
-                }
-            }
-
-            return null;
-        }
-
         public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet = false, int variance = 0)
         {
-            //Diffuse Color
-            if (F_00 != 0 || F_04 != 0 || F_08 != 0)
-            {
-                if (F_00 != 1 || F_04 != 1 || F_08 != 1)
-                {
-                    HslColor.HslColor newCol1 = new RgbColor(F_00, F_04, F_08).ToHsl();
-                    RgbColor convertedColor;
-
-                    if (hueSet)
-                    {
-                        newCol1.SetHue(hue, variance);
-                    }
-                    else
-                    {
-                        newCol1.ChangeHue(hue);
-                        newCol1.ChangeSaturation(saturation);
-                        newCol1.ChangeLightness(lightness);
-                    }
-
-                    convertedColor = newCol1.ToRgb();
-
-                    undos.Add(new UndoableProperty<ECF_Entry>(nameof(F_00), this, F_00, (float)convertedColor.R));
-                    undos.Add(new UndoableProperty<ECF_Entry>(nameof(F_04), this, F_04, (float)convertedColor.G));
-                    undos.Add(new UndoableProperty<ECF_Entry>(nameof(F_08), this, F_08, (float)convertedColor.B));
-
-                    F_00 = (float)convertedColor.R;
-                    F_04 = (float)convertedColor.G;
-                    F_08 = (float)convertedColor.B;
-                }
-            }
-
-            //Specular Color
-            if (F_16 != 0 || F_20 != 0 || F_24 != 0)
-            {
-                if (F_16 != 1 || F_20 != 1 || F_24 != 1)
-                {
-                    HslColor.HslColor newCol1 = new RgbColor(F_16, F_20, F_24).ToHsl();
-                    RgbColor convertedColor;
-
-                    if (hueSet)
-                    {
-                        newCol1.SetHue(hue, variance);
-                    }
-                    else
-                    {
-                        newCol1.ChangeHue(hue);
-                        newCol1.ChangeSaturation(saturation);
-                        newCol1.ChangeLightness(lightness);
-                    }
-
-                    convertedColor = newCol1.ToRgb();
-
-                    undos.Add(new UndoableProperty<ECF_Entry>(nameof(F_16), this, F_16, (float)convertedColor.R));
-                    undos.Add(new UndoableProperty<ECF_Entry>(nameof(F_20), this, F_20, (float)convertedColor.G));
-                    undos.Add(new UndoableProperty<ECF_Entry>(nameof(F_24), this, F_24, (float)convertedColor.B));
-
-                    F_16 = (float)convertedColor.R;
-                    F_20 = (float)convertedColor.G;
-                    F_24 = (float)convertedColor.B;
-                }
-            }
-
-            //Ambient Color
-            if (F_32 != 0 || F_36 != 0 || F_40 != 0)
-            {
-                if (F_32 != 1 || F_36 != 1 || F_40 != 1)
-                {
-                    HslColor.HslColor newCol1 = new RgbColor(F_32, F_36, F_40).ToHsl();
-                    RgbColor convertedColor;
-
-                    if (hueSet)
-                    {
-                        newCol1.SetHue(hue, variance);
-                    }
-                    else
-                    {
-                        newCol1.ChangeHue(hue);
-                        newCol1.ChangeSaturation(saturation);
-                        newCol1.ChangeLightness(lightness);
-                    }
-
-                    convertedColor = newCol1.ToRgb();
-
-                    undos.Add(new UndoableProperty<ECF_Entry>(nameof(F_32), this, F_32, (float)convertedColor.R));
-                    undos.Add(new UndoableProperty<ECF_Entry>(nameof(F_36), this, F_36, (float)convertedColor.G));
-                    undos.Add(new UndoableProperty<ECF_Entry>(nameof(F_40), this, F_40, (float)convertedColor.B));
-
-                    F_32 = (float)convertedColor.R;
-                    F_36 = (float)convertedColor.G;
-                    F_40 = (float)convertedColor.B;
-                }
-            }
-
-            if(Animations != null)
-            {
-                ChangeHueForAnimations(hue, saturation, lightness, ECF.Type0.ParameterEnum.DiffuseColor, undos, hueSet, variance);
-                ChangeHueForAnimations(hue, saturation, lightness, ECF.Type0.ParameterEnum.SpecularColor, undos, hueSet, variance);
-                ChangeHueForAnimations(hue, saturation, lightness, ECF.Type0.ParameterEnum.AmbientColor, undos, hueSet, variance);
-            }
+            DiffuseColor.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
+            SpecularColor.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
+            AmbientColor.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
         }
 
-        private void ChangeHueForAnimations(double hue, double saturation, double lightness, Type0.ParameterEnum parameter, List<IUndoRedo> undos, bool hueSet = false, int variance = 0)
+        public EMP_KeyframedValue[] GetKeyframedValues(int parameter, params int[] components)
         {
-            Type0 r = Animations.FirstOrDefault(e => e.Component == ECF.Type0.ComponentEnum.R && e.Parameter == parameter);
-            Type0 g = Animations.FirstOrDefault(e => e.Component == ECF.Type0.ComponentEnum.G && e.Parameter == parameter);
-            Type0 b = Animations.FirstOrDefault(e => e.Component == ECF.Type0.ComponentEnum.B && e.Parameter == parameter);
-            if (r == null || g == null || b == null) return;
+            EMP_KeyframedValue[] values = new EMP_KeyframedValue[components.Length];
 
-            foreach (var r_frame in r.Keyframes)
+            for (int i = 0; i < components.Length; i++)
             {
-                float g_frame = g.GetValue(r_frame.Index);
-                float b_frame = b.GetValue(r_frame.Index);
+                EMP_KeyframedValue value = KeyframedValues.FirstOrDefault(x => x.Value == parameter && x.Component == components[i]);
 
-                if (r_frame.Float != 0.0 || g_frame != 0.0 || b_frame != 0.0)
-                {
-                    HslColor.HslColor color = new RgbColor(r_frame.Float, g_frame, b_frame).ToHsl();
-                    RgbColor convertedColor;
-
-                    if (hueSet)
-                    {
-                        color.SetHue(hue, variance);
-                    }
-                    else
-                    {
-                        color.ChangeHue(hue);
-                        color.ChangeSaturation(saturation);
-                        color.ChangeLightness(lightness);
-                    }
-
-                    convertedColor = color.ToRgb();
-
-                    r.SetValue(r_frame.Index, (float)convertedColor.R, undos);
-                    g.SetValue(r_frame.Index, (float)convertedColor.G, undos);
-                    b.SetValue(r_frame.Index, (float)convertedColor.B, undos);
-                }
+                if (value != null)
+                    values[i] = value;
+                else
+                    values[i] = EMP_KeyframedValue.Default;
             }
 
+            return values;
+        }
+
+
+        internal void CompileAllKeyframes()
+        {
+            KeyframedValues.Clear();
+
+            AddKeyframedValues(DiffuseColor.CompileKeyframes());
+            AddKeyframedValues(SpecularColor.CompileKeyframes());
+            AddKeyframedValues(AmbientColor.CompileKeyframes());
+            AddKeyframedValues(DiffuseColor_Transparency.CompileKeyframes());
+            AddKeyframedValues(SpecularColor_Transparency.CompileKeyframes());
+            AddKeyframedValues(AmbientColor_Transparency.CompileKeyframes());
+            AddKeyframedValues(BlendingFactor.CompileKeyframes());
+        }
+
+        internal void AddKeyframedValues(EMP_KeyframedValue[] values)
+        {
+            for (int i = 0; i < values.Length; i++)
+            {
+                if (values[i] != null)
+                {
+                    if (KeyframedValues.Any(x => x.Value == values[i].Value && x.Component == values[i].Component))
+                    {
+                        throw new Exception($"ECF_File: KeyframedValue already exists (parameter = {values[i].Value}, component = {values[i].Component})");
+                    }
+
+                    KeyframedValues.Add(values[i]);
+                }
+            }
         }
 
     }
-
+    /*
     [Serializable]
     [YAXSerializeAs("Animation")]
     public class Type0
@@ -461,7 +199,7 @@ namespace Xv2CoreLib.ECF
         [YAXAttributeForClass]
         [YAXSerializeAs("Duration")]
         public ushort I_04 { get; set; }
-        
+
         public AsyncObservableCollection<Type0_Keyframe> Keyframes { get; set; }
 
         public enum ParameterEnum
@@ -480,7 +218,7 @@ namespace Xv2CoreLib.ECF
             A = 3,
             Base = 4
         }
-        
+
         public static ComponentEnum GetComponent(ParameterEnum parameter, int component)
         {
             switch (parameter)
@@ -655,5 +393,5 @@ namespace Xv2CoreLib.ECF
         [YAXFormat("0.0######")]
         public float Float { get; set; }
     }
-    
+    */
 }

@@ -22,7 +22,7 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
-            args = new string[1] { @"E:\VS_Test\EMP\ALL EMP" };
+            args = new string[1] { @"E:\VS_Test\ECF\ALL ECF" };
             //args = new string[1] { @"E:\VS_Test\QXD" };
 
             DEBUG_MODE = true;
@@ -1182,27 +1182,25 @@ namespace XV2_Xml_Serializer
         static void BulkParseEcf(string directory)
         {
             string[] files = Directory.GetFiles(directory);
-            List<string> values = new List<string>();
+            List<ushort> values = new List<ushort>();
 
             foreach (string s in files)
             {
                 if (Path.GetExtension(s) == ".ecf")
                 {
+                    
                     Console.WriteLine(s);
-                    var ecf = new Xv2CoreLib.ECF.Parser(s, false).GetEcfFile();
+                    var ecf = Xv2CoreLib.ECF.ECF_File.Load(s);
 
-                    foreach(var entry in ecf.Entries)
+                    foreach(var node in ecf.Nodes)
                     {
-                        if(entry.Animations != null)
+                        if(node.I_60 != 0 || node.I_62 != 0 || node.I_64 != 0 || node.I_72 != 0 || node.I_80 != 0 || node.I_88 != 0 || node.I_96 != 0)
                         {
-                            foreach (var anim in entry.Animations)
-                            {
-                                if (!values.Contains(anim.Component.ToString()))
-                                    values.Add(anim.Component.ToString());
-                            }
+                            Console.WriteLine("This");
+                            Console.ReadLine();
                         }
                     }
-
+                    
                 }
             }
 
@@ -1211,7 +1209,7 @@ namespace XV2_Xml_Serializer
 
             foreach (var value in values)
             {
-                str.AppendLine(value);
+                str.AppendLine(value.ToString());
             }
 
             File.WriteAllText("ecf_log.txt", str.ToString());

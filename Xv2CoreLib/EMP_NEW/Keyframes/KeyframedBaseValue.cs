@@ -137,6 +137,9 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
                 //The duration must be a minimum of 101 (the particles whole life time). This also means that non-looped values will need to be extended as well, if they are less than that.
                 int newDuration = keyframeValues.Max(x => x.Duration) > 101 ? keyframeValues.Max(x => x.Duration) : 101;
 
+                if (newDuration == 0)
+                    newDuration = 101;
+
                 for(int i = 0; i < values.Length; i++)
                 {
                     if (!keyframeValues[i].Loop) continue;
@@ -144,16 +147,24 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
                     int loopDuration = keyframeValues[i].Duration;
                     int currentDuration = loopDuration;
 
-                    while(currentDuration < newDuration)
+                    if(loopDuration != 0)
                     {
-                        for (int a = 0; a < loopDuration; a++)
+                        while (currentDuration < newDuration)
                         {
-                            if (currentDuration + a >= newDuration) break;
+                            for (int a = 0; a < loopDuration; a++)
+                            {
+                                if (currentDuration + a >= newDuration) break;
 
-                            values[i].Add(new KeyframedGenericValue((ushort)(currentDuration + a), EMP_Keyframe.GetInterpolatedKeyframe(values[i], a, keyframeValues[i].Interpolate)));
+                                values[i].Add(new KeyframedGenericValue((ushort)(currentDuration + a), EMP_Keyframe.GetInterpolatedKeyframe(values[i], a, keyframeValues[i].Interpolate)));
+                            }
+
+                            currentDuration += loopDuration;
                         }
-
-                        currentDuration += loopDuration;
+                    }
+                    else
+                    {
+                        //Special case: looped keyframe with duration of 0. 
+                        values[i].Add(new KeyframedGenericValue((ushort)(newDuration - 1), values[i][0].Value));
                     }
 
                 }

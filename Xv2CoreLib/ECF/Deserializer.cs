@@ -1,33 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using Xv2CoreLib.Resource;
-using YAXLib;
+using Xv2CoreLib.EMP_NEW;
 
 namespace Xv2CoreLib.ECF
 {
     public class Deserializer
     {
-        string saveLocation;
         ECF_File ecfFile;
         public List<byte> bytes = new List<byte>() { 35, 69, 67, 70, 254, 255, 32, 00 };
-        bool writeToDisk = true;
 
-        public Deserializer(string location)
-        {
-            saveLocation = String.Format("{0}/{1}", Path.GetDirectoryName(location), Path.GetFileNameWithoutExtension(location));
-            YAXSerializer serializer = new YAXSerializer(typeof(ECF_File), YAXSerializationOptions.DontSerializeNullObjects);
-            ecfFile = (ECF_File)serializer.DeserializeFromFile(location);
-            Write();
-        }
 
         public Deserializer(ECF_File _ecfFile)
         {
-            writeToDisk = false;
             ecfFile = _ecfFile;
             Write();
         }
@@ -44,51 +30,56 @@ namespace Xv2CoreLib.ECF
             bytes.AddRange(BitConverter.GetBytes(ecfFile.I_12));
             bytes.AddRange(new byte[12]);
 
-            if (ecfFile.Entries != null)
+            if (ecfFile.Nodes != null)
             {
-                bytes.AddRange(BitConverter.GetBytes((short)ecfFile.Entries.Count));
+                bytes.AddRange(BitConverter.GetBytes((short)ecfFile.Nodes.Count));
                 bytes.AddRange(BitConverter.GetBytes(32));
 
-
-                for (int i = 0; i < ecfFile.Entries.Count; i++)
+                for (int i = 0; i < ecfFile.Nodes.Count; i++)
                 {
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Entries[i].F_00));
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Entries[i].F_04));
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Entries[i].F_08));
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Entries[i].F_12));
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Entries[i].F_16));
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Entries[i].F_20));
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Entries[i].F_24));
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Entries[i].F_28));
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Entries[i].F_32));
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Entries[i].F_36));
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Entries[i].F_40));
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Entries[i].F_44));
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Entries[i].F_48));
-                    bytes.AddRange(BitConverter.GetBytes((ushort)ecfFile.Entries[i].I_52));
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Entries[i].I_54));
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Entries[i].I_56));
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Entries[i].I_58));
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Entries[i].I_60));
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Entries[i].I_62));
-
-                    foreach (ushort value in ecfFile.Entries[i].I_64)
+                    if (EffectContainer.EepkToolInterlop.FullDecompile)
                     {
-                        bytes.AddRange(BitConverter.GetBytes(value));
+                        ecfFile.Nodes[i].CompileAllKeyframes();
                     }
 
-                    if (!string.IsNullOrWhiteSpace(ecfFile.Entries[i].MaterialLink))
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].DiffuseColor.Constant.R));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].DiffuseColor.Constant.G));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].DiffuseColor.Constant.B));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].DiffuseColor_Transparency.Constant));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].SpecularColor.Constant.R));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].SpecularColor.Constant.G));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].SpecularColor.Constant.B));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].SpecularColor_Transparency.Constant));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].AmbientColor.Constant.R));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].AmbientColor.Constant.G));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].AmbientColor.Constant.B));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].AmbientColor_Transparency.Constant));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].BlendingFactor.Constant));
+
+                    bytes.AddRange(BitConverter.GetBytes((ushort)ecfFile.Nodes[i].LoopMode));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].I_54));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].StartTime));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].EndTime));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].I_60));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].I_62));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].I_64));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].I_72));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].I_80));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].I_88));
+
+
+                    if (!string.IsNullOrWhiteSpace(ecfFile.Nodes[i].Material))
                     {
                         StrOffsets.Add(bytes.Count);
-                        StrToWrite.Add(ecfFile.Entries[i].MaterialLink);
+                        StrToWrite.Add(ecfFile.Nodes[i].Material);
                     }
 
                     bytes.AddRange(new byte[4]);
 
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Entries[i].I_96));
-                    if (ecfFile.Entries[i].Animations != null)
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].I_96));
+                    if (ecfFile.Nodes[i].KeyframedValues != null)
                     {
-                        bytes.AddRange(BitConverter.GetBytes((short)ecfFile.Entries[i].Animations.Count));
+                        bytes.AddRange(BitConverter.GetBytes((short)ecfFile.Nodes[i].KeyframedValues.Count));
                         Type0_Offsets.Add(bytes.Count);
                         bytes.AddRange(BitConverter.GetBytes(8));
                     }
@@ -101,21 +92,21 @@ namespace Xv2CoreLib.ECF
 
 
                 //Writing Keyframed Values
-                for (int i = 0; i < ecfFile.Entries.Count; i++)
+                for (int i = 0; i < ecfFile.Nodes.Count; i++)
                 {
-                    if (ecfFile.Entries[i].Animations != null)
+                    if (ecfFile.Nodes[i].KeyframedValues != null)
                     {
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - Type0_Offsets[i] + 4), Type0_Offsets[i]);
 
                         List<int> Type0EntryOffsets = new List<int>();
 
-                        foreach (var e in ecfFile.Entries[i].Animations)
+                        foreach (var e in ecfFile.Nodes[i].KeyframedValues)
                         {
-                            int I_01_b = (e.Interpolated == true) ? 1 : 0;
+                            int I_01_b = (e.Interpolate == true) ? 1 : 0;
                             int I_02 = (e.Loop == true) ? 1 : 0;
-                            bytes.AddRange(new byte[4] { (byte)e.Parameter, Int4Converter.GetByte((byte)e.GetComponent(), (byte)I_01_b, "Animation: Component", "Animation: Interpolated"), (byte)I_02, e.I_03 });
-                            bytes.AddRange(BitConverter.GetBytes(e.I_04));
-                            bytes.AddRange(BitConverter.GetBytes((short)e.Keyframes.Count()));
+                            bytes.AddRange(new byte[4] { e.Value, Int4Converter.GetByte(e.Component, (byte)I_01_b, "Animation: Component", "Animation: Interpolated"), (byte)I_02, e.I_03 });
+                            bytes.AddRange(BitConverter.GetBytes((ushort)0));
+                            bytes.AddRange(BitConverter.GetBytes((short)e.Keyframes.Count));
                             Type0EntryOffsets.Add(bytes.Count);
                             bytes.AddRange(new byte[8]);
 
@@ -126,12 +117,12 @@ namespace Xv2CoreLib.ECF
                             }
                         }
 
-                        for (int a = 0; a < ecfFile.Entries[i].Animations.Count; a++)
+                        for (int a = 0; a < ecfFile.Nodes[i].KeyframedValues.Count; a++)
                         {
                             int entryOffset = Type0EntryOffsets[a] - 8;
                             bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - entryOffset), Type0EntryOffsets[a]);
 
-                            int floatListOffset = WriteKeyframe(ecfFile.Entries[i].Animations[a].Keyframes);
+                            int floatListOffset = WriteKeyframe(ecfFile.Nodes[i].KeyframedValues[a].Keyframes);
 
                             bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(floatListOffset - entryOffset), Type0EntryOffsets[a] + 4);
                         }
@@ -154,14 +145,9 @@ namespace Xv2CoreLib.ECF
             {
                 bytes.AddRange(new byte[8]);
             }
-
-            if (writeToDisk)
-            {
-                File.WriteAllBytes(saveLocation, bytes.ToArray());
-            }
         }
 
-        private int WriteKeyframe(IList<Type0_Keyframe> keyframes)
+        private int WriteKeyframe(IList<EMP_Keyframe> keyframes)
         {
             //Determines the size of the keyframe list (adds padding if its not in 32 bit blocks)
             float fCount = keyframes.Count;
@@ -176,7 +162,7 @@ namespace Xv2CoreLib.ECF
             {
                 if (i < keyframes.Count())
                 {
-                    bytes.AddRange(BitConverter.GetBytes(keyframes[i].Index));
+                    bytes.AddRange(BitConverter.GetBytes(keyframes[i].Time));
                 }
                 else
                 {
@@ -188,12 +174,12 @@ namespace Xv2CoreLib.ECF
             int floatListOffset = bytes.Count();
             for (int i = 0; i < keyframes.Count(); i++)
             {
-                bytes.AddRange(BitConverter.GetBytes(keyframes[i].Float));
+                bytes.AddRange(BitConverter.GetBytes(keyframes[i].Value));
             }
 
             //Checking to make sure there are more than 1 keyframes (else, no index list)
-            bool specialCase_FirstKeyFrameIsNotZero = (keyframes[0].Index == 0) ? false : true;
-            if (keyframes.Count() > 1)
+            bool specialCase_FirstKeyFrameIsNotZero = (keyframes[0].Time == 0) ? false : true;
+            if (keyframes.Count > 1)
             {
                 //Writing IndexList
                 float totalIndex = 0;
@@ -206,12 +192,12 @@ namespace Xv2CoreLib.ECF
                     }
                     else if (specialCase_FirstKeyFrameIsNotZero == true && i == 0)
                     {
-                        thisFrameLength = keyframes[0].Index;
-                        thisFrameLength += keyframes[i + 1].Index - keyframes[i].Index;
+                        thisFrameLength = keyframes[0].Time;
+                        thisFrameLength += keyframes[i + 1].Time - keyframes[i].Time;
                     }
                     else
                     {
-                        thisFrameLength = keyframes[i + 1].Index - keyframes[i].Index;
+                        thisFrameLength = keyframes[i + 1].Time - keyframes[i].Time;
                     }
 
                     for (int a = 0; a < thisFrameLength; a++)

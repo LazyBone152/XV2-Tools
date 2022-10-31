@@ -2222,6 +2222,10 @@ namespace Xv2CoreLib.EMP_NEW
         public const byte COMPONENT_X = 0;
         public const byte COMPONENT_Y = 1;
         public const byte COMPONENT_Z = 2;
+        public const byte ECF_VALUE_DIFFUSE = 0;
+        public const byte ECF_VALUE_SPECULAR = 0;
+        public const byte ECF_VALUE_AMBIENT = 0;
+        public const byte ECF_VALUE_BLENDING = 0;
 
         /// <summary>
         /// This is the default <see cref="EMP_KeyframedValue"/> instance. Do not use this for anything other than representing a "null" or "empty" keyframed value.
@@ -2292,15 +2296,21 @@ namespace Xv2CoreLib.EMP_NEW
             switch (value)
             {
                 case KeyframedValueType.Position:
+                case KeyframedValueType.ECF_DiffuseColor:
+                case KeyframedValueType.ECF_DiffuseTransparency:
                     return 0;
                 case KeyframedValueType.Rotation:
                 case KeyframedValueType.ActiveRotation:
+                case KeyframedValueType.ECF_SpecularColor:
+                case KeyframedValueType.ECF_SpecularTransparency:
                     return 1;
                 case KeyframedValueType.ScaleBase:
                 case KeyframedValueType.ScaleXY:
                 case KeyframedValueType.PositionY:
                 case KeyframedValueType.Velocity:
                 case KeyframedValueType.Angle:
+                case KeyframedValueType.ECF_AmbientColor:
+                case KeyframedValueType.ECF_AmbientTransparency:
                     return 2;
                 case KeyframedValueType.Color1:
                 case KeyframedValueType.Color1_Transparency:
@@ -2308,6 +2318,7 @@ namespace Xv2CoreLib.EMP_NEW
                     //Radius for sphere is at a different component.
                     return (byte)(isSphere ? 2 : 3);
                 case KeyframedValueType.Size2:
+                case KeyframedValueType.ECF_BlendingFactor:
                     return 3;
                 case KeyframedValueType.Color2:
                 case KeyframedValueType.Color2_Transparency:
@@ -2325,17 +2336,24 @@ namespace Xv2CoreLib.EMP_NEW
                 case KeyframedValueType.Rotation:
                 case KeyframedValueType.Color1:
                 case KeyframedValueType.Color2:
+                case KeyframedValueType.ECF_DiffuseColor:
+                case KeyframedValueType.ECF_SpecularColor:
+                case KeyframedValueType.ECF_AmbientColor:
                     return new byte[] { 0, 1, 2 };
                 case KeyframedValueType.ActiveRotation:
+                case KeyframedValueType.ECF_AmbientTransparency:
+                case KeyframedValueType.ECF_DiffuseTransparency:
+                case KeyframedValueType.ECF_SpecularTransparency:
+                case KeyframedValueType.Color1_Transparency:
+                case KeyframedValueType.Color2_Transparency:
                     return new byte[] { 3 };
                 case KeyframedValueType.ScaleBase:
                     return isScaleXyEnabled ? new byte[] { 2 } : new byte[] { 0 };
                 case KeyframedValueType.ScaleXY:
                     return new byte[] { 0, 1 };
                 case KeyframedValueType.PositionY:
-                case KeyframedValueType.Color1_Transparency:
-                case KeyframedValueType.Color2_Transparency:
                 case KeyframedValueType.Size1:
+                case KeyframedValueType.ECF_BlendingFactor:
                     return new byte[] { 0 };
                 case KeyframedValueType.Velocity:
                 case KeyframedValueType.Size2:
@@ -2409,10 +2427,10 @@ namespace Xv2CoreLib.EMP_NEW
             AngleTranslation = 6,
             AngleAcceleration = 7,
             PointLoop = 8,
-            PivotRotate = 9,
+            Vortex = 9,
             Jitter = 10,
-            Unk11 = 11,
-            Acceleration2 = 12
+            Drag = 11,
+            Attract = 12
         }
 
         [Flags]
@@ -2424,7 +2442,7 @@ namespace Xv2CoreLib.EMP_NEW
 
         public ModifierType Type { get; set; }
         public ModifierFlags Flags { get; set; }
-        public AsyncObservableCollection<EMP_KeyframedValue> KeyframedValues { get; set; }
+        public AsyncObservableCollection<EMP_KeyframedValue> KeyframedValues { get; set; } = new AsyncObservableCollection<EMP_KeyframedValue>();
 
     }
 
@@ -2951,6 +2969,14 @@ namespace Xv2CoreLib.EMP_NEW
         Angle, //2, 2 (ShapeAreaDist, ShapePerimeterDist, VerticalDist)
         Size1, //3, 0 (ShapeAreaDist, ShapePerimeterDist) OR 2, 0 (SphereDist)
         Size2, //3, 1 (ShapeAreaDist, ShapePerimeterDist)
+
+        ECF_DiffuseColor,
+        ECF_SpecularColor,
+        ECF_AmbientColor,
+        ECF_DiffuseTransparency,
+        ECF_SpecularTransparency,
+        ECF_AmbientTransparency,
+        ECF_BlendingFactor
     }
 
 }
