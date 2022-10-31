@@ -198,6 +198,9 @@
     <Compile Include="ECF\Deserializer.cs" />
     <Compile Include="ECF\ECF_File.cs" />
     <Compile Include="ECF\Parser.cs" />
+    <Compile Include="ECF_XML\Deserializer.cs" />
+    <Compile Include="ECF_XML\ECF_File.cs" />
+    <Compile Include="ECF_XML\Parser.cs" />
     <Compile Include="EEPK\Deserializer.cs" />
     <Compile Include="EEPK\EEPK_File.cs" />
     <Compile Include="EEPK\Parser.cs" />

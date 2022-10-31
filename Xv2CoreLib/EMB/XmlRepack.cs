@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace Xv2CoreLib.EMB
@@ -33,7 +31,7 @@ namespace Xv2CoreLib.EMB
                     {
                         case ".ecf":
                             Console.WriteLine(String.Format("Converting \"{0}\" to binary file...", s));
-                            new ECF.Deserializer(s);
+                            new ECF_XML.Deserializer(s);
                             break;
                         case ".emp":
                             Console.WriteLine(String.Format("Converting \"{0}\" to binary file...", s));
