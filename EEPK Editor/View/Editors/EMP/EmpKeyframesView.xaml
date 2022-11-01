@@ -79,7 +79,7 @@
                         <CheckBox Grid.Column="1" IsChecked="{Binding ElementName=UserControl, Path=ViewModel.Interpolate}"/>
                     </Grid>
                 </StackPanel>
-                <Grid Grid.Column="1" Background="{DynamicResource MahApps.Brushes.SemiTransparent}"/>
+                <Grid Grid.Column="1" Background="{DynamicResource MahApps.Brushes.SystemControlForegroundListMedium}"/>
                 <Grid Grid.Column="2" IsEnabled="{Binding ElementName=UserControl, Path=ViewModel.IsAnimated}">
                     <!-- Float Keyframes -->
                     <Grid Visibility="{Binding ElementName=UserControl, Path=ViewModel.FloatVisibile}">
@@ -87,7 +87,7 @@
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="30"/>
                         </Grid.RowDefinitions>
-                        <DataGrid x:Name="floatKeyframesGrid" ItemsSource="{Binding ElementName=UserControl, Path=ViewModel.FloatValue.Keyframes.Binding}" SelectedItem="{Binding ElementName=UserControl, Path=ViewModel.SelectedFloat}" HeadersVisibility="None" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
+                        <DataGrid x:Name="floatKeyframesGrid" ItemsSource="{Binding ElementName=UserControl, Path=ViewModel.FloatValue.Keyframes.Binding}" SelectedItem="{Binding ElementName=UserControl, Path=ViewModel.SelectedFloat}" HeadersVisibility="None" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" >
                             <DataGrid.Columns>
                                 <DataGridTemplateColumn Header="Time" Width="0.3*" SortMemberPath="Time">
                                     <DataGridTemplateColumn.CellTemplate>

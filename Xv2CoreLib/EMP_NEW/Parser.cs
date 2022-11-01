@@ -227,7 +227,6 @@ namespace Xv2CoreLib.EMP_NEW
                     node.GroupKeyframedValues.Add(new EMP_Modifier());
                     node.GroupKeyframedValues[a].Type = (EMP_Modifier.ModifierType)rawBytes[groupedKeyframedValuesOffset];
                     node.GroupKeyframedValues[a].Flags = (EMP_Modifier.ModifierFlags)rawBytes[groupedKeyframedValuesOffset + 1];
-                    node.GroupKeyframedValues[a].KeyframedValues = new AsyncObservableCollection<EMP_KeyframedValue>();
 
                     for (int d = 0; d < entryCount; d++)
                     {

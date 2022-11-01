@@ -1194,9 +1194,9 @@ namespace XV2_Xml_Serializer
 
                     foreach(var node in ecf.Nodes)
                     {
-                        if(node.I_60 != 0 || node.I_62 != 0 || node.I_64 != 0 || node.I_72 != 0 || node.I_80 != 0 || node.I_88 != 0 || node.I_96 != 0)
+                        if(node.EndTime > 20000)
                         {
-                            Console.WriteLine("This");
+                            Console.WriteLine(node.ToString());
                             Console.ReadLine();
                         }
                     }

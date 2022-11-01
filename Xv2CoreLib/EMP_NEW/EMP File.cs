@@ -593,7 +593,7 @@ namespace Xv2CoreLib.EMP_NEW
     }
 
     [Serializable]
-    public class ParticleNode : INotifyPropertyChanged, IName
+    public class ParticleNode : INotifyPropertyChanged, IName, ISelectedKeyframedValue
     {
         public const int ENTRY_SIZE = 160;
 
@@ -2441,7 +2441,7 @@ namespace Xv2CoreLib.EMP_NEW
         }
 
         public ModifierType Type { get; set; }
-        public ModifierFlags Flags { get; set; }
+        public ModifierFlags Flags { get; set; } //"PRESERVE_NODE_FLAG"?
         public AsyncObservableCollection<EMP_KeyframedValue> KeyframedValues { get; set; } = new AsyncObservableCollection<EMP_KeyframedValue>();
 
     }

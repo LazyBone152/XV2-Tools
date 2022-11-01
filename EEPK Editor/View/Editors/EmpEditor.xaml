@@ -22,7 +22,7 @@
         <converters:BooleanToVisibilityConverter x:Key="visibilityConverter" />
     </UserControl.Resources>
     <Grid>
-        <Controls:MetroTabControl Controls:TabControlHelper.Underlined="TabPanel" Controls:TabControlHelper.UnderlineBrush="{DynamicResource MahApps.Brushes.Gray.SemiTransparent}">
+        <Controls:MetroTabControl Controls:TabControlHelper.Underlined="TabPanel" Controls:TabControlHelper.UnderlineBrush="{DynamicResource MahApps.Brushes.SystemControlForegroundListMedium}">
             <Controls:MetroTabItem Header="Particle Nodes" Controls:HeaderedControlHelper.HeaderFontSize="16">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -33,7 +33,7 @@
                     </Grid.ColumnDefinitions>
                     <GridSplitter Grid.Column="2" Grid.RowSpan="3" Margin="0, 20, 0, 20" Width="3" ResizeDirection="Columns" ResizeBehavior="PreviousAndNext" Background="{DynamicResource MahApps.Brushes.Accent}"/>
 
-                    <TreeView Margin="5, 20, 5, 20" Grid.Column="1" Grid.RowSpan="3" Style="{DynamicResource MahApps.Styles.TreeView.Virtualized}" BorderBrush="{DynamicResource MahApps.Brushes.SemiTransparent}" BorderThickness="1" ItemsSource="{Binding ElementName=UserControl, Path=EmpFile.ParticleNodes.Binding}" SelectedItemChanged="TreeView_SelectedItemChanged"
+                    <TreeView Margin="5, 20, 5, 20" Grid.Column="1" Grid.RowSpan="3" Style="{DynamicResource MahApps.Styles.TreeView.Virtualized}" BorderBrush="{DynamicResource MahApps.Brushes.SystemControlForegroundListMedium}" BorderThickness="1" ItemsSource="{Binding ElementName=UserControl, Path=EmpFile.ParticleNodes.Binding}" SelectedItemChanged="TreeView_SelectedItemChanged"
                                   dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" dd:DragDrop.UseDefaultDragAdorner="True" PreviewDrop="TreeView_PreviewDrop" AllowDrop="True">
                         <TreeView.Resources>
                             <HierarchicalDataTemplate DataType="{x:Type emp:ParticleNode}" ItemsSource="{Binding ChildParticleNodes.Binding}">
@@ -52,7 +52,7 @@
 
                                 </StackPanel>
                             </HierarchicalDataTemplate>
-
+                           
                         </TreeView.Resources>
                         <TreeView.ContextMenu>
                             <ContextMenu>
@@ -110,18 +110,19 @@
                     </TreeView>
 
 
-                    <Grid Grid.Column="3" Margin="0, 20, 0, 20">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="580*" MinHeight="500"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="140*" MinHeight="100"/>
-                            <RowDefinition Height="2"/>
-                        </Grid.RowDefinitions>
-                        <GridSplitter Grid.Row="1" Height="3" ResizeDirection="Rows" Background="{DynamicResource MahApps.Brushes.Accent}" HorizontalAlignment="Stretch"/>
-                        <views:EmpNodeView x:Name="nodeView" Node="{Binding ElementName=UserControl, Path=SelectedNode}" AssetContainer="{Binding ElementName=UserControl, Path=AssetContainer}" EmpFile="{Binding ElementName=UserControl, Path=EmpFile}"/>
-                        <views:EmpKeyframesView Grid.Row="2" KeyframedValue="{Binding ElementName=UserControl, Path=SelectedNode.SelectedKeyframedValue}" Node="{Binding ElementName=UserControl, Path=SelectedNode}" Margin="0, 0, 0, 5"/>
-                        <Grid Grid.Row="3" Background="{DynamicResource MahApps.Brushes.SemiTransparent}"/>
-                    </Grid>
+                    <Border Grid.Column="3" Margin="0, 20, 10, 20" BorderBrush="{DynamicResource MahApps.Brushes.SystemControlForegroundListMedium}" BorderThickness="1">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="580*" MinHeight="500"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="140*" MinHeight="100"/>
+                            </Grid.RowDefinitions>
+                            <GridSplitter Grid.Row="1" Height="3" ResizeDirection="Rows" Background="{DynamicResource MahApps.Brushes.Accent}" HorizontalAlignment="Stretch"/>
+                            <views:EmpNodeView x:Name="nodeView" Node="{Binding ElementName=UserControl, Path=SelectedNode}" AssetContainer="{Binding ElementName=UserControl, Path=AssetContainer}" EmpFile="{Binding ElementName=UserControl, Path=EmpFile}"/>
+                            <views:EmpKeyframesView Grid.Row="2" KeyframedValue="{Binding ElementName=UserControl, Path=SelectedNode.SelectedKeyframedValue}" Node="{Binding ElementName=UserControl, Path=SelectedNode}" Margin="0, 0, 0, 5" Background="{DynamicResource MahApps.Brushes.SystemControlBackgroundAltMediumLow}"/>
+                        </Grid>
+
+                    </Border>
                 </Grid>
 
             </Controls:MetroTabItem>

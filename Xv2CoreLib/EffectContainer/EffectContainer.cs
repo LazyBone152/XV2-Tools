@@ -3156,7 +3156,7 @@ namespace Xv2CoreLib.EffectContainer
             {
                 name += ".ecf";
             }
-            var asset = Asset.Create(ecfFile, name, EffectFile.FileType.ECF, AssetType.CBIND);
+            Asset asset = Asset.Create(ecfFile, name, EffectFile.FileType.ECF, AssetType.CBIND);
             AddAsset(asset);
 
             return asset;

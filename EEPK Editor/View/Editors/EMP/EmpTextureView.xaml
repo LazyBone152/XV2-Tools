@@ -139,7 +139,7 @@
                         <ColumnDefinition Width="99"/>
                         <ColumnDefinition Width="20"/>
                         <ColumnDefinition Width="120"/>
-                        <ColumnDefinition Width="35"/>
+                        <ColumnDefinition Width="34"/>
                         <ColumnDefinition Width="120"/>
                     </Grid.ColumnDefinitions>
                     <Label Content="Random Symetry" VerticalAlignment="Center" FontSize="11"/>

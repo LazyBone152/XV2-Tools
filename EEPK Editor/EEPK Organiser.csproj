@@ -165,6 +165,9 @@
     <Compile Include="Forms\AssetContainerSettings.xaml.cs">
       <DependentUpon>AssetContainerSettings.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Forms\Editors\EcfEditorWindow.xaml.cs">
+      <DependentUpon>EcfEditorWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Forms\Editors\EmpEditorWindow.xaml.cs">
       <DependentUpon>EmpEditorWindow.xaml</DependentUpon>
     </Compile>
@@ -208,6 +211,7 @@
     <Compile Include="Misc\CacheManager.cs" />
     <Compile Include="Misc\LoadFromGameHelper.cs" />
     <Compile Include="ViewModel\AssetContainerViewModel.cs" />
+    <Compile Include="ViewModel\EcfNodeViewModel.cs" />
     <Compile Include="ViewModel\EffectPartViewModel.cs" />
     <Compile Include="ViewModel\EmpKeyframesViewModel.cs" />
     <Compile Include="ViewModel\EmpNodeViewModel.cs" />
@@ -215,6 +219,9 @@
     <Compile Include="ViewModel\MaterialViewModel.cs" />
     <Compile Include="View\Controls\ShapeDraw.xaml.cs">
       <DependentUpon>ShapeDraw.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Editors\EcfEditor.xaml.cs">
+      <DependentUpon>EcfEditor.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Editors\EMP\EmpKeyframesView.xaml.cs">
       <DependentUpon>EmpKeyframesView.xaml</DependentUpon>
@@ -266,6 +273,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Forms\AssetSelector.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Forms\Editors\EcfEditorWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -364,6 +375,10 @@
     <Page Include="View\Controls\ShapeDraw.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Editors\EcfEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Editors\EMP\EmpKeyframesView.xaml">
       <SubType>Designer</SubType>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using Xv2CoreLib.EMP_NEW;
 using Xv2CoreLib.EMP_NEW.Keyframes;
@@ -57,20 +58,64 @@ namespace Xv2CoreLib.ECF
     }
 
     [Serializable]
-    public class ECF_Node
+    public class ECF_Node : INotifyPropertyChanged, ISelectedKeyframedValue
     {
+        #region INotifyPropChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public void NotifyPropertyChanged(string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        #endregion
+
+        public const string CLIPBOARD_ID = "XV2_ECF_NODE";
+
         public enum PlayMode : ushort
         {
-            Unk0 = 0,
-            Unk1 = 1,
+            Unk0 = 0, //Only used for specific materials (never just the default "node')
+            Unk1 = 1, //Never used
             NoLoop = 2,
             Loop = 3
         }
 
-        public string Material { get; set; } //Material linkage. "Node" seems to be the default value, applying to all materials.
+        //Selected KeyframedValue is binded here for the Keyframe Editor to access
+        [NonSerialized]
+        private KeyframedBaseValue _selectedKeyframedValue = null;
+        public KeyframedBaseValue SelectedKeyframedValue
+        {
+            get => _selectedKeyframedValue;
+            set
+            {
+                if (_selectedKeyframedValue != value)
+                {
+                    _selectedKeyframedValue = value;
+                    NotifyPropertyChanged(nameof(SelectedKeyframedValue));
+                }
+            }
+        }
+
+        private string _material = "node";
+
+        //Material to apply color effect too, or just "node" to apply to all
+        public string Material
+        {
+            get => _material;
+            set
+            {
+                if (value != _material)
+                {
+                    _material = value;
+                    NotifyPropertyChanged(nameof(Material));
+                }
+            }
+        }
         public ushort StartTime { get; set; }
-        public ushort EndTime { get; set; }
-        public PlayMode LoopMode { get; set; } //uint16
+        //There is 1 ecf where the EndTime is before the StartTime (PWW_Fade.ecf)
+        public ushort EndTime { get; set; } = 60;
+        public PlayMode LoopMode { get; set; } = PlayMode.Loop;
 
         public KeyframedColorValue DiffuseColor { get; set; } = new KeyframedColorValue(0, 0, 0, KeyframedValueType.ECF_DiffuseColor);
         public KeyframedColorValue SpecularColor { get; set; } = new KeyframedColorValue(0, 0, 0, KeyframedValueType.ECF_SpecularColor);
@@ -135,7 +180,6 @@ namespace Xv2CoreLib.ECF
             return values;
         }
 
-
         internal void CompileAllKeyframes()
         {
             KeyframedValues.Clear();
@@ -165,6 +209,10 @@ namespace Xv2CoreLib.ECF
             }
         }
 
+        public override string ToString()
+        {
+            return $"{Material}: {StartTime}, {EndTime}";
+        }
     }
     /*
     [Serializable]

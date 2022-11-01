@@ -126,6 +126,8 @@ namespace EEPK_Organiser.Forms
             cancelled = false;
             CurrentTexture.wasEdited = true;
             UndoManager.Instance.AddUndo(new UndoableProperty<EmbEntry>(nameof(EmbEntry.Texture), CurrentTexture, OriginalTextureBackup, CurrentTexture.Texture, "Hue Adjustment"));
+            UndoManager.Instance.ForceEventCall();
+
             Close();
         }
 

@@ -1,0 +1,19 @@
+﻿<Controls:MetroWindow x:Class="EEPK_Organiser.Forms.Editors.EcfEditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EEPK_Organiser.Forms.Editors"
+        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:view="clr-namespace:EEPK_Organiser.View.Editors"
+        xmlns:undoRedo="clr-namespace:Xv2CoreLib.Resource.UndoRedo;assembly=Xv2CoreLib"
+        mc:Ignorable="d"
+        Title="Color Fade Editor" Height="1280" Width="1280" MinHeight="600" MinWidth="1200" ResizeMode="CanResizeWithGrip" SaveWindowPosition="True" WindowStartupLocation="CenterOwner" x:Name="Window" TitleCharacterCasing="Normal">
+    <Window.InputBindings>
+        <KeyBinding Key="Z" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=UndoCommand}"/>
+        <KeyBinding Key="Y" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=RedoCommand}"/>
+    </Window.InputBindings>
+    <Grid>
+        <view:EcfEditor EcfFile="{Binding ElementName=Window, Path=EcfFile}"/>
+    </Grid>
+</Controls:MetroWindow>

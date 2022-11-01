@@ -30,11 +30,11 @@ namespace EEPK_Organiser.View.Editors.EMP
             set => SetValue(KeyframedValueProperty, value);
         }
 
-        public static readonly DependencyProperty NodeProperty = DependencyProperty.Register(nameof(Node), typeof(ParticleNode), typeof(EmpKeyframesView), new PropertyMetadata(null));
+        public static readonly DependencyProperty NodeProperty = DependencyProperty.Register(nameof(Node), typeof(ISelectedKeyframedValue), typeof(EmpKeyframesView), new PropertyMetadata(null));
 
-        public ParticleNode Node
+        public ISelectedKeyframedValue Node
         {
-            get => (ParticleNode)GetValue(NodeProperty);
+            get => (ISelectedKeyframedValue)GetValue(NodeProperty);
             set => SetValue(NodeProperty, value);
         }
 

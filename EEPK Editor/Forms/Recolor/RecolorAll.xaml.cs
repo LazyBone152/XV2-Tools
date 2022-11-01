@@ -258,6 +258,7 @@ namespace EEPK_Organiser.Forms
             }
 
             UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Hue Adjustment"));
+            UndoManager.Instance.ForceEventCall();
 
             Close();
         }

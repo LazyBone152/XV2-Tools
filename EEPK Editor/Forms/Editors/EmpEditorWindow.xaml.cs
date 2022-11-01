@@ -1,12 +1,5 @@
 ﻿using MahApps.Metro.Controls;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using Xv2CoreLib.EffectContainer;
-using Xv2CoreLib.EMM;
 using Xv2CoreLib.EMP_NEW;
 
 namespace EEPK_Organiser.Forms.Editors

@@ -237,7 +237,7 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             Parameter = EMP_KeyframedValue.GetParameter(ValueType, isSphere);
             Components = EMP_KeyframedValue.GetComponent(ValueType, isScaleXyEnabled);
         }
-    
+
         public string GetValueName()
         {
             switch (ValueType)
@@ -262,6 +262,20 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
                     return "Size 1";
                 case KeyframedValueType.Size2:
                     return "Size 2";
+                case KeyframedValueType.ECF_AmbientColor:
+                    return "Ambient Color";
+                case KeyframedValueType.ECF_DiffuseColor:
+                    return "Diffuse Color";
+                case KeyframedValueType.ECF_SpecularColor:
+                    return "Specular Color";
+                case KeyframedValueType.ECF_AmbientTransparency:
+                    return "Ambient Alpha";
+                case KeyframedValueType.ECF_DiffuseTransparency:
+                    return "Diffuse Alpha";
+                case KeyframedValueType.ECF_SpecularTransparency:
+                    return "Specular Alpha";
+                case KeyframedValueType.ECF_BlendingFactor:
+                    return "Blending Factor";
                 default:
                     return ValueType.ToString();
             }
@@ -337,5 +351,10 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
                 }
             }
         }
+    }
+
+    public interface ISelectedKeyframedValue
+    {
+        KeyframedBaseValue SelectedKeyframedValue { get; set; }
     }
 }

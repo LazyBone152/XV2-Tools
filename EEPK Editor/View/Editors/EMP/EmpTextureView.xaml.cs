@@ -319,8 +319,9 @@ namespace EEPK_Organiser.View.Editors.EMP
 
             foreach (EMP_ScrollKeyframe keyframe in keyframes)
             {
-                undos.Add(new UndoableListAdd<EMP_ScrollKeyframe>(SelectedTexture.ScrollState.Keyframes, keyframe));
-                SelectedTexture.ScrollState.Keyframes.Add(keyframe);
+                EMP_ScrollKeyframe newKeyframe = keyframe.Clone();
+                undos.Add(new UndoableListAdd<EMP_ScrollKeyframe>(SelectedTexture.ScrollState.Keyframes, newKeyframe));
+                SelectedTexture.ScrollState.Keyframes.Add(newKeyframe);
             }
 
             UndoManager.Instance.AddCompositeUndo(undos, "EMP Texture -> Duplicate Keyframe");

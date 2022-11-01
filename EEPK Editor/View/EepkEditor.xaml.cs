@@ -2539,6 +2539,52 @@ namespace EEPK_Organiser.View
         {
             AssetContainer_OpenSettings(effectContainerFile.Cbind);
         }
+
+        public static EcfEditorWindow CBIND_OpenEditor(ECF_File ecfFile, string name)
+        {
+            EcfEditorWindow form = GetActiveEcfForm(ecfFile);
+
+            if (form == null)
+            {
+                form = new EcfEditorWindow(ecfFile, name);
+                form.Show();
+            }
+
+            form.Focus();
+            return form;
+        }
+
+        private void CBIND_AssetContainer_Edit_Click(object sender, RoutedEventArgs e)
+        {
+            Asset selectedAsset = cbindDataGrid.SelectedItem as Asset;
+
+            if (selectedAsset != null)
+            {
+                CBIND_OpenEditor(selectedAsset.Files[0].EcfFile, selectedAsset.Files[0].FileName);
+            }
+        }
+
+        private void CBIND_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            CBIND_AssetContainer_Edit_Click(null, null);
+        }
+
+        private void CBIND_NewEcf_Click(object sender, RoutedEventArgs e)
+        {
+            ECF_File ecfFile = new ECF_File();
+            ecfFile.Nodes.Add(new ECF_Node());
+
+            Asset asset = effectContainerFile.Cbind.AddAsset(ecfFile, "NewEcf.ecf");
+            effectContainerFile.Cbind.RefreshAssetCount();
+            cbindDataGrid.SelectedItem = asset;
+            cbindDataGrid.ScrollIntoView(asset);
+
+            //Undos
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+            undos.Add(new UndoableListAdd<Asset>(effectContainerFile.Cbind.Assets, asset));
+            undos.Add(new UndoActionDelegate(effectContainerFile.Cbind, nameof(effectContainerFile.Cbind.UpdateAssetFilter), true));
+            UndoManager.Instance.AddUndo(new CompositeUndo(undos, "New ECF"));
+        }
         #endregion
 
         #region LIGHT
@@ -4144,6 +4190,28 @@ namespace EEPK_Organiser.View
         public static void CloseEmpForm(EMP_File empFile)
         {
             var form = GetActiveEmpForm(empFile);
+
+            if (form != null)
+                form.Close();
+        }
+
+        public static EcfEditorWindow GetActiveEcfForm(ECF_File _ecfFile)
+        {
+            foreach (object window in Application.Current.Windows)
+            {
+                if (window is EcfEditorWindow empEditor)
+                {
+                    if (empEditor.EcfFile == _ecfFile)
+                        return empEditor;
+                }
+            }
+
+            return null;
+        }
+
+        public static void CloseEcfForm(ECF_File _ecfFile)
+        {
+            var form = GetActiveEcfForm(_ecfFile);
 
             if (form != null)
                 form.Close();

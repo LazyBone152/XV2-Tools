@@ -270,6 +270,7 @@ namespace EEPK_Organiser.Forms.Recolor
             }
 
             UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Hue Set"));
+            UndoManager.Instance.ForceEventCall();
 
             Close();
         }

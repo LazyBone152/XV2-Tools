@@ -570,11 +570,11 @@
 
                     <GroupBox Header="Options" HorizontalAlignment="Right" Height="Auto" Margin="0,10,10,0" VerticalAlignment="Top" Width="223">
                         <StackPanel Margin="0, 5">
-                            <Button Content="Import Asset(s)" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123" lbUtils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
+                            <Button Content="Add Asset" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123" lbUtils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
                                 <Button.ContextMenu>
                                     <ContextMenu FontSize="12">
+                                        <MenuItem Header="New EMP" Click="PBIND_ImportAsset_MenuItem_CreateNewEmp_Click"/>
                                         <MenuItem Header="Load External EEPK" Click="PBIND_AssetContainer_AddAsset_Click"/>
-                                        <MenuItem Header="Create New EMP" Click="PBIND_ImportAsset_MenuItem_CreateNewEmp_Click"/>
                                         <Separator/>
                                         <MenuItem Header="CMN" Click="PBIND_ImportAsset_MenuItem_FromCMN_Click"/>
                                         <MenuItem Header="Character" Click="PBIND_ImportAsset_MenuItem_FromCharacter_Click"/>
@@ -645,7 +645,7 @@
                     <Label Content="{Binding effectContainerFile.Tbind.AssetCount}" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Margin="765,423,-0.327,-0.055" VerticalAlignment="Bottom" Width="177" Height="30"/>
                     <GroupBox Header="Options" HorizontalAlignment="Right" Height="Auto" Margin="0,10,10,0" VerticalAlignment="Top" Width="223">
                         <StackPanel Margin="0, 5">
-                            <Button Content="Import Asset(s)" HorizontalAlignment="Left" Margin="10,5,0,0"  VerticalAlignment="Top" Width="123" lbUtils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
+                            <Button Content="Add Asset" HorizontalAlignment="Left" Margin="10,5,0,0"  VerticalAlignment="Top" Width="123" lbUtils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
                                 <Button.ContextMenu>
                                     <ContextMenu FontSize="12">
                                         <MenuItem Header="Load External EEPK" Click="TBIND_AssetContainer_AddAsset_Click"/>
@@ -686,7 +686,7 @@
             <Controls:MetroTabItem Header="CBIND" Controls:HeaderedControlHelper.HeaderFontSize="14">
                 <Grid Background="Transparent">
 
-                    <DataGrid PreviewKeyDown="CbindDataGrid_Hotkeys_PreviewKeyDown" SelectionMode="Extended" x:Name="cbindDataGrid" RowDetailsVisibilityMode="Collapsed" ItemsSource="{Binding effectContainerFile.Cbind.ViewAssets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False">
+                    <DataGrid MouseDoubleClick="CBIND_MouseDoubleClick" PreviewKeyDown="CbindDataGrid_Hotkeys_PreviewKeyDown" SelectionMode="Extended" x:Name="cbindDataGrid" RowDetailsVisibilityMode="Collapsed" ItemsSource="{Binding effectContainerFile.Cbind.ViewAssets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False">
                         
                         <DataGrid.ContextMenu>
                             <ContextMenu FontSize="12">
@@ -702,6 +702,8 @@
                                 <Separator/>
                                 <MenuItem Header="Hue Adjustment" Click="CBIND_AssetContainer_Recolor"/>
                                 <MenuItem Header="Hue Set" Click="CBIND_AssetContainer_RecolorHueSet"/>
+                                <Separator/>
+                                <MenuItem Header="Edit" Click="CBIND_AssetContainer_Edit_Click"/>
                             </ContextMenu>
                         </DataGrid.ContextMenu>
 
@@ -719,9 +721,10 @@
                     <Label Content="{Binding effectContainerFile.Cbind.AssetCount}" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Margin="765,423,-0.327,-0.055" VerticalAlignment="Bottom" Width="177" Height="30"/>
                     <GroupBox Header="Options" HorizontalAlignment="Right" Height="Auto" Margin="0,10,10,0" VerticalAlignment="Top" Width="223">
                         <StackPanel Margin="0, 5">
-                            <Button Content="Import Asset(s)" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123" lbUtils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
+                            <Button Content="Add Asset" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123" lbUtils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
                                 <Button.ContextMenu>
                                     <ContextMenu FontSize="12">
+                                        <MenuItem Header="New ECF" Click="CBIND_NewEcf_Click"/>
                                         <MenuItem Header="Load External EEPK" Click="CBIND_AssetContainer_AddAsset_Click"/>
                                         <MenuItem Header="Load External ECF" Click="CBIND_ImportAsset_MenuItem_LoadEcf_Click"/>
                                         <Separator/>
@@ -825,7 +828,7 @@
                     <Label Content="{Binding effectContainerFile.Emo.AssetCount}" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Margin="765,423,-0.327,-0.055" VerticalAlignment="Bottom" Width="177" Height="30"/>
                     <GroupBox Header="Options" HorizontalAlignment="Right" Height="Auto" Margin="0,10,10,0" VerticalAlignment="Top" Width="223">
                         <StackPanel Margin="0, 5">
-                            <Button Content="Import Asset(s)" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123" lbUtils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
+                            <Button Content="Add Asset" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123" lbUtils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
                                 <Button.ContextMenu>
                                     <ContextMenu FontSize="12">
                                         <MenuItem Header="Load External EEPK" Click="EMO_AssetContainer_AddAsset_Click"/>
@@ -893,7 +896,7 @@
                     <Label Content="{Binding effectContainerFile.LightEma.AssetCount}" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Margin="765,423,-0.327,-0.055" VerticalAlignment="Bottom" Width="177" Height="30"/>
                     <GroupBox Header="Options" HorizontalAlignment="Right" Height="Auto" Margin="0,10,10,0" VerticalAlignment="Top" Width="223">
                         <StackPanel Margin="0, 5">
-                            <Button Content="Import Asset(s)" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123" lbUtils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
+                            <Button Content="Add Asset" HorizontalAlignment="Left" Margin="10,5,0,0" VerticalAlignment="Top" Width="123" lbUtils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
                                 <Button.ContextMenu>
                                     <ContextMenu FontSize="12">
                                         <MenuItem Header="Load External EEPK" Click="LIGHT_AssetContainer_AddAsset_Click"/>
