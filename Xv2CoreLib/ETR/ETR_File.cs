@@ -107,9 +107,9 @@ namespace Xv2CoreLib.ETR
                 bytes.AddRange(BitConverter.GetBytes(node.Position.X));
                 bytes.AddRange(BitConverter.GetBytes(node.Position.Y));
                 bytes.AddRange(BitConverter.GetBytes(node.Position.Z));
-                bytes.AddRange(BitConverter.GetBytes(node.Rotation.X));
-                bytes.AddRange(BitConverter.GetBytes(node.Rotation.Y));
-                bytes.AddRange(BitConverter.GetBytes(node.Rotation.Z));
+                bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(node.Rotation.X)));
+                bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(node.Rotation.Y)));
+                bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(node.Rotation.Z)));
                 bytes.Add(node.I_88);
                 bytes.Add((byte)(node.ExtrudeSegements.Count - 1));
                 bytes.AddRange(BitConverter.GetBytes(node.TimeStartExtrude));
