@@ -3705,7 +3705,7 @@ namespace Xv2CoreLib.EffectContainer
                     {
                         if (texture.TextureRef == oldRef)
                         {
-                            undos.Add(new UndoableProperty<ETR_TextureEntry>(nameof(ETR_TextureEntry.TextureRef), texture, oldRef, newRef));
+                            undos.Add(new UndoableProperty<EMP_TextureSamplerDef>(nameof(EMP_TextureSamplerDef.TextureRef), texture, oldRef, newRef));
                             texture.TextureRef = newRef;
                         }
                     }
@@ -3732,7 +3732,7 @@ namespace Xv2CoreLib.EffectContainer
                     {
                         if (etrEntry.MaterialRef == oldRef)
                         {
-                            undos.Add(new UndoableProperty<ETR_MainEntry>(nameof(ETR_MainEntry.MaterialRef), etrEntry, oldRef, newRef));
+                            undos.Add(new UndoableProperty<ETR_Node>(nameof(ETR_Node.MaterialRef), etrEntry, oldRef, newRef));
                             etrEntry.MaterialRef = newRef;
                         }
                     }
