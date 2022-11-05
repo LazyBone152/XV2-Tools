@@ -76,6 +76,7 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
         public virtual KeyframedValueType ValueType { get; protected set; }
         protected byte Parameter { get; set; }
         public byte[] Components { get; set; }
+        public ETR.ETR_InterpolationType ETR_InterpolationType { get; set; }
 
         /// <summary>
         /// Decompiles an array of <see cref="EMP_KeyframedValue"/> into an array of keyframes with synchronized timings. 
@@ -84,6 +85,7 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
         {
             //Interpolation setting should be shared between all EMP_KeyframedValues for the same parameter/value (and it is the case in all vanilla EMP files for XV2, SDBH and Breakers)
             Interpolate = keyframeValues[0].Interpolate;
+            ETR_InterpolationType = keyframeValues[0].ETR_InterpolationType;
             IsAnimated = false;
 
             List<KeyframedGenericValue>[] values = new List<KeyframedGenericValue>[keyframeValues.Length];
@@ -209,13 +211,14 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             {
                 for (int i = 0; i < keyframes.Length; i++)
                 {
-                    if (keyframes[i].All(x => x.Value != constant[i]))
+                    if (keyframes[i].Any(x => x.Value != constant[i]))
                     {
                         empKeyframes[i] = new EMP_KeyframedValue();
                         empKeyframes[i].Loop = Loop;
                         empKeyframes[i].Interpolate = Interpolate;
-                        empKeyframes[i].Value = Parameter;
+                        empKeyframes[i].Parameter = Parameter;
                         empKeyframes[i].Component = Components[i];
+                        empKeyframes[i].ETR_InterpolationType = ETR_InterpolationType;
 
                         for (int a = 0; a < keyframes[i].Count; a++)
                         {
@@ -245,16 +248,21 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
                 case KeyframedValueType.ActiveRotation:
                     return "Active Rotation";
                 case KeyframedValueType.Color1:
+                case KeyframedValueType.ETR_Color1:
                     return "Color (Primary)";
                 case KeyframedValueType.Color2:
+                case KeyframedValueType.ETR_Color2:
                     return "Color (Secondary)";
                 case KeyframedValueType.Color1_Transparency:
+                case KeyframedValueType.ETR_Color1_Transparency:
                     return "Alpha (Primary)";
                 case KeyframedValueType.Color2_Transparency:
+                case KeyframedValueType.ETR_Color2_Transparency:
                     return "Alpha (Secondary)";
                 case KeyframedValueType.PositionY:
                     return "Position Y";
                 case KeyframedValueType.ScaleBase:
+                case KeyframedValueType.ETR_Scale:
                     return "Scale";
                 case KeyframedValueType.ScaleXY:
                     return "Scale XY";

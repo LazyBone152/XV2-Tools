@@ -116,15 +116,7 @@ namespace Xv2CoreLib.EMP_NEW
 
             int nodeOffset = bytes.Count;
 
-            //Trim node name if its too long
-            if (node.Name.Length > 32)
-            {
-                node.Name = node.Name.Substring(0, 32);
-            }
-
-            //Write name, and pad it out to 32 bytes
-            bytes.AddRange(Encoding.ASCII.GetBytes(node.Name));
-            bytes.AddRange(new byte[32 - node.Name.Length]);
+            bytes.AddRange(StringEx.WriteFixedSizeString(node.Name, 32));
 
             //Counts
             int keyframedValuesCount = (node.KeyframedValues != null) ? node.KeyframedValues.Count : 0;
@@ -429,7 +421,7 @@ namespace Xv2CoreLib.EMP_NEW
         //Writers (Section 2)
         private void WriteTextureSamplers(IList<EMP_TextureSamplerDef> textures)
         {
-            List<int> subData2Offsets_ToReplace = new List<int>();
+            List<int> KeyframeOffsets_ToReplace = new List<int>();
 
             for (int i = 0; i < textures.Count; i++)
             {
@@ -456,7 +448,7 @@ namespace Xv2CoreLib.EMP_NEW
                             bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.Keyframes[0].I_24));
                         }
 
-                        subData2Offsets_ToReplace.Add(bytes.Count());
+                        KeyframeOffsets_ToReplace.Add(bytes.Count());
                         break;
                     case EMP_ScrollState.ScrollTypeEnum.Speed:
                         bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.ScrollSpeed_U));
@@ -468,14 +460,14 @@ namespace Xv2CoreLib.EMP_NEW
                             bytes.AddRange(new byte[8]);
                         }
 
-                        subData2Offsets_ToReplace.Add(bytes.Count());
+                        KeyframeOffsets_ToReplace.Add(bytes.Count());
                         break;
                     case EMP_ScrollState.ScrollTypeEnum.SpriteSheet:
                         bytes.AddRange(new byte[10]);
                         int animationCount = (textures[i].ScrollState.Keyframes != null) ? textures[i].ScrollState.Keyframes.Count() : 0;
                         bytes.AddRange(BitConverter.GetBytes((short)animationCount));
 
-                        subData2Offsets_ToReplace.Add(bytes.Count());
+                        KeyframeOffsets_ToReplace.Add(bytes.Count());
                         bytes.AddRange(new byte[4]);
 
                         if (EmpFile.Version == VersionEnum.SDBH)
@@ -494,7 +486,7 @@ namespace Xv2CoreLib.EMP_NEW
                 {
                     if (textures[i].ScrollState.ScrollType == EMP_ScrollState.ScrollTypeEnum.SpriteSheet)
                     {
-                        bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - subData2Offsets_ToReplace[i] + 12), subData2Offsets_ToReplace[i]);
+                        bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - KeyframeOffsets_ToReplace[i] + 12), KeyframeOffsets_ToReplace[i]);
 
                         for (int a = 0; a < textures[i].ScrollState.Keyframes.Count; a++)
                         {

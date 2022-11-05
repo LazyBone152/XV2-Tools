@@ -169,7 +169,7 @@ namespace Xv2CoreLib.ECF
 
             for (int i = 0; i < components.Length; i++)
             {
-                EMP_KeyframedValue value = KeyframedValues.FirstOrDefault(x => x.Value == parameter && x.Component == components[i]);
+                EMP_KeyframedValue value = KeyframedValues.FirstOrDefault(x => x.Parameter == parameter && x.Component == components[i]);
 
                 if (value != null)
                     values[i] = value;
@@ -199,9 +199,9 @@ namespace Xv2CoreLib.ECF
             {
                 if (values[i] != null)
                 {
-                    if (KeyframedValues.Any(x => x.Value == values[i].Value && x.Component == values[i].Component))
+                    if (KeyframedValues.Any(x => x.Parameter == values[i].Parameter && x.Component == values[i].Component))
                     {
-                        throw new Exception($"ECF_File: KeyframedValue already exists (parameter = {values[i].Value}, component = {values[i].Component})");
+                        throw new Exception($"ECF_File: KeyframedValue already exists (parameter = {values[i].Parameter}, component = {values[i].Component})");
                     }
 
                     KeyframedValues.Add(values[i]);

@@ -77,7 +77,7 @@ namespace Xv2CoreLib.ECF
 
                             ecfFile.Nodes[i].KeyframedValues.Add(new EMP_KeyframedValue()
                             {
-                                Value = rawBytes[keyframedValuesOffset + 0],
+                                Parameter = rawBytes[keyframedValuesOffset + 0],
                                 Component = Int4Converter.ToInt4(rawBytes[keyframedValuesOffset + 1])[0],
                                 Interpolate = BitConverter_Ex.ToBoolean(Int4Converter.ToInt4(rawBytes[keyframedValuesOffset + 1])[1]),
                                 Loop = (rawBytes[keyframedValuesOffset + 2] == 0) ? false : true,

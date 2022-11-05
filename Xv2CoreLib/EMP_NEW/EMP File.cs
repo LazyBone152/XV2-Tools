@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using Xv2CoreLib.EMB_CLASS;
@@ -987,7 +988,7 @@ namespace Xv2CoreLib.EMP_NEW
 
             for(int i = 0; i < components.Length; i++)
             {
-                EMP_KeyframedValue value = KeyframedValues.FirstOrDefault(x => x.Value == parameter && x.Component == components[i]);
+                EMP_KeyframedValue value = KeyframedValues.FirstOrDefault(x => x.Parameter == parameter && x.Component == components[i]);
 
                 if (value != null)
                     values[i] = value;
@@ -1060,9 +1061,9 @@ namespace Xv2CoreLib.EMP_NEW
             {
                 if(values[i] != null)
                 {
-                    if(KeyframedValues.Any(x => x.Value == values[i].Value && x.Component == values[i].Component))
+                    if(KeyframedValues.Any(x => x.Parameter == values[i].Parameter && x.Component == values[i].Component))
                     {
-                        throw new Exception($"EMP_File: KeyframedValue already exists (parameter = {values[i].Value}, component = {values[i].Component})");
+                        throw new Exception($"EMP_File: KeyframedValue already exists (parameter = {values[i].Parameter}, component = {values[i].Component})");
                     }
 
                     KeyframedValues.Add(values[i]);
@@ -1288,7 +1289,7 @@ namespace Xv2CoreLib.EMP_NEW
                 }
             };
         }
-    
+
         /// <summary>
         /// Returns the amount of textures to write back to binary. Any nulls at the end will be removed, but nulls inbetween will be preserved.
         /// </summary>
@@ -2019,6 +2020,14 @@ namespace Xv2CoreLib.EMP_NEW
             WorldOffsetFactor2 = worldOffsetFactor2;
         }
 
+        public ConeExtrudePoint(byte[] bytes, int offset)
+        {
+            WorldScaleFactor = BitConverter.ToSingle(bytes, offset);
+            WorldScaleAdd = BitConverter.ToSingle(bytes, offset + 4);
+            WorldOffsetFactor = BitConverter.ToSingle(bytes, offset + 8);
+            WorldOffsetFactor2 = BitConverter.ToSingle(bytes, offset + 12);
+        }
+
         public override string ToString()
         {
             return $"{WorldScaleFactor}, {WorldScaleAdd}, {WorldOffsetFactor}, {WorldOffsetFactor2}";
@@ -2167,6 +2176,14 @@ namespace Xv2CoreLib.EMP_NEW
         }
         #endregion
 
+        public ShapeDrawPoint() { }
+
+        public ShapeDrawPoint(float x, float y)
+        {
+            X = x;
+            Y = y;
+        }
+
         public static float ConvertPointToPixelSpace(float point)
         {
             return (point + 1) / 2 * SHAPE_DRAW_CONTROL_SIZE;
@@ -2210,11 +2227,11 @@ namespace Xv2CoreLib.EMP_NEW
     [Serializable]
     public class EMP_KeyframedValue
     {
-        public const byte VALUE_POSITION = 0;
-        public const byte VALUE_ROTATION = 1;
-        public const byte VALUE_SCALE = 2;
-        public const byte VALUE_COLOR1 = 3;
-        public const byte VALUE_COLOR2 = 4;
+        public const byte PARAMETER_POSITION = 0;
+        public const byte PARAMETER_ROTATION = 1;
+        public const byte PARAMETER_SCALE = 2;
+        public const byte PARAMETER_COLOR1 = 3;
+        public const byte PARAMETER_COLOR2 = 4;
         public const byte COMPONENT_R = 0;
         public const byte COMPONENT_G = 1;
         public const byte COMPONENT_B = 2;
@@ -2222,10 +2239,6 @@ namespace Xv2CoreLib.EMP_NEW
         public const byte COMPONENT_X = 0;
         public const byte COMPONENT_Y = 1;
         public const byte COMPONENT_Z = 2;
-        public const byte ECF_VALUE_DIFFUSE = 0;
-        public const byte ECF_VALUE_SPECULAR = 0;
-        public const byte ECF_VALUE_AMBIENT = 0;
-        public const byte ECF_VALUE_BLENDING = 0;
 
         /// <summary>
         /// This is the default <see cref="EMP_KeyframedValue"/> instance. Do not use this for anything other than representing a "null" or "empty" keyframed value.
@@ -2236,19 +2249,22 @@ namespace Xv2CoreLib.EMP_NEW
         /// </summary>
         public bool IsDefault { get; private set; }
 
-        public byte Value { get; set; }
-        public byte Component { get; set; }
+        //Base:
         public bool Interpolate { get; set; }
         public bool Loop { get; set; }
         public byte I_03 { get; set; }
-        public float DefaultValue { get; set; } //Only used in KeyframeGroups.
+        public float DefaultValue { get; set; } //Only used in EMP KeyframeGroups. Missing entirely in ECF.
         public ushort Duration => (ushort)(Keyframes.Count > 1 ? Keyframes.Max(x => x.Time) + 1 : 0);
+        public byte Parameter { get; set; }
+        public byte Component { get; set; }
         public AsyncObservableCollection<EMP_Keyframe> Keyframes { get; set; } = new AsyncObservableCollection<EMP_Keyframe>();
 
+        //ECF specific value. Defines how interpolation will be applied to the extruded part.
+        public ETR.ETR_InterpolationType ETR_InterpolationType { get; set; }
 
         public void SetParameters(int parameter, int component)
         {
-            Value = (byte)parameter;
+            Parameter = (byte)parameter;
             Component = (byte)component;
         }
 
@@ -2257,7 +2273,7 @@ namespace Xv2CoreLib.EMP_NEW
         /// </summary>
         public short GetParameters()
         {
-            byte _I_00 = Value;
+            byte _I_00 = Parameter;
             byte _I_01_a = Component;
             byte _I_01 = 0;
 
@@ -2298,11 +2314,15 @@ namespace Xv2CoreLib.EMP_NEW
                 case KeyframedValueType.Position:
                 case KeyframedValueType.ECF_DiffuseColor:
                 case KeyframedValueType.ECF_DiffuseTransparency:
+                case KeyframedValueType.ETR_Color1:
+                case KeyframedValueType.ETR_Color1_Transparency:
                     return 0;
                 case KeyframedValueType.Rotation:
                 case KeyframedValueType.ActiveRotation:
                 case KeyframedValueType.ECF_SpecularColor:
                 case KeyframedValueType.ECF_SpecularTransparency:
+                case KeyframedValueType.ETR_Color2:
+                case KeyframedValueType.ETR_Color2_Transparency:
                     return 1;
                 case KeyframedValueType.ScaleBase:
                 case KeyframedValueType.ScaleXY:
@@ -2311,6 +2331,7 @@ namespace Xv2CoreLib.EMP_NEW
                 case KeyframedValueType.Angle:
                 case KeyframedValueType.ECF_AmbientColor:
                 case KeyframedValueType.ECF_AmbientTransparency:
+                case KeyframedValueType.ETR_Scale:
                     return 2;
                 case KeyframedValueType.Color1:
                 case KeyframedValueType.Color1_Transparency:
@@ -2339,6 +2360,8 @@ namespace Xv2CoreLib.EMP_NEW
                 case KeyframedValueType.ECF_DiffuseColor:
                 case KeyframedValueType.ECF_SpecularColor:
                 case KeyframedValueType.ECF_AmbientColor:
+                case KeyframedValueType.ETR_Color1:
+                case KeyframedValueType.ETR_Color2:
                     return new byte[] { 0, 1, 2 };
                 case KeyframedValueType.ActiveRotation:
                 case KeyframedValueType.ECF_AmbientTransparency:
@@ -2346,6 +2369,8 @@ namespace Xv2CoreLib.EMP_NEW
                 case KeyframedValueType.ECF_SpecularTransparency:
                 case KeyframedValueType.Color1_Transparency:
                 case KeyframedValueType.Color2_Transparency:
+                case KeyframedValueType.ETR_Color1_Transparency:
+                case KeyframedValueType.ETR_Color2_Transparency:
                     return new byte[] { 3 };
                 case KeyframedValueType.ScaleBase:
                     return isScaleXyEnabled ? new byte[] { 2 } : new byte[] { 0 };
@@ -2354,6 +2379,7 @@ namespace Xv2CoreLib.EMP_NEW
                 case KeyframedValueType.PositionY:
                 case KeyframedValueType.Size1:
                 case KeyframedValueType.ECF_BlendingFactor:
+                case KeyframedValueType.ETR_Scale:
                     return new byte[] { 0 };
                 case KeyframedValueType.Velocity:
                 case KeyframedValueType.Size2:
@@ -2374,6 +2400,14 @@ namespace Xv2CoreLib.EMP_NEW
 
         public ushort Time { get; set; }
         public float Value { get; set; }
+
+        public EMP_Keyframe() { }
+
+        public EMP_Keyframe(ushort time, float value)
+        {
+            Time = time;
+            Value = value;
+        }
 
         public static float GetInterpolatedKeyframe<T>(IList<T> keyframes, int time, bool interpolationEnabled) where T : IKeyframe
         {
@@ -2504,7 +2538,190 @@ namespace Xv2CoreLib.EMP_NEW
 
         public EMP_ScrollState ScrollState { get; set; } = new EMP_ScrollState();
 
+        #region LoadSave
+        public static EMP_TextureSamplerDef Read(byte[] rawBytes, int TextureSamplersOffset, int index, VersionEnum version)
+        {
 
+            int textureOffset = TextureSamplersOffset + (index * EMP_TextureSamplerDef.GetSize(version));
+
+            EMP_TextureSamplerDef textureEntry = new EMP_TextureSamplerDef();
+            textureEntry.ScrollState.ScrollType = (EMP_ScrollState.ScrollTypeEnum)BitConverter.ToInt16(rawBytes, textureOffset + 10);
+            textureEntry.I_00 = rawBytes[textureOffset + 0];
+            textureEntry.EmbIndex = rawBytes[textureOffset + 1];
+            textureEntry.I_02 = rawBytes[textureOffset + 2];
+            textureEntry.I_03 = rawBytes[textureOffset + 3];
+            textureEntry.FilteringMin = (EMP_TextureSamplerDef.TextureFiltering)rawBytes[textureOffset + 4];
+            textureEntry.FilteringMag = (EMP_TextureSamplerDef.TextureFiltering)rawBytes[textureOffset + 5];
+            textureEntry.RepetitionU = (EMP_TextureSamplerDef.TextureRepitition)rawBytes[textureOffset + 6];
+            textureEntry.RepetitionV = (EMP_TextureSamplerDef.TextureRepitition)rawBytes[textureOffset + 7];
+            textureEntry.RandomSymetryU = rawBytes[textureOffset + 8];
+            textureEntry.RandomSymetryV = rawBytes[textureOffset + 9];
+
+            switch (textureEntry.ScrollState.ScrollType)
+            {
+                case EMP_ScrollState.ScrollTypeEnum.Static:
+                    {
+                        EMP_ScrollKeyframe staticKeyframe = new EMP_ScrollKeyframe()
+                        {
+                            Time = 100,
+                            ScrollU = BitConverter.ToSingle(rawBytes, textureOffset + 12),
+                            ScrollV = BitConverter.ToSingle(rawBytes, textureOffset + 16),
+                            ScaleU = BitConverter.ToSingle(rawBytes, textureOffset + 20),
+                            ScaleV = BitConverter.ToSingle(rawBytes, textureOffset + 24),
+                        };
+
+                        if (version == VersionEnum.SDBH)
+                        {
+                            staticKeyframe.I_20 = BitConverter.ToInt32(rawBytes, textureOffset + 28);
+                            staticKeyframe.I_24 = BitConverter.ToInt32(rawBytes, textureOffset + 32);
+                        }
+
+                        textureEntry.ScrollState.Keyframes.Add(staticKeyframe);
+
+                    }
+                    break;
+                case EMP_ScrollState.ScrollTypeEnum.Speed:
+                    {
+                        textureEntry.ScrollState.ScrollSpeed_U = BitConverter.ToSingle(rawBytes, textureOffset + 12);
+                        textureEntry.ScrollState.ScrollSpeed_V = BitConverter.ToSingle(rawBytes, textureOffset + 16);
+                    }
+                    break;
+                case EMP_ScrollState.ScrollTypeEnum.SpriteSheet:
+                    {
+                        int keyframeCount = BitConverter.ToInt16(rawBytes, textureOffset + 22);
+                        int keyframeOffset = BitConverter.ToInt32(rawBytes, textureOffset + 24) + textureOffset + 12;
+
+                        for (int i = 0; i < keyframeCount; i++)
+                        {
+                            EMP_ScrollKeyframe keyframe = new EMP_ScrollKeyframe()
+                            {
+                                Time = BitConverter.ToInt32(rawBytes, keyframeOffset + 0),
+                                ScrollU = BitConverter.ToSingle(rawBytes, keyframeOffset + 4),
+                                ScrollV = BitConverter.ToSingle(rawBytes, keyframeOffset + 8),
+                                ScaleU = BitConverter.ToSingle(rawBytes, keyframeOffset + 12),
+                                ScaleV = BitConverter.ToSingle(rawBytes, keyframeOffset + 16)
+                            };
+
+                            if (version == VersionEnum.SDBH)
+                            {
+                                keyframe.I_20 = BitConverter.ToInt32(rawBytes, keyframeOffset + 20);
+                                keyframe.I_24 = BitConverter.ToInt32(rawBytes, keyframeOffset + 24);
+                            }
+
+                            textureEntry.ScrollState.Keyframes.Add(keyframe);
+
+                            keyframeOffset += EMP_ScrollKeyframe.GetSize(version);
+                        }
+                    }
+                    break;
+            }
+
+            return textureEntry;
+        }
+
+        public static void Write(List<byte> bytes, IList<EMP_TextureSamplerDef> textures, VersionEnum version)
+        {
+            List<int> KeyframeOffsets_ToReplace = new List<int>();
+
+            for (int i = 0; i < textures.Count; i++)
+            {
+                //Filling in offsets
+                for (int a = 0; a < textures[i].OffsetsToReplace.Count; a++)
+                {
+                    bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - textures[i].OffsetsToReplace_Relative[a]), textures[i].OffsetsToReplace[a]);
+                }
+
+                bytes.AddRange(new byte[10] { textures[i].I_00, textures[i].EmbIndex, textures[i].I_02, textures[i].I_03, (byte)textures[i].FilteringMin, (byte)textures[i].FilteringMag, (byte)textures[i].RepetitionU, (byte)textures[i].RepetitionV, textures[i].RandomSymetryU, textures[i].RandomSymetryV });
+                bytes.AddRange(BitConverter.GetBytes((ushort)textures[i].ScrollState.ScrollType));
+
+                switch (textures[i].ScrollState.ScrollType)
+                {
+                    case EMP_ScrollState.ScrollTypeEnum.Static:
+                        bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.Keyframes[0].ScrollU));
+                        bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.Keyframes[0].ScrollV));
+                        bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.Keyframes[0].ScaleU));
+                        bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.Keyframes[0].ScaleV));
+
+                        if (version == VersionEnum.SDBH)
+                        {
+                            bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.Keyframes[0].I_20));
+                            bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.Keyframes[0].I_24));
+                        }
+
+                        KeyframeOffsets_ToReplace.Add(bytes.Count());
+                        break;
+                    case EMP_ScrollState.ScrollTypeEnum.Speed:
+                        bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.ScrollSpeed_U));
+                        bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.ScrollSpeed_V));
+                        bytes.AddRange(new byte[8]);
+
+                        if (version == VersionEnum.SDBH)
+                        {
+                            bytes.AddRange(new byte[8]);
+                        }
+
+                        KeyframeOffsets_ToReplace.Add(bytes.Count());
+                        break;
+                    case EMP_ScrollState.ScrollTypeEnum.SpriteSheet:
+                        bytes.AddRange(new byte[10]);
+                        int animationCount = (textures[i].ScrollState.Keyframes != null) ? textures[i].ScrollState.Keyframes.Count() : 0;
+                        bytes.AddRange(BitConverter.GetBytes((short)animationCount));
+
+                        KeyframeOffsets_ToReplace.Add(bytes.Count());
+                        bytes.AddRange(new byte[4]);
+
+                        if (version == VersionEnum.SDBH)
+                        {
+                            bytes.AddRange(new byte[8]);
+                        }
+                        break;
+                    default:
+                        throw new InvalidDataException("Unknown ScrollState.ScrollType: " + textures[i].ScrollState.ScrollType);
+                }
+            }
+
+            for (int i = 0; i < textures.Count; i++)
+            {
+                if (textures[i].ScrollState != null)
+                {
+                    if (textures[i].ScrollState.ScrollType == EMP_ScrollState.ScrollTypeEnum.SpriteSheet)
+                    {
+                        bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - KeyframeOffsets_ToReplace[i] + 12), KeyframeOffsets_ToReplace[i]);
+
+                        for (int a = 0; a < textures[i].ScrollState.Keyframes.Count; a++)
+                        {
+                            bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.Keyframes[a].Time));
+                            bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.Keyframes[a].ScrollU));
+                            bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.Keyframes[a].ScrollV));
+                            bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.Keyframes[a].ScaleU));
+                            bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.Keyframes[a].ScaleV));
+
+                            if (version == VersionEnum.SDBH)
+                            {
+                                bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.Keyframes[a].I_20));
+                                bytes.AddRange(BitConverter.GetBytes(textures[i].ScrollState.Keyframes[a].I_24));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private List<int> OffsetsToReplace = new List<int>();
+        private List<int> OffsetsToReplace_Relative = new List<int>();
+
+        public void AddOffset(int offset, int relative)
+        {
+            OffsetsToReplace.Add(offset);
+            OffsetsToReplace_Relative.Add(relative);
+        }
+
+        public void ClearOffsets()
+        {
+            OffsetsToReplace.Clear();
+            OffsetsToReplace_Relative.Clear();
+        }
+        #endregion
         public void ReplaceValues(EMP_TextureSamplerDef newValues, List<IUndoRedo> undos = null)
         {
             if (undos == null) undos = new List<IUndoRedo>();
@@ -2905,6 +3122,7 @@ namespace Xv2CoreLib.EMP_NEW
         {
             _textureRef = textureSampler;
         }
+    
     }
 
     //Interface
@@ -2976,7 +3194,13 @@ namespace Xv2CoreLib.EMP_NEW
         ECF_DiffuseTransparency,
         ECF_SpecularTransparency,
         ECF_AmbientTransparency,
-        ECF_BlendingFactor
+        ECF_BlendingFactor,
+
+        ETR_Color1,
+        ETR_Color2,
+        ETR_Color1_Transparency,
+        ETR_Color2_Transparency,
+        ETR_Scale
     }
 
 }

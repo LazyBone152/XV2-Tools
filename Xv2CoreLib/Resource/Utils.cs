@@ -344,6 +344,22 @@ namespace Xv2CoreLib
             size += 1; //Null terminator
             return Utils.CalculatePadding(size, blockSize) + size;
         }
+    
+        public static byte[] WriteFixedSizeString(string str, int maxSize)
+        {
+            //Trim if too long
+            if (str.Length > maxSize)
+            {
+                str = str.Substring(0, maxSize);
+            }
+
+            //Write name, and pad it out to max size
+            List<byte> bytes = new List<byte>(maxSize - str.Length);
+            bytes.AddRange(Encoding.ASCII.GetBytes(str));
+            bytes.AddRange(new byte[maxSize - str.Length]);
+
+            return bytes.ToArray();
+        }
     }
     
     public static class Utils

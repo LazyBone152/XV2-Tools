@@ -136,6 +136,23 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             return new UndoableListRemove<KeyframeFloatValue>(Keyframes, keyframe);
         }
 
+        public List<IUndoRedo> RescaleValue(float scaleFactor)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            float value = Constant * scaleFactor;
+            undos.Add(new UndoablePropertyGeneric(nameof(Constant), this, Constant, value));
+            Constant = value;
+
+            foreach(var keyframe in Keyframes)
+            {
+                value = keyframe.Value * scaleFactor;
+                undos.Add(new UndoablePropertyGeneric(nameof(keyframe.Value), keyframe, keyframe.Value, value));
+                keyframe.Value = value;
+            }
+
+            return undos;
+        }
     }
 
     [Serializable]

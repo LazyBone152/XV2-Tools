@@ -3,14 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
 using YAXLib;
 using Xv2CoreLib;
 
 namespace EmbPack_LB.EMB
 {
-    class Repacker
+    public class Repacker
     {
         string directoryLocation;
         string saveLocation;
@@ -20,7 +18,8 @@ namespace EmbPack_LB.EMB
         public Repacker(string fileLocation) {
             directoryLocation = fileLocation;
             saveLocation = String.Format("{0}/{1}.emb", Path.GetDirectoryName(fileLocation), Path.GetFileName(fileLocation));
-            if (ReadXmlFile()) {
+            if (ReadXmlFile()) 
+            {
                 WriteBinaryEmb();
             }
         }
@@ -32,8 +31,10 @@ namespace EmbPack_LB.EMB
             WriteBinaryEmb();
         }
 
-        bool ReadXmlFile() {
-            if (!File.Exists(directoryLocation + "/EmbIndex.xml")){
+        bool ReadXmlFile()
+        {
+            if (!File.Exists(directoryLocation + "/EmbIndex.xml"))
+            {
                 Console.WriteLine("Could not find \"EmbIndex.xml\"\n" +
                     "Extraction failed.");
                 Console.ReadLine();
@@ -54,16 +55,17 @@ namespace EmbPack_LB.EMB
             }
         }
 
-        void WriteBinaryEmb() {
+        void WriteBinaryEmb()
+        {
             List<int> dataOffsets = new List<int>();
             List<int> stringOffsets = new List<int>();
             List<byte[]> files = new List<byte[]>();
 
             //Getting all file paths;
-            int totalEntries = EmbIndexXml.Entry.Count();
+            int totalEntries = EmbIndexXml.Entry.Count;
 
-
-            for (int i = 0; i < totalEntries; i++) {
+            for (int i = 0; i < totalEntries; i++)
+            {
                 try
                 {
                     files.Add(File.ReadAllBytes(String.Format("{0}/{1}", directoryLocation, EmbIndexXml.Entry[i].Name)));

@@ -104,7 +104,7 @@ namespace Xv2CoreLib.ECF
                         {
                             int I_01_b = (e.Interpolate == true) ? 1 : 0;
                             int I_02 = (e.Loop == true) ? 1 : 0;
-                            bytes.AddRange(new byte[4] { e.Value, Int4Converter.GetByte(e.Component, (byte)I_01_b, "Animation: Component", "Animation: Interpolated"), (byte)I_02, e.I_03 });
+                            bytes.AddRange(new byte[4] { e.Parameter, Int4Converter.GetByte(e.Component, (byte)I_01_b, "Animation: Component", "Animation: Interpolated"), (byte)I_02, e.I_03 });
                             bytes.AddRange(BitConverter.GetBytes((ushort)0));
                             bytes.AddRange(BitConverter.GetBytes((short)e.Keyframes.Count));
                             Type0EntryOffsets.Add(bytes.Count);

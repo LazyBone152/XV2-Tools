@@ -870,7 +870,7 @@ namespace Xv2CoreLib.EffectContainer
                     foreach (Asset asset in Tbind.Assets)
                     {
                         ExternalFileSaved(string.Format("{0}/{1}", Directory, asset.Files[0].FullFileName));
-                        SaveFile(asset.Files[0].EtrFile.Save(false), string.Format("{0}/{1}", Directory, asset.Files[0].FullFileName));
+                        SaveFile(asset.Files[0].EtrFile.Write(), string.Format("{0}/{1}", Directory, asset.Files[0].FullFileName));
                     }
                 }
             }
@@ -987,7 +987,7 @@ namespace Xv2CoreLib.EffectContainer
 
                 foreach (var asset in Tbind.Assets)
                 {
-                    byte[] bytes = asset.Files[0].EtrFile.Save(false);
+                    byte[] bytes = asset.Files[0].EtrFile.Write();
                     Tbind.File1_Ref.Entry.Add(new EmbEntry()
                     {
                         Data = bytes,
@@ -1283,21 +1283,21 @@ namespace Xv2CoreLib.EffectContainer
                     ETR_File etrFile = etrAsset.Files[0].EtrFile;
 
                     //Materials
-                    foreach (var etrEntry in etrFile.ETR_Entries)
+                    foreach (var etrEntry in etrFile.Nodes)
                     {
-                        etrEntry.MaterialRef = Tbind.File2_Ref.GetEntry(etrEntry.I_108);
+                        etrEntry.MaterialRef = Tbind.File2_Ref.GetEntry(etrEntry.MaterialID);
                     }
 
                     //Textures
-                    foreach (var etrTexture in etrFile.ETR_TextureEntries)
+                    foreach (var etrTexture in etrFile.Textures)
                     {
-                        if (etrTexture.I_01 >= byte.MinValue && etrTexture.I_01 < sbyte.MaxValue + 1)
+                        if (etrTexture.EmbIndex >= byte.MinValue && etrTexture.EmbIndex < sbyte.MaxValue + 1)
                         {
-                            etrTexture.TextureRef = Tbind.File3_Ref.GetEntry(etrTexture.I_01);
+                            etrTexture.TextureRef = Tbind.File3_Ref.GetEntry(etrTexture.EmbIndex);
                         }
-                        else if (etrTexture.I_01 != byte.MaxValue)
+                        else if (etrTexture.EmbIndex != byte.MaxValue)
                         {
-                            throw new IndexOutOfRangeException(String.Format("TbindLinkTextureAndMaterial: EMB_Index is out of range ({0}).\n\trc.emb can only have a maximum of 128 textures.", etrTexture.I_01));
+                            throw new IndexOutOfRangeException(String.Format("TbindLinkTextureAndMaterial: EMB_Index is out of range ({0}).\n\trc.emb can only have a maximum of 128 textures.", etrTexture.EmbIndex));
                         }
                     }
 
@@ -1398,7 +1398,7 @@ namespace Xv2CoreLib.EffectContainer
                     ETR_File etrFile = etrAsset.Files[0].EtrFile;
 
                     //Materials
-                    foreach (var etrEntry in etrFile.ETR_Entries)
+                    foreach (var etrEntry in etrFile.Nodes)
                     {
                         int matIdx = Tbind.File2_Ref.Materials.IndexOf(etrEntry.MaterialRef);
 
@@ -1407,11 +1407,11 @@ namespace Xv2CoreLib.EffectContainer
                             throw new InvalidOperationException("TbindSetTextureAndMaterialIndex: material not found.");
                         }
 
-                        etrEntry.I_108 = (ushort)matIdx;
+                        etrEntry.MaterialID = (ushort)matIdx;
                     }
 
                     //Textures
-                    foreach (var etrTexture in etrFile.ETR_TextureEntries)
+                    foreach (var etrTexture in etrFile.Textures)
                     {
                         if(etrTexture.TextureRef != null)
                         {
@@ -1422,11 +1422,11 @@ namespace Xv2CoreLib.EffectContainer
                                 throw new InvalidOperationException("TbindSetTextureAndMaterialIndex: texture not found.");
                             }
 
-                            etrTexture.I_01 = (byte)textureIdx;
+                            etrTexture.EmbIndex = (byte)textureIdx;
                         }
                         else
                         {
-                            etrTexture.I_01 = byte.MaxValue;
+                            etrTexture.EmbIndex = byte.MaxValue;
                         }
                     }
 
@@ -2853,7 +2853,7 @@ namespace Xv2CoreLib.EffectContainer
                 }
                 else if (ContainerAssetType == AssetType.TBIND)
                 {
-                    foreach (var texture in asset.Files[0].EtrFile.ETR_TextureEntries)
+                    foreach (var texture in asset.Files[0].EtrFile.Textures)
                     {
                         if (texture.TextureRef == embEntry)
                         {
@@ -2884,7 +2884,7 @@ namespace Xv2CoreLib.EffectContainer
                 }
                 else if (ContainerAssetType == AssetType.TBIND)
                 {
-                    foreach (var texture in asset.Files[0].EtrFile.ETR_Entries)
+                    foreach (var texture in asset.Files[0].EtrFile.Nodes)
                     {
                         if (texture.MaterialRef == material)
                         {
@@ -2941,7 +2941,7 @@ namespace Xv2CoreLib.EffectContainer
                 }
                 else if (ContainerAssetType == AssetType.TBIND)
                 {
-                    foreach (var texture in asset.Files[0].EtrFile.ETR_TextureEntries)
+                    foreach (var texture in asset.Files[0].EtrFile.Textures)
                     {
                         if (texture.TextureRef == embEntry)
                         {
@@ -2968,7 +2968,7 @@ namespace Xv2CoreLib.EffectContainer
                 }
                 else if (ContainerAssetType == AssetType.TBIND)
                 {
-                    foreach (var mat in asset.Files[0].EtrFile.ETR_Entries)
+                    foreach (var mat in asset.Files[0].EtrFile.Nodes)
                     {
                         if (mat.MaterialRef == material)
                         {
@@ -3265,7 +3265,7 @@ namespace Xv2CoreLib.EffectContainer
             }
 
             //Textures
-            foreach (var texture in etrFile.ETR_TextureEntries)
+            foreach (var texture in etrFile.Textures)
             {
                 if (texture.TextureRef != null)
                 {
@@ -3298,7 +3298,7 @@ namespace Xv2CoreLib.EffectContainer
             }
 
             //Main entries
-            foreach (var entry in etrFile.ETR_Entries)
+            foreach (ETR_Node entry in etrFile.Nodes)
             {
                 var ret = File2_Ref.Compare(entry.MaterialRef);
 
@@ -3701,7 +3701,7 @@ namespace Xv2CoreLib.EffectContainer
                 }
                 else if (ContainerAssetType == AssetType.TBIND)
                 {
-                    foreach (var texture in asset.Files[0].EtrFile.ETR_TextureEntries)
+                    foreach (var texture in asset.Files[0].EtrFile.Textures)
                     {
                         if (texture.TextureRef == oldRef)
                         {
@@ -3728,7 +3728,7 @@ namespace Xv2CoreLib.EffectContainer
                 }
                 else if (ContainerAssetType == AssetType.TBIND)
                 {
-                    foreach (var etrEntry in asset.Files[0].EtrFile.ETR_Entries)
+                    foreach (var etrEntry in asset.Files[0].EtrFile.Nodes)
                     {
                         if (etrEntry.MaterialRef == oldRef)
                         {
@@ -4371,21 +4371,21 @@ namespace Xv2CoreLib.EffectContainer
         /// </summary>
         public static void CopyEtrRef(ETR_File oldFile, ETR_File newFile)
         {
-            if (oldFile.ETR_Entries.Count != newFile.ETR_Entries.Count)
+            if (oldFile.Nodes.Count != newFile.Nodes.Count)
                 throw new InvalidDataException("CopyEtrRef: oldFile and newFile Entry count is out of sync.");
-            if (oldFile.ETR_TextureEntries.Count != newFile.ETR_TextureEntries.Count)
+            if (oldFile.Textures.Count != newFile.Textures.Count)
                 throw new InvalidDataException("CopyEtrRef: oldFile and newFile Texture count is out of sync.");
 
-            //Copy particle effect material references
-            for (int i = 0; i < oldFile.ETR_Entries.Count; i++)
+            //Copy trace effect material references
+            for (int i = 0; i < oldFile.Nodes.Count; i++)
             {
-                newFile.ETR_Entries[i].MaterialRef = oldFile.ETR_Entries[i].MaterialRef;
+                newFile.Nodes[i].MaterialRef = oldFile.Nodes[i].MaterialRef;
             }
 
             //Copy texture EmbEntry references
-            for (int i = 0; i < oldFile.ETR_TextureEntries.Count; i++)
+            for (int i = 0; i < oldFile.Textures.Count; i++)
             {
-                newFile.ETR_TextureEntries[i].TextureRef = oldFile.ETR_TextureEntries[i].TextureRef;
+                newFile.Textures[i].TextureRef = oldFile.Textures[i].TextureRef;
             }
         }
 
@@ -4434,7 +4434,7 @@ namespace Xv2CoreLib.EffectContainer
                 case FileType.EMP:
                     return EmpFile.SaveToBytes();
                 case FileType.ETR:
-                    return EtrFile.Save(false);
+                    return EtrFile.Write();
                 case FileType.Other:
                 case FileType.EMO:
                     return Bytes;

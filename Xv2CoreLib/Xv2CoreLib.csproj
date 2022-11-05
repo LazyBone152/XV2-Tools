@@ -249,6 +249,7 @@
     <Compile Include="Eternity\StageDefFile.cs" />
     <Compile Include="Eternity\StageSlotsFile.cs" />
     <Compile Include="ETR\ETR_File.cs" />
+    <Compile Include="ETR\ETR_File1.cs" />
     <Compile Include="FPF\FPF_File.cs" />
     <Compile Include="HCA\HcaMetadata.cs" />
     <Compile Include="HCI\HCI_File.cs" />

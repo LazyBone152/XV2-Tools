@@ -46,8 +46,8 @@ namespace Xv2CoreLib.EMP_NEW
             if (TextureSamplerCount > 0)
             {
                 for (int i = 0; i < TextureSamplerCount; i++)
-                {;
-                    EmpFile.Textures.Add(ParseTextureSampler(i));
+                {
+                    EmpFile.Textures.Add(EMP_TextureSamplerDef.Read(rawBytes, TextureSamplersOffset, i, EmpFile.Version));
                 }
             }
 
@@ -256,28 +256,28 @@ namespace Xv2CoreLib.EMP_NEW
             if (EmpFile.FullDecompile)
             {
                 //Position + Rotation keyframes exist on all node types
-                node.Position.DecompileKeyframes(node.GetKeyframedValues(EMP_KeyframedValue.VALUE_POSITION, EMP_KeyframedValue.COMPONENT_X, EMP_KeyframedValue.COMPONENT_Y, EMP_KeyframedValue.COMPONENT_Z));
-                node.Rotation.DecompileKeyframes(node.GetKeyframedValues(EMP_KeyframedValue.VALUE_ROTATION, EMP_KeyframedValue.COMPONENT_X, EMP_KeyframedValue.COMPONENT_Y, EMP_KeyframedValue.COMPONENT_Z));
+                node.Position.DecompileKeyframes(node.GetKeyframedValues(EMP_KeyframedValue.PARAMETER_POSITION, EMP_KeyframedValue.COMPONENT_X, EMP_KeyframedValue.COMPONENT_Y, EMP_KeyframedValue.COMPONENT_Z));
+                node.Rotation.DecompileKeyframes(node.GetKeyframedValues(EMP_KeyframedValue.PARAMETER_ROTATION, EMP_KeyframedValue.COMPONENT_X, EMP_KeyframedValue.COMPONENT_Y, EMP_KeyframedValue.COMPONENT_Z));
 
                 //Scale, Color1 and Color2 only exist on emission types
                 if (node.NodeType == ParticleNodeType.Emission)
                 {
-                    EMP_KeyframedValue[] color1Keyframes = node.GetKeyframedValues(EMP_KeyframedValue.VALUE_COLOR1, EMP_KeyframedValue.COMPONENT_R, EMP_KeyframedValue.COMPONENT_G, EMP_KeyframedValue.COMPONENT_B);
-                    EMP_KeyframedValue[] color2Keyframes = node.GetKeyframedValues(EMP_KeyframedValue.VALUE_COLOR2, EMP_KeyframedValue.COMPONENT_R, EMP_KeyframedValue.COMPONENT_G, EMP_KeyframedValue.COMPONENT_B);
-                    EMP_KeyframedValue[] color1AlphaKeyframes = node.GetKeyframedValues(EMP_KeyframedValue.VALUE_COLOR1, EMP_KeyframedValue.COMPONENT_A);
-                    EMP_KeyframedValue[] color2AlphaKeyframes = node.GetKeyframedValues(EMP_KeyframedValue.VALUE_COLOR2, EMP_KeyframedValue.COMPONENT_A);
+                    EMP_KeyframedValue[] color1Keyframes = node.GetKeyframedValues(EMP_KeyframedValue.PARAMETER_COLOR1, EMP_KeyframedValue.COMPONENT_R, EMP_KeyframedValue.COMPONENT_G, EMP_KeyframedValue.COMPONENT_B);
+                    EMP_KeyframedValue[] color2Keyframes = node.GetKeyframedValues(EMP_KeyframedValue.PARAMETER_COLOR2, EMP_KeyframedValue.COMPONENT_R, EMP_KeyframedValue.COMPONENT_G, EMP_KeyframedValue.COMPONENT_B);
+                    EMP_KeyframedValue[] color1AlphaKeyframes = node.GetKeyframedValues(EMP_KeyframedValue.PARAMETER_COLOR1, EMP_KeyframedValue.COMPONENT_A);
+                    EMP_KeyframedValue[] color2AlphaKeyframes = node.GetKeyframedValues(EMP_KeyframedValue.PARAMETER_COLOR2, EMP_KeyframedValue.COMPONENT_A);
                     EMP_KeyframedValue[] scaleBaseKeyframes;
 
                     if (node.NodeFlags.HasFlag(NodeFlags1.EnableScaleXY))
                     {
-                        EMP_KeyframedValue[] scale2Keyframes = node.GetKeyframedValues(EMP_KeyframedValue.VALUE_SCALE, EMP_KeyframedValue.COMPONENT_X, EMP_KeyframedValue.COMPONENT_Y);
-                        scaleBaseKeyframes = node.GetKeyframedValues(EMP_KeyframedValue.VALUE_SCALE, EMP_KeyframedValue.COMPONENT_Z);
+                        EMP_KeyframedValue[] scale2Keyframes = node.GetKeyframedValues(EMP_KeyframedValue.PARAMETER_SCALE, EMP_KeyframedValue.COMPONENT_X, EMP_KeyframedValue.COMPONENT_Y);
+                        scaleBaseKeyframes = node.GetKeyframedValues(EMP_KeyframedValue.PARAMETER_SCALE, EMP_KeyframedValue.COMPONENT_Z);
 
                         node.EmissionNode.Texture.ScaleXY.DecompileKeyframes(scale2Keyframes);
                     }
                     else
                     {
-                        scaleBaseKeyframes = node.GetKeyframedValues(EMP_KeyframedValue.VALUE_SCALE, EMP_KeyframedValue.COMPONENT_X);
+                        scaleBaseKeyframes = node.GetKeyframedValues(EMP_KeyframedValue.PARAMETER_SCALE, EMP_KeyframedValue.COMPONENT_X);
                     }
 
                     node.EmissionNode.Texture.Color1.DecompileKeyframes(color1Keyframes);
@@ -391,90 +391,6 @@ namespace Xv2CoreLib.EMP_NEW
 
         }
 
-        //Textures:
-        private EMP_TextureSamplerDef ParseTextureSampler(int index)
-        {
-            int textureOffset = TextureSamplersOffset + (index * EMP_TextureSamplerDef.GetSize(EmpFile.Version));
-
-            EMP_TextureSamplerDef textureEntry = new EMP_TextureSamplerDef();
-            textureEntry.ScrollState.ScrollType = (EMP_ScrollState.ScrollTypeEnum)BitConverter.ToInt16(rawBytes, textureOffset + 10);
-            textureEntry.I_00 = rawBytes[textureOffset + 0];
-            textureEntry.EmbIndex = rawBytes[textureOffset + 1];
-            textureEntry.I_02 = rawBytes[textureOffset + 2];
-            textureEntry.I_03 = rawBytes[textureOffset + 3];
-            textureEntry.FilteringMin = (EMP_TextureSamplerDef.TextureFiltering)rawBytes[textureOffset + 4];
-            textureEntry.FilteringMag = (EMP_TextureSamplerDef.TextureFiltering)rawBytes[textureOffset + 5];
-            textureEntry.RepetitionU = (EMP_TextureSamplerDef.TextureRepitition)rawBytes[textureOffset + 6];
-            textureEntry.RepetitionV = (EMP_TextureSamplerDef.TextureRepitition)rawBytes[textureOffset + 7];
-            textureEntry.RandomSymetryU = rawBytes[textureOffset + 8];
-            textureEntry.RandomSymetryV = rawBytes[textureOffset + 9];
-
-            switch (textureEntry.ScrollState.ScrollType)
-            {
-                case EMP_ScrollState.ScrollTypeEnum.Static:
-                    {
-                        EMP_ScrollKeyframe staticKeyframe = new EMP_ScrollKeyframe()
-                        {
-                            Time = 100,
-                            ScrollU = BitConverter.ToSingle(rawBytes, textureOffset + 12),
-                            ScrollV = BitConverter.ToSingle(rawBytes, textureOffset + 16),
-                            ScaleU = BitConverter.ToSingle(rawBytes, textureOffset + 20),
-                            ScaleV = BitConverter.ToSingle(rawBytes, textureOffset + 24),
-                        };
-
-                        if(EmpFile.Version == VersionEnum.SDBH)
-                        {
-                            staticKeyframe.I_20 = BitConverter.ToInt32(rawBytes, textureOffset + 28);
-                            staticKeyframe.I_24 = BitConverter.ToInt32(rawBytes, textureOffset + 32);
-                        }
-
-                        textureEntry.ScrollState.Keyframes.Add(staticKeyframe);
-
-                    }
-                    break;
-                case EMP_ScrollState.ScrollTypeEnum.Speed:
-                    {
-                        textureEntry.ScrollState.ScrollSpeed_U = BitConverter.ToSingle(rawBytes, textureOffset + 12);
-                        textureEntry.ScrollState.ScrollSpeed_V = BitConverter.ToSingle(rawBytes, textureOffset + 16);
-                    }
-                    break;
-                case EMP_ScrollState.ScrollTypeEnum.SpriteSheet:
-                    {
-                        int keyframeCount = BitConverter.ToInt16(rawBytes, textureOffset + 22);
-                        int keyframeOffset = BitConverter.ToInt32(rawBytes, textureOffset + 24) + textureOffset + 12;
-
-                        for (int i = 0; i < keyframeCount; i++)
-                        {
-                            textureEntry.ScrollState.Keyframes.Add(ParseScrollKeyframe(keyframeOffset));
-
-                            keyframeOffset += EMP_ScrollKeyframe.GetSize(EmpFile.Version);
-                        }
-                    }
-                    break;
-            }
-
-            return textureEntry;
-        }
-
-        private EMP_ScrollKeyframe ParseScrollKeyframe(int offset)
-        {
-            EMP_ScrollKeyframe keyframe = new EMP_ScrollKeyframe()
-            {
-                Time = BitConverter.ToInt32(rawBytes, offset + 0),
-                ScrollU = BitConverter.ToSingle(rawBytes, offset + 4),
-                ScrollV = BitConverter.ToSingle(rawBytes, offset + 8),
-                ScaleU = BitConverter.ToSingle(rawBytes, offset + 12),
-                ScaleV = BitConverter.ToSingle(rawBytes, offset + 16)
-            };
-
-            if(EmpFile.Version == VersionEnum.SDBH)
-            {
-                keyframe.I_20 = BitConverter.ToInt32(rawBytes, offset + 20);
-                keyframe.I_24 = BitConverter.ToInt32(rawBytes, offset + 24);
-            }
-
-            return keyframe;
-        }
 
         /*
          * EMG file is now parsed directly
