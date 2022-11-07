@@ -3,26 +3,36 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:EEPK_Organiser.Forms"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
-        Title="Entity Select" Height="361.432" Width="300" ShowInTaskbar="True" ResizeMode="NoResize" WindowStartupLocation="CenterOwner">
+        Title="Entity Select" Height="410" Width="300" ShowInTaskbar="True" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" ShowIconOnTitleBar="False" Name="Window" TitleCharacterCasing="Normal">
     <Grid>
-        <ListBox x:Name="listBox" ItemsSource="{Binding Entities}" TextSearch.TextPath="Name" PreviewKeyDown="ListBox_PreviewKeyDown" MouseDoubleClick="ListBox_MouseDoubleClick" HorizontalAlignment="Left" Height="249" Margin="31,10,0,0" VerticalAlignment="Top" Width="230">
-            <ListBox.Resources>
-                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Black"/>
-            
-            </ListBox.Resources>
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel ToolTip="{Binding ToolTip}">
-                        <TextBlock Text="{Binding Name}"/>
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
-        <Button Content="Ok" HorizontalAlignment="Left" Margin="111,296,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click"/>
-        <CheckBox ToolTip="Ignore loose files and load directly from CPK." IsChecked="{Binding OnlyLoadFromCPK}" Content="Only Load From CPK" HorizontalAlignment="Left" Margin="76,268,0,0" VerticalAlignment="Top" Width="153"/>
+        <DataGrid x:Name="listBox" Style="{DynamicResource MahApps.Styles.DataGrid.Azure}" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" ItemsSource="{Binding ElementName=Window, Path=FilterList}" HorizontalAlignment="Left" Height="260" Margin="31,10,0,0" VerticalAlignment="Top" Width="230" SelectionMode="Single" IsTextSearchEnabled="True" IsTextSearchCaseSensitive="False" TextSearch.TextPath="Name">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="ID" Binding="{Binding ID}" IsReadOnly="True" Width="50*" SortMemberPath="ID" CanUserSort="True"/>
+                <DataGridTemplateColumn Header="Name" Width="150*" SortMemberPath="Name" CanUserSort="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}" ToolTip="{Binding Name}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}" ToolTip="{Binding Name}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+            <DataGrid.InputBindings>
+                <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding ElementName=Window, Path=SelectItemCommand}"/>
+                <KeyBinding Key="Return" Command="{Binding ElementName=Window, Path=SelectItemCommand}"/>
+            </DataGrid.InputBindings>
+        </DataGrid>
+
+
+        <Button Content="Ok" HorizontalAlignment="Left" Margin="113,341,0,0" VerticalAlignment="Top" Width="75" Command="{Binding ElementName=Window, Path=SelectItemCommand}"/>
+        <CheckBox ToolTip="Ignore loose files and load directly from CPK." IsChecked="{Binding OnlyLoadFromCPK}" Content="Only Load From CPK" HorizontalAlignment="Left" Margin="78,317,0,0" VerticalAlignment="Top" Width="153"/>
+        <TextBox Text="{Binding ElementName=Window, Path=SearchFilter, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource MahApps.Styles.TextBox.Search}" Controls:TextBoxHelper.Watermark="Search..." Controls:TextBoxHelper.ButtonCommand="{Binding ElementName=Window, Path=ClearSearchCommand}" Controls:TextBoxHelper.ClearTextButton="True" HorizontalAlignment="Left" VerticalContentAlignment="Center" Height="23" Margin="51,283,0,0" VerticalAlignment="Top" Width="188" TextWrapping="Wrap" />
 
     </Grid>
 </Controls:MetroWindow>
