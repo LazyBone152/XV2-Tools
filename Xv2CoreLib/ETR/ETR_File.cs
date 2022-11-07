@@ -14,7 +14,7 @@ using LB_Common.Numbers;
 namespace Xv2CoreLib.ETR
 {
     [Serializable]
-    public class ETR_File
+    public class ETR_File : ITexture
     {
         private const int ETR_SIGNATURE = 1381254435;
 
@@ -96,10 +96,10 @@ namespace Xv2CoreLib.ETR
                     node.CompileAllKeyframes();
                 }
 
-                if (node.ExtrudeSegements.Count == 0)
+                if (node.ExtrudePaths.Count == 0)
                 {
-                    //There should always be at least 1 segement
-                    node.ExtrudeSegements.Add(new ConeExtrudePoint(1, 0, 0, 0));
+                    //There should always be at least 1 path
+                    node.ExtrudePaths.Add(new ConeExtrudePoint(1, 0, 0, 0));
                 }
 
                 bytes.AddRange(StringEx.WriteFixedSizeString(node.AttachBone, 32));
@@ -111,12 +111,12 @@ namespace Xv2CoreLib.ETR
                 bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(node.Rotation.Y)));
                 bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(node.Rotation.Z)));
                 bytes.Add(node.I_88);
-                bytes.Add((byte)(node.ExtrudeSegements.Count - 1));
-                bytes.AddRange(BitConverter.GetBytes(node.TimeStartExtrude));
+                bytes.Add((byte)(node.ExtrudePaths.Count - 1));
+                bytes.AddRange(BitConverter.GetBytes(node.StartTime));
                 bytes.Add(node.I_92);
-                bytes.Add(node.SegementFrameStep);
+                bytes.Add(node.SegementFrameSize);
                 bytes.AddRange(BitConverter.GetBytes(node.ExtrudeDuration));
-                bytes.AddRange(BitConverter.GetBytes((int)node.Flags));
+                bytes.AddRange(BitConverter.GetBytes((uint)node.Flags));
                 bytes.AddRange(BitConverter.GetBytes(node.I_100));
                 bytes.AddRange(BitConverter.GetBytes(node.PositionExtrudeZ));
                 bytes.AddRange(BitConverter.GetBytes(node.MaterialID));
@@ -132,7 +132,7 @@ namespace Xv2CoreLib.ETR
                 bytes.AddRange(BitConverter.GetBytes(node.Color2.Constant.B));
                 bytes.AddRange(BitConverter.GetBytes(node.Color2_Transparency.Constant));
                 bytes.AddRange(BitConverter.GetBytes(node.Scale.Constant));
-                bytes.AddRange(BitConverter.GetBytes(node.ExtrudeShapePoints.Count > 0 ? node.ExtrudeShapePoints.Count - 1 : 0));
+                bytes.AddRange(BitConverter.GetBytes(node.ExtrudeShapePoints.Count > 1 ? node.ExtrudeShapePoints.Count - 1 : 0));
                 bytes.AddRange(BitConverter.GetBytes(node.HoldDuration));
                 bytes.AddRange(BitConverter.GetBytes((ushort)node.Modifiers.Count));
                 bytes.AddRange(BitConverter.GetBytes(0)); //Modifiers offset
@@ -194,24 +194,26 @@ namespace Xv2CoreLib.ETR
                     }
                 }
 
-                //Extrude Segements
+                //Extrude paths
                 Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - nodeOffset), nodeOffset + 116);
 
-                foreach(ConeExtrudePoint extrudeSegement in node.ExtrudeSegements)
+                foreach(ConeExtrudePoint path in node.ExtrudePaths)
                 {
-                    bytes.AddRange(BitConverter.GetBytes(extrudeSegement.WorldScaleFactor));
-                    bytes.AddRange(BitConverter.GetBytes(extrudeSegement.WorldScaleAdd));
-                    bytes.AddRange(BitConverter.GetBytes(extrudeSegement.WorldOffsetFactor));
-                    bytes.AddRange(BitConverter.GetBytes(extrudeSegement.WorldOffsetFactor2));
+                    bytes.AddRange(BitConverter.GetBytes(path.WorldScaleFactor));
+                    bytes.AddRange(BitConverter.GetBytes(path.WorldScaleAdd));
+                    bytes.AddRange(BitConverter.GetBytes(path.WorldOffsetFactor));
+                    bytes.AddRange(BitConverter.GetBytes(path.WorldOffsetFactor2));
                 }
 
-                foreach(ShapeDrawPoint shapePoint in node.ExtrudeShapePoints)
+                //There need to be at least 2 points
+                if(node.ExtrudeShapePoints.Count > 1)
                 {
-                    bytes.AddRange(BitConverter.GetBytes(shapePoint.X));
-                    bytes.AddRange(BitConverter.GetBytes(shapePoint.Y));
+                    foreach (ShapeDrawPoint shapePoint in node.ExtrudeShapePoints)
+                    {
+                        bytes.AddRange(BitConverter.GetBytes(shapePoint.X));
+                        bytes.AddRange(BitConverter.GetBytes(shapePoint.Y));
+                    }
                 }
-
-
             }
 
             //Textures
@@ -313,29 +315,101 @@ namespace Xv2CoreLib.ETR
             }
         }
 
+        public List<ITextureRef> GetNodesThatUseTexture(EMP_TextureSamplerDef embEntryRef)
+        {
+            List<ITextureRef> nodes = new List<ITextureRef>();
+
+            foreach(ETR_Node node in Nodes)
+            {
+                if(node.TextureEntryRef.Any(x => x.TextureRef == embEntryRef))
+                {
+                    nodes.Add(node);
+                }
+            }
+
+            return nodes;
+        }
+
+        public void RefactorTextureRef(EMP_TextureSamplerDef oldTextureRef, EMP_TextureSamplerDef newTextureRef, List<IUndoRedo> undos = null)
+        {
+            foreach(ETR_Node node in Nodes)
+            {
+                foreach(TextureEntry_Ref textureRef in node.TextureEntryRef)
+                {
+                    if(textureRef.TextureRef == oldTextureRef)
+                    {
+                        undos?.Add(new UndoablePropertyGeneric(nameof(textureRef.TextureRef), textureRef, textureRef.TextureRef, newTextureRef));
+                        textureRef.TextureRef = newTextureRef;
+                    }
+                }
+            }
+        }
+
+        public void RemoveTextureReferences(EMP_TextureSamplerDef textureRef, List<IUndoRedo> undos = null)
+        {
+            foreach (ETR_Node node in Nodes)
+            {
+                foreach (TextureEntry_Ref texture in node.TextureEntryRef)
+                {
+                    if (texture.TextureRef == textureRef)
+                    {
+                        undos?.Add(new UndoablePropertyGeneric(nameof(textureRef.TextureRef), textureRef, textureRef.TextureRef, null));
+                        textureRef.TextureRef = null;
+                    }
+                }
+            }
+        }
     }
 
     [Serializable]
-    public class ETR_Node : INotifyPropertyChanged
+    public class ETR_Node : INotifyPropertyChanged, ISelectedKeyframedValue, ITextureRef
     {
         #region NotifyPropChanged
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected void NotifyPropertyChanged(String propertyName = "")
+        protected void NotifyPropertyChanged(string propertyName = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         #endregion
 
-        public enum ExtrudeFlags : int
+        public const string CLIPBOARD_ID = "XV2_ETR_NODE";
+
+        [Flags]
+        public enum ExtrudeFlags : uint
         {
-            UVPauseOnHold = 0x100,
-            UVPauseOnExtrude = 0x20000,
-            DisplayMiddleSection = 0x10000,
-            AutoOrientation = 0x1000000,
-            NoDegrade = 0x4000000,
-            DoublePointOfMiddleSection = 0x8000000
+            AutoOrientation = 0x1,
+            Unk2 = 0x2,
+            NoDegrade = 0x4,
+            DoublePointOfMiddleSection = 0x8,
+            Unk5 = 0x10,
+            Unk6 = 0x20,
+            Unk7 = 0x40,
+            Unk8 = 0x80,
+            DisplayMiddleSection = 0x100,
+            UVPauseOnExtrude = 0x200,
+            Unk11 = 0x400,
+            Unk12 = 0x800,
+            Unk13 = 0x1000,
+            Unk14 = 0x2000,
+            Unk15 = 0x4000,
+            UVPauseOnHold = 0x10000,
+            Unk17 = 0x20000,
+            Unk18 = 0x40000, //Last flag used
+            Unk19 = 0x80000,
+            Unk20 = 0x100000,
+            Unk21 = 0x200000,
+            Unk22 = 0x400000,
+            Unk23 = 0x800000,
+            Unk24 = 0x1000000,
+            Unk25 = 0x2000000,
+            Unk26 = 0x4000000,
+            Unk27 = 0x8000000,
+            Unk28 = 0x10000000,
+            Unk29 = 0x20000000,
+            Unk30 = 0x40000000,
+            Unk31 = 0x80000000
         }
 
         #region References
@@ -357,31 +431,60 @@ namespace Xv2CoreLib.ETR
 
         #endregion
 
-        public string AttachBone { get; set; } //Max 32 characters
+        //Selected KeyframedValue is binded here for the Keyframe Editor to access
+        [NonSerialized]
+        private KeyframedBaseValue _selectedKeyframedValue = null;
+        public KeyframedBaseValue SelectedKeyframedValue
+        {
+            get => _selectedKeyframedValue;
+            set
+            {
+                if (_selectedKeyframedValue != value)
+                {
+                    _selectedKeyframedValue = value;
+                    NotifyPropertyChanged(nameof(SelectedKeyframedValue));
+                }
+            }
+        }
+
+        private string _attachBone = null;
+
+        public string AttachBone
+        {
+            get => _attachBone;
+            set
+            {
+                if(value != _attachBone)
+                {
+                    _attachBone = value;
+                    NotifyPropertyChanged(nameof(AttachBone));
+                }
+            }
+        }
         public string AttachBone2 { get; set; } //Max 32 characters
         public CustomVector4 Position { get; set; } = new CustomVector4();
         public CustomVector4 Rotation { get; set; } = new CustomVector4();
 
-        public ushort TimeStartExtrude { get; set; }
-        public byte SegementFrameStep { get; set; } //NumberFrameForNextSegment
-        public ushort ExtrudeDuration { get; set; }
+        public ushort StartTime { get; set; }
+        public byte SegementFrameSize { get; set; } //NumberFrameForNextSegment
+        public short ExtrudeDuration { get; set; }
         public ushort HoldDuration { get; set; }
         public ExtrudeFlags Flags { get; set; }
         public float PositionExtrudeZ { get; set; }
         public KeyframedFloatValue Scale { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.ETR_Scale);
 
-        public ushort MaterialID { get; set; }
+        public ushort MaterialID { get; set; } = ushort.MaxValue;
         public KeyframedColorValue Color1 { get; set; } = new KeyframedColorValue(1, 1, 1, KeyframedValueType.ETR_Color1);
         public KeyframedColorValue Color2 { get; set; } = new KeyframedColorValue(1, 1, 1, KeyframedValueType.ETR_Color2);
         public KeyframedFloatValue Color1_Transparency { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.ETR_Color1_Transparency);
         public KeyframedFloatValue Color2_Transparency { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.ETR_Color2_Transparency);
 
-        public byte I_92 { get; set; }
-        public byte I_88 { get; set; }
-        public int I_100 { get; set; }
-        public ushort I_168 { get; set; }
+        public byte I_92 { get; set; } //Looks like flags
+        public byte I_88 { get; set; } //Possibily flags
+        public int I_100 { get; set; } //69, 71, 79, 199... looks similar to ParticleTexture.I_00 from EMP
+        public ushort I_168 { get; set; } = 1; //Always 1
 
-        public AsyncObservableCollection<ConeExtrudePoint> ExtrudeSegements { get; set; } = new AsyncObservableCollection<ConeExtrudePoint>();
+        public AsyncObservableCollection<ConeExtrudePoint> ExtrudePaths { get; set; } = new AsyncObservableCollection<ConeExtrudePoint>();
         public AsyncObservableCollection<ShapeDrawPoint> ExtrudeShapePoints { get; set; } = new AsyncObservableCollection<ShapeDrawPoint>();
         public AsyncObservableCollection<EMP_KeyframedValue> KeyframedValues { get; set; } = new AsyncObservableCollection<EMP_KeyframedValue>();
         public AsyncObservableCollection<EMP_Modifier> Modifiers { get; set; } = new AsyncObservableCollection<EMP_Modifier>();
@@ -400,11 +503,11 @@ namespace Xv2CoreLib.ETR
             node.Rotation.Y = (float)MathHelpers.ConvertRadiansToDegrees(BitConverter.ToSingle(bytes, nodeOffset + 80));
             node.Rotation.Z = (float)MathHelpers.ConvertRadiansToDegrees(BitConverter.ToSingle(bytes, nodeOffset + 84));
             node.I_88 = bytes[nodeOffset + 88];
-            node.TimeStartExtrude = BitConverter.ToUInt16(bytes, nodeOffset + 90);
+            node.StartTime = BitConverter.ToUInt16(bytes, nodeOffset + 90);
             node.I_92 = bytes[nodeOffset + 92];
-            node.SegementFrameStep = bytes[nodeOffset + 93];
-            node.ExtrudeDuration = BitConverter.ToUInt16(bytes, nodeOffset + 94);
-            node.Flags = (ExtrudeFlags)BitConverter.ToInt32(bytes, nodeOffset + 96);
+            node.SegementFrameSize = bytes[nodeOffset + 93];
+            node.ExtrudeDuration = BitConverter.ToInt16(bytes, nodeOffset + 94);
+            node.Flags = (ExtrudeFlags)BitConverter.ToUInt32(bytes, nodeOffset + 96);
             node.I_100 = BitConverter.ToInt32(bytes, nodeOffset + 100);
             node.PositionExtrudeZ = BitConverter.ToSingle(bytes, nodeOffset + 104);
             node.MaterialID = BitConverter.ToUInt16(bytes, nodeOffset + 108);
@@ -450,14 +553,14 @@ namespace Xv2CoreLib.ETR
                 node.TextureEntryRef.Add(new TextureEntry_Ref());
             }
 
-            //Extrude Segements
-            byte extrudeSegementCount = (byte)(bytes[nodeOffset + 89] + 1);
-            int extrudeSegementOffset = BitConverter.ToInt32(bytes, nodeOffset + 116) + nodeOffset;
+            //Extrude Paths
+            byte extrudePathCount = (byte)(bytes[nodeOffset + 89] + 1);
+            int extrudePathOffset = BitConverter.ToInt32(bytes, nodeOffset + 116) + nodeOffset;
 
-            for(int i = 0; i < extrudeSegementCount; i++)
+            for(int i = 0; i < extrudePathCount; i++)
             {
-                node.ExtrudeSegements.Add(new ConeExtrudePoint(bytes, extrudeSegementOffset));
-                extrudeSegementOffset += 16;
+                node.ExtrudePaths.Add(new ConeExtrudePoint(bytes, extrudePathOffset));
+                extrudePathOffset += 16;
             }
 
             //Extrude Points
@@ -471,8 +574,8 @@ namespace Xv2CoreLib.ETR
 
                 for(int i = 0; i < pointsCount; i++)
                 {
-                    node.ExtrudeShapePoints.Add(new ShapeDrawPoint(BitConverter.ToSingle(bytes, extrudeSegementOffset), BitConverter.ToSingle(bytes, extrudeSegementOffset + 4)));
-                    extrudeSegementOffset += 8;
+                    node.ExtrudeShapePoints.Add(new ShapeDrawPoint(BitConverter.ToSingle(bytes, extrudePathOffset), BitConverter.ToSingle(bytes, extrudePathOffset + 4)));
+                    extrudePathOffset += 8;
                 }
             }
 
@@ -656,6 +759,22 @@ namespace Xv2CoreLib.ETR
             Color2.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
         }
 
+        public static ETR_Node GetNew()
+        {
+            return new ETR_Node()
+            {
+                AttachBone = "TRS",
+                ExtrudePaths = new AsyncObservableCollection<ConeExtrudePoint>()
+                {
+                    new ConeExtrudePoint(1,0,0,0)
+                },
+                TextureEntryRef = new AsyncObservableCollection<TextureEntry_Ref>()
+                {
+                    new TextureEntry_Ref(),
+                    new TextureEntry_Ref()
+                }
+            };
+        }
     }
 
     public enum ETR_InterpolationType

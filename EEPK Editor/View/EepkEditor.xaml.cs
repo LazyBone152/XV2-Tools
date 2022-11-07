@@ -36,6 +36,7 @@ using Xv2CoreLib.EMO;
 using Xv2CoreLib.EAN;
 using EEPK_Organiser.Forms;
 using EEPK_Organiser.Forms.Editors;
+using Xv2CoreLib.ETR;
 
 #if XenoKit
 using XenoKit;
@@ -2146,6 +2147,53 @@ namespace EEPK_Organiser.View
         {
             AssetContainer_OpenSettings(effectContainerFile.Tbind);
         }
+
+        private void TBIND_AssetContainer_Edit_Click(object sender, RoutedEventArgs e)
+        {
+            Asset selectedAsset = tbindDataGrid.SelectedItem as Asset;
+
+            if (selectedAsset != null)
+            {
+                TBIND_OpenEditor(selectedAsset.Files[0].EtrFile, effectContainerFile.Tbind, selectedAsset.Files[0].FileName);
+            }
+        }
+
+        private void TBIND_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            TBIND_AssetContainer_Edit_Click(null, null);
+        }
+
+        public static EtrEditorWindow TBIND_OpenEditor(ETR_File etrFile, AssetContainerTool assetContainer, string name)
+        {
+            EtrEditorWindow form = GetActiveEtrForm(etrFile);
+
+            if (form == null)
+            {
+                form = new EtrEditorWindow(etrFile, assetContainer, name);
+                form.Show();
+            }
+
+            form.Focus();
+            return form;
+        }
+
+        private void TBIND_NewEtr_Click(object sender, RoutedEventArgs e)
+        {
+            ETR_File etrFile = new ETR_File();
+            etrFile.Nodes.Add(ETR_Node.GetNew());
+
+            Asset asset = effectContainerFile.Tbind.AddAsset(etrFile, "NewEtr.etr");
+            effectContainerFile.Tbind.RefreshAssetCount();
+            tbindDataGrid.SelectedItem = asset;
+            tbindDataGrid.ScrollIntoView(asset);
+
+            //Undos
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+            undos.Add(new UndoableListAdd<Asset>(effectContainerFile.Tbind.Assets, asset));
+            undos.Add(new UndoActionDelegate(effectContainerFile.Tbind, nameof(effectContainerFile.Tbind.UpdateAssetFilter), true));
+            UndoManager.Instance.AddUndo(new CompositeUndo(undos, "New ETR"));
+        }
+
         #endregion
 
         #region CBIND
@@ -3214,6 +3262,14 @@ namespace EEPK_Organiser.View
                     {
                         CloseEmpForm(asset.Files[0].EmpFile);
                     }
+                    else if (asset.assetType == AssetType.CBIND)
+                    {
+                        CloseEcfForm(asset.Files[0].EcfFile);
+                    }
+                    else if (asset.assetType == AssetType.TBIND)
+                    {
+                        CloseEtrForm(asset.Files[0].EtrFile);
+                    }
                 }
 
                 container.RefreshAssetCount();
@@ -4212,6 +4268,28 @@ namespace EEPK_Organiser.View
         public static void CloseEcfForm(ECF_File _ecfFile)
         {
             var form = GetActiveEcfForm(_ecfFile);
+
+            if (form != null)
+                form.Close();
+        }
+
+        public static EtrEditorWindow GetActiveEtrForm(ETR_File _etrFile)
+        {
+            foreach (object window in Application.Current.Windows)
+            {
+                if (window is EtrEditorWindow etrEditor)
+                {
+                    if (etrEditor.EtrFile == _etrFile)
+                        return etrEditor;
+                }
+            }
+
+            return null;
+        }
+
+        public static void CloseEtrForm(ETR_File _etrFile)
+        {
+            var form = GetActiveEtrForm(_etrFile);
 
             if (form != null)
                 form.Close();

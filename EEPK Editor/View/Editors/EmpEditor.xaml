@@ -22,8 +22,8 @@
         <converters:BooleanToVisibilityConverter x:Key="visibilityConverter" />
     </UserControl.Resources>
     <Grid>
-        <Controls:MetroTabControl Controls:TabControlHelper.Underlined="TabPanel" Controls:TabControlHelper.UnderlineBrush="{DynamicResource MahApps.Brushes.SystemControlForegroundListMedium}">
-            <Controls:MetroTabItem Header="Particle Nodes" Controls:HeaderedControlHelper.HeaderFontSize="16">
+        <Controls:MetroTabControl x:Name="tabItems" Controls:TabControlHelper.Underlined="TabPanel" Controls:TabControlHelper.UnderlineBrush="{DynamicResource MahApps.Brushes.SystemControlForegroundListMedium}">
+            <Controls:MetroTabItem Header="Nodes" Controls:HeaderedControlHelper.HeaderFontSize="16">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="40"/>
@@ -31,6 +31,16 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
+                    <StackPanel Margin="5, 20, 0, 0">
+                        <Button Margin="2" HorizontalAlignment="Center" VerticalAlignment="Top" Width="22" Height="22" BorderThickness="1" Style="{DynamicResource MahApps.Styles.Button.Circle}" Command="{Binding ElementName=UserControl, Path=NewNodeCommand}">
+                            <iconPacks:PackIconMaterialLight Kind="Plus" />
+                        </Button>
+                        <Button Margin="2" HorizontalAlignment="Center" VerticalAlignment="Top" Width="22" Height="22" BorderThickness="1" Style="{DynamicResource MahApps.Styles.Button.Circle}" Command="{Binding ElementName=UserControl, Path=DeleteNodeCommand}">
+                            <iconPacks:PackIconMaterialLight Kind="Delete" />
+                        </Button>
+
+                    </StackPanel>
+
                     <GridSplitter Grid.Column="2" Grid.RowSpan="3" Margin="0, 20, 0, 20" Width="3" ResizeDirection="Columns" ResizeBehavior="PreviousAndNext" Background="{DynamicResource MahApps.Brushes.Accent}"/>
 
                     <TreeView Margin="5, 20, 5, 20" Grid.Column="1" Grid.RowSpan="3" Style="{DynamicResource MahApps.Styles.TreeView.Virtualized}" BorderBrush="{DynamicResource MahApps.Brushes.SystemControlForegroundListMedium}" BorderThickness="1" ItemsSource="{Binding ElementName=UserControl, Path=EmpFile.ParticleNodes.Binding}" SelectedItemChanged="TreeView_SelectedItemChanged"
@@ -128,7 +138,7 @@
             </Controls:MetroTabItem>
             <Controls:MetroTabItem Header="Textures" Controls:HeaderedControlHelper.HeaderFontSize="16">
                 <Grid>
-                    <views:EmpTextureView EmpFile="{Binding ElementName=UserControl, Path=EmpFile}" AssetContainer="{Binding ElementName=UserControl, Path=AssetContainer}"/>
+                    <views:EmpTextureView x:Name="textureView" TextureFile="{Binding ElementName=UserControl, Path=EmpFile}" AssetContainer="{Binding ElementName=UserControl, Path=AssetContainer}"/>
                 </Grid>
             </Controls:MetroTabItem>
         </Controls:MetroTabControl>

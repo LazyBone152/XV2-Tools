@@ -49,13 +49,13 @@ namespace EEPK_Organiser
 
             MSG_File characterMsgFile = (MSG_File)FileManager.Instance.GetParsedFileFromGame(CHARACTER_MSG_PATH);
 
-            foreach(var ersEntry in ersFile.GetSubentryList(2))
+            foreach (var ersEntry in ersFile.GetSubentryList(2))
             {
                 CMS_Entry cmsEntry = cmsFile.GetEntry(ersEntry.Index);
                 string name = null;
                 string eepkPath = string.Format("vfx/{0}", ersEntry.FILE_PATH);
 
-                if(cmsEntry != null)
+                if (cmsEntry != null)
                 {
                     name = characterMsgFile.GetCharacterName(cmsEntry.Str_04);
 
@@ -65,10 +65,11 @@ namespace EEPK_Organiser
                         name = String.Format("??? ({0} / {1})", cmsEntry.Index, cmsEntry.Str_04);
                     }
                 }
-                
+
 
                 entities.Add(new GameEntity()
                 {
+                    ID = ersEntry.ID,
                     Name = name,
                     EepkPath = eepkPath
                 });
@@ -76,11 +77,11 @@ namespace EEPK_Organiser
 
             return entities;
         }
-        
+
         private ObservableCollection<GameEntity> LoadSkillNames(CUS_File.SkillType skillType, CUS_File cusFile, CMS_File cmsFile)
         {
             ObservableCollection<GameEntity> entities = new ObservableCollection<GameEntity>();
-            
+
             MSG_File nameMsgFile = (skillType != CUS_File.SkillType.Blast) ? (MSG_File)FileManager.Instance.GetParsedFileFromGame(string.Format("{0}en.msg", cusFile.GetNameMsgPath(skillType))) : null;
             string skillDir;
 
@@ -111,14 +112,14 @@ namespace EEPK_Organiser
                 default:
                     throw new InvalidDataException("LoadSkillNames: unknown skillType = " + skillType);
             }
-            
-            foreach(var skill in skills)
+
+            foreach (Skill skill in skills)
             {
                 if (skill.FilesLoadedFlags1.HasFlag(Skill.FilesLoadedFlags.Eepk))
                 {
                     string eepkPath;
 
-                    if(!skill.HasEepkPath)
+                    if (!skill.HasEepkPath)
                     {
                         //Get skill folder and files name
                         int skillID2 = skill.ID2;
@@ -155,6 +156,7 @@ namespace EEPK_Organiser
 
                     entities.Add(new GameEntity()
                     {
+                        ID = skill.ID2,
                         Name = name,
                         EepkPath = eepkPath
                     });
@@ -167,10 +169,11 @@ namespace EEPK_Organiser
         {
             ObservableCollection<GameEntity> entities = new ObservableCollection<GameEntity>();
 
-            foreach(var entry in ersFile.GetSubentryList(0))
+            foreach (var entry in ersFile.GetSubentryList(0))
             {
                 entities.Add(new GameEntity()
                 {
+                    ID = entry.ID,
                     Name = Path.GetFileNameWithoutExtension(entry.FILE_PATH),
                     EepkPath = String.Format("vfx/{0}", entry.FILE_PATH)
                 });
@@ -187,6 +190,7 @@ namespace EEPK_Organiser
             {
                 entities.Add(new GameEntity()
                 {
+                    ID = entry.ID,
                     Name = Path.GetFileNameWithoutExtension(entry.FILE_PATH),
                     EepkPath = String.Format("vfx/{0}", entry.FILE_PATH)
                 });
@@ -200,6 +204,7 @@ namespace EEPK_Organiser
 
     public class GameEntity
     {
+        public int ID { get; set; }
         public string Name { get; set; }
         public string EepkPath { get; set; }
         public string ToolTip

@@ -288,6 +288,11 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
                     return ValueType.ToString();
             }
         }
+
+        public bool IsEtrValue()
+        {
+            return ValueType == KeyframedValueType.ETR_Color1 || ValueType == KeyframedValueType.ETR_Color2 || ValueType == KeyframedValueType.ETR_Color1_Transparency || ValueType == KeyframedValueType.ETR_Color2_Transparency || ValueType == KeyframedValueType.ETR_Scale;
+        }
     }
 
     public class KeyframedGenericValue : IKeyframe

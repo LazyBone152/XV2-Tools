@@ -4,6 +4,7 @@ using Xv2CoreLib.EMP_NEW.Keyframes;
 using Xv2CoreLib.Resource.UndoRedo;
 using LB_Common.Numbers;
 using GalaSoft.MvvmLight;
+using Xv2CoreLib.EMM;
 
 namespace EEPK_Organiser.ViewModel
 {
@@ -936,9 +937,21 @@ namespace EEPK_Organiser.ViewModel
             }
         }
 
+        public EmmMaterial MaterialRef
+        {
+            get => node.EmissionNode.Texture.MaterialRef;
+            set
+            {
+                UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.Texture.MaterialRef), node.EmissionNode.Texture, node.EmissionNode.Texture.MaterialRef, value, "ETR -> Material"));
+                node.EmissionNode.Texture.MaterialRef = value;
+                RaisePropertyChanged(nameof(MaterialRef));
+            }
+        }
 
         public void UpdateProperties()
         {
+            RaisePropertyChanged(nameof(MaterialRef));
+
             //Base
             RaisePropertyChanged(nameof(Name));
             RaisePropertyChanged(nameof(NodeType));

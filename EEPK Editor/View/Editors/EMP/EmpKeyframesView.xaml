@@ -7,6 +7,7 @@
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:vector="clr-namespace:EEPK_Organiser.View.Vectors"
              xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:empDic="clr-namespace:Xv2CoreLib.ValuesDictionary;assembly=Xv2CoreLib"
              xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
              xmlns:lbUtils="clr-namespace:LB_Common.Utils;assembly=LB_Common"
              mc:Ignorable="d" 
@@ -49,31 +50,58 @@
 
             <Grid Grid.Row="1" Grid.ColumnSpan="10">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="120"/>
                     <ColumnDefinition Width="2"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel>
-                    <Grid Width="100" ToolTip="Enable keyframing for this value.">
+                <StackPanel x:Name="etrValues" HorizontalAlignment="Left" Width="120">
+                    <Grid ToolTip="Enable keyframing for this value.">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="80"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="20"/>
                         </Grid.ColumnDefinitions>
                         <Label Content="Enabled"/>
                         <CheckBox Grid.Column="1" IsChecked="{Binding ElementName=UserControl, Path=ViewModel.IsAnimated}"/>
                     </Grid>
-                    <Grid IsEnabled="{Binding ElementName=UserControl, Path=ViewModel.IsAnimated}" Width="100" ToolTip="This setting will loop the keyframes if they end before the particles lifetime expires.&#x0a;&#x0a;Since time is a factor of a particles lifetime, this setting will only do anything if the final keyframe is less than 1.0">
+                    <Grid IsEnabled="{Binding ElementName=UserControl, Path=ViewModel.IsAnimated}" ToolTip="Allows interpolation between the declared keyframes.&#x0a;&#x0a;This will automatically generate new keyframes when the animation is playing, using the previous and next keyframes to get an interpolated value.">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="80"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="20"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Content="Interpolate"/>
+                        <CheckBox Grid.Column="1" IsChecked="{Binding ElementName=UserControl, Path=ViewModel.Interpolate}"/>
+                    </Grid>
+                    <Grid IsEnabled="{Binding ElementName=UserControl, Path=ViewModel.IsAnimated}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Label Content="Interpolate Type:"/>
+                        <ComboBox Grid.Row="1" Margin="3,0" ItemsSource="{x:Static empDic:EMP.ETR_InterpolationType}" SelectedValue="{Binding ElementName=UserControl, Path=ViewModel.InterpolationType}" DisplayMemberPath="Value" SelectedValuePath="Key"/>
+                    </Grid>
+
+                </StackPanel>
+                <StackPanel x:Name="defaultValues" HorizontalAlignment="Left" Width="120">
+                    <Grid ToolTip="Enable keyframing for this value.">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="20"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Content="Enabled"/>
+                        <CheckBox Grid.Column="1" IsChecked="{Binding ElementName=UserControl, Path=ViewModel.IsAnimated}"/>
+                    </Grid>
+                    <Grid IsEnabled="{Binding ElementName=UserControl, Path=ViewModel.IsAnimated}" ToolTip="This setting will loop the keyframes if they end before the particles lifetime expires.&#x0a;&#x0a;Since time is a factor of a particles lifetime, this setting will only do anything if the final keyframe is less than 1.0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="20"/>
                         </Grid.ColumnDefinitions>
                         <Label Content="Loop"/>
                         <CheckBox Grid.Column="1" IsChecked="{Binding ElementName=UserControl, Path=ViewModel.Loop}"/>
                     </Grid>
-                    <Grid IsEnabled="{Binding ElementName=UserControl, Path=ViewModel.IsAnimated}" Width="100" ToolTip="Allows interpolation between the declared keyframes.&#x0a;&#x0a;This will automatically generate new keyframes when the animation is playing, using the previous and next keyframes to get an interpolated value.">
+                    <Grid IsEnabled="{Binding ElementName=UserControl, Path=ViewModel.IsAnimated}" ToolTip="Allows interpolation between the declared keyframes.&#x0a;&#x0a;This will automatically generate new keyframes when the animation is playing, using the previous and next keyframes to get an interpolated value.">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="80"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="20"/>
                         </Grid.ColumnDefinitions>
                         <Label Content="Interpolate"/>
                         <CheckBox Grid.Column="1" IsChecked="{Binding ElementName=UserControl, Path=ViewModel.Interpolate}"/>
@@ -92,7 +120,7 @@
                                 <DataGridTemplateColumn Header="Time" Width="0.3*" SortMemberPath="Time">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <controls:NumericUpDown Value="{Binding UndoableTime, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01" Minimum="0" Maximum="1" />
+                                            <controls:NumericUpDown Value="{Binding UndoableTime, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01" Minimum="0" Maximum="{Binding ElementName=UserControl, Path=MaxTime}" />
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -133,7 +161,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="60"/>
                             </Grid.ColumnDefinitions>
-                            <controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=ViewModel.NewTime}" Interval="0.01" Minimum="0" Maximum="1" StringFormat="0.0#" Margin="0,0,2,0"/>
+                            <controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=ViewModel.NewTime}" Interval="0.01" Minimum="0" Maximum="{Binding ElementName=UserControl, Path=MaxTime}" StringFormat="0.0#" Margin="0,0,2,0"/>
                             <controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=ViewModel.NewFloat}" Interval="0.01" StringFormat="0.0##" Margin="50, 0"/>
                             <Button Grid.Column="2" Content="Add" Command="{Binding ElementName=UserControl, Path=ViewModel.AddFloatKeyframeCommand}" Margin="0,0,5,0"/>
                         </Grid>
@@ -150,7 +178,7 @@
                                 <DataGridTemplateColumn Header="Time" Width="0.3*" SortMemberPath="Time">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <controls:NumericUpDown Value="{Binding UndoableTime, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01" Minimum="0" Maximum="1" />
+                                            <controls:NumericUpDown Value="{Binding UndoableTime, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01" Minimum="0" Maximum="{Binding ElementName=UserControl, Path=MaxTime}" />
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -192,7 +220,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="60"/>
                             </Grid.ColumnDefinitions>
-                            <controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=ViewModel.NewTime}" Interval="0.01" Minimum="0" Maximum="1" StringFormat="0.00" Margin="0,0,2,0"/>
+                            <controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=ViewModel.NewTime}" Interval="0.01" Minimum="0" Maximum="{Binding ElementName=UserControl, Path=MaxTime}" StringFormat="0.00" Margin="0,0,2,0"/>
                             <vector:CustomRgbColor Grid.Column="1" Value="{Binding ElementName=UserControl, Path=ViewModel.NewColor}" AllowUndo="False" HideUpDownButtons="False"/>
                             <Button Grid.Column="2" Content="Add" Command="{Binding ElementName=UserControl, Path=ViewModel.AddColorKeyframeCommand}" Margin="0,0,5,0"/>
                         </Grid>
@@ -209,7 +237,7 @@
                                 <DataGridTemplateColumn Header="Time" Width="0.3*" SortMemberPath="Time">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <controls:NumericUpDown Value="{Binding UndoableTime, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01" Minimum="0" Maximum="1" />
+                                            <controls:NumericUpDown Value="{Binding UndoableTime, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01" Minimum="0" Maximum="{Binding ElementName=UserControl, Path=MaxTime}" />
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -268,7 +296,7 @@
                                 <DataGridTemplateColumn Header="Time" Width="0.3*" SortMemberPath="Time">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <controls:NumericUpDown Value="{Binding UndoableTime, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01" Minimum="0" Maximum="1" />
+                                            <controls:NumericUpDown Value="{Binding UndoableTime, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01" Minimum="0" Maximum="{Binding ElementName=UserControl, Path=MaxTime}" />
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -310,7 +338,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="60"/>
                             </Grid.ColumnDefinitions>
-                            <controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=ViewModel.NewTime}" Interval="0.01" Minimum="0" Maximum="1" StringFormat="0.00" Margin="0,0,2,0"/>
+                            <controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=ViewModel.NewTime}" Interval="0.01" Minimum="0" Maximum="{Binding ElementName=UserControl, Path=MaxTime}" StringFormat="0.00" Margin="0,0,2,0"/>
                             <vector:CustomVector3 Grid.Column="1" Value="{Binding ElementName=UserControl, Path=ViewModel.NewVector}" AllowUndo="False" HideUpDownButtons="False"/>
                             <Button Grid.Column="2" Content="Add" Command="{Binding ElementName=UserControl, Path=ViewModel.AddVector3KeyframeCommand}" Margin="0,0,5,0"/>
                         </Grid>

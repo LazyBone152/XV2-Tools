@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.EMG;
 using Xv2CoreLib.EMP_NEW;
@@ -237,10 +238,8 @@ namespace EEPK_Organiser.View.Editors.EMP
 
             if (textureRef.TextureRef != null)
             {
-                //TODO: hook this up
-                //mainTabControl.SelectedIndex = 1;
-                //listBox_Textures.SelectedItem = textureRef.TextureRef;
-                //listBox_Textures.ScrollIntoView(textureRef.TextureRef);
+                EmpEditor empEditor = ((Grid)VisualTreeHelper.GetParent(this)).DataContext as EmpEditor;
+                empEditor.SelectTexture(textureRef.TextureRef);
             }
         }
 

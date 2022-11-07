@@ -1,15 +1,13 @@
-﻿using EEPK_Organiser.ViewModel;
-using GalaSoft.MvvmLight.CommandWpf;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using Xv2CoreLib.ECF;
 using Xv2CoreLib.Resource.UndoRedo;
+using EEPK_Organiser.ViewModel;
+using GalaSoft.MvvmLight.CommandWpf;
 
 namespace EEPK_Organiser.View.Editors
 {
@@ -69,6 +67,13 @@ namespace EEPK_Organiser.View.Editors
             InitializeComponent();
             UndoManager.Instance.UndoOrRedoCalled += Instance_UndoOrRedoCalled;
             Unloaded += EcfEditor_Unloaded;
+            Loaded += EcfEditor_Loaded;
+        }
+
+        private void EcfEditor_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (EcfFile?.Nodes?.Count > 0)
+                SelectedNode = EcfFile.Nodes[0];
         }
 
         private void EcfEditor_Unloaded(object sender, RoutedEventArgs e)

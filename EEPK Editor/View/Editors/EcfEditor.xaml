@@ -38,8 +38,7 @@
         </StackPanel>
         
         <DataGrid x:Name="ecfDataGrid" BorderBrush="{DynamicResource MahApps.Brushes.SystemControlForegroundListMedium}" BorderThickness="1" Grid.Column="1" Margin="5, 20" ItemsSource="{Binding ElementName=UserControl, Path=EcfFile.Nodes.Binding}" SelectedItem="{Binding ElementName=UserControl, Path=SelectedNode}" CanUserAddRows="False" CanUserDeleteRows="False" AutoGenerateColumns="False"
-                  dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" dd:DragDrop.UseDefaultDragAdorner="True" dd:DragDrop.SelectDroppedItems="True" dd:DragDrop.DropScrollingMode="Both"
-                  >
+                  dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" dd:DragDrop.UseDefaultDragAdorner="True" dd:DragDrop.SelectDroppedItems="True" dd:DragDrop.DropScrollingMode="Both">
 
             <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding Material}" Width="*" Header="Node" IsReadOnly="True"/>

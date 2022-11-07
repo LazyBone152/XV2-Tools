@@ -48,6 +48,7 @@ namespace EEPK_Organiser.View.Editors.EMP
                 view.NotifyPropertyChanged(nameof(KeyframedValue));
                 view.NotifyPropertyChanged(nameof(ViewModel));
                 view.NotifyPropertyChanged(nameof(KeyframedValueName));
+                view.NotifyPropertyChanged(nameof(MaxTime));
 
                 if (view.KeyframedValue == null)
                 {
@@ -59,6 +60,20 @@ namespace EEPK_Organiser.View.Editors.EMP
                     view.mainGrid.Visibility = Visibility.Visible;
                     view.nothingSelectedText.Visibility = Visibility.Collapsed;
                 }
+
+                if(view.KeyframedValue != null)
+                {
+                    if (view.KeyframedValue.IsEtrValue())
+                    {
+                        view.defaultValues.Visibility = Visibility.Collapsed;
+                        view.etrValues.Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        view.defaultValues.Visibility = Visibility.Visible;
+                        view.etrValues.Visibility = Visibility.Collapsed;
+                    }
+                }
             }
         }
         #endregion
@@ -67,6 +82,7 @@ namespace EEPK_Organiser.View.Editors.EMP
         public EmpKeyframesViewModel ViewModel => KeyframedValue != null ? _viewModel : null;
 
         public string KeyframedValueName => KeyframedValue != null ? KeyframedValue.GetValueName().ToUpper() : null;
+        public int MaxTime => KeyframedValue?.IsEtrValue() == true ? 20000 : 1;
 
         public EmpKeyframesView()
         {

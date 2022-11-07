@@ -69,7 +69,7 @@ namespace Xv2CoreLib.EMP_NEW
     }
 
     [Serializable]
-    public class EMP_File
+    public class EMP_File : ITexture
     {
         public const int EMP_SIGNATURE = 1347241251;
         public const string CLIPBOARD_NODE = "EMP_NODE";
@@ -310,10 +310,13 @@ namespace Xv2CoreLib.EMP_NEW
         }
 
         /// <summary>
-        /// Get the collection that this node belongs to.
+        /// Get the collection that this node belongs to. 
+        /// If node is null, the root node collection will be returned.
         /// </summary>
         public AsyncObservableCollection<ParticleNode> GetParentList(ParticleNode particleNode)
         {
+            if (particleNode == null) return ParticleNodes;
+
             foreach (ParticleNode node in ParticleNodes)
             {
                 AsyncObservableCollection<ParticleNode> result = null;
@@ -418,9 +421,9 @@ namespace Xv2CoreLib.EMP_NEW
             return textureParts;
         }
 
-        public List<ParticleTexture> GetTexturePartsThatUseEmbEntryRef(EMP_TextureSamplerDef embEntryRef)
+        public List<ITextureRef> GetNodesThatUseTexture(EMP_TextureSamplerDef embEntryRef)
         {
-            List<ParticleTexture> textureParts = new List<ParticleTexture>();
+            List<ITextureRef> textureParts = new List<ITextureRef>();
 
             foreach (var particleEffect in ParticleNodes)
             {
@@ -443,7 +446,7 @@ namespace Xv2CoreLib.EMP_NEW
             return textureParts;
         }
 
-        private List<ParticleTexture> GetTexturePartsThatUseEmbEntryRef_Recursive(EMP_TextureSamplerDef embEntryRef, List<ParticleTexture> textureParts, AsyncObservableCollection<ParticleNode> particleEffects)
+        private List<ITextureRef> GetTexturePartsThatUseEmbEntryRef_Recursive(EMP_TextureSamplerDef embEntryRef, List<ITextureRef> textureParts, AsyncObservableCollection<ParticleNode> particleEffects)
         {
             foreach (var particleEffect in particleEffects)
             {
@@ -1073,7 +1076,7 @@ namespace Xv2CoreLib.EMP_NEW
     }
 
     [Serializable]
-    public class ParticleTexture : INotifyPropertyChanged
+    public class ParticleTexture : INotifyPropertyChanged, ITextureRef
     {
         #region NotifyPropChanged
         [field: NonSerialized]
@@ -2576,8 +2579,7 @@ namespace Xv2CoreLib.EMP_NEW
                             staticKeyframe.I_24 = BitConverter.ToInt32(rawBytes, textureOffset + 32);
                         }
 
-                        textureEntry.ScrollState.Keyframes.Add(staticKeyframe);
-
+                        textureEntry.ScrollState.Keyframes[0] = staticKeyframe;
                     }
                     break;
                 case EMP_ScrollState.ScrollTypeEnum.Speed:
@@ -2588,6 +2590,7 @@ namespace Xv2CoreLib.EMP_NEW
                     break;
                 case EMP_ScrollState.ScrollTypeEnum.SpriteSheet:
                     {
+                        textureEntry.ScrollState.Keyframes.Clear();
                         int keyframeCount = BitConverter.ToInt16(rawBytes, textureOffset + 22);
                         int keyframeOffset = BitConverter.ToInt32(rawBytes, textureOffset + 24) + textureOffset + 12;
 
@@ -2874,7 +2877,13 @@ namespace Xv2CoreLib.EMP_NEW
         public float ScrollSpeed_U { get; set; }
         public float ScrollSpeed_V { get; set; }
 
-        public AsyncObservableCollection<EMP_ScrollKeyframe> Keyframes { get; set; } = new AsyncObservableCollection<EMP_ScrollKeyframe>();
+        public AsyncObservableCollection<EMP_ScrollKeyframe> Keyframes { get; set; }
+
+        public EMP_ScrollState()
+        {
+            Keyframes = new AsyncObservableCollection<EMP_ScrollKeyframe>();
+            Keyframes.Add(new EMP_ScrollKeyframe(100, 0, 0, 1, 1));
+        }
 
         public bool Compare(EMP_ScrollState obj2)
         {
@@ -2997,6 +3006,17 @@ namespace Xv2CoreLib.EMP_NEW
         //Added in newer versions of EMP (SDBH and Breakers)
         public int I_20 { get; set; } //0, 3
         public int I_24 { get; set; } //0, 60
+
+        public EMP_ScrollKeyframe() { }
+
+        public EMP_ScrollKeyframe(int time, float scrollX, float scrollY, float scaleX, float scaleY)
+        {
+            Time = time;
+            ScrollU = scrollX;
+            ScrollV = scrollY;
+            ScaleU = scaleX;
+            ScaleV = scaleY;
+        }
 
         /// <summary>
         /// Create sprite sheet keyframes out of the specified columns and rows.
@@ -3203,4 +3223,17 @@ namespace Xv2CoreLib.EMP_NEW
         ETR_Scale
     }
 
+    public interface ITexture
+    {
+        AsyncObservableCollection<EMP_TextureSamplerDef> Textures { get; set; }
+
+        List<ITextureRef> GetNodesThatUseTexture(EMP_TextureSamplerDef embEntryRef);
+        void RefactorTextureRef(EMP_TextureSamplerDef oldTextureRef, EMP_TextureSamplerDef newTextureRef, List<IUndoRedo> undos);
+        void RemoveTextureReferences(EMP_TextureSamplerDef textureRef, List<IUndoRedo> undos = null);
+    }
+
+    public interface ITextureRef
+    {
+        AsyncObservableCollection<TextureEntry_Ref> TextureEntryRef { get; set; }
+    }
 }

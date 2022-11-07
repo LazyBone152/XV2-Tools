@@ -8,7 +8,7 @@
         xmlns:view="clr-namespace:EEPK_Organiser.View"
         xmlns:undoRedo="clr-namespace:Xv2CoreLib.Resource.UndoRedo;assembly=Xv2CoreLib"
         mc:Ignorable="d"
-        Title="Materials Editor" Height="600" Width="900" MinHeight="400" MinWidth="840" ResizeMode="CanResizeWithGrip" SaveWindowPosition="True" WindowStartupLocation="CenterOwner" x:Name="Window" TitleCharacterCasing="Normal">
+        Title="Materials Editor" Height="600" Width="900" MinHeight="500" MinWidth="960" ResizeMode="CanResizeWithGrip" SaveWindowPosition="True" WindowStartupLocation="CenterOwner" x:Name="Window" TitleCharacterCasing="Normal">
     <Window.InputBindings>
         <KeyBinding Key="Z" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=UndoCommand}"/>
         <KeyBinding Key="Y" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=RedoCommand}"/>

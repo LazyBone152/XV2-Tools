@@ -1,19 +1,15 @@
-﻿using EEPK_Organiser.Misc;
-using EEPK_Organiser.ViewModel;
-using GalaSoft.MvvmLight.CommandWpf;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.EMP_NEW;
-using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
+using EEPK_Organiser.Misc;
+using EEPK_Organiser.ViewModel;
+using GalaSoft.MvvmLight.CommandWpf;
 
 namespace EEPK_Organiser.View.Editors.EMP
 {
@@ -32,12 +28,12 @@ namespace EEPK_Organiser.View.Editors.EMP
         #endregion
 
         #region DependencyProperty
-        public static readonly DependencyProperty EmpFileProperty = DependencyProperty.Register(nameof(EmpFile), typeof(EMP_File), typeof(EmpTextureView), new PropertyMetadata(null));
+        public static readonly DependencyProperty ITextureProperty = DependencyProperty.Register(nameof(TextureFile), typeof(ITexture), typeof(EmpTextureView), new PropertyMetadata(null));
 
-        public EMP_File EmpFile
+        public ITexture TextureFile
         {
-            get => (EMP_File)GetValue(EmpFileProperty);
-            set => SetValue(EmpFileProperty, value);
+            get => (ITexture)GetValue(ITextureProperty);
+            set => SetValue(ITextureProperty, value);
         }
 
         public static readonly DependencyProperty AssetContainerProperty = DependencyProperty.Register(nameof(AssetContainer), typeof(AssetContainerTool), typeof(EmpTextureView), new PropertyMetadata(null));
@@ -71,6 +67,8 @@ namespace EEPK_Organiser.View.Editors.EMP
         public Visibility StaticVisibility => ViewModel?.ScrollType == EMP_ScrollState.ScrollTypeEnum.Static ? Visibility.Visible : Visibility.Collapsed;
         public Visibility SpeedVisibility => ViewModel?.ScrollType == EMP_ScrollState.ScrollTypeEnum.Speed ? Visibility.Visible : Visibility.Collapsed;
         public Visibility SpriteSheetVisibility => ViewModel?.ScrollType == EMP_ScrollState.ScrollTypeEnum.SpriteSheet ? Visibility.Visible : Visibility.Collapsed;
+
+        private string FileType => TextureFile is EMP_File ? "EMP" : "ETR";
 
         public EmpTextureView()
         {
@@ -112,23 +110,23 @@ namespace EEPK_Organiser.View.Editors.EMP
         {
             List<IUndoRedo> undos = new List<IUndoRedo>();
 
-            List<ParticleTexture> textureInstances = new List<ParticleTexture>();
+            List<ITextureRef> textureInstances = new List<ITextureRef>();
 
-            foreach (var texture in SelectedTextures)
+            foreach (EMP_TextureSamplerDef texture in SelectedTextures)
             {
-                textureInstances.AddRange(EmpFile.GetTexturePartsThatUseEmbEntryRef(texture));
+                textureInstances.AddRange(TextureFile.GetNodesThatUseTexture(texture));
             }
 
-            if (MessageBox.Show(String.Format("The selected texture(s) will be deleted and all references to them on {0} Particle Effects in this EMP will be removed.\n\nContinue?", textureInstances.Count, SelectedTextures.Count), "Delete", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            if (MessageBox.Show(string.Format("The selected texture(s) will be deleted and all references to them on {0} nodes in this {1} will be removed.\n\nContinue?", textureInstances.Count, FileType), "Delete", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
-                foreach (var texture in SelectedTextures)
+                foreach (EMP_TextureSamplerDef texture in SelectedTextures)
                 {
-                    EmpFile.RemoveTextureReferences(texture, undos);
-                    undos.Add(new UndoableListRemove<EMP_TextureSamplerDef>(EmpFile.Textures, texture));
-                    EmpFile.Textures.Remove(texture);
+                    TextureFile.RemoveTextureReferences(texture, undos);
+                    undos.Add(new UndoableListRemove<EMP_TextureSamplerDef>(TextureFile.Textures, texture, TextureFile.Textures.IndexOf(texture)));
+                    TextureFile.Textures.Remove(texture);
                 }
 
-                UndoManager.Instance.AddCompositeUndo(undos, SelectedTextures.Count > 1 ? "Delete Textures (EMP)" : "Delete Texture (EMP)");
+                UndoManager.Instance.AddCompositeUndo(undos, SelectedTextures.Count > 1 ? $"Delete Textures ({FileType})" : $"Delete Texture ({FileType})");
             }
         }
 
@@ -137,18 +135,18 @@ namespace EEPK_Organiser.View.Editors.EMP
         {
             EMP_TextureSamplerDef newTexture = EMP_TextureSamplerDef.GetNew();
 
-            EmpFile.Textures.Add(newTexture);
+            TextureFile.Textures.Add(newTexture);
             SelectTexture(newTexture);
 
-            UndoManager.Instance.AddUndo(new UndoableListAdd<EMP_TextureSamplerDef>(EmpFile.Textures, newTexture, "Add Texture (EMP)"));
+            UndoManager.Instance.AddUndo(new UndoableListAdd<EMP_TextureSamplerDef>(TextureFile.Textures, newTexture, $"Add Texture ({FileType})"));
         }
 
         public RelayCommand TextureDuplicateCommand => new RelayCommand(TextureDuplicate, IsTextureSelected);
         private void TextureDuplicate()
         {
             EMP_TextureSamplerDef newTexture = SelectedTexture.Clone();
-            UndoManager.Instance.AddUndo(new UndoableListAdd<EMP_TextureSamplerDef>(EmpFile.Textures, newTexture, "Duplicate Texture (EMP)"));
-            EmpFile.Textures.Add(newTexture);
+            UndoManager.Instance.AddUndo(new UndoableListAdd<EMP_TextureSamplerDef>(TextureFile.Textures, newTexture, $"Duplicate Texture ({FileType})"));
+            TextureFile.Textures.Add(newTexture);
 
             SelectTexture(newTexture);
         }
@@ -175,9 +173,9 @@ namespace EEPK_Organiser.View.Editors.EMP
                     Xv2CoreLib.EMB_CLASS.EmbEntry newEmbEntry = AssetContainer.File3_Ref.Add(newTexture.TextureRef, undos);
                     newTexture.TextureRef = newEmbEntry;
 
-                    EmpFile.Textures.Add(newTexture);
+                    TextureFile.Textures.Add(newTexture);
 
-                    undos.Add(new UndoableListAdd<EMP_TextureSamplerDef>(EmpFile.Textures, newTexture));
+                    undos.Add(new UndoableListAdd<EMP_TextureSamplerDef>(TextureFile.Textures, newTexture));
                 }
 
                 UndoManager.Instance.AddCompositeUndo(undos, copiedTextures.Count > 1 ? "Paste Textures" : "Paste Texture");
@@ -199,7 +197,8 @@ namespace EEPK_Organiser.View.Editors.EMP
                     newTexture.TextureRef = AssetContainer.File3_Ref.Add(newTexture.TextureRef, undos);
 
                     SelectedTexture.ReplaceValues(newTexture, undos);
-                    UndoManager.Instance.AddCompositeUndo(undos, "Paste Values (EMP)");
+                    UndoManager.Instance.AddCompositeUndo(undos, $"Paste Values ({FileType})");
+                    ViewModel?.UpdateProperties();
                 }
             }
         }
@@ -220,12 +219,12 @@ namespace EEPK_Organiser.View.Editors.EMP
                 {
                     foreach (var textureToRemove in selectedTextures)
                     {
-                        EmpFile.RefactorTextureRef(textureToRemove, texture, undos);
-                        undos.Add(new UndoableListRemove<EMP_TextureSamplerDef>(EmpFile.Textures, textureToRemove));
-                        EmpFile.Textures.Remove(textureToRemove);
+                        TextureFile.RefactorTextureRef(textureToRemove, texture, undos);
+                        undos.Add(new UndoableListRemove<EMP_TextureSamplerDef>(TextureFile.Textures, textureToRemove));
+                        TextureFile.Textures.Remove(textureToRemove);
                     }
 
-                    UndoManager.Instance.AddCompositeUndo(undos, "Merge Textures (EMP)");
+                    UndoManager.Instance.AddCompositeUndo(undos, $"Merge Textures ({FileType})");
                 }
             }
             else
@@ -256,7 +255,8 @@ namespace EEPK_Organiser.View.Editors.EMP
         public RelayCommand GotoTextureCommand => new RelayCommand(GotoTexture, () => ViewModel?.SelectedEmbEntry != null);
         private void GotoTexture()
         {
-            Forms.EmbEditForm textureViewer = EepkEditor.PBIND_OpenTextureViewer(AssetContainer, Xv2CoreLib.EEPK.AssetType.PBIND);
+            Forms.EmbEditForm textureViewer = EepkEditor.PBIND_OpenTextureViewer(AssetContainer, AssetContainer.ContainerAssetType);
+
             textureViewer.textureEditor.SelectedTexture = ViewModel.SelectedEmbEntry;
             textureViewer.textureEditor.textureDataGrid.ScrollIntoView(ViewModel.SelectedEmbEntry);
         }
@@ -272,7 +272,7 @@ namespace EEPK_Organiser.View.Editors.EMP
             EMP_ScrollKeyframe keyframe = new EMP_ScrollKeyframe();
             keyframe.Time = 2;
             SelectedTexture.ScrollState.Keyframes.Add(keyframe);
-            UndoManager.Instance.AddUndo(new UndoableListAdd<EMP_ScrollKeyframe>(SelectedTexture.ScrollState.Keyframes, keyframe, "EMP Texture -> Add Keyframe"));
+            UndoManager.Instance.AddUndo(new UndoableListAdd<EMP_ScrollKeyframe>(SelectedTexture.ScrollState.Keyframes, keyframe, $"{FileType} Texture -> Add Keyframe"));
         }
 
         public RelayCommand DeleteKeyframeCommand => new RelayCommand(DeleteKeyframe, IsKeyframeSelected);
@@ -283,11 +283,12 @@ namespace EEPK_Organiser.View.Editors.EMP
 
             foreach(EMP_ScrollKeyframe keyframe in keyframes)
             {
+                if (SelectedTexture.ScrollState.Keyframes.Count == 1) break;
                 undos.Add(new UndoableListRemove<EMP_ScrollKeyframe>(SelectedTexture.ScrollState.Keyframes, keyframe));
                 SelectedTexture.ScrollState.Keyframes.Remove(keyframe);
             }
 
-            UndoManager.Instance.AddCompositeUndo(undos, "EMP Texture -> Delete Keyframe");
+            UndoManager.Instance.AddCompositeUndo(undos, $"{FileType} Texture -> Delete Keyframe");
         }
 
         public RelayCommand CopyKeyframeCommand => new RelayCommand(CopyKeyframe, IsKeyframeSelected);
@@ -308,7 +309,7 @@ namespace EEPK_Organiser.View.Editors.EMP
                 SelectedTexture.ScrollState.Keyframes.Add(keyframe);
             }
 
-            UndoManager.Instance.AddCompositeUndo(undos, "EMP Texture -> Paste Keyframe");
+            UndoManager.Instance.AddCompositeUndo(undos, $"{FileType} Texture -> Paste Keyframe");
         }
 
         public RelayCommand DuplicateKeyframeCommand => new RelayCommand(DuplicateKeyframe, IsKeyframeSelected);
@@ -324,7 +325,7 @@ namespace EEPK_Organiser.View.Editors.EMP
                 SelectedTexture.ScrollState.Keyframes.Add(newKeyframe);
             }
 
-            UndoManager.Instance.AddCompositeUndo(undos, "EMP Texture -> Duplicate Keyframe");
+            UndoManager.Instance.AddCompositeUndo(undos, $"{FileType} Texture -> Duplicate Keyframe");
         }
 
 
@@ -334,9 +335,9 @@ namespace EEPK_Organiser.View.Editors.EMP
         }
         #endregion
 
-        private void SelectTexture(EMP_TextureSamplerDef texture)
+        public void SelectTexture(EMP_TextureSamplerDef texture)
         {
-            if (EmpFile.Textures.Contains(texture))
+            if (TextureFile.Textures.Contains(texture))
             {
                 SelectedTexture = texture;
                 textureListBox.ScrollIntoView(texture);

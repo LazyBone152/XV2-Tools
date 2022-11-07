@@ -291,6 +291,7 @@ namespace EEPK_Organiser.View
         {
             return Clipboard.ContainsData(EMP_File.CLIPBOARD_NODE);
         }
+        
         private bool CanPasteNodeChild()
         {
             return Clipboard.ContainsData(EMP_File.CLIPBOARD_NODE) && SelectedNode != null;
@@ -317,6 +318,12 @@ namespace EEPK_Organiser.View
                 }
             }
 
+        }
+    
+        public void SelectTexture(EMP_TextureSamplerDef texture)
+        {
+            tabItems.SelectedIndex = 1;
+            textureView.SelectTexture(texture);
         }
     }
 }

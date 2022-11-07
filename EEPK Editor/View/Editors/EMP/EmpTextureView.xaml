@@ -35,7 +35,7 @@
             </Button>
 
         </StackPanel>
-        <ListBox x:Name="textureListBox" Grid.Column="1" Margin="5, 20, 5, 20" BorderBrush="{DynamicResource MahApps.Brushes.SemiTransparent}" BorderThickness="1" SelectionMode="Extended" SelectedItem="{Binding ElementName=UserControl, Path=SelectedTexture}" ItemsSource="{Binding ElementName=UserControl, Path=EmpFile.Textures.Binding}" lbUtils:AttachedProperties.SelectedItems="{Binding ElementName=UserControl, Path=SelectedTextures}">
+        <ListBox x:Name="textureListBox" Grid.Column="1" Margin="5, 20, 5, 20" BorderBrush="{DynamicResource MahApps.Brushes.SemiTransparent}" BorderThickness="1" SelectionMode="Extended" SelectedItem="{Binding ElementName=UserControl, Path=SelectedTexture}" ItemsSource="{Binding ElementName=UserControl, Path=TextureFile.Textures.Binding}" lbUtils:AttachedProperties.SelectedItems="{Binding ElementName=UserControl, Path=SelectedTextures}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Grid Margin="3,2">

@@ -612,7 +612,7 @@
             <Controls:MetroTabItem Header="TBIND" Controls:HeaderedControlHelper.HeaderFontSize="14">
                 <Grid Background="Transparent">
 
-                    <DataGrid PreviewKeyDown="TbindDataGrid_Hotkeys_PreviewKeyDown" SelectionMode="Extended" x:Name="tbindDataGrid" RowDetailsVisibilityMode="Collapsed" ItemsSource="{Binding effectContainerFile.Tbind.ViewAssets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False">
+                    <DataGrid MouseDoubleClick="TBIND_MouseDoubleClick" PreviewKeyDown="TbindDataGrid_Hotkeys_PreviewKeyDown" SelectionMode="Extended" x:Name="tbindDataGrid" RowDetailsVisibilityMode="Collapsed" ItemsSource="{Binding effectContainerFile.Tbind.ViewAssets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False">
                         
                         <DataGrid.ContextMenu>
                             <ContextMenu FontSize="12">
@@ -628,6 +628,8 @@
                                 <MenuItem Header="Hue Adjustment" Click="TBIND_AssetContainer_Recolor"/>
                                 <MenuItem Header="Hue Set" Click="TBIND_AssetContainer_RecolorHueSet"/>
                                 <MenuItem Header="Extrude Scale" Click="TBIND_AssetContainer_Scale"/>
+                                <Separator/>
+                                <MenuItem Header="Edit" Click="TBIND_AssetContainer_Edit_Click"/>
                             </ContextMenu>
                         </DataGrid.ContextMenu>
 
@@ -648,6 +650,7 @@
                             <Button Content="Add Asset" HorizontalAlignment="Left" Margin="10,5,0,0"  VerticalAlignment="Top" Width="123" lbUtils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
                                 <Button.ContextMenu>
                                     <ContextMenu FontSize="12">
+                                        <MenuItem Header="New ETR" Click="TBIND_NewEtr_Click"/>
                                         <MenuItem Header="Load External EEPK" Click="TBIND_AssetContainer_AddAsset_Click"/>
                                         <Separator/>
                                         <MenuItem Header="CMN" Click="TBIND_ImportAsset_MenuItem_FromCMN_Click"/>

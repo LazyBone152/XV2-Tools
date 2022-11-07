@@ -3302,7 +3302,7 @@ namespace Xv2CoreLib.EffectContainer
             {
                 var ret = File2_Ref.Compare(entry.MaterialRef);
 
-                if (ret == null)
+                if (ret == null && entry.MaterialRef != null)
                 {
                     //No identical material was found, so add it
                     entry.MaterialRef.Name = File2_Ref.GetUnusedName(entry.MaterialRef.Name); //Regenerate the name
@@ -3317,10 +3317,39 @@ namespace Xv2CoreLib.EffectContainer
             }
         }
 
+        public void AddTbindDependencies(ETR_Node node, ETR_File etrFile, List<IUndoRedo> undos)
+        {
+            //Import Materials
+            if (node.MaterialRef != null)
+            {
+                if (!File2_Ref.Materials.Contains(node.MaterialRef))
+                {
+                    EmmMaterial result = File2_Ref.Compare(node.MaterialRef, true);
+
+                    if (result == null)
+                    {
+                        //Material didn't exist so we have to add it
+                        node.MaterialRef.Name = File2_Ref.GetUnusedName(node.MaterialRef.Name);
+                        undos.Add(new UndoableListAdd<EmmMaterial>(File2_Ref.Materials, node.MaterialRef));
+                        File2_Ref.Materials.Add(node.MaterialRef);
+                    }
+                    else if (result != node.MaterialRef)
+                    {
+                        //A identical material already existed but it was a different instance.
+                        //Change the referenced material to this.
+                        node.MaterialRef = result;
+                    }
+                }
+            }
+
+            //Import Textures
+            ImportTextures(node.TextureEntryRef, etrFile.Textures, undos);
+        }
+
         public void AddPbindDependencies(ParticleNode node, EMP_File empFile, List<IUndoRedo> undos)
         {
             //Import Materials
-            if(node.EmissionNode.Texture.MaterialRef != null)
+            if (node.EmissionNode.Texture.MaterialRef != null)
             {
                 if (!File2_Ref.Materials.Contains(node.EmissionNode.Texture.MaterialRef))
                 {
@@ -3343,9 +3372,26 @@ namespace Xv2CoreLib.EffectContainer
             }
 
             //Import Textures
-            foreach (TextureEntry_Ref texture in node.EmissionNode.Texture.TextureEntryRef.Where(x => x.TextureRef != null))
+            ImportTextures(node.EmissionNode.Texture.TextureEntryRef, empFile.Textures, undos);
+
+            //Recursively call this method again if this node has children
+            if (node.ChildParticleNodes != null)
             {
-                EMP_TextureSamplerDef newTex = empFile.GetTexture(texture.TextureRef);
+                foreach (ParticleNode child in node.ChildParticleNodes)
+                {
+                    AddPbindDependencies(child, empFile, undos);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Import textures from an EMP or ETR. Internal function.
+        /// </summary>
+        private void ImportTextures(IList<TextureEntry_Ref> texturesToImport, IList<EMP_TextureSamplerDef> destination, List<IUndoRedo> undos)
+        {
+            foreach (TextureEntry_Ref texture in texturesToImport.Where(x => x.TextureRef != null))
+            {
+                EMP_TextureSamplerDef newTex = destination.FirstOrDefault(x => x.Compare(texture.TextureRef));
 
                 if (newTex == null)
                 {
@@ -3359,22 +3405,13 @@ namespace Xv2CoreLib.EffectContainer
                     texture.TextureRef.TextureRef = File3_Ref.Add(texture.TextureRef.TextureRef);
 
                     //Add the texture
-                    undos.Add(new UndoableListAdd<EMP_TextureSamplerDef>(empFile.Textures, texture.TextureRef));
-                    empFile.Textures.Add(texture.TextureRef);
+                    undos.Add(new UndoableListAdd<EMP_TextureSamplerDef>(destination, texture.TextureRef));
+                    destination.Add(texture.TextureRef);
                 }
                 else
                 {
                     //An identical texture was found, so set that as the ref
                     texture.TextureRef = newTex;
-                }
-            }
-
-            //Recursively call this method again if this node has children
-            if (node.ChildParticleNodes != null)
-            {
-                foreach (ParticleNode child in node.ChildParticleNodes)
-                {
-                    AddPbindDependencies(child, empFile, undos);
                 }
             }
         }
@@ -3662,7 +3699,7 @@ namespace Xv2CoreLib.EffectContainer
 
                 for (int i = empFile.Textures.Count - 1; i >= 0; i--)
                 {
-                    if(empFile.GetTexturePartsThatUseEmbEntryRef(empFile.Textures[i]).Count == 0)
+                    if(empFile.GetNodesThatUseTexture(empFile.Textures[i]).Count == 0)
                     {
                         if (undos != null)
                         {

@@ -34,9 +34,12 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             if (Keyframes.Count > 0)
                 Keyframes.Clear();
 
-            for(int i = 0; i < tempKeyframes[0].Count; i++)
+            //Reduce time down to a 0 to 1 range for EMP and ECF, since they are based on the lifetime (ETR is directly based on frames)
+            float timeScale = IsEtrValue() ? 1f : 100f;
+
+            for (int i = 0; i < tempKeyframes[0].Count; i++)
             {
-                Keyframes.Add(new KeyframeColorValue(tempKeyframes[0][i].Time / 100f, tempKeyframes[0][i].Value, tempKeyframes[1][i].Value, tempKeyframes[2][i].Value));
+                Keyframes.Add(new KeyframeColorValue(tempKeyframes[0][i].Time / timeScale, tempKeyframes[0][i].Value, tempKeyframes[1][i].Value, tempKeyframes[2][i].Value));
             }
         }
 
@@ -55,9 +58,11 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             keyframes[1] = new List<KeyframedGenericValue>();
             keyframes[2] = new List<KeyframedGenericValue>();
 
+            float timeScale = IsEtrValue() ? 1f : 100f;
+
             for (int i = 0; i < Keyframes.Count; i++)
             {
-                ushort time = (ushort)(Keyframes[i].Time * 100f);
+                ushort time = (ushort)(Keyframes[i].Time * timeScale);
                 keyframes[0].Add(new KeyframedGenericValue(time, Keyframes[i].Value.R));
                 keyframes[1].Add(new KeyframedGenericValue(time, Keyframes[i].Value.G));
                 keyframes[2].Add(new KeyframedGenericValue(time, Keyframes[i].Value.B));

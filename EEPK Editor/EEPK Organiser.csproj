@@ -171,6 +171,9 @@
     <Compile Include="Forms\Editors\EmpEditorWindow.xaml.cs">
       <DependentUpon>EmpEditorWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Forms\Editors\EtrEditorWindow.xaml.cs">
+      <DependentUpon>EtrEditorWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Forms\EffectSelector.xaml.cs">
       <DependentUpon>EffectSelector.xaml</DependentUpon>
     </Compile>
@@ -216,6 +219,7 @@
     <Compile Include="ViewModel\EmpKeyframesViewModel.cs" />
     <Compile Include="ViewModel\EmpNodeViewModel.cs" />
     <Compile Include="ViewModel\EmpTextureViewModel.cs" />
+    <Compile Include="ViewModel\EtrNodeViewModel.cs" />
     <Compile Include="ViewModel\MaterialViewModel.cs" />
     <Compile Include="View\Controls\ShapeDraw.xaml.cs">
       <DependentUpon>ShapeDraw.xaml</DependentUpon>
@@ -237,6 +241,9 @@
     </Compile>
     <Compile Include="View\Editors\EMP\KeyframedValueView.xaml.cs">
       <DependentUpon>KeyframedValueView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Editors\EtrEditor.xaml.cs">
+      <DependentUpon>EtrEditor.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\EepkEditor.xaml.cs">
       <DependentUpon>EepkEditor.xaml</DependentUpon>
@@ -281,6 +288,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Forms\Editors\EmpEditorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Forms\Editors\EtrEditorWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -397,6 +408,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Editors\EMP\KeyframedValueView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Editors\EtrEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

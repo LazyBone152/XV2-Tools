@@ -62,12 +62,15 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             if (Keyframes.Count > 0)
                 Keyframes.Clear();
 
+            //Reduce time down to a 0 to 1 range for EMP and ECF, since they are based on the lifetime (ETR is directly based on frames)
+            float timeScale = IsEtrValue() ? 1f : 100f;
+
             for (int i = 0; i < tempKeyframes[0].Count; i++)
             {
                 //Scale values within an EMP are half-scales, where 0.5 is full scaled. So it makes more sense, we will just scale the keyframes by 2 so 1.0 becomes full scale
                 float scale = IsScale ? 2f : 1f;
 
-                Keyframes.Add(new KeyframeFloatValue(tempKeyframes[0][i].Time / 100f, tempKeyframes[0][i].Value * scale));
+                Keyframes.Add(new KeyframeFloatValue(tempKeyframes[0][i].Time / timeScale, tempKeyframes[0][i].Value * scale));
             }
         }
 
@@ -92,10 +95,11 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
         {
             List<KeyframedGenericValue>[] keyframes = new List<KeyframedGenericValue>[1];
             keyframes[0] = new List<KeyframedGenericValue>();
+            float timeScale = IsEtrValue() ? 1f : 100f;
 
             for (int i = 0; i < Keyframes.Count; i++)
             {
-                ushort time = (ushort)(Keyframes[i].Time * 100f);
+                ushort time = (ushort)(Keyframes[i].Time * timeScale);
                 keyframes[0].Add(new KeyframedGenericValue(time, Keyframes[i].Value));
             }
 

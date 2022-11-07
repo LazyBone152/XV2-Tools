@@ -11,6 +11,7 @@ using System.Windows;
 using LB_Common.Numbers;
 using Xv2CoreLib.Resource.UndoRedo;
 using System.Windows.Controls;
+using Xv2CoreLib.ETR;
 
 namespace EEPK_Organiser.ViewModel
 {
@@ -134,6 +135,19 @@ namespace EEPK_Organiser.ViewModel
                 }
             }
         }
+        public ETR_InterpolationType InterpolationType
+        {
+            get => KeyframedValue.ETR_InterpolationType;
+            set
+            {
+                if (KeyframedValue.ETR_InterpolationType != value)
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(KeyframedValue.ETR_InterpolationType), KeyframedValue, KeyframedValue.IsAnimated, value, "Keyframed Value -> Interpolation Type"));
+                    KeyframedValue.ETR_InterpolationType = value;
+                    RaisePropertyChanged(nameof(InterpolationType));
+                }
+            }
+        }
 
         public void SetContext(KeyframedBaseValue value)
         {
@@ -157,6 +171,7 @@ namespace EEPK_Organiser.ViewModel
             RaisePropertyChanged(nameof(Loop));
             RaisePropertyChanged(nameof(Interpolate));
             RaisePropertyChanged(nameof(IsAnimated));
+            RaisePropertyChanged(nameof(InterpolationType));
         }
 
 

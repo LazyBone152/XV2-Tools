@@ -22,7 +22,7 @@
             <Controls:MetroTabItem Header="General" Controls:HeaderedControlHelper.HeaderFontSize="16">
                 <ScrollViewer>
                     <StackPanel Background="{DynamicResource MahApps.Brushes.SystemControlBackgroundAltMediumLow}">
-                        <Expander Header="Node" IsExpanded="True">
+                        <Expander Header="Node" IsExpanded="True" BorderThickness="0">
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal">
                                     <Grid Margin="3,5,0,0" Width="380">
@@ -213,7 +213,7 @@
                                 </WrapPanel>
                             </StackPanel>
                         </Expander>
-                        <Expander Header="Emitter" IsExpanded="True" Visibility="{Binding ElementName=UserControl, Path=EmitterVisibility}">
+                        <Expander Header="Emitter" IsExpanded="True" Visibility="{Binding ElementName=UserControl, Path=EmitterVisibility}" BorderThickness="0">
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal">
                                     <Grid Margin="3,5,0,0" Width="250">
@@ -343,7 +343,7 @@
 
                             </StackPanel>
                         </Expander>
-                        <Expander Header="Emission" IsExpanded="True" Visibility="{Binding ElementName=UserControl, Path=EmissionVisibility}">
+                        <Expander Header="Emission" IsExpanded="True" Visibility="{Binding ElementName=UserControl, Path=EmissionVisibility}" BorderThickness="0">
                             <StackPanel>
                                 <StackPanel>
                                     <StackPanel Orientation="Horizontal">
@@ -440,7 +440,7 @@
                                             </GroupBox>
                                         </StackPanel>
 
-                                        <DataGrid x:Name="shapeDrawPointDataGrid" Height="540" Grid.Column="1" VerticalAlignment="Top" Margin="20, 10, 0,0" BorderBrush="{DynamicResource MahApps.Brushes.Gray.SemiTransparent}" BorderThickness="1" ItemsSource="{Binding ElementName=UserControl, Path=Node.EmissionNode.ShapeDraw.Points.Binding}" SelectedItem="{Binding ElementName=UserControl, Path=SelectedShapeDrawPoint}" CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False" AutoGenerateColumns="False">
+                                        <DataGrid x:Name="shapeDrawPointDataGrid" Height="540" Grid.Column="1" VerticalAlignment="Top" Margin="20, 10, 0,0" BorderBrush="{DynamicResource MahApps.Brushes.SystemControlForegroundListMedium}" BorderThickness="1" ItemsSource="{Binding ElementName=UserControl, Path=Node.EmissionNode.ShapeDraw.Points.Binding}" SelectedItem="{Binding ElementName=UserControl, Path=SelectedShapeDrawPoint}" CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False" AutoGenerateColumns="False">
                                             <DataGrid.Columns>
                                                 <Controls:DataGridNumericUpDownColumn Binding="{Binding UndoableX}" StringFormat="0.0###" TextAlignment="Left" Interval="0.05" Minimum="-1" Maximum="1" Width="*" Header="X"/>
                                                 <Controls:DataGridNumericUpDownColumn Binding="{Binding UndoableY}" StringFormat="0.0###" TextAlignment="Left" Interval="0.05" Minimum="-1" Maximum="1" Width="*" Header="Y"/>
@@ -541,7 +541,7 @@
                                     </StackPanel>
 
 
-                                    <DataGrid x:Name="extrudeDataGrid" Margin="20" Height="500"  BorderBrush="{DynamicResource MahApps.Brushes.Gray.SemiTransparent}" BorderThickness="1" ItemsSource="{Binding ElementName=UserControl, Path=Node.EmissionNode.ConeExtrude.Points.Binding}" SelectedItem="{Binding ElementName=UserControl, Path=SelectedExtrudePoint}" Controls:ControlsHelper.ContentCharacterCasing="Normal" CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False" AutoGenerateColumns="False">
+                                    <DataGrid x:Name="extrudeDataGrid" Margin="20" Height="500"  BorderBrush="{DynamicResource MahApps.Brushes.SystemControlForegroundListMedium}" BorderThickness="1" ItemsSource="{Binding ElementName=UserControl, Path=Node.EmissionNode.ConeExtrude.Points.Binding}" SelectedItem="{Binding ElementName=UserControl, Path=SelectedExtrudePoint}" Controls:ControlsHelper.ContentCharacterCasing="Normal" CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False" AutoGenerateColumns="False">
                                         <DataGrid.InputBindings>
                                             <KeyBinding Key="Delete" Command="{Binding ElementName=UserControl, Path=DeleteExtrudePointCommand}"/>
                                             <KeyBinding Modifiers="Ctrl" Key="C" Command="{Binding ElementName=UserControl, Path=CopyExtrudePointCommand}"/>
@@ -549,10 +549,10 @@
                                         </DataGrid.InputBindings>
 
                                         <DataGrid.Columns>
-                                            <Controls:DataGridNumericUpDownColumn Header="World Scale Factor" Width="*" Binding="{Binding UndoableWorldScaleFactor}" StringFormat="0.0####" Interval="0.01"/>
-                                            <Controls:DataGridNumericUpDownColumn Header="World Scale Add" Width="*" Binding="{Binding UndoableWorldScaleAdd}" StringFormat="0.0####" Interval="0.01"/>
-                                            <Controls:DataGridNumericUpDownColumn Header="World Offset Factor" Width="*" Binding="{Binding UndoableWorldOffsetFactor}" StringFormat="0.0####" Interval="0.01"/>
-                                            <Controls:DataGridNumericUpDownColumn Header="World Offset Factor 2" Width="*" Binding="{Binding UndoableWorldOffsetFactor2}" StringFormat="0.0####" Interval="0.01"/>
+                                            <Controls:DataGridNumericUpDownColumn Header="World Scale Factor" Width="*" Binding="{Binding UndoableWorldScaleFactor}" StringFormat="0.0####" Interval="0.01" TextAlignment="Left"/>
+                                            <Controls:DataGridNumericUpDownColumn Header="World Scale Add" Width="*" Binding="{Binding UndoableWorldScaleAdd}" StringFormat="0.0####" Interval="0.01" TextAlignment="Left"/>
+                                            <Controls:DataGridNumericUpDownColumn Header="World Offset Factor" Width="*" Binding="{Binding UndoableWorldOffsetFactor}" StringFormat="0.0####" Interval="0.01" TextAlignment="Left"/>
+                                            <Controls:DataGridNumericUpDownColumn Header="World Offset Factor 2" Width="*" Binding="{Binding UndoableWorldOffsetFactor2}" StringFormat="0.0####" Interval="0.01" TextAlignment="Left"/>
                                         </DataGrid.Columns>
 
                                         <DataGrid.ContextMenu>
@@ -566,7 +566,7 @@
                                         </DataGrid.ContextMenu>
                                     </DataGrid>
                                 </StackPanel>
-                                
+
                             </StackPanel>
                             
                         </Expander>
@@ -575,365 +575,372 @@
 
             </Controls:MetroTabItem>
             <Controls:MetroTabItem Header="Texture" Controls:HeaderedControlHelper.HeaderFontSize="16" Visibility="{Binding ElementName=UserControl, Path=EmissionVisibility}" >
-                <Grid Background="{DynamicResource MahApps.Brushes.SystemControlBackgroundAltMediumLow}">
+                <ScrollViewer>
+                    <Grid Background="{DynamicResource MahApps.Brushes.SystemControlBackgroundAltMediumLow}">
 
-                    <StackPanel Margin="10, 10" HorizontalAlignment="Left" Visibility="{Binding ElementName=UserControl,Path=EmissionVisibility}" >
+                        <StackPanel Margin="10, 10" HorizontalAlignment="Left" Visibility="{Binding ElementName=UserControl,Path=EmissionVisibility}" >
 
-                        <TextBlock Text="Texture" FontWeight="Bold" HorizontalAlignment="Center"/>
-                        <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="120"/>
-                                <ColumnDefinition Width="217"/>
-                                <ColumnDefinition Width="30"/>
-                                <ColumnDefinition Width="30"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Content="Material"/>
-                            <ComboBox Grid.Column="1" DisplayMemberPath="Name" SelectedItem="{Binding ElementName=UserControl, Path=Node.EmissionNode.Texture.MaterialRef}" ItemsSource="{Binding ElementName=UserControl, Path=AssetContainer.File2_Ref.Materials.Binding}" Controls:TextBoxHelper.Watermark="No Material Selected"/>
+                            <TextBlock Text="Texture" FontWeight="Bold" HorizontalAlignment="Center"/>
+                            <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="217"/>
+                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="30"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Content="Material"/>
+                                <ComboBox Grid.Column="1" DisplayMemberPath="Name" SelectedItem="{Binding ElementName=UserControl, Path=NodeViewModel.MaterialRef}" ItemsSource="{Binding ElementName=UserControl, Path=AssetContainer.File2_Ref.Materials.Binding}" Controls:TextBoxHelper.Watermark="No Material Selected"/>
 
-                            <Button Grid.Column="2" Command="{Binding ElementName=UserControl, Path=TexturePart_RemoveMaterialCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="20" Height="20" ToolTip="Remove the selected material from this emission node.">
-                                <iconPacks:PackIconMaterialDesign Kind="RemoveCircleOutline"/>
-                            </Button>
-                            <Button Grid.Column="3" Command="{Binding ElementName=UserControl, Path=TexturePart_GotoMaterialCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="20" Height="20" ToolTip="Jump to the selected material, opening the Materials Editor.">
-                                <iconPacks:PackIconMaterialDesign Kind="KeyboardArrowRight"/>
-                            </Button>
-                        </Grid>
+                                <Button Grid.Column="2" Command="{Binding ElementName=UserControl, Path=TexturePart_RemoveMaterialCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="20" Height="20" ToolTip="Remove the selected material from this emission node.">
+                                    <iconPacks:PackIconMaterialDesign Kind="RemoveCircleOutline"/>
+                                </Button>
+                                <Button Grid.Column="3" Command="{Binding ElementName=UserControl, Path=TexturePart_GotoMaterialCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="20" Height="20" ToolTip="Jump to the selected material, opening the Materials Editor.">
+                                    <iconPacks:PackIconMaterialDesign Kind="KeyboardArrowRight"/>
+                                </Button>
+                            </Grid>
 
-                        <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="120"/>
-                                <ColumnDefinition Width="217"/>
-                                <ColumnDefinition Width="30"/>
-                                <ColumnDefinition Width="30"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Content="Texture"/>
-                            <ComboBox Grid.Column="1" DisplayMemberPath="TextureName" SelectedItem="{Binding Path=Node.EmissionNode.Texture.TextureEntryRef[0].UndoableTextureRef, ElementName=UserControl}" ItemsSource="{Binding ElementName=UserControl, Path=EmpFile.Textures.Binding}" Controls:TextBoxHelper.Watermark="No Texture Selected"/>
-                            <Button Grid.Column="2" Command="{Binding ElementName=UserControl, Path=TexturePart_RemoveTextureCommand}" CommandParameter="0" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="20" Height="20" ToolTip="Remove the selected texture from this emission node.">
-                                <iconPacks:PackIconMaterialDesign Kind="RemoveCircleOutline"/>
-                            </Button>
-                            <Button Grid.Column="3" Command="{Binding ElementName=UserControl, Path=TexturePart_GotoTextureCommand}" CommandParameter="0" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="20" Height="20" ToolTip="Jump to the selected texture.">
-                                <iconPacks:PackIconMaterialDesign Kind="KeyboardArrowRight"/>
-                            </Button>
-                        </Grid>
-                        <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="120"/>
-                                <ColumnDefinition Width="217"/>
-                                <ColumnDefinition Width="30"/>
-                                <ColumnDefinition Width="30"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Content="Texture (Secondary)" ToolTip="A secondary texture that emission nodes can use in some cases, depending on the shader used."/>
-                            <ComboBox Grid.Column="1" DisplayMemberPath="TextureName" SelectedItem="{Binding Path=Node.EmissionNode.Texture.TextureEntryRef[1].UndoableTextureRef, ElementName=UserControl}" ItemsSource="{Binding ElementName=UserControl, Path=EmpFile.Textures.Binding}" Controls:TextBoxHelper.Watermark="No Texture Selected"/>
-                            <Button Grid.Column="2" Command="{Binding ElementName=UserControl, Path=TexturePart_RemoveTextureCommand}" CommandParameter="1" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="20" Height="20" ToolTip="Remove the selected texture from this emission node.">
-                                <iconPacks:PackIconMaterialDesign Kind="RemoveCircleOutline"/>
-                            </Button>
-                            <Button Grid.Column="3" Command="{Binding ElementName=UserControl, Path=TexturePart_GotoTextureCommand}" CommandParameter="1" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="20" Height="20" ToolTip="Jump to the selected texture.">
-                                <iconPacks:PackIconMaterialDesign Kind="KeyboardArrowRight"/>
-                            </Button>
-                        </Grid>
+                            <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="217"/>
+                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="30"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Content="Texture"/>
+                                <ComboBox Grid.Column="1" DisplayMemberPath="TextureName" SelectedItem="{Binding Path=Node.EmissionNode.Texture.TextureEntryRef[0].UndoableTextureRef, ElementName=UserControl}" ItemsSource="{Binding ElementName=UserControl, Path=EmpFile.Textures.Binding}" Controls:TextBoxHelper.Watermark="No Texture Selected"/>
+                                <Button Grid.Column="2" Command="{Binding ElementName=UserControl, Path=TexturePart_RemoveTextureCommand}" CommandParameter="0" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="20" Height="20" ToolTip="Remove the selected texture from this emission node.">
+                                    <iconPacks:PackIconMaterialDesign Kind="RemoveCircleOutline"/>
+                                </Button>
+                                <Button Grid.Column="3" Command="{Binding ElementName=UserControl, Path=TexturePart_GotoTextureCommand}" CommandParameter="0" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="20" Height="20" ToolTip="Jump to the selected texture.">
+                                    <iconPacks:PackIconMaterialDesign Kind="KeyboardArrowRight"/>
+                                </Button>
+                            </Grid>
+                            <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="217"/>
+                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="30"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Content="Texture (Secondary)" ToolTip="A secondary texture that emission nodes can use in some cases, depending on the shader used."/>
+                                <ComboBox Grid.Column="1" DisplayMemberPath="TextureName" SelectedItem="{Binding Path=Node.EmissionNode.Texture.TextureEntryRef[1].UndoableTextureRef, ElementName=UserControl}" ItemsSource="{Binding ElementName=UserControl, Path=EmpFile.Textures.Binding}" Controls:TextBoxHelper.Watermark="No Texture Selected"/>
+                                <Button Grid.Column="2" Command="{Binding ElementName=UserControl, Path=TexturePart_RemoveTextureCommand}" CommandParameter="1" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="20" Height="20" ToolTip="Remove the selected texture from this emission node.">
+                                    <iconPacks:PackIconMaterialDesign Kind="RemoveCircleOutline"/>
+                                </Button>
+                                <Button Grid.Column="3" Command="{Binding ElementName=UserControl, Path=TexturePart_GotoTextureCommand}" CommandParameter="1" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="20" Height="20" ToolTip="Jump to the selected texture.">
+                                    <iconPacks:PackIconMaterialDesign Kind="KeyboardArrowRight"/>
+                                </Button>
+                            </Grid>
 
 
-                        <TextBlock Text="Color" FontWeight="Bold" HorizontalAlignment="Center"/>
-                        <Grid Margin="3,5,0,0" Width="250" HorizontalAlignment="Left">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="120"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Content="Use Secondary" ToolTip="Enables the usage of an additional color."/>
-                            <CheckBox Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_SecondaryColor}"/>
-                        </Grid>
-                        <Grid Margin="3,5,0,0" Width="250" HorizontalAlignment="Left" IsEnabled="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_SecondaryColor}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="120"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Content="Flash On Creation" ToolTip="On particle creation, the particles color will quickly flash the Secondary Color for a single frame. The particle will then use just Primary Color for the rest of its life."/>
-                            <CheckBox Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_FlashOnGen}"/>
-                        </Grid>
-                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Color" FontWeight="Bold" HorizontalAlignment="Center"/>
+                            <Grid Margin="3,5,0,0" Width="250" HorizontalAlignment="Left">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Content="Use Secondary" ToolTip="Enables the usage of an additional color."/>
+                                <CheckBox Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_SecondaryColor}"/>
+                            </Grid>
+                            <Grid Margin="3,5,0,0" Width="250" HorizontalAlignment="Left" IsEnabled="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_SecondaryColor}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Content="Flash On Creation" ToolTip="On particle creation, the particles color will quickly flash the Secondary Color for a single frame. The particle will then use just Primary Color for the rest of its life."/>
+                                <CheckBox Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_FlashOnGen}"/>
+                            </Grid>
+                            <StackPanel Orientation="Horizontal">
+                                <Grid Margin="3,3" Width="400" HorizontalAlignment="Left">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Primary Color"/>
+                                    <local:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding Path=NodeViewModel.Color1, ElementName=UserControl}" Node="{Binding ElementName=UserControl, Path=Node}" HideUpDownButtons="True"/>
+                                </Grid>
+                                <Grid Margin="3,3" Width="110" HorizontalAlignment="Left">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="20"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="A" FontSize="10"/>
+                                    <local:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding ElementName=UserControl, Path=NodeViewModel.Color1_Transparency}" Node="{Binding ElementName=UserControl, Path=Node}" HideUpDownButtons="True"/>
+                                </Grid>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal">
+                                <Grid Margin="3,3" Width="400" HorizontalAlignment="Left" IsEnabled="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_SecondaryColor}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Secondary Color"/>
+                                    <local:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding Path=NodeViewModel.Color2, ElementName=UserControl}" Node="{Binding ElementName=UserControl, Path=Node}" HideUpDownButtons="True"/>
+                                </Grid>
+                                <Grid Margin="3,3" Width="110" HorizontalAlignment="Left" IsEnabled="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_SecondaryColor}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="20"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="A" FontSize="10"/>
+                                    <local:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding ElementName=UserControl, Path=NodeViewModel.Color2_Transparency}" Node="{Binding ElementName=UserControl, Path=Node}" HideUpDownButtons="True"/>
+                                </Grid>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal">
+                                <Grid Margin="3,3" Width="400" HorizontalAlignment="Left">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="25"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Color Variance"/>
+                                    <vector:CustomRgbColor Grid.Column="1" Value="{Binding Path=NodeViewModel.Color_Variance, ElementName=UserControl}" HideUpDownButtons="True"/>
+                                </Grid>
+                                <Grid Margin="3,3" Width="88" HorizontalAlignment="Left">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="20"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="A" FontSize="10"/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.ColorVariance_Transparency}" StringFormat="0.0###" HideUpDownButtons="True" InterceptMouseWheel="True" Interval="0.01"/>
+                                </Grid>
+                            </StackPanel>
+
+                            <TextBlock Text="Scale" FontWeight="Bold" HorizontalAlignment="Center"/>
+                            <Grid Margin="3,5,0,0" Width="250" HorizontalAlignment="Left">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Content="Use XY" ToolTip="Enables the usage of Scale XY values, which can scale the particle on each axis individually."/>
+                                <CheckBox Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_ScaleXY}"/>
+                            </Grid>
                             <Grid Margin="3,3" Width="400" HorizontalAlignment="Left">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="100"/>
-                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="143"/>
                                 </Grid.ColumnDefinitions>
-                                <Label Content="Primary Color"/>
-                                <local:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding Path=NodeViewModel.Color1, ElementName=UserControl}" Node="{Binding ElementName=UserControl, Path=Node}" HideUpDownButtons="True"/>
+                                <Label Content="Scale" />
+                                <local:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding ElementName=UserControl, Path=NodeViewModel.ScaleBase}" Node="{Binding ElementName=UserControl, Path=Node}" HideUpDownButtons="False"/>
                             </Grid>
-                            <Grid Margin="3,3" Width="110" HorizontalAlignment="Left">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="20"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Label Content="A" FontSize="10"/>
-                                <local:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding ElementName=UserControl, Path=NodeViewModel.Color1_Transparency}" Node="{Binding ElementName=UserControl, Path=Node}" HideUpDownButtons="True"/>
-                            </Grid>
-                        </StackPanel>
-
-                        <StackPanel Orientation="Horizontal">
-                            <Grid Margin="3,3" Width="400" HorizontalAlignment="Left" IsEnabled="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_SecondaryColor}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="100"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Label Content="Secondary Color"/>
-                                <local:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding Path=NodeViewModel.Color2, ElementName=UserControl}" Node="{Binding ElementName=UserControl, Path=Node}" HideUpDownButtons="True"/>
-                            </Grid>
-                            <Grid Margin="3,3" Width="110" HorizontalAlignment="Left" IsEnabled="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_SecondaryColor}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="20"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Label Content="A" FontSize="10"/>
-                                <local:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding ElementName=UserControl, Path=NodeViewModel.Color2_Transparency}" Node="{Binding ElementName=UserControl, Path=Node}" HideUpDownButtons="True"/>
-                            </Grid>
-                        </StackPanel>
-
-                        <StackPanel Orientation="Horizontal">
                             <Grid Margin="3,3" Width="400" HorizontalAlignment="Left">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="120"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0" Content="Scale Variance" />
+                                <Controls:NumericUpDown Grid.Column="13" Value="{Binding ElementName=UserControl, Path=NodeViewModel.ScaleBase_Variance}" Interval="0.025" StringFormat="0.00####"/>
+
+                            </Grid>
+                            <Grid Margin="3,3" Width="400" HorizontalAlignment="Left" IsEnabled="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_ScaleXY}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Content="Scale XY"/>
+                                <local:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding ElementName=UserControl, Path=NodeViewModel.ScaleXY}" Node="{Binding ElementName=UserControl, Path=Node}" HideUpDownButtons="False"/>
+                            </Grid>
+                            <Grid Margin="3,3" Width="400" HorizontalAlignment="Left" IsEnabled="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_ScaleXY}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="100"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="25"/>
                                 </Grid.ColumnDefinitions>
-                                <Label Content="Color Variance"/>
-                                <vector:CustomRgbColor Grid.Column="1" Value="{Binding Path=NodeViewModel.Color_Variance, ElementName=UserControl}" HideUpDownButtons="True"/>
+                                <Label Content="Scale XY Variance" FontSize="11"/>
+                                <vector:CustomVector2 Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.ScaleBase_Variance}"/>
                             </Grid>
-                            <Grid Margin="3,3" Width="88" HorizontalAlignment="Left">
+
+                            <TextBlock Text="Other" FontWeight="Bold" HorizontalAlignment="Center"/>
+                            <Grid Margin="3,3" Width="400" HorizontalAlignment="Left">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="20"/>
-                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="120"/>
                                 </Grid.ColumnDefinitions>
-                                <Label Content="A" FontSize="10"/>
-                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.ColorVariance_Transparency}" StringFormat="0.0###" HideUpDownButtons="True" InterceptMouseWheel="True" Interval="0.01"/>
+                                <Label Content="Render Depth" ToolTip="Controls the depth at which the particle effect is rendered at.&#x0a;&#x0a;Negative values = closer to the front&#x0a;Positive values = render in the back, behind other objects."/>
+                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Texture_RenderDepth}" Interval="0.025" StringFormat="0.0####"/>
+
+                            </Grid>
+                            <Grid Margin="3,3" Width="400" HorizontalAlignment="Left">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="120"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Content="_I_00" ToolTip="Exact function unknown. Appears to affect the texture used in some cases, and can result in the wrong colors/texture being used when 2 different effects are on screen with the same value (???)."/>
+                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Texture_I_00}" Minimum="0" Maximum="255"/>
+
                             </Grid>
                         </StackPanel>
 
-                        <TextBlock Text="Scale" FontWeight="Bold" HorizontalAlignment="Center"/>
-                        <Grid Margin="3,5,0,0" Width="250" HorizontalAlignment="Left">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="120"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Content="Use XY" ToolTip="Enables the usage of Scale XY values, which can scale the particle on each axis individually."/>
-                            <CheckBox Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_ScaleXY}"/>
-                        </Grid>
-                        <Grid Margin="3,3" Width="400" HorizontalAlignment="Left">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="120"/>
-                                <ColumnDefinition Width="143"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Content="Scale" />
-                            <local:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding ElementName=UserControl, Path=NodeViewModel.ScaleBase}" Node="{Binding ElementName=UserControl, Path=Node}" HideUpDownButtons="False"/>
-                        </Grid>
-                        <Grid Margin="3,3" Width="400" HorizontalAlignment="Left">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="120"/>
-                                <ColumnDefinition Width="120"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Grid.Column="0" Content="Scale Variance" />
-                            <Controls:NumericUpDown Grid.Column="13" Value="{Binding ElementName=UserControl, Path=NodeViewModel.ScaleBase_Variance}" Interval="0.025" StringFormat="0.00####"/>
+                    </Grid>
 
-                        </Grid>
-                        <Grid Margin="3,3" Width="400" HorizontalAlignment="Left" IsEnabled="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_ScaleXY}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="100"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Content="Scale XY"/>
-                            <local:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding ElementName=UserControl, Path=NodeViewModel.ScaleXY}" Node="{Binding ElementName=UserControl, Path=Node}" HideUpDownButtons="False"/>
-                        </Grid>
-                        <Grid Margin="3,3" Width="400" HorizontalAlignment="Left" IsEnabled="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_ScaleXY}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="100"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="25"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Content="Scale XY Variance" FontSize="11"/>
-                            <vector:CustomVector2 Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.ScaleBase_Variance}"/>
-                        </Grid>
-
-                        <TextBlock Text="Other" FontWeight="Bold" HorizontalAlignment="Center"/>
-                        <Grid Margin="3,3" Width="400" HorizontalAlignment="Left">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="120"/>
-                                <ColumnDefinition Width="120"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Content="Render Depth" ToolTip="Controls the depth at which the particle effect is rendered at.&#x0a;&#x0a;Negative values = closer to the front&#x0a;Positive values = render in the back, behind other objects."/>
-                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Texture_RenderDepth}" Interval="0.025" StringFormat="0.0####"/>
-
-                        </Grid>
-                        <Grid Margin="3,3" Width="400" HorizontalAlignment="Left">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="120"/>
-                                <ColumnDefinition Width="120"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Content="_I_00" ToolTip="Exact function unknown. Appears to affect the texture used in some cases, and can result in the wrong colors/texture being used when 2 different effects are on screen with the same value (???)."/>
-                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Texture_I_00}" Minimum="0" Maximum="255"/>
-
-                        </Grid>
-                    </StackPanel>
-
-                </Grid>
-            </Controls:MetroTabItem>
+                </ScrollViewer>
+                </Controls:MetroTabItem>
             <Controls:MetroTabItem Header="Modifiers" Controls:HeaderedControlHelper.HeaderFontSize="16">
                 <Grid Background="{DynamicResource MahApps.Brushes.SystemControlBackgroundAltMediumLow}">
                     
                 </Grid>
             </Controls:MetroTabItem>
             <Controls:MetroTabItem Header="Unknown" Controls:HeaderedControlHelper.HeaderFontSize="16">
-                <Grid Background="{DynamicResource MahApps.Brushes.SystemControlBackgroundAltMediumLow}">
-                    <StackPanel HorizontalAlignment="Left">
-                        <Expander Header="Node" IsExpanded="True" Width="2000">
-                            <Grid>
-                                <StackPanel Margin="10, 2" Width="550" HorizontalAlignment="Left">
-                                    <StackPanel Orientation="Horizontal">
-                                        <Grid Margin="3,5,0,0" Width="250" HorizontalAlignment="Left">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="125"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Label Content="_I_128"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Node_I_128}" Minimum="0"/>
-                                        </Grid>
-                                        <Grid Margin="3,5,0,0" Width="250" HorizontalAlignment="Left">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="125"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Label Content="_F_132"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Node_F_132}" StringFormat="0.0####" Interval="0.05"/>
-                                        </Grid>
-                                    </StackPanel>
+                <ScrollViewer>
+                    <Grid Background="{DynamicResource MahApps.Brushes.SystemControlBackgroundAltMediumLow}">
+                        <StackPanel HorizontalAlignment="Left">
+                            <Expander Header="Node" IsExpanded="True" Width="2000" BorderThickness="0">
+                                <Grid>
+                                    <StackPanel Margin="10, 2" Width="550" HorizontalAlignment="Left">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Grid Margin="3,5,0,0" Width="250" HorizontalAlignment="Left">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="125"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="_I_128"/>
+                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Node_I_128}" Minimum="0"/>
+                                            </Grid>
+                                            <Grid Margin="3,5,0,0" Width="250" HorizontalAlignment="Left">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="125"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="_F_132"/>
+                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Node_F_132}" StringFormat="0.0####" Interval="0.05"/>
+                                            </Grid>
+                                        </StackPanel>
 
-                                    <Label Content="Node Flags" HorizontalContentAlignment="Center" VerticalContentAlignment="Top" FontSize="10" FontWeight="SemiBold"/>
-                                    <Separator/>
-                                    <StackPanel Orientation="Horizontal">
-                                        <StackPanel Margin="20, 5" Width="200">
-                                            <CheckBox Content="Unk1"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_Unk1}"/>
-                                            <CheckBox Content="Unk3"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_Unk3}"/>
-                                            <CheckBox Content="Unk4" ToolTip="This is Flash On Creation for Emission Node types. Function is unknown for other types."  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_FlashOnGen}" IsEnabled="{Binding ElementName=UserControl, Path=IsEmitterOrNull}"/>
-                                        </StackPanel>
-                                        <StackPanel Margin="20, 5" Width="200">
-                                            <CheckBox Content="Unk5"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_Unk5}"/>
-                                            <CheckBox Content="Unk6"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_Unk6}"/>
-                                            <CheckBox Content="Unk7"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_Unk7}"/>
-                                        </StackPanel>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal">
+                                        <Label Content="Node Flags" HorizontalContentAlignment="Center" VerticalContentAlignment="Top" FontSize="10" FontWeight="SemiBold"/>
+                                        <Separator/>
                                         <StackPanel Orientation="Horizontal">
                                             <StackPanel Margin="20, 5" Width="200">
-                                                <CheckBox Content="Unk8"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_Unk8}"/>
-                                                <CheckBox Content="Unk9"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_Unk9}"/>
-                                                <CheckBox Content="Unk10"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_Unk10}"/>
+                                                <CheckBox Content="Unk1"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_Unk1}"/>
+                                                <CheckBox Content="Unk3"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_Unk3}"/>
+                                                <CheckBox Content="Unk4" ToolTip="This is Flash On Creation for Emission Node types. Function is unknown for other types."  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_FlashOnGen}" IsEnabled="{Binding ElementName=UserControl, Path=IsEmitterOrNull}"/>
                                             </StackPanel>
                                             <StackPanel Margin="20, 5" Width="200">
-                                                <CheckBox Content="Unk11"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_Unk11}"/>
-                                                <CheckBox Content="Unk14"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_Unk14}"/>
-                                                <CheckBox Content="Unk16"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_Unk16}"/>
+                                                <CheckBox Content="Unk5"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_Unk5}"/>
+                                                <CheckBox Content="Unk6"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_Unk6}"/>
+                                                <CheckBox Content="Unk7"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_Unk7}"/>
                                             </StackPanel>
                                         </StackPanel>
-                                    </StackPanel>
-
-                                    <Label Content="Node Flags 2" HorizontalContentAlignment="Center" VerticalContentAlignment="Top" FontSize="10" FontWeight="SemiBold"/>
-                                    <Separator/>
-                                    <StackPanel Orientation="Horizontal">
-                                        <StackPanel Margin="20, 5" Width="200">
-                                            <CheckBox Content="Unk1"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags2_Unk1}"/>
-                                            <CheckBox Content="Unk2"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags2_Unk2}"/>
-                                            <CheckBox Content="Unk3"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags2_Unk3}"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <StackPanel Orientation="Horizontal">
+                                                <StackPanel Margin="20, 5" Width="200">
+                                                    <CheckBox Content="Unk8"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_Unk8}"/>
+                                                    <CheckBox Content="Unk9"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_Unk9}"/>
+                                                    <CheckBox Content="Unk10"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_Unk10}"/>
+                                                </StackPanel>
+                                                <StackPanel Margin="20, 5" Width="200">
+                                                    <CheckBox Content="Unk11"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_Unk11}"/>
+                                                    <CheckBox Content="Unk14"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_Unk14}"/>
+                                                    <CheckBox Content="Unk16"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_Unk16}"/>
+                                                </StackPanel>
+                                            </StackPanel>
                                         </StackPanel>
-                                        <StackPanel Margin="20, 5" Width="200">
-                                            <CheckBox Content="Unk4"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags2_Unk4}"/>
-                                            <CheckBox Content="Unk6"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags2_Unk6}"/>
-                                            <CheckBox Content="Unk8"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags2_Unk8}"/>
-                                        </StackPanel>
-                                    </StackPanel>
 
+                                        <Label Content="Node Flags 2" HorizontalContentAlignment="Center" VerticalContentAlignment="Top" FontSize="10" FontWeight="SemiBold"/>
+                                        <Separator/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <StackPanel Margin="20, 5" Width="200">
+                                                <CheckBox Content="Unk1"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags2_Unk1}"/>
+                                                <CheckBox Content="Unk2"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags2_Unk2}"/>
+                                                <CheckBox Content="Unk3"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags2_Unk3}"/>
+                                            </StackPanel>
+                                            <StackPanel Margin="20, 5" Width="200">
+                                                <CheckBox Content="Unk4"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags2_Unk4}"/>
+                                                <CheckBox Content="Unk6"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags2_Unk6}"/>
+                                                <CheckBox Content="Unk8"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags2_Unk8}"/>
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                    </StackPanel>
+                                </Grid>
+                            </Expander>
+                            <Expander Header="Texture" IsExpanded="True" Visibility="{Binding ElementName=UserControl,Path=EmissionVisibility}" BorderThickness="0">
+                                <StackPanel>
+                                    <WrapPanel>
+                                        <Grid Margin="3,5,0,0" Width="250">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="125"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="_I_01"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Texture_I_01}" Minimum="0" Maximum="255"/>
+                                        </Grid>
+                                        <Grid Margin="3,5,0,0" Width="250">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="125"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="_I_02"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Texture_I_02}" Minimum="0" Maximum="255"/>
+                                        </Grid>
+                                        <Grid Margin="3,5,0,0" Width="250">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="125"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="_I_03"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Texture_I_03}" Minimum="0" Maximum="255"/>
+                                        </Grid>
+                                        <Grid Margin="3,5,0,0" Width="250">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="125"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="_I_08"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Texture_I_08}"/>
+                                        </Grid>
+                                        <Grid Margin="3,5,0,0" Width="250">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="125"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="_I_12"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Texture_I_12}"/>
+                                        </Grid>
+                                    </WrapPanel>
+                                    <WrapPanel>
+                                        <Grid Margin="3,5,0,0" Width="250">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="125"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="_F_96"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Texture_F_96}" StringFormat="0.0###" Interval="0.05"/>
+                                        </Grid>
+                                        <Grid Margin="3,5,0,0" Width="250">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="125"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="_F_100"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Texture_F_100}" StringFormat="0.0###" Interval="0.05"/>
+                                        </Grid>
+                                        <Grid Margin="3,5,0,0" Width="250">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="125"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="_F_104"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Texture_F_104}" StringFormat="0.0###" Interval="0.05"/>
+                                        </Grid>
+                                        <Grid Margin="3,5,0,0" Width="250">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="125"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="_F_108"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Texture_F_108}" StringFormat="0.0###" Interval="0.05"/>
+                                        </Grid>
+                                    </WrapPanel>
                                 </StackPanel>
-                            </Grid>
-                        </Expander>
-                        <Expander Header="Texture" IsExpanded="True" Visibility="{Binding ElementName=UserControl,Path=EmissionVisibility}">
-                            <StackPanel>
-                                <WrapPanel>
-                                    <Grid Margin="3,5,0,0" Width="250">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="125"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Content="_I_01"/>
-                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Texture_I_01}" Minimum="0" Maximum="255"/>
-                                    </Grid>
-                                    <Grid Margin="3,5,0,0" Width="250">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="125"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Content="_I_02"/>
-                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Texture_I_02}" Minimum="0" Maximum="255"/>
-                                    </Grid>
-                                    <Grid Margin="3,5,0,0" Width="250">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="125"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Content="_I_03"/>
-                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Texture_I_03}" Minimum="0" Maximum="255"/>
-                                    </Grid>
-                                    <Grid Margin="3,5,0,0" Width="250">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="125"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Content="_I_08"/>
-                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Texture_I_08}"/>
-                                    </Grid>
-                                    <Grid Margin="3,5,0,0" Width="250">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="125"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Content="_I_12"/>
-                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Texture_I_12}"/>
-                                    </Grid>
-                                </WrapPanel>
-                                <WrapPanel>
-                                    <Grid Margin="3,5,0,0" Width="250">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="125"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Content="_F_96"/>
-                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Texture_F_96}" StringFormat="0.0###" Interval="0.05"/>
-                                    </Grid>
-                                    <Grid Margin="3,5,0,0" Width="250">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="125"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Content="_F_100"/>
-                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Texture_F_100}" StringFormat="0.0###" Interval="0.05"/>
-                                    </Grid>
-                                    <Grid Margin="3,5,0,0" Width="250">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="125"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Content="_F_104"/>
-                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Texture_F_104}" StringFormat="0.0###" Interval="0.05"/>
-                                    </Grid>
-                                    <Grid Margin="3,5,0,0" Width="250">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="125"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Content="_F_108"/>
-                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Texture_F_108}" StringFormat="0.0###" Interval="0.05"/>
-                                    </Grid>
-                                </WrapPanel>
-                            </StackPanel>
-                        </Expander>
-                    </StackPanel>
+                            </Expander>
+                        </StackPanel>
 
-                </Grid></Controls:MetroTabItem>
+                    </Grid>
+
+                </ScrollViewer>
+            </Controls:MetroTabItem>
         </Controls:MetroTabControl>
     </Grid>
 </UserControl>

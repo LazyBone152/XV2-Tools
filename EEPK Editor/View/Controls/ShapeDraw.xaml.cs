@@ -117,7 +117,10 @@ namespace EEPK_Organiser.View.Controls
             }
 
             if (points.Count <= 1)
+            {
+                path.Data = null;
                 return;
+            }
 
             PathFigure myPathFigure = new PathFigure { StartPoint = points.FirstOrDefault() };
 
