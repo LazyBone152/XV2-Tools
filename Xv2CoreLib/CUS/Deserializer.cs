@@ -157,6 +157,11 @@ namespace Xv2CoreLib.CUS
                     bytes.AddRange(BitConverter.GetBytes(skills[i].I_62));
                     bytes.AddRange(BitConverter.GetBytes(skills[i].NumTransformations));
                     bytes.AddRange(BitConverter.GetBytes(skills[i].I_66));
+
+                    if(cusFile.Version >= 1)
+                    {
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].I_68));
+                    }
                 }
             }
 

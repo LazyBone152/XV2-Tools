@@ -12,6 +12,9 @@ namespace Xv2CoreLib.CUS
     [YAXSerializeAs("CUS")]
     public class CUS_File : ISorting
     {
+        [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0)]
+        public byte Version { get; set; } = 1;
 
         public List<Skillset> Skillsets { get; set; }
         public List<Skill> SuperSkills { get; set; }
@@ -312,6 +315,18 @@ namespace Xv2CoreLib.CUS
             return -1;
         }
 
+        public static byte GetCusVersion(int skillSectionOffset, int skillCount, int nextSectionOffset)
+        {
+            switch((nextSectionOffset - skillSectionOffset) / skillCount)
+            {
+                case 68:
+                    return 0;
+                case 72:
+                    return 1;
+                default:
+                    throw new InvalidDataException("CUS file version not supported.");
+            }
+        }
         #endregion
     }
 
@@ -535,6 +550,12 @@ namespace Xv2CoreLib.CUS
         [YAXAttributeFor("I_66")]
         [YAXSerializeAs("value")]
         public ushort I_66 { get; set; }
+
+        [YAXHexValue]
+        [YAXAttributeFor("I_68")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0xffffff00)]
+        public uint I_68 { get; set; } = 0xffffff00;
 
 
         #region Installer

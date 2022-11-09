@@ -10,7 +10,7 @@ namespace Xv2CoreLib.CUS
         string saveLocation;
         byte[] rawBytes;
         CUS_File cusFile = new CUS_File();
-        
+
 
         public Parser(string location, bool _writeXml = false)
         {
@@ -27,7 +27,7 @@ namespace Xv2CoreLib.CUS
         public Parser(byte[] _bytes)
         {
             rawBytes = _bytes;
-            if(rawBytes != null)
+            if (rawBytes != null)
             {
                 Parse();
             }
@@ -37,12 +37,12 @@ namespace Xv2CoreLib.CUS
             }
         }
 
-        public CUS_File GetCusFile() 
+        public CUS_File GetCusFile()
         {
             return cusFile;
         }
-        
-        void Parse() 
+
+        private void Parse()
         {
             //counts
             int skillsetCount = BitConverter.ToInt32(rawBytes, 8);
@@ -62,7 +62,9 @@ namespace Xv2CoreLib.CUS
             int blastOffset = BitConverter.ToInt32(rawBytes, 56);
             int awokenOffset = BitConverter.ToInt32(rawBytes, 60);
 
-            if(skillsetCount > 0)
+            cusFile.Version = CUS_File.GetCusVersion(superOffset, superCount, ultimateOffset);
+
+            if (skillsetCount > 0)
             {
                 cusFile.Skillsets = new List<Skillset>();
                 for (int i = 0; i < skillsetCount; i++)
@@ -78,7 +80,6 @@ namespace Xv2CoreLib.CUS
             cusFile.UnkSkills = GetSkillEntries(unkCount, unkOffset);
             cusFile.BlastSkills = GetSkillEntries(blastCount, blastOffset);
             cusFile.AwokenSkills = GetSkillEntries(awokenCount, awokenOffset);
-            
 
         }
 
@@ -101,9 +102,9 @@ namespace Xv2CoreLib.CUS
             };
         }
 
-        private List<Skill> GetSkillEntries(int count, int offset) 
+        private List<Skill> GetSkillEntries(int count, int offset)
         {
-            var skillEntries = new List<Skill>();
+            List<Skill> skillEntries = new List<Skill>();
 
             for (int i = 0; i < count; i++)
             {
@@ -137,7 +138,15 @@ namespace Xv2CoreLib.CUS
                     I_66 = BitConverter.ToUInt16(rawBytes, offset + 66)
                 });
 
-                offset += 68;
+                if(cusFile.Version == 1)
+                {
+                    skillEntries[i].I_68 = BitConverter.ToUInt32(rawBytes, offset + 68);
+                    offset += 72;
+                }
+                else
+                {
+                    offset += 68;
+                }
             }
 
             return skillEntries;
