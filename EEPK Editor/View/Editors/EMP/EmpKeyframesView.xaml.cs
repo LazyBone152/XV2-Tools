@@ -63,7 +63,7 @@ namespace EEPK_Organiser.View.Editors.EMP
 
                 if(view.KeyframedValue != null)
                 {
-                    if (view.KeyframedValue.IsEtrValue())
+                    if (view.KeyframedValue.IsEtrValue)
                     {
                         view.defaultValues.Visibility = Visibility.Collapsed;
                         view.etrValues.Visibility = Visibility.Visible;
@@ -82,7 +82,7 @@ namespace EEPK_Organiser.View.Editors.EMP
         public EmpKeyframesViewModel ViewModel => KeyframedValue != null ? _viewModel : null;
 
         public string KeyframedValueName => KeyframedValue != null ? KeyframedValue.GetValueName().ToUpper() : null;
-        public int MaxTime => KeyframedValue?.IsEtrValue() == true ? 20000 : 1;
+        public int MaxTime => KeyframedValue?.IsEtrValue == true ? 20000 : 1;
 
         public EmpKeyframesView()
         {

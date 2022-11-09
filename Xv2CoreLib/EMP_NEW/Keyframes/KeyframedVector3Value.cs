@@ -16,10 +16,12 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
         public AsyncObservableCollection<KeyframeVector3Value> Keyframes { get; set; } = new AsyncObservableCollection<KeyframeVector3Value>();
 
         #region Init
-        public KeyframedVector3Value(float x, float y, float z, KeyframedValueType valueType)
+        public KeyframedVector3Value(float x, float y, float z, KeyframedValueType valueType, bool isEtr = false, bool isModifier = false)
         {
             Constant = new CustomVector4(x, y, z, 1f);
             ValueType = valueType;
+            IsEtrValue = isEtr;
+            IsModifierValue = isModifier;
         }
 
         public void DecompileKeyframes(params EMP_KeyframedValue[] empKeyframes)
@@ -35,9 +37,31 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             if (Keyframes.Count > 0)
                 Keyframes.Clear();
 
+            //Reduce time down to a 0 to 1 range for EMP and ECF, since they are based on the lifetime (ETR is directly based on frames)
+            float timeScale = IsEtrValue ? 1f : 100f;
+
             for (int i = 0; i < tempKeyframes[0].Count; i++)
             {
-                Keyframes.Add(new KeyframeVector3Value(tempKeyframes[0][i].Time / 100f, tempKeyframes[0][i].Value, tempKeyframes[1][i].Value, tempKeyframes[2][i].Value));
+                Keyframes.Add(new KeyframeVector3Value(tempKeyframes[0][i].Time / timeScale, tempKeyframes[0][i].Value, tempKeyframes[1][i].Value, tempKeyframes[2][i].Value));
+            }
+
+            //Set constant value for modifer keyframes
+            if (IsModifierValue)
+            {
+                if (IsEtrValue && Keyframes.Count > 0)
+                {
+                    //ETR has no default value defined on keyframes, so just use the keyframe values 
+                    Constant.X = Keyframes[0].Value.X;
+                    Constant.Y = Keyframes[0].Value.Y;
+                    Constant.Z = Keyframes[0].Value.Z;
+                }
+                else if (!IsEtrValue)
+                {
+                    //EMP
+                    Constant.X = empKeyframes[0].DefaultValue;
+                    Constant.Y = empKeyframes[1].DefaultValue;
+                    Constant.Z = empKeyframes[2].DefaultValue;
+                }
             }
         }
 
@@ -55,9 +79,11 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             keyframes[1] = new List<KeyframedGenericValue>();
             keyframes[2] = new List<KeyframedGenericValue>();
 
+            float timeScale = IsEtrValue ? 1f : 100f;
+
             for (int i = 0; i < Keyframes.Count; i++)
             {
-                ushort time = (ushort)(Keyframes[i].Time * 100f);
+                ushort time = (ushort)(Keyframes[i].Time * timeScale);
                 keyframes[0].Add(new KeyframedGenericValue(time, Keyframes[i].Value.X));
                 keyframes[1].Add(new KeyframedGenericValue(time, Keyframes[i].Value.Y));
                 keyframes[2].Add(new KeyframedGenericValue(time, Keyframes[i].Value.Z));

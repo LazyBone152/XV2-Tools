@@ -19,16 +19,16 @@
             <ColumnDefinition Width="35"/>
         </Grid.ColumnDefinitions>
         <Label Content="R" FontSize="10" VerticalContentAlignment="Center"/>
-        <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=R}" Grid.Column="1" InterceptMouseWheel="True" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="False" StringFormat="0.0##" Grid.ColumnSpan="2" Margin="0,0,16,0"/>
-        <Label Content="G" FontSize="10" VerticalContentAlignment="Center" Grid.Column="2" Margin="1,0,0,0"/>
-        <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=G}" Grid.Column="3" InterceptMouseWheel="True" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="False" StringFormat="0.0##" Grid.ColumnSpan="2" Margin="0,0,15.333,0"/>
-        <Label Content="B" FontSize="10" VerticalContentAlignment="Center" Grid.Column="4" Margin="0.667,0,0.333,0"/>
-        <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=B}" Grid.Column="5" InterceptMouseWheel="True" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="False" StringFormat="0.0##" Grid.ColumnSpan="2" Margin="0.667,0,14.667,0"/>
-        <Label Content="A" FontSize="10" VerticalContentAlignment="Center" Grid.Column="6" Grid.ColumnSpan="2" Margin="0.667,0,57,0"/>
-        <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=A}" Grid.Column="7" InterceptMouseWheel="True" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="False" StringFormat="0.0##" Grid.ColumnSpan="2" Margin="0.333,0,35,0"/>
+        <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=R}" Grid.Column="1" InterceptMouseWheel="True" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="False" StringFormat="0.0##" Margin="0, 0,-2, 0"/>
+        <Label Content="G" FontSize="10" VerticalContentAlignment="Center" Grid.Column="2" Margin="2,0,0,0"/>
+        <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=G}" Grid.Column="3" InterceptMouseWheel="True" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="False" StringFormat="0.0##" Margin="0, 0,-3, 0"/>
+        <Label Content="B" FontSize="10" VerticalContentAlignment="Center" Grid.Column="4" Margin="2,0,0,0"/>
+        <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=B}" Grid.Column="5" InterceptMouseWheel="True" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="False" StringFormat="0.0##" Margin="0, 0,-2, 0"/>
+        <Label Content="A" FontSize="10" VerticalContentAlignment="Center" Grid.Column="6" Margin="2, 0, 0, 0"/>
+        <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=A}" Grid.Column="7" InterceptMouseWheel="True" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="False" StringFormat="0.0##" Margin="0, 0,-2, 0"/>
 
         <Grid Background="{Binding ElementName=UserControl, Path=Preview}" Grid.Column="8" Margin="10,0,3,0">
-            <controls:ColorPicker SelectedColor="{Binding ElementName=UserControl, Path=CurrentColor}" Background="Transparent" BorderBrush="Transparent" Foreground="Transparent" IsColorPalettesTabVisible="False"/>
+            <controls:ColorPicker SelectedColor="{Binding ElementName=UserControl, Path=CurrentColor}" Background="Transparent" BorderBrush="Transparent" Foreground="Transparent" BorderThickness="0" IsColorPalettesTabVisible="False"/>
 
         </Grid>
     </Grid>

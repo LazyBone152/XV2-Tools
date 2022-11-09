@@ -78,6 +78,9 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
         public byte[] Components { get; set; }
         public ETR.ETR_InterpolationType ETR_InterpolationType { get; set; }
 
+        public bool IsEtrValue { get; protected set; }
+        public bool IsModifierValue { get; protected set; }
+
         /// <summary>
         /// Decompiles an array of <see cref="EMP_KeyframedValue"/> into an array of keyframes with synchronized timings. 
         /// </summary>
@@ -218,6 +221,7 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
                         empKeyframes[i].Interpolate = Interpolate;
                         empKeyframes[i].Parameter = Parameter;
                         empKeyframes[i].Component = Components[i];
+                        empKeyframes[i].DefaultValue = IsModifierValue ? constant[i] : 0f;
                         empKeyframes[i].ETR_InterpolationType = ETR_InterpolationType;
 
                         for (int a = 0; a < keyframes[i].Count; a++)
@@ -229,6 +233,19 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
                             });
                         }
                     }
+                }
+            }
+            else if (IsModifierValue)
+            {
+                //Even if a modifier isn't animated it will still need a definition to hold the constant values
+                for (int i = 0; i < keyframes.Length; i++)
+                {
+                    empKeyframes[i] = new EMP_KeyframedValue();
+                    empKeyframes[i].Parameter = Parameter;
+                    empKeyframes[i].Component = Components[i];
+                    empKeyframes[i].DefaultValue = constant[i];
+                    empKeyframes[i].ETR_InterpolationType = ETR_InterpolationType;
+                    empKeyframes[i].Keyframes.Add(new EMP_Keyframe(0, constant[i]));
                 }
             }
 
@@ -284,15 +301,22 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
                     return "Specular Alpha";
                 case KeyframedValueType.ECF_BlendingFactor:
                     return "Blending Factor";
+                case KeyframedValueType.Modifier_Axis:
+                case KeyframedValueType.Modifier_Axis2:
+                    return "Axis";
+                case KeyframedValueType.Modifier_RotationRate:
+                    return "Rotation Rate";
+                case KeyframedValueType.Modifier_Radial:
+                    return "Radial";
+                case KeyframedValueType.Modifier_DragStrength:
+                    return "Drag Strength";
+                case KeyframedValueType.Modifier_Direction:
+                    return "Direction";
                 default:
                     return ValueType.ToString();
             }
         }
 
-        public bool IsEtrValue()
-        {
-            return ValueType == KeyframedValueType.ETR_Color1 || ValueType == KeyframedValueType.ETR_Color2 || ValueType == KeyframedValueType.ETR_Color1_Transparency || ValueType == KeyframedValueType.ETR_Color2_Transparency || ValueType == KeyframedValueType.ETR_Scale;
-        }
     }
 
     public class KeyframedGenericValue : IKeyframe

@@ -779,7 +779,7 @@
                 </Controls:MetroTabItem>
             <Controls:MetroTabItem Header="Modifiers" Controls:HeaderedControlHelper.HeaderFontSize="16">
                 <Grid Background="{DynamicResource MahApps.Brushes.SystemControlBackgroundAltMediumLow}">
-                    
+                    <local:EmpModifiersView Modifiers="{Binding ElementName=UserControl, Path=Node.Modifiers}" Node="{Binding ElementName=UserControl, Path=Node}" IsEtr="False"/>
                 </Grid>
             </Controls:MetroTabItem>
             <Controls:MetroTabItem Header="Unknown" Controls:HeaderedControlHelper.HeaderFontSize="16">

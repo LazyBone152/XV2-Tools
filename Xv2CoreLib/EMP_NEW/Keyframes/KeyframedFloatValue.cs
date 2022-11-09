@@ -42,11 +42,13 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
         private readonly bool IsScale;
 
         #region Init
-        public KeyframedFloatValue(float value, KeyframedValueType valueType, bool isScale = false)
+        public KeyframedFloatValue(float value, KeyframedValueType valueType, bool isEtr = false, bool isModifier = false, bool isScale = false)
         {
             ValueType = valueType;
             Constant = value;
             IsScale = isScale;
+            IsEtrValue = isEtr;
+            IsModifierValue = isModifier;
         }
 
         public void DecompileKeyframes(params EMP_KeyframedValue[] empKeyframes)
@@ -63,7 +65,7 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
                 Keyframes.Clear();
 
             //Reduce time down to a 0 to 1 range for EMP and ECF, since they are based on the lifetime (ETR is directly based on frames)
-            float timeScale = IsEtrValue() ? 1f : 100f;
+            float timeScale = IsEtrValue ? 1f : 100f;
 
             for (int i = 0; i < tempKeyframes[0].Count; i++)
             {
@@ -71,6 +73,21 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
                 float scale = IsScale ? 2f : 1f;
 
                 Keyframes.Add(new KeyframeFloatValue(tempKeyframes[0][i].Time / timeScale, tempKeyframes[0][i].Value * scale));
+            }
+
+            //Set constant value for modifer keyframes
+            if (IsModifierValue)
+            {
+                if (IsEtrValue && Keyframes.Count > 0)
+                {
+                    //ETR has no default value defined on keyframes, so just use the keyframe values 
+                    Constant = Keyframes[0].Value;
+                }
+                else if(!IsEtrValue)
+                {
+                    //EMP
+                    Constant = empKeyframes[0].DefaultValue;
+                }
             }
         }
 
@@ -95,7 +112,7 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
         {
             List<KeyframedGenericValue>[] keyframes = new List<KeyframedGenericValue>[1];
             keyframes[0] = new List<KeyframedGenericValue>();
-            float timeScale = IsEtrValue() ? 1f : 100f;
+            float timeScale = IsEtrValue ? 1f : 100f;
 
             for (int i = 0; i < Keyframes.Count; i++)
             {

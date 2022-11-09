@@ -471,13 +471,13 @@ namespace Xv2CoreLib.ETR
         public ushort HoldDuration { get; set; }
         public ExtrudeFlags Flags { get; set; }
         public float PositionExtrudeZ { get; set; }
-        public KeyframedFloatValue Scale { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.ETR_Scale);
+        public KeyframedFloatValue Scale { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.ETR_Scale, true);
 
         public ushort MaterialID { get; set; } = ushort.MaxValue;
-        public KeyframedColorValue Color1 { get; set; } = new KeyframedColorValue(1, 1, 1, KeyframedValueType.ETR_Color1);
-        public KeyframedColorValue Color2 { get; set; } = new KeyframedColorValue(1, 1, 1, KeyframedValueType.ETR_Color2);
-        public KeyframedFloatValue Color1_Transparency { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.ETR_Color1_Transparency);
-        public KeyframedFloatValue Color2_Transparency { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.ETR_Color2_Transparency);
+        public KeyframedColorValue Color1 { get; set; } = new KeyframedColorValue(1, 1, 1, KeyframedValueType.ETR_Color1, true);
+        public KeyframedColorValue Color2 { get; set; } = new KeyframedColorValue(1, 1, 1, KeyframedValueType.ETR_Color2, true);
+        public KeyframedFloatValue Color1_Transparency { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.ETR_Color1_Transparency, true);
+        public KeyframedFloatValue Color2_Transparency { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.ETR_Color2_Transparency, true);
 
         public byte I_92 { get; set; } //Looks like flags
         public byte I_88 { get; set; } //Possibily flags
@@ -594,8 +594,8 @@ namespace Xv2CoreLib.ETR
 
             for(int i = 0; i < modifiersCount; i++)
             {
-                EMP_Modifier modifer = new EMP_Modifier();
-                modifer.Type = (EMP_Modifier.ModifierType)bytes[modifiersOffset];
+                EMP_Modifier modifer = new EMP_Modifier(true);
+                modifer.Type = bytes[modifiersOffset];
                 modifer.Flags = (EMP_Modifier.ModifierFlags)bytes[modifiersOffset + 1];
 
                 ushort keyframeCount = BitConverter.ToUInt16(bytes, modifiersOffset + 2);
@@ -618,6 +618,12 @@ namespace Xv2CoreLib.ETR
                 node.Color1_Transparency.DecompileKeyframes(node.GetKeyframedValues(0, 3));
                 node.Color2_Transparency.DecompileKeyframes(node.GetKeyframedValues(1, 3));
                 node.Scale.DecompileKeyframes(node.GetKeyframedValues(2, 0));
+
+                //Decompile modifiers
+                foreach(EMP_Modifier modifier in node.Modifiers)
+                {
+                    modifier.DecompileEtr();
+                }
 
                 //Fix old scaled ETRs:
                 //ShapePoints should be between -1 and 1, but the old ETR Scale feature rescaled these outside this range. This code will rescale these back within that range, and apply the scale to the actual scale value and its keyframes
@@ -704,6 +710,12 @@ namespace Xv2CoreLib.ETR
             AddKeyframedValues(Color1_Transparency.CompileKeyframes());
             AddKeyframedValues(Color2_Transparency.CompileKeyframes());
             AddKeyframedValues(Scale.CompileKeyframes());
+
+            //Modifers
+            foreach (EMP_Modifier modifier in Modifiers)
+            {
+                modifier.CompileEtr();
+            }
         }
 
         internal void AddKeyframedValues(EMP_KeyframedValue[] values)

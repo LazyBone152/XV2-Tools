@@ -17,10 +17,12 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
         public AsyncObservableCollection<KeyframeColorValue> Keyframes { get; set; } = new AsyncObservableCollection<KeyframeColorValue>();
 
         #region Init
-        public KeyframedColorValue(float r, float g, float b, KeyframedValueType valueType)
+        public KeyframedColorValue(float r, float g, float b, KeyframedValueType valueType, bool isEtr = false, bool isModifier = false)
         {
             Constant = new CustomColor(r, g, b, 1f);
             ValueType = valueType;
+            IsEtrValue = isEtr;
+            IsModifierValue = isModifier;
         }
 
         public void DecompileKeyframes(params EMP_KeyframedValue[] empKeyframes)
@@ -35,7 +37,7 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
                 Keyframes.Clear();
 
             //Reduce time down to a 0 to 1 range for EMP and ECF, since they are based on the lifetime (ETR is directly based on frames)
-            float timeScale = IsEtrValue() ? 1f : 100f;
+            float timeScale = IsEtrValue ? 1f : 100f;
 
             for (int i = 0; i < tempKeyframes[0].Count; i++)
             {
@@ -58,7 +60,7 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             keyframes[1] = new List<KeyframedGenericValue>();
             keyframes[2] = new List<KeyframedGenericValue>();
 
-            float timeScale = IsEtrValue() ? 1f : 100f;
+            float timeScale = IsEtrValue ? 1f : 100f;
 
             for (int i = 0; i < Keyframes.Count; i++)
             {

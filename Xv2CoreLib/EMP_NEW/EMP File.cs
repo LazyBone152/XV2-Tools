@@ -745,7 +745,7 @@ namespace Xv2CoreLib.EMP_NEW
         public ParticleEmission EmissionNode { get; set; } = new ParticleEmission();
 
         public AsyncObservableCollection<EMP_KeyframedValue> KeyframedValues { get; set; } = new AsyncObservableCollection<EMP_KeyframedValue>();
-        public AsyncObservableCollection<EMP_Modifier> GroupKeyframedValues { get; set; } = new AsyncObservableCollection<EMP_Modifier>();
+        public AsyncObservableCollection<EMP_Modifier> Modifiers { get; set; } = new AsyncObservableCollection<EMP_Modifier>();
         public AsyncObservableCollection<ParticleNode> ChildParticleNodes { get; set; } = new AsyncObservableCollection<ParticleNode>();
 
 
@@ -788,7 +788,7 @@ namespace Xv2CoreLib.EMP_NEW
                 Position_Variance = Position_Variance.Copy(),
                 Name = Utils.CloneString(Name),
                 KeyframedValues = KeyframedValues.Copy(),
-                GroupKeyframedValues = GroupKeyframedValues.Copy(),
+                Modifiers = Modifiers.Copy(),
                 EmissionNode = EmissionNode.Clone(),
                 EmitterNode = EmitterNode.Copy(),
                 NodeType = NodeType,
@@ -908,18 +908,18 @@ namespace Xv2CoreLib.EMP_NEW
             var emitter = particleEffect.EmitterNode.Copy();
             var emission = particleEffect.EmissionNode.Clone(); //Clone keeps texture and material references intact
             var type_0 = particleEffect.KeyframedValues.Copy();
-            var type_1 = particleEffect.GroupKeyframedValues.Copy();
+            var type_1 = particleEffect.Modifiers.Copy();
 
             undos.Add(new UndoableProperty<ParticleNode>(nameof(EmitterNode), this, EmitterNode, emitter));
             undos.Add(new UndoableProperty<ParticleNode>(nameof(EmissionNode), this, EmissionNode, emission));
             undos.Add(new UndoableProperty<ParticleNode>(nameof(KeyframedValues), this, KeyframedValues, type_0));
-            undos.Add(new UndoableProperty<ParticleNode>(nameof(GroupKeyframedValues), this, GroupKeyframedValues, type_1));
+            undos.Add(new UndoableProperty<ParticleNode>(nameof(Modifiers), this, Modifiers, type_1));
             undos.Add(new UndoActionPropNotify(this, true));
 
             EmitterNode = emitter;
             EmissionNode = emission;
             KeyframedValues = type_0;
-            GroupKeyframedValues = type_1;
+            Modifiers = type_1;
 
             this.NotifyPropsChanged();
         }
@@ -984,7 +984,7 @@ namespace Xv2CoreLib.EMP_NEW
                 }
             }
         }
-    
+
         public EMP_KeyframedValue[] GetKeyframedValues(int parameter, params int[] components)
         {
             EMP_KeyframedValue[] values = new EMP_KeyframedValue[components.Length];
@@ -1055,6 +1055,12 @@ namespace Xv2CoreLib.EMP_NEW
                 case NodeSpecificType.ShapeDraw:
                     AddKeyframedValues(EmissionNode.ActiveRotation.CompileKeyframes());
                     break;
+            }
+        
+            //Modifers
+            foreach(EMP_Modifier modifier in Modifiers)
+            {
+                modifier.CompileEmp();
             }
         }
 
@@ -1127,9 +1133,9 @@ namespace Xv2CoreLib.EMP_NEW
         public KeyframedFloatValue Color1_Transparency { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.Color1_Transparency);
         public KeyframedFloatValue Color2_Transparency { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.Color2_Transparency);
 
-        public KeyframedFloatValue ScaleBase { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.ScaleBase, true);
+        public KeyframedFloatValue ScaleBase { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.ScaleBase, isScale: true);
         public float ScaleBase_Variance { get; set; }
-        public KeyframedVector2Value ScaleXY { get; set; } = new KeyframedVector2Value(1f, 1f, KeyframedValueType.ScaleXY, true);
+        public KeyframedVector2Value ScaleXY { get; set; } = new KeyframedVector2Value(1f, 1f, KeyframedValueType.ScaleXY, isScale: true);
         public CustomVector4 ScaleXY_Variance { get; set; } = new CustomVector4();
         public float F_96 { get; set; }
         public float F_100 { get; set; }
@@ -2319,6 +2325,8 @@ namespace Xv2CoreLib.EMP_NEW
                 case KeyframedValueType.ECF_DiffuseTransparency:
                 case KeyframedValueType.ETR_Color1:
                 case KeyframedValueType.ETR_Color1_Transparency:
+                case KeyframedValueType.Modifier_Axis:
+                case KeyframedValueType.Modifier_DragStrength:
                     return 0;
                 case KeyframedValueType.Rotation:
                 case KeyframedValueType.ActiveRotation:
@@ -2326,6 +2334,9 @@ namespace Xv2CoreLib.EMP_NEW
                 case KeyframedValueType.ECF_SpecularTransparency:
                 case KeyframedValueType.ETR_Color2:
                 case KeyframedValueType.ETR_Color2_Transparency:
+                case KeyframedValueType.Modifier_Axis2:
+                case KeyframedValueType.Modifier_Factor:
+                case KeyframedValueType.Modifier_Direction:
                     return 1;
                 case KeyframedValueType.ScaleBase:
                 case KeyframedValueType.ScaleXY:
@@ -2335,6 +2346,10 @@ namespace Xv2CoreLib.EMP_NEW
                 case KeyframedValueType.ECF_AmbientColor:
                 case KeyframedValueType.ECF_AmbientTransparency:
                 case KeyframedValueType.ETR_Scale:
+                case KeyframedValueType.Modifier_Radial:
+                case KeyframedValueType.Modifier_RotationRate:
+                case KeyframedValueType.Modifier_Unk7_20:
+                case KeyframedValueType.Modifier_Unk7_21:
                     return 2;
                 case KeyframedValueType.Color1:
                 case KeyframedValueType.Color1_Transparency:
@@ -2365,6 +2380,9 @@ namespace Xv2CoreLib.EMP_NEW
                 case KeyframedValueType.ECF_AmbientColor:
                 case KeyframedValueType.ETR_Color1:
                 case KeyframedValueType.ETR_Color2:
+                case KeyframedValueType.Modifier_Axis:
+                case KeyframedValueType.Modifier_Axis2:
+                case KeyframedValueType.Modifier_Direction:
                     return new byte[] { 0, 1, 2 };
                 case KeyframedValueType.ActiveRotation:
                 case KeyframedValueType.ECF_AmbientTransparency:
@@ -2383,9 +2401,15 @@ namespace Xv2CoreLib.EMP_NEW
                 case KeyframedValueType.Size1:
                 case KeyframedValueType.ECF_BlendingFactor:
                 case KeyframedValueType.ETR_Scale:
+                case KeyframedValueType.Modifier_Factor:
+                case KeyframedValueType.Modifier_DragStrength:
+                case KeyframedValueType.Modifier_Radial:
+                case KeyframedValueType.Modifier_Unk7_20:
                     return new byte[] { 0 };
                 case KeyframedValueType.Velocity:
                 case KeyframedValueType.Size2:
+                case KeyframedValueType.Modifier_RotationRate:
+                case KeyframedValueType.Modifier_Unk7_21:
                     return new byte[] { 1 };
                 case KeyframedValueType.Angle:
                     return new byte[] { 2 };
@@ -2457,7 +2481,7 @@ namespace Xv2CoreLib.EMP_NEW
     [Serializable]
     public class EMP_Modifier
     {
-        public enum ModifierType : byte
+        public enum EmpModifierType : byte
         {
             Translation = 4,
             Acceleration = 5,
@@ -2470,6 +2494,15 @@ namespace Xv2CoreLib.EMP_NEW
             Attract = 12
         }
 
+        public enum EtrModifierType : byte
+        {
+            Translation = 2,
+            Acceleration = 3, //Guess
+            InverseTranslation = 4,
+            InverseAcceleration = 5,
+            Unk7 = 7
+        }
+
         [Flags]
         public enum ModifierFlags : byte
         {
@@ -2477,9 +2510,174 @@ namespace Xv2CoreLib.EMP_NEW
             Unk2 = 0x2
         }
 
-        public ModifierType Type { get; set; }
+        public bool IsEtr { get; private set; }
+        public byte Type { get; set; }
+        public EmpModifierType EmpType => (EmpModifierType)Type;
+        public EtrModifierType EtrType => (EtrModifierType)Type;
+        public string TypeStr => IsEtr ? EtrType.ToString() : EmpType.ToString();
         public ModifierFlags Flags { get; set; } //"PRESERVE_NODE_FLAG"?
         public AsyncObservableCollection<EMP_KeyframedValue> KeyframedValues { get; set; } = new AsyncObservableCollection<EMP_KeyframedValue>();
+
+        public KeyframedVector3Value Axis { get; set; }
+        public KeyframedVector3Value Direction { get; set; }
+        public KeyframedFloatValue Factor { get; set; }
+        public KeyframedFloatValue Radial { get; set; }
+        public KeyframedFloatValue RotationRate { get; set; }
+        public KeyframedFloatValue DragStrength { get; set; }
+
+        //ETR:
+        public KeyframedVector3Value Axis2 { get; set; }
+        public KeyframedFloatValue Unk7_20 { get; set; }
+        public KeyframedFloatValue Unk7_21 { get; set; }
+
+        public EMP_Modifier(bool isEtr)
+        {
+            IsEtr = isEtr;
+            if (EffectContainer.EepkToolInterlop.FullDecompile)
+            {
+                Axis = new KeyframedVector3Value(0, 0, 0, KeyframedValueType.Modifier_Axis, isEtr, true);
+                Axis2 = new KeyframedVector3Value(0, 0, 0, KeyframedValueType.Modifier_Axis2, isEtr, true);
+                Direction = new KeyframedVector3Value(0, 0, 0, KeyframedValueType.Modifier_Direction, isEtr, true);
+                Factor = new KeyframedFloatValue(0, KeyframedValueType.Modifier_Factor, isEtr, true);
+                Radial = new KeyframedFloatValue(0, KeyframedValueType.Modifier_Radial, isEtr, true);
+                RotationRate = new KeyframedFloatValue(0, KeyframedValueType.Modifier_RotationRate, isEtr, true);
+                DragStrength = new KeyframedFloatValue(0, KeyframedValueType.Modifier_DragStrength, isEtr, true);
+                Unk7_20 = new KeyframedFloatValue(0, KeyframedValueType.Modifier_Unk7_20, isEtr, true);
+                Unk7_21 = new KeyframedFloatValue(0, KeyframedValueType.Modifier_Unk7_21, isEtr, true);
+            }
+        }
+
+        public EMP_Modifier(byte type, bool isEtr) : this(isEtr)
+        {
+            Type = type;
+        }
+
+        public void DecompileEmp()
+        {
+            switch (EmpType)
+            {
+                case EmpModifierType.Translation:
+                case EmpModifierType.Acceleration:
+                case EmpModifierType.AngleTranslation:
+                case EmpModifierType.AngleAcceleration:
+                case EmpModifierType.PointLoop:
+                case EmpModifierType.Jitter:
+                case EmpModifierType.Attract:
+                    Axis.DecompileKeyframes(GetKeyframedValues(0, 0, 1, 2));
+                    Factor.DecompileKeyframes(GetKeyframedValues(1, 0));
+                    break;
+                case EmpModifierType.Vortex:
+                    Axis.DecompileKeyframes(GetKeyframedValues(0, 0, 1, 2));
+                    Direction.DecompileKeyframes(GetKeyframedValues(1, 0, 1, 2));
+                    Radial.DecompileKeyframes(GetKeyframedValues(2, 0));
+                    RotationRate.DecompileKeyframes(GetKeyframedValues(2, 1));
+                    break;
+                case EmpModifierType.Drag:
+                    DragStrength.DecompileKeyframes(GetKeyframedValues(0, 0));
+                    break;
+            }
+        }
+
+        public void CompileEmp()
+        {
+            KeyframedValues.Clear();
+
+            switch (EmpType)
+            {
+                case EmpModifierType.Translation:
+                case EmpModifierType.Acceleration:
+                case EmpModifierType.AngleTranslation:
+                case EmpModifierType.AngleAcceleration:
+                case EmpModifierType.PointLoop:
+                case EmpModifierType.Jitter:
+                case EmpModifierType.Attract:
+                    AddKeyframedValues(Axis.CompileKeyframes());
+                    AddKeyframedValues(Factor.CompileKeyframes());
+                    break;
+                case EmpModifierType.Vortex:
+                    AddKeyframedValues(Axis.CompileKeyframes());
+                    AddKeyframedValues(Direction.CompileKeyframes());
+                    AddKeyframedValues(Radial.CompileKeyframes());
+                    AddKeyframedValues(RotationRate.CompileKeyframes());
+                    break;
+                case EmpModifierType.Drag:
+                    AddKeyframedValues(DragStrength.CompileKeyframes());
+                    break;
+            }
+        }
+
+        public void DecompileEtr()
+        {
+            switch (EtrType)
+            {
+                case EtrModifierType.Translation:
+                case EtrModifierType.InverseAcceleration:
+                case EtrModifierType.Acceleration:
+                case EtrModifierType.InverseTranslation:
+                    Axis.DecompileKeyframes(GetKeyframedValues(0, 0, 1, 2));
+                    Factor.DecompileKeyframes(GetKeyframedValues(1, 0));
+                    break;
+                case EtrModifierType.Unk7:
+                    Axis2.DecompileKeyframes(GetKeyframedValues(1, 0, 1, 2));
+                    Unk7_20.DecompileKeyframes(GetKeyframedValues(2, 0));
+                    Unk7_21.DecompileKeyframes(GetKeyframedValues(2, 1));
+                    break;
+            }
+        }
+
+        public void CompileEtr()
+        {
+            KeyframedValues.Clear();
+
+            switch (EtrType)
+            {
+                case EtrModifierType.Translation:
+                case EtrModifierType.InverseAcceleration:
+                case EtrModifierType.Acceleration:
+                case EtrModifierType.InverseTranslation:
+                    AddKeyframedValues(Axis.CompileKeyframes());
+                    AddKeyframedValues(Factor.CompileKeyframes());
+                    break;
+                case EtrModifierType.Unk7:
+                    AddKeyframedValues(Axis2.CompileKeyframes());
+                    AddKeyframedValues(Unk7_20.CompileKeyframes());
+                    AddKeyframedValues(Unk7_21.CompileKeyframes());
+                    break;
+            }
+        }
+
+        public EMP_KeyframedValue[] GetKeyframedValues(int parameter, params int[] components)
+        {
+            EMP_KeyframedValue[] values = new EMP_KeyframedValue[components.Length];
+
+            for (int i = 0; i < components.Length; i++)
+            {
+                EMP_KeyframedValue value = KeyframedValues.FirstOrDefault(x => x.Parameter == parameter && x.Component == components[i]);
+
+                if (value != null)
+                    values[i] = value;
+                else
+                    values[i] = EMP_KeyframedValue.Default;
+            }
+
+            return values;
+        }
+
+        private void AddKeyframedValues(EMP_KeyframedValue[] values)
+        {
+            for (int i = 0; i < values.Length; i++)
+            {
+                if (values[i] != null)
+                {
+                    if (KeyframedValues.Any(x => x.Parameter == values[i].Parameter && x.Component == values[i].Component))
+                    {
+                        throw new Exception($"EMP_Modifier: KeyframedValue already exists (parameter = {values[i].Parameter}, component = {values[i].Component})");
+                    }
+
+                    KeyframedValues.Add(values[i]);
+                }
+            }
+        }
 
     }
 
@@ -3190,7 +3388,7 @@ namespace Xv2CoreLib.EMP_NEW
 
     public enum KeyframedValueType
     {
-        //All known keyframed values and their associated Parameter/Component values. These apply to main KeyframedValues only, not the groups (which are unknown so far).
+        //All known keyframed values and their associated Parameter/Component values. These apply to main KeyframedValues only
         //Formated where the first number is the Parameter, and any following are the Components
 
         Position, //0, X = 0, Y = 1, Z = 2 (All node types)
@@ -3220,7 +3418,18 @@ namespace Xv2CoreLib.EMP_NEW
         ETR_Color2,
         ETR_Color1_Transparency,
         ETR_Color2_Transparency,
-        ETR_Scale
+        ETR_Scale,
+
+        //Modifiers (groups):
+        Modifier_Axis, //0, vector3
+        Modifier_Axis2, //1, vetor3
+        Modifier_Factor, //1, float
+        Modifier_Direction, //1, vector3
+        Modifier_Radial, //2, 0 = float
+        Modifier_RotationRate, //2, 1 = float
+        Modifier_DragStrength, //0, float
+        Modifier_Unk7_20, //2, 0 = float (unknown type in ETR)
+        Modifier_Unk7_21, //2, 1 = float (unknown type in ETR)
     }
 
     public interface ITexture

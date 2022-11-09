@@ -224,25 +224,25 @@ namespace Xv2CoreLib.EMP_NEW
                     int entryCount = BitConverter.ToInt16(rawBytes, groupedKeyframedValuesOffset + 2);
                     int entryOffset = BitConverter.ToInt32(rawBytes, groupedKeyframedValuesOffset + 4) + groupedKeyframedValuesOffset;
 
-                    node.GroupKeyframedValues.Add(new EMP_Modifier());
-                    node.GroupKeyframedValues[a].Type = (EMP_Modifier.ModifierType)rawBytes[groupedKeyframedValuesOffset];
-                    node.GroupKeyframedValues[a].Flags = (EMP_Modifier.ModifierFlags)rawBytes[groupedKeyframedValuesOffset + 1];
+                    node.Modifiers.Add(new EMP_Modifier(false));
+                    node.Modifiers[a].Type = rawBytes[groupedKeyframedValuesOffset];
+                    node.Modifiers[a].Flags = (EMP_Modifier.ModifierFlags)rawBytes[groupedKeyframedValuesOffset + 1];
 
                     for (int d = 0; d < entryCount; d++)
                     {
                         int subEntryCount = BitConverter.ToInt16(rawBytes, entryOffset + 10);
                         int keyframesOffset = BitConverter.ToInt32(rawBytes, entryOffset + 12) + entryOffset;
 
-                        node.GroupKeyframedValues[a].KeyframedValues.Add(new EMP_KeyframedValue());
+                        node.Modifiers[a].KeyframedValues.Add(new EMP_KeyframedValue());
 
-                        node.GroupKeyframedValues[a].KeyframedValues[d].SetParameters(rawBytes[entryOffset + 0], Int4Converter.ToInt4(rawBytes[entryOffset + 1])[0]);
-                        node.GroupKeyframedValues[a].KeyframedValues[d].Interpolate = BitConverter_Ex.ToBoolean(Int4Converter.ToInt4(rawBytes[entryOffset + 1])[1]);
-                        node.GroupKeyframedValues[a].KeyframedValues[d].Loop = BitConverter_Ex.ToBoolean(rawBytes, entryOffset + 2);
-                        node.GroupKeyframedValues[a].KeyframedValues[d].I_03 = rawBytes[entryOffset + 3];
-                        node.GroupKeyframedValues[a].KeyframedValues[d].DefaultValue = BitConverter.ToSingle(rawBytes, entryOffset + 4);
+                        node.Modifiers[a].KeyframedValues[d].SetParameters(rawBytes[entryOffset + 0], Int4Converter.ToInt4(rawBytes[entryOffset + 1])[0]);
+                        node.Modifiers[a].KeyframedValues[d].Interpolate = BitConverter_Ex.ToBoolean(Int4Converter.ToInt4(rawBytes[entryOffset + 1])[1]);
+                        node.Modifiers[a].KeyframedValues[d].Loop = BitConverter_Ex.ToBoolean(rawBytes, entryOffset + 2);
+                        node.Modifiers[a].KeyframedValues[d].I_03 = rawBytes[entryOffset + 3];
+                        node.Modifiers[a].KeyframedValues[d].DefaultValue = BitConverter.ToSingle(rawBytes, entryOffset + 4);
 
                         ushort duration = BitConverter.ToUInt16(rawBytes, entryOffset + 8);
-                        node.GroupKeyframedValues[a].KeyframedValues[d].Keyframes = ParseKeyframes<EMP_Keyframe>(subEntryCount, keyframesOffset, duration, node.GroupKeyframedValues[a].KeyframedValues[d].Loop, node.GroupKeyframedValues[a].KeyframedValues[d].Interpolate);
+                        node.Modifiers[a].KeyframedValues[d].Keyframes = ParseKeyframes<EMP_Keyframe>(subEntryCount, keyframesOffset, duration, node.Modifiers[a].KeyframedValues[d].Loop, node.Modifiers[a].KeyframedValues[d].Interpolate);
 
                         entryOffset += 16;
                     }
@@ -317,6 +317,12 @@ namespace Xv2CoreLib.EMP_NEW
                 }
 
                 node.KeyframedValues.Clear();
+
+                //Decompile modifier keyframes
+                foreach(EMP_Modifier modifier in node.Modifiers)
+                {
+                    modifier.DecompileEmp();
+                }
             }
 
             return node;

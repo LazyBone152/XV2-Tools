@@ -77,7 +77,7 @@
 
         <!-- Texture selection -->
         <Grid Grid.Column="1" Grid.Row="1">
-            <DataGrid x:Name="textureDataGrid" Style="{StaticResource MahApps.Styles.DataGrid.Azure}" ItemsSource="{Binding ElementName=UserControl, Path=ViewTextures}" SelectedItem="{Binding ElementName=UserControl, Path=SelectedTexture}" Controls:ControlsHelper.ContentCharacterCasing="Normal" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
+            <DataGrid x:Name="textureDataGrid" BorderBrush="{DynamicResource MahApps.Brushes.SystemControlForegroundListMedium}" BorderThickness="1" Style="{StaticResource MahApps.Styles.DataGrid.Azure}" ItemsSource="{Binding ElementName=UserControl, Path=ViewTextures}" SelectedItem="{Binding ElementName=UserControl, Path=SelectedTexture}" Controls:ControlsHelper.ContentCharacterCasing="Normal" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False">
 
                 <DataGrid.InputBindings>
                     <KeyBinding Key="C" Modifiers="Ctrl" Command="{Binding ElementName=UserControl, Path=CopyTextureCommand}"/>
@@ -159,15 +159,16 @@
         </Grid>
 
         <!-- Texture -->
-        <Grid Grid.Row="1" Grid.Column="2" Margin="15, 10">
-            <Grid.Background>
-                <ImageBrush ImageSource="{StaticResource gridlines}" Stretch="UniformToFill" Opacity="1"/>
-            </Grid.Background>
-            <lbCommon:ZoomBorder ClipToBounds="True" Background="Transparent">
-                <Image x:Name="imagePreview" Source="{Binding ElementName=UserControl, Path=SelectedTexture.Texture}" Stretch="Uniform"/>
-            </lbCommon:ZoomBorder>
-
-        </Grid>
+        <Border BorderBrush="{DynamicResource MahApps.Brushes.SystemControlForegroundListMedium}" BorderThickness="1" Grid.Row="1" Grid.Column="2" Margin="10, 0">
+            <Grid Margin="3, 3">
+                <Grid.Background>
+                    <ImageBrush ImageSource="{StaticResource gridlines}" Stretch="UniformToFill" Opacity="1"/>
+                </Grid.Background>
+                <lbCommon:ZoomBorder ClipToBounds="True" Background="Transparent">
+                    <Image x:Name="imagePreview" Source="{Binding ElementName=UserControl, Path=SelectedTexture.Texture}" Stretch="Uniform"/>
+                </lbCommon:ZoomBorder>
+            </Grid>
+        </Border>
     
     </Grid>
 </UserControl>

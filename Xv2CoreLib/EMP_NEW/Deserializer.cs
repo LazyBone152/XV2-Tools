@@ -120,7 +120,7 @@ namespace Xv2CoreLib.EMP_NEW
 
             //Counts
             int keyframedValuesCount = (node.KeyframedValues != null) ? node.KeyframedValues.Count : 0;
-            int groupKeyframedValuesCount = (node.GroupKeyframedValues != null) ? node.GroupKeyframedValues.Count : 0;
+            int groupKeyframedValuesCount = (node.Modifiers != null) ? node.Modifiers.Count : 0;
             int childNodeCount = (node.ChildParticleNodes != null) ? node.ChildParticleNodes.Count : 0;
 
             bytes.AddRange(BitConverter.GetBytes((ushort)node.NodeFlags));
@@ -224,7 +224,7 @@ namespace Xv2CoreLib.EMP_NEW
             }
             if (groupKeyframedValuesCount > 0)
             {
-                WriteGroupKeyframedValues(node.GroupKeyframedValues, nodeOffset + 148, nodeOffset);
+                WriteGroupKeyframedValues(node.Modifiers, nodeOffset + 148, nodeOffset);
             }
         }
 

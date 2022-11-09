@@ -233,6 +233,9 @@
     <Compile Include="View\Editors\EMP\EmpKeyframeView.xaml.cs">
       <DependentUpon>EmpKeyframeView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\Editors\EMP\EmpModifiersView.xaml.cs">
+      <DependentUpon>EmpModifiersView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\Editors\EMP\EmpNodeView.xaml.cs">
       <DependentUpon>EmpNodeView.xaml</DependentUpon>
     </Compile>
@@ -396,6 +399,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Editors\EMP\EmpKeyframeView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Editors\EMP\EmpModifiersView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
