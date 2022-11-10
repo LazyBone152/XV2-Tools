@@ -214,7 +214,7 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             {
                 for (int i = 0; i < keyframes.Length; i++)
                 {
-                    if (keyframes[i].Any(x => x.Value != constant[i]))
+                    if (keyframes[i].Any(x => x.Value != constant[i]) || IsModifierValue)
                     {
                         empKeyframes[i] = new EMP_KeyframedValue();
                         empKeyframes[i].Loop = Loop;
@@ -289,10 +289,10 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
                     return "Size 2";
                 case KeyframedValueType.ECF_AmbientColor:
                     return "Ambient Color";
-                case KeyframedValueType.ECF_DiffuseColor:
-                    return "Diffuse Color";
-                case KeyframedValueType.ECF_SpecularColor:
-                    return "Specular Color";
+                case KeyframedValueType.ECF_MultiColor:
+                    return "Multi Color";
+                case KeyframedValueType.ECF_RimColor:
+                    return "Rim Color";
                 case KeyframedValueType.ECF_AmbientTransparency:
                     return "Ambient Alpha";
                 case KeyframedValueType.ECF_DiffuseTransparency:

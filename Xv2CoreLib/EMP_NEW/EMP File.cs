@@ -2321,7 +2321,7 @@ namespace Xv2CoreLib.EMP_NEW
             switch (value)
             {
                 case KeyframedValueType.Position:
-                case KeyframedValueType.ECF_DiffuseColor:
+                case KeyframedValueType.ECF_MultiColor:
                 case KeyframedValueType.ECF_DiffuseTransparency:
                 case KeyframedValueType.ETR_Color1:
                 case KeyframedValueType.ETR_Color1_Transparency:
@@ -2330,7 +2330,7 @@ namespace Xv2CoreLib.EMP_NEW
                     return 0;
                 case KeyframedValueType.Rotation:
                 case KeyframedValueType.ActiveRotation:
-                case KeyframedValueType.ECF_SpecularColor:
+                case KeyframedValueType.ECF_RimColor:
                 case KeyframedValueType.ECF_SpecularTransparency:
                 case KeyframedValueType.ETR_Color2:
                 case KeyframedValueType.ETR_Color2_Transparency:
@@ -2375,8 +2375,8 @@ namespace Xv2CoreLib.EMP_NEW
                 case KeyframedValueType.Rotation:
                 case KeyframedValueType.Color1:
                 case KeyframedValueType.Color2:
-                case KeyframedValueType.ECF_DiffuseColor:
-                case KeyframedValueType.ECF_SpecularColor:
+                case KeyframedValueType.ECF_MultiColor:
+                case KeyframedValueType.ECF_RimColor:
                 case KeyframedValueType.ECF_AmbientColor:
                 case KeyframedValueType.ETR_Color1:
                 case KeyframedValueType.ETR_Color2:
@@ -3406,8 +3406,8 @@ namespace Xv2CoreLib.EMP_NEW
         Size1, //3, 0 (ShapeAreaDist, ShapePerimeterDist) OR 2, 0 (SphereDist)
         Size2, //3, 1 (ShapeAreaDist, ShapePerimeterDist)
 
-        ECF_DiffuseColor,
-        ECF_SpecularColor,
+        ECF_MultiColor,
+        ECF_RimColor,
         ECF_AmbientColor,
         ECF_DiffuseTransparency,
         ECF_SpecularTransparency,

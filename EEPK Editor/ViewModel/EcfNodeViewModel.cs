@@ -50,8 +50,8 @@ namespace EEPK_Organiser.ViewModel
                 RaisePropertyChanged(nameof(LoopMode));
             }
         }
-        public KeyframedColorValue DiffuseColor => node.DiffuseColor;
-        public KeyframedColorValue SpecularColor => node.SpecularColor;
+        public KeyframedColorValue MultiColor => node.MultiColor;
+        public KeyframedColorValue RimColor => node.RimColor;
         public KeyframedColorValue AmbientColor => node.AmbientColor;
         public KeyframedFloatValue DiffuseTransparency => node.DiffuseColor_Transparency;
         public KeyframedFloatValue SpecularTransparency => node.SpecularColor_Transparency;
@@ -73,8 +73,8 @@ namespace EEPK_Organiser.ViewModel
             RaisePropertyChanged(nameof(EndTime));
             RaisePropertyChanged(nameof(LoopMode));
 
-            RaisePropertyChanged(nameof(DiffuseColor));
-            RaisePropertyChanged(nameof(SpecularColor));
+            RaisePropertyChanged(nameof(MultiColor));
+            RaisePropertyChanged(nameof(RimColor));
             RaisePropertyChanged(nameof(AmbientColor));
             RaisePropertyChanged(nameof(DiffuseTransparency));
             RaisePropertyChanged(nameof(SpecularTransparency));

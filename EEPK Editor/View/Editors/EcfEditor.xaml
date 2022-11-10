@@ -113,8 +113,8 @@
                                     <ColumnDefinition Width="100"/>
                                     <ColumnDefinition/>
                                 </Grid.ColumnDefinitions>
-                                <Label Content="Diffuse"/>
-                                <views:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding Path=ViewModel.DiffuseColor, ElementName=UserControl}" Node="{Binding ElementName=UserControl, Path=SelectedNode}" HideUpDownButtons="True"/>
+                                <Label Content="Multi Color" ToolTip="Multiplies the color of the material that this ECF is applied to."/>
+                                <views:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding Path=ViewModel.MultiColor, ElementName=UserControl}" Node="{Binding ElementName=UserControl, Path=SelectedNode}" HideUpDownButtons="True"/>
                             </Grid>
                             <Grid Margin="3,3" Width="110" HorizontalAlignment="Left">
                                 <Grid.ColumnDefinitions>
@@ -131,8 +131,8 @@
                                     <ColumnDefinition Width="100"/>
                                     <ColumnDefinition/>
                                 </Grid.ColumnDefinitions>
-                                <Label Content="Specular"/>
-                                <views:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding Path=ViewModel.SpecularColor, ElementName=UserControl}" Node="{Binding ElementName=UserControl, Path=SelectedNode}" HideUpDownButtons="True"/>
+                                <Label Content="Rim Color"/>
+                                <views:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding Path=ViewModel.RimColor, ElementName=UserControl}" Node="{Binding ElementName=UserControl, Path=SelectedNode}" HideUpDownButtons="True"/>
                             </Grid>
                             <Grid Margin="3,3" Width="110" HorizontalAlignment="Left">
                                 <Grid.ColumnDefinitions>
@@ -149,7 +149,7 @@
                                     <ColumnDefinition Width="100"/>
                                     <ColumnDefinition/>
                                 </Grid.ColumnDefinitions>
-                                <Label Content="Ambient"/>
+                                <Label Content="Ambient" ToolTip="Adds onto the materials color."/>
                                 <views:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding Path=ViewModel.AmbientColor, ElementName=UserControl}" Node="{Binding ElementName=UserControl, Path=SelectedNode}" HideUpDownButtons="True"/>
                             </Grid>
                             <Grid Margin="3,3" Width="110" HorizontalAlignment="Left">

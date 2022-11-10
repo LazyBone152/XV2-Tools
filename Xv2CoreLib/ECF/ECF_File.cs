@@ -117,8 +117,8 @@ namespace Xv2CoreLib.ECF
         public ushort EndTime { get; set; } = 60;
         public PlayMode LoopMode { get; set; } = PlayMode.Loop;
 
-        public KeyframedColorValue DiffuseColor { get; set; } = new KeyframedColorValue(0, 0, 0, KeyframedValueType.ECF_DiffuseColor);
-        public KeyframedColorValue SpecularColor { get; set; } = new KeyframedColorValue(0, 0, 0, KeyframedValueType.ECF_SpecularColor);
+        public KeyframedColorValue MultiColor { get; set; } = new KeyframedColorValue(0, 0, 0, KeyframedValueType.ECF_MultiColor);
+        public KeyframedColorValue RimColor { get; set; } = new KeyframedColorValue(0, 0, 0, KeyframedValueType.ECF_RimColor);
         public KeyframedColorValue AmbientColor { get; set; } = new KeyframedColorValue(0, 0, 0, KeyframedValueType.ECF_AmbientColor);
         public KeyframedFloatValue DiffuseColor_Transparency { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.ECF_DiffuseTransparency);
         public KeyframedFloatValue SpecularColor_Transparency { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.ECF_SpecularTransparency);
@@ -140,8 +140,8 @@ namespace Xv2CoreLib.ECF
         {
             List<RgbColor> colors = new List<RgbColor>();
 
-            RgbColor diffuse = DiffuseColor.GetAverageColor();
-            RgbColor specular = SpecularColor.GetAverageColor();
+            RgbColor diffuse = MultiColor.GetAverageColor();
+            RgbColor specular = RimColor.GetAverageColor();
             RgbColor ambient = AmbientColor.GetAverageColor();
 
             if (!diffuse.IsWhiteOrBlack)
@@ -158,8 +158,8 @@ namespace Xv2CoreLib.ECF
 
         public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet = false, int variance = 0)
         {
-            DiffuseColor.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
-            SpecularColor.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
+            MultiColor.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
+            RimColor.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
             AmbientColor.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
         }
 
@@ -184,8 +184,8 @@ namespace Xv2CoreLib.ECF
         {
             KeyframedValues.Clear();
 
-            AddKeyframedValues(DiffuseColor.CompileKeyframes());
-            AddKeyframedValues(SpecularColor.CompileKeyframes());
+            AddKeyframedValues(MultiColor.CompileKeyframes());
+            AddKeyframedValues(RimColor.CompileKeyframes());
             AddKeyframedValues(AmbientColor.CompileKeyframes());
             AddKeyframedValues(DiffuseColor_Transparency.CompileKeyframes());
             AddKeyframedValues(SpecularColor_Transparency.CompileKeyframes());

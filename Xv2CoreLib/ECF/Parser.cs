@@ -39,13 +39,13 @@ namespace Xv2CoreLib.ECF
                     ecfFile.Nodes.Add(new ECF_Node());
 
                     ecfFile.Nodes[i].LoopMode = (PlayMode)BitConverter.ToInt16(rawBytes, NodeOffset + 52);
-                    ecfFile.Nodes[i].DiffuseColor.Constant.R = BitConverter.ToSingle(rawBytes, NodeOffset + 0);
-                    ecfFile.Nodes[i].DiffuseColor.Constant.G = BitConverter.ToSingle(rawBytes, NodeOffset + 4);
-                    ecfFile.Nodes[i].DiffuseColor.Constant.B = BitConverter.ToSingle(rawBytes, NodeOffset + 8);
+                    ecfFile.Nodes[i].MultiColor.Constant.R = BitConverter.ToSingle(rawBytes, NodeOffset + 0);
+                    ecfFile.Nodes[i].MultiColor.Constant.G = BitConverter.ToSingle(rawBytes, NodeOffset + 4);
+                    ecfFile.Nodes[i].MultiColor.Constant.B = BitConverter.ToSingle(rawBytes, NodeOffset + 8);
                     ecfFile.Nodes[i].DiffuseColor_Transparency.Constant = BitConverter.ToSingle(rawBytes, NodeOffset + 12);
-                    ecfFile.Nodes[i].SpecularColor.Constant.R = BitConverter.ToSingle(rawBytes, NodeOffset + 16);
-                    ecfFile.Nodes[i].SpecularColor.Constant.G = BitConverter.ToSingle(rawBytes, NodeOffset + 20);
-                    ecfFile.Nodes[i].SpecularColor.Constant.B = BitConverter.ToSingle(rawBytes, NodeOffset + 24);
+                    ecfFile.Nodes[i].RimColor.Constant.R = BitConverter.ToSingle(rawBytes, NodeOffset + 16);
+                    ecfFile.Nodes[i].RimColor.Constant.G = BitConverter.ToSingle(rawBytes, NodeOffset + 20);
+                    ecfFile.Nodes[i].RimColor.Constant.B = BitConverter.ToSingle(rawBytes, NodeOffset + 24);
                     ecfFile.Nodes[i].SpecularColor_Transparency.Constant = BitConverter.ToSingle(rawBytes, NodeOffset + 28);
                     ecfFile.Nodes[i].AmbientColor.Constant.R = BitConverter.ToSingle(rawBytes, NodeOffset + 32);
                     ecfFile.Nodes[i].AmbientColor.Constant.G = BitConverter.ToSingle(rawBytes, NodeOffset + 36);
@@ -109,8 +109,8 @@ namespace Xv2CoreLib.ECF
 
                     if (EffectContainer.EepkToolInterlop.FullDecompile)
                     {
-                        ecfFile.Nodes[i].DiffuseColor.DecompileKeyframes(ecfFile.Nodes[i].GetKeyframedValues(0, 0, 1, 2));
-                        ecfFile.Nodes[i].SpecularColor.DecompileKeyframes(ecfFile.Nodes[i].GetKeyframedValues(1, 0, 1, 2));
+                        ecfFile.Nodes[i].MultiColor.DecompileKeyframes(ecfFile.Nodes[i].GetKeyframedValues(0, 0, 1, 2));
+                        ecfFile.Nodes[i].RimColor.DecompileKeyframes(ecfFile.Nodes[i].GetKeyframedValues(1, 0, 1, 2));
                         ecfFile.Nodes[i].AmbientColor.DecompileKeyframes(ecfFile.Nodes[i].GetKeyframedValues(2, 0, 1, 2));
                         ecfFile.Nodes[i].DiffuseColor_Transparency.DecompileKeyframes(ecfFile.Nodes[i].GetKeyframedValues(0, 3));
                         ecfFile.Nodes[i].SpecularColor_Transparency.DecompileKeyframes(ecfFile.Nodes[i].GetKeyframedValues(1, 3));

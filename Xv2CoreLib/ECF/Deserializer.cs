@@ -42,13 +42,13 @@ namespace Xv2CoreLib.ECF
                         ecfFile.Nodes[i].CompileAllKeyframes();
                     }
 
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].DiffuseColor.Constant.R));
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].DiffuseColor.Constant.G));
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].DiffuseColor.Constant.B));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].MultiColor.Constant.R));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].MultiColor.Constant.G));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].MultiColor.Constant.B));
                     bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].DiffuseColor_Transparency.Constant));
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].SpecularColor.Constant.R));
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].SpecularColor.Constant.G));
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].SpecularColor.Constant.B));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].RimColor.Constant.R));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].RimColor.Constant.G));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].RimColor.Constant.B));
                     bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].SpecularColor_Transparency.Constant));
                     bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].AmbientColor.Constant.R));
                     bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].AmbientColor.Constant.G));
