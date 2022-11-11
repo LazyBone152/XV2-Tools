@@ -45,15 +45,15 @@ namespace Xv2CoreLib.ECF
                     bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].MultiColor.Constant.R));
                     bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].MultiColor.Constant.G));
                     bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].MultiColor.Constant.B));
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].DiffuseColor_Transparency.Constant));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].MultiColor_Transparency.Constant));
                     bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].RimColor.Constant.R));
                     bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].RimColor.Constant.G));
                     bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].RimColor.Constant.B));
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].SpecularColor_Transparency.Constant));
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].AmbientColor.Constant.R));
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].AmbientColor.Constant.G));
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].AmbientColor.Constant.B));
-                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].AmbientColor_Transparency.Constant));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].RimColor_Transparency.Constant));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].AddColor.Constant.R));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].AddColor.Constant.G));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].AddColor.Constant.B));
+                    bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].AddColor_Transparency.Constant));
                     bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].BlendingFactor.Constant));
 
                     bytes.AddRange(BitConverter.GetBytes((ushort)ecfFile.Nodes[i].LoopMode));
@@ -102,10 +102,10 @@ namespace Xv2CoreLib.ECF
 
                         foreach (var e in ecfFile.Nodes[i].KeyframedValues)
                         {
-                            int I_01_b = (e.Interpolate == true) ? 1 : 0;
-                            int I_02 = (e.Loop == true) ? 1 : 0;
-                            bytes.AddRange(new byte[4] { e.Parameter, Int4Converter.GetByte(e.Component, (byte)I_01_b, "Animation: Component", "Animation: Interpolated"), (byte)I_02, e.I_03 });
-                            bytes.AddRange(BitConverter.GetBytes((ushort)0));
+                            int I_02 = (e.Interpolate == true) ? 1 : 0;
+                            int I_03 = (e.Loop == true) ? 1 : 0;
+                            bytes.AddRange(new byte[4] { e.Parameter, Int4Converter.GetByte(e.Component, (byte)e.I_03, "Animation: Component", "Animation: Interpolated"), (byte)I_02, e.I_03 });
+                            bytes.AddRange(BitConverter.GetBytes((ushort)e.Duration));
                             bytes.AddRange(BitConverter.GetBytes((short)e.Keyframes.Count));
                             Type0EntryOffsets.Add(bytes.Count);
                             bytes.AddRange(new byte[8]);

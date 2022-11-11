@@ -174,6 +174,51 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
 
             return undos;
         }
+
+        public float GetInterpolatedValue(float time)
+        {
+            if (Keyframes.Count == 0 || !IsAnimated) return Constant;
+
+            //Check for a direct keyframe
+            KeyframeFloatValue currentKeyframe = Keyframes.FirstOrDefault(x => x.Time == time);
+
+            if (currentKeyframe != null)
+                return currentKeyframe.Value;
+
+            //Interpolate the value from existing keyframes
+            float prev = -1;
+            float next = -1;
+
+            foreach (var keyframe in Keyframes.OrderBy(x => x.Time))
+            {
+                if (keyframe.Time > prev && prev < time && keyframe.Time < time)
+                    prev = keyframe.Time;
+
+                if (keyframe.Time > time)
+                {
+                    next = keyframe.Time;
+                    break;
+                }
+            }
+
+            //No prev keyframe exists, so no interpolation is possible. Just use next keyframe then
+            if (prev == -1)
+            {
+                return Keyframes.FirstOrDefault(x => x.Time == next).Value;
+            }
+
+            //Same, but for next keyframe. We will use the prev keyframe here.
+            if (next == -1 || prev == next)
+            {
+                return Keyframes.FirstOrDefault(x => x.Time == prev).Value;
+            }
+
+            float factor = (time - prev) / (next - prev);
+            var prevKeyframe = Keyframes.FirstOrDefault(x => x.Time == prev).Value;
+            var nextKeyframe = Keyframes.FirstOrDefault(x => x.Time == next).Value;
+
+            return Interpolate ? MathHelpers.Lerp(prevKeyframe, nextKeyframe, factor) : prevKeyframe;
+        }
     }
 
     [Serializable]

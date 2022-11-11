@@ -1,14 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.IO;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.IO;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Collections.ObjectModel;
 using System.Runtime.ExceptionServices;
+using Application = System.Windows.Application;
 using Microsoft.Win32;
 using Xv2CoreLib;
 using Xv2CoreLib.EffectContainer;
@@ -18,28 +21,27 @@ using Xv2CoreLib.EMA;
 using Xv2CoreLib.EMP_NEW;
 using Xv2CoreLib.EMM;
 using Xv2CoreLib.EMB_CLASS;
-using Xv2CoreLib.Resource.UndoRedo;
-using EEPK_Organiser.Misc;
-using MahApps.Metro.Controls;
-using System.Threading.Tasks;
-using MahApps.Metro.Controls.Dialogs;
-using EEPK_Organiser.ViewModel;
-using GalaSoft.MvvmLight.CommandWpf;
-using EEPK_Organiser.Forms.Recolor;
-using Xv2CoreLib.Resource.App;
-using Application = System.Windows.Application;
-using Xv2CoreLib.Resource;
-using System.Windows.Media;
 using Xv2CoreLib.EMD;
 using Xv2CoreLib.ESK;
 using Xv2CoreLib.EMO;
 using Xv2CoreLib.EAN;
+using Xv2CoreLib.ETR;
+using Xv2CoreLib.Resource.UndoRedo;
+using Xv2CoreLib.Resource.App;
+using Xv2CoreLib.Resource;
+using EEPK_Organiser.Misc;
 using EEPK_Organiser.Forms;
 using EEPK_Organiser.Forms.Editors;
-using Xv2CoreLib.ETR;
+using EEPK_Organiser.Forms.Recolor;
+using EEPK_Organiser.ViewModel;
+using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
+using GalaSoft.MvvmLight.CommandWpf;
 
 #if XenoKit
 using XenoKit;
+using XenoKit.Engine;
+using XenoKit.Engine.Vfx;
 #endif
 
 namespace EEPK_Organiser.View
@@ -4441,6 +4443,15 @@ namespace EEPK_Organiser.View
         private void effectPart_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             CreateEffectPartViewModel();
+
+            #if XenoKit
+            if(SelectedEffect != null)
+            {
+                SceneManager.EnsureActorIsSet(0);
+                SceneManager.MainGameBase.VfxManager.StopEffects();
+                SceneManager.MainGameBase.VfxManager.PlayEffect(SelectedEffect, SceneManager.Actors[0]);
+            }
+            #endif
         }
 
         private void CreateEffectPartViewModel()

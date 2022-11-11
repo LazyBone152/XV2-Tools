@@ -119,10 +119,10 @@ namespace Xv2CoreLib.ECF
 
         public KeyframedColorValue MultiColor { get; set; } = new KeyframedColorValue(0, 0, 0, KeyframedValueType.ECF_MultiColor);
         public KeyframedColorValue RimColor { get; set; } = new KeyframedColorValue(0, 0, 0, KeyframedValueType.ECF_RimColor);
-        public KeyframedColorValue AmbientColor { get; set; } = new KeyframedColorValue(0, 0, 0, KeyframedValueType.ECF_AmbientColor);
-        public KeyframedFloatValue DiffuseColor_Transparency { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.ECF_DiffuseTransparency);
-        public KeyframedFloatValue SpecularColor_Transparency { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.ECF_SpecularTransparency);
-        public KeyframedFloatValue AmbientColor_Transparency { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.ECF_AmbientTransparency);
+        public KeyframedColorValue AddColor { get; set; } = new KeyframedColorValue(0, 0, 0, KeyframedValueType.ECF_AmbientColor);
+        public KeyframedFloatValue MultiColor_Transparency { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.ECF_DiffuseTransparency);
+        public KeyframedFloatValue RimColor_Transparency { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.ECF_SpecularTransparency);
+        public KeyframedFloatValue AddColor_Transparency { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.ECF_AmbientTransparency);
         public KeyframedFloatValue BlendingFactor { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.ECF_BlendingFactor);
 
         public ushort I_54 { get; set; } //always 0
@@ -142,7 +142,7 @@ namespace Xv2CoreLib.ECF
 
             RgbColor diffuse = MultiColor.GetAverageColor();
             RgbColor specular = RimColor.GetAverageColor();
-            RgbColor ambient = AmbientColor.GetAverageColor();
+            RgbColor ambient = AddColor.GetAverageColor();
 
             if (!diffuse.IsWhiteOrBlack)
                 colors.Add(diffuse);
@@ -160,7 +160,7 @@ namespace Xv2CoreLib.ECF
         {
             MultiColor.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
             RimColor.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
-            AmbientColor.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
+            AddColor.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
         }
 
         public EMP_KeyframedValue[] GetKeyframedValues(int parameter, params int[] components)
@@ -186,10 +186,10 @@ namespace Xv2CoreLib.ECF
 
             AddKeyframedValues(MultiColor.CompileKeyframes());
             AddKeyframedValues(RimColor.CompileKeyframes());
-            AddKeyframedValues(AmbientColor.CompileKeyframes());
-            AddKeyframedValues(DiffuseColor_Transparency.CompileKeyframes());
-            AddKeyframedValues(SpecularColor_Transparency.CompileKeyframes());
-            AddKeyframedValues(AmbientColor_Transparency.CompileKeyframes());
+            AddKeyframedValues(AddColor.CompileKeyframes());
+            AddKeyframedValues(MultiColor_Transparency.CompileKeyframes());
+            AddKeyframedValues(RimColor_Transparency.CompileKeyframes());
+            AddKeyframedValues(AddColor_Transparency.CompileKeyframes());
             AddKeyframedValues(BlendingFactor.CompileKeyframes());
         }
 

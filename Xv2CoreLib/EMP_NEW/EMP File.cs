@@ -2441,9 +2441,15 @@ namespace Xv2CoreLib.EMP_NEW
             int prev = -1;
             int next = -1;
 
+            //Check for a direct keyframe
+            var currentKeyframe = keyframes.FirstOrDefault(x => x.Time == time);
+
+            if (currentKeyframe != null)
+                return currentKeyframe.Value;
+
             foreach (var keyframe in keyframes.OrderBy(x => x.Time))
             {
-                if (keyframe.Time > prev && prev < time)
+                if (keyframe.Time > prev && prev < time && keyframe.Time < time)
                     prev = keyframe.Time;
 
                 if (keyframe.Time > time)
@@ -2465,7 +2471,7 @@ namespace Xv2CoreLib.EMP_NEW
                 return keyframes.FirstOrDefault(x => x.Time == prev).Value;
             }
 
-            float factor = (time - prev) / (next - prev);
+            float factor = (float)(time - prev) / (float)(next - prev);
             float prevKeyframe = keyframes.FirstOrDefault(x => x.Time == prev).Value;
             float nextKeyframe = keyframes.FirstOrDefault(x => x.Time == next).Value;
 

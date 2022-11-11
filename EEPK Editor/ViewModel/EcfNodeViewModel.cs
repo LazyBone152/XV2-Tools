@@ -52,10 +52,10 @@ namespace EEPK_Organiser.ViewModel
         }
         public KeyframedColorValue MultiColor => node.MultiColor;
         public KeyframedColorValue RimColor => node.RimColor;
-        public KeyframedColorValue AmbientColor => node.AmbientColor;
-        public KeyframedFloatValue DiffuseTransparency => node.DiffuseColor_Transparency;
-        public KeyframedFloatValue SpecularTransparency => node.SpecularColor_Transparency;
-        public KeyframedFloatValue AmbientTransparency => node.AmbientColor_Transparency;
+        public KeyframedColorValue AmbientColor => node.AddColor;
+        public KeyframedFloatValue DiffuseTransparency => node.MultiColor_Transparency;
+        public KeyframedFloatValue SpecularTransparency => node.RimColor_Transparency;
+        public KeyframedFloatValue AmbientTransparency => node.AddColor_Transparency;
         public KeyframedFloatValue BlendingFactor => node.BlendingFactor;
 
 
