@@ -14,8 +14,10 @@
 
         </Grid>
         <Grid x:Name="generalGrid" Visibility="{Binding GeneralVisibility}">
-            <Button x:Name="button_About" HorizontalAlignment="Left" Margin="613,5,0,0" VerticalAlignment="Top" Width="18" Height="16" Style="{StaticResource ButtonNoGlow}" Click="Button_About_Click" ToolTip="View more information about this mod.">
-                <iconPacks:PackIconMaterial Kind="Information" Foreground="SkyBlue"/>
+            <Button x:Name="button_About" HorizontalAlignment="Left" Margin="613,5,0,0" VerticalAlignment="Top" Width="20" Height="20" Style="{StaticResource ButtonNoGlow}" Click="Button_About_Click" ToolTip="View more information about this mod.">
+                <Grid>
+                    <iconPacks:PackIconMaterialLight Kind="Information" Foreground="SkyBlue"/>
+                </Grid>
                 <Button.OpacityMask>
                     <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                         <GradientStop Color="Black" Offset="0"/>

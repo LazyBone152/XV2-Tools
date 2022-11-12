@@ -56,7 +56,23 @@ namespace Xv2CoreLib.ECF
                     bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].AddColor_Transparency.Constant));
                     bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].BlendingFactor.Constant));
 
-                    bytes.AddRange(BitConverter.GetBytes((ushort)ecfFile.Nodes[i].LoopMode));
+                    if(ecfFile.Nodes[i].UseMaterial && ecfFile.Nodes[i].Loop)
+                    {
+                        bytes.AddRange(BitConverter.GetBytes((ushort)ECF_Node.NodeTypeEnum.UseMaterialName_Loop));
+                    }
+                    else if (ecfFile.Nodes[i].UseMaterial && !ecfFile.Nodes[i].Loop)
+                    {
+                        bytes.AddRange(BitConverter.GetBytes((ushort)ECF_Node.NodeTypeEnum.UseMaterialName_NoLoop));
+                    }
+                    else if (!ecfFile.Nodes[i].UseMaterial && ecfFile.Nodes[i].Loop)
+                    {
+                        bytes.AddRange(BitConverter.GetBytes((ushort)ECF_Node.NodeTypeEnum.AllMaterials_Loop));
+                    }
+                    else
+                    {
+                        bytes.AddRange(BitConverter.GetBytes((ushort)ECF_Node.NodeTypeEnum.AllMaterials_NoLoop));
+                    }
+
                     bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].I_54));
                     bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].StartTime));
                     bytes.AddRange(BitConverter.GetBytes(ecfFile.Nodes[i].EndTime));

@@ -218,7 +218,7 @@ namespace Xv2CoreLib.EEPK
                         bytes.Add((byte)eepk_File.Effects[i].EffectParts[a].I_02);
                         bytes.Add((byte)eepk_File.Effects[i].EffectParts[a].I_03);
                         bytes.Add(eepk_File.Effects[i].EffectParts[a].I_04);
-                        bytes.Add((byte)eepk_File.Effects[i].EffectParts[a].I_05);
+                        bytes.Add((byte)eepk_File.Effects[i].EffectParts[a].Deactivation);
                         bytes.Add(eepk_File.Effects[i].EffectParts[a].I_06);
                         bytes.Add(eepk_File.Effects[i].EffectParts[a].I_07);
                         bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].I_08));

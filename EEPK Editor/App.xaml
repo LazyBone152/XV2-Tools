@@ -6,24 +6,10 @@
              DispatcherUnhandledException="Application_DispatcherUnhandledException"
              StartupUri="MainWindow.xaml" ShutdownMode="OnMainWindowClose">
     <Application.Resources>
-
-
         <ResourceDictionary>
             <converters:VisibilityToNullableBooleanConverter x:Key="visibilityConverter"/>
 
-            <BitmapImage x:Key="expand" UriSource="Resources/icons8-expand-arrow-50.png" />
             <BitmapImage x:Key="gridlines" UriSource="Resources/transparent_checkerboard.png" />
-            <BitmapImage x:Key="question" UriSource="Resources/icons8-question-mark-64.png" />
-            <BitmapImage x:Key="information" UriSource="Resources/icons8-info-512.png" />
-            <!-- EMP Editor -->
-            <BitmapImage x:Key="plus" UriSource="Resources/icons8-plus-40.png" />
-            <BitmapImage x:Key="delete" UriSource="Resources/icons8-delete-48.png"/>
-            <BitmapImage x:Key="trash" UriSource="Resources/icons8-trash-40.png" />
-            <BitmapImage x:Key="undo" UriSource="Resources/icons8-undo-24.png" />
-
-
-
-
 
             <Style x:Key="ButtonNoGlow" TargetType="Button">
                 <Setter Property="OverridesDefaultStyle" Value="True" />

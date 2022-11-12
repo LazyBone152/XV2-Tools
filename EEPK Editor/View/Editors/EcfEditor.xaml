@@ -68,18 +68,29 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" MinHeight="200"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="0.7*" MinHeight="200"/>
+                    <RowDefinition Height="0.65*" MinHeight="200"/>
                 </Grid.RowDefinitions>
                 <ScrollViewer>
                     <StackPanel HorizontalAlignment="Left">
-                        <Grid Margin="3,5,0,0" Width="380" HorizontalAlignment="Left">
+                        <TextBlock Text="Material" FontWeight="Bold" HorizontalAlignment="Center" Margin="0, 5"/>
+                        <Grid Margin="3,5,0,0" Width="350" HorizontalAlignment="Left" IsEnabled="{Binding ElementName=UserControl, Path=ViewModel.UseMaterial}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="120"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Label Content="Material"/>
+                            <Label Content="Material Name" ToolTip="The name of the material that this Color Fade node will be applied to."/>
                             <TextBox Grid.Column="1" Text="{Binding ElementName=UserControl, Path=ViewModel.Material}"/>
                         </Grid>
+                        <Grid Margin="3,5,0,0" Width="150" HorizontalAlignment="Left">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Content="Enabled" ToolTip="Make this Color Fade node target a specific material.&#x0a;&#x0a;If disabled, then all materials will be affected by this node."/>
+                            <CheckBox Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding ElementName=UserControl, Path=ViewModel.UseMaterial}"/>
+                        </Grid>
+                        
+                        <TextBlock Text="Duration" FontWeight="Bold" HorizontalAlignment="Center" Margin="0, 5"/>
                         <Grid Margin="3,5,0,0" Width="250" HorizontalAlignment="Left">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="120"/>
@@ -101,8 +112,8 @@
                                 <ColumnDefinition Width="120"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Label Content="Loop Mode"/>
-                            <ComboBox Grid.Column="1" ItemsSource="{x:Static empDic:EMP.ECF_LoopMode}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding ElementName=UserControl, Path=ViewModel.LoopMode}"/>
+                            <Label Content="Loop" ToolTip="Enables looping for this Color Fade node."/>
+                            <CheckBox Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding ElementName=UserControl, Path=ViewModel.Loop}"/>
                         </Grid>
 
                         <TextBlock Text="Color" FontWeight="Bold" HorizontalAlignment="Center" Margin="0, 5"/>
@@ -113,15 +124,15 @@
                                     <ColumnDefinition Width="100"/>
                                     <ColumnDefinition/>
                                 </Grid.ColumnDefinitions>
-                                <Label Content="Multi Color" ToolTip="Multiplies the color of the material that this ECF is applied to."/>
+                                <Label Content="Multiplier" ToolTip="Multiplies the color of the material that this Color Fade node is applied to."/>
                                 <views:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding Path=ViewModel.MultiColor, ElementName=UserControl}" Node="{Binding ElementName=UserControl, Path=SelectedNode}" HideUpDownButtons="True"/>
                             </Grid>
-                            <Grid Margin="3,3" Width="110" HorizontalAlignment="Left">
+                            <Grid Margin="3,3" Width="130" HorizontalAlignment="Left">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="40"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <Label Content="A" FontSize="10"/>
+                                <Label Content="Factor" FontSize="10" ToolTip="Factor of the original value. This can be used to scale it as a whole, usually during an animation, as is the case in many vanilla ECF files."/>
                                 <views:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding ElementName=UserControl, Path=ViewModel.DiffuseTransparency}" Node="{Binding ElementName=UserControl, Path=SelectedNode}" HideUpDownButtons="True"/>
                             </Grid>
                         </StackPanel>
@@ -134,12 +145,12 @@
                                 <Label Content="Rim Color"/>
                                 <views:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding Path=ViewModel.RimColor, ElementName=UserControl}" Node="{Binding ElementName=UserControl, Path=SelectedNode}" HideUpDownButtons="True"/>
                             </Grid>
-                            <Grid Margin="3,3" Width="110" HorizontalAlignment="Left">
+                            <Grid Margin="3,3" Width="130" HorizontalAlignment="Left">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="40"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <Label Content="A" FontSize="10"/>
+                                <Label Content="Factor" FontSize="10" ToolTip="Factor of the original value. This can be used to scale it as a whole, usually during an animation, as is the case in many vanilla ECF files."/>
                                 <views:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding ElementName=UserControl, Path=ViewModel.SpecularTransparency}" Node="{Binding ElementName=UserControl, Path=SelectedNode}" HideUpDownButtons="True"/>
                             </Grid>
                         </StackPanel>
@@ -149,15 +160,15 @@
                                     <ColumnDefinition Width="100"/>
                                     <ColumnDefinition/>
                                 </Grid.ColumnDefinitions>
-                                <Label Content="Ambient" ToolTip="Adds onto the materials color."/>
+                                <Label Content="Add Color" ToolTip="Adds onto the materials color."/>
                                 <views:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding Path=ViewModel.AmbientColor, ElementName=UserControl}" Node="{Binding ElementName=UserControl, Path=SelectedNode}" HideUpDownButtons="True"/>
                             </Grid>
-                            <Grid Margin="3,3" Width="110" HorizontalAlignment="Left">
+                            <Grid Margin="3,3" Width="130" HorizontalAlignment="Left">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="40"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <Label Content="A" FontSize="10"/>
+                                <Label Content="Factor" FontSize="10" ToolTip="Factor of the original value. This can be used to scale it as a whole, usually during an animation, as is the case in many vanilla ECF files."/>
                                 <views:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding ElementName=UserControl, Path=ViewModel.AmbientTransparency}" Node="{Binding ElementName=UserControl, Path=SelectedNode}" HideUpDownButtons="True"/>
                             </Grid>
                         </StackPanel>
@@ -166,7 +177,7 @@
                                 <ColumnDefinition Width="120"/>
                                 <ColumnDefinition Width="87"/>
                             </Grid.ColumnDefinitions>
-                            <Label Content="Blending Factor"/>
+                            <Label Content="Blending Factor" ToolTip="Scales all the above colors during game rendering. Similar to Factor, but for all the colors at once."/>
                             <views:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding ElementName=UserControl, Path=ViewModel.BlendingFactor}" Node="{Binding ElementName=UserControl, Path=SelectedNode}" HideUpDownButtons="True"/>
                         </Grid>
 

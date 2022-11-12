@@ -22,14 +22,13 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
+            //args = new string[1] { @"E:\VS_Test\ETR\Kmh_Beam3.etr" };
             args = new string[1] { @"E:\VS_Test\ECF\ALL ECF" };
-            //args = new string[1] { @"E:\VS_Test\QXD" };
 
             DEBUG_MODE = true;
 #endif
             //CpkExtract();
             //MatDecompile(args);
-
             string fileLocation = null;
 
             if (args.Length > 0)
@@ -688,6 +687,9 @@ namespace XV2_Xml_Serializer
                 case ".ecf":
                     BulkParseEcf(fileLocation);
                     break;
+                case ".etr":
+                    BulkParseEtr(fileLocation);
+                    break;
                 case ".eepk":
                     BulkParseEepk(fileLocation);
                     break;
@@ -1082,6 +1084,7 @@ namespace XV2_Xml_Serializer
             public int Group;
             public int Parameter;
             public int Component;
+            public int Count = 1;
             public List<float> Values = new List<float>();
 
             public KeyframeGroups(int group, int parameter, int component)
@@ -1094,7 +1097,10 @@ namespace XV2_Xml_Serializer
             public void AddValue(float value)
             {
                 if (!Values.Contains(value))
+                {
                     Values.Add(value);
+                    Count++;
+                }
             }
         }
 
@@ -1115,20 +1121,17 @@ namespace XV2_Xml_Serializer
                         //var emp = new Xv2CoreLib.EMP.Parser(s, false).empFile;
                         var particleEffects = emp.GetAllParticleEffects_DEBUG();
 
-                        foreach(var texture in emp.Textures)
-                        {
-                            foreach (var keyframe in texture.ScrollState.Keyframes)
-                            {
-                                if(keyframe.I_20 != 0f || keyframe.I_24 != 0f)
-                                {
-                                    Console.WriteLine(keyframe.ToString());
-                                    Console.ReadLine();
-                                }
-                            }
-                        }
 
                         foreach (var particle in particleEffects)
                         {
+                            foreach(var modifier in particle.Modifiers)
+                            {
+                                if(particle.Modifiers.Any(x => x.Type == modifier.Type && x != modifier))
+                                {
+                                    Console.WriteLine("this");
+                                    Console.Read();
+                                }
+                            }
                             /*
                             if(particle.GroupKeyframedValues.Count > 0)
                             {
@@ -1171,7 +1174,7 @@ namespace XV2_Xml_Serializer
 
             foreach (var value in groups.OrderBy(x => x.Group))
             {
-                str.AppendLine($"Group: {value.Group}, Param/Comp: {value.Parameter}/{value.Component} = ({value.Values.Min()} - {value.Values.Max()})");
+                str.AppendLine($"Group: {value.Group}, Param/Comp: {value.Parameter}/{value.Component} = ({value.Values.Min()} - {value.Values.Max()}) (Sample Count: {value.Count})");
             }
 
             File.WriteAllText("emp_test.txt", str.ToString());
@@ -1182,7 +1185,8 @@ namespace XV2_Xml_Serializer
         static void BulkParseEcf(string directory)
         {
             string[] files = Directory.GetFiles(directory);
-            List<ushort> values = new List<ushort>();
+            List<string> values = new List<string>();
+            int count = 0;
 
             foreach (string s in files)
             {
@@ -1194,28 +1198,99 @@ namespace XV2_Xml_Serializer
 
                     foreach(var node in ecf.Nodes)
                     {
-                        if(node.EndTime > 20000)
-                        {
-                            Console.WriteLine(node.ToString());
-                            Console.ReadLine();
-                        }
+
                     }
                     
                 }
             }
+
+            Console.WriteLine(count);
+            Console.ReadLine();
 
             //log
             StringBuilder str = new StringBuilder();
 
             foreach (var value in values)
             {
-                str.AppendLine(value.ToString());
+                str.AppendLine($"\"{value.ToString()}\",");
             }
 
-            File.WriteAllText("ecf_log.txt", str.ToString());
-            Process.Start("ecf_log.txt");
+            //File.WriteAllText("ecf_log.txt", str.ToString());
+            //Process.Start("ecf_log.txt");
             Environment.Exit(0);
         }
+
+        static void BulkParseEtr(string directory)
+        {
+            string[] files = Directory.GetFiles(directory);
+            List<string> values = new List<string>();
+            List<KeyframeGroups> groups = new List<KeyframeGroups>();
+
+            foreach (string s in files)
+            {
+                if (Path.GetExtension(s) == ".etr")
+                {
+                    Console.WriteLine(s);
+                    Xv2CoreLib.ETR.ETR_File etr = Xv2CoreLib.ETR.ETR_File.Load(s);
+
+                    foreach (var node in etr.Nodes)
+                    {
+                        if(node.AttachBone == "a_x_spear_front2" || node.AttachBone2 == "a_x_spear_front2")
+                        {
+                            Console.WriteLine("This");
+                            Console.ReadLine();
+                        }
+
+                        foreach (var modifier in node.Modifiers)
+                        {
+                            foreach (var value in modifier.KeyframedValues)
+                            {
+                                /*
+                                KeyframeGroups keyframeGroup = groups.FirstOrDefault(x => x.Group == (int)modifier.Type && x.Parameter == value.Parameter && x.Component == value.Component);
+
+                                if (keyframeGroup == null)
+                                {
+                                    keyframeGroup = new KeyframeGroups((int)modifier.Type, value.Parameter, value.Component);
+                                    groups.Add(keyframeGroup);
+                                }
+
+                                foreach (var keyframe in value.Keyframes)
+                                {
+                                    if ((int)modifier.Type == 2)
+                                    {
+                                        Console.WriteLine("This");
+                                        Console.ReadLine();
+                                    }
+                                    keyframeGroup.AddValue(keyframe.Value);
+                                }
+                                //if (!values.Contains(value.I_04))
+                                //    values.Add(value.I_04);
+                                */
+                            }
+                        }
+                    }
+
+                }
+            }
+
+            //log
+            StringBuilder str = new StringBuilder();
+            //values.Sort();
+
+            foreach (var value in values)
+            {
+                str.AppendLine($"\"{value.ToString()}\",");
+            }
+            foreach (var value in groups.OrderBy(x => x.Group))
+            {
+                //str.AppendLine($"Group: {value.Group}, Param/Comp: {value.Parameter}/{value.Component} = ({value.Values.Min()} - {value.Values.Max()}) (Sample Count: {value.Count})");
+            }
+
+            //File.WriteAllText("etr_log.txt", str.ToString());
+            //Process.Start("etr_log.txt");
+            Environment.Exit(0);
+        }
+
 
         static void BulkParseEepk(string directory)
         {
@@ -1270,6 +1345,7 @@ namespace XV2_Xml_Serializer
             {
                 str.AppendLine(value);
             }
+
 
             File.WriteAllText("eepk_values.txt", str.ToString());
             Process.Start("eepk_values.txt");

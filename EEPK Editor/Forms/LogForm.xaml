@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EEPK_Organiser.Forms"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         mc:Ignorable="d"
         Title="Log" Height="281.349" Width="400.118" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" WindowStyle="ToolWindow" PreviewKeyDown="Window_PreviewKeyDown" TitleCharacterCasing="Normal">
     <Grid>
@@ -17,7 +18,7 @@
         </RichTextBox>
         <Button Content="Ok" HorizontalAlignment="Left" Margin="154,215,0,0" VerticalAlignment="Top" Width="75" Click="Button_Ok_Click"/>
         <TextBlock HorizontalAlignment="Left" Margin="82,10,0,0" TextWrapping="Wrap" Text="{Binding Description}" VerticalAlignment="Top" Height="43" Width="283"/>
-        <Image x:Name="imageBox" Source="{StaticResource information}" HorizontalAlignment="Left" Height="50" Margin="24,3,0,0" VerticalAlignment="Top" Width="53"/>
+        <iconPacks:PackIconMaterialLight Kind="Information" Foreground="{DynamicResource MahApps.Brushes.Accent}" HorizontalAlignment="Left" Height="50" Margin="24,3,0,0" VerticalAlignment="Top" Width="40"/>
 
     </Grid>
 </Controls:MetroWindow>

@@ -73,12 +73,12 @@ namespace Xv2CoreLib.ECF
 
         public const string CLIPBOARD_ID = "XV2_ECF_NODE";
 
-        public enum PlayMode : ushort
+        public enum NodeTypeEnum : ushort
         {
-            Unk0 = 0, //Only used for specific materials (never just the default "node')
-            Unk1 = 1, //Never used
-            NoLoop = 2,
-            Loop = 3
+            UseMaterialName_NoLoop = 0,
+            UseMaterialName_Loop = 1,
+            AllMaterials_NoLoop = 2, //Material name is usually some variant of "node", which is apparantly just a placeholder
+            AllMaterials_Loop = 3 //Material name is usually some variant of "node", which is apparantly just a placeholder
         }
 
         //Selected KeyframedValue is binded here for the Keyframe Editor to access
@@ -115,7 +115,8 @@ namespace Xv2CoreLib.ECF
         public ushort StartTime { get; set; }
         //There is 1 ecf where the EndTime is before the StartTime (PWW_Fade.ecf)
         public ushort EndTime { get; set; } = 60;
-        public PlayMode LoopMode { get; set; } = PlayMode.Loop;
+        public bool Loop { get; set; }
+        public bool UseMaterial { get; set; }
 
         public KeyframedColorValue MultiColor { get; set; } = new KeyframedColorValue(0, 0, 0, KeyframedValueType.ECF_MultiColor);
         public KeyframedColorValue RimColor { get; set; } = new KeyframedColorValue(0, 0, 0, KeyframedValueType.ECF_RimColor);

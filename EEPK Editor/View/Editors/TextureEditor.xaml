@@ -61,7 +61,7 @@
             <!-- Currently this menu is only useful for container type EMBs, so it will be hidden for everything else. -->
             <StackPanel VerticalAlignment="Center" Visibility="{Binding ElementName=UserControl, Path=ContainerVisiblility}" >
                 <Button HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="25" Height="25" lbUtils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
-                    <iconPacks:PackIconModern Kind="Tools" Width="13" Height="13"/>
+                    <iconPacks:Material Kind="Tools" Width="13" Height="13"/>
                     <Button.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Merge Duplicates" Command="{Binding MergeDuplicatesCommand}" Visibility="{Binding ElementName=UserControl, Path=ContainerVisiblility}" IsEnabled="{Binding ElementName=UserControl, Path=IsForContainer}"/>

@@ -27,7 +27,7 @@
             <iconPacks:PackIconMaterialDesign Kind="Undo"  Foreground="{DynamicResource MahApps.Brushes.Accent}"/>
         </Button>
 
-        <Label ToolTip="Add in a small random variance in the final hue. Each texture, particle, animation and so on will have a small hue difference. (Can go up to 180, but nest to keep to small values!)" Content="Variance" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="10,108,0,0" VerticalAlignment="Top" Width="75"/>
+        <Label ToolTip="Add in a small random variance in the final hue. Each texture, particle, animation and so on will have a small hue difference. (Can go up to 180, but best to keep to small values!)" Content="Variance" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="10,108,0,0" VerticalAlignment="Top" Width="75"/>
         <Controls:NumericUpDown Value="{Binding Variance, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Margin="90,111,0,0" VerticalAlignment="Top" Width="107" Maximum="180"/>
         <CheckBox ToolTip="Apply hue variance to textures when enabled." IsChecked="{Binding TextureVariance, UpdateSourceTrigger=PropertyChanged}" Content="Texture Variance" HorizontalAlignment="Left" Margin="202,115,0,0" VerticalAlignment="Top" Width="146"/>
 

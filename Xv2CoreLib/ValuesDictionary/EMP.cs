@@ -57,15 +57,6 @@ namespace Xv2CoreLib.ValuesDictionary
             { EMP_TextureSamplerDef.TextureRepitition.Border , "Border" }
         };
 
-        //Not exactly EMP... but I'm not making another file just for 1 value
-        public static Dictionary<ECF.ECF_Node.PlayMode, string> ECF_LoopMode { get; private set; } = new Dictionary<ECF.ECF_Node.PlayMode, string>()
-        {
-            { ECF.ECF_Node.PlayMode.NoLoop , "No Loop" },
-            { ECF.ECF_Node.PlayMode.Loop , "Loop" },
-            { ECF.ECF_Node.PlayMode.Unk0 , "Unk0" },
-            { ECF.ECF_Node.PlayMode.Unk1 , "Unk1" },
-        };
-
         //ETR:
         public static Dictionary<ETR.ETR_InterpolationType, string> ETR_InterpolationType { get; private set; } = new Dictionary<ETR.ETR_InterpolationType, string>()
         {

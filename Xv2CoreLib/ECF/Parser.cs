@@ -39,7 +39,10 @@ namespace Xv2CoreLib.ECF
                 {
                     ecfFile.Nodes.Add(new ECF_Node());
 
-                    ecfFile.Nodes[i].LoopMode = (PlayMode)BitConverter.ToInt16(rawBytes, NodeOffset + 52);
+                    NodeTypeEnum nodeType = (NodeTypeEnum)BitConverter.ToInt16(rawBytes, NodeOffset + 52);
+                    ecfFile.Nodes[i].Loop = nodeType == NodeTypeEnum.AllMaterials_Loop || nodeType == NodeTypeEnum.UseMaterialName_Loop;
+                    ecfFile.Nodes[i].UseMaterial = nodeType == NodeTypeEnum.UseMaterialName_Loop || nodeType == NodeTypeEnum.UseMaterialName_NoLoop;
+
                     ecfFile.Nodes[i].MultiColor.Constant.R = BitConverter.ToSingle(rawBytes, NodeOffset + 0);
                     ecfFile.Nodes[i].MultiColor.Constant.G = BitConverter.ToSingle(rawBytes, NodeOffset + 4);
                     ecfFile.Nodes[i].MultiColor.Constant.B = BitConverter.ToSingle(rawBytes, NodeOffset + 8);

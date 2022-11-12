@@ -64,7 +64,7 @@
             <!-- Currently this menu is only useful for container type EMMs, so it will be hidden for everything else. -->
             <StackPanel VerticalAlignment="Center" Visibility="{Binding ElementName=UserControl, Path=ContainerVisiblility}" >
                 <Button HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="25" Height="25" lbUtils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
-                    <iconPacks:PackIconModern Kind="Tools" Width="13" Height="13"/>
+                    <iconPacks:Material Kind="Tools" Width="13" Height="13"/>
                     <Button.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Merge Duplicates" Command="{Binding MergeDuplicatesCommand}"/>
@@ -217,7 +217,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="Glare"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.Glare}" Width="60" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="True" HideUpDownButtons="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.Glare}" Width="60" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
                                         <Grid Margin="3,3" Width="450">
                                             <Grid.ColumnDefinitions>
@@ -344,7 +344,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="TextureFilter0"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.TextureFilter0}" Width="85" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.TextureFilter0}" Width="85" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
                                         <Grid Margin="3,3">
                                             <Grid.ColumnDefinitions>
@@ -352,7 +352,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="TextureFilter1"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.TextureFilter1}" Width="85" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.TextureFilter1}" Width="85" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
                                         <Grid Margin="3,3">
                                             <Grid.ColumnDefinitions>
@@ -360,7 +360,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="TextureFilter2"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.TextureFilter2}" Width="85" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.TextureFilter2}" Width="85" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
                                     </WrapPanel>
                                     <WrapPanel>
@@ -370,7 +370,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="MipMapLod0"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.MipMapLod0}" Width="85" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="True" Interval="0.05" HideUpDownButtons="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.MipMapLod0}" Width="85" HorizontalAlignment="Left" StringFormat="0.0##" Interval="0.05" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
                                         <Grid Margin="3,3">
                                             <Grid.ColumnDefinitions>
@@ -378,7 +378,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="MipMapLod1"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.MipMapLod1}" Width="85" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="True" Interval="0.05" HideUpDownButtons="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.MipMapLod1}" Width="85" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True" Interval="0.05" />
                                         </Grid>
                                         <Grid Margin="3,3">
                                             <Grid.ColumnDefinitions>
@@ -386,7 +386,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="MipMapLod2"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.MipMapLod2}" Width="85" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="True" Interval="0.05" HideUpDownButtons="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.MipMapLod2}" Width="85" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True" Interval="0.05" />
                                         </Grid>
                                     </WrapPanel>
                                     <WrapPanel>
@@ -396,7 +396,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="gToonTextureWidth"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.gToonTextureWidth}" Width="85" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="True" Interval="0.05" HideUpDownButtons="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.gToonTextureWidth}" Width="85" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True" Interval="0.05"/>
                                         </Grid>
                                         <Grid Margin="3,3">
                                             <Grid.ColumnDefinitions>
@@ -404,7 +404,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="gToonTextureHeight"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.gToonTextureHeight}" Width="85" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="True" Interval="0.05" HideUpDownButtons="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.gToonTextureHeight}" Width="85" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True" Interval="0.05"/>
                                         </Grid>
 
                                     </WrapPanel>
@@ -441,7 +441,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="AlphaBlend"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.AlphaBlend}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.AlphaBlend}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
                                         <Grid Margin="3,3">
                                             <Grid.ColumnDefinitions>
@@ -459,7 +459,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="AlphaTest"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.AlphaTest}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.AlphaTest}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
                                         <Grid Margin="3,3">
                                             <Grid.ColumnDefinitions>
@@ -485,7 +485,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="AlphaSortMask"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.AlphaSortMask}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.AlphaSortMask}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
                                         <Grid Margin="3,3">
                                             <Grid.ColumnDefinitions>
@@ -493,7 +493,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="ZTestMask"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.ZTestMask}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.ZTestMask}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
                                         <Grid Margin="3,3">
                                             <Grid.ColumnDefinitions>
@@ -501,7 +501,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="ZWriteMask"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.ZWriteMask}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.ZWriteMask}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
                                     </WrapPanel>
                                 </StackPanel>
@@ -551,7 +551,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="MatDifScale"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.MatDifScale}" Width="102" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="True" Interval="0.05" HideUpDownButtons="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.MatDifScale}" Width="102" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True" Interval="0.05"/>
                                         </Grid>
                                         <Grid Margin="3,3">
                                             <Grid.ColumnDefinitions>
@@ -559,7 +559,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="MatAmbScale"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.MatAmbScale}" Width="102" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="True" Interval="0.05" HideUpDownButtons="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.MatAmbScale}" Width="102" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True" Interval="0.05"/>
                                         </Grid>
                                         <Grid Margin="3,3">
                                             <Grid.ColumnDefinitions>
@@ -567,7 +567,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="SpcCoeff"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.SpcCoeff}" Width="102" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="True" Interval="0.05" HideUpDownButtons="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.SpcCoeff}" Width="102" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" Interval="0.05" HideUpDownButtons="True"/>
                                         </Grid>
                                         <Grid Margin="3,3">
                                             <Grid.ColumnDefinitions>
@@ -575,7 +575,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="SpcPower"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.SpcPower}" Width="102" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="True" Interval="0.05" HideUpDownButtons="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.SpcPower}" Width="102" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True" Interval="0.05"/>
                                         </Grid>
                                     </WrapPanel>
                                 </StackPanel>
@@ -622,7 +622,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="CustomFlag"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.CustomFlag}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.CustomFlag}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
                                     </WrapPanel>
                                     <WrapPanel>
@@ -633,7 +633,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="BackFace"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.BackFace}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.BackFace}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
                                         <Grid Margin="3,3">
                                             <Grid.ColumnDefinitions>
@@ -641,7 +641,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="TwoSidedRender"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.TwoSidedRender}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.TwoSidedRender}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
                                     </WrapPanel>
                                     <WrapPanel>
@@ -652,7 +652,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="LowRez"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.LowRez}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.LowRez}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
                                         <Grid Margin="3,3">
                                             <Grid.ColumnDefinitions>
@@ -660,7 +660,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="LowRezSmoke"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.LowRezSmoke}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.LowRezSmoke}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
                                     </WrapPanel>
                                     <WrapPanel>
@@ -670,7 +670,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="IncidencePower"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.IncidencePower}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.IncidencePower}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
                                         <Grid Margin="3,3">
                                             <Grid.ColumnDefinitions>
@@ -678,7 +678,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="IncidenceAlphaBias"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.IncidenceAlphaBias}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.IncidenceAlphaBias}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
                                     </WrapPanel>
                                     <WrapPanel>
@@ -688,7 +688,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="ReflectCoeff"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.ReflectCoeff}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.ReflectCoeff}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
                                         <Grid Margin="3,3">
                                             <Grid.ColumnDefinitions>
@@ -696,7 +696,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="ReflectFresnelBias"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.ReflectFresnelBias}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.ReflectFresnelBias}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
                                         <Grid Margin="3,3">
                                             <Grid.ColumnDefinitions>
@@ -704,7 +704,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="ReflectFresnelCoeff"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.ReflectFresnelCoeff}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.ReflectFresnelCoeff}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
                                     </WrapPanel>
                                     <Grid Margin="3,3" HorizontalAlignment="Left">
@@ -713,7 +713,7 @@
                                             <ColumnDefinition/>
                                         </Grid.ColumnDefinitions>
                                         <Label Content="AnimationChannel"/>
-                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.AnimationChannel}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.AnimationChannel}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                     </Grid>
                                 </StackPanel>
                             </Expander>
@@ -785,7 +785,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="Billboard"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.Billboard}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.Billboard}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
                                         <Grid Margin="3,3">
                                             <Grid.ColumnDefinitions>
@@ -793,7 +793,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="BillboardType"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.BillboardType}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.BillboardType}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
                                         <Grid Margin="3,3">
                                             <Grid.ColumnDefinitions>
@@ -801,7 +801,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="NoEdge"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.NoEdge}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.NoEdge}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
                                         <Grid Margin="3,3">
                                             <Grid.ColumnDefinitions>
@@ -809,7 +809,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="Shimmer"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.Shimmer}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.Shimmer}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
                                         <Grid Margin="3,3">
                                             <Grid.ColumnDefinitions>
@@ -817,7 +817,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="gTime"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.gTime}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True" StringFormat="0.0##"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.gTime}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True" StringFormat="0.0##"/>
                                         </Grid>
 
                                     </WrapPanel>
@@ -853,7 +853,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="SpecularPower"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.SpecularPower}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True" StringFormat="0.0##"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.SpecularPower}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True" StringFormat="0.0##"/>
                                         </Grid>
                                     </WrapPanel>
                                     <WrapPanel>
@@ -864,7 +864,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="FadeInit"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.FadeInit}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True" StringFormat="0.0##"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.FadeInit}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True" StringFormat="0.0##"/>
                                         </Grid>
                                         <Grid Margin="3,3">
                                             <Grid.ColumnDefinitions>
@@ -872,7 +872,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="FadeSpeed"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.FadeSpeed}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True" StringFormat="0.0##"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.FadeSpeed}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True" StringFormat="0.0##"/>
                                         </Grid>
 
                                         <Grid Margin="3,3">
@@ -881,7 +881,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="GradientInit"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.GradientInit}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True" StringFormat="0.0##"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.GradientInit}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True" StringFormat="0.0##"/>
                                         </Grid>
                                         <Grid Margin="3,3">
                                             <Grid.ColumnDefinitions>
@@ -889,7 +889,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="GradientSpeed"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.GradientSpeed}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True" StringFormat="0.0##"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.GradientSpeed}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True" StringFormat="0.0##"/>
                                         </Grid>
 
                                         <Grid Margin="3,3" Width="450">
@@ -909,7 +909,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="RimCoeff"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.RimCoeff}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True" StringFormat="0.0##"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.RimCoeff}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True" StringFormat="0.0##"/>
                                         </Grid>
                                         <Grid Margin="3,3">
                                             <Grid.ColumnDefinitions>
@@ -917,7 +917,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="RimPower"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.RimPower}" Width="102" HorizontalAlignment="Left" HideUpDownButtons="True" TrackMouseWheelWhenMouseOver="True" StringFormat="0.0##"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.RimPower}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True" StringFormat="0.0##"/>
                                         </Grid>
                                     </WrapPanel>
                                 </StackPanel>

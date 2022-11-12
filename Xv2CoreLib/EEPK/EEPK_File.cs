@@ -621,7 +621,7 @@ namespace Xv2CoreLib.EEPK
         public byte I_04 { get; set; }
         [YAXAttributeFor("Deactivation")]
         [YAXSerializeAs("Mode")]
-        public DeactivationMode I_05 { get; set; }//int8
+        public DeactivationMode Deactivation { get; set; }//int8
         [YAXAttributeFor("I_06")]
         [YAXSerializeAs("value")]
         public byte I_06 { get; set; }
@@ -866,7 +866,7 @@ namespace Xv2CoreLib.EEPK
                 I_02 = I_02,
                 I_03 = I_03,
                 I_04 = I_04,
-                I_05 = I_05,
+                Deactivation = Deactivation,
                 I_06 = I_06,
                 I_07 = I_07,
                 I_08 = I_08,

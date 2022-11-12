@@ -3543,7 +3543,6 @@ namespace EEPK_Organiser.View
                     copiedEffect.IndexNum = effectContainerFile.GetUnusedEffectId(copiedEffect.IndexNum);
                     effectContainerFile.Effects.Add(copiedEffect);
                     effectDataGrid.SelectedItem = copiedEffect;
-                    effectDataGrid.Items.SortDescriptions.Add(new SortDescription("Index", ListSortDirection.Ascending));
                     effectDataGrid.ScrollIntoView(copiedEffect);
 
                     UndoManager.Instance.AddUndo(new UndoableListAdd<Effect>(effectContainerFile.Effects, copiedEffect, "Duplicate Effect"));
@@ -3857,7 +3856,6 @@ namespace EEPK_Organiser.View
                 newEffect.IndexNum = effectContainerFile.GetUnusedEffectId(0);
                 effectContainerFile.Effects.Add(newEffect);
                 effectDataGrid.SelectedItem = newEffect;
-                effectDataGrid.Items.SortDescriptions.Add(new SortDescription("Index", ListSortDirection.Ascending));
                 effectDataGrid.ScrollIntoView(newEffect);
 
                 effectContainerFile.UpdateEffectFilter();
@@ -4295,6 +4293,21 @@ namespace EEPK_Organiser.View
 
             if (form != null)
                 form.Close();
+        }
+
+        public static void CloseAllEditorForms()
+        {
+            foreach (object window in App.Current.Windows)
+            {
+                if (window is EmbEditForm ||
+                    window is MaterialsEditorForm ||
+                    window is EmpEditorWindow ||
+                    window is EcfEditorWindow ||
+                    window is EtrEditorWindow)
+                {
+                    (window as Window).Close();
+                }
+            }
         }
 
         public bool GameDirectoryCheck()

@@ -53,12 +53,12 @@ namespace EEPK_Organiser.ViewModel
         {
             get
             {
-                return effectPart.I_05;
+                return effectPart.Deactivation;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_05), effectPart, effectPart.I_05, value, "Deactivation"));
-                effectPart.I_05 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.Deactivation), effectPart, effectPart.Deactivation, value, "Deactivation"));
+                effectPart.Deactivation = value;
             }
         }
         public byte I_06

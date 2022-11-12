@@ -288,17 +288,17 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
                 case KeyframedValueType.Size2:
                     return "Size 2";
                 case KeyframedValueType.ECF_AmbientColor:
-                    return "Ambient Color";
+                    return "Add Color";
                 case KeyframedValueType.ECF_MultiColor:
-                    return "Multi Color";
+                    return "Multiplier";
                 case KeyframedValueType.ECF_RimColor:
                     return "Rim Color";
                 case KeyframedValueType.ECF_AmbientTransparency:
-                    return "Ambient Alpha";
+                    return "Add Factor";
                 case KeyframedValueType.ECF_DiffuseTransparency:
-                    return "Diffuse Alpha";
+                    return "Multi Factor";
                 case KeyframedValueType.ECF_SpecularTransparency:
-                    return "Specular Alpha";
+                    return "Rim Factor";
                 case KeyframedValueType.ECF_BlendingFactor:
                     return "Blending Factor";
                 case KeyframedValueType.Modifier_Axis:

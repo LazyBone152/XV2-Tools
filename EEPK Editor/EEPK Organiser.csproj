@@ -15,7 +15,13 @@
     <PackageReference Include="MahApps.Metro">
       <Version>2.4.9</Version>
     </PackageReference>
-    <PackageReference Include="MahApps.Metro.IconPacks">
+    <PackageReference Include="MahApps.Metro.IconPacks.Material">
+      <Version>4.11.0</Version>
+    </PackageReference>
+    <PackageReference Include="MahApps.Metro.IconPacks.MaterialDesign">
+      <Version>4.11.0</Version>
+    </PackageReference>
+    <PackageReference Include="MahApps.Metro.IconPacks.MaterialLight">
       <Version>4.11.0</Version>
     </PackageReference>
     <PackageReference Include="MvvmLight">
@@ -70,7 +76,7 @@
     <LangVersion>7.1</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>eepk organiser.ico</ApplicationIcon>
+    <ApplicationIcon>Resources\eepk organiser.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AForge">
@@ -177,7 +183,6 @@
     <Compile Include="Forms\EffectSelector.xaml.cs">
       <DependentUpon>EffectSelector.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Forms\EMP\EMP_Editor.xaml.cs" />
     <Compile Include="Forms\EntitySelector.xaml.cs">
       <DependentUpon>EntitySelector.xaml</DependentUpon>
     </Compile>
@@ -205,14 +210,17 @@
     <Compile Include="Forms\Recolor\TextureEditHueChange.xaml.cs">
       <DependentUpon>TextureEditHueChange.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Forms\MaterialSelector.xaml.cs" />
-    <Compile Include="Forms\TextureSelector.xaml.cs" />
     <Compile Include="Misc\ClipboardDataTypes.cs" />
     <Compile Include="Misc\InputValidation.cs" />
     <Compile Include="Name\Namelist.cs" />
     <Compile Include="Name\NameListManager.cs" />
     <Compile Include="Misc\CacheManager.cs" />
     <Compile Include="Misc\LoadFromGameHelper.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="ViewModel\AssetContainerViewModel.cs" />
     <Compile Include="ViewModel\EcfNodeViewModel.cs" />
     <Compile Include="ViewModel\EffectPartViewModel.cs" />
@@ -306,10 +314,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Forms\EMP\EMP_Editor.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Forms\EntitySelector.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -353,14 +357,6 @@
     <Page Include="Forms\Recolor\TextureEditHueChange.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Forms\MaterialSelector.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Forms\TextureSelector.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -467,11 +463,6 @@
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
@@ -479,6 +470,7 @@
     </Compile>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="packages.config" />
@@ -491,27 +483,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\icons8-expand-arrow-50.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\icons8-question-mark-64.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\icons8-delete-48.png" />
-    <Resource Include="Resources\icons8-plus-40.png" />
-    <Resource Include="Resources\icons8-trash-40.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\icons8-info-512.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="favicon.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="eepk organiser.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\icons8-undo-24.png" />
+    <Resource Include="Resources\eepk organiser.ico" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LB_Common\LB_Common.csproj">

@@ -487,16 +487,16 @@
                                         <TextBox IsEnabled="False" Grid.Column="1" Text="{Binding ElementName=UserControl, Path=NodeViewModel.Mesh_HasMesh, Mode=OneWay}" IsReadOnly="True"  TextWrapping="NoWrap" />
                                         
                                         <Button Grid.Column="2" Command="{Binding ElementName=UserControl, Path=Mesh_ImportMeshCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="Transparent" Style="{DynamicResource MahApps.Styles.Button.Circle}" ToolTip="Import a static mesh from an external file (EMD)." Width="20" Height="20">
-                                            <iconPacks:Modern Kind="NewWindow"/>
+                                            <iconPacks:Material Kind="OpenInNew"/>
                                         </Button>
                                         <Button Grid.Column="3" Command="{Binding ElementName=UserControl, Path=Mesh_ExportMeshCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="Transparent" Style="{DynamicResource MahApps.Styles.Button.Circle}" ToolTip="Export the current static mesh to an external file (EMD)." Width="20" Height="20">
-                                            <iconPacks:Modern Kind="Save"/>
+                                            <iconPacks:Material Kind="ContentSave"/>
                                         </Button>
                                         <Button Grid.Column="4" Command="{Binding ElementName=UserControl, Path=Mesh_CopyMeshCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="Transparent" Style="{DynamicResource MahApps.Styles.Button.Circle}" ToolTip="Copy the current static mesh." Width="20" Height="20">
-                                            <iconPacks:Modern Kind="PageCopy"/>
+                                            <iconPacks:Material Kind="ContentCopy"/>
                                         </Button>
                                         <Button Grid.Column="5" Command="{Binding ElementName=UserControl, Path=Mesh_PasteMeshCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="Transparent" Style="{DynamicResource MahApps.Styles.Button.Circle}" ToolTip="Paste" Width="20" Height="20">
-                                            <iconPacks:Modern Kind="ClipboardPaste"/>
+                                            <iconPacks:Material Kind="ContentPaste"/>
                                         </Button>
                                     </Grid>
                                 </StackPanel>

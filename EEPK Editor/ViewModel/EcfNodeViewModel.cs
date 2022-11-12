@@ -40,16 +40,27 @@ namespace EEPK_Organiser.ViewModel
                 RaisePropertyChanged(nameof(EndTime));
             }
         }
-        public PlayMode LoopMode
+        public bool Loop
         {
-            get => node.LoopMode;
+            get => node.Loop;
             set
             {
-                UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.LoopMode), node, node.LoopMode, value, "ECF -> Loop Mode"));
-                node.LoopMode = value;
-                RaisePropertyChanged(nameof(LoopMode));
+                UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.Loop), node, node.Loop, "ECF -> Loop"));
+                node.Loop = value;
+                RaisePropertyChanged(nameof(Loop));
             }
         }
+        public bool UseMaterial
+        {
+            get => node.UseMaterial;
+            set
+            {
+                UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.UseMaterial), node, node.UseMaterial, "ECF -> Use Material"));
+                node.UseMaterial = value;
+                RaisePropertyChanged(nameof(UseMaterial));
+            }
+        }
+
         public KeyframedColorValue MultiColor => node.MultiColor;
         public KeyframedColorValue RimColor => node.RimColor;
         public KeyframedColorValue AmbientColor => node.AddColor;
@@ -71,7 +82,8 @@ namespace EEPK_Organiser.ViewModel
             RaisePropertyChanged(nameof(Material));
             RaisePropertyChanged(nameof(StartTime));
             RaisePropertyChanged(nameof(EndTime));
-            RaisePropertyChanged(nameof(LoopMode));
+            RaisePropertyChanged(nameof(Loop));
+            RaisePropertyChanged(nameof(UseMaterial));
 
             RaisePropertyChanged(nameof(MultiColor));
             RaisePropertyChanged(nameof(RimColor));

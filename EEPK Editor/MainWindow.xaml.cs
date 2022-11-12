@@ -237,7 +237,7 @@ namespace EEPK_Organiser
 
             if (file != null)
             {
-                CloseOpenWindows();
+                View.EepkEditor.CloseAllEditorForms();
                 effectContainerFile = file;
                 UpdateSelectedVersion();
             }
@@ -375,7 +375,7 @@ namespace EEPK_Organiser
 
             effectContainerFile = EffectContainerFile.New();
             UpdateSelectedVersion();
-            CloseOpenWindows();
+            View.EepkEditor.CloseAllEditorForms();
         }
 
         private void Menu_Open_Click(object sender, RoutedEventArgs e)
@@ -761,6 +761,7 @@ namespace EEPK_Organiser
             {
                 //Clear undo stack
                 UndoManager.Instance.Clear();
+                View.EepkEditor.CloseAllEditorForms();
 
                 effectContainerFile = effectFile;
                 NotifyPropertyChanged("CanSave");
@@ -779,6 +780,7 @@ namespace EEPK_Organiser
             {
                 //Clear undo stack
                 UndoManager.Instance.Clear();
+                View.EepkEditor.CloseAllEditorForms();
 
                 effectContainerFile = effectFile;
                 NotifyPropertyChanged("CanSave");
@@ -796,6 +798,7 @@ namespace EEPK_Organiser
             {
                 //Clear undo stack
                 UndoManager.Instance.Clear();
+                View.EepkEditor.CloseAllEditorForms();
 
                 effectContainerFile = effectFile;
                 NotifyPropertyChanged("CanSave");
@@ -813,6 +816,7 @@ namespace EEPK_Organiser
             {
                 //Clear undo stack
                 UndoManager.Instance.Clear();
+                View.EepkEditor.CloseAllEditorForms();
 
                 effectContainerFile = effectFile;
                 NotifyPropertyChanged("CanSave");
@@ -830,6 +834,7 @@ namespace EEPK_Organiser
             {
                 //Clear undo stack
                 UndoManager.Instance.Clear();
+                View.EepkEditor.CloseAllEditorForms();
 
                 effectContainerFile = effectFile;
                 NotifyPropertyChanged("CanSave");
@@ -847,6 +852,7 @@ namespace EEPK_Organiser
             {
                 //Clear undo stack
                 UndoManager.Instance.Clear();
+                View.EepkEditor.CloseAllEditorForms();
 
                 effectContainerFile = effectFile;
                 NotifyPropertyChanged("CanSave");
@@ -864,6 +870,7 @@ namespace EEPK_Organiser
             {
                 //Clear undo stack
                 UndoManager.Instance.Clear();
+                View.EepkEditor.CloseAllEditorForms();
 
                 effectContainerFile = effectFile;
                 NotifyPropertyChanged("CanSave");
@@ -881,6 +888,7 @@ namespace EEPK_Organiser
             {
                 //Clear undo stack
                 UndoManager.Instance.Clear();
+                View.EepkEditor.CloseAllEditorForms();
 
                 effectContainerFile = effectFile;
                 NotifyPropertyChanged("CanSave");
@@ -963,25 +971,6 @@ namespace EEPK_Organiser
                 MessageBox.Show(System.Windows.Application.Current.MainWindow, String.Format("The dropped file could not be opened.\n\nThe reason given by the system: {0}", ex.Message), "File Drop", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
-
-        private void CloseOpenWindows()
-        {
-            //Close all open windows that are not the main
-            //Used for when a new eepk is opened/created
-
-            foreach (var window in App.Current.Windows)
-            {
-                if (window is Forms.EmbEditForm ||
-                    window is Forms.MaterialsEditorForm ||
-                    window is Forms.EMP.EMP_Editor)
-                {
-                    (window as Window).Close();
-                }
-            }
-
-        }
-
 
         //"Import" relay events
 #region Import_relay_Events

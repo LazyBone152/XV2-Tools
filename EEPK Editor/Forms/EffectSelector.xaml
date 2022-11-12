@@ -102,18 +102,6 @@
                 </DataTemplate>
             </DataGrid.RowDetailsTemplate>
 
-            <DataGrid.RowHeaderTemplate>
-                <DataTemplate>
-                    <Grid VerticalAlignment="Top">
-                        <ToggleButton Width="12" Height="12"
-                            IsChecked="{Binding DetailsVisibility, Converter={StaticResource visibilityConverter}, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" BorderBrush="Transparent" Foreground="Transparent" Background="Transparent"
-                                >
-                            <Image Source="{StaticResource expand}"/>
-                        </ToggleButton>
-                    </Grid>
-                </DataTemplate>
-            </DataGrid.RowHeaderTemplate>
-
         </DataGrid>
         <Button Click="Done_Click" Content="Done" HorizontalAlignment="Left" Margin="173,400,0,0" VerticalAlignment="Top" Width="75"/>
         <TextBox VerticalContentAlignment="Center" HorizontalAlignment="Left" Height="23" Margin="61,351,0,0" TextWrapping="Wrap" Text="{Binding IdIncreaseValue, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top" Width="120"/>

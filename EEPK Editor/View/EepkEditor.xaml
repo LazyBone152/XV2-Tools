@@ -35,7 +35,7 @@
             <Controls:MetroTabItem Header="EFFECT" Controls:HeaderedControlHelper.HeaderFontSize="14">
                 <Grid Background="Transparent">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="40"/>
                         <ColumnDefinition Width="0.45*"/>
                         <ColumnDefinition Width="*" MinWidth="500" MaxWidth="800"/>
                     </Grid.ColumnDefinitions>
@@ -121,19 +121,6 @@
                                 </ListBox>
                             </DataTemplate>
                         </DataGrid.RowDetailsTemplate>
-
-                        <DataGrid.RowHeaderTemplate>
-                            <DataTemplate>
-                                <Grid VerticalAlignment="Top">
-                                    <ToggleButton Width="12" Height="12"
-                                IsChecked="{Binding DetailsVisibility, Converter={StaticResource visibilityConverter}, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" BorderBrush="Transparent" Foreground="Transparent" Background="Transparent"
-                                >
-                                        <Image Source="{StaticResource expand}"/>
-                                    </ToggleButton>
-                                </Grid>
-                            </DataTemplate>
-                        </DataGrid.RowHeaderTemplate>
-
                     </DataGrid>
 
                     <ScrollViewer Grid.Column="2" Margin="5, 0">
@@ -485,20 +472,20 @@
                         </Grid>
                     </ScrollViewer>
 
-                    <StackPanel Grid.Column="0" HorizontalAlignment="Left" Height="461" Margin="0,33,0,0" VerticalAlignment="Top" Width="59">
+                    <StackPanel Grid.Column="0" HorizontalAlignment="Center" Margin="0,20,0,0" VerticalAlignment="Top">
                         <StackPanel.Resources>
                             <Style TargetType="{x:Type StackPanel}">
                                 <Setter Property="Margin" Value="0,5,0,0"/>
                             </Style>
                         </StackPanel.Resources>
                         <StackPanel VerticalAlignment="Center">
-                            <Button Command="{Binding EffectOptions_AddEffect_Command}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="30">
+                            <Button Command="{Binding EffectOptions_AddEffect_Command}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="22" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="22">
                                 <iconPacks:PackIconMaterialLight Kind="Plus" />
                             </Button>
-                            <TextBlock Text="New Effect" HorizontalAlignment="Center" FontSize="8"/>
+                            <TextBlock Text="New" HorizontalAlignment="Center" FontSize="8"/>
                         </StackPanel>
                         <StackPanel VerticalAlignment="Center">
-                            <Button HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="30" lbUtils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
+                            <Button HorizontalAlignment="Center" VerticalAlignment="Center" Width="22" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="22" lbUtils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
                                 <Button.ContextMenu>
                                     <ContextMenu FontSize="12">
                                         <MenuItem Header="Load External EEPK" Click="EffectOptions_ImportEffectsFromFile_Click"/>
@@ -525,7 +512,7 @@
 
                                 <iconPacks:PackIconMaterialLight Kind="Plus" />
                             </Button>
-                            <TextBlock Text="Import Effect" HorizontalAlignment="Center" FontSize="8"/>
+                            <TextBlock Text="Import" HorizontalAlignment="Center" FontSize="8"/>
                         </StackPanel>
 
                     </StackPanel>
@@ -791,7 +778,7 @@
                         <DataGrid.RowDetailsTemplate>
                             <DataTemplate>
                                 <ListBox x:Name="emoListBox" BorderBrush="{DynamicResource MahApps.Brushes.Accent2}" BorderThickness="1" ItemsSource="{Binding Files.Binding}">
-                                   
+
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
                                             <Grid Margin="0,2">
@@ -817,16 +804,6 @@
                                 </ListBox>
                             </DataTemplate>
                         </DataGrid.RowDetailsTemplate>
-
-                        <DataGrid.RowHeaderTemplate>
-                            <DataTemplate>
-                                <Grid VerticalAlignment="Top">
-                                    <ToggleButton Width="12" Height="12" IsChecked="{Binding DetailsVisibility, Converter={StaticResource visibilityConverter}, RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}}" BorderBrush="Transparent" Foreground="Transparent" Background="Transparent">
-                                        <Image Source="{StaticResource expand}"/>
-                                    </ToggleButton>
-                                </Grid>
-                            </DataTemplate>
-                        </DataGrid.RowHeaderTemplate>
                     </DataGrid>
                     <Label Content="{Binding effectContainerFile.Emo.AssetCount}" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Margin="765,423,-0.327,-0.055" VerticalAlignment="Bottom" Width="177" Height="30"/>
                     <GroupBox Header="Options" HorizontalAlignment="Right" Height="Auto" Margin="0,10,10,0" VerticalAlignment="Top" Width="223">
@@ -941,7 +918,7 @@
 
             <!-- Tool menu for when embedded on XenoKit  -->
             <Button x:Name="toolButton" lbUtils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True" HorizontalAlignment="Right" VerticalAlignment="Top" Width="25" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="25" Margin="0,0,181,0">
-                <iconPacks:PackIconModern Kind="Tools" />
+                <iconPacks:Material Kind="Tools" />
                 <Button.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Hue Adjustment" Click="ToolMenu_HueAdjustment_Click"/>
