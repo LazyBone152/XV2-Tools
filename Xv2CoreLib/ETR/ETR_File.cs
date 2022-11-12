@@ -315,6 +315,18 @@ namespace Xv2CoreLib.ETR
             }
         }
 
+        public float GetAverageScale()
+        {
+            float scale = 0;
+
+            foreach(ETR_Node node in Nodes)
+            {
+                scale += node.GetAverageScale();
+            }
+
+            return Nodes.Count > 0 ? scale / Nodes.Count : 0;
+        }
+
         public List<ITextureRef> GetNodesThatUseTexture(EMP_TextureSamplerDef embEntryRef)
         {
             List<ITextureRef> nodes = new List<ITextureRef>();
@@ -359,6 +371,7 @@ namespace Xv2CoreLib.ETR
                 }
             }
         }
+   
     }
 
     [Serializable]
@@ -749,17 +762,22 @@ namespace Xv2CoreLib.ETR
         }
         #endregion
 
-        public List<RgbColor> GetUsedColors()
+        private RgbColor GetUsedColor()
+        {
+            return ColorEx.GetAverageColor(GetUsedColors(true));
+        }
+
+        public List<RgbColor> GetUsedColors(bool includeBlackAndWhite = false)
         {
             List<RgbColor> colors = new List<RgbColor>();
 
             RgbColor color1 = Color1.GetAverageColor();
             RgbColor color2 = Color2.GetAverageColor();
 
-            if (!color1.IsWhiteOrBlack)
+            if (!color1.IsWhiteOrBlack || includeBlackAndWhite)
                 colors.Add(color1);
 
-            if (!color2.IsWhiteOrBlack)
+            if ((!color2.IsWhiteOrBlack || includeBlackAndWhite) && !Flags.HasFlag(ExtrudeFlags.NoDegrade))
                 colors.Add(color2);
 
             return colors;
@@ -786,6 +804,18 @@ namespace Xv2CoreLib.ETR
                     new TextureEntry_Ref()
                 }
             };
+        }
+
+        public float GetAverageScale()
+        {
+            float scale = Scale.Constant;
+
+            foreach(var keyframe in Scale.Keyframes)
+            {
+                scale += keyframe.Value;
+            }
+
+            return scale / (Scale.Keyframes.Count + 1);
         }
     }
 

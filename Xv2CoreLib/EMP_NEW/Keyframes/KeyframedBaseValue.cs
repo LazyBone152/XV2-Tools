@@ -359,7 +359,7 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected void NotifyPropertyChanged(string propertyName = "")
+        public void NotifyPropertyChanged(string propertyName = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

@@ -139,7 +139,9 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             {
                 IUndoRedo undo = new UndoablePropertyGeneric(nameof(keyframe.Value), keyframe, keyframe.Value, value, "Add Keyframe");
                 keyframe.Value = value;
-                return undo;
+                keyframe.NotifyPropsChanged();
+
+                return new CompositeUndo(new List<IUndoRedo>() { undo, new UndoActionDelegate(keyframe, "NotifyPropsChanged", true) }, "Add Keyframe");
             }
 
         }

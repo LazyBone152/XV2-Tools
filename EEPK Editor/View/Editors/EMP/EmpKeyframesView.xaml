@@ -45,7 +45,7 @@
                 <Button Grid.Column="3" Style="{DynamicResource MahApps.Styles.Button.Circle}" Background="Transparent" BorderBrush="Transparent" Command="{Binding ElementName=UserControl, Path=DeselectedKeyframedValueCommand}" Margin="0,0,0,2" Width="15" Height="15">
                     <iconPacks:PackIconMaterialDesign Kind="Clear" Width="10" Height="10" VerticalAlignment="Center"/>
                 </Button>
-                
+
             </Grid>
 
             <Grid Grid.Row="1" Grid.ColumnSpan="10">
@@ -120,18 +120,28 @@
                                 <DataGridTemplateColumn Header="Time" Width="0.3*" SortMemberPath="Time">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <controls:NumericUpDown Value="{Binding UndoableTime, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01" Minimum="0" Maximum="{Binding ElementName=UserControl, Path=MaxTime}" />
+                                            <TextBlock Text="{Binding UndoableTime, StringFormat=0.00}"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <controls:NumericUpDown Value="{Binding UndoableTime, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Left" StringFormat="0.00" Interval="0.01" Minimum="0" Maximum="{Binding ElementName=UserControl, Path=MaxTime}" InterceptMouseWheel="True" TrackMouseWheelWhenMouseOver="True"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
                                 </DataGridTemplateColumn>
                                 <DataGridTemplateColumn Header="Value" Width="*">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <controls:NumericUpDown Value="{Binding UndoableValue, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.0###" Interval="0.01"  Margin="50, 0"/>
+                                            <TextBlock Text="{Binding Value, StringFormat=0.0##}" Margin="5, 0"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <controls:NumericUpDown Value="{Binding UndoableValue, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Left" StringFormat="0.0###" Interval="0.01" Margin="5, 0" InterceptMouseWheel="True" TrackMouseWheelWhenMouseOver="True"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
                                 </DataGridTemplateColumn>
-                                
+
                                 <DataGridTemplateColumn Width="60">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
@@ -161,12 +171,12 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="60"/>
                             </Grid.ColumnDefinitions>
-                            <controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=ViewModel.NewTime}" Interval="0.01" Minimum="0" Maximum="{Binding ElementName=UserControl, Path=MaxTime}" StringFormat="0.0#" Margin="0,0,2,0"/>
-                            <controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=ViewModel.NewFloat}" Interval="0.01" StringFormat="0.0##" Margin="50, 0"/>
+                            <controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=ViewModel.NewTime}" TextAlignment="Left" Interval="0.01" Minimum="0" Maximum="{Binding ElementName=UserControl, Path=MaxTime}" StringFormat="0.0#" Margin="0,0,2,0"/>
+                            <controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=ViewModel.NewFloat}" TextAlignment="Left" Interval="0.01" StringFormat="0.0##" Margin="5, 0"/>
                             <Button Grid.Column="2" Content="Add" Command="{Binding ElementName=UserControl, Path=ViewModel.AddFloatKeyframeCommand}" Margin="0,0,5,0"/>
                         </Grid>
                     </Grid>
-                    
+
                     <!-- Color Keyframes -->
                     <Grid Visibility="{Binding ElementName=UserControl, Path=ViewModel.ColorVisibile}">
                         <Grid.RowDefinitions>
@@ -178,17 +188,27 @@
                                 <DataGridTemplateColumn Header="Time" Width="0.3*" SortMemberPath="Time">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <controls:NumericUpDown Value="{Binding UndoableTime, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01" Minimum="0" Maximum="{Binding ElementName=UserControl, Path=MaxTime}" />
+                                            <TextBlock Text="{Binding UndoableTime, StringFormat=0.00}"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <controls:NumericUpDown Value="{Binding UndoableTime, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Left" StringFormat="0.00" Interval="0.01" Minimum="0" Maximum="{Binding ElementName=UserControl, Path=MaxTime}" InterceptMouseWheel="True" TrackMouseWheelWhenMouseOver="True"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
                                 </DataGridTemplateColumn>
-                                
+
                                 <DataGridTemplateColumn Header="Value" Width="*">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <vector:CustomRgbColor Value="{Binding Value}" HideUpDownButtons="False"/>
+                                            <vector:CustomRgbColor Value="{Binding Value}" HideUpDownButtons="False" TextAlignment="Left" IsReadOnly="True"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <vector:CustomRgbColor Value="{Binding Value}" HideUpDownButtons="False" TextAlignment="Left"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
                                 </DataGridTemplateColumn>
 
                                 <DataGridTemplateColumn Width="60">
@@ -220,8 +240,8 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="60"/>
                             </Grid.ColumnDefinitions>
-                            <controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=ViewModel.NewTime}" Interval="0.01" Minimum="0" Maximum="{Binding ElementName=UserControl, Path=MaxTime}" StringFormat="0.00" Margin="0,0,2,0"/>
-                            <vector:CustomRgbColor Grid.Column="1" Value="{Binding ElementName=UserControl, Path=ViewModel.NewColor}" AllowUndo="False" HideUpDownButtons="False"/>
+                            <controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=ViewModel.NewTime}" TextAlignment="Left" Interval="0.01" Minimum="0" Maximum="{Binding ElementName=UserControl, Path=MaxTime}" StringFormat="0.00" Margin="0,0,2,0"/>
+                            <vector:CustomRgbColor Grid.Column="1" Value="{Binding ElementName=UserControl, Path=ViewModel.NewColor}" TextAlignment="Left" AllowUndo="False" HideUpDownButtons="False"/>
                             <Button Grid.Column="2" Content="Add" Command="{Binding ElementName=UserControl, Path=ViewModel.AddColorKeyframeCommand}" Margin="0,0,5,0"/>
                         </Grid>
                     </Grid>
@@ -237,17 +257,27 @@
                                 <DataGridTemplateColumn Header="Time" Width="0.3*" SortMemberPath="Time">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <controls:NumericUpDown Value="{Binding UndoableTime, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01" Minimum="0" Maximum="{Binding ElementName=UserControl, Path=MaxTime}" />
+                                            <TextBlock Text="{Binding UndoableTime, StringFormat=0.00}"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <controls:NumericUpDown Value="{Binding UndoableTime, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01" Minimum="0" Maximum="{Binding ElementName=UserControl, Path=MaxTime}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
                                 </DataGridTemplateColumn>
 
                                 <DataGridTemplateColumn Header="Value" Width="*">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <vector:CustomVector2 Value="{Binding Value}" HideUpDownButtons="False"/>
+                                            <vector:CustomVector2 Value="{Binding Value}" HideUpDownButtons="False" IsReadOnly="True"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <vector:CustomVector2 Value="{Binding Value}" HideUpDownButtons="False"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
                                 </DataGridTemplateColumn>
 
                                 <DataGridTemplateColumn Width="60">
@@ -279,7 +309,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="60"/>
                             </Grid.ColumnDefinitions>
-                            <controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=ViewModel.NewTime}" Interval="0.01" Minimum="0" Maximum="1" StringFormat="0.00" Margin="0,0,2,0"/>
+                            <controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=ViewModel.NewTime}" Interval="0.01" Minimum="0" Maximum="1" StringFormat="0.00" Margin="0,0,2,0" InterceptMouseWheel="True"/>
                             <vector:CustomVector2 Grid.Column="1" Value="{Binding ElementName=UserControl, Path=ViewModel.NewVector}" AllowUndo="False" HideUpDownButtons="False"/>
                             <Button Grid.Column="2" Content="Add" Command="{Binding ElementName=UserControl, Path=ViewModel.AddVector2KeyframeCommand}" Margin="0,0,5,0"/>
                         </Grid>
@@ -296,17 +326,27 @@
                                 <DataGridTemplateColumn Header="Time" Width="0.3*" SortMemberPath="Time">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <controls:NumericUpDown Value="{Binding UndoableTime, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01" Minimum="0" Maximum="{Binding ElementName=UserControl, Path=MaxTime}" />
+                                            <TextBlock Text="{Binding UndoableTime, StringFormat=0.00}"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <controls:NumericUpDown Value="{Binding UndoableTime, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01" Minimum="0" Maximum="{Binding ElementName=UserControl, Path=MaxTime}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
                                 </DataGridTemplateColumn>
 
                                 <DataGridTemplateColumn Header="Value" Width="*">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <vector:CustomVector3 Value="{Binding Value}" HideUpDownButtons="False"/>
+                                            <vector:CustomVector3 Value="{Binding Value}" HideUpDownButtons="False" IsReadOnly="True"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <vector:CustomVector3 Value="{Binding Value}" HideUpDownButtons="False"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
                                 </DataGridTemplateColumn>
 
                                 <DataGridTemplateColumn Width="60">
@@ -338,16 +378,13 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="60"/>
                             </Grid.ColumnDefinitions>
-                            <controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=ViewModel.NewTime}" Interval="0.01" Minimum="0" Maximum="{Binding ElementName=UserControl, Path=MaxTime}" StringFormat="0.00" Margin="0,0,2,0"/>
+                            <controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=ViewModel.NewTime}" Interval="0.01" Minimum="0" Maximum="{Binding ElementName=UserControl, Path=MaxTime}" StringFormat="0.00" Margin="0,0,2,0" InterceptMouseWheel="True"/>
                             <vector:CustomVector3 Grid.Column="1" Value="{Binding ElementName=UserControl, Path=ViewModel.NewVector}" AllowUndo="False" HideUpDownButtons="False"/>
                             <Button Grid.Column="2" Content="Add" Command="{Binding ElementName=UserControl, Path=ViewModel.AddVector3KeyframeCommand}" Margin="0,0,5,0"/>
                         </Grid>
                     </Grid>
-
                 </Grid>
             </Grid>
-
         </Grid>
-        
     </Grid>
 </UserControl>

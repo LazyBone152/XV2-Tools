@@ -66,9 +66,9 @@
         <Border Grid.Column="3" Margin="0, 20, 10, 20" BorderBrush="{DynamicResource MahApps.Brushes.SystemControlForegroundListMedium}" BorderThickness="1">
             <Grid IsEnabled="{Binding ElementName=UserControl, Path=IsNodeEnabled}" Background="{DynamicResource MahApps.Brushes.SystemControlBackgroundAltMediumLow}">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="*" MinHeight="200"/>
+                    <RowDefinition Height="*" MinHeight="200" MaxHeight="400"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="0.65*" MinHeight="200"/>
+                    <RowDefinition Height="0.4*" MinHeight="150"/>
                 </Grid.RowDefinitions>
                 <ScrollViewer>
                     <StackPanel HorizontalAlignment="Left">

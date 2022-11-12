@@ -88,11 +88,16 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             }
             else
             {
-                CustomColor color = new CustomColor(r, g, b, 1f);
-                IUndoRedo undo = new UndoablePropertyGeneric(nameof(keyframe.Value), keyframe, keyframe.Value, color, "Add Keyframe");
-                keyframe.Value = color;
+                List<IUndoRedo> undos = new List<IUndoRedo>();
+                undos.Add(new UndoablePropertyGeneric("R", keyframe.Value, keyframe.Value.R, r));
+                undos.Add(new UndoablePropertyGeneric("G", keyframe.Value, keyframe.Value.G, g));
+                undos.Add(new UndoablePropertyGeneric("B", keyframe.Value, keyframe.Value.B, b));
 
-                return undo;
+                keyframe.Value.R = r;
+                keyframe.Value.G = g;
+                keyframe.Value.B = b;
+
+                return new CompositeUndo(undos, "Add Keyframe");
             }
         }
 
@@ -140,7 +145,7 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
 
             return colors.Count > 0 ? ColorEx.GetAverageColor(colors) : new RgbColor(Constant);
         }
-    
+
         public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet = false, int variance = 0)
         {
             Constant.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);

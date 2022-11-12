@@ -13,7 +13,8 @@ namespace EEPK_Organiser.Forms
     {
         private Asset _asset = null;
 
-        public float scaleFactor { get; set; } = 1.0f;
+        public float ScaleFactor { get; set; } = 1.0f;
+        private float OriginalScale;
 
 
         public EtrScale(Asset asset, Window parent = null)
@@ -22,17 +23,20 @@ namespace EEPK_Organiser.Forms
             _asset = asset;
             InitializeComponent();
             DataContext = this;
+
+            OriginalScale = asset.Files[0].EtrFile.GetAverageScale();
+            ScaleFactor = OriginalScale;
         }
 
         private void Button_OK_Click(object sender, RoutedEventArgs e)
         {
-
-            if (scaleFactor != 1.0f)
+            if (ScaleFactor != OriginalScale)
             {
                 List<IUndoRedo> undos = new List<IUndoRedo>();
-                _asset.Files[0].EtrFile.ScaleETRParts(scaleFactor, undos);
+                _asset.Files[0].EtrFile.ScaleETRParts(ScaleFactor / OriginalScale, undos);
 
                 UndoManager.Instance.AddUndo(new CompositeUndo(undos, "ETR Scale"));
+                UndoManager.Instance.ForceEventCall();
             }
 
             Close();

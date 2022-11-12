@@ -14,9 +14,11 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Label Content="X" FontSize="10" VerticalContentAlignment="Center"/>
-        <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=X}" Grid.Column="1" InterceptMouseWheel="{Binding ElementName=UserControl, Path=HideUpDownButtons}" HideUpDownButtons="{Binding ElementName=UserControl, Path=HideUpDownButtons}" TrackMouseWheelWhenMouseOver="False" StringFormat="0.0###" Margin="0, 0,-2, 0"/>
+        <controls:NumericUpDown TextAlignment="{Binding ElementName=UserControl, Path=TextAlignment}" Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=X}" Grid.Column="1" InterceptMouseWheel="{Binding ElementName=UserControl, Path=HideUpDownButtons}" HideUpDownButtons="{Binding ElementName=UserControl, Path=HideUpDownButtons}" TrackMouseWheelWhenMouseOver="False" StringFormat="0.0###" Margin="0, 0,-2, 0" Visibility="{Binding ElementName=UserControl, Path=EditableVisibility}"/>
         <Label Content="Y" FontSize="10" VerticalContentAlignment="Center" Grid.Column="2" Margin="1,0,0,0"/>
-        <controls:NumericUpDown Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=Y}" Grid.Column="3" InterceptMouseWheel="{Binding ElementName=UserControl, Path=HideUpDownButtons}" HideUpDownButtons="{Binding ElementName=UserControl, Path=HideUpDownButtons}" TrackMouseWheelWhenMouseOver="False" StringFormat="0.0###" Margin="0, 0,-2, 0"/>
+        <controls:NumericUpDown TextAlignment="{Binding ElementName=UserControl, Path=TextAlignment}" Interval="{Binding ElementName=UserControl, Path=Interval}" Value="{Binding ElementName=UserControl, Path=Y}" Grid.Column="3" InterceptMouseWheel="{Binding ElementName=UserControl, Path=HideUpDownButtons}" HideUpDownButtons="{Binding ElementName=UserControl, Path=HideUpDownButtons}" TrackMouseWheelWhenMouseOver="False" StringFormat="0.0###" Margin="0, 0,-2, 0" Visibility="{Binding ElementName=UserControl, Path=EditableVisibility}"/>
 
+        <Label Grid.Column="1" Content="{Binding ElementName=UserControl, Path=X_Preview, UpdateSourceTrigger=PropertyChanged}" Margin="0, 0,-0, 0" Visibility="{Binding ElementName=UserControl, Path=ReadOnlyVisibility}"/>
+        <Label Grid.Column="3" Content="{Binding ElementName=UserControl, Path=Y_Preview}" Margin="0, 0,-0, 0" Visibility="{Binding ElementName=UserControl, Path=ReadOnlyVisibility}"/>
     </Grid>
 </UserControl>

@@ -107,11 +107,16 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             }
             else
             {
-                CustomVector4 vector = new CustomVector4(x, y, z, 0f);
-                IUndoRedo undo = new UndoablePropertyGeneric(nameof(keyframe.Value), keyframe, keyframe.Value, vector, "Add Keyframe");
-                keyframe.Value = vector;
+                List<IUndoRedo> undos = new List<IUndoRedo>();
+                undos.Add(new UndoablePropertyGeneric("X", keyframe.Value, keyframe.Value.X, x));
+                undos.Add(new UndoablePropertyGeneric("Y", keyframe.Value, keyframe.Value.Y, y));
+                undos.Add(new UndoablePropertyGeneric("Z", keyframe.Value, keyframe.Value.Z, z));
 
-                return undo;
+                keyframe.Value.X = x;
+                keyframe.Value.Y = y;
+                keyframe.Value.Z = z;
+
+                return new CompositeUndo(undos, "Add Keyframe");
             }
         }
 

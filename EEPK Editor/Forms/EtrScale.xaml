@@ -10,7 +10,7 @@
     <Grid>
         <Button Click="Button_OK_Click" Content="Ok" HorizontalAlignment="Left" Margin="89,91,0,0" VerticalAlignment="Top" Width="75"/>
         <Button Click="Button_Cancel_Click" Content="Cancel" HorizontalAlignment="Left" Margin="196,91,0,0" VerticalAlignment="Top" Width="75"/>
-        <Controls:NumericUpDown Value="{Binding scaleFactor, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Minimum="-10" Maximum="10" Interval="0.1" Margin="132,37,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="139" />
+        <Controls:NumericUpDown Value="{Binding ScaleFactor, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Minimum="0" Maximum="50" Interval="0.1" Margin="132,37,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="139" />
         <Label Content="Scale Factor" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="56,37,0,0" VerticalAlignment="Top" Width="73" Height="26"/>
 
     </Grid>

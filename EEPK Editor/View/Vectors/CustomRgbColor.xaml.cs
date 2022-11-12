@@ -8,7 +8,7 @@ using Xv2CoreLib.Resource.UndoRedo;
 
 namespace EEPK_Organiser.View.Vectors
 {
-    public partial class CustomRgbColor : UserControl, INotifyPropertyChanged, IDisposable
+    public partial class CustomRgbColor : UserControl, INotifyPropertyChanged
     {
         #region NotifyPropChanged
         public event PropertyChangedEventHandler PropertyChanged;
@@ -58,13 +58,35 @@ namespace EEPK_Organiser.View.Vectors
             set => SetValue(AllowUndoProperty, value);
         }
 
+        //TextAlignment
+        public static readonly DependencyProperty TextAlignmentProperty = DependencyProperty.Register(
+            nameof(TextAlignment), typeof(TextAlignment), typeof(CustomRgbColor), new PropertyMetadata(TextAlignment.Right));
+
+        public TextAlignment TextAlignment
+        {
+            get => (TextAlignment)GetValue(TextAlignmentProperty);
+            set => SetValue(TextAlignmentProperty, value);
+        }
+
+        //IsReadOnly
+        public static readonly DependencyProperty IsReadOnlyProperty = DependencyProperty.Register(
+            nameof(IsReadOnly), typeof(bool), typeof(CustomRgbColor), new PropertyMetadata(false));
+
+        public bool IsReadOnly
+        {
+            get => (bool)GetValue(IsReadOnlyProperty);
+            set => SetValue(IsReadOnlyProperty, value);
+        }
+
         private static void ValueChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             if(sender is CustomRgbColor view)
             {
                 view.UpdateProperties();
+                view.UpdateEvents(e.NewValue, e.OldValue);
             }
         }
+
 
         #endregion
 
@@ -101,6 +123,10 @@ namespace EEPK_Organiser.View.Vectors
             }
         }
 
+        public string R_Preview => $"{R.ToString("0.0###")}";
+        public string G_Preview => $"{G.ToString("0.0###")}";
+        public string B_Preview => $"{B.ToString("0.0###")}";
+
         public Color? CurrentColor
         {
             get => Color.FromScRgb(1f, NormalizedFloatColor(R), NormalizedFloatColor(G), NormalizedFloatColor(B));
@@ -109,20 +135,34 @@ namespace EEPK_Organiser.View.Vectors
 
         public Brush Preview => CalculateColorPreview();
 
+        public Visibility EditableVisibility => !IsReadOnly ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility ReadOnlyVisibility => IsReadOnly ? Visibility.Visible : Visibility.Collapsed;
+
         public CustomRgbColor()
         {
             InitializeComponent();
             UndoManager.Instance.UndoOrRedoCalled += Instance_UndoOrRedoCalled;
+            Loaded += CustomRgbColor_Loaded;
+            Unloaded += CustomRgbColor_Unloaded;
+        }
+
+        private void CustomRgbColor_Unloaded(object sender, RoutedEventArgs e)
+        {
+            UndoManager.Instance.UndoOrRedoCalled -= Instance_UndoOrRedoCalled;
+
+            if(Value != null)
+                Value.PropertyChanged -= Color_PropertyChanged;
+        }
+
+        private void CustomRgbColor_Loaded(object sender, RoutedEventArgs e)
+        {
+            NotifyPropertyChanged(nameof(EditableVisibility));
+            NotifyPropertyChanged(nameof(ReadOnlyVisibility));
         }
 
         private void Instance_UndoOrRedoCalled(object sender, UndoEventRaisedEventArgs e)
         {
             UpdateProperties();
-        }
-
-        public void Dispose()
-        {
-            UndoManager.Instance.UndoOrRedoCalled -= Instance_UndoOrRedoCalled;
         }
 
         private IUndoRedo SetFloatValue(float newValue, string propName, bool addUndo = true)
@@ -161,6 +201,9 @@ namespace EEPK_Organiser.View.Vectors
             NotifyPropertyChanged(nameof(R));
             NotifyPropertyChanged(nameof(G));
             NotifyPropertyChanged(nameof(B));
+            NotifyPropertyChanged(nameof(R_Preview));
+            NotifyPropertyChanged(nameof(G_Preview));
+            NotifyPropertyChanged(nameof(B_Preview));
             NotifyPropertyChanged(nameof(CurrentColor));
             NotifyPropertyChanged(nameof(Preview));
         }
@@ -179,6 +222,24 @@ namespace EEPK_Organiser.View.Vectors
             int asInt = (int)value;
             if (asInt == value) return value;
             return value - asInt;
+        }
+
+        private void UpdateEvents(object newValue, object oldValue)
+        {
+            if (oldValue is LB_Common.Numbers.CustomColor oldColor)
+            {
+                oldColor.PropertyChanged -= Color_PropertyChanged;
+            }
+
+            if (newValue is LB_Common.Numbers.CustomColor newColor)
+            {
+                newColor.PropertyChanged += Color_PropertyChanged;
+            }
+        }
+
+        private void Color_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            UpdateProperties();
         }
     }
 }

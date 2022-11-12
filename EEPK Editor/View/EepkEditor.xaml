@@ -35,7 +35,7 @@
             <Controls:MetroTabItem Header="EFFECT" Controls:HeaderedControlHelper.HeaderFontSize="14">
                 <Grid Background="Transparent">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="40"/>
+                        <ColumnDefinition Width="35"/>
                         <ColumnDefinition Width="0.45*"/>
                         <ColumnDefinition Width="*" MinWidth="500" MaxWidth="800"/>
                     </Grid.ColumnDefinitions>
@@ -479,13 +479,13 @@
                             </Style>
                         </StackPanel.Resources>
                         <StackPanel VerticalAlignment="Center">
-                            <Button Command="{Binding EffectOptions_AddEffect_Command}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="22" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="22">
+                            <Button Command="{Binding EffectOptions_AddEffect_Command}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="20" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="20">
                                 <iconPacks:PackIconMaterialLight Kind="Plus" />
                             </Button>
                             <TextBlock Text="New" HorizontalAlignment="Center" FontSize="8"/>
                         </StackPanel>
                         <StackPanel VerticalAlignment="Center">
-                            <Button HorizontalAlignment="Center" VerticalAlignment="Center" Width="22" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="22" lbUtils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
+                            <Button HorizontalAlignment="Center" VerticalAlignment="Center" Width="20" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="20" lbUtils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
                                 <Button.ContextMenu>
                                     <ContextMenu FontSize="12">
                                         <MenuItem Header="Load External EEPK" Click="EffectOptions_ImportEffectsFromFile_Click"/>
@@ -614,7 +614,7 @@
                                 <Separator/>
                                 <MenuItem Header="Hue Adjustment" Click="TBIND_AssetContainer_Recolor"/>
                                 <MenuItem Header="Hue Set" Click="TBIND_AssetContainer_RecolorHueSet"/>
-                                <MenuItem Header="Extrude Scale" Click="TBIND_AssetContainer_Scale"/>
+                                <MenuItem Header="Scale" Click="TBIND_AssetContainer_Scale"/>
                                 <Separator/>
                                 <MenuItem Header="Edit" Click="TBIND_AssetContainer_Edit_Click"/>
                             </ContextMenu>

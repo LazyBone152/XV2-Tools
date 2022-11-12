@@ -49,6 +49,14 @@ namespace EEPK_Organiser.ViewModel
                 if (value != _selectedVector2)
                 {
                     _selectedVector2 = value;
+
+                    if(value != null)
+                    {
+                        NewVector.X = _selectedVector2.Value.X;
+                        NewVector.Y = _selectedVector2.Value.Y;
+                        NewTime = _selectedVector3.Time;
+                        RaisePropertyChanged(nameof(NewTime));
+                    }
                     RaisePropertyChanged(nameof(SelectedVector2));
                 }
             }
@@ -61,6 +69,15 @@ namespace EEPK_Organiser.ViewModel
                 if (value != _selectedVector3)
                 {
                     _selectedVector3 = value;
+
+                    if(value != null)
+                    {
+                        NewVector.X = _selectedVector3.Value.X;
+                        NewVector.Y = _selectedVector3.Value.Y;
+                        NewVector.Z = _selectedVector3.Value.Z;
+                        NewTime = _selectedVector3.Time;
+                        RaisePropertyChanged(nameof(NewTime));
+                    }
                     RaisePropertyChanged(nameof(SelectedVector3));
                 }
             }
@@ -73,6 +90,15 @@ namespace EEPK_Organiser.ViewModel
                 if (value != _selectedColor)
                 {
                     _selectedColor = value;
+
+                    if(value != null)
+                    {
+                        NewColor.R = _selectedColor.Value.R;
+                        NewColor.G = _selectedColor.Value.G;
+                        NewColor.B = _selectedColor.Value.B;
+                        NewTime = _selectedColor.Time;
+                        RaisePropertyChanged(nameof(NewTime));
+                    }
                     RaisePropertyChanged(nameof(SelectedColor));
                 }
             }
@@ -85,11 +111,19 @@ namespace EEPK_Organiser.ViewModel
                 if (value != _selectedFloat)
                 {
                     _selectedFloat = value;
+
+                    if(value != null)
+                    {
+                        NewFloat = _selectedFloat.Value;
+                        NewTime = _selectedFloat.Time;
+                        RaisePropertyChanged(nameof(NewTime));
+                        RaisePropertyChanged(nameof(NewFloat));
+                    }
                     RaisePropertyChanged(nameof(SelectedFloat));
                 }
             }
         }
-       
+
 
         //Add Keyframe
         public float NewTime { get; set; }

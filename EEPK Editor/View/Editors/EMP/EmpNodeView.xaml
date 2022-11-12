@@ -390,7 +390,7 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            <Label Content="Start Rotation" ToolTip="Starting rotation Units in degrees.&#x0a;&#x0a;Rotation is relative to the Rotation Axis/Auto Rotation Type."/>
+                                            <Label Content="Start Rotation" ToolTip="Starting rotation Units in degrees.&#x0a;&#x0a;Rotation is relative to the Rotation Axis or Billboard Type."/>
                                             <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.StartRotation}" StringFormat="0.0####" Interval="0.05"/>
                                         </Grid>
                                         <Grid Margin="3,5,0,0" Width="250">
@@ -410,7 +410,7 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="2"/>
                                             </Grid.ColumnDefinitions>
-                                            <Label Content="Active Rotation" ToolTip="Rotation per second. Units in degrees.&#x0a;&#x0a;Rotation is relative to the Rotation Axis/Auto Rotation Type."/>
+                                            <Label Content="Active Rotation" ToolTip="Rotation per second. Units in degrees.&#x0a;&#x0a;Rotation is relative to the Rotation Axis or Billboard Type."/>
                                             <local:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding ElementName=UserControl, Path=NodeViewModel.ActiveRotation}" Node="{Binding ElementName=UserControl, Path=Node}"/>
                                         </Grid>
                                         <Grid Margin="3,5,0,0" Width="225">

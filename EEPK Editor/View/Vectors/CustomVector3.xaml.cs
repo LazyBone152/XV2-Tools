@@ -6,7 +6,7 @@ using Xv2CoreLib.Resource.UndoRedo;
 
 namespace EEPK_Organiser.View.Vectors
 {
-    public partial class CustomVector3 : UserControl, INotifyPropertyChanged, IDisposable
+    public partial class CustomVector3 : UserControl, INotifyPropertyChanged
     {
         #region NotifyPropChanged
         public event PropertyChangedEventHandler PropertyChanged;
@@ -72,11 +72,32 @@ namespace EEPK_Organiser.View.Vectors
             set => SetValue(MaxValueProperty, value);
         }
 
+        public static readonly DependencyProperty TextAlignmentProperty = DependencyProperty.Register(
+            nameof(TextAlignment), typeof(TextAlignment), typeof(CustomVector3), new PropertyMetadata(TextAlignment.Right));
+
+        public TextAlignment TextAlignment
+        {
+            get => (TextAlignment)GetValue(TextAlignmentProperty);
+            set => SetValue(TextAlignmentProperty, value);
+        }
+
+        //IsReadOnly
+        public static readonly DependencyProperty IsReadOnlyProperty = DependencyProperty.Register(
+            nameof(IsReadOnly), typeof(bool), typeof(CustomVector3), new PropertyMetadata(false));
+
+        public bool IsReadOnly
+        {
+            get => (bool)GetValue(IsReadOnlyProperty);
+            set => SetValue(IsReadOnlyProperty, value);
+        }
+
+
         private static void ValueChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             if(sender is CustomVector3 view)
             {
                 view.UpdateProperties();
+                view.UpdateEvents(e.NewValue, e.OldValue);
             }
         }
         #endregion
@@ -105,21 +126,40 @@ namespace EEPK_Organiser.View.Vectors
                 if (Value != null) SetFloatValue(value, nameof(Value.Z));
             }
         }
-        
+
+        public string X_Preview => $"{X.ToString("0.0###")}";
+        public string Y_Preview => $"{Y.ToString("0.0###")}";
+        public string Z_Preview => $"{Z.ToString("0.0###")}";
+
+        public Visibility EditableVisibility => !IsReadOnly ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility ReadOnlyVisibility => IsReadOnly ? Visibility.Visible : Visibility.Collapsed;
+
+
         public CustomVector3()
         {
             InitializeComponent();
             UndoManager.Instance.UndoOrRedoCalled += Instance_UndoOrRedoCalled;
+            Loaded += CustomVector3_Loaded;
+            Unloaded += CustomVector3_Unloaded;
+        }
+
+        private void CustomVector3_Unloaded(object sender, RoutedEventArgs e)
+        {
+            UndoManager.Instance.UndoOrRedoCalled -= Instance_UndoOrRedoCalled;
+
+            if (Value != null)
+                Value.PropertyChanged -= Vector_PropertyChanged;
+        }
+
+        private void CustomVector3_Loaded(object sender, RoutedEventArgs e)
+        {
+            NotifyPropertyChanged(nameof(EditableVisibility));
+            NotifyPropertyChanged(nameof(ReadOnlyVisibility));
         }
 
         private void Instance_UndoOrRedoCalled(object sender, UndoEventRaisedEventArgs e)
         {
             UpdateProperties();
-        }
-
-        public void Dispose()
-        {
-            UndoManager.Instance.UndoOrRedoCalled -= Instance_UndoOrRedoCalled;
         }
 
         private void SetFloatValue(float newValue, string propName)
@@ -140,6 +180,28 @@ namespace EEPK_Organiser.View.Vectors
             NotifyPropertyChanged(nameof(X));
             NotifyPropertyChanged(nameof(Y));
             NotifyPropertyChanged(nameof(Z));
+            NotifyPropertyChanged(nameof(X_Preview));
+            NotifyPropertyChanged(nameof(Y_Preview));
+            NotifyPropertyChanged(nameof(Z_Preview));
+
+        }
+
+        private void UpdateEvents(object newValue, object oldValue)
+        {
+            if (oldValue is LB_Common.Numbers.CustomVector4 oldVector)
+            {
+                oldVector.PropertyChanged -= Vector_PropertyChanged;
+            }
+
+            if (newValue is LB_Common.Numbers.CustomVector4 newVector)
+            {
+                newVector.PropertyChanged += Vector_PropertyChanged;
+            }
+        }
+
+        private void Vector_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            UpdateProperties();
         }
     }
 }
