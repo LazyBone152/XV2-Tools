@@ -26,7 +26,7 @@ namespace Xv2CoreLib.EMM
                 YAXSerializer serializer = new YAXSerializer(typeof(EMM_File));
                 serializer.SerializeToFile(emmFile, saveLocation + ".xml");
             }
-            else if (EffectContainer.EepkToolInterlop.FullDecompile)
+            else
             {
                 emmFile.DecompileMaterials();
             }
@@ -37,9 +37,7 @@ namespace Xv2CoreLib.EMM
             rawBytes = _rawBytes;
             SignatureValidation();
             ParseEmm();
-
-            if(EffectContainer.EepkToolInterlop.FullDecompile)
-                emmFile.DecompileMaterials();
+            emmFile.DecompileMaterials();
         }
 
         public EMM_File GetEmmFile()

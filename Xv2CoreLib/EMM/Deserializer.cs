@@ -26,9 +26,7 @@ namespace Xv2CoreLib.EMM
         {
             saveLocation = location;
             emmFile = _emmFile;
-
-            if (EffectContainer.EepkToolInterlop.FullDecompile)
-                emmFile.CompileMaterials();
+            emmFile.CompileMaterials();
 
             Write();
             File.WriteAllBytes(saveLocation, bytes.ToArray());
@@ -37,9 +35,7 @@ namespace Xv2CoreLib.EMM
         public Deserializer(EMM_File _emmFile)
         {
             emmFile = _emmFile;
-            
-            if (EffectContainer.EepkToolInterlop.FullDecompile)
-                emmFile.CompileMaterials();
+            emmFile.CompileMaterials();
 
             Write();
         }
