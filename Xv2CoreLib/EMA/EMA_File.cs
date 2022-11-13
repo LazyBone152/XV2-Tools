@@ -17,38 +17,24 @@ namespace Xv2CoreLib.EMA
 {
     public enum ValueType : ushort
     {
-        Float32_2 = 0,
+        Vector4 = 0, //Shader vector4, used exclusively by mat.ema
         Float16 = 1,
         Float32 = 2
     }
 
     public enum EmaType : ushort
     {
-        obj = 0,
-        cam = 1,
-        mat = 3,
-        light = 0x102
+        obj = 3,
+        light = 4,
+        mat = 8
     }
 
-    [Flags]
-    public enum KeyframeFlags : ushort
+    public enum EmaAnimationType : byte
     {
-        Flag0 = 0x1,
-        Flag1 = 0x2,
-        Flag2 = 0x4,
-        Flag3 = 0x8,
-        Flag4 = 0x10,
-        Flag5 = 0x20,
-        QuadraticBezier = 0x40, //Extra float value
-        CubicBezier = 0x80, //Extra float value
-        Flag8 = 0x100,
-        Flag9 = 0x200,
-        Flag10 = 0x400,
-        Flag11 = 0x800,
-        Flag12 = 0x1000,
-        Flag13 = 0x2000,
-        Flag14 = 0x4000,
-        Flag15 = 0x8000
+        obj = 0,
+        cam = 1, //Not used in the Xenoverse games, but was in older games on the engine apparantly
+        light = 2,
+        mat = 3,
     }
 
     [Serializable]
@@ -58,27 +44,13 @@ namespace Xv2CoreLib.EMA
         public const int EMA_SIGNATURE = 1095583011;
 
         [YAXDontSerialize]
-        public bool HasSkeleton
-        {
-            get { return (skeleton != null); }
-        }
-        [YAXDontSerialize]
-        public EmaType EmaType
-        {
-            get
-            {
-                if(Animations.Count > 0)
-                {
-                    return Animations[0].EmaType;
-                }
-                return EmaType.obj;
-            }
-        }
+        public bool HasSkeleton => Skeleton != null;
+
 
         [YAXAttributeForClass]
         public int Version { get; set; }
         [YAXAttributeForClass]
-        public ushort I_18 { get; set; }
+        public EmaType EmaType { get; set; }
         [YAXAttributeForClass]
         public int I_20 { get; set; }
         [YAXAttributeForClass]
@@ -88,7 +60,7 @@ namespace Xv2CoreLib.EMA
 
         [YAXDontSerializeIfNull]
         [YAXSerializeAs("Skeleton")]
-        public Skeleton skeleton { get; set; }
+        public Skeleton Skeleton { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Animation")]
         public AsyncObservableCollection<EMA_Animation> Animations { get; set; } = new AsyncObservableCollection<EMA_Animation>();
@@ -119,7 +91,7 @@ namespace Xv2CoreLib.EMA
 
             //Header
             emaFile.Version = BitConverter.ToInt32(rawBytes, 8);
-            emaFile.I_18 = BitConverter.ToUInt16(rawBytes, 18);
+            emaFile.EmaType = (EmaType)BitConverter.ToUInt16(rawBytes, 18);
             emaFile.I_20 = BitConverter.ToInt32(rawBytes, 20);
             emaFile.I_24 = BitConverter.ToInt32(rawBytes, 24);
             emaFile.I_28 = BitConverter.ToInt32(rawBytes, 28);
@@ -131,7 +103,7 @@ namespace Xv2CoreLib.EMA
             //Parse skeleton
             if(skeletonOffset > 0)
             {
-                emaFile.skeleton = Skeleton.Parse(rawBytes, skeletonOffset);
+                emaFile.Skeleton = Skeleton.Parse(rawBytes, skeletonOffset);
             }
 
             //Parse animations
@@ -174,7 +146,7 @@ namespace Xv2CoreLib.EMA
             bytes.AddRange(BitConverter.GetBytes((int)Version));
             bytes.AddRange(new byte[4]); //Skeleton offset
             bytes.AddRange(BitConverter.GetBytes((ushort)animCount));
-            bytes.AddRange(BitConverter.GetBytes(I_18));
+            bytes.AddRange(BitConverter.GetBytes((ushort)EmaType));
             bytes.AddRange(BitConverter.GetBytes(I_20));
             bytes.AddRange(BitConverter.GetBytes(I_24));
             bytes.AddRange(BitConverter.GetBytes(I_28));
@@ -193,7 +165,8 @@ namespace Xv2CoreLib.EMA
                 bytes.AddRange(BitConverter.GetBytes(anim.EndFrame));
                 bytes.AddRange(BitConverter.GetBytes((ushort)anim.CommandCount));
                 bytes.AddRange(BitConverter.GetBytes((int)values.Count));
-                bytes.AddRange(BitConverter.GetBytes((ushort)anim.EmaType));
+                bytes.Add((byte)anim.EmaType);
+                bytes.Add((byte)anim.LightUnknown);
                 bytes.AddRange(BitConverter.GetBytes((ushort)anim.FloatPrecision));
                 animNameOffsets.Add(bytes.Count);
                 bytes.AddRange(new byte[4]); //Name offset
@@ -217,11 +190,12 @@ namespace Xv2CoreLib.EMA
                         bytes.AddRange(new byte[2]);
                     }
 
-                    bytes.Add(anim.Commands[i].I_02);
+                    bytes.Add(anim.Commands[i].Parameter);
 
-                    var bitArray_b = new BitArray(new bool[8] { anim.Commands[i].I_03_b1, anim.Commands[i].I_03_b2_Int16ForTime, anim.Commands[i].I_03_b3_Int16ForValueIndex, anim.Commands[i].I_03_b4, false, false, false, false });
-                    var bitArray_a = new BitArray(new byte[1] { anim.Commands[i].I_03_a });
+                    var bitArray_b = new BitArray(new bool[8] { anim.Commands[i].I_03_b1, anim.Commands[i].Int16ForTime, anim.Commands[i].Int16ForValueIndex, anim.Commands[i].I_03_b4, false, false, false, false });
+                    var bitArray_a = new BitArray(new byte[1] { anim.Commands[i].Component });
 
+                    bitArray_a[2] = anim.Commands[i].NoInterpolation;
                     bitArray_a[3] = anim.Commands[i].I_03_a4;
                     bytes.Add((byte)Int4Converter.GetByte(Utils.ConvertToByte(bitArray_a), Utils.ConvertToByte(bitArray_b)));
                     bytes.AddRange(BitConverter.GetBytes((ushort)anim.Commands[i].KeyframeCount));
@@ -236,7 +210,7 @@ namespace Xv2CoreLib.EMA
                     //Write Time
                     for(int a = 0; a < anim.Commands[i].KeyframeCount; a++)
                     {
-                        if(anim.Commands[i].I_03_b2_Int16ForTime)
+                        if(anim.Commands[i].Int16ForTime)
                         {
                             bytes.AddRange(BitConverter.GetBytes(anim.Commands[i].Keyframes[a].Time));
                         }
@@ -253,15 +227,16 @@ namespace Xv2CoreLib.EMA
                     bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes((ushort)(bytes.Count - startCommandOffset)), startCommandOffset + 6);
                     for (int a = 0; a < anim.Commands[i].KeyframeCount; a++)
                     {
-                        if (anim.Commands[i].I_03_b3_Int16ForValueIndex)
+                        if (anim.Commands[i].Int16ForValueIndex)
                         {
                             bytes.AddRange(BitConverter.GetBytes((ushort)anim.Commands[i].Keyframes[a].index));
-                            bytes.AddRange(BitConverter.GetBytes((ushort)anim.Commands[i].Keyframes[a].Flags));
+                            bytes.Add(0);
+                            bytes.Add((byte)anim.Commands[i].Keyframes[a].InterpolationType);
                         }
                         else
                         {
                             bytes.Add((byte)anim.Commands[i].Keyframes[a].index);
-                            bytes.Add((byte)anim.Commands[i].Keyframes[a].Flags);
+                            bytes.Add((byte)anim.Commands[i].Keyframes[a].InterpolationType);
                         }
                     }
 
@@ -279,7 +254,7 @@ namespace Xv2CoreLib.EMA
                     {
                         bytes.AddRange(Half.GetBytes((Half)value));
                     }
-                    else if (anim.FloatPrecision == ValueType.Float32 || anim.FloatPrecision == ValueType.Float32_2)
+                    else if (anim.FloatPrecision == ValueType.Float32 || anim.FloatPrecision == ValueType.Vector4)
                     {
                         bytes.AddRange(BitConverter.GetBytes(value));
                     }
@@ -297,7 +272,7 @@ namespace Xv2CoreLib.EMA
             {
                 bytes.AddRange(new byte[Utils.CalculatePadding(bytes.Count, 16)]);
                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), 12);
-                bytes.AddRange(skeleton.Write());
+                bytes.AddRange(Skeleton.Write());
             }
 
             //Strings (animations)
@@ -334,7 +309,7 @@ namespace Xv2CoreLib.EMA
         {
             if (!HasSkeleton) throw new InvalidOperationException("EMA_File.GetBoneName: emaFile has no skeleton.");
 
-            foreach(var bone in skeleton.Bones)
+            foreach(var bone in Skeleton.Bones)
             {
                 if (bone.Index == boneIndex) return bone.Name;
             }
@@ -346,7 +321,7 @@ namespace Xv2CoreLib.EMA
         {
             if (!HasSkeleton) throw new InvalidOperationException("EMA_File.GetBoneIndex: emaFile has no skeleton.");
 
-            foreach (var bone in skeleton.Bones)
+            foreach (var bone in Skeleton.Bones)
             {
                 if (bone.Name == boneName) return bone.Index;
             }
@@ -390,13 +365,13 @@ namespace Xv2CoreLib.EMA
 
             EMA_File emaFile = new EMA_File();
             emaFile.Version = 37568;
-            emaFile.skeleton = Skeleton.Convert(eanFile.Skeleton);
+            emaFile.Skeleton = Skeleton.Convert(eanFile.Skeleton);
 
             foreach(var animation in deskinnedEan)
             {
                 EMA_Animation emaAnimation = new EMA_Animation();
                 emaAnimation.Name = animation.Name;
-                emaAnimation.EmaType = EmaType.obj;
+                emaAnimation.EmaType = EmaAnimationType.obj;
                 emaAnimation.FloatPrecision = (ValueType)animation.FloatType;
                 emaAnimation.EndFrame = (ushort)animation.GetLastKeyframe();
 
@@ -488,7 +463,9 @@ namespace Xv2CoreLib.EMA
         public ushort EndFrame { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("Type")]
-        public EmaType EmaType { get; set; } //ushort
+        public EmaAnimationType EmaType { get; set; }
+        [YAXAttributeForClass]
+        public byte LightUnknown { get; set; } //Light = 1, all other types = 0
         [YAXAttributeForClass]
         [YAXSerializeAs("FloatType")]
         public ValueType FloatPrecision { get; set; }
@@ -501,9 +478,9 @@ namespace Xv2CoreLib.EMA
             EMA_Animation animation = new EMA_Animation();
             animation.Index = index;
             animation.EndFrame = BitConverter.ToUInt16(rawBytes, offset + 0);
-            animation.EmaType = (EmaType)BitConverter.ToUInt16(rawBytes, offset + 8);
+            animation.EmaType = (EmaAnimationType)rawBytes[offset + 8];
+            animation.LightUnknown = rawBytes[offset + 9];
             animation.FloatPrecision = (ValueType)BitConverter.ToUInt16(rawBytes, offset + 10);
-            animation.Commands = AsyncObservableCollection<EMA_Command>.Create();
 
             int commandCount = BitConverter.ToUInt16(rawBytes, offset + 2);
             int valueCount = BitConverter.ToInt32(rawBytes, offset + 4);
@@ -525,7 +502,7 @@ namespace Xv2CoreLib.EMA
                 {
                     values[i] = Half.ToHalf(rawBytes, valueOffset + (i * 2));
                 }
-                else if (animation.FloatPrecision == ValueType.Float32 || animation.FloatPrecision == ValueType.Float32_2)
+                else if (animation.FloatPrecision == ValueType.Float32 || animation.FloatPrecision == ValueType.Vector4)
                 {
                     values[i] = BitConverter.ToSingle(rawBytes, valueOffset + (i * 4));
                 }
@@ -565,35 +542,22 @@ namespace Xv2CoreLib.EMA
                 foreach(var keyframe in command.Keyframes)
                 {
                     //Sloppy code for now, refactor it later...
-                    if (keyframe.Flags.HasFlag(KeyframeFlags.QuadraticBezier) && keyframe.Flags.HasFlag(KeyframeFlags.CubicBezier))
-                    {
-                        //Both flags are in use.
-                        floats.Add(keyframe.Value);
-                        keyframe.index = floats.Count - 1;
-                        floats.Add(keyframe.Value2Float);
-                        floats.Add(keyframe.Value3Float);
-                        floats.Add(keyframe.Value4Float);
-                        dualIndex.Add(keyframe.index);
-                        dualIndex.Add(keyframe.index + 1);
-                        dualIndex.Add(keyframe.index + 2);
-                        dualIndex.Add(keyframe.index + 4);
-                    }
-                    else if (keyframe.Flags.HasFlag(KeyframeFlags.QuadraticBezier))
+                    if (keyframe.InterpolationType == KeyframeInterpolation.QuadraticBezier)
                     {
                         //Always add new dual values. Don't reuse, and dont let them be used by other keyframes.
                         floats.Add(keyframe.Value);
                         keyframe.index = floats.Count - 1;
-                        floats.Add(keyframe.Value2Float);
+                        floats.Add(keyframe.ControlPoint1);
                         dualIndex.Add(keyframe.index);
                         dualIndex.Add(keyframe.index + 1);
                     }
-                    else if (keyframe.Flags.HasFlag(KeyframeFlags.CubicBezier))
+                    else if (keyframe.InterpolationType == KeyframeInterpolation.CubicBezier)
                     {
                         //Always add new dual values. Don't reuse, and dont let them be used by other keyframes.
                         floats.Add(keyframe.Value);
                         keyframe.index = floats.Count - 1;
-                        floats.Add(keyframe.Value3Float);
-                        floats.Add(keyframe.Value4Float);
+                        floats.Add(keyframe.ControlPoint1);
+                        floats.Add(keyframe.ControlPoint2);
                         dualIndex.Add(keyframe.index);
                         dualIndex.Add(keyframe.index + 1);
                         dualIndex.Add(keyframe.index + 2);
@@ -635,7 +599,7 @@ namespace Xv2CoreLib.EMA
         /// </summary>
         public void SyncColorCommands()
         {
-            if (EmaType != EmaType.light) throw new InvalidOperationException("EMA_Animation.SyncColorCommands: Method not valid for type = " + EmaType);
+            if (EmaType != EmaAnimationType.light) throw new InvalidOperationException("EMA_Animation.SyncColorCommands: Method not valid for type = " + EmaType);
 
             var r_command = GetCommand("Color", "R");
             var g_command = GetCommand("Color", "G");
@@ -648,7 +612,7 @@ namespace Xv2CoreLib.EMA
                 if(r_command == null)
                 {
                     var newCommand = EMA_Command.GetNewLight();
-                    newCommand.Component = "R";
+                    newCommand.ComponentXmlBinding = "R";
                     newCommand.Keyframes.Add(new EMA_Keyframe() { Time = 0, Value = 0 }); //First keyframe
                     newCommand.Keyframes.Add(new EMA_Keyframe() { Time = EndFrame, Value = 0 }); //Last keyframe
                     Commands.Add(newCommand);
@@ -657,7 +621,7 @@ namespace Xv2CoreLib.EMA
                 if (g_command == null)
                 {
                     var newCommand = EMA_Command.GetNewLight();
-                    newCommand.Component = "G";
+                    newCommand.ComponentXmlBinding = "G";
                     newCommand.Keyframes.Add(new EMA_Keyframe() { Time = 0, Value = 0 }); //First keyframe
                     newCommand.Keyframes.Add(new EMA_Keyframe() { Time = EndFrame, Value = 0 }); //Last keyframe
                     Commands.Add(newCommand);
@@ -666,7 +630,7 @@ namespace Xv2CoreLib.EMA
                 if (b_command == null)
                 {
                     var newCommand = EMA_Command.GetNewLight();
-                    newCommand.Component = "B";
+                    newCommand.ComponentXmlBinding = "B";
                     newCommand.Keyframes.Add(new EMA_Keyframe() { Time = 0, Value = 0 }); //First keyframe
                     newCommand.Keyframes.Add(new EMA_Keyframe() { Time = EndFrame, Value = 0 }); //Last keyframe
                     Commands.Add(newCommand);
@@ -684,7 +648,7 @@ namespace Xv2CoreLib.EMA
             {
                 foreach (var anim2 in Commands)
                 {
-                    if (anim.I_02 == 2 && anim2.I_02 == 2 && anim.I_03_a != 3 && anim2.I_03_a != 3)
+                    if (anim.Parameter == 2 && anim2.Parameter == 2 && anim.Component != 3 && anim2.Component != 3)
                     {
                         anim.AddKeyframesFromCommand(anim2);
                     }
@@ -698,7 +662,7 @@ namespace Xv2CoreLib.EMA
 
             foreach(var command in Commands)
             {
-                if (command.Parameter.ToLower() == parameter.ToLower() && command.Component.ToLower() == component.ToLower()) return command;
+                if (command.ParameterXmlBinding.ToLower() == parameter.ToLower() && command.ComponentXmlBinding.ToLower() == component.ToLower()) return command;
             }
 
             return null;
@@ -764,7 +728,7 @@ namespace Xv2CoreLib.EMA
     [YAXSerializeAs("Command")]
     public class EMA_Command
     {
-        private EmaType emaType = EmaType.obj;
+        private EmaAnimationType emaType = EmaAnimationType.obj;
 
         [YAXDontSerialize]
         public int KeyframeCount
@@ -783,40 +747,28 @@ namespace Xv2CoreLib.EMA
 
         [YAXAttributeForClass]
         [YAXSerializeAs("Parameter")]
-        public string Parameter
+        public string ParameterXmlBinding
         {
-            get
-            {
-                return GetParameterString();
-            }
-            set
-            {
-                I_02 = GetParameterInt(value);
-            }
+            get => GetParameterString();
+            set => Parameter = GetParameterInt(value);
         }
         [YAXAttributeForClass]
         [YAXSerializeAs("Component")]
-        public string Component
+        public string ComponentXmlBinding
         {
-            get
-            {
-                return GetComponentString();
-            }
-            set
-            {
-                I_03_a = GetComponentInt(value);
-            }
+            get => GetComponentString();
+            set => Component = GetComponentInt(value);
         }
 
         [YAXDontSerialize]
-        public byte I_02 { get; set; } //Parameter
+        public byte Parameter { get; set; }
         
         [YAXDontSerialize]
-        public byte I_03_a { get; set; } //uint4 (Component)
+        public byte Component { get; set; }
         [YAXDontSerialize]
-        public bool I_03_b2_Int16ForTime = false; //Calculated on save
+        public bool Int16ForTime = false; //Calculated on save
         [YAXDontSerialize]
-        public bool I_03_b3_Int16ForValueIndex = false; //Calculated on save
+        public bool Int16ForValueIndex = false; //Calculated on save
         [YAXAttributeFor("Flags")]
         [YAXSerializeAs("Unk1")]
         public bool I_03_b1 { get; set; }
@@ -826,6 +778,8 @@ namespace Xv2CoreLib.EMA
         [YAXAttributeFor("Flags")]
         [YAXSerializeAs("Unk5")]
         public bool I_03_a4 { get; set; }
+        [YAXAttributeFor("Flags")]
+        public bool NoInterpolation { get; set; }
 
         public AsyncObservableCollection<EMA_Keyframe> Keyframes { get; set; } = new AsyncObservableCollection<EMA_Keyframe>();
 
@@ -834,12 +788,12 @@ namespace Xv2CoreLib.EMA
             return new EMA_Command()
             {
                 Keyframes = AsyncObservableCollection<EMA_Keyframe>.Create(),
-                emaType = EmaType.light,
-                I_02 = 2, //Color
+                emaType = EmaAnimationType.light,
+                Parameter = 2, //Color
             };
         }
 
-        public static EMA_Command Read(byte[] rawBytes, int offset, float[] values, EMA_File emaFile, EmaType _emaType)
+        public static EMA_Command Read(byte[] rawBytes, int offset, float[] values, EMA_File emaFile, EmaAnimationType _emaType)
         {
             EMA_Command command = new EMA_Command();
             command.emaType = _emaType;
@@ -851,23 +805,22 @@ namespace Xv2CoreLib.EMA
             else
             {
                 //This ema has no skeleton, thus no bones
-                command.BoneName = null; 
+                command.BoneName = null;
             }
             
-            command.I_02 = rawBytes[offset + 2];
+            command.Parameter = rawBytes[offset + 2];
 
             BitArray flags_b = new BitArray(new byte[1] { Int4Converter.ToInt4(rawBytes[offset + 3])[1] });
             BitArray flags_a = new BitArray(new byte[1] { Int4Converter.ToInt4(rawBytes[offset + 3])[0] });
             command.I_03_b1 = flags_b[0];
-            command.I_03_b2_Int16ForTime = flags_b[1];
-            command.I_03_b3_Int16ForValueIndex = flags_b[2];
+            command.Int16ForTime = flags_b[1];
+            command.Int16ForValueIndex = flags_b[2];
             command.I_03_b4 = flags_b[3];
             command.I_03_a4 = flags_a[3];
+            command.NoInterpolation = flags_a[2];
+            flags_a[2] = false;
             flags_a[3] = false;
-            command.I_03_a = Int4Converter.GetByte(Utils.ConvertToByte(flags_a), 0);
-
-
-            command.Keyframes = AsyncObservableCollection<EMA_Keyframe>.Create();
+            command.Component = Int4Converter.GetByte(Utils.ConvertToByte(flags_a), 0);
 
             ushort keyframeCount = BitConverter.ToUInt16(rawBytes, offset + 4);
             ushort indexOffset = BitConverter.ToUInt16(rawBytes, offset + 6);
@@ -876,12 +829,11 @@ namespace Xv2CoreLib.EMA
             {
                 ushort time;
                 float value;
-                string value2 = null;
-                string value3 = null;
-                string value4 = null;
-                KeyframeFlags flags;
+                float controlPoint1 = 0f;
+                float controlPoint2 = 0f;
+                KeyframeInterpolation interpolation;
 
-                if (command.I_03_b2_Int16ForTime)
+                if (command.Int16ForTime)
                 {
                     time = BitConverter.ToUInt16(rawBytes, offset + 8 + (i * 2));
                 }
@@ -890,39 +842,29 @@ namespace Xv2CoreLib.EMA
                     time = rawBytes[offset + 8 + i];
                 }
 
-                if (command.I_03_b3_Int16ForValueIndex)
+                if (command.Int16ForValueIndex)
                 {
                     value = values[BitConverter.ToUInt16(rawBytes, offset + indexOffset + (i * 4))];
-                    flags = (KeyframeFlags)BitConverter.ToUInt16(rawBytes, offset + indexOffset + 2 + (i * 4));
+                    interpolation = (KeyframeInterpolation)rawBytes[offset + indexOffset + 3 + (i * 4)];
                     int extraOffset = 0;
 
-                    if (flags.HasFlag(KeyframeFlags.QuadraticBezier))
+                    if (interpolation == KeyframeInterpolation.QuadraticBezier)
                     {
                         ushort idx = (ushort)(BitConverter.ToUInt16(rawBytes, offset + indexOffset + (i * 4)) + 1);
 
-                        //idx might be out of range due to a bug with an older version of the parser... so in that case set it to value
                         if (idx <= values.Length - 1)
-                            value2 = values[idx].ToString();
-                        else
-                            value2 = value.ToString();
+                            controlPoint1 = values[idx];
 
                         extraOffset++;
                     }
-
-                    if (flags.HasFlag(KeyframeFlags.CubicBezier))
+                    else if (interpolation == KeyframeInterpolation.CubicBezier)
                     {
                         ushort idx = (ushort)(BitConverter.ToUInt16(rawBytes, offset + indexOffset + (i * 4)) + 1 + extraOffset);
 
-                        //idx might be out of range due to a bug with an older version of the parser... so in that case set it to value
                         if (idx + 1 <= values.Length - 1)
                         {
-                            value3 = values[idx].ToString();
-                            value4 = values[idx + 1].ToString();
-                        }
-                        else
-                        {
-                            value3 = value.ToString();
-                            value4 = value.ToString();
+                            controlPoint1 = values[idx];
+                            controlPoint2 = values[idx + 1];
                         }
 
                         extraOffset++;
@@ -931,33 +873,31 @@ namespace Xv2CoreLib.EMA
                 }
                 else
                 {
-                    value = values[rawBytes[offset + indexOffset + (i * 2)]];
-                    flags = (KeyframeFlags)rawBytes[offset + indexOffset + 1 + (i * 2)];
+                    int valueIdx = BitConverter.ToUInt16(rawBytes, offset + indexOffset + (i * 2)) & 0x3fff;
+
+                    //The index could be bad for older serialized EMAs since the value index was handled incorrectly in old versions
+                    if (values.Length - 1 < valueIdx)
+                        valueIdx = 0;
+
+                    value = values[valueIdx];
+                    interpolation = (KeyframeInterpolation)(rawBytes[offset + indexOffset + 1 + (i * 2)] & 0xc0);
                     int extraOffset = 0;
 
-                    if (flags.HasFlag(KeyframeFlags.QuadraticBezier))
+                    if (interpolation == KeyframeInterpolation.QuadraticBezier)
                     {
                         byte idx = (byte)(rawBytes[offset + indexOffset + (i * 2)] + 1);
 
                         if(idx <= values.Length -1)
-                            value2 = values[idx].ToString();
-                        else
-                            value2 = value.ToString();
+                            controlPoint1 = values[idx];
                     }
-
-                    if (flags.HasFlag(KeyframeFlags.CubicBezier))
+                    else if (interpolation == KeyframeInterpolation.CubicBezier)
                     {
                         byte idx = (byte)(rawBytes[offset + indexOffset + (i * 2)] + 1 + extraOffset);
 
                         if (idx + 1 <= values.Length - 1)
                         {
-                            value3 = values[idx].ToString();
-                            value4 = values[idx + 1].ToString();
-                        }
-                        else
-                        {
-                            value3 = value.ToString();
-                            value4 = value.ToString();
+                            controlPoint1 = values[idx];
+                            controlPoint2 = values[idx + 1];
                         }
                     }
                 }
@@ -966,10 +906,9 @@ namespace Xv2CoreLib.EMA
                 {
                     Time = time,
                     Value = value,
-                    Flags = flags,
-                    Value2 = value2,
-                    CubicBezier_1 = value3,
-                    CubicBezier_2 = value4
+                    InterpolationType = interpolation,
+                    ControlPoint1 = controlPoint1,
+                    ControlPoint2 = controlPoint2
                 });
             }
 
@@ -981,47 +920,91 @@ namespace Xv2CoreLib.EMA
             foreach (var keyframe in Keyframes)
             {
                 if (keyframe.Time > byte.MaxValue)
-                    I_03_b2_Int16ForTime = true;
+                    Int16ForTime = true;
                 if (keyframe.index > byte.MaxValue)
-                    I_03_b3_Int16ForValueIndex = true;
-                if ((ushort)keyframe.Flags > byte.MaxValue)
-                    I_03_b3_Int16ForValueIndex = true;
+                    Int16ForValueIndex = true;
             }
         }
-        
+
         //Component range: 0 > 3 (3 bits only, remaining 5 are flags)
 
         private string GetParameterString()
         {
-            switch (I_02)
+            if(emaType == EmaAnimationType.obj)
             {
-                case 0:
-                    return (emaType == EmaType.light) ? I_02.ToString() : "Position";
-                case 1:
-                    return (emaType == EmaType.light) ? I_02.ToString() : "Rotation";
-                case 2:
-                    return (emaType == EmaType.light) ? "Color" : "Scale";
-                case 3:
-                    return (emaType == EmaType.light) ? "Light" : I_02.ToString();
-                default:
-                    return I_02.ToString();
+                switch (Parameter)
+                {
+                    case 0:
+                        return "Position";
+                    case 1:
+                        return "Rotation";
+                    case 2:
+                        return "Scale";
+                }
             }
+            else if (emaType == EmaAnimationType.light)
+            {
+                switch (Parameter)
+                {
+                    case 2:
+                        return "Color";
+                    case 3:
+                        return "Light";
+                }
+            }
+            else if (emaType == EmaAnimationType.mat)
+            {
+                switch (Parameter)
+                {
+                    case 0:
+                        return "MatCol0";
+                    case 1:
+                        return "MatCol1";
+                    case 2:
+                        return "MatCol2";
+                    case 3:
+                        return "MatCol3";
+                    case 4:
+                        return "TexScrl0";
+                    case 5:
+                        return "TexScrl1";
+                    case 6:
+                        return "TexScrl2";
+                    case 7:
+                        return "TexScrl3";
+                }
+            }
+
+            return Parameter.ToString();
         }
 
         private byte GetParameterInt(string parameter)
         {
             parameter = parameter.ToLower();
+
             switch (parameter)
             {
                 case "position":
+                case "matcol0":
                     return 0;
                 case "rotation":
+                case "matcol1":
                     return 1;
                 case "scale":
                 case "color":
+                case "matcol2":
                     return 2;
                 case "light":
+                case "matcol3":
                     return 3;
+                case "texscrl0":
+                    return 4;
+                case "texscrl1":
+                    return 5;
+                case "texscrl2":
+                    return 6;
+                case "texscrl3":
+                    return 7;
                 default:
                     try
                     {
@@ -1036,9 +1019,9 @@ namespace Xv2CoreLib.EMA
 
         private string GetComponentString()
         {
-            if(emaType != EmaType.light)
+            if(emaType != EmaAnimationType.light)
             {
-                switch (I_03_a)
+                switch (Component)
                 {
                     case 0:
                         return "X";
@@ -1046,38 +1029,40 @@ namespace Xv2CoreLib.EMA
                         return "Y";
                     case 2:
                         return "Z";
+                    case 3:
+                        return "W";
                     default:
-                        return I_03_a.ToString();
+                        return Component.ToString();
                 }
             }
             else
             {
-                if(I_02 == 3)
+                if(Parameter == 3)
                 {
-                    switch (I_03_a)
+                    switch (Component)
                     {
                         case 0:
                             return "InnerRadius";
                         case 1:
                             return "OuterRadius";
                         default:
-                            return I_03_a.ToString();
+                            return Component.ToString();
                     }
                 }
                 else
                 {
-                    switch (I_03_a)
+                    switch (Component)
                     {
                         case 0:
-                            return (I_02 == 2) ? "R" : I_03_a.ToString();
+                            return (Parameter == 2) ? "R" : Component.ToString();
                         case 1:
-                            return (I_02 == 2) ? "G" : I_03_a.ToString();
+                            return (Parameter == 2) ? "G" : Component.ToString();
                         case 2:
-                            return (I_02 == 2) ? "B" : I_03_a.ToString();
+                            return (Parameter == 2) ? "B" : Component.ToString();
                         case 3:
-                            return (I_02 == 2) ? "A" : I_03_a.ToString();
+                            return (Parameter == 2) ? "A" : Component.ToString();
                         default:
-                            return I_03_a.ToString();
+                            return Component.ToString();
                     }
                 }
             }
@@ -1233,8 +1218,8 @@ namespace Xv2CoreLib.EMA
         {
             EMA_Command command = new EMA_Command();
             command.BoneName = boneName;
-            command.Component = axis.ToString();
-            command.Parameter = eanComponent.Type.ToString();
+            command.ComponentXmlBinding = axis.ToString();
+            command.ParameterXmlBinding = eanComponent.Type.ToString();
 
             foreach(var keyframe in eanComponent.Keyframes)
             {
@@ -1259,23 +1244,23 @@ namespace Xv2CoreLib.EMA
 
             return command;
         }
-    
+
         public static EMA_Command[] ConvertToEma_Rotation(EAN_AnimationComponent eanComponent, string boneName)
         {
             EMA_Command command1 = new EMA_Command();
             command1.BoneName = boneName;
-            command1.Component = "X";
-            command1.Parameter = eanComponent.Type.ToString();
+            command1.ComponentXmlBinding = "X";
+            command1.ParameterXmlBinding = eanComponent.Type.ToString();
 
             EMA_Command command2 = new EMA_Command();
             command2.BoneName = boneName;
-            command2.Component = "Y";
-            command2.Parameter = eanComponent.Type.ToString();
+            command2.ComponentXmlBinding = "Y";
+            command2.ParameterXmlBinding = eanComponent.Type.ToString();
 
             EMA_Command command3 = new EMA_Command();
             command3.BoneName = boneName;
-            command3.Component = "Z";
-            command3.Parameter = eanComponent.Type.ToString();
+            command3.ComponentXmlBinding = "Z";
+            command3.ParameterXmlBinding = eanComponent.Type.ToString();
 
             foreach (var keyframe in eanComponent.Keyframes)
             {
@@ -1297,7 +1282,7 @@ namespace Xv2CoreLib.EMA
     public class EMA_Keyframe : ISortable
     {
         [YAXDontSerialize]
-        public int SortID { get { return Time; } }
+        public int SortID => Time;
 
         [YAXAttributeForClass]
         [YAXSerializeAs("Time")]
@@ -1306,64 +1291,51 @@ namespace Xv2CoreLib.EMA
         [YAXSerializeAs("Value")]
         [YAXFormat("0.0########")]
         public float Value { get; set; }
+
+        [YAXDontSerialize]
+        public float ControlPoint1 { get; set; }
+        [YAXDontSerialize]
+        public float ControlPoint2 { get; set; }
+
+        //ControlPoint serialization in XML. These values will only appear if the correct Flags is set.
         [YAXAttributeForClass]
-        [YAXSerializeAs("QuadraticBezier")]
+        [YAXSerializeAs("ControlPoint1")]
         [YAXDontSerializeIfNull]
-        public string Value2 { get; set; }
+        public string StrCtrlPoint1
+        {
+            get => InterpolationType == KeyframeInterpolation.CubicBezier || InterpolationType == KeyframeInterpolation.QuadraticBezier ? ControlPoint1.ToString() : null;
+            set
+            {
+                if(value != null)
+                {
+                    float val;
+                    if (float.TryParse(value, out val))
+                        ControlPoint1 = val;
+                }
+            }
+        }
         [YAXAttributeForClass]
-        [YAXSerializeAs("CubicBezier_1")]
+        [YAXSerializeAs("ControlPoint2")]
         [YAXDontSerializeIfNull]
-        public string CubicBezier_1 { get; set; }
+        public string StrCtrlPoint2
+        {
+            get => InterpolationType == KeyframeInterpolation.CubicBezier ? ControlPoint2.ToString() : null;
+            set
+            {
+                if (value != null)
+                {
+                    float val;
+                    if (float.TryParse(value, out val))
+                        ControlPoint2 = val;
+                }
+            }
+        }
         [YAXAttributeForClass]
-        [YAXSerializeAs("CubicBezier_2")]
-        [YAXDontSerializeIfNull]
-        public string CubicBezier_2 { get; set; }
-        [YAXAttributeForClass]
-        [YAXSerializeAs("Flags")]
-        public KeyframeFlags Flags { get; set; }
+        [YAXSerializeAs("Interpolation")]
+        public KeyframeInterpolation InterpolationType { get; set; }
 
         [YAXDontSerialize]
         public int index = -1;
-        [YAXDontSerialize]
-        public float Value2Float
-        {
-            get
-            {
-                if (string.IsNullOrWhiteSpace(Value2)) return Value;
-                return float.Parse(Value2);
-            }
-            set
-            {
-                Value2 = value.ToString();
-            }
-        }
-        [YAXDontSerialize]
-        public float Value3Float
-        {
-            get
-            {
-                if (string.IsNullOrWhiteSpace(CubicBezier_1)) return Value;
-                return float.Parse(CubicBezier_1);
-            }
-            set
-            {
-                CubicBezier_1 = value.ToString();
-            }
-        }
-        [YAXDontSerialize]
-        public float Value4Float
-        {
-            get
-            {
-                if (string.IsNullOrWhiteSpace(CubicBezier_2)) return Value;
-                return float.Parse(CubicBezier_2);
-            }
-            set
-            {
-                CubicBezier_2 = value.ToString();
-            }
-        }
-
         public EMA_Keyframe() { }
 
         public EMA_Keyframe(int frame, float value)
@@ -1373,5 +1345,11 @@ namespace Xv2CoreLib.EMA
         }
     }
 
+    public enum KeyframeInterpolation
+    {
+        Linear,
+        QuadraticBezier = 0x40, //0x40 / 0x4000 (depends on value index type)
+        CubicBezier = 0x80 //0x80 / 0x8000
+    }
 
 }
