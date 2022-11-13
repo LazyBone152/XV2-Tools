@@ -13,7 +13,7 @@ namespace Xv2CoreLib.CUS
     public class CUS_File : ISorting
     {
         [YAXAttributeForClass]
-        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0)]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (byte)0)]
         public byte Version { get; set; } = 1;
 
         public List<Skillset> Skillsets { get; set; }
