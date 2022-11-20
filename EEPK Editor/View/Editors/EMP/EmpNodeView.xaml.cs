@@ -106,7 +106,7 @@ namespace EEPK_Organiser.View.Editors.EMP
 
         //Emission
         public Visibility BillboardVisibility => IsEmissionType(ParticleEmission.ParticleEmissionType.Plane, ParticleEmission.ParticleEmissionType.ShapeDraw) ? Visibility.Visible : Visibility.Collapsed;
-        public Visibility EmissionRotationValuesVisibility => IsEmissionType(ParticleEmission.ParticleEmissionType.Mesh, ParticleEmission.ParticleEmissionType.ShapeDraw) || (IsEmissionType(ParticleEmission.ParticleEmissionType.Plane) && Node?.EmissionNode?.BillboardEnabled == true && Node?.EmissionNode?.VisibleOnlyOnMotion == false) ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility EmissionRotationValuesVisibility => IsEmissionType(ParticleEmission.ParticleEmissionType.Mesh, ParticleEmission.ParticleEmissionType.ShapeDraw) || (IsEmissionType(ParticleEmission.ParticleEmissionType.Plane) && Node?.EmissionNode?.VisibleOnlyOnMotion == false) ? Visibility.Visible : Visibility.Collapsed;
         public Visibility EmissionDefaultVisibility => IsEmissionType(ParticleEmission.ParticleEmissionType.Plane) ? Visibility.Visible : Visibility.Collapsed;
         public Visibility EmissionAutoRotationVisibility => IsEmissionType(ParticleEmission.ParticleEmissionType.Plane) && Node?.EmissionNode?.BillboardEnabled == true ? Visibility.Visible : Visibility.Collapsed;
         public Visibility EmissionRotAxisVisibility => IsEmissionType(ParticleEmission.ParticleEmissionType.Plane) && Node?.EmissionNode?.BillboardEnabled == false ? Visibility.Visible : Visibility.Collapsed;

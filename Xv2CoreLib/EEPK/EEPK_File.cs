@@ -29,14 +29,14 @@ namespace Xv2CoreLib.EEPK
     public class EEPK_File : ISorting
     {
         public const int EEPK_SIGNATURE = 1263551779;
-        
+
         public int Version = 37568;
         [YAXSerializeAs("Containers")]
         [YAXDontSerializeIfNull]
         public List<AssetContainer> Assets { get; set; } = new List<AssetContainer>();
         [YAXDontSerializeIfNull]
         public List<Effect> Effects { get; set; } = new List<Effect>();
-        
+
         public void SortEntries()
         {
             Effects = Sorting.SortEntries(Effects);
@@ -80,13 +80,13 @@ namespace Xv2CoreLib.EEPK
         {
             return new Parser(bytes).eepkFile;
         }
-        
+
 
         public int IndexOfContainer(AssetType _containerType)
         {
-            for(int i = 0; i < Assets.Count(); i++)
+            for (int i = 0; i < Assets.Count(); i++)
             {
-                if(Assets[i].I_16 == _containerType)
+                if (Assets[i].I_16 == _containerType)
                 {
                     return i;
                 }
@@ -119,13 +119,13 @@ namespace Xv2CoreLib.EEPK
         {
             return new Deserializer(this).bytes.ToArray();
         }
-        
+
         public AssetContainer GetContainer(AssetType type)
         {
             if (Assets == null) throw new Exception("Assets was null.");
 
             //Check if it exists, and return it if it does.
-            foreach(var container in Assets)
+            foreach (var container in Assets)
             {
                 if (container.I_16 == type) return container;
             }
@@ -137,9 +137,9 @@ namespace Xv2CoreLib.EEPK
         {
             if (Assets == null) throw new Exception("Assets was null.");
 
-            for(int i = 0; i < Assets.Count; i++)
+            for (int i = 0; i < Assets.Count; i++)
             {
-                if(Assets[i].I_16 == type)
+                if (Assets[i].I_16 == type)
                 {
                     Assets[i] = container;
                     return;
@@ -208,7 +208,7 @@ namespace Xv2CoreLib.EEPK
         //I_36 = Offset to Asset Container string 1
         //I_40 = Offset to Asset Container string 2
         //I_44 = Offset to Asset Container string 3
-        
+
         /// <summary>
         /// Creates a duplicate of the Asset Container, but without the Asset_Entries
         /// </summary>
@@ -231,11 +231,11 @@ namespace Xv2CoreLib.EEPK
 
         public int IndexOf(string file)
         {
-            if(AssetEntries != null)
+            if (AssetEntries != null)
             {
                 for (int i = 0; i < AssetEntries.Count(); i++)
                 {
-                    if(AssetEntries[i].FILES[0].Path == file)
+                    if (AssetEntries[i].FILES[0].Path == file)
                     {
                         return i;
                     }
@@ -244,7 +244,7 @@ namespace Xv2CoreLib.EEPK
 
             return -1;
         }
-        
+
         public static AssetContainer Default()
         {
             return new AssetContainer()
@@ -450,12 +450,12 @@ namespace Xv2CoreLib.EEPK
 
         #region Undoable
         [YAXDontSerialize]
-        public ushort UndoableId 
-        { 
-            get { return IndexNum; } 
-            set 
-            { 
-                if(value != IndexNum)
+        public ushort UndoableId
+        {
+            get { return IndexNum; }
+            set
+            {
+                if (value != IndexNum)
                 {
                     UndoManager.Instance.AddUndo(new CompositeUndo(new List<IUndoRedo>() { new UndoableProperty<Effect>(nameof(IndexNum), this, IndexNum, value), new UndoActionDelegate(this, nameof(RefreshProperties), true) }, "Effect ID"));
                     IndexNum = value;
@@ -476,7 +476,7 @@ namespace Xv2CoreLib.EEPK
             newEffect.IndexNum = IndexNum;
             newEffect.I_02 = I_02;
 
-            if(EffectParts != null)
+            if (EffectParts != null)
             {
                 foreach (var effectPart in EffectParts)
                 {
@@ -489,8 +489,8 @@ namespace Xv2CoreLib.EEPK
 
         public void RemoveNulls()
         {
-            start:
-            for(int i = 0; i < EffectParts.Count; i++)
+        start:
+            for (int i = 0; i < EffectParts.Count; i++)
             {
                 if (EffectParts[i].AssetRef == null)
                 {
@@ -502,7 +502,7 @@ namespace Xv2CoreLib.EEPK
 
         public void AssetRefDetailsRefresh(Asset asset)
         {
-            foreach(var part in EffectParts)
+            foreach (var part in EffectParts)
             {
                 part.AssetRefDetailsRefreash(asset);
             }
@@ -525,7 +525,7 @@ namespace Xv2CoreLib.EEPK
         #region EEPK_Organiser
         [YAXDontSerialize]
         public static List<string> CommonBones { get; private set; } = new List<string>()
-        {   
+        {
             "b_C_Base",
             "b_C_Pelvis",
             "g_C_Pelvis",
@@ -572,7 +572,7 @@ namespace Xv2CoreLib.EEPK
             get
             {
                 if (AssetRef == null) return "Unassigned";
-                return String.Format("[{1}] {0}", AssetRef.FileNamesPreview, I_02);
+                return String.Format("[{1}] {0}", AssetRef.FileNamesPreview, AssetType);
             }
         }
         [YAXDontSerialize]
@@ -581,7 +581,7 @@ namespace Xv2CoreLib.EEPK
             get
             {
                 if (AssetRef == null) return "Unassigned";
-                return !string.IsNullOrWhiteSpace(ESK) ? String.Format("[{1}] {0}  |  {2}", AssetRef.FileNamesPreview, I_02, ESK) : AssetRefDetails;
+                return !string.IsNullOrWhiteSpace(ESK) ? String.Format("[{1}] {0}  |  {2}", AssetRef.FileNamesPreview, AssetType, ESK) : AssetRefDetails;
             }
         }
         private Asset _assetRef = null;
@@ -606,19 +606,19 @@ namespace Xv2CoreLib.EEPK
 
         [YAXAttributeForClass]
         [YAXSerializeAs("Container_Type")]
-        public AssetType I_02 { get; set; } //int8
+        public AssetType AssetType { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("Container_Index")]
-        public ushort I_00 { get; set; }
+        public ushort AssetIndex { get; set; }
         [YAXAttributeFor("StartTime")]
         [YAXSerializeAs("Frames")]
-        public ushort I_28 { get; set; } //delay/start time
+        public ushort StartTime { get; set; }
         [YAXAttributeFor("Attachment")]
         [YAXSerializeAs("value")]
-        public Attachment I_03 { get; set; }//int8
+        public Attachment AttachementType { get; set; }
         [YAXAttributeFor("RotateOnMovement")]
         [YAXSerializeAs("value")]
-        public byte I_04 { get; set; }
+        public byte RotateMovement { get; set; }
         [YAXAttributeFor("Deactivation")]
         [YAXSerializeAs("Mode")]
         public DeactivationMode Deactivation { get; set; }//int8
@@ -627,56 +627,56 @@ namespace Xv2CoreLib.EEPK
         public byte I_06 { get; set; }
         [YAXAttributeFor("I_07")]
         [YAXSerializeAs("value")]
-        public byte I_07 { get; set; } //assumption
+        public byte I_07 { get; set; }
         [YAXAttributeFor("I_08")]
         [YAXSerializeAs("value")]
-        public int I_08 { get; set; } //assumption
+        public int I_08 { get; set; }
         [YAXAttributeFor("I_12")]
         [YAXSerializeAs("value")]
-        public int I_12 { get; set; } //assumption
+        public int I_12 { get; set; }
         [YAXAttributeFor("I_16")]
         [YAXSerializeAs("value")]
-        public int I_16 { get; set; } //assumption
+        public int I_16 { get; set; }
         [YAXAttributeFor("I_20")]
         [YAXSerializeAs("value")]
-        public int I_20 { get; set; } //assumption
+        public int I_20 { get; set; }
         [YAXAttributeFor("AvoidSphere")]
         [YAXSerializeAs("Diameter")]
         [YAXFormat("0.0#######")]
-        public float F_24 { get; set; }
+        public float AvoidSphere { get; set; }
 
-        
+
         [YAXAttributeFor("AttachFlags")]
-        [YAXSerializeAs("MoveWithBone")]
-        public bool I_32_0 { get; set; } //I_32
+        [YAXSerializeAs("PositionUpdate")]
+        public bool PositionUpdate { get; set; } //I_32_0
         [YAXAttributeFor("AttachFlags")]
-        [YAXSerializeAs("RotateWithBone")]
-        public bool I_32_1 { get; set; } //I_32
+        [YAXSerializeAs("RotateUpdate")]
+        public bool RotateUpdate { get; set; } //I_32_1
         [YAXAttributeFor("AttachFlags")]
-        [YAXSerializeAs("InstantMoveAndRotate")]
-        public bool I_32_2 { get; set; } //I_32
+        [YAXSerializeAs("InstantUpdate")]
+        public bool InstantUpdate { get; set; } //I_32_2
         [YAXAttributeFor("AttachFlags")]
         [YAXSerializeAs("OnGroundOnly")]
-        public bool I_32_3 { get; set; } //I_32
+        public bool OnGroundOnly { get; set; } //I_32_3
         [YAXAttributeFor("AttachFlags")]
         [YAXSerializeAs("UseTimeScale")]
-        public bool I_32_4 { get; set; } //I_32
+        public bool UseTimeScale { get; set; } //I_32_4
         [YAXAttributeFor("StartEffectPosition")]
         [YAXSerializeAs("UseBoneDirection")]
-        public bool I_32_5 { get; set; } //I_32
+        public bool UseBoneDirection { get; set; } //I_32_5
         [YAXAttributeFor("StartEffectPosition")]
         [YAXSerializeAs("UseBoneToCameraDirection")]
-        public bool I_32_6 { get; set; } //I_32
+        public bool UseBoneToCameraDirection { get; set; } //I_32_6
         [YAXAttributeFor("StartEffectPosition")]
         [YAXSerializeAs("UseSceneCenterToBoneDirection")]
-        public bool I_32_7 { get; set; } //I_32
+        public bool UseScreenCenterToBoneDirection { get; set; } //I_32_7
 
 
         [YAXAttributeFor("I_34")]
         [YAXSerializeAs("value")]
         public short I_34 { get; set; }
 
-        
+
         [YAXAttributeFor("Flag_36")]
         [YAXSerializeAs("Unk1")]
         public bool I_36_1 { get; set; }
@@ -723,105 +723,107 @@ namespace Xv2CoreLib.EEPK
         [YAXSerializeAs("Unk7")]
         public bool I_37_7 { get; set; }
 
-        
+
         [YAXAttributeFor("Flag_38")]
         [YAXSerializeAs("a")]
-        public string I_38_a { get; set; } //int4
+        [YAXHexValue]
+        public byte I_38_a { get; set; } //int4
         [YAXAttributeFor("Flag_38")]
         [YAXSerializeAs("b")]
-        public string I_38_b { get; set; } //int4
+        [YAXHexValue]
+        public byte I_38_b { get; set; } //int4
 
         //Flag_39
         [YAXAttributeFor("Flag_39")]
         [YAXSerializeAs("NoGlare")]
-        public bool I_39_0 { get; set; } 
+        public bool NoGlare { get; set; } //I_39_0
         [YAXAttributeFor("Flag_39")]
         [YAXSerializeAs("InverseTransparentDrawOrder")]
-        public bool I_39_2 { get; set; } 
+        public bool InverseTransparentDrawOrder { get; set; } //I_39_2
         [YAXAttributeFor("Flag_39")]
         [YAXSerializeAs("Unk1")]
         public bool I_39_1 { get; set; }
         [YAXAttributeFor("Flag_39")]
         [YAXSerializeAs("Unk5")]
-        public bool I_39_5 { get; set; } 
+        public bool I_39_5 { get; set; }
         [YAXAttributeFor("Flag_39")]
         [YAXSerializeAs("Unk6")]
         public bool I_39_6 { get; set; }
         [YAXAttributeFor("LinkFlags")]
         [YAXSerializeAs("RelativePositionZ_To_AbsolutePositionZ")]
-        public bool I_39_3 { get; set; }
+        public bool RelativePositionZ_To_AbsolutePositionZ { get; set; } //I_39_3
         [YAXAttributeFor("LinkFlags")]
         [YAXSerializeAs("ScaleZ_To_BonePositionZ")]
-        public bool I_39_4 { get; set; }
+        public bool ScaleZ_To_BonePositionZ { get; set; } //I_39_4
         [YAXAttributeFor("LinkFlags")]
         [YAXSerializeAs("ObjectOrientation_To_XXXX")]
-        public bool I_39_7 { get; set; }
+        public bool ObjectOrientation_To_XXXX { get; set; } //I_39_7
 
 
         [YAXAttributeFor("Position")]
         [YAXSerializeAs("X")]
         [YAXFormat("0.0#######")]
-        public float POSITION_X { get; set; } //F_40
+        public float PositionX { get; set; } //F_40
         [YAXAttributeFor("Position")]
         [YAXSerializeAs("Y")]
         [YAXFormat("0.0#######")]
-        public float POSITION_Y { get; set; } //F_44
+        public float PositionY { get; set; } //F_44
         [YAXAttributeFor("Position")]
         [YAXSerializeAs("Z")]
         [YAXFormat("0.0#######")]
-        public float POSITION_Z { get; set; } //F_48
+        public float PositionZ { get; set; } //F_48
         [YAXAttributeFor("Orientation_X")]
         [YAXSerializeAs("Min")]
         [YAXFormat("0.0#######")]
-        public float F_52 { get; set; }
+        public float RotationX_Min { get; set; }
         [YAXAttributeFor("Orientation_X")]
         [YAXSerializeAs("Max")]
         [YAXFormat("0.0#######")]
-        public float F_56 { get; set; } 
+        public float RotationX_Max { get; set; }
         [YAXAttributeFor("Orientation_Y")]
         [YAXSerializeAs("Min")]
         [YAXFormat("0.0#######")]
-        public float F_60 { get; set; } 
+        public float RotationY_Min { get; set; }
         [YAXAttributeFor("Orientation_Y")]
         [YAXSerializeAs("Max")]
         [YAXFormat("0.0#######")]
-        public float F_64 { get; set; } 
+        public float RotationY_Max { get; set; }
         [YAXAttributeFor("Orientation_Z")]
         [YAXSerializeAs("Min")]
         [YAXFormat("0.0#######")]
-        public float F_68 { get; set; } //F_68
+        public float RotationZ_Min { get; set; }
         [YAXAttributeFor("Orientation_Z")]
         [YAXSerializeAs("Max")]
         [YAXFormat("0.0#######")]
-        public float F_72 { get; set; } //F_72
+        public float RotationZ_Max { get; set; }
         [YAXAttributeFor("Scale")]
         [YAXSerializeAs("Min")]
         [YAXFormat("0.0#######")]
-        public float SIZE_1 { get; set; } //F_76
+        public float ScaleMin { get; set; }
         [YAXAttributeFor("Scale")]
         [YAXSerializeAs("Max")]
         [YAXFormat("0.0#######")]
-        public float SIZE_2 { get; set; } //F_80
+        public float ScaleMax { get; set; }
         [YAXAttributeFor("NearFadeDistance")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#######")]
-        public float F_84 { get; set; }
+        public float NearFadeDistance { get; set; }
         [YAXAttributeFor("FarFadeDistance")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#######")]
-        public float F_88 { get; set; }
+        public float FarFadeDistance { get; set; }
         [YAXAttributeFor("EMA_Animation")]
         [YAXSerializeAs("Index")]
-        public ushort I_30 { get; set; } 
+        public ushort EMA_AnimationIndex { get; set; }
         [YAXAttributeFor("EMA_Animation")]
         [YAXSerializeAs("LoopStartFrame")]
-        public ushort I_92 { get; set; }
+        public ushort EMA_LoopStartFrame { get; set; }
         [YAXAttributeFor("EMA_Animation")]
         [YAXSerializeAs("LoopEndFrame")]
-        public ushort I_94 { get; set; } //I_94
+        public ushort EMA_LoopEndFrame { get; set; }
         [YAXAttributeFor("EMA_Animation")]
         [YAXSerializeAs("Loop")]
-        public bool I_36_0 { get; set; }
+        public bool EMA_Loop { get; set; } //I_36_0
         [YAXAttributeFor("BoneToAttach")]
         [YAXSerializeAs("name")]
         public string ESK { get; set; } //if NULL, then make it 4 zero bytes instead of an offset
@@ -832,7 +834,7 @@ namespace Xv2CoreLib.EEPK
             Always = 1,
             AfterAnimLoop = 2
         }
-        
+
         public enum Attachment : byte
         {
             External = 0,
@@ -847,25 +849,25 @@ namespace Xv2CoreLib.EEPK
             return new EffectPart()
             {
                 AssetRef = AssetRef,
-                SIZE_2 = SIZE_2,
-                SIZE_1 = SIZE_1,
+                ScaleMax = ScaleMax,
+                ScaleMin = ScaleMin,
                 ESK = ESK,
-                F_68 = F_68,
-                F_72 = F_72,
-                POSITION_X = POSITION_X,
-                POSITION_Y = POSITION_Y,
-                POSITION_Z = POSITION_Z,
-                F_24 = F_24,
-                F_52 = F_52,
-                F_56 = F_56,
-                F_60 = F_60,
-                F_64 = F_64,
-                F_84 = F_84,
-                F_88 = F_88,
-                I_00 = I_00,
-                I_02 = I_02,
-                I_03 = I_03,
-                I_04 = I_04,
+                RotationZ_Min = RotationZ_Min,
+                RotationZ_Max = RotationZ_Max,
+                PositionX = PositionX,
+                PositionY = PositionY,
+                PositionZ = PositionZ,
+                AvoidSphere = AvoidSphere,
+                RotationX_Min = RotationX_Min,
+                RotationX_Max = RotationX_Max,
+                RotationY_Min = RotationY_Min,
+                RotationY_Max = RotationY_Max,
+                NearFadeDistance = NearFadeDistance,
+                FarFadeDistance = FarFadeDistance,
+                AssetIndex = AssetIndex,
+                AssetType = AssetType,
+                AttachementType = AttachementType,
+                RotateMovement = RotateMovement,
                 Deactivation = Deactivation,
                 I_06 = I_06,
                 I_07 = I_07,
@@ -873,18 +875,18 @@ namespace Xv2CoreLib.EEPK
                 I_12 = I_12,
                 I_16 = I_16,
                 I_20 = I_20,
-                I_28 = I_28,
-                I_30 = I_30,
-                I_32_0 = I_32_0,
-                I_32_1 = I_32_1,
-                I_32_2 = I_32_2,
-                I_32_3 = I_32_3,
-                I_32_4 = I_32_4,
-                I_32_5 = I_32_5,
-                I_32_6 = I_32_6,
-                I_32_7 = I_32_7,
+                StartTime = StartTime,
+                EMA_AnimationIndex = EMA_AnimationIndex,
+                PositionUpdate = PositionUpdate,
+                RotateUpdate = RotateUpdate,
+                InstantUpdate = InstantUpdate,
+                OnGroundOnly = OnGroundOnly,
+                UseTimeScale = UseTimeScale,
+                UseBoneDirection = UseBoneDirection,
+                UseBoneToCameraDirection = UseBoneToCameraDirection,
+                UseScreenCenterToBoneDirection = UseScreenCenterToBoneDirection,
                 I_34 = I_34,
-                I_36_0 = I_36_0,
+                EMA_Loop = EMA_Loop,
                 I_36_1 = I_36_1,
                 I_36_2 = I_36_2,
                 I_36_3 = I_36_3,
@@ -902,31 +904,27 @@ namespace Xv2CoreLib.EEPK
                 I_37_7 = I_37_7,
                 I_38_a = I_38_a,
                 I_38_b = I_38_b,
-                I_39_0 = I_39_0,
+                NoGlare = NoGlare,
                 I_39_1 = I_39_1,
-                I_39_2 = I_39_2,
-                I_39_3 = I_39_3,
-                I_39_4 = I_39_4,
+                InverseTransparentDrawOrder = InverseTransparentDrawOrder,
+                RelativePositionZ_To_AbsolutePositionZ = RelativePositionZ_To_AbsolutePositionZ,
+                ScaleZ_To_BonePositionZ = ScaleZ_To_BonePositionZ,
                 I_39_5 = I_39_5,
                 I_39_6 = I_39_6,
-                I_39_7 = I_39_7,
-                I_92 = I_92,
-                I_94 = I_94
+                ObjectOrientation_To_XXXX = ObjectOrientation_To_XXXX,
+                EMA_LoopStartFrame = EMA_LoopStartFrame,
+                EMA_LoopEndFrame = EMA_LoopEndFrame
             };
         }
 
         public static EffectPart NewEffectPart()
         {
-            return new EffectPart()
-            {
-                I_38_a = "0x0",
-                I_38_b = "0x0"
-            };
+            return new EffectPart();
         }
 
         public void AssetRefDetailsRefreash(Asset asset)
         {
-            if(AssetRef == asset)
+            if (AssetRef == asset)
             {
                 RefreshDetails();
             }
@@ -950,6 +948,6 @@ namespace Xv2CoreLib.EEPK
             undos.Add(new UndoActionPropNotify(this, true));
         }
     }
-    
+
 
 }

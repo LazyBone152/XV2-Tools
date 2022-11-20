@@ -25,7 +25,7 @@ namespace Xv2CoreLib.ESK
         public int I_24 { get; set; }
 
         public ESK_Skeleton Skeleton { get; set; }
-        
+
         public byte[] SaveToBytes()
         {
             return new Deserializer(this).bytes.ToArray();
@@ -57,15 +57,32 @@ namespace Xv2CoreLib.ESK
         public short I_02 { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("UseUnk2")]
-        public bool UseUnk2 { get; set; }
+        public bool UseExtraValues { get; set; }
         [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (ulong)0)]
+        public ulong SkeletonID { get; set; }
+
+        //Skeleton ID as a int array (how it was originally). Preserved here to maintain support for older EAN XMLs.
+        [YAXAttributeForClass]
+        [YAXDontSerializeIfNull]
         [YAXSerializeAs("I_28")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public int[] I_28 { get; set; } // size 2
+        public int[] I_28
+        {
+            get => null;
+            set
+            {
+                if (value?.Length == 2)
+                {
+                    byte[] bytes = BitConverter_Ex.GetBytes(value);
+                    SkeletonID = BitConverter.ToUInt64(bytes, 0);
+                }
+            }
+        }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Bone")]
         [YAXDontSerializeIfNull]
-        public AsyncObservableCollection<ESK_Bone> ESKBones { get; set; }
+        public AsyncObservableCollection<ESK_Bone> ESKBones { get; set; } = new AsyncObservableCollection<ESK_Bone>();
         public ESK_Unk1 Unk1 { get; set; }
 
         //Non-hierarchy list - Save it here for better performance when using GetBone. (mostly for XenoKit, since it needs to use this method several dozen times each frame)
@@ -97,12 +114,12 @@ namespace Xv2CoreLib.ESK
             bytes.AddRange(BitConverter.GetBytes((short)count));
             bytes.AddRange(BitConverter.GetBytes(I_02));
             bytes.AddRange(new byte[24]);
-            bytes.AddRange(BitConverter_Ex.GetBytes(I_28));
+            bytes.AddRange(BitConverter.GetBytes(SkeletonID));
 
             if (count > 0)
             {
                 //Writing Index List
-                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - startOffset), startOffset + 4);
+                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - startOffset), startOffset + 4);
 
                 for (int i = 0; i < count; i++)
                 {
@@ -184,7 +201,7 @@ namespace Xv2CoreLib.ESK
                 //Writing Unk1
                 if (Unk1 != null)
                 {
-                    bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - startOffset), startOffset + 20);
+                    bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - startOffset), startOffset + 20);
                     bytes.AddRange(BitConverter.GetBytes(Unk1.I_00));
                     bytes.AddRange(BitConverter.GetBytes(Unk1.I_04));
                     bytes.AddRange(BitConverter.GetBytes(Unk1.I_08));
@@ -218,14 +235,17 @@ namespace Xv2CoreLib.ESK
                     bytes.AddRange(BitConverter.GetBytes(Unk1.I_120));
                 }
 
-                //Writing Unk2
-                if (UseUnk2 == true && count > 0)
+                //Writing Extra Values
+                if (UseExtraValues && count > 0)
                 {
                     bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - startOffset), startOffset + 24);
 
                     for (int i = 0; i < count; i++)
                     {
-                        bytes.AddRange(BitConverter.GetBytes(281470681743360));
+                        bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].ExtraValue_1));
+                        bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].ExtraValue_2));
+                        bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].ExtraValue_3));
+                        bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].ExtraValue_4));
                     }
                 }
 
@@ -237,17 +257,16 @@ namespace Xv2CoreLib.ESK
         public static ESK_Skeleton Read(byte[] rawBytes, int offset, bool loadAbsTransform)
         {
             //Init
-            int unk1Offset = BitConverter.ToInt32(rawBytes, offset + 20) + offset;
-            int unk2Offset = BitConverter.ToInt32(rawBytes, offset + 24) + offset;
+            int ikOffset = BitConverter.ToInt32(rawBytes, offset + 20) + offset; //Unk1
+            int boneExtraInfoOffset = BitConverter.ToInt32(rawBytes, offset + 24) + offset; //Unk2
 
             //Skeleton init
             ESK_Skeleton skeleton = new ESK_Skeleton()
             {
                 I_02 = BitConverter.ToInt16(rawBytes, offset + 2),
-                I_28 = BitConverter_Ex.ToInt32Array(rawBytes, offset + 28, 2),
-                Unk1 = ESK_Unk1.Read(rawBytes, unk1Offset),
-                UseUnk2 = (unk2Offset != 0) ? true : false,
-                ESKBones = AsyncObservableCollection<ESK_Bone>.Create()
+                SkeletonID = BitConverter.ToUInt64(rawBytes, offset + 28),
+                Unk1 = ESK_Unk1.Read(rawBytes, ikOffset),
+                UseExtraValues = boneExtraInfoOffset - offset != 0
             };
 
             short boneCount = BitConverter.ToInt16(rawBytes, offset);
@@ -297,6 +316,17 @@ namespace Xv2CoreLib.ESK
                     //There is no sibling. End loop.
                     break;
                 }
+            }
+
+            //Parse extra data
+            skeleton.CreateNonRecursiveBoneList();
+
+            for(int i = 0; i < boneCount; i++)
+            {
+                skeleton.NonRecursiveBones[i].ExtraValue_1 = BitConverter.ToUInt16(rawBytes, boneExtraInfoOffset + 0);
+                skeleton.NonRecursiveBones[i].ExtraValue_2 = BitConverter.ToUInt16(rawBytes, boneExtraInfoOffset + 2);
+                skeleton.NonRecursiveBones[i].ExtraValue_3 = BitConverter.ToUInt16(rawBytes, boneExtraInfoOffset + 4);
+                skeleton.NonRecursiveBones[i].ExtraValue_4 = BitConverter.ToUInt16(rawBytes, boneExtraInfoOffset + 6);
             }
 
             return skeleton;
@@ -369,23 +399,24 @@ namespace Xv2CoreLib.ESK
         #endregion
 
         #region Add
-        public void AddBones(string parent, List<ESK_Bone> bonesToAdd)
+        public void AddBones(string parent, List<ESK_Bone> bonesToAdd, bool reloadListBones = true)
         {
             foreach (var bone in bonesToAdd)
             {
                 AddBone(parent, bone, false);
             }
 
-            CreateNonRecursiveBoneList();
+            if (reloadListBones)
+                CreateNonRecursiveBoneList();
         }
 
         public bool AddBone(string parent, ESK_Bone boneToAdd, bool reloadListBones = true)
         {
-            if (parent == String.Empty)
+            if (parent == string.Empty)
             {
-                ESKBones.Add(boneToAdd.Clone());
+                ESKBones.Add(boneToAdd.Copy());
 
-                if(reloadListBones)
+                if (reloadListBones)
                     CreateNonRecursiveBoneList();
 
                 return true;
@@ -395,7 +426,7 @@ namespace Xv2CoreLib.ESK
             {
                 if (ESKBones[i].Name == parent)
                 {
-                    ESKBones[i].ESK_Bones.Add(boneToAdd.Clone());
+                    ESKBones[i].ESK_Bones.Add(boneToAdd.Copy());
 
                     if (reloadListBones)
                         CreateNonRecursiveBoneList();
@@ -423,12 +454,11 @@ namespace Xv2CoreLib.ESK
 
         private bool AddBoneRecursive(string parent, ESK_Bone boneToAdd, AsyncObservableCollection<ESK_Bone> eskBones)
         {
-
             for (int i = 0; i < eskBones.Count; i++)
             {
                 if (eskBones[i].Name == parent)
                 {
-                    eskBones[i].ESK_Bones.Add(boneToAdd.Clone());
+                    eskBones[i].ESK_Bones.Add(boneToAdd.Copy());
                     return true;
                 }
 
@@ -442,7 +472,6 @@ namespace Xv2CoreLib.ESK
             }
 
             return false;
-
         }
 
         #endregion
@@ -693,7 +722,7 @@ namespace Xv2CoreLib.ESK
         #region Helper
         public bool Exists(string boneName)
         {
-            foreach(var bone in NonRecursiveBones)
+            foreach (var bone in NonRecursiveBones)
             {
                 if (bone.Name == boneName) return true;
             }
@@ -708,7 +737,7 @@ namespace Xv2CoreLib.ESK
 
         public ESK_Skeleton Clone()
         {
-            AsyncObservableCollection<ESK_Bone> bones = AsyncObservableCollection<ESK_Bone>.Create();
+            AsyncObservableCollection<ESK_Bone> bones = new AsyncObservableCollection<ESK_Bone>();
 
             foreach (var e in ESKBones)
             {
@@ -718,9 +747,9 @@ namespace Xv2CoreLib.ESK
             return new ESK_Skeleton()
             {
                 I_02 = I_02,
-                I_28 = I_28,
+                SkeletonID = SkeletonID,
                 Unk1 = Unk1,
-                UseUnk2 = UseUnk2,
+                UseExtraValues = UseExtraValues,
                 ESKBones = bones
             };
         }
@@ -746,15 +775,9 @@ namespace Xv2CoreLib.ESK
         #region NotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
 
-        // This method is called by the Set accessor of each property.
-        // The CallerMemberName attribute that is applied to the optional propertyName
-        // parameter causes the property name of the caller to be substituted as an argument.
         private void NotifyPropertyChanged(String propertyName = "")
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         #endregion
 
@@ -797,24 +820,13 @@ namespace Xv2CoreLib.ESK
         [YAXDontSerialize]
         public ESK_Bone Parent { get; set; }
 
-        //Props
-        [YAXDontSerialize]
-        public int NumChildren
-        {
-            get
-            {
-                if (ESK_Bones == null) return 0;
-                return ESK_Bones.Count;
-            }
-        }
-
         //For non-recursive bone list:
         [YAXDontSerialize]
-        public short Index1 { get; set; }
+        public short Index1 { get; set; } //Parent
         [YAXDontSerialize]
-        public short Index2 { get; set; }
+        public short Index2 { get; set; } //Child
         [YAXDontSerialize]
-        public short Index3 { get; set; }
+        public short Index3 { get; set; } //Sibling
         [YAXDontSerialize]
         public string Index1_Name { get; set; }
         [YAXDontSerialize]
@@ -822,10 +834,27 @@ namespace Xv2CoreLib.ESK
         [YAXDontSerialize]
         public string Index3_Name { get; set; }
 
+        [YAXAttributeFor("Extra")]
+        [YAXSerializeAs("Value1")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (ushort)0)]
+        public ushort ExtraValue_1 { get; set; }
+        [YAXAttributeFor("Extra")]
+        [YAXSerializeAs("Value2")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (ushort)0)]
+        public ushort ExtraValue_2 { get; set; }
+        [YAXAttributeFor("Extra")]
+        [YAXSerializeAs("Value3")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = ushort.MaxValue)]
+        public ushort ExtraValue_3 { get; set; } = ushort.MaxValue;
+        [YAXAttributeFor("Extra")]
+        [YAXSerializeAs("Value4")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (ushort)0)]
+        public ushort ExtraValue_4 { get; set; }
+
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Bone")]
         public AsyncObservableCollection<ESK_Bone> ESK_Bones { get; set; }
-        
+
         public ESK_Bone Clone()
         {
             return new ESK_Bone()
@@ -838,7 +867,7 @@ namespace Xv2CoreLib.ESK
                 isSelected = true,
                 Index = Index,
                 Index1 = Index1,
-                Index2 = Index2, 
+                Index2 = Index2,
                 Index3 = Index3,
                 Index1_Name = Index1_Name,
                 Index2_Name = Index2_Name,
@@ -850,7 +879,7 @@ namespace Xv2CoreLib.ESK
         {
             AsyncObservableCollection<ESK_Bone> newBones = new AsyncObservableCollection<ESK_Bone>();
 
-            foreach(var bone in bones)
+            foreach (var bone in bones)
             {
                 newBones.Add(bone.Clone());
             }
@@ -875,25 +904,25 @@ namespace Xv2CoreLib.ESK
                 Parent = parent
             };
         }
-        
+
         public ESK_Bone GetBoneWithIndex(int index)
         {
             if (Index == index) return this;
             if (ESK_Bones == null) return null;
 
-            foreach(var child in ESK_Bones)
+            foreach (var child in ESK_Bones)
             {
                 if (child.Index == index) return child;
 
                 ESK_Bone _children = child.GetBoneWithIndex(index);
 
                 if (_children != null) return _children;
-                
+
             }
 
             return null;
         }
-        
+
         public ESK_Bone GetBoneWithName(string name)
         {
             if (Name == name) return this;
@@ -986,7 +1015,7 @@ namespace Xv2CoreLib.ESK
                 ScaleW = ScaleW
             };
         }
-        
+
         public static ESK_RelativeTransform Read(byte[] bytes, int offset)
         {
             if (offset == 0) return null;
@@ -1157,7 +1186,7 @@ namespace Xv2CoreLib.ESK
         }
 
     }
-    
+
     [YAXSerializeAs("Unk1")]
     [Serializable]
     public class ESK_Unk1
@@ -1294,7 +1323,7 @@ namespace Xv2CoreLib.ESK
                 unk1.I_116 = BitConverter.ToInt32(bytes, offset + 116);
                 unk1.I_120 = BitConverter.ToInt32(bytes, offset + 120);
                 return unk1;
-                
+
             }
             catch
             {

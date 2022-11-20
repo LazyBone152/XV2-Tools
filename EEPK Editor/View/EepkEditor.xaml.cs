@@ -960,7 +960,7 @@ namespace EEPK_Organiser.View
                         Files = new AsyncObservableCollection<EffectFile>()
                     };
 
-                    foreach (var file in openFile.FileNames)
+                    foreach (string file in openFile.FileNames)
                     {
                         string newName = effectContainerFile.Emo.GetUnusedName(System.IO.Path.GetFileName(file));
 
@@ -972,9 +972,11 @@ namespace EEPK_Organiser.View
                             case EffectFile.FileType.EMM:
                                 asset.AddFile(EMM_File.LoadEmm(file), newName, EffectFile.FileType.EMM);
                                 break;
-                            case EffectFile.FileType.Other:
+                            case EffectFile.FileType.EMA:
+                                asset.AddFile(EMA_File.Load(file), newName, EffectFile.FileType.EMA);
+                                break;
                             case EffectFile.FileType.EMO:
-                                asset.AddFile(File.ReadAllBytes(file), newName, EffectFile.FileType.Other);
+                                asset.AddFile(EMO_File.Load(file), newName, EffectFile.FileType.EMO);
                                 break;
                             default:
                                 throw new InvalidDataException(String.Format("EMO_ImportAsset_MenuItem_LoadEmoFiles_Click: FileType = {0} is not valid for EMO.", EffectFile.GetFileType(file)));
@@ -1257,6 +1259,7 @@ namespace EEPK_Organiser.View
 
             if (openFile.ShowDialog() == true)
             {
+                /*
                 EAN_File eanFile = EAN_File.Load(openFile.FileName);
                 EMA_File emaFile = EMA_File.ConvertToEma(eanFile);
 
@@ -1264,6 +1267,7 @@ namespace EEPK_Organiser.View
                 asset.AddFile(emaFile, $"{Path.GetFileNameWithoutExtension(openFile.FileName)}.obj.ema", EffectFile.FileType.EMA, undos);
 
                 UndoManager.Instance.AddCompositeUndo(undos, "EAN -> EMA");
+                */
             }
         }
 
@@ -3573,7 +3577,7 @@ namespace EEPK_Organiser.View
                             foreach (var effectPart in effectParts)
                             {
                                 if (effectPart.AssetRef != null)
-                                    effectPart.AssetRef = effectContainerFile.AddAsset(effectPart.AssetRef, effectPart.I_02, undos);
+                                    effectPart.AssetRef = effectContainerFile.AddAsset(effectPart.AssetRef, effectPart.AssetType, undos);
 
                                 var newEffectPart = effectPart.Clone();
                                 SelectedEffect.EffectParts.Add(newEffectPart);
@@ -3685,7 +3689,7 @@ namespace EEPK_Organiser.View
                 {
                     if (selectedEffectPart.Count > 0)
                     {
-                        switch (selectedEffectPart[0].I_02)
+                        switch (selectedEffectPart[0].AssetType)
                         {
                             case AssetType.PBIND:
                                 tabControl.SelectedIndex = (int)Tabs.Pbind;
@@ -3731,7 +3735,7 @@ namespace EEPK_Organiser.View
             {
                 if (SelectedEffect.SelectedEffectPart != null)
                 {
-                    Forms.AssetSelector assetSel = new Forms.AssetSelector(effectContainerFile, false, false, SelectedEffect.SelectedEffectPart.I_02, this, SelectedEffect.SelectedEffectPart.AssetRef);
+                    Forms.AssetSelector assetSel = new Forms.AssetSelector(effectContainerFile, false, false, SelectedEffect.SelectedEffectPart.AssetType, this, SelectedEffect.SelectedEffectPart.AssetRef);
                     assetSel.ShowDialog();
 
                     if(assetSel.SelectedAsset != null)
@@ -3740,10 +3744,10 @@ namespace EEPK_Organiser.View
 
                         foreach (var effectPart in SelectedEffect.SelectedEffectParts)
                         {
-                            undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.I_02), effectPart, effectPart.I_02, assetSel.SelectedAssetType));
+                            undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.AssetType), effectPart, effectPart.AssetType, assetSel.SelectedAssetType));
                             undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.AssetRef), effectPart, effectPart.AssetRef, assetSel.SelectedAsset));
 
-                            effectPart.I_02 = assetSel.SelectedAssetType;
+                            effectPart.AssetType = assetSel.SelectedAssetType;
                             effectPart.AssetRef = assetSel.SelectedAsset;
                         }
 
@@ -3775,14 +3779,14 @@ namespace EEPK_Organiser.View
 
                     foreach (var effectPart in SelectedEffect.SelectedEffectParts)
                     {
-                        float size1 = effectPart.SIZE_1 * scaleFactor;
-                        float size2 = effectPart.SIZE_2 * scaleFactor;
+                        float size1 = effectPart.ScaleMin * scaleFactor;
+                        float size2 = effectPart.ScaleMax * scaleFactor;
 
-                        undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.SIZE_1), effectPart, effectPart.SIZE_1, size1));
-                        undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.SIZE_2), effectPart, effectPart.SIZE_2, size2));
+                        undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.ScaleMin), effectPart, effectPart.ScaleMin, size1));
+                        undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.ScaleMax), effectPart, effectPart.ScaleMax, size2));
 
-                        effectPart.SIZE_1 = size1;
-                        effectPart.SIZE_2 = size2;
+                        effectPart.ScaleMin = size1;
+                        effectPart.ScaleMax = size2;
                     }
 
                     UndoManager.Instance.AddCompositeUndo(undos, "Rescale EffectPart");
@@ -3805,7 +3809,7 @@ namespace EEPK_Organiser.View
 
                 List<IUndoRedo> undos = new List<IUndoRedo>();
 
-                effectParts[0].AssetRef = effectContainerFile.AddAsset(effectParts[0].AssetRef, effectParts[0].I_02, undos);
+                effectParts[0].AssetRef = effectContainerFile.AddAsset(effectParts[0].AssetRef, effectParts[0].AssetType, undos);
                 SelectedEffect.SelectedEffectPart.CopyValues(effectParts[0], undos);
 
                 UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Paste Values"));

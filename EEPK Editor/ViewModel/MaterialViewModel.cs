@@ -135,12 +135,12 @@ namespace EEPK_Organiser.ViewModel
         public int AlphaBlend
         {
             get => CurrentMaterial.AlphaBlend;
-            set => SetIntValue(value, nameof(CurrentMaterial.AlphaBlend));
+            set => SetIntValue(value, nameof(CurrentMaterial.AlphaBlend), 2);
         }
         public AlphaBlendType AlphaBlendType
         {
             get => (AlphaBlendType)CurrentMaterial.AlphaBlendType;
-            set => SetIntValue((int)value, nameof(CurrentMaterial.AlphaBlendType));
+            set => SetIntValue((int)value, nameof(CurrentMaterial.AlphaBlendType), 2);
         }
         public int AlphaTest
         {
@@ -162,12 +162,12 @@ namespace EEPK_Organiser.ViewModel
         public int AlphaSortMask
         {
             get => CurrentMaterial.AlphaSortMask;
-            set => SetIntValue(value, nameof(CurrentMaterial.AlphaSortMask));
+            set => SetIntValue(value, nameof(CurrentMaterial.AlphaSortMask), 2);
         }
         public int ZTestMask
         {
             get => CurrentMaterial.ZTestMask;
-            set => SetIntValue(value, nameof(CurrentMaterial.ZTestMask));
+            set => SetIntValue(value, nameof(CurrentMaterial.ZTestMask), 2);
         }
         public int ZWriteMask
         {
@@ -207,12 +207,12 @@ namespace EEPK_Organiser.ViewModel
         public int BackFace
         {
             get => CurrentMaterial.BackFace;
-            set => SetIntValue(value, nameof(CurrentMaterial.BackFace));
+            set => SetIntValue(value, nameof(CurrentMaterial.BackFace), 2);
         }
         public int TwoSidedRender
         {
             get => CurrentMaterial.TwoSidedRender;
-            set => SetIntValue(value, nameof(CurrentMaterial.TwoSidedRender));
+            set => SetIntValue(value, nameof(CurrentMaterial.TwoSidedRender), 2);
         }
 
         //LowRez
@@ -380,57 +380,54 @@ namespace EEPK_Organiser.ViewModel
         }
 
         #region UndoableSetMethods
-        private void SetIntValue(int newValue, string fieldName)
+        private void SetIntValue(int newValue, string fieldName, int changeType = 1)
         {
             int original = (int)CurrentMaterial.GetType().GetField(fieldName).GetValue(CurrentMaterial);
 
             if(original != newValue)
             {
                 CurrentMaterial.GetType().GetField(fieldName).SetValue(CurrentMaterial, newValue);
+                CurrentMaterial.ParametersChanged = changeType;
 
                 UndoManager.Instance.AddCompositeUndo(new System.Collections.Generic.List<IUndoRedo>()
                 {
                     new UndoableField(fieldName, CurrentMaterial, original, newValue),
-                    new UndoActionDelegate(CurrentMaterial, nameof(CurrentMaterial.TriggerParametersChangedEvent), true)
+                    new UndoablePropertyGeneric(nameof(CurrentMaterial.ParametersChanged), CurrentMaterial, changeType, changeType)
                 }, $"{fieldName}");
-
-                CurrentMaterial.TriggerParametersChangedEvent();
             }
         }
 
-        private void SetBoolValue(bool newValue, string fieldName)
+        private void SetBoolValue(bool newValue, string fieldName, int changeType = 1)
         {
             bool original = (bool)CurrentMaterial.GetType().GetField(fieldName).GetValue(CurrentMaterial);
 
             if (original != newValue)
             {
                 CurrentMaterial.GetType().GetField(fieldName).SetValue(CurrentMaterial, newValue);
+                CurrentMaterial.ParametersChanged = changeType;
 
                 UndoManager.Instance.AddCompositeUndo(new System.Collections.Generic.List<IUndoRedo>()
                 {
                     new UndoableField(fieldName, CurrentMaterial, original, newValue),
-                    new UndoActionDelegate(CurrentMaterial, nameof(CurrentMaterial.TriggerParametersChangedEvent), true)
+                    new UndoablePropertyGeneric(nameof(CurrentMaterial.ParametersChanged), CurrentMaterial, changeType, changeType)
                 }, $"{fieldName}");
-
-                CurrentMaterial.TriggerParametersChangedEvent();
             }
         }
 
-        private void SetFloatValue(float newValue, string fieldName)
+        private void SetFloatValue(float newValue, string fieldName, int changeType = 1)
         {
             float original = (float)CurrentMaterial.GetType().GetField(fieldName).GetValue(CurrentMaterial);
 
             if (original != newValue)
             {
                 CurrentMaterial.GetType().GetField(fieldName).SetValue(CurrentMaterial, newValue);
+                CurrentMaterial.ParametersChanged = changeType;
 
                 UndoManager.Instance.AddCompositeUndo(new System.Collections.Generic.List<IUndoRedo>()
                 {
                     new UndoableField(fieldName, CurrentMaterial, original, newValue),
-                    new UndoActionDelegate(CurrentMaterial, nameof(CurrentMaterial.TriggerParametersChangedEvent), true)
+                    new UndoablePropertyGeneric(nameof(CurrentMaterial.ParametersChanged), CurrentMaterial, changeType, changeType)
                 }, $"{fieldName}");
-
-                CurrentMaterial.TriggerParametersChangedEvent();
             }
         }
         

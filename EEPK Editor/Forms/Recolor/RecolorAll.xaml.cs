@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using Xv2CoreLib.EEPK;
@@ -286,7 +287,7 @@ namespace EEPK_Organiser.Forms
                     _asset.Files[0].EmaFile.ChangeHue(hueChange, saturationChange, lightnessChange, undos);
                     break;
                 case AssetType.EMO:
-                    foreach (var file in _asset.Files)
+                    foreach (EffectFile file in _asset.Files)
                     {
                         switch (file.Extension)
                         {
@@ -295,6 +296,10 @@ namespace EEPK_Organiser.Forms
                                 break;
                             case ".emm":
                                 file.EmmFile.ChangeHsl(hueChange, saturationChange, lightnessChange, undos);
+                                break;
+                            case ".mat.ema":
+                                EMM_File emmFile = _asset.Files.FirstOrDefault(x => x.fileType == EffectFile.FileType.EMM)?.EmmFile;
+                                file.EmaFile.ChangeHue(hueChange, saturationChange, lightnessChange, undos, emmFile:emmFile);
                                 break;
                         }
                     }

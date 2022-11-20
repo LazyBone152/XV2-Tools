@@ -9,21 +9,21 @@ namespace Xv2CoreLib.CST
     [Flags]
     public enum CstDlcVer : uint
     {
-        DLC_Def = 1,
-        DLC_Gkb = 2,
-        DLC_1 = 4, //Super Pack 1
-        DLC_2 = 8, //Super Pack 2
-        DLC_3 = 16, //Super Pack 3
-        DLC_4 = 32, //Super Pack 4
-        DLC_5 = 64, //Extra Pack 1
-        DLC_6 = 128, //Extra Pack 2
-        DLC_7 = 256, //Extra Pack 3
-        DLC_8 = 512, //Extra Pack 4
-        DLC_9 = 1024, //Ultra Pack 1
-        DLC_10 = 2048, //Ultra Pack 2
-        Ver_Day1 = 4096,
-        Ver_TU4 = 65536,
-        UD7 = 524288,
+        DLC_Def = 0x1,
+        DLC_Gkb = 0x2,
+        DLC_1 = 0x4, //Super Pack 1
+        DLC_2 = 0x8, //Super Pack 2
+        DLC_3 = 0x10, //Super Pack 3
+        DLC_4 = 0x20, //Super Pack 4
+        DLC_5 = 0x40, //Extra Pack 1
+        DLC_6 = 0x80, //Extra Pack 2
+        DLC_7 = 0x100, //Extra Pack 3
+        DLC_8 = 0x200, //Extra Pack 4
+        DLC_9 = 0x400, //Ultra Pack 1
+        DLC_10 = 0x800, //Ultra Pack 2
+        Ver_Day1 = 0x1000,
+        Ver_TU4 = 0x10000,
+        UD7 = 0x80000,
         PRB = 0x10000000,
         EL0 = 0x20000000,
         DLC12 = 0x40000000, //Legendary Pack 1
@@ -33,7 +33,8 @@ namespace Xv2CoreLib.CST
     [Flags]
     public enum CstDlcVer2 : uint
     {
-        DLC14 = 1,
+        DLC14 = 0x1, //Conton City Vote Pack
+        DLC15 = 0x10 //Hero of Justice Pack 1
     }
 
     [YAXSerializeAs("CST")]

@@ -268,7 +268,19 @@ namespace Xv2CoreLib.EMM
         private List<string> InitialParameters = new List<string>();
 
         //Notify
-        public bool ParametersChanged { get; set; }
+        private int _parametersChanged = 0;
+        public int ParametersChanged
+        {
+            get => _parametersChanged;
+            set
+            {
+                if(_parametersChanged != value)
+                {
+                    _parametersChanged = value;
+                    NotifyPropertyChanged(nameof(ParametersChanged));
+                }
+            }
+        }
 
         #region Compile
         public List<Parameter> Compile()
@@ -778,12 +790,41 @@ namespace Xv2CoreLib.EMM
             return 0f;
         }
 
+        public CustomColor GetMatCol(int index)
+        {
+            switch (index)
+            {
+                case 0:
+                    return MatCol0;
+                case 1:
+                    return MatCol1;
+                case 2:
+                    return MatCol2;
+                case 3:
+                    return MatCol3;
+            }
+
+            return null;
+        }
+
+        public CustomMatUV GetTexScrl(int index)
+        {
+            switch (index)
+            {
+                case 0:
+                    return TexScrl0;
+                case 1:
+                    return TexScrl1;
+            }
+
+            return null;
+        }
         public bool Compare(DecompiledMaterial material)
         {
             foreach (var field in Fields)
             {
                 //Skip non-parameters
-                if (field.Name == nameof(InitialParameters)) continue;
+                if (field.Name == nameof(InitialParameters) || field.Name == nameof(_parametersChanged)) continue;
 
                 object oldValue = field.GetValue(this);
                 object newValue = field.GetValue(material);
@@ -906,13 +947,15 @@ namespace Xv2CoreLib.EMM
 
         private void VectorValuesChangedEvent(object sender, PropertyChangedEventArgs e)
         {
-            TriggerParametersChangedEvent();
-        }
-
-        public void TriggerParametersChangedEvent()
-        {
+            _parametersChanged = 1;
             NotifyPropertyChanged(nameof(ParametersChanged));
         }
+
+        public void ResetParametersChanged()
+        {
+            _parametersChanged = 0;
+        }
+
     }
 
     public enum AlphaBlendType : int

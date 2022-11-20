@@ -8,6 +8,7 @@ using Xv2CoreLib.Resource.UndoRedo;
 using Xv2CoreLib.Resource;
 using System.Numerics;
 using Xv2CoreLib.ESK;
+using Xv2CoreLib.EMA;
 
 namespace Xv2CoreLib.EAN
 {
@@ -295,7 +296,7 @@ namespace Xv2CoreLib.EAN
         #region Defaults
         public static EAN_File DefaultCamFile()
         {
-            var eskBones = AsyncObservableCollection<ESK_Bone>.Create();
+            AsyncObservableCollection<ESK_Bone> eskBones = new AsyncObservableCollection<ESK_Bone>();
             eskBones.Add(new ESK_Bone()
             {
                 Name = EAN_Node.CAM_NODE,
@@ -310,13 +311,12 @@ namespace Xv2CoreLib.EAN
 
             return new EAN_File()
             {
-                Animations = AsyncObservableCollection<EAN_Animation>.Create(),
                 IsCamera = true,
                 I_08 = 37508,
                 Skeleton = new ESK_Skeleton()
                 {
-                    I_28 = new int[2] { 1900697063, 175112582 },
-                    UseUnk2 = true,
+                    SkeletonID = 752102814708815335,
+                    UseExtraValues = true,
                     ESKBones = eskBones
                 }
             };
@@ -326,7 +326,6 @@ namespace Xv2CoreLib.EAN
         {
             return new EAN_File()
             {
-                Animations = AsyncObservableCollection<EAN_Animation>.Create(),
                 IsCamera = true,
                 I_08 = 37508,
                 Skeleton = skeleton.Copy()
@@ -2437,6 +2436,7 @@ namespace Xv2CoreLib.EAN
         public float Z { get; set; } = 0f;
         [YAXAttributeForClass]
         public float W { get; set; } = 1f;
+
 
         public EAN_Keyframe() { }
 

@@ -148,7 +148,8 @@ namespace Xv2CoreLib.ECF
 
             if (duration == 0) return keyframes;
 
-            if (EffectContainer.EepkToolInterlop.FullDecompile && loop && duration != 0)
+            //if (EffectContainer.EepkToolInterlop.FullDecompile && loop && duration != 0)
+            if (loop && duration != 0)
             {
                 //Ensure that a keyframe exists at the end frame. If there is none, an interpolated one will be added
                 EMP_Keyframe endKeyframe = keyframes.FirstOrDefault(x => x.Time == duration - 1);

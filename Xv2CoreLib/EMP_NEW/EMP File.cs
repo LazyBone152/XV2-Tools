@@ -2438,6 +2438,8 @@ namespace Xv2CoreLib.EMP_NEW
 
         public static float GetInterpolatedKeyframe<T>(IList<T> keyframes, int time, bool interpolationEnabled) where T : IKeyframe
         {
+            if (keyframes.Count == 0) return 0f;
+
             int prev = -1;
             int next = -1;
 

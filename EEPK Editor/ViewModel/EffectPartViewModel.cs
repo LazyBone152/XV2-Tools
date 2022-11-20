@@ -11,42 +11,42 @@ namespace EEPK_Organiser.ViewModel
     {
         private EffectPart effectPart;
 
-        public bool IsNotTBIND { get { return effectPart.I_02 != AssetType.TBIND; } }
+        public bool IsNotTBIND { get { return effectPart.AssetType != AssetType.TBIND; } }
 
         public ushort StartTime
         {
             get
             {
-                return effectPart.I_28;
+                return effectPart.StartTime;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_28), effectPart, effectPart.I_28, value, "Start Time"));
-                effectPart.I_28 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.StartTime), effectPart, effectPart.StartTime, value, "Start Time"));
+                effectPart.StartTime = value;
             }
         }
         public Attachment Attachment
         {
             get
             {
-                return effectPart.I_03;
+                return effectPart.AttachementType;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_03), effectPart, effectPart.I_03, value, "Attachment"));
-                effectPart.I_03 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.AttachementType), effectPart, effectPart.AttachementType, value, "Attachment"));
+                effectPart.AttachementType = value;
             }
         }
         public byte RotateOnMovement
         {
             get
             {
-                return effectPart.I_04;
+                return effectPart.RotateMovement;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_04), effectPart, effectPart.I_04, value, "RotateOnMovement"));
-                effectPart.I_04 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.RotateMovement), effectPart, effectPart.RotateMovement, value, "RotateOnMovement"));
+                effectPart.RotateMovement = value;
             }
         }
         public DeactivationMode Deactivation
@@ -137,108 +137,108 @@ namespace EEPK_Organiser.ViewModel
         {
             get
             {
-                return effectPart.F_24;
+                return effectPart.AvoidSphere;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.F_24), effectPart, effectPart.F_24, value, "AvoidSphere"));
-                effectPart.F_24 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.AvoidSphere), effectPart, effectPart.AvoidSphere, value, "AvoidSphere"));
+                effectPart.AvoidSphere = value;
             }
         }
         public bool I_32_0
         {
             get
             {
-                return effectPart.I_32_0;
+                return effectPart.PositionUpdate;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_32_0), effectPart, effectPart.I_32_0, value, "MoveWithBone"));
-                effectPart.I_32_0 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.PositionUpdate), effectPart, effectPart.PositionUpdate, value, "MoveWithBone"));
+                effectPart.PositionUpdate = value;
             }
         }
         public bool I_32_1
         {
             get
             {
-                return effectPart.I_32_1;
+                return effectPart.RotateUpdate;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_32_1), effectPart, effectPart.I_32_1, value, "RotateWithBone"));
-                effectPart.I_32_1 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.RotateUpdate), effectPart, effectPart.RotateUpdate, value, "RotateWithBone"));
+                effectPart.RotateUpdate = value;
             }
         }
         public bool I_32_2
         {
             get
             {
-                return effectPart.I_32_2;
+                return effectPart.InstantUpdate;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_32_2), effectPart, effectPart.I_32_2, value, "InstantMoveAndRotate"));
-                effectPart.I_32_2 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.InstantUpdate), effectPart, effectPart.InstantUpdate, value, "InstantMoveAndRotate"));
+                effectPart.InstantUpdate = value;
             }
         }
         public bool I_32_3
         {
             get
             {
-                return effectPart.I_32_3;
+                return effectPart.OnGroundOnly;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_32_3), effectPart, effectPart.I_32_3, value, "OnGroundOnly"));
-                effectPart.I_32_3 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.OnGroundOnly), effectPart, effectPart.OnGroundOnly, value, "OnGroundOnly"));
+                effectPart.OnGroundOnly = value;
             }
         }
         public bool I_32_4
         {
             get
             {
-                return effectPart.I_32_4;
+                return effectPart.UseTimeScale;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_32_4), effectPart, effectPart.I_32_4, value, "UseTimeScale"));
-                effectPart.I_32_4 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.UseTimeScale), effectPart, effectPart.UseTimeScale, value, "UseTimeScale"));
+                effectPart.UseTimeScale = value;
             }
         }
         public bool I_32_5
         {
             get
             {
-                return effectPart.I_32_5;
+                return effectPart.UseBoneDirection;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_32_5), effectPart, effectPart.I_32_5, value, "UseBoneDirection"));
-                effectPart.I_32_5 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.UseBoneDirection), effectPart, effectPart.UseBoneDirection, value, "UseBoneDirection"));
+                effectPart.UseBoneDirection = value;
             }
         }
         public bool I_32_6
         {
             get
             {
-                return effectPart.I_32_6;
+                return effectPart.UseBoneToCameraDirection;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_32_6), effectPart, effectPart.I_32_6, value, "UseBoneToCameraDirection"));
-                effectPart.I_32_6 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.UseBoneToCameraDirection), effectPart, effectPart.UseBoneToCameraDirection, value, "UseBoneToCameraDirection"));
+                effectPart.UseBoneToCameraDirection = value;
             }
         }
         public bool I_32_7
         {
             get
             {
-                return effectPart.I_32_7;
+                return effectPart.UseScreenCenterToBoneDirection;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_32_7), effectPart, effectPart.I_32_7, value, "UseSceneCenterToBoneDirection"));
-                effectPart.I_32_7 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.UseScreenCenterToBoneDirection), effectPart, effectPart.UseScreenCenterToBoneDirection, value, "UseSceneCenterToBoneDirection"));
+                effectPart.UseScreenCenterToBoneDirection = value;
             }
         }
         public short I_34
@@ -433,7 +433,7 @@ namespace EEPK_Organiser.ViewModel
                 effectPart.I_37_7 = value;
             }
         }
-        public string I_38_a
+        public byte I_38_a
         {
             get
             {
@@ -445,7 +445,7 @@ namespace EEPK_Organiser.ViewModel
                 effectPart.I_38_a = value;
             }
         }
-        public string I_38_b
+        public byte I_38_b
         {
             get
             {
@@ -461,12 +461,12 @@ namespace EEPK_Organiser.ViewModel
         {
             get
             {
-                return effectPart.I_39_0;
+                return effectPart.NoGlare;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_39_0), effectPart, effectPart.I_39_0, value, "NoGlare"));
-                effectPart.I_39_0 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.NoGlare), effectPart, effectPart.NoGlare, value, "NoGlare"));
+                effectPart.NoGlare = value;
             }
         }
         public bool I_39_1
@@ -485,36 +485,36 @@ namespace EEPK_Organiser.ViewModel
         {
             get
             {
-                return effectPart.I_39_2;
+                return effectPart.InverseTransparentDrawOrder;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_39_2), effectPart, effectPart.I_39_2, value, "InverseTransparentDrawOrder"));
-                effectPart.I_39_2 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.InverseTransparentDrawOrder), effectPart, effectPart.InverseTransparentDrawOrder, value, "InverseTransparentDrawOrder"));
+                effectPart.InverseTransparentDrawOrder = value;
             }
         }
         public bool I_39_3
         {
             get
             {
-                return effectPart.I_39_3;
+                return effectPart.RelativePositionZ_To_AbsolutePositionZ;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_39_3), effectPart, effectPart.I_39_3, value, "ScaleZ_To_BonePositionZ"));
-                effectPart.I_39_3 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.RelativePositionZ_To_AbsolutePositionZ), effectPart, effectPart.RelativePositionZ_To_AbsolutePositionZ, value, "ScaleZ_To_BonePositionZ"));
+                effectPart.RelativePositionZ_To_AbsolutePositionZ = value;
             }
         }
         public bool I_39_4
         {
             get
             {
-                return effectPart.I_39_4;
+                return effectPart.ScaleZ_To_BonePositionZ;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_39_4), effectPart, effectPart.I_39_4, value, "ScaleZ_To_BonePositionZ"));
-                effectPart.I_39_4 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.ScaleZ_To_BonePositionZ), effectPart, effectPart.ScaleZ_To_BonePositionZ, value, "ScaleZ_To_BonePositionZ"));
+                effectPart.ScaleZ_To_BonePositionZ = value;
             }
         }
         public bool I_39_5
@@ -545,216 +545,216 @@ namespace EEPK_Organiser.ViewModel
         {
             get
             {
-                return effectPart.I_39_7;
+                return effectPart.ObjectOrientation_To_XXXX;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_39_7), effectPart, effectPart.I_39_7, value, "ObjectOrientation_To_XXXX"));
-                effectPart.I_39_7 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.ObjectOrientation_To_XXXX), effectPart, effectPart.ObjectOrientation_To_XXXX, value, "ObjectOrientation_To_XXXX"));
+                effectPart.ObjectOrientation_To_XXXX = value;
             }
         }
         public float POSITION_X
         {
             get
             {
-                return effectPart.POSITION_X;
+                return effectPart.PositionX;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.POSITION_X), effectPart, effectPart.POSITION_X, value, "Position X"));
-                effectPart.POSITION_X = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.PositionX), effectPart, effectPart.PositionX, value, "Position X"));
+                effectPart.PositionX = value;
             }
         }
         public float POSITION_Y
         {
             get
             {
-                return effectPart.POSITION_Y;
+                return effectPart.PositionY;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.POSITION_Y), effectPart, effectPart.POSITION_Y, value, "Position Y"));
-                effectPart.POSITION_Y = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.PositionY), effectPart, effectPart.PositionY, value, "Position Y"));
+                effectPart.PositionY = value;
             }
         }
         public float POSITION_Z
         {
             get
             {
-                return effectPart.POSITION_Z;
+                return effectPart.PositionZ;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.POSITION_Z), effectPart, effectPart.POSITION_Z, value, "Position Z"));
-                effectPart.POSITION_Z = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.PositionZ), effectPart, effectPart.PositionZ, value, "Position Z"));
+                effectPart.PositionZ = value;
             }
         }
         public float F_52
         {
             get
             {
-                return effectPart.F_52;
+                return effectPart.RotationX_Min;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.F_52), effectPart, effectPart.F_52, value, "Rotation X (Min)"));
-                effectPart.F_52 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.RotationX_Min), effectPart, effectPart.RotationX_Min, value, "Rotation X (Min)"));
+                effectPart.RotationX_Min = value;
             }
         }
         public float F_56
         {
             get
             {
-                return effectPart.F_56;
+                return effectPart.RotationX_Max;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.F_56), effectPart, effectPart.F_56, value, "Rotation X (Max)"));
-                effectPart.F_56 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.RotationX_Max), effectPart, effectPart.RotationX_Max, value, "Rotation X (Max)"));
+                effectPart.RotationX_Max = value;
             }
         }
         public float F_60
         {
             get
             {
-                return effectPart.F_60;
+                return effectPart.RotationY_Min;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.F_60), effectPart, effectPart.F_60, value, "Rotation Y (Min)"));
-                effectPart.F_60 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.RotationY_Min), effectPart, effectPart.RotationY_Min, value, "Rotation Y (Min)"));
+                effectPart.RotationY_Min = value;
             }
         }
         public float F_64
         {
             get
             {
-                return effectPart.F_64;
+                return effectPart.RotationY_Max;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.F_64), effectPart, effectPart.F_64, value, "Rotation Y (Max)"));
-                effectPart.F_64 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.RotationY_Max), effectPart, effectPart.RotationY_Max, value, "Rotation Y (Max)"));
+                effectPart.RotationY_Max = value;
             }
         }
         public float F_68
         {
             get
             {
-                return effectPart.F_68;
+                return effectPart.RotationZ_Min;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.F_68), effectPart, effectPart.F_68, value, "Rotation Z (Min)"));
-                effectPart.F_68 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.RotationZ_Min), effectPart, effectPart.RotationZ_Min, value, "Rotation Z (Min)"));
+                effectPart.RotationZ_Min = value;
             }
         }
         public float F_72
         {
             get
             {
-                return effectPart.F_72;
+                return effectPart.RotationZ_Max;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.F_72), effectPart, effectPart.F_72, value, "Rotation Z (Max)"));
-                effectPart.F_72 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.RotationZ_Max), effectPart, effectPart.RotationZ_Max, value, "Rotation Z (Max)"));
+                effectPart.RotationZ_Max = value;
             }
         }
         public float SIZE_1
         {
             get
             {
-                return effectPart.SIZE_1;
+                return effectPart.ScaleMin;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.SIZE_1), effectPart, effectPart.SIZE_1, value, "Scale (Min)"));
-                effectPart.SIZE_1 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.ScaleMin), effectPart, effectPart.ScaleMin, value, "Scale (Min)"));
+                effectPart.ScaleMin = value;
             }
         }
         public float SIZE_2
         {
             get
             {
-                return effectPart.SIZE_2;
+                return effectPart.ScaleMax;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.SIZE_2), effectPart, effectPart.SIZE_2, value, "Scale (Max)"));
-                effectPart.SIZE_2 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.ScaleMax), effectPart, effectPart.ScaleMax, value, "Scale (Max)"));
+                effectPart.ScaleMax = value;
             }
         }
         public float F_84
         {
             get
             {
-                return effectPart.F_84;
+                return effectPart.NearFadeDistance;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.F_84), effectPart, effectPart.F_84, value, "Near Fade Distance"));
-                effectPart.F_84 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.NearFadeDistance), effectPart, effectPart.NearFadeDistance, value, "Near Fade Distance"));
+                effectPart.NearFadeDistance = value;
             }
         }
         public float F_88
         {
             get
             {
-                return effectPart.F_88;
+                return effectPart.FarFadeDistance;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.F_88), effectPart, effectPart.F_88, value, "Far Fade Distance"));
-                effectPart.F_88 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.FarFadeDistance), effectPart, effectPart.FarFadeDistance, value, "Far Fade Distance"));
+                effectPart.FarFadeDistance = value;
             }
         }
         public ushort I_30
         {
             get
             {
-                return effectPart.I_30;
+                return effectPart.EMA_AnimationIndex;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_30), effectPart, effectPart.I_30, value, "EMA Animation Index"));
-                effectPart.I_30 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.EMA_AnimationIndex), effectPart, effectPart.EMA_AnimationIndex, value, "EMA Animation Index"));
+                effectPart.EMA_AnimationIndex = value;
             }
         }
         public ushort I_92
         {
             get
             {
-                return effectPart.I_92;
+                return effectPart.EMA_LoopStartFrame;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_92), effectPart, effectPart.I_92, value, "Loop Start Frame"));
-                effectPart.I_92 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.EMA_LoopStartFrame), effectPart, effectPart.EMA_LoopStartFrame, value, "Loop Start Frame"));
+                effectPart.EMA_LoopStartFrame = value;
             }
         }
         public ushort I_94
         {
             get
             {
-                return effectPart.I_94;
+                return effectPart.EMA_LoopEndFrame;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_94), effectPart, effectPart.I_94, value, "Loop End Frame"));
-                effectPart.I_94 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.EMA_LoopEndFrame), effectPart, effectPart.EMA_LoopEndFrame, value, "Loop End Frame"));
+                effectPart.EMA_LoopEndFrame = value;
             }
         }
         public bool I_36_0
         {
             get
             {
-                return effectPart.I_36_0;
+                return effectPart.EMA_Loop;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.I_36_0), effectPart, effectPart.I_36_0, value, "EMA Loop"));
-                effectPart.I_36_0 = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.EMA_Loop), effectPart, effectPart.EMA_Loop, value, "EMA Loop"));
+                effectPart.EMA_Loop = value;
             }
         }
         public string ESK

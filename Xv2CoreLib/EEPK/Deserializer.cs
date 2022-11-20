@@ -57,6 +57,13 @@ namespace Xv2CoreLib.EEPK
                     if (container.AssetEntries == null) container.AssetEntries = new List<Asset_Entry>();
                 }
             }
+            if(eepk_File.Effects != null)
+            {
+                foreach(var effect in eepk_File.Effects)
+                {
+                    if (effect.EffectParts == null) effect.EffectParts = new AsyncObservableCollection<EffectPart>();
+                }
+            }
         }
 
         void WriteBinaryEEPK()
@@ -205,19 +212,19 @@ namespace Xv2CoreLib.EEPK
                     bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - effectIdActualPosition[i]), effectIdActualPosition[i] + 12);
                     
                     //Above line: setting offset to Effect Entry Start in the Effect ID Entry
-                    for (int a = 0; a < eepk_File.Effects[i].EffectParts.Count(); a++)
+                    for (int a = 0; a < eepk_File.Effects[i].EffectParts.Count; a++)
                     {
                         //Each entry/size
-                        BitArray compositeBits_I_32 = new BitArray(new bool[8] { eepk_File.Effects[i].EffectParts[a].I_32_0, eepk_File.Effects[i].EffectParts[a].I_32_1, eepk_File.Effects[i].EffectParts[a].I_32_2, eepk_File.Effects[i].EffectParts[a].I_32_3, eepk_File.Effects[i].EffectParts[a].I_32_4, eepk_File.Effects[i].EffectParts[a].I_32_5, eepk_File.Effects[i].EffectParts[a].I_32_6, eepk_File.Effects[i].EffectParts[a].I_32_7 });
-                        BitArray compositeBits_I_39 = new BitArray(new bool[8] { eepk_File.Effects[i].EffectParts[a].I_39_0, eepk_File.Effects[i].EffectParts[a].I_39_1, eepk_File.Effects[i].EffectParts[a].I_39_2, eepk_File.Effects[i].EffectParts[a].I_39_3, eepk_File.Effects[i].EffectParts[a].I_39_4, eepk_File.Effects[i].EffectParts[a].I_39_5, eepk_File.Effects[i].EffectParts[a].I_39_6, eepk_File.Effects[i].EffectParts[a].I_39_7 });
-                        BitArray compositeBits_I_36 = new BitArray(new bool[8] { eepk_File.Effects[i].EffectParts[a].I_36_0, eepk_File.Effects[i].EffectParts[a].I_36_1, eepk_File.Effects[i].EffectParts[a].I_36_2, eepk_File.Effects[i].EffectParts[a].I_36_3, eepk_File.Effects[i].EffectParts[a].I_36_4, eepk_File.Effects[i].EffectParts[a].I_36_5, eepk_File.Effects[i].EffectParts[a].I_36_6, eepk_File.Effects[i].EffectParts[a].I_36_6 });
+                        BitArray compositeBits_I_32 = new BitArray(new bool[8] { eepk_File.Effects[i].EffectParts[a].PositionUpdate, eepk_File.Effects[i].EffectParts[a].RotateUpdate, eepk_File.Effects[i].EffectParts[a].InstantUpdate, eepk_File.Effects[i].EffectParts[a].OnGroundOnly, eepk_File.Effects[i].EffectParts[a].UseTimeScale, eepk_File.Effects[i].EffectParts[a].UseBoneDirection, eepk_File.Effects[i].EffectParts[a].UseBoneToCameraDirection, eepk_File.Effects[i].EffectParts[a].UseScreenCenterToBoneDirection });
+                        BitArray compositeBits_I_39 = new BitArray(new bool[8] { eepk_File.Effects[i].EffectParts[a].NoGlare, eepk_File.Effects[i].EffectParts[a].I_39_1, eepk_File.Effects[i].EffectParts[a].InverseTransparentDrawOrder, eepk_File.Effects[i].EffectParts[a].RelativePositionZ_To_AbsolutePositionZ, eepk_File.Effects[i].EffectParts[a].ScaleZ_To_BonePositionZ, eepk_File.Effects[i].EffectParts[a].I_39_5, eepk_File.Effects[i].EffectParts[a].I_39_6, eepk_File.Effects[i].EffectParts[a].ObjectOrientation_To_XXXX });
+                        BitArray compositeBits_I_36 = new BitArray(new bool[8] { eepk_File.Effects[i].EffectParts[a].EMA_Loop, eepk_File.Effects[i].EffectParts[a].I_36_1, eepk_File.Effects[i].EffectParts[a].I_36_2, eepk_File.Effects[i].EffectParts[a].I_36_3, eepk_File.Effects[i].EffectParts[a].I_36_4, eepk_File.Effects[i].EffectParts[a].I_36_5, eepk_File.Effects[i].EffectParts[a].I_36_6, eepk_File.Effects[i].EffectParts[a].I_36_6 });
                         BitArray compositeBits_I_37 = new BitArray(new bool[8] { eepk_File.Effects[i].EffectParts[a].I_37_0, eepk_File.Effects[i].EffectParts[a].I_37_1, eepk_File.Effects[i].EffectParts[a].I_37_2, eepk_File.Effects[i].EffectParts[a].I_37_3, eepk_File.Effects[i].EffectParts[a].I_37_4, eepk_File.Effects[i].EffectParts[a].I_37_5, eepk_File.Effects[i].EffectParts[a].I_37_6, eepk_File.Effects[i].EffectParts[a].I_37_6 });
 
 
-                        bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].I_00));
-                        bytes.Add((byte)eepk_File.Effects[i].EffectParts[a].I_02);
-                        bytes.Add((byte)eepk_File.Effects[i].EffectParts[a].I_03);
-                        bytes.Add(eepk_File.Effects[i].EffectParts[a].I_04);
+                        bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].AssetIndex));
+                        bytes.Add((byte)eepk_File.Effects[i].EffectParts[a].AssetType);
+                        bytes.Add((byte)eepk_File.Effects[i].EffectParts[a].AttachementType);
+                        bytes.Add(eepk_File.Effects[i].EffectParts[a].RotateMovement);
                         bytes.Add((byte)eepk_File.Effects[i].EffectParts[a].Deactivation);
                         bytes.Add(eepk_File.Effects[i].EffectParts[a].I_06);
                         bytes.Add(eepk_File.Effects[i].EffectParts[a].I_07);
@@ -225,33 +232,33 @@ namespace Xv2CoreLib.EEPK
                         bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].I_12));
                         bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].I_16));
                         bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].I_20));
-                        bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].F_24));
-                        bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].I_28));
-                        bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].I_30));
+                        bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].AvoidSphere));
+                        bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].StartTime));
+                        bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].EMA_AnimationIndex));
                         bytes.Add(Utils.ConvertToByte(compositeBits_I_32));
                         bytes.Add(0);
                         bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].I_34));
                         bytes.Add(Utils.ConvertToByte(compositeBits_I_36));
                         bytes.Add(Utils.ConvertToByte(compositeBits_I_37));
-                        bytes.Add(Int4Converter.GetByte(HexConverter.ToInt8(eepk_File.Effects[i].EffectParts[a].I_38_a), HexConverter.ToInt8(eepk_File.Effects[i].EffectParts[a].I_38_b), "Flag_38 a", "Flag_38 b"));
+                        bytes.Add(Int4Converter.GetByte(eepk_File.Effects[i].EffectParts[a].I_38_a, eepk_File.Effects[i].EffectParts[a].I_38_b, "Flag_38 a", "Flag_38 b"));
                         bytes.Add(Utils.ConvertToByte(compositeBits_I_39));
-                        bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].POSITION_X));
-                        bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].POSITION_Y));
-                        bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].POSITION_Z));
+                        bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].PositionX));
+                        bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].PositionY));
+                        bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].PositionZ));
 
-                        bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(eepk_File.Effects[i].EffectParts[a].F_52)));
-                        bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(eepk_File.Effects[i].EffectParts[a].F_56)));
-                        bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(eepk_File.Effects[i].EffectParts[a].F_60)));
-                        bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(eepk_File.Effects[i].EffectParts[a].F_64)));
-                        bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(eepk_File.Effects[i].EffectParts[a].F_68)));
-                        bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(eepk_File.Effects[i].EffectParts[a].F_72)));
+                        bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(eepk_File.Effects[i].EffectParts[a].RotationX_Min)));
+                        bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(eepk_File.Effects[i].EffectParts[a].RotationX_Max)));
+                        bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(eepk_File.Effects[i].EffectParts[a].RotationY_Min)));
+                        bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(eepk_File.Effects[i].EffectParts[a].RotationY_Max)));
+                        bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(eepk_File.Effects[i].EffectParts[a].RotationZ_Min)));
+                        bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(eepk_File.Effects[i].EffectParts[a].RotationZ_Max)));
 
-                        bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].SIZE_1));
-                        bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].SIZE_2));
-                        bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].F_84));
-                        bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].F_88));
-                        bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].I_92));
-                        bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].I_94));
+                        bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].ScaleMin));
+                        bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].ScaleMax));
+                        bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].NearFadeDistance));
+                        bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].FarFadeDistance));
+                        bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].EMA_LoopStartFrame));
+                        bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].EMA_LoopEndFrame));
                         eskStringPointers.Add(bytes.Count());
                         eskStringsToWrite.Add(eepk_File.Effects[i].EffectParts[a].ESK);
                         bytes.AddRange(new List<byte> { 0, 0, 0, 0 });

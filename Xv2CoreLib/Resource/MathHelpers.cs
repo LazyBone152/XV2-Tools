@@ -65,6 +65,16 @@ namespace Xv2CoreLib.Resource
             return Math.Abs(value1 - value2) < Epsilon;
         }
 
+        public static float QuadraticBezier(float factor, float startPoint, float controlPoint, float endPoint)
+        {
+            return (float)((Math.Pow(1.0 - factor, 2.0) * startPoint) + (2.0 * (1.0 - factor) * factor * controlPoint) + (Math.Pow(factor, 2.0) * endPoint));
+        }
+
+        public static float CubicBezier(float factor, float startPoint, float controlPoint1, float controlPoint2, float endPoint)
+        {
+            return (float)((Math.Pow(1.0 - factor, 3.0) * startPoint) + (3.0 * Math.Pow(1.0 - factor, 2.0) * factor * controlPoint1) + (3.0 * (1.0 - factor) * Math.Pow(factor, 2.0) * controlPoint2) + (Math.Pow(factor, 3.0) * endPoint));
+        }
+
         //Testing for EMA. Not good to use
         public static Quaternion EulerAnglesToQuaternion(Vector3 eulerAngles)
         {
@@ -235,6 +245,6 @@ namespace Xv2CoreLib.Resource
             m2[1] = fTyz + fTwx;
             m2[2] = 1.0 - (fTxx + fTyy);
         }
-    
+
     }
 }

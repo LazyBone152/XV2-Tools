@@ -617,11 +617,11 @@ namespace Xv2CoreLib.EMD
         [YAXAttributeFor("BlendIndexes")]
         [YAXSerializeAs("values")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public byte[] BlendIndexes { get; set; } //Size 4
+        public byte[] BlendIndexes { get; set; } = new byte[4]; //Size 4
         [YAXAttributeFor("BlendWeights")]
         [YAXSerializeAs("values")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public float[] BlendWeights { get; set; } //Size 3 (if float16, then 2 bytes of padding after)
+        public float[] BlendWeights { get; set; } = new float[4]; //Size 3 (if float16, then 2 bytes of padding after)
 
         public static int GetVertexSize(VertexFlags flags)
         {
@@ -800,18 +800,26 @@ namespace Xv2CoreLib.EMD
 
                 if (flags.HasFlag(VertexFlags.BlendWeight))
                 {
-                    vertex.BlendIndexes = new byte[4] { rawBytes[offset + addedOffset + 0], rawBytes[offset + addedOffset + 1], rawBytes[offset + addedOffset + 2], rawBytes[offset + addedOffset + 3] };
+                    vertex.BlendIndexes[0] = rawBytes[offset + addedOffset + 0];
+                    vertex.BlendIndexes[1] = rawBytes[offset + addedOffset + 1];
+                    vertex.BlendIndexes[2] = rawBytes[offset + addedOffset + 2];
+                    vertex.BlendIndexes[3] = rawBytes[offset + addedOffset + 3];
 
                     addedOffset += 4;
 
                     if (flags.HasFlag(VertexFlags.CompressedFormat))
                     {
-                        vertex.BlendWeights = new float[4] { Half.ToHalf(rawBytes, offset + addedOffset + 0), Half.ToHalf(rawBytes, offset + addedOffset + 2), Half.ToHalf(rawBytes, offset + addedOffset + 4), 0f };
+                        vertex.BlendWeights[0] = Half.ToHalf(rawBytes, offset + addedOffset + 0);
+                        vertex.BlendWeights[1] = Half.ToHalf(rawBytes, offset + addedOffset + 2);
+                        vertex.BlendWeights[2] = Half.ToHalf(rawBytes, offset + addedOffset + 4);
+
                         addedOffset += 8;
                     }
                     else
                     {
-                        vertex.BlendWeights = new float[4] { BitConverter.ToSingle(rawBytes, offset + addedOffset + 0), BitConverter.ToSingle(rawBytes, offset + addedOffset + 4), BitConverter.ToSingle(rawBytes, offset + addedOffset + 8), 0f };
+                        vertex.BlendWeights[0] = BitConverter.ToSingle(rawBytes, offset + addedOffset + 0);
+                        vertex.BlendWeights[1] = BitConverter.ToSingle(rawBytes, offset + addedOffset + 4);
+                        vertex.BlendWeights[2] = BitConverter.ToSingle(rawBytes, offset + addedOffset + 8);
                         addedOffset += 16;
                     }
 

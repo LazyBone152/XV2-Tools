@@ -131,7 +131,7 @@ namespace Xv2CoreLib.EffectContainer
         {
             get
             {
-                if(saveFormat == SaveFormat.VfxPackage)
+                if (saveFormat == SaveFormat.VfxPackage)
                 {
                     return string.Format("{0}{1}", Directory, ZipExtension);
                 }
@@ -248,11 +248,11 @@ namespace Xv2CoreLib.EffectContainer
 
                 if (_effect.EffectParts == null) return false;
 
-                foreach(var effectPart in _effect.EffectParts)
+                foreach (var effectPart in _effect.EffectParts)
                 {
                     if (effectPart.AssetRefDetails.ToLower().Contains(flattenedSearchParam)) return true;
                 }
-                
+
             }
 
             return false;
@@ -272,7 +272,7 @@ namespace Xv2CoreLib.EffectContainer
             _viewEffects.Filter = new Predicate<object>(EffectFilterCheck);
             NotifyPropertyChanged("ViewEffects");
         }
-        
+
         public void UpdateAllFilters()
         {
             UpdateEffectFilter();
@@ -295,7 +295,7 @@ namespace Xv2CoreLib.EffectContainer
             undos.Add(new UndoActionDelegate(this, nameof(UpdateEffectFilter), true));
             UndoManager.Instance.AddUndo(new CompositeUndo(undos, (wasForPaste) ? "Paste Effects" : "Add Effects"));
         }
-        
+
         public void UndoableAddAsset(Asset assetToAdd, AssetType type)
         {
             List<IUndoRedo> undos = new List<IUndoRedo>();
@@ -332,7 +332,7 @@ namespace Xv2CoreLib.EffectContainer
         {
             return AddAsset(assetToAdd, type, new List<IUndoRedo>());
         }
-        
+
         public Asset AddAsset(Asset assetToAdd, AssetType type, List<IUndoRedo> undos)
         {
             Asset existingAsset = AssetExists(assetToAdd, type);
@@ -373,7 +373,7 @@ namespace Xv2CoreLib.EffectContainer
             List<IUndoRedo> undos = new List<IUndoRedo>();
 
             //Add the assets used
-            foreach(var effectPart in effect.EffectParts)
+            foreach (var effectPart in effect.EffectParts)
             {
                 if (effectPart.AssetRef == null && allowNullAssets)
                 {
@@ -381,7 +381,7 @@ namespace Xv2CoreLib.EffectContainer
                 }
                 if (effectPart.AssetRef != null)
                 {
-                    effectPart.AssetRef = AddAsset(effectPart.AssetRef, effectPart.I_02, undos);
+                    effectPart.AssetRef = AddAsset(effectPart.AssetRef, effectPart.AssetType, undos);
                 }
                 else if (!allowNullAssets)
                 {
@@ -400,7 +400,7 @@ namespace Xv2CoreLib.EffectContainer
         {
             List<IUndoRedo> undos = new List<IUndoRedo>();
 
-            foreach(var effect in effects)
+            foreach (var effect in effects)
             {
                 undos.AddRange(AddEffect(effect, allowNullAssets));
             }
@@ -540,7 +540,7 @@ namespace Xv2CoreLib.EffectContainer
             }
 
             //If SDBH, then we need to convert the container into the global EMM/EMB format that XV2 uses.
-            if((effectContainerFile.Version == VersionEnum.SDBH || effectContainerFile.Version == (VersionEnum)1))
+            if ((effectContainerFile.Version == VersionEnum.SDBH || effectContainerFile.Version == (VersionEnum)1))
             {
                 effectContainerFile.LoadSDBHPBINDContainer();
             }
@@ -557,14 +557,14 @@ namespace Xv2CoreLib.EffectContainer
             effectContainerFile.ValidateTextureContainers(AssetType.TBIND);
 
             //Load VfxPackageExtension
-            if(_saveFormat == SaveFormat.VfxPackage)
+            if (_saveFormat == SaveFormat.VfxPackage)
             {
                 effectContainerFile.VfxPackageExtension = VfxPackageExtension.Load(_zipReader, effectContainerFile);
             }
 
             return effectContainerFile;
         }
-        
+
         public static EffectContainerFile LoadVfxPackage(Stream stream, string path)
         {
             using (ZipReader reader = new ZipReader(new ZipArchive(stream, ZipArchiveMode.Read)))
@@ -658,6 +658,9 @@ namespace Xv2CoreLib.EffectContainer
             //Load the actual assets and link them (if needed)
             for (int i = 0; i < container.Assets.Count; i++)
             {
+                EMM_File emmFile = null;
+                EMA_File matEmaFile = null;
+
                 foreach (var file in container.Assets[i].Files)
                 {
                     if (file.FullFileName != "NULL")
@@ -699,25 +702,55 @@ namespace Xv2CoreLib.EffectContainer
                             case ".emm":
                                 file.EmmFile = EMM_File.LoadEmm(fileBytes);
                                 file.fileType = EffectFile.FileType.EMM;
+                                emmFile = file.EmmFile;
                                 break;
+                            case ".mat.ema":
                             case ".light.ema":
+                            case ".obj.ema":
                             case ".ema":
-                                file.EmaFile = EMA_File.Load(fileBytes);
+                            ema:
+                                if (EepkToolInterlop.FullDecompile)
+                                {
+                                    file.EmaFile = EMA_File.Load(fileBytes);
+
+                                    if (file.EmaFile.EmaType == EmaType.mat)
+                                        matEmaFile = file.EmaFile;
+                                }
+                                else
+                                {
+                                    file.Bytes = fileBytes;
+                                }
+
                                 file.fileType = EffectFile.FileType.EMA;
                                 break;
                             case ".emo":
-                                file.Bytes = fileBytes;
+                                if (EepkToolInterlop.FullDecompile)
+                                {
+                                    file.EmoFile = EMO_File.Load(fileBytes);
+                                }
+                                else
+                                {
+                                    file.Bytes = fileBytes;
+                                }
+
                                 file.fileType = EffectFile.FileType.EMO;
                                 break;
                             default:
+                                if (file.Extension.Contains(".ema")) goto ema;
                                 file.Bytes = fileBytes;
                                 file.fileType = EffectFile.FileType.Other;
                                 break;
                         }
+
                     }
 
                 }
 
+                //MAT.EMA material name linkage
+                if(matEmaFile != null && emmFile != null)
+                {
+                    matEmaFile.FixMaterialNames(emmFile);
+                }
             }
 
             //Regenerate asset names (to solve any name conflict user-errors)
@@ -804,7 +837,7 @@ namespace Xv2CoreLib.EffectContainer
 
             return result;
         }
-        
+
         public bool Save()
         {
             //Convert all loaded dds textures back into a byte array
@@ -828,7 +861,7 @@ namespace Xv2CoreLib.EffectContainer
 
             //Save containers
             //If a container has no assets, it will be ignored. The binary eepk also omits it.
-            if(Pbind.Assets.Count > 0)
+            if (Pbind.Assets.Count > 0)
             {
                 if (!Pbind.LooseFiles)
                 {
@@ -843,7 +876,7 @@ namespace Xv2CoreLib.EffectContainer
                 //Lose files
                 if (Pbind.LooseFiles)
                 {
-                    foreach(Asset asset in Pbind.Assets)
+                    foreach (Asset asset in Pbind.Assets)
                     {
                         ExternalFileSaved(String.Format("{0}/{1}", Directory, asset.Files[0].FullFileName));
                         SaveFile(asset.Files[0].EmpFile.SaveToBytes(), string.Format("{0}/{1}", Directory, asset.Files[0].FullFileName));
@@ -863,7 +896,7 @@ namespace Xv2CoreLib.EffectContainer
                 ExternalFileSaved(string.Format("{0}/{1}", Directory, Tbind.File3_Name));
                 SaveFile(Tbind.File2_Ref.SaveToBytes(), string.Format("{0}/{1}", Directory, Tbind.File2_Name));
                 SaveFile(Tbind.File3_Ref.SaveToBytes(), string.Format("{0}/{1}", Directory, Tbind.File3_Name));
-                
+
                 //Lose files
                 if (Tbind.LooseFiles)
                 {
@@ -894,15 +927,15 @@ namespace Xv2CoreLib.EffectContainer
                 }
             }
 
-            if(Emo.Assets.Count > 0)
+            if (Emo.Assets.Count > 0)
             {
                 if (Emo.LooseFiles)
                 {
-                    foreach(Asset asset in Emo.Assets)
+                    foreach (Asset asset in Emo.Assets)
                     {
-                        foreach(var file in asset.Files)
+                        foreach (var file in asset.Files)
                         {
-                            if(file.HasValidData() && file.FullFileName != "NULL")
+                            if (file.HasValidData() && file.FullFileName != "NULL")
                             {
                                 ExternalFileSaved(string.Format("{0}/{1}", Directory, file.FullFileName));
 
@@ -915,7 +948,22 @@ namespace Xv2CoreLib.EffectContainer
                                         SaveFile(file.EmbFile.SaveToBytes(), string.Format("{0}/{1}", Directory, file.FullFileName));
                                         break;
                                     case EffectFile.FileType.EMA:
+                                        if (!EepkToolInterlop.FullDecompile) goto default;
+
+                                        //Link material animation nodes to the actual materials
+                                        if(file.EmaFile.EmaType == EmaType.mat)
+                                        {
+                                            EffectFile _emmFile = asset.Files.FirstOrDefault(x => x.fileType == EffectFile.FileType.EMM);
+
+                                            if(_emmFile?.EmmFile != null)
+                                                file.EmaFile.CreateMaterialSkeleton(_emmFile.EmmFile);
+                                        }
+
                                         SaveFile(file.EmaFile.Write(), string.Format("{0}/{1}", Directory, file.FullFileName));
+                                        break;
+                                    case EffectFile.FileType.EMO:
+                                        if (!EepkToolInterlop.FullDecompile) goto default;
+                                        SaveFile(file.EmoFile.Write(), string.Format("{0}/{1}", Directory, file.FullFileName));
                                         break;
                                     default:
                                         SaveFile(file.Bytes, string.Format("{0}/{1}", Directory, file.FullFileName));
@@ -939,7 +987,7 @@ namespace Xv2CoreLib.EffectContainer
                     {
                         foreach (EffectFile file in asset.Files)
                         {
-                            if(file.fileType == EffectFile.FileType.EMA)
+                            if (file.fileType == EffectFile.FileType.EMA)
                             {
                                 ExternalFileSaved(string.Format("{0}/{1}", Directory, file.FullFileName));
                                 SaveFile(file.EmaFile.Write(), string.Format("{0}/{1}", Directory, file.FullFileName));
@@ -952,7 +1000,7 @@ namespace Xv2CoreLib.EffectContainer
                         }
                     }
                 }
-                else if(!LightEma.LooseFiles)
+                else if (!LightEma.LooseFiles)
                 {
                     ExternalFileSaved(string.Format("{0}/{1}", Directory, LightEma.File1_Name));
                     SaveFile(LightEma.File1_Ref.SaveToBytes(), string.Format("{0}/{1}", Directory, LightEma.File1_Name));
@@ -961,7 +1009,7 @@ namespace Xv2CoreLib.EffectContainer
 
             return true;
         }
-        
+
         private void FinalizeMainEmb()
         {
             if (!Pbind.LooseFiles)
@@ -969,7 +1017,7 @@ namespace Xv2CoreLib.EffectContainer
                 Pbind.File1_Ref = EMB_File.DefaultEmbFile(false);
                 Pbind.File1_Ref.UseFileNames = true;
 
-                foreach(var asset in Pbind.Assets)
+                foreach (var asset in Pbind.Assets)
                 {
                     byte[] bytes = asset.Files[0].EmpFile.SaveToBytes();
                     Pbind.File1_Ref.Entry.Add(new EmbEntry()
@@ -1019,7 +1067,7 @@ namespace Xv2CoreLib.EffectContainer
 
                 foreach (var asset in LightEma.Assets)
                 {
-                    if(asset.Files[0].fileType == EffectFile.FileType.EMA)
+                    if (asset.Files[0].fileType == EffectFile.FileType.EMA)
                     {
                         LightEma.File1_Ref.Entry.Add(new EmbEntry()
                         {
@@ -1052,7 +1100,7 @@ namespace Xv2CoreLib.EffectContainer
             if (Pbind.File3_Name == "NULL" || EepkToolInterlop.AutoRenameContainers)
                 Pbind.File3_Name = String.Format("{0}.ptcl.emb", GetDefaultEepkName());
 
-            if(Pbind.File1_Name == "NULL" && !Pbind.LooseFiles)
+            if (Pbind.File1_Name == "NULL" && !Pbind.LooseFiles)
             {
                 Pbind.File1_Name = String.Format("{0}.pbind.emb", GetDefaultEepkName());
             }
@@ -1114,7 +1162,7 @@ namespace Xv2CoreLib.EffectContainer
             }
 
         }
-        
+
         private void SetVersion()
         {
             //Set Version on all applicable files
@@ -1138,7 +1186,7 @@ namespace Xv2CoreLib.EffectContainer
                 throw new Exception(String.Format("SetVersion: {0}", ex.Message));
             }
         }
-        
+
         public void ChangeFilePath(string fullPath)
         {
             Directory = Path.GetDirectoryName(fullPath);
@@ -1150,7 +1198,7 @@ namespace Xv2CoreLib.EffectContainer
         //Loading
         private byte[] LoadExternalFile(string path, bool log = true)
         {
-            if(log && saveFormat != SaveFormat.VfxPackage)
+            if (log && saveFormat != SaveFormat.VfxPackage)
                 LoadedExternalFiles.Add(path);
 
             return GetFile(path, xv2FileIO, OnlyLoadFromCpk, zipReader);
@@ -1168,7 +1216,7 @@ namespace Xv2CoreLib.EffectContainer
         {
             LoadedExternalFilesNotSaved.Clear();
 
-            foreach(var str in LoadedExternalFiles)
+            foreach (var str in LoadedExternalFiles)
             {
                 LoadedExternalFilesNotSaved.Add(str);
             }
@@ -1183,7 +1231,7 @@ namespace Xv2CoreLib.EffectContainer
                 return true;
             }
 
-            if(xv2FileIO != null)
+            if (xv2FileIO != null)
             {
                 return xv2FileIO.FileExists(path);
             }
@@ -1194,7 +1242,7 @@ namespace Xv2CoreLib.EffectContainer
         //Saving
         private void SaveFile(byte[] bytes, string path)
         {
-            if(saveFormat == SaveFormat.EEPK)
+            if (saveFormat == SaveFormat.EEPK)
             {
                 System.IO.Directory.CreateDirectory(Path.GetDirectoryName(path));
                 File.WriteAllBytes(path, bytes);
@@ -1209,13 +1257,13 @@ namespace Xv2CoreLib.EffectContainer
         #region LinkingFunctions
         private void PbindLinkTextureAndMaterial()
         {
-            if(Pbind != null)
+            if (Pbind != null)
             {
                 int index = 0;
-                foreach(var empAsset in Pbind.Assets)
+                foreach (var empAsset in Pbind.Assets)
                 {
                     //Validation
-                    if(empAsset.Files.Count < 1)
+                    if (empAsset.Files.Count < 1)
                     {
                         throw new InvalidDataException(String.Format("Cant find PBIND asset at index {0}.", index));
                     }
@@ -1232,16 +1280,16 @@ namespace Xv2CoreLib.EffectContainer
                     //Textures
                     foreach (EMP_TextureSamplerDef empTexture in empFile.Textures)
                     {
-                        if(empTexture.EmbIndex >= byte.MinValue && empTexture.EmbIndex < sbyte.MaxValue + 1)
+                        if (empTexture.EmbIndex >= byte.MinValue && empTexture.EmbIndex < sbyte.MaxValue + 1)
                         {
                             empTexture.TextureRef = Pbind.File3_Ref.GetEntry(empTexture.EmbIndex);
                         }
-                        else if(empTexture.EmbIndex != byte.MaxValue)
+                        else if (empTexture.EmbIndex != byte.MaxValue)
                         {
                             throw new IndexOutOfRangeException(String.Format("PbindLinkTextureAndMaterial: EMB_Index is out of range ({0}).\n\nptcl.emb can only have a maximum of 128 textures.", empTexture.EmbIndex));
                         }
                     }
-                    
+
                     index++; //This is for debugging/error messages, no other purpose
                 }
             }
@@ -1331,7 +1379,7 @@ namespace Xv2CoreLib.EffectContainer
                     //Textures
                     foreach (var empTexture in empFile.Textures)
                     {
-                        if(empTexture.TextureRef != null)
+                        if (empTexture.TextureRef != null)
                         {
                             int textureIdx = Pbind.File3_Ref.Entry.IndexOf(empTexture.TextureRef);
 
@@ -1413,7 +1461,7 @@ namespace Xv2CoreLib.EffectContainer
                     //Textures
                     foreach (var etrTexture in etrFile.Textures)
                     {
-                        if(etrTexture.TextureRef != null)
+                        if (etrTexture.TextureRef != null)
                         {
                             int textureIdx = Tbind.File3_Ref.Entry.IndexOf(etrTexture.TextureRef);
 
@@ -1447,22 +1495,22 @@ namespace Xv2CoreLib.EffectContainer
                 {
                     try
                     {
-                        switch (effectPart.I_02)
+                        switch (effectPart.AssetType)
                         {
                             case AssetType.EMO:
-                                effectPart.AssetRef = Emo.Assets[effectPart.I_00];
+                                effectPart.AssetRef = Emo.Assets[effectPart.AssetIndex];
                                 break;
                             case AssetType.PBIND:
-                                effectPart.AssetRef = Pbind.Assets[effectPart.I_00];
+                                effectPart.AssetRef = Pbind.Assets[effectPart.AssetIndex];
                                 break;
                             case AssetType.TBIND:
-                                effectPart.AssetRef = Tbind.Assets[effectPart.I_00];
+                                effectPart.AssetRef = Tbind.Assets[effectPart.AssetIndex];
                                 break;
                             case AssetType.CBIND:
-                                effectPart.AssetRef = Cbind.Assets[effectPart.I_00];
+                                effectPart.AssetRef = Cbind.Assets[effectPart.AssetIndex];
                                 break;
                             case AssetType.LIGHT:
-                                effectPart.AssetRef = LightEma.Assets[effectPart.I_00];
+                                effectPart.AssetRef = LightEma.Assets[effectPart.AssetIndex];
                                 break;
                         }
                     }
@@ -1490,26 +1538,26 @@ namespace Xv2CoreLib.EffectContainer
                         throw new InvalidOperationException(String.Format("EffectSetAssetIndex: effectPart.AssetRef was null, method cannot proceed in this state."));
                     }
 
-                    switch (effectPart.I_02)
+                    switch (effectPart.AssetType)
                     {
                         case AssetType.EMO:
-                            effectPart.I_00 = (ushort)Emo.Assets.IndexOf(effectPart.AssetRef);
+                            effectPart.AssetIndex = (ushort)Emo.Assets.IndexOf(effectPart.AssetRef);
                             break;
                         case AssetType.PBIND:
-                            effectPart.I_00 = (ushort)Pbind.Assets.IndexOf(effectPart.AssetRef);
+                            effectPart.AssetIndex = (ushort)Pbind.Assets.IndexOf(effectPart.AssetRef);
                             break;
                         case AssetType.TBIND:
-                            effectPart.I_00 = (ushort)Tbind.Assets.IndexOf(effectPart.AssetRef);
+                            effectPart.AssetIndex = (ushort)Tbind.Assets.IndexOf(effectPart.AssetRef);
                             break;
                         case AssetType.CBIND:
-                            effectPart.I_00 = (ushort)Cbind.Assets.IndexOf(effectPart.AssetRef);
+                            effectPart.AssetIndex = (ushort)Cbind.Assets.IndexOf(effectPart.AssetRef);
                             break;
                         case AssetType.LIGHT:
-                            effectPart.I_00 = (ushort)LightEma.Assets.IndexOf(effectPart.AssetRef);
+                            effectPart.AssetIndex = (ushort)LightEma.Assets.IndexOf(effectPart.AssetRef);
                             break;
                     }
 
-                    if (effectPart.I_00 == ushort.MaxValue)
+                    if (effectPart.AssetIndex == ushort.MaxValue)
                     {
                         throw new InvalidOperationException(String.Format("EffectSetAssetIndex: index returned -1, method is unable to proceed in this state."));
                     }
@@ -1527,7 +1575,7 @@ namespace Xv2CoreLib.EffectContainer
             effectContainer.Version = (VersionEnum)eepkFile.Version;
             effectContainer.Effects = new AsyncObservableCollection<Effect>(eepkFile.Effects);
 
-            foreach(var container in eepkFile.Assets)
+            foreach (var container in eepkFile.Assets)
             {
                 AssetContainerTool assetContainer = new AssetContainerTool();
 
@@ -1540,21 +1588,21 @@ namespace Xv2CoreLib.EffectContainer
                 assetContainer.AssetListLimit = container.AssetListLimit;
                 assetContainer.I_12 = container.I_12;
                 assetContainer.ContainerAssetType = container.I_16;
-                
+
                 assetContainer.File1_Name = container.FILES[0];
                 assetContainer.File2_Name = container.FILES[1];
                 assetContainer.File3_Name = container.FILES[2];
                 assetContainer.Assets = new AsyncObservableCollection<Asset>();
 
-                foreach(var assets in container.AssetEntries)
+                foreach (var assets in container.AssetEntries)
                 {
                     AsyncObservableCollection<EffectFile> files = new AsyncObservableCollection<EffectFile>();
 
-                    foreach(Asset_File filename in assets.FILES)
+                    foreach (Asset_File filename in assets.FILES)
                     {
                         //IF the file is NULL, then we wont add it
                         //When recreating the EEPK file we will add the nessecary NULL entries once again (up to 5)
-                        if(filename.Path != "NULL")
+                        if (filename.Path != "NULL")
                         {
                             //At this point we wont be loading the assets, just setting the name and type
                             EffectFile.FileType type;
@@ -1600,7 +1648,7 @@ namespace Xv2CoreLib.EffectContainer
                     assetContainer.Assets.Add(new Asset()
                     {
                         I_00 = assets.I_00,
-                        Files = files, 
+                        Files = files,
                         assetType = container.I_16
                     });
                 }
@@ -1637,7 +1685,7 @@ namespace Xv2CoreLib.EffectContainer
             eepkFile.Assets = new List<AssetContainer>();
             eepkFile.Effects = effectContainer.Effects.ToList();
 
-            if(effectContainer.Emo.Assets.Count > 0)
+            if (effectContainer.Emo.Assets.Count > 0)
             {
                 eepkFile.Assets.Add(CreateEepkAssetContainer(effectContainer.Emo, AssetType.EMO));
             }
@@ -1682,19 +1730,19 @@ namespace Xv2CoreLib.EffectContainer
                 assetContainer.File1_Name = "NULL";
             }
 
-            newAssetContainer.FILES = new string[3] { assetContainer.File1_Name, assetContainer.File2_Name , assetContainer.File3_Name };
+            newAssetContainer.FILES = new string[3] { assetContainer.File1_Name, assetContainer.File2_Name, assetContainer.File3_Name };
 
-            if(assetContainer.Assets != null)
+            if (assetContainer.Assets != null)
             {
                 newAssetContainer.AssetEntries = new List<Asset_Entry>();
 
-                foreach(var asset in assetContainer.Assets)
+                foreach (var asset in assetContainer.Assets)
                 {
                     List<Asset_File> files = new List<Asset_File>();
 
-                    for(int i = 0; i < asset.Files.Count; i++)
+                    for (int i = 0; i < asset.Files.Count; i++)
                     {
-                        if(asset.Files[i].FullFileName != "NULL")
+                        if (asset.Files[i].FullFileName != "NULL")
                             files.Add(new Asset_File() { Path = asset.Files[i].FullFileName });
                     }
 
@@ -1803,7 +1851,7 @@ namespace Xv2CoreLib.EffectContainer
 
             }
         }
-        
+
         public void RefreshAssetCounts()
         {
             Pbind.RefreshAssetCount();
@@ -1817,11 +1865,11 @@ namespace Xv2CoreLib.EffectContainer
         {
             AssetContainerTool container = GetAssetContainer(type);
 
-            if(container.File3_Ref.Entry.Count > EMB_File.MAX_EFFECT_TEXTURES)
+            if (container.File3_Ref.Entry.Count > EMB_File.MAX_EFFECT_TEXTURES)
             {
                 RemoveUnusedTextures(type);
 
-                if(container.File3_Ref.Entry.Count > EMB_File.MAX_EFFECT_TEXTURES)
+                if (container.File3_Ref.Entry.Count > EMB_File.MAX_EFFECT_TEXTURES)
                 {
                     throw new IndexOutOfRangeException(string.Format("ValidateTextureContainers: The {2} texture container has too many textures ({0}, maximum allowed is {1}).", container.File3_Ref.Entry.Count, EMB_File.MAX_EFFECT_TEXTURES, type));
                 }
@@ -1881,7 +1929,7 @@ namespace Xv2CoreLib.EffectContainer
 
             foreach (var effect in Effects)
             {
-                start:
+            start:
                 for (int i = 0; i < effect.EffectParts.Count; i++)
                 {
                     if (effect.EffectParts[i].AssetRef == oldAsset)
@@ -1988,7 +2036,7 @@ namespace Xv2CoreLib.EffectContainer
         private void RemoveNullEffectParts()
         {
             //Removes all EffectParts that have a null AssetRef (e.g. someone added a new EffectPart and never assigned an asset to it)
-            foreach(var effect in Effects)
+            foreach (var effect in Effects)
             {
                 effect.RemoveNulls();
             }
@@ -2006,7 +2054,7 @@ namespace Xv2CoreLib.EffectContainer
 
         public bool IsEffectIdUsed(ushort id)
         {
-            foreach(var effect in Effects)
+            foreach (var effect in Effects)
             {
                 if (effect.IndexNum == id) return true;
             }
@@ -2017,9 +2065,9 @@ namespace Xv2CoreLib.EffectContainer
         {
             if (effectPart == null) return null;
 
-            foreach(var effect in Effects)
+            foreach (var effect in Effects)
             {
-                foreach(var _effectPart in effect.EffectParts)
+                foreach (var _effectPart in effect.EffectParts)
                 {
                     if (_effectPart == effectPart) return effect;
                 }
@@ -2032,10 +2080,10 @@ namespace Xv2CoreLib.EffectContainer
         {
             if (effectParts == null) return null;
             if (effectParts.Count == 0) return null;
-            
-            if(firstEffect != null)
+
+            if (firstEffect != null)
             {
-                foreach(var effectPart in firstEffect.EffectParts)
+                foreach (var effectPart in firstEffect.EffectParts)
                 {
                     if (effectPart == effectParts[0]) return firstEffect;
                 }
@@ -2043,25 +2091,25 @@ namespace Xv2CoreLib.EffectContainer
 
             return GetEffectAssociatedWithEffectPart(effectParts[0]);
         }
-        
+
         private bool IsAssetIndexUsed(AssetType type, int index)
         {
-            foreach(var effect in Effects)
+            foreach (var effect in Effects)
             {
-                foreach(var effectPart in effect.EffectParts)
+                foreach (var effectPart in effect.EffectParts)
                 {
-                    if (effectPart.I_02 == type && effectPart.I_00 == index) return true;
+                    if (effectPart.AssetType == type && effectPart.AssetIndex == index) return true;
                 }
             }
 
             return false;
         }
         #endregion
-        
+
         #region SDBHSupport
         private string CalculateSDBHPBINDContainerName_EMM(string emm)
         {
-            if(emm != "NULL" && File.Exists(string.Format("{0}/{1}", Directory, emm)))
+            if (emm != "NULL" && File.Exists(string.Format("{0}/{1}", Directory, emm)))
             {
                 return string.Format("{0}/{1}", Directory, emm);
             }
@@ -2096,12 +2144,12 @@ namespace Xv2CoreLib.EffectContainer
 
             return null;
         }
-        
+
         private void LoadSDBHPBINDContainer()
         {
             SDBH_PbindLinkTextureAndMaterial();
 
-            foreach(var emp in Pbind.Assets)
+            foreach (var emp in Pbind.Assets)
             {
                 Pbind.AddPbindDependencies(emp.Files[0].EmpFile);
             }
@@ -2229,7 +2277,7 @@ namespace Xv2CoreLib.EffectContainer
 
             return removed;
         }
-        
+
         /// <summary>
         /// Renives all textures that are unused by Particle Effects or ETR Effects (depending on type)
         /// </summary>
@@ -2242,7 +2290,7 @@ namespace Xv2CoreLib.EffectContainer
 
             AssetContainerTool container = GetAssetContainer(type);
 
-            if(type == AssetType.PBIND)
+            if (type == AssetType.PBIND)
                 _ = container.RemoveUnusedEmpTextures();
 
             return container.RemoveUnusedTextures(undos);
@@ -2338,7 +2386,7 @@ namespace Xv2CoreLib.EffectContainer
             List<WriteableBitmap> toMerge = new List<WriteableBitmap>();
             toMerge.Add(bitmaps[0]);
 
-            for(int i = 1; i < bitmaps.Count; i++)
+            for (int i = 1; i < bitmaps.Count; i++)
             {
                 toMerge.Add(bitmaps[i]);
 
@@ -2368,16 +2416,16 @@ namespace Xv2CoreLib.EffectContainer
 
             Effect toRemove = Effects.First(e => e.IndexNum == id);
 
-            if(toRemove != null)
+            if (toRemove != null)
             {
                 Effects.Remove(toRemove);
 
-                foreach(var asset in toRemove.EffectParts)
+                foreach (var asset in toRemove.EffectParts)
                 {
                     //If asset isn't used by other effects, then remove it
                     if (!IsAssetUsed(asset.AssetRef) && asset.AssetRef != null)
                     {
-                        RemoveAsset(asset.AssetRef, asset.I_02);
+                        RemoveAsset(asset.AssetRef, asset.AssetType);
                     }
                 }
             }
@@ -2388,7 +2436,7 @@ namespace Xv2CoreLib.EffectContainer
             ProcessVfxExtensions(effects);
 
             //Remove effects (clears out potential duplicate and unneeded data)
-            foreach(var effect in effects)
+            foreach (var effect in effects)
             {
                 RemoveEffect(effect.IndexNum);
             }
@@ -2413,12 +2461,12 @@ namespace Xv2CoreLib.EffectContainer
         public void UninstallEffects(List<string> ids, EffectContainerFile originalEepk)
         {
             //Uninstall effects
-            foreach(var id in ids)
+            foreach (var id in ids)
             {
                 Effect originalEffect = originalEepk != null ? originalEepk.Effects.FirstOrDefault(e => e.Index == id) : null;
                 Effect effect = Effects.FirstOrDefault(e => e.Index == id);
 
-                if(effect != null)
+                if (effect != null)
                 {
                     //An effect with a matching ID exists and so we will uninstall it.
                     UninstallEffect(effect, originalEffect);
@@ -2444,7 +2492,7 @@ namespace Xv2CoreLib.EffectContainer
             {
                 RemoveEffect(effect.IndexNum);
 
-                if(original != null)
+                if (original != null)
                 {
                     AddEffect(original);
                 }
@@ -2455,7 +2503,7 @@ namespace Xv2CoreLib.EffectContainer
         {
             foreach (var effect in effects)
             {
-                if(effect.ExtendedEffectData != null)
+                if (effect.ExtendedEffectData != null)
                 {
                     //AutoID
                     if (effect.ExtendedEffectData.AutoIdEnabled)
@@ -2464,7 +2512,7 @@ namespace Xv2CoreLib.EffectContainer
                     }
 
                     //CopyFrom
-                    if(effect.ExtendedEffectData.CopyFrom != -1)
+                    if (effect.ExtendedEffectData.CopyFrom != -1)
                     {
                         //First try to find effect in VfxPackage
                         Effect copyEffect = effects.FirstOrDefault(x => x.IndexNum == effect.ExtendedEffectData.CopyFrom);
@@ -2489,11 +2537,11 @@ namespace Xv2CoreLib.EffectContainer
         {
             int id = 2000;
 
-            while(IsEffectIdUsed(id, effectsToInstall))
+            while (IsEffectIdUsed(id, effectsToInstall))
             {
                 id++;
 
-                if(id > ushort.MaxValue)
+                if (id > ushort.MaxValue)
                 {
                     throw new Exception("AssignAutoId: Cannot assign a ID within the EEPK file. There are no suitable IDs.");
                 }
@@ -2529,11 +2577,11 @@ namespace Xv2CoreLib.EffectContainer
             embEntry.Name = "StageSelector.png";
             embEntry.Data = texture;
 
-            if(Pbind.File3_Ref.Entry.Count == EMB_File.MAX_EFFECT_TEXTURES)
+            if (Pbind.File3_Ref.Entry.Count == EMB_File.MAX_EFFECT_TEXTURES)
             {
                 MergeAllTexturesIntoSuperTextures_PBIND();
 
-                if(Pbind.File3_Ref.Entry.Count == EMB_File.MAX_EFFECT_TEXTURES)
+                if (Pbind.File3_Ref.Entry.Count == EMB_File.MAX_EFFECT_TEXTURES)
                 {
                     throw new Exception("CreateStageSelectorEntry: Not enough space for the StageSelector textures.");
                 }
@@ -2548,8 +2596,6 @@ namespace Xv2CoreLib.EffectContainer
 
         }
         #endregion
-
-
 
         public bool IsNull()
         {
@@ -2600,7 +2646,7 @@ namespace Xv2CoreLib.EffectContainer
             }
             set
             {
-                if(LooseFiles != value)
+                if (LooseFiles != value)
                 {
                     UndoManager.Instance.AddUndo(new UndoableProperty<AssetContainerTool>(nameof(LooseFiles), this, LooseFiles, value, "Loose Files"));
                     LooseFiles = value;
@@ -2672,7 +2718,7 @@ namespace Xv2CoreLib.EffectContainer
                 }
             }
         }
-        
+
         [NonSerialized]
         private ListCollectionView _viewAssets = null;
         public ListCollectionView ViewAssets
@@ -2697,7 +2743,7 @@ namespace Xv2CoreLib.EffectContainer
                 }
             }
         }
-        
+
 
         //Filter methods
         public bool AssetFilterCheck(object skill)
@@ -2708,7 +2754,7 @@ namespace Xv2CoreLib.EffectContainer
 
             if (_asset != null)
             {
-                foreach(var file in _asset.Files)
+                foreach (var file in _asset.Files)
                 {
                     string fullName = file.FileName + file.Extension;
                     if (fullName.ToLower().Contains(flattenedSearchParam)) return true;
@@ -2725,14 +2771,14 @@ namespace Xv2CoreLib.EffectContainer
 
         public void UpdateAssetFilter()
         {
-            if(_viewAssets == null)
+            if (_viewAssets == null)
                 _viewAssets = new ListCollectionView(Assets.Binding);
-            
+
             _viewAssets.Filter = new Predicate<object>(AssetFilterCheck);
             NotifyPropertyChanged("ViewAssets");
         }
 
-        
+
         //Count Method
         public void RefreshAssetCount()
         {
@@ -2748,9 +2794,9 @@ namespace Xv2CoreLib.EffectContainer
         /// <returns></returns>
         public Asset GetAsset(string fileName)
         {
-            foreach(var asset in Assets)
+            foreach (var asset in Assets)
             {
-                if(asset.Files.Count > 0)
+                if (asset.Files.Count > 0)
                 {
                     if (asset.Files[0].FileName == fileName) return asset;
                 }
@@ -2779,9 +2825,9 @@ namespace Xv2CoreLib.EffectContainer
         {
             if (name == "NULL") return true;
 
-            foreach(var asset in Assets)
+            foreach (var asset in Assets)
             {
-                foreach(var file in asset.Files)
+                foreach (var file in asset.Files)
                 {
                     if (file.FullFileName == name) return true;
                 }
@@ -2789,14 +2835,14 @@ namespace Xv2CoreLib.EffectContainer
 
             return false;
         }
-        
+
         public Asset GetAssetByFileInstance(EffectFile file)
         {
-            foreach(var asset in Assets)
+            foreach (var asset in Assets)
             {
-                foreach(var _file in asset.Files)
+                foreach (var _file in asset.Files)
                 {
-                    if(_file == file)
+                    if (_file == file)
                     {
                         return asset;
                     }
@@ -2818,10 +2864,10 @@ namespace Xv2CoreLib.EffectContainer
                         return _asset;
                     }
                 }
-                
+
             }
 
-            foreach(var _asset in Assets)
+            foreach (var _asset in Assets)
             {
                 if (_asset.InstanceID == asset.InstanceID) return _asset;
             }
@@ -3033,11 +3079,11 @@ namespace Xv2CoreLib.EffectContainer
         {
             List<EMP_TextureSamplerDef> textures = new List<EMP_TextureSamplerDef>();
 
-            foreach(var asset in Assets)
+            foreach (var asset in Assets)
             {
-                if(asset.assetType == AssetType.PBIND && asset.Files.Count == 1)
+                if (asset.assetType == AssetType.PBIND && asset.Files.Count == 1)
                 {
-                    foreach(var textureDef in asset.Files[0].EmpFile.Textures)
+                    foreach (var textureDef in asset.Files[0].EmpFile.Textures)
                     {
                         if (textureDef.TextureRef == embEntry)
                             textures.Add(textureDef);
@@ -3089,7 +3135,7 @@ namespace Xv2CoreLib.EffectContainer
                     string originalName = file.FullFileName;
                     file.SetName(GetUnusedName(file.FullFileName));
 
-                    if(file.FullFileName != originalName)
+                    if (file.FullFileName != originalName)
                         undos.Add(new UndoableProperty<EffectFile>("FullFileName", file, originalName, file.FullFileName));
                 }
             }
@@ -3120,7 +3166,7 @@ namespace Xv2CoreLib.EffectContainer
         /// </summary>
         public Asset AddAsset(EMP_File empFile, string name)
         {
-            if(Path.GetExtension(name) != ".emp")
+            if (Path.GetExtension(name) != ".emp")
             {
                 name += ".emp";
             }
@@ -3506,7 +3552,7 @@ namespace Xv2CoreLib.EffectContainer
 
             return removed;
         }
-        
+
         public int MergeDuplicateTextures(List<IUndoRedo> undos = null)
         {
             int duplicateCount = 0;
@@ -3544,7 +3590,7 @@ namespace Xv2CoreLib.EffectContainer
 
             return duplicateCount;
         }
-        
+
         public int RemoveUnusedTextures(List<IUndoRedo> undos = null)
         {
             int removed = 0;
@@ -3690,7 +3736,7 @@ namespace Xv2CoreLib.EffectContainer
         {
             int total = 0;
 
-            foreach(Asset asset in Assets)
+            foreach (Asset asset in Assets)
             {
                 if (asset.Files.Count == 0) continue;
                 if (asset.Files[0].EmpFile == null) continue;
@@ -3699,7 +3745,7 @@ namespace Xv2CoreLib.EffectContainer
 
                 for (int i = empFile.Textures.Count - 1; i >= 0; i--)
                 {
-                    if(empFile.GetNodesThatUseTexture(empFile.Textures[i]).Count == 0)
+                    if (empFile.GetNodesThatUseTexture(empFile.Textures[i]).Count == 0)
                     {
                         if (undos != null)
                         {
@@ -3725,7 +3771,7 @@ namespace Xv2CoreLib.EffectContainer
 
             foreach (var asset in Assets)
             {
-                if(ContainerAssetType == AssetType.PBIND)
+                if (ContainerAssetType == AssetType.PBIND)
                 {
                     foreach (var texture in asset.Files[0].EmpFile.Textures)
                     {
@@ -3806,7 +3852,7 @@ namespace Xv2CoreLib.EffectContainer
 
             for (int i = 0; i < Assets.Count; i++)
             {
-                for(int a = 0; a <Assets[i].Files.Count; a++)
+                for (int a = 0; a < Assets[i].Files.Count; a++)
                 {
                     if (names.Contains(Assets[i].Files[a].FullFileName))
                     {
@@ -3821,7 +3867,7 @@ namespace Xv2CoreLib.EffectContainer
                 }
             }
         }
-        
+
     }
 
     [Serializable]
@@ -3905,16 +3951,16 @@ namespace Xv2CoreLib.EffectContainer
 
         public bool Compare(Asset asset, AssetType type)
         {
-            if(type == AssetType.TBIND || type == AssetType.PBIND || type == AssetType.CBIND)
+            if (type == AssetType.TBIND || type == AssetType.PBIND || type == AssetType.CBIND)
             {
                 //No comparison for these types, yet...
                 return false;
             }
             else
             {
-                for(int i = 0; i < Files.Count; i++)
+                for (int i = 0; i < Files.Count; i++)
                 {
-                    if(Files[i].FullFileName != "NULL")
+                    if (Files[i].FullFileName != "NULL")
                     {
                         if (!Utils.CompareArray(Files[i].Bytes, asset.Files[i].Bytes) || Files[i].FullFileName != asset.Files[i].FullFileName)
                         {
@@ -3929,7 +3975,7 @@ namespace Xv2CoreLib.EffectContainer
 
         public void AddFile(object data, string name, EffectFile.FileType type, List<IUndoRedo> undos = null)
         {
-            if(Files.Count == 5)
+            if (Files.Count == 5)
             {
                 throw new InvalidOperationException("Cannot add file because the maximum allowed amount of 5 is already reached.");
             }
@@ -3993,13 +4039,16 @@ namespace Xv2CoreLib.EffectContainer
                     };
                     break;
                 case EffectFile.FileType.EMO:
-                    if(data is EMO_File emo)
+                    newEffectFile = new EffectFile()
                     {
-                        data = emo.Write();
-                    }
-                    goto default;
+                        EmoFile = data as EMO_File,
+                        FileName = name,
+                        fileType = type,
+                        OriginalFileName = name
+                    };
+                    break;
                 default:
-                    if(data as byte[] == null)
+                    if (data as byte[] == null)
                     {
                         throw new InvalidDataException(String.Format("EffectFile.AddFile: tried add undefined file type ({0}), but bytes was null.", type));
                     }
@@ -4015,7 +4064,7 @@ namespace Xv2CoreLib.EffectContainer
 
             Files.Add(newEffectFile);
 
-            if(undos != null)
+            if (undos != null)
             {
                 undos.Add(new UndoableListAdd<EffectFile>(Files, newEffectFile));
             }
@@ -4025,7 +4074,7 @@ namespace Xv2CoreLib.EffectContainer
 
         public void RemoveFile(EffectFile file, List<IUndoRedo> undos = null)
         {
-            if(Files.Count == 1)
+            if (Files.Count == 1)
             {
                 throw new InvalidOperationException("Cannot remove the last file.");
             }
@@ -4044,7 +4093,7 @@ namespace Xv2CoreLib.EffectContainer
             NotifyPropertyChanged(nameof(FileNamesPreviewWithExtension));
             NotifyPropertyChanged(nameof(FileNamePreviewWithAssetType));
         }
-        
+
         /// <summary>
         /// EMP/ETR: DO NOT USE WITHOUT FIRST SETTING THE TEXTURE/MATERIAL INDEXES!!!!
         /// Other asset types are fine.
@@ -4056,7 +4105,7 @@ namespace Xv2CoreLib.EffectContainer
             newAsset.I_00 = I_00;
             newAsset.Files = new AsyncObservableCollection<EffectFile>();
 
-            foreach(var file in Files)
+            foreach (var file in Files)
             {
                 EffectFile newFile = new EffectFile();
                 newFile.OriginalFileName = file.OriginalFileName;
@@ -4064,7 +4113,7 @@ namespace Xv2CoreLib.EffectContainer
                 newFile.Extension = file.Extension;
                 newFile.fileType = file.fileType;
 
-                if(newFile.fileType == EffectFile.FileType.Other)
+                if (newFile.fileType == EffectFile.FileType.Other)
                 {
                     newFile.Bytes = file.Bytes.Copy();
                 }
@@ -4104,7 +4153,7 @@ namespace Xv2CoreLib.EffectContainer
             }
             return newAsset;
         }
-        
+
         /// <summary>
         /// Create a new Asset with no files.
         /// </summary>
@@ -4132,11 +4181,11 @@ namespace Xv2CoreLib.EffectContainer
 
         public bool HasSameFileNames(Asset asset)
         {
-            if(Files.Count == asset.Files.Count)
+            if (Files.Count == asset.Files.Count)
             {
-                for(int i = 0; i < Files.Count; i++)
+                for (int i = 0; i < Files.Count; i++)
                 {
-                    if(Files[i].FullFileName != asset.Files[i].FullFileName)
+                    if (Files[i].FullFileName != asset.Files[i].FullFileName)
                     {
                         return false;
                     }
@@ -4149,7 +4198,7 @@ namespace Xv2CoreLib.EffectContainer
 
             return true;
         }
-        
+
         public List<RgbColor> GetUsedColors()
         {
             List<RgbColor> colors;
@@ -4171,7 +4220,7 @@ namespace Xv2CoreLib.EffectContainer
                 case AssetType.EMO:
                     colors = new List<RgbColor>();
 
-                    foreach(var file in Files)
+                    foreach (var file in Files)
                     {
                         switch (file.Extension)
                         {
@@ -4191,7 +4240,7 @@ namespace Xv2CoreLib.EffectContainer
 
             return colors;
         }
-        
+
     }
 
     [Serializable]
@@ -4254,7 +4303,7 @@ namespace Xv2CoreLib.EffectContainer
                 }
             }
         }
-        
+
         private string _extension = null;
         public string Extension
         {
@@ -4282,6 +4331,7 @@ namespace Xv2CoreLib.EffectContainer
         public EMB_File EmbFile { get; set; } = null;
         public EMM_File EmmFile { get; set; } = null;
         public EMA_File EmaFile { get; set; } = null;
+        public EMO_File EmoFile { get; set; } = null;
         public byte[] Bytes { get; set; } = null;
 
         public void SetName(string name)
@@ -4289,7 +4339,7 @@ namespace Xv2CoreLib.EffectContainer
             Extension = GetExtension(name);
             FileName = GetFileNameWithoutExtension(name);
 
-            if(OriginalFileName == null)
+            if (OriginalFileName == null)
             {
                 OriginalFileName = name;
             }
@@ -4345,18 +4395,16 @@ namespace Xv2CoreLib.EffectContainer
                     return FileType.EMB;
                 case ".emm":
                     return FileType.EMM;
-                case ".mat.ema":
-                    return FileType.Other;
-                case ".obj.ema":
-                    return FileType.Other;
                 case ".emp":
                     return FileType.EMP;
                 case ".etr":
                     return FileType.ETR;
                 case ".ecf":
                     return FileType.ECF;
+                case ".obj.ema":
+                case ".mat.ema":
                 case ".light.ema":
-                case ".ema"://Some .light.ema are named incorrectly, like "_light.ema", so we must also load .ema files
+                case ".ema":
                     return FileType.EMA;
                 default:
                     throw new InvalidDataException(String.Format("GetFileType: Unrecognized asset file type = {0}.", GetExtension(fileName)));
@@ -4378,7 +4426,7 @@ namespace Xv2CoreLib.EffectContainer
             CopyEmpRef_Recursive(oldFile.ParticleNodes, newFile.ParticleNodes);
 
             //Copy texture EmbEntry references
-            for(int i = 0; i < oldFile.Textures.Count; i++)
+            for (int i = 0; i < oldFile.Textures.Count; i++)
             {
                 newFile.Textures[i].TextureRef = oldFile.Textures[i].TextureRef;
             }
@@ -4448,6 +4496,9 @@ namespace Xv2CoreLib.EffectContainer
                 case FileType.EMA:
                     if (EmaFile == null) return false;
                     break;
+                case FileType.EMO:
+                    if (EmoFile == null) return false;
+                    break;
                 default:
                     if (Bytes == null) return false;
                     break;
@@ -4463,7 +4514,7 @@ namespace Xv2CoreLib.EffectContainer
                 case FileType.ECF:
                     return EcfFile.SaveToBytes();
                 case FileType.EMA:
-                    return EmaFile.Write();
+                    return EepkToolInterlop.FullDecompile ? EmaFile.Write() : Bytes;
                 case FileType.EMB:
                     return EmbFile.SaveToBytes();
                 case FileType.EMM:
@@ -4472,8 +4523,9 @@ namespace Xv2CoreLib.EffectContainer
                     return EmpFile.SaveToBytes();
                 case FileType.ETR:
                     return EtrFile.Write();
-                case FileType.Other:
                 case FileType.EMO:
+                    return EepkToolInterlop.FullDecompile ? EmoFile.Write() : Bytes;
+                case FileType.Other:
                     return Bytes;
                 default:
                     throw new Exception(string.Format("EffectFile.GetBytes(): Unknown fileType = {0}", fileType));

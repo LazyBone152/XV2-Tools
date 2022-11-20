@@ -86,7 +86,7 @@
                                 <ColumnDefinition Width="120"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Label Content="Enabled" ToolTip="Make this Color Fade node target a specific material.&#x0a;&#x0a;If disabled, then all materials will be affected by this node."/>
+                            <Label Content="Material Enabled" ToolTip="Make this Color Fade node target a specific material.&#x0a;&#x0a;If disabled, then all materials will be affected by this node."/>
                             <CheckBox Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding ElementName=UserControl, Path=ViewModel.UseMaterial}"/>
                         </Grid>
                         

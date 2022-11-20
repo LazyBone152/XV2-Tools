@@ -557,6 +557,15 @@ namespace Xv2CoreLib.EMG
 
         public int GetBoneIndex(int vertexIdx, int boneIdx)
         {
+            if(boneIdx >= Bones.Count)
+            {
+                return Bones[0];
+            }
+            else
+            {
+                return Bones[boneIdx];
+            }
+            /*
             foreach (var vertex in Faces)
             {
                 if (vertex == vertexIdx)
@@ -566,6 +575,7 @@ namespace Xv2CoreLib.EMG
             }
 
             throw new InvalidDataException(String.Format("Could not get the bone idx for boneIndex: {0} on vertex: {1}", boneIdx, vertexIdx));
+            */
         }
     }
 }

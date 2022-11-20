@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using Xv2CoreLib.EEPK;
@@ -307,6 +308,10 @@ namespace EEPK_Organiser.Forms.Recolor
                                 break;
                             case ".emm":
                                 file.EmmFile.ChangeHsl(hueChange, 0f, 0f, undos, true, Variance);
+                                break;
+                            case ".mat.ema":
+                                EMM_File emmFile = _asset.Files.FirstOrDefault(x => x.fileType == EffectFile.FileType.EMM)?.EmmFile;
+                                file.EmaFile.ChangeHue(hueChange, 0f, 0f, undos, true, Variance, emmFile);
                                 break;
                         }
                     }

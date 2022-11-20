@@ -65,11 +65,13 @@ namespace Xv2CoreLib.EMA
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Animation")]
         public AsyncObservableCollection<EMA_Animation> Animations { get; set; } = new AsyncObservableCollection<EMA_Animation>();
 
+        #region LoadSave
         public static EMA_File Serialize(string path, bool writeXml)
         {
             byte[] bytes = File.ReadAllBytes(path);
 
             EMA_File emaFile = Load(bytes);
+            //emaFile.AddInterpolatedKeyframes();
 
             if (writeXml)
             {
@@ -101,15 +103,13 @@ namespace Xv2CoreLib.EMA
             int animationsStart = 32;
 
             //Parse skeleton
-            if(skeletonOffset > 0)
+            if (skeletonOffset > 0)
             {
                 emaFile.Skeleton = Skeleton.Parse(rawBytes, skeletonOffset);
             }
 
             //Parse animations
-            emaFile.Animations = AsyncObservableCollection<EMA_Animation>.Create();
-
-            for(int i = 0; i < animationCount; i++)
+            for (int i = 0; i < animationCount; i++)
             {
                 int animOffset = BitConverter.ToInt32(rawBytes, animationsStart + (i * 4));
 
@@ -136,7 +136,7 @@ namespace Xv2CoreLib.EMA
         {
             List<byte> bytes = new List<byte>();
 
-            int animCount = GetIndexedAnimationCount();
+            int animCount = Animations.Count > 0 ? Animations.Max(x => x.Index) + 1 : 0;
             List<int> animNameOffsets = new List<int>();
 
             //Header
@@ -155,7 +155,7 @@ namespace Xv2CoreLib.EMA
             bytes.AddRange(new byte[4 * animCount]);
 
             //Animations
-            foreach(var anim in Animations)
+            foreach (var anim in Animations)
             {
                 int animStartOffset = bytes.Count;
                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), 32 + (anim.Index * 4));
@@ -174,83 +174,93 @@ namespace Xv2CoreLib.EMA
                 bytes.AddRange(new byte[4 * anim.CommandCount]);
 
                 //Commands
-                for(int i = 0; i < anim.CommandCount; i++)
+                int commandIndex = 0;
+                foreach (EMA_Node node in anim.Nodes)
                 {
-                    int startCommandOffset = bytes.Count;
-                    bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - animStartOffset), animStartOffset + 20 + (i * 4));
-                    
-                    anim.Commands[i].SetFlags(); //Calculate the known flags
+                    if (node.Commands == null) continue;
 
-                    if (HasSkeleton)
+                    foreach (EMA_Command command in node.Commands)
                     {
-                        bytes.AddRange(BitConverter.GetBytes((ushort)GetBoneIndex(anim.Commands[i].BoneName)));
-                    }
-                    else
-                    {
+                        int startCommandOffset = bytes.Count;
+                        bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - animStartOffset), animStartOffset + 20 + (commandIndex * 4));
+
+                        //Calculate time and index size (uint8 or uint16)
+                        foreach (var keyframe in command.Keyframes)
+                        {
+                            if (keyframe.Time > byte.MaxValue)
+                                command.Int16ForTime = true;
+                            if (keyframe.index > byte.MaxValue)
+                                command.Int16ForValueIndex = true;
+                        }
+
+                        if (HasSkeleton)
+                        {
+                            bytes.AddRange(BitConverter.GetBytes((ushort)GetBoneIndex(node.BoneName)));
+                        }
+                        else
+                        {
+                            bytes.AddRange(new byte[2]);
+                        }
+
+                        bytes.Add(command.Parameter);
+
+                        var bitArray_b = new BitArray(new bool[8] { command.I_03_b1, command.Int16ForTime, command.Int16ForValueIndex, command.I_03_b4, false, false, false, false });
+                        var bitArray_a = new BitArray(new byte[1] { command.Component });
+
+                        bitArray_a[2] = command.NoInterpolation;
+                        bitArray_a[3] = command.I_03_a4;
+                        bytes.Add((byte)Int4Converter.GetByte(Utils.ConvertToByte(bitArray_a), Utils.ConvertToByte(bitArray_b)));
+                        bytes.AddRange(BitConverter.GetBytes((ushort)command.KeyframeCount));
                         bytes.AddRange(new byte[2]);
-                    }
 
-                    bytes.Add(anim.Commands[i].Parameter);
-
-                    var bitArray_b = new BitArray(new bool[8] { anim.Commands[i].I_03_b1, anim.Commands[i].Int16ForTime, anim.Commands[i].Int16ForValueIndex, anim.Commands[i].I_03_b4, false, false, false, false });
-                    var bitArray_a = new BitArray(new byte[1] { anim.Commands[i].Component });
-
-                    bitArray_a[2] = anim.Commands[i].NoInterpolation;
-                    bitArray_a[3] = anim.Commands[i].I_03_a4;
-                    bytes.Add((byte)Int4Converter.GetByte(Utils.ConvertToByte(bitArray_a), Utils.ConvertToByte(bitArray_b)));
-                    bytes.AddRange(BitConverter.GetBytes((ushort)anim.Commands[i].KeyframeCount));
-                    bytes.AddRange(new byte[2]);
-
-                    //Sort keyframes
-                    if(anim.Commands[i].KeyframeCount > 0)
-                    {
-                        anim.Commands[i].SortKeyframes();
-                    }
-
-                    //Write Time
-                    for(int a = 0; a < anim.Commands[i].KeyframeCount; a++)
-                    {
-                        if(anim.Commands[i].Int16ForTime)
+                        //Write Time
+                        foreach (var keyframe in command.Keyframes.OrderBy(x => x.Time))
                         {
-                            bytes.AddRange(BitConverter.GetBytes(anim.Commands[i].Keyframes[a].Time));
+
+                            if (command.Int16ForTime)
+                            {
+                                bytes.AddRange(BitConverter.GetBytes(keyframe.Time));
+                            }
+                            else
+                            {
+                                bytes.Add((byte)keyframe.Time);
+                            }
                         }
-                        else
+
+                        //Add padding
+                        bytes.AddRange(new byte[Utils.CalculatePadding(bytes.Count - startCommandOffset, 4)]);
+
+                        //Write value/index
+                        bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes((ushort)(bytes.Count - startCommandOffset)), startCommandOffset + 6);
+
+                        foreach (EMA_Keyframe keyframe in command.Keyframes.OrderBy(x => x.Time))
                         {
-                            bytes.Add((byte)anim.Commands[i].Keyframes[a].Time);
+                            if (command.Int16ForValueIndex)
+                            {
+                                bytes.AddRange(BitConverter.GetBytes((ushort)keyframe.index));
+                                bytes.Add(0);
+                                bytes.Add((byte)keyframe.InterpolationType);
+                            }
+                            else
+                            {
+                                bytes.Add((byte)keyframe.index);
+                                bytes.Add((byte)keyframe.InterpolationType);
+                            }
                         }
+
+                        //Add padding
+                        bytes.AddRange(new byte[Utils.CalculatePadding(bytes.Count - startCommandOffset, 4)]);
+
+                        commandIndex++;
                     }
-
-                    //Add padding
-                    bytes.AddRange(new byte[Utils.CalculatePadding(bytes.Count - startCommandOffset, 4)]);
-
-                    //Write value/index
-                    bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes((ushort)(bytes.Count - startCommandOffset)), startCommandOffset + 6);
-                    for (int a = 0; a < anim.Commands[i].KeyframeCount; a++)
-                    {
-                        if (anim.Commands[i].Int16ForValueIndex)
-                        {
-                            bytes.AddRange(BitConverter.GetBytes((ushort)anim.Commands[i].Keyframes[a].index));
-                            bytes.Add(0);
-                            bytes.Add((byte)anim.Commands[i].Keyframes[a].InterpolationType);
-                        }
-                        else
-                        {
-                            bytes.Add((byte)anim.Commands[i].Keyframes[a].index);
-                            bytes.Add((byte)anim.Commands[i].Keyframes[a].InterpolationType);
-                        }
-                    }
-
-                    //Add padding
-                    bytes.AddRange(new byte[Utils.CalculatePadding(bytes.Count - startCommandOffset, 4)]);
-
                 }
 
                 //Values
                 int valuesStartOffset = bytes.Count;
                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - animStartOffset), animStartOffset + 16);
-                foreach(var value in values)
+                foreach (var value in values)
                 {
-                    if(anim.FloatPrecision == ValueType.Float16)
+                    if (anim.FloatPrecision == ValueType.Float16)
                     {
                         bytes.AddRange(Half.GetBytes((Half)value));
                     }
@@ -276,7 +286,7 @@ namespace Xv2CoreLib.EMA
             }
 
             //Strings (animations)
-            for(int i = 0; i < Animations.Count; i++)
+            for (int i = 0; i < Animations.Count; i++)
             {
                 if (!String.IsNullOrWhiteSpace(Animations[i].Name))
                 {
@@ -290,26 +300,13 @@ namespace Xv2CoreLib.EMA
 
             return bytes.ToArray();
         }
-
-        private int GetIndexedAnimationCount()
-        {
-            if (Animations == null) return 0;
-
-            int max = 0;
-
-            foreach(var anim in Animations)
-            {
-                if (anim.Index > max) max = anim.Index;
-            }
-
-            return max + 1;
-        }
+        #endregion
 
         public string GetBoneName(int boneIndex)
         {
             if (!HasSkeleton) throw new InvalidOperationException("EMA_File.GetBoneName: emaFile has no skeleton.");
 
-            foreach(var bone in Skeleton.Bones)
+            foreach (var bone in Skeleton.Bones)
             {
                 if (bone.Index == boneIndex) return bone.Name;
             }
@@ -334,7 +331,7 @@ namespace Xv2CoreLib.EMA
             List<RgbColor> colors = new List<RgbColor>();
             if (Animations == null) Animations = AsyncObservableCollection<EMA_Animation>.Create();
 
-            foreach(var anim in Animations)
+            foreach (var anim in Animations)
             {
                 colors.AddRange(anim.GetUsedColors());
             }
@@ -342,17 +339,10 @@ namespace Xv2CoreLib.EMA
             return colors;
         }
 
-        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0)
-        {
-            if (Animations == null) return;
-            if (undos == null) undos = new List<IUndoRedo>();
-
-            foreach (var anim in Animations)
-            {
-                anim.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
-            }
-        }
-
+        /*
+        /// <summary>
+        /// Convert a <see cref="EAN_File"/> created from the <see cref="ConvertToEan"/> method back to a <see cref="EMA_File"/> instance. It CANNOT convert any EAN file, it must be one created from this method!
+        /// </summary>
         public static EMA_File ConvertToEma(EAN_File eanFile)
         {
             //NOT FINISHED. VERY BUGGY!
@@ -360,17 +350,18 @@ namespace Xv2CoreLib.EMA
             //Rotation conversion also seems broken (Quaternion -> Euler Angles)
 
             //Remove skeleton from keyframe values (test)
-            List<SerializedAnimation> deskinnedAnims = SerializedAnimation.Serialize(eanFile.Animations, eanFile.Skeleton);
-            List<EAN_Animation> deskinnedEan = SerializedAnimation.Deserialize(deskinnedAnims, null);
+            //List<SerializedAnimation> deskinnedAnims = SerializedAnimation.Serialize(eanFile.Animations, eanFile.Skeleton);
+            //List<EAN_Animation> deskinnedEan = SerializedAnimation.Deserialize(deskinnedAnims, null);
 
             EMA_File emaFile = new EMA_File();
             emaFile.Version = 37568;
             emaFile.Skeleton = Skeleton.Convert(eanFile.Skeleton);
 
-            foreach(var animation in deskinnedEan)
+            foreach(var animation in eanFile.Animations)
             {
                 EMA_Animation emaAnimation = new EMA_Animation();
                 emaAnimation.Name = animation.Name;
+                emaAnimation.Index = animation.IndexNumeric;
                 emaAnimation.EmaType = EmaAnimationType.obj;
                 emaAnimation.FloatPrecision = (ValueType)animation.FloatType;
                 emaAnimation.EndFrame = (ushort)animation.GetLastKeyframe();
@@ -379,54 +370,186 @@ namespace Xv2CoreLib.EMA
                 {
                     foreach(var component in node.AnimationComponents)
                     {
-                        if(component.Type == EAN_AnimationComponent.ComponentType.Position || component.Type == EAN_AnimationComponent.ComponentType.Scale)
+                        if(component.Type == EAN_AnimationComponent.ComponentType.Position || component.Type == EAN_AnimationComponent.ComponentType.Scale || component.Type == EAN_AnimationComponent.ComponentType.Rotation)
                         {
-                            emaAnimation.Commands.Add(EMA_Command.ConvertToEma(component, Axis.X, node.BoneName));
-                            emaAnimation.Commands.Add(EMA_Command.ConvertToEma(component, Axis.Y, node.BoneName));
-                            emaAnimation.Commands.Add(EMA_Command.ConvertToEma(component, Axis.Z, node.BoneName));
+                            emaAnimation.Nodes.Add(EMA_Command.ConvertToEma(component, Axis.X, node.BoneName));
+                            emaAnimation.Nodes.Add(EMA_Command.ConvertToEma(component, Axis.Y, node.BoneName));
+                            emaAnimation.Nodes.Add(EMA_Command.ConvertToEma(component, Axis.Z, node.BoneName));
                         }
-                        else if(component.Type == EAN_AnimationComponent.ComponentType.Rotation)
-                        {
-                            //emaAnimation.Commands.AddRange(EMA_Command.ConvertToEma_Rotation(component, node.BoneName));
-                        }
+                        //else if(component.Type == EAN_AnimationComponent.ComponentType.Rotation)
+                        //{
+                        //    emaAnimation.Commands.AddRange(EMA_Command.ConvertToEma_Rotation(component, node.BoneName));
+                        //}
                     }
                 }
 
                 emaFile.Animations.Add(emaAnimation);
             }
-            /*
-             * 
-            foreach(var animation in eanFile.Animations)
-            {
-                EMA_Animation emaAnimation = new EMA_Animation();
-                emaAnimation.Name = animation.Name;
-                emaAnimation.EmaType = EmaType.obj;
-                emaAnimation.FloatPrecision = (ValueType)animation.FloatSize;
-                emaAnimation.EndFrame = (ushort)animation.GetLastKeyframe();
-
-                foreach(var node in animation.Nodes)
-                {
-                    foreach(var component in node.AnimationComponents)
-                    {
-                        if(component.Type == EAN_AnimationComponent.ComponentType.Position || component.Type == EAN_AnimationComponent.ComponentType.Scale)
-                        {
-                            emaAnimation.Commands.Add(EMA_Command.ConvertToEma(component, Axis.X, node.BoneName));
-                            emaAnimation.Commands.Add(EMA_Command.ConvertToEma(component, Axis.Y, node.BoneName));
-                            emaAnimation.Commands.Add(EMA_Command.ConvertToEma(component, Axis.Z, node.BoneName));
-                        }
-                        else if(component.Type == EAN_AnimationComponent.ComponentType.Rotation)
-                        {
-                            //emaAnimation.Commands.AddRange(EMA_Command.ConvertToEma_Rotation(component, node.BoneName));
-                        }
-                    }
-                }
-
-                emaFile.Animations.Add(emaAnimation);
-            }
-            */
 
             return emaFile;
         }
+
+        /// <summary>
+        /// Convert to an <see cref="EAN_File"/> instance. Note: Rotation values are not converted to <see cref="Quaternion"/> and thus this isn't a real <see cref="EAN_File"/> that can be used by the game. It's just for easier management of EMA by combining all components together.
+        /// </summary>
+        public EAN_File ConvertToEan()
+        {
+            EAN_File eanFile = new EAN_File();
+            eanFile.Skeleton = Skeleton?.Convert()?.Skeleton;
+
+            foreach(EMA_Animation animation in Animations)
+            {
+
+            }
+
+            return eanFile;
+        }
+        */
+
+        public void AddInterpolatedKeyframes()
+        {
+            //Manually add interpolated keyframes from the bezier curve definitions
+            //Right now this is just for testing, but it will be needed for any EMA -> EAN conversions in the future
+
+            foreach (EMA_Animation animation in Animations)
+            {
+                foreach (EMA_Node node in animation.Nodes)
+                {
+                    foreach (EMA_Command command in node.Commands)
+                    {
+                        for (int i = 0; i < animation.EndFrame; i++)
+                        {
+                            EMA_Keyframe keyframe = command.Keyframes.FirstOrDefault(x => x.Time == i);
+                            if (keyframe == null) continue;
+
+                            if (keyframe.InterpolationType == KeyframeInterpolation.CubicBezier || keyframe.InterpolationType == KeyframeInterpolation.QuadraticBezier)
+                            {
+                                EMA_Keyframe nextKeyframe = command.GetKeyframeAfter(i);
+                                if (nextKeyframe?.Time == keyframe.Time + 1 || nextKeyframe == null) continue; //No interpolation required
+                                if (nextKeyframe.Value == keyframe.Value && MathHelpers.FloatEquals(keyframe.ControlPoint1, 0f) && MathHelpers.FloatEquals(keyframe.ControlPoint2, 0f)) continue;
+
+                                float controlPoint1 = keyframe.Value + keyframe.ControlPoint1;
+                                float controlPoint2 = nextKeyframe.Value - keyframe.ControlPoint2;
+
+                                for (int a = keyframe.Time + 1; a < nextKeyframe.Time; a++)
+                                {
+                                    float factor = (float)(a - keyframe.Time) / (float)(nextKeyframe.Time - keyframe.Time);
+                                    float value = 0f;
+
+                                    if (keyframe.InterpolationType == KeyframeInterpolation.CubicBezier)
+                                    {
+                                        value = MathHelpers.CubicBezier(factor, keyframe.Value, controlPoint1, controlPoint2, nextKeyframe.Value);
+                                    }
+                                    else if (keyframe.InterpolationType == KeyframeInterpolation.QuadraticBezier)
+                                    {
+                                        value = MathHelpers.QuadraticBezier(factor, keyframe.Value, controlPoint1, nextKeyframe.Value);
+                                    }
+
+                                    command.Keyframes.Add(new EMA_Keyframe(a, value));
+                                }
+
+                                //Remove interp from keyframe
+                                keyframe.InterpolationType = KeyframeInterpolation.Linear;
+
+                                //Jump straight to next keyframe
+                                i = nextKeyframe.Time;
+                            }
+                        }
+
+                        command.Keyframes.Sort((x, y) => x.Time - y.Time);
+                    }
+
+                }
+            }
+        }
+        
+        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0, EMM.EMM_File emmFile = null)
+        {
+            if (Animations == null) return;
+            if (undos == null) undos = new List<IUndoRedo>();
+
+            foreach (EMA_Animation anim in Animations)
+            {
+                anim.ChangeHue(hue, saturation, lightness, undos, hueSet, variance, emmFile);
+            }
+        }
+
+        #region MaterialAnimation
+        /// <summary>
+        /// Updates all material names to correctly match the actual materials defined in the EMM file.
+        /// </summary>
+        public void FixMaterialNames(EMM.EMM_File emmFile)
+        {
+            //The EMA file uses the skeleton index to match material nodes with the actual materials. The node name is gibberish and means nothing. So, this method will rename them all to the correct name.
+            //On save, the skeleton will be dynamically rereated based on the material file.
+
+            foreach(EMA_Animation anim in Animations)
+            {
+                foreach(EMA_Node node in anim.Nodes)
+                {
+                    int materialIdx = Skeleton.Bones.IndexOf(Skeleton.Bones.FirstOrDefault(x => x.Name == node.BoneName));
+
+                    if(materialIdx != -1 && materialIdx <= emmFile.Materials.Count - 1)
+                    {
+                        node.BoneName = emmFile.Materials[materialIdx].Name;
+                    }
+                }
+            }
+
+            for(int i = 0; i < Skeleton.Bones.Count; i++)
+            {
+                if (i != -1 && i <= emmFile.Materials.Count - 1)
+                {
+                    Skeleton.Bones[i].Name = emmFile.Materials[i].Name;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Dynamically creates the EMA skeleton to match the material index.
+        /// </summary>
+        public void CreateMaterialSkeleton(EMM.EMM_File emmFile)
+        {
+            Skeleton skeleton = new Skeleton();
+
+            //Create bones for all materials
+            for(int i = 0; i < emmFile.Materials.Count; i++)
+            {
+                Bone bone = new Bone();
+                bone.Name = emmFile.Materials[i].Name;
+                bone.Index = (ushort)i;
+                bone.EmoPartIndex = 0;
+                bone.I_08 = 0;
+                bone.IKFlag = 1;
+                bone.RelativeMatrix = SkeletonMatrix.ZeroMatrix();
+
+                skeleton.Bones.Add(bone);
+            }
+
+            //Create bones for all nodes in this EMA file that aren't actually materials.
+            //These nodes dont actually do anything, but to be in a sane state when saving this step is needed, becuases mats could be renamed or deleted...
+            foreach(EMA_Animation anim in Animations)
+            {
+                foreach(EMA_Node node in anim.Nodes)
+                {
+                    if(skeleton.Bones.FirstOrDefault(x => x.Name == node.BoneName) == null)
+                    {
+                        Bone bone = new Bone();
+                        bone.Name = node.BoneName;
+                        bone.Index = (ushort)skeleton.Bones.Count;
+                        bone.EmoPartIndex = 0;
+                        bone.I_08 = 0;
+                        bone.IKFlag = 1;
+                        bone.RelativeMatrix = SkeletonMatrix.ZeroMatrix();
+
+                        skeleton.Bones.Add(bone);
+                    }
+                }
+            }
+
+            Skeleton = skeleton;
+        }
+        #endregion
     }
 
     [Serializable]
@@ -434,21 +557,17 @@ namespace Xv2CoreLib.EMA
     public class EMA_Animation
     {
         [YAXDontSerialize]
-        public string ToolName
-        {
-            get
-            {
-                return string.Format("[{0}] {1}", Index, Name);
-            }
-        }
-
-        [YAXDontSerialize]
         public int CommandCount
         {
             get
             {
-                if (Commands == null) return 0;
-                return Commands.Count;
+                if (Nodes == null) return 0;
+                int count = 0;
+
+                foreach (var node in Nodes)
+                    count += node.Commands.Count;
+
+                return count;
             }
         }
 
@@ -470,9 +589,10 @@ namespace Xv2CoreLib.EMA
         [YAXSerializeAs("FloatType")]
         public ValueType FloatPrecision { get; set; }
 
-        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Command")]
-        public AsyncObservableCollection<EMA_Command> Commands { get; set; } = new AsyncObservableCollection<EMA_Command>();
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Node")]
+        public AsyncObservableCollection<EMA_Node> Nodes { get; set; } = new AsyncObservableCollection<EMA_Node>();
 
+        #region LoadSave
         public static EMA_Animation Read(byte[] rawBytes, int offset, int index, EMA_File emaFile)
         {
             EMA_Animation animation = new EMA_Animation();
@@ -488,7 +608,7 @@ namespace Xv2CoreLib.EMA
             int nameOffset = (BitConverter.ToInt32(rawBytes, offset + 12) != 0) ? BitConverter.ToInt32(rawBytes, offset + 12) + offset : 0;
 
             //Name
-            if(nameOffset > 0)
+            if (nameOffset > 0)
             {
                 animation.Name = StringEx.GetString(rawBytes, nameOffset + 11, false, StringEx.EncodingType.UTF8);
             }
@@ -496,9 +616,9 @@ namespace Xv2CoreLib.EMA
             //Values
             float[] values = new float[valueCount];
 
-            for(int i = 0; i < valueCount; i++)
+            for (int i = 0; i < valueCount; i++)
             {
-                if(animation.FloatPrecision == ValueType.Float16)
+                if (animation.FloatPrecision == ValueType.Float16)
                 {
                     values[i] = Half.ToHalf(rawBytes, valueOffset + (i * 2));
                 }
@@ -508,7 +628,7 @@ namespace Xv2CoreLib.EMA
                 }
                 else
                 {
-                    throw new InvalidDataException(String.Format("EMA_Animation: Unknown float type ({0}).", animation.FloatPrecision));
+                    throw new InvalidDataException(string.Format("EMA_Animation: Unknown float type ({0}).", animation.FloatPrecision));
                 }
 
                 //Console.WriteLine(string.Format("{1}: {0}", values[i], i));
@@ -516,13 +636,15 @@ namespace Xv2CoreLib.EMA
             //Console.ReadLine();
 
             //Commands
-            for(int i = 0; i < commandCount; i++)
+            for (int i = 0; i < commandCount; i++)
             {
                 int commandOffset = BitConverter.ToInt32(rawBytes, offset + 20 + (i * 4));
 
-                if(commandOffset != 0)
+                if (commandOffset != 0)
                 {
-                    animation.Commands.Add(EMA_Command.Read(rawBytes, commandOffset + offset, values, emaFile, animation.EmaType));
+                    string boneName = emaFile.HasSkeleton ? emaFile.GetBoneName(BitConverter.ToUInt16(rawBytes, commandOffset + offset)) : null;
+
+                    animation.AddCommand(boneName, EMA_Command.Read(rawBytes, commandOffset + offset, values, animation.EmaType));
                 }
 
             }
@@ -537,116 +659,178 @@ namespace Xv2CoreLib.EMA
 
             List<int> dualIndex = new List<int>();
 
-            foreach (var command in Commands)
+            foreach(var node in Nodes)
             {
-                foreach(var keyframe in command.Keyframes)
+                foreach (var command in node.Commands)
                 {
-                    //Sloppy code for now, refactor it later...
-                    if (keyframe.InterpolationType == KeyframeInterpolation.QuadraticBezier)
+                    foreach (var keyframe in command.Keyframes)
                     {
-                        //Always add new dual values. Don't reuse, and dont let them be used by other keyframes.
-                        floats.Add(keyframe.Value);
-                        keyframe.index = floats.Count - 1;
-                        floats.Add(keyframe.ControlPoint1);
-                        dualIndex.Add(keyframe.index);
-                        dualIndex.Add(keyframe.index + 1);
-                    }
-                    else if (keyframe.InterpolationType == KeyframeInterpolation.CubicBezier)
-                    {
-                        //Always add new dual values. Don't reuse, and dont let them be used by other keyframes.
-                        floats.Add(keyframe.Value);
-                        keyframe.index = floats.Count - 1;
-                        floats.Add(keyframe.ControlPoint1);
-                        floats.Add(keyframe.ControlPoint2);
-                        dualIndex.Add(keyframe.index);
-                        dualIndex.Add(keyframe.index + 1);
-                        dualIndex.Add(keyframe.index + 2);
-                    }
-                    else
-                    {
-                        //Value is not dual, so reuse any NON-DUAL value or add a new value
-                        int idx = -1;
-                        for(int i = 0; i < floats.Count; i++)
+                        //Sloppy code for now, refactor it later...
+                        if (keyframe.InterpolationType == KeyframeInterpolation.QuadraticBezier)
                         {
-                            if(floats[i] == keyframe.Value && !dualIndex.Contains(i))
-                            {
-                                //Reuse this index
-                                idx = i;
-                                break;
-                            }
+                            //Always add new dual values. Don't reuse, and dont let them be used by other keyframes.
+                            floats.Add(keyframe.Value);
+                            keyframe.index = floats.Count - 1;
+                            floats.Add(keyframe.ControlPoint1);
+                            dualIndex.Add(keyframe.index);
+                            dualIndex.Add(keyframe.index + 1);
                         }
-
-                        if(idx != -1)
+                        else if (keyframe.InterpolationType == KeyframeInterpolation.CubicBezier)
                         {
-                            keyframe.index = idx;
+                            //Always add new dual values. Don't reuse, and dont let them be used by other keyframes.
+                            floats.Add(keyframe.Value);
+                            keyframe.index = floats.Count - 1;
+                            floats.Add(keyframe.ControlPoint1);
+                            floats.Add(keyframe.ControlPoint2);
+                            dualIndex.Add(keyframe.index);
+                            dualIndex.Add(keyframe.index + 1);
+                            dualIndex.Add(keyframe.index + 2);
                         }
                         else
                         {
-                            //Value not found. Add it.
-                            floats.Add(keyframe.Value);
-                            keyframe.index = floats.Count - 1;
-                        }
+                            //Value is not dual, so reuse any NON-DUAL value or add a new value
+                            int idx = -1;
+                            for (int i = 0; i < floats.Count; i++)
+                            {
+                                if (floats[i] == keyframe.Value && !dualIndex.Contains(i))
+                                {
+                                    //Reuse this index
+                                    idx = i;
+                                    break;
+                                }
+                            }
 
+                            if (idx != -1)
+                            {
+                                keyframe.index = idx;
+                            }
+                            else
+                            {
+                                //Value not found. Add it.
+                                floats.Add(keyframe.Value);
+                                keyframe.index = floats.Count - 1;
+                            }
+
+                        }
+                    }
+                }
+
+            }
+            
+            return floats;
+        }
+
+        #endregion
+
+        public List<IUndoRedo> SyncMatCommands(byte parameter, EMM.EMM_File emmFile)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            //MatCol = 4 (x,y,z,w), TexScrl = 2 (u,v)
+            //int numComponents = parameter > 3 ? 2 : 4;
+            int numComponents = 3; //Hardcode to 3 components for RGB.
+
+            foreach(EMA_Node node in Nodes)
+            {
+                EMA_Command[] components = new EMA_Command[numComponents];
+
+                //Grab the material and get the default values
+                EMM.EmmMaterial material = emmFile.GetMaterial(node.BoneName);
+                if (material == null) continue;
+
+                //float[] defaultValues = parameter > 3 ? material.DecompiledParameters.GetTexScrl(parameter - 4).Values : material.DecompiledParameters.GetMatCol(parameter).Values;
+                float[] defaultValues = material.DecompiledParameters.GetMatCol(parameter).Values;
+
+                //If ALL of the components dont exist, then none need to be added. SO skip.
+                if (components.All(x => x == null))
+                    continue;
+
+                for (byte i = 0; i < numComponents; i++)
+                {
+                    components[i] = node.GetCommand(parameter, i);
+
+                    //Create the component with the default values from EMM
+                    if(components[i] == null)
+                    {
+                        components[i] = EMA_Command.GetNew(parameter, i, EmaAnimationType.mat);
+                        components[i].Keyframes.Add(new EMA_Keyframe(0, defaultValues[i]));
+                        components[i].Keyframes.Add(new EMA_Keyframe(EndFrame, defaultValues[i]));
+                        AddCommand(node.BoneName, components[i], undos);
+                    }
+                }
+
+
+                //Now sync the commands
+                foreach (EMA_Command anim in node.Commands)
+                {
+                    foreach (EMA_Command anim2 in node.Commands)
+                    {
+                        if (anim.Parameter == parameter && anim2.Parameter == parameter)
+                        {
+                            anim.AddKeyframesFromCommand(anim2);
+                        }
                     }
                 }
             }
 
-            return floats;
+            return undos;
         }
 
         /// <summary>
         /// Ensures that color components (R, G, B) are always in sync (e.x: R must exist at same frame as G, and so on)
         /// </summary>
-        public void SyncColorCommands()
+        public List<IUndoRedo> SyncColorCommands()
         {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
             if (EmaType != EmaAnimationType.light) throw new InvalidOperationException("EMA_Animation.SyncColorCommands: Method not valid for type = " + EmaType);
 
-            var r_command = GetCommand("Color", "R");
-            var g_command = GetCommand("Color", "G");
-            var b_command = GetCommand("Color", "B");
+            EMA_Command r_command = GetCommand(EMA_Command.PARAMETER_COLOR, EMA_Command.COMPONENT_R);
+            EMA_Command g_command = GetCommand(EMA_Command.PARAMETER_COLOR, EMA_Command.COMPONENT_G);
+            EMA_Command b_command = GetCommand(EMA_Command.PARAMETER_COLOR, EMA_Command.COMPONENT_B);
 
             //There is atleast one color component on this animation
-            if(r_command != null || g_command != null || b_command != null)
+            if (r_command != null || g_command != null || b_command != null)
             {
                 //Now we need to add the components that dont exist
-                if(r_command == null)
+                if (r_command == null)
                 {
-                    var newCommand = EMA_Command.GetNewLight();
-                    newCommand.ComponentXmlBinding = "R";
+                    EMA_Command newCommand = EMA_Command.GetNewLight();
+                    newCommand.Component = EMA_Command.COMPONENT_R;
                     newCommand.Keyframes.Add(new EMA_Keyframe() { Time = 0, Value = 0 }); //First keyframe
                     newCommand.Keyframes.Add(new EMA_Keyframe() { Time = EndFrame, Value = 0 }); //Last keyframe
-                    Commands.Add(newCommand);
+                    AddCommand(null, newCommand, undos);
                 }
 
                 if (g_command == null)
                 {
-                    var newCommand = EMA_Command.GetNewLight();
-                    newCommand.ComponentXmlBinding = "G";
+                    EMA_Command newCommand = EMA_Command.GetNewLight();
+                    newCommand.Component = EMA_Command.COMPONENT_G;
                     newCommand.Keyframes.Add(new EMA_Keyframe() { Time = 0, Value = 0 }); //First keyframe
                     newCommand.Keyframes.Add(new EMA_Keyframe() { Time = EndFrame, Value = 0 }); //Last keyframe
-                    Commands.Add(newCommand);
+                    AddCommand(null, newCommand, undos);
                 }
 
                 if (b_command == null)
                 {
-                    var newCommand = EMA_Command.GetNewLight();
-                    newCommand.ComponentXmlBinding = "B";
+                    EMA_Command newCommand = EMA_Command.GetNewLight();
+                    newCommand.Component = EMA_Command.COMPONENT_B;
                     newCommand.Keyframes.Add(new EMA_Keyframe() { Time = 0, Value = 0 }); //First keyframe
                     newCommand.Keyframes.Add(new EMA_Keyframe() { Time = EndFrame, Value = 0 }); //Last keyframe
-                    Commands.Add(newCommand);
+                    AddCommand(null, newCommand, undos);
                 }
 
             }
 
             //Reload the commands now that they are all added.
-            r_command = GetCommand("Color", "R");
-            g_command = GetCommand("Color", "G");
-            b_command = GetCommand("Color", "B");
+            r_command = GetCommand(EMA_Command.PARAMETER_COLOR, EMA_Command.COMPONENT_R);
+            g_command = GetCommand(EMA_Command.PARAMETER_COLOR, EMA_Command.COMPONENT_G);
+            b_command = GetCommand(EMA_Command.PARAMETER_COLOR, EMA_Command.COMPONENT_B);
 
             //Now sync the commands
-            foreach (var anim in Commands)
+            foreach (EMA_Command anim in Nodes[0].Commands)
             {
-                foreach (var anim2 in Commands)
+                foreach (EMA_Command anim2 in Nodes[0].Commands)
                 {
                     if (anim.Parameter == 2 && anim2.Parameter == 2 && anim.Component != 3 && anim2.Component != 3)
                     {
@@ -654,15 +838,20 @@ namespace Xv2CoreLib.EMA
                     }
                 }
             }
+
+            return undos;
         }
 
-        public EMA_Command GetCommand(string parameter, string component)
+        public EMA_Command GetCommand(int parameter, int component, string nodeName = null)
         {
-            if (Commands == null) Commands = AsyncObservableCollection<EMA_Command>.Create();
+            if (Nodes == null) Nodes = new AsyncObservableCollection<EMA_Node>();
 
-            foreach(var command in Commands)
+            foreach(EMA_Node node in Nodes.Where(x => x.BoneName == nodeName))
             {
-                if (command.ParameterXmlBinding.ToLower() == parameter.ToLower() && command.ComponentXmlBinding.ToLower() == component.ToLower()) return command;
+                foreach (EMA_Command command in node.Commands)
+                {
+                    if (command.Parameter == parameter && command.Component == component) return command;
+                }
             }
 
             return null;
@@ -674,14 +863,14 @@ namespace Xv2CoreLib.EMA
 
             List<RgbColor> colors = new List<RgbColor>();
 
-            var r_command = GetCommand("Color", "R");
-            var g_command = GetCommand("Color", "G");
-            var b_command = GetCommand("Color", "B");
+            EMA_Command r_command = GetCommand(EMA_Command.PARAMETER_COLOR, EMA_Command.COMPONENT_R);
+            EMA_Command g_command = GetCommand(EMA_Command.PARAMETER_COLOR, EMA_Command.COMPONENT_G);
+            EMA_Command b_command = GetCommand(EMA_Command.PARAMETER_COLOR, EMA_Command.COMPONENT_B);
 
-            foreach(var r in r_command.Keyframes)
+            foreach (var r in r_command.Keyframes)
             {
-                var g = g_command.GetValue(r.Time);
-                var b = b_command.GetValue(r.Time);
+                float g = g_command.GetKeyframeValue(r.Time);
+                float b = b_command.GetKeyframeValue(r.Time);
 
                 colors.Add(new RgbColor(r.Value, g, b));
             }
@@ -689,18 +878,50 @@ namespace Xv2CoreLib.EMA
             return colors;
         }
 
-        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet = false, int variance = 0)
+        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet = false, int variance = 0, EMM.EMM_File emmFile = null)
         {
-            var r_command = GetCommand("Color", "R");
-            var g_command = GetCommand("Color", "G");
-            var b_command = GetCommand("Color", "B");
-
-            foreach (var r in r_command.Keyframes)
+            if(EmaType == EmaAnimationType.light)
             {
-                var g = g_command.GetValue(r.Time);
-                var b = b_command.GetValue(r.Time);
+                EMA_Command r_command = GetCommand(EMA_Command.PARAMETER_COLOR, EMA_Command.COMPONENT_R);
+                EMA_Command g_command = GetCommand(EMA_Command.PARAMETER_COLOR, EMA_Command.COMPONENT_G);
+                EMA_Command b_command = GetCommand(EMA_Command.PARAMETER_COLOR, EMA_Command.COMPONENT_B);
 
-                var hslColor = new RgbColor(r.Value, g, b).ToHsl();
+                ChangeHue(hue, saturation, lightness, undos, hueSet, variance, r_command, g_command, b_command);
+            }
+            else if(EmaType == EmaAnimationType.mat && emmFile != null)
+            {
+                undos.AddRange(SyncMatCommands(0, emmFile));
+                undos.AddRange(SyncMatCommands(1, emmFile));
+                undos.AddRange(SyncMatCommands(2, emmFile));
+                undos.AddRange(SyncMatCommands(3, emmFile));
+
+                foreach (EMA_Node node in Nodes)
+                {
+                    for (byte i = 0; i < 4; i++)
+                    {
+                        EMA_Command r_command = GetCommand(i, EMA_Command.COMPONENT_R, node.BoneName);
+                        EMA_Command g_command = GetCommand(i, EMA_Command.COMPONENT_G, node.BoneName);
+                        EMA_Command b_command = GetCommand(i, EMA_Command.COMPONENT_B, node.BoneName);
+
+                        ChangeHue(hue, saturation, lightness, undos, hueSet, variance, r_command, g_command, b_command);
+                    }
+                }
+            }
+        }
+
+        private void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet, int variance, params EMA_Command[] commands)
+        {
+            if (commands.All(x => x == null)) return;
+            //EMA_Command r_command = GetCommand(EMA_Command.PARAMETER_COLOR, EMA_Command.COMPONENT_R);
+            //EMA_Command g_command = GetCommand(EMA_Command.PARAMETER_COLOR, EMA_Command.COMPONENT_G);
+            //EMA_Command b_command = GetCommand(EMA_Command.PARAMETER_COLOR, EMA_Command.COMPONENT_B);
+
+            foreach (EMA_Keyframe r in commands[0].Keyframes)
+            {
+                float g = commands[1].GetKeyframeValue(r.Time);
+                float b = commands[2].GetKeyframeValue(r.Time);
+
+                HslColor.HslColor hslColor = new RgbColor(r.Value, g, b).ToHsl();
                 RgbColor convertedColor;
 
                 if (hueSet)
@@ -716,11 +937,56 @@ namespace Xv2CoreLib.EMA
 
                 convertedColor = hslColor.ToRgb();
 
-                r_command.SetValue(r.Time, (float)convertedColor.R, undos);
-                g_command.SetValue(r.Time, (float)convertedColor.G, undos);
-                b_command.SetValue(r.Time, (float)convertedColor.B, undos);
+                commands[0].SetValue(r.Time, (float)convertedColor.R, undos);
+                commands[1].SetValue(r.Time, (float)convertedColor.G, undos);
+                commands[2].SetValue(r.Time, (float)convertedColor.B, undos);
+            }
+        }
+
+        public void AddCommand(string bone, EMA_Command command, List<IUndoRedo> undos = null)
+        {
+            EMA_Node node = Nodes.FirstOrDefault(x => x.BoneName == bone);
+
+            if (node == null)
+            {
+                node = new EMA_Node();
+                node.BoneName = bone;
+                Nodes.Add(node);
+
+                undos?.Add(new UndoableListAdd<EMA_Node>(Nodes, node));
             }
 
+            EMA_Command existingCommand = node.Commands.FirstOrDefault(x => x.Parameter == command.Parameter && x.Component == command.Component);
+
+            if (existingCommand != null)
+            {
+                int idx = node.Commands.IndexOf(existingCommand);
+                undos?.Add(new UndoableListInsert<EMA_Command>(node.Commands, idx, command));
+                node.Commands[idx] = command;
+            }
+            else
+            {
+                node.Commands.Add(command);
+                undos?.Add(new UndoableListAdd<EMA_Command>(node.Commands, command));
+            }
+        }
+    }
+
+    [Serializable]
+    [YAXSerializeAs("Node")]
+    public class EMA_Node
+    {
+        [YAXAttributeForClass]
+        [YAXSerializeAs("BoneName")]
+        [YAXDontSerializeIfNull]
+        public string BoneName { get; set; }
+
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Command")]
+        public AsyncObservableCollection<EMA_Command> Commands { get; set; } = new AsyncObservableCollection<EMA_Command>();
+
+        public EMA_Command GetCommand(int parameter, int component)
+        {
+            return Commands.FirstOrDefault(x => x.Parameter == parameter && x.Component == component);
         }
     }
 
@@ -728,6 +994,11 @@ namespace Xv2CoreLib.EMA
     [YAXSerializeAs("Command")]
     public class EMA_Command
     {
+        public const byte PARAMETER_COLOR = 2;
+        public const byte COMPONENT_R = 0;
+        public const byte COMPONENT_G = 1;
+        public const byte COMPONENT_B = 2;
+
         private EmaAnimationType emaType = EmaAnimationType.obj;
 
         [YAXDontSerialize]
@@ -739,11 +1010,6 @@ namespace Xv2CoreLib.EMA
                 return Keyframes.Count;
             }
         }
-
-        [YAXAttributeForClass]
-        [YAXSerializeAs("Bone")]
-        [YAXDontSerializeIfNull]
-        public string BoneName { get; set; } //ushort
 
         [YAXAttributeForClass]
         [YAXSerializeAs("Parameter")]
@@ -762,7 +1028,7 @@ namespace Xv2CoreLib.EMA
 
         [YAXDontSerialize]
         public byte Parameter { get; set; }
-        
+
         [YAXDontSerialize]
         public byte Component { get; set; }
         [YAXDontSerialize]
@@ -783,31 +1049,31 @@ namespace Xv2CoreLib.EMA
 
         public AsyncObservableCollection<EMA_Keyframe> Keyframes { get; set; } = new AsyncObservableCollection<EMA_Keyframe>();
 
+
         public static EMA_Command GetNewLight()
         {
             return new EMA_Command()
             {
-                Keyframes = AsyncObservableCollection<EMA_Keyframe>.Create(),
                 emaType = EmaAnimationType.light,
                 Parameter = 2, //Color
             };
         }
 
-        public static EMA_Command Read(byte[] rawBytes, int offset, float[] values, EMA_File emaFile, EmaAnimationType _emaType)
+        public static EMA_Command GetNew(byte parameter, byte component, EmaAnimationType type)
+        {
+            return new EMA_Command()
+            {
+                emaType = type,
+                Parameter = parameter,
+                Component = component
+            };
+        }
+
+        public static EMA_Command Read(byte[] rawBytes, int offset, float[] values, EmaAnimationType _emaType)
         {
             EMA_Command command = new EMA_Command();
             command.emaType = _emaType;
 
-            if (emaFile.HasSkeleton)
-            {
-                command.BoneName = emaFile.GetBoneName(BitConverter.ToUInt16(rawBytes, offset + 0));
-            }
-            else
-            {
-                //This ema has no skeleton, thus no bones
-                command.BoneName = null;
-            }
-            
             command.Parameter = rawBytes[offset + 2];
 
             BitArray flags_b = new BitArray(new byte[1] { Int4Converter.ToInt4(rawBytes[offset + 3])[1] });
@@ -825,7 +1091,7 @@ namespace Xv2CoreLib.EMA
             ushort keyframeCount = BitConverter.ToUInt16(rawBytes, offset + 4);
             ushort indexOffset = BitConverter.ToUInt16(rawBytes, offset + 6);
 
-            for(int i = 0; i < keyframeCount; i++)
+            for (int i = 0; i < keyframeCount; i++)
             {
                 ushort time;
                 float value;
@@ -887,7 +1153,7 @@ namespace Xv2CoreLib.EMA
                     {
                         byte idx = (byte)(rawBytes[offset + indexOffset + (i * 2)] + 1);
 
-                        if(idx <= values.Length -1)
+                        if (idx <= values.Length - 1)
                             controlPoint1 = values[idx];
                     }
                     else if (interpolation == KeyframeInterpolation.CubicBezier)
@@ -915,22 +1181,10 @@ namespace Xv2CoreLib.EMA
             return command;
         }
 
-        public void SetFlags()
-        {
-            foreach (var keyframe in Keyframes)
-            {
-                if (keyframe.Time > byte.MaxValue)
-                    Int16ForTime = true;
-                if (keyframe.index > byte.MaxValue)
-                    Int16ForValueIndex = true;
-            }
-        }
-
-        //Component range: 0 > 3 (3 bits only, remaining 5 are flags)
 
         private string GetParameterString()
         {
-            if(emaType == EmaAnimationType.obj)
+            if (emaType == EmaAnimationType.obj)
             {
                 switch (Parameter)
                 {
@@ -1019,7 +1273,7 @@ namespace Xv2CoreLib.EMA
 
         private string GetComponentString()
         {
-            if(emaType != EmaAnimationType.light)
+            if (emaType != EmaAnimationType.light)
             {
                 switch (Component)
                 {
@@ -1037,7 +1291,7 @@ namespace Xv2CoreLib.EMA
             }
             else
             {
-                if(Parameter == 3)
+                if (Parameter == 3)
                 {
                     switch (Component)
                     {
@@ -1084,6 +1338,7 @@ namespace Xv2CoreLib.EMA
                 case "z":
                     return 2;
                 case "a":
+                case "w":
                     return 3;
                 default:
                     try
@@ -1099,36 +1354,16 @@ namespace Xv2CoreLib.EMA
 
         public void AddKeyframesFromCommand(EMA_Command anim)
         {
-            foreach (var keyframe in anim.Keyframes)
+            foreach (EMA_Keyframe keyframe in anim.Keyframes)
             {
-                var existing = GetKeyframe(keyframe.Time);
+                EMA_Keyframe existing = GetKeyframe(keyframe.Time);
 
                 if (existing == null)
                 {
-                    var newKeyframe = new EMA_Keyframe() { Time = keyframe.Time, Value = GetValue(keyframe.Time) };
+                    EMA_Keyframe newKeyframe = new EMA_Keyframe() { Time = keyframe.Time, Value = GetKeyframeValue(keyframe.Time) };
                     Keyframes.Add(newKeyframe);
                 }
             }
-        }
-
-        public EMA_Keyframe GetKeyframe(int time)
-        {
-            foreach (var keyframe in Keyframes)
-            {
-                if (keyframe.Time == time) return keyframe;
-            }
-
-            return null;
-        }
-
-        public float GetValue(int time)
-        {
-            foreach (var keyframe in Keyframes)
-            {
-                if (keyframe.Time == time) return keyframe.Value;
-            }
-
-            return CalculateKeyframeValue(time);
         }
 
         public void SetValue(int time, float value, List<IUndoRedo> undos = null)
@@ -1151,69 +1386,8 @@ namespace Xv2CoreLib.EMA
             Keyframes.Add(new EMA_Keyframe() { Time = (ushort)time, Value = value });
         }
 
-        public float CalculateKeyframeValue(int time)
-        {
-            EMA_Keyframe before = GetKeyframeBefore(time);
-            EMA_Keyframe after = GetKeyframeAfter(time);
-
-            if (before == null) return 0f;
-
-            if (after == null)
-            {
-                after = new EMA_Keyframe() { Time = ushort.MaxValue, Value = before.Value };
-            }
-
-            //Frame difference between previous frame and the current frame (current frame is AFTER the frame we want)
-            int diff = after.Time - before.Time;
-
-            //Keyframe value difference
-            float keyframe2 = after.Value - before.Value;
-
-            //Difference between the frame we WANT and the previous frame
-            int diff2 = time - before.Time;
-
-            //Divide keyframe value difference by the keyframe time difference, and then multiply it by diff2, then add the previous keyframe value
-            return (keyframe2 / diff) * diff2 + before.Value;
-        }
-
-        /// <summary>
-        /// Returns the keyframe that appears just before the specified frame
-        /// </summary>
-        /// <returns></returns>
-        public EMA_Keyframe GetKeyframeBefore(int time)
-        {
-            SortKeyframes();
-            EMA_Keyframe prev = null;
-
-            foreach (var keyframe in Keyframes)
-            {
-                if (keyframe.Time >= time) break;
-                prev = keyframe;
-            }
-
-            return prev;
-        }
-
-        /// <summary>
-        /// Returns the keyframe that appears just after the specified frame
-        /// </summary>
-        /// <returns></returns>
-        public EMA_Keyframe GetKeyframeAfter(int time)
-        {
-            SortKeyframes();
-            foreach (var keyframe in Keyframes)
-            {
-                if (keyframe.Time > time) return keyframe;
-            }
-
-            return null;
-        }
-
-        public void SortKeyframes()
-        {
-            Keyframes = Sorting.SortEntries2(Keyframes);
-        }
-
+        #region EanConversion
+        /*
         public static EMA_Command ConvertToEma(EAN_AnimationComponent eanComponent, Axis axis, string boneName)
         {
             EMA_Command command = new EMA_Command();
@@ -1221,7 +1395,7 @@ namespace Xv2CoreLib.EMA
             command.ComponentXmlBinding = axis.ToString();
             command.ParameterXmlBinding = eanComponent.Type.ToString();
 
-            foreach(var keyframe in eanComponent.Keyframes)
+            foreach (var keyframe in eanComponent.Keyframes)
             {
                 var emaKeyframe = new EMA_Keyframe();
                 emaKeyframe.Time = keyframe.FrameIndex;
@@ -1231,7 +1405,7 @@ namespace Xv2CoreLib.EMA
                     case Axis.X:
                         emaKeyframe.Value = keyframe.X * keyframe.W;
                         break;
-                    case Axis.Y: 
+                    case Axis.Y:
                         emaKeyframe.Value = keyframe.Y * keyframe.W;
                         break;
                     case Axis.Z:
@@ -1265,7 +1439,7 @@ namespace Xv2CoreLib.EMA
             foreach (var keyframe in eanComponent.Keyframes)
             {
                 Quaternion rot = new Quaternion(keyframe.X, keyframe.Y, keyframe.Z, keyframe.W);
-                Vector3 angles = MathHelpers.QuaternionToEulerAngles(rot);
+                Vector3 angles = MathHelpers.QuaternionToEulerAngles_OLD(rot);
 
                 command1.Keyframes.Add(new EMA_Keyframe(keyframe.FrameIndex, angles.X));
                 command2.Keyframes.Add(new EMA_Keyframe(keyframe.FrameIndex, angles.Y));
@@ -1275,15 +1449,249 @@ namespace Xv2CoreLib.EMA
 
             return new EMA_Command[] { command1, command2, command3 };
         }
+        */
+        #endregion
+
+        #region Get
+        public EMA_Keyframe GetKeyframe(int time)
+        {
+            foreach (var keyframe in Keyframes)
+            {
+                if (keyframe.Time == time) return keyframe;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Returns the keyframe that appears just before the specified frame
+        /// </summary>
+        /// <returns></returns>
+        public EMA_Keyframe GetKeyframeBefore(int time)
+        {
+            EMA_Keyframe prev = null;
+
+            foreach (var keyframe in Keyframes.OrderBy(x => x.Time))
+            {
+                if (keyframe.Time >= time) break;
+                prev = keyframe;
+            }
+
+            return prev;
+        }
+
+        /// <summary>
+        /// Returns the keyframe that appears just after the specified frame
+        /// </summary>
+        /// <returns></returns>
+        public EMA_Keyframe GetKeyframeAfter(int time)
+        {
+            foreach (var keyframe in Keyframes.OrderBy(x => x.Time))
+            {
+                if (keyframe.Time > time) return keyframe;
+            }
+
+            return null;
+        }
+
+        #endregion
+
+        #region Interpolation
+
+        private EMA_Keyframe _defaultKeyframe = null;
+        [YAXDontSerialize]
+        internal EMA_Keyframe DefaultKeyframe
+        {
+            get
+            {
+                if (_defaultKeyframe == null)
+                    _defaultKeyframe = new EMA_Keyframe();
+                return _defaultKeyframe;
+            }
+        }
+
+        public float GetKeyframeValue(int time)
+        {
+            int idx = 0;
+            return GetKeyframeValue(time, ref idx, 0);
+        }
+
+        public float GetKeyframeValue(float time)
+        {
+            int idx = 0;
+            return GetKeyframeValue(time, ref idx, 0);
+        }
+
+
+        /// <summary>
+        /// Get an interpolated keyframe value, from the specified floating-point frame. Allows time-scaled animations.
+        /// </summary>
+        public float GetKeyframeValue(float frame, ref int index, int startIdx = 0)
+        {
+            bool isWhole = Math.Floor(frame) == frame;
+
+            if (isWhole)
+            {
+                return GetKeyframeValue((int)frame, ref index, startIdx);
+            }
+
+            int flooredFrame = (int)Math.Floor(frame);
+
+            float beforeValue = GetKeyframeValue(flooredFrame, ref index, startIdx);
+            float afterValue = GetKeyframeValue(flooredFrame + 1, ref index, startIdx);
+            float factor = (float)(frame - Math.Floor(frame));
+
+            return MathHelpers.Lerp(beforeValue, afterValue, factor);
+        }
+
+        /// <summary>
+        /// Get an interpolated keyframe value.
+        /// </summary>
+        public float GetKeyframeValue(int time, ref int index, int startIdx = 0)
+        {
+            EMA_Keyframe existing = GetKeyframe(time);
+
+            if (existing != null)
+                return existing.Value;
+
+            //No keyframe existed. Calculate the value.
+            int prevFrame = 0;
+            int nextFrame = 0;
+            EMA_Keyframe prevKeyframe = GetNearestKeyframeBefore(time, startIdx, ref prevFrame, ref index);
+            EMA_Keyframe nextKeyframe = GetNearestKeyframeAfter(time, startIdx, ref nextFrame, ref index);
+
+            if ((prevKeyframe != null && nextKeyframe == null) || (prevKeyframe == nextKeyframe && prevKeyframe != null))
+            {
+                return prevKeyframe.Value;
+            }
+
+            float factor = (float)(time - prevFrame) / (float)(nextFrame - prevFrame);
+
+            if (prevKeyframe.InterpolationType == KeyframeInterpolation.CubicBezier)
+            {
+                return MathHelpers.CubicBezier(factor, prevKeyframe.Value, prevKeyframe.ControlPoint1 + prevKeyframe.Value, prevKeyframe.ControlPoint2 - nextKeyframe.Value, nextKeyframe.Value);
+            }
+            else if (prevKeyframe.InterpolationType == KeyframeInterpolation.QuadraticBezier)
+            {
+                return MathHelpers.QuadraticBezier(factor, prevKeyframe.Value, prevKeyframe.ControlPoint1 + prevKeyframe.Value, nextKeyframe.Value);
+            }
+            else
+            {
+                return MathHelpers.Lerp(prevKeyframe.Value, nextKeyframe.Value, factor);
+            }
+        }
+
+        /// <summary>
+        /// Get a non-persistent instance of the nearest keyframe BEFORE the specified frame. This instance MAY belong to another keyframe entirely, or not exist in Keyframes at all (if its a default keyframe generated because no keyframes currently exist) - so this method is ONLY intended for reading purposes! 
+        /// </summary>
+        /// <param name="frame">The specified frame.</param>
+        /// <param name="nearFrame">The frame the returned <see cref="EAN_Keyframe"/> belongs to (ignore FrameIndex on the keyframe) </param>
+        private EMA_Keyframe GetNearestKeyframeBefore(int frame, int startIdx, ref int nearFrame, ref int index)
+        {
+            EMA_Keyframe nearest = null;
+
+            int nearIdx = GetClosestKeyframeIndexBefore(frame, startIdx, ref index);
+
+            if (nearIdx != -1)
+            {
+                nearest = Keyframes[nearIdx];
+                nearFrame = nearest.Time;
+            }
+
+            //None found, so use default
+            if (nearest == null)
+            {
+                nearest = DefaultKeyframe;
+                nearFrame = frame - 1;
+            }
+
+            return nearest;
+        }
+
+        /// <summary>
+        /// Get a non-persistent instance of the nearest keyframe AFTER the specified frame. This instant MAY belong to another keyframe entirely, or not exist in Keyframes at all (if its a default keyframe generated because no keyframes currently exist) - so this method is ONLY intended for reading purposes! 
+        /// </summary>
+        /// <param name="frame">The specified frame.</param>
+        /// <param name="nearFrame">The frame the returned <see cref="EAN_Keyframe"/> belongs to (ignore <see cref="EAN_Keyframe.FrameIndex"/> on the keyframe) </param>
+        private EMA_Keyframe GetNearestKeyframeAfter(int frame, int startIdx, ref int nearFrame, ref int index)
+        {
+            EMA_Keyframe nearest = null;
+
+            int nearIdx = GetClosestKeyframeIndexAfter(frame, startIdx, ref index);
+
+            if (nearIdx != -1)
+            {
+                nearest = Keyframes[nearIdx];
+                nearFrame = nearest.Time;
+            }
+
+            //None found, so use default
+            if (nearest == null)
+            {
+                nearest = DefaultKeyframe;
+                nearFrame = frame + 1;
+            }
+
+            return nearest;
+        }
+
+        private int GetClosestKeyframeIndexBefore(int frame, int startIdx, ref int index)
+        {
+            if (startIdx < 0) startIdx = 0;
+
+            if (Keyframes.Count == 1)
+            {
+                index = 0;
+                return index;
+            }
+
+            for (int i = startIdx; i < Keyframes.Count; i++)
+            {
+                if (Keyframes[i].Time >= frame)
+                {
+                    index = i - 1;
+
+                    if (index < 0)
+                        index = 0;
+
+                    return index;
+                }
+            }
+
+            index = Keyframes.Count - 1;
+            return Keyframes.Count - 1;
+        }
+
+        private int GetClosestKeyframeIndexAfter(int frame, int startIdx, ref int index)
+        {
+            if (startIdx < 0) startIdx = 0;
+
+            if (Keyframes.Count == 1)
+            {
+                index = 0;
+                return index;
+            }
+
+            for (int i = startIdx; i < Keyframes.Count; i++)
+            {
+                if (Keyframes[i].Time >= frame)
+                {
+                    index = i;
+                    return index;
+                }
+            }
+
+            index = Keyframes.Count - 1;
+            return Keyframes.Count - 1;
+        }
+
+        #endregion
     }
 
     [Serializable]
     [YAXSerializeAs("Keyframe")]
-    public class EMA_Keyframe : ISortable
+    public class EMA_Keyframe
     {
-        [YAXDontSerialize]
-        public int SortID => Time;
-
         [YAXAttributeForClass]
         [YAXSerializeAs("Time")]
         public ushort Time { get; set; }
@@ -1306,7 +1714,7 @@ namespace Xv2CoreLib.EMA
             get => InterpolationType == KeyframeInterpolation.CubicBezier || InterpolationType == KeyframeInterpolation.QuadraticBezier ? ControlPoint1.ToString() : null;
             set
             {
-                if(value != null)
+                if (value != null)
                 {
                     float val;
                     if (float.TryParse(value, out val))
