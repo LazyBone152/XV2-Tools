@@ -1396,6 +1396,7 @@ namespace LB_Mod_Installer.Binding
     public enum SkillFileType
     {
         BAC,
+        BSA,
         BDM,
         ShotBDM
     }
