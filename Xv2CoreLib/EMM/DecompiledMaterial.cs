@@ -234,7 +234,7 @@ namespace Xv2CoreLib.EMM
 
         //Other
         [ParameterGroup(ParameterGroup.Misc)]
-        public int AnimationChannel;
+        public int AnimationChannel; //byte[4], with 4th byte never being used in any material
         public int NoEdge;
         public int Shimmer;
         public float gTime;

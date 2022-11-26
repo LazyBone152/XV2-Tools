@@ -17,10 +17,10 @@ namespace EEPK_Organiser.ViewModel
         }
 
         //Glare
-        public int Glare
+        public bool Glare
         {
-            get => CurrentMaterial.Glare;
-            set => SetIntValue(value, nameof(CurrentMaterial.Glare));
+            get => CurrentMaterial.Glare == 1;
+            set => SetIntBoolValue(value, nameof(CurrentMaterial.Glare));
         }
         public CustomColor GlareCol => CurrentMaterial.GlareCol;
 
@@ -132,10 +132,10 @@ namespace EEPK_Organiser.ViewModel
         }
 
         //Alpha
-        public int AlphaBlend
+        public bool AlphaBlend
         {
-            get => CurrentMaterial.AlphaBlend;
-            set => SetIntValue(value, nameof(CurrentMaterial.AlphaBlend), 2);
+            get => CurrentMaterial.AlphaBlend == 1;
+            set => SetIntBoolValue(value, nameof(CurrentMaterial.AlphaBlend), 2);
         }
         public AlphaBlendType AlphaBlendType
         {
@@ -204,27 +204,27 @@ namespace EEPK_Organiser.ViewModel
         }
 
         //Culling
-        public int BackFace
+        public bool BackFace
         {
-            get => CurrentMaterial.BackFace;
-            set => SetIntValue(value, nameof(CurrentMaterial.BackFace), 2);
+            get => CurrentMaterial.BackFace == 1;
+            set => SetIntBoolValue(value, nameof(CurrentMaterial.BackFace), 2);
         }
-        public int TwoSidedRender
+        public bool TwoSidedRender
         {
-            get => CurrentMaterial.TwoSidedRender;
-            set => SetIntValue(value, nameof(CurrentMaterial.TwoSidedRender), 2);
+            get => CurrentMaterial.TwoSidedRender == 1;
+            set => SetIntBoolValue(value, nameof(CurrentMaterial.TwoSidedRender), 2);
         }
 
         //LowRez
-        public int LowRez
+        public bool LowRez
         {
-            get => CurrentMaterial.LowRez;
-            set => SetIntValue(value, nameof(CurrentMaterial.LowRez));
+            get => CurrentMaterial.LowRez == 1;
+            set => SetIntBoolValue(value, nameof(CurrentMaterial.LowRez));
         }
-        public int LowRezSmoke
+        public bool LowRezSmoke
         {
-            get => CurrentMaterial.LowRezSmoke;
-            set => SetIntValue(value, nameof(CurrentMaterial.LowRezSmoke));
+            get => CurrentMaterial.LowRezSmoke == 1;
+            set => SetIntBoolValue(value, nameof(CurrentMaterial.LowRezSmoke));
         }
 
         //Incidence
@@ -240,10 +240,10 @@ namespace EEPK_Organiser.ViewModel
         }
 
         //Billboard
-        public int Billboard
+        public bool Billboard
         {
-            get => CurrentMaterial.Billboard;
-            set => SetIntValue(value, nameof(CurrentMaterial.Billboard));
+            get => CurrentMaterial.Billboard == 1;
+            set => SetIntBoolValue(value, nameof(CurrentMaterial.Billboard));
         }
         public int BillboardType
         {
@@ -274,15 +274,15 @@ namespace EEPK_Organiser.ViewModel
             get => CurrentMaterial.AnimationChannel;
             set => SetIntValue(value, nameof(CurrentMaterial.AnimationChannel));
         }
-        public int NoEdge
+        public bool NoEdge
         {
-            get => CurrentMaterial.NoEdge;
-            set => SetIntValue(value, nameof(CurrentMaterial.NoEdge));
+            get => CurrentMaterial.NoEdge == 1;
+            set => SetIntBoolValue(value, nameof(CurrentMaterial.NoEdge));
         }
-        public int Shimmer
+        public bool Shimmer
         {
-            get => CurrentMaterial.Shimmer;
-            set => SetIntValue(value, nameof(CurrentMaterial.Shimmer));
+            get => CurrentMaterial.Shimmer == 1;
+            set => SetIntBoolValue(value, nameof(CurrentMaterial.Shimmer));
         }
         public float gTime
         {
@@ -380,6 +380,13 @@ namespace EEPK_Organiser.ViewModel
         }
 
         #region UndoableSetMethods
+        private void SetIntBoolValue(bool newValue, string fieldName, int changeType = 1)
+        {
+            int value = newValue ? 1 : 0;
+            SetIntValue(value, fieldName, changeType);
+            RaisePropertyChanged(fieldName);
+        }
+
         private void SetIntValue(int newValue, string fieldName, int changeType = 1)
         {
             int original = (int)CurrentMaterial.GetType().GetField(fieldName).GetValue(CurrentMaterial);

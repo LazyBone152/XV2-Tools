@@ -19,7 +19,7 @@ namespace Xv2CoreLib.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -83,6 +83,29 @@ namespace Xv2CoreLib.Properties {
         internal static string AcbFormatHelper {
             get {
                 return ResourceManager.GetString("AcbFormatHelper", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;ShaderHelper&gt;
+        ///  &lt;Shader ShaderProgram=&quot;ParticleDecal&quot;&gt;
+        ///    &lt;Parameter Name=&quot;GlareCol&quot; /&gt;
+        ///    &lt;Parameter Name=&quot;AlphaBlend&quot; /&gt;
+        ///    &lt;Parameter Name=&quot;AlphaBlendType&quot; /&gt;
+        ///    &lt;Parameter Name=&quot;ZWriteMask&quot; /&gt;
+        ///    &lt;Parameter Name=&quot;Glare&quot; /&gt;
+        ///    &lt;Parameter Name=&quot;BackFace&quot; /&gt;
+        ///    &lt;Parameter Name=&quot;LowRez&quot; /&gt;
+        ///    &lt;Parameter Name=&quot;LowRezSmoke&quot; /&gt;
+        ///    &lt;Parameter Name=&quot;AlphaSortMask&quot; /&gt;
+        ///    &lt;Parameter Name=&quot;AlphaTest&quot; /&gt;
+        ///    &lt;Parameter Name=&quot;TwoSidedRender&quot; /&gt;
+        ///    &lt;Para [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string ShaderHelper {
+            get {
+                return ResourceManager.GetString("ShaderHelper", resourceCulture);
             }
         }
         

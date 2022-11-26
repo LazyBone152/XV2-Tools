@@ -1455,9 +1455,19 @@ namespace Xv2CoreLib.EMA
         #region Get
         public EMA_Keyframe GetKeyframe(int time)
         {
-            foreach (var keyframe in Keyframes)
+            for(int i = CurrentKeyframeIndex; i < Keyframes.Count; i++)
             {
-                if (keyframe.Time == time) return keyframe;
+                if (Keyframes[CurrentKeyframeIndex].Time == time)
+                {
+                    CurrentKeyframeIndex = i;
+                    return Keyframes[CurrentKeyframeIndex];
+                }
+            }
+
+            if(CurrentKeyframeIndex != 0)
+            {
+                CurrentKeyframeIndex = 0;
+                return GetKeyframe(time);
             }
 
             return null;
@@ -1510,35 +1520,26 @@ namespace Xv2CoreLib.EMA
             }
         }
 
-        public float GetKeyframeValue(int time)
-        {
-            int idx = 0;
-            return GetKeyframeValue(time, ref idx, 0);
-        }
-
-        public float GetKeyframeValue(float time)
-        {
-            int idx = 0;
-            return GetKeyframeValue(time, ref idx, 0);
-        }
+        private int CurrentStartKeyframeIndex = 0;
+        private int CurrentKeyframeIndex = 0;
 
 
         /// <summary>
         /// Get an interpolated keyframe value, from the specified floating-point frame. Allows time-scaled animations.
         /// </summary>
-        public float GetKeyframeValue(float frame, ref int index, int startIdx = 0)
+        public float GetKeyframeValue(float frame)
         {
             bool isWhole = Math.Floor(frame) == frame;
 
             if (isWhole)
             {
-                return GetKeyframeValue((int)frame, ref index, startIdx);
+                return GetKeyframeValue((int)frame);
             }
 
             int flooredFrame = (int)Math.Floor(frame);
 
-            float beforeValue = GetKeyframeValue(flooredFrame, ref index, startIdx);
-            float afterValue = GetKeyframeValue(flooredFrame + 1, ref index, startIdx);
+            float beforeValue = GetKeyframeValue(flooredFrame);
+            float afterValue = GetKeyframeValue(flooredFrame + 1);
             float factor = (float)(frame - Math.Floor(frame));
 
             return MathHelpers.Lerp(beforeValue, afterValue, factor);
@@ -1547,7 +1548,7 @@ namespace Xv2CoreLib.EMA
         /// <summary>
         /// Get an interpolated keyframe value.
         /// </summary>
-        public float GetKeyframeValue(int time, ref int index, int startIdx = 0)
+        public float GetKeyframeValue(int time)
         {
             EMA_Keyframe existing = GetKeyframe(time);
 
@@ -1557,8 +1558,8 @@ namespace Xv2CoreLib.EMA
             //No keyframe existed. Calculate the value.
             int prevFrame = 0;
             int nextFrame = 0;
-            EMA_Keyframe prevKeyframe = GetNearestKeyframeBefore(time, startIdx, ref prevFrame, ref index);
-            EMA_Keyframe nextKeyframe = GetNearestKeyframeAfter(time, startIdx, ref nextFrame, ref index);
+            EMA_Keyframe prevKeyframe = GetNearestKeyframeBefore(time, ref prevFrame);
+            EMA_Keyframe nextKeyframe = GetNearestKeyframeAfter(time, ref nextFrame);
 
             if ((prevKeyframe != null && nextKeyframe == null) || (prevKeyframe == nextKeyframe && prevKeyframe != null))
             {
@@ -1586,11 +1587,11 @@ namespace Xv2CoreLib.EMA
         /// </summary>
         /// <param name="frame">The specified frame.</param>
         /// <param name="nearFrame">The frame the returned <see cref="EAN_Keyframe"/> belongs to (ignore FrameIndex on the keyframe) </param>
-        private EMA_Keyframe GetNearestKeyframeBefore(int frame, int startIdx, ref int nearFrame, ref int index)
+        private EMA_Keyframe GetNearestKeyframeBefore(int frame,  ref int nearFrame)
         {
             EMA_Keyframe nearest = null;
 
-            int nearIdx = GetClosestKeyframeIndexBefore(frame, startIdx, ref index);
+            int nearIdx = GetClosestKeyframeIndexBefore(frame);
 
             if (nearIdx != -1)
             {
@@ -1613,11 +1614,11 @@ namespace Xv2CoreLib.EMA
         /// </summary>
         /// <param name="frame">The specified frame.</param>
         /// <param name="nearFrame">The frame the returned <see cref="EAN_Keyframe"/> belongs to (ignore <see cref="EAN_Keyframe.FrameIndex"/> on the keyframe) </param>
-        private EMA_Keyframe GetNearestKeyframeAfter(int frame, int startIdx, ref int nearFrame, ref int index)
+        private EMA_Keyframe GetNearestKeyframeAfter(int frame, ref int nearFrame)
         {
             EMA_Keyframe nearest = null;
 
-            int nearIdx = GetClosestKeyframeIndexAfter(frame, startIdx, ref index);
+            int nearIdx = GetClosestKeyframeIndexAfter(frame);
 
             if (nearIdx != -1)
             {
@@ -1635,53 +1636,53 @@ namespace Xv2CoreLib.EMA
             return nearest;
         }
 
-        private int GetClosestKeyframeIndexBefore(int frame, int startIdx, ref int index)
+        private int GetClosestKeyframeIndexBefore(int frame)
         {
-            if (startIdx < 0) startIdx = 0;
+            if (CurrentKeyframeIndex < 0) CurrentKeyframeIndex = 0;
 
             if (Keyframes.Count == 1)
             {
-                index = 0;
-                return index;
+                CurrentKeyframeIndex = 0;
+                return CurrentKeyframeIndex;
             }
 
-            for (int i = startIdx; i < Keyframes.Count; i++)
+            for (int i = CurrentKeyframeIndex; i < Keyframes.Count; i++)
             {
                 if (Keyframes[i].Time >= frame)
                 {
-                    index = i - 1;
+                    CurrentKeyframeIndex = i - 1;
 
-                    if (index < 0)
-                        index = 0;
+                    if (CurrentKeyframeIndex < 0)
+                        CurrentKeyframeIndex = 0;
 
-                    return index;
+                    return CurrentKeyframeIndex;
                 }
             }
 
-            index = Keyframes.Count - 1;
+            CurrentKeyframeIndex = Keyframes.Count - 1;
             return Keyframes.Count - 1;
         }
 
-        private int GetClosestKeyframeIndexAfter(int frame, int startIdx, ref int index)
+        private int GetClosestKeyframeIndexAfter(int frame)
         {
-            if (startIdx < 0) startIdx = 0;
+            if (CurrentKeyframeIndex < 0) CurrentKeyframeIndex = 0;
 
             if (Keyframes.Count == 1)
             {
-                index = 0;
-                return index;
+                CurrentKeyframeIndex = 0;
+                return CurrentKeyframeIndex;
             }
 
-            for (int i = startIdx; i < Keyframes.Count; i++)
+            for (int i = CurrentKeyframeIndex; i < Keyframes.Count; i++)
             {
                 if (Keyframes[i].Time >= frame)
                 {
-                    index = i;
-                    return index;
+                    CurrentKeyframeIndex = i;
+                    return CurrentKeyframeIndex;
                 }
             }
 
-            index = Keyframes.Count - 1;
+            CurrentKeyframeIndex = Keyframes.Count - 1;
             return Keyframes.Count - 1;
         }
 

@@ -335,7 +335,7 @@ namespace Xv2CoreLib.ESK
         //Helper
         private static AsyncObservableCollection<ESK_Bone> ParseChildrenBones(byte[] rawBytes, int indexOfFirstSibling, int offset, ESK_Bone parent, ref int _index, bool loadAbsTransform)
         {
-            AsyncObservableCollection<ESK_Bone> newBones = AsyncObservableCollection<ESK_Bone>.Create();
+            AsyncObservableCollection<ESK_Bone> newBones = new AsyncObservableCollection<ESK_Bone>();
 
             int[] offsets = GetBoneOffset(rawBytes, indexOfFirstSibling, offset);
             int boneIndexOffset = offsets[0];
@@ -386,13 +386,13 @@ namespace Xv2CoreLib.ESK
             int boneIndexTableOffset = BitConverter.ToInt32(rawBytes, SkeletonOffset + 4) + SkeletonOffset;
             int nameTableOffset = BitConverter.ToInt32(rawBytes, SkeletonOffset + 8) + SkeletonOffset;
             int skinningMatrixTableOffset = BitConverter.ToInt32(rawBytes, SkeletonOffset + 12) + SkeletonOffset;
-            int transformMatrixTableOffset = BitConverter.ToInt32(rawBytes, SkeletonOffset + 16) + SkeletonOffset;
+            int transformMatrixTableOffset = BitConverter.ToInt32(rawBytes, SkeletonOffset + 16);
 
             //Calc offsets
             int boneIndex = (8 * index) + boneIndexTableOffset;
             int nameTable = BitConverter.ToInt32(rawBytes, (4 * index) + nameTableOffset) + SkeletonOffset; //Points to the actual string, not the table
             int skinningMatrix = (48 * index) + skinningMatrixTableOffset;
-            int transformMatrix = (64 * index) + transformMatrixTableOffset;
+            int transformMatrix = (transformMatrixTableOffset != 0) ? (64 * index) + transformMatrixTableOffset + SkeletonOffset : 0;
 
             return new int[4] { boneIndex, nameTable, skinningMatrix, transformMatrix };
         }
@@ -900,7 +900,7 @@ namespace Xv2CoreLib.ESK
                 Index = (short)idx,
                 Name = StringEx.GetString(bytes, nameOffset, false),
                 RelativeTransform = ESK_RelativeTransform.Read(bytes, skinningMatrixOffset),
-                AbsoluteTransform = (loadAbsTransform) ? ESK_AbsoluteTransform.Read(bytes, transformMatrixOffset) : null,
+                AbsoluteTransform = (loadAbsTransform && transformMatrixOffset != 0) ? ESK_AbsoluteTransform.Read(bytes, transformMatrixOffset) : null,
                 Parent = parent
             };
         }

@@ -987,15 +987,10 @@ namespace Xv2CoreLib.EffectContainer
                     {
                         foreach (EffectFile file in asset.Files)
                         {
-                            if (file.fileType == EffectFile.FileType.EMA)
+                            if (file.fileType == EffectFile.FileType.EMA && file.FullFileName != "NULL")
                             {
                                 ExternalFileSaved(string.Format("{0}/{1}", Directory, file.FullFileName));
-                                SaveFile(file.EmaFile.Write(), string.Format("{0}/{1}", Directory, file.FullFileName));
-                            }
-                            else if (file.Bytes != null && file.FullFileName != "NULL")
-                            {
-                                ExternalFileSaved(string.Format("{0}/{1}", Directory, file.FullFileName));
-                                SaveFile(file.Bytes, string.Format("{0}/{1}", Directory, file.FullFileName));
+                                SaveFile(file.EmaFile != null ? file.EmaFile.Write() : file.Bytes, string.Format("{0}/{1}", Directory, file.FullFileName));
                             }
                         }
                     }
@@ -1049,7 +1044,7 @@ namespace Xv2CoreLib.EffectContainer
                 Cbind.File1_Ref = EMB_File.DefaultEmbFile(false);
                 Cbind.File1_Ref.UseFileNames = true;
 
-                foreach (var asset in Cbind.Assets)
+                foreach (Asset asset in Cbind.Assets)
                 {
                     byte[] bytes = asset.Files[0].EcfFile.SaveToBytes();
                     Cbind.File1_Ref.Entry.Add(new EmbEntry()
@@ -1067,7 +1062,7 @@ namespace Xv2CoreLib.EffectContainer
 
                 foreach (var asset in LightEma.Assets)
                 {
-                    if (asset.Files[0].fileType == EffectFile.FileType.EMA)
+                    if (asset.Files[0].EmaFile != null)
                     {
                         LightEma.File1_Ref.Entry.Add(new EmbEntry()
                         {
@@ -4494,9 +4489,11 @@ namespace Xv2CoreLib.EffectContainer
                     if (EcfFile == null) return false;
                     break;
                 case FileType.EMA:
+                    if (!EepkToolInterlop.FullDecompile) goto default;
                     if (EmaFile == null) return false;
                     break;
                 case FileType.EMO:
+                    if (!EepkToolInterlop.FullDecompile) goto default;
                     if (EmoFile == null) return false;
                     break;
                 default:

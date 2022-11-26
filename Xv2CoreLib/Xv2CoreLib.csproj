@@ -224,6 +224,7 @@
     <Compile Include="EMM\DefaultMaterialValues.cs" />
     <Compile Include="EMM\Deserializer.cs" />
     <Compile Include="EMM\EMM_File.cs" />
+    <Compile Include="EMM\MaterialAnalyzer.cs" />
     <Compile Include="EMM\Parser.cs" />
     <Compile Include="EMO\EMO_File.cs" />
     <Compile Include="EMP\Deserializer.cs" />
@@ -396,6 +397,9 @@
       <Project>{513b1851-4576-45ec-8f8e-400a38b05502}</Project>
       <Name>LB_Common</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\ShaderHelper.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Fody.3.3.2\build\Fody.targets" Condition="Exists('..\packages\Fody.3.3.2\build\Fody.targets')" />

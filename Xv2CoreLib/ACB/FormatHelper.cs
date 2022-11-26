@@ -74,12 +74,7 @@ namespace Xv2CoreLib.ACB
             {
                 YAXSerializer serializer = new YAXSerializer(typeof(AcbFormatHelperMain), YAXSerializationOptions.DontSerializeNullObjects);
 
-#if XenoKit
-                //XenoKit uses linked code rather than Xv2CoreLib.dll currently, so it cannot access Xv2CoreLib.Properties
-                AcbFormatHelperMain = (AcbFormatHelperMain)serializer.Deserialize(XenoKit.Properties.Resources.AcbFormatHelper);
-#else
                 AcbFormatHelperMain = (AcbFormatHelperMain)serializer.Deserialize(Properties.Resources.AcbFormatHelper);
-#endif
             }
         }
 

@@ -24,7 +24,6 @@ using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.EMD;
 using Xv2CoreLib.ESK;
 using Xv2CoreLib.EMO;
-using Xv2CoreLib.EAN;
 using Xv2CoreLib.ETR;
 using Xv2CoreLib.Resource.UndoRedo;
 using Xv2CoreLib.Resource.App;
@@ -41,7 +40,6 @@ using GalaSoft.MvvmLight.CommandWpf;
 #if XenoKit
 using XenoKit;
 using XenoKit.Engine;
-using XenoKit.Engine.Vfx;
 #endif
 
 namespace EEPK_Organiser.View
@@ -4464,9 +4462,13 @@ namespace EEPK_Organiser.View
             #if XenoKit
             if(SelectedEffect != null)
             {
-                SceneManager.EnsureActorIsSet(0);
                 SceneManager.MainGameBase.VfxManager.StopEffects();
-                SceneManager.MainGameBase.VfxManager.PlayEffect(SelectedEffect, SceneManager.Actors[0]);
+
+                if (SettingsManager.Instance.Settings.XenoKit_VfxSimulation)
+                {
+                    SceneManager.EnsureActorIsSet(0);
+                    SceneManager.MainGameBase.VfxManager.PlayEffect(SelectedEffect, SceneManager.Actors[0]);
+                }
             }
             #endif
         }

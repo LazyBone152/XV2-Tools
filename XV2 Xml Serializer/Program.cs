@@ -11,6 +11,7 @@ using YAXLib;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Windows.Media.Imaging;
+using Xv2CoreLib.Resource;
 
 namespace XV2_Xml_Serializer
 {
@@ -22,13 +23,16 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
-            //args = new string[1] { @"E:\VS_Test\ETR\Kmh_Beam3.etr" };
-            args = new string[1] { @"E:\VS_Test\ECF\ALL ECF" };
+            args = new string[1] { @"E:\VS_Test\EMM/ALL EMM" };
+            //args = new string[1] { @"E:\VS_Test\EMA" };
 
             DEBUG_MODE = true;
 #endif
             //CpkExtract();
             //MatDecompile(args);
+            //Xv2CoreLib.EMM.Analyzer.MaterialAnalyzer.Instance.AnalyzeMaterials();
+            //return;
+
             string fileLocation = null;
 
             if (args.Length > 0)
@@ -1043,7 +1047,7 @@ namespace XV2_Xml_Serializer
         static void BulkParseEma(string directory)
         {
             string[] files = Directory.GetFiles(directory);
-            List<string> values = new List<string>();
+            List<int> values = new List<int>();
 
             foreach (string s in files)
             {
@@ -1051,16 +1055,13 @@ namespace XV2_Xml_Serializer
                 {
                     Console.WriteLine(s);
                     var ema = Xv2CoreLib.EMA.EMA_File.Serialize(s, false);
+                    bool done = false;
 
                     if (ema.Animations != null)
                     {
                         foreach(var anim in ema.Animations)
                         {
-                            foreach(var cmd in anim.Commands)
-                            {
-                                if (!values.Contains(cmd.I_03_a.ToString()) && cmd.I_02 == 3)
-                                    values.Add(cmd.I_03_a.ToString());
-                            }
+                           
                         }
                     }
 
@@ -1069,16 +1070,17 @@ namespace XV2_Xml_Serializer
 
             //log
             StringBuilder str = new StringBuilder();
+            values.Sort();
 
-            foreach(var value in values)
+            foreach (var value in values)
             {
-                str.AppendLine(value);
+                str.AppendLine(value.ToString());
             }
-
-            File.WriteAllText("log.txt", str.ToString());
-
-
+            File.WriteAllText("ema_test.txt", str.ToString());
+            Process.Start("ema_test.txt");
+            Environment.Exit(0);
         }
+
         class KeyframeGroups
         {
             public int Group;
@@ -1295,7 +1297,7 @@ namespace XV2_Xml_Serializer
         static void BulkParseEepk(string directory)
         {
             string[] files = Directory.GetFiles(directory);
-            List<string> values = new List<string>();
+            List<int> values = new List<int>();
 
             foreach (string s in files)
             {
@@ -1314,18 +1316,13 @@ namespace XV2_Xml_Serializer
                                 {
                                     foreach (var effectPart in effect.EffectParts)
                                     {
-                                        if (!values.Contains(effectPart.I_03.ToString()))
-                                            values.Add(effectPart.I_03.ToString());
-
-
-                                        if (effectPart.I_02 != Xv2CoreLib.EEPK.AssetType.LIGHT)
+                                        if(effectPart.AssetType == Xv2CoreLib.EEPK.AssetType.LIGHT && effectPart.ScaleMin != 1f && effectPart.ScaleMax != 1f)
                                         {
-                                            if (effectPart.I_36_1 || effectPart.I_36_2 || effectPart.I_36_3 || effectPart.I_36_4 || effectPart.I_36_5 || effectPart.I_36_6 || effectPart.I_36_7)
-                                            {
-                                                //Console.WriteLine("Here: ");
-                                                //Console.ReadLine();
-                                            }
+                                            Console.WriteLine(effectPart.ScaleMin + ", " + effectPart.ScaleMax);
+                                            Console.ReadLine();
                                         }
+
+
                                     }
                                 }
                             }
@@ -1343,7 +1340,7 @@ namespace XV2_Xml_Serializer
 
             foreach(var value in values)
             {
-                str.AppendLine(value);
+                str.AppendLine(value.ToString());
             }
 
 
@@ -1444,9 +1441,7 @@ namespace XV2_Xml_Serializer
         static void BulkParseEmm(string directory)
         {
             string[] files = Directory.GetFiles(directory);
-            List<string> value = new List<string>();
-            List<int> count = new List<int>();
-            int errors = 0;
+            List<float> value = new List<float>();
 
             foreach (string s in files)
             {
@@ -1456,45 +1451,29 @@ namespace XV2_Xml_Serializer
                     {
                         Console.WriteLine(s);
                         var emm = new Xv2CoreLib.EMM.Parser(s, false).emmFile;
+                        emm.DecompileMaterials();
 
                         foreach (var mat in emm.Materials)
                         {
-                            foreach (var parm in mat.Parameters)
+                            if (!value.Contains(mat.DecompiledParameters.BillboardType))
                             {
-                                if (parm.FloatValue > 1f)
-                                {
-                                    Console.WriteLine("HERE : " + parm.FloatValue);
-                                    Console.ReadLine();
-                                }
-                                string name = $"{parm.Name} ({parm.Type})";
-                                if (!value.Contains(name))
-                                {
-                                    value.Add(name);
-                                    count.Add(1);
-                                }
-                                else
-                                {
-                                    count[value.IndexOf(name)] += 1;
-                                }
+                                value.Add(mat.DecompiledParameters.BillboardType);
                             }
                         }
                     }
                 }
                 catch
                 {
-                    errors++;
                 }
             }
 
             //Debug log
             StringBuilder str = new StringBuilder();
-            str.Append($"{errors} errors.\n\n");
+            value.Sort();
 
-            int idx = 0;
-            foreach(var shader in value)
+            foreach (var val in value)
             {
-                str.Append(shader + $"({count[idx]})").AppendLine();
-                idx++;
+                str.Append(val).AppendLine();
             }
 
             File.WriteAllText("emm_debug_log.txt", str.ToString());
@@ -1515,11 +1494,11 @@ namespace XV2_Xml_Serializer
                     Console.WriteLine(String.Format("{0} (File {1} of {2})", s, i, files.Count()));
                     var ean = new Xv2CoreLib.EAN.Parser(s, false, false).eanFile;
 
-                    foreach(var anim in ean.Animations)
+                    if(ean.Skeleton != null)
                     {
-                        if(anim.CalculateFrameCount() != anim.FrameCount)
+                        if(ean.Skeleton.Unk1 != null)
                         {
-                            Console.WriteLine($"{anim.CalculateFrameCount()} != {anim.FrameCount}");
+                            Console.WriteLine("this");
                             Console.ReadLine();
                         }
                     }

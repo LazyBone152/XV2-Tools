@@ -15,6 +15,9 @@ using EEPK_Organiser.ViewModel;
 using MahApps.Metro.Controls.Dialogs;
 using GalaSoft.MvvmLight.CommandWpf;
 using MahApps.Metro.Controls;
+using System.Windows.Media;
+using Xv2CoreLib.EMM.Analyzer;
+using LB_Common.Numbers;
 
 namespace EEPK_Organiser.View
 {
@@ -34,16 +37,16 @@ namespace EEPK_Organiser.View
             }
         }
         #endregion
-        
+
         #region DependencyProperty
         public static readonly DependencyProperty EmmFileProperty = DependencyProperty.Register(nameof(EmmFile), typeof(EMM_File), typeof(MaterialsEditor), new PropertyMetadata(null));
 
         public EMM_File EmmFile
         {
             get { return (EMM_File)GetValue(EmmFileProperty); }
-            set 
-            { 
-                SetValue(EmmFileProperty, value); 
+            set
+            {
+                SetValue(EmmFileProperty, value);
                 NotifyPropertyChanged(nameof(EmmFile));
             }
         }
@@ -54,7 +57,7 @@ namespace EEPK_Organiser.View
         {
             get { return (AssetContainerTool)GetValue(AssetContainerProperty); }
             set
-            { 
+            {
                 SetValue(AssetContainerProperty, value);
                 NotifyPropertyChanged(nameof(AssetContainer));
                 NotifyPropertyChanged(nameof(ContainerVisiblility));
@@ -90,19 +93,19 @@ namespace EEPK_Organiser.View
             get => _selectedMaterial != null ? _selectedMaterial.Index : -1;
             set
             {
-                if(value != _selectedMaterial.Index)
+                if (value != _selectedMaterial.Index)
                 {
                     SetID(value);
                 }
             }
         }
-        
+
         public string SelectedMaterialName
         {
             get => _selectedMaterial?.Name;
             set
             {
-                if(value != _selectedMaterial.Name)
+                if (value != _selectedMaterial.Name)
                 {
                     SetName(value);
                 }
@@ -113,7 +116,7 @@ namespace EEPK_Organiser.View
             get => _selectedMaterial.ShaderProgram;
             set
             {
-                if(value != _selectedMaterial.ShaderProgram)
+                if (value != _selectedMaterial.ShaderProgram)
                 {
                     SetShaderProgram(value);
                 }
@@ -124,6 +127,20 @@ namespace EEPK_Organiser.View
         public bool IsForContainer => AssetContainer != null;
         public Visibility ContainerVisiblility => IsForContainer ? Visibility.Visible : Visibility.Collapsed;
         public Visibility InverseContainerVisiblility => IsForContainer ? Visibility.Collapsed : Visibility.Visible;
+
+        //Options
+        private bool _filterParameters = true;
+
+        public bool FilterParameters
+        {
+            get => _filterParameters;
+            set
+            {
+                _filterParameters = value;
+                UpdateVisibilities();
+            }
+        }
+        public bool FilterTabs { get; set; } = true;
 
         #endregion
 
@@ -164,7 +181,7 @@ namespace EEPK_Organiser.View
 
         private void RefreshViewMaterials()
         {
-            if(_viewMaterials == null)
+            if (_viewMaterials == null)
                 _viewMaterials = new ListCollectionView(EmmFile.Materials.Binding);
 
             _viewMaterials.Filter = new Predicate<object>(SearchFilterCheck);
@@ -208,7 +225,6 @@ namespace EEPK_Organiser.View
             InitializeComponent();
             UndoManager.Instance.UndoOrRedoCalled += Instance_UndoOrRedoCalled;
             Loaded += MaterialsEditor_Loaded;
-            ExpanderUpdate();
         }
 
 
@@ -221,11 +237,125 @@ namespace EEPK_Organiser.View
 
             if (AssetContainer != null)
                 idColumn.Visibility = Visibility.Collapsed;
+
+            ScaleOffsetParameters = new FrameworkElement[]
+            {
+                MatScale0,
+                MatScale1,
+                MatOffset0,
+                MatOffset1
+            };
+
+            ColorParameters = new FrameworkElement[]
+            {
+                Glare,
+                GlareCol,
+                MatCol0,
+                MatCol1,
+                MatCol2,
+                MatCol3
+            };
+
+            TextureParameters = new FrameworkElement[]
+            {
+                TexScrl0,
+                TexScrl1,
+                TexRep0,
+                TexRep1,
+                TexRep2,
+                TextureFilter0,
+                TextureFilter1,
+                TextureFilter2,
+                MipMapLod0,
+                MipMapLod1,
+                MipMapLod2,
+                gToonTextureWidth,
+                gToonTextureHeight,
+                ToonSamplerAddress,
+                MarkSamplerAddress
+            };
+
+            AlphaParameters = new FrameworkElement[]
+            {
+                AlphaBlend,
+                AlphaBlendType,
+                AlphaTest,
+                AlphaTestThreshold,
+                AlphaRef,
+                AlphaSortMask,
+                ZTestMask,
+                ZWriteMask
+            };
+
+            LightingParameters = new FrameworkElement[]
+            {
+                gCamPos,
+                MatDif,
+                MatAmb,
+                MatSpc,
+                MatDifScale,
+                MatAmbScale,
+                SpcCoeff,
+                SpcPower
+            };
+
+            MiscParameters = new FrameworkElement[]
+            {
+                VsFlag0,
+                VsFlag1,
+                VsFlag2,
+                VsFlag3,
+                CustomFlag,
+                BackFace,
+                TwoSidedRender,
+                LowRez,
+                LowRezSmoke,
+                IncidencePower,
+                IncidenceAlphaBias,
+                ReflectCoeff,
+                ReflectFresnelBias,
+                ReflectFresnelCoeff,
+                AnimationChannel
+            };
+
+            UnknownParameters = new FrameworkElement[]
+            {
+                gLightDir,
+                gLightDif,
+                gLightSpc,
+                gLightAmb,
+                DirLight0Dir,
+                DirLight0Col,
+                AmbLight0Col,
+                Billboard,
+                BillboardType,
+                NoEdge,
+                Shimmer,
+                gTime,
+                Ambient,
+                Diffuse,
+                Specular,
+                SpecularPower,
+                FadeInit,
+                FadeSpeed,
+                GradientInit,
+                GradientSpeed,
+                gGradientCol,
+                RimCoeff,
+                RimPower
+            };
+
+            ExpanderUpdate();
         }
 
         private void Instance_UndoOrRedoCalled(object sender, UndoEventRaisedEventArgs e)
         {
             UpdateProperties();
+
+            if(e.UndoArg == "ShaderProgram" && e.UndoContext == SelectedMaterial)
+            {
+                UpdateVisibilities();
+            }
         }
 
         private void UpdateProperties()
@@ -246,26 +376,31 @@ namespace EEPK_Organiser.View
 
         private void ExpanderUpdate()
         {
-            //Collapse all expanders
-            alphaExpander.IsExpanded = false;
-            colorExpander.IsExpanded = false;
-            lightingExpander.IsExpanded = false;
-            miscExpander.IsExpanded = false;
-            scaleOffsetExpander.IsExpanded = false;
-            textureExpander.IsExpanded = false;
-            unknownExpander.IsExpanded = false;
-
-            if (SelectedMaterial != null)
+            if (FilterTabs)
             {
-                //Selectively expand ones that have parameters within
-                alphaExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Alpha);
-                colorExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Color);
-                lightingExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Lighting);
-                miscExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Misc);
-                scaleOffsetExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.MatScaleOffset);
-                textureExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Texture);
-                unknownExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Unsorted);
+                //Collapse all expanders
+                alphaExpander.IsExpanded = false;
+                colorExpander.IsExpanded = false;
+                lightingExpander.IsExpanded = false;
+                miscExpander.IsExpanded = false;
+                scaleOffsetExpander.IsExpanded = false;
+                textureExpander.IsExpanded = false;
+                unknownExpander.IsExpanded = false;
+
+                if (SelectedMaterial != null)
+                {
+                    //Selectively expand ones that have parameters within
+                    alphaExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Alpha);
+                    colorExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Color);
+                    lightingExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Lighting);
+                    miscExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Misc);
+                    scaleOffsetExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.MatScaleOffset);
+                    textureExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Texture);
+                    unknownExpander.IsExpanded = SelectedMaterial.DecompiledParameters.IsGroupUsed(ParameterGroup.Unsorted);
+                }
             }
+
+            UpdateVisibilities();
         }
 
         private void RefreshViewModel()
@@ -456,7 +591,7 @@ namespace EEPK_Organiser.View
         {
             List<EmmMaterial> selectedMaterials = materialDataGrid.SelectedItems.Cast<EmmMaterial>().ToList();
 
-            if(selectedMaterials != null)
+            if (selectedMaterials != null)
             {
                 Clipboard.SetData(Misc.ClipboardDataTypes.EmmMaterial, selectedMaterials);
             }
@@ -467,7 +602,7 @@ namespace EEPK_Organiser.View
         {
             List<EmmMaterial> copiedMaterials = (List<EmmMaterial>)Clipboard.GetData(Misc.ClipboardDataTypes.EmmMaterial);
 
-            if(copiedMaterials != null)
+            if (copiedMaterials != null)
             {
                 List<IUndoRedo> undos = new List<IUndoRedo>();
 
@@ -492,7 +627,7 @@ namespace EEPK_Organiser.View
 
             if (copiedMaterials != null)
             {
-                if(copiedMaterials.Count == 0 || copiedMaterials.Count > 1)
+                if (copiedMaterials.Count == 0 || copiedMaterials.Count > 1)
                 {
                     await DialogCoordinator.Instance.ShowMessageAsync(this, "Paste Values", "Cannot paste the material values as there were more than 1 copied.", MessageDialogStyle.Affirmative, DialogSettings.Default);
                     return;
@@ -534,7 +669,7 @@ namespace EEPK_Organiser.View
         {
             var result = await DialogCoordinator.Instance.ShowMessageAsync(this, "Merge Duplicates", "All instances of duplicated materials will be merged into a single material. A duplicated material means any that share the same parameters, but have a different name. \n\nAll references to the duplicates in any assets will also be updated to reflect these changes.\n\nDo you want to continue?", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.Default);
 
-            if(result == MessageDialogResult.Affirmative)
+            if (result == MessageDialogResult.Affirmative)
             {
                 List<IUndoRedo> undos = new List<IUndoRedo>();
                 int duplicateCount = AssetContainer.MergeDuplicateMaterials(undos);
@@ -577,6 +712,80 @@ namespace EEPK_Organiser.View
 
         }
 
+
+        #endregion
+
+        #region ParameterVisibility
+        private FrameworkElement[] ScaleOffsetParameters = null;
+        private FrameworkElement[] ColorParameters = null;
+        private FrameworkElement[] TextureParameters = null;
+        private FrameworkElement[] AlphaParameters = null;
+        private FrameworkElement[] LightingParameters = null;
+        private FrameworkElement[] MiscParameters = null;
+        private FrameworkElement[] UnknownParameters = null;
+
+        private void UpdateVisibilities()
+        {
+            if (ScaleOffsetParameters == null || UnknownParameters == null) return;
+
+            if (FilterParameters)
+            {
+                AnalyzedShader shaderHelper = MaterialAnalyzer.Instance.ShaderHelper.Shaders.FirstOrDefault(x => x.ShaderProgram == SelectedMaterial?.ShaderProgram);
+
+                UpdateVisibilitiesRecursive(ScaleOffsetParameters, shaderHelper);
+                UpdateVisibilitiesRecursive(ColorParameters, shaderHelper);
+                UpdateVisibilitiesRecursive(TextureParameters, shaderHelper);
+                UpdateVisibilitiesRecursive(AlphaParameters, shaderHelper);
+                UpdateVisibilitiesRecursive(LightingParameters, shaderHelper);
+                UpdateVisibilitiesRecursive(MiscParameters, shaderHelper);
+                UpdateVisibilitiesRecursive(UnknownParameters, shaderHelper);
+
+                scaleOffsetExpander.Visibility = ScaleOffsetParameters.Any(x => x.Visibility == Visibility.Visible) ? Visibility.Visible : Visibility.Collapsed;
+                colorExpander.Visibility = ColorParameters.Any(x => x.Visibility == Visibility.Visible) ? Visibility.Visible : Visibility.Collapsed;
+                textureExpander.Visibility = TextureParameters.Any(x => x.Visibility == Visibility.Visible) ? Visibility.Visible : Visibility.Collapsed;
+                alphaExpander.Visibility = AlphaParameters.Any(x => x.Visibility == Visibility.Visible) ? Visibility.Visible : Visibility.Collapsed;
+                lightingExpander.Visibility = LightingParameters.Any(x => x.Visibility == Visibility.Visible) ? Visibility.Visible : Visibility.Collapsed;
+                miscExpander.Visibility = MiscParameters.Any(x => x.Visibility == Visibility.Visible) ? Visibility.Visible : Visibility.Collapsed;
+                unknownExpander.Visibility = UnknownParameters.Any(x => x.Visibility == Visibility.Visible) ? Visibility.Visible : Visibility.Collapsed;
+            }
+            else
+            {
+                //Make all visible
+                UpdateVisibilitiesRecursive(ScaleOffsetParameters, null, true);
+                UpdateVisibilitiesRecursive(ColorParameters, null, true);
+                UpdateVisibilitiesRecursive(TextureParameters, null, true);
+                UpdateVisibilitiesRecursive(AlphaParameters, null, true);
+                UpdateVisibilitiesRecursive(LightingParameters, null, true);
+                UpdateVisibilitiesRecursive(MiscParameters, null, true);
+                UpdateVisibilitiesRecursive(UnknownParameters, null, true);
+
+                scaleOffsetExpander.Visibility = Visibility.Visible;
+                colorExpander.Visibility = Visibility.Visible;
+                textureExpander.Visibility = Visibility.Visible;
+                alphaExpander.Visibility = Visibility.Visible;
+                lightingExpander.Visibility = Visibility.Visible;
+                miscExpander.Visibility = Visibility.Visible;
+                unknownExpander.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void UpdateVisibilitiesRecursive(FrameworkElement[] elements, AnalyzedShader shader, bool allVisible = false)
+        {
+            for(int i = 0; i < elements.Length; i++)
+            {
+                if (MaterialAnalyzer.Instance.ShaderHelper.AllParameters.Contains(elements[i].Name))
+                {
+                    if (shader != null)
+                    {
+                        elements[i].Visibility = shader.Parameters.Any(x => x.Name == elements[i].Name) ? Visibility.Visible : Visibility.Collapsed;
+                    }
+                    else
+                    {
+                        elements[i].Visibility = allVisible ? Visibility.Visible : Visibility.Collapsed;
+                    }
+                }
+            }
+        }
 
         #endregion
 
@@ -624,9 +833,10 @@ namespace EEPK_Organiser.View
             if (shader.Length > 32)
                 shader = shader.Substring(0, 32);
 
-            UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(_selectedMaterial.ShaderProgram), _selectedMaterial, _selectedMaterial.ShaderProgram, shader, "Material ShaderProgram"));
+            UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(_selectedMaterial.ShaderProgram), _selectedMaterial, _selectedMaterial.ShaderProgram, shader, "Material ShaderProgram"), 0, "ShaderProgram", SelectedMaterial);
             _selectedMaterial.ShaderProgram = shader;
             NotifyPropertyChanged(nameof(SelectedMaterialShaderProgram));
+            UpdateVisibilities();
         }
     }
 }

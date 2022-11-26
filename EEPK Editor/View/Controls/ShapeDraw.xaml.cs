@@ -162,6 +162,24 @@ namespace EEPK_Organiser.View.Controls
 
         private void OnPointCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
+            if (e.OldItems != null)
+            {
+                foreach (object item in e.OldItems)
+                {
+                    if (item is ShapeDrawPoint point)
+                        point.PropertyChanged -= OnPointPropertyChanged;
+                }
+            }
+
+            if (e.NewItems != null)
+            {
+                foreach (object newItem in e.NewItems)
+                {
+                    if (newItem is ShapeDrawPoint point)
+                        point.PropertyChanged += OnPointPropertyChanged;
+                }
+            }
+
             RegisterCollectionItemPropertyChanged(e.NewItems as AsyncObservableCollection<ShapeDrawPoint>);
 
             UnRegisterCollectionItemPropertyChanged(e.OldItems as AsyncObservableCollection<ShapeDrawPoint>);

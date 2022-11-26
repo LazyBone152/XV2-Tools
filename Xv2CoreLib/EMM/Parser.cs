@@ -8,7 +8,7 @@ namespace Xv2CoreLib.EMM
 {
     public class Parser
     {
-        private const int EMM_SIGNATURE = 1296909603;
+        public const int EMM_SIGNATURE = 1296909603;
 
         string saveLocation { get; set; }
         public EMM_File emmFile { get; private set; } = new EMM_File();

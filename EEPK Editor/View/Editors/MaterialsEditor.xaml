@@ -32,6 +32,25 @@
             <ColumnDefinition MinWidth="340" MaxWidth="420" Width="*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Row="0" Grid.Column="2" FlowDirection="RightToLeft" Margin="5,0" Orientation="Horizontal">
+            <Grid ToolTip="Automatically hide parameters that are not relevant for the selected shader">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="100"/>
+                </Grid.ColumnDefinitions>
+                <Label Content="Filter Parameters" Grid.Column="1"  VerticalAlignment="Center"/>
+                <CheckBox VerticalAlignment="Center" IsChecked="{Binding ElementName=UserControl, Path=FilterParameters}"/>
+            </Grid>
+            <Grid ToolTip="When selecting a new material automatically close tabs that have no values on them (are set to the default value, usually 0, or 1 for color and scales), and open those that do">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="100"/>
+                </Grid.ColumnDefinitions>
+                <Label Content="Filter Tabs" Grid.Column="1"  VerticalAlignment="Center"/>
+                <CheckBox VerticalAlignment="Center" IsChecked="{Binding ElementName=UserControl, Path=FilterTabs}"/>
+            </Grid>
+        </StackPanel>
         
         <!-- Search Bar-->
         <StackPanel Grid.Row="0" Grid.Column="1">
@@ -163,11 +182,11 @@
             <Grid IsEnabled="{Binding ElementName=UserControl, Path=ParameterEditorEnabled}" DataContext="{Binding ElementName=UserControl}" Background="{DynamicResource MahApps.Brushes.SystemControlBackgroundAltMediumLow}">
                 <ScrollViewer>
                     <StackPanel>
-                        <StackPanel>
+                        <StackPanel x:Name="parameterStackPanel">
                             <Expander x:Name="scaleOffsetExpander" Header="Scale/Offset" IsExpanded="False" BorderThickness="0">
                                 <StackPanel>
                                     <WrapPanel>
-                                        <Grid Margin="3,3" Width="450">
+                                        <Grid Margin="3,3" Width="450" x:Name="MatScale0">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition/>
@@ -175,7 +194,7 @@
                                             <Label Content="MatScale0"/>
                                             <vector:CustomVector4 Grid.Column="1" Value="{Binding MaterialViewModel.MatScale0}"/>
                                         </Grid>
-                                        <Grid Margin="3,3" Width="450">
+                                        <Grid Margin="3,3" Width="450" x:Name="MatScale1">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition/>
@@ -183,11 +202,9 @@
                                             <Label Content="MatScale1"/>
                                             <vector:CustomVector4 Grid.Column="1" Value="{Binding MaterialViewModel.MatScale1}"/>
                                         </Grid>
-
                                     </WrapPanel>
                                     <WrapPanel>
-
-                                        <Grid Margin="3,3" Width="450">
+                                        <Grid Margin="3,3" Width="450" x:Name="MatOffset0">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition/>
@@ -195,7 +212,7 @@
                                             <Label Content="MatOffset0"/>
                                             <vector:CustomVector4 Grid.Column="1" Value="{Binding MaterialViewModel.MatOffset0}"/>
                                         </Grid>
-                                        <Grid Margin="3,3" Width="450">
+                                        <Grid Margin="3,3" Width="450" x:Name="MatOffset1">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition/>
@@ -204,22 +221,21 @@
                                             <vector:CustomVector4 Grid.Column="3" Value="{Binding MaterialViewModel.MatOffset1}"/>
                                         </Grid>
                                     </WrapPanel>
-
                                 </StackPanel>
                             </Expander>
 
                             <Expander x:Name="colorExpander" Header="Color" IsExpanded="True" BorderThickness="0">
                                 <StackPanel>
                                     <StackPanel HorizontalAlignment="Left">
-                                        <Grid Margin="3,3" Width="450">
+                                        <Grid Margin="3,3" x:Name="Glare" Width="450">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
-                                                <ColumnDefinition/>
+                                                <ColumnDefinition Width="20"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="Glare"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.Glare}" Width="60" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
+                                            <CheckBox Grid.Column="1" IsChecked="{Binding MaterialViewModel.Glare}" Width="20" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                                         </Grid>
-                                        <Grid Margin="3,3" Width="450">
+                                        <Grid Margin="3,3" Width="450" x:Name="GlareCol" IsEnabled="{Binding MaterialViewModel.Glare}">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition/>
@@ -230,7 +246,7 @@
                                     </StackPanel>
 
                                     <WrapPanel>
-                                        <Grid Margin="3,3" Width="450">
+                                        <Grid Margin="3,3" Width="450" x:Name="MatCol0">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition/>
@@ -238,7 +254,7 @@
                                             <Label Content="MatCol0"/>
                                             <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.MatCol0}" Width="350"/>
                                         </Grid>
-                                        <Grid Margin="3,3" Width="450">
+                                        <Grid Margin="3,3" Width="450" x:Name="MatCol1">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition/>
@@ -246,9 +262,7 @@
                                             <Label Content="MatCol1"/>
                                             <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.MatCol1}"/>
                                         </Grid>
-                                    </WrapPanel>
-                                    <WrapPanel>
-                                        <Grid Margin="3,3" Width="450">
+                                        <Grid Margin="3,3" Width="450" x:Name="MatCol2">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition/>
@@ -256,7 +270,7 @@
                                             <Label Content="MatCol2"/>
                                             <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.MatCol2}"/>
                                         </Grid>
-                                        <Grid Margin="3,3" Width="450">
+                                        <Grid Margin="3,3" Width="450" x:Name="MatCol3">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition/>
@@ -272,7 +286,7 @@
                             <Expander x:Name="textureExpander" Header="Texture" IsExpanded="False" BorderThickness="0">
                                 <StackPanel>
                                     <WrapPanel>
-                                        <Grid Margin="3,3" Width="450">
+                                        <Grid Margin="3,3" Width="450" x:Name="TexScrl0">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition/>
@@ -280,7 +294,7 @@
                                             <Label Content="TexScrl0"/>
                                             <vector:CustomMatUV Grid.Column="1" Value="{Binding MaterialViewModel.TexScrl0}" Width="315" HorizontalAlignment="Left"/>
                                         </Grid>
-                                        <Grid Margin="3,3" Width="450">
+                                        <Grid Margin="3,3" Width="450" x:Name="TexScrl1">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition/>
@@ -291,7 +305,7 @@
 
                                     </WrapPanel>
                                     <WrapPanel>
-                                        <Grid Margin="3,3" Width="180">
+                                        <Grid Margin="3,3" Width="180" x:Name="TexRep0">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition Width="20"/>
@@ -306,7 +320,7 @@
                                             <CheckBox IsChecked="{Binding MaterialViewModel.TexRep0.V}" Grid.Column="4"/>
                                         </Grid>
 
-                                        <Grid Margin="3,3" Width="150">
+                                        <Grid Margin="3,3" Width="150" x:Name="TexRep1">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="70"/>
                                                 <ColumnDefinition Width="20"/>
@@ -321,7 +335,7 @@
                                             <CheckBox IsChecked="{Binding MaterialViewModel.TexRep1.V}" Grid.Column="4"/>
                                         </Grid>
 
-                                        <Grid Margin="3,3" Width="150">
+                                        <Grid Margin="3,3" Width="150" x:Name="TexRep2">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="70"/>
                                                 <ColumnDefinition Width="20"/>
@@ -337,7 +351,7 @@
                                         </Grid>
                                     </WrapPanel>
                                     <WrapPanel>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="TextureFilter0">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -346,7 +360,7 @@
                                             <Label Content="TextureFilter0"/>
                                             <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.TextureFilter0}" Width="85" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="TextureFilter1">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -354,7 +368,7 @@
                                             <Label Content="TextureFilter1"/>
                                             <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.TextureFilter1}" Width="85" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="TextureFilter2">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -364,7 +378,7 @@
                                         </Grid>
                                     </WrapPanel>
                                     <WrapPanel>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="MipMapLod0">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -372,7 +386,7 @@
                                             <Label Content="MipMapLod0"/>
                                             <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.MipMapLod0}" Width="85" HorizontalAlignment="Left" StringFormat="0.0##" Interval="0.05" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="MipMapLod1">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -380,7 +394,7 @@
                                             <Label Content="MipMapLod1"/>
                                             <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.MipMapLod1}" Width="85" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True" Interval="0.05" />
                                         </Grid>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="MipMapLod2">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -390,7 +404,7 @@
                                         </Grid>
                                     </WrapPanel>
                                     <WrapPanel>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="gToonTextureWidth">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -398,7 +412,7 @@
                                             <Label Content="gToonTextureWidth"/>
                                             <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.gToonTextureWidth}" Width="85" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True" Interval="0.05"/>
                                         </Grid>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="gToonTextureHeight">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -410,7 +424,7 @@
                                     </WrapPanel>
                                     <WrapPanel>
 
-                                        <Grid Margin="3,3" Width="450">
+                                        <Grid Margin="3,3" Width="450" x:Name="ToonSamplerAddress">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition/>
@@ -418,7 +432,7 @@
                                             <Label Content="ToonSamplerAdd" FontSize="11" VerticalContentAlignment="Center"/>
                                             <vector:CustomMatUV Grid.Column="1" Value="{Binding MaterialViewModel.ToonSamplerAddress}" Width="315" HorizontalAlignment="Left"/>
                                         </Grid>
-                                        <Grid Margin="3,3" Width="450">
+                                        <Grid Margin="3,3" Width="450" x:Name="MarkSamplerAddress">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition/>
@@ -435,15 +449,15 @@
                             <Expander x:Name="alphaExpander" Header="Alpha" BorderThickness="0">
                                 <StackPanel>
                                     <WrapPanel>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="AlphaBlend">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
-                                                <ColumnDefinition/>
+                                                <ColumnDefinition Width="102"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="AlphaBlend"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.AlphaBlend}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
+                                            <CheckBox Grid.Column="1" IsChecked="{Binding MaterialViewModel.AlphaBlend}" Width="20" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                                         </Grid>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3"  x:Name="AlphaBlendType" IsEnabled="{Binding ElementName=UserControl, Path=MaterialViewModel.AlphaBlend}">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -453,15 +467,15 @@
                                         </Grid>
                                     </WrapPanel>
                                     <WrapPanel>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3"  x:Name="AlphaTest">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="AlphaTest"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.AlphaTest}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.AlphaTest}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True" Minimum="0" Maximum="255"/>
                                         </Grid>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="AlphaTestThreshold">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -469,7 +483,7 @@
                                             <Label Content="AlphaTestThreshold"/>
                                             <CheckBox IsChecked="{Binding MaterialViewModel.AlphaTestThreshold}" Grid.Column="1" Width="102"/>
                                         </Grid>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="AlphaRef">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -479,7 +493,7 @@
                                         </Grid>
                                     </WrapPanel>
                                     <WrapPanel>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="AlphaSortMask">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -487,7 +501,7 @@
                                             <Label Content="AlphaSortMask"/>
                                             <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.AlphaSortMask}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="ZTestMask">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -495,7 +509,7 @@
                                             <Label Content="ZTestMask"/>
                                             <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.ZTestMask}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="ZWriteMask">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -509,7 +523,7 @@
 
                             <Expander x:Name="lightingExpander" Header="Lighting" BorderThickness="0">
                                 <StackPanel>
-                                    <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
+                                    <Grid Margin="3,3" Width="450" HorizontalAlignment="Left" x:Name="gCamPos">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="100"/>
                                             <ColumnDefinition/>
@@ -518,7 +532,7 @@
                                         <vector:CustomVector4 Grid.Column="1" Value="{Binding MaterialViewModel.gCamPos}"/>
                                     </Grid>
                                     <WrapPanel>
-                                        <Grid Margin="3,3" Width="450">
+                                        <Grid Margin="3,3" Width="450" x:Name="MatDif">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition/>
@@ -526,7 +540,7 @@
                                             <Label Content="MatDif"/>
                                             <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.MatDif}"/>
                                         </Grid>
-                                        <Grid Margin="3,3" Width="450">
+                                        <Grid Margin="3,3" Width="450" x:Name="MatAmb">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition/>
@@ -534,7 +548,7 @@
                                             <Label Content="MatAmb"/>
                                             <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.MatAmb}"/>
                                         </Grid>
-                                        <Grid Margin="3,3" Width="450">
+                                        <Grid Margin="3,3" Width="450" x:Name="MatSpc">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition/>
@@ -545,7 +559,7 @@
                                     </WrapPanel>
                                     <WrapPanel>
 
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="MatDifScale">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -553,7 +567,7 @@
                                             <Label Content="MatDifScale"/>
                                             <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.MatDifScale}" Width="102" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True" Interval="0.05"/>
                                         </Grid>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="MatAmbScale">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -561,7 +575,7 @@
                                             <Label Content="MatAmbScale"/>
                                             <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.MatAmbScale}" Width="102" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True" Interval="0.05"/>
                                         </Grid>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="SpcCoeff">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -569,7 +583,7 @@
                                             <Label Content="SpcCoeff"/>
                                             <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.SpcCoeff}" Width="102" HorizontalAlignment="Left" StringFormat="0.0##" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" Interval="0.05" HideUpDownButtons="True"/>
                                         </Grid>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="SpcPower">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -584,7 +598,7 @@
                             <Expander x:Name="miscExpander" Header="Misc" BorderThickness="0">
                                 <StackPanel>
                                     <WrapPanel>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="VsFlag0">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -592,7 +606,7 @@
                                             <Label Content="VsFlag0"/>
                                             <CheckBox Grid.Column="1" IsChecked="{Binding MaterialViewModel.VsFlag0}" Width="102"/>
                                         </Grid>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="VsFlag1">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -600,7 +614,7 @@
                                             <Label Content="VsFlag1"/>
                                             <CheckBox Grid.Column="1" IsChecked="{Binding MaterialViewModel.VsFlag1}" Width="102"/>
                                         </Grid>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="VsFlag2">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -608,7 +622,7 @@
                                             <Label Content="VsFlag2"/>
                                             <CheckBox Grid.Column="1" IsChecked="{Binding MaterialViewModel.VsFlag2}" Width="102"/>
                                         </Grid>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="VsFlag3">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -616,7 +630,45 @@
                                             <Label Content="VsFlag3"/>
                                             <CheckBox Grid.Column="1" IsChecked="{Binding MaterialViewModel.VsFlag3}" Width="102"/>
                                         </Grid>
-                                        <Grid Margin="3,3">
+                                    </WrapPanel>
+                                    <WrapPanel>
+                                        <Grid Margin="3,3" x:Name="BackFace">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="120"/>
+                                                <ColumnDefinition Width="102"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="BackFace"/>
+                                            <CheckBox Grid.Column="1" IsChecked="{Binding MaterialViewModel.BackFace}" Width="20" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                        </Grid>
+                                        <Grid Margin="3,3" x:Name="TwoSidedRender">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="120"/>
+                                                <ColumnDefinition Width="102"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="TwoSidedRender"/>
+                                            <CheckBox Grid.Column="1" IsChecked="{Binding MaterialViewModel.TwoSidedRender}" Width="20" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                        </Grid>
+                                    </WrapPanel>
+                                    <WrapPanel>
+                                        <Grid Margin="3,3" x:Name="LowRez">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="120"/>
+                                                <ColumnDefinition Width="102"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="LowRez"/>
+                                            <CheckBox Grid.Column="1" IsChecked="{Binding MaterialViewModel.LowRez}" Width="20" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                        </Grid>
+                                        <Grid Margin="3,3" x:Name="LowRezSmoke">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="120"/>
+                                                <ColumnDefinition Width="102"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="LowRezSmoke"/>
+                                            <CheckBox Grid.Column="1" IsChecked="{Binding MaterialViewModel.LowRezSmoke}" Width="20" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                        </Grid>
+                                    </WrapPanel>
+                                    <StackPanel>
+                                        <Grid Margin="3,3" x:Name="CustomFlag">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -624,65 +676,27 @@
                                             <Label Content="CustomFlag"/>
                                             <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.CustomFlag}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
-                                    </WrapPanel>
+                                    </StackPanel>
                                     <WrapPanel>
-
-                                        <Grid Margin="3,3">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="120"/>
-                                                <ColumnDefinition/>
-                                            </Grid.ColumnDefinitions>
-                                            <Label Content="BackFace"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.BackFace}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
-                                        </Grid>
-                                        <Grid Margin="3,3">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="120"/>
-                                                <ColumnDefinition/>
-                                            </Grid.ColumnDefinitions>
-                                            <Label Content="TwoSidedRender"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.TwoSidedRender}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
-                                        </Grid>
-                                    </WrapPanel>
-                                    <WrapPanel>
-
-                                        <Grid Margin="3,3">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="120"/>
-                                                <ColumnDefinition/>
-                                            </Grid.ColumnDefinitions>
-                                            <Label Content="LowRez"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.LowRez}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
-                                        </Grid>
-                                        <Grid Margin="3,3">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="120"/>
-                                                <ColumnDefinition/>
-                                            </Grid.ColumnDefinitions>
-                                            <Label Content="LowRezSmoke"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.LowRezSmoke}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
-                                        </Grid>
-                                    </WrapPanel>
-                                    <WrapPanel>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="IncidencePower">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="IncidencePower"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.IncidencePower}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.IncidencePower}" StringFormat="0.0###" Interval="0.1" Minimum="0" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="IncidenceAlphaBias">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="IncidenceAlphaBias"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.IncidenceAlphaBias}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
+                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.IncidenceAlphaBias}" StringFormat="0.0###" Interval="0.01" Minimum="0" Maximum="1" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
                                     </WrapPanel>
                                     <WrapPanel>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="ReflectCoeff">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -690,7 +704,7 @@
                                             <Label Content="ReflectCoeff"/>
                                             <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.ReflectCoeff}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="ReflectFresnelBias">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -698,7 +712,7 @@
                                             <Label Content="ReflectFresnelBias"/>
                                             <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.ReflectFresnelBias}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="ReflectFresnelCoeff">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -707,7 +721,7 @@
                                             <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.ReflectFresnelCoeff}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
                                     </WrapPanel>
-                                    <Grid Margin="3,3" HorizontalAlignment="Left">
+                                    <Grid Margin="3,3" HorizontalAlignment="Left" x:Name="AnimationChannel">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="120"/>
                                             <ColumnDefinition/>
@@ -721,7 +735,7 @@
                             <Expander x:Name="unknownExpander" Header="Unsorted" ToolTip="All parameters in this group have very niche uses and aren't used by many materials in the base game." BorderThickness="0">
                                 <StackPanel>
                                     <WrapPanel>
-                                        <Grid Margin="3,3" Width="450">
+                                        <Grid Margin="3,3" Width="450" x:Name="gLightDir">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition/>
@@ -729,7 +743,7 @@
                                             <Label Content="gLightDir"/>
                                             <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.gLightDir}"/>
                                         </Grid>
-                                        <Grid Margin="3,3" Width="450">
+                                        <Grid Margin="3,3" Width="450" x:Name="gLightDif">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition/>
@@ -737,7 +751,7 @@
                                             <Label Content="gLightDif"/>
                                             <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.gLightDif}"/>
                                         </Grid>
-                                        <Grid Margin="3,3" Width="450">
+                                        <Grid Margin="3,3" Width="450" x:Name="gLightSpc">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition/>
@@ -745,7 +759,7 @@
                                             <Label Content="gLightSpc"/>
                                             <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.gLightSpc}"/>
                                         </Grid>
-                                        <Grid Margin="3,3" Width="450">
+                                        <Grid Margin="3,3" Width="450" x:Name="gLightAmb">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition/>
@@ -753,7 +767,7 @@
                                             <Label Content="gLightAmb"/>
                                             <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.gLightAmb}"/>
                                         </Grid>
-                                        <Grid Margin="3,3" Width="450">
+                                        <Grid Margin="3,3" Width="450" x:Name="DirLight0Dir">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition/>
@@ -761,7 +775,7 @@
                                             <Label Content="DirLight0Dir"/>
                                             <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.DirLight0Dir}"/>
                                         </Grid>
-                                        <Grid Margin="3,3" Width="450">
+                                        <Grid Margin="3,3" Width="450" x:Name="DirLight0Col">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition/>
@@ -769,7 +783,7 @@
                                             <Label Content="DirLight0Col"/>
                                             <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.DirLight0Col}"/>
                                         </Grid>
-                                        <Grid Margin="3,3" Width="450">
+                                        <Grid Margin="3,3" Width="450" x:Name="AmbLight0Col">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition/>
@@ -779,15 +793,15 @@
                                         </Grid>
                                     </WrapPanel>
                                     <WrapPanel>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="Billboard">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
-                                                <ColumnDefinition/>
+                                                <ColumnDefinition Width="102"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="Billboard"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.Billboard}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
+                                            <CheckBox Grid.Column="1" IsChecked="{Binding MaterialViewModel.Billboard}" Width="20" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                                         </Grid>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="BillboardType" IsEnabled="{Binding ElementName=UserControl, Path=MaterialViewModel.Billboard}">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -795,23 +809,23 @@
                                             <Label Content="BillboardType"/>
                                             <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.BillboardType}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
                                         </Grid>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="NoEdge">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
-                                                <ColumnDefinition/>
+                                                <ColumnDefinition Width="102"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="NoEdge"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.NoEdge}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
+                                            <CheckBox Grid.Column="1" IsChecked="{Binding MaterialViewModel.NoEdge}" Width="20" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                                         </Grid>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="Shimmer">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
-                                                <ColumnDefinition/>
+                                                <ColumnDefinition Width="102"/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="Shimmer"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.Shimmer}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
+                                            <CheckBox Grid.Column="1" IsChecked="{Binding MaterialViewModel.Shimmer}" Width="20" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                                         </Grid>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="gTime">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -823,7 +837,7 @@
                                     </WrapPanel>
                                     <WrapPanel>
 
-                                        <Grid Margin="3,3" Width="450">
+                                        <Grid Margin="3,3" Width="450" x:Name="Ambient">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition/>
@@ -831,7 +845,7 @@
                                             <Label Content="Ambient"/>
                                             <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.Ambient}"/>
                                         </Grid>
-                                        <Grid Margin="3,3" Width="450">
+                                        <Grid Margin="3,3" Width="450" x:Name="Diffuse">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition/>
@@ -839,7 +853,7 @@
                                             <Label Content="Diffuse"/>
                                             <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.Diffuse}"/>
                                         </Grid>
-                                        <Grid Margin="3,3" Width="450">
+                                        <Grid Margin="3,3" Width="450" x:Name="Specular">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition/>
@@ -847,7 +861,7 @@
                                             <Label Content="Specular"/>
                                             <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.Specular}"/>
                                         </Grid>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="SpecularPower">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -858,7 +872,7 @@
                                     </WrapPanel>
                                     <WrapPanel>
 
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="FadeInit">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -866,7 +880,7 @@
                                             <Label Content="FadeInit"/>
                                             <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.FadeInit}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True" StringFormat="0.0##"/>
                                         </Grid>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="FadeSpeed">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -875,7 +889,7 @@
                                             <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.FadeSpeed}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True" StringFormat="0.0##"/>
                                         </Grid>
 
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="GradientInit">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -883,7 +897,7 @@
                                             <Label Content="GradientInit"/>
                                             <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.GradientInit}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True" StringFormat="0.0##"/>
                                         </Grid>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="GradientSpeed">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -892,7 +906,7 @@
                                             <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.GradientSpeed}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True" StringFormat="0.0##"/>
                                         </Grid>
 
-                                        <Grid Margin="3,3" Width="450">
+                                        <Grid Margin="3,3" Width="450" x:Name="gGradientCol">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
                                                 <ColumnDefinition/>
@@ -903,7 +917,7 @@
                                     </WrapPanel>
                                     <WrapPanel>
 
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="RimCoeff">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
@@ -911,7 +925,7 @@
                                             <Label Content="RimCoeff"/>
                                             <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.RimCoeff}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True" StringFormat="0.0##"/>
                                         </Grid>
-                                        <Grid Margin="3,3">
+                                        <Grid Margin="3,3" x:Name="RimPower">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
