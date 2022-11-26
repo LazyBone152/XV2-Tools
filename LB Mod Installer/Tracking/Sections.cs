@@ -51,6 +51,11 @@
         public const string ACB_Voice_Cue = "ACB_Voice_Cue";
         public const string PAL_Entry = "PAL_Entry";
         public const string QSF_Entry = "QSF_Entry";
+        public const string QBT_NormalDialogue = "QBT_NormalDialogue";
+        public const string QBT_InteractiveDialogue = "QBT_InteractiveDialogue";
+        public const string QBT_SpecialDialogue = "QBT_SpecialDialogue";
+        public const string QSL_Entry = "QSL_Entry";
+        public const string QED_Entry = "QED_Entry";
         public const string DML_Entry = "DML_Entry";
 
         public const string TTB_Entry = "TTB_Entry";

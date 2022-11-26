@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using Xv2CoreLib;
 using Xv2CoreLib.ACB;
 using Xv2CoreLib.EffectContainer;
 
@@ -20,6 +21,7 @@ namespace LB_Mod_Installer.Installer
         /// </summary>
         public void AddParsedFile(string path, object data)
         {
+            path = Utils.SanitizePath(path);
             CachedFile existing = GetCachedFile(path);
 
             if (existing != null)
@@ -43,6 +45,7 @@ namespace LB_Mod_Installer.Installer
 
         public void AddStreamFile(string path, ZipArchiveEntry zipEntry, bool allowOverwrite = true)
         {
+            path = Utils.SanitizePath(path);
             if (GeneralInfo.JungleBlacklist.Contains(Path.GetFileName(path)))
             {
                 throw new InvalidDataException(string.Format("File \"{0}\" cannot be copied to the game dir because it is blacklisted.", path));
@@ -76,22 +79,23 @@ namespace LB_Mod_Installer.Installer
 
 
         }
-        
+
         /// <summary>
         /// Returns a parsed cachedFile, if it has previously been loaded. Otherwise it returns null.
         /// </summary>
         /// <returns></returns>
         public T GetParsedFile<T>(string path) where T : new()
         {
+            path = Utils.SanitizePath(path);
             CachedFile existing = GetCachedFile(path);
 
-            if(existing == null)
+            if (existing == null)
             {
                 return default(T);
             }
             else
             {
-                if(existing.FileType == CachedFileType.Parsed)
+                if (existing.FileType == CachedFileType.Parsed)
                 {
                     return (T)existing.Data;
                 }
@@ -105,6 +109,7 @@ namespace LB_Mod_Installer.Installer
 
         private void Add(string path, object data, CachedFileType type, bool allowOverwrite = true)
         {
+            path = Utils.SanitizePath(path);
             var cachedFile = new CachedFile(path, data, allowOverwrite);
 
             if (data.GetType() == typeof(EffectContainerFile))
@@ -113,12 +118,12 @@ namespace LB_Mod_Installer.Installer
                 ecf.AddEffects(((EffectContainerFile)data).Effects);
                 cachedFile.backupEffectContainerFile = ecf;
             }
-            else if(data.GetType() == typeof(ACB_File))
+            else if (data.GetType() == typeof(ACB_File))
             {
                 //Might be better to change this to a shallow-copy
                 ACB_File acb = ACB_File.NewXv2Acb();
-                
-                foreach(var cue in ((ACB_File)data).Cues)
+
+                foreach (var cue in ((ACB_File)data).Cues)
                 {
                     acb.CopyCue((int)cue.ID, (ACB_File)data, false);
                 }
@@ -131,7 +136,9 @@ namespace LB_Mod_Installer.Installer
 
         private CachedFile GetCachedFile(string path)
         {
-            foreach(var file in cachedFiles)
+            path = Utils.SanitizePath(path);
+
+            foreach (var file in cachedFiles)
             {
                 if (Path.Equals(file.Path, path)) return file;
             }
@@ -163,7 +170,24 @@ namespace LB_Mod_Installer.Installer
                 }
                 else if (file.FileType == CachedFileType.Parsed)
                 {
-                    File.WriteAllBytes(GeneralInfo.GetPathInGameDir(file.Path), file.GetBytes());
+                    string path = GeneralInfo.GetPathInGameDir(file.Path);
+
+                    if (file.Data is IIsNull isNull)
+                    {
+                        //Do not save the file if it has nothing in it, and if it already exists, delete it.
+                        if (isNull.IsNull())
+                        {
+                            try
+                            {
+                                if (File.Exists(path))
+                                    File.Delete(path);
+                            }
+                            catch { }
+
+                            continue;
+                        }
+                    }
+                    File.WriteAllBytes(path, file.GetBytes());
                 }
             }
         }
@@ -216,7 +240,7 @@ namespace LB_Mod_Installer.Installer
                     file.backupEffectContainerFile.saveFormat = Xv2CoreLib.EffectContainer.SaveFormat.EEPK;
                     file.backupEffectContainerFile.Save();
                 }
-                else if(file.backupBgmFile != null)
+                else if (file.backupBgmFile != null)
                 {
                     //Restore CAR_BGM.acb
                     string path = GeneralInfo.GetPathInGameDir(file.Path);
@@ -225,7 +249,33 @@ namespace LB_Mod_Installer.Installer
                 }
             }
         }
-        
+
+        public void NukeEmptyDirectories()
+        {
+            List<string> dirs = new List<string>();
+
+            foreach(var file in cachedFiles)
+            {
+                string dir = Path.GetDirectoryName(file.Path);
+
+                if (!dirs.Contains(dir))
+                    dirs.Add(dir);
+            }
+
+            foreach(var dir in dirs)
+            {
+                string actualPath = GeneralInfo.GetPathInGameDir(dir);
+
+                if(Directory.GetFiles(actualPath).Length == 0)
+                {
+                    try
+                    {
+                        Directory.Delete(actualPath);
+                    }
+                    catch { }
+                }
+            }
+        }
     }
 
     public class CachedFile
@@ -239,7 +289,7 @@ namespace LB_Mod_Installer.Installer
         public bool alreadyExists = false; //If false and install fails, delete the file from disk
         public byte[] backupBytes = null; //If the file already exists, back it up into this array
         public EffectContainerFile backupEffectContainerFile = null;
-        public ACB_File backupBgmFile = null; 
+        public ACB_File backupBgmFile = null;
 
 
         public CachedFile(string _path, object _data, bool _allowOverwrite)

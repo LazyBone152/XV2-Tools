@@ -50,6 +50,9 @@ using LB_Mod_Installer.Installer.Transformation;
 using Xv2CoreLib.QSF;
 using Xv2CoreLib.DML;
 using Xv2CoreLib.AFS2;
+using Xv2CoreLib.QBT;
+using Xv2CoreLib.QSL;
+using Xv2CoreLib.QED;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -198,8 +201,17 @@ namespace LB_Mod_Installer.Installer
                         }
                         break;
                     case FileType.CopyDir:
-                        UpdateProgessBarText($"_Copying {File.SourcePath}...");
-                        ProcessJungle($"{JUNGLE3}/{File.SourcePath}", true, File.InstallPath, true);
+                        {
+                            UpdateProgessBarText($"_Copying {File.SourcePath}...");
+
+                            //Path can be in either data or JUNGLE3
+                            if (!ProcessJungle($"{JUNGLE3}/{File.SourcePath}", true, File.InstallPath, true))
+                                ProcessJungle($"data/{File.SourcePath}", true, File.InstallPath, true);
+                        }
+                        break;
+                    case FileType.SkillDir:
+                        UpdateProgessBarText($"_Skill {File.InstallPath}...");
+                        InstallSkillFolder(File);
                         break;
                     case FileType.Binding:
                         bindingManager.ParseString(File.Binding, GeneralInfo.InstallerXml, "Binding");
@@ -225,11 +237,11 @@ namespace LB_Mod_Installer.Installer
             }
 
         }
-        
+
         private void ResolveFileType(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
             //Special case: prebaked.xml
-            if(installPath?.Equals(PrebakedFile.PATH, StringComparison.OrdinalIgnoreCase) == true)
+            if (installPath?.Equals(PrebakedFile.PATH, StringComparison.OrdinalIgnoreCase) == true)
             {
                 Install_Prebaked(xmlPath, installPath);
                 return;
@@ -345,6 +357,15 @@ namespace LB_Mod_Installer.Installer
                 case ".qsf":
                     Install_QSF(xmlPath, installPath, isXml);
                     break;
+                case ".qsl":
+                    Install_QSL(xmlPath, installPath, isXml, useSkipBindings);
+                    break;
+                case ".qbt":
+                    Install_QBT(xmlPath, installPath, isXml, useSkipBindings);
+                    break;
+                case ".qed":
+                    Install_QED(xmlPath, installPath, isXml, useSkipBindings);
+                    break;
                 default:
                     if (TryTransformationInstall(xmlPath))
                         break;
@@ -352,7 +373,7 @@ namespace LB_Mod_Installer.Installer
                     throw new InvalidDataException(string.Format("The filetype of \"{0}\" is not supported.", xmlPath));
             }
         }
-        
+
         private bool TryTransformationInstall(string xmlPath)
         {
 #if !DEBUG
@@ -398,8 +419,8 @@ namespace LB_Mod_Installer.Installer
 #if !DEBUG
             catch (Exception ex)
             {
-                    string error = string.Format("Failed at Awoken Skill Defines load phase ({0}).", xmlPath);
-                    throw new Exception(error, ex);
+                string error = string.Format("Failed at Awoken Skill Defines load phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
             }
 #endif
 
@@ -436,14 +457,17 @@ namespace LB_Mod_Installer.Installer
                 useJungle2 = true;
         }
 
-        private void ProcessJungle(string jungleDir, bool allowOverwrite, string gameDirPath = null, bool isDirCopy = false)
+        private bool ProcessJungle(string jungleDir, bool allowOverwrite, string gameDirPath = null, bool isDirCopy = false)
         {
-            foreach(var file in zipManager.archive.Entries)
+            bool exists = false;
+
+            foreach (var file in zipManager.archive.Entries)
             {
                 if (file.FullName.StartsWith(jungleDir) && !string.IsNullOrEmpty(file.Name))
                 {
-                    if(file.FullName.Length > jungleDir.Length + 1)
+                    if (file.FullName.Length > jungleDir.Length + 1)
                     {
+                        exists = true;
                         //string filePath = file.FullName.Remove(0, jungleDir.Length + 1);
                         string filePath = Utils.SanitizePath(file.FullName);
 
@@ -468,6 +492,125 @@ namespace LB_Mod_Installer.Installer
                     }
                 }
             }
+
+            return exists;
+        }
+
+        private void InstallSkillFolder(FilePath fileInstance)
+        {
+            //Process bindings for SkillID
+            if (!string.IsNullOrWhiteSpace(fileInstance.SkillID))
+            {
+                fileInstance.SkillID = bindingManager.ParseString(fileInstance.SkillID, GeneralInfo.InstallerXml, "File.SkillID");
+            }
+
+            int skillId;
+
+            if(!int.TryParse(fileInstance.SkillID, out skillId))
+                throw new Exception($"Error while installing SkillDir \"{fileInstance.SourcePath}\".\n\nSkillID was not set!");
+
+            CUS_File.SkillType skillType = fileInstance.SkillType == CUS_File.SkillType.NotSet ? CUS_File.GetSkillTypeFromID1(skillId) : fileInstance.SkillType;
+
+            if (skillType == CUS_File.SkillType.NotSet)
+                throw new Exception($"Error while installing SkillDir \"{fileInstance.SourcePath}\".\n\nSkillType was not set!");
+
+            if (skillId == -1)
+                throw new Exception($"Error while installing SkillDir \"{fileInstance.SourcePath}\".\n\nSkillID was not set!");
+
+            int id2 = (skillId > 5000) ? CUS_File.ConvertToID2(skillId, skillType) : skillId;
+
+            CMS_File cmsFile = (CMS_File)GetParsedFile<CMS_File>(BindingManager.CMS_PATH);
+            CUS_File cusFile = (CUS_File)GetParsedFile<CUS_File>(BindingManager.CUS_PATH);
+            Skill skill = cusFile.GetSkill(id2, skillType);
+
+            if (skill == null)
+                throw new Exception($"Error while installing SkillDir \"{fileInstance.SourcePath}\".\n\nThe specified skill was not found in the system. Ensure that the CUS entry for this skill was installed BEFORE the SkillDir (SkillID: {id2}, SkillType: {skillType})");
+
+            string cmsParent = cmsFile.GetSkillOwner(id2);
+            string folderName = string.Format("{0}_{1}_{2}", skill.ID2.ToString("D3"), cmsParent, skill.ShortName);
+            string skillPath = $"{CUS_File.GetSkillDir(skillType)}/{folderName}";
+            string skillPathInArchive = $"data/{fileInstance.SourcePath}";
+            bool exists = false;
+
+            foreach (var file in zipManager.archive.Entries)
+            {
+                if (file.FullName.StartsWith(skillPathInArchive))
+                {
+                    if (file.FullName.Length > skillPathInArchive.Length + 1)
+                    {
+                        exists = true;
+                        //string filePath = file.FullName.Remove(0, jungleDir.Length + 1);
+                        string filePath = Utils.SanitizePath(file.FullName);
+
+                        string sanitizedDir = Utils.SanitizePath(skillPathInArchive);
+                        int rootCount = sanitizedDir.Split('/').Count();
+
+                        for (int i = 0; i < rootCount; i++)
+                            filePath = Utils.PathRemoveRoot(filePath);
+
+                        //Rename NNNN_CCC_SSSS -> folderName
+                        filePath = filePath.Replace("NNNN_CCC_SSSS", folderName);
+                        string newFilePath = $"{skillPath}/{filePath}";
+
+                        string ext = Path.GetExtension(filePath);
+
+                        if (ext == ".xml")
+                        {
+                            string ext2 = Path.GetExtension(Path.GetFileNameWithoutExtension(filePath));
+                            newFilePath = $"{Path.GetDirectoryName(newFilePath)}/{Path.GetFileNameWithoutExtension(newFilePath)}";
+
+                            switch (ext2)
+                            {
+                                case ".bac":
+                                    BAC_File bacFile = zipManager.DeserializeXmlFromArchive_Ext<BAC_File>(file.FullName);
+                                    bacFile.ChangeNeutralSkillId((ushort)id2);
+                                    fileManager.AddParsedFile(newFilePath, bacFile);
+                                    break;
+                                case ".bsa":
+                                    BSA_File bsaFile = zipManager.DeserializeXmlFromArchive_Ext<BSA_File>(file.FullName);
+                                    bsaFile.ChangeNeutralSkillId((ushort)id2);
+                                    fileManager.AddParsedFile(newFilePath, bsaFile);
+                                    break;
+                                case ".bdm":
+                                    BDM_File bdmFile = zipManager.DeserializeXmlFromArchive_Ext<BDM_File>(file.FullName);
+                                    bdmFile.ChangeNeutralSkillId((ushort)id2);
+                                    fileManager.AddParsedFile(newFilePath, bdmFile);
+                                    break;
+                                default:
+                                    throw new Exception($"Error while installing SkillDir \"{fileInstance.SourcePath}\".\n\nAn unknown .xml file was detected in the skill dir ({file.FullName}). Only .bac, .bdm and .bsa xmls are allowed.");
+                            }
+
+                        }
+                        else if(ext == ".bac")
+                        {
+                            BAC_File bacFile = BAC_File.Load(zipManager.GetFileFromArchive(file.FullName));
+                            bacFile.ChangeNeutralSkillId((ushort)id2);
+                            fileManager.AddParsedFile(newFilePath, bacFile);
+                        }
+                        else if (ext == ".bsa")
+                        {
+                            BSA_File bsaFile = BSA_File.Load(zipManager.GetFileFromArchive(file.FullName));
+                            bsaFile.ChangeNeutralSkillId((ushort)id2);
+                            fileManager.AddParsedFile(newFilePath, bsaFile);
+                        }
+                        else if (ext == ".bdm")
+                        {
+                            BDM_File bdmFile = BDM_File.Load(zipManager.GetFileFromArchive(file.FullName));
+                            bdmFile.ChangeNeutralSkillId((ushort)id2);
+                            fileManager.AddParsedFile(newFilePath, bdmFile);
+                        }
+                        else
+                        {
+                            fileManager.AddStreamFile(newFilePath, file, true);
+                        }
+
+                        GeneralInfo.Tracker.AddJungleFile(newFilePath);
+                    }
+                }
+            }
+
+            if (!exists)
+                throw new Exception($"Error while installing SkillDir \"{fileInstance.SourcePath}\".\n\nNo skill directory was found at the SourcePath ({fileInstance.SourcePath})");
         }
 
         private void SaveFiles()
@@ -484,6 +627,8 @@ namespace LB_Mod_Installer.Installer
                 //Binary files. They are a "stream" from the zip file, not loaded into memory.
                 //Save them last to decrease chance of errors, as these files cant be restored if anything happens
                 fileManager.SaveStreamFiles();
+
+                fileManager.NukeEmptyDirectories();
             }
 #if !DEBUG
             catch (Exception ex)
@@ -492,7 +637,7 @@ namespace LB_Mod_Installer.Installer
             }
 #endif
         }
-        
+
         /// <summary>
         /// Returns true if file is blacklisted.
         /// </summary>
@@ -500,7 +645,7 @@ namespace LB_Mod_Installer.Installer
         /// <returns></returns>
         private bool IsJungleFileBlacklisted(string path)
         {
-            if(GeneralInfo.JungleBlacklist.Contains(Path.GetFileName(path)))
+            if (GeneralInfo.JungleBlacklist.Contains(Path.GetFileName(path)))
             {
                 //is blacklisted
                 MessageBox.Show(string.Format("\"{0}\" is blacklisted and cannot be used in JUNGLE1, JUNGLE2 or as a binary copy. \n\nFile skipped.", Path.GetFileName(path)), "Blacklisted File", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -526,7 +671,7 @@ namespace LB_Mod_Installer.Installer
                 bindingManager.ParseProperties(xmlFile.Entries, binaryFile.Entries, installPath);
 
                 //MsgComponent Code
-                foreach(var idbEntry in xmlFile.Entries)
+                foreach (var idbEntry in xmlFile.Entries)
                 {
                     if (idbEntry.MsgComponents != null)
                         IdbMsgWriter(idbEntry, installPath);
@@ -538,7 +683,7 @@ namespace LB_Mod_Installer.Installer
 #if !DEBUG
             catch (Exception ex)
             {
-                string error = string.Format("Failed at IDB install phase ({0}).",  xmlPath);
+                string error = string.Format("Failed at IDB install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
@@ -585,12 +730,12 @@ namespace LB_Mod_Installer.Installer
 #endif
             {
                 BCS_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<BCS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : BCS_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
-                BCS_File binaryFile = (BCS_File)GetParsedFile<BCS_File>(installPath);
+                BCS_File binaryFile = (BCS_File)GetParsedFile<BCS_File>(installPath, raiseEx: false);
 
                 if (binaryFile == null)
                 {
                     //No matching file exists in the game, so use xml as base
-                    binaryFile = zipManager.DeserializeXmlFromArchive_Ext<BCS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                    binaryFile = new BCS_File();
                     fileManager.AddParsedFile(installPath, binaryFile);
                 }
 
@@ -611,14 +756,14 @@ namespace LB_Mod_Installer.Installer
                 InstallEntries(xmlFile.Bodies, binaryFile.Bodies, installPath, Sections.BCS_Bodies, useSkipBindings);
 
                 //Install PartColors
-                if(xmlFile.PartColors != null)
+                if (xmlFile.PartColors != null)
                 {
                     for (int i = 0; i < xmlFile.PartColors.Count; i++)
                     {
                         PartColor binPartColor = binaryFile.GetPartColors(xmlFile.PartColors[i].Index, xmlFile.PartColors[i].Name);
                         bindingManager.ParseProperties(xmlFile.PartColors[i].ColorsList, binPartColor.ColorsList, installPath);
 
-                        if(xmlFile.PartColors[i].ColorsList != null)
+                        if (xmlFile.PartColors[i].ColorsList != null)
                         {
                             foreach (var color in xmlFile.PartColors[i].ColorsList)
                             {
@@ -630,7 +775,7 @@ namespace LB_Mod_Installer.Installer
                 }
 
                 //Install SkeletonData
-                if(xmlFile.SkeletonData1 != null)
+                if (xmlFile.SkeletonData1 != null)
                 {
                     binaryFile.SkeletonData1 = xmlFile.SkeletonData1;
                     GeneralInfo.Tracker.AddID(installPath, Sections.BCS_SkeletonData, "0");
@@ -692,12 +837,16 @@ namespace LB_Mod_Installer.Installer
                     throw new Exception("Type.Binary not possible for bac files. You must use XML.");
 
                 BAC_File xmlFile = zipManager.DeserializeXmlFromArchive_Ext<BAC_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
-                BAC_File binaryFile = (BAC_File)GetParsedFile<BAC_File>(installPath);
+                BAC_File binaryFile = (BAC_File)GetParsedFile<BAC_File>(installPath, raiseEx: false);
 
-                if(binaryFile == null)
+                if (binaryFile == null)
                 {
-                    //No matching file exists in the game, so use xml as base
-                    binaryFile = zipManager.DeserializeXmlFromArchive_Ext<BAC_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                    binaryFile = new BAC_File
+                    {
+                        F_32 = xmlFile.F_32,
+                        I_20 = xmlFile.I_20,
+                        I_80 = xmlFile.I_80
+                    };
                     fileManager.AddParsedFile(installPath, binaryFile);
                 }
 
@@ -726,11 +875,11 @@ namespace LB_Mod_Installer.Installer
                 PSC_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<PSC_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : PSC_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 PSC_File binaryFile = (PSC_File)GetParsedFile<PSC_File>(installPath);
 
-                foreach(var config in xmlFile.Configurations)
+                foreach (var config in xmlFile.Configurations)
                 {
                     var binaryConfig = binaryFile.GetConfiguration(config.Index);
 
-                    foreach(var pscEntry in config.PscEntries)
+                    foreach (var pscEntry in config.PscEntries)
                     {
                         var binaryPscConfig = binaryConfig.GetPscEntry(pscEntry.Index);
                         bindingManager.ParseProperties(pscEntry.PscSpecEntries, binaryPscConfig.PscSpecEntries, installPath);
@@ -789,7 +938,7 @@ namespace LB_Mod_Installer.Installer
                 {
                     GeneralInfo.Tracker.AddID(installPath, Sections.EEPK_Effect, effect.Index);
 
-                    if(effect.ExtendedEffectData?.AutoIdEnabled == true)
+                    if (effect.ExtendedEffectData?.AutoIdEnabled == true)
                     {
                         bindingManager.AddAlias(effect.IndexNum.ToString(), effect.ExtendedEffectData.Alias);
                     }
@@ -827,7 +976,7 @@ namespace LB_Mod_Installer.Installer
                     {
                         int idx = binaryFile.AddEntry(entry, entry.Index, xmlFile.installMode);
 
-                        if(xmlFile.installMode == InstallMode.MatchIndex)
+                        if (xmlFile.installMode == InstallMode.MatchIndex)
                             GeneralInfo.Tracker.AddID(installPath, Sections.EMB_Entry, idx.ToString());
                         else if (xmlFile.installMode == InstallMode.MatchName)
                             GeneralInfo.Tracker.AddID(installPath, Sections.EMB_Entry, entry.Name);
@@ -888,7 +1037,7 @@ namespace LB_Mod_Installer.Installer
                 CharaSlotsFile tempSlotsFile = cstSlots.ConvertToPatcherSlotsFile();
                 slotsFile.CharaSlots = tempSlotsFile.CharaSlots;
 
-                foreach(var id in installIDs)
+                foreach (var id in installIDs)
                 {
                     GeneralInfo.Tracker.AddID(CharaSlotsFile.FILE_NAME_BIN, Sections.CharaSlotEntry, id);
                 }
@@ -912,7 +1061,7 @@ namespace LB_Mod_Installer.Installer
                 OCS_File binaryFile = (OCS_File)GetParsedFile<OCS_File>(installPath);
 
                 //Install entries
-                if(xmlFile?.Partners != null)
+                if (xmlFile?.Partners != null)
                 {
                     var ids = binaryFile.InstallEntries(xmlFile.Partners);
 
@@ -994,12 +1143,12 @@ namespace LB_Mod_Installer.Installer
 #endif
             {
                 BDM_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<BDM_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : BDM_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
-                BDM_File binaryFile = (BDM_File)GetParsedFile<BDM_File>(installPath);
+                BDM_File binaryFile = (BDM_File)GetParsedFile<BDM_File>(installPath, raiseEx: false);
 
                 if (binaryFile == null)
                 {
                     //No matching file exists in the game, so use xml as base
-                    binaryFile = zipManager.DeserializeXmlFromArchive_Ext<BDM_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                    binaryFile = new BDM_File();
                     fileManager.AddParsedFile(installPath, binaryFile);
                 }
 
@@ -1077,12 +1226,11 @@ namespace LB_Mod_Installer.Installer
 #endif
             {
                 BSA_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<BSA_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : BSA_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
-                BSA_File binaryFile = (BSA_File)GetParsedFile<BSA_File>(installPath);
+                BSA_File binaryFile = (BSA_File)GetParsedFile<BSA_File>(installPath, raiseEx: false);
 
                 if (binaryFile == null)
                 {
-                    //No matching file exists in the game, so use xml as base
-                    binaryFile = zipManager.DeserializeXmlFromArchive_Ext<BSA_File>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                    binaryFile = new BSA_File();
                     fileManager.AddParsedFile(installPath, binaryFile);
                 }
 
@@ -1180,7 +1328,14 @@ namespace LB_Mod_Installer.Installer
 #endif
             {
                 EAN_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<EAN_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : EAN_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
-                EAN_File binaryFile = (EAN_File)GetParsedFile<EAN_File>(installPath);
+                EAN_File binaryFile = (EAN_File)GetParsedFile<EAN_File>(installPath, raiseEx: false);
+
+                if (binaryFile == null)
+                {
+                    binaryFile = new EAN_File();
+                    binaryFile.Skeleton = xmlFile.Skeleton;
+                    fileManager.AddParsedFile(installPath, binaryFile);
+                }
 
                 //Parse bindings
                 bindingManager.ParseProperties(xmlFile.Animations, binaryFile.Animations, installPath);
@@ -1204,7 +1359,10 @@ namespace LB_Mod_Installer.Installer
 #endif
             {
                 MSG_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<MSG_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : MSG_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
-                MSG_File binaryFile = (MSG_File)GetParsedFile<MSG_File>(installPath);
+                MSG_File binaryFile = (MSG_File)GetParsedFile<MSG_File>(installPath, raiseEx: false);
+
+                if (binaryFile == null)
+                    binaryFile = new MSG_File();
 
                 //Parse bindings
                 bindingManager.ParseProperties(xmlFile.MSG_Entries, binaryFile.MSG_Entries, installPath);
@@ -1363,7 +1521,7 @@ namespace LB_Mod_Installer.Installer
                     binaryFile.Characters2 = new List<Quest_Characters>();
 
                 //Merge AutoIdContexts for Character1 and Character2 lists
-                if(binaryFile.Characters2 != null)
+                if (binaryFile.Characters2 != null)
                 {
                     AutoIdContext chara1Context = bindingManager.GetAutoIdContext(binaryFile.Characters1);
                     AutoIdContext chara2Context = bindingManager.GetAutoIdContext(binaryFile.Characters2);
@@ -1427,9 +1585,9 @@ namespace LB_Mod_Installer.Installer
                 TTB_File binaryFile = (TTB_File)GetParsedFile<TTB_File>(installPath);
 
                 //Set Actor1 CMS_ID
-                foreach(var entry in xmlFile.Entries.Where(x => x.SubEntries != null))
+                foreach (var entry in xmlFile.Entries.Where(x => x.SubEntries != null))
                 {
-                    foreach(var _event in entry.SubEntries)
+                    foreach (var _event in entry.SubEntries)
                     {
                         _event.Cms_Id1 = entry.CmsID;
                     }
@@ -1501,7 +1659,7 @@ namespace LB_Mod_Installer.Installer
                 HCI_File binaryFile = (HCI_File)GetParsedFile<HCI_File>(installPath);
 
                 //Install entries
-                foreach(var entry in xmlFile.Entries)
+                foreach (var entry in xmlFile.Entries)
                 {
                     GeneralInfo.Tracker.AddID(installPath, Sections.HCI_Entry, entry.Index);
 
@@ -1570,7 +1728,13 @@ namespace LB_Mod_Installer.Installer
 #endif
             {
                 QML_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<QML_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : QML_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
-                QML_File binaryFile = (QML_File)GetParsedFile<QML_File>(installPath);
+                QML_File binaryFile = (QML_File)GetParsedFile<QML_File>(installPath, raiseEx: false);
+
+                if (binaryFile == null)
+                {
+                    binaryFile = new QML_File();
+                    fileManager.AddParsedFile(installPath, binaryFile);
+                }
 
                 //Parse bindings
                 bindingManager.ParseProperties(xmlFile.Entries, binaryFile.Entries, installPath);
@@ -1683,6 +1847,99 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
+        private void Install_QBT(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                QBT_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<QBT_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : QBT_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                QBT_File binaryFile = (QBT_File)GetParsedFile<QBT_File>(installPath, raiseEx: false);
+
+                if (binaryFile == null)
+                {
+                    binaryFile = new QBT_File();
+                    fileManager.AddParsedFile(installPath, binaryFile);
+                }
+
+                //Parse bindings
+                bindingManager.ParseProperties(xmlFile.NormalDialogues, binaryFile.NormalDialogues, installPath);
+                bindingManager.ParseProperties(xmlFile.InteractiveDialogues, binaryFile.InteractiveDialogues, installPath);
+                bindingManager.ParseProperties(xmlFile.SpecialDialogues, binaryFile.SpecialDialogues, installPath);
+
+                //Install entries
+                InstallEntries(xmlFile.NormalDialogues, binaryFile.NormalDialogues, installPath, Sections.QBT_NormalDialogue, useSkipBindings);
+                InstallEntries(xmlFile.InteractiveDialogues, binaryFile.InteractiveDialogues, installPath, Sections.QBT_InteractiveDialogue, useSkipBindings);
+                InstallEntries(xmlFile.SpecialDialogues, binaryFile.SpecialDialogues, installPath, Sections.QBT_SpecialDialogue, useSkipBindings);
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at QBT install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
+        private void Install_QSL(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                QSL_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<QSL_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : QSL_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                QSL_File binaryFile = (QSL_File)GetParsedFile<QSL_File>(installPath, raiseEx: false);
+
+                if (binaryFile == null)
+                {
+                    binaryFile = new QSL_File();
+                    fileManager.AddParsedFile(installPath, binaryFile);
+                }
+
+                //Parse bindings
+                bindingManager.ParseProperties(xmlFile.Stages, binaryFile.Stages, installPath);
+
+                InstallSubEntries<PositionEntry, StageEntry>(xmlFile.Stages, binaryFile.Stages, installPath, Sections.QSL_Entry, useSkipBindings);
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at QSL install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
+        private void Install_QED(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                QED_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<QED_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : QED_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                QED_File binaryFile = (QED_File)GetParsedFile<QED_File>(installPath, raiseEx: false);
+
+                if (binaryFile == null)
+                {
+                    binaryFile = new QED_File();
+                    fileManager.AddParsedFile(installPath, binaryFile);
+                }
+
+                //Parse bindings
+                bindingManager.ParseProperties(xmlFile.Events, binaryFile.Events, installPath);
+
+                //Install entries
+                InstallEntries(xmlFile.Events, binaryFile.Events, installPath, Sections.QED_Entry, useSkipBindings);
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at QED install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
 
         //Generic Install Methods
         //We need generic methods for IInstallable via List and ObservableCollection. Most file types will be handled with this.
@@ -1712,7 +1969,7 @@ namespace LB_Mod_Installer.Installer
                 {
                     //Entry with same index exists, so overwrite it.
 
-                    if(useSkipBindings)
+                    if (useSkipBindings)
                         bindingManager.ProcessSkipBindings(entryToInstall, destEntries[index]);
 
                     destEntries[index] = entryToInstall;
@@ -1733,13 +1990,13 @@ namespace LB_Mod_Installer.Installer
             //Initial binding pass (This wont parse the AutoID bindings on SubEntries, as we need to resolve the root ID first)
             bindingManager.ParseProperties(installEntries, destEntries, path);
 
-            foreach (var entryToInstall in installEntries) 
+            foreach (var entryToInstall in installEntries)
             {
                 //Get index
                 int index = destEntries.IndexOf(destEntries.FirstOrDefault(x => x.Index == entryToInstall.Index));
 
                 //Create root entry if required
-                if(index == -1)
+                if (index == -1)
                 {
                     destEntries.Add(new M() { Index = entryToInstall.Index, SubEntries = new List<T>() });
                     index = destEntries.Count - 1;
@@ -1855,7 +2112,7 @@ namespace LB_Mod_Installer.Installer
 
             var cachedFile = fileManager.GetParsedFile<T>(path);
 
-            if(cachedFile != null)
+            if (cachedFile != null)
             {
                 //File is already cached. Return that instance.
                 return cachedFile;
@@ -1865,16 +2122,15 @@ namespace LB_Mod_Installer.Installer
                 //File is not cached. So parse it, add it and then return it.
                 var file = GetParsedFileFromGame(path, FileIO, false, raiseEx);
 
-                if(file != null)
+                if (file != null)
                     fileManager.AddParsedFile(path, file);
 
                 return file;
             }
         }
-        
+
         public static object GetParsedFileFromGame(string path, Xv2FileIO fileIO, bool onlyFromCpk, bool raiseEx = true)
         {
-
             //Special case: prebaked.xml
             if (path.Equals(PrebakedFile.PATH, StringComparison.OrdinalIgnoreCase))
             {
@@ -1895,10 +2151,29 @@ namespace LB_Mod_Installer.Installer
                 return null;
             }
 
-            //Special case: chara slots file
-            if(path.Equals(CharaSlotsFile.FILE_NAME_BIN, StringComparison.OrdinalIgnoreCase))
+            //Special cases:
+            //Chara slot file (.x2s)
+            if (path.Equals(CharaSlotsFile.FILE_NAME_BIN, StringComparison.OrdinalIgnoreCase))
             {
                 return CharaSlotsFile.Load(fileIO.GetFileFromGame(path, false, false));
+            }
+
+            //Stage slot file (.x2s)
+            if (path.Equals(StageSlotsFile.FILE_NAME_BIN, StringComparison.OrdinalIgnoreCase))
+            {
+                return StageSlotsFile.Load(fileIO.GetFileFromGame(path, false, false));
+            }
+
+            //Stage def file 
+            if (path.Equals(StageDefFile.PATH, StringComparison.OrdinalIgnoreCase))
+            {
+                if (!fileIO.FileExists(path))
+                    throw new FileNotFoundException($"Could not find \"{StageDefFile.PATH}\". This file must exist before install - to create it simply run xv2ins.exe once (the X2M installer).");
+
+                StageDefFile stageFile = StageDefFile.Load(fileIO.PathInGameDir(path));
+
+
+                return stageFile;
             }
 
             switch (Path.GetExtension(path))
@@ -1977,6 +2252,12 @@ namespace LB_Mod_Installer.Installer
                     return OCO_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".qml":
                     return QML_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".qbt":
+                    return QBT_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".qsl":
+                    return QSL_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".qed":
+                    return QED_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".bcm":
                     return BCM_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".qsf":
@@ -1991,9 +2272,15 @@ namespace LB_Mod_Installer.Installer
         public static byte[] GetBytesFromParsedFile(string path, object data)
         {
             //Special case: prebaked.xml
-            if(path.Equals(PrebakedFile.PATH, StringComparison.OrdinalIgnoreCase))
+            if (path.Equals(PrebakedFile.PATH, StringComparison.OrdinalIgnoreCase))
             {
                 return ((PrebakedFile)data).SaveToBytes();
+            }
+
+            //Special case: stage_def.xml
+            if (path.Equals(StageDefFile.PATH, StringComparison.OrdinalIgnoreCase))
+            {
+                return ((StageDefFile)data).SaveToBytes();
             }
 
             switch (Path.GetExtension(path))
@@ -2059,13 +2346,26 @@ namespace LB_Mod_Installer.Installer
                 case ".cst":
                     return ((CST_File)data).SaveToBytes();
                 case ".x2s":
-                    return ((CharaSlotsFile)data).SaveToBytes();
+                    {
+                        if (data is CharaSlotsFile charaSlotsFile)
+                            return charaSlotsFile.SaveToBytes();
+                        else if (data is StageSlotsFile stageSlotsFile)
+                            return stageSlotsFile.SaveToBytes();
+
+                        goto default;
+                    }
                 case ".ocs":
                     return ((OCS_File)data).SaveToBytes();
                 case ".oco":
                     return ((OCO_File)data).SaveToBytes();
                 case ".qml":
                     return ((QML_File)data).SaveToBytes();
+                case ".qbt":
+                    return ((QBT_File)data).SaveToBytes();
+                case ".qsl":
+                    return ((QSL_File)data).SaveToBytes();
+                case ".qed":
+                    return ((QED_File)data).SaveToBytes();
                 case ".bcm":
                     return ((BCM_File)data).SaveToBytes();
                 case ".qsf":
@@ -2094,18 +2394,18 @@ namespace LB_Mod_Installer.Installer
         //UI
         private void SetProgressBarSteps()
         {
-            Parent.Dispatcher.Invoke((Action)(() =>
+            Parent.Dispatcher.Invoke((System.Action)(() =>
             {
                 Parent.ProgressBar_Main.Maximum = Files.Count + ((useJungle1) ? 1 : 0) + ((useJungle2) ? 1 : 0);
                 Parent.ProgressBar_Main.Value = 0;
             }));
         }
-        
+
         private void UpdateProgessBarText(string text, bool advanceProgress = true)
         {
-            Parent.Dispatcher.BeginInvoke((Action)(() =>
+            Parent.Dispatcher.BeginInvoke((System.Action)(() =>
             {
-                if(advanceProgress)
+                if (advanceProgress)
                     Parent.ProgressBar_Main.Value++;
 
                 Parent.ProgressBar_Label.Content = text;

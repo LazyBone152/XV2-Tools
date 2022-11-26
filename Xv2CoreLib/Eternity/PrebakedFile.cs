@@ -96,6 +96,11 @@ namespace Xv2CoreLib.Eternity
         {
             AutoBattlePortraits = HexConverter.ReadInt32Array(XML_AutoBattlePortraitsString);
             AnyDualSkillList = HexConverter.ReadInt32Array(XML_AnyDualSkillListString);
+
+            //if (CusAuras == null) CusAuras = new List<CusAuraData>();
+            if (PreBakedAliases == null) PreBakedAliases = new List<PreBakedAlias>();
+            if (BodyShapes == null) BodyShapes = new List<PrebakedBodyShape>();
+            if (Ozarus == null) Ozarus = new List<string>();
         }
 
         //Save:

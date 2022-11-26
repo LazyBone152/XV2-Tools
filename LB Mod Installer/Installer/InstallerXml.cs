@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using YAXLib;
+using static Xv2CoreLib.CUS.CUS_File;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -1051,6 +1052,15 @@ namespace LB_Mod_Installer.Installer
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = "True")]
         public string IsEnabled { get; set; }
 
+        //SkillDir
+        [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = SkillType.NotSet)]
+        public SkillType SkillType { get; set; }
+        [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = -1)]
+        public string SkillID { get; set; }
+
+
         public FileType GetFileType()
         {
             if (Type == FileType.Binding) return Type;
@@ -1105,7 +1115,8 @@ namespace LB_Mod_Installer.Installer
         CopyDir,
         VfxPackage,
         AudioPackage,
-        Binding
+        Binding,
+        SkillDir
     }
 
     //Localisation

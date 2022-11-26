@@ -18,7 +18,7 @@ namespace Xv2CoreLib.MSG
         [YAXAttributeForClass]
         public bool unicode_msg { get; set; }
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Msg_Entry")]
-        public List<MSG_Entry> MSG_Entries { get; set; }
+        public List<MSG_Entry> MSG_Entries { get; set; } = new List<MSG_Entry>();
 
         public byte[] SaveToBytes()
         {
@@ -38,7 +38,8 @@ namespace Xv2CoreLib.MSG
         /// <summary>
         /// Check whether a entry name already exists in the file.
         /// </summary>
-        public bool nameExists(string name) {
+        public bool nameExists(string name) 
+        {
             if (MSG_Entries != null) {
                 for (int i = 0; i < MSG_Entries.Count(); i++)
                 {

@@ -28,7 +28,7 @@ namespace Xv2CoreLib.BSA
         Skill_SE = 3
         //Chara_VOX = 2 and Skill_VOX = 4?
     }
-    
+
     public enum Switch
     {
         On = 0,
@@ -75,9 +75,9 @@ namespace Xv2CoreLib.BSA
 
         public void AddEntry(int id, BSA_Entry entry)
         {
-            for(int i = 0; i < BSA_Entries.Count; i++)
+            for (int i = 0; i < BSA_Entries.Count; i++)
             {
-                if(int.Parse(BSA_Entries[i].Index) == id)
+                if (int.Parse(BSA_Entries[i].Index) == id)
                 {
                     BSA_Entries[i] = entry;
                     return;
@@ -133,6 +133,39 @@ namespace Xv2CoreLib.BSA
             }
         }
         #endregion
+
+        public void ChangeNeutralSkillId(ushort newId)
+        {
+            foreach (BSA_Entry entry in BSA_Entries)
+            {
+                if (entry.SubEntries?.CollisionEntries != null)
+                {
+                    foreach (var collision in entry.SubEntries.CollisionEntries)
+                    {
+                        if (collision.SkillID == 0xBACA)
+                            collision.SkillID = newId;
+                    }
+                }
+
+                if(entry.Type6 != null)
+                {
+                    foreach(var effect in entry.Type6)
+                    {
+                        if (effect.SkillID == 0xBACA)
+                            effect.SkillID = newId;
+                    }
+                }
+
+                if (entry.Type12 != null)
+                {
+                    foreach (var type12 in entry.Type12)
+                    {
+                        if (type12.SkillID == 0xBACA)
+                            type12.SkillID = newId;
+                    }
+                }
+            }
+        }
     }
 
     [YAXSerializeAs("BSA_Entry")]
@@ -316,7 +349,7 @@ namespace Xv2CoreLib.BSA
                 }
             }
         }
-        
+
         private void InitBsaLists()
         {
             if (Type0 == null)
@@ -358,7 +391,7 @@ namespace Xv2CoreLib.BSA
         }
 
         #endregion
-        
+
     }
 
     [YAXSerializeAs("AfterEffects")]
@@ -423,7 +456,7 @@ namespace Xv2CoreLib.BSA
 
             return types;
         }
-        
+
     }
 
     [YAXSerializeAs("Expiration")]
@@ -443,7 +476,7 @@ namespace Xv2CoreLib.BSA
         [YAXSerializeAs("value")]
         public ushort I_06 { get; set; }
     }
-    
+
     //Types
     [YAXSerializeAs("BsaEntryPassing")]
     [BindingSubClass]
@@ -805,7 +838,7 @@ namespace Xv2CoreLib.BSA
 
             return types;
         }
-        
+
     }
 
     [YAXSerializeAs("Sound")]
@@ -882,10 +915,10 @@ namespace Xv2CoreLib.BSA
         public float F_00 { get; set; }
         [YAXAttributeFor("EepkType")]
         [YAXSerializeAs("value")]
-        public EepkType I_04 { get; set; }
+        public EepkType EepkType { get; set; }
         [YAXAttributeFor("Skill_ID")]
         [YAXSerializeAs("value")]
-        public int I_08 { get; set; }
+        public int SkillID { get; set; }
         [YAXAttributeFor("I_12")]
         [YAXSerializeAs("value")]
         public int I_12 { get; set; } //Effect ID or something?

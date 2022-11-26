@@ -137,14 +137,14 @@ namespace Xv2CoreLib
             public ulong? Unsigned { get; set; }
         }
     }
-    
+
     public static class ArrayConvert
     {
         public static List<string> ConvertToStringList(List<int> list)
         {
             List<string> stringList = new List<string>();
 
-            foreach(var value in list)
+            foreach (var value in list)
             {
                 stringList.Add(value.ToString());
             }
@@ -163,7 +163,7 @@ namespace Xv2CoreLib
 
             return convertedList;
         }
-    
+
         public static List<int> ConvertToIntList(List<ushort> list)
         {
             List<int> newList = new List<int>();
@@ -194,9 +194,9 @@ namespace Xv2CoreLib
         {
             ASCII,
             UTF8,
-            Unicode 
+            Unicode
         }
-        
+
         /// <summary>
         /// Search for a string at the inputted index and return it. Supports ASCII and UTF8 encoding as well as fixed length strings and null terminated ones.
         /// </summary>
@@ -225,7 +225,7 @@ namespace Xv2CoreLib
                 }
             }
 
-            if(maxSize == 0)
+            if (maxSize == 0)
             {
                 return (useNullText) ? "NULL" : "";
             }
@@ -245,7 +245,7 @@ namespace Xv2CoreLib
                 throw new Exception("GetString: Unsupported EncodingType = " + encodingType);
             }
         }
-        
+
         /// <summary>
         /// Search for a string at the inputted index and return it. Supports ASCII and UTF8 encoding as well as fixed length strings and null terminated ones.
         /// </summary>
@@ -296,12 +296,12 @@ namespace Xv2CoreLib
                 //throw new Exception("GetString: Unsupported EncodingType = " + encodingType);
             }
         }
-        
+
         private static int GetStringSize(byte[] bytes, int index, bool unicode = false)
         {
             if (unicode)
             {
-                for(int i = index; i < bytes.Length; i += 2)
+                for (int i = index; i < bytes.Length; i += 2)
                 {
                     if (i >= bytes.Length) break;
 
@@ -319,7 +319,7 @@ namespace Xv2CoreLib
                     if (bytes[i] == 0)
                     {
                         return i - index;
-                        
+
                     }
                 }
             }
@@ -344,7 +344,7 @@ namespace Xv2CoreLib
             size += 1; //Null terminator
             return Utils.CalculatePadding(size, blockSize) + size;
         }
-    
+
         public static byte[] WriteFixedSizeString(string str, int maxSize)
         {
             //Trim if too long
@@ -361,7 +361,7 @@ namespace Xv2CoreLib
             return bytes.ToArray();
         }
     }
-    
+
     public static class Utils
     {
         public static int TryParseInt(string value)
@@ -388,7 +388,7 @@ namespace Xv2CoreLib
 
             return false;
         }
-        
+
         public static bool CompareSplitString(string originalString, char splitParam, int index, string compareParam)
         {
             var splitStr = originalString.Split(splitParam);
@@ -408,7 +408,7 @@ namespace Xv2CoreLib
 
             PropertyInfo[] properties = instance.GetType().GetProperties();
 
-            foreach(var prop in properties)
+            foreach (var prop in properties)
             {
                 if ((prop.PropertyType == typeof(string) || prop.PropertyType.IsPrimitive || prop.PropertyType.IsValueType)
                     && (prop.SetMethod != null && prop.GetMethod != null) && !exclusions.Contains(prop.Name))
@@ -585,11 +585,11 @@ namespace Xv2CoreLib
             if (newSize == array.Length) return array;
 
             List<byte> bytes = array.ToList();
-            
-            if(newSize > array.Length)
+
+            if (newSize > array.Length)
             {
                 //Add elements
-                for(int i = 0; i < newSize - array.Length; i++)
+                for (int i = 0; i < newSize - array.Length; i++)
                 {
                     bytes.Add(0);
                 }
@@ -600,7 +600,7 @@ namespace Xv2CoreLib
                 bytes.RemoveRange(newSize, array.Length - newSize);
             }
 
-            if(bytes.Count != newSize) throw new InvalidDataException("ResizeArray: bytes.Count != newSize");
+            if (bytes.Count != newSize) throw new InvalidDataException("ResizeArray: bytes.Count != newSize");
 
             return bytes.ToArray();
         }
@@ -674,19 +674,19 @@ namespace Xv2CoreLib
                 padding += 1;
             }
             return (int)padding;
-            
+
         }
 
         public static byte[] PadBytes(byte[] bytes, int minSize)
         {
-            
+
             if (bytes.Length >= minSize) return bytes;
 
             List<byte> _bytes = bytes.ToList();
 
-            if(_bytes.Count() < minSize)
+            if (_bytes.Count() < minSize)
             {
-                while(_bytes.Count() < minSize)
+                while (_bytes.Count() < minSize)
                 {
                     _bytes.Add(0);
                 }
@@ -702,7 +702,7 @@ namespace Xv2CoreLib
             if (array2 == null && array1 != null) return false;
             if (array1.Length != array2.Length) return false;
 
-            for(int i = 0; i < array1.Length; i++)
+            for (int i = 0; i < array1.Length; i++)
             {
                 if (array1[i] != array2[i]) return false;
             }
@@ -730,7 +730,7 @@ namespace Xv2CoreLib
         {
             byte[] ret = new byte[count];
 
-            for(int i = index; i < index + count; i++)
+            for (int i = index; i < index + count; i++)
             {
                 ret[i - index] = bytes[i];
             }
@@ -868,20 +868,20 @@ namespace Xv2CoreLib
 
         public static List<byte> GetStringBytes(string str, int minSize = -1, int maxSize = -1)
         {
-            if(str == null)
+            if (str == null)
             {
                 str = string.Empty;
             }
             List<byte> strBytes = Encoding.ASCII.GetBytes(str).ToList();
 
-            if(minSize == -1)
+            if (minSize == -1)
             {
                 strBytes.Add(0);
             }
             else
             {
                 int bytesToAdd = minSize - str.Length;
-                if(bytesToAdd > 0)
+                if (bytesToAdd > 0)
                 {
                     strBytes.AddRange(new byte[bytesToAdd]);
                 }
@@ -890,7 +890,7 @@ namespace Xv2CoreLib
                     strBytes.Add(0);
                 }
 
-                if(strBytes.Count > maxSize && maxSize != -1)
+                if (strBytes.Count > maxSize && maxSize != -1)
                 {
                     strBytes.RemoveRange(4, strBytes.Count - 4);
                 }
@@ -899,14 +899,14 @@ namespace Xv2CoreLib
             return strBytes;
         }
 
-        public static string CloneString (string str)
+        public static string CloneString(string str)
         {
             return String.Format("{0}", str);
         }
 
         public static List<int> AddUnique(List<int> _list, int value)
         {
-            if(_list.IndexOf(value) == -1)
+            if (_list.IndexOf(value) == -1)
             {
                 _list.Add(value);
             }
@@ -944,12 +944,12 @@ namespace Xv2CoreLib
                 throw new ArgumentException("bits is either to small or to large (a byte needs 8 bits)");
             }
             byte[] bytes = new byte[byteCount];
-            
+
             bits.CopyTo(bytes, 0);
 
             return bytes;
         }
-        
+
 
 
         /// <summary>
@@ -1028,13 +1028,13 @@ namespace Xv2CoreLib
 
             return ints;
         }
-        
+
         public static int[] ToInt32Array(byte[] bytes, int index, int count)
         {
             int[] ints = new int[count];
-            
 
-            for(int i = 0; i < count * 4; i+=4)
+
+            for (int i = 0; i < count * 4; i += 4)
             {
                 ints[i / 4] = BitConverter.ToInt32(bytes, index + i);
             }
@@ -1080,7 +1080,7 @@ namespace Xv2CoreLib
         {
             return (BitConverter.ToInt32(bytes, index) == 0) ? false : true;
         }
-        
+
         public static float[] ToFloat32Array(byte[] bytes, int index, int count)
         {
             float[] floats = new float[count];
@@ -1099,10 +1099,11 @@ namespace Xv2CoreLib
         /// </summary>=
         public static byte GetBytes(bool _bool)
         {
-            if(_bool == true)
+            if (_bool == true)
             {
                 return 1;
-            } else
+            }
+            else
             {
                 return 0;
             }
@@ -1112,57 +1113,117 @@ namespace Xv2CoreLib
         {
             if (_bool == true)
             {
-                return new byte[4] { 1, 0,0,0};
+                return new byte[4] { 1, 0, 0, 0 };
             }
             else
             {
                 return new byte[4] { 0, 0, 0, 0 };
             }
         }
-        
-        public static byte[] GetBytes(int[] intArray)
+
+        public static byte[] GetBytes(int[] intArray, int fixedSize = -1)
         {
+            if (intArray == null)
+                return new byte[2 * fixedSize];
+
+            if (fixedSize == -1)
+                fixedSize = intArray.Length;
+
             List<byte> bytes = new List<byte>();
 
-            foreach(int i in intArray)
+            for (int i = 0; i < intArray.Length; i++)
             {
-                bytes.AddRange(BitConverter.GetBytes(i));
+                if (i == fixedSize) break;
+                bytes.AddRange(BitConverter.GetBytes(intArray[i]));
+            }
+
+            if (intArray.Length < fixedSize)
+            {
+                for (int i = 0; i < fixedSize - intArray.Length; i++)
+                {
+                    bytes.AddRange(BitConverter.GetBytes((ushort)0));
+                }
             }
 
             return bytes.ToArray();
         }
 
-        public static byte[] GetBytes(float[] intArray)
+        public static byte[] GetBytes(float[] floatArray, int fixedSize = -1)
         {
+            if (floatArray == null)
+                return new byte[2 * fixedSize];
+
+            if (fixedSize == -1)
+                fixedSize = floatArray.Length;
+
             List<byte> bytes = new List<byte>();
 
-            foreach (float i in intArray)
+            for (int i = 0; i < floatArray.Length; i++)
             {
-                bytes.AddRange(BitConverter.GetBytes(i));
+                if (i == fixedSize) break;
+                bytes.AddRange(BitConverter.GetBytes(floatArray[i]));
+            }
+
+            if (floatArray.Length < fixedSize)
+            {
+                for (int i = 0; i < fixedSize - floatArray.Length; i++)
+                {
+                    bytes.AddRange(BitConverter.GetBytes((ushort)0));
+                }
             }
 
             return bytes.ToArray();
         }
 
-        public static byte[] GetBytes(short[] intArray)
+        public static byte[] GetBytes(short[] intArray, int fixedSize = -1)
         {
+            if (intArray == null)
+                return new byte[2 * fixedSize];
+
+            if (fixedSize == -1)
+                fixedSize = intArray.Length;
+
             List<byte> bytes = new List<byte>();
 
-            foreach (short i in intArray)
+            for (int i = 0; i < intArray.Length; i++)
             {
-                bytes.AddRange(BitConverter.GetBytes(i));
+                if (i == fixedSize) break;
+                bytes.AddRange(BitConverter.GetBytes(intArray[i]));
+            }
+
+            if (intArray.Length < fixedSize)
+            {
+                for (int i = 0; i < fixedSize - intArray.Length; i++)
+                {
+                    bytes.AddRange(BitConverter.GetBytes((ushort)0));
+                }
             }
 
             return bytes.ToArray();
         }
 
-        public static byte[] GetBytes(ushort[] intArray)
+        public static byte[] GetBytes(ushort[] intArray, int fixedSize = -1)
         {
+            if (intArray == null)
+                return new byte[2 * fixedSize];
+
+            if (fixedSize == -1)
+                fixedSize = intArray.Length;
+
             List<byte> bytes = new List<byte>();
 
-            foreach (ushort i in intArray)
+            for (int i = 0; i < intArray.Length; i++)
             {
-                bytes.AddRange(BitConverter.GetBytes(i));
+                if (i == fixedSize) break;
+                bytes.AddRange(BitConverter.GetBytes(intArray[i]));
+            }
+
+            if (intArray.Length < fixedSize)
+            {
+                for (int i = 0; i < fixedSize - intArray.Length; i++)
+                {
+                    bytes.AddRange(BitConverter.GetBytes((ushort)0));
+                }
             }
 
             return bytes.ToArray();
@@ -1186,7 +1247,7 @@ namespace Xv2CoreLib
             {
                 string copyPath = (string)fileNames[i].Clone();
                 string destPath = String.Format("{0}/{1}", destDir, Utils.CleanPath(fileNames[i].Remove(0, sourceDir.Count())));
-                
+
                 if (!File.Exists(destPath) || allowOverwrite == true)
                 {
                     File.Copy(copyPath, destPath, true);
@@ -1240,7 +1301,7 @@ namespace Xv2CoreLib
         /// </summary>
         public static int ToInt32(string value)
         {
-            if(value[1] != 'x' || value[0] != '0')
+            if (value[1] != 'x' || value[0] != '0')
             {
                 throw new Exception(String.Format("{0} is not a valid hexadecimal value.", value));
             }
@@ -1274,12 +1335,12 @@ namespace Xv2CoreLib
             string[] splitValue = value.Split('x');
             return byte.Parse(splitValue[1], NumberStyles.HexNumber);
         }
-        
+
         public static string ToSerializedArray(List<int> values)
         {
             StringBuilder str = new StringBuilder();
 
-            for(int i = 0; i < values.Count; i++)
+            for (int i = 0; i < values.Count; i++)
             {
                 str.Append($"{HexConverter.GetHexString(values[i])}");
 
@@ -1323,7 +1384,7 @@ namespace Xv2CoreLib
             BitArray b = (BitArray)bits.Clone();
 
             //Removing unneeded bits
-            for(int i = 0; i < 4; i++)
+            for (int i = 0; i < 4; i++)
             {
                 a[4 + i] = false;
             }
@@ -1344,7 +1405,7 @@ namespace Xv2CoreLib
         /// </summary>
         public static byte GetByte(byte a, byte b, string a_name = "default_a", string b_name = "default_b")
         {
-            if(a > 15)
+            if (a > 15)
             {
                 Console.WriteLine(String.Format("Warning! a uint4 cannot contain a value greater than 15, or less than 0! (attribute name: {0})", a_name));
                 Console.ReadLine();
@@ -1405,7 +1466,7 @@ namespace Xv2CoreLib
         /// </summary>
         public static void ValidateNumericString(string value, string xml_section_name, string xml_attribute_name)
         {
-            if(value.All(Char.IsNumber) == false)
+            if (value.All(Char.IsNumber) == false)
             {
                 throw new Exception(String.Format("\"{0}\" is not a valid parameter for {1} on {2}", value, xml_attribute_name, xml_section_name));
             }
@@ -1419,7 +1480,7 @@ namespace Xv2CoreLib
         {
             throw new Exception(String.Format("\"{0}\" is not a valid parameter for {1} on {2}", value, xml_attribute_name, xml_section_name));
         }
-        
+
         public static void AssertArraySize<T>(T[] array, int size, string xml_section_name, string xml_attribute_name)
         {
             if (array.Count() != size)
@@ -1435,7 +1496,7 @@ namespace Xv2CoreLib
                 throw new Exception(String.Format("Array size mismatch. (XML Element: {2}, XML Attribute: {3})\nExpected = {0}\nFound = {1}", size, array.Count(), xml_section_name, xml_attribute_name));
             }
         }
-        
+
         public static void AssertStringSize(string _str, int size, string xml_section_name, string xml_attribute_name)
         {
             if (_str.Count() > size)
@@ -1494,13 +1555,13 @@ namespace Xv2CoreLib
         /// </summary>
         public static List<byte> WriteFixedLengthString(string _string, int maxLength, string parameterName, List<byte> bytes)
         {
-            if(_string.Length > maxLength)
+            if (_string.Length > maxLength)
             {
-                Console.WriteLine(String.Format("{0} exceeds the maximum allowed length of {1} for parameter {2}", _string, maxLength, parameterName ));
+                Console.WriteLine(String.Format("{0} exceeds the maximum allowed length of {1} for parameter {2}", _string, maxLength, parameterName));
                 Utils.WaitForInputThenQuit();
             }
             bytes.AddRange(Encoding.ASCII.GetBytes(_string));
-            if(maxLength != _string.Length)
+            if (maxLength != _string.Length)
             {
                 bytes.AddRange(new byte[maxLength - _string.Length]);
             }
@@ -1519,14 +1580,14 @@ namespace Xv2CoreLib
 
         public static List<byte> WritePointers(List<Ptr> ptrs, List<byte> bytes)
         {
-            foreach(var ptr in ptrs)
+            foreach (var ptr in ptrs)
             {
                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - ptr.RelativeTo), ptr.Offset);
             }
             return bytes;
         }
     }
-    
+
     public static class TimeHelper
     {
         public static DateTime ToDateTime(ulong time)
@@ -1573,7 +1634,7 @@ namespace Xv2CoreLib
             {
                 return new DateTime(1, 0, 0);
             }
-            
+
         }
 
         public static ulong ToUInt64(DateTime time)
@@ -1610,7 +1671,7 @@ namespace Xv2CoreLib
             timeStr.Append(hour);
             timeStr.Append(minute);
             timeStr.Append(second);
-            
+
             return ulong.Parse(timeStr.ToString());
         }
     }

@@ -4,12 +4,15 @@ using System.Linq;
 using System.Xml.Linq;
 using System.Collections.Generic;
 using YAXLib;
+using System.Text;
 
 namespace Xv2CoreLib.Eternity
 {
     [YAXSerializeAs("Xv2StageDef")]
     public class StageDefFile
     {
+        public const string PATH = "xv2_stage_def.xml";
+
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Stage")]
         public List<StageDef> Stages { get; set; }
 
@@ -19,6 +22,11 @@ namespace Xv2CoreLib.Eternity
         {
             string text = File.ReadAllText(path);
             return Parse(text);
+        }
+
+        public static StageDefFile Load(byte[] bytes)
+        {
+            return Parse(Encoding.ASCII.GetString(bytes));
         }
 
         private static StageDefFile Parse(string xmlText)
@@ -112,9 +120,16 @@ namespace Xv2CoreLib.Eternity
         [YAXAttributeForClass]
         [YAXSerializeAs("idx")]
         public uint Index { get; set; }
+        [YAXDontSerialize]
+        public ushort SSID { get; set; } //Really, a byte
         [YAXAttributeForClass]
         [YAXSerializeAs("ssid")]
-        public byte SSID { get; set; }
+        [YAXDontSerializeIfNull]
+        public string SSID_XmlBinding
+        {
+            get => SSID != ushort.MaxValue ? SSID.ToString() : null;
+            set => SSID = value != null ? (ushort)Utils.TryParseInt(value) : ushort.MaxValue;
+        }
 
         [YAXAttributeFor("BASE_DIR")]
         [YAXSerializeAs("value")]

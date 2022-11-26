@@ -42,6 +42,7 @@ namespace Xv2CoreLib.BDM
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BDM_Entry")]
         public List<BDM_Entry> BDM_Entries { get; set; } = new List<BDM_Entry>();
 
+        #region LoadSave
         public byte[] SaveToBytes()
         {
             return new Deserializer(this).bytes.ToArray();
@@ -63,7 +64,6 @@ namespace Xv2CoreLib.BDM
 
             return bdm;
         }
-
 
         public static BDM_File Load(string path, bool convertToType0 = false)
         {
@@ -95,6 +95,9 @@ namespace Xv2CoreLib.BDM
             new Deserializer(this, path);
         }
 
+        #endregion
+
+        #region Helpers
         public void AddEntry(int id, BDM_Entry entry)
         {
             for (int i = 0; i < BDM_Entries.Count; i++)
@@ -116,6 +119,98 @@ namespace Xv2CoreLib.BDM
             return entry.ID;
         }
 
+        public int IndexOf(int ID)
+        {
+            if (BDM_Entries != null)
+            {
+                for (int i = 0; i < BDM_Entries.Count; i++)
+                {
+                    if (BDM_Entries[i].ID == ID)
+                    {
+                        return i;
+                    }
+                }
+            }
+
+            return -1;
+        }
+
+        public BDM_Entry GetEntryClone(int id)
+        {
+            if (BDM_Entries == null) throw new Exception("BDM_Entries was null.");
+
+            foreach (var entry in BDM_Entries)
+            {
+                if (entry.ID == id) return entry.CloneType0();
+            }
+
+            throw new Exception("Could not find the BDM_Entry with ID " + id);
+        }
+
+        public int NextID(int minID = 500)
+        {
+            int id = minID;
+
+            while (IndexOf(id) != -1)
+            {
+                id++;
+            }
+
+            return id;
+        }
+
+        public BDM_Entry GetEntry(int id)
+        {
+            int idx = IndexOf(id);
+            if (idx == -1) throw new Exception("Could not find a BDM_Entry the id " + id);
+            return BDM_Entries[idx];
+        }
+
+        public bool IsNull()
+        {
+            return (BDM_Entries.Count == 0);
+        }
+
+        public static BDM_File DefaultBdmFile()
+        {
+            return new BDM_File()
+            {
+                BDM_Type = BDM_Type.XV2_0,
+                BDM_Entries = new List<BDM_Entry>()
+            };
+        }
+
+        public void ChangeNeutralSkillId(ushort newId)
+        {
+            foreach (var entry in BDM_Entries)
+            {
+                foreach(var subEntry in entry.Type0Entries)
+                {
+                    if (subEntry.Effect1_SkillID == 0xBACA)
+                        subEntry.Effect1_SkillID = newId;
+
+                    if (subEntry.Effect2_SkillID == 0xBACA)
+                        subEntry.Effect2_SkillID = newId;
+
+                    if (subEntry.Effect3_SkillID == 0xBACA)
+                        subEntry.Effect3_SkillID = newId;
+                }
+            }
+        }
+
+        #endregion
+
+        #region Convert
+        private static ushort DamageTypeXv1ToXv2(ushort damageType)
+        {
+            int _type = damageType;
+
+            if (damageType == 6) _type += 1;
+            if (damageType >= 7) _type += 2;
+
+            return (ushort)_type;
+        }
+
         public void ConvertToXv2()
         {
             if (BDM_Type == BDM_Type.XV1)
@@ -130,16 +225,16 @@ namespace Xv2CoreLib.BDM
         /// </summary>
         public void ConvertToXv2_0()
         {
-            if(BDM_Type == BDM_Type.XV2_1)
+            if (BDM_Type == BDM_Type.XV2_1)
             {
                 List<BDM_Entry> newEntries = new List<BDM_Entry>();
 
-                foreach(var entry in BDM_Entries)
+                foreach (var entry in BDM_Entries)
                 {
                     int idx = newEntries.Count;
                     newEntries.Add(new BDM_Entry() { Type0Entries = new List<Type0SubEntry>(), ID = entry.ID });
 
-                    foreach(var subEntry in entry.Type1Entries)
+                    foreach (var subEntry in entry.Type1Entries)
                     {
                         newEntries[idx].Type0Entries.Add(new Type0SubEntry()
                         {
@@ -211,7 +306,7 @@ namespace Xv2CoreLib.BDM
                 {
                     int idx = newEntries.Count;
                     newEntries.Add(new BDM_Entry() { Type0Entries = new List<Type0SubEntry>(), ID = entry.ID });
-                    
+
                     foreach (var subEntry in entry.Type1Entries)
                     {
                         newEntries[idx].Type0Entries.Add(new Type0SubEntry()
@@ -268,7 +363,7 @@ namespace Xv2CoreLib.BDM
                     newEntries[idx].Type0Entries.Add(newEntries[idx].Type0Entries[0].Clone(8));
                     newEntries[idx].Type0Entries.Add(newEntries[idx].Type0Entries[6].Clone(9));
                     newEntries[idx].Type0Entries[6] = newEntries[idx].Type0Entries[0].Clone(6);
-                    
+
                 }
 
 
@@ -297,7 +392,7 @@ namespace Xv2CoreLib.BDM
                     {
                         int skillID1 = subEntry.I_16;
                         int skillID2 = subEntry.I_24;
-                        if(skillID != -1)
+                        if (skillID != -1)
                         {
                             if (subEntry.I_20 >= 5 && subEntry.I_20 < 10)
                             {
@@ -308,8 +403,8 @@ namespace Xv2CoreLib.BDM
                                 skillID2 = skillID;
                             }
                         }
-                        
-                        
+
+
                         newEntries[idx].Type0Entries.Add(new Type0SubEntry()
                         {
                             Index = subEntry.Index,
@@ -376,84 +471,15 @@ namespace Xv2CoreLib.BDM
                 throw new Exception("BDM file was not in Xenoverse 1 format.");
             }
         }
-        
-        public int IndexOf(int ID)
-        {
-            if(BDM_Entries != null)
-            {
-                for(int i = 0; i < BDM_Entries.Count; i++)
-                {
-                    if(BDM_Entries[i].ID == ID)
-                    {
-                        return i;
-                    }
-                }
-            }
 
-            return -1;
-        }
-
-        private static ushort DamageTypeXv1ToXv2(ushort damageType)
-        {
-            int _type = damageType;
-
-            if (damageType == 6) _type += 1;
-            if (damageType >= 7) _type += 2;
-
-            return (ushort)_type;
-        }
-        
-        public BDM_Entry GetEntryClone(int id)
-        {
-            if (BDM_Entries == null) throw new Exception("BDM_Entries was null.");
-
-            foreach(var entry in BDM_Entries)
-            {
-                if (entry.ID == id) return entry.CloneType0();
-            }
-
-            throw new Exception("Could not find the BDM_Entry with ID " + id);
-        }
-
-        public int NextID(int minID = 500)
-        {
-            int id = minID;
-
-            while(IndexOf(id) != -1)
-            {
-                id++;
-            }
-
-            return id;
-        }
-        
-        public BDM_Entry GetEntry(int id)
-        {
-            int idx = IndexOf(id);
-            if (idx == -1) throw new Exception("Could not find a BDM_Entry the id " + id);
-            return BDM_Entries[idx];
-        }
-
-        public bool IsNull()
-        {
-            return (BDM_Entries.Count == 0);
-        }
-    
-        public static BDM_File DefaultBdmFile()
-        {
-            return new BDM_File()
-            {
-                BDM_Type = BDM_Type.XV2_0,
-                BDM_Entries = new List<BDM_Entry>()
-            };
-        }
+        #endregion
     }
 
     [Serializable]
     public class BDM_Entry : IInstallable, INotifyPropertyChanged
     {
         #region INotifyPropChanged
-        [field:NonSerialized]
+        [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void NotifyPropertyChanged(String propertyName = "")
@@ -475,7 +501,7 @@ namespace Xv2CoreLib.BDM
             get => Utils.TryParseInt(Index);
             set => Index = value.ToString();
         }
-        
+
         #endregion
 
         [YAXAttributeForClass]
@@ -500,7 +526,7 @@ namespace Xv2CoreLib.BDM
             if (Type0Entries == null) throw new Exception("Cannot clone BDM Entry as it is not Type0.");
             List<Type0SubEntry> subs = new List<Type0SubEntry>();
 
-            foreach(var sub in Type0Entries)
+            foreach (var sub in Type0Entries)
             {
                 subs.Add(sub.Clone());
             }
@@ -523,10 +549,42 @@ namespace Xv2CoreLib.BDM
         [YAXAttributeFor("Damage")]
         [YAXSerializeAs("Type")]
         public DamageType DamageType { get; set; }
+        [YAXDontSerialize]
+        public SecondaryTypeFlags DamageSecondaryType { get; set; }
+
         [YAXAttributeFor("Damage")]
         [YAXSerializeAs("Secondary_Type")]
         [YAXHexValue]
-        public SecondaryTypeFlags DamageSecondaryType { get; set; }
+        public string DamageSecondaryType_XmlBinding
+        {
+            get => DamageSecondaryType.ToString();
+            set
+            {
+                if (value == null) return;
+                SecondaryTypeFlags val;
+                if (Enum.TryParse(value, out val))
+                {
+                    DamageSecondaryType = val;
+                }
+                else
+                {
+                    ushort intVal;
+                    if (ushort.TryParse(value, out intVal))
+                    {
+                        DamageSecondaryType = (SecondaryTypeFlags)intVal;
+                    }
+                    else if (value.Contains("0x"))
+                    {
+                        DamageSecondaryType = (SecondaryTypeFlags)HexConverter.ToInt16(value);
+                    }
+                    else
+                    {
+                        throw new InvalidDataException(string.Format("BDM: Unknown value for \"Secondary_Type\" = \"{0}\"", value));
+                    }
+                }
+            }
+        }
+
         [YAXAttributeFor("Damage")]
         [YAXSerializeAs("Amount")]
         public ushort DamageAmount { get; set; }
@@ -566,7 +624,7 @@ namespace Xv2CoreLib.BDM
         [YAXAttributeFor("Effect_3")]
         [YAXSerializeAs("EepkType")]
         public EepkType Effect3_EepkType { get; set; }
-        
+
 
 
         [YAXAttributeFor("Pushback")]
@@ -700,7 +758,7 @@ namespace Xv2CoreLib.BDM
 
         public Type0SubEntry Clone(int index = -1)
         {
-            if(index == -1)
+            if (index == -1)
             {
                 index = Index;
             }
@@ -764,7 +822,7 @@ namespace Xv2CoreLib.BDM
         }
 
     }
-    
+
 
     [Serializable]
     public class Type1SubEntry
@@ -919,7 +977,7 @@ namespace Xv2CoreLib.BDM
 
         public Type1SubEntry Clone(int index = -1)
         {
-            if(index == -1)
+            if (index == -1)
             {
                 index = Index;
             }
@@ -947,7 +1005,7 @@ namespace Xv2CoreLib.BDM
                 I_40 = I_40,
                 I_42 = I_42,
                 I_44 = I_44,
-                I_46 =I_46,
+                I_46 = I_46,
                 I_48 = I_48,
                 I_50 = I_50,
                 I_68 = I_68,

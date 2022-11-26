@@ -46,9 +46,9 @@ namespace Xv2CoreLib.CUS
 
         public int GetIndexOf(int CharacterID, int CostumeID, int ModelPreset)
         {
-            for(int i = 0; i < Skillsets.Count(); i++)
+            for (int i = 0; i < Skillsets.Count(); i++)
             {
-                if(int.Parse(Skillsets[i].I_00) == CharacterID && Skillsets[i].I_04 == CostumeID && Skillsets[i].I_26 == (ushort)ModelPreset)
+                if (int.Parse(Skillsets[i].I_00) == CharacterID && Skillsets[i].I_04 == CostumeID && Skillsets[i].I_26 == (ushort)ModelPreset)
                 {
                     return i;
                 }
@@ -91,63 +91,6 @@ namespace Xv2CoreLib.CUS
             }
         }
 
-        /// <summary>
-        /// (Deprecrated?) Converts a Skill ShortName into it's actual ID, if it is installed in the system. If it is not installed, then -1 will be returned. If "SkillID" is already an ID, then it will simply be returned.
-        /// ShortNames should be formatted like this "#GOK" (minus the quotes)
-        /// </summary>
-        public string GetRealSkillId(string SkillID, SkillType _SkillType)
-        {
-            //Obsolete function
-            if(SkillID[0] == '#')
-            {
-                SkillID = SkillID.Remove(0, 1);
-            }
-            else
-            {
-                return SkillID;
-            }
-
-            List<Skill> SkillList = null;
-            switch (_SkillType)
-            {
-                case SkillType.Super:
-                    SkillList = SuperSkills;
-                    break;
-                case SkillType.Ultimate:
-                    SkillList = UltimateSkills;
-                    break;
-                case SkillType.Evasive:
-                    SkillList = EvasiveSkills;
-                    break;
-                case SkillType.Blast:
-                    SkillList = BlastSkills;
-                    break;
-                case SkillType.Awoken:
-                    SkillList = AwokenSkills;
-                    break;
-            }
-
-            foreach(var e in SkillList)
-            {
-                if(e.ShortName == SkillID)
-                {
-                    return e.ID1.ToString();
-                }
-            }
-
-
-            return (UInt16.MaxValue).ToString();
-        }
-
-        public enum SkillType
-        {
-            Super = 0,
-            Ultimate = 1,
-            Evasive = 2,
-            Blast = 3,
-            Awoken = 5,
-        }
-
         public void SaveBinary(string path)
         {
             if (!Directory.Exists(Path.GetDirectoryName(path)))
@@ -156,7 +99,7 @@ namespace Xv2CoreLib.CUS
             }
             new Deserializer(this, path);
         }
-        
+
         public bool SkillExists(int id1, SkillType type)
         {
             List<Skill> skills = null;
@@ -180,7 +123,7 @@ namespace Xv2CoreLib.CUS
                     break;
             }
 
-            foreach(var skill in skills)
+            foreach (var skill in skills)
             {
                 if (skill.ID1 == id1) return true;
             }
@@ -207,6 +150,11 @@ namespace Xv2CoreLib.CUS
             }
         }
 
+        public Skill GetSkill(int id2, SkillType type)
+        {
+            List<Skill> skills = GetSkills(type);
+            return skills?.FirstOrDefault(x => x.ID2 == id2);
+        }
 
         #region Helper
 
@@ -228,7 +176,7 @@ namespace Xv2CoreLib.CUS
 
         private bool IsPupEntryUsed(List<Skill> skills, int pupId, int pupCount, params int[] cusId1Exclusions)
         {
-            foreach(var skill in skills.Where(x => !cusId1Exclusions.Contains(x.ID1)))
+            foreach (var skill in skills.Where(x => !cusId1Exclusions.Contains(x.ID1)))
             {
                 if (skill.PUP == ushort.MaxValue) continue;
                 int min = skill.PUP;
@@ -245,7 +193,7 @@ namespace Xv2CoreLib.CUS
 
         public static int ConvertToID1(int ID2, SkillType type)
         {
-            switch (type) 
+            switch (type)
             {
                 case SkillType.Ultimate:
                     return ID2 + 5000;
@@ -281,20 +229,32 @@ namespace Xv2CoreLib.CUS
 
         }
 
-        public bool IsSkillIdRangeUsed(CMS_Entry cmsEntry, SkillType skillType)
+        public static SkillType GetSkillTypeFromID1(int ID1)
+        {
+            if (ID1 > 30000) return SkillType.NotSet;
+            if (ID1 > 25000) return SkillType.Awoken;
+            if (ID1 > 20000) return SkillType.Blast;
+            if (ID1 > 10000) return SkillType.Evasive;
+            if (ID1 > 5000) return SkillType.Ultimate;
+            if (ID1 > 0) return SkillType.Super;
+
+            return SkillType.NotSet;
+        }
+
+        public bool IsSkillIdRangeUsed(CMS_Entry cmsEntry, SkillType skillType, List<int> assignedIds = null)
         {
             int id = cmsEntry.ID * 10;
 
             List<Skill> skills = GetSkills(skillType);
 
-            for(int i = 0; i < 10; i++)
+            for (int i = 0; i < 10; i++)
             {
-                if (!skills.Any(x => x.ID2 == id + i)) return false;
+                if (!skills.Any(x => x.ID2 == id + i) || assignedIds?.Any(x => x == id + i) == true) return false;
             }
 
             return true;
-        } 
-        
+        }
+
         /// <summary>
         /// Assigns a new skill ID (ID2), parented to the assigned CMS entry. If no free IDs are available, -1 will be returned.
         /// </summary>
@@ -306,7 +266,7 @@ namespace Xv2CoreLib.CUS
             int min = id;
             int max = id + 10;
 
-            for(int i = 0; i < 10; i++)
+            for (int i = 0; i < 10; i++)
             {
                 if (skills.FirstOrDefault(x => x.ID2 == id) == null) return id;
                 id++;
@@ -317,7 +277,7 @@ namespace Xv2CoreLib.CUS
 
         public static byte GetCusVersion(int skillSectionOffset, int skillCount, int nextSectionOffset)
         {
-            switch((nextSectionOffset - skillSectionOffset) / skillCount)
+            switch ((nextSectionOffset - skillSectionOffset) / skillCount)
             {
                 case 68:
                     return 0;
@@ -327,7 +287,36 @@ namespace Xv2CoreLib.CUS
                     throw new InvalidDataException("CUS file version not supported.");
             }
         }
+
+        public static string GetSkillDir(SkillType skillType)
+        {
+            switch (skillType)
+            {
+                case SkillType.Super:
+                    return "skill/SPA";
+                case SkillType.Ultimate:
+                    return "skill/ULT";
+                case SkillType.Evasive:
+                    return "skill/ESC";
+                case SkillType.Blast:
+                    return "skill/BLT";
+                case SkillType.Awoken:
+                    return "skill/MET";
+                default:
+                    return null;
+            }
+        }
         #endregion
+
+        public enum SkillType
+        {
+            Super = 0,
+            Ultimate = 1,
+            Evasive = 2,
+            Blast = 3,
+            Awoken = 5,
+            NotSet = -1
+        }
     }
 
     public class Skillset : IInstallable
@@ -339,7 +328,7 @@ namespace Xv2CoreLib.CUS
         {
             get
             {
-                return String.Format("{0}_{1}_{2}",I_00, I_04, I_26);
+                return String.Format("{0}_{1}_{2}", I_00, I_04, I_26);
             }
             set
             {
@@ -414,7 +403,7 @@ namespace Xv2CoreLib.CUS
             AfterBcm = 0x4000,
             Unk15 = 0x8000
         }
-        
+
         [Flags]
         public enum Type : byte
         {
@@ -438,7 +427,7 @@ namespace Xv2CoreLib.CUS
             get { return ID1.ToString(); }
             set { ID1 = ushort.Parse(value); }
         }
-        
+
         [YAXDontSerialize]
         public Type FilesLoadedFlags2
         {
@@ -448,13 +437,13 @@ namespace Xv2CoreLib.CUS
             }
             set
             {
-                if((byte)value != I_13)
+                if ((byte)value != I_13)
                 {
                     I_13 = (byte)value;
                 }
             }
         }
-        
+
 
         [YAXDontSerialize]
         public bool HasEanPath { get { return !(EanPath == "NULL" || string.IsNullOrWhiteSpace(EanPath)); } }
@@ -554,7 +543,7 @@ namespace Xv2CoreLib.CUS
         [YAXHexValue]
         [YAXAttributeFor("I_68")]
         [YAXSerializeAs("value")]
-        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0xffffff00)]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (uint)0xffffff00)]
         public uint I_68 { get; set; } = 0xffffff00;
 
 

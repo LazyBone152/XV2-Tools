@@ -607,8 +607,8 @@ namespace Xv2CoreLib.BSA
                 for (int i = 0; i < type.Count; i++)
                 {
                     bytes.AddRange(BitConverter.GetBytes(type[i].F_00));
-                    bytes.AddRange(BitConverter.GetBytes((int)type[i].I_04));
-                    bytes.AddRange(BitConverter.GetBytes(type[i].I_08));
+                    bytes.AddRange(BitConverter.GetBytes((int)type[i].EepkType));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].SkillID));
                     bytes.AddRange(BitConverter.GetBytes(type[i].I_12));
                     bytes.AddRange(BitConverter.GetBytes(type[i].F_16));
                 }

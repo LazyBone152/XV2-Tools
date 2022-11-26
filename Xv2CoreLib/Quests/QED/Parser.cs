@@ -10,24 +10,26 @@ namespace Xv2CoreLib.QED
     {
         string saveLocation;
         byte[] rawBytes;
-        QED_File qed_File = new QED_File();
-        bool writeXml = false;
-        bool isFinished = false;
+        public QED_File QedFile { get; private set; } = new QED_File();
 
         public Parser(string location, bool _writeXml)
         {
-            writeXml = _writeXml;
             rawBytes = File.ReadAllBytes(location);
             saveLocation = location;
             ParseFile();
-            isFinished = true;
-            if (writeXml == true) 
+            if (_writeXml == true)
             {
                 WriteXmlFile();
             }
         }
 
-        void ParseFile() 
+        public Parser(byte[] bytes)
+        {
+            rawBytes = bytes;
+            ParseFile();
+        }
+
+        private void ParseFile()
         {
             if (BitConverter.ToInt32(rawBytes, 8) == 0)
             {
@@ -43,96 +45,110 @@ namespace Xv2CoreLib.QED
             ParseEvents2(event2Offset, event2Count);
         }
 
-        void WriteXmlFile()
+        private void WriteXmlFile()
         {
             YAXSerializer serializer = new YAXSerializer(typeof(QED_File));
-            serializer.SerializeToFile(qed_File, saveLocation + ".xml");
+            serializer.SerializeToFile(QedFile, saveLocation + ".xml");
         }
 
 
-        void ParseEvents2 (int offset, int count) {
+        private void ParseEvents2(int offset, int count)
+        {
             int eventIndex = 0; //index of Event object list
             int previousIndex = -532532;
-            for (int i = 0; i < count; i++) {
+            for (int i = 0; i < count; i++)
+            {
                 int index = BitConverter.ToInt16(rawBytes, offset + 4);
                 int subIndex = BitConverter.ToInt16(rawBytes, offset + 2);
-                
-                if (qed_File.Events[eventIndex].Index == index && qed_File.Events[eventIndex].SubIndex == subIndex)
+
+                if (QedFile.Events[eventIndex].ID == index && QedFile.Events[eventIndex].SubIndex == subIndex)
                 {
                     //same index. Put these Actions in this Event
-                    if (qed_File.Events[eventIndex].Actions == null) {
-                        qed_File.Events[eventIndex].Actions = new List<Action>();
+                    if (QedFile.Events[eventIndex].Actions == null)
+                    {
+                        QedFile.Events[eventIndex].Actions = new List<Action>();
                     }
-                    qed_File.Events[eventIndex].Actions.Add(GetAction(offset));
+                    QedFile.Events[eventIndex].Actions.Add(GetAction(offset));
                     offset += 12;
                     previousIndex = index;
                 }
-                else {
+                else
+                {
                     //different index numbers. Logic to set the eventIndex to the correct one (can scan backwards, in case the index belongs to a previous one)
                     bool foundIndex = false;
 
-                    for (int a = 0; a < qed_File.Events.Count(); a++) {
-                        if (qed_File.Events[a].Index == index && qed_File.Events[a].SubIndex == subIndex) {
+                    for (int a = 0; a < QedFile.Events.Count(); a++)
+                    {
+                        if (QedFile.Events[a].ID == index && QedFile.Events[a].SubIndex == subIndex)
+                        {
                             eventIndex = a;
                             foundIndex = true;
                             break;
                         }
                     }
 
-                    if (foundIndex == false) {
+                    if (foundIndex == false)
+                    {
                         //No corresponding index can be found, so create a "condition-less" one
 
-                        for (int a = 0; a < qed_File.Events.Count(); a++) {
-                            if (qed_File.Events[a].Index > index) {
+                        for (int a = 0; a < QedFile.Events.Count(); a++)
+                        {
+                            if (QedFile.Events[a].ID > index)
+                            {
                                 eventIndex = a;
                                 break;
                             }
                         }
 
-                        qed_File.Events.Insert(eventIndex, new Event() {
-                            Index = (short)index,
+                        QedFile.Events.Insert(eventIndex, new Event()
+                        {
+                            ID = (short)index,
                             SubIndex = (short)subIndex,
-                            CONDITIONS = new List<string>() { "NONE"}
+                            CONDITIONS = new List<string>() { "NONE" }
                         });
                     }
 
                     i--;
                 }
 
-                
+
             }
         }
 
-        void ParseEvents1 (int offset, int count) {
-            qed_File.Events = new List<Event>();
+        private void ParseEvents1(int offset, int count)
+        {
+            QedFile.Events = new List<Event>();
             int access = -1;
             int prevIndex = -554;
             int prevSubIndex = -554;
-            for (int i = 0; i < count; i++) {
+            for (int i = 0; i < count; i++)
+            {
                 int nowSubIndx = BitConverter.ToInt16(rawBytes, offset + 2);
                 int nowIndx = BitConverter.ToInt16(rawBytes, offset + 4);
-                
+
 
                 if (prevIndex == nowIndx && prevSubIndex == nowSubIndx)
                 {
                     //same index level as previous
-                    if (qed_File.Events[access].CONDITIONS == null) {
-                        qed_File.Events[access].CONDITIONS = new List<string>();
+                    if (QedFile.Events[access].CONDITIONS == null)
+                    {
+                        QedFile.Events[access].CONDITIONS = new List<string>();
                     }
                     Condition condition = GetCondition(offset);
-                    qed_File.Events[access].CONDITIONS.Add(condition.CONDITION);
-                    qed_File.Events[access].Conditions.Add(condition);
+                    QedFile.Events[access].CONDITIONS.Add(condition.CONDITION);
+                    QedFile.Events[access].Conditions.Add(condition);
                     offset += 12;
 
                 }
-                else {
+                else
+                {
 
                     //new index level. Create new Event and decreace i by 1 (to go through above code with this entry)
                     access++;
-                    qed_File.Events.Add(new Event());
-                    qed_File.Events[access].Conditions = new List<Condition>();
-                    qed_File.Events[access].Index = (short)nowIndx;
-                    qed_File.Events[access].SubIndex = (short)nowSubIndx;
+                    QedFile.Events.Add(new Event());
+                    QedFile.Events[access].Conditions = new List<Condition>();
+                    QedFile.Events[access].ID = (short)nowIndx;
+                    QedFile.Events[access].SubIndex = (short)nowSubIndx;
                     prevIndex = nowIndx;
                     prevSubIndex = nowSubIndx;
                     i--;
@@ -141,7 +157,8 @@ namespace Xv2CoreLib.QED
             }
         }
 
-        Action GetAction(int offset) {
+        private Action GetAction(int offset)
+        {
             Action action = new Action();
             action.Type = BitConverter.ToInt16(rawBytes, offset + 0);
             action.I_06 = BitConverter.ToInt16(rawBytes, offset + 6);
@@ -242,7 +259,7 @@ namespace Xv2CoreLib.QED
                     action.ACTION = "TRANSFORM_CHARA_SWAP";
                     break;
                 case 55:
-                    action.PRELOAD_CHARA = GetGenericTemplate < QED_Types.TYPE55_PRELOAD_CHARA>(offsetToData);
+                    action.PRELOAD_CHARA = GetGenericTemplate<QED_Types.TYPE55_PRELOAD_CHARA>(offsetToData);
                     action.ACTION = "PRELOAD_CHARA";
                     break;
                 case 57:
@@ -250,27 +267,27 @@ namespace Xv2CoreLib.QED
                     action.ACTION = action.WAIT.DESCRIPTION;
                     break;
                 case 58:
-                    action.CHANGE_STAGE = GetGenericTemplate < QED_Types.TYPE58_CHANGE_STAGE>(offsetToData);
+                    action.CHANGE_STAGE = GetGenericTemplate<QED_Types.TYPE58_CHANGE_STAGE>(offsetToData);
                     action.ACTION = action.CHANGE_STAGE.DESCRIPTION;
                     break;
                 case 71:
-                    action.TUT_POPUP = GetGenericTemplate < QED_Types.TYPE71_TUT_POPUP>(offsetToData);
+                    action.TUT_POPUP = GetGenericTemplate<QED_Types.TYPE71_TUT_POPUP>(offsetToData);
                     action.ACTION = action.TUT_POPUP.DESCRIPTION;
                     break;
                 case 67:
-                    action.LOAD_BEV = GetTemplate2 < QED_Types.TYPE67_LOAD_BEV>(offsetToData);
+                    action.LOAD_BEV = GetTemplate2<QED_Types.TYPE67_LOAD_BEV>(offsetToData);
                     action.ACTION = action.LOAD_BEV.DESCRIPTION;
                     break;
                 case 83:
-                    action.TRANSFORM_CHARA_SWAP1 = GetGenericTemplate < QED_Types.TYPE83_TRANSFORM_CHARA_SWAP_1>(offsetToData);
+                    action.TRANSFORM_CHARA_SWAP1 = GetGenericTemplate<QED_Types.TYPE83_TRANSFORM_CHARA_SWAP_1>(offsetToData);
                     action.ACTION = action.TRANSFORM_CHARA_SWAP1.DESCRIPTION;
                     break;
                 case 85:
-                    action.ADD_TIME = GetTemplate4 < QED_Types.TYPE85_ADD_TIME>(offsetToData);
+                    action.ADD_TIME = GetTemplate4<QED_Types.TYPE85_ADD_TIME>(offsetToData);
                     action.ACTION = action.ADD_TIME.DESCRIPTION;
                     break;
                 case 88:
-                    action.SKILLS_EQUIP = GetGenericTemplate < QED_Types.TYPE88_SKILLS_EQUIP>(offsetToData);
+                    action.SKILLS_EQUIP = GetGenericTemplate<QED_Types.TYPE88_SKILLS_EQUIP>(offsetToData);
                     action.ACTION = "SKILLS_EQUIP";
                     break;
                 case 96:
@@ -278,16 +295,17 @@ namespace Xv2CoreLib.QED
                     action.ACTION = "UNKNOWN";
                     break;
                 default:
-                    action.TemplateGeneric = GetGenericTemplate< QED_Types.Template0>(offsetToData);
+                    action.TemplateGeneric = GetGenericTemplate<QED_Types.Template0>(offsetToData);
                     action.ACTION = "UNKNOWN";
                     break;
             }
             return action;
-            
-            
+
+
         }
 
-        Condition GetCondition(int offset) {
+        private Condition GetCondition(int offset)
+        {
             Condition condition = new Condition();
             condition.Type = BitConverter.ToInt16(rawBytes, offset + 0);
             condition.I_06 = BitConverter.ToInt16(rawBytes, offset + 6);
@@ -348,20 +366,21 @@ namespace Xv2CoreLib.QED
                     condition.CONDITION = "UNKNOWN_" + condition.Type.ToString();
                     break;
                 default:
-                    condition.TemplateGeneric = GetGenericTemplate< QED_Types.Template0>(offsetToData);
+                    condition.TemplateGeneric = GetGenericTemplate<QED_Types.Template0>(offsetToData);
                     condition.CONDITION = "UNKNOWN_" + condition.Type.ToString();
                     break;
             }
 
             return condition;
-            
-            
+
+
         }
 
 
         //Generic type readers
 
-        T GetGenericTemplate<T>(int offset) where T : IGenericTemplate, new() {
+        private T GetGenericTemplate<T>(int offset) where T : IGenericTemplate, new()
+        {
             T Generic_Temp = new T();
             Generic_Temp.I_00 = BitConverter.ToInt32(rawBytes, offset + 0);
             Generic_Temp.I_04 = BitConverter.ToInt32(rawBytes, offset + 4);
@@ -374,7 +393,7 @@ namespace Xv2CoreLib.QED
             return Generic_Temp;
         }
 
-        T GetTemplate1<T>(int offset) where T : ITemplate1, new()
+        private T GetTemplate1<T>(int offset) where T : ITemplate1, new()
         {
             T Template1 = new T();
             Template1.F_00 = BitConverter.ToSingle(rawBytes, offset + 0);
@@ -388,7 +407,7 @@ namespace Xv2CoreLib.QED
             return Template1;
         }
 
-        T GetTemplate2<T>(int offset) where T : ITemplate2, new()
+        private T GetTemplate2<T>(int offset) where T : ITemplate2, new()
         {
             T Template2 = new T();
             Template2.Str_00 = StringEx.GetString(rawBytes, offset);
@@ -398,7 +417,7 @@ namespace Xv2CoreLib.QED
             return Template2;
         }
 
-        T GetTemplate3<T>(int offset) where T : ITemplate3, new()
+        private T GetTemplate3<T>(int offset) where T : ITemplate3, new()
         {
             T Template = new T();
             Template.I_00 = BitConverter.ToInt32(rawBytes, offset + 0);
@@ -412,7 +431,7 @@ namespace Xv2CoreLib.QED
             return Template;
         }
 
-        T GetTemplate4<T>(int offset) where T : ITemplate4, new()
+        private T GetTemplate4<T>(int offset) where T : ITemplate4, new()
         {
             T Template = new T();
             Template.I_00 = BitConverter.ToInt32(rawBytes, offset + 0);
@@ -426,7 +445,7 @@ namespace Xv2CoreLib.QED
             return Template;
         }
 
-        T GetTemplate5<T>(int offset) where T : ITemplate5, new()
+        private T GetTemplate5<T>(int offset) where T : ITemplate5, new()
         {
             T Template = new T();
             Template.I_00 = BitConverter.ToInt32(rawBytes, offset + 0);

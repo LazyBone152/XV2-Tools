@@ -343,6 +343,7 @@ namespace Xv2CoreLib.CST
 
         public CST_CharaSlot(CST_CharaCostumeSlot slot)
         {
+            //InstallID = slot.InstallID;
             CharaCostumeSlots.Add(slot);
         }
 

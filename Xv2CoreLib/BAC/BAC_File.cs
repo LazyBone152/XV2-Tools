@@ -45,7 +45,7 @@ namespace Xv2CoreLib.BAC
         public int[] I_80 { get; set; } = new int[4];// size 4
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BacEntry")]
-        public AsyncObservableCollection<BAC_Entry> BacEntries { get; set; } = AsyncObservableCollection<BAC_Entry>.Create();
+        public AsyncObservableCollection<BAC_Entry> BacEntries { get; set; } = new AsyncObservableCollection<BAC_Entry>();
 
 
         #region LoadSave
@@ -138,7 +138,7 @@ namespace Xv2CoreLib.BAC
             return null;
 
         }
-        
+
         #endregion
 
         #region IBacTypesMethods
@@ -295,16 +295,16 @@ namespace Xv2CoreLib.BAC
 
             return null;
         }
-       
+
         public void ChangeNeutralSkillId(ushort newId)
         {
-            foreach(var entry in BacEntries)
+            foreach (var entry in BacEntries)
             {
-                if(entry.Type8 != null)
+                if (entry.Type8 != null)
                 {
                     foreach (var effect in entry.Type8)
                     {
-                        if (effect.SkillID == 0xBACB)
+                        if (effect.SkillID == 0xBACA)
                             effect.SkillID = newId;
                     }
                 }
@@ -312,7 +312,7 @@ namespace Xv2CoreLib.BAC
                 {
                     foreach (var projectile in entry.Type9)
                     {
-                        if (projectile.SkillID == 0xBACB)
+                        if (projectile.SkillID == 0xBACA)
                             projectile.SkillID = newId;
                     }
                 }
@@ -321,19 +321,19 @@ namespace Xv2CoreLib.BAC
                 {
                     foreach (var function in entry.Type15)
                     {
-                        if (function.Param1 == 0xBACB || function.Param1 == 0xBACABACA)
+                        if (function.Param1 == 0xBACA || function.Param1 == 0xBACABACA)
                             function.Param1 = newId;
 
-                        if (function.Param2 == 0xBACB || function.Param2 == 0xBACABACA)
+                        if (function.Param2 == 0xBACA || function.Param2 == 0xBACABACA)
                             function.Param2 = newId;
 
-                        if (function.Param3 == 0xBACB || function.Param3 == 0xBACABACA)
+                        if (function.Param3 == 0xBACA || function.Param3 == 0xBACABACA)
                             function.Param3 = newId;
 
-                        if (function.Param4 == 0xBACB || function.Param4 == 0xBACABACA)
+                        if (function.Param4 == 0xBACA || function.Param4 == 0xBACABACA)
                             function.Param4 = newId;
 
-                        if (function.Param5 == 0xBACB || function.Param5 == 0xBACABACA)
+                        if (function.Param5 == 0xBACA || function.Param5 == 0xBACABACA)
                             function.Param5 = newId;
                     }
                 }
@@ -974,7 +974,7 @@ namespace Xv2CoreLib.BAC
         public IUndoRedo AddEntry(IBacType bacType)
         {
             int insertIdx = IBacTypes.IndexOf(IBacTypes.FirstOrDefault(x => x.TypeID > bacType.TypeID));
-            
+
             if (insertIdx == -1)
             {
                 //Add
@@ -988,7 +988,7 @@ namespace Xv2CoreLib.BAC
                 return new UndoableListInsert<IBacType>(IBacTypes, insertIdx, bacType, $"New BacType {bacType}");
             }
         }
-        
+
         public void RefreshIBacTypes()
         {
             NotifyPropertyChanged(nameof(IBacTypes));
@@ -1063,7 +1063,7 @@ namespace Xv2CoreLib.BAC
                 SortID = id
             };
         }
-        
+
         public void UpdateEntryName()
         {
             NotifyPropertyChanged(nameof(MovesetBacEntryName));
@@ -1086,7 +1086,7 @@ namespace Xv2CoreLib.BAC
         }
 
         #endregion
-        
+
         [YAXDontSerialize]
         public virtual int TypeID => -1;
 
@@ -1431,7 +1431,7 @@ namespace Xv2CoreLib.BAC
         public ushort StaminaTakenWhenBlocked { get; set; }
         [YAXAttributeFor("I_20")]
         [YAXSerializeAs("value")]
-        public ushort I_20 { get; set; } 
+        public ushort I_20 { get; set; }
         [YAXAttributeFor("I_22")]
         [YAXSerializeAs("value")]
         public BoneLinks BoneLink
@@ -1471,7 +1471,7 @@ namespace Xv2CoreLib.BAC
             get => _posY;
             set
             {
-                if(value != _posY)
+                if (value != _posY)
                 {
                     _posY = value;
                     NotifyPropertyChanged(nameof(PositionY));
@@ -2157,7 +2157,7 @@ namespace Xv2CoreLib.BAC
             Unk18 = 0x20000,
             Unk19 = 0x40000,
             Unk20 = 0x80000,
-            KNOWN_MASK =  0xfffff
+            KNOWN_MASK = 0xfffff
             //0x80000 and onwards are never used (included 0x80000 in the enum just to even it out)
         }
 
@@ -2882,7 +2882,7 @@ namespace Xv2CoreLib.BAC
         #region NonSerialized
         [YAXDontSerialize]
         public ushort AcbTypeNumeric { get { return (ushort)AcbType; } set { AcbType = (AcbType)value; } }
-#endregion
+        #endregion
 
         [YAXAttributeFor("ACB")]
         [YAXSerializeAs("File")]
@@ -5181,7 +5181,7 @@ namespace Xv2CoreLib.BAC
         g_x_CAM = 0x17,
         g_x_LND = 0x18
     }
-#endregion
+    #endregion
 
     public interface IBacTypeMatrix
     {

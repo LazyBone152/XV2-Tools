@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace Xv2CoreLib.QED
@@ -12,8 +11,7 @@ namespace Xv2CoreLib.QED
     {
         string saveLocation;
         QED_File qed_File;
-        List<byte> bytes = new List<byte>() { 35,81,69,68,254,255,0,0 };
-        bool consoleActive = true;
+        public List<byte> bytes { get; private set; } = new List<byte>() { 35, 81, 69, 68, 254, 255, 0, 0 };
 
         public Deserializer(string location)
         {
@@ -25,39 +23,28 @@ namespace Xv2CoreLib.QED
             File.WriteAllBytes(saveLocation, bytes.ToArray());
         }
 
-        /// <summary>
-        /// Create a QED file from a QED_File object.
-        /// </summary>
-        public Deserializer(QED_File _qedFile, string _saveLocation)
+        public Deserializer(QED_File qedFile)
         {
-            saveLocation = _saveLocation;
-            qed_File = _qedFile;
-            consoleActive = false;
+            qed_File = qedFile;
             ValidateFile();
             WriteBinaryFile();
         }
 
-        void ValidateFile()
+        private void ValidateFile()
         {
-            if(qed_File.Events == null)
-            {
+            if (qed_File.Events == null)
                 return;
-            }
-            //Checks for errors
-            int prevID = -2642362;
-            int prevSubID = -99236239;
-            for (int i = 0; i < qed_File.Events.Count(); i++) {
-                if (qed_File.Events[i].Index == prevID && qed_File.Events[i].SubIndex == prevSubID) {
-                    Console.WriteLine("ERROR: An Event with a Index of " + qed_File.Events[i].Index + " and a subIndex of " + qed_File.Events[i].SubIndex + " already exists. There cannot be duplicates. \nLoad failed.");
-                    Console.ReadLine();
-                    Environment.Exit(0);
+
+            for (int i = 0; i < qed_File.Events.Count; i++) 
+            {
+                if(qed_File.Events.Any(x => x.ID == qed_File.Events[i].ID && x.SubIndex == qed_File.Events[i].SubIndex && x != qed_File.Events[i]))
+                {
+                    throw new Exception("QED: An Event with a Index of " + qed_File.Events[i].ID + " and a subIndex of " + qed_File.Events[i].SubIndex + " already exists. There cannot be duplicates.");
                 }
-                prevID = qed_File.Events[i].Index;
-                prevSubID = qed_File.Events[i].SubIndex;
             }
         }
 
-        void WriteBinaryFile()
+        private void WriteBinaryFile()
         {
             if(qed_File.Events == null)
             {
@@ -82,7 +69,7 @@ namespace Xv2CoreLib.QED
 
             //Write Condition Types
             int offsetAccess = 0;
-            for (int i = 0; i < qed_File.Events.Count(); i++)
+            for (int i = 0; i < qed_File.Events.Count; i++)
             {
                 if (qed_File.Events[i].Conditions != null) {
                     for (int a = 0; a < qed_File.Events[i].Conditions.Count(); a++)
@@ -114,7 +101,7 @@ namespace Xv2CoreLib.QED
 
         //Counts Events and Actions, since a simple count check wont work (due to the special grouping)
 
-        int CountOfEvents() {
+        private int CountOfEvents() {
             int count = 0;
 
             for (int i = 0; i < qed_File.Events.Count(); i++) {
@@ -126,7 +113,7 @@ namespace Xv2CoreLib.QED
             return count;
         }
 
-        int CountOfActions() {
+        private int CountOfActions() {
             int count = 0;
 
             for (int i = 0; i < qed_File.Events.Count(); i++) {
@@ -144,7 +131,7 @@ namespace Xv2CoreLib.QED
 
         //Write Events1 and Events2. Return a List with Offset positions (to insert the offset into later)
 
-        List<int> WriteEvents1() {
+        private List<int> WriteEvents1() {
             List<int> offsetList = new List<int>();
 
             for (int i = 0; i < qed_File.Events.Count(); i++) {
@@ -153,7 +140,7 @@ namespace Xv2CoreLib.QED
                     {
                         bytes.AddRange(BitConverter.GetBytes(qed_File.Events[i].Conditions[a].Type));
                         bytes.AddRange(BitConverter.GetBytes(qed_File.Events[i].SubIndex));
-                        bytes.AddRange(BitConverter.GetBytes(qed_File.Events[i].Index));
+                        bytes.AddRange(BitConverter.GetBytes(qed_File.Events[i].ID));
                         bytes.AddRange(BitConverter.GetBytes(qed_File.Events[i].Conditions[a].I_06));
                         offsetList.Add(bytes.Count());
                         bytes.AddRange(new byte[4]);
@@ -164,7 +151,7 @@ namespace Xv2CoreLib.QED
             return offsetList;
         }
 
-        List<int> WriteEvents2() {
+        private List<int> WriteEvents2() {
             List<int> offsetList = new List<int>();
 
             for (int i = 0; i < qed_File.Events.Count(); i++)
@@ -175,7 +162,7 @@ namespace Xv2CoreLib.QED
                     {
                         bytes.AddRange(BitConverter.GetBytes(qed_File.Events[i].Actions[a].Type));
                         bytes.AddRange(BitConverter.GetBytes(qed_File.Events[i].SubIndex));
-                        bytes.AddRange(BitConverter.GetBytes(qed_File.Events[i].Index));
+                        bytes.AddRange(BitConverter.GetBytes(qed_File.Events[i].ID));
                         bytes.AddRange(BitConverter.GetBytes(qed_File.Events[i].Actions[a].I_06));
                         offsetList.Add(bytes.Count());
                         bytes.AddRange(new byte[4]);
@@ -186,20 +173,15 @@ namespace Xv2CoreLib.QED
             return offsetList;
 
         }
-        
+
 
 
         // Type Writer Manager methods
 
-        void WriteActionType(Action action) {
+        private void WriteActionType(Action action) 
+        {
             int type = action.Type;
             
-            if (consoleActive == true) {
-                Console.Clear();
-                Console.WriteLine("Writing Action: Type " + type);
-            }
-            
-
             switch (type) {
                 case 2:
                     WriteTemplate1(action.Template_1);
@@ -303,16 +285,10 @@ namespace Xv2CoreLib.QED
             }
         }
 
-        void WriteConditionType(Condition condition)
+        private void WriteConditionType(Condition condition)
         {
             int type = condition.Type;
             
-            if (consoleActive == true) {
-                Console.Clear();
-                Console.WriteLine("Writing Condition: Type " + type);
-            }
-            
-
             switch (type)
             {
                 case 3:
@@ -362,7 +338,7 @@ namespace Xv2CoreLib.QED
 
         //Everything below is just for writing types. 
 
-        void WriteGeneric<T>(T template) where T : IGenericTemplate, new()
+        private void WriteGeneric<T>(T template) where T : IGenericTemplate, new()
         {
             bytes.AddRange(BitConverter.GetBytes(template.I_00));
             bytes.AddRange(BitConverter.GetBytes(template.I_04));
@@ -374,7 +350,7 @@ namespace Xv2CoreLib.QED
             bytes.AddRange(BitConverter.GetBytes(template.I_28));
         }
 
-        void WriteTemplate1<T>(T template) where T : ITemplate1, new()
+        private void WriteTemplate1<T>(T template) where T : ITemplate1, new()
         {
             bytes.AddRange(BitConverter.GetBytes(template.F_00));
             bytes.AddRange(BitConverter.GetBytes(template.I_04));
@@ -386,7 +362,7 @@ namespace Xv2CoreLib.QED
             bytes.AddRange(BitConverter.GetBytes(template.I_28));
         }
 
-        void WriteTemplate2<T>(T template) where T : ITemplate2, new()
+        private void WriteTemplate2<T>(T template) where T : ITemplate2, new()
         {
             bytes.AddRange(Encoding.ASCII.GetBytes(template.Str_00));
             int remainingSpace = 20 - template.Str_00.Count();
@@ -399,7 +375,7 @@ namespace Xv2CoreLib.QED
             bytes.AddRange(BitConverter.GetBytes(template.I_28));
         }
 
-        void WriteTemplate3<T>(T template) where T : ITemplate3, new()
+        private void WriteTemplate3<T>(T template) where T : ITemplate3, new()
         {
             bytes.AddRange(BitConverter.GetBytes(template.I_00));
             bytes.AddRange(BitConverter.GetBytes(template.I_04));
@@ -411,7 +387,7 @@ namespace Xv2CoreLib.QED
             bytes.AddRange(BitConverter.GetBytes(template.I_28));
         }
 
-        void WriteTemplate4<T>(T template) where T : ITemplate4, new()
+        private void WriteTemplate4<T>(T template) where T : ITemplate4, new()
         {
             bytes.AddRange(BitConverter.GetBytes(template.I_00));
             bytes.AddRange(BitConverter.GetBytes(template.F_04));
@@ -423,7 +399,7 @@ namespace Xv2CoreLib.QED
             bytes.AddRange(BitConverter.GetBytes(template.I_28));
         }
 
-        void WriteTemplate5<T>(T template) where T : ITemplate5, new()
+        private void WriteTemplate5<T>(T template) where T : ITemplate5, new()
         {
             bytes.AddRange(BitConverter.GetBytes(template.I_00));
             if (template.FLAG == false)

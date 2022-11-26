@@ -52,6 +52,11 @@ namespace LB_Mod_Installer.Binding
         private List<int> AssignedCharaIDs = new List<int>();
         private List<string> AssignedCostumes = new List<string>();
         private List<int> AssignedTtbEventIDs = new List<int>();
+        private List<int> AssignedSuperSkillIDs = new List<int>(); //ID2
+        private List<int> AssignedUltimateSkillIDs = new List<int>();
+        private List<int> AssignedEvasiveSkillIDs = new List<int>();
+        private List<int> AssignedBlastSkillIDs = new List<int>();
+        private List<int> AssignedAwokenSkillIDs = new List<int>();
 
         /// <summary>
         /// Stores a reference to the current entry during the Memory Pass (second pass). 
@@ -475,6 +480,48 @@ namespace LB_Mod_Installer.Binding
                                 retStr = b.GetArgument1();
                                 break;
                             }
+                        case Function.StageID:
+                            {
+                                string arg1 = b.GetArgument1(); //Either x2m guid or code, can determine what by checking length
+                                bool returnSsid = b.HasArgument(2) ? b.GetArgument2().ToLower() == "ssid" : false;
+                                retID = x2mHelper.GetStageId(arg1, returnSsid);
+                                break;
+                            }
+                        case Function.AutoSkillID:
+                            {
+                                CUS_File.SkillType skillType = GetSkillType(b.GetArgument1());
+                                string id2Alias = b.GetArgument2();
+                                string parentCmsAlias = b.HasArgument(3) ? b.GetArgument3() : null;
+
+                                List<int> assignedSkillIds = GetAssignedSkillList(skillType);
+
+                                CMS_File cmsFile = (CMS_File)install.GetParsedFile<CMS_File>(CMS_PATH);
+                                CUS_File cusFile = (CUS_File)install.GetParsedFile<CUS_File>(CUS_PATH);
+                                CMS_Entry parentCmsEntry = cmsFile.AssignDummyEntryForSkill(cusFile, skillType, assignedSkillIds);
+                                
+                                if(parentCmsEntry == null)
+                                {
+                                    retID = NullTokenInt;
+                                    break;
+                                }
+
+                                int skillId2 = cusFile.AssignNewSkillId(parentCmsEntry, skillType);
+
+                                if(skillId2 == -1)
+                                {
+                                    retID = NullTokenInt;
+                                    break;
+                                }
+
+                                retID = CUS_File.ConvertToID1(skillId2, skillType);
+                                AddAlias(skillId2.ToString(), id2Alias);
+
+                                if(!string.IsNullOrWhiteSpace(parentCmsAlias))
+                                    AddAlias(parentCmsEntry.ShortName, parentCmsAlias);
+
+                                assignedSkillIds.Add(skillId2);
+                            }
+                            break;
                     }
                 }
 
@@ -661,6 +708,13 @@ namespace LB_Mod_Installer.Binding
                     case "setvalue":
                         bindings.Add(new BindingValue() { Function = Function.SetValue, Arguments = arguments });
                         break;
+                    case "x2mstageid":
+                    case "stageid":
+                        bindings.Add(new BindingValue() { Function = Function.StageID, Arguments = arguments });
+                        break;
+                    case "autoskillid":
+                        bindings.Add(new BindingValue() { Function = Function.AutoSkillID, Arguments = arguments });
+                        break;
                     default:
                         throw new FormatException(String.Format("Invalid ID Binding Function (Function = {0}, Argument = {1})\nFull binding: {2}", function, argument, originalBinding));
                 }
@@ -751,6 +805,7 @@ namespace LB_Mod_Installer.Binding
                     case Function.AutoCusAura:
                     case Function.GetEntry:
                     case Function.SetValue:
+                    case Function.StageID:
                         //Must have an argument
                         if (!bindings[i].HasArgument()) throw new ArgumentException(String.Format("The {0} binding function takes a string argument, but none was found.\n({1})", bindings[i].Function, comment));
                         break;
@@ -759,6 +814,7 @@ namespace LB_Mod_Installer.Binding
                     case Function.X2MSkillID1:
                     case Function.X2MSkillID2:
                     case Function.X2MSkillPath:
+                    case Function.AutoSkillID:
                         if (bindings[i].Arguments.Length < 2)
                         {
                             throw new ArgumentException(String.Format("The {0} binding function takes 2 string arguments minimum, but only {1} were found. \n({2})", bindings[i].Function, bindings[i].Arguments.Length, comment));
@@ -862,6 +918,8 @@ namespace LB_Mod_Installer.Binding
             {
                 case "bac":
                     return SkillFileType.BAC;
+                case "bsa":
+                    return SkillFileType.BSA;
                 case "bdm":
                     return SkillFileType.BDM;
                 case "shotbdm":
@@ -912,6 +970,24 @@ namespace LB_Mod_Installer.Binding
             return NullTokenInt; //Skill wasn't found
         }
 
+        private List<int> GetAssignedSkillList(CUS_File.SkillType skillType)
+        {
+            switch (skillType)
+            {
+                case CUS_File.SkillType.Super:
+                    return AssignedSuperSkillIDs;
+                case CUS_File.SkillType.Ultimate:
+                    return AssignedUltimateSkillIDs;
+                case CUS_File.SkillType.Evasive:
+                    return AssignedEvasiveSkillIDs;
+                case CUS_File.SkillType.Blast:
+                    return AssignedBlastSkillIDs;
+                case CUS_File.SkillType.Awoken:
+                    return AssignedAwokenSkillIDs;
+            }
+
+            throw new Exception($"GetAssignedSkillList: Invalid skill type.");
+        }
         
         private string ApplyFormatting(int value, string formatting)
         {
@@ -1360,6 +1436,7 @@ namespace LB_Mod_Installer.Binding
         AutoCostume,
         AutoTtbEvent,
         AutoCusAura,
+        AutoSkillID,
         GetAlias,
         SkillID1,
         SkillID2,
@@ -1368,6 +1445,7 @@ namespace LB_Mod_Installer.Binding
         X2MCharaCode,
         X2MSkillID1,
         X2MSkillID2,
+        StageID,
         Skip,
         GetEntry,
         SetValue,
@@ -1396,6 +1474,7 @@ namespace LB_Mod_Installer.Binding
     public enum SkillFileType
     {
         BAC,
+        BSA,
         BDM,
         ShotBDM
     }

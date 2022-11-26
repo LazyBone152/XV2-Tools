@@ -44,6 +44,9 @@ using Xv2CoreLib.QML;
 using Xv2CoreLib.OCO;
 using Xv2CoreLib.DML;
 using Xv2CoreLib.QSF;
+using Xv2CoreLib.QED;
+using Xv2CoreLib.QSL;
+using Xv2CoreLib.QBT;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -53,7 +56,6 @@ namespace LB_Mod_Installer.Installer
         private Xv2FileIO FileIO;
         public FileCacheManager fileManager { get; private set; }
         private Mod currentMod = GeneralInfo.Tracker.GetCurrentMod();
-
 
         public Uninstall(MainWindow _parent, Xv2FileIO _fileIO, FileCacheManager _fileManager)
         {
@@ -93,14 +95,14 @@ namespace LB_Mod_Installer.Installer
         private void UninstallMod()
         {
             //Parsed files
-            foreach(var file in currentMod.Files)
+            foreach (var file in currentMod.Files)
             {
                 UpdateProgessBarText(string.Format("_Uninstalling \"{0}\"...", file.filePath));
                 ResolveFileType(file.filePath, file);
             }
 
             //MsgComponents
-            foreach(var file in currentMod.MsgComponents)
+            foreach (var file in currentMod.MsgComponents)
             {
                 UpdateProgessBarText(string.Format("_Uninstalling \"{0}\"...", file.filePath));
                 Uninstall_MsgComponent(file.filePath, file);
@@ -135,6 +137,7 @@ namespace LB_Mod_Installer.Installer
             {
                 fileManager.SaveParsedFiles();
                 fileManager.SaveStreamFiles();
+                fileManager.NukeEmptyDirectories();
             }
 #if !DEBUG
             catch (Exception ex)
@@ -160,7 +163,7 @@ namespace LB_Mod_Installer.Installer
             }
 #endif
         }
-        
+
         private void ResolveFileType(string path, _File file)
         {
             //Special cases
@@ -169,7 +172,7 @@ namespace LB_Mod_Installer.Installer
                 Uninstall_ACB(path, file);
                 return;
             }
-            if(path.Equals(CharaSlotsFile.FILE_NAME_BIN, StringComparison.OrdinalIgnoreCase))
+            if (path.Equals(CharaSlotsFile.FILE_NAME_BIN, StringComparison.OrdinalIgnoreCase))
             {
                 Uninstall_CharaSlots(file);
                 return;
@@ -182,7 +185,7 @@ namespace LB_Mod_Installer.Installer
 
             //If file doesn't exist in game data dir then it doesn't need to be uninstalled.
             if (!FileIO.FileExistsInGameDataDir(path)) return;
-            
+
             //Standard cases
             switch (Path.GetExtension(path))
             {
@@ -291,6 +294,15 @@ namespace LB_Mod_Installer.Installer
                 case ".qsf":
                     Uninstall_QSF(path, file);
                     break;
+                case ".qsl":
+                    Uninstall_QSL(path, file);
+                    break;
+                case ".qbt":
+                    Uninstall_QBT(path, file);
+                    break;
+                case ".qed":
+                    Uninstall_QED(path, file);
+                    break;
                 default:
                     throw new Exception(string.Format("The filetype of \"{0}\" is unsupported. Uninstall failed.\n\nThis mod was likely installed by a newer version of the installer.", path));
             }
@@ -352,7 +364,7 @@ namespace LB_Mod_Installer.Installer
                 throw new Exception(error, ex);
             }
         }
-        
+
         private void Uninstall_CUS(string path, _File file)
         {
             try
@@ -401,10 +413,10 @@ namespace LB_Mod_Installer.Installer
 
                 if (partSetSection != null)
                     UninstallEntries(binaryFile.PartSets, (cpkBinFile != null) ? cpkBinFile.PartSets : null, partSetSection.IDs);
-                
-                if(binaryFile.PartColors != null)
+
+                if (binaryFile.PartColors != null)
                 {
-                    foreach (var section in binaryFile.PartColors)
+                    foreach (PartColor section in binaryFile.PartColors)
                     {
                         Section partColorSection = file.GetSection(Sections.GetBcsPartColor(section.Index));
 
@@ -415,19 +427,19 @@ namespace LB_Mod_Installer.Installer
                         }
                     }
                 }
-                
+
                 if (bodiesSection != null)
                     UninstallEntries(binaryFile.Bodies, (cpkBinFile != null) ? cpkBinFile.Bodies : null, bodiesSection.IDs);
 
-                if(skeletonDataSection != null)
+                if (skeletonDataSection != null)
                 {
-                    foreach(var _idStr in skeletonDataSection.IDs)
+                    foreach (string _idStr in skeletonDataSection.IDs)
                     {
                         int id;
 
-                        if(int.TryParse(_idStr, out id))
+                        if (int.TryParse(_idStr, out id))
                         {
-                            if(id == 0)
+                            if (id == 0)
                             {
                                 binaryFile.SkeletonData1 = (cpkBinFile != null) ? cpkBinFile.SkeletonData1 : null;
                             }
@@ -441,7 +453,7 @@ namespace LB_Mod_Installer.Installer
 
                     skeletonDataSection.IDs.Clear();
                 }
-                
+
             }
             catch (Exception ex)
             {
@@ -518,7 +530,7 @@ namespace LB_Mod_Installer.Installer
 
                 binaryFile.ConvertToXv2();
 
-                if(cpkBinFile != null)
+                if (cpkBinFile != null)
                     cpkBinFile.ConvertToXv2();
 
                 Section section = file.GetSection(Sections.BDM_Entries);
@@ -731,7 +743,7 @@ namespace LB_Mod_Installer.Installer
                         }
                     }
 
-                    
+
                 }
             }
             catch (Exception ex)
@@ -795,7 +807,7 @@ namespace LB_Mod_Installer.Installer
                         }
 
                         //If PSC Entry now has 0 Spec entries, then remove it
-                        if(binaryFile.Configurations[i].PscEntries[a].PscSpecEntries.Count == 0)
+                        if (binaryFile.Configurations[i].PscEntries[a].PscSpecEntries.Count == 0)
                         {
                             binaryFile.Configurations[i].PscEntries.RemoveAt(a);
                         }
@@ -929,7 +941,7 @@ namespace LB_Mod_Installer.Installer
 
                 if (section != null)
                 {
-                    for(int i = 0; i < section.IDs.Count; i++)
+                    for (int i = 0; i < section.IDs.Count; i++)
                     {
                         int idNum;
 
@@ -945,12 +957,12 @@ namespace LB_Mod_Installer.Installer
                             EmbEntry original = (cpkBinFile != null) ? cpkBinFile.GetEntry(section.IDs[i]) : null;
                             var existingEntry = binaryFile.Entry.FirstOrDefault(x => x.Name == section.IDs[i]);
 
-                            if(existingEntry != null)
+                            if (existingEntry != null)
                             {
                                 binaryFile.RemoveEntry(binaryFile.Entry.IndexOf(existingEntry).ToString(), original);
                             }
                         }
-                        
+
                     }
 
                     binaryFile.TrimNullEntries();
@@ -1079,7 +1091,7 @@ namespace LB_Mod_Installer.Installer
                 throw new Exception(error, ex);
             }
         }
-        
+
         private void Uninstall_HCI(string path, _File file)
         {
             try
@@ -1329,6 +1341,77 @@ namespace LB_Mod_Installer.Installer
             }
         }
 
+        private void Uninstall_QBT(string path, _File file)
+        {
+            try
+            {
+                QBT_File binaryFile = (QBT_File)GetParsedFile<QBT_File>(path, false);
+                QBT_File cpkBinFile = (QBT_File)GetParsedFile<QBT_File>(path, true, false);
+
+                Section normalSection = file.GetSection(Sections.QBT_NormalDialogue);
+                Section interactiveSection = file.GetSection(Sections.QBT_InteractiveDialogue);
+                Section specialSection = file.GetSection(Sections.QBT_SpecialDialogue);
+
+                if (normalSection != null)
+                {
+                    UninstallEntries(binaryFile.NormalDialogues, (cpkBinFile != null) ? cpkBinFile.NormalDialogues : null, normalSection.IDs);
+                }
+
+                if (interactiveSection != null)
+                {
+                    UninstallEntries(binaryFile.InteractiveDialogues, (cpkBinFile != null) ? cpkBinFile.InteractiveDialogues : null, interactiveSection.IDs);
+                }
+
+                if (specialSection != null)
+                {
+                    UninstallEntries(binaryFile.SpecialDialogues, (cpkBinFile != null) ? cpkBinFile.SpecialDialogues : null, specialSection.IDs);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at QBT uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
+
+        private void Uninstall_QSL(string path, _File file)
+        {
+            try
+            {
+                QSL_File binaryFile = (QSL_File)GetParsedFile<QSL_File>(path, false);
+                QSL_File cpkBinFile = (QSL_File)GetParsedFile<QSL_File>(path, true, false);
+
+                UninstallSubEntries<PositionEntry, StageEntry>(binaryFile.Stages, (cpkBinFile != null) ? cpkBinFile.Stages : null, file, true);
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at QSL uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
+
+        private void Uninstall_QED(string path, _File file)
+        {
+            try
+            {
+                QED_File binaryFile = (QED_File)GetParsedFile<QED_File>(path, false);
+                QED_File cpkBinFile = (QED_File)GetParsedFile<QED_File>(path, true, false);
+
+                Section normalSection = file.GetSection(Sections.QED_Entry);
+
+                if (normalSection != null)
+                {
+                    UninstallEntries(binaryFile.Events, (cpkBinFile != null) ? cpkBinFile.Events : null, normalSection.IDs);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at QED uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
 
         //Generic uninstallers
         private void UninstallEntries<T>(IList<T> entries, IList<T> ogEntries, List<string> ids) where T : IInstallable
@@ -1358,16 +1441,16 @@ namespace LB_Mod_Installer.Installer
             if (entries == null) return;
 
             List<string> roots = new List<string>();
-            
-            foreach(var section in file.Sections)
+
+            foreach (var section in file.Sections)
             {
                 var splitName = section.FileSection.Split('/');
                 string rootId = splitName[splitName.Length - 1];
 
-                M rootEntry = GetOriginalEntry2<T,M>(entries, rootId, true);
+                M rootEntry = GetOriginalEntry2<T, M>(entries, rootId, true);
                 M originalRootEntry = GetOriginalEntry2<T, M>(ogEntries, rootId);
 
-                if(rootEntry != null)
+                if (rootEntry != null)
                 {
                     if (!roots.Contains(rootId))
                         roots.Add(rootId);
@@ -1388,11 +1471,11 @@ namespace LB_Mod_Installer.Installer
 
         }
 
-        private T GetOriginalEntry<T>(IList<T> ogEntries, string id) where T :IInstallable
+        private T GetOriginalEntry<T>(IList<T> ogEntries, string id) where T : IInstallable
         {
             if (ogEntries == null) return default(T);
 
-            if(ogEntries.Any(e => e.Index == id))
+            if (ogEntries.Any(e => e.Index == id))
             {
                 return ogEntries.FirstOrDefault(e => e.Index == id);
             }
@@ -1419,7 +1502,7 @@ namespace LB_Mod_Installer.Installer
         //MsgComponent
         private void Uninstall_MsgComponent(string path, _File file)
         {
-            foreach(var langSuffix in GeneralInfo.LanguageSuffix)
+            foreach (var langSuffix in GeneralInfo.LanguageSuffix)
             {
                 Uninstall_MSG(path + langSuffix, file);
             }
@@ -1451,7 +1534,7 @@ namespace LB_Mod_Installer.Installer
             {
                 //File is not cached. So parse it, add it and then return it.
                 var file = Install.GetParsedFileFromGame(path, FileIO, fromCpk, raiseEx);
-                if(file != null)
+                if (file != null)
                     fileManager.AddParsedFile(path, file);
                 return file;
             }
@@ -1461,7 +1544,7 @@ namespace LB_Mod_Installer.Installer
         //UI
         private void SetProgressBarSteps()
         {
-            parent.Dispatcher.Invoke((Action)(() =>
+            parent.Dispatcher.Invoke((System.Action)(() =>
             {
                 parent.ProgressBar_Main.Maximum = currentMod.TotalInstalledFiles;
                 parent.ProgressBar_Main.Value = 0;
@@ -1470,7 +1553,7 @@ namespace LB_Mod_Installer.Installer
 
         private void UpdateProgessBarText(string text, bool advanceProgress = true)
         {
-            parent.Dispatcher.Invoke((Action)(() =>
+            parent.Dispatcher.Invoke((System.Action)(() =>
             {
                 if (advanceProgress)
                     parent.ProgressBar_Main.Value++;

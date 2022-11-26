@@ -520,8 +520,8 @@ namespace Xv2CoreLib.BSA
                     Type.Add(new BSA_Type12()
                     {
                         F_00 = BitConverter.ToSingle(rawBytes, offset + 0),
-                        I_04 = (EepkType)BitConverter.ToInt32(rawBytes, offset + 4),
-                        I_08 = BitConverter.ToInt32(rawBytes, offset + 8),
+                        EepkType = (EepkType)BitConverter.ToInt32(rawBytes, offset + 4),
+                        SkillID = BitConverter.ToInt32(rawBytes, offset + 8),
                         I_12 = BitConverter.ToInt32(rawBytes, offset + 12),
                         F_16 = BitConverter.ToSingle(rawBytes, offset + 16),
                         StartTime = BitConverter.ToUInt16(rawBytes, hdrOffset + 0),

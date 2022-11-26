@@ -3,120 +3,74 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace Xv2CoreLib.QBT
 {
     public class Deserializer
     {
-        string saveLocation;
-        QBT_File qbt_File;
-        List<byte> bytes = new List<byte>() {35,81,66,84,254,255,36,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,36,0,0,0,0,0,0,0,0,0,0,0 };
+        private string saveLocation;
+        public QBT_File qbt_File { get; private set; }
+        public List<byte> bytes { get; private set; } = new List<byte>() { 35, 81, 66, 84, 254, 255, 36, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 36, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
         public Deserializer(string location)
         {
-            saveLocation = String.Format("{0}/{1}", Path.GetDirectoryName(location), Path.GetFileNameWithoutExtension(location));
+            saveLocation = string.Format("{0}/{1}", Path.GetDirectoryName(location), Path.GetFileNameWithoutExtension(location));
             YAXSerializer serializer = new YAXSerializer(typeof(QBT_File), YAXSerializationOptions.DontSerializeNullObjects);
             qbt_File = (QBT_File)serializer.DeserializeFromFile(location);
-            Validation();
             WriteBinaryFile();
+            File.WriteAllBytes(saveLocation, bytes.ToArray());
         }
 
-        public Deserializer(QBT_File _qbtFile, string location)
+        public Deserializer(QBT_File _qbtFile)
         {
-            saveLocation = location;
             qbt_File = _qbtFile;
             WriteBinaryFile();
         }
 
-        void Validation() {
-            int type0Count = CountTypes(qbt_File.Type0);
-            int type1Count = CountTypes(qbt_File.Type1);
-            int type2Count = CountTypes(qbt_File.Type2);
-
-            for (int i = 0; i < type0Count; i++)
-            {
-                Assertion.AssertArraySize(qbt_File.Type0[i].I_00, 30, "Normal_Dialogue", "Table");
-                if(qbt_File.Type0[i].DialogueEntries!= null)
-                {
-                    for (int a = 0; a < qbt_File.Type0[i].DialogueEntries.Count(); a++)
-                    {
-                        Assertion.AssertStringSize(qbt_File.Type0[i].DialogueEntries[a].Str_18, 32, "Normal_Dialogue", "MSG");
-                    }
-                }
-            }
-            for (int i = 0; i < type1Count; i++)
-            {
-                Assertion.AssertArraySize(qbt_File.Type1[i].I_00, 30, "Interactive_Dialogue", "Table");
-                if (qbt_File.Type1[i].DialogueEntries != null)
-                {
-                    for (int a = 0; a < qbt_File.Type1[i].DialogueEntries.Count(); a++)
-                    {
-                        Assertion.AssertStringSize(qbt_File.Type1[i].DialogueEntries[a].Str_18, 32, "Interactive_Dialogue", "MSG");
-                    }
-                }
-            }
-            for (int i = 0; i < type2Count; i++)
-            {
-                Assertion.AssertArraySize(qbt_File.Type2[i].I_00, 30, "Type2_Unknown", "Table");
-                if (qbt_File.Type2[i].DialogueEntries != null)
-                {
-                    for (int a = 0; a < qbt_File.Type2[i].DialogueEntries.Count(); a++)
-                    {
-                        Assertion.AssertStringSize(qbt_File.Type2[i].DialogueEntries[a].Str_18, 32, "Type2_Unknown", "MSG");
-                    }
-                }
-            }
-        }
-
-        void WriteBinaryFile()
+        private void WriteBinaryFile()
         {
-            int type0Count = CountTypes(qbt_File.Type0);
-            int type1Count = CountTypes(qbt_File.Type1);
-            int type2Count = CountTypes(qbt_File.Type2);
+            int type0Count = CountTypes(qbt_File.NormalDialogues);
+            int type1Count = CountTypes(qbt_File.InteractiveDialogues);
+            int type2Count = CountTypes(qbt_File.SpecialDialogues);
 
 
             bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(CountAllTableEntries()), 12);
             bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(CountAllDialogueEntries()), 14);
-            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(CountTypes(qbt_File.Type0)), 16);
-            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(CountTypes(qbt_File.Type1)), 18);
-            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(CountTypes(qbt_File.Type2)), 20);
+            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(CountTypes(qbt_File.NormalDialogues)), 16);
+            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(CountTypes(qbt_File.InteractiveDialogues)), 18);
+            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(CountTypes(qbt_File.SpecialDialogues)), 20);
 
-            int[] tableOffsets = CalculateTableOffsets();
+            int[] qbtEntryOffsets = CalculateTableOffsets();
 
-            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(tableOffsets[0]), 24);
-            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(tableOffsets[1]), 28);
-            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(tableOffsets[2]), 32);
-
-            if (qbt_File.I_04 == false)
-            {
-                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes((short)0), 4);
-            }
+            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(qbtEntryOffsets[0]), 24);
+            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(qbtEntryOffsets[1]), 28);
+            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(qbtEntryOffsets[2]), 32);
 
             int indexOfQuoteEntries = 0;
 
-            indexOfQuoteEntries = WriteTableEntries(qbt_File.Type0, indexOfQuoteEntries);
-            indexOfQuoteEntries = WriteTableEntries(qbt_File.Type1, indexOfQuoteEntries);
-            indexOfQuoteEntries = WriteTableEntries(qbt_File.Type2, indexOfQuoteEntries);
+            indexOfQuoteEntries = WriteQbtEntry(qbt_File.NormalDialogues, indexOfQuoteEntries);
+            indexOfQuoteEntries = WriteQbtEntry(qbt_File.InteractiveDialogues, indexOfQuoteEntries);
+            indexOfQuoteEntries = WriteQbtEntry(qbt_File.SpecialDialogues, indexOfQuoteEntries);
 
 
             //Dialogue Section
             int stringIndex = 0;
 
-            
-            for (int i = 0; i < type0Count; i++) {
-                stringIndex = WriteDialogieEntries(qbt_File.Type0[i].DialogueEntries, stringIndex, qbt_File.Type0[i].QBT_ID);
+
+            for (int i = 0; i < type0Count; i++)
+            {
+                stringIndex = WriteDialogieEntries(qbt_File.NormalDialogues[i].DialogueEntries, stringIndex, qbt_File.NormalDialogues[i].ID);
             }
 
             for (int i = 0; i < type1Count; i++)
             {
-                stringIndex = WriteDialogieEntries(qbt_File.Type1[i].DialogueEntries, stringIndex, qbt_File.Type1[i].QBT_ID);
+                stringIndex = WriteDialogieEntries(qbt_File.InteractiveDialogues[i].DialogueEntries, stringIndex, qbt_File.InteractiveDialogues[i].ID);
             }
 
             for (int i = 0; i < type2Count; i++)
             {
-                stringIndex = WriteDialogieEntries(qbt_File.Type2[i].DialogueEntries, stringIndex, qbt_File.Type2[i].QBT_ID);
+                stringIndex = WriteDialogieEntries(qbt_File.SpecialDialogues[i].DialogueEntries, stringIndex, qbt_File.SpecialDialogues[i].ID);
             }
 
 
@@ -124,73 +78,55 @@ namespace Xv2CoreLib.QBT
 
             for (int i = 0; i < type0Count; i++)
             {
-                WriteStrings(qbt_File.Type0[i].DialogueEntries);
+                WriteStrings(qbt_File.NormalDialogues[i].DialogueEntries);
             }
 
             for (int i = 0; i < type1Count; i++)
             {
-                WriteStrings(qbt_File.Type1[i].DialogueEntries);
+                WriteStrings(qbt_File.InteractiveDialogues[i].DialogueEntries);
             }
 
             for (int i = 0; i < type2Count; i++)
             {
-                WriteStrings(qbt_File.Type2[i].DialogueEntries);
+                WriteStrings(qbt_File.SpecialDialogues[i].DialogueEntries);
             }
-
-            File.WriteAllBytes(saveLocation, bytes.ToArray());
 
         }
 
-        int WriteTableEntries(List<TableEntry> tableEntry, int index) {
-
-            if (tableEntry != null) {
-                for (int i = 0; i < tableEntry.Count(); i++)
+        private int WriteQbtEntry(List<DialogueEntry> qbtEntries, int index)
+        {
+            if (qbtEntries != null)
+            {
+                for (int i = 0; i < qbtEntries.Count; i++)
                 {
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[0]));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[1]));
-                    bytes.AddRange(BitConverter.GetBytes((short)index));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[2]));
-                    bytes.AddRange(BitConverter.GetBytes((short)tableEntry[i].DialogueEntries.Count()));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[3]));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[4]));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[5]));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[6]));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[7]));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[8]));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[9]));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[10]));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[11]));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[12]));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[13]));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[14]));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[15]));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[16]));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[17]));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[18]));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[19]));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[20]));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[21]));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[22]));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[23]));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[24]));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[25]));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[26]));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[27]));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[28]));
-                    bytes.AddRange(BitConverter.GetBytes(tableEntry[i].I_00[29]));
+                    int sizeBefore = bytes.Count;
 
-                    index += tableEntry[i].DialogueEntries.Count();
+                    bytes.AddRange(BitConverter.GetBytes(qbtEntries[i].I_00));
+                    bytes.AddRange(BitConverter.GetBytes(qbtEntries[i].I_02));
+                    bytes.AddRange(BitConverter.GetBytes(index));
+                    bytes.AddRange(BitConverter.GetBytes(qbtEntries[i].DialogueEntries.Count));
+                    bytes.AddRange(BitConverter.GetBytes((int)qbtEntries[i].InteractionType));
+                    bytes.AddRange(BitConverter.GetBytes(qbtEntries[i].InteractionParam));
+                    bytes.AddRange(BitConverter.GetBytes((int)qbtEntries[i].SpecialEvent));
+                    bytes.AddRange(BitConverter.GetBytes(qbtEntries[i].SpecialOnEventEnd));
+                    bytes.AddRange(BitConverter.GetBytes(qbtEntries[i].I_28));
+                    bytes.AddRange(BitConverter.GetBytes(qbtEntries[i].CharaID));
+                    bytes.AddRange(BitConverter.GetBytes(qbtEntries[i].I_34));
+                    bytes.AddRange(BitConverter_Ex.GetBytes(qbtEntries[i].I_36, 7));
 
+                    index += qbtEntries[i].DialogueEntries.Count;
+
+                    if (bytes.Count - sizeBefore != 64)
+                        throw new InvalidDataException("QBT_File.Save: QBT entry size is invalid!");
                 }
             }
-            
 
             return index;
-
         }
 
-        int WriteDialogieEntries(List<QuoteData> quoteEntries, int index, int qbtID) {
-            
+        private int WriteDialogieEntries(List<QuoteData> quoteEntries, int index, int qbtID)
+        {
+
             for (int a = 0; a < quoteEntries.Count(); a++)
             {
                 bytes.AddRange(BitConverter.GetBytes((short)qbtID));
@@ -209,65 +145,41 @@ namespace Xv2CoreLib.QBT
 
         }
 
-        void WriteStrings(List<QuoteData> quoteEntries) {
-
-            for (int i = 0; i < quoteEntries.Count(); i++) {
-                bytes.AddRange(Encoding.ASCII.GetBytes(quoteEntries[i].Str_18));
-                int remainingSpace = 32 - quoteEntries[i].Str_18.Count();
-                for (int a = 0; a < remainingSpace; a++) {
-                    bytes.Add(0);
-                }
+        private void WriteStrings(List<QuoteData> quoteEntries)
+        {
+            for (int i = 0; i < quoteEntries.Count(); i++)
+            {
+                bytes.AddRange(StringEx.WriteFixedSizeString(quoteEntries[i].MSG_Name, 32));
             }
         }
 
-        short CountAllDialogueEntries() {
-            short count = 0;
-
-            if (qbt_File.Type0 != null) {
-                for (int i = 0; i < qbt_File.Type0.Count(); i++)
-                {
-                    count += (short)qbt_File.Type0[i].DialogueEntries.Count();
-                }
-            }
-            
-
-            if (qbt_File.Type1 != null) {
-                for (int i = 0; i < qbt_File.Type1.Count(); i++)
-                {
-                    count += (short)qbt_File.Type1[i].DialogueEntries.Count();
-                }
-            }
-
-            if (qbt_File.Type2 != null) {
-                for (int i = 0; i < qbt_File.Type2.Count(); i++)
-                {
-                    count += (short)qbt_File.Type2[i].DialogueEntries.Count();
-                }
-            }
-            
-
-            return count;
-
-        }
-
-        short CountAllTableEntries()
+        private short CountAllDialogueEntries()
         {
             short count = 0;
 
-            if (qbt_File.Type0 != null)
+            if (qbt_File.NormalDialogues != null)
             {
-                count += (short)qbt_File.Type0.Count();
+                for (int i = 0; i < qbt_File.NormalDialogues.Count(); i++)
+                {
+                    count += (short)qbt_File.NormalDialogues[i].DialogueEntries.Count();
+                }
             }
 
 
-            if (qbt_File.Type1 != null)
+            if (qbt_File.InteractiveDialogues != null)
             {
-                count += (short)qbt_File.Type1.Count();
+                for (int i = 0; i < qbt_File.InteractiveDialogues.Count(); i++)
+                {
+                    count += (short)qbt_File.InteractiveDialogues[i].DialogueEntries.Count();
+                }
             }
 
-            if (qbt_File.Type2 != null)
+            if (qbt_File.SpecialDialogues != null)
             {
-                count += (short)qbt_File.Type2.Count();
+                for (int i = 0; i < qbt_File.SpecialDialogues.Count(); i++)
+                {
+                    count += (short)qbt_File.SpecialDialogues[i].DialogueEntries.Count();
+                }
             }
 
 
@@ -275,22 +187,50 @@ namespace Xv2CoreLib.QBT
 
         }
 
-        int[] CalculateTableOffsets() {
+        private short CountAllTableEntries()
+        {
+            short count = 0;
+
+            if (qbt_File.NormalDialogues != null)
+            {
+                count += (short)qbt_File.NormalDialogues.Count();
+            }
+
+
+            if (qbt_File.InteractiveDialogues != null)
+            {
+                count += (short)qbt_File.InteractiveDialogues.Count();
+            }
+
+            if (qbt_File.SpecialDialogues != null)
+            {
+                count += (short)qbt_File.SpecialDialogues.Count();
+            }
+
+
+            return count;
+
+        }
+
+        private int[] CalculateTableOffsets()
+        {
             int[] offsets = new int[3] { 36, 0, 0 };
 
-            if (qbt_File.Type0 != null)
+            if (qbt_File.NormalDialogues != null)
             {
-                offsets[1] = qbt_File.Type0.Count() * 64 + offsets[0];
+                offsets[1] = qbt_File.NormalDialogues.Count() * 64 + offsets[0];
             }
-            else {
+            else
+            {
                 offsets[1] = offsets[0];
             }
 
-            if (qbt_File.Type1 != null)
+            if (qbt_File.InteractiveDialogues != null)
             {
-                offsets[2] = qbt_File.Type1.Count() * 64 + offsets[1];
+                offsets[2] = qbt_File.InteractiveDialogues.Count() * 64 + offsets[1];
             }
-            else {
+            else
+            {
                 offsets[2] = offsets[1];
             }
 
@@ -299,12 +239,14 @@ namespace Xv2CoreLib.QBT
 
         }
 
-        short CountTypes(List<TableEntry> tableEntry) {
+        private short CountTypes(List<DialogueEntry> tableEntry)
+        {
             if (tableEntry != null)
             {
                 return (short)tableEntry.Count();
             }
-            else {
+            else
+            {
                 return 0;
             }
         }

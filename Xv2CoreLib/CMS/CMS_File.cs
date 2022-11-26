@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Xv2CoreLib.Resource.UndoRedo;
 using YAXLib;
 
 namespace Xv2CoreLib.CMS
@@ -32,7 +33,7 @@ namespace Xv2CoreLib.CMS
 
         public CMS_Entry GetEntry(string id)
         {
-            foreach(var entry in CMS_Entries)
+            foreach (var entry in CMS_Entries)
             {
                 if (entry.Index == id) return entry;
             }
@@ -58,7 +59,7 @@ namespace Xv2CoreLib.CMS
             }
             new Deserializer(this, path);
         }
-    
+
         public string CharaIdToCharaCode(int charaId)
         {
             string charaIdStr = charaId.ToString();
@@ -83,7 +84,7 @@ namespace Xv2CoreLib.CMS
 
             return -1;
         }
-    
+
         public CMS_Entry CreateDummyEntry()
         {
             for (int i = 0; i < 0x99; i++)
@@ -98,7 +99,7 @@ namespace Xv2CoreLib.CMS
                 {
                     CMS_Entry dummy = CMS_Entry.CreateDummyEntry(AssignNewID(), dummyName);
 
-                    if(dummy.ID >= 500)
+                    if (dummy.ID >= 500)
                     {
                         throw new Exception("CMS_File.CreateDummyEntry: A suitable dummy entry could not be created because too many characters are installed!\n\nUninstall some older character mods, and then try again.");
                     }
@@ -116,7 +117,7 @@ namespace Xv2CoreLib.CMS
 
             while (true)
             {
-                if(CMS_Entries.FirstOrDefault(x => x.ID == id) == null)
+                if (CMS_Entries.FirstOrDefault(x => x.ID == id) == null)
                 {
                     break;
                 }
@@ -125,6 +126,46 @@ namespace Xv2CoreLib.CMS
             }
 
             return id;
+        }
+
+        public CMS_Entry AssignDummyEntryForSkill(CUS.CUS_File cusFile, CUS.CUS_File.SkillType skillType, List<int> assignedIds = null, List<IUndoRedo> undos = null)
+        {
+            //Find dummy CMS entry
+            CMS_Entry dummyCmsEntry = null;
+
+            foreach (CMS_Entry cmsEntry in CMS_Entries)
+            {
+                if (cmsEntry.IsDummyEntry())
+                {
+                    if (!cusFile.IsSkillIdRangeUsed(cmsEntry, skillType, assignedIds))
+                    {
+                        dummyCmsEntry = cmsEntry;
+                        break;
+                    }
+                }
+            }
+
+            //If no suitable dummy was found, create a new one
+            if (dummyCmsEntry == null)
+            {
+                dummyCmsEntry = CreateDummyEntry();
+                CMS_Entries.Add(dummyCmsEntry);
+
+                undos?.Add(new UndoableListAdd<CMS_Entry>(CMS_Entries, dummyCmsEntry));
+            }
+
+            return dummyCmsEntry;
+        }
+
+        public string GetSkillOwner(int skillId2)
+        {
+            int cmsId = skillId2 / 10;
+
+            //If chara ID belongs to a CAC, it is owned by "CMN" instead
+            if (cmsId >= 100 && cmsId < 109)
+                return "CMN";
+
+            return CMS_Entries.FirstOrDefault(x => x.ID == cmsId)?.ShortName;
         }
     }
 
@@ -229,7 +270,7 @@ namespace Xv2CoreLib.CMS
         {
             return (ShortName == path || path == string.Format("../{0}/{0}", ShortName));
         }
-    
+
         public bool IsDummyEntry()
         {
             if (!string.IsNullOrWhiteSpace(Str_32)) return false;

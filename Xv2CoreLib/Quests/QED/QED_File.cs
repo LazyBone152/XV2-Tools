@@ -1,23 +1,57 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using YAXLib;
 
 namespace Xv2CoreLib.QED
 {
     [YAXSerializeAs("QED")]
-    public class QED_File
+    public class QED_File : IIsNull
     {
         [YAXDontSerializeIfNull]
-        public List<Event> Events { get; set; }
+        public List<Event> Events { get; set; } = new List<Event>();
+
+        public static QED_File Load(byte[] bytes)
+        {
+            return new Parser(bytes).QedFile;
+        }
+
+        public byte[] SaveToBytes()
+        {
+            return new Deserializer(this).bytes.ToArray();
+        }
+
+        public bool IsNull()
+        {
+            return Events.Count == 0;
+        }
     }
 
-    public class Event {
+    public class Event : IInstallable
+    {
+        #region IInstallable
+        [YAXDontSerialize]
+        public int SortID => ID;
+
+        [YAXDontSerialize]
+        public string Index
+        {
+            get => $"{ID}_{SubIndex}";
+            set
+            {
+                string[] vals = value?.Split('_');
+
+                if(vals?.Length == 2)
+                {
+                    ID = (short)Utils.TryParseInt(vals[0]);
+                    SubIndex = (short)Utils.TryParseInt(vals[1]);
+                }
+            }
+        }
+        #endregion
+
         //Contains all the Event1s and Event2s from a single index combination (example, index 4, subindex 2)
         [YAXAttributeForClass]
-        public short Index { get; set; }
+        [YAXSerializeAs("Index")]
+        public short ID { get; set; }
         [YAXAttributeForClass]
         public short SubIndex { get; set; }
         [YAXAttributeForClass]
@@ -34,7 +68,6 @@ namespace Xv2CoreLib.QED
 
     public class Condition
     {
-        
         [YAXAttributeForClass]
         public short Type { get; set; }
         [YAXAttributeForClass]
@@ -154,8 +187,4 @@ namespace Xv2CoreLib.QED
         public QED_Types.TYPE58_CHANGE_STAGE CHANGE_STAGE { get; set; }
 
     }
-
-
-
-
 }

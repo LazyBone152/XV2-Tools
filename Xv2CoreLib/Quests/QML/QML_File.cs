@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using YAXLib;
 
 namespace Xv2CoreLib.QML
@@ -11,11 +7,11 @@ namespace Xv2CoreLib.QML
                "Team: ally or enemy. 1 = Ally, 2 = Enemy\n" +
                "Skills defined here will only be used if the QED switches them in (this is done for mentor missions)")]
     [YAXSerializeAs("QML")]
-    public class QML_File
+    public class QML_File : IIsNull
     {
-       
+
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "QML_Entry")]
-        public List<QML_Entry> Entries { get; set; }
+        public List<QML_Entry> Entries { get; set; } = new List<QML_Entry>();
 
         public static QML_File Load(byte[] bytes)
         {
@@ -25,6 +21,11 @@ namespace Xv2CoreLib.QML
         public byte[] SaveToBytes()
         {
             return new Deserializer(this).bytes.ToArray();
+        }
+
+        public bool IsNull()
+        {
+            return Entries.Count == 0;
         }
     }
 
