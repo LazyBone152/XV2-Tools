@@ -258,7 +258,7 @@ namespace Xv2CoreLib.CUS
         /// <summary>
         /// Assigns a new skill ID (ID2), parented to the assigned CMS entry. If no free IDs are available, -1 will be returned.
         /// </summary>
-        public int AssignNewSkillId(CMS_Entry cmsEntry, SkillType skillType)
+        public int AssignNewSkillId(CMS_Entry cmsEntry, SkillType skillType, List<int> assignedIds = null)
         {
             int id = cmsEntry.ID * 10;
             List<Skill> skills = GetSkills(skillType);
@@ -268,7 +268,14 @@ namespace Xv2CoreLib.CUS
 
             for (int i = 0; i < 10; i++)
             {
-                if (skills.FirstOrDefault(x => x.ID2 == id) == null) return id;
+                if(assignedIds == null)
+                {
+                    if (skills.FirstOrDefault(x => x.ID2 == id) == null) return id;
+                }
+                else
+                {
+                    if (skills.FirstOrDefault(x => x.ID2 == id) == null && !assignedIds.Contains(id) == true) return id;
+                }
                 id++;
             }
 

@@ -97,7 +97,7 @@ namespace Xv2CoreLib.Eternity
             AutoBattlePortraits = HexConverter.ReadInt32Array(XML_AutoBattlePortraitsString);
             AnyDualSkillList = HexConverter.ReadInt32Array(XML_AnyDualSkillListString);
 
-            //if (CusAuras == null) CusAuras = new List<CusAuraData>();
+            if (CusAuras == null) CusAuras = new List<CusAuraData>();
             if (PreBakedAliases == null) PreBakedAliases = new List<PreBakedAlias>();
             if (BodyShapes == null) BodyShapes = new List<PrebakedBodyShape>();
             if (Ozarus == null) Ozarus = new List<string>();
@@ -181,11 +181,17 @@ namespace Xv2CoreLib.Eternity
 
         private bool IsCusAuraSequenceUsed(int id, int sequenceSize)
         {
-            if (CusAuras.Any(x => x.CusAuraID >= id && x.CusAuraID < id + sequenceSize))
-                return true;
+            if(CusAuras.Count > 0)
+            {
+                if (CusAuras.Any(x => x.CusAuraID >= id && x.CusAuraID < id + sequenceSize))
+                    return true;
+            }
 
-            if (ReservedCusAuraIds.Any(x => x >= id && x < id + sequenceSize))
-                return true;
+            if(ReservedCusAuraIds.Count > 0)
+            {
+                if (ReservedCusAuraIds.Any(x => x >= id && x < id + sequenceSize))
+                    return true;
+            }
 
             return false;
         }

@@ -505,7 +505,7 @@ namespace LB_Mod_Installer.Binding
                                     break;
                                 }
 
-                                int skillId2 = cusFile.AssignNewSkillId(parentCmsEntry, skillType);
+                                int skillId2 = cusFile.AssignNewSkillId(parentCmsEntry, skillType, assignedSkillIds);
 
                                 if(skillId2 == -1)
                                 {
