@@ -119,7 +119,7 @@
         <Canvas>
             <Path x:Name="path" Stroke="{Binding PathColor, ElementName=UserControl}" StrokeThickness="1"/>
         </Canvas>
-        <ListBox ItemsSource="{Binding ElementName=UserControl, Path=Points.Binding}" ItemContainerStyle="{StaticResource PointListBoxItemStyle}" SelectedItem="{Binding ElementName=UserControl, Path=SelectedPoint}">
+        <ListBox ItemsSource="{Binding ElementName=UserControl, Path=Points.Binding}" ItemContainerStyle="{StaticResource PointListBoxItemStyle}" SelectedItem="{Binding ElementName=UserControl, Path=SelectedPoint.Point}">
             <ListBox.InputBindings>
                 <KeyBinding Key="Delete" Command="{Binding ElementName=UserControl, Path=DeletePointCommand}"/>
                 <KeyBinding Key="E" Command="{Binding ElementName=UserControl, Path=CreatePointCommand}"/>

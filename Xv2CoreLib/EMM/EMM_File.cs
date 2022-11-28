@@ -145,7 +145,7 @@ namespace Xv2CoreLib.EMM
             List<RgbColor> colors = new List<RgbColor>();
             if (Materials == null) return colors;
 
-            foreach (var mat in Materials)
+            foreach (EmmMaterial mat in Materials)
             {
                 colors.AddRange(mat.GetUsedColors());
             }

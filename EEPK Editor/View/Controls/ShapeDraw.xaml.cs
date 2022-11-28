@@ -40,11 +40,11 @@ namespace EEPK_Organiser.View.Controls
         }
 
 
-        public static readonly DependencyProperty SelectedPointProperty = DependencyProperty.Register(nameof(SelectedPoint), typeof(ShapeDrawPoint), typeof(ShapeDraw), new PropertyMetadata(null, SelectedPointChangedCallback));
+        public static readonly DependencyProperty SelectedPointProperty = DependencyProperty.Register(nameof(SelectedPoint), typeof(ShapePointRef), typeof(ShapeDraw), new PropertyMetadata(null, SelectedPointChangedCallback));
 
-        public ShapeDrawPoint SelectedPoint
+        public ShapePointRef SelectedPoint
         {
-            get => (ShapeDrawPoint)GetValue(SelectedPointProperty);
+            get => (ShapePointRef)GetValue(SelectedPointProperty);
             set => SetValue(SelectedPointProperty, value);
         }
 
@@ -73,7 +73,24 @@ namespace EEPK_Organiser.View.Controls
         private static void SelectedPointChangedCallback(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
         {
             if(dependencyObject is ShapeDraw shapeDrawControl)
+            {
+                if(dependencyPropertyChangedEventArgs.OldValue is ShapePointRef oldPoint)
+                {
+                    oldPoint.PropertyChanged -= SelectedPoint_PropertyChanged;
+                }
+
+                if (dependencyPropertyChangedEventArgs.NewValue is ShapePointRef newPoint)
+                {
+                    newPoint.PropertyChanged += SelectedPoint_PropertyChanged;
+                }
+
                 shapeDrawControl.NotifyPropertyChanged(nameof(SelectedPoint));
+            }
+        }
+
+        private static void SelectedPoint_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            //Do something...
         }
 
         #endregion
@@ -204,20 +221,20 @@ namespace EEPK_Organiser.View.Controls
             newPoint.Y = ShapeDrawPoint.ConvertPointFromPixelSpace((float)mousePos.Y);
             newPoint.PropertyChanged += OnPointPropertyChanged;
 
-            int insertIdx = SelectedPoint != null ? Points.IndexOf(SelectedPoint) + 1 : Points.Count;
+            int insertIdx = SelectedPoint != null ? Points.IndexOf(SelectedPoint.Point) + 1 : Points.Count;
 
             UndoManager.Instance.AddUndo(new UndoableListInsert<ShapeDrawPoint>(Points, insertIdx, newPoint, "Shape Draw -> Add Point"));
             Points.Insert(insertIdx, newPoint);
 
-            SelectedPoint = newPoint;
+            SelectedPoint.Point = newPoint;
             NotifyPropertyChanged(nameof(SelectedPoint));
         }
 
         public RelayCommand DeletePointCommand => new RelayCommand(DeletePoint, CanDeletePoint);
         private void DeletePoint()
         {
-            UndoManager.Instance.AddUndo(new UndoableListRemove<ShapeDrawPoint>(Points, SelectedPoint, "Shape Draw -> Delete Point"));
-            Points.Remove(SelectedPoint);
+            UndoManager.Instance.AddUndo(new UndoableListRemove<ShapeDrawPoint>(Points, SelectedPoint.Point, "Shape Draw -> Delete Point"));
+            Points.Remove(SelectedPoint.Point);
         }
 
         public RelayCommand ReducePointsCommand => new RelayCommand(ReducePoints, CanReducePoints);
@@ -229,12 +246,12 @@ namespace EEPK_Organiser.View.Controls
 
         private bool CanReducePoints()
         {
-            return Points?.Count > 4;
+            return Points?.Count > 4 && SelectedPoint != null;
         }
 
         private bool HasPoints()
         {
-            return Points != null;
+            return Points != null && SelectedPoint != null;
         }
 
         private bool CanDeletePoint()
@@ -247,5 +264,27 @@ namespace EEPK_Organiser.View.Controls
         {
             return SelectedPoint != null;
         }
+
     }
+
+    public class ShapePointRef : INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private ShapeDrawPoint _point = null;
+
+        public ShapeDrawPoint Point
+        {
+            get => _point;
+            set
+            {
+                if(_point != value)
+                {
+                    _point = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Point)));
+                }
+            }
+        }
+    }
+
 }

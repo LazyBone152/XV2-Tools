@@ -11,6 +11,7 @@ using EEPK_Organiser.ViewModel;
 using GalaSoft.MvvmLight.CommandWpf;
 using EEPK_Organiser.Forms;
 using Xv2CoreLib.EMP_NEW;
+using EEPK_Organiser.View.Controls;
 
 namespace EEPK_Organiser.View.Editors
 {
@@ -79,6 +80,15 @@ namespace EEPK_Organiser.View.Editors
             UndoManager.Instance.UndoOrRedoCalled += Instance_UndoOrRedoCalled;
             Unloaded += EcfEditor_Unloaded;
             Loaded += EtrEditor_Loaded;
+            SelectedShapePoint.PropertyChanged += SelectedShapePoint_PropertyChanged;
+        }
+
+        private void SelectedShapePoint_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (shapeDrawPointDataGrid != null && SelectedShapePoint.Point != null)
+            {
+                shapeDrawPointDataGrid.ScrollIntoView(SelectedShapePoint.Point);
+            }
         }
 
         private void EtrEditor_Loaded(object sender, RoutedEventArgs e)
@@ -225,16 +235,7 @@ namespace EEPK_Organiser.View.Editors
         #endregion
 
         #region ShapePoints
-        private ShapeDrawPoint _selectedPoint = null;
-        public ShapeDrawPoint SelectedShapePoint
-        {
-            get => _selectedPoint;
-            set
-            {
-                _selectedPoint = value;
-                NotifyPropertyChanged(nameof(SelectedShapePoint));
-            }
-        }
+        public ShapePointRef SelectedShapePoint { get; set; } = new ShapePointRef();
 
         public RelayCommand NewShapeDrawPointCommand => new RelayCommand(NewShapeDrawPoint, IsNodeSelected);
         private void NewShapeDrawPoint()
@@ -244,7 +245,7 @@ namespace EEPK_Organiser.View.Editors
             UndoManager.Instance.AddUndo(new UndoableListAdd<ShapeDrawPoint>(SelectedNode.ExtrudeShapePoints, newPoint, "Shape -> Add Point"));
             SelectedNode.ExtrudeShapePoints.Add(newPoint);
 
-            SelectedShapePoint = newPoint;
+            SelectedShapePoint.Point = newPoint;
         }
 
         public RelayCommand DeleteShapeDrawPointCommand => new RelayCommand(DeleteShapeDrawPoint, IsPointSelected);
@@ -315,7 +316,7 @@ namespace EEPK_Organiser.View.Editors
         private bool IsPointSelected()
         {
             if (!IsNodeSelected()) return false;
-            return SelectedShapePoint != null;
+            return SelectedShapePoint?.Point != null;
         }
 
         #endregion

@@ -435,12 +435,12 @@
                                         <StackPanel>
                                             <GroupBox Header="Shape Preview" Controls:ControlsHelper.ContentCharacterCasing="Normal" Controls:HeaderedControlHelper.HeaderFontSize="10" BorderThickness="1" Margin="20"  Background="{DynamicResource MahApps.Brushes.Gray.SemiTransparent}">
                                                 <Grid>
-                                                    <eepkControl:ShapeDraw Points="{Binding ElementName=UserControl, Path=Node.EmissionNode.ShapeDraw.Points}" PathColor="{DynamicResource MahApps.Brushes.Accent}" SelectedPoint="{Binding ElementName=UserControl, Path=SelectedShapeDrawPoint}" Width="500" Height="500"/>
+                                                    <eepkControl:ShapeDraw x:Name="shapeDrawControl" Points="{Binding ElementName=UserControl, Path=Node.EmissionNode.ShapeDraw.Points}" PathColor="{DynamicResource MahApps.Brushes.Accent}" SelectedPoint="{Binding ElementName=UserControl, Path=SelectedShapeDrawPoint}" Width="500" Height="500"/>
                                                 </Grid>
                                             </GroupBox>
                                         </StackPanel>
 
-                                        <DataGrid x:Name="shapeDrawPointDataGrid" Height="540" Grid.Column="1" VerticalAlignment="Top" Margin="20, 10, 0,0" BorderBrush="{DynamicResource MahApps.Brushes.SystemControlForegroundListMedium}" BorderThickness="1" ItemsSource="{Binding ElementName=UserControl, Path=Node.EmissionNode.ShapeDraw.Points.Binding}" SelectedItem="{Binding ElementName=UserControl, Path=SelectedShapeDrawPoint}" CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False" AutoGenerateColumns="False">
+                                        <DataGrid x:Name="shapeDrawPointDataGrid" Height="540" Grid.Column="1" VerticalAlignment="Top" Margin="20, 10, 0,0" BorderBrush="{DynamicResource MahApps.Brushes.SystemControlForegroundListMedium}" BorderThickness="1" ItemsSource="{Binding ElementName=UserControl, Path=Node.EmissionNode.ShapeDraw.Points.Binding}" SelectedItem="{Binding ElementName=UserControl, Path=SelectedShapeDrawPoint.Point}" CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False" AutoGenerateColumns="False">
                                             <DataGrid.Columns>
                                                 <Controls:DataGridNumericUpDownColumn Binding="{Binding UndoableX}" StringFormat="0.0###" TextAlignment="Left" Interval="0.05" Minimum="-1" Maximum="1" Width="*" Header="X"/>
                                                 <Controls:DataGridNumericUpDownColumn Binding="{Binding UndoableY}" StringFormat="0.0###" TextAlignment="Left" Interval="0.05" Minimum="-1" Maximum="1" Width="*" Header="Y"/>

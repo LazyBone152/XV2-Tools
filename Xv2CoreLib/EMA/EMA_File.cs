@@ -329,7 +329,7 @@ namespace Xv2CoreLib.EMA
         public List<RgbColor> GetUsedColors()
         {
             List<RgbColor> colors = new List<RgbColor>();
-            if (Animations == null) Animations = AsyncObservableCollection<EMA_Animation>.Create();
+            if (Animations == null) Animations = new AsyncObservableCollection<EMA_Animation>();
 
             foreach (var anim in Animations)
             {
@@ -462,7 +462,7 @@ namespace Xv2CoreLib.EMA
                 }
             }
         }
-        
+
         public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0, EMM.EMM_File emmFile = null)
         {
             if (Animations == null) return;
@@ -483,20 +483,20 @@ namespace Xv2CoreLib.EMA
             //The EMA file uses the skeleton index to match material nodes with the actual materials. The node name is gibberish and means nothing. So, this method will rename them all to the correct name.
             //On save, the skeleton will be dynamically rereated based on the material file.
 
-            foreach(EMA_Animation anim in Animations)
+            foreach (EMA_Animation anim in Animations)
             {
-                foreach(EMA_Node node in anim.Nodes)
+                foreach (EMA_Node node in anim.Nodes)
                 {
                     int materialIdx = Skeleton.Bones.IndexOf(Skeleton.Bones.FirstOrDefault(x => x.Name == node.BoneName));
 
-                    if(materialIdx != -1 && materialIdx <= emmFile.Materials.Count - 1)
+                    if (materialIdx != -1 && materialIdx <= emmFile.Materials.Count - 1)
                     {
                         node.BoneName = emmFile.Materials[materialIdx].Name;
                     }
                 }
             }
 
-            for(int i = 0; i < Skeleton.Bones.Count; i++)
+            for (int i = 0; i < Skeleton.Bones.Count; i++)
             {
                 if (i != -1 && i <= emmFile.Materials.Count - 1)
                 {
@@ -513,7 +513,7 @@ namespace Xv2CoreLib.EMA
             Skeleton skeleton = new Skeleton();
 
             //Create bones for all materials
-            for(int i = 0; i < emmFile.Materials.Count; i++)
+            for (int i = 0; i < emmFile.Materials.Count; i++)
             {
                 Bone bone = new Bone();
                 bone.Name = emmFile.Materials[i].Name;
@@ -528,11 +528,11 @@ namespace Xv2CoreLib.EMA
 
             //Create bones for all nodes in this EMA file that aren't actually materials.
             //These nodes dont actually do anything, but to be in a sane state when saving this step is needed, becuases mats could be renamed or deleted...
-            foreach(EMA_Animation anim in Animations)
+            foreach (EMA_Animation anim in Animations)
             {
-                foreach(EMA_Node node in anim.Nodes)
+                foreach (EMA_Node node in anim.Nodes)
                 {
-                    if(skeleton.Bones.FirstOrDefault(x => x.Name == node.BoneName) == null)
+                    if (skeleton.Bones.FirstOrDefault(x => x.Name == node.BoneName) == null)
                     {
                         Bone bone = new Bone();
                         bone.Name = node.BoneName;
@@ -659,7 +659,7 @@ namespace Xv2CoreLib.EMA
 
             List<int> dualIndex = new List<int>();
 
-            foreach(var node in Nodes)
+            foreach (var node in Nodes)
             {
                 foreach (var command in node.Commands)
                 {
@@ -716,7 +716,7 @@ namespace Xv2CoreLib.EMA
                 }
 
             }
-            
+
             return floats;
         }
 
@@ -730,7 +730,7 @@ namespace Xv2CoreLib.EMA
             //int numComponents = parameter > 3 ? 2 : 4;
             int numComponents = 3; //Hardcode to 3 components for RGB.
 
-            foreach(EMA_Node node in Nodes)
+            foreach (EMA_Node node in Nodes)
             {
                 EMA_Command[] components = new EMA_Command[numComponents];
 
@@ -750,7 +750,7 @@ namespace Xv2CoreLib.EMA
                     components[i] = node.GetCommand(parameter, i);
 
                     //Create the component with the default values from EMM
-                    if(components[i] == null)
+                    if (components[i] == null)
                     {
                         components[i] = EMA_Command.GetNew(parameter, i, EmaAnimationType.mat);
                         components[i].Keyframes.Add(new EMA_Keyframe(0, defaultValues[i]));
@@ -846,7 +846,7 @@ namespace Xv2CoreLib.EMA
         {
             if (Nodes == null) Nodes = new AsyncObservableCollection<EMA_Node>();
 
-            foreach(EMA_Node node in Nodes.Where(x => x.BoneName == nodeName))
+            foreach (EMA_Node node in Nodes.Where(x => x.BoneName == nodeName))
             {
                 foreach (EMA_Command command in node.Commands)
                 {
@@ -880,7 +880,7 @@ namespace Xv2CoreLib.EMA
 
         public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet = false, int variance = 0, EMM.EMM_File emmFile = null)
         {
-            if(EmaType == EmaAnimationType.light)
+            if (EmaType == EmaAnimationType.light)
             {
                 EMA_Command r_command = GetCommand(EMA_Command.PARAMETER_COLOR, EMA_Command.COMPONENT_R);
                 EMA_Command g_command = GetCommand(EMA_Command.PARAMETER_COLOR, EMA_Command.COMPONENT_G);
@@ -888,7 +888,7 @@ namespace Xv2CoreLib.EMA
 
                 ChangeHue(hue, saturation, lightness, undos, hueSet, variance, r_command, g_command, b_command);
             }
-            else if(EmaType == EmaAnimationType.mat && emmFile != null)
+            else if (EmaType == EmaAnimationType.mat && emmFile != null)
             {
                 undos.AddRange(SyncMatCommands(0, emmFile));
                 undos.AddRange(SyncMatCommands(1, emmFile));
@@ -1354,6 +1354,8 @@ namespace Xv2CoreLib.EMA
 
         public void AddKeyframesFromCommand(EMA_Command anim)
         {
+            if (anim == this) return;
+
             foreach (EMA_Keyframe keyframe in anim.Keyframes)
             {
                 EMA_Keyframe existing = GetKeyframe(keyframe.Time);
@@ -1455,16 +1457,16 @@ namespace Xv2CoreLib.EMA
         #region Get
         public EMA_Keyframe GetKeyframe(int time)
         {
-            for(int i = CurrentKeyframeIndex; i < Keyframes.Count; i++)
+            for (int i = CurrentKeyframeIndex; i < Keyframes.Count; i++)
             {
-                if (Keyframes[CurrentKeyframeIndex].Time == time)
+                if (Keyframes[i].Time == time)
                 {
                     CurrentKeyframeIndex = i;
-                    return Keyframes[CurrentKeyframeIndex];
+                    return Keyframes[i];
                 }
             }
 
-            if(CurrentKeyframeIndex != 0)
+            if (CurrentKeyframeIndex != 0)
             {
                 CurrentKeyframeIndex = 0;
                 return GetKeyframe(time);
@@ -1520,7 +1522,6 @@ namespace Xv2CoreLib.EMA
             }
         }
 
-        private int CurrentStartKeyframeIndex = 0;
         private int CurrentKeyframeIndex = 0;
 
 
@@ -1587,7 +1588,7 @@ namespace Xv2CoreLib.EMA
         /// </summary>
         /// <param name="frame">The specified frame.</param>
         /// <param name="nearFrame">The frame the returned <see cref="EAN_Keyframe"/> belongs to (ignore FrameIndex on the keyframe) </param>
-        private EMA_Keyframe GetNearestKeyframeBefore(int frame,  ref int nearFrame)
+        private EMA_Keyframe GetNearestKeyframeBefore(int frame, ref int nearFrame)
         {
             EMA_Keyframe nearest = null;
 
@@ -1751,6 +1752,11 @@ namespace Xv2CoreLib.EMA
         {
             Time = (ushort)frame;
             Value = value;
+        }
+
+        public override string ToString()
+        {
+            return $"Time: {Time}, Value: {Value}, Interpolation: {InterpolationType}";
         }
     }
 
