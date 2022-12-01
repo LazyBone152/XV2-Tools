@@ -749,7 +749,7 @@
                                     <ColumnDefinition Width="25"/>
                                 </Grid.ColumnDefinitions>
                                 <Label Content="Scale XY Variance" FontSize="11"/>
-                                <vector:CustomVector2 Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.ScaleBase_Variance}"/>
+                                <vector:CustomVector2 Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.ScaleXY_Variance}"/>
                             </Grid>
 
                             <TextBlock Text="Other" FontWeight="Bold" HorizontalAlignment="Center"/>
