@@ -1133,9 +1133,9 @@ namespace Xv2CoreLib.EMP_NEW
         public KeyframedFloatValue Color1_Transparency { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.Color1_Transparency);
         public KeyframedFloatValue Color2_Transparency { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.Color2_Transparency);
 
-        public KeyframedFloatValue ScaleBase { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.ScaleBase, isScale: true);
+        public KeyframedFloatValue ScaleBase { get; set; } = new KeyframedFloatValue(1f, KeyframedValueType.ScaleBase);
         public float ScaleBase_Variance { get; set; }
-        public KeyframedVector2Value ScaleXY { get; set; } = new KeyframedVector2Value(1f, 1f, KeyframedValueType.ScaleXY, isScale: true);
+        public KeyframedVector2Value ScaleXY { get; set; } = new KeyframedVector2Value(1f, 1f, KeyframedValueType.ScaleXY);
         public CustomVector4 ScaleXY_Variance { get; set; } = new CustomVector4();
         public float F_96 { get; set; }
         public float F_100 { get; set; }
@@ -1156,13 +1156,13 @@ namespace Xv2CoreLib.EMP_NEW
             newTexture.MaterialID = BitConverter.ToUInt16(rawBytes, offset + 16);
             newTexture.RenderDepth = BitConverter.ToSingle(rawBytes, offset + 4);
 
-            //Scales (scale by 2 when reading, divide by 2 when writing)
-            newTexture.ScaleBase.Constant = BitConverter.ToSingle(rawBytes, offset + 24) * 2f;
-            newTexture.ScaleBase_Variance = BitConverter.ToSingle(rawBytes, offset + 28) * 2f;
-            newTexture.ScaleXY.Constant.X = BitConverter.ToSingle(rawBytes, offset + 32) * 2f;
-            newTexture.ScaleXY.Constant.Y = BitConverter.ToSingle(rawBytes, offset + 40) * 2f;
-            newTexture.ScaleXY_Variance.X = BitConverter.ToSingle(rawBytes, offset + 36) * 2f;
-            newTexture.ScaleXY_Variance.Y = BitConverter.ToSingle(rawBytes, offset + 44) * 2f;
+            //Scales
+            newTexture.ScaleBase.Constant = BitConverter.ToSingle(rawBytes, offset + 24);
+            newTexture.ScaleBase_Variance = BitConverter.ToSingle(rawBytes, offset + 28);
+            newTexture.ScaleXY.Constant.X = BitConverter.ToSingle(rawBytes, offset + 32);
+            newTexture.ScaleXY.Constant.Y = BitConverter.ToSingle(rawBytes, offset + 40);
+            newTexture.ScaleXY_Variance.X = BitConverter.ToSingle(rawBytes, offset + 36);
+            newTexture.ScaleXY_Variance.Y = BitConverter.ToSingle(rawBytes, offset + 44);
 
             //Colors
             newTexture.Color1.Constant = new CustomColor(BitConverter.ToSingle(rawBytes, offset + 48), BitConverter.ToSingle(rawBytes, offset + 52), BitConverter.ToSingle(rawBytes, offset + 56), 1f);
@@ -1222,12 +1222,12 @@ namespace Xv2CoreLib.EMP_NEW
             bytes.AddRange(BitConverter.GetBytes((ushort)textureCount));
             bytes.AddRange(BitConverter.GetBytes((int)0)); //Offset, fill with 0 for now
 
-            bytes.AddRange(BitConverter.GetBytes(ScaleBase.Constant / 2));
-            bytes.AddRange(BitConverter.GetBytes(ScaleBase_Variance / 2));
-            bytes.AddRange(BitConverter.GetBytes(ScaleXY.Constant.X / 2));
-            bytes.AddRange(BitConverter.GetBytes(ScaleXY_Variance.X / 2));
-            bytes.AddRange(BitConverter.GetBytes(ScaleXY.Constant.Y / 2));
-            bytes.AddRange(BitConverter.GetBytes(ScaleXY_Variance.Y / 2));
+            bytes.AddRange(BitConverter.GetBytes(ScaleBase.Constant));
+            bytes.AddRange(BitConverter.GetBytes(ScaleBase_Variance));
+            bytes.AddRange(BitConverter.GetBytes(ScaleXY.Constant.X));
+            bytes.AddRange(BitConverter.GetBytes(ScaleXY_Variance.X));
+            bytes.AddRange(BitConverter.GetBytes(ScaleXY.Constant.Y));
+            bytes.AddRange(BitConverter.GetBytes(ScaleXY_Variance.Y));
             bytes.AddRange(BitConverter.GetBytes(Color1.Constant.R));
             bytes.AddRange(BitConverter.GetBytes(Color1.Constant.G));
             bytes.AddRange(BitConverter.GetBytes(Color1.Constant.B));

@@ -15,6 +15,8 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
         public CustomVector4 Constant { get; set; }
         public AsyncObservableCollection<KeyframeVector3Value> Keyframes { get; set; } = new AsyncObservableCollection<KeyframeVector3Value>();
 
+        private float[] InterpolatedValues = new float[4];
+
         #region Init
         public KeyframedVector3Value(float x, float y, float z, KeyframedValueType valueType, bool isEtr = false, bool isModifier = false)
         {
@@ -133,6 +135,63 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             return new UndoableListRemove<KeyframeVector3Value>(Keyframes, keyframe);
         }
 
+        public float[] GetInterpolatedValue(float time)
+        {
+            if (Keyframes.Count == 0 || !IsAnimated) return Constant.Values;
+
+            //Check for a direct keyframe
+            var currentKeyframe = Keyframes.FirstOrDefault(x => x.Time == time);
+
+            if (currentKeyframe != null)
+                return currentKeyframe.Value.Values;
+
+            float prev = -1;
+            float next = -1;
+
+            foreach (var keyframe in Keyframes.OrderBy(x => x.Time))
+            {
+                if (keyframe.Time > prev && prev < time && keyframe.Time < time)
+                    prev = keyframe.Time;
+
+                if (keyframe.Time > time)
+                {
+                    next = keyframe.Time;
+                    break;
+                }
+            }
+
+            //No prev keyframe exists, so no interpolation is possible. Just use next keyframe then
+            if (prev == -1)
+            {
+                return Keyframes.FirstOrDefault(x => x.Time == next).Value.Values;
+            }
+
+            //Same, but for next keyframe. We will use the prev keyframe here.
+            if (next == -1 || prev == next)
+            {
+                return Keyframes.FirstOrDefault(x => x.Time == prev).Value.Values;
+            }
+
+            float factor = (time - prev) / (next - prev);
+            var prevKeyframe = Keyframes.FirstOrDefault(x => x.Time == prev).Value;
+            var nextKeyframe = Keyframes.FirstOrDefault(x => x.Time == next).Value;
+
+            //Reuse the same array to save on performance
+            if (Interpolate)
+            {
+                InterpolatedValues[0] = MathHelpers.Lerp(prevKeyframe.X, nextKeyframe.X, factor);
+                InterpolatedValues[1] = MathHelpers.Lerp(prevKeyframe.Y, nextKeyframe.Y, factor);
+                InterpolatedValues[2] = MathHelpers.Lerp(prevKeyframe.Z, nextKeyframe.Z, factor);
+            }
+            else
+            {
+                InterpolatedValues[0] = prevKeyframe.X;
+                InterpolatedValues[1] = prevKeyframe.Y;
+                InterpolatedValues[2] = prevKeyframe.Z;
+            }
+
+            return InterpolatedValues;
+        }
     }
 
     [Serializable]

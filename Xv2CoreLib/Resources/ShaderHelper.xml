@@ -383,7 +383,7 @@
     <Parameter Name="MatAmb" />
     <Parameter Name="TexRep0" />
     <Parameter Name="TwoSidedRender" />
-    <Parameter Name="gCamPosR" />
+    <Parameter Name="gCamPos" />
     <Parameter Name="gCamPosG" />
     <Parameter Name="gCamPosB" />
     <Parameter Name="gCamPosA" />
@@ -452,10 +452,7 @@
     <Parameter Name="TexRep1" />
     <Parameter Name="BackFace" />
     <Parameter Name="TextureFilter0" />
-    <Parameter Name="gCamPosR" />
-    <Parameter Name="gCamPosG" />
-    <Parameter Name="gCamPosB" />
-    <Parameter Name="gCamPosA" />
+    <Parameter Name="gCamPos" />
   </Shader>
   <Shader ShaderProgram="U3spua_BM_BUMP_SM_S">
     <Parameter Name="MatSpc" />
@@ -488,10 +485,7 @@
     <Parameter Name="AlphaBlendType" />
     <Parameter Name="TextureFilter0" />
     <Parameter Name="NoEdge" />
-    <Parameter Name="gCamPosR" />
-    <Parameter Name="gCamPosG" />
-    <Parameter Name="gCamPosB" />
-    <Parameter Name="gCamPosA" />
+    <Parameter Name="gCamPos" />
     <Parameter Name="MatDif" />
     <Parameter Name="MatAmb" />
     <Parameter Name="TexRep0" />
@@ -549,10 +543,7 @@
     <Parameter Name="ZWriteMask" />
     <Parameter Name="NoEdge" />
     <Parameter Name="TwoSidedRender" />
-    <Parameter Name="gCamPosR" />
-    <Parameter Name="gCamPosG" />
-    <Parameter Name="gCamPosB" />
-    <Parameter Name="gCamPosA" />
+    <Parameter Name="gCamPos" />
     <Parameter Name="MatDif" />
     <Parameter Name="MatAmb" />
     <Parameter Name="AlphaRef" />
@@ -589,10 +580,7 @@
     <Parameter Name="SpcPower" />
     <Parameter Name="TexRep0" />
     <Parameter Name="TexRep1" />
-    <Parameter Name="gCamPosR" />
-    <Parameter Name="gCamPosG" />
-    <Parameter Name="gCamPosB" />
-    <Parameter Name="gCamPosA" />
+    <Parameter Name="gCamPos" />
     <Parameter Name="AlphaBlend" />
     <Parameter Name="AlphaBlendType" />
     <Parameter Name="BackFace" />
@@ -893,10 +881,7 @@
     <Parameter Name="MatScale0" />
     <Parameter Name="TextureFilter0" />
     <Parameter Name="TextureFilter2" />
-    <Parameter Name="gCamPosR" />
-    <Parameter Name="gCamPosG" />
-    <Parameter Name="gCamPosB" />
-    <Parameter Name="gCamPosA" />
+    <Parameter Name="gCamPos" />
     <Parameter Name="TexRep0" />
     <Parameter Name="TexRep1" />
     <Parameter Name="TexRep2" />
@@ -909,10 +894,7 @@
     <Parameter Name="MatSpc" />
     <Parameter Name="SpcCoeff" />
     <Parameter Name="SpcPower" />
-    <Parameter Name="gCamPosR" />
-    <Parameter Name="gCamPosG" />
-    <Parameter Name="gCamPosB" />
-    <Parameter Name="gCamPosA" />
+    <Parameter Name="gCamPos" />
     <Parameter Name="TexRep0" />
     <Parameter Name="TexRep1" />
     <Parameter Name="TexRep2" />
@@ -948,7 +930,7 @@
     <Parameter Name="Glare" />
     <Parameter Name="MipMapLod2" />
     <Parameter Name="TextureFilter0" />
-    <Parameter Name="gCamPosR" />
+    <Parameter Name="gCamPos" />
     <Parameter Name="gCamPosG" />
     <Parameter Name="gCamPosB" />
     <Parameter Name="gCamPosA" />
@@ -1011,7 +993,7 @@
     <Parameter Name="TextureFilter0" />
     <Parameter Name="TextureFilter1" />
     <Parameter Name="TextureFilter2" />
-    <Parameter Name="gCamPosR" />
+    <Parameter Name="gCamPos" />
     <Parameter Name="gCamPosG" />
     <Parameter Name="gCamPosB" />
     <Parameter Name="gCamPosA" />
@@ -1040,7 +1022,7 @@
     <Parameter Name="Billboard" />
     <Parameter Name="BillboardType" />
     <Parameter Name="MipMapLod1" />
-    <Parameter Name="gCamPosR" />
+    <Parameter Name="gCamPos" />
     <Parameter Name="gCamPosG" />
     <Parameter Name="gCamPosB" />
     <Parameter Name="gCamPosA" />
@@ -1136,7 +1118,7 @@
     <Parameter Name="TexRep1" />
     <Parameter Name="TextureFilter0" />
     <Parameter Name="BackFace" />
-    <Parameter Name="gCamPosR" />
+    <Parameter Name="gCamPos" />
     <Parameter Name="gCamPosG" />
     <Parameter Name="gCamPosB" />
     <Parameter Name="gCamPosA" />
@@ -1152,7 +1134,7 @@
     <Parameter Name="AlphaTest" />
     <Parameter Name="AnimationChannel" />
     <Parameter Name="MipMapLod1" />
-    <Parameter Name="gCamPosR" />
+    <Parameter Name="gCamPos" />
     <Parameter Name="gCamPosG" />
     <Parameter Name="gCamPosB" />
     <Parameter Name="gCamPosA" />
@@ -1179,7 +1161,7 @@
     <Parameter Name="SpcCoeff" />
     <Parameter Name="SpcPower" />
     <Parameter Name="Glare" />
-    <Parameter Name="gCamPosR" />
+    <Parameter Name="gCamPos" />
     <Parameter Name="gCamPosG" />
     <Parameter Name="gCamPosB" />
     <Parameter Name="gCamPosA" />
@@ -1196,7 +1178,7 @@
     <Parameter Name="Glare" />
     <Parameter Name="TextureFilter0" />
     <Parameter Name="TextureFilter2" />
-    <Parameter Name="gCamPosR" />
+    <Parameter Name="gCamPos" />
     <Parameter Name="gCamPosG" />
     <Parameter Name="gCamPosB" />
     <Parameter Name="gCamPosA" />
@@ -1377,7 +1359,7 @@
     <Parameter Name="Glare" />
     <Parameter Name="TextureFilter0" />
     <Parameter Name="TextureFilter2" />
-    <Parameter Name="gCamPosR" />
+    <Parameter Name="gCamPos" />
     <Parameter Name="gCamPosG" />
     <Parameter Name="gCamPosB" />
     <Parameter Name="gCamPosA" />
@@ -1399,7 +1381,7 @@
     <Parameter Name="BackFace" />
     <Parameter Name="AlphaTest" />
     <Parameter Name="NoEdge" />
-    <Parameter Name="gCamPosR" />
+    <Parameter Name="gCamPos" />
     <Parameter Name="gCamPosG" />
     <Parameter Name="gCamPosB" />
     <Parameter Name="gCamPosA" />
@@ -1732,7 +1714,7 @@
     <Parameter Name="TexRep0" />
     <Parameter Name="BackFace" />
     <Parameter Name="MipMapLod1" />
-    <Parameter Name="gCamPosR" />
+    <Parameter Name="gCamPos" />
     <Parameter Name="gCamPosG" />
     <Parameter Name="gCamPosB" />
     <Parameter Name="gCamPosA" />
@@ -1787,7 +1769,7 @@
     <Parameter Name="ZWriteMask" />
     <Parameter Name="BackFace" />
     <Parameter Name="CustomFlag" />
-    <Parameter Name="gCamPosR" />
+    <Parameter Name="gCamPos" />
     <Parameter Name="gCamPosG" />
     <Parameter Name="gCamPosB" />
     <Parameter Name="gCamPosA" />
@@ -2026,7 +2008,7 @@
     <Parameter Name="MipMapLod1" />
     <Parameter Name="BackFace" />
     <Parameter Name="TwoSidedRender" />
-    <Parameter Name="gCamPosR" />
+    <Parameter Name="gCamPos" />
     <Parameter Name="gCamPosG" />
     <Parameter Name="gCamPosB" />
     <Parameter Name="gCamPosA" />
@@ -2232,7 +2214,7 @@
     <Parameter Name="MatAmb" />
     <Parameter Name="TexRep0" />
     <Parameter Name="SpcCoeff" />
-    <Parameter Name="gCamPosR" />
+    <Parameter Name="gCamPos" />
     <Parameter Name="gCamPosG" />
     <Parameter Name="gCamPosB" />
     <Parameter Name="gCamPosA" />
@@ -2248,7 +2230,7 @@
     <Parameter Name="MipMapLod0" />
     <Parameter Name="MipMapLod1" />
     <Parameter Name="AlphaTest" />
-    <Parameter Name="gCamPosR" />
+    <Parameter Name="gCamPos" />
     <Parameter Name="gCamPosG" />
     <Parameter Name="gCamPosB" />
     <Parameter Name="gCamPosA" />
@@ -2536,7 +2518,7 @@
     <Parameter Name="Glare" />
     <Parameter Name="AlphaTest" />
     <Parameter Name="NoEdge" />
-    <Parameter Name="gCamPosR" />
+    <Parameter Name="gCamPos" />
     <Parameter Name="gCamPosG" />
     <Parameter Name="gCamPosB" />
     <Parameter Name="gCamPosA" />
@@ -3385,7 +3367,7 @@
     <Parameter Name="SpcCoeff" />
     <Parameter Name="SpcPower" />
     <Parameter Name="Glare" />
-    <Parameter Name="gCamPosR" />
+    <Parameter Name="gCamPos" />
     <Parameter Name="gCamPosG" />
     <Parameter Name="gCamPosB" />
     <Parameter Name="gCamPosA" />

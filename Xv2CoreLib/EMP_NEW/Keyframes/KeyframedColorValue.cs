@@ -16,6 +16,8 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
         public CustomColor Constant { get; set; }
         public AsyncObservableCollection<KeyframeColorValue> Keyframes { get; set; } = new AsyncObservableCollection<KeyframeColorValue>();
 
+        private float[] InterpolatedValues = new float[4];
+
         #region Init
         public KeyframedColorValue(float r, float g, float b, KeyframedValueType valueType, bool isEtr = false, bool isModifier = false)
         {
@@ -134,10 +136,10 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
         {
             List<RgbColor> colors = new List<RgbColor>();
 
-            if(!Constant.IsWhiteOrBlack())
+            if (!Constant.IsWhiteOrBlack())
                 colors.Add(new RgbColor(Constant));
 
-            foreach(var keyframe in Keyframes)
+            foreach (var keyframe in Keyframes)
             {
                 if (!keyframe.Value.IsWhiteOrBlack())
                     colors.Add(new RgbColor(keyframe.Value));
@@ -150,26 +152,26 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
         {
             Constant.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
 
-            foreach(var keyframe in Keyframes)
+            foreach (var keyframe in Keyframes)
             {
-                keyframe.Value.ChangeHue( hue, saturation, lightness, undos, hueSet, variance);
+                keyframe.Value.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
             }
         }
 
-        public CustomColor GetInterpolatedValue(float time)
+        public float[] GetInterpolatedValue(float time)
         {
-            if (Keyframes.Count == 0 || !IsAnimated) return Constant;
+            if (Keyframes.Count == 0 || !IsAnimated) return Constant.Values;
 
             //Check for a direct keyframe
-            var currentKeyframe = Keyframes.FirstOrDefault(x => x.Time == time);
+            KeyframeColorValue currentKeyframe = Keyframes.FirstOrDefault(x => x.Time == time);
 
             if (currentKeyframe != null)
-                return currentKeyframe.Value;
+                return currentKeyframe.Value.Values;
 
             float prev = -1;
             float next = -1;
 
-            foreach (var keyframe in Keyframes.OrderBy(x => x.Time))
+            foreach (KeyframeColorValue keyframe in Keyframes.OrderBy(x => x.Time))
             {
                 if (keyframe.Time > prev && prev < time && keyframe.Time < time)
                     prev = keyframe.Time;
@@ -184,20 +186,36 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             //No prev keyframe exists, so no interpolation is possible. Just use next keyframe then
             if (prev == -1)
             {
-                return Keyframes.FirstOrDefault(x => x.Time == next).Value;
+                return Keyframes.FirstOrDefault(x => x.Time == next).Value.Values;
             }
 
             //Same, but for next keyframe. We will use the prev keyframe here.
             if (next == -1 || prev == next)
             {
-                return Keyframes.FirstOrDefault(x => x.Time == prev).Value;
+                return Keyframes.FirstOrDefault(x => x.Time == prev).Value.Values;
             }
 
             float factor = (time - prev) / (next - prev);
-            var prevKeyframe = Keyframes.FirstOrDefault(x => x.Time == prev).Value;
-            var nextKeyframe = Keyframes.FirstOrDefault(x => x.Time == next).Value;
-            
-            return Interpolate ? new CustomColor(MathHelpers.Lerp(prevKeyframe.R, nextKeyframe.R, factor), MathHelpers.Lerp(prevKeyframe.G, nextKeyframe.G, factor), MathHelpers.Lerp(prevKeyframe.B, nextKeyframe.B, factor), 0f) : prevKeyframe;
+            CustomColor prevKeyframe = Keyframes.FirstOrDefault(x => x.Time == prev).Value;
+            CustomColor nextKeyframe = Keyframes.FirstOrDefault(x => x.Time == next).Value;
+
+            //Reuse the same array to save on performance
+            if (Interpolate)
+            {
+                InterpolatedValues[0] = MathHelpers.Lerp(prevKeyframe.R, nextKeyframe.R, factor);
+                InterpolatedValues[1] = MathHelpers.Lerp(prevKeyframe.G, nextKeyframe.G, factor);
+                InterpolatedValues[2] = MathHelpers.Lerp(prevKeyframe.B, nextKeyframe.B, factor);
+            }
+            else
+            {
+                InterpolatedValues[0] = prevKeyframe.R;
+                InterpolatedValues[1] = prevKeyframe.G;
+                InterpolatedValues[2] = prevKeyframe.B;
+            }
+
+            return InterpolatedValues;
+
+            //return Interpolate ? new CustomColor(MathHelpers.Lerp(prevKeyframe.R, nextKeyframe.R, factor), MathHelpers.Lerp(prevKeyframe.G, nextKeyframe.G, factor), MathHelpers.Lerp(prevKeyframe.B, nextKeyframe.B, factor), 0f) : prevKeyframe;
         }
     }
 

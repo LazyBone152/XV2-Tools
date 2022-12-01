@@ -15,14 +15,13 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
         public CustomVector4 Constant { get; set; }
         public AsyncObservableCollection<KeyframeVector2Value> Keyframes { get; set; } = new AsyncObservableCollection<KeyframeVector2Value>();
 
-        private readonly bool IsScale;
+        private float[] InterpolatedValues = new float[4];
 
         #region Init
-        public KeyframedVector2Value(float x, float y, KeyframedValueType valueType, bool isScale = false)
+        public KeyframedVector2Value(float x, float y, KeyframedValueType valueType)
         {
             Constant = new CustomVector4(x, y, 1f, 1f);
             ValueType = valueType;
-            IsScale = isScale;
         }
 
         public void DecompileKeyframes(params EMP_KeyframedValue[] empKeyframes)
@@ -32,13 +31,6 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
 
             float[] constantValue = Constant.Values;
 
-            if (IsScale)
-            {
-                constantValue = new float[4];
-                constantValue[0] = Constant.Values[0] / 2f;
-                constantValue[1] = Constant.Values[1] / 2f;
-            }
-
             //Returns array of 3: X, Y
             List<KeyframedGenericValue>[] tempKeyframes = Decompile(constantValue, empKeyframes);
 
@@ -47,8 +39,7 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
 
             for (int i = 0; i < tempKeyframes[0].Count; i++)
             {
-                float scale = IsScale ? 2f : 1f;
-                Keyframes.Add(new KeyframeVector2Value(tempKeyframes[0][i].Time / 100f, tempKeyframes[0][i].Value * scale, tempKeyframes[1][i].Value * scale));
+                Keyframes.Add(new KeyframeVector2Value(tempKeyframes[0][i].Time / 100f, tempKeyframes[0][i].Value, tempKeyframes[1][i].Value));
             }
         }
 
@@ -56,21 +47,6 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
         {
             SetParameterAndComponents(false, isScaleXyEnabled);
             EMP_KeyframedValue[] keyframes = Compile(Constant.Values, GetGenericKeyframes());
-
-            //Rescale keyframes to EMP standards (half-scale)
-            if (IsScale)
-            {
-                foreach(var keyframedValue in keyframes)
-                {
-                    if(keyframedValue != null)
-                    {
-                        foreach (var keyframe in keyframedValue.Keyframes)
-                        {
-                            keyframe.Value /= 2;
-                        }
-                    }
-                }
-            }
 
             return keyframes;
         }
@@ -130,6 +106,61 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             return new UndoableListRemove<KeyframeVector2Value>(Keyframes, keyframe);
         }
 
+        public float[] GetInterpolatedValue(float time)
+        {
+            if (Keyframes.Count == 0 || !IsAnimated) return Constant.Values;
+
+            //Check for a direct keyframe
+            var currentKeyframe = Keyframes.FirstOrDefault(x => x.Time == time);
+
+            if (currentKeyframe != null)
+                return currentKeyframe.Value.Values;
+
+            float prev = -1;
+            float next = -1;
+
+            foreach (var keyframe in Keyframes.OrderBy(x => x.Time))
+            {
+                if (keyframe.Time > prev && prev < time && keyframe.Time < time)
+                    prev = keyframe.Time;
+
+                if (keyframe.Time > time)
+                {
+                    next = keyframe.Time;
+                    break;
+                }
+            }
+
+            //No prev keyframe exists, so no interpolation is possible. Just use next keyframe then
+            if (prev == -1)
+            {
+                return Keyframes.FirstOrDefault(x => x.Time == next).Value.Values;
+            }
+
+            //Same, but for next keyframe. We will use the prev keyframe here.
+            if (next == -1 || prev == next)
+            {
+                return Keyframes.FirstOrDefault(x => x.Time == prev).Value.Values;
+            }
+
+            float factor = (time - prev) / (next - prev);
+            var prevKeyframe = Keyframes.FirstOrDefault(x => x.Time == prev).Value;
+            var nextKeyframe = Keyframes.FirstOrDefault(x => x.Time == next).Value;
+
+            //Reuse the same array to save on performance
+            if (Interpolate)
+            {
+                InterpolatedValues[0] = MathHelpers.Lerp(prevKeyframe.X, nextKeyframe.X, factor);
+                InterpolatedValues[1] = MathHelpers.Lerp(prevKeyframe.Y, nextKeyframe.Y, factor);
+            }
+            else
+            {
+                InterpolatedValues[0] = prevKeyframe.X;
+                InterpolatedValues[1] = prevKeyframe.Y;
+            }
+
+            return InterpolatedValues;
+        }
     }
 
     [Serializable]

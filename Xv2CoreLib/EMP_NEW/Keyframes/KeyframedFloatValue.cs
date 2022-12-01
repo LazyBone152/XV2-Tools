@@ -38,15 +38,11 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
         }
         public AsyncObservableCollection<KeyframeFloatValue> Keyframes { get; set; } = new AsyncObservableCollection<KeyframeFloatValue>();
 
-        //The EMP_KeyframedValue ID values. These will be used when re-compiling the keyframes.
-        private readonly bool IsScale;
-
         #region Init
-        public KeyframedFloatValue(float value, KeyframedValueType valueType, bool isEtr = false, bool isModifier = false, bool isScale = false)
+        public KeyframedFloatValue(float value, KeyframedValueType valueType, bool isEtr = false, bool isModifier = false)
         {
             ValueType = valueType;
             Constant = value;
-            IsScale = isScale;
             IsEtrValue = isEtr;
             IsModifierValue = isModifier;
         }
@@ -56,7 +52,7 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             if (empKeyframes.Length != 1)
                 throw new ArgumentException($"KeyframedFloatValue.DecompileKeyframes: Invalid number of keyframed values. Expected 1, but there are {empKeyframes.Length}!");
 
-            float constant = IsScale ? Constant / 2 : Constant;
+            float constant = Constant;
 
             //Returns array of 1
             List<KeyframedGenericValue>[] tempKeyframes = Decompile(new float[] { constant }, empKeyframes);
@@ -69,10 +65,7 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
 
             for (int i = 0; i < tempKeyframes[0].Count; i++)
             {
-                //Scale values within an EMP are half-scales, where 0.5 is full scaled. So it makes more sense, we will just scale the keyframes by 2 so 1.0 becomes full scale
-                float scale = IsScale ? 2f : 1f;
-
-                Keyframes.Add(new KeyframeFloatValue(tempKeyframes[0][i].Time / timeScale, tempKeyframes[0][i].Value * scale));
+                Keyframes.Add(new KeyframeFloatValue(tempKeyframes[0][i].Time / timeScale, tempKeyframes[0][i].Value));
             }
 
             //Set constant value for modifer keyframes
@@ -95,15 +88,6 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
         {
             SetParameterAndComponents(isSphere, isScaleXyEnabled);
             EMP_KeyframedValue[] keyframes = Compile(new float[] { Constant }, GetGenericKeyframes());
-
-            //Rescale keyframes to EMP standards (half-scale)
-            if (IsScale && keyframes[0] != null)
-            {
-                foreach (var keyframe in keyframes[0].Keyframes)
-                {
-                    keyframe.Value /= 2;
-                }
-            }
 
             return keyframes;
         }
