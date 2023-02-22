@@ -89,7 +89,7 @@
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
-                                                <Label Content="Burst" ToolTip="The maximum amount of node instances (any child node) that can be created per burst.&#x0a;&#x0a;Burst behaviour is dependent on the Node Type:&#x0a;-Emitter: Bursts can happen every frame, with a delay between them specified in Burst Frequency.&#x0a;-Emission and Null: A single burst happens at the end of the nodes lifetime, when the node is destroyed (for looping nodes, this is when the particle system is deactivated, and depends on the EEPK Deactivation Mode)"/>
+                                                <Label Content="Burst" ToolTip="The maximum amount of instances of each child node that can be created per burst.&#x0a;&#x0a;Burst behaviour is dependent on the Node Type:&#x0a;-Emitter: Bursts can happen every frame, with a delay between them specified in Burst Frequency.&#x0a;-Emission and Null: A single burst happens at the end of the nodes lifetime, when the node is destroyed (for looping nodes, this is when the particle system is deactivated, and depends on the EEPK Deactivation Mode)"/>
                                                 <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Burst}" Minimum="0" Maximum="1000"/>
                                             </Grid>
                                             <Grid Margin="3,5,0,0" Width="250">
@@ -403,7 +403,7 @@
                                             <Controls:NumericUpDown Grid.Column="2" Value="{Binding ElementName=UserControl, Path=NodeViewModel.StartRotation_Variance}" StringFormat="0.0####" Interval="0.05"/>
                                         </Grid>
                                     </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Visibility="{Binding ElementName=UserControl, Path=EmissionRotationValuesVisibility}">
+                                    <StackPanel Orientation="Horizontal" Visibility="{Binding ElementName=UserControl, Path=EmissionRotationValuesVisibility}" Margin="0,0,0,1">
                                         <Grid Margin="3,5,0,0" Width="275">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="125"/>
@@ -714,7 +714,7 @@
                                     <ColumnDefinition Width="120"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <Label Content="Use XY" ToolTip="Enables the usage of Scale XY values, which can scale the particle on each axis individually."/>
+                                <Label Content="Use XY" ToolTip="Enables the usage of Scale XY values, which can scale the particle on each axis individually.&#x0a;&#x0a;NOTE: ScaleBase must be set to the same value as Scale X, or the particle plane will deform. If ScaleBase was set to 0, then you would just have a single triangle."/>
                                 <CheckBox Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_ScaleXY}"/>
                             </Grid>
                             <Grid Margin="3,3" Width="400" HorizontalAlignment="Left">

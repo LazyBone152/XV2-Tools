@@ -131,6 +131,18 @@ namespace Xv2CoreLib.CUS
             return false;
         }
 
+        public int GetSkillIndex(ushort id2, SkillType skillType)
+        {
+            List<Skill> skills = GetSkills(skillType);
+
+            for(int i = 0; i < skills.Count; i++)
+            {
+                if (skills[i].ID2 == id2) return i;
+            }
+
+            return -1;
+        }
+
         public List<Skill> GetSkills(SkillType type)
         {
             switch (type)

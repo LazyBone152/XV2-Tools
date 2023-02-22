@@ -14,7 +14,7 @@ namespace Xv2CoreLib.Eternity
 
         [YAXAttributeFor("OZARUS")]
         [YAXSerializeAs("value")]
-        [YAXCollection(YAXCollectionSerializationTypes.Serially)]
+        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
         public List<string> Ozarus { get; set; } = new List<string>();
 
         [YAXAttributeFor("AUTO_BTL_PORT")]

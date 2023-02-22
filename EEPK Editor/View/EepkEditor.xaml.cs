@@ -4468,6 +4468,7 @@ namespace EEPK_Organiser.View
                 {
                     SceneManager.EnsureActorIsSet(0);
                     SceneManager.MainGameBase.VfxManager.PlayEffect(SelectedEffect, SceneManager.Actors[0]);
+                    //SceneManager.MainGameInstance?.TestParticlePlay(SelectedEffect);
                 }
             }
             #endif

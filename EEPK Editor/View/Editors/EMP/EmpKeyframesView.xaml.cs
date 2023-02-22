@@ -105,19 +105,24 @@ namespace EEPK_Organiser.View.Editors.EMP
 
         private void DataGridSorting()
         {
-            floatKeyframesGrid.Items.SortDescriptions.Clear();
-            colorKeyframesGrid.Items.SortDescriptions.Clear();
-            vector2KeyframesGrid.Items.SortDescriptions.Clear();
-            vector3KeyframesGrid.Items.SortDescriptions.Clear();
+            try
+            {
+                floatKeyframesGrid.Items.SortDescriptions.Clear();
+                colorKeyframesGrid.Items.SortDescriptions.Clear();
+                vector2KeyframesGrid.Items.SortDescriptions.Clear();
+                vector3KeyframesGrid.Items.SortDescriptions.Clear();
 
-            floatKeyframesGrid.Items.SortDescriptions.Add(new SortDescription(nameof(KeyframeBaseValue.Time), ListSortDirection.Ascending));
-            floatKeyframesGrid.Items.IsLiveSorting = true;
-            colorKeyframesGrid.Items.SortDescriptions.Add(new SortDescription(nameof(KeyframeBaseValue.Time), ListSortDirection.Ascending));
-            colorKeyframesGrid.Items.IsLiveSorting = true;
-            vector2KeyframesGrid.Items.SortDescriptions.Add(new SortDescription(nameof(KeyframeBaseValue.Time), ListSortDirection.Ascending));
-            vector2KeyframesGrid.Items.IsLiveSorting = true;
-            vector3KeyframesGrid.Items.SortDescriptions.Add(new SortDescription(nameof(KeyframeBaseValue.Time), ListSortDirection.Ascending));
-            vector3KeyframesGrid.Items.IsLiveSorting = true;
+                floatKeyframesGrid.Items.SortDescriptions.Add(new SortDescription(nameof(KeyframeBaseValue.Time), ListSortDirection.Ascending));
+                floatKeyframesGrid.Items.IsLiveSorting = true;
+                colorKeyframesGrid.Items.SortDescriptions.Add(new SortDescription(nameof(KeyframeBaseValue.Time), ListSortDirection.Ascending));
+                colorKeyframesGrid.Items.IsLiveSorting = true;
+                vector2KeyframesGrid.Items.SortDescriptions.Add(new SortDescription(nameof(KeyframeBaseValue.Time), ListSortDirection.Ascending));
+                vector2KeyframesGrid.Items.IsLiveSorting = true;
+                vector3KeyframesGrid.Items.SortDescriptions.Add(new SortDescription(nameof(KeyframeBaseValue.Time), ListSortDirection.Ascending));
+                vector3KeyframesGrid.Items.IsLiveSorting = true;
+
+            }
+            catch { }
         }
 
         private void Instance_UndoOrRedoCalled(object source, UndoEventRaisedEventArgs e)

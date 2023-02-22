@@ -144,6 +144,7 @@ namespace Xv2CoreLib
                 {
                     _costumes = value;
                     NotifyPropertyChanged(nameof(Costumes));
+                    NotifyPropertyChanged(nameof(DisplayName));
                 }
             }
         }
@@ -386,6 +387,8 @@ namespace Xv2CoreLib
 
             if (!Costumes.Contains(costume))
                 Costumes.Add(costume);
+
+            NotifyPropertyChanged(nameof(DisplayName));
         }
 
 

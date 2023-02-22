@@ -69,6 +69,7 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
 
         public EMP_KeyframedValue[] CompileKeyframes()
         {
+            SetParameterAndComponents();
             EMP_KeyframedValue[] keyframes = Compile(Constant.Values, GetGenericKeyframes());
 
             return keyframes;

@@ -144,6 +144,50 @@ namespace Xv2CoreLib.EMD
 
             return null;
         }
+    
+
+        public void CopyTextureSamplers(EMD_File copyEmdFile)
+        {
+            //Simple foreach loop over all submeshes
+            foreach (EMD_Model model in Models)
+            {
+                foreach (EMD_Mesh mesh in model.Meshes)
+                {
+                    foreach (EMD_Submesh submesh in mesh.Submeshes)
+                    {
+                        //Gets the submesh with the same material name from copyEmdFile
+                        EMD_Submesh submeshToCopyFrom = copyEmdFile.GetSubmesh(submesh.Name);
+
+                        //Check if emdFile has a equivalent submesh
+                        //If one isn't found, then nothing will be copied
+                        if (submeshToCopyFrom != null)
+                        {
+                            submesh.TextureSamplerDefs = submeshToCopyFrom.TextureSamplerDefs;
+                        }
+                    }
+                }
+            }
+        }
+
+        public EMD_Submesh GetSubmesh(string name)
+        {
+            //Gets the first submesh with the matching name
+
+            foreach (EMD_Model model in Models)
+            {
+                foreach (EMD_Mesh mesh in model.Meshes)
+                {
+                    foreach (EMD_Submesh submesh in mesh.Submeshes)
+                    {
+                        //Check if name is the same, allowing for casing differences
+                        if (submesh.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                            return submesh;
+                    }
+                }
+            }
+
+            return null;
+        }
     }
 
     [YAXSerializeAs("Model")]

@@ -1085,7 +1085,7 @@ namespace EEPK_Organiser.ViewModel
 
             if (node.NodeFlags2 != newFlag)
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<ParticleNode>(nameof(ParticleNode.NodeFlags2), node, node.NodeFlags, newFlag, "Node Flags"));
+                UndoManager.Instance.AddUndo(new UndoableProperty<ParticleNode>(nameof(ParticleNode.NodeFlags2), node, node.NodeFlags2, newFlag, "Node Flags"));
                 node.NodeFlags2 = newFlag;
             }
         }

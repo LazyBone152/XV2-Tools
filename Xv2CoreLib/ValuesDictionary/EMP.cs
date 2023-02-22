@@ -57,6 +57,21 @@ namespace Xv2CoreLib.ValuesDictionary
             { EMP_TextureSamplerDef.TextureRepitition.Border , "Border" }
         };
 
+        public static Dictionary<EMP_TextureSamplerDef.KeyframeTypeEnum, string> TextureKeyframeType { get; private set; } = new Dictionary<EMP_TextureSamplerDef.KeyframeTypeEnum, string>()
+        {
+            { EMP_TextureSamplerDef.KeyframeTypeEnum.Sequential , "Sequential" },
+            { EMP_TextureSamplerDef.KeyframeTypeEnum.SequentialLoop , "Sequential Loop" },
+            { EMP_TextureSamplerDef.KeyframeTypeEnum.Random , "Random" },
+            { EMP_TextureSamplerDef.KeyframeTypeEnum.Unk3 , "Unk3" },
+        };
+
+        public static Dictionary<EMP_TextureSamplerDef.SymmetryType, string> SymmetryType { get; private set; } = new Dictionary<EMP_TextureSamplerDef.SymmetryType, string>()
+        {
+            { EMP_TextureSamplerDef.SymmetryType.Default , "Default" },
+            { EMP_TextureSamplerDef.SymmetryType.Inverted , "Inverted" },
+            { EMP_TextureSamplerDef.SymmetryType.Random , "Random" }
+        };
+
         //ETR:
         public static Dictionary<ETR.ETR_InterpolationType, string> ETR_InterpolationType { get; private set; } = new Dictionary<ETR.ETR_InterpolationType, string>()
         {

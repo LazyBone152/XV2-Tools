@@ -59,6 +59,7 @@ namespace Xv2CoreLib.ACB
         public const string GLOBAL_AISAC_3DVOL_DEF = "3Dvol_def";
 
         //Known ACB Versions
+        public readonly static Version _1_37_0_0 = new Version("1.37.0.0");
         public readonly static Version _1_35_0_0 = new Version("1.35.0.0"); 
         public readonly static Version _1_30_0_0 = new Version("1.30.0.0"); //SDBH
         public readonly static Version _1_29_2_0 = new Version("1.29.2.0"); //SDBH

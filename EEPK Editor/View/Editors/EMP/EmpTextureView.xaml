@@ -71,254 +71,273 @@
             </ListBox.InputBindings>
         </ListBox>
 
-        <Grid Grid.Column="2" Margin="5, 20">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <StackPanel>
-                <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="120"/>
-                        <ColumnDefinition Width="217"/>
-                        <ColumnDefinition Width="30"/>
-                        <ColumnDefinition Width="30"/>
-                    </Grid.ColumnDefinitions>
-                    <Label Content="Texture" VerticalAlignment="Center"/>
-                    <ComboBox Grid.Column="1" MinHeight="40" SelectedItem="{Binding Path=ViewModel.SelectedEmbEntry, ElementName=UserControl}" ItemsSource="{Binding ElementName=UserControl, Path=AssetContainer.File3_Ref.Entry.Binding}" Controls:TextBoxHelper.Watermark="No Texture Assigned">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <Canvas Height="30">
-                                    <Grid Background="#1c1c1c" Height="30" Width="30" Canvas.Left="8">
-                                        <Image Source="{Binding Texture}"/>
-                                    </Grid>
-                                    <TextBlock Text="{Binding Name}" Canvas.Left="56" Canvas.Top="8"/>
-                                </Canvas>
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                    <Button Grid.Column="2" Command="{Binding ElementName=UserControl, Path=UnassignTextureCommand}" CommandParameter="0" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="20" Height="20" ToolTip="Unassign this texture.">
-                        <iconPacks:PackIconMaterialDesign Kind="RemoveCircleOutline"/>
-                    </Button>
-                    <Button Grid.Column="3" Command="{Binding ElementName=UserControl, Path=GotoTextureCommand}" CommandParameter="0" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="20" Height="20" ToolTip="View the selected texture in the Texture Viewer.">
-                        <iconPacks:PackIconMaterialDesign Kind="KeyboardArrowRight"/>
-                    </Button>
-                </Grid>
-
-                <TextBlock Text="Properties" FontWeight="Bold" HorizontalAlignment="Center" Margin="0, 5"/>
-                <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="85"/>
-                        <ColumnDefinition Width="33"/>
-                        <ColumnDefinition Width="120"/>
-                        <ColumnDefinition Width="35"/>
-                        <ColumnDefinition Width="120"/>
-                    </Grid.ColumnDefinitions>
-                    <Label Content="Filtering" VerticalAlignment="Center"/>
-                    <Label Content="Min" Grid.Column="1" VerticalAlignment="Center" HorizontalContentAlignment="Right" ToolTip="Filtering to use during minification – when the texture is zoomed out."/>
-                    <ComboBox Grid.Column="2" ItemsSource="{x:Static empDic:EMP.TextureFiltering}" SelectedValue="{Binding ElementName=UserControl, Path=ViewModel.FilteringMin}" DisplayMemberPath="Value" SelectedValuePath="Key"/>
-                    <Label Content="Mag" Grid.Column="3" VerticalAlignment="Center" HorizontalContentAlignment="Right" ToolTip="Filtering to use during magnification – when the texture is zoomed in."/>
-                    <ComboBox Grid.Column="4" ItemsSource="{x:Static empDic:EMP.TextureFiltering}" SelectedValue="{Binding ElementName=UserControl, Path=ViewModel.FilteringMag}" DisplayMemberPath="Value" SelectedValuePath="Key"/>
-                </Grid>
-                <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="85"/>
-                        <ColumnDefinition Width="33"/>
-                        <ColumnDefinition Width="120"/>
-                        <ColumnDefinition Width="35"/>
-                        <ColumnDefinition Width="120"/>
-                    </Grid.ColumnDefinitions>
-                    <Label Content="Repetition" VerticalAlignment="Center"/>
-                    <Label Content="U" Grid.Column="1" VerticalAlignment="Center" HorizontalContentAlignment="Right"/>
-                    <ComboBox Grid.Column="2" ItemsSource="{x:Static empDic:EMP.TextureRepitition}" SelectedValue="{Binding ElementName=UserControl, Path=ViewModel.RepetitionU}" DisplayMemberPath="Value" SelectedValuePath="Key"/>
-                    <Label Content="V" Grid.Column="3" VerticalAlignment="Center" HorizontalContentAlignment="Right"/>
-                    <ComboBox Grid.Column="4" ItemsSource="{x:Static empDic:EMP.TextureRepitition}" SelectedValue="{Binding ElementName=UserControl, Path=ViewModel.RepetitionV}" DisplayMemberPath="Value" SelectedValuePath="Key"/>
-                </Grid>
-                <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="99"/>
-                        <ColumnDefinition Width="20"/>
-                        <ColumnDefinition Width="120"/>
-                        <ColumnDefinition Width="34"/>
-                        <ColumnDefinition Width="120"/>
-                    </Grid.ColumnDefinitions>
-                    <Label Content="Random Symetry" VerticalAlignment="Center" FontSize="11"/>
-                    <Label Content="U" Grid.Column="1" VerticalAlignment="Center" HorizontalContentAlignment="Right"/>
-                    <Controls:NumericUpDown Grid.Column="2" Value="{Binding ElementName=UserControl, Path=ViewModel.RandomSymetryU}" Minimum="0" Maximum="255"/>
-                    <Label Content="V" Grid.Column="3" VerticalAlignment="Center" HorizontalContentAlignment="Right"/>
-                    <Controls:NumericUpDown Grid.Column="4" Value="{Binding ElementName=UserControl, Path=ViewModel.RandomSymetryU}" Minimum="0" Maximum="255"/>
-                </Grid>
-                <Grid Margin="3,3" Width="240" HorizontalAlignment="Left">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="120"/>
-                        <ColumnDefinition Width="120"/>
-                    </Grid.ColumnDefinitions>
-                    <Label Content="I__00" VerticalAlignment="Center"/>
-                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=ViewModel.I_00}" Minimum="0" Maximum="255"/>
-                </Grid>
-                <Grid Margin="3,3" Width="240" HorizontalAlignment="Left">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="120"/>
-                        <ColumnDefinition Width="120"/>
-                    </Grid.ColumnDefinitions>
-                    <Label Content="I__02" VerticalAlignment="Center"/>
-                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=ViewModel.I_02}" Minimum="0" Maximum="255"/>
-                </Grid>
-                <Grid Margin="3,3" Width="240" HorizontalAlignment="Left">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="120"/>
-                        <ColumnDefinition Width="120"/>
-                    </Grid.ColumnDefinitions>
-                    <Label Content="I__03" VerticalAlignment="Center"/>
-                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=ViewModel.I_03}" Minimum="0" Maximum="255"/>
-                </Grid>
-
-                <TextBlock Text="Scroll" FontWeight="Bold" HorizontalAlignment="Center" Margin="0, 5"/>
-                <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="120"/>
-                        <ColumnDefinition Width="120"/>
-                    </Grid.ColumnDefinitions>
-                    <Label Content="Scroll Type" VerticalAlignment="Center"/>
-                    <ComboBox Grid.Column="1" ItemsSource="{x:Static empDic:EMP.ScrollType}" SelectedValue="{Binding ElementName=UserControl, Path=ViewModel.ScrollType}" DisplayMemberPath="Value" SelectedValuePath="Key"/>
-                </Grid>
-
-                <StackPanel Visibility="{Binding ElementName=UserControl, Path=StaticVisibility}">
+        <GroupBox Header="Texture Definition" Grid.Column="2" Margin="5, 20" BorderBrush="{DynamicResource MahApps.Brushes.SemiTransparent}" BorderThickness="1">
+            <Grid Background="{DynamicResource MahApps.Brushes.SystemControlBackgroundAltMediumLow}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <StackPanel>
                     <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100"/>
-                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="217"/>
+                            <ColumnDefinition Width="30"/>
+                            <ColumnDefinition Width="30"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Content="Texture" VerticalAlignment="Center"/>
+                        <ComboBox Grid.Column="1" MinHeight="40" SelectedItem="{Binding Path=ViewModel.SelectedEmbEntry, ElementName=UserControl}" ItemsSource="{Binding ElementName=UserControl, Path=AssetContainer.File3_Ref.Entry.Binding}" Controls:TextBoxHelper.Watermark="No Texture Assigned">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Canvas Height="30">
+                                        <Grid Background="#1c1c1c" Height="30" Width="30" Canvas.Left="8">
+                                            <Image Source="{Binding Texture}"/>
+                                        </Grid>
+                                        <TextBlock Text="{Binding Name}" Canvas.Left="56" Canvas.Top="8"/>
+                                    </Canvas>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <Button Grid.Column="2" Command="{Binding ElementName=UserControl, Path=UnassignTextureCommand}" CommandParameter="0" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="20" Height="20" ToolTip="Unassign this texture.">
+                            <iconPacks:PackIconMaterialDesign Kind="RemoveCircleOutline"/>
+                        </Button>
+                        <Button Grid.Column="3" Command="{Binding ElementName=UserControl, Path=GotoTextureCommand}" CommandParameter="0" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="20" Height="20" ToolTip="View the selected texture in the Texture Viewer.">
+                            <iconPacks:PackIconMaterialDesign Kind="KeyboardArrowRight"/>
+                        </Button>
+                    </Grid>
+
+                    <TextBlock Text="Properties" FontWeight="Bold" HorizontalAlignment="Center" Margin="0, 5"/>
+                    <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="85"/>
+                            <ColumnDefinition Width="33"/>
                             <ColumnDefinition Width="120"/>
                             <ColumnDefinition Width="35"/>
                             <ColumnDefinition Width="120"/>
                         </Grid.ColumnDefinitions>
-                        <Label Content="Scroll" VerticalAlignment="Center"/>
-                        <Label Content="U" Grid.Column="1" VerticalAlignment="Center" HorizontalContentAlignment="Right"/>
-                        <Controls:NumericUpDown Grid.Column="2" Value="{Binding ElementName=UserControl, Path=ViewModel.ScrollU}" StringFormat="0.0###" HideUpDownButtons="True" InterceptMouseWheel="True" TrackMouseWheelWhenMouseOver="False" Interval="0.05"/>
-                        <Label Content="V" Grid.Column="3" VerticalAlignment="Center" HorizontalContentAlignment="Right"/>
-                        <Controls:NumericUpDown Grid.Column="4" Value="{Binding ElementName=UserControl, Path=ViewModel.ScrollV}" StringFormat="0.0###" HideUpDownButtons="True" InterceptMouseWheel="True" TrackMouseWheelWhenMouseOver="False" Interval="0.05"/>
+                        <Label Content="Filtering" VerticalAlignment="Center"/>
+                        <Label Content="Min" Grid.Column="1" VerticalAlignment="Center" HorizontalContentAlignment="Right" ToolTip="Filtering to use during minification – when the texture is zoomed out."/>
+                        <ComboBox Grid.Column="2" ItemsSource="{x:Static empDic:EMP.TextureFiltering}" SelectedValue="{Binding ElementName=UserControl, Path=ViewModel.FilteringMin}" DisplayMemberPath="Value" SelectedValuePath="Key"/>
+                        <Label Content="Mag" Grid.Column="3" VerticalAlignment="Center" HorizontalContentAlignment="Right" ToolTip="Filtering to use during magnification – when the texture is zoomed in."/>
+                        <ComboBox Grid.Column="4" ItemsSource="{x:Static empDic:EMP.TextureFiltering}" SelectedValue="{Binding ElementName=UserControl, Path=ViewModel.FilteringMag}" DisplayMemberPath="Value" SelectedValuePath="Key"/>
                     </Grid>
                     <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100"/>
-                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="85"/>
+                            <ColumnDefinition Width="33"/>
                             <ColumnDefinition Width="120"/>
                             <ColumnDefinition Width="35"/>
                             <ColumnDefinition Width="120"/>
                         </Grid.ColumnDefinitions>
-                        <Label Content="Scale" VerticalAlignment="Center"/>
+                        <Label Content="Repetition" VerticalAlignment="Center"/>
                         <Label Content="U" Grid.Column="1" VerticalAlignment="Center" HorizontalContentAlignment="Right"/>
-                        <Controls:NumericUpDown Grid.Column="2" Value="{Binding ElementName=UserControl, Path=ViewModel.ScaleU}" StringFormat="0.0###" HideUpDownButtons="True" InterceptMouseWheel="True" TrackMouseWheelWhenMouseOver="False" Interval="0.05"/>
+                        <ComboBox Grid.Column="2" ItemsSource="{x:Static empDic:EMP.TextureRepitition}" SelectedValue="{Binding ElementName=UserControl, Path=ViewModel.RepetitionU}" DisplayMemberPath="Value" SelectedValuePath="Key"/>
                         <Label Content="V" Grid.Column="3" VerticalAlignment="Center" HorizontalContentAlignment="Right"/>
-                        <Controls:NumericUpDown Grid.Column="4" Value="{Binding ElementName=UserControl, Path=ViewModel.ScaleV}" StringFormat="0.0###" HideUpDownButtons="True" InterceptMouseWheel="True" TrackMouseWheelWhenMouseOver="False" Interval="0.05"/>
+                        <ComboBox Grid.Column="4" ItemsSource="{x:Static empDic:EMP.TextureRepitition}" SelectedValue="{Binding ElementName=UserControl, Path=ViewModel.RepetitionV}" DisplayMemberPath="Value" SelectedValuePath="Key"/>
                     </Grid>
+                    <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="85"/>
+                            <ColumnDefinition Width="33"/>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="35"/>
+                            <ColumnDefinition Width="120"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Content="Symmetry" VerticalAlignment="Center"/>
+                        <Label Content="U" Grid.Column="1" VerticalAlignment="Center" HorizontalContentAlignment="Right"/>
+                        <ComboBox Grid.Column="2" ItemsSource="{x:Static empDic:EMP.SymmetryType}" SelectedValue="{Binding ElementName=UserControl, Path=ViewModel.SymmetryU}" DisplayMemberPath="Value" SelectedValuePath="Key"/>
+                        <Label Content="V" Grid.Column="3" VerticalAlignment="Center" HorizontalContentAlignment="Right"/>
+                        <ComboBox Grid.Column="4" ItemsSource="{x:Static empDic:EMP.SymmetryType}" SelectedValue="{Binding ElementName=UserControl, Path=ViewModel.SymmetryV}" DisplayMemberPath="Value" SelectedValuePath="Key"/>
+                    </Grid>
+                    <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="118"/>
+                            <ColumnDefinition Width="120"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Content="Keyframe Type" VerticalAlignment="Center" ToolTip="For Sprite Sheets, this determines how the keyframes work.&#x0a;&#x0a;-Sequential: Keyframes play out sequentially, and stop at the final one.&#x0a;-Sequential Loop: Keyframes play out  sequentially, and loop back to the start when the final one has been reached.&#x0a;-Random: Keyframes are always picked randomly."/>
+                        <ComboBox Grid.Column="1" ItemsSource="{x:Static empDic:EMP.TextureKeyframeType}" SelectedValue="{Binding ElementName=UserControl, Path=ViewModel.KeyframeType}" DisplayMemberPath="Value" SelectedValuePath="Key"/>
+                    </Grid>
+
+                    <Grid Margin="3,3" Width="240" HorizontalAlignment="Left">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="118"/>
+                            <ColumnDefinition Width="120"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Content="I__00" VerticalAlignment="Center"/>
+                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=ViewModel.I_00}" Minimum="0" Maximum="255"/>
+                    </Grid>
+                    <Grid Margin="3,3" Width="240" HorizontalAlignment="Left">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="85"/>
+                            <ColumnDefinition Width="33"/>
+                            <ColumnDefinition Width="120"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Content="I__02" VerticalAlignment="Center"/>
+                        <Label Content="b" Grid.Column="1" VerticalAlignment="Center" HorizontalContentAlignment="Right"/>
+                        <Controls:NumericUpDown Grid.Column="2" Value="{Binding ElementName=UserControl, Path=ViewModel.I_02_b}" Minimum="0" Maximum="15"/>
+                    </Grid>
+                    <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="85"/>
+                            <ColumnDefinition Width="33"/>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="35"/>
+                            <ColumnDefinition Width="120"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Content="I__03" VerticalAlignment="Center"/>
+                        <Label Content="a" Grid.Column="1" VerticalAlignment="Center" HorizontalContentAlignment="Right"/>
+                        <Controls:NumericUpDown Grid.Column="2" Value="{Binding ElementName=UserControl, Path=ViewModel.I_03_a}" Minimum="0" Maximum="15"/>
+                        <Label Content="b" Grid.Column="3" VerticalAlignment="Center" HorizontalContentAlignment="Right"/>
+                        <Controls:NumericUpDown Grid.Column="4" Value="{Binding ElementName=UserControl, Path=ViewModel.I_03_b}" Minimum="0" Maximum="15"/>
+                    </Grid>
+                    <TextBlock Text="Scroll" FontWeight="Bold" HorizontalAlignment="Center" Margin="0, 5"/>
+                    <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="120"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Content="Scroll Type" VerticalAlignment="Center"/>
+                        <ComboBox Grid.Column="1" ItemsSource="{x:Static empDic:EMP.ScrollType}" SelectedValue="{Binding ElementName=UserControl, Path=ViewModel.ScrollType}" DisplayMemberPath="Value" SelectedValuePath="Key"/>
+                    </Grid>
+
+                    <StackPanel Visibility="{Binding ElementName=UserControl, Path=StaticVisibility}">
+                        <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="20"/>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="35"/>
+                                <ColumnDefinition Width="120"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Content="Scroll" VerticalAlignment="Center"/>
+                            <Label Content="U" Grid.Column="1" VerticalAlignment="Center" HorizontalContentAlignment="Right"/>
+                            <Controls:NumericUpDown Grid.Column="2" Value="{Binding ElementName=UserControl, Path=ViewModel.ScrollU}" StringFormat="0.0###" HideUpDownButtons="True" InterceptMouseWheel="True" TrackMouseWheelWhenMouseOver="False" Interval="0.05"/>
+                            <Label Content="V" Grid.Column="3" VerticalAlignment="Center" HorizontalContentAlignment="Right"/>
+                            <Controls:NumericUpDown Grid.Column="4" Value="{Binding ElementName=UserControl, Path=ViewModel.ScrollV}" StringFormat="0.0###" HideUpDownButtons="True" InterceptMouseWheel="True" TrackMouseWheelWhenMouseOver="False" Interval="0.05"/>
+                        </Grid>
+                        <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="20"/>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="35"/>
+                                <ColumnDefinition Width="120"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Content="Scale" VerticalAlignment="Center"/>
+                            <Label Content="U" Grid.Column="1" VerticalAlignment="Center" HorizontalContentAlignment="Right"/>
+                            <Controls:NumericUpDown Grid.Column="2" Value="{Binding ElementName=UserControl, Path=ViewModel.ScaleU}" StringFormat="0.0###" HideUpDownButtons="True" InterceptMouseWheel="True" TrackMouseWheelWhenMouseOver="False" Interval="0.05"/>
+                            <Label Content="V" Grid.Column="3" VerticalAlignment="Center" HorizontalContentAlignment="Right"/>
+                            <Controls:NumericUpDown Grid.Column="4" Value="{Binding ElementName=UserControl, Path=ViewModel.ScaleV}" StringFormat="0.0###" HideUpDownButtons="True" InterceptMouseWheel="True" TrackMouseWheelWhenMouseOver="False" Interval="0.05"/>
+                        </Grid>
+                    </StackPanel>
+
+                    <StackPanel Visibility="{Binding ElementName=UserControl, Path=SpeedVisibility}">
+                        <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="20"/>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="35"/>
+                                <ColumnDefinition Width="120"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Content="Scroll Speed" VerticalAlignment="Center"/>
+                            <Label Content="U" Grid.Column="1" VerticalAlignment="Center" HorizontalContentAlignment="Right"/>
+                            <Controls:NumericUpDown Grid.Column="2" Value="{Binding ElementName=UserControl, Path=ViewModel.ScrollSpeedU}" StringFormat="0.0###" HideUpDownButtons="True" InterceptMouseWheel="True" TrackMouseWheelWhenMouseOver="False" Interval="0.05"/>
+                            <Label Content="V" Grid.Column="3" VerticalAlignment="Center" HorizontalContentAlignment="Right"/>
+                            <Controls:NumericUpDown Grid.Column="4" Value="{Binding ElementName=UserControl, Path=ViewModel.ScrollSpeedV}" StringFormat="0.0###" HideUpDownButtons="True" InterceptMouseWheel="True" TrackMouseWheelWhenMouseOver="False" Interval="0.05"/>
+                        </Grid>
+                    </StackPanel>
+
                 </StackPanel>
 
-                <StackPanel Visibility="{Binding ElementName=UserControl, Path=SpeedVisibility}">
-                    <Grid Margin="3,3" Width="450" HorizontalAlignment="Left">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100"/>
-                            <ColumnDefinition Width="20"/>
-                            <ColumnDefinition Width="120"/>
-                            <ColumnDefinition Width="35"/>
-                            <ColumnDefinition Width="120"/>
-                        </Grid.ColumnDefinitions>
-                        <Label Content="Scroll Speed" VerticalAlignment="Center"/>
-                        <Label Content="U" Grid.Column="1" VerticalAlignment="Center" HorizontalContentAlignment="Right"/>
-                        <Controls:NumericUpDown Grid.Column="2" Value="{Binding ElementName=UserControl, Path=ViewModel.ScrollSpeedU}" StringFormat="0.0###" HideUpDownButtons="True" InterceptMouseWheel="True" TrackMouseWheelWhenMouseOver="False" Interval="0.05"/>
-                        <Label Content="V" Grid.Column="3" VerticalAlignment="Center" HorizontalContentAlignment="Right"/>
-                        <Controls:NumericUpDown Grid.Column="4" Value="{Binding ElementName=UserControl, Path=ViewModel.ScrollSpeedV}" StringFormat="0.0###" HideUpDownButtons="True" InterceptMouseWheel="True" TrackMouseWheelWhenMouseOver="False" Interval="0.05"/>
-                    </Grid>
-                </StackPanel>
+                <DataGrid Grid.Row="1" Visibility="{Binding ElementName=UserControl, Path=SpriteSheetVisibility}" BorderBrush="{DynamicResource MahApps.Brushes.Gray.SemiTransparent}" BorderThickness="1" Margin="5, 5, 5, 0" x:Name="keyframeDataGrid" ItemsSource="{Binding ElementName=UserControl, Path=SelectedTexture.ScrollState.Keyframes.Binding}" SelectedItem="{Binding ElementName=UserControl, Path=ViewModel.SelectedKeyframe}" 
+                              CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False" AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="Time" Width="*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Time}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate>
+                                    <Controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=ViewModel.KeyframeTime}" TextAlignment="Left" HideUpDownButtons="True" InterceptMouseWheel="True" TrackMouseWheelWhenMouseOver="True"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
 
-            </StackPanel>
+                        <DataGridTemplateColumn Header="Scroll U" Width="*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding ScrollU}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate>
+                                    <Controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=ViewModel.ScrollU}" TextAlignment="Left" StringFormat="0.0###" HideUpDownButtons="True" InterceptMouseWheel="True" TrackMouseWheelWhenMouseOver="True" Interval="0.05"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Scroll V" Width="*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding ScrollV}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate>
+                                    <Controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=ViewModel.ScrollV}" TextAlignment="Left" StringFormat="0.0###" HideUpDownButtons="True" InterceptMouseWheel="True" TrackMouseWheelWhenMouseOver="True" Interval="0.05"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Scale U" Width="*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding ScaleU}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate>
+                                    <Controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=ViewModel.ScaleU}" TextAlignment="Left" StringFormat="0.0###" HideUpDownButtons="True" InterceptMouseWheel="True" TrackMouseWheelWhenMouseOver="True" Interval="0.05"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Scale V" Width="*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding ScaleV}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate>
+                                    <Controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=ViewModel.ScaleV}" TextAlignment="Left" StringFormat="0.0###" HideUpDownButtons="True" InterceptMouseWheel="True" TrackMouseWheelWhenMouseOver="True" Interval="0.05"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
 
-            <DataGrid Grid.Row="1" Visibility="{Binding ElementName=UserControl, Path=SpriteSheetVisibility}" BorderBrush="{DynamicResource MahApps.Brushes.Gray.SemiTransparent}" BorderThickness="1" Margin="5, 5, 5, 0" x:Name="keyframeDataGrid" ItemsSource="{Binding ElementName=UserControl, Path=SelectedTexture.ScrollState.Keyframes.Binding}" SelectedItem="{Binding ElementName=UserControl, Path=ViewModel.SelectedKeyframe}" 
-                              CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False" AutoGenerateColumns="False" dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" dd:DragDrop.UseDefaultDragAdorner="True">
-                <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="Time" Width="*">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Time}"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                        <DataGridTemplateColumn.CellEditingTemplate>
-                            <DataTemplate>
-                                <Controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=ViewModel.KeyframeTime}" TextAlignment="Left" HideUpDownButtons="True" InterceptMouseWheel="True" TrackMouseWheelWhenMouseOver="True"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellEditingTemplate>
-                    </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                    <DataGrid.ContextMenu>
+                        <ContextMenu FontSize="12">
+                            <MenuItem Header="New" Command="{Binding Source={StaticResource Proxy}, Path=Data.AddKeyframeCommand}"/>
+                            <MenuItem Header="Duplicate" Command="{Binding Source={StaticResource Proxy}, Path=Data.DuplicateKeyframeCommand}"/>
+                            <MenuItem Header="Delete" Command="{Binding Source={StaticResource Proxy}, Path=Data.DeleteKeyframeCommand}"/>
+                            <Separator/>
+                            <MenuItem Header="Copy" Command="{Binding Source={StaticResource Proxy}, Path=Data.CopyKeyframeCommand}"/>
+                            <MenuItem Header="Paste" Command="{Binding Source={StaticResource Proxy}, Path=Data.PasteKeyframeCommand}"/>
+                        </ContextMenu>
+                    </DataGrid.ContextMenu>
+                    <DataGrid.InputBindings>
+                        <KeyBinding Modifiers="Ctrl" Key="C" Command="{Binding ElementName=UserControl, Path=CopyKeyframeCommand}"/>
+                        <KeyBinding Modifiers="Ctrl" Key="V" Command="{Binding ElementName=UserControl, Path=PasteKeyframeCommand}"/>
+                        <KeyBinding Modifiers="Ctrl" Key="D" Command="{Binding ElementName=UserControl, Path=DuplicateKeyframeCommand}"/>
+                        <KeyBinding Modifiers="Ctrl" Key="N" Command="{Binding ElementName=UserControl, Path=AddKeyframeCommand}"/>
+                        <KeyBinding Key="Delete" Command="{Binding ElementName=UserControl, Path=DeleteKeyframeCommand}"/>
+                    </DataGrid.InputBindings>
+                </DataGrid>
 
-                    <DataGridTemplateColumn Header="Scroll U" Width="*">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding ScrollU}"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                        <DataGridTemplateColumn.CellEditingTemplate>
-                            <DataTemplate>
-                                <Controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=ViewModel.ScrollU}" TextAlignment="Left" StringFormat="0.0###" HideUpDownButtons="True" InterceptMouseWheel="True" TrackMouseWheelWhenMouseOver="True" Interval="0.05"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellEditingTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTemplateColumn Header="Scroll V" Width="*">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding ScrollV}"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                        <DataGridTemplateColumn.CellEditingTemplate>
-                            <DataTemplate>
-                                <Controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=ViewModel.ScrollV}" TextAlignment="Left" StringFormat="0.0###" HideUpDownButtons="True" InterceptMouseWheel="True" TrackMouseWheelWhenMouseOver="True" Interval="0.05"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellEditingTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTemplateColumn Header="Scale U" Width="*">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding ScaleU}"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                        <DataGridTemplateColumn.CellEditingTemplate>
-                            <DataTemplate>
-                                <Controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=ViewModel.ScaleU}" TextAlignment="Left" StringFormat="0.0###" HideUpDownButtons="True" InterceptMouseWheel="True" TrackMouseWheelWhenMouseOver="True" Interval="0.05"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellEditingTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTemplateColumn Header="Scale V" Width="*">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding ScaleV}"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                        <DataGridTemplateColumn.CellEditingTemplate>
-                            <DataTemplate>
-                                <Controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=ViewModel.ScaleV}" TextAlignment="Left" StringFormat="0.0###" HideUpDownButtons="True" InterceptMouseWheel="True" TrackMouseWheelWhenMouseOver="True" Interval="0.05"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellEditingTemplate>
-                    </DataGridTemplateColumn>
+            </Grid>
 
-                </DataGrid.Columns>
-                <DataGrid.ContextMenu>
-                    <ContextMenu FontSize="12">
-                        <MenuItem Header="New" Command="{Binding Source={StaticResource Proxy}, Path=Data.AddKeyframeCommand}"/>
-                        <MenuItem Header="Duplicate" Command="{Binding Source={StaticResource Proxy}, Path=Data.DuplicateKeyframeCommand}"/>
-                        <MenuItem Header="Delete" Command="{Binding Source={StaticResource Proxy}, Path=Data.DeleteKeyframeCommand}"/>
-                        <Separator/>
-                        <MenuItem Header="Copy" Command="{Binding Source={StaticResource Proxy}, Path=Data.CopyKeyframeCommand}"/>
-                        <MenuItem Header="Paste" Command="{Binding Source={StaticResource Proxy}, Path=Data.PasteKeyframeCommand}"/>
-                    </ContextMenu>
-                </DataGrid.ContextMenu>
-                <DataGrid.InputBindings>
-                    <KeyBinding Modifiers="Ctrl" Key="C" Command="{Binding ElementName=UserControl, Path=CopyKeyframeCommand}"/>
-                    <KeyBinding Modifiers="Ctrl" Key="V" Command="{Binding ElementName=UserControl, Path=PasteKeyframeCommand}"/>
-                    <KeyBinding Modifiers="Ctrl" Key="D" Command="{Binding ElementName=UserControl, Path=DuplicateKeyframeCommand}"/>
-                    <KeyBinding Modifiers="Ctrl" Key="N" Command="{Binding ElementName=UserControl, Path=AddKeyframeCommand}"/>
-                    <KeyBinding Key="Delete" Command="{Binding ElementName=UserControl, Path=DeleteKeyframeCommand}"/>
-                </DataGrid.InputBindings>
-            </DataGrid>
-
-        </Grid>
+        </GroupBox>
         
         <Border Grid.Column="3" BorderBrush="{DynamicResource MahApps.Brushes.Gray.SemiTransparent}" BorderThickness="2" Margin="5, 15">
             <Grid Margin="5, 5">

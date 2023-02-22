@@ -431,7 +431,7 @@ namespace Xv2CoreLib.EMP_NEW
                     bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - EmbTextureOffsets_Minus[i][a]), EmbTextureOffsets[i][a]);
                 }
 
-                bytes.AddRange(new byte[10] { textures[i].I_00, textures[i].EmbIndex, textures[i].I_02, textures[i].I_03, (byte)textures[i].FilteringMin, (byte)textures[i].FilteringMag, (byte)textures[i].RepetitionU, (byte)textures[i].RepetitionV, textures[i].RandomSymetryU, textures[i].RandomSymetryV });
+                bytes.AddRange(new byte[10] { textures[i].I_00, textures[i].EmbIndex, Int4Converter.GetByte((byte)textures[i].KeyframeType, textures[i].I_02_b), Int4Converter.GetByte(textures[i].I_03_a, textures[i].I_03_b), (byte)textures[i].FilteringMin, (byte)textures[i].FilteringMag, (byte)textures[i].RepetitionU, (byte)textures[i].RepetitionV, (byte)textures[i].SymmetryU, (byte)textures[i].SymmetryV });
                 bytes.AddRange(BitConverter.GetBytes((ushort)textures[i].ScrollState.ScrollType));
 
                 switch (textures[i].ScrollState.ScrollType)

@@ -1810,6 +1810,7 @@ namespace Xv2CoreLib.EMP_NEW
             return new ParticleEmission()
             {
                 EmissionType = EmissionType,
+                BillboardType = BillboardType,
                 VisibleOnlyOnMotion = VisibleOnlyOnMotion,
                 StartRotation = StartRotation,
                 StartRotation_Variance = StartRotation_Variance,
@@ -2717,6 +2718,21 @@ namespace Xv2CoreLib.EMP_NEW
             Linear = 2
         }
 
+        public enum KeyframeTypeEnum : byte
+        {
+            Sequential = 0,
+            SequentialLoop = 1,
+            Random = 2,
+            Unk3 = 3
+        }
+
+        public enum SymmetryType : byte
+        {
+            Default = 0,
+            Inverted = 1,
+            Random = 2
+        }
+
         public string TextureName => _textureRef != null ? TextureRef.Name : "No Texture Assigned";
 
         private EmbEntry _textureRef = null;
@@ -2736,14 +2752,16 @@ namespace Xv2CoreLib.EMP_NEW
 
         public byte EmbIndex { get; set; } = byte.MaxValue;
         public byte I_00 { get; set; }
-        public byte I_02 { get; set; }
-        public byte I_03 { get; set; }
+        public KeyframeTypeEnum KeyframeType { get; set; } //I_02_a
+        public byte I_02_b { get; set; } //Seems to be flags. 0x1 and 0x3 result in the texture being rotated sideways. No visible changes with 0x2.
+        public byte I_03_a { get; set; }
+        public byte I_03_b { get; set; }
         public TextureFiltering FilteringMin { get; set; }
         public TextureFiltering FilteringMag { get; set; }
         public TextureRepitition RepetitionU { get; set; }
         public TextureRepitition RepetitionV { get; set; }
-        public byte RandomSymetryU { get; set; }
-        public byte RandomSymetryV { get; set; }
+        public SymmetryType SymmetryU { get; set; }
+        public SymmetryType SymmetryV { get; set; }
 
         public EMP_ScrollState ScrollState { get; set; } = new EMP_ScrollState();
 
@@ -2757,14 +2775,16 @@ namespace Xv2CoreLib.EMP_NEW
             textureEntry.ScrollState.ScrollType = (EMP_ScrollState.ScrollTypeEnum)BitConverter.ToInt16(rawBytes, textureOffset + 10);
             textureEntry.I_00 = rawBytes[textureOffset + 0];
             textureEntry.EmbIndex = rawBytes[textureOffset + 1];
-            textureEntry.I_02 = rawBytes[textureOffset + 2];
-            textureEntry.I_03 = rawBytes[textureOffset + 3];
+            textureEntry.KeyframeType = (KeyframeTypeEnum)Int4Converter.ToInt4(rawBytes[textureOffset + 2])[0];
+            textureEntry.I_02_b = Int4Converter.ToInt4(rawBytes[textureOffset + 2])[1];
+            textureEntry.I_03_a = Int4Converter.ToInt4(rawBytes[textureOffset + 3])[0];
+            textureEntry.I_03_b = Int4Converter.ToInt4(rawBytes[textureOffset + 3])[1];
             textureEntry.FilteringMin = (EMP_TextureSamplerDef.TextureFiltering)rawBytes[textureOffset + 4];
             textureEntry.FilteringMag = (EMP_TextureSamplerDef.TextureFiltering)rawBytes[textureOffset + 5];
             textureEntry.RepetitionU = (EMP_TextureSamplerDef.TextureRepitition)rawBytes[textureOffset + 6];
             textureEntry.RepetitionV = (EMP_TextureSamplerDef.TextureRepitition)rawBytes[textureOffset + 7];
-            textureEntry.RandomSymetryU = rawBytes[textureOffset + 8];
-            textureEntry.RandomSymetryV = rawBytes[textureOffset + 9];
+            textureEntry.SymmetryU = (SymmetryType)rawBytes[textureOffset + 8];
+            textureEntry.SymmetryV = (SymmetryType)rawBytes[textureOffset + 9];
 
             switch (textureEntry.ScrollState.ScrollType)
             {
@@ -2840,7 +2860,7 @@ namespace Xv2CoreLib.EMP_NEW
                     bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - textures[i].OffsetsToReplace_Relative[a]), textures[i].OffsetsToReplace[a]);
                 }
 
-                bytes.AddRange(new byte[10] { textures[i].I_00, textures[i].EmbIndex, textures[i].I_02, textures[i].I_03, (byte)textures[i].FilteringMin, (byte)textures[i].FilteringMag, (byte)textures[i].RepetitionU, (byte)textures[i].RepetitionV, textures[i].RandomSymetryU, textures[i].RandomSymetryV });
+                bytes.AddRange(new byte[10] { textures[i].I_00, textures[i].EmbIndex, Int4Converter.GetByte((byte)textures[i].KeyframeType, textures[i].I_02_b), Int4Converter.GetByte(textures[i].I_03_a, textures[i].I_03_b), (byte)textures[i].FilteringMin, (byte)textures[i].FilteringMag, (byte)textures[i].RepetitionU, (byte)textures[i].RepetitionV, (byte)textures[i].SymmetryU, (byte)textures[i].SymmetryV });
                 bytes.AddRange(BitConverter.GetBytes((ushort)textures[i].ScrollState.ScrollType));
 
                 switch (textures[i].ScrollState.ScrollType)
@@ -2965,14 +2985,16 @@ namespace Xv2CoreLib.EMP_NEW
             {
                 I_00 = I_00,
                 EmbIndex = EmbIndex,
-                I_02 = I_02,
-                I_03 = I_03,
+                KeyframeType = KeyframeType,
+                I_03_a = I_03_a,
+                I_03_b = I_03_b,
                 FilteringMin = FilteringMin,
                 FilteringMag = FilteringMag,
                 RepetitionU = RepetitionU,
                 RepetitionV = RepetitionV,
-                RandomSymetryU = RandomSymetryU,
-                RandomSymetryV = RandomSymetryV,
+                SymmetryU = SymmetryU,
+                SymmetryV = SymmetryV,
+                I_02_b = I_02_b,
                 ScrollState = ScrollState.Copy(),
                 TextureRef = TextureRef
             };
@@ -3005,14 +3027,16 @@ namespace Xv2CoreLib.EMP_NEW
         {
             if (obj1.I_00 != obj2.I_00) return false;
             if (obj1.EmbIndex != obj2.EmbIndex) return false;
-            if (obj1.I_02 != obj2.I_02) return false;
-            if (obj1.I_03 != obj2.I_03) return false;
+            if (obj1.KeyframeType != obj2.KeyframeType) return false;
+            if (obj1.I_02_b != obj2.I_02_b) return false;
+            if (obj1.I_03_a != obj2.I_03_a) return false;
+            if (obj1.I_03_b != obj2.I_03_b) return false;
             if (obj1.FilteringMin != obj2.FilteringMin) return false;
             if (obj1.FilteringMag != obj2.FilteringMag) return false;
-            if (obj1.RandomSymetryU != obj2.RandomSymetryU) return false;
+            if (obj1.SymmetryU != obj2.SymmetryU) return false;
             if (obj1.RepetitionU != obj2.RepetitionU) return false;
             if (obj1.RepetitionV != obj2.RepetitionV) return false;
-            if (obj1.RandomSymetryV != obj2.RandomSymetryV) return false;
+            if (obj1.SymmetryV != obj2.SymmetryV) return false;
 
             if(obj1.ScrollState != null)
             {

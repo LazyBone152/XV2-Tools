@@ -29,7 +29,7 @@ namespace EEPK_Organiser.ViewModel
             get => texture.TextureRef;
             set
             {
-                if(value != texture.TextureRef)
+                if (value != texture.TextureRef)
                 {
                     UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(texture.TextureRef), texture, texture.TextureRef, value, "Change Texture"));
                     texture.TextureRef = value;
@@ -50,29 +50,55 @@ namespace EEPK_Organiser.ViewModel
                 }
             }
         }
-        public byte I_02
+        public EMP_TextureSamplerDef.KeyframeTypeEnum KeyframeType
         {
-            get => texture.I_02;
+            get => texture.KeyframeType;
             set
             {
-                if (value != texture.I_02)
+                if (value != texture.KeyframeType)
                 {
-                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(texture.I_02), texture, texture.I_02, value, "EMP Texture -> I_02"));
-                    texture.I_02 = value;
-                    RaisePropertyChanged(nameof(I_02));
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(texture.KeyframeType), texture, texture.KeyframeType, value, "EMP Texture -> Keyframe Type"));
+                    texture.KeyframeType = value;
+                    RaisePropertyChanged(nameof(KeyframeType));
                 }
             }
         }
-        public byte I_03
+        public byte I_02_b
         {
-            get => texture.I_03;
+            get => texture.I_02_b;
             set
             {
-                if (value != texture.I_03)
+                if (value != texture.I_02_b)
                 {
-                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(texture.I_03), texture, texture.I_03, value, "EMP Texture -> I_03"));
-                    texture.I_03 = value;
-                    RaisePropertyChanged(nameof(I_03));
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(texture.I_02_b), texture, texture.I_02_b, value, "EMP Texture -> I_02_b"));
+                    texture.I_02_b = value;
+                    RaisePropertyChanged(nameof(I_02_b));
+                }
+            }
+        }
+        public byte I_03_a
+        {
+            get => texture.I_03_a;
+            set
+            {
+                if (value != texture.I_03_a)
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(texture.I_03_a), texture, texture.I_03_a, value, "EMP Texture -> I_03_a"));
+                    texture.I_03_a = value;
+                    RaisePropertyChanged(nameof(I_03_a));
+                }
+            }
+        }
+        public byte I_03_b
+        {
+            get => texture.I_03_b;
+            set
+            {
+                if (value != texture.I_03_b)
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(texture.I_03_b), texture, texture.I_03_b, value, "EMP Texture -> I_03_b"));
+                    texture.I_03_b = value;
+                    RaisePropertyChanged(nameof(I_03_b));
                 }
             }
         }
@@ -128,29 +154,29 @@ namespace EEPK_Organiser.ViewModel
                 }
             }
         }
-        public byte RandomSymetryU
+        public EMP_TextureSamplerDef.SymmetryType SymmetryU
         {
-            get => texture.RandomSymetryU;
+            get => texture.SymmetryU;
             set
             {
-                if (value != texture.RandomSymetryU)
+                if (value != texture.SymmetryU)
                 {
-                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(texture.RandomSymetryU), texture, texture.RandomSymetryU, value, "EMP Texture -> RandomSymetry U"));
-                    texture.RandomSymetryU = value;
-                    RaisePropertyChanged(nameof(RandomSymetryU));
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(texture.SymmetryU), texture, texture.SymmetryU, value, "EMP Texture -> Symmetry U"));
+                    texture.SymmetryU = value;
+                    RaisePropertyChanged(nameof(SymmetryU));
                 }
             }
         }
-        public byte RandomSymetryV
+        public EMP_TextureSamplerDef.SymmetryType SymmetryV
         {
-            get => texture.RandomSymetryV;
+            get => texture.SymmetryV;
             set
             {
-                if (value != texture.RandomSymetryV)
+                if (value != texture.SymmetryV)
                 {
-                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(texture.RandomSymetryV), texture, texture.RandomSymetryV, value, "EMP Texture -> RandomSymetry V"));
-                    texture.RandomSymetryV = value;
-                    RaisePropertyChanged(nameof(RandomSymetryV));
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(texture.SymmetryV), texture, texture.SymmetryV, value, "EMP Texture -> Symmetry V"));
+                    texture.SymmetryV = value;
+                    RaisePropertyChanged(nameof(SymmetryV));
                 }
             }
         }
@@ -257,7 +283,7 @@ namespace EEPK_Organiser.ViewModel
                 }
             }
         }
-        
+
         public EMP_ScrollState.ScrollTypeEnum ScrollType
         {
             get => texture.ScrollState.ScrollType;
@@ -268,6 +294,10 @@ namespace EEPK_Organiser.ViewModel
                     UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(texture.ScrollState.ScrollType), texture.ScrollState, texture.ScrollState.ScrollType, value, "EMP Texture -> Scroll Type"));
                     texture.ScrollState.ScrollType = value;
                     RaisePropertyChanged(nameof(ScrollType));
+                    RaisePropertyChanged(nameof(ScrollU));
+                    RaisePropertyChanged(nameof(ScrollV));
+                    RaisePropertyChanged(nameof(ScaleU));
+                    RaisePropertyChanged(nameof(ScaleV));
                 }
             }
         }
@@ -283,14 +313,16 @@ namespace EEPK_Organiser.ViewModel
             RaisePropertyChanged(nameof(SelectedKeyframe));
             RaisePropertyChanged(nameof(SelectedEmbEntry));
             RaisePropertyChanged(nameof(I_00));
-            RaisePropertyChanged(nameof(I_02));
-            RaisePropertyChanged(nameof(I_03));
+            RaisePropertyChanged(nameof(KeyframeType));
+            RaisePropertyChanged(nameof(I_02_b));
+            RaisePropertyChanged(nameof(I_03_a));
+            RaisePropertyChanged(nameof(I_03_b));
             RaisePropertyChanged(nameof(FilteringMin));
             RaisePropertyChanged(nameof(FilteringMag));
             RaisePropertyChanged(nameof(RepetitionU));
             RaisePropertyChanged(nameof(RepetitionV));
-            RaisePropertyChanged(nameof(RandomSymetryU));
-            RaisePropertyChanged(nameof(RandomSymetryV));
+            RaisePropertyChanged(nameof(SymmetryU));
+            RaisePropertyChanged(nameof(SymmetryV));
             RaisePropertyChanged(nameof(ScrollSpeedU));
             RaisePropertyChanged(nameof(ScrollSpeedV));
             RaisePropertyChanged(nameof(ScrollU));
