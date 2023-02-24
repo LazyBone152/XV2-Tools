@@ -14,6 +14,7 @@ namespace Xv2CoreLib.AFS2
         None
     }
 
+    [Serializable]
     public class AWB_Wrapper
     {
         public AFS2_File AwbFile { get; set; }

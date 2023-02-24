@@ -34,7 +34,7 @@ namespace Xv2CoreLib
 
         #region UI Properties
         public string BorrowString { get { return (Borrowed) ? "Yes" : "No"; } }
-        public string PathString { get { return (Borrowed) ? Path : "Calculated on save"; } }
+        public string PathString { get { return (Borrowed) ? RelativePath : "Calculated on save"; } }
         public string DisplayName
         {
             get
@@ -84,6 +84,24 @@ namespace Xv2CoreLib
         /// Absolute path to the file. This will be re-calculated when saving except when it is "Borrowed" or was loaded manually.
         /// </summary>
         public string Path { get; set; } = string.Empty;
+        public string RelativePath
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(Path)) return "";
+
+                const string removeToken = "DB Xenoverse 2/data";
+
+                if (Path.Contains(removeToken))
+                {
+                    int idx = Path.IndexOf(removeToken) + removeToken.Length + 1;
+                    string str = Path.Remove(0, idx);
+                    return str;
+                }
+
+                return Path;
+            }
+        }
         /// <summary>
         /// If true, then this file belongs to another source. In this case, it will always be saved back to its original source (overwritting it) unless specified otherwise.
         /// </summary>
@@ -234,7 +252,7 @@ namespace Xv2CoreLib
                 Costumes.Add(0);
             }
         }
-        
+
 
         public List<IUndoRedo> ReplaceFile(string path)
         {
@@ -327,7 +345,7 @@ namespace Xv2CoreLib
             File = File.Copy();
 
             //Special case: if ACB, references must be fixed after serialization
-            if(File is ACB_Wrapper acb && typeof(T) == typeof(ACB_Wrapper))
+            if (File is ACB_Wrapper acb && typeof(T) == typeof(ACB_Wrapper))
             {
                 acb.AcbFile.SetCommandTableVersion();
                 File = new ACB_Wrapper(acb.AcbFile) as T;
@@ -385,6 +403,13 @@ namespace Xv2CoreLib
             //0 will automatically be used by all costumes that dont have a specific extra defined.
             if (HasCostume(0)) return;
 
+            //If costume to add is 0, then clear all other costumes out since this one will now become the default
+            if(costume == 0)
+            {
+                Costumes.Clear();
+                IsDefault = true;
+            }
+
             if (!Costumes.Contains(costume))
                 Costumes.Add(costume);
 
@@ -430,6 +455,18 @@ namespace Xv2CoreLib
 
             return false;
         }
+
+        public static void GetCostumes(IList<Xv2File<T>> files, List<int> costumes)
+        {
+            foreach (var file in files)
+            {
+                foreach (var costume in file.Costumes)
+                {
+                    if (!costumes.Contains(costume))
+                        costumes.Add(costume);
+                }
+            }
+        }
         #endregion
 
         #region Helpers
@@ -474,7 +511,7 @@ namespace Xv2CoreLib
 
             return false;
         }
-        
+
         #endregion
     }
 

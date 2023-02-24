@@ -21,7 +21,7 @@ namespace Xv2CoreLib.ACB
     //-Copying cues
     //-All interactions are undoable (via UndoManager)
     
-
+    [Serializable]
     public class ACB_Wrapper : IIsNull, INotifyPropertyChanged
     {
         #region NotifyPropertyChanged
@@ -412,6 +412,7 @@ namespace Xv2CoreLib.ACB
         }
     }
 
+    [Serializable]
     public class Cue_Wrapper : INotifyPropertyChanged
     {
         #region NotifyPropertyChanged
@@ -963,6 +964,7 @@ namespace Xv2CoreLib.ACB
         #endregion
     }
 
+    [Serializable]
     public class Track_Wrapper : INotifyPropertyChanged
     {
 #region NotifyPropertyChanged
@@ -1204,6 +1206,7 @@ namespace Xv2CoreLib.ACB
         
     }
 
+    [Serializable]
     public class Waveform_Wrapper : INotifyPropertyChanged
     {
 #region NotifyPropertyChanged

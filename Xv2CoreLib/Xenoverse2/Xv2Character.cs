@@ -31,7 +31,7 @@ namespace Xv2CoreLib
 
         public string[] Name = new string[(int)Xenoverse2.Language.NumLanguages];
 
-        public AsyncObservableCollection<Xv2CharaCostume> Costumes { get; set; } = new AsyncObservableCollection<Xv2CharaCostume>();
+        public AsyncObservableCollection<Xv2CharaCostumeData> Costumes { get; set; } = new AsyncObservableCollection<Xv2CharaCostumeData>();
         public CMS_Entry CmsEntry { get; set; }
         public List<CSO_Entry> CsoEntry { get; set; }
         public ERS_MainTableEntry ErsEntry { get; set; }
@@ -91,11 +91,32 @@ namespace Xv2CoreLib
             {
                 EskFile.File.Save(EskFile.Path);
             }
+
+            if(BcsFile != null)
+            {
+                BcsFile.File.SaveBinary(BcsFile.Path);
+            }
+
+            foreach(var file in PartSetFiles)
+            {
+                //These files should only be saved if they were opened in an editor
+
+                if(file.IsEdited && file.IsLoaded)
+                {
+                    file.Save();
+                }
+            }
         }
 
         public void CalculateFilePaths()
         {
             string charaDir = $"chara/{CmsEntry.ShortName}";
+
+            if (BcsFile?.Borrowed == false)
+            {
+                BcsFile.Path = FileManager.Instance.GetAbsolutePath(String.Format("{0}/{1}.bcs", charaDir, CmsEntry.ShortName));
+                CmsEntry.BcsPath = CmsEntry.ShortName;
+            }
 
             if (MovesetFiles.BacFile?.Borrowed == false)
             {
@@ -132,13 +153,16 @@ namespace Xv2CoreLib
                 MovesetFiles.EepkFile.Path = FileManager.Instance.GetAbsolutePath(String.Format("vfx/chara/{0}/{0}.eepk", CmsEntry.ShortName));
             }
 
-            for (int i = 0; i < AmkFile.Count; i++)
+            if(AmkFile != null)
             {
-                //Number the AMK file if there are more than one
-
-                if (!AmkFile[i].Borrowed)
+                for (int i = 0; i < AmkFile.Count; i++)
                 {
-                    AmkFile[i].Path = FileManager.Instance.GetAbsolutePath(String.Format("{0}/{1}{2}.amk", charaDir, CmsEntry.ShortName, (i > 0) ? i.ToString() : string.Empty));
+                    //Number the AMK file if there are more than one
+
+                    if (!AmkFile[i].Borrowed)
+                    {
+                        AmkFile[i].Path = FileManager.Instance.GetAbsolutePath(String.Format("{0}/{1}{2}.amk", charaDir, CmsEntry.ShortName, (i > 0) ? i.ToString() : string.Empty));
+                    }
                 }
             }
 
@@ -218,14 +242,14 @@ namespace Xv2CoreLib
             if (MovesetFiles.CamEanFile.All(x => !x.IsDefault))
                 MovesetFiles.CamEanFile.Add(new Xv2File<EAN_File>(EAN_File.DefaultCamFile(), null, false, null, false, Xenoverse2.MoveFileTypes.CAM_EAN));
 
-            if (MovesetFiles.VoxAcbFile.All(x => !x.IsDefault && x.IsEnglish))
-                MovesetFiles.VoxAcbFile.Add(new Xv2File<ACB_Wrapper>(ACB_Wrapper.NewXv2Acb(), null, false, null, true, Xenoverse2.MoveFileTypes.VOX_ACB));
+            if (MovesetFiles.VoxAcbFile.All(x => !x.HasCostume(0) && x.IsEnglish))
+                MovesetFiles.VoxAcbFile.Insert(0, new Xv2File<ACB_Wrapper>(ACB_Wrapper.NewXv2Acb(), null, false, null, true, Xenoverse2.MoveFileTypes.VOX_ACB, 0, true, Xenoverse2.MoveType.Character));
 
-            if (MovesetFiles.VoxAcbFile.All(x => !x.IsDefault && !x.IsEnglish))
-                MovesetFiles.VoxAcbFile.Add(new Xv2File<ACB_Wrapper>(ACB_Wrapper.NewXv2Acb(), null, false, null, false, Xenoverse2.MoveFileTypes.VOX_ACB));
+            if (MovesetFiles.VoxAcbFile.All(x => !x.HasCostume(0) && !x.IsEnglish))
+                MovesetFiles.VoxAcbFile.Insert(0, new Xv2File<ACB_Wrapper>(ACB_Wrapper.NewXv2Acb(), null, false, null, false, Xenoverse2.MoveFileTypes.VOX_ACB, 0, true, Xenoverse2.MoveType.Character));
 
-            if (MovesetFiles.SeAcbFile.All(x => !x.IsDefault))
-                MovesetFiles.SeAcbFile.Add(new Xv2File<ACB_Wrapper>(ACB_Wrapper.NewXv2Acb(), null, false, null, false, Xenoverse2.MoveFileTypes.SE_ACB));
+            if (MovesetFiles.SeAcbFile.All(x => !x.HasCostume(0)))
+                MovesetFiles.SeAcbFile.Insert(0, new Xv2File<ACB_Wrapper>(ACB_Wrapper.NewXv2Acb(), null, false, null, false, Xenoverse2.MoveFileTypes.SE_ACB, 0, true, Xenoverse2.MoveType.Character));
 
             if (AmkFile.Any(x => !x.IsDefault))
                 AmkFile.Add(new Xv2File<AMK_File>(new AMK_File(), null, false, null, false, Xenoverse2.MoveFileTypes.AMK));
@@ -381,6 +405,7 @@ namespace Xv2CoreLib
             if (forceLoad)
                 file.Load();
 
+            file.IsEdited = true;
             PartSetFiles.Add(file);
 
             return new UndoableListAdd<Xv2PartSetFile>(PartSetFiles, file, "Add Chara File");
@@ -397,8 +422,8 @@ namespace Xv2CoreLib
             if (Costumes.Any(x => x.CostumeId == costume))
                 return undos;
 
-            Xv2CharaCostume newCostume = new Xv2CharaCostume(costume);
-            Xv2CharaCostume defaultCostume = Costumes.FirstOrDefault(x => x.CostumeId == 0);
+            Xv2CharaCostumeData newCostume = new Xv2CharaCostumeData(costume);
+            Xv2CharaCostumeData defaultCostume = Costumes.FirstOrDefault(x => x.CostumeId == 0);
 
             //Copy values over
             newCostume.CsoSkills = (defaultCostume.CsoSkills != null) ? defaultCostume.CsoSkills.Copy() : string.Empty;
@@ -406,14 +431,36 @@ namespace Xv2CoreLib
             newCostume.PscEntry = (defaultCostume.PscEntry != null) ? defaultCostume.PscEntry.Copy() : null;
 
             Costumes.Add(newCostume);
-            undos.Add(new UndoableListAdd<Xv2CharaCostume>(Costumes, newCostume));
+            undos.Add(new UndoableListAdd<Xv2CharaCostumeData>(Costumes, newCostume));
 
             return undos;
+        }
+
+        /// <summary>
+        /// Calculate what CSO costumes must be created based on existing SE, VOX, AMK and CostumeData.
+        /// </summary>
+        public List<int> CalculateCsoCostumes()
+        {
+            List<int> costumes = new List<int>();
+
+            Xv2File<ACB_Wrapper>.GetCostumes(MovesetFiles.VoxAcbFile, costumes);
+            Xv2File<ACB_Wrapper>.GetCostumes(MovesetFiles.SeAcbFile, costumes);
+            Xv2File<AMK_File>.GetCostumes(AmkFile, costumes);
+
+            foreach (var costume in Costumes)
+            {
+                if (!costumes.Contains(costume.CostumeId) && !string.IsNullOrWhiteSpace(costume.CsoSkills))
+                    costumes.Add(costume.CostumeId);
+            }
+
+            costumes.Sort();
+
+            return costumes;
         }
     }
 
     [Serializable]
-    public class Xv2CharaCostume : INotifyPropertyChanged
+    public class Xv2CharaCostumeData : INotifyPropertyChanged
     {
         #region NotifyPropertyChanged
         [field:NonSerialized]
@@ -428,6 +475,8 @@ namespace Xv2CoreLib
         }
         #endregion
 
+        //Contains costume specific data
+
         public int CostumeId { get; set; }
 
         //PSC
@@ -437,18 +486,18 @@ namespace Xv2CoreLib
         //CSO
         public string CsoSkills { get; set; }
 
-        public Xv2CharaCostume(int id)
+        public Xv2CharaCostumeData(int id)
         {
             CostumeId = id;
         }
 
-        public static Xv2CharaCostume GetAndAddCostume(IList<Xv2CharaCostume> costumes, int id)
+        public static Xv2CharaCostumeData GetAndAddCostume(IList<Xv2CharaCostumeData> costumes, int id)
         {
             var existing = costumes.FirstOrDefault(x => x.CostumeId == id);
 
             if (existing == null)
             {
-                existing = new Xv2CharaCostume(id);
+                existing = new Xv2CharaCostumeData(id);
                 costumes.Add(existing);
             }
 
@@ -472,7 +521,7 @@ namespace Xv2CoreLib
             return false;
         }
 
-        public static string GetCsoSkillOrDefault(IList<Xv2CharaCostume> costumes, int costume)
+        public static string GetCsoSkillOrDefault(IList<Xv2CharaCostumeData> costumes, int costume)
         {
             if (costumes.Any(x => x.CostumeId == costume))
             {
@@ -536,6 +585,7 @@ namespace Xv2CoreLib
 
         //Data:
         public bool IsLoaded { get; private set; }
+        public bool IsEdited { get; set; }
         private bool WasManualLoaded { get; set; }
         public object File { get; private set; }
         //Used for unsupported file types like SCD that have no parser. Otherwise, its null

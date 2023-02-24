@@ -16,6 +16,7 @@ namespace Xv2CoreLib.CPK
     //CPK Parser solely for cpk-based AWB files.
     //These only use ITOC table, so TOC + ETOC can be ignored.
 
+    [Serializable]
     public class AWB_CPK : IAwbFile
     {
         public const int CPK_SIGNATURE = 0x204B5043;
@@ -367,6 +368,7 @@ namespace Xv2CoreLib.CPK
 
     }
 
+    [Serializable]
     public class CPK_Entry
     {
         [YAXAttributeForClass]
