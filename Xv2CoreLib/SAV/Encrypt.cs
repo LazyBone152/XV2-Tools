@@ -10,6 +10,35 @@ namespace Xv2CoreLib.SAV
     {
 
         /// <summary>
+        /// Encrypts verion 30 of the save file.
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <returns></returns>
+        public static byte[] EncryptManaged_V30(byte[] bytes)
+        {
+            UIntPtr arraySize = (new UIntPtr((uint)Offsets.DECRYPTED_SAVE_SIZE_V30));
+            IntPtr retPtr = SaveEncrypt(bytes, arraySize);
+            byte[] newBytes = new byte[Offsets.ENCRYPTED_SAVE_SIZE_V30];
+            Marshal.Copy(retPtr, newBytes, 0, Offsets.ENCRYPTED_SAVE_SIZE_V30);
+            return newBytes;
+        }
+
+        /// <summary>
+        /// Decrypts verion 30 of the save file.
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <returns></returns>
+        public static byte[] DecryptManaged_V30(byte[] bytes)
+        {
+            UIntPtr arraySize = (new UIntPtr((uint)Offsets.ENCRYPTED_SAVE_SIZE_V30));
+            IntPtr retPtr = SaveDecrypt(bytes, arraySize);
+            byte[] newBytes = new byte[Offsets.DECRYPTED_SAVE_SIZE_V30];
+            Marshal.Copy(retPtr, newBytes, 0, Offsets.DECRYPTED_SAVE_SIZE_V30);
+            return newBytes;
+        }
+
+
+        /// <summary>
         /// Encrypts verion 21 of the save file.
         /// </summary>
         /// <param name="bytes"></param>
@@ -93,6 +122,7 @@ namespace Xv2CoreLib.SAV
             Marshal.Copy(retPtr, newBytes, 0, Offsets.ENECRYPTED_SAVE_SIZE_V1);
             return newBytes;
         }
+
 
         [DllImport("AesCtrLibrary.dll", CallingConvention = CallingConvention.Cdecl)]
         private static extern IntPtr SaveDecrypt(byte[] file, UIntPtr arraySize);

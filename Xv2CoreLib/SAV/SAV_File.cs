@@ -37,6 +37,8 @@ namespace Xv2CoreLib.SAV
         public const int ENECRYPTED_SAVE_SIZE_V10 = 723136;
         public const int ENCRYPTED_SAVE_SIZE_V21 = 914080;
         public const int DECRYPTED_SAVE_SIZE_V21 = 913912;
+        public const int ENCRYPTED_SAVE_SIZE_V30 = 0x12A2A0;
+        public const int DECRYPTED_SAVE_SIZE_V30 = 0x12A1F8;
 
 
         //Equipment Flags
@@ -649,6 +651,8 @@ namespace Xv2CoreLib.SAV
                         return "1.18.01";
                     case 29:
                         return "1.19";
+                    case 30:
+                        return "1.20";
                     default:
                         return String.Format("Unknown ({0})", Version);
 
@@ -693,6 +697,7 @@ namespace Xv2CoreLib.SAV
                     case 26:
                     case 27:
                     case 29:
+                    case 30:
                         return null;
                     default:
                         return "This save version is not supported. It is recommened to update the application (if one is available).";
@@ -734,6 +739,7 @@ namespace Xv2CoreLib.SAV
                     case 26:
                     case 27:
                     case 29:
+                    case 30:
                         return Brushes.Blue;
                     default:
                         return Brushes.Red;
@@ -965,6 +971,8 @@ namespace Xv2CoreLib.SAV
             {
                 case Offsets.DECRYPTED_SAVE_SIZE_V1:
                 case Offsets.DECRYPTED_SAVE_SIZE_V10:
+                case Offsets.DECRYPTED_SAVE_SIZE_V21:
+                case Offsets.DECRYPTED_SAVE_SIZE_V30:
                     break;
                 case Offsets.ENECRYPTED_SAVE_SIZE_V1:
                     encrypted = true;
@@ -977,6 +985,10 @@ namespace Xv2CoreLib.SAV
                 case Offsets.ENCRYPTED_SAVE_SIZE_V21:
                     encrypted = true;
                     rawBytes = Crypt.DecryptManaged_V21(rawBytes);
+                    break;
+                case Offsets.ENCRYPTED_SAVE_SIZE_V30:
+                    encrypted = true;
+                    rawBytes = Crypt.DecryptManaged_V30(rawBytes);
                     break;
                 case Offsets.XV1_SAVE_SIZE:
                     throw new InvalidDataException("DBXV1 saves are not supported.");
@@ -1020,6 +1032,9 @@ namespace Xv2CoreLib.SAV
                         break;
                     case Offsets.DECRYPTED_SAVE_SIZE_V21:
                         rawBytes = Crypt.EncryptManaged_V21(rawBytes);
+                        break;
+                    case Offsets.DECRYPTED_SAVE_SIZE_V30:
+                        rawBytes = Crypt.EncryptManaged_V30(rawBytes);
                         break;
                     default:
                         throw new InvalidDataException("Invalid decrypted save size. Save failed.");
@@ -1135,9 +1150,10 @@ namespace Xv2CoreLib.SAV
 
         private List<byte> Write()
         {
-            if(Version >= 22 && FileBytes.Count != Offsets.DECRYPTED_SAVE_SIZE_V21) throw new InvalidDataException(String.Format("Invalid BaseFile bytes array size. Expected {1} but found {0}. Save failed.", FileBytes.Count, Offsets.DECRYPTED_SAVE_SIZE_V21));
-            if (Version >= 10 && Version <= 21 && FileBytes.Count != Offsets.DECRYPTED_SAVE_SIZE_V10) throw new InvalidDataException(String.Format("Invalid BaseFile bytes array size. Expected {1} but found {0}. Save failed.", FileBytes.Count, Offsets.DECRYPTED_SAVE_SIZE_V10));
-            if(Version < 10 && FileBytes.Count != Offsets.DECRYPTED_SAVE_SIZE_V1) throw new InvalidDataException(String.Format("Invalid BaseFile bytes array size. Expected {1} but found {0}. Save failed.", FileBytes.Count, Offsets.DECRYPTED_SAVE_SIZE_V1));
+            if (Version >= 30 && FileBytes.Count != Offsets.DECRYPTED_SAVE_SIZE_V30) throw new InvalidDataException(String.Format("Invalid BaseFile bytes array size. Expected {1} but found {0}. Save failed.", FileBytes.Count, Offsets.DECRYPTED_SAVE_SIZE_V30));
+            //if (Version >= 22 && FileBytes.Count != Offsets.DECRYPTED_SAVE_SIZE_V21) throw new InvalidDataException(String.Format("Invalid BaseFile bytes array size. Expected {1} but found {0}. Save failed.", FileBytes.Count, Offsets.DECRYPTED_SAVE_SIZE_V21));
+            //if (Version >= 10 && Version <= 21 && FileBytes.Count != Offsets.DECRYPTED_SAVE_SIZE_V10) throw new InvalidDataException(String.Format("Invalid BaseFile bytes array size. Expected {1} but found {0}. Save failed.", FileBytes.Count, Offsets.DECRYPTED_SAVE_SIZE_V10));
+            //if(Version < 10 && FileBytes.Count != Offsets.DECRYPTED_SAVE_SIZE_V1) throw new InvalidDataException(String.Format("Invalid BaseFile bytes array size. Expected {1} but found {0}. Save failed.", FileBytes.Count, Offsets.DECRYPTED_SAVE_SIZE_V1));
 
             List<byte> bytes = FileBytes;
 

@@ -439,14 +439,14 @@ namespace Xv2CoreLib
                 {
                     moveFiles.SeAcbPath = string.Format(@"sound/SE/Battle/Skill/CAR_BTL_{2}{1}_{0}_SE.acb", cusEntry.ShortName, cusEntry.ID2.ToString("D3"), GetAcbSkillTypeLetter(skillType));
 
-                    if (loadSkillFiles)
+                    if (loadSkillFiles && FileManager.Instance.fileIO.FileExists(moveFiles.SeAcbPath))
                         moveFiles.AddSeAcbFile((ACB_Wrapper)FileManager.Instance.GetParsedFileFromGame(moveFiles.SeAcbPath), -1, fileIO.PathInGameDir(moveFiles.SeAcbPath), false, true, MoveType.Skill);
                 }
                 else
                 {
                     moveFiles.SeAcbPath = string.Format(@"sound/SE/Battle/Skill/{0}.acb", cusEntry.SePath);
 
-                    if (loadSkillFiles)
+                    if (loadSkillFiles && FileManager.Instance.fileIO.FileExists(moveFiles.SeAcbPath))
                         moveFiles.AddSeAcbFile((ACB_Wrapper)FileManager.Instance.GetParsedFileFromGame(moveFiles.SeAcbPath), -1, fileIO.PathInGameDir(moveFiles.SeAcbPath), true, true, MoveType.Skill);
                 }
             }

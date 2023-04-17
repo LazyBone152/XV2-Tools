@@ -4464,7 +4464,7 @@ namespace EEPK_Organiser.View
             {
                 SceneManager.MainGameBase.VfxManager.StopEffects();
 
-                if (SettingsManager.Instance.Settings.XenoKit_VfxSimulation)
+                if (SettingsManager.Instance.Settings.XenoKit_VfxSimulation && SceneManager.IsOnTab(EditorTabs.Effect))
                 {
                     SceneManager.EnsureActorIsSet(0);
                     SceneManager.MainGameBase.VfxManager.PlayEffect(SelectedEffect, SceneManager.Actors[0]);
