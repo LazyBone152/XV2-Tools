@@ -39,8 +39,9 @@ namespace Xv2CoreLib.BAC
 
         private void WriteBac()
         {
+         
             SortEntries();
-
+       
             int count = (bacFile.BacEntries != null) ? bacFile.BacEntries.Count() : 0;
             List<int> BacEntryOffsets = new List<int>();
             List<List<int>> TypeOffsets = new List<List<int>>();
@@ -191,13 +192,16 @@ namespace Xv2CoreLib.BAC
                             case 27:
                                 bytes.AddRange(BAC_Type27.Write(bacFile.BacEntries[i].Type27));
                                 break;
+                            case 28:
+                                bytes.AddRange(BAC_Type28.Write(bacFile.BacEntries[i].Type28));
+                                break;
 
-                            //case 29:
-                            //    bytes.AddRange(BAC_Type29.Write(bacFile.BacEntries[i].Type29));
-                            //    break;
-                            //case 31:
-                            //    bytes.AddRange(BAC_Type31.Write(bacFile.BacEntries[i].Type31));
-                            //   break;
+                            case 29:
+                                bytes.AddRange(BAC_Type29.Write(bacFile.BacEntries[i].Type29));
+                                break;
+                                //case 31:
+                                //    bytes.AddRange(BAC_Type31.Write(bacFile.BacEntries[i].Type31));
+                                //   break;
                         }
                     }
                 }
@@ -381,6 +385,16 @@ namespace Xv2CoreLib.BAC
                 bacEntry.TypeDummy.Remove(27);
                 count++;
             }
+            if (bacEntry.Type28?.Count > 0)
+            {
+                bacEntry.TypeDummy.Remove(28);
+                count++;
+            }
+            if (bacEntry.Type29?.Count > 0)
+            {
+                bacEntry.TypeDummy.Remove(29);
+                count++;
+            }
             /*
             if (bacEntry.Type29?.Count > 0)
             {
@@ -516,6 +530,14 @@ namespace Xv2CoreLib.BAC
             if (bacEntry.Type27?.Count > 0)
             {
                 types.Add(27);
+            }
+            if (bacEntry.Type28?.Count > 0)
+            {
+                types.Add(28);
+            }
+            if (bacEntry.Type29?.Count > 0)
+            {
+                types.Add(29);
             }
             /*
             if (bacEntry.Type29?.Count > 0)
@@ -661,6 +683,14 @@ namespace Xv2CoreLib.BAC
             else if (type == 27)
             {
                 return (bacEntry.Type27 != null) ? bacEntry.Type27.Count() : 0;
+            }
+            else if (type == 28)
+            {
+                return (bacEntry.Type28 != null) ? bacEntry.Type28.Count() : 0;
+            }
+            else if (type == 29)
+            {
+                return (bacEntry.Type29 != null) ? bacEntry.Type29.Count() : 0;
             }
             /*
             else if (type == 29)
