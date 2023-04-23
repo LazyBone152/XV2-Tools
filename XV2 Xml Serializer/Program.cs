@@ -575,6 +575,9 @@ namespace XV2_Xml_Serializer
                     case ".emg":
                         Xv2CoreLib.EMG.EMG_File.ConvertFromXml(fileLocation);
                         break;
+                    case ".tnn":
+                        Xv2CoreLib.TNN.TNN_File.Write(fileLocation);
+                        break;
                     case ".x2s":
                         {
                             switch (Path.GetFileName(fileLocation))

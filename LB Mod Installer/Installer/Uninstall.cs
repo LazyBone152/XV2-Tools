@@ -47,6 +47,7 @@ using Xv2CoreLib.QSF;
 using Xv2CoreLib.QED;
 using Xv2CoreLib.QSL;
 using Xv2CoreLib.QBT;
+using Xv2CoreLib.TNN;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -302,6 +303,9 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".qed":
                     Uninstall_QED(path, file);
+                    break;
+                case ".tnn":
+                    Uninstall_TNN(path, file);
                     break;
                 default:
                     throw new Exception(string.Format("The filetype of \"{0}\" is unsupported. Uninstall failed.\n\nThis mod was likely installed by a newer version of the installer.", path));
@@ -1412,6 +1416,29 @@ namespace LB_Mod_Installer.Installer
                 throw new Exception(error, ex);
             }
         }
+
+        private void Uninstall_TNN(string path, _File file)
+        {
+            try
+            {
+                TNN_File binaryFile = (TNN_File)GetParsedFile<TNN_File>(path, false);
+                TNN_File cpkBinFile = (TNN_File)GetParsedFile<TNN_File>(path, true, true);
+
+                Section section = file.GetSection(Sections.TNN_Tutorial);
+
+                if (section != null)
+                {
+                    UninstallEntries(binaryFile.Tutorials, (cpkBinFile != null) ? cpkBinFile.Tutorials : null, section.IDs);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at TNN uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
+
 
         //Generic uninstallers
         private void UninstallEntries<T>(IList<T> entries, IList<T> ogEntries, List<string> ids) where T : IInstallable

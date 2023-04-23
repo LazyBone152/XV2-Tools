@@ -45,6 +45,10 @@ namespace LB_Mod_Installer.Installer
 
         public void AddStreamFile(string path, ZipArchiveEntry zipEntry, bool allowOverwrite = true)
         {
+            //Its a directory, skip
+            if (string.IsNullOrWhiteSpace(zipEntry.Name))
+                return;
+
             path = Utils.SanitizePath(path);
             if (GeneralInfo.JungleBlacklist.Contains(Path.GetFileName(path)))
             {
@@ -334,6 +338,7 @@ namespace LB_Mod_Installer.Installer
         public void WriteStream()
         {
             if (File.Exists(GeneralInfo.GetPathInGameDir(Path)) && !allowOverwrite) return;
+            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(GeneralInfo.GetPathInGameDir(Path)));
 
             zipEntry.ExtractToFile(GeneralInfo.GetPathInGameDir(Path), true);
         }

@@ -53,6 +53,7 @@ using Xv2CoreLib.AFS2;
 using Xv2CoreLib.QBT;
 using Xv2CoreLib.QSL;
 using Xv2CoreLib.QED;
+using Xv2CoreLib.TNN;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -365,6 +366,9 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".qed":
                     Install_QED(xmlPath, installPath, isXml, useSkipBindings);
+                    break;
+                case ".tnn":
+                    Install_TNN(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 default:
                     if (TryTransformationInstall(xmlPath))
@@ -1940,6 +1944,30 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
+        private void Install_TNN(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                TNN_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<TNN_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : TNN_File.Parse(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                TNN_File binaryFile = (TNN_File)GetParsedFile<TNN_File>(installPath);
+
+                //Parse bindings
+                bindingManager.ParseProperties(xmlFile.Tutorials, binaryFile.Tutorials, installPath);
+
+                //Install entries
+                InstallEntries(xmlFile.Tutorials, binaryFile.Tutorials, installPath, Sections.TNN_Tutorial, useSkipBindings);
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at TNN install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
 
         //Generic Install Methods
         //We need generic methods for IInstallable via List and ObservableCollection. Most file types will be handled with this.
@@ -2264,6 +2292,8 @@ namespace LB_Mod_Installer.Installer
                     return QSF_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".dml":
                     return DML_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".tnn":
+                    return TNN_File.Parse(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 default:
                     throw new InvalidDataException(String.Format("GetParsedFileFromGame: The filetype of \"{0}\" is not supported.", path));
             }
@@ -2372,6 +2402,8 @@ namespace LB_Mod_Installer.Installer
                     return ((QSF_File)data).SaveToBytes();
                 case ".dml":
                     return ((DML_File)data).SaveToBytes();
+                case ".tnn":
+                    return ((TNN_File)data).Write();
                 default:
                     throw new InvalidDataException(String.Format("GetBytesFromParsedFile: The filetype of \"{0}\" is not supported.", path));
             }
