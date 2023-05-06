@@ -231,6 +231,13 @@ namespace Xv2CoreLib.BSA
                     dataOffset.Add(results[1]);
                     typeList.Add(8);
                 }
+                if (types.Type10 != null)
+                {
+                    var results = WriteTypeHeader(8, types.Type10.Count);
+                    hdrOffset.Add(results[0]);
+                    dataOffset.Add(results[1]);
+                    typeList.Add(10);
+                }
                 if (types.Type12 != null)
                 {
                     var results = WriteTypeHeader(12, types.Type12.Count);
@@ -274,6 +281,9 @@ namespace Xv2CoreLib.BSA
                             break;
                         case 8:
                             WriteType8(types.Type8, hdrOffset[i], dataOffset[i]);
+                            break;
+                        case 10:
+                            WriteType10(types.Type10, hdrOffset[i], dataOffset[i]);
                             break;
                         case 12:
                             WriteType12(types.Type12, hdrOffset[i], dataOffset[i]);
@@ -587,6 +597,35 @@ namespace Xv2CoreLib.BSA
 
         }
 
+        private void WriteType10(List<BSA_Type10> type, int hdrOffset, int dataOffset)
+        {
+            if (type != null)
+            {
+
+                //Hdr data
+                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - hdrOffset + 8), hdrOffset);
+
+                for (int i = 0; i < type.Count(); i++)
+                {
+                    bytes.AddRange(BitConverter.GetBytes(type[i].StartTime));
+                    bytes.AddRange(BitConverter.GetBytes(GetTypeEndTime(type[i].StartTime, type[i].Duration)));
+                }
+
+                //Main Type Data
+                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - dataOffset + 12), dataOffset);
+
+                for (int i = 0; i < type.Count(); i++)
+                {
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_00));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_02));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_04));
+   
+                }
+
+            }
+
+        }
+
         private void WriteType12(List<BSA_Type12> type, int hdrOffset, int dataOffset)
         {
             if (type != null)
@@ -686,6 +725,10 @@ namespace Xv2CoreLib.BSA
                 count++;
             }
             if (bsaEntry.Type8 != null)
+            {
+                count++;
+            }
+            if (bsaEntry.Type10 != null)
             {
                 count++;
             }

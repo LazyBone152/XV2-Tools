@@ -260,6 +260,10 @@ namespace Xv2CoreLib.BSA
         [BindingSubList]
         public List<BSA_Type8> Type8 { get; set; }
         [YAXDontSerializeIfNull]
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BSA_Type10")]
+        [BindingSubList]
+        public List<BSA_Type10> Type10 { get; set; }
+        [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BSA_Type12")]
         [BindingSubList]
         public List<BSA_Type12> Type12 { get; set; }
@@ -896,6 +900,28 @@ namespace Xv2CoreLib.BSA
         [YAXAttributeFor("I_20")]
         [YAXSerializeAs("value")]
         public int I_20 { get; set; }
+    }
+
+    [YAXSerializeAs("BSA_Type10")]
+    [Serializable]
+    public class BSA_Type10 : IBsaType
+    {
+        [YAXAttributeFor("Start_Time")]
+        [YAXSerializeAs("frames")]
+        public ushort StartTime { get; set; }
+        [YAXAttributeFor("Duration")]
+        [YAXSerializeAs("frames")]
+        public ushort Duration { get; set; }
+        [YAXAttributeFor("Skill_ID")]
+        [YAXSerializeAs("value")]
+        public UInt32 I_00 { get; set; }
+        [YAXAttributeFor("I_02")]
+        [YAXSerializeAs("value")]
+        public ushort I_02 { get; set; }
+        [YAXAttributeFor("I_04")]
+        [YAXSerializeAs("value")]
+        public ushort I_04 { get; set; }
+
     }
 
 
