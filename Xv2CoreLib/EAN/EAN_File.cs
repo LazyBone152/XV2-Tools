@@ -33,6 +33,13 @@ namespace Xv2CoreLib.EAN
         [YAXAttributeForClass]
         public byte I_17 { get; set; }
 
+        /// <summary>
+        /// If the EAN is unique to a specific character (either a character EAN file, or a skill EAN with a chara suffix).
+        /// Used only by XenoKit to help with correctly rescaling common animations. This value is only set and read from there.
+        /// </summary>
+        [YAXDontSerialize]
+        public bool IsCharaUnique { get; set; }
+
         public ESK_Skeleton Skeleton { get; set; }
         public AsyncObservableCollection<EAN_Animation> Animations { get; set; } = new AsyncObservableCollection<EAN_Animation>();
 

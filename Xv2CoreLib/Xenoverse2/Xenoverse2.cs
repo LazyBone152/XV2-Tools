@@ -970,7 +970,10 @@ namespace Xv2CoreLib
             moveFiles.EanFile.Clear();
 
             if (loadFiles)
+            {
                 moveFiles.EanFile.Add(new Xv2File<EAN_File>((EAN_File)FileManager.Instance.GetParsedFileFromGame(eanPath), fileIO.PathInGameDir(eanPath), !cmsEntry.IsSelfReference(cmsEntry.EanPath), null, false, MoveFileTypes.EAN, 0, true, MoveType.Character));
+                moveFiles.EanFile[0].File.IsCharaUnique = true;
+            }
 
             //CAM
             if (!string.IsNullOrWhiteSpace(cmsEntry.CamEanPath))
@@ -980,7 +983,10 @@ namespace Xv2CoreLib
                 moveFiles.CamEanFile.Clear();
 
                 if (loadFiles)
+                {
                     moveFiles.CamEanFile.Add(new Xv2File<EAN_File>((EAN_File)FileManager.Instance.GetParsedFileFromGame(camEanPath), fileIO.PathInGameDir(camEanPath), !cmsEntry.IsSelfReference(cmsEntry.CamEanPath), null, false, MoveFileTypes.CAM_EAN, 0, true, MoveType.Character));
+                    moveFiles.CamEanFile[0].File.IsCharaUnique = true;
+                }
             }
 
             //BDM

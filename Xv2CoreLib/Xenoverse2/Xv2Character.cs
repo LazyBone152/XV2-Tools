@@ -237,10 +237,16 @@ namespace Xv2CoreLib
                 BaiFile = new Xv2File<BAI_File>(new BAI_File(), null, false, null, false, Xenoverse2.MoveFileTypes.BAI);
 
             if (MovesetFiles.EanFile.All(x => !x.IsDefault) && Xenoverse2.Instance.CmnEan != null)
+            {
                 MovesetFiles.EanFile.Add(new Xv2File<EAN_File>(EAN_File.DefaultFile(Xenoverse2.Instance.CmnEan.Skeleton), null, false, null, false, Xenoverse2.MoveFileTypes.EAN));
+                MovesetFiles.EanFile[0].File.IsCharaUnique = true;
+            }
 
             if (MovesetFiles.CamEanFile.All(x => !x.IsDefault))
+            {
                 MovesetFiles.CamEanFile.Add(new Xv2File<EAN_File>(EAN_File.DefaultCamFile(), null, false, null, false, Xenoverse2.MoveFileTypes.CAM_EAN));
+                MovesetFiles.CamEanFile[0].File.IsCharaUnique = true;
+            }
 
             if (MovesetFiles.VoxAcbFile.All(x => !x.HasCostume(0) && x.IsEnglish))
                 MovesetFiles.VoxAcbFile.Insert(0, new Xv2File<ACB_Wrapper>(ACB_Wrapper.NewXv2Acb(), null, false, null, true, Xenoverse2.MoveFileTypes.VOX_ACB, 0, true, Xenoverse2.MoveType.Character));

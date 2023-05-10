@@ -91,18 +91,30 @@ namespace Xv2CoreLib
         {
             int index = CamEanFile.IndexOf(CamEanFile.FirstOrDefault(x => x.CharaCode == chara));
             if (index != -1)
+            {
                 CamEanFile[index] = new Xv2File<EAN_File>(file, path, borrowed, chara, false, Xenoverse2.MoveFileTypes.CAM_EAN, 0, isDefault, moveType);
+                CamEanFile[index].File.IsCharaUnique = !string.IsNullOrWhiteSpace(chara);
+            }
             else
+            {
                 CamEanFile.Add(new Xv2File<EAN_File>(file, path, borrowed, chara, false, Xenoverse2.MoveFileTypes.CAM_EAN, 0, isDefault, moveType));
+                CamEanFile[CamEanFile.Count - 1].File.IsCharaUnique = !string.IsNullOrWhiteSpace(chara);
+            }
         }
 
         public void AddEanFile(EAN_File file, string chara, string path, bool borrowed = false, bool isDefault = false, MoveType moveType = 0)
         {
             int index = EanFile.IndexOf(EanFile.FirstOrDefault(x => x.CharaCode == chara));
             if (index != -1)
+            {
                 EanFile[index] = new Xv2File<EAN_File>(file, path, borrowed, chara, false, Xenoverse2.MoveFileTypes.EAN, 0, isDefault, moveType);
+                EanFile[index].File.IsCharaUnique = !string.IsNullOrWhiteSpace(chara);
+            }
             else
+            {
                 EanFile.Add(new Xv2File<EAN_File>(file, path, borrowed, chara, false, Xenoverse2.MoveFileTypes.EAN, 0, isDefault, moveType));
+                EanFile[EanFile.Count - 1].File.IsCharaUnique = !string.IsNullOrWhiteSpace(chara);
+            }
         }
 
         public void AddVoxAcbFile(ACB_Wrapper file, string chara, bool isEnglish, string path, bool borrowed = false, bool isDefault = false, MoveType moveType = 0)
