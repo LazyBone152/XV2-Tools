@@ -127,6 +127,9 @@ namespace Xv2CoreLib.BSA
                                 case 8:
                                     bsaFile.BSA_Entries[thisEntry].Type8 = ParseType8(hdrOffset, dataOffset, typeCount);
                                     break;
+                                case 10:
+                                    bsaFile.BSA_Entries[thisEntry].Type10 = ParseType10(hdrOffset, dataOffset, typeCount);
+                                    break;
                                 case 12:
                                     bsaFile.BSA_Entries[thisEntry].Type12 = ParseType12(hdrOffset, dataOffset, typeCount);
                                     break;
@@ -508,6 +511,35 @@ namespace Xv2CoreLib.BSA
                 return null;
             }
         }
+        private List<BSA_Type10> ParseType10(int hdrOffset, int offset, int count)
+        {
+            if (count > 0)
+            {
+                List<BSA_Type10> Type = new List<BSA_Type10>();
+
+                for (int i = 0; i < count; i++)
+                {
+                    Type.Add(new BSA_Type10()
+                    {
+                        I_00 = BitConverter.ToUInt32(rawBytes, offset + 0),
+                        I_02 = BitConverter.ToUInt16(rawBytes, offset + 4),
+                        I_04 = BitConverter.ToUInt16(rawBytes, offset + 6),
+
+                        StartTime = BitConverter.ToUInt16(rawBytes, hdrOffset + 0),
+                        Duration = GetTypeDuration(BitConverter.ToUInt16(rawBytes, hdrOffset + 0), BitConverter.ToUInt16(rawBytes, hdrOffset + 2)),
+                    });
+                    hdrOffset += 4;
+                    offset += 8;
+                }
+
+                return Type;
+
+            }
+            else
+            {
+                return null;
+            }
+        }
 
         private List<BSA_Type12> ParseType12(int hdrOffset, int offset, int count)
         {
@@ -558,7 +590,7 @@ namespace Xv2CoreLib.BSA
                         F_16 = BitConverter.ToSingle(rawBytes, offset + 16),
                         I_20 = BitConverter.ToInt32(rawBytes, offset + 20),
                         I_24 = BitConverter.ToInt32(rawBytes, offset + 24),
-                        I_28 = BitConverter.ToInt16(rawBytes, offset + 28),
+                        I_28 = BitConverter.ToInt32(rawBytes, offset + 28),
                         StartTime = BitConverter.ToUInt16(rawBytes, hdrOffset + 0),
                         Duration = GetTypeDuration(BitConverter.ToUInt16(rawBytes, hdrOffset + 0), BitConverter.ToUInt16(rawBytes, hdrOffset + 2)),
                     });
