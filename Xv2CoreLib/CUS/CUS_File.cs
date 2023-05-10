@@ -259,9 +259,10 @@ namespace Xv2CoreLib.CUS
 
             List<Skill> skills = GetSkills(skillType);
 
+            //Check each ID if its used, and return false if its free to use
             for (int i = 0; i < 10; i++)
             {
-                if (!skills.Any(x => x.ID2 == id + i) || assignedIds?.Any(x => x == id + i) == true) return false;
+                if (skills.FirstOrDefault(x => x.ID2 == id + i) == null && assignedIds?.Contains(id + i) == false) return false;
             }
 
             return true;
