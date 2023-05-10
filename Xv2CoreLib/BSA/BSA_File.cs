@@ -914,13 +914,13 @@ namespace Xv2CoreLib.BSA
         public ushort Duration { get; set; }
         [YAXAttributeFor("Skill_ID")]
         [YAXSerializeAs("value")]
-        public UInt32 I_00 { get; set; }
-        [YAXAttributeFor("I_02")]
-        [YAXSerializeAs("value")]
-        public ushort I_02 { get; set; }
+        public int I_00 { get; set; }
         [YAXAttributeFor("I_04")]
         [YAXSerializeAs("value")]
         public ushort I_04 { get; set; }
+        [YAXAttributeFor("I_06")]
+        [YAXSerializeAs("value")]
+        public ushort I_06 { get; set; }
 
     }
 
@@ -990,6 +990,7 @@ namespace Xv2CoreLib.BSA
         [YAXSerializeAs("value")]
         public int I_24 { get; set; }
         [YAXAttributeFor("I_26")]
+        [YAXSerializeAs("value")]
         public int I_28 { get; set; }
 
 

@@ -522,8 +522,8 @@ namespace Xv2CoreLib.BSA
                     Type.Add(new BSA_Type10()
                     {
                         I_00 = BitConverter.ToUInt32(rawBytes, offset + 0),
-                        I_02 = BitConverter.ToUInt16(rawBytes, offset + 4),
-                        I_04 = BitConverter.ToUInt16(rawBytes, offset + 6),
+                        I_04 = BitConverter.ToUInt16(rawBytes, offset + 4),
+                        I_06 = BitConverter.ToUInt16(rawBytes, offset + 6),
 
                         StartTime = BitConverter.ToUInt16(rawBytes, hdrOffset + 0),
                         Duration = GetTypeDuration(BitConverter.ToUInt16(rawBytes, hdrOffset + 0), BitConverter.ToUInt16(rawBytes, hdrOffset + 2)),
