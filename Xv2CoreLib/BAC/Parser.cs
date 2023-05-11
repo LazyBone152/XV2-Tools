@@ -230,18 +230,16 @@ namespace Xv2CoreLib.BAC
                             case 27:
                                 bacFile.BacEntries[i].Type27 = BAC_Type27.Read(rawBytes, thisTypeOffset, thisTypeCount);
                                 break;
-
                             case 28:
                                 bacFile.BacEntries[i].Type28 = BAC_Type28.Read(rawBytes, thisTypeOffset, thisTypeCount);
                                 break;
-
-                            //DB Breakers:
                             case 29:
                                 bacFile.BacEntries[i].Type29 = BAC_Type29.Read(rawBytes, thisTypeOffset, thisTypeCount);
                                 break;
-                            // case 31:
-                            //     bacFile.BacEntries[i].Type31 = BAC_Type31.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                            //     break;
+                            case 30:
+                                bacFile.BacEntries[i].Type30 = BAC_Type30.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                break;
+
                             default:
                                 //Wait until we reach the next bac type before throwing, so we can calc the size
 

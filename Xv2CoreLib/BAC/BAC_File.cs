@@ -528,15 +528,15 @@ namespace Xv2CoreLib.BAC
         [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "EffectPropertyControl")]
         public List<BAC_Type27> Type27 { get; set; }
-
         [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BacType28")]
         public List<BAC_Type28> Type28 { get; set; }
-
-
         [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BacType29")]
         public List<BAC_Type29> Type29 { get; set; }
+        [YAXDontSerializeIfNull]
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BacType30")]
+        public List<BAC_Type30> Type30 { get; set; }
 
         //[YAXDontSerializeIfNull]
         //[YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BAC_Type29")]
@@ -559,7 +559,7 @@ namespace Xv2CoreLib.BAC
         {
             InitBacLists();
 
-            IBacTypes = AsyncObservableCollection<IBacType>.Create();
+            IBacTypes = new AsyncObservableCollection<IBacType>();
 
             foreach (var bacEntry in Type0.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
@@ -645,12 +645,13 @@ namespace Xv2CoreLib.BAC
             foreach (var bacEntry in Type27.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-
             foreach (var bacEntry in Type28.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
 
-
             foreach (var bacEntry in Type29.OrderBy(x => x.StartTime))
+                IBacTypes.Add(bacEntry);
+
+            foreach (var bacEntry in Type30.OrderBy(x => x.StartTime))
                 IBacTypes.Add(bacEntry);
         }
 
@@ -772,15 +773,17 @@ namespace Xv2CoreLib.BAC
                 {
                     Type27.Add(type27);
                 }
-
                 else if (bacEntry is BAC_Type28 type28)
                 {
                     Type28.Add(type28);
                 }
-
                 else if (bacEntry is BAC_Type29 type29)
                 {
                     Type29.Add(type29);
+                }
+                else if (bacEntry is BAC_Type30 type30)
+                {
+                    Type30.Add(type30);
                 }
             }
         }
@@ -847,6 +850,8 @@ namespace Xv2CoreLib.BAC
                 Type28 = new List<BAC_Type28>();
             if (Type29 == null)
                 Type29 = new List<BAC_Type29>();
+            if (Type30 == null)
+                Type30 = new List<BAC_Type30>();
         }
 
         private void ClearBacLists()
@@ -883,6 +888,7 @@ namespace Xv2CoreLib.BAC
             Type27.Clear();
             Type28.Clear();
             Type29.Clear();
+            Type30.Clear();
         }
 
         /// <summary>
@@ -1039,7 +1045,7 @@ namespace Xv2CoreLib.BAC
             if (Type0?.Count != 0 || Type1?.Count != 0 || Type2?.Count != 0 || Type3?.Count != 0 || Type4?.Count != 0 || Type5?.Count != 0 || Type6?.Count != 0 ||
                 Type7?.Count != 0 || Type8?.Count != 0 || Type9?.Count != 0 || Type10?.Count != 0 || Type11?.Count != 0 || Type12?.Count != 0 || Type13?.Count != 0 ||
                 Type14?.Count != 0 || Type15?.Count != 0 || Type16?.Count != 0 || Type17?.Count != 0 || Type18?.Count != 0 || Type19?.Count != 0 || Type20?.Count != 0 ||
-                Type21?.Count != 0 || Type22?.Count != 0 || Type23?.Count != 0 || Type24?.Count != 0 || Type25?.Count != 0 || Type26?.Count != 0 || Type27?.Count != 0 || Type28?.Count != 0 || Type29?.Count != 0)
+                Type21?.Count != 0 || Type22?.Count != 0 || Type23?.Count != 0 || Type24?.Count != 0 || Type25?.Count != 0 || Type26?.Count != 0 || Type27?.Count != 0 || Type28?.Count != 0 || Type29?.Count != 0 || Type30?.Count != 0)
             {
                 return false;
             }
@@ -1092,6 +1098,7 @@ namespace Xv2CoreLib.BAC
                 Type27 = Type27,
                 Type28 = Type28,
                 Type29 = Type29,
+                Type30 = Type30,
                 TypeDummy = TypeDummy
             };
         }
@@ -2381,9 +2388,9 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.PositionX));
                 bytes.AddRange(BitConverter.GetBytes(type.PositionY));
                 bytes.AddRange(BitConverter.GetBytes(type.PositionZ));
-                bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertRadiansToDegrees(type.RotationX)));
-                bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertRadiansToDegrees(type.RotationY)));
-                bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertRadiansToDegrees(type.RotationZ)));
+                bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(type.RotationX)));
+                bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(type.RotationY)));
+                bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(type.RotationZ)));
                 bytes.AddRange(BitConverter.GetBytes((uint)type.EffectFlags));
             }
 
@@ -4200,18 +4207,19 @@ namespace Xv2CoreLib.BAC
                 bytes.Add(type.VerticalGapWidth);
                 bytes.Add(type.HorizontalGapHeight);
                 bytes.Add(type.VisiblePixelWidth);
-                bytes.AddRange(BitConverter.GetBytes(type.Dilution));
-                bytes.AddRange(BitConverter.GetBytes(type.I_14));
-                bytes.AddRange(BitConverter.GetBytes(type.I_16));
-                bytes.AddRange(BitConverter.GetBytes(type.Tint_R));
-                bytes.AddRange(BitConverter.GetBytes(type.Tint_G));
-                bytes.AddRange(BitConverter.GetBytes(type.Tint_B));
-                bytes.AddRange(BitConverter.GetBytes(type.Tint_A));
-                bytes.AddRange(BitConverter.GetBytes(type.F_36));
-                bytes.AddRange(BitConverter.GetBytes(type.F_40));
-                bytes.AddRange(BitConverter.GetBytes(type.F_44));
-                bytes.AddRange(BitConverter.GetBytes(type.F_48));
-                bytes.AddRange(BitConverter_Ex.GetBytes(type.F_52));
+                bytes.AddRange(BitConverter.GetBytes(type.Dilution)); //12
+                bytes.Add(type.I_14); //14
+                bytes.Add(type.I_15); //15
+                bytes.AddRange(BitConverter.GetBytes(type.I_16)); //16
+                bytes.AddRange(BitConverter.GetBytes(type.Tint_R)); //20
+                bytes.AddRange(BitConverter.GetBytes(type.Tint_G)); //24
+                bytes.AddRange(BitConverter.GetBytes(type.Tint_B)); //28
+                bytes.AddRange(BitConverter.GetBytes(type.Tint_A)); //32
+                bytes.AddRange(BitConverter.GetBytes(type.F_36)); //36
+                bytes.AddRange(BitConverter.GetBytes(type.F_40)); //40
+                bytes.AddRange(BitConverter.GetBytes(type.F_44)); //44
+                bytes.AddRange(BitConverter.GetBytes(type.F_48)); //48
+                bytes.AddRange(BitConverter_Ex.GetBytes(type.F_52)); //52
             }
 
             if (bytes.Count != types.Count * 64) throw new InvalidDataException("BACType23.Write: Invalid size!");
@@ -4904,6 +4912,110 @@ namespace Xv2CoreLib.BAC
             }
 
             if (bytes.Count != 60 * types.Count) throw new InvalidDataException($"BacType29 invalid size. {bytes.Count }");
+
+            return bytes;
+        }
+    }
+
+    [YAXSerializeAs("BAC_Type30")]
+    [Serializable]
+    public class BAC_Type30 : BAC_TypeBase
+    {
+        [YAXDontSerialize]
+        public string Type => $"BAC_Type30";
+        [YAXDontSerialize]
+        public override int TypeID => 30;
+
+
+        [YAXAttributeFor("F_08")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0###########")]
+        public float F_08 { get; set; }
+        [YAXAttributeFor("I_12")]
+        [YAXSerializeAs("value")]
+        public int I_12 { get; set; }
+        [YAXAttributeFor("I_16")]
+        [YAXSerializeAs("value")]
+        public int I_16 { get; set; }
+        [YAXAttributeFor("I_20")]
+        [YAXSerializeAs("value")]
+        public int I_20 { get; set; }
+        [YAXAttributeFor("I_24")]
+        [YAXSerializeAs("value")]
+        public int I_24 { get; set; }
+        [YAXAttributeFor("I_28")]
+        [YAXSerializeAs("value")]
+        public int I_28 { get; set; }
+        [YAXAttributeFor("I_32")]
+        [YAXSerializeAs("value")]
+        public int I_32 { get; set; }
+        [YAXAttributeFor("I_36")]
+        [YAXSerializeAs("value")]
+        public int I_36 { get; set; }
+        [YAXAttributeFor("I_40")]
+        [YAXSerializeAs("value")]
+        public int I_40 { get; set; }
+        [YAXAttributeFor("I_44")]
+        [YAXSerializeAs("value")]
+        public int I_44 { get; set; }
+
+
+        public static List<BAC_Type30> Read(byte[] rawBytes, int offset, int count)
+        {
+            List<BAC_Type30> Type30 = new List<BAC_Type30>();
+
+            for (int i = 0; i < count; i++)
+            {
+                Type30.Add(new BAC_Type30()
+                {
+                    StartTime = BitConverter.ToUInt16(rawBytes, offset + 0),
+                    Duration = BitConverter.ToUInt16(rawBytes, offset + 2),
+                    I_04 = BitConverter.ToUInt16(rawBytes, offset + 4),
+                    Flags = BitConverter.ToUInt16(rawBytes, offset + 6),
+                    F_08 = BitConverter.ToSingle(rawBytes, offset + 8),
+                    I_12 = BitConverter.ToInt32(rawBytes, offset + 12),
+                    I_16 = BitConverter.ToInt32(rawBytes, offset + 16),
+                    I_20 = BitConverter.ToInt32(rawBytes, offset + 20),
+                    I_24 = BitConverter.ToInt32(rawBytes, offset + 24),
+                    I_28 = BitConverter.ToInt32(rawBytes, offset + 28),
+                    I_32 = BitConverter.ToInt32(rawBytes, offset + 32),
+                    I_36 = BitConverter.ToInt32(rawBytes, offset + 36),
+                    I_40 = BitConverter.ToInt32(rawBytes, offset + 40),
+                    I_44 = BitConverter.ToInt32(rawBytes, offset + 44),
+
+
+                });
+
+                offset += 48;
+            }
+
+            return Type30;
+        }
+
+        public static List<byte> Write(List<BAC_Type30> types)
+        {
+            List<byte> bytes = new List<byte>();
+
+            foreach (var type in types)
+            {
+                bytes.AddRange(BitConverter.GetBytes(type.StartTime));
+                bytes.AddRange(BitConverter.GetBytes(type.Duration));
+                bytes.AddRange(BitConverter.GetBytes(type.I_04));
+                bytes.AddRange(BitConverter.GetBytes(type.Flags));
+                bytes.AddRange(BitConverter.GetBytes(type.F_08));
+                bytes.AddRange(BitConverter.GetBytes(type.I_12));
+                bytes.AddRange(BitConverter.GetBytes(type.I_16));
+                bytes.AddRange(BitConverter.GetBytes(type.I_20));
+                bytes.AddRange(BitConverter.GetBytes(type.I_24));
+                bytes.AddRange(BitConverter.GetBytes(type.I_28));
+                bytes.AddRange(BitConverter.GetBytes(type.I_32));
+                bytes.AddRange(BitConverter.GetBytes(type.I_36));
+                bytes.AddRange(BitConverter.GetBytes(type.I_40));
+                bytes.AddRange(BitConverter.GetBytes(type.I_44));
+
+            }
+
+            if (bytes.Count != 48 * types.Count) throw new InvalidDataException($"BacType30 invalid size. {bytes.Count }");
 
             return bytes;
         }

@@ -195,13 +195,12 @@ namespace Xv2CoreLib.BAC
                             case 28:
                                 bytes.AddRange(BAC_Type28.Write(bacFile.BacEntries[i].Type28));
                                 break;
-
                             case 29:
                                 bytes.AddRange(BAC_Type29.Write(bacFile.BacEntries[i].Type29));
                                 break;
-                                //case 31:
-                                //    bytes.AddRange(BAC_Type31.Write(bacFile.BacEntries[i].Type31));
-                                //   break;
+                            case 30:
+                                bytes.AddRange(BAC_Type30.Write(bacFile.BacEntries[i].Type30));
+                                break;
                         }
                     }
                 }
@@ -395,18 +394,11 @@ namespace Xv2CoreLib.BAC
                 bacEntry.TypeDummy.Remove(29);
                 count++;
             }
-            /*
-            if (bacEntry.Type29?.Count > 0)
+            if (bacEntry.Type30?.Count > 0)
             {
-                bacEntry.TypeDummy.Remove(29);
+                bacEntry.TypeDummy.Remove(30);
                 count++;
             }
-            if (bacEntry.Type31?.Count > 0)
-            {
-                bacEntry.TypeDummy.Remove(31);
-                count++;
-            }
-            */
             if (bacEntry.TypeDummy != null)
             {
                 count += bacEntry.TypeDummy.Count();
@@ -539,16 +531,10 @@ namespace Xv2CoreLib.BAC
             {
                 types.Add(29);
             }
-            /*
-            if (bacEntry.Type29?.Count > 0)
+            if (bacEntry.Type30?.Count > 0)
             {
-                types.Add(29);
+                types.Add(30);
             }
-            if (bacEntry.Type31?.Count > 0)
-            {
-                types.Add(31);
-            }
-            */
             if (bacEntry.TypeDummy != null)
             {
                 foreach(var i in bacEntry.TypeDummy)
@@ -692,16 +678,10 @@ namespace Xv2CoreLib.BAC
             {
                 return (bacEntry.Type29 != null) ? bacEntry.Type29.Count() : 0;
             }
-            /*
-            else if (type == 29)
+            else if (type == 30)
             {
-                return (bacEntry.Type29 != null) ? bacEntry.Type29.Count() : 0;
+                return (bacEntry.Type30 != null) ? bacEntry.Type30.Count() : 0;
             }
-            else if (type == 31)
-            {
-                return (bacEntry.Type31 != null) ? bacEntry.Type31.Count() : 0;
-            }
-            */
             else
             {
                 return 0;
