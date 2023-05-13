@@ -92,6 +92,11 @@ namespace LB_Common.Numbers
             }
         }
 
+        public override string ToString()
+        {
+            return string.Format("[X: {0}, Y: {1}, Z: {2}, W: {3}]", X, Y, Z, W);
+        }
+
         public static bool operator ==(CustomVector4 a, CustomVector4 b)
         {
             return a?.X == b?.X && a?.Y == b?.Y && a?.Z == b?.Z && a?.W == b?.W;
@@ -106,9 +111,18 @@ namespace LB_Common.Numbers
         {
             return new CustomVector4(a.X * b, a.Y * b, a.Z * b, a.W * b);
         }
+        
+        public static CustomVector4 operator -(CustomVector4 a, CustomVector4 b)
+        {
+            return new CustomVector4(a.X - b.X, a.Y - b.Y, a.Z - b.Z, a.W - b.W);
+        }
 
+        public static CustomVector4 operator +(CustomVector4 a, CustomVector4 b)
+        {
+            return new CustomVector4(a.X + b.X, a.Y + b.Y, a.Z + b.Z, a.W + b.W);
+        }
         #endregion
 
-        
+
     }
 }

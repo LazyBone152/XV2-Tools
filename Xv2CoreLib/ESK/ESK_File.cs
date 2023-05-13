@@ -16,6 +16,8 @@ namespace Xv2CoreLib.ESK
     {
         public const string BaseBone = "b_C_Base";
         public const string PelvisBone = "b_C_Pelvis";
+        public const string LeftEyeIrisBone = "f_L_EyeIris";
+        public const string RightEyeIrisBone = "f_R_EyeIris";
 
         [YAXAttributeForClass]
         public int I_12 { get; set; }
