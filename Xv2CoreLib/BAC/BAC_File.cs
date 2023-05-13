@@ -3923,15 +3923,15 @@ namespace Xv2CoreLib.BAC
         public int EyeRotationFrames { get; set; }
         [YAXAttributeFor("EyeMovementDuration")]
         [YAXSerializeAs("value")]
-        public int EyeMovementDuration { get; set; }
+        public int EyeMovementDuration { get; set; } = 100;
         [YAXAttributeFor("LeftEyeRotationPercent")]
         [YAXFormat("0.0########")]
         [YAXSerializeAs("value")]
-        public float LeftEyeRotationPercent { get; set; }
+        public float LeftEyeRotationPercent { get; set; } = 1f;
         [YAXAttributeFor("RightEyeRotationPercent")]
         [YAXFormat("0.0########")]
         [YAXSerializeAs("value")]
-        public float RightEyeRotationPercent { get; set; }
+        public float RightEyeRotationPercent { get; set; } = 1f;
 
         public static List<BAC_Type21> Read(byte[] rawBytes, int offset, int count)
         {

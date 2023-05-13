@@ -562,6 +562,7 @@ namespace Xv2CoreLib.Resource.App
         public bool XenoKit_HideLessImportantBones { get; set; } = true;
         public bool XenoKit_AutoResolvePasteReferences { get; set; } = false;
         internal int XenoKit_BacTypeSortMode { get; set; }
+        public bool XenoKit_SuppressErrorsToLogOnly { get; set; } = false;
 
         //Enums, which are not-serialized directly
         [DontSerialize]
