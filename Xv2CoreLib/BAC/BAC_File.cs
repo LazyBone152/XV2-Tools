@@ -992,6 +992,9 @@ namespace Xv2CoreLib.BAC
                 case 29:
                     iBacType = new BAC_Type29();
                     break;
+                case 30:
+                    iBacType = new BAC_Type30();
+                    break;
                 default:
                     throw new InvalidOperationException($"UndoableAddIBacType: Invalid bacType {bacType}!");
             }
