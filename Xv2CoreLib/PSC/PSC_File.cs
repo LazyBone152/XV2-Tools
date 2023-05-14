@@ -26,6 +26,10 @@ namespace Xv2CoreLib.PSC
             }
         }
 
+        [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0)]
+        public int Version { get; set; } = 1;
+
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Configuration")]
         public List<PSC_Configuration> Configurations { get; set; } = new List<PSC_Configuration>();
 
@@ -54,6 +58,7 @@ namespace Xv2CoreLib.PSC
             }
 
             PSC_File pscFile = new PSC_File();
+            pscFile.Version = DetermineVersion(bytes);
 
             int numEntries = BitConverter.ToInt32(bytes, 8);
             int numConfigurations = BitConverter.ToInt32(bytes, 16);
@@ -74,8 +79,8 @@ namespace Xv2CoreLib.PSC
 
                     for(int s = 0; s < numSpec; s++)
                     {
-                        pscEntry.PscSpecEntries.Add(PSC_SpecEntry.Read(bytes, currentSpecPos));
-                        currentSpecPos += 196;
+                        pscEntry.PscSpecEntries.Add(PSC_SpecEntry.Read(bytes, currentSpecPos, pscFile.Version));
+                        currentSpecPos += pscFile.Version > 0 ? 200 : 196;
                     }
 
                     config.PscEntries.Add(pscEntry);
@@ -145,7 +150,7 @@ namespace Xv2CoreLib.PSC
 
                     for (int s = 0; s < specCount; s++)
                     {
-                        bytes.AddRange(Configurations[i].PscEntries[a].PscSpecEntries[s].Write());
+                        bytes.AddRange(Configurations[i].PscEntries[a].PscSpecEntries[s].Write(Version));
                     }
                 }
             }
@@ -184,6 +189,35 @@ namespace Xv2CoreLib.PSC
                 throw new Exception(string.Format("No PSC_Configuration exists at index {0}", index));
         }
 
+        private static int DetermineVersion(byte[] bytes)
+        {
+            int numEntries = BitConverter.ToInt32(bytes, 8);
+            int numConfigurations = BitConverter.ToInt32(bytes, 16);
+            int numSpecEntries = 0;
+
+            for (int i = 0; i < numConfigurations; i++)
+            {
+                int pscEntryOffset = PSC_HEADER_SIZE + ((12 * numEntries) * i);
+
+                for (int a = 0; a < numEntries; a++)
+                {
+                    numSpecEntries += BitConverter.ToInt32(bytes, pscEntryOffset + 4);
+                    pscEntryOffset += 12;
+                }
+            }
+
+            int specSize = ((bytes.Length - 20) - (12 * numEntries * numConfigurations)) / numSpecEntries;
+
+            switch (specSize)
+            {
+                case 196:
+                    return 0;
+                case 200:
+                    return 1;
+                default:
+                    throw new InvalidDataException($"Unsupported PSC version! (spec size = {specSize})");
+            }
+        }
 
         public bool CharacterExists(int charaId)
         {
@@ -468,63 +502,75 @@ namespace Xv2CoreLib.PSC
         [YAXFormat("0.0##########")]
         public float F_192 { get; set; }
 
-        public static PSC_SpecEntry Read(byte[] bytes, int offset)
+        //New in 1.20:
+        [YAXAttributeFor("NEW_I_20")]
+        [YAXSerializeAs("value")]
+        public int NEW_I_20 { get; set; } //Appears at offset 20 (where health used to be), pushing all other values down 4 bytes
+
+        public static PSC_SpecEntry Read(byte[] bytes, int offset, int version)
         {
-            return new PSC_SpecEntry()
+            PSC_SpecEntry specEntry = new PSC_SpecEntry();
+            specEntry.Index = BitConverter.ToInt32(bytes, offset + 0).ToString();
+            specEntry.I_04 = BitConverter.ToInt32(bytes, offset + 4);
+            specEntry.I_08 = BitConverter.ToInt32(bytes, offset + 8);
+            specEntry.I_12 = BitConverter.ToInt32(bytes, offset + 12);
+            specEntry.I_16 = BitConverter.ToInt32(bytes, offset + 16);
+
+            if(version >= 1)
             {
-                Index = BitConverter.ToInt32(bytes, offset + 0).ToString(),
-                I_04 = BitConverter.ToInt32(bytes, offset + 4),
-                I_08 = BitConverter.ToInt32(bytes, offset + 8),
-                I_12 = BitConverter.ToInt32(bytes, offset + 12),
-                I_16 = BitConverter.ToInt32(bytes, offset + 16),
-                F_20 = BitConverter.ToSingle(bytes, offset + 20),
-                F_24 = BitConverter.ToSingle(bytes, offset + 24),
-                F_28 = BitConverter.ToSingle(bytes, offset + 28),
-                F_32 = BitConverter.ToSingle(bytes, offset + 32),
-                I_36 = BitConverter.ToInt32(bytes, offset + 36),
-                I_40 = BitConverter.ToInt32(bytes, offset + 40),
-                I_44 = BitConverter.ToInt32(bytes, offset + 44),
-                F_48 = BitConverter.ToSingle(bytes, offset + 48),
-                F_52 = BitConverter.ToSingle(bytes, offset + 52),
-                F_56 = BitConverter.ToSingle(bytes, offset + 56),
-                F_60 = BitConverter.ToSingle(bytes, offset + 60),
-                F_64 = BitConverter.ToSingle(bytes, offset + 64),
-                F_68 = BitConverter.ToSingle(bytes, offset + 68),
-                F_72 = BitConverter.ToSingle(bytes, offset + 72),
-                F_76 = BitConverter.ToSingle(bytes, offset + 76),
-                F_80 = BitConverter.ToSingle(bytes, offset + 80),
-                F_84 = BitConverter.ToSingle(bytes, offset + 84),
-                F_88 = BitConverter.ToSingle(bytes, offset + 88),
-                F_92 = BitConverter.ToSingle(bytes, offset + 92),
-                F_96 = BitConverter.ToSingle(bytes, offset + 96),
-                F_100 = BitConverter.ToSingle(bytes, offset + 100),
-                F_104 = BitConverter.ToSingle(bytes, offset + 104),
-                F_108 = BitConverter.ToSingle(bytes, offset + 108),
-                F_112 = BitConverter.ToSingle(bytes, offset + 112),
-                F_116 = BitConverter.ToSingle(bytes, offset + 116),
-                F_120 = BitConverter.ToSingle(bytes, offset + 120),
-                F_124 = BitConverter.ToSingle(bytes, offset + 124),
-                F_128 = BitConverter.ToSingle(bytes, offset + 128),
-                F_132 = BitConverter.ToSingle(bytes, offset + 132),
-                F_136 = BitConverter.ToSingle(bytes, offset + 136),
-                F_140 = BitConverter.ToSingle(bytes, offset + 140),
-                F_144 = BitConverter.ToSingle(bytes, offset + 144),
-                I_148 = BitConverter.ToInt32(bytes, offset + 148),
-                I_152 = BitConverter.ToInt32(bytes, offset + 152),
-                I_156 = BitConverter.ToInt32(bytes, offset + 156),
-                I_160 = BitConverter.ToInt32(bytes, offset + 160),
-                I_164 = BitConverter.ToInt32(bytes, offset + 164),
-                I_168 = BitConverter.ToInt32(bytes, offset + 168),
-                I_172 = BitConverter.ToInt32(bytes, offset + 172),
-                I_176 = BitConverter.ToInt32(bytes, offset + 176),
-                I_180 = BitConverter.ToInt32(bytes, offset + 180),
-                I_184 = BitConverter.ToInt32(bytes, offset + 184),
-                I_188 = BitConverter.ToInt32(bytes, offset + 188),
-                F_192 = BitConverter.ToSingle(bytes, offset + 192)
-            };
+                specEntry.NEW_I_20 = BitConverter.ToInt32(bytes, offset + 20);
+                offset += 4;
+            }
+
+            specEntry.F_20 = BitConverter.ToSingle(bytes, offset + 20);
+            specEntry.F_24 = BitConverter.ToSingle(bytes, offset + 24);
+            specEntry.F_28 = BitConverter.ToSingle(bytes, offset + 28);
+            specEntry.F_32 = BitConverter.ToSingle(bytes, offset + 32);
+            specEntry.I_36 = BitConverter.ToInt32(bytes, offset + 36);
+            specEntry.I_40 = BitConverter.ToInt32(bytes, offset + 40);
+            specEntry.I_44 = BitConverter.ToInt32(bytes, offset + 44);
+            specEntry.F_48 = BitConverter.ToSingle(bytes, offset + 48);
+            specEntry.F_52 = BitConverter.ToSingle(bytes, offset + 52);
+            specEntry.F_56 = BitConverter.ToSingle(bytes, offset + 56);
+            specEntry.F_60 = BitConverter.ToSingle(bytes, offset + 60);
+            specEntry.F_64 = BitConverter.ToSingle(bytes, offset + 64);
+            specEntry.F_68 = BitConverter.ToSingle(bytes, offset + 68);
+            specEntry.F_72 = BitConverter.ToSingle(bytes, offset + 72);
+            specEntry.F_76 = BitConverter.ToSingle(bytes, offset + 76);
+            specEntry.F_80 = BitConverter.ToSingle(bytes, offset + 80);
+            specEntry.F_84 = BitConverter.ToSingle(bytes, offset + 84);
+            specEntry.F_88 = BitConverter.ToSingle(bytes, offset + 88);
+            specEntry.F_92 = BitConverter.ToSingle(bytes, offset + 92);
+            specEntry.F_96 = BitConverter.ToSingle(bytes, offset + 96);
+            specEntry.F_100 = BitConverter.ToSingle(bytes, offset + 100);
+            specEntry.F_104 = BitConverter.ToSingle(bytes, offset + 104);
+            specEntry.F_108 = BitConverter.ToSingle(bytes, offset + 108);
+            specEntry.F_112 = BitConverter.ToSingle(bytes, offset + 112);
+            specEntry.F_116 = BitConverter.ToSingle(bytes, offset + 116);
+            specEntry.F_120 = BitConverter.ToSingle(bytes, offset + 120);
+            specEntry.F_124 = BitConverter.ToSingle(bytes, offset + 124);
+            specEntry.F_128 = BitConverter.ToSingle(bytes, offset + 128);
+            specEntry.F_132 = BitConverter.ToSingle(bytes, offset + 132);
+            specEntry.F_136 = BitConverter.ToSingle(bytes, offset + 136);
+            specEntry.F_140 = BitConverter.ToSingle(bytes, offset + 140);
+            specEntry.F_144 = BitConverter.ToSingle(bytes, offset + 144);
+            specEntry.I_148 = BitConverter.ToInt32(bytes, offset + 148);
+            specEntry.I_152 = BitConverter.ToInt32(bytes, offset + 152);
+            specEntry.I_156 = BitConverter.ToInt32(bytes, offset + 156);
+            specEntry.I_160 = BitConverter.ToInt32(bytes, offset + 160);
+            specEntry.I_164 = BitConverter.ToInt32(bytes, offset + 164);
+            specEntry.I_168 = BitConverter.ToInt32(bytes, offset + 168);
+            specEntry.I_172 = BitConverter.ToInt32(bytes, offset + 172);
+            specEntry.I_176 = BitConverter.ToInt32(bytes, offset + 176);
+            specEntry.I_180 = BitConverter.ToInt32(bytes, offset + 180);
+            specEntry.I_184 = BitConverter.ToInt32(bytes, offset + 184);
+            specEntry.I_188 = BitConverter.ToInt32(bytes, offset + 188);
+            specEntry.F_192 = BitConverter.ToSingle(bytes, offset + 192);
+
+            return specEntry;
         }
 
-        public byte[] Write()
+        public byte[] Write(int version)
         {
             List<byte> bytes = new List<byte>();
 
@@ -534,6 +580,12 @@ namespace Xv2CoreLib.PSC
             bytes.AddRange(BitConverter.GetBytes(I_08));
             bytes.AddRange(BitConverter.GetBytes(I_12));
             bytes.AddRange(BitConverter.GetBytes(I_16));
+
+            if (version >= 1)
+            {
+                bytes.AddRange(BitConverter.GetBytes(NEW_I_20));
+            }
+
             bytes.AddRange(BitConverter.GetBytes(F_20));
             bytes.AddRange(BitConverter.GetBytes(F_24));
             bytes.AddRange(BitConverter.GetBytes(F_28));
@@ -579,8 +631,9 @@ namespace Xv2CoreLib.PSC
             bytes.AddRange(BitConverter.GetBytes(I_188));
             bytes.AddRange(BitConverter.GetBytes(F_192));
 
+
             //Validate and return
-            if (bytes.Count != 196) throw new InvalidDataException("PSC_SpecEntry must be 196 bytes.");
+            if (bytes.Count != 200 && version == 1 || bytes.Count != 196 && version == 0) throw new InvalidDataException("PSC_SpecEntry size mismatch.");
             return bytes.ToArray();
         }
     }

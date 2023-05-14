@@ -216,7 +216,7 @@ namespace Xv2CoreLib.BAC
                     }
                     else if (type is BAC_Type8 type8)
                     {
-                        var flag = type8.EffectFlags.RemoveFlag(BAC_Type8.EffectFlagsEnum.Loop | BAC_Type8.EffectFlagsEnum.Unk2 | BAC_Type8.EffectFlagsEnum.Unk6 | BAC_Type8.EffectFlagsEnum.Off | BAC_Type8.EffectFlagsEnum.SpawnOnTarget | BAC_Type8.EffectFlagsEnum.UserOnly);
+                        var flag = type8.EffectFlags.RemoveFlag(BAC_Type8.EffectFlagsEnum.Loop | BAC_Type8.EffectFlagsEnum.Unk2 | BAC_Type8.EffectFlagsEnum.Unk6 | BAC_Type8.EffectFlagsEnum.Off | BAC_Type8.EffectFlagsEnum.SpawnOnTarget | BAC_Type8.EffectFlagsEnum.UserOnly | BAC_Type8.EffectFlagsEnum.Unk8);
 
                         if ((uint)flag != 0)
                             return $"EffectFlags ({HexConverter.GetHexString((uint)flag)})";
@@ -2285,7 +2285,8 @@ namespace Xv2CoreLib.BAC
             SpawnOnTarget = 0x4,
             Loop = 0x8,
             UserOnly = 0x10,
-            Unk6 = 0x20
+            Unk6 = 0x20,
+            Unk8 = 0x80
         }
 
         public enum UseSkillIdEnum : ushort
