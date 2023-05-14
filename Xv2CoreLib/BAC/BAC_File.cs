@@ -2842,8 +2842,8 @@ namespace Xv2CoreLib.BAC
                     PositionZ = BitConverter.ToSingle(rawBytes, offset + 20),
                     DisplacementXZ = BitConverter.ToSingle(rawBytes, offset + 24),
                     DisplacementZY = BitConverter.ToSingle(rawBytes, offset + 28),
-                    RotationX = BitConverter.ToSingle(rawBytes, offset + 32),
-                    RotationY = BitConverter.ToSingle(rawBytes, offset + 36),
+                    RotationX = BitConverter.ToSingle(rawBytes, offset + 36),
+                    RotationY = BitConverter.ToSingle(rawBytes, offset + 32),
                     PositionX = BitConverter.ToSingle(rawBytes, offset + 40),
                     PositionY = BitConverter.ToSingle(rawBytes, offset + 44),
                     FieldOfView = BitConverter.ToSingle(rawBytes, offset + 48),
@@ -2851,8 +2851,8 @@ namespace Xv2CoreLib.BAC
                     PositionZ_Duration = BitConverter.ToUInt16(rawBytes, offset + 56),
                     DisplacementXZ_Duration = BitConverter.ToUInt16(rawBytes, offset + 58),
                     DisplacementZY_Duration = BitConverter.ToUInt16(rawBytes, offset + 60),
-                    RotationX_Duration = BitConverter.ToUInt16(rawBytes, offset + 62),
-                    RotationY_Duration = BitConverter.ToUInt16(rawBytes, offset + 64),
+                    RotationX_Duration = BitConverter.ToUInt16(rawBytes, offset + 64),
+                    RotationY_Duration = BitConverter.ToUInt16(rawBytes, offset + 62),
                     PositionX_Duration = BitConverter.ToUInt16(rawBytes, offset + 66),
                     PositionY_Duration = BitConverter.ToUInt16(rawBytes, offset + 68),
                     FieldOfView_Duration = BitConverter.ToUInt16(rawBytes, offset + 70),
@@ -2895,8 +2895,8 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.PositionZ));
                 bytes.AddRange(BitConverter.GetBytes(type.DisplacementXZ));
                 bytes.AddRange(BitConverter.GetBytes(type.DisplacementZY));
-                bytes.AddRange(BitConverter.GetBytes(type.RotationX));
                 bytes.AddRange(BitConverter.GetBytes(type.RotationY));
+                bytes.AddRange(BitConverter.GetBytes(type.RotationX));
                 bytes.AddRange(BitConverter.GetBytes(type.PositionX));
                 bytes.AddRange(BitConverter.GetBytes(type.PositionY));
                 bytes.AddRange(BitConverter.GetBytes(type.FieldOfView));
@@ -2904,8 +2904,8 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.PositionZ_Duration));
                 bytes.AddRange(BitConverter.GetBytes(type.DisplacementXZ_Duration));
                 bytes.AddRange(BitConverter.GetBytes(type.DisplacementZY_Duration));
-                bytes.AddRange(BitConverter.GetBytes(type.RotationX_Duration));
                 bytes.AddRange(BitConverter.GetBytes(type.RotationY_Duration));
+                bytes.AddRange(BitConverter.GetBytes(type.RotationX_Duration));
                 bytes.AddRange(BitConverter.GetBytes(type.PositionX_Duration));
                 bytes.AddRange(BitConverter.GetBytes(type.PositionY_Duration));
                 bytes.AddRange(BitConverter.GetBytes(type.FieldOfView_Duration));
