@@ -329,6 +329,7 @@ namespace Xv2CoreLib.ValuesDictionary
             { 0x28 , "Invisible Opponents" },
             { 0x29 , "Untargetable" },
             { 0x2a , "Set BCS BoneScale (gradual)" },
+            { 0x2b , "Auto Lock-on" },
             { 0x2d , "Disable Hitbox" },
             { 0x2e , "Activate Giant Hitbox (Become Giant)" },
             { 0x30 , "Render Black Void" },
@@ -339,9 +340,11 @@ namespace Xv2CoreLib.ValuesDictionary
             { 0x40 , "Auto Lock-On" },
             { 0x43 , "Auto-Dodge 1" },
             { 0x44 , "Damages User (x10)" },
+            { 0x48 , "Enable Hitbox for Victim (ThrowHandler)" },
             { 0x4a , "Skill Cooldown" },
             { 0x4c , "Activate Talisman" },
             { 0x4e , "Skill Upgrade" },
+            { 0x57 , "Extended Set BCS Partset (Permanent)" },
             { 0x5f , "Auto-Dodge 2" }
         };
 
@@ -362,6 +365,7 @@ namespace Xv2CoreLib.ValuesDictionary
             { 0x25 , "BAC Entry ID" },
             { 0x26 , "BSA Condition" },
             { 0x2a , "BoneScale ID" },
+            { 0x2b , "Lock-on Range" },
             { 0x31 , "Health Amount" },
             { 0x3c , "Stun Duration" },
             { 0x40 , "Range" },
@@ -370,6 +374,7 @@ namespace Xv2CoreLib.ValuesDictionary
             { 0x4a , "Cooldown Duration" },
             { 0x4c , "Talisman ID" },
             { 0x4e , "Skill ID" },
+            { 0x57 , "Partset (Colorable)" },
             { 0x5f , "Stamina Cost" },
         };
 
@@ -379,6 +384,7 @@ namespace Xv2CoreLib.ValuesDictionary
             { 0x25 , "Skill Type" },
             { 0x26 , "Skill Type" },
             { 0x4e , "Skill Type" },
+            { 0x57 , "Partset (Non-colorable)" },
             { 0x5f , "Health Requirement" },
         };
 
