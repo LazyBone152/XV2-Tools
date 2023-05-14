@@ -2637,9 +2637,9 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.PositionX));
                 bytes.AddRange(BitConverter.GetBytes(type.PositionY));
                 bytes.AddRange(BitConverter.GetBytes(type.PositionZ));
-                bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertRadiansToDegrees(type.RotationX)));
-                bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertRadiansToDegrees(type.RotationY)));
-                bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertRadiansToDegrees(type.RotationZ)));
+                bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(type.RotationX)));
+                bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(type.RotationY)));
+                bytes.AddRange(BitConverter.GetBytes((float)MathHelpers.ConvertDegreesToRadians(type.RotationZ)));
                 bytes.Add((byte)type.BsaType);
                 bytes.AddRange(BitConverter.GetBytes((ushort)type.BsaFlags));
                 bytes.Add(type.I_47);
