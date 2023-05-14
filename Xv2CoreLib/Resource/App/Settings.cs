@@ -543,7 +543,7 @@ namespace Xv2CoreLib.Resource.App
         #region XenoKit
         public int XenoKit_WindowSizeX { get; set; } = -1;
         public int XenoKit_WindowSizeY { get; set; } = -1;
-        public int XenoKit_DelayedUpdateInterval { get; set; } = 250;
+        public int XenoKit_DelayedUpdateFrameInterval { get; set; } = 60;
         public bool XenoKit_HideEmptyBacEntries { get; set; } = true;
         public bool XenoKit_EnableCameraAnimations { get; set; } = true;
         public bool XenoKit_EnableVisualSkeleton { get; set; } = true;
@@ -625,7 +625,7 @@ namespace Xv2CoreLib.Resource.App
                 _fileCleanUp = EepkFileCleanUp.Prompt;
 
             //XenoKit
-            XenoKit_DelayedUpdateInterval = MathHelpers.Clamp(100, 1000, XenoKit_DelayedUpdateInterval);
+            XenoKit_DelayedUpdateFrameInterval = MathHelpers.Clamp(10, 200, XenoKit_DelayedUpdateFrameInterval);
         }
 
         private string FindGameDirectory()
