@@ -1236,16 +1236,25 @@ namespace Xv2CoreLib.BAC
             Unk4 = 0x8,
             UseRootMotion = 0x10,
             Unk6 = 0x20,
-            FullRootMotion = 0x40,
+            ForceYRootMotion = 0x40,
             Unk8 = 0x80,
             Unk9 = 0x100,
-            Unk10 = 0x200,
-            Unk11 = 0x400,
-            Unk12 = 0x800,
-            Unk13 = 0x1000,
+            ContinueFromLast = 0x200,
+            IgnoreRootMotionX = 0x400,
+            IgnoreRootMotionY = 0x800,
+            IgnoreRootMotionZ = 0x1000,
             Unk14 = 0x2000,
             Unk15 = 0x4000,
-            Unk16 = 0x8000
+            Rotate180Degrees = 0x8000,
+
+            //Old options kept for installer compatibility
+            FullRootMotion = 0x40, //"Force Y Motion"
+            Unk10 = 0x200, //"Continue From Last"
+            Unk11 = 0x400, //"Ignore Root Motion X"
+            Unk12 = 0x800, //"Ignore Root Motion Y"
+            Unk13 = 0x1000, //"Ignore Root Motion Z"
+            Unk16 = 0x8000, //"Rotate 180 degrees"
+
         }
 
         [YAXAttributeFor("EAN")]
