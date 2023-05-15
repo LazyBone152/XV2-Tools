@@ -323,7 +323,8 @@ namespace Xv2CoreLib
 
         private void LoadPartSetFile(string path, string charaCode, PartType type, string altPath = null)
         {
-            if (charaCode != CmsEntry.ShortName) return; //Dont load files belonging to another character
+            if (path == null) return;
+            if (charaCode != CmsEntry.ShortName || (!path.Contains($"{charaCode}/") && !path.Contains($"{charaCode}" + @"\"))) return; //Dont load files belonging to another character
 
             string name = Path.GetFileName(path);
 
