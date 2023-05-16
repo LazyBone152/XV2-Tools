@@ -83,7 +83,8 @@ namespace Xv2CoreLib
             AFTER_BCM,
             BAI,
             AMK,
-            FCE_EAN,
+            FCE_EAN, //Applies to FaceBase. Whole face animation for cast characters, but for CaCs its only the mouth.
+            FCE_FOREHEAD_EAN, //Applies to FaceForehead, covering eye and nose animations. For CaCs only in vanilla, since cast characters have the whole face in FaceBase and only use the one fce.ean.
             TAL_EAN //CMN
         }
 
@@ -1082,6 +1083,14 @@ namespace Xv2CoreLib
             moveFiles.EanPaths.Add(fceEanPath);
             moveFiles.EanFile.Add(new Xv2File<EAN_File>((EAN_File)FileManager.Instance.GetParsedFileFromGame(fceEanPath), fileIO.PathInGameDir(fceEanPath), !cmsEntry.IsSelfReference(cmsEntry.FceEanPath), null, false, MoveFileTypes.FCE_EAN, 0, true, MoveType.Character));
 
+            //fce.ean for foreheads
+            if (!string.IsNullOrWhiteSpace(cmsEntry.FceForeheadEanPath))
+            {
+                string fceForeheadEanPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.ean", cmsEntry.ShortName, cmsEntry.FceForeheadEanPath));
+                moveFiles.EanPaths.Add(fceForeheadEanPath);
+                moveFiles.EanFile.Add(new Xv2File<EAN_File>((EAN_File)FileManager.Instance.GetParsedFileFromGame(fceForeheadEanPath), fileIO.PathInGameDir(fceForeheadEanPath), !cmsEntry.IsSelfReference(cmsEntry.FceForeheadEanPath), null, false, MoveFileTypes.FCE_FOREHEAD_EAN, 0, true, MoveType.Character));
+            }
+
             return moveFiles;
         }
 
@@ -1437,8 +1446,6 @@ namespace Xv2CoreLib
         }
 
         #endregion
-
-
 
         public static Language SystemLanguageToXv2()
         {

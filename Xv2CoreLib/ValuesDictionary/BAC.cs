@@ -88,8 +88,8 @@ namespace Xv2CoreLib.ValuesDictionary
             { 5 , "Character" },
             { 65534 , "Skill" },
             { 9 , "Commom (tail)" },
-            { 10 , "Face (A)" },
-            { 11 , "Face (B)" }
+            { 10 , "Face Base" },
+            { 11 , "Face Forehead" }
         };
 
         //BdmType

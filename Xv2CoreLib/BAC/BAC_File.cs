@@ -1222,9 +1222,13 @@ namespace Xv2CoreLib.BAC
             Common = 0,
             Character = 5,
             CommonTail = 9,
+            FaceBase = 10,
+            FaceForehead = 11,
+            Skill = 65534,
+
+            //Legacy options (installer compat):
             FaceA = 10,
             FaceB = 11,
-            Skill = 65534
         }
 
         [Flags]

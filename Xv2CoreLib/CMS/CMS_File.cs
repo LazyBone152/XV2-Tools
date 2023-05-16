@@ -186,7 +186,7 @@ namespace Xv2CoreLib.CMS
         [YAXDontSerialize]
         public string FceEanPath { get { return Str_44; } set { Str_44 = value; } }
         [YAXDontSerialize]
-        public string FcePath { get { return Str_48; } set { Str_48 = value; } }
+        public string FceForeheadEanPath { get { return Str_48; } set { Str_48 = value; } }
         [YAXDontSerialize]
         public string CamEanPath { get { return Str_56; } set { Str_56 = value; } }
         [YAXDontSerialize]

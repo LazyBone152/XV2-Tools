@@ -168,6 +168,11 @@ namespace Xv2CoreLib
             return EanFile.FirstOrDefault(x => x.FileType == Xenoverse2.MoveFileTypes.FCE_EAN)?.File;
         }
 
+        public EAN_File GetFaceForeheadEanFile()
+        {
+            return EanFile.FirstOrDefault(x => x.FileType == Xenoverse2.MoveFileTypes.FCE_FOREHEAD_EAN)?.File;
+        }
+
         public EAN_File GetTailEanFile()
         {
             return EanFile.FirstOrDefault(x => x.FileType == Xenoverse2.MoveFileTypes.TAL_EAN)?.File;
