@@ -91,6 +91,21 @@ namespace LB_Common.Numbers
                 return hash1;
             }
         }
+ 
+        public static CustomVector4 Lerp(CustomVector4 firstVector, CustomVector4 secondVector, float by)
+        {
+            float retX = firstVector.X * (1 - by) + secondVector.X * by;
+            float retY = firstVector.Y * (1 - by) + secondVector.Y * by;
+            //float retZ = firstVector.Z * (1 - by) + secondVector.Z * by;
+            //float retW = firstVector.W * (1 - by) + secondVector.W * by;
+
+
+            //return new CustomVector4(retX, retY, retZ, retW);
+            //Only need XY for now
+            return new CustomVector4(retX, retY, 0.0f, 1.0f);
+
+        }
+      
 
         public override string ToString()
         {
