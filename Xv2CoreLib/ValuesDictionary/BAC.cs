@@ -53,7 +53,7 @@ namespace Xv2CoreLib.ValuesDictionary
                     else if (type is BAC_Type10 camera)
                     {
                         if (!CameraEanType.ContainsKey((ushort)camera.EanType))
-                            CameraEanType.Add((ushort)camera.EanType, $"Unknown ({camera.EanType})");
+                            CameraEanType.Add((ushort)camera.EanType, $"Unknown ({HexConverter.GetHexString((ushort)camera.EanType)})");
                     }
                     else if(type is BAC_Type11 sound)
                     {
@@ -153,10 +153,26 @@ namespace Xv2CoreLib.ValuesDictionary
         //Camera Ean Type
         public static Dictionary<ushort, string> CameraEanType { get; private set; } = new Dictionary<ushort, string>()
         {
-            { 0 , "Target" },
+            //Primary EANs
             { 3 , "Common" },
             { 4 , "Character" },
-            { 5 , "Skill" }
+            { 5 , "Skill" },
+            { 0x19 , "Activate Extended Camera" },
+            { 0x20 , "Disable Extended Camera" },
+
+            //Everything else
+            { 0 , "Target (0x0)" },
+            { 1 , "Heavy Rumble (0x1)" },
+            { 2 , "Extreme Rumble (0x2)" },
+            { 6 , "Zoom (0x6)" },
+            { 7 , "Static (0x7)" },
+            { 8 , "Victim Focus (0x8)" },
+            { 0xa , "Zoom, Speed-Lines (0xa)" },
+            { 0xb , "Unknown (0xb)" },
+            { 0xc , "Unknown (0xc)" },
+            { 0xd , "Unknown (0xd)" },
+            { 0xf , "Unknown (0xf)" },
+            { 0x11 , "Zoom (0x11)" },
         };
 
         //"Flags"
