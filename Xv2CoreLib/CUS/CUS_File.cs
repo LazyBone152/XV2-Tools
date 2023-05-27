@@ -262,7 +262,14 @@ namespace Xv2CoreLib.CUS
             //Check each ID if its used, and return false if its free to use
             for (int i = 0; i < 10; i++)
             {
-                if (skills.FirstOrDefault(x => x.ID2 == id + i) == null && assignedIds?.Contains(id + i) == false) return false;
+                if(assignedIds == null)
+                {
+                    if (skills.FirstOrDefault(x => x.ID2 == id + i) == null) return false;
+                }
+                else
+                {
+                    if (skills.FirstOrDefault(x => x.ID2 == id + i) == null && assignedIds.Contains(id + i) == false) return false;
+                }
             }
 
             return true;
@@ -287,7 +294,7 @@ namespace Xv2CoreLib.CUS
                 }
                 else
                 {
-                    if (skills.FirstOrDefault(x => x.ID2 == id) == null && !assignedIds.Contains(id) == true) return id;
+                    if (skills.FirstOrDefault(x => x.ID2 == id) == null && !assignedIds.Contains(id)) return id;
                 }
                 id++;
             }

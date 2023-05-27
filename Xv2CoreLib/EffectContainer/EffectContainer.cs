@@ -4108,13 +4108,9 @@ namespace Xv2CoreLib.EffectContainer
                 newFile.Extension = file.Extension;
                 newFile.fileType = file.fileType;
 
-                if (newFile.fileType == EffectFile.FileType.Other)
+                if (newFile.fileType == EffectFile.FileType.EMO && EepkToolInterlop.FullDecompile)
                 {
-                    newFile.Bytes = file.Bytes.Copy();
-                }
-                else if (newFile.fileType == EffectFile.FileType.EMO)
-                {
-                    newFile.Bytes = file.Bytes.Copy();
+                    newFile.EmoFile = file.EmoFile.Copy();
                 }
                 else if (newFile.fileType == EffectFile.FileType.ECF)
                 {
@@ -4138,9 +4134,13 @@ namespace Xv2CoreLib.EffectContainer
                 {
                     newFile.EmmFile = file.EmmFile.Copy();
                 }
-                else if (newFile.fileType == EffectFile.FileType.EMA)
+                else if (newFile.fileType == EffectFile.FileType.EMA && EepkToolInterlop.FullDecompile)
                 {
                     newFile.EmaFile = file.EmaFile.Copy();
+                }
+                else if(file.Bytes != null)
+                {
+                    newFile.Bytes = file.Bytes.Copy();
                 }
 
                 newAsset.Files.Add(newFile);
