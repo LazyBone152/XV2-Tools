@@ -3,10 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
-using System.Globalization;
-using System.Threading;
 
 namespace Xv2CoreLib.QXD
 {
@@ -14,12 +11,12 @@ namespace Xv2CoreLib.QXD
     {
         QXD_File qxd_File;
         string saveLocation;
-        public List<byte> bytes = new List<byte>() {35,81,88,68,254,255,48,0,0,0,0,0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0 };
+        public List<byte> bytes = new List<byte>() { 35, 81, 88, 68, 254, 255, 48, 0, 0, 0, 0, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0 };
 
         public Deserializer(string location)
         {
             saveLocation = String.Format("{0}/{1}", Path.GetDirectoryName(location), Path.GetFileNameWithoutExtension(location));
-            YAXSerializer serializer = new YAXSerializer(typeof(QXD_File),YAXSerializationOptions.DontSerializeNullObjects);
+            YAXSerializer serializer = new YAXSerializer(typeof(QXD_File), YAXSerializationOptions.DontSerializeNullObjects);
             qxd_File = (QXD_File)serializer.DeserializeFromFile(location);
             Validation();
             WriteQuestData();
@@ -37,56 +34,70 @@ namespace Xv2CoreLib.QXD
         public Deserializer(QXD_File _qxdFile)
         {
             qxd_File = _qxdFile;
+            Validation();
             WriteQuestData();
         }
 
-        void Validation()
+        private void Validation()
         {
-            //Validating Arrays (checking for duplicate and non-consecutive ID2s)
-
-            for (int i = 0; i < qxd_File.Quests.Count(); i++)
+            for (int i = 0; i < qxd_File.Quests.Count; i++)
             {
-                Assertion.AssertStringSize(qxd_File.Quests[i].Name, 16, "Quest", "QuestID");
-                Assertion.AssertArraySize(qxd_File.Quests[i].I_48, 4, "Quest", "I_48");
-                Assertion.AssertArraySize(qxd_File.Quests[i].I_68, 5, "Quest", "I_68");
-                Assertion.AssertArraySize(qxd_File.Quests[i].I_232, 8, "Quest", "I_232");
-                Assertion.AssertArraySize(qxd_File.Quests[i].StageDisplay, 16, "Quest", "Stage_Portraits");
+                if (qxd_File.Quests[i].Name.Length > 16)
+                    throw new InvalidDataException(string.Format("Quest name exceeds max length of 16 ({0})", qxd_File.Quests[i].Name));
 
-                if(qxd_File.Quests[i].UnknownNum1 != null)
+                if (qxd_File.Quests[i].I_48.Length != 4)
+                    throw new InvalidDataException(string.Format("Quest I_48 is an invalid size. Must have 4 values. (on quest: {0}", qxd_File.Quests[i].Name));
+
+                if (qxd_File.Quests[i].I_68.Length != 5)
+                    throw new InvalidDataException(string.Format("Quest I_68 is an invalid size. Must have 5 values. (on quest: {0}", qxd_File.Quests[i].Name));
+
+                if (qxd_File.Quests[i].I_232.Length != 8)
+                    throw new InvalidDataException(string.Format("Quest I_232 is an invalid size. Must have 8 values. (on quest: {0}", qxd_File.Quests[i].Name));
+
+                if (qxd_File.Quests[i].StageDisplay.Count != 16)
+                    throw new InvalidDataException(string.Format("Quest Stage_Portraits is an invalid size. Must have 16 values. (on quest: {0}", qxd_File.Quests[i].Name));
+
+                if (qxd_File.Quests[i].UnknownNum1 != null)
                 {
-                    foreach(var unk1 in qxd_File.Quests[i].UnknownNum1)
+                    foreach (UnkNum1 unk1 in qxd_File.Quests[i].UnknownNum1)
                     {
-                        Assertion.AssertArraySize(unk1.I_00, 16, "Unk1", "I_00");
+                        if (unk1.I_00.Length != 16)
+                            throw new InvalidDataException(string.Format("Unk1 values is an invalid size. Must have 16 values. (on quest: {0}", qxd_File.Quests[i].Name));
                     }
                 }
 
                 if (qxd_File.Quests[i].UnknownNum2 != null)
                 {
-                    foreach (var unk2 in qxd_File.Quests[i].UnknownNum2)
+                    foreach (UnkNum2 unk2 in qxd_File.Quests[i].UnknownNum2)
                     {
-                        Assertion.AssertArraySize(unk2.I_00, 16, "Unk2", "I_00");
+                        if (unk2.I_00.Length != 16)
+                            throw new InvalidDataException(string.Format("Unk2 values is an invalid size. Must have 16 values. (on quest: {0}", qxd_File.Quests[i].Name));
                     }
                 }
             }
 
-            for(int i = 0; i < qxd_File.Characters1.Count; i++)
+            for (int i = 0; i < qxd_File.Characters1.Count; i++)
             {
-                Assertion.AssertArraySize(qxd_File.Characters1[i].I_106, 7, "NormalCharacters", "I_106");
+                if (qxd_File.Characters1[i].I_106.Length != 7)
+                    throw new InvalidDataException(string.Format("QXD NormalCharacter I_106 is an invalid size. Must have 7 values. (ID: {0}", qxd_File.Characters1[i].SortID));
             }
 
             for (int i = 0; i < qxd_File.Characters2.Count; i++)
             {
-                Assertion.AssertArraySize(qxd_File.Characters2[i].I_106, 7, "SpecialCharacters", "I_106");
+                if (qxd_File.Characters2[i].I_106.Length != 7)
+                    throw new InvalidDataException(string.Format("QXD SpecialCharacter I_106 is an invalid size. Must have 7 values. (ID: {0}", qxd_File.Characters2[i].SortID));
             }
         }
 
-        void WriteQuestData()
+        private void WriteQuestData()
         {
+            List<Quest_Data> quests = qxd_File.GetQuestsToWrite();
+
             //writing the count
-            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(qxd_File.Quests.Count()), 8);
+            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(quests.Count), 8);
 
             //counts
-            int totalQuests = qxd_File.Quests.Count();
+            int totalQuests = quests.Count();
             int totalCharacters1 = 0;
             int totalCharacters2 = 0;
             int totalUnknownDatas = 0;
@@ -115,22 +126,22 @@ namespace Xv2CoreLib.QXD
 
             for (int i = 0; i < totalQuests; i++)
             {
-                bytes.AddRange(Encoding.ASCII.GetBytes(qxd_File.Quests[i].Name));
+                bytes.AddRange(Encoding.ASCII.GetBytes(quests[i].Name));
 
-                for (int a = 0; a < 16 - qxd_File.Quests[i].Name.Count(); a++)
+                for (int a = 0; a < 16 - quests[i].Name.Count(); a++)
                 {
                     bytes.Add(0);
                 }
 
-                bytes.AddRange(BitConverter.GetBytes(int.Parse(qxd_File.Quests[i].Index)));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_20));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_24));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_28));
+                bytes.AddRange(BitConverter.GetBytes(int.Parse(quests[i].Index)));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_20));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_24));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_28));
 
                 //MsgEntries
-                if (qxd_File.Quests[i].MsgFiles != null)
+                if (quests[i].MsgFiles != null)
                 {
-                    bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].MsgFiles.Count()));
+                    bytes.AddRange(BitConverter.GetBytes(quests[i].MsgFiles.Count()));
                     MsgEntryOffsets.Add(bytes.Count());
                     bytes.AddRange(new List<byte>() { 0, 0, 0, 0 });
                 }
@@ -141,18 +152,18 @@ namespace Xv2CoreLib.QXD
                 }
 
                 //some shorts
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_40));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_42));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_44));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_46));
-                bytes.AddRange(BitConverter_Ex.GetBytes(qxd_File.Quests[i].I_48));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_64));
-                bytes.AddRange(BitConverter_Ex.GetBytes(qxd_File.Quests[i].I_68));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_40));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_42));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_44));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_46));
+                bytes.AddRange(BitConverter_Ex.GetBytes(quests[i].I_48));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_64));
+                bytes.AddRange(BitConverter_Ex.GetBytes(quests[i].I_68));
 
                 //UnkNum1
-                if (qxd_File.Quests[i].UnknownNum1 != null)
+                if (quests[i].UnknownNum1 != null)
                 {
-                    bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].UnknownNum1.Count()));
+                    bytes.AddRange(BitConverter.GetBytes(quests[i].UnknownNum1.Count()));
                     UnkNum1Offsets.Add(bytes.Count());
                     bytes.AddRange(new List<byte>() { 0, 0, 0, 0 });
                 }
@@ -163,9 +174,9 @@ namespace Xv2CoreLib.QXD
                 }
 
                 //UnkNum2
-                if (qxd_File.Quests[i].UnknownNum2 != null)
+                if (quests[i].UnknownNum2 != null)
                 {
-                    bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].UnknownNum2.Count()));
+                    bytes.AddRange(BitConverter.GetBytes(quests[i].UnknownNum2.Count()));
                     UnkNum2Offsets.Add(bytes.Count());
                     bytes.AddRange(new List<byte>() { 0, 0, 0, 0 });
                 }
@@ -177,15 +188,15 @@ namespace Xv2CoreLib.QXD
 
 
                 //more values
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_104));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_106));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_108));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_110));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_104));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_106));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_108));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_110));
 
                 //QBT
-                if (qxd_File.Quests[i].QedFiles != null)
+                if (quests[i].QedFiles != null)
                 {
-                    bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].QedFiles.Count()));
+                    bytes.AddRange(BitConverter.GetBytes(quests[i].QedFiles.Count()));
                     QbtFilesOffsets.Add(bytes.Count());
                     bytes.AddRange(new List<byte>() { 0, 0, 0, 0 });
                 }
@@ -194,25 +205,25 @@ namespace Xv2CoreLib.QXD
                     bytes.AddRange(new List<byte>() { 0, 0, 0, 0, 0, 0, 0, 0 });
                     QbtFilesOffsets.Add(0);
                 }
-                
+
 
                 //more values
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_120));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_124));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_128));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_132));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_136));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_140));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_144));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_148));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_152));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_156));
-                
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_120));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_124));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_128));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_132));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_136));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_140));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_144));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_148));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_152));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_156));
+
 
                 //Equipment Reward
-                if (qxd_File.Quests[i].EquipReward != null)
+                if (quests[i].EquipReward != null)
                 {
-                    bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].EquipReward.Count()));
+                    bytes.AddRange(BitConverter.GetBytes(quests[i].EquipReward.Count()));
                     EquipRewardOffsets.Add(bytes.Count());
                     bytes.AddRange(new List<byte>() { 0, 0, 0, 0 });
                 }
@@ -223,9 +234,9 @@ namespace Xv2CoreLib.QXD
                 }
 
                 //Skill Reward
-                if (qxd_File.Quests[i].Skill_Reward != null)
+                if (quests[i].Skill_Reward != null)
                 {
-                    bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].Skill_Reward.Count()));
+                    bytes.AddRange(BitConverter.GetBytes(quests[i].Skill_Reward.Count()));
                     SkillRewardOffsets.Add(bytes.Count());
                     bytes.AddRange(new List<byte>() { 0, 0, 0, 0 });
                 }
@@ -236,9 +247,9 @@ namespace Xv2CoreLib.QXD
                 }
 
                 //Chara Unlock
-                if (qxd_File.Quests[i].Chara_Unlock != null)
+                if (quests[i].Chara_Unlock != null)
                 {
-                    bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].Chara_Unlock.Count()));
+                    bytes.AddRange(BitConverter.GetBytes(quests[i].Chara_Unlock.Count()));
                     CharaUnlockOffsets.Add(bytes.Count());
                     bytes.AddRange(new List<byte>() { 0, 0, 0, 0 });
                 }
@@ -249,7 +260,7 @@ namespace Xv2CoreLib.QXD
                 }
 
                 //Stage Portrait
-                if (qxd_File.Quests[i].StageDisplay != null)
+                if (quests[i].StageDisplay != null)
                 {
                     bytes.AddRange(BitConverter.GetBytes((int)1));
                     StageDisplayOffsets.Add(bytes.Count());
@@ -262,37 +273,37 @@ namespace Xv2CoreLib.QXD
                 }
 
                 //random value
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_192));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_192));
 
                 //Enemy Portrait
-                InvalidCollectionCheck("EnemyPortraits", 6, qxd_File.Quests[i].EnemyPortraitDisplay.Count(), qxd_File.Quests[i].Name);
+                InvalidCollectionCheck("EnemyPortraits", 6, quests[i].EnemyPortraitDisplay.Count(), quests[i].Name);
                 int addedOffset = 0;
                 for (int a = 0; a < 6; a++)
                 {
-                    bytes.AddRange(BitConverter.GetBytes((short)qxd_File.Quests[i].EnemyPortraitDisplay[a].CharaID));
-                    bytes.AddRange(BitConverter.GetBytes((short)qxd_File.Quests[i].EnemyPortraitDisplay[a].CostumeIndex));
-                    bytes.AddRange(BitConverter.GetBytes((short)qxd_File.Quests[i].EnemyPortraitDisplay[a].State));
+                    bytes.AddRange(BitConverter.GetBytes((short)quests[i].EnemyPortraitDisplay[a].CharaID));
+                    bytes.AddRange(BitConverter.GetBytes((short)quests[i].EnemyPortraitDisplay[a].CostumeIndex));
+                    bytes.AddRange(BitConverter.GetBytes((short)quests[i].EnemyPortraitDisplay[a].State));
                     addedOffset += 6;
                 }
 
                 //collection of unknown values
-                bytes.AddRange(BitConverter_Ex.GetBytes(qxd_File.Quests[i].I_232));
+                bytes.AddRange(BitConverter_Ex.GetBytes(quests[i].I_232));
 
                 //5 Int32s
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_248));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_252));
-                bytes.AddRange(BitConverter.GetBytes((int)qxd_File.Quests[i].I_256));
-                bytes.AddRange(BitConverter.GetBytes((int)qxd_File.Quests[i].I_260));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_264));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_248));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_252));
+                bytes.AddRange(BitConverter.GetBytes((int)quests[i].I_256));
+                bytes.AddRange(BitConverter.GetBytes((int)quests[i].I_260));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_264));
 
 
                 //Music Values
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_268));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_270));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_272));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_274));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].F_276));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].I_280));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_268));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_270));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_272));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_274));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].F_276));
+                bytes.AddRange(BitConverter.GetBytes(quests[i].I_280));
 
 
                 //end main Quest Data, Next: MSG entries
@@ -305,10 +316,10 @@ namespace Xv2CoreLib.QXD
                 if (MsgEntryOffsets[i] > 0)
                 {
                     bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), MsgEntryOffsets[i]);
-                    for (int a = 0; a < qxd_File.Quests[i].MsgFiles.Count(); a++)
+                    for (int a = 0; a < quests[i].MsgFiles.Count(); a++)
                     {
-                        bytes.AddRange(Encoding.ASCII.GetBytes(qxd_File.Quests[i].MsgFiles[a]));
-                        int remainingBytes = 32 - qxd_File.Quests[i].MsgFiles[a].Count();
+                        bytes.AddRange(Encoding.ASCII.GetBytes(quests[i].MsgFiles[a]));
+                        int remainingBytes = 32 - quests[i].MsgFiles[a].Count();
                         for (int b = 0; b < remainingBytes; b++)
                         {
                             bytes.Add(0);
@@ -324,12 +335,12 @@ namespace Xv2CoreLib.QXD
                 {
                     bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), UnkNum1Offsets[i]);
 
-                    for (int e = 0; e < qxd_File.Quests[i].UnknownNum1.Count(); e++)
+                    for (int e = 0; e < quests[i].UnknownNum1.Count(); e++)
                     {
-                        InvalidCollectionCheck("UnkNum1", 16, qxd_File.Quests[i].UnknownNum1[e].I_00.Count(), qxd_File.Quests[i].Name);
-                        for (int a = 0; a < qxd_File.Quests[i].UnknownNum1[e].I_00.Count(); a++)
+                        InvalidCollectionCheck("UnkNum1", 16, quests[i].UnknownNum1[e].I_00.Count(), quests[i].Name);
+                        for (int a = 0; a < quests[i].UnknownNum1[e].I_00.Count(); a++)
                         {
-                            bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].UnknownNum1[e].I_00[a]));
+                            bytes.AddRange(BitConverter.GetBytes(quests[i].UnknownNum1[e].I_00[a]));
                         }
                     }
                 }
@@ -342,12 +353,12 @@ namespace Xv2CoreLib.QXD
                 {
                     bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), UnkNum2Offsets[i]);
 
-                    for (int a = 0; a < qxd_File.Quests[i].UnknownNum2.Count(); a++)
+                    for (int a = 0; a < quests[i].UnknownNum2.Count(); a++)
                     {
-                        InvalidCollectionCheck("UnkNum2", 16, qxd_File.Quests[i].UnknownNum2[a].I_00.Count(), qxd_File.Quests[i].Name);
-                        for (int b = 0; b < qxd_File.Quests[i].UnknownNum2[a].I_00.Count(); b++)
+                        InvalidCollectionCheck("UnkNum2", 16, quests[i].UnknownNum2[a].I_00.Count(), quests[i].Name);
+                        for (int b = 0; b < quests[i].UnknownNum2[a].I_00.Count(); b++)
                         {
-                            bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].UnknownNum2[a].I_00[b]));
+                            bytes.AddRange(BitConverter.GetBytes(quests[i].UnknownNum2[a].I_00[b]));
                         }
                     }
                 }
@@ -360,11 +371,11 @@ namespace Xv2CoreLib.QXD
                 {
                     bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), QbtFilesOffsets[i]);
 
-                    for (int a = 0; a < qxd_File.Quests[i].QedFiles.Count(); a++)
+                    for (int a = 0; a < quests[i].QedFiles.Count(); a++)
                     {
-                        ErrorStringToLongCheck(qxd_File.Quests[i].QedFiles[a],31);
-                        bytes.AddRange(Encoding.ASCII.GetBytes(qxd_File.Quests[i].QedFiles[a]));
-                        int remainingBytes = 32 - qxd_File.Quests[i].QedFiles[a].Count();
+                        ErrorStringToLongCheck(quests[i].QedFiles[a], 31);
+                        bytes.AddRange(Encoding.ASCII.GetBytes(quests[i].QedFiles[a]));
+                        int remainingBytes = 32 - quests[i].QedFiles[a].Count();
 
                         for (int b = 0; b < remainingBytes; b++)
                         {
@@ -381,16 +392,16 @@ namespace Xv2CoreLib.QXD
                 {
                     bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), EquipRewardOffsets[i]);
 
-                    for (int a = 0; a < qxd_File.Quests[i].EquipReward.Count(); a++)
+                    for (int a = 0; a < quests[i].EquipReward.Count(); a++)
                     {
-                        bytes.AddRange(BitConverter.GetBytes((int)qxd_File.Quests[i].EquipReward[a].I_00));
-                        bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].EquipReward[a].I_04));
-                        bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].EquipReward[a].I_08));
-                        bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].EquipReward[a].I_12));
-                        bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].EquipReward[a].I_16));
-                        bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].EquipReward[a].I_20));
-                        bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].EquipReward[a].F_24));
-                        bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].EquipReward[a].I_28));
+                        bytes.AddRange(BitConverter.GetBytes((int)quests[i].EquipReward[a].I_00));
+                        bytes.AddRange(BitConverter.GetBytes(quests[i].EquipReward[a].I_04));
+                        bytes.AddRange(BitConverter.GetBytes(quests[i].EquipReward[a].I_08));
+                        bytes.AddRange(BitConverter.GetBytes(quests[i].EquipReward[a].I_12));
+                        bytes.AddRange(BitConverter.GetBytes(quests[i].EquipReward[a].I_16));
+                        bytes.AddRange(BitConverter.GetBytes(quests[i].EquipReward[a].I_20));
+                        bytes.AddRange(BitConverter.GetBytes(quests[i].EquipReward[a].F_24));
+                        bytes.AddRange(BitConverter.GetBytes(quests[i].EquipReward[a].I_28));
                     }
                 }
             }
@@ -402,13 +413,13 @@ namespace Xv2CoreLib.QXD
                 {
                     bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), SkillRewardOffsets[i]);
 
-                    for (int a = 0; a < qxd_File.Quests[i].Skill_Reward.Count(); a++)
+                    for (int a = 0; a < quests[i].Skill_Reward.Count(); a++)
                     {
-                        bytes.AddRange(BitConverter.GetBytes((int)qxd_File.Quests[i].Skill_Reward[a].I_00));
-                        bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].Skill_Reward[a].I_04));
-                        bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].Skill_Reward[a].I_08));
-                        bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].Skill_Reward[a].I_12));
-                        bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].Skill_Reward[a].F_16));
+                        bytes.AddRange(BitConverter.GetBytes((int)quests[i].Skill_Reward[a].I_00));
+                        bytes.AddRange(BitConverter.GetBytes(quests[i].Skill_Reward[a].I_04));
+                        bytes.AddRange(BitConverter.GetBytes(quests[i].Skill_Reward[a].I_08));
+                        bytes.AddRange(BitConverter.GetBytes(quests[i].Skill_Reward[a].I_12));
+                        bytes.AddRange(BitConverter.GetBytes(quests[i].Skill_Reward[a].F_16));
                     }
                 }
             }
@@ -420,20 +431,20 @@ namespace Xv2CoreLib.QXD
                 {
                     bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), CharaUnlockOffsets[i]);
 
-                    for (int a = 0; a < qxd_File.Quests[i].Chara_Unlock.Count(); a++)
+                    for (int a = 0; a < quests[i].Chara_Unlock.Count(); a++)
                     {
-                        ErrorStringToLongCheck(qxd_File.Quests[i].Chara_Unlock[a].ShortName,3);
+                        ErrorStringToLongCheck(quests[i].Chara_Unlock[a].ShortName, 3);
 
-                        bytes.AddRange(Encoding.ASCII.GetBytes(qxd_File.Quests[i].Chara_Unlock[a].ShortName));
-                        int remainingBytes = 4 - qxd_File.Quests[i].Chara_Unlock[a].ShortName.Count();
+                        bytes.AddRange(Encoding.ASCII.GetBytes(quests[i].Chara_Unlock[a].ShortName));
+                        int remainingBytes = 4 - quests[i].Chara_Unlock[a].ShortName.Count();
 
                         for (int b = 0; b < remainingBytes; b++)
                         {
                             bytes.Add(0);
                         }
 
-                        bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].Chara_Unlock[a].CostumeIndex));
-                        bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].Chara_Unlock[a].I_06));
+                        bytes.AddRange(BitConverter.GetBytes(quests[i].Chara_Unlock[a].CostumeIndex));
+                        bytes.AddRange(BitConverter.GetBytes(quests[i].Chara_Unlock[a].I_06));
 
                     }
                 }
@@ -446,9 +457,9 @@ namespace Xv2CoreLib.QXD
                 {
                     bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), StageDisplayOffsets[i]);
 
-                    for (int a = 0; a < qxd_File.Quests[i].StageDisplay.Count(); a++)
+                    for (int a = 0; a < quests[i].StageDisplay.Count(); a++)
                     {
-                        bytes.AddRange(BitConverter.GetBytes(qxd_File.Quests[i].StageDisplay[a]));
+                        bytes.AddRange(BitConverter.GetBytes(quests[i].StageDisplay[a]));
                     }
                 }
             }
@@ -456,9 +467,8 @@ namespace Xv2CoreLib.QXD
             WriteCharacterData();
         }
 
-        void WriteCharacterData()
+        private void WriteCharacterData()
         {
-
             //setting header info for Characters1
             bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), 20);
             bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(qxd_File.Characters1.Count()), 16);
@@ -466,7 +476,7 @@ namespace Xv2CoreLib.QXD
             for (int i = 0; i < qxd_File.Characters1.Count(); i++)
             {
                 bytes.AddRange(BitConverter.GetBytes(int.Parse(qxd_File.Characters1[i].Index)));
-                
+
                 bytes.AddRange(Encoding.ASCII.GetBytes(qxd_File.Characters1[i].CharaShortName));
                 int remainingBytes = 4 - qxd_File.Characters1[i].CharaShortName.Count();
                 for (int b = 0; b < remainingBytes; b++)
@@ -510,7 +520,7 @@ namespace Xv2CoreLib.QXD
 
                 bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters1[i].I_120));
                 bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters1[i].I_122));
-                
+
             }
 
             //CHARACTERS2 (duplicated code)
@@ -521,7 +531,7 @@ namespace Xv2CoreLib.QXD
             for (int i = 0; i < qxd_File.Characters2.Count(); i++)
             {
                 bytes.AddRange(BitConverter.GetBytes(int.Parse(qxd_File.Characters2[i].Index)));
-                
+
                 bytes.AddRange(Encoding.ASCII.GetBytes(qxd_File.Characters2[i].CharaShortName));
                 int remainingBytes = 4 - qxd_File.Characters2[i].CharaShortName.Count();
                 for (int b = 0; b < remainingBytes; b++)
@@ -571,7 +581,7 @@ namespace Xv2CoreLib.QXD
             WriteUnknownData();
         }
 
-        void WriteUnknownData()
+        private void WriteUnknownData()
         {
             if (qxd_File.Collections != null)
             {
@@ -597,11 +607,11 @@ namespace Xv2CoreLib.QXD
             {
                 bytes.AddRange(BitConverter.GetBytes(qxd_File.EndFloats[i]));
             }
-            
+
 
         }
 
-        void InvalidCollectionCheck(string collection, int limit, int actual, string questID)
+        private void InvalidCollectionCheck(string collection, int limit, int actual, string questID)
         {
             if (actual > limit || actual < limit)
             {
@@ -613,15 +623,8 @@ namespace Xv2CoreLib.QXD
             }
         }
 
-        void ErrorQuestIdToLong(string questID)
+        private void ErrorStringToLongCheck(string input, int maxSize)
         {
-            Console.WriteLine("Error! " + "Quest ID: " + questID + " is to long. Max size is 15.\n" +
-                questID + " is " + questID.Count() + " long.");
-            Console.ReadLine();
-            Environment.Exit(0);
-        }
-
-        void ErrorStringToLongCheck(string input, int maxSize) {
             if (input.Count() > maxSize)
             {
                 Console.WriteLine("Error! The string \"" + input + "\" exceeds the maximum length of " + maxSize);
@@ -629,8 +632,6 @@ namespace Xv2CoreLib.QXD
                 Environment.Exit(0);
             }
         }
-
-
 
     }
 }

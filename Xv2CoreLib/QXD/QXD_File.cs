@@ -60,7 +60,7 @@ namespace Xv2CoreLib.QXD
         ITEM_TTL_OBJECT = 100,
         ITEM_TTL_SKILL = 101, // I guess id is one from those tdb files
         ITEM_TTL_FIGURE = 102, // I guess id is one from those tdb files
-                                   // There is a 999 referenced in a collection in some .qxd, but the collection isn't used in any item reward
+                               // There is a 999 referenced in a collection in some .qxd, but the collection isn't used in any item reward
     };
 
     public enum QxdSkillType
@@ -126,7 +126,7 @@ namespace Xv2CoreLib.QXD
             List<string> ids = new List<string>();
             if (Collections == null) return ids;
 
-            foreach(var collection in Collections)
+            foreach (var collection in Collections)
             {
                 if (!ids.Contains(collection.I_00))
                     ids.Add(collection.I_00);
@@ -157,6 +157,34 @@ namespace Xv2CoreLib.QXD
             return ids;
         }
 
+        /// <summary>
+        /// Gets the quests to write to binary, adding dummy placeholder entries to fill gaps.
+        /// </summary>
+        public List<Quest_Data> GetQuestsToWrite()
+        {
+            List<Quest_Data> quests = new List<Quest_Data>();
+
+            for (int i = 0; i < Quests.Count; i++)
+                quests.Add(Quests[i]);
+
+            quests.Sort((x, y) => x.SortID - y.SortID);
+
+            int count = quests.Max(x => x.SortID) + 1;
+            int prevID = -1;
+
+            for (int i = 0; i < count; i++)
+            {
+                //Check if there is an ID gap, and fill any with a dummy quest to maintain ID consistency
+                if (prevID + 1 != quests[i].SortID)
+                {
+                    quests.Insert(i, Quest_Data.CreatePlaceholderQuest(i));
+                }
+
+                prevID = quests[i].SortID;
+            }
+
+            return quests;
+        }
     }
 
     [YAXSerializeAs("Quest")]
@@ -326,19 +354,65 @@ namespace Xv2CoreLib.QXD
             if (Name.Split('_')[0] == "empty") return true;
             return false;
         }
+
+        public bool IsPlaceholder()
+        {
+            return Name.Contains("dummyQ");
+        }
+
+        public static Quest_Data CreatePlaceholderQuest(int id)
+        {
+            Quest_Data dummyQuest = new Quest_Data()
+            {
+                Name = $"dummyQ_{id}",
+                Index = id.ToString(),
+                I_248 = -1,
+                MsgFiles = new List<string>()
+                {
+                    "dummy",
+                    "dummy",
+                    "dummy",
+                    "dummy",
+                    "dummy",
+                    "dummy",
+                },
+                EnemyPortraitDisplay = new List<EnemyPortrait>()
+                {
+                    new EnemyPortrait(),
+                    new EnemyPortrait(),
+                    new EnemyPortrait(),
+                    new EnemyPortrait(),
+                    new EnemyPortrait(),
+                    new EnemyPortrait(),
+                },
+                StageDisplay = new short[16].ToList(),
+                I_48 = new int[4],
+                I_68 = new int[5],
+                I_232 = new short[8],
+                F_276 = 1f
+            };
+
+            dummyQuest.I_232[6] = -1;
+            dummyQuest.I_232[7] = -1;
+
+            if (dummyQuest.Name.Length > 16)
+                throw new Exception("Dummy quest name is too long!");
+
+            return dummyQuest;
+        }
     }
-    
+
     public class EnemyPortrait
     {
         [YAXAttributeForClass]
         [YAXSerializeAs("Chara_ID")]
-        public short CharaID { get; set; }
+        public short CharaID { get; set; } = -1;
         [YAXAttributeForClass]
         [YAXSerializeAs("Costume")]
-        public short CostumeIndex { get; set; }
+        public short CostumeIndex { get; set; } = -1;
         [YAXAttributeForClass]
         [YAXSerializeAs("Transformation")]
-        public short State { get; set; }
+        public short State { get; set; } = -1;
     }
 
     public class UnkNum1
@@ -509,7 +583,7 @@ namespace Xv2CoreLib.QXD
         [YAXAttributeFor("AI_Table")]
         [YAXSerializeAs("ID")]
         public int I_84 { get; set; } //Int32
-        
+
         [YAXSerializeAs("value")]
         [YAXAttributeFor("Transformation")]
         public short I_120 { get; set; }
@@ -524,7 +598,7 @@ namespace Xv2CoreLib.QXD
         [YAXSerializeAs("Skills")]
         public Skills _Skills { get; set; }
     }
-    
+
     [BindingSubClass]
     public class Skills
     {
@@ -532,7 +606,7 @@ namespace Xv2CoreLib.QXD
 
         [YAXAttributeFor("Super_1")]
         [YAXSerializeAs("ID2")]
-        public ushort I_00 { get; set; } 
+        public ushort I_00 { get; set; }
         [YAXAttributeFor("Super_2")]
         [YAXSerializeAs("ID2")]
         public ushort I_02 { get; set; }
@@ -564,10 +638,10 @@ namespace Xv2CoreLib.QXD
         [YAXDontSerialize]
         public int SortID { get { return int.Parse(I_00); } }
         [YAXDontSerialize]
-        public string Index 
-        { 
-            get 
-            { 
+        public string Index
+        {
+            get
+            {
                 return string.Format("{0}_{1}_{2}_{3}_{4}_{5}", I_00, (ushort)I_02, I_04, I_06, I_08, I_10);
             }
             set
