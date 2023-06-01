@@ -5119,8 +5119,8 @@ namespace Xv2CoreLib.BAC
         b_C_Spine2 = 0x6,
         b_R_Hand = 0x7,
         b_L_Hand = 0x8,
-        b_R_Arm1 = 0x9,
-        b_L_Arm1 = 0xA,
+        b_R_Elbow = 0x9,
+        b_L_Elbow = 0xA,
         b_R_Shoulder = 0xB,
         b_L_Shoulder = 0xC,
         b_R_Foot = 0xD,
@@ -5134,7 +5134,23 @@ namespace Xv2CoreLib.BAC
         g_R_Foot = 0x15,
         g_R_Hand = 0x16,
         g_x_CAM = 0x17,
-        g_x_LND = 0x18
+        g_x_LND = 0x18,
+
+        /*
+        Unk_25 = 25,
+        Unk_26 = 26,
+        Unk_27 = 27,
+        Unk_28 = 28,
+        Unk_29 = 29,
+        Unk_30 = 30,
+        Unk_31 = 31,
+        Unk_32 = 32,
+        Unk_33 = 33,
+        Unk_34 = 34,
+        */
+        //Old options kept for installer compatibility
+        b_R_Arm1 = 0x9,
+        b_L_Arm1 = 0xA,
     }
     #endregion
 

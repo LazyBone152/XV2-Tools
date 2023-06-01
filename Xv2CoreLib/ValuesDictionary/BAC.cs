@@ -76,7 +76,11 @@ namespace Xv2CoreLib.ValuesDictionary
                             HomingType.Add((ushort)homing.HomingMovementType, $"Unknown ({(ushort)homing.HomingMovementType})");
                     }
 
-
+                    if(type is IBacBone bacBone)
+                    {
+                        if(!BoneNames.ContainsKey(bacBone.BoneLink))
+                            BoneNames.Add(bacBone.BoneLink, $"Unknown Bone ({bacBone.BoneLink})");
+                    }
                 }
             }
         }
@@ -292,8 +296,8 @@ namespace Xv2CoreLib.ValuesDictionary
             { BoneLinks.b_C_Spine2 , "b_C_Spine2" },
             { BoneLinks.b_R_Hand , "b_R_Hand" },
             { BoneLinks.b_L_Hand , "b_L_Hand" },
-            { BoneLinks.b_R_Arm1 , "b_R_Arm" },
-            { BoneLinks.b_L_Arm1 , "b_L_Arm" },
+            { BoneLinks.b_R_Elbow , "b_R_Elbow" },
+            { BoneLinks.b_L_Elbow , "b_L_Elbow" },
             { BoneLinks.b_R_Shoulder , "b_R_Shoulder" },
             { BoneLinks.b_L_Shoulder , "b_L_Shoulder" },
             { BoneLinks.b_R_Foot , "b_R_Foot" },
@@ -308,6 +312,18 @@ namespace Xv2CoreLib.ValuesDictionary
             { BoneLinks.g_R_Hand , "g_R_Hand" },
             { BoneLinks.g_x_CAM, "g_x_CAM" },
             { BoneLinks.g_x_LND , "g_x_LND" },
+
+            //Added in 1.20, and currently unknown:
+            { (BoneLinks)25 , "Unknown Bone (25)" },
+            { (BoneLinks)26 , "Unknown Bone (26)" },
+            { (BoneLinks)27 , "Unknown Bone (27)" },
+            { (BoneLinks)28 , "Unknown Bone (28)" },
+            { (BoneLinks)29 , "Unknown Bone (29)" },
+            { (BoneLinks)30 , "Unknown Bone (30)" },
+            { (BoneLinks)31 , "Unknown Bone (31)" },
+            { (BoneLinks)32 , "Unknown Bone (32)" },
+            { (BoneLinks)33 , "Unknown Bone (33)" },
+            { (BoneLinks)34 , "Unknown Bone (34)" },
         };
 
         #region Functions
