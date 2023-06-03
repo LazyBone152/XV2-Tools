@@ -2028,6 +2028,11 @@ namespace Xv2CoreLib.EffectContainer
 
 
         //Effect
+        public Effect GetEffect(int id)
+        {
+            return Effects.FirstOrDefault(x => x.IndexNum == id);
+        }
+
         private void RemoveNullEffectParts()
         {
             //Removes all EffectParts that have a null AssetRef (e.g. someone added a new EffectPart and never assigned an asset to it)

@@ -109,7 +109,7 @@ namespace Xv2CoreLib.EEPK
                     eepkFile.Effects[i].EffectParts[a].AssetIndex = BitConverter.ToUInt16(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset);
                     eepkFile.Effects[i].EffectParts[a].AssetType = (AssetType)rawBytes[effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 2];
                     eepkFile.Effects[i].EffectParts[a].AttachementType = (EffectPart.Attachment)rawBytes[effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 3];
-                    eepkFile.Effects[i].EffectParts[a].RotateMovement = rawBytes[effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 4];
+                    eepkFile.Effects[i].EffectParts[a].Orientation = (EffectPart.OrientationType)rawBytes[effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 4];
                     eepkFile.Effects[i].EffectParts[a].Deactivation = (EffectPart.DeactivationMode)rawBytes[effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 5];
                     eepkFile.Effects[i].EffectParts[a].I_06 = rawBytes[effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 6];
                     eepkFile.Effects[i].EffectParts[a].I_07 = rawBytes[effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 7];

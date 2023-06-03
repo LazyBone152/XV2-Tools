@@ -22,6 +22,11 @@
                 <x:Type TypeName="eepk:EffectPart+DeactivationMode"/>
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
+        <ObjectDataProvider x:Key="OrientationEnum" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="eepk:EffectPart+OrientationType"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
 
     </UserControl.Resources>
     <Grid x:Name="rootGrid">
@@ -164,8 +169,8 @@
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
-                                                <Label Content="Rotate Movement"/>
-                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.RotateOnMovement, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="4"/>
+                                                <Label Content="Orientation Type"/>
+                                                <ComboBox Grid.Column="1" SelectedItem="{Binding effectPartViewModel.OrientationType, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={StaticResource ResourceKey=OrientationEnum}}"/>
                                             </Grid>
                                             <Grid Margin="3,5,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
@@ -189,7 +194,7 @@
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
-                                                <Label Content="Attach Bone"/>
+                                                <Label Content="Attachment Bone"/>
                                                 <ComboBox Grid.Column="1" IsEditable="True" Text="{Binding effectPartViewModel.ESK, UpdateSourceTrigger=LostFocus}" ItemsSource="{x:Static eepk:EffectPart.CommonBones}"/>
                                             </Grid>
 
@@ -352,7 +357,7 @@
                                         <WrapPanel>
                                             <CheckBox Width="160" Margin="3,1" Content="Position Update" IsChecked="{Binding effectPartViewModel.I_32_0, UpdateSourceTrigger=PropertyChanged}" ToolTip="Continually update the effects position to match its attached bone."/>
                                             <CheckBox Width="160" Margin="3,1" Content="Rotation Update" IsChecked="{Binding effectPartViewModel.I_32_1, UpdateSourceTrigger=PropertyChanged}" ToolTip="Continually update the effects rotation to match its attached bone."/>
-                                            <CheckBox Width="160" Margin="3,1" Content="Instant Update" IsChecked="{Binding effectPartViewModel.I_32_2, UpdateSourceTrigger=PropertyChanged}" ToolTip="Instantly update particle position and rotation to move with the attached bone (requires either the Position Update or Rotation Update flag to have any effect)."/>
+                                            <CheckBox Width="160" Margin="3,1" Content="Instant Particle Update" IsChecked="{Binding effectPartViewModel.I_32_2, UpdateSourceTrigger=PropertyChanged}" ToolTip="Instantly update particle position and rotation to move with the attached bone (requires either the Position Update or Rotation Update flag to have any effect).&#x0a;&#x0a;Without this, particle nodes will only be created at the bone position, but wont update with it throughout their lifetime."/>
                                             <CheckBox Width="160" Margin="3,1" Content="Ground Only" IsChecked="{Binding effectPartViewModel.I_32_3, UpdateSourceTrigger=PropertyChanged}" ToolTip="The effect will only appear when on (or near) the ground."/>
                                         </WrapPanel>
 

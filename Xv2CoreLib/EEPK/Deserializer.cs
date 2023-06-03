@@ -224,7 +224,7 @@ namespace Xv2CoreLib.EEPK
                         bytes.AddRange(BitConverter.GetBytes(eepk_File.Effects[i].EffectParts[a].AssetIndex));
                         bytes.Add((byte)eepk_File.Effects[i].EffectParts[a].AssetType);
                         bytes.Add((byte)eepk_File.Effects[i].EffectParts[a].AttachementType);
-                        bytes.Add(eepk_File.Effects[i].EffectParts[a].RotateMovement);
+                        bytes.Add((byte)eepk_File.Effects[i].EffectParts[a].Orientation);
                         bytes.Add((byte)eepk_File.Effects[i].EffectParts[a].Deactivation);
                         bytes.Add(eepk_File.Effects[i].EffectParts[a].I_06);
                         bytes.Add(eepk_File.Effects[i].EffectParts[a].I_07);

@@ -37,16 +37,13 @@ namespace EEPK_Organiser.ViewModel
                 effectPart.AttachementType = value;
             }
         }
-        public byte RotateOnMovement
+        public OrientationType OrientationType
         {
-            get
-            {
-                return effectPart.RotateMovement;
-            }
+            get => effectPart.Orientation;
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.RotateMovement), effectPart, effectPart.RotateMovement, value, "RotateOnMovement"));
-                effectPart.RotateMovement = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.Orientation), effectPart, effectPart.Orientation, value, "Orientation Type"));
+                effectPart.Orientation = value;
             }
         }
         public DeactivationMode Deactivation
@@ -761,8 +758,9 @@ namespace EEPK_Organiser.ViewModel
         {
             get
             {
-                if (!EffectPart.CommonBones.Contains(effectPart.ESK))
-                    EffectPart.CommonBones.Add(effectPart.ESK);
+                //WPF hates this because its not an observable collection
+                //if (!EffectPart.CommonBones.Contains(effectPart.ESK))
+                //    EffectPart.CommonBones.Add(effectPart.ESK);
 
                 return effectPart.ESK;
             }
@@ -804,7 +802,7 @@ namespace EEPK_Organiser.ViewModel
             //Needed for updating properties when undo/redo is called
             RaisePropertyChanged(() => StartTime);
             RaisePropertyChanged(() => Attachment);
-            RaisePropertyChanged(() => RotateOnMovement);
+            RaisePropertyChanged(() => OrientationType);
             RaisePropertyChanged(() => Deactivation);
             RaisePropertyChanged(() => I_06);
             RaisePropertyChanged(() => I_07);

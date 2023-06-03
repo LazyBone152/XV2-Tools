@@ -634,7 +634,7 @@ namespace EEPK_Organiser.View
 
                         if (File.Exists(openFile.FileName) && !String.IsNullOrWhiteSpace(openFile.FileName))
                         {
-                            if (Path.GetExtension(openFile.FileName) != selectedFile.Extension)
+                            if (EffectFile.GetExtension(openFile.FileName) != selectedFile.Extension)
                             {
                                 MessageBox.Show(String.Format("The file type of the selected external file ({0}) does not match that of {1}.", openFile.FileName, selectedFile.FullFileName), "Replace", MessageBoxButton.OK, MessageBoxImage.Error);
                                 return;

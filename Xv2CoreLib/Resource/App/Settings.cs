@@ -171,7 +171,7 @@ namespace Xv2CoreLib.Resource.App
             UpdateEepkToolInterlop();
         }
 
-        public void SaveSettings()
+        public void SaveSettings(bool errorIfFail = true)
         {
             //if (CurrentApp == Application.NotSet) throw new InvalidOperationException("SettingsManager.LoadSettings: CurrentApp has not been set.");
             if (Settings == null) throw new Exception("SettingsManager.SaveSettings: No settings are loaded.");
@@ -191,11 +191,13 @@ namespace Xv2CoreLib.Resource.App
             }
             catch (UnauthorizedAccessException)
             {
-                MessageBox.Show("Failed to save settings.\n\nThe application does not have write access in the current directory. Try moving it somewhere else or running it as administrator.", "Settings", MessageBoxButton.OK, MessageBoxImage.Warning);
+                if(errorIfFail)
+                    MessageBox.Show("Failed to save settings.\n\nThe application does not have write access in the current directory. Try moving it somewhere else or running it as administrator.", "Settings", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
             catch
             {
-                MessageBox.Show("Failed to save settings.", "Settings", MessageBoxButton.OK, MessageBoxImage.Error);
+                if(errorIfFail)
+                    MessageBox.Show("Failed to save settings.", "Settings", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 #endif
 

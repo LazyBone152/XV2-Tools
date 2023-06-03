@@ -10,6 +10,7 @@ namespace Xv2CoreLib.Resource
     {
         private const double FBXSDK_180_DIV_PI = 180.0 / Math.PI;
         public const double Epsilon = 0.00001;
+        public const float Radians90Degrees = 1.570796f;
 
         public static double ConvertRadiansToDegrees(double radians)
         {

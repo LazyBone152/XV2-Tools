@@ -618,7 +618,7 @@ namespace Xv2CoreLib.EEPK
         public Attachment AttachementType { get; set; }
         [YAXAttributeFor("RotateOnMovement")]
         [YAXSerializeAs("value")]
-        public byte RotateMovement { get; set; }
+        public OrientationType Orientation { get; set; }
         [YAXAttributeFor("Deactivation")]
         [YAXSerializeAs("Mode")]
         public DeactivationMode Deactivation { get; set; }//int8
@@ -843,6 +843,15 @@ namespace Xv2CoreLib.EEPK
             Camera = 3
         }
 
+        public enum OrientationType : byte
+        {
+            None = 0,
+            User = 1,
+            AttachmentBone = 2,
+            Camera = 3,
+            Unk4 = 4
+        }
+
 
         public EffectPart Clone()
         {
@@ -867,7 +876,7 @@ namespace Xv2CoreLib.EEPK
                 AssetIndex = AssetIndex,
                 AssetType = AssetType,
                 AttachementType = AttachementType,
-                RotateMovement = RotateMovement,
+                Orientation = Orientation,
                 Deactivation = Deactivation,
                 I_06 = I_06,
                 I_07 = I_07,
