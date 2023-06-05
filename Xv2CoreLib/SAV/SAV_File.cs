@@ -99,6 +99,7 @@ namespace Xv2CoreLib.SAV
 
         //Quests
         public const int QUESTS_TPQ = 97840;
+        public const int QUESTS_TPQ_EXPANDED = 527144;
         public const int QUESTS_TMQ = 100912;
         public const int QUESTS_BAQ = 105520;
         public const int QUESTS_TCQ = 108592;
@@ -112,6 +113,7 @@ namespace Xv2CoreLib.SAV
         public const int QUESTS_TFB = 533176;
 
         public const int QUESTS_TPQ_COUNT = 128;
+        public const int QUESTS_TPQ_EXPANDED_COUNT = 32;
         public const int QUESTS_TMQ_COUNT = 192;
         public const int QUESTS_BAQ_COUNT = 128;
         public const int QUESTS_TCQ_COUNT = 256;
@@ -245,7 +247,7 @@ namespace Xv2CoreLib.SAV
             }
         }
     }
-    
+
 
     public enum SkillType
     {
@@ -270,7 +272,7 @@ namespace Xv2CoreLib.SAV
         Capsule,
         QQBang
     }
-    
+
     public enum QuestType
     {
         Null = -1,
@@ -361,7 +363,7 @@ namespace Xv2CoreLib.SAV
         Unk31 = 536870912,
         Unk32 = 1073741824
     }
-    
+
     [Flags]
     public enum DeckFlags : byte
     {
@@ -573,7 +575,7 @@ namespace Xv2CoreLib.SAV
         public const int SUPER_MAX = 1232;
     }
 
-#endregion
+    #endregion
 
     [YAXSerializeAs("Xv2SaveFile")]
     public class SAV_File : INotifyPropertyChanged
@@ -842,7 +844,7 @@ namespace Xv2CoreLib.SAV
             }
         }
 
-#endregion
+        #endregion
 
         //Header
         [YAXAttributeFor("Version")]
@@ -999,7 +1001,7 @@ namespace Xv2CoreLib.SAV
                 default:
                     throw new InvalidDataException("Unsupported save version. Load failed.");
             }
-            
+
             List<byte> bytes = rawBytes.ToList();
 
             //Parse the file
@@ -1078,6 +1080,9 @@ namespace Xv2CoreLib.SAV
                     case Offsets.DECRYPTED_SAVE_SIZE_V21:
                         rawBytes = Crypt.EncryptManaged_V21(rawBytes);
                         break;
+                    case Offsets.DECRYPTED_SAVE_SIZE_V30:
+                        rawBytes = Crypt.EncryptManaged_V30(rawBytes);
+                        break;
                     default:
                         throw new InvalidDataException("Invalid decrypted save size. Save failed.");
                 }
@@ -1105,7 +1110,7 @@ namespace Xv2CoreLib.SAV
             savFile.Zeni = BitConverter.ToUInt32(rawBytes, 44);
             savFile.TPMedals = BitConverter.ToUInt32(rawBytes, 48);
             savFile.AccFlags = (AccountFlags)BitConverter.ToUInt32(rawBytes, 76);
-            
+
             //CaCs
             savFile.Characters = CaC.ReadAll(bytes, rawBytes, Offsets.CAC, savFile);
 
@@ -1130,7 +1135,7 @@ namespace Xv2CoreLib.SAV
                 savFile.MentorCustomizationUnlockFlags = MentorCustomizationUnlockFlag.Read(bytes, Offsets.MENTOR_CUSTOMIZATION_FLAGS, Offsets.MENTOR_CUSTOMIZATION_COUNT);
             }
 
-            if(savFile.Version >= 19)
+            if (savFile.Version >= 19)
             {
                 savFile.MentorCustomizationUnlockFlags2 = MentorCustomizationUnlockFlag.Read(bytes, Offsets.MENTOR_CUSTOMIZATION_FLAGS2, Offsets.MENTOR_CUSTOMIZATION_COUNT2);
             }
@@ -1197,7 +1202,7 @@ namespace Xv2CoreLib.SAV
                 bytes = MentorCustomizationUnlockFlag.Write(MentorCustomizationUnlockFlags, bytes, Offsets.MENTOR_CUSTOMIZATION_FLAGS, Offsets.MENTOR_CUSTOMIZATION_COUNT);
             }
 
-            if(Version >= 19)
+            if (Version >= 19)
             {
                 bytes = MentorCustomizationUnlockFlag.Write(MentorCustomizationUnlockFlags2, bytes, Offsets.MENTOR_CUSTOMIZATION_FLAGS2, Offsets.MENTOR_CUSTOMIZATION_COUNT2);
             }
@@ -1228,12 +1233,12 @@ namespace Xv2CoreLib.SAV
                 return false;
             }
         }
-        
+
         public void UpdateByteArray()
         {
             bytes = FileBytes.ToArray();
         }
-        
+
         internal void SetAccFlag(AccountFlags flag)
         {
             if (!AccFlags.HasFlag(flag))
@@ -1277,7 +1282,7 @@ namespace Xv2CoreLib.SAV
                 SetAccFlag(AccountFlags.Level85Unlock);
             }
         }
-        
+
         public List<byte> ValidatePartnerKeyFlags(List<byte> bytes)
         {
             //Set the flags if the keys are currently in the inventory
@@ -1683,7 +1688,7 @@ namespace Xv2CoreLib.SAV
             attributePoints += I_204;
             return attributePoints;
         }
-        
+
         private bool HasCompletedQuestForMentor(string mentorName)
         {
             foreach (var quest in Quests.MasterQuests)
@@ -1698,12 +1703,12 @@ namespace Xv2CoreLib.SAV
         {
             InitMentors();
             InitQuests();
-            if(MentorCustomizations != null)
+            if (MentorCustomizations != null)
             {
                 InitMentorCustomizations();
             }
             InitSysFlags();
-            if(HC != null)
+            if (HC != null)
             {
                 HC.InitQuests();
             }
@@ -1781,7 +1786,7 @@ namespace Xv2CoreLib.SAV
         {
             Quests.InitQuests();
 
-            if(HC != null)
+            if (HC != null)
             {
                 HC.InitQuests();
             }
@@ -1839,7 +1844,7 @@ namespace Xv2CoreLib.SAV
                 }
             }
         }
-        
+
         private bool IsFlagTrue(LB_Save_Editor.ID.SysFlagType flagType, List<string> conditions)
         {
             foreach (string s in conditions)
@@ -2627,7 +2632,7 @@ namespace Xv2CoreLib.SAV
         }
 
     }
-    
+
     public class PlayData : INotifyPropertyChanged
     {
 
@@ -2995,9 +3000,9 @@ namespace Xv2CoreLib.SAV
         }
     }
 
-#endregion
+    #endregion
 
-#region Inventory
+    #region Inventory
     public class Inventory : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
@@ -3300,9 +3305,9 @@ namespace Xv2CoreLib.SAV
 
         private List<EquipmentFlag> UpdateFlags(List<EquipmentFlag> flags, ObservableCollection<InventoryItem> items)
         {
-            for(int i = 0; i < flags.Count; i++)
+            for (int i = 0; i < flags.Count; i++)
             {
-                if(InventoryItem.Exists(items, i))
+                if (InventoryItem.Exists(items, i))
                 {
                     flags[i].Acquired = true;
                 }
@@ -3390,7 +3395,7 @@ namespace Xv2CoreLib.SAV
 
             return bytes;
         }
-        
+
 
         public InventoryItem GetItem(int ID, EquipmentType equipmentType)
         {
@@ -3445,7 +3450,40 @@ namespace Xv2CoreLib.SAV
             return QQBangs.FirstOrDefault(a => a.Name == name);
         }
 
-        
+        public void AddPartnerKeys()
+        {
+            AddPartnerKey(13); //Key 1
+            AddPartnerKey(14); //Key 2
+            AddPartnerKey(15); //Key 3
+            AddPartnerKey(16); //Key 4
+            AddPartnerKey(17); //Key 5
+            AddPartnerKey(18); //Key 6
+            AddPartnerKey(19); //Key 7
+            AddPartnerKey(20); //Key 8
+            AddPartnerKey(21); //Key 9
+            AddPartnerKey(22); //Key 10
+            AddPartnerKey(23); //Key 11
+            AddPartnerKey(24); //Key 12
+            AddPartnerKey(25); //Key 13
+            AddPartnerKey(26); //Key 14
+            AddPartnerKey(27); //Key 15
+            AddPartnerKey(31); //Key 16
+            AddPartnerKey(32); //Key 17
+            AddPartnerKey(33); //Key 18
+            AddPartnerKey(34); //Key 19
+            AddPartnerKey(35); //Key 20
+        }
+
+        private void AddPartnerKey(int id)
+        {
+            var item = ImportantItems.FirstOrDefault(x => x.I_00 == id);
+
+            if (item == null)
+                ImportantItems.Add(new InventoryItem(id, EquipmentType.ImportantItem));
+            else
+                item.I_05 = 1;
+        }
+
         //Events
         public void RegisterEvents()
         {
@@ -3460,7 +3498,7 @@ namespace Xv2CoreLib.SAV
             Capsules.CollectionChanged += new NotifyCollectionChangedEventHandler(OnCollectionChanged);
             QQBangs.CollectionChanged += new NotifyCollectionChangedEventHandler(OnCollectionChanged);
         }
-        
+
         public void UnregisterEvents()
         {
             Tops.CollectionChanged -= new NotifyCollectionChangedEventHandler(OnCollectionChanged);
@@ -3474,7 +3512,7 @@ namespace Xv2CoreLib.SAV
             Capsules.CollectionChanged -= new NotifyCollectionChangedEventHandler(OnCollectionChanged);
             QQBangs.CollectionChanged -= new NotifyCollectionChangedEventHandler(OnCollectionChanged);
         }
-        
+
         internal void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             NotifyPropertyChanged("TopsCount");
@@ -3488,7 +3526,7 @@ namespace Xv2CoreLib.SAV
             NotifyPropertyChanged("CapsuleCount");
             NotifyPropertyChanged("QQBangCount");
         }
-        
+
     }
 
     public class InventoryItem : INotifyPropertyChanged
@@ -3609,6 +3647,15 @@ namespace Xv2CoreLib.SAV
         [YAXSerializeAs("I_07")]
         public byte I_07 { get; set; }
 
+        public InventoryItem() { }
+
+        public InventoryItem(int id, EquipmentType type)
+        {
+            I_00 = id;
+            I_04 = (byte)type;
+            I_05 = 1;
+        }
+
         public static ObservableCollection<InventoryItem> ReadItems(byte[] rawBytes, int offset, int maxCount)
         {
             ObservableCollection<InventoryItem> items = new ObservableCollection<InventoryItem>();
@@ -3699,11 +3746,14 @@ namespace Xv2CoreLib.SAV
         }
 
         [YAXDontSerialize]
-        public string Name { get
+        public string Name
+        {
+            get
             {
                 if (QQBang != null) return QQBang.ToString();
                 return "Unknown QQ Bang";
-            } }
+            }
+        }
 
         private QQ_Bang _qqBangValue = null;
         public QQ_Bang QQBang
@@ -4345,7 +4395,7 @@ namespace Xv2CoreLib.SAV
             return bytes;
         }
 
-        
+
         //Filter methods
         public bool SuperFilterCheck(object skill)
         {
@@ -4545,9 +4595,9 @@ namespace Xv2CoreLib.SAV
             return new List<byte> { 255, 255, 255, 255, 255, 255, 255, 255 };
         }
     }
-#endregion
+    #endregion
 
-#region Quests
+    #region Quests
     public class Quests : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
@@ -4764,22 +4814,29 @@ namespace Xv2CoreLib.SAV
 
         public List<byte> Write(List<byte> bytes, int charaIdx, SAV_File sav)
         {
-            bytes = Utils.ReplaceRange(bytes, Quest.WriteAll(TimePatrols, 128, "TimePatrols").ToArray(), Offsets.QUESTS_TPQ + (Offsets.CAC_SIZE * charaIdx));
-            bytes = Utils.ReplaceRange(bytes, Quest.WriteAll(ParallelQuests, 192, "ParallelQuests").ToArray(), Offsets.QUESTS_TMQ + (Offsets.CAC_SIZE * charaIdx));
-            bytes = Utils.ReplaceRange(bytes, Quest.WriteAll(TimeRiftQuests, 128, "TimeRiftQuests").ToArray(), Offsets.QUESTS_BAQ + (Offsets.CAC_SIZE * charaIdx));
-            bytes = Utils.ReplaceRange(bytes, Quest.WriteAll(MasterQuests, 256, "MasterQuests").ToArray(), Offsets.QUESTS_TCQ + (Offsets.CAC_SIZE * charaIdx));
-            bytes = Utils.ReplaceRange(bytes, Quest.WriteAll(ExpertMissions, 96, "ExpertMissions").ToArray(), Offsets.QUESTS_HLQ + (Offsets.CAC_SIZE * charaIdx));
-            bytes = Utils.ReplaceRange(bytes, Quest.WriteAll(Raids, 96, "Raids").ToArray(), Offsets.QUESTS_RBQ + (Offsets.CAC_SIZE * charaIdx));
-            bytes = Utils.ReplaceRange(bytes, Quest.WriteAll(ElderKaiQuests, 64, "ElderKaiQuests").ToArray(), Offsets.QUESTS_CHQ + (Offsets.CAC_SIZE * charaIdx));
-            bytes = Utils.ReplaceRange(bytes, Quest.WriteAll(FriezaSeige, 128, "FriezaSeige").ToArray(), Offsets.QUESTS_LEQ + (Offsets.CAC_SIZE * charaIdx));
+            bytes = Utils.ReplaceRange(bytes, Quest.WriteAll(TimePatrols, 128, 0).ToArray(), Offsets.QUESTS_TPQ + (Offsets.CAC_SIZE * charaIdx));
+            bytes = Utils.ReplaceRange(bytes, Quest.WriteAll(ParallelQuests, 192).ToArray(), Offsets.QUESTS_TMQ + (Offsets.CAC_SIZE * charaIdx));
+            bytes = Utils.ReplaceRange(bytes, Quest.WriteAll(TimeRiftQuests, 128).ToArray(), Offsets.QUESTS_BAQ + (Offsets.CAC_SIZE * charaIdx));
+            bytes = Utils.ReplaceRange(bytes, Quest.WriteAll(MasterQuests, 256).ToArray(), Offsets.QUESTS_TCQ + (Offsets.CAC_SIZE * charaIdx));
+            bytes = Utils.ReplaceRange(bytes, Quest.WriteAll(ExpertMissions, 96).ToArray(), Offsets.QUESTS_HLQ + (Offsets.CAC_SIZE * charaIdx));
+            bytes = Utils.ReplaceRange(bytes, Quest.WriteAll(Raids, 96).ToArray(), Offsets.QUESTS_RBQ + (Offsets.CAC_SIZE * charaIdx));
+            bytes = Utils.ReplaceRange(bytes, Quest.WriteAll(ElderKaiQuests, 64).ToArray(), Offsets.QUESTS_CHQ + (Offsets.CAC_SIZE * charaIdx));
+            bytes = Utils.ReplaceRange(bytes, Quest.WriteAll(FriezaSeige, 128).ToArray(), Offsets.QUESTS_LEQ + (Offsets.CAC_SIZE * charaIdx));
+
             if (sav.DLC6)
             {
-                bytes = Utils.ReplaceRange(bytes, Quest.WriteAll(InfiniteHistory, Offsets.QUESTS_OSQ_COUNT, "InfiniteHistory").ToArray(), Offsets.QUESTS_OSQ + (Offsets.CAC_DLC_SIZE * charaIdx));
+                bytes = Utils.ReplaceRange(bytes, Quest.WriteAll(InfiniteHistory, Offsets.QUESTS_OSQ_COUNT).ToArray(), Offsets.QUESTS_OSQ + (Offsets.CAC_DLC_SIZE * charaIdx));
                 bytes = Utils.ReplaceRange(bytes, TokipediaProgress.Write(charaIdx, InfiniteHistory).ToArray(), Offsets.TOKIPEDIA + (Offsets.CAC_DLC_SIZE * charaIdx));
             }
+
             if (sav.DLC8)
             {
-                bytes = Utils.ReplaceRange(bytes, Quest.WriteAll(PlayerRaidBattles, Offsets.QUESTS_PRB_COUNT, "PlayerRaidBattles").ToArray(), Offsets.QUESTS_PRB + (Offsets.CAC_DLC_SIZE * charaIdx));
+                bytes = Utils.ReplaceRange(bytes, Quest.WriteAll(PlayerRaidBattles, Offsets.QUESTS_PRB_COUNT).ToArray(), Offsets.QUESTS_PRB + (Offsets.CAC_DLC_SIZE * charaIdx));
+            }
+
+            if(sav.Version >= 30)
+            {
+                bytes = Utils.ReplaceRange(bytes, Quest.WriteAll(TimePatrols, Offsets.QUESTS_TPQ_EXPANDED_COUNT, Offsets.QUESTS_TPQ_COUNT).ToArray(), Offsets.QUESTS_TPQ_EXPANDED + (Offsets.CAC_DLC_SIZE * charaIdx));
             }
 
             return bytes;
@@ -4788,8 +4845,10 @@ namespace Xv2CoreLib.SAV
         public static Quests Read(byte[] rawBytes, int charaIdx, SAV_File sav)
         {
             //Check if save file has DLC data
+            List<Quest> timePatrolQuests = Quest.ReadAll(rawBytes, Offsets.QUESTS_TPQ + (Offsets.CAC_SIZE * charaIdx), 128, charaIdx).ToList();
             ObservableCollection<Quest> inf = null;
             ObservableCollection<Quest> prb = null;
+
             if (sav.DLC6)
             {
                 inf = Quest.ReadAll(rawBytes, Offsets.QUESTS_OSQ + (Offsets.CAC_DLC_SIZE * charaIdx), Offsets.QUESTS_OSQ_COUNT, charaIdx, true);
@@ -4799,9 +4858,14 @@ namespace Xv2CoreLib.SAV
                 prb = Quest.ReadAll(rawBytes, Offsets.QUESTS_PRB + (Offsets.CAC_DLC_SIZE * charaIdx), Offsets.QUESTS_PRB_COUNT, charaIdx, false);
             }
 
+            if(sav.Version >= 30)
+            {
+                timePatrolQuests.AddRange(Quest.ReadAll(rawBytes, Offsets.QUESTS_TPQ_EXPANDED + (Offsets.CAC_DLC_SIZE * charaIdx), Offsets.QUESTS_TPQ_EXPANDED, charaIdx));
+            }
+
             return new Quests()
             {
-                TimePatrols = Quest.ReadAll(rawBytes, Offsets.QUESTS_TPQ + (Offsets.CAC_SIZE * charaIdx), 128, charaIdx),
+                TimePatrols = new ObservableCollection<Quest>(timePatrolQuests),
                 ParallelQuests = Quest.ReadAll(rawBytes, Offsets.QUESTS_TMQ + (Offsets.CAC_SIZE * charaIdx), 192, charaIdx),
                 TimeRiftQuests = Quest.ReadAll(rawBytes, Offsets.QUESTS_BAQ + (Offsets.CAC_SIZE * charaIdx), 128, charaIdx),
                 MasterQuests = Quest.ReadAll(rawBytes, Offsets.QUESTS_TCQ + (Offsets.CAC_SIZE * charaIdx), 256, charaIdx),
@@ -4813,7 +4877,7 @@ namespace Xv2CoreLib.SAV
                 PlayerRaidBattles = prb
             };
         }
-        
+
         public bool Contains(object quest)
         {
             var _quest = quest as Quest;
@@ -5059,39 +5123,20 @@ namespace Xv2CoreLib.SAV
             };
         }
 
-        public static List<byte> WriteAll(ObservableCollection<Quest> _quests, int count, string questType)
+        public static List<byte> WriteAll(ObservableCollection<Quest> _quests, int count, int startIndex = 0)
         {
-            //Create a new collection of quests so that the original isn't modified
-            List<Quest> quests = new List<Quest>();
-
-            for (int i = 0; i < _quests.Count; i++)
-            {
-                quests.Add(new Quest()
-                {
-                    I_00 = _quests[i].I_00,
-                    I_04 = _quests[i].I_04,
-                    I_08 = _quests[i].I_08,
-                    I_12 = _quests[i].I_12,
-                    I_16 = _quests[i].I_16,
-                    I_20 = _quests[i].I_20
-                });
-            }
-
-            //Add padding entries if required
-            if (quests.Count < count)
-            {
-                while (quests.Count != count)
-                {
-                    quests.Add(GetNull());
-                }
-            }
-
-            if (quests.Count != count) throw new InvalidDataException(String.Format("Invalid quest count for quest type {0}. Expected {1} but found {2}.", questType, count, quests.Count));
             List<byte> bytes = new List<byte>();
 
             for (int i = 0; i < count; i++)
             {
-                bytes.AddRange(quests[i].Write());
+                if(_quests.Count - 1 >= startIndex + i)
+                {
+                    bytes.AddRange(_quests[startIndex + i].Write());
+                }
+                else
+                {
+                    bytes.AddRange(GetNull().Write());
+                }
             }
 
             return bytes;
@@ -5150,7 +5195,7 @@ namespace Xv2CoreLib.SAV
 #if SaveEditor
         [YAXDontSerialize]
         public LB_Save_Editor.ID.TokipediaEntry TokipediaEntry { get; set; }
-        
+
         public override string ToString()
         {
             if (TokipediaEntry == null) return "---";
@@ -5178,7 +5223,7 @@ namespace Xv2CoreLib.SAV
             int totalPaths = Utils.GetSetBitCount((long)combinedRequirement) + 1; //For 100% the game requires all paths to be completed + one non-path completed.
             return (100f / totalPaths) * totalRequirementsMeet;
         }
-        
+
 #endif
         [YAXAttributeForClass]
         [YAXSerializeAs("Flags")]
@@ -5220,7 +5265,7 @@ namespace Xv2CoreLib.SAV
 
             return newBytes;
         }
-        
+
         public static int TokipediaFlagToCharaId(TokipediaFlags flag)
         {
             switch (flag)
@@ -5301,9 +5346,9 @@ namespace Xv2CoreLib.SAV
         }
     }
 
-#endregion
+    #endregion
 
-#region Mentors
+    #region Mentors
     public class MentorCustomization
     {
         [YAXDontSerialize]
@@ -5486,16 +5531,16 @@ namespace Xv2CoreLib.SAV
             {
                 mentors.Add(Read(rawBytes, i, cacIdx));
             }
-            
+
             //Partners added in 1.15
-            if(version  >= 19)
+            if (version >= 19)
             {
                 for (int i = 0; i < Offsets.MENTOR_CUSTOMIZATION_COUNT2; i++)
                 {
                     mentors.Add(Read(rawBytes, i + Offsets.MENTOR_CUSTOMIZATION_COUNT, cacIdx));
                 }
             }
-            
+
             //Partners added in 1.17
             if (version >= 22)
             {
@@ -5512,17 +5557,17 @@ namespace Xv2CoreLib.SAV
         {
             int offset;
 
-            if(mentorIdx <= 46)
+            if (mentorIdx <= 46)
             {
                 offset = Offsets.MENTOR_CUSTOMIZATION + (92 * mentorIdx) + (Offsets.CAC_DLC_SIZE * cacIdx);
                 return Read_Large(rawBytes, offset, mentorIdx);
             }
-            else if(mentorIdx >= 47 && mentorIdx <= 56)
+            else if (mentorIdx >= 47 && mentorIdx <= 56)
             {
                 offset = Offsets.MENTOR_CUSTOMIZATION2 + (44 * (mentorIdx - 47)) + (Offsets.CAC_DLC_SIZE * cacIdx);
                 return Read_Small(rawBytes, offset, mentorIdx);
             }
-            else if(mentorIdx >= 57 && mentorIdx <= 110)
+            else if (mentorIdx >= 57 && mentorIdx <= 110)
             {
                 offset = Offsets.MENTOR_CUSTOMIZATION3 + (44 * (mentorIdx - 57)) + (Offsets.CAC_DLC2_SIZE * cacIdx);
                 return Read_Small(rawBytes, offset, mentorIdx);
@@ -5542,9 +5587,9 @@ namespace Xv2CoreLib.SAV
             int offset2 = Offsets.MENTOR_CUSTOMIZATION2 + (Offsets.CAC_DLC_SIZE * cacIdx);
             int offset3 = Offsets.MENTOR_CUSTOMIZATION3 + (Offsets.CAC_DLC2_SIZE * cacIdx);
 
-            foreach(var partner in mentors)
+            foreach (var partner in mentors)
             {
-                if(partner.Index >= 0 && partner.Index <= 46)
+                if (partner.Index >= 0 && partner.Index <= 46)
                 {
                     //Original partner list
                     var ret = partner.Write_Large();
@@ -5994,9 +6039,9 @@ namespace Xv2CoreLib.SAV
         }
     }
 
-#endregion
+    #endregion
 
-#region HeroColosseum
+    #region HeroColosseum
     public class MentorCustomizationUnlockFlag
     {
         [YAXAttributeForClass]
@@ -6029,7 +6074,7 @@ namespace Xv2CoreLib.SAV
             BitArray flags = new BitArray(bytes.GetRange(offset, 28 * count).ToArray());
 
             int i = 0;
-            foreach(bool flag in flags)
+            foreach (bool flag in flags)
             {
                 mentorFlags.Add(new MentorCustomizationUnlockFlag()
                 {
@@ -6265,7 +6310,7 @@ namespace Xv2CoreLib.SAV
 
             return false;
         }
-        
+
     }
 
     public class HCQuest : INotifyPropertyChanged
@@ -6728,7 +6773,7 @@ namespace Xv2CoreLib.SAV
                 return String.Format("{0}/{1}", Figures.Count, 100 + I_10);
             }
         }
-        
+
         public static HeroColosseumGlobal Read(byte[] rawBytes, List<byte> bytes, int version)
         {
             HeroColosseumGlobal hc = new HeroColosseumGlobal();
@@ -6737,7 +6782,7 @@ namespace Xv2CoreLib.SAV
             hc.I_04 = BitConverter.ToInt32(rawBytes, Offsets.HC_GLOBAL_VALUES + 4);
             hc.I_11 = rawBytes[Offsets.HC_GLOBAL_VALUES + 11];
 
-            if(version >= 23)
+            if (version >= 23)
             {
                 //1.17.01
                 hc.I_10 = BitConverter.ToUInt16(rawBytes, Offsets.HC_GLOBAL_VALUES + 76);
@@ -6794,7 +6839,7 @@ namespace Xv2CoreLib.SAV
             NotifyPropertyChanged("FigureCount");
             NotifyPropertyChanged("CompositeFigureCollection");
         }
-        
+
         public void InitGuids()
         {
             //Set a guid on each figure
@@ -7209,7 +7254,7 @@ namespace Xv2CoreLib.SAV
             }
         }
 
-        
+
         public static ObservableCollection<FigureCollectionItem> Read(byte[] rawBytes, List<byte> bytes)
         {
             ObservableCollection<FigureCollectionItem> figures = new ObservableCollection<FigureCollectionItem>();
@@ -7287,7 +7332,7 @@ namespace Xv2CoreLib.SAV
         [YAXDontSerializeIfNull]
         public LB_Save_Editor.ID.Figure FigureData { get; set; }
 
-        
+
         [YAXDontSerialize]
         public bool UseSkill2
         {
@@ -7309,7 +7354,7 @@ namespace Xv2CoreLib.SAV
             }
         }
 
-        
+
         [YAXDontSerialize]
         public int HP
         {
@@ -7430,7 +7475,7 @@ namespace Xv2CoreLib.SAV
                 return ((int)I_30 != 0);
             }
         }
-        
+
         private byte _I_16_value = 0;
         private byte _I_17_value = 0;
         private byte _I_18_value = 0;
@@ -7810,17 +7855,17 @@ namespace Xv2CoreLib.SAV
             for (int i = 0; i < Offsets.HC_FIGURE_INVENTORY_COUNT; i++)
             {
                 if (BitConverter.ToInt64(rawBytes, offset) == 0) break;
-                
+
                 var figure = Figure.Read(rawBytes, offset, i);
 
-                if(figure != null)
-                    figures.Add(figure); 
+                if (figure != null)
+                    figures.Add(figure);
 
                 offset += 40;
             }
 
             //Extra figures added in 1.17.01
-            if(version >= 23)
+            if (version >= 23)
             {
                 offset = Offsets.HC_FIGURE_INVENTORY2;
 
@@ -8274,14 +8319,14 @@ namespace Xv2CoreLib.SAV
             if (Figure5 == ushort.MaxValue) Figure5 = 65476;
         }
     }
-#endregion
+    #endregion
 
     public class SystemFlag
     {
-        #if SaveEditor
+#if SaveEditor
         [YAXDontSerialize]
         public LB_Save_Editor.ID.SysFlag FlagData { get; set; }
-        #endif
+#endif
 
         [YAXAttributeForClass]
         public int Index { get; set; }
@@ -8332,7 +8377,7 @@ namespace Xv2CoreLib.SAV
         }
     }
 
-#region Xv1Hero
+    #region Xv1Hero
     //XV1 Hero
     public class Xv1Hero : INotifyPropertyChanged
     {
@@ -8423,7 +8468,7 @@ namespace Xv2CoreLib.SAV
                         return _selectedPreset3;
                 }
                 return 0;
-            } 
+            }
         }
 
         [YAXAttributeForClass]
@@ -8513,7 +8558,7 @@ namespace Xv2CoreLib.SAV
                     hero.SelectedPreset3 = BitConverter.ToUInt16(rawBytes, 70);
                     break;
             }
-            
+
             hero.ImportedHero0 = Xv1HeroImport.Read(rawBytes, bytes, hero.SelectedImport);
 
             return hero;
@@ -8526,7 +8571,7 @@ namespace Xv2CoreLib.SAV
             bytes = ImportedHero0.Write(bytes, 0);
             return bytes;
         }
-        
+
     }
 
     public class Xv1HeroImport : INotifyPropertyChanged
@@ -9012,7 +9057,7 @@ namespace Xv2CoreLib.SAV
                 Ultimate2 = cac.UltimateSkill2,
                 Awoken = -1,
                 Blast = -1,
-                SuperSoul = -1, 
+                SuperSoul = -1,
                 SkinColor1 = cac.SkinColor1,
                 SkinColor2 = cac.SkinColor2,
                 SkinColor3 = cac.SkinColor3,
@@ -9027,7 +9072,7 @@ namespace Xv2CoreLib.SAV
 #endif
     }
 
-#endregion
+    #endregion
 
     //Equipment Flags
 
@@ -9089,7 +9134,7 @@ namespace Xv2CoreLib.SAV
             BitArray newFlags = new BitArray(bytes.GetRange(newOffset, 64).ToArray());
             BitArray acquireFlags = new BitArray(bytes.GetRange(acquireOffset, 64).ToArray());
 
-            for(int i = 0; i < 512; i++)
+            for (int i = 0; i < 512; i++)
             {
                 flags.Add(new EquipmentFlag()
                 {
@@ -9179,7 +9224,7 @@ namespace Xv2CoreLib.SAV
     //New 1.15 stuff:
     public class MascotFlag : INotifyPropertyChanged
     {
-#region NotifyPropChanged
+        #region NotifyPropChanged
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -9190,16 +9235,16 @@ namespace Xv2CoreLib.SAV
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
-#endregion
+        #endregion
 
-#region View
+        #region View
         [YAXDontSerialize]
         public int DisplayID { get { return Index + 1; } }
         [YAXDontSerialize]
         public string Name { get; set; }
         [YAXDontSerialize]
         public bool HasName { get { return !string.IsNullOrEmpty(Name); } }
-#endregion
+        #endregion
 
         [YAXAttributeForClass]
         public int Index { get; set; }
@@ -9259,7 +9304,7 @@ namespace Xv2CoreLib.SAV
 
     public class ArtworkFlag : INotifyPropertyChanged
     {
-#region NotifyPropChanged
+        #region NotifyPropChanged
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -9270,16 +9315,16 @@ namespace Xv2CoreLib.SAV
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
-#endregion
+        #endregion
 
-#region View
+        #region View
         [YAXDontSerialize]
         public int DisplayID { get { return Index + 1; } }
         [YAXDontSerialize]
         public string Name { get; set; }
         [YAXDontSerialize]
         public bool HasName { get { return !string.IsNullOrEmpty(Name); } }
-#endregion
+        #endregion
 
         [YAXAttributeForClass]
         public int Index { get; set; }
