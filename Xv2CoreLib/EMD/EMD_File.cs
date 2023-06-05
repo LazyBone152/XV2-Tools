@@ -411,21 +411,9 @@ namespace Xv2CoreLib.EMD
             }
         }
         [YAXDontSerialize]
-        public int TriangleListCount
-        {
-            get
-            {
-                return (Triangles != null) ? Triangles.Count : 0;
-            }
-        }
+        public int TriangleListCount => (Triangles != null) ? Triangles.Count : 0;
         [YAXDontSerialize]
-        public int VertexSize
-        {
-            get
-            {
-                return EMD_Vertex.GetVertexSize(VertexFlags);
-            }
-        }
+        public int VertexSize => EMD_Vertex.GetVertexSizeFromFlags(VertexFlags);
 
         [YAXComment("Sampler entries depend on the shader defined in EMM. Usually if there are duplicate entries then only the last one matters, the earlier ones are just there to maintain the sampler index. (Dont delete them) \n" +
             "There is a max of 4 possible entries that the shaders will accept, but no actual (vanilla) EMD shader uses more than 3.")]
@@ -595,6 +583,7 @@ namespace Xv2CoreLib.EMD
     [Serializable]
     public class EMD_Vertex
     {
+
         [YAXAttributeFor("Position")]
         [YAXSerializeAs("X")]
         public float PositionX { get; set; }
@@ -667,85 +656,6 @@ namespace Xv2CoreLib.EMD
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
         public float[] BlendWeights { get; set; } = new float[4]; //Size 3 (if float16, then 2 bytes of padding after)
 
-        public static int GetVertexSize(VertexFlags flags)
-        {
-            int size = 0;
-
-            if (flags.HasFlag(VertexFlags.Position))
-            {
-                size += 12;
-            }
-
-            if (flags.HasFlag(VertexFlags.Normal))
-            {
-                if (flags.HasFlag(VertexFlags.CompressedFormat))
-                {
-                    size += 8;
-                }
-                else
-                {
-                    size += 12;
-                }
-            }
-
-            if (flags.HasFlag(VertexFlags.Tangent))
-            {
-                if (flags.HasFlag(VertexFlags.CompressedFormat))
-                {
-                    size += 8;
-                }
-                else
-                {
-                    size += 12;
-                }
-            }
-
-            if (flags.HasFlag(VertexFlags.TexUV))
-            {
-                if (flags.HasFlag(VertexFlags.CompressedFormat))
-                {
-                    size += 4;
-                }
-                else
-                {
-                    size += 8;
-                }
-            }
-
-            if (flags.HasFlag(VertexFlags.Tex2UV))
-            {
-                if (flags.HasFlag(VertexFlags.CompressedFormat))
-                {
-                    size += 4;
-                }
-                else
-                {
-                    size += 8;
-                }
-            }
-
-            if (flags.HasFlag(VertexFlags.Color))
-            {
-                size += 4;
-            }
-
-            if (flags.HasFlag(VertexFlags.BlendWeight))
-            {
-                size += 4;
-
-                if (flags.HasFlag(VertexFlags.CompressedFormat))
-                {
-                    size += 8;
-                }
-                else
-                {
-                    size += 16;
-                }
-            }
-
-            return size;
-        }
-
         public static List<EMD_Vertex> ReadVertices(VertexFlags flags, byte[] rawBytes, int offset, int vertexCount, int vertexSize)
         {
             List<EMD_Vertex> vertices = new List<EMD_Vertex>();
@@ -760,7 +670,7 @@ namespace Xv2CoreLib.EMD
                     vertex.PositionX = BitConverter.ToSingle(rawBytes, offset + addedOffset + 0);
                     vertex.PositionY = BitConverter.ToSingle(rawBytes, offset + addedOffset + 4);
                     vertex.PositionZ = BitConverter.ToSingle(rawBytes, offset + addedOffset + 8);
-                    addedOffset += 12;
+                    addedOffset += GetVertexSizeFromFlags(VertexFlags.Position);
                 }
 
                 if (flags.HasFlag(VertexFlags.Normal))
@@ -770,14 +680,14 @@ namespace Xv2CoreLib.EMD
                         vertex.NormalX = Half.ToHalf(rawBytes, offset + addedOffset + 0);
                         vertex.NormalY = Half.ToHalf(rawBytes, offset + addedOffset + 2);
                         vertex.NormalZ = Half.ToHalf(rawBytes, offset + addedOffset + 4);
-                        addedOffset += 8;
+                        addedOffset += GetVertexSizeFromFlags(VertexFlags.Normal | VertexFlags.CompressedFormat);
                     }
                     else
                     {
                         vertex.NormalX = BitConverter.ToSingle(rawBytes, offset + addedOffset + 0);
                         vertex.NormalY = BitConverter.ToSingle(rawBytes, offset + addedOffset + 4);
                         vertex.NormalZ = BitConverter.ToSingle(rawBytes, offset + addedOffset + 8);
-                        addedOffset += 12;
+                        addedOffset += GetVertexSizeFromFlags(VertexFlags.Normal);
                     }
                 }
 
@@ -789,13 +699,13 @@ namespace Xv2CoreLib.EMD
                     {
                         vertex.TextureU = Half.ToHalf(rawBytes, offset + addedOffset + 0);
                         vertex.TextureV = Half.ToHalf(rawBytes, offset + addedOffset + 2);
-                        addedOffset += 4;
+                        addedOffset += GetVertexSizeFromFlags(VertexFlags.TexUV | VertexFlags.CompressedFormat);
                     }
                     else
                     {
                         vertex.TextureU = BitConverter.ToSingle(rawBytes, offset + addedOffset + 0);
                         vertex.TextureV = BitConverter.ToSingle(rawBytes, offset + addedOffset + 4);
-                        addedOffset += 8;
+                        addedOffset += GetVertexSizeFromFlags(VertexFlags.TexUV);
                     }
                 }
 
@@ -805,13 +715,13 @@ namespace Xv2CoreLib.EMD
                     {
                         vertex.Texture2U = Half.ToHalf(rawBytes, offset + addedOffset + 0);
                         vertex.Texture2V = Half.ToHalf(rawBytes, offset + addedOffset + 2);
-                        addedOffset += 4;
+                        addedOffset += GetVertexSizeFromFlags(VertexFlags.Tex2UV | VertexFlags.CompressedFormat);
                     }
                     else
                     {
                         vertex.Texture2U = BitConverter.ToSingle(rawBytes, offset + addedOffset + 0);
                         vertex.Texture2V = BitConverter.ToSingle(rawBytes, offset + addedOffset + 4);
-                        addedOffset += 8;
+                        addedOffset += GetVertexSizeFromFlags(VertexFlags.Tex2UV);
                     }
                 }
 
@@ -822,14 +732,14 @@ namespace Xv2CoreLib.EMD
                         vertex.TangentX = Half.ToHalf(rawBytes, offset + addedOffset + 0);
                         vertex.TangentY = Half.ToHalf(rawBytes, offset + addedOffset + 2);
                         vertex.TangentZ = Half.ToHalf(rawBytes, offset + addedOffset + 4);
-                        addedOffset += 8;
+                        addedOffset += GetVertexSizeFromFlags(VertexFlags.Tangent | VertexFlags.CompressedFormat);
                     }
                     else
                     {
                         vertex.TangentX = BitConverter.ToSingle(rawBytes, offset + addedOffset + 0);
                         vertex.TangentY = BitConverter.ToSingle(rawBytes, offset + addedOffset + 4);
                         vertex.TangentZ = BitConverter.ToSingle(rawBytes, offset + addedOffset + 8);
-                        addedOffset += 12;
+                        addedOffset += GetVertexSizeFromFlags(VertexFlags.Tangent);
                     }
                 }
 
@@ -839,7 +749,7 @@ namespace Xv2CoreLib.EMD
                     vertex.ColorG = rawBytes[offset + addedOffset + 1];
                     vertex.ColorB = rawBytes[offset + addedOffset + 2];
                     vertex.ColorA = rawBytes[offset + addedOffset + 3];
-                    addedOffset += 4;
+                    addedOffset += GetVertexSizeFromFlags(VertexFlags.Color);
                 }
 
                 if (flags.HasFlag(VertexFlags.BlendWeight))
@@ -849,22 +759,21 @@ namespace Xv2CoreLib.EMD
                     vertex.BlendIndexes[2] = rawBytes[offset + addedOffset + 2];
                     vertex.BlendIndexes[3] = rawBytes[offset + addedOffset + 3];
 
-                    addedOffset += 4;
-
                     if (flags.HasFlag(VertexFlags.CompressedFormat))
                     {
-                        vertex.BlendWeights[0] = Half.ToHalf(rawBytes, offset + addedOffset + 0);
-                        vertex.BlendWeights[1] = Half.ToHalf(rawBytes, offset + addedOffset + 2);
-                        vertex.BlendWeights[2] = Half.ToHalf(rawBytes, offset + addedOffset + 4);
+                        vertex.BlendWeights[0] = Half.ToHalf(rawBytes, offset + addedOffset + 4);
+                        vertex.BlendWeights[1] = Half.ToHalf(rawBytes, offset + addedOffset + 6);
+                        vertex.BlendWeights[2] = Half.ToHalf(rawBytes, offset + addedOffset + 8);
 
-                        addedOffset += 8;
+                        addedOffset += GetVertexSizeFromFlags(VertexFlags.BlendWeight | VertexFlags.CompressedFormat);
                     }
                     else
                     {
-                        vertex.BlendWeights[0] = BitConverter.ToSingle(rawBytes, offset + addedOffset + 0);
-                        vertex.BlendWeights[1] = BitConverter.ToSingle(rawBytes, offset + addedOffset + 4);
-                        vertex.BlendWeights[2] = BitConverter.ToSingle(rawBytes, offset + addedOffset + 8);
-                        addedOffset += 16;
+                        vertex.BlendWeights[0] = BitConverter.ToSingle(rawBytes, offset + addedOffset + 4);
+                        vertex.BlendWeights[1] = BitConverter.ToSingle(rawBytes, offset + addedOffset + 8);
+                        vertex.BlendWeights[2] = BitConverter.ToSingle(rawBytes, offset + addedOffset + 12);
+
+                        addedOffset += GetVertexSizeFromFlags(VertexFlags.BlendWeight);
                     }
 
                     vertex.BlendWeights[3] = 1.0f - (vertex.BlendWeights[0] + vertex.BlendWeights[1] + vertex.BlendWeights[2]);
@@ -881,6 +790,35 @@ namespace Xv2CoreLib.EMD
             }
 
             return vertices;
+        }
+
+        public static int GetVertexSizeFromFlags(VertexFlags flags)
+        {
+            int size = 0;
+            bool isCompressed = flags.HasFlag(VertexFlags.CompressedFormat);
+
+            if (flags.HasFlag(VertexFlags.Position))
+                size += 3 * 4;
+
+            if (flags.HasFlag(VertexFlags.Normal))
+                size += isCompressed ? (4 * 2) : (3 * 4);
+
+            if (flags.HasFlag(VertexFlags.TexUV))
+                size += 2 * (isCompressed ? 2 : 4);
+
+            if (flags.HasFlag(VertexFlags.Tex2UV))
+                size += 2 * (isCompressed ? 2 : 4);
+
+            if (flags.HasFlag(VertexFlags.Tangent))
+                size += isCompressed ? (4 * 2) : (3 * 4);
+
+            if (flags.HasFlag(VertexFlags.Color))
+                size += 4;
+
+            if (flags.HasFlag(VertexFlags.BlendWeight))
+                size += 4 + (isCompressed ? (4 * 2) : (3 * 4));
+
+            return size;
         }
 
         public static List<byte> GetBytes(IList<EMD_Vertex> vertices, VertexFlags flags)
@@ -903,7 +841,7 @@ namespace Xv2CoreLib.EMD
                 bytes.AddRange(BitConverter.GetBytes(PositionX));
                 bytes.AddRange(BitConverter.GetBytes(PositionY));
                 bytes.AddRange(BitConverter.GetBytes(PositionZ));
-                size += 12;
+                size += GetVertexSizeFromFlags(VertexFlags.Position);
             }
 
             if (flags.HasFlag(VertexFlags.Normal))
@@ -914,14 +852,46 @@ namespace Xv2CoreLib.EMD
                     bytes.AddRange(Half.GetBytes((Half)NormalY));
                     bytes.AddRange(Half.GetBytes((Half)NormalZ));
                     bytes.AddRange(new byte[2]);
-                    size += 8;
+                    size += GetVertexSizeFromFlags(VertexFlags.Normal | VertexFlags.CompressedFormat);
                 }
                 else
                 {
                     bytes.AddRange(BitConverter.GetBytes(NormalX));
                     bytes.AddRange(BitConverter.GetBytes(NormalY));
                     bytes.AddRange(BitConverter.GetBytes(NormalZ));
-                    size += 12;
+                    size += GetVertexSizeFromFlags(VertexFlags.Normal);
+                }
+            }
+
+            if (flags.HasFlag(VertexFlags.TexUV))
+            {
+                if (flags.HasFlag(VertexFlags.CompressedFormat))
+                {
+                    bytes.AddRange(Half.GetBytes((Half)TextureU));
+                    bytes.AddRange(Half.GetBytes((Half)TextureV));
+                    size += GetVertexSizeFromFlags(VertexFlags.TexUV | VertexFlags.CompressedFormat);
+                }
+                else
+                {
+                    bytes.AddRange(BitConverter.GetBytes(TextureU));
+                    bytes.AddRange(BitConverter.GetBytes(TextureV));
+                    size += GetVertexSizeFromFlags(VertexFlags.TexUV);
+                }
+            }
+
+            if (flags.HasFlag(VertexFlags.Tex2UV))
+            {
+                if (flags.HasFlag(VertexFlags.CompressedFormat))
+                {
+                    bytes.AddRange(Half.GetBytes((Half)Texture2U));
+                    bytes.AddRange(Half.GetBytes((Half)Texture2V));
+                    size += GetVertexSizeFromFlags(VertexFlags.Tex2UV | VertexFlags.CompressedFormat);
+                }
+                else
+                {
+                    bytes.AddRange(BitConverter.GetBytes(Texture2U));
+                    bytes.AddRange(BitConverter.GetBytes(Texture2V));
+                    size += GetVertexSizeFromFlags(VertexFlags.Tex2UV);
                 }
             }
 
@@ -933,46 +903,14 @@ namespace Xv2CoreLib.EMD
                     bytes.AddRange(Half.GetBytes((Half)TangentY));
                     bytes.AddRange(Half.GetBytes((Half)TangentZ));
                     bytes.AddRange(new byte[2]);
-                    size += 8;
+                    size += GetVertexSizeFromFlags(VertexFlags.Tangent | VertexFlags.CompressedFormat);
                 }
                 else
                 {
                     bytes.AddRange(BitConverter.GetBytes(TangentX));
                     bytes.AddRange(BitConverter.GetBytes(TangentY));
                     bytes.AddRange(BitConverter.GetBytes(TangentZ));
-                    size += 12;
-                }
-            }
-
-            if (flags.HasFlag(VertexFlags.TexUV))
-            {
-                if (flags.HasFlag(VertexFlags.CompressedFormat))
-                {
-                    bytes.AddRange(Half.GetBytes((Half)TextureU));
-                    bytes.AddRange(Half.GetBytes((Half)TextureV));
-                    size += 4;
-                }
-                else
-                {
-                    bytes.AddRange(BitConverter.GetBytes(TextureU));
-                    bytes.AddRange(BitConverter.GetBytes(TextureV));
-                    size += 8;
-                }
-            }
-
-            if (flags.HasFlag(VertexFlags.Tex2UV))
-            {
-                if (flags.HasFlag(VertexFlags.CompressedFormat))
-                {
-                    bytes.AddRange(Half.GetBytes((Half)Texture2U));
-                    bytes.AddRange(Half.GetBytes((Half)Texture2V));
-                    size += 4;
-                }
-                else
-                {
-                    bytes.AddRange(BitConverter.GetBytes(Texture2U));
-                    bytes.AddRange(BitConverter.GetBytes(Texture2V));
-                    size += 8;
+                    size += GetVertexSizeFromFlags(VertexFlags.Tangent);
                 }
             }
 
@@ -982,7 +920,7 @@ namespace Xv2CoreLib.EMD
                 bytes.Add(ColorG);
                 bytes.Add(ColorB);
                 bytes.Add(ColorA);
-                size += 4;
+                size += GetVertexSizeFromFlags(VertexFlags.Color);
             }
 
             if (flags.HasFlag(VertexFlags.BlendWeight))
@@ -991,7 +929,6 @@ namespace Xv2CoreLib.EMD
                 bytes.Add(BlendIndexes[1]);
                 bytes.Add(BlendIndexes[2]);
                 bytes.Add(BlendIndexes[3]);
-                size += 4;
 
                 if (flags.HasFlag(VertexFlags.CompressedFormat))
                 {
@@ -999,7 +936,7 @@ namespace Xv2CoreLib.EMD
                     bytes.AddRange(Half.GetBytes((Half)BlendWeights[1]));
                     bytes.AddRange(Half.GetBytes((Half)BlendWeights[2]));
                     bytes.AddRange(Half.GetBytes((Half)0f));
-                    size += 8; //An additional 2 bytes of padding added at the end
+                    size += GetVertexSizeFromFlags(VertexFlags.BlendWeight | VertexFlags.CompressedFormat);
                 }
                 else
                 {
@@ -1007,7 +944,7 @@ namespace Xv2CoreLib.EMD
                     bytes.AddRange(BitConverter.GetBytes(BlendWeights[1]));
                     bytes.AddRange(BitConverter.GetBytes(BlendWeights[2]));
                     bytes.AddRange(BitConverter.GetBytes(0f));
-                    size += 16;
+                    size += GetVertexSizeFromFlags(VertexFlags.BlendWeight);
                 }
             }
 

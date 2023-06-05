@@ -387,7 +387,7 @@ namespace Xv2CoreLib.EMG
             bytes.AddRange(BitConverter.GetBytes(I_08));
             bytes.AddRange(BitConverter.GetBytes(textureListsCount > 0 ? 80 : 0)); //Textures offset (12). Since textures come first we can just set this now.
             bytes.AddRange(BitConverter.GetBytes((ushort)vertexCount));
-            bytes.AddRange(BitConverter.GetBytes((ushort)EMD_Vertex.GetVertexSize(VertexFlags)));
+            bytes.AddRange(BitConverter.GetBytes((ushort)EMD_Vertex.GetVertexSizeFromFlags(VertexFlags)));
             VertexOffset = bytes.Count + absOffsetInFile;
             bytes.AddRange(BitConverter.GetBytes(0)); //Vertex offset (20)
             bytes.AddRange(BitConverter.GetBytes(Strips));
