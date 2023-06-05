@@ -564,7 +564,7 @@ namespace LB_Mod_Installer.Binding
         {
             if (!string.IsNullOrWhiteSpace(alias))
             {
-                AliasValue existingAlias = Aliases.FirstOrDefault(x => x.Alias == alias);
+                AliasValue existingAlias = Aliases.FirstOrDefault(x => x.Alias.Equals(alias, StringComparison.OrdinalIgnoreCase));
 
                 if (existingAlias != null)
                 {
@@ -885,9 +885,12 @@ namespace LB_Mod_Installer.Binding
         #region Function Helpers
         private string GetAliasId(string alias, string comment)
         {
-            foreach(var a in Aliases)
+            if (string.IsNullOrWhiteSpace(alias))
+                throw new Exception($"An alias cannot be empty or whitespace ({comment}).");
+
+            foreach (AliasValue a in Aliases)
             {
-                if (a.Alias == alias) return a.ID;
+                if (a.Alias.Equals(alias, StringComparison.OrdinalIgnoreCase)) return a.ID;
             }
 
             throw new Exception(String.Format("Could not find the alias: {0}. Binding parse failed. ({1})\n\nThis is most likely caused by using a binding that relies on something to be installed before it. To fix this issue, you can simply add a DoLast=\"True\" tag onto the File entry which will cause the file to be installed last.", alias, comment));
