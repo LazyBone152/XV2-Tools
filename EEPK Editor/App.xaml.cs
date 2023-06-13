@@ -31,5 +31,9 @@ namespace EEPK_Organiser
             }
         }
 
+        private void Application_Startup(object sender, StartupEventArgs e)
+        {
+            SettingsManager.Instance.CurrentApp = Xv2CoreLib.Resource.App.Application.EepkOrganiser;
+        }
     }
 }

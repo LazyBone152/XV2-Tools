@@ -948,6 +948,18 @@
                     <ContextMenu>
                         <MenuItem Header="Hue Adjustment" Click="ToolMenu_HueAdjustment_Click"/>
                         <MenuItem Header="Hue Set" Click="ToolMenu_HueSet_Click"/>
+                        <MenuItem Header="Namelist">
+                            <MenuItem Header="Save Name List" Click="NameList_Save_Click"/>
+                            <MenuItem Header="Clear Name List" Click="NameList_Clear_Click"/>
+                            <MenuItem x:Name="nameListMenu" Header="Apply..." IsEnabled="{Binding IsFileLoaded}" ItemsSource="{Binding nameListManager.LoadedNameLists}" Click="NameList_Item_Click">
+                                <MenuItem.ItemContainerStyle>
+                                    <Style>
+                                        <Setter Property="MenuItem.Header" Value="{Binding DisplayName}" />
+                                    </Style>
+                                </MenuItem.ItemContainerStyle>
+                            </MenuItem>
+
+                        </MenuItem>
                     </ContextMenu>
                 </Button.ContextMenu>
 

@@ -128,7 +128,6 @@ namespace EEPK_Organiser
             typeof(DependencyObject), new FrameworkPropertyMetadata(Int32.MaxValue));
 
             //Init settings
-            SettingsManager.Instance.CurrentApp = Xv2CoreLib.Resource.App.Application.EepkOrganiser;
             SettingsManager.SettingsReloaded += SettingsManager_SettingsReloaded;
 
             //Init UI

@@ -77,6 +77,7 @@ namespace Xv2CoreLib.EffectContainer
         //Name/Directory 
         private string _name = null;
         private string _directory = null;
+        public bool NameListApplied = false;
 
         /// <summary>
         /// The name of the EEPK file, minus the extension.

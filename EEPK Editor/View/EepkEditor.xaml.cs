@@ -89,6 +89,9 @@ namespace EEPK_Organiser.View
         {
             NotifyPropertyChanged(nameof(effectContainerFile));
             NotifyPropertyChanged(nameof(IsFileLoaded));
+
+            if(effectContainerFile != null)
+                nameListManager.EepkLoaded(effectContainerFile);
         }
         #endregion
 
@@ -4468,7 +4471,6 @@ namespace EEPK_Organiser.View
                 {
                     SceneManager.EnsureActorIsSet(0);
                     SceneManager.MainGameBase.VfxManager.PlayEffect(SelectedEffect, SceneManager.Actors[0]);
-                    //SceneManager.MainGameInstance?.TestParticlePlay(SelectedEffect);
                 }
             }
             #endif
@@ -4795,7 +4797,7 @@ namespace EEPK_Organiser.View
             SettingsManager.settings.EepkOrganiser_EffectPart_UnkValues_Expanded = effectPartUnkValues.IsExpanded;
         }
 
-        //Tool Button
+        //Tool Button (XenoKit - hidden in EEPK Organiser as the Tools menu can be used there)
         private void ToolMenu_HueAdjustment_Click(object sender, RoutedEventArgs e)
         {
 #if !DEBUG
@@ -4836,6 +4838,33 @@ namespace EEPK_Organiser.View
             }
 #endif
 
+        }
+
+        private void NameList_Item_Click(object sender, RoutedEventArgs e)
+        {
+            if (effectContainerFile == null) return;
+
+            MenuItem selectedMenuItem = e.OriginalSource as MenuItem;
+
+            if (selectedMenuItem != null)
+            {
+                NameList.NameListFile nameList = selectedMenuItem.DataContext as NameList.NameListFile;
+
+                if (nameList != null)
+                {
+                    nameListManager.ApplyNameList(effectContainerFile.Effects, nameList.GetNameList());
+                }
+            }
+        }
+
+        private void NameList_Clear_Click(object sender, RoutedEventArgs e)
+        {
+            nameListManager.ClearNameList(effectContainerFile.Effects);
+        }
+
+        private void NameList_Save_Click(object sender, RoutedEventArgs e)
+        {
+            nameListManager.SaveNameList(effectContainerFile.Effects);
         }
 
 

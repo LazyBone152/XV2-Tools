@@ -149,11 +149,16 @@ namespace EEPK_Organiser.NameList
         {
             if (effectContainerFile == null) return;
 
-            NameList nameListToUse = GetNameListForFile(effectContainerFile.Name);
-
-            if(nameListToUse != null)
+            if (!effectContainerFile.NameListApplied)
             {
-                ApplyNameList(effectContainerFile.Effects, nameListToUse);
+                effectContainerFile.NameListApplied = true;
+
+                NameList nameListToUse = GetNameListForFile(effectContainerFile.Name);
+
+                if (nameListToUse != null)
+                {
+                    ApplyNameList(effectContainerFile.Effects, nameListToUse);
+                }
             }
         }
 

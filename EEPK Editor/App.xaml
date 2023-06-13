@@ -4,7 +4,8 @@
              xmlns:converters="clr-namespace:LB_Common.Converters;assembly=LB_Common"
              xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              DispatcherUnhandledException="Application_DispatcherUnhandledException"
-             StartupUri="MainWindow.xaml" ShutdownMode="OnMainWindowClose">
+             StartupUri="MainWindow.xaml" ShutdownMode="OnMainWindowClose"
+             Startup="Application_Startup">
     <Application.Resources>
         <ResourceDictionary>
             <converters:VisibilityToNullableBooleanConverter x:Key="visibilityConverter"/>
