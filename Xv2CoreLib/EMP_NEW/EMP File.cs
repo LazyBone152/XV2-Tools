@@ -928,8 +928,20 @@ namespace Xv2CoreLib.EMP_NEW
         {
             List<RgbColor> colors = new List<RgbColor>();
 
+            bool invertColor = false;
+
+            //Invert color if AlphaBlendType 2 (Subtractive) is used for this node.
+            if (EmissionNode.Texture.MaterialRef != null)
+                invertColor = EmissionNode.Texture.MaterialRef.DecompiledParameters.AlphaBlendType == 2;
+
             RgbColor color1 = EmissionNode.Texture.Color1.GetAverageColor();
             RgbColor color2 = EmissionNode.Texture.Color2.GetAverageColor();
+
+            if (invertColor)
+            {
+                color1.Invert();
+                color2.Invert();
+            }
 
             if (!color1.IsWhiteOrBlack)
                 colors.Add(color1);
@@ -946,6 +958,7 @@ namespace Xv2CoreLib.EMP_NEW
                 }
             }
 
+
             return colors;
         }
 
@@ -953,9 +966,15 @@ namespace Xv2CoreLib.EMP_NEW
         {
             if(NodeType == ParticleNodeType.Emission)
             {
-                EmissionNode.Texture.Color1.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
-                EmissionNode.Texture.Color2.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
-                EmissionNode.Texture.Color_Variance.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
+                bool invertColor = false;
+
+                //Invert color if AlphaBlendType 2 (Subtractive) is used for this node.
+                if (EmissionNode.Texture.MaterialRef != null)
+                    invertColor = EmissionNode.Texture.MaterialRef.DecompiledParameters.AlphaBlendType == 2;
+
+                EmissionNode.Texture.Color1.ChangeHue(hue, saturation, lightness, undos, hueSet, variance, invertColor);
+                EmissionNode.Texture.Color2.ChangeHue(hue, saturation, lightness, undos, hueSet, variance, invertColor);
+                EmissionNode.Texture.Color_Variance.ChangeHue(hue, saturation, lightness, undos, hueSet, variance, invertColor);
             }
 
             //Children

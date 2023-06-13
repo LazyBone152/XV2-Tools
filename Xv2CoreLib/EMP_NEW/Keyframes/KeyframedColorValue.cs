@@ -148,13 +148,13 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             return colors.Count > 0 ? ColorEx.GetAverageColor(colors) : new RgbColor(Constant);
         }
 
-        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet = false, int variance = 0)
+        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet = false, int variance = 0, bool invertColor = false)
         {
-            Constant.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
+            Constant.ChangeHue(hue, saturation, lightness, undos, hueSet, variance, invertColor);
 
             foreach (var keyframe in Keyframes)
             {
-                keyframe.Value.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
+                keyframe.Value.ChangeHue(hue, saturation, lightness, undos, hueSet, variance, invertColor);
             }
         }
 

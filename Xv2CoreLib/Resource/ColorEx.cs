@@ -95,7 +95,7 @@ namespace Xv2CoreLib.HslColor
         {
             Hue += amount;
 
-            if(Hue > 360)
+            if (Hue > 360)
             {
                 Hue -= 360;
             }
@@ -143,7 +143,7 @@ namespace Xv2CoreLib.HslColor
             return ColorEx.HlsToRgb(Hue, Lightness, Saturation);
         }
 
-        
+
     }
 
     public class RgbColor
@@ -178,7 +178,7 @@ namespace Xv2CoreLib.HslColor
             G = customColor.G;
             B = customColor.B;
 
-            
+
         }
 
         public double R { get; set; }
@@ -213,7 +213,7 @@ namespace Xv2CoreLib.HslColor
         {
             int asInt = (int)value;
 
-            if (asInt == value) 
+            if (asInt == value)
             {
                 //Whole value (0 or 1)
                 return new double[2] { value, 0 };
@@ -255,15 +255,34 @@ namespace Xv2CoreLib.HslColor
         {
             return ColorEx.RgbToHls(R, G, B);
         }
+
+        /// <summary>
+        /// Inverts the RGB components of this color.
+        /// </summary>
+        public void Invert()
+        {
+            R = 1f - R;
+            G = 1f - G;
+            B = 1f - B;
+
+            R_Multi = 1f - R_Multi;
+            G_Multi = 1f - G_Multi;
+            B_Multi = 1f - B_Multi;
+        }
     }
 
     public static class ColorEx
     {
-        public static void ChangeHue(this CustomColor color, double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet, int variance)
+        public static void ChangeHue(this CustomColor color, double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet, int variance, bool invertColor = false)
         {
             if (!color.IsWhiteOrBlack())
             {
-                HslColor newCol = new RgbColor(color).ToHsl();
+                RgbColor rgbColor = new RgbColor(color);
+
+                if (invertColor)
+                    rgbColor.Invert();
+
+                HslColor newCol = rgbColor.ToHsl();
                 RgbColor convertedColor;
 
                 if (hueSet)
@@ -279,6 +298,9 @@ namespace Xv2CoreLib.HslColor
 
                 convertedColor = newCol.ToRgb();
 
+                if (invertColor)
+                    convertedColor.Invert();
+
                 undos.Add(new UndoableProperty<CustomColor>(nameof(color.R), color, color.R, (float)convertedColor.R));
                 undos.Add(new UndoableProperty<CustomColor>(nameof(color.G), color, color.G, (float)convertedColor.G));
                 undos.Add(new UndoableProperty<CustomColor>(nameof(color.B), color, color.B, (float)convertedColor.B));
@@ -286,6 +308,7 @@ namespace Xv2CoreLib.HslColor
                 color.R = (float)convertedColor.R;
                 color.G = (float)convertedColor.G;
                 color.B = (float)convertedColor.B;
+
             }
         }
 
@@ -293,9 +316,9 @@ namespace Xv2CoreLib.HslColor
         {
             //Does not work for whatever reason...
             if (hue == 0) return bitmap;
-            
+
             bitmap.ForEach((x, y, color) => Work(color.R, color.G, color.B, color.A, hue));
-            
+
             return bitmap;
         }
 
