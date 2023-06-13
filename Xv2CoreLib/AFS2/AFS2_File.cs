@@ -361,6 +361,8 @@ namespace Xv2CoreLib.AFS2
         {
             string tempPath = path + "_temp";
 
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+
             using (FileStream fs = new FileStream(tempPath, FileMode.Create))
             {
                 using (BinaryWriter writer = new BinaryWriter(fs))

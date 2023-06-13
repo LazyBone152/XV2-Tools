@@ -67,6 +67,12 @@ namespace Xv2CoreLib
             return result;
         }
 
+        public static double Next()
+        {
+            InitRandomGenerator();
+            return RandomGenerator.NextDouble();
+        }
+
         private static void InitRandomGenerator()
         {
             if (RandomGenerator == null) RandomGenerator = new System.Random(_getRandomInt(352, 242142142));

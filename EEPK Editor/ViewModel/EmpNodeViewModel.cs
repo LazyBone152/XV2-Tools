@@ -707,7 +707,7 @@ namespace EEPK_Organiser.ViewModel
         {
             get
             {
-                return node.NodeFlags.HasFlag(NodeFlags1.Unk7);
+                return node.NodeFlags.HasFlag(NodeFlags1.Unk8);
             }
             set
             {
