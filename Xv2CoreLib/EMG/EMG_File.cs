@@ -432,7 +432,7 @@ namespace Xv2CoreLib.EMG
                 bytes.AddRange(new byte[Utils.CalculatePadding(bytes.Count, 16)]);
 
                 //Vertices:
-                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(pointerList), 20); //Add vertex offset to mesh header
+                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), 20);
                 bytes.AddRange(EMD_Vertex.GetBytes(Vertices, VertexFlags));
             }
 

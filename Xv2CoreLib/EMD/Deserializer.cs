@@ -53,7 +53,7 @@ namespace Xv2CoreLib.EMD
             bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), 20);
             List<PtrWriter.Ptr> ModelPtrs = new List<PtrWriter.Ptr>();
 
-            for(int i = 0; i < modelCount; i++)
+            for (int i = 0; i < modelCount; i++)
             {
                 ModelPtrs.Add(new PtrWriter.Ptr()
                 {
@@ -65,8 +65,10 @@ namespace Xv2CoreLib.EMD
             PadFile(16); //At the end of the model pointer list, we need to pad the file to 16-byte alignment
 
             //Models
-            for(int i = 0; i < modelCount; i++)
+            for (int i = 0; i < modelCount; i++)
             {
+                PadFile(16);
+
                 //Fill in pointer
                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - ModelPtrs[i].RelativeTo), ModelPtrs[i].Offset);
 
@@ -79,18 +81,19 @@ namespace Xv2CoreLib.EMD
                 bytes.AddRange(BitConverter.GetBytes(8));
 
                 //Mesh pointers
-                for(int a = 0; a < meshCount; a++)
+                for (int a = 0; a < meshCount; a++)
                 {
                     meshPtrs.Add(new PtrWriter.Ptr() { Offset = bytes.Count, RelativeTo = meshRelativeOfs });
                     bytes.AddRange(new byte[4]);
                 }
-                
+
                 //Pad file
                 PadFile(16);
 
                 //Mesh
                 for (int a = 0; a < meshCount; a++)
                 {
+                    PadFile(16);
                     //Fill in pointer
                     bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - meshPtrs[a].RelativeTo), meshPtrs[a].Offset);
 
@@ -126,7 +129,7 @@ namespace Xv2CoreLib.EMD
                     PadFile(16);
 
                     //Submeshes
-                    for(int s = 0; s < submeshCount; s++)
+                    for (int s = 0; s < submeshCount; s++)
                     {
                         //Pad file to 16 byte alignment
                         PadFile(16);
@@ -146,7 +149,7 @@ namespace Xv2CoreLib.EMD
                         bytes.AddRange(BitConverter.GetBytes((ushort)emdFile.Models[i].Meshes[a].Submeshes[s].TriangleListCount));
                         bytes.AddRange(new byte[4]); //Texture definitions pointer
                         bytes.AddRange(new byte[4]); //Triangles pointer
-                        
+
                         //Write name
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - submeshStart), submeshStart + 64);
                         bytes.AddRange(Encoding.ASCII.GetBytes(emdFile.Models[i].Meshes[a].Submeshes[s].Name));
@@ -163,11 +166,11 @@ namespace Xv2CoreLib.EMD
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - submeshStart), submeshStart + 76);
                         int triangleTableStart = bytes.Count;
 
-                        for(int t = 0; t < emdFile.Models[i].Meshes[a].Submeshes[s].TriangleListCount; t++)
+                        for (int t = 0; t < emdFile.Models[i].Meshes[a].Submeshes[s].TriangleListCount; t++)
                         {
                             bytes.AddRange(new byte[4]);
                         }
-                        
+
 
                         //Triangles
                         for (int t = 0; t < emdFile.Models[i].Meshes[a].Submeshes[s].TriangleListCount; t++)
@@ -182,7 +185,7 @@ namespace Xv2CoreLib.EMD
                             bytes.AddRange(new byte[4]);
 
                             //Faces
-                            for(int f = 0; f < emdFile.Models[i].Meshes[a].Submeshes[s].Triangles[t].FaceCount; f++)
+                            for (int f = 0; f < emdFile.Models[i].Meshes[a].Submeshes[s].Triangles[t].FaceCount; f++)
                             {
                                 bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].Submeshes[s].Triangles[t].Faces[f]));
                             }
@@ -194,7 +197,7 @@ namespace Xv2CoreLib.EMD
                             int boneTablePos = bytes.Count;
                             bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - triangleStart), triangleStart + 12);
 
-                            for(int b = 0; b < emdFile.Models[i].Meshes[a].Submeshes[s].Triangles[t].BonesCount; b++)
+                            for (int b = 0; b < emdFile.Models[i].Meshes[a].Submeshes[s].Triangles[t].BonesCount; b++)
                             {
                                 bytes.AddRange(new byte[4]);
                             }
@@ -202,7 +205,7 @@ namespace Xv2CoreLib.EMD
                             //Write strings
                             for (int b = 0; b < emdFile.Models[i].Meshes[a].Submeshes[s].Triangles[t].BonesCount; b++)
                             {
-                                if(emdFile.Models[i].Meshes[a].Submeshes[s].Triangles[t].Bones[b] != "NULL")
+                                if (emdFile.Models[i].Meshes[a].Submeshes[s].Triangles[t].Bones[b] != "NULL")
                                 {
                                     bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - triangleStart), boneTablePos);
                                     bytes.AddRange(Encoding.ASCII.GetBytes(emdFile.Models[i].Meshes[a].Submeshes[s].Triangles[t].Bones[b]));
@@ -212,18 +215,19 @@ namespace Xv2CoreLib.EMD
                                 boneTablePos += 4;
                             }
 
+                            PadFile(4);
+
                             triangleTableStart += 4;
                         }
-
 
                         //Vertex
                         bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - submeshStart), submeshStart + 60);
 
-                        for(int v = 0; v < emdFile.Models[i].Meshes[a].Submeshes[s].VertexCount; v++)
+                        for (int v = 0; v < emdFile.Models[i].Meshes[a].Submeshes[s].VertexCount; v++)
                         {
                             bytes.AddRange(emdFile.Models[i].Meshes[a].Submeshes[s].Vertexes[v].GetBytes(emdFile.Models[i].Meshes[a].Submeshes[s].VertexFlags));
                         }
-                        
+
                     }
                 }
             }

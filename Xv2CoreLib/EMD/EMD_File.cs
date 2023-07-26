@@ -44,6 +44,8 @@ namespace Xv2CoreLib.EMD
         public bool ModelChanged { get; set; }
         [YAXDontSerialize]
         public bool TextureSamplersChanged { get; set; }
+        [YAXDontSerialize]
+        public bool MaterialsChanged { get; set; }
 
         public void TriggerModelChanged()
         {
@@ -53,6 +55,11 @@ namespace Xv2CoreLib.EMD
         public void TriggerTexturesChanged()
         {
             NotifyPropertyChanged(nameof(TextureSamplersChanged));
+        }
+
+        public void TriggerMaterialsChanged()
+        {
+            NotifyPropertyChanged(nameof(MaterialsChanged));
         }
         #endregion
 
@@ -764,7 +771,6 @@ namespace Xv2CoreLib.EMD
                         vertex.BlendWeights[0] = Half.ToHalf(rawBytes, offset + addedOffset + 4);
                         vertex.BlendWeights[1] = Half.ToHalf(rawBytes, offset + addedOffset + 6);
                         vertex.BlendWeights[2] = Half.ToHalf(rawBytes, offset + addedOffset + 8);
-
                         addedOffset += GetVertexSizeFromFlags(VertexFlags.BlendWeight | VertexFlags.CompressedFormat);
                     }
                     else
@@ -943,7 +949,7 @@ namespace Xv2CoreLib.EMD
                     bytes.AddRange(BitConverter.GetBytes(BlendWeights[0]));
                     bytes.AddRange(BitConverter.GetBytes(BlendWeights[1]));
                     bytes.AddRange(BitConverter.GetBytes(BlendWeights[2]));
-                    bytes.AddRange(BitConverter.GetBytes(0f));
+                    //bytes.AddRange(BitConverter.GetBytes(0));
                     size += GetVertexSizeFromFlags(VertexFlags.BlendWeight);
                 }
             }
