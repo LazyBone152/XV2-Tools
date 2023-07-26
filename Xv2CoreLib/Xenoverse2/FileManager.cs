@@ -246,6 +246,9 @@ namespace Xv2CoreLib
                 case ".eepk":
                     file = EffectContainerFile.Load(path, fileIO, onlyFromCpk);
                     break;
+                case ".emz":
+                    file = EMZ.EMZ_File.LoadData(GetBytesFromGame(path, onlyFromCpk, raiseEx));
+                    break;
                 case ".acb":
                     {
                         byte[] awbBytes = fileIO.GetFileFromGame(string.Format("{0}/{1}.awb", Path.GetFileNameWithoutExtension(path), Path.GetDirectoryName(path)), false);

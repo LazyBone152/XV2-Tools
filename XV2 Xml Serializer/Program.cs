@@ -312,6 +312,13 @@ namespace XV2_Xml_Serializer
                                         }
                                     }
                                     break;
+                                case ".sds":
+                                    Xv2CoreLib.SDS.SDS_File.Parse(fileLocation, true);
+                                    break;
+                                case ".emz":
+                                    if(!Path.GetFileName(fileLocation).Contains("_sds.")) goto default;
+                                    Xv2CoreLib.SDS.SDS_File.Parse(fileLocation, true);
+                                    break;
                                 case ".xml":
                                     LoadXmlInitial(fileLocation);
                                     break;
@@ -592,6 +599,13 @@ namespace XV2_Xml_Serializer
                             }
                             break;
                         }
+                    case ".sds":
+                        Xv2CoreLib.SDS.SDS_File.Write(fileLocation);
+                        break;
+                    case ".emz":
+                        if (!Path.GetFileName(fileLocation).Contains("_sds.")) goto default;
+                        Xv2CoreLib.SDS.SDS_File.Write(fileLocation);
+                        break;
                     default:
                         FileTypeNotSupported(fileLocation);
                         break;

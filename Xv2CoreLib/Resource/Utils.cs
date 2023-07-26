@@ -360,6 +360,19 @@ namespace Xv2CoreLib
 
             return bytes.ToArray();
         }
+
+        public static int GetMinIndexOfSubstrings(this string str, int startIndex, params char[] substrings)
+        {
+            int idx = int.MaxValue;
+
+            foreach(var sub in substrings)
+            {
+                int _idx = str.IndexOf(sub, startIndex);
+                if (_idx < idx && _idx != -1) idx = _idx;
+            }
+
+            return idx == int.MaxValue ? -1 : idx;
+        }
     }
 
     public static class Utils
@@ -974,7 +987,7 @@ namespace Xv2CoreLib
         /// </summary>
         public static byte[] ReplaceRange(byte[] list, byte[] insertedData, int startIndex)
         {
-            if (insertedData.Count() >= list.Count())
+            if (insertedData.Count() > list.Count())
             {
                 throw new InvalidOperationException("Cannot insert more data than is in the original list");
             }
