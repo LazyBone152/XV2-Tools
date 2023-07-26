@@ -38,6 +38,10 @@ namespace Xv2CoreLib.OCT
         [YAXAttributeForClass]
         [YAXSerializeAs("TP_Cost")]
         public int I_12 { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("I_20")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = -1)]
+        public int I_20 { get; set; }
 
     }
 }

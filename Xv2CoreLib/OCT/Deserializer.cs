@@ -12,7 +12,7 @@ namespace Xv2CoreLib.OCT
     {
         string saveLocation;
         OCT_File octFile;
-        List<byte> bytes = new List<byte>() { 35, 79, 67, 84, 254, 255, 16, 0 };
+        List<byte> bytes = new List<byte>() { 35, 79, 67, 84, 254, 255, 20, 0 };
 
         public Deserializer(string location)
         {
@@ -55,6 +55,7 @@ namespace Xv2CoreLib.OCT
                     bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].OctSubEntries[a].I_08));
                     bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].OctSubEntries[a].I_12));
                     bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].OctSubEntries[a].I_16));
+                    bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].OctSubEntries[a].I_20));
                 }
 
             }
