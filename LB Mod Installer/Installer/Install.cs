@@ -762,17 +762,31 @@ namespace LB_Mod_Installer.Installer
                 //Install PartColors
                 if (xmlFile.PartColors != null)
                 {
+                    bindingManager.ParseProperties(xmlFile.PartColors, binaryFile.PartColors, installPath);
+
                     for (int i = 0; i < xmlFile.PartColors.Count; i++)
                     {
-                        PartColor binPartColor = binaryFile.GetPartColors(xmlFile.PartColors[i].Index, xmlFile.PartColors[i].Name);
-                        bindingManager.ParseProperties(xmlFile.PartColors[i].ColorsList, binPartColor.ColorsList, installPath);
-
-                        if (xmlFile.PartColors[i].ColorsList != null)
+                        if (xmlFile.PartColors[i].Overwrite)
                         {
-                            foreach (var color in xmlFile.PartColors[i].ColorsList)
+                            //Overwrite Path
+                            bindingManager.ParseProperties(xmlFile.PartColors[i].ColorsList, null, installPath);
+                            GeneralInfo.Tracker.AddID(installPath, Sections.GetBcsPartColorOverwrite(xmlFile.PartColors[i].Index), "0");
+                            binaryFile.AddPartColorGroup(xmlFile.PartColors[i]);
+
+                        }
+                        else
+                        {
+                            //Standard Append Path
+                            PartColor binPartColor = binaryFile.GetPartColors(xmlFile.PartColors[i].Index, xmlFile.PartColors[i].Name);
+                            bindingManager.ParseProperties(xmlFile.PartColors[i].ColorsList, binPartColor.ColorsList, installPath);
+
+                            if (xmlFile.PartColors[i].ColorsList != null)
                             {
-                                GeneralInfo.Tracker.AddID(installPath, Sections.GetBcsPartColor(xmlFile.PartColors[i].Index), color.Index);
-                                binPartColor.AddColor(color);
+                                foreach (var color in xmlFile.PartColors[i].ColorsList)
+                                {
+                                    GeneralInfo.Tracker.AddID(installPath, Sections.GetBcsPartColor(xmlFile.PartColors[i].Index), color.Index);
+                                    binPartColor.AddColor(color);
+                                }
                             }
                         }
                     }

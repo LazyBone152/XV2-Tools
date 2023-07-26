@@ -219,7 +219,6 @@ namespace LB_Mod_Installer.Binding
 
                 ErrorHandling errorHandler = ErrorHandling.Stop;
                 string formating = "0";
-                int increment = 0;
 
                 foreach (var b in bindings)
                 {
@@ -227,12 +226,6 @@ namespace LB_Mod_Installer.Binding
                     {
                         case Function.Format:
                             formating = b.GetArgument1();
-                            break;
-                        case Function.SetAlias:
-                            if(retIsString)
-                                AddAlias(retStr, b.GetArgument1());
-                            else
-                                AddAlias((retID + increment).ToString(), b.GetArgument1());
                             break;
                         case Function.GetAlias:
                             {
@@ -341,13 +334,6 @@ namespace LB_Mod_Installer.Binding
 
                                 retID = nextId;
                             }
-                            break;
-                        case Function.Increment:
-                            if (!b.HasArgument()) throw new Exception($"No argument found on Increment binding!");
-
-                            if(!int.TryParse(b.GetArgument1(), out increment))
-                                throw new ArgumentException($"Error while parsing the argument on Increment binding. (Binding: {binding})");
-                            
                             break;
                         case Function.X2MSkillPath:
                             {
@@ -522,14 +508,37 @@ namespace LB_Mod_Installer.Binding
                                 assignedSkillIds.Add(skillId2);
                             }
                             break;
-                    }
-                }
+                        case Function.Addition:
+                            int increment;
+                            if (!int.TryParse(b.GetArgument1(), out increment))
+                                throw new ArgumentException($"Error while parsing the argument on Increment binding. (Binding: {binding})");
 
-                //If retID == SkipToken or NullToken, then we dont want to increment or format
-                if (increment > 0 && (retID == SkipToken || retID == NullTokenInt))
-                {
-                    increment = 0;
-                    formating = "0";
+                            if (!(retID == SkipToken || retID == NullTokenInt))
+                                retID += increment;
+                            break;
+                        case Function.Subtract:
+                            int sub;
+                            if (!int.TryParse(b.GetArgument1(), out sub))
+                                throw new ArgumentException($"Error while parsing the argument on Subtractive binding. (Binding: {binding})");
+
+                            if (!(retID == SkipToken || retID == NullTokenInt))
+                                retID -= sub;
+                            break;
+                        case Function.Multiply:
+                            float mult;
+                            if (!float.TryParse(b.GetArgument1(), out mult))
+                                throw new ArgumentException($"Error while parsing the argument on Multiply binding. (Binding: {binding})");
+
+                            if (!(retID == SkipToken || retID == NullTokenInt))
+                                retID = (int)(retID * mult);
+                            break;
+                        case Function.SetAlias:
+                            if (retIsString)
+                                AddAlias(retStr, b.GetArgument1());
+                            else
+                                AddAlias(retID.ToString(), b.GetArgument1());
+                            break;
+                    }
                 }
 
                 //Generic error handling code
@@ -550,7 +559,7 @@ namespace LB_Mod_Installer.Binding
                 }
                 else
                 {
-                    return ApplyFormatting(retID + increment, formating);
+                    return ApplyFormatting(retID, formating);
                 }
             }
             else
@@ -666,9 +675,6 @@ namespace LB_Mod_Installer.Binding
                     case "format":
                         bindings.Add(new BindingValue() { Function = Function.Format, Arguments = arguments });
                         break;
-                    case "increment":
-                        bindings.Add(new BindingValue() { Function = Function.Increment, Arguments = arguments });
-                        break;
                     case "x2mskillpath":
                         bindings.Add(new BindingValue() { Function = Function.X2MSkillPath, Arguments = arguments });
                         break;
@@ -715,6 +721,18 @@ namespace LB_Mod_Installer.Binding
                     case "autoskillid":
                         bindings.Add(new BindingValue() { Function = Function.AutoSkillID, Arguments = arguments });
                         break;
+                    case "increment":
+                    case "add":
+                        bindings.Add(new BindingValue() { Function = Function.Addition, Arguments = arguments });
+                        break;
+                    case "subtract":
+                    case "sub":
+                        bindings.Add(new BindingValue() { Function = Function.Subtract, Arguments = arguments });
+                        break;
+                    case "multiply":
+                    case "mult":
+                        bindings.Add(new BindingValue() { Function = Function.Multiply, Arguments = arguments });
+                        break;
                     default:
                         throw new FormatException(String.Format("Invalid ID Binding Function (Function = {0}, Argument = {1})\nFull binding: {2}", function, argument, originalBinding));
                 }
@@ -729,9 +747,9 @@ namespace LB_Mod_Installer.Binding
         {
             //Ensures the bindings are valid, and orders them correctly so the alias function comes last (if present)
 
-            //Entries must be ordered like this: Error > ID > Increment > Alias
+            //Entries must be ordered like this: Error > ID > Add/Sub/Mult > Alias
             MoveFunctionToStart(bindings, Function.Error);
-            MoveFunctionToLast(bindings, Function.Increment);
+            MoveFunctionToLast(bindings, Function.Addition, Function.Subtract, Function.Multiply);
             MoveFunctionToLast(bindings, Function.SetAlias);
 
             //Validate functions
@@ -740,7 +758,6 @@ namespace LB_Mod_Installer.Binding
             bool hasErrorBinding = false;
             bool hasDefaultValueBinding = false;
             bool hasFormatBinding = false;
-            bool hasIncrementBinding = false;
 
             for (int i = 0; i < bindings.Count; i++)
             {
@@ -762,9 +779,9 @@ namespace LB_Mod_Installer.Binding
                         if (hasFormatBinding) throw new ArgumentException(String.Format("More than one instance of {0} found. Binding parse failed.\n({1})", Function.Format, comment));
                         hasFormatBinding = true;
                         break;
-                    case Function.Increment:
-                        if (hasIncrementBinding) throw new ArgumentException(String.Format("More than one instance of {0} found. Binding parse failed.\n({1})", Function.Increment, comment));
-                        hasIncrementBinding = true;
+                    case Function.Addition:
+                    case Function.Subtract:
+                    case Function.Multiply:
                         break;
                     default:
                         if (hasIdBinding) throw new ArgumentException(String.Format("More than one instance of an ID binding found within the same binding. Binding parse failed.\n({0})", comment));
@@ -806,6 +823,9 @@ namespace LB_Mod_Installer.Binding
                     case Function.GetEntry:
                     case Function.SetValue:
                     case Function.StageID:
+                    case Function.Addition:
+                    case Function.Subtract:
+                    case Function.Multiply:
                         //Must have an argument
                         if (!bindings[i].HasArgument()) throw new ArgumentException(String.Format("The {0} binding function takes a string argument, but none was found.\n({1})", bindings[i].Function, comment));
                         break;
@@ -862,6 +882,27 @@ namespace LB_Mod_Installer.Binding
                     bindings.Add(function);
                     break;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Moves all specified functions to last as a group, preserving their intended order
+        /// </summary>
+        private void MoveFunctionToLast(List<BindingValue> bindings, params Function[] func)
+        {
+            List<BindingValue> lastBindings = new List<BindingValue>();
+
+            foreach (var binding in bindings)
+            {
+                if (func.Contains(binding.Function))
+                    lastBindings.Add(binding);
+            }
+
+            bindings.RemoveAll(x => func.Contains(x.Function));
+
+            foreach(var binding in lastBindings)
+            {
+                bindings.Add(binding);
             }
         }
 
@@ -1464,7 +1505,9 @@ namespace LB_Mod_Installer.Binding
         Error,
         DefaultValue,
         SetAlias,
-        Increment
+        Addition,
+        Subtract,
+        Multiply
     }
 
     public enum ErrorHandling

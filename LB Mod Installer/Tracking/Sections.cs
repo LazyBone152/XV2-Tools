@@ -16,6 +16,7 @@
         public const string BAC_Entries = "BAC_Entries";
         public const string BCS_PartSets = "BCS_PartSets";
         public const string BCS_PartColors = "BCS_PartColor_";
+        public const string BCS_PartColorsOverwrite = "BCS_PartColorOverwrite_";
         public const string BCS_Bodies = "BCS_Bodies";
         public const string BCS_SkeletonData = "BCS_SkeletonData";
         public const string BDM_Entries = "BDM_Entries";
@@ -80,6 +81,7 @@
 
 
         public static string GetBcsPartColor(string id) { return string.Format("{0}{1}", BCS_PartColors, id); }
+        public static string GetBcsPartColorOverwrite(string id) { return string.Format("{0}{1}", BCS_PartColorsOverwrite, id); }
         public static string GetPscEntry(string charaID) { return string.Format("{0}_{1}", PSC_Spec_Entry, charaID); }
     }
 }

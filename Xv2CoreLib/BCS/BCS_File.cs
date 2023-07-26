@@ -95,7 +95,7 @@ namespace Xv2CoreLib.BCS
 
         public void SortEntries()
         {
-            if(PartSets != null)
+            if (PartSets != null)
                 PartSets.Sort((x, y) => x.SortID - y.SortID);
 
             if (PartColors != null)
@@ -104,7 +104,7 @@ namespace Xv2CoreLib.BCS
 
                 foreach (var partColor in PartColors)
                 {
-                    if(partColor.ColorsList != null)
+                    if (partColor.ColorsList != null)
                         partColor.ColorsList.Sort((x, y) => x.SortID - y.SortID);
                 }
             }
@@ -126,27 +126,48 @@ namespace Xv2CoreLib.BCS
         {
             return new Parser(bytes).GetBcsFile();
         }
-        
+
         public static BCS_File Load(string path)
         {
             return new Parser(File.ReadAllBytes(path)).GetBcsFile();
         }
 
-        public PartColor GetPartColors(string id, string name)
+        public PartColor GetPartColors(string id, string name, bool addNewIfMissing = true)
         {
             if (PartColors == null) PartColors = new AsyncObservableCollection<PartColor>();
 
             int index = PartColors.IndexOf(PartColors.FirstOrDefault(x => x.Index == id));
 
-            if(index != -1)
+            if (index != -1)
             {
                 return PartColors[index];
             }
-            else
+            else if(addNewIfMissing)
             {
                 PartColor newPartColor = new PartColor() { Index = id, Name = name, ColorsList = new AsyncObservableCollection<Colors>() };
                 PartColors.Add(newPartColor);
                 return newPartColor;
+            }
+            else
+            {
+                return null;
+            }
+
+        }
+
+        public void AddPartColorGroup(PartColor colorGroup)
+        {
+            if (PartColors == null) PartColors = new AsyncObservableCollection<PartColor>();
+
+            int index = PartColors.IndexOf(PartColors.FirstOrDefault(x => x.Index == colorGroup.Index));
+
+            if(index != -1)
+            {
+                PartColors[index] = colorGroup;
+            }
+            else
+            {
+                PartColors.Add(colorGroup);
             }
 
         }
@@ -155,7 +176,7 @@ namespace Xv2CoreLib.BCS
         {
             PartColor partColor = PartColors.FirstOrDefault(x => x.ID == groupId);
 
-            if(partColor != null)
+            if (partColor != null)
             {
                 return partColor.ColorsList.FirstOrDefault(x => x.ID == colorIndex);
             }
@@ -180,12 +201,12 @@ namespace Xv2CoreLib.BCS
 
             return null;
         }
-        
-        public int NewPartColorGroupID()
-        {
-            int id = 0;
 
-            while(PartColors.Any(x => x.SortID == id))
+        public int NewPartColorGroupID(int min = 0)
+        {
+            int id = min;
+
+            while (PartColors.Any(x => x.SortID == id))
             {
                 id++;
             }
@@ -223,7 +244,7 @@ namespace Xv2CoreLib.BCS
             {
                 foreach (var _part in partSet.Parts)
                 {
-                    foreach(var _physicsPart in _part.PhysicsParts)
+                    foreach (var _physicsPart in _part.PhysicsParts)
                     {
                         if (_physicsPart == physicsPart) return partSet;
                     }
@@ -248,11 +269,11 @@ namespace Xv2CoreLib.BCS
 
         public PartSet GetParentPartSet(ColorSelector colSel)
         {
-            foreach(var partSet in PartSets)
+            foreach (var partSet in PartSets)
             {
-                foreach(var part in partSet.Parts)
+                foreach (var part in partSet.Parts)
                 {
-                    foreach(var colorSel in part.ColorSelectors)
+                    foreach (var colorSel in part.ColorSelectors)
                     {
                         if (colorSel == colSel) return partSet;
                     }
@@ -293,12 +314,12 @@ namespace Xv2CoreLib.BCS
 
             return null;
         }
-        
+
         public Part GetPartWithEmdPath(string emdPath)
         {
-            foreach(var partSet in PartSets)
+            foreach (var partSet in PartSets)
             {
-                foreach(var part in partSet.Parts)
+                foreach (var part in partSet.Parts)
                 {
                     if (Path.GetFileName(part.GetModelPath(part.PartType)) == emdPath) return part;
                 }
@@ -313,7 +334,7 @@ namespace Xv2CoreLib.BCS
             {
                 foreach (var part in partSet.Parts)
                 {
-                    foreach(var physicsPart in part.PhysicsParts)
+                    foreach (var physicsPart in part.PhysicsParts)
                     {
                         if (Path.GetFileNameWithoutExtension(physicsPart.GetEmbPath()) == emdPath) return physicsPart;
                     }
@@ -447,7 +468,7 @@ namespace Xv2CoreLib.BCS
                 if (undos != null)
                 {
                     undos.Add(new UndoableListRemove<Part>(Parts, Parts[replaceIdx], replaceIdx));
-                    undos.Add(new UndoableListInsert<Part>(Parts, replaceIdx,  part));
+                    undos.Add(new UndoableListInsert<Part>(Parts, replaceIdx, part));
                 }
 
                 Parts.RemoveAt(replaceIdx);
@@ -469,9 +490,9 @@ namespace Xv2CoreLib.BCS
 
         public Part GetParentPart(PhysicsPart physicsPart)
         {
-            foreach(var part in Parts)
+            foreach (var part in Parts)
             {
-                if(part.PhysicsParts != null)
+                if (part.PhysicsParts != null)
                 {
                     if (part.PhysicsParts.Contains(physicsPart)) return part;
                 }
@@ -484,7 +505,7 @@ namespace Xv2CoreLib.BCS
         {
             NotifyPropertyChanged(nameof(ID));
         }
-    
+
     }
 
     [Serializable]
@@ -642,7 +663,7 @@ namespace Xv2CoreLib.BCS
         {
             get
             {
-                if(_mergedList == null)
+                if (_mergedList == null)
                 {
                     _mergedList = new CompositeReadOnlyAsyncObservableCollection();
                     _mergedList.AddList(PhysicsParts, PhysicsParts);
@@ -713,14 +734,15 @@ namespace Xv2CoreLib.BCS
 
                 return string.Format("{0}/{1}.dyt.emb", Path.GetDirectoryName(embPath), Path.GetFileNameWithoutExtension(embPath));
             }
-            else if(Model != -1)
+            else if (Model != -1)
             {
                 //Uses Model1
                 return string.Format("{0}.dyt.emb", GetPath(Model, partType));
             }
-            else if(!string.IsNullOrWhiteSpace(EmdPath))
+            else if (!string.IsNullOrWhiteSpace(EmdPath))
             {
-                return string.Format("{0}.dyt.emb", EmdPath);
+                string emdPath = GetModelPath(partType);
+                return string.Format("{0}/{1}.dyt.emb", Path.GetDirectoryName(emdPath), Path.GetFileNameWithoutExtension(emdPath));
             }
 
             return null;
@@ -953,7 +975,7 @@ namespace Xv2CoreLib.BCS
 
         public string GetEmbPath()
         {
-            if(string.IsNullOrWhiteSpace(EmbPath))
+            if (string.IsNullOrWhiteSpace(EmbPath))
                 return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.emb", CharaCode, EmdPath));
             else
                 return Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.emb", CharaCode, EmbPath));
@@ -1018,7 +1040,7 @@ namespace Xv2CoreLib.BCS
         }
 
         #endregion
-        
+
         [YAXDontSerialize]
         public int SortID
         {
@@ -1035,10 +1057,19 @@ namespace Xv2CoreLib.BCS
         }
 
         [YAXAttributeForClass]
+        [BindingAutoId]
         public string Index { get; set; } //int16
         [YAXAttributeFor("Name")]
         [YAXSerializeAs("value")]
         public string Name { get; set; }
+
+        [YAXAttributeForClass]
+        [YAXDontSerializeIfNull]
+        [YAXSerializeAs("ReplaceAll")]
+        public string Overwrite_XmlBinding { get; set; }
+        [YAXDontSerialize]
+        public bool Overwrite => !string.IsNullOrWhiteSpace(Overwrite_XmlBinding) ? Overwrite_XmlBinding.Equals("true", StringComparison.OrdinalIgnoreCase) : false;
+
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Colors")]
         public AsyncObservableCollection<Colors> ColorsList { get; set; } = new AsyncObservableCollection<Colors>();
@@ -1057,14 +1088,14 @@ namespace Xv2CoreLib.BCS
 
         public void AddColor(Colors color)
         {
-            if (ColorsList == null) 
+            if (ColorsList == null)
                 ColorsList = new AsyncObservableCollection<Colors>();
 
             int idx = color.SortID;
 
             int existingIndex = ColorsList.IndexOf(ColorsList.FirstOrDefault(p => p.Index == color.Index));
 
-            if(existingIndex != -1)
+            if (existingIndex != -1)
             {
                 ColorsList[existingIndex] = color;
             }
@@ -1073,13 +1104,13 @@ namespace Xv2CoreLib.BCS
                 ColorsList.Add(color);
             }
         }
-        
+
         public void RefreshValues()
         {
             NotifyPropertyChanged(nameof(Index));
             NotifyPropertyChanged(nameof(Name));
 
-            if(ColorsList != null)
+            if (ColorsList != null)
             {
                 foreach (var color in ColorsList)
                 {
@@ -1359,7 +1390,7 @@ namespace Xv2CoreLib.BCS
         }
 
         #endregion
-        
+
         [YAXAttributeForClass]
         [YAXSerializeAs("Name")]
         public string BoneName { get; set; }

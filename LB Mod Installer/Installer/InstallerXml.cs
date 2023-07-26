@@ -145,7 +145,7 @@ namespace LB_Mod_Installer.Installer
                 files.AddRange(InstallFiles.Where(x => x.GetInstallPriority() == 2));
             }
 
-            //Remove all files with empty SourcePath, and without a Binding
+            //Remove all files with empty SourcePath and without a Binding (empty SourcePath is only allowed for Type=Binding)
             files.RemoveAll(x => string.IsNullOrWhiteSpace(x.SourcePath) && string.IsNullOrWhiteSpace(x.Binding));
 
             //Remove files that have a invalid flag or are otherwise disabled

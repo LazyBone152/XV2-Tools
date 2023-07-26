@@ -420,14 +420,35 @@ namespace LB_Mod_Installer.Installer
 
                 if (binaryFile.PartColors != null)
                 {
+                    //Standard path
                     foreach (PartColor section in binaryFile.PartColors)
                     {
                         Section partColorSection = file.GetSection(Sections.GetBcsPartColor(section.Index));
 
                         if (partColorSection != null)
                         {
-                            var cpkSection = (cpkBinFile != null) ? cpkBinFile.GetPartColors(section.Index, section.Name) : null;
+                            PartColor cpkSection = (cpkBinFile != null) ? cpkBinFile.GetPartColors(section.Index, section.Name, false) : null;
                             UninstallEntries(section.ColorsList, (cpkSection != null) ? cpkSection.ColorsList : null, partColorSection.IDs);
+                        }
+                    }
+
+                    //Overwrite path
+                    for (int i = binaryFile.PartColors.Count - 1; i >= 0; i--)
+                    {
+                        Section partColorOverwirteSection = file.GetSection(Sections.GetBcsPartColorOverwrite(binaryFile.PartColors[i].Index));
+
+                        if (partColorOverwirteSection != null)
+                        {
+                            PartColor cpkSection = (cpkBinFile != null) ? cpkBinFile.GetPartColors(binaryFile.PartColors[i].Index, binaryFile.PartColors[i].Name, false) : null;
+
+                            if (cpkSection != null)
+                            {
+                                binaryFile.PartColors[i] = cpkSection;
+                            }
+                            else
+                            {
+                                binaryFile.PartColors.RemoveAt(i);
+                            }
                         }
                     }
                 }
