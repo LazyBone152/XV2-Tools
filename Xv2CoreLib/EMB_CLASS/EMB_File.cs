@@ -27,6 +27,7 @@ namespace Xv2CoreLib.EMB_CLASS
     [Serializable]
     public class EMB_File
     {
+        internal const int SIGNATURE = 1112360227;
         public const int MAX_EFFECT_TEXTURES = 128;
 
         [YAXAttributeForClass]
