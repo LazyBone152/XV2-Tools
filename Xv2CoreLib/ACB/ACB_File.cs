@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xv2CoreLib.UTF;
@@ -5790,13 +5790,13 @@ namespace Xv2CoreLib.ACB
 
         private ushort GetParam(int idx)
         {
-            if (Parameters == null) Parameters = new List<byte>();
+            if (Parameters == null) return 0;
             int adjustedIndex = idx * 2;
             int newSize = 2 * (idx + 1);
 
-            while (Parameters.Count < newSize)
+            if (Parameters.Count < newSize)
             {
-                Parameters.Add(0);
+                return 0;
             }
 
             return BigEndianConverter.ReadUInt16(Parameters, adjustedIndex);
