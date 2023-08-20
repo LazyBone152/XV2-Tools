@@ -319,6 +319,9 @@ namespace XV2_Xml_Serializer
                                     if(!Path.GetFileName(fileLocation).Contains("_sds.")) goto default;
                                     Xv2CoreLib.SDS.SDS_File.Parse(fileLocation, true);
                                     break;
+                                case ".ems":
+                                    Xv2CoreLib.EMS.EMS_File.CreateXml(fileLocation);
+                                    break;
                                 case ".xml":
                                     LoadXmlInitial(fileLocation);
                                     break;
@@ -605,6 +608,9 @@ namespace XV2_Xml_Serializer
                     case ".emz":
                         if (!Path.GetFileName(fileLocation).Contains("_sds.")) goto default;
                         Xv2CoreLib.SDS.SDS_File.Write(fileLocation);
+                        break;
+                    case ".ems":
+                        Xv2CoreLib.EMS.EMS_File.SaveXml(fileLocation);
                         break;
                     default:
                         FileTypeNotSupported(fileLocation);

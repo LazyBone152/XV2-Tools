@@ -239,6 +239,7 @@
     <Compile Include="EMP_NEW\Keyframes\KeyframedVector3Value.cs" />
     <Compile Include="EMP_NEW\Keyframes\KeyframedBaseValue.cs" />
     <Compile Include="EMP_NEW\Parser.cs" />
+    <Compile Include="EMS\EMS_File.cs" />
     <Compile Include="EMZ\EMZ_File.cs" />
     <Compile Include="ERS\Deserializer.cs" />
     <Compile Include="ERS\ERS_File.cs" />
