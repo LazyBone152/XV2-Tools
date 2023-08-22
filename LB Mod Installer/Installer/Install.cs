@@ -214,6 +214,10 @@ namespace LB_Mod_Installer.Installer
                         UpdateProgessBarText($"_Skill {File.InstallPath}...");
                         InstallSkillFolder(File);
                         break;
+                    case FileType.EPatch:
+                        UpdateProgessBarText(String.Format("_EPatch \"{0}\"...", Path.GetFileNameWithoutExtension(File.SourcePath)));
+                        fileManager.AddStreamFile($"../XV2PATCHER/Epatches/{File.SourcePath}", zipManager.GetZipEntry(string.Format("Epatches/{0}", File.SourcePath)), true);
+                        break;
                     case FileType.Binding:
                         bindingManager.ParseString(File.Binding, GeneralInfo.InstallerXml, "Binding");
                         break;
