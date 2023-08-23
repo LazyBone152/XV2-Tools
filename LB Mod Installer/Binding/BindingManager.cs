@@ -57,6 +57,8 @@ namespace LB_Mod_Installer.Binding
         private List<int> AssignedEvasiveSkillIDs = new List<int>();
         private List<int> AssignedBlastSkillIDs = new List<int>();
         private List<int> AssignedAwokenSkillIDs = new List<int>();
+        private List<int> AssignedStageIDs = new List<int>();
+        private List<int> AssignedStageSelectIDs = new List<int>();
 
         /// <summary>
         /// Stores a reference to the current entry during the Memory Pass (second pass). 
@@ -538,6 +540,16 @@ namespace LB_Mod_Installer.Binding
                             else
                                 AddAlias(retID.ToString(), b.GetArgument1());
                             break;
+                        case Function.AutoStage:
+                            {
+                                retID = GetFreeStageID();
+                                break;
+                            }
+                        case Function.AutoStageSelect:
+                            {
+                                retID = GetFreeStageSelectID();
+                                break;
+                            }
                     }
                 }
 
@@ -732,6 +744,12 @@ namespace LB_Mod_Installer.Binding
                     case "multiply":
                     case "mult":
                         bindings.Add(new BindingValue() { Function = Function.Multiply, Arguments = arguments });
+                        break;
+                    case "autostage":
+                        bindings.Add(new BindingValue() { Function = Function.AutoStage, Arguments = arguments });
+                        break;
+                    case "autostageselect":
+                        bindings.Add(new BindingValue() { Function = Function.AutoStageSelect, Arguments = arguments });
                         break;
                     default:
                         throw new FormatException(String.Format("Invalid ID Binding Function (Function = {0}, Argument = {1})\nFull binding: {2}", function, argument, originalBinding));
@@ -1426,6 +1444,53 @@ namespace LB_Mod_Installer.Binding
             return false;
         }
 
+        //Stages
+        public int GetFreeStageID()
+        {
+            int current = 0;
+
+            while (IsStageIdUsed(current))
+            {
+                current++;
+
+                if (current == ushort.MaxValue) return -1;
+            }
+
+            AssignedStageIDs.Add(current);
+            return current;
+        }
+
+        private bool IsStageIdUsed(int stageId)
+        {
+            if (AssignedStageIDs.Contains(stageId)) return true;
+            if (((StageDefFile)install.GetParsedFile<StageDefFile>(StageDefFile.PATH)).Stages.Any(x => x.Index == stageId)) return true;
+
+            return false;
+        }
+
+        public int GetFreeStageSelectID()
+        {
+            int current = 0;
+
+            while (IsStageSelectIdUsed(current))
+            {
+                current++;
+
+                if (current == ushort.MaxValue) return -1;
+            }
+
+            AssignedStageSelectIDs.Add(current);
+            return current;
+        }
+
+        private bool IsStageSelectIdUsed(int ssid)
+        {
+            if (AssignedStageSelectIDs.Contains(ssid)) return true;
+            if (((StageDefFile)install.GetParsedFile<StageDefFile>(StageDefFile.PATH)).Stages.Any(x => x.SSID == ssid)) return true;
+
+            return false;
+        }
+
         #endregion
 
         #region Misc
@@ -1481,6 +1546,8 @@ namespace LB_Mod_Installer.Binding
         AutoTtbEvent,
         AutoCusAura,
         AutoSkillID,
+        AutoStage,
+        AutoStageSelect,
         GetAlias,
         SkillID1,
         SkillID2,

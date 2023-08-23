@@ -387,6 +387,8 @@
     <None Include="app.config" />
     <None Include="packages.config" />
     <EmbeddedResource Include="Resources\silence.hca" />
+    <EmbeddedResource Include="Resources\XV2P_SLOTS_STAGE.x2s" />
+    <EmbeddedResource Include="Resources\XV2P_SLOTS_STAGE_LOCAL.x2s" />
   </ItemGroup>
   <ItemGroup>
     <None Include="FodyWeavers.xml" />
@@ -402,6 +404,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\ShaderHelper.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\xv2_stage_def.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Fody.3.3.2\build\Fody.targets" Condition="Exists('..\packages\Fody.3.3.2\build\Fody.targets')" />

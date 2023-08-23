@@ -178,6 +178,16 @@ namespace LB_Mod_Installer.Installer
                 Uninstall_CharaSlots(file);
                 return;
             }
+            if (path.Equals(StageSlotsFile.FILE_NAME_BIN, StringComparison.OrdinalIgnoreCase) || path.Equals(StageSlotsFile.FILE_NAME_LOCAL_BIN, StringComparison.OrdinalIgnoreCase))
+            {
+                Uninstall_StageSlots(file);
+                return;
+            }
+            if (path.Equals(StageDefFile.PATH, StringComparison.OrdinalIgnoreCase))
+            {
+                Uninstall_StageDef(file);
+                return;
+            }
             if (path.Equals(PrebakedFile.PATH, StringComparison.OrdinalIgnoreCase))
             {
                 Uninstall_Prebaked(file);
@@ -1165,7 +1175,7 @@ namespace LB_Mod_Installer.Installer
         {
             try
             {
-                CharaSlotsFile charaSlotsFile = (CharaSlotsFile)GetParsedFile<CharaSlotsFile>(CharaSlotsFile.FILE_NAME_BIN, false, false);
+                CharaSlotsFile charaSlotsFile = (CharaSlotsFile)GetParsedFile<CharaSlotsFile>(CharaSlotsFile.FILE_NAME_BIN, false, true);
                 CST_File cstFile = (CST_File)GetParsedFile<CST_File>(CST_File.CST_PATH, true, true);
                 CST_File x2sFileConverted = charaSlotsFile.ConvertToCst();
 
@@ -1186,6 +1196,47 @@ namespace LB_Mod_Installer.Installer
             catch (Exception ex)
             {
                 string error = string.Format("Failed at CharaSlots uninstall phase ({0}).", CharaSlotsFile.FILE_NAME_BIN);
+                throw new Exception(error, ex);
+            }
+        }
+
+        private void Uninstall_StageSlots(_File file)
+        {
+            try
+            {
+                StageSlotsFile stageSlotFile = (StageSlotsFile)GetParsedFile<StageSlotsFile>(file.filePath, false, true);
+
+                Section section = file.GetSection(Sections.StageSlotEntry);
+
+                if (section != null)
+                {
+                    StageSlotsFile defaultFile = file.filePath.Equals(StageSlotsFile.FILE_NAME_LOCAL_BIN) ? StageSlotsFile.DefaultLocalFile : StageSlotsFile.DefaultFile;
+                    UninstallEntries(stageSlotFile.StageSlots, defaultFile.StageSlots, section.IDs);
+                }
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at StageSlots uninstall phase ({0}).", file.filePath);
+                throw new Exception(error, ex);
+            }
+        }
+
+        private void Uninstall_StageDef(_File file)
+        {
+            try
+            {
+                StageDefFile stageDefs = (StageDefFile)GetParsedFile<StageDefFile>(StageDefFile.PATH, false, true);
+
+                Section section = file.GetSection(Sections.StageDefEntry);
+
+                if (section != null)
+                {
+                    stageDefs.UninstallStages(section.IDs);
+                }
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at StageDef uninstall phase ({0}).", StageDefFile.PATH);
                 throw new Exception(error, ex);
             }
         }

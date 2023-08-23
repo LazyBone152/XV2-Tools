@@ -1,0 +1,4894 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Xv2StageDef>
+  <Stage idx="0" ssid="0">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="LBY" />
+    <DIR value="LBY" />
+    <STR4 value="LBY" />
+    <EVE value="template" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="1" ssid="1">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFlbb" />
+    <DIR value="BFlbb" />
+    <STR4 value="BFlbb" />
+    <EVE value="BFlbb" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_lbb" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="2" ssid="2">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFlby" />
+    <DIR value="BFlby" />
+    <STR4 value="BFlby" />
+    <EVE value="template" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_lby" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="3" ssid="3">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFpln" />
+    <DIR value="BFpln" />
+    <STR4 value="BFpln" />
+    <EVE value="BFpln" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_pln" />
+    <BGM_CUE_ID value="9" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFsin" />
+      <TARGET_STAGE_IDX value="15" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFrck" />
+      <TARGET_STAGE_IDX value="4" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFtwn" />
+      <TARGET_STAGE_IDX value="10" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFsky" />
+      <TARGET_STAGE_IDX value="16" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFtwh" />
+      <TARGET_STAGE_IDX value="11" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="4" ssid="4">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFrck" />
+    <DIR value="BFrck" />
+    <STR4 value="BFrck" />
+    <EVE value="BFrck" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_rck" />
+    <BGM_CUE_ID value="1" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFsin" />
+      <TARGET_STAGE_IDX value="15" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFpln" />
+      <TARGET_STAGE_IDX value="3" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFund" />
+      <TARGET_STAGE_IDX value="25" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFkoh" />
+      <TARGET_STAGE_IDX value="14" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFtwn" />
+      <TARGET_STAGE_IDX value="10" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="5" ssid="5">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFrcn" />
+    <DIR value="BFrcn" />
+    <STR4 value="BFrcn" />
+    <EVE value="BFrcn" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_rcn" />
+    <BGM_CUE_ID value="32" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFund" />
+      <TARGET_STAGE_IDX value="25" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFspe" />
+      <TARGET_STAGE_IDX value="19" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="6" ssid="6">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFnmc" />
+    <DIR value="AFnmc" />
+    <STR4 value="AFnmc" />
+    <EVE value="BFnmc" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_nmc" />
+    <BGM_CUE_ID value="30" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFtwc" />
+      <TARGET_STAGE_IDX value="9" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFnms" />
+      <TARGET_STAGE_IDX value="7" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFnmb" />
+      <TARGET_STAGE_IDX value="8" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFspv" />
+      <TARGET_STAGE_IDX value="20" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="7" ssid="7">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFnms" />
+    <DIR value="BFnms" />
+    <STR4 value="BFnms" />
+    <EVE value="BFnms" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_nms" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFnmc" />
+      <TARGET_STAGE_IDX value="6" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFspv" />
+      <TARGET_STAGE_IDX value="20" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="8" ssid="8">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFnmb" />
+    <DIR value="BFnmb" />
+    <STR4 value="BFnmb" />
+    <EVE value="BFnmb" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_nmb" />
+    <BGM_CUE_ID value="2" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFnmc" />
+      <TARGET_STAGE_IDX value="6" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFspv" />
+      <TARGET_STAGE_IDX value="20" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="9" ssid="9">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFtwc" />
+    <DIR value="BFtwc" />
+    <STR4 value="BFtwc" />
+    <EVE value="BFtwc" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_twc" />
+    <BGM_CUE_ID value="33" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFnmc" />
+      <TARGET_STAGE_IDX value="6" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFtwh" />
+      <TARGET_STAGE_IDX value="11" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFtwn" />
+      <TARGET_STAGE_IDX value="10" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFtfl" />
+      <TARGET_STAGE_IDX value="22" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFspv" />
+      <TARGET_STAGE_IDX value="20" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFtwf" />
+      <TARGET_STAGE_IDX value="58" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFspe" />
+      <TARGET_STAGE_IDX value="19" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="10" ssid="10">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFtwn" />
+    <DIR value="BFtwn" />
+    <STR4 value="BFtwn" />
+    <EVE value="BFtwn" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_twn" />
+    <BGM_CUE_ID value="35" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFtwh" />
+      <TARGET_STAGE_IDX value="11" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFtwc" />
+      <TARGET_STAGE_IDX value="9" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFpln" />
+      <TARGET_STAGE_IDX value="3" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFrck" />
+      <TARGET_STAGE_IDX value="4" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="11" ssid="11">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFtwh" />
+    <DIR value="BFtwh" />
+    <STR4 value="BFtwh" />
+    <EVE value="BFtwh" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_twh" />
+    <BGM_CUE_ID value="34" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFten" />
+      <TARGET_STAGE_IDX value="24" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFtwn" />
+      <TARGET_STAGE_IDX value="10" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFtwc" />
+      <TARGET_STAGE_IDX value="9" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFpln" />
+      <TARGET_STAGE_IDX value="3" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="12" ssid="12">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFcel" />
+    <DIR value="BFcel" />
+    <STR4 value="BFcel" />
+    <EVE value="BFcel" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_cel" />
+    <BGM_CUE_ID value="31" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFkoh" />
+      <TARGET_STAGE_IDX value="14" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFceb" />
+      <TARGET_STAGE_IDX value="13" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFgen" />
+      <TARGET_STAGE_IDX value="23" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="13" ssid="13">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFceb" />
+    <DIR value="BFceb" />
+    <STR4 value="BFceb" />
+    <EVE value="BFceb" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_ceb" />
+    <BGM_CUE_ID value="3" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFkoh" />
+      <TARGET_STAGE_IDX value="14" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFcel" />
+      <TARGET_STAGE_IDX value="12" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFgen" />
+      <TARGET_STAGE_IDX value="23" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="14" ssid="14">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFkoh" />
+    <DIR value="BFkoh" />
+    <STR4 value="BFkoh" />
+    <EVE value="BFkoh" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_koh" />
+    <BGM_CUE_ID value="7" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFcel" />
+      <TARGET_STAGE_IDX value="12" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFceb" />
+      <TARGET_STAGE_IDX value="13" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFsky" />
+      <TARGET_STAGE_IDX value="16" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFgen" />
+      <TARGET_STAGE_IDX value="23" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFrck" />
+      <TARGET_STAGE_IDX value="4" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="15" ssid="15">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFsin" />
+    <DIR value="BFsin" />
+    <STR4 value="BFsin" />
+    <EVE value="BFsin" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_sin" />
+    <BGM_CUE_ID value="39" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFpln" />
+      <TARGET_STAGE_IDX value="3" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFrck" />
+      <TARGET_STAGE_IDX value="4" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFkai" />
+      <TARGET_STAGE_IDX value="18" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFsei" />
+      <TARGET_STAGE_IDX value="17" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFsky" />
+      <TARGET_STAGE_IDX value="16" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFhel" />
+      <TARGET_STAGE_IDX value="40" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="16" ssid="16">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFsky" />
+    <DIR value="BFsky" />
+    <STR4 value="BFsky" />
+    <EVE value="BFsky" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_sky" />
+    <BGM_CUE_ID value="33" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFsin" />
+      <TARGET_STAGE_IDX value="15" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFpln" />
+      <TARGET_STAGE_IDX value="3" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFkoh" />
+      <TARGET_STAGE_IDX value="14" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFgen" />
+      <TARGET_STAGE_IDX value="23" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFspe" />
+      <TARGET_STAGE_IDX value="19" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFhel" />
+      <TARGET_STAGE_IDX value="40" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="17" ssid="17">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFsei" />
+    <DIR value="BFsei" />
+    <STR4 value="BFsei" />
+    <EVE value="BFsei" />
+    <UNK5 value="0" />
+    <F6 value="500.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_sei" />
+    <BGM_CUE_ID value="41" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFsin" />
+      <TARGET_STAGE_IDX value="15" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="18" ssid="18">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFkai" />
+    <DIR value="BFkai" />
+    <STR4 value="BFkai" />
+    <EVE value="BFkai" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_kai" />
+    <BGM_CUE_ID value="5" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFsin" />
+      <TARGET_STAGE_IDX value="15" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFspe" />
+      <TARGET_STAGE_IDX value="19" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="19" ssid="19">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFspe" />
+    <DIR value="BFspe" />
+    <STR4 value="BFspe" />
+    <EVE value="BFspe" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_spe" />
+    <BGM_CUE_ID value="17" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFkai" />
+      <TARGET_STAGE_IDX value="18" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFsky" />
+      <TARGET_STAGE_IDX value="16" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFrcn" />
+      <TARGET_STAGE_IDX value="5" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFice" />
+      <TARGET_STAGE_IDX value="21" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFtfl" />
+      <TARGET_STAGE_IDX value="22" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFsmt" />
+      <TARGET_STAGE_IDX value="56" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFpot" />
+      <TARGET_STAGE_IDX value="60" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFtwc" />
+      <TARGET_STAGE_IDX value="9" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="20" ssid="20">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFspv" />
+    <DIR value="BFspv" />
+    <STR4 value="BFspv" />
+    <EVE value="BFspv" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_spv" />
+    <BGM_CUE_ID value="10" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFtwc" />
+      <TARGET_STAGE_IDX value="9" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFnmc" />
+      <TARGET_STAGE_IDX value="6" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFnms" />
+      <TARGET_STAGE_IDX value="7" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFnmb" />
+      <TARGET_STAGE_IDX value="8" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="21" ssid="21">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFice" />
+    <DIR value="BFice" />
+    <STR4 value="BFice" />
+    <EVE value="BFice" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_ice" />
+    <BGM_CUE_ID value="18" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFspe" />
+      <TARGET_STAGE_IDX value="19" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFgen" />
+      <TARGET_STAGE_IDX value="23" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFund" />
+      <TARGET_STAGE_IDX value="25" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFlnd" />
+      <TARGET_STAGE_IDX value="38" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFlnc" />
+      <TARGET_STAGE_IDX value="39" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="22" ssid="22">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFtfl" />
+    <DIR value="BFtfl" />
+    <STR4 value="BFtfl" />
+    <EVE value="BFtfl" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_tfl" />
+    <BGM_CUE_ID value="6" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFtwc" />
+      <TARGET_STAGE_IDX value="9" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFspe" />
+      <TARGET_STAGE_IDX value="19" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="23" ssid="23">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFgen" />
+    <DIR value="BFgen" />
+    <STR4 value="BFgen" />
+    <EVE value="BFgen" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_gen" />
+    <BGM_CUE_ID value="13" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFice" />
+      <TARGET_STAGE_IDX value="21" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFkoh" />
+      <TARGET_STAGE_IDX value="14" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFsky" />
+      <TARGET_STAGE_IDX value="16" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFcel" />
+      <TARGET_STAGE_IDX value="12" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFceb" />
+      <TARGET_STAGE_IDX value="13" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFlnd" />
+      <TARGET_STAGE_IDX value="38" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFlnc" />
+      <TARGET_STAGE_IDX value="39" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="24" ssid="24">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFten" />
+    <DIR value="BFten" />
+    <STR4 value="BFten" />
+    <EVE value="BFten" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_ten" />
+    <BGM_CUE_ID value="38" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFtwh" />
+      <TARGET_STAGE_IDX value="11" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="25" ssid="25">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFund" />
+    <DIR value="BFund" />
+    <STR4 value="BFund" />
+    <EVE value="BFund" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_und" />
+    <BGM_CUE_ID value="34" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFrck" />
+      <TARGET_STAGE_IDX value="4" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFrcn" />
+      <TARGET_STAGE_IDX value="5" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFice" />
+      <TARGET_STAGE_IDX value="21" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="26" ssid="31">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFtok" />
+    <DIR value="BFtok" />
+    <STR4 value="BFtok" />
+    <EVE value="BFtok" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_tok" />
+    <BGM_CUE_ID value="22" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="27">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFnmt" />
+    <DIR value="BFnmt" />
+    <STR4 value="BFnmt" />
+    <EVE value="BFnmt" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFnmc" />
+      <TARGET_STAGE_IDX value="6" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="28">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="DMkok" />
+    <DIR value="DMkok" />
+    <STR4 value="DMkok" />
+    <EVE value="template" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_DMkok" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="29">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="DMnmc" />
+    <DIR value="AFnmc" />
+    <STR4 value="AFnmc" />
+    <EVE value="BFnmc" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_nmc" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="30">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="DMnms" />
+    <DIR value="BFnms" />
+    <STR4 value="BFnms" />
+    <EVE value="BFnms" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_nms" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="31" ssid="26">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="DMtwh" />
+    <DIR value="DMtwh" />
+    <STR4 value="DMtwh" />
+    <EVE value="DMtwh" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_twh" />
+    <BGM_CUE_ID value="36" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="32">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="DMdom" />
+    <DIR value="DMdom" />
+    <STR4 value="DMdom" />
+    <EVE value="template" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_pln" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="33">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="LBY01" />
+    <DIR value="LBY" />
+    <STR4 value="LBY01" />
+    <EVE value="template" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_pln" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="34">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="LBY02" />
+    <DIR value="LBY" />
+    <STR4 value="LBY02" />
+    <EVE value="template" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="35">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="LBY03" />
+    <DIR value="LBY" />
+    <STR4 value="LBY03" />
+    <EVE value="template" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_pln" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="36">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="LBY04" />
+    <DIR value="LBY" />
+    <STR4 value="LBY04" />
+    <EVE value="template" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_LBY04" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="37">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="DMtwh3" />
+    <DIR value="DMtwh3" />
+    <STR4 value="DMtwh3" />
+    <EVE value="template" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_twh" />
+    <BGM_CUE_ID value="66" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="38" ssid="27">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFlnd" />
+    <DIR value="BFlnd" />
+    <STR4 value="BFlnd" />
+    <EVE value="BFlnd" />
+    <UNK5 value="1" />
+    <F6 value="300.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_pln" />
+    <BGM_CUE_ID value="36" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFice" />
+      <TARGET_STAGE_IDX value="21" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFgen" />
+      <TARGET_STAGE_IDX value="23" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="39" ssid="28">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFlnc" />
+    <DIR value="BFlnc" />
+    <STR4 value="BFlnc" />
+    <EVE value="BFlnc" />
+    <UNK5 value="1" />
+    <F6 value="300.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_pln" />
+    <BGM_CUE_ID value="2" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFice" />
+      <TARGET_STAGE_IDX value="21" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFgen" />
+      <TARGET_STAGE_IDX value="23" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="40" ssid="29">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFhel" />
+    <DIR value="BFhel" />
+    <STR4 value="BFhel" />
+    <EVE value="BFhel" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_pln" />
+    <BGM_CUE_ID value="31" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFsin" />
+      <TARGET_STAGE_IDX value="15" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFsky" />
+      <TARGET_STAGE_IDX value="16" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="41">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="LBY05" />
+    <DIR value="LBY" />
+    <STR4 value="LBY05" />
+    <EVE value="template" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_pln" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="42">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="NLBY" />
+    <DIR value="LBY" />
+    <STR4 value="NLBY" />
+    <EVE value="template" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_pln" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="43">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="NLBY02" />
+    <DIR value="LBY" />
+    <STR4 value="NLBY" />
+    <EVE value="template" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_pln" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="44">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="NLBY03" />
+    <DIR value="LBY" />
+    <STR4 value="NLBY" />
+    <EVE value="template" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_pln" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="45">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="FLBY01" />
+    <DIR value="LBY" />
+    <STR4 value="FLBY01" />
+    <EVE value="template" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_pln" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="46">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="FLBY02" />
+    <DIR value="LBY" />
+    <STR4 value="FLBY02" />
+    <EVE value="template" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_pln" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="47">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="FLBY03" />
+    <DIR value="LBY" />
+    <STR4 value="FLBY03" />
+    <EVE value="template" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_pln" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="48">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="FLBY04" />
+    <DIR value="LBY" />
+    <STR4 value="FLBY04" />
+    <EVE value="template" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_pln" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="49">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="FLBY05" />
+    <DIR value="LBY" />
+    <STR4 value="FLBY05" />
+    <EVE value="template" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_pln" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="50">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="DMtwh2" />
+    <DIR value="BFtwh" />
+    <STR4 value="BFtwh" />
+    <EVE value="DMtwh2" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_pln" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="51" ssid="30">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFtre" />
+    <DIR value="BFtre" />
+    <STR4 value="BFtre" />
+    <EVE value="BFtre" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_pln" />
+    <BGM_CUE_ID value="32" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="52">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFbrw" />
+    <DIR value="BFbrw" />
+    <STR4 value="BFbrw" />
+    <EVE value="BFbrw" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_pln" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="53">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="FLBY03IN" />
+    <DIR value="LBY" />
+    <STR4 value="FLBY03IN" />
+    <EVE value="FLBY03IN" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_pln" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="54">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="FLBY04IN" />
+    <DIR value="LBY" />
+    <STR4 value="FLBY04IN" />
+    <EVE value="FLBY04IN" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_pln" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="55">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="FLBY05IN" />
+    <DIR value="LBY" />
+    <STR4 value="FLBY05IN" />
+    <EVE value="FLBY05IN" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_pln" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="56" ssid="32">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFsmt" />
+    <DIR value="BFsmt" />
+    <STR4 value="BFsmt" />
+    <EVE value="BFsmt" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_ten" />
+    <BGM_CUE_ID value="38" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="Gate_to_BFspe" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="57">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="LBY06" />
+    <DIR value="LBY" />
+    <STR4 value="LBY06" />
+    <EVE value="template" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="58" ssid="33">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFtwf" />
+    <DIR value="BFtwf" />
+    <STR4 value="BFtwf" />
+    <EVE value="BFtwf" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_twf" />
+    <BGM_CUE_ID value="34" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFtwc" />
+      <TARGET_STAGE_IDX value="9" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="59">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFwis" />
+    <DIR value="BFsei" />
+    <STR4 value="BFwis" />
+    <EVE value="BFwis" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_pln" />
+    <BGM_CUE_ID value="9" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFtwc" />
+      <TARGET_STAGE_IDX value="9" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="60" ssid="34">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFpot" />
+    <DIR value="BFpot" />
+    <STR4 value="BFpot" />
+    <EVE value="BFpot" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_pot" />
+    <BGM_CUE_ID value="35" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFspe" />
+      <TARGET_STAGE_IDX value="19" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="61" ssid="35">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFvol" />
+    <DIR value="BFvol" />
+    <STR4 value="BFvol" />
+    <EVE value="BFvol" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_sky" />
+    <BGM_CUE_ID value="10" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="GATE_to_BFnmc" />
+      <TARGET_STAGE_IDX value="6" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="GATE_to_BFspv" />
+      <TARGET_STAGE_IDX value="20" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="62" ssid="36">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="BFrrg" />
+    <DIR value="BFrrg" />
+    <STR4 value="BFrrg" />
+    <EVE value="BFrrg" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_pln" />
+    <BGM_CUE_ID value="2" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="63">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="Err" />
+    <DIR value="Err" />
+    <STR4 value="Err" />
+    <EVE value="Err" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_pln" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="64">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="Err" />
+    <DIR value="Err" />
+    <STR4 value="Err" />
+    <EVE value="Err" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="SE/Battle/Field/CAR_BTL_BKG_pln" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="65">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="Err" />
+    <DIR value="Err" />
+    <STR4 value="Err" />
+    <EVE value="Err" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="4294967295" />
+      <U_0C value="0x0" />
+      <U_10 value="0x1" />
+    </Gate>
+  </Stage>
+  <Stage idx="66">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="Err" />
+    <DIR value="Err" />
+    <STR4 value="Err" />
+    <EVE value="Err" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+  </Stage>
+  <Stage idx="67">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="Err" />
+    <DIR value="Err" />
+    <STR4 value="Err" />
+    <EVE value="Err" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+  </Stage>
+  <Stage idx="68">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="TRN" />
+    <DIR value="TRN" />
+    <STR4 value="TRN" />
+    <EVE value="TRN" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+  </Stage>
+  <Stage idx="69">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="CHR" />
+    <DIR value="CHR" />
+    <STR4 value="CHR" />
+    <EVE value="template" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+  </Stage>
+  <Stage idx="70">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="SANDBOX" />
+    <DIR value="SANDBOX" />
+    <STR4 value="SANDBOX" />
+    <EVE value="SANDBOX" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+  </Stage>
+  <Stage idx="71">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="NMC" />
+    <DIR value="NMC" />
+    <STR4 value="NMC" />
+    <EVE value="NMC" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+  </Stage>
+  <Stage idx="72">
+    <BASE_DIR value="data/stage/" />
+    <CODE value="Random" />
+    <DIR value="SANDBOX" />
+    <STR4 value="SANDBOX" />
+    <EVE value="Random" />
+    <UNK5 value="0" />
+    <F6 value="200.0" />
+    <SE value="" />
+    <BGM_CUE_ID value="0" />
+    <OVERRIDE_FAR_CLIP value="0.0" />
+    <LIMIT value="500.0" />
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+    <Gate>
+      <NAME value="" />
+      <TARGET_STAGE_IDX value="0" />
+      <U_0C value="0x0" />
+      <U_10 value="0x0" />
+    </Gate>
+  </Stage>
+</Xv2StageDef>

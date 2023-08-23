@@ -13,6 +13,22 @@ namespace Xv2CoreLib.Eternity
     {
         public const string PATH = "xv2_stage_def.xml";
 
+        private static StageDefFile _defaultFile = null;
+        /// <summary>
+        /// Gets the default instance of "xv2_stage_def.xml".
+        /// </summary>
+        public static StageDefFile DefaultFile
+        {
+            get
+            {
+                if(_defaultFile == null)
+                {
+                    _defaultFile = Parse(Properties.Resources.xv2_stage_def);
+                }
+                return _defaultFile;
+            }
+        }
+
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Stage")]
         public List<StageDef> Stages { get; set; }
 
@@ -100,14 +116,23 @@ namespace Xv2CoreLib.Eternity
 
         public void UninstallStages(List<string> ids)
         {
-            foreach (var stringId in ids)
+            foreach (string stringId in ids)
             {
                 int id;
 
                 if (int.TryParse(stringId, out id))
                 {
                     Stages.RemoveAll(x => x.Index == id);
+
+                    //Restore original entries
+                    StageDef originalEntry = DefaultFile.Stages.FirstOrDefault(x => x.Index == id);
+
+                    if(originalEntry != null)
+                    {
+                        Stages.Add(originalEntry.Copy());
+                    }
                 }
+
             }
         }
         
@@ -115,6 +140,7 @@ namespace Xv2CoreLib.Eternity
     }
 
     [YAXSerializeAs("Stage")]
+    [Serializable]
     public class StageDef
     {
         [YAXAttributeForClass]
@@ -254,6 +280,7 @@ namespace Xv2CoreLib.Eternity
     }
 
     [YAXSerializeAs("Gate")]
+    [Serializable]
     public class GateDef
     {
         [YAXAttributeFor("NAME")]

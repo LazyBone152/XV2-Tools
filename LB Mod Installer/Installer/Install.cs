@@ -248,6 +248,26 @@ namespace LB_Mod_Installer.Installer
                 return;
             }
 
+            //Stage Def
+            if (installPath?.Equals(StageDefFile.PATH, StringComparison.OrdinalIgnoreCase) == true)
+            {
+                Install_StageDef(xmlPath);
+                return;
+            }
+
+            //Stage slots
+            if (installPath?.Equals(StageSlotsFile.FILE_NAME_BIN, StringComparison.OrdinalIgnoreCase) == true || installPath?.Equals(StageSlotsFile.FILE_NAME_LOCAL_BIN, StringComparison.OrdinalIgnoreCase) == true)
+            {
+                Install_StageSlots(xmlPath, installPath);
+                return;
+            }
+            else if(installPath?.Equals(CharaSlotsFile.FILE_NAME_BIN, StringComparison.OrdinalIgnoreCase) == true)
+            {
+                Install_CharaSlots(xmlPath);
+                return;
+            }
+
+            //Standard path:
             switch (Path.GetExtension(Path.GetFileNameWithoutExtension(xmlPath)))
             {
                 case ".eepk":
@@ -336,9 +356,6 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".cml":
                     Install_CML(xmlPath, installPath, isXml, useSkipBindings);
-                    break;
-                case ".x2s":
-                    Install_CharaSlots(xmlPath);
                     break;
                 case ".ocs":
                     Install_OCS(xmlPath, installPath, isXml);
@@ -1064,6 +1081,65 @@ namespace LB_Mod_Installer.Installer
             catch (Exception ex)
             {
                 string error = string.Format("Failed at CharaSlots install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
+        private void Install_StageSlots(string xmlPath, string installPath)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                StageSlotsFile xmlFile = zipManager.DeserializeXmlFromArchive_Ext<StageSlotsFile>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                StageSlotsFile slotsFile = (StageSlotsFile)GetParsedFile<StageSlotsFile>(StageSlotsFile.FILE_NAME_BIN, false, false);
+
+                if (slotsFile == null)
+                {
+                    throw new FileNotFoundException($"Could not find \"{installPath}\". This file must exist before install - to create it simply run xv2ins.exe once (the X2M installer).");
+                }
+
+                //Install entries
+                InstallEntries(xmlFile.StageSlots, slotsFile.StageSlots, installPath, Sections.StageSlotEntry, false);
+
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at StageSlots install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
+        private void Install_StageDef(string xmlPath)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                StageDefFile xmlFile = zipManager.DeserializeXmlFromArchive_Ext<StageDefFile>(GeneralInfo.GetPathInZipDataDir(xmlPath));
+                StageDefFile defFile = (StageDefFile)GetParsedFile<StageDefFile>(StageDefFile.PATH, false, false);
+
+                if (defFile == null)
+                {
+                    throw new FileNotFoundException($"Could not find \"{StageDefFile.PATH}\". This file must exist before install - to create it simply run xv2ins.exe once (the X2M installer).");
+                }
+
+                //Parse bindings
+                bindingManager.ParseProperties(xmlFile.Stages, null, xmlPath);
+
+                //Install entries
+                List<string> ids = defFile.InstallStages(xmlFile.Stages);
+
+                GeneralInfo.Tracker.AddIDs(StageDefFile.PATH, Sections.StageDefEntry, ids);
+
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at StageDef install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
