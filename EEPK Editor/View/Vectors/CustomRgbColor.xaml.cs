@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Xv2CoreLib.EMP_NEW;
 using Xv2CoreLib.Resource.UndoRedo;
 
 namespace EEPK_Organiser.View.Vectors
@@ -87,6 +88,15 @@ namespace EEPK_Organiser.View.Vectors
             }
         }
 
+        //Context (ParticleNode, TraceNode or ColorFadeNode). Used for undo context.
+        public static readonly DependencyProperty UndoContextProperty = DependencyProperty.Register(
+            "UndoContext", typeof(object), typeof(CustomRgbColor), new PropertyMetadata(null));
+
+        public object UndoContext
+        {
+            get { return (object)GetValue(UndoContextProperty); }
+            set { SetValue(UndoContextProperty, value); }
+        }
 
         #endregion
 
@@ -174,10 +184,14 @@ namespace EEPK_Organiser.View.Vectors
                 Value.GetType().GetProperty(propName).SetValue(Value, newValue);
 
                 if (addUndo && AllowUndo)
-                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(propName, Value, original, newValue, $"{propName}"));
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(propName, Value, original, newValue, $"{propName}"), UndoGroup.ColorControl, undoContext: UndoContext);
 
                 ColorChangedEvent?.Invoke(this, EventArgs.Empty);
             }
+
+            if (UndoContext != null && addUndo)
+                UndoManager.Instance.ForceEventCall(UndoGroup.ColorControl, null, UndoContext);
+
             return (!addUndo) ? new UndoablePropertyGeneric(propName, Value, original, newValue, $"{propName}") : null;
         }
 
@@ -191,9 +205,12 @@ namespace EEPK_Organiser.View.Vectors
             undos.Add(SetFloatValue(newValue.Value.ScB, "B", false));
 
             if(AllowUndo)
-                UndoManager.Instance.AddCompositeUndo(undos, "Color");
+                UndoManager.Instance.AddCompositeUndo(undos, "Color", UndoGroup.ColorControl, undoContext: UndoContext);
 
             UpdateProperties();
+
+            if(UndoContext != null)
+                UndoManager.Instance.ForceEventCall(UndoGroup.ColorControl, null, UndoContext);
         }
 
         private void UpdateProperties()

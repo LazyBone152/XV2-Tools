@@ -182,6 +182,30 @@
             <Grid IsEnabled="{Binding ElementName=UserControl, Path=ParameterEditorEnabled}" DataContext="{Binding ElementName=UserControl}" Background="{DynamicResource MahApps.Brushes.SystemControlBackgroundAltMediumLow}">
                 <ScrollViewer>
                     <StackPanel>
+                        <StackPanel>
+                            <Expander Header="Material" IsExpanded="True" BorderThickness="0">
+                                <WrapPanel>
+                                    <Grid Margin="3,3" Width="300" HorizontalAlignment="Left">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="100"/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Content="Name"/>
+                                        <TextBox Grid.Column="1" Text="{Binding SelectedMaterialName}" MaxLength="32"/>
+                                    </Grid>
+                                    <Grid Margin="3,3" Width="300" HorizontalAlignment="Left">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="100"/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Content="Shader"/>
+                                        <ComboBox Grid.Column="1" IsEditable="True" Text="{Binding SelectedMaterialShaderProgram, UpdateSourceTrigger=LostFocus}" ItemsSource="{x:Static emm:EmmMaterial.CommonShaderPrograms}"/>
+                                    </Grid>
+                                </WrapPanel>
+                                
+                            </Expander>
+                        </StackPanel>
+                        
                         <StackPanel x:Name="parameterStackPanel">
                             <Expander x:Name="scaleOffsetExpander" Header="Scale/Offset" IsExpanded="False" BorderThickness="0">
                                 <StackPanel>
@@ -499,7 +523,7 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="AlphaSortMask"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.AlphaSortMask}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
+                                            <CheckBox IsChecked="{Binding MaterialViewModel.AlphaSortMask}" Grid.Column="1" Width="102"/>
                                         </Grid>
                                         <Grid Margin="3,3" x:Name="ZTestMask">
                                             <Grid.ColumnDefinitions>
@@ -507,15 +531,15 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="ZTestMask"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.ZTestMask}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
+                                            <CheckBox IsChecked="{Binding MaterialViewModel.ZTestMask}" Grid.Column="1" Width="102"/>
                                         </Grid>
                                         <Grid Margin="3,3" x:Name="ZWriteMask">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
-                                            <Label Content="ZWriteMask"/>
-                                            <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.ZWriteMask}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
+                                            <Label Content="ZWriteMask" ToolTip="Disable depth buffer writes by this material during rendering."/>
+                                            <CheckBox IsChecked="{Binding MaterialViewModel.ZWriteMask}" Grid.Column="1" Width="102"/>
                                         </Grid>
                                     </WrapPanel>
                                 </StackPanel>
@@ -637,7 +661,7 @@
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition Width="102"/>
                                             </Grid.ColumnDefinitions>
-                                            <Label Content="BackFace"/>
+                                            <Label Content="BackFace" ToolTip="The triangle backfaces will not be culled. &#x0a;&#x0a;Unknown difference to TwoSidedRender."/>
                                             <CheckBox Grid.Column="1" IsChecked="{Binding MaterialViewModel.BackFace}" Width="20" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                                         </Grid>
                                         <Grid Margin="3,3" x:Name="TwoSidedRender">
@@ -645,26 +669,30 @@
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition Width="102"/>
                                             </Grid.ColumnDefinitions>
-                                            <Label Content="TwoSidedRender"/>
+                                            <Label Content="TwoSidedRender" ToolTip="The triangle backfaces will not be culled. &#x0a;&#x0a;Unknown difference to BackFace."/>
                                             <CheckBox Grid.Column="1" IsChecked="{Binding MaterialViewModel.TwoSidedRender}" Width="20" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                        </Grid>
+                                        <Grid Margin="3,3" x:Name="NoEdge">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="120"/>
+                                                <ColumnDefinition Width="102"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="NoEdge" ToolTip="Do not draw an outline around the edges (only applicable for character shaders).&#x0a;&#x0a;There is a small bug with the VS screen at the start of a battle, where the submeshes with this material wont be rendered at all."/>
+                                            <CheckBox Grid.Column="1" IsChecked="{Binding MaterialViewModel.NoEdge}" Width="20" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                                         </Grid>
                                     </WrapPanel>
                                     <WrapPanel>
-                                        <Grid Margin="3,3" x:Name="LowRez">
+                                        <Grid Margin="3,3">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition Width="102"/>
                                             </Grid.ColumnDefinitions>
-                                            <Label Content="LowRez"/>
-                                            <CheckBox Grid.Column="1" IsChecked="{Binding MaterialViewModel.LowRez}" Width="20" VerticalAlignment="Center" HorizontalAlignment="Left"/>
-                                        </Grid>
-                                        <Grid Margin="3,3" x:Name="LowRezSmoke">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="120"/>
-                                                <ColumnDefinition Width="102"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Label Content="LowRezSmoke"/>
-                                            <CheckBox Grid.Column="1" IsChecked="{Binding MaterialViewModel.LowRezSmoke}" Width="20" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                            <Label Content="Render Resolution" ToolTip="Alters the resolution that this material will be rendered at. Lower resolution settings may be used for some visual effects for performance reasons. &#x0a;&#x0a;Supports effects (PBIND, TBIND, EMO) and characters. Stages are currently untested."/>
+                                            <ComboBox Grid.Column="1" SelectedIndex="{Binding MaterialViewModel.RenderRes}" VerticalAlignment="Center" HorizontalAlignment="Left" Width="102">
+                                                <ComboBoxItem Content="Full"/>
+                                                <ComboBoxItem Content="Half"/>
+                                                <ComboBoxItem Content="Quater"/>
+                                            </ComboBox>
                                         </Grid>
                                     </WrapPanel>
                                     <StackPanel>
@@ -808,14 +836,6 @@
                                             </Grid.ColumnDefinitions>
                                             <Label Content="BillboardType"/>
                                             <Controls:NumericUpDown Grid.Column="1" Value="{Binding MaterialViewModel.BillboardType}" Width="102" HorizontalAlignment="Left" TrackMouseWheelWhenMouseOver="False" InterceptMouseWheel="True" HideUpDownButtons="True"/>
-                                        </Grid>
-                                        <Grid Margin="3,3" x:Name="NoEdge">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="120"/>
-                                                <ColumnDefinition Width="102"/>
-                                            </Grid.ColumnDefinitions>
-                                            <Label Content="NoEdge"/>
-                                            <CheckBox Grid.Column="1" IsChecked="{Binding MaterialViewModel.NoEdge}" Width="20" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                                         </Grid>
                                         <Grid Margin="3,3" x:Name="Shimmer">
                                             <Grid.ColumnDefinitions>

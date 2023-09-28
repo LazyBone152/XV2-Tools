@@ -119,6 +119,26 @@ namespace Xv2CoreLib.EMA
                 }
             }
 
+            /*
+            //TEST REMOVE
+            foreach(var anim in emaFile.Animations)
+            {
+                foreach(var node in anim.Nodes)
+                {
+                    foreach(var command in node.Commands)
+                    {
+                        for (int i = command.Keyframes.Count - 1; i >= 0; i--)
+                        {
+                            if(command.Keyframes[i].InterpolationType == KeyframeInterpolation.CubicBezier)
+                            {
+                                command.Keyframes.RemoveAt(i);
+                            }
+                        }
+                    }
+                }
+            }
+            */
+
             return emaFile;
         }
 
@@ -1571,9 +1591,9 @@ namespace Xv2CoreLib.EMA
 
             if (prevKeyframe.InterpolationType == KeyframeInterpolation.CubicBezier)
             {
-                return MathHelpers.CubicBezier(factor, prevKeyframe.Value, prevKeyframe.ControlPoint1 + prevKeyframe.Value, prevKeyframe.ControlPoint2 - nextKeyframe.Value, nextKeyframe.Value);
+                return MathHelpers.CubicBezier(factor, prevKeyframe.Value, prevKeyframe.ControlPoint1 + prevKeyframe.Value, prevKeyframe.ControlPoint2 + prevKeyframe.Value, nextKeyframe.Value);
             }
-            else if (prevKeyframe.InterpolationType == KeyframeInterpolation.QuadraticBezier)
+            else if(prevKeyframe.InterpolationType == KeyframeInterpolation.QuadraticBezier)
             {
                 return MathHelpers.QuadraticBezier(factor, prevKeyframe.Value, prevKeyframe.ControlPoint1 + prevKeyframe.Value, nextKeyframe.Value);
             }

@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Xv2CoreLib.EMP_NEW;
 using Xv2CoreLib.Resource.UndoRedo;
 
 namespace EEPK_Organiser.View.Vectors
@@ -31,6 +32,17 @@ namespace EEPK_Organiser.View.Vectors
             get { return (LB_Common.Numbers.CustomColor)GetValue(ValueProperty); }
             set { SetValue(ValueProperty, value); }
         }
+
+
+        public static readonly DependencyProperty ParticleNodeProperty = DependencyProperty.Register(
+            "ParticleNode", typeof(ParticleNode), typeof(CustomColor), new PropertyMetadata(null));
+
+        public ParticleNode ParticleNode
+        {
+            get { return (ParticleNode)GetValue(ParticleNodeProperty); }
+            set { SetValue(ParticleNodeProperty, value); }
+        }
+
 
         public static readonly DependencyProperty IntervalProperty = DependencyProperty.Register(
             "Interval", typeof(float), typeof(CustomColor), new PropertyMetadata(0.05f));
@@ -140,7 +152,7 @@ namespace EEPK_Organiser.View.Vectors
                 Value.GetType().GetProperty(propName).SetValue(Value, newValue);
 
                 if (addUndo)
-                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(propName, Value, original, newValue, $"{propName}"));
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(propName, Value, original, newValue, $"{propName}"), UndoGroup.ColorControl, undoContext: ParticleNode);
 
                 ColorChangedEvent?.Invoke(this, EventArgs.Empty);
             }
@@ -157,7 +169,7 @@ namespace EEPK_Organiser.View.Vectors
             undos.Add(SetFloatValue(newValue.Value.ScB, "B", false));
             undos.Add(SetFloatValue(newValue.Value.ScA, "A", false));
 
-            UndoManager.Instance.AddCompositeUndo(undos, "Color");
+            UndoManager.Instance.AddCompositeUndo(undos, "Color", UndoGroup.ColorControl, undoContext: ParticleNode);
             UpdateProperties();
         }
 

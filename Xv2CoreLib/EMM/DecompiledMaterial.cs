@@ -210,9 +210,9 @@ namespace Xv2CoreLib.EMM
 
         //LowRez
         [ParameterGroup(ParameterGroup.Misc)]
-        public int LowRez;
+        public int LowRez; //bool. Renders at a reduced resolution (1/2)
         [ParameterGroup(ParameterGroup.Misc)]
-        public int LowRezSmoke;
+        public int LowRezSmoke; //1/4 render resolution
 
         //Incidence
         [ParameterGroup(ParameterGroup.Misc)]
@@ -235,6 +235,7 @@ namespace Xv2CoreLib.EMM
         //Other
         [ParameterGroup(ParameterGroup.Misc)]
         public int AnimationChannel; //byte[4], with 4th byte never being used in any material
+        [ParameterGroup(ParameterGroup.Misc)]
         public int NoEdge;
         public int Shimmer;
         public float gTime;

@@ -377,6 +377,33 @@ namespace Xv2CoreLib
 
     public static class Utils
     {
+        /// <summary>
+        /// Remove tailing zeros from a version in string format.
+        /// </summary>
+        public static string FormatVersionString(string version)
+        {
+            try
+            {
+                string[] split = version.Split('.');
+                if (split[2] == "0" && split[3] == "0")
+                {
+                    return string.Format("{0}.{1}", split[0], split[1]);
+                }
+                else if (split[3] == "0")
+                {
+                    return string.Format("{0}.{1}.{2}", split[0], split[1], split[2]);
+                }
+                else
+                {
+                    return string.Format("{0}.{1}.{2}.{3}", split[0], split[1], split[2], split[3]);
+                }
+            }
+            catch
+            {
+                return version;
+            }
+        }
+
         public static int TryParseInt(string value)
         {
             int val;
@@ -461,6 +488,14 @@ namespace Xv2CoreLib
         public static bool ComparePaths(string path1, string path2)
         {
             return SanitizePath(path1) == SanitizePath(path2);
+        }
+
+        public static bool CompareCharaFolder(string path, string charaCode)
+        {
+            if (string.IsNullOrWhiteSpace(path)) return false;
+            path = SanitizePath(path);
+
+            return path[6] == charaCode[0] && path[7] == charaCode[1] && path[8] == charaCode[2];
         }
 
         public static string SanitizePath(string path)

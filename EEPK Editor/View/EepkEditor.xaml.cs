@@ -72,6 +72,7 @@ namespace EEPK_Organiser.View
             Light = 5
         }
 
+        public event EventHandler SelectedEffectTabChanged;
 
         #region DependencyProperty
         public static readonly DependencyProperty EepkInstanceProperty = DependencyProperty.Register(
@@ -139,11 +140,26 @@ namespace EEPK_Organiser.View
             {
                 if(SelectedEffect != null && SelectedEffect?.IndexNum != value)
                 {
+                    if(effectContainerFile.Effects.FirstOrDefault(x => x.IndexNum == value) == null)
+                    {
+                        List<IUndoRedo> undos = new List<IUndoRedo>();
+                        undos.Add(new UndoablePropertyGeneric(nameof(SelectedEffect.IndexNum), SelectedEffect, SelectedEffect.IndexNum, (ushort)value));
+                        undos.Add(new UndoActionDelegate(effectContainerFile, nameof(EffectContainerFile.UpdateEffectFilter), true));
 
-                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(SelectedEffect.IndexNum), SelectedEffect, SelectedEffect.IndexNum, (ushort)value, "Effect ID"));
-                    SelectedEffect.IndexNum = (ushort)value;
-                    NotifyPropertyChanged(nameof(SelectedEffectID));
+                        SelectedEffect.IndexNum = (ushort)value;
+
+                        UndoManager.Instance.AddCompositeUndo(undos, "Effect ID");
+                        NotifyPropertyChanged(nameof(SelectedEffectID));
+                        effectContainerFile.UpdateEffectFilter();
+
+                        effectDataGrid.ScrollIntoView(SelectedEffect);
+                    }
+                    else
+                    {
+                        MessageBox.Show($"This ID ({value}) is already used for another effect.", "ID Used", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
+
             }
         }
 
@@ -214,7 +230,11 @@ namespace EEPK_Organiser.View
             }
         }
 
-        private bool effectPartTabInitialize = false;
+#if XenoKit
+        public Visibility XenoKitVisible => Visibility.Visible;
+#else
+        public Visibility XenoKitVisible => Visibility.Collapsed;
+#endif
 
         public EepkEditor()
         {
@@ -223,15 +243,6 @@ namespace EEPK_Organiser.View
 
             //Load NameLists
             nameListManager = new NameList.NameListManager();
-
-            //Set tab status
-            effectPartGeneral.IsExpanded = SettingsManager.settings.EepkOrganiser_EffectPart_General_Expanded;
-            effectPartAnimation.IsExpanded = SettingsManager.settings.EepkOrganiser_EffectPart_Animation_Expanded;
-            effectPartPos.IsExpanded = SettingsManager.settings.EepkOrganiser_EffectPart_Position_Expanded;
-            effectPartFlags.IsExpanded = SettingsManager.settings.EepkOrganiser_EffectPart_Flags_Expanded;
-            effectPartUnkFlags.IsExpanded = SettingsManager.settings.EepkOrganiser_EffectPart_UnkFlags_Expanded;
-            effectPartUnkValues.IsExpanded = SettingsManager.settings.EepkOrganiser_EffectPart_UnkValues_Expanded;
-            effectPartTabInitialize = true;
 
             EepkChanged += EepkInstanceChanged;
             UndoManager.Instance.UndoOrRedoCalled += UndoManager_UndoOrRedoCalled;
@@ -381,6 +392,7 @@ namespace EEPK_Organiser.View
         //Main TabControl
         private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            SelectedEffectTabChanged?.Invoke(this, EventArgs.Empty);
             if (effectContainerFile == null) return;
 
             switch ((Tabs)tabControl.SelectedIndex)
@@ -390,25 +402,30 @@ namespace EEPK_Organiser.View
                     break;
                 case Tabs.Pbind:
                     SearchFilter = effectContainerFile.Pbind.AssetSearchFilter;
+                    pbindDataGrid_SelectionChanged(null, null);
                     break;
                 case Tabs.Tbind:
                     SearchFilter = effectContainerFile.Tbind.AssetSearchFilter;
+                    tbindDataGrid_SelectionChanged(null, null);
                     break;
                 case Tabs.Cbind:
                     SearchFilter = effectContainerFile.Cbind.AssetSearchFilter;
+                    cbindDataGrid_SelectionChanged(null, null);
                     break;
                 case Tabs.Emo:
                     SearchFilter = effectContainerFile.Emo.AssetSearchFilter;
+                    emoDataGrid_SelectionChanged(null, null);
                     break;
                 case Tabs.Light:
                     SearchFilter = effectContainerFile.LightEma.AssetSearchFilter;
+                    lightDataGrid_SelectionChanged(null, null);
                     break;
             }
 
             e.Handled = true;
         }
 
-        #region EMO
+#region EMO
 
         private void EMO_AssetContainer_NewAsset_Click(object sender, RoutedEventArgs e)
         {
@@ -1284,9 +1301,9 @@ namespace EEPK_Organiser.View
             OpenEmoEffectFileEditor(file, false);
         }
 
-        #endregion
+#endregion
 
-        #region PBIND
+#region PBIND
         public void PBIND_AssetContainer_AddAsset_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -1447,20 +1464,22 @@ namespace EEPK_Organiser.View
 
             if (selectedAsset != null)
             {
-                EmpEditorWindow empEditor = GetActiveEmpForm(selectedAsset.Files[0].EmpFile);
-
-                if (empEditor == null)
-                {
-                    //empEditor = new Forms.EMP.EMP_Editor(selectedAsset.Files[0].EmpFile, selectedAsset.Files[0].FullFileName, effectContainerFile.Pbind.File3_Ref, effectContainerFile.Pbind.File2_Ref, this);
-                    empEditor = new EmpEditorWindow(selectedAsset.Files[0].EmpFile, effectContainerFile.Pbind, selectedAsset.Files[0].FullFileName);
-                }
-                else
-                {
-                    empEditor.Focus();
-                }
-
-                empEditor.Show();
+                PBIND_OpenEditor(selectedAsset.Files[0].EmpFile, effectContainerFile.Pbind, selectedAsset.Files[0].FullFileName);
             }
+        }
+
+        public static EmpEditorWindow PBIND_OpenEditor(EMP_File empFile, AssetContainerTool assetContainer, string name)
+        {
+            EmpEditorWindow form = GetActiveEmpForm(empFile);
+
+            if (form == null)
+            {
+                form = new EmpEditorWindow(empFile, assetContainer, name);
+                form.Show();
+            }
+
+            form.Focus();
+            return form;
         }
 
         public static EmbEditForm PBIND_OpenTextureViewer(AssetContainerTool assetContainer, AssetType assetType)
@@ -1757,9 +1776,9 @@ namespace EEPK_Organiser.View
         {
             AssetContainer_OpenSettings(effectContainerFile.Pbind);
         }
-        #endregion
+#endregion
 
-        #region TBIND
+#region TBIND
         public void TBIND_AssetContainer_AddAsset_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -2201,9 +2220,9 @@ namespace EEPK_Organiser.View
             UndoManager.Instance.AddUndo(new CompositeUndo(undos, "New ETR"));
         }
 
-        #endregion
+#endregion
 
-        #region CBIND
+#region CBIND
         public void CBIND_AssetContainer_AddAsset_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -2640,9 +2659,9 @@ namespace EEPK_Organiser.View
             undos.Add(new UndoActionDelegate(effectContainerFile.Cbind, nameof(effectContainerFile.Cbind.UpdateAssetFilter), true));
             UndoManager.Instance.AddUndo(new CompositeUndo(undos, "New ECF"));
         }
-        #endregion
+#endregion
 
-        #region LIGHT
+#region LIGHT
         public void LIGHT_AssetContainer_AddAsset_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -3036,9 +3055,9 @@ namespace EEPK_Organiser.View
         {
             AssetContainer_OpenSettings(effectContainerFile.LightEma);
         }
-        #endregion
+#endregion
 
-        #region Asset_Containers_General
+#region Asset_Containers_General
         private async Task AssetContainer_ImportAssets(AssetContainerTool container, AssetType type, EffectContainerFile importFile = null)
         {
             if (importFile == null)
@@ -3437,10 +3456,11 @@ namespace EEPK_Organiser.View
             effectContainerFile.LightEma.RefreshAssetCount();
         }
 
-#endregion
+        #endregion
 
 
         #region EFFECT
+        public RelayCommand Effect_Play_Command => new RelayCommand(PlaySelectedEffect, IsEffectSelected);
 
         public RelayCommand Effect_AddEffectPart_Command => new RelayCommand(Effect_AddEffectPart, IsEffectSelected);
         private void Effect_AddEffectPart()
@@ -3729,6 +3749,8 @@ namespace EEPK_Organiser.View
             }
         }
 
+        public RelayCommand EffectPart_EditAsset_Command => new RelayCommand(EffectPart_OpenEditor, CanEditAsset);
+        
         public RelayCommand EffectPart_ChangeAsset_Command => new RelayCommand(EffectPart_ChangeAsset, IsEffectPartSelected);
         private void EffectPart_ChangeAsset()
         {
@@ -3827,8 +3849,40 @@ namespace EEPK_Organiser.View
 
         private void EffectPart_DoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (CanGoToAsset())
+            if (!CanGoToAsset()) return;
+
+            if (Keyboard.IsKeyDown(Key.LeftAlt))
+            {
+                EffectPart_OpenEditor();
+            }
+            else
+            {
                 EffectPart_GoToAsset();
+            }
+        }
+
+        private void EffectPart_OpenEditor()
+        {
+            ObservableCollection<EffectPart> selectedEffectPart = GetSelectedEffectParts();
+
+            if (selectedEffectPart != null)
+            {
+                if (selectedEffectPart.Count > 0)
+                {
+                    switch (selectedEffectPart[0].AssetType)
+                    {
+                        case AssetType.PBIND:
+                            PBIND_OpenEditor(selectedEffectPart[0].AssetRef.Files[0].EmpFile, effectContainerFile.Pbind, selectedEffectPart[0].AssetRef.Files[0].FileName);
+                            break;
+                        case AssetType.TBIND:
+                            TBIND_OpenEditor(selectedEffectPart[0].AssetRef.Files[0].EtrFile, effectContainerFile.Tbind, selectedEffectPart[0].AssetRef.Files[0].FileName);
+                            break;
+                        case AssetType.CBIND:
+                            CBIND_OpenEditor(selectedEffectPart[0].AssetRef.Files[0].EcfFile, selectedEffectPart[0].AssetRef.Files[0].FileName);
+                            break;
+                    }
+                }
+            }
         }
 
         public RelayCommand Effect_Export_Command => new RelayCommand(Effect_Export, IsEffectSelected);
@@ -3857,19 +3911,13 @@ namespace EEPK_Organiser.View
             try
             {
                 Effect newEffect = new Effect();
-                newEffect.EffectParts = new AsyncObservableCollection<EffectPart>();
                 newEffect.IndexNum = effectContainerFile.GetUnusedEffectId(0);
-                effectContainerFile.Effects.Add(newEffect);
+                List<IUndoRedo> undos = effectContainerFile.AddEffect(newEffect, false, true);
+                UndoManager.Instance.AddUndo(new CompositeUndo(undos, "New Effect"));
+
                 effectDataGrid.SelectedItem = newEffect;
                 effectDataGrid.ScrollIntoView(newEffect);
 
-                effectContainerFile.UpdateEffectFilter();
-
-                //Undo
-                List<IUndoRedo> undos = new List<IUndoRedo>();
-                undos.Add(new UndoableListAdd<Effect>(effectContainerFile.Effects, newEffect));
-                undos.Add(new UndoActionDelegate(effectContainerFile, nameof(effectContainerFile.UpdateEffectFilter), true));
-                UndoManager.Instance.AddUndo(new CompositeUndo(undos, "New Effect"));
             }
             catch (Exception ex)
             {
@@ -4176,6 +4224,15 @@ namespace EEPK_Organiser.View
             }
             return false;
         }
+        
+        public bool CanEditAsset()
+        {
+            if (IsEffectPartSelected())
+            {
+                return SelectedEffect.SelectedEffectPart.AssetType == AssetType.CBIND || SelectedEffect.SelectedEffectPart.AssetType == AssetType.TBIND || SelectedEffect.SelectedEffectPart.AssetType == AssetType.PBIND;
+            }
+            return false;
+        }
 
         public bool IsEffectPartSelected()
         {
@@ -4201,7 +4258,7 @@ namespace EEPK_Organiser.View
         {
             return (IsEffectPartSelected()) ? Clipboard.ContainsData(ClipboardDataTypes.EffectPart) : false;
         }
-        #endregion
+#endregion
 
 
 
@@ -4462,18 +4519,22 @@ namespace EEPK_Organiser.View
         {
             CreateEffectPartViewModel();
 
-            #if XenoKit
-            if(SelectedEffect != null)
-            {
-                SceneManager.MainGameBase.VfxManager.StopEffects();
+        }
 
-                if (SettingsManager.Instance.Settings.XenoKit_VfxSimulation && SceneManager.IsOnTab(EditorTabs.Effect))
-                {
-                    SceneManager.EnsureActorIsSet(0);
-                    SceneManager.MainGameBase.VfxManager.PlayEffect(SelectedEffect, SceneManager.Actors[0]);
-                }
+        private void effectDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            CreateEffectPartViewModel();
+            PlaySelectedEffect();
+        }
+
+        private void PlaySelectedEffect()
+        {
+#if XenoKit
+            if (SelectedEffect != null && SceneManager.MainGameInstance != null)
+            {
+                SceneManager.MainGameInstance.VfxPreview.PreviewEffect(SelectedEffect);
             }
-            #endif
+#endif
         }
 
         private void CreateEffectPartViewModel()
@@ -4786,17 +4847,6 @@ namespace EEPK_Organiser.View
             parent?.RaiseEvent(wheelArgs);
         }
 
-        private void effectPartTabs_ExpandedOrCollapsed(object sender, RoutedEventArgs e)
-        {
-            if (SettingsManager.settings == null || !effectPartTabInitialize) return;
-            SettingsManager.settings.EepkOrganiser_EffectPart_General_Expanded = effectPartGeneral.IsExpanded;
-            SettingsManager.settings.EepkOrganiser_EffectPart_Position_Expanded = effectPartPos.IsExpanded;
-            SettingsManager.settings.EepkOrganiser_EffectPart_Animation_Expanded = effectPartAnimation.IsExpanded;
-            SettingsManager.settings.EepkOrganiser_EffectPart_Flags_Expanded = effectPartFlags.IsExpanded;
-            SettingsManager.settings.EepkOrganiser_EffectPart_UnkFlags_Expanded = effectPartUnkFlags.IsExpanded;
-            SettingsManager.settings.EepkOrganiser_EffectPart_UnkValues_Expanded = effectPartUnkValues.IsExpanded;
-        }
-
         //Tool Button (XenoKit - hidden in EEPK Organiser as the Tools menu can be used there)
         private void ToolMenu_HueAdjustment_Click(object sender, RoutedEventArgs e)
         {
@@ -4882,5 +4932,38 @@ namespace EEPK_Organiser.View
             return null;
         }
 
+        private void pbindDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            PlayAsset(pbindDataGrid.SelectedItem as Asset);
+        }
+
+
+        private void tbindDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            //PlayAsset(tbindDataGrid.SelectedItem as Asset);
+        }
+
+        private void cbindDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            PlayAsset(cbindDataGrid.SelectedItem as Asset);
+        }
+
+        private void emoDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            PlayAsset(emoDataGrid.SelectedItem as Asset);
+        }
+
+        private void lightDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            PlayAsset(lightDataGrid.SelectedItem as Asset);
+        }
+
+        private void PlayAsset(Asset asset)
+        {
+#if XenoKit
+            if (SceneManager.MainGameInstance != null && asset != null)
+                SceneManager.MainGameInstance.VfxPreview.PreviewAsset(asset);
+#endif
+        }
     }
 }

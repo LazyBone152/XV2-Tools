@@ -270,8 +270,9 @@ namespace Xv2CoreLib.EffectContainer
                 _viewEffects = new ListCollectionView(Effects.Binding);
 
             _viewEffects.CommitEdit();
+            _viewEffects.SortDescriptions.Add(new SortDescription(nameof(Effect.IndexNum), ListSortDirection.Ascending));
             _viewEffects.Filter = new Predicate<object>(EffectFilterCheck);
-            NotifyPropertyChanged("ViewEffects");
+            NotifyPropertyChanged(nameof(ViewEffects));
         }
 
         public void UpdateAllFilters()
@@ -292,7 +293,7 @@ namespace Xv2CoreLib.EffectContainer
         /// <param name="wasForPaste">Is this a part of a copy-paste operation? (Used for the undo description)</param>
         public void UndoableAddEffects(IList<Effect> effects, bool wasForPaste = false)
         {
-            var undos = AddEffects(effects);
+            List<IUndoRedo> undos = AddEffects(effects);
             undos.Add(new UndoActionDelegate(this, nameof(UpdateEffectFilter), true));
             UndoManager.Instance.AddUndo(new CompositeUndo(undos, (wasForPaste) ? "Paste Effects" : "Add Effects"));
         }
@@ -369,12 +370,12 @@ namespace Xv2CoreLib.EffectContainer
             return existingAsset;
         }
 
-        public List<IUndoRedo> AddEffect(Effect effect, bool allowNullAssets = false)
+        public List<IUndoRedo> AddEffect(Effect effect, bool allowNullAssets = false, bool addUndoDelegate = false)
         {
             List<IUndoRedo> undos = new List<IUndoRedo>();
 
             //Add the assets used
-            foreach (var effectPart in effect.EffectParts)
+            foreach (EffectPart effectPart in effect.EffectParts)
             {
                 if (effectPart.AssetRef == null && allowNullAssets)
                 {
@@ -392,7 +393,14 @@ namespace Xv2CoreLib.EffectContainer
 
             //Add the effect
             Effects.Add(effect);
+            Effects.Sort((x, y) => x.IndexNum - y.IndexNum);
             undos.Add(new UndoableListAdd<Effect>(Effects, effect));
+
+            if (addUndoDelegate)
+            {
+                undos.Add(new UndoActionDelegate(this, nameof(UpdateEffectFilter), true));
+                UpdateEffectFilter();
+            }
 
             return undos;
         }

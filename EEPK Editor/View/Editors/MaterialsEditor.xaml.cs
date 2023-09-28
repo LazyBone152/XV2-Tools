@@ -79,6 +79,8 @@ namespace EEPK_Organiser.View
 
                 _selectedMaterial = value;
                 NotifyPropertyChanged(nameof(SelectedMaterial));
+                NotifyPropertyChanged(nameof(SelectedMaterialName));
+                NotifyPropertyChanged(nameof(SelectedMaterialShaderProgram));
                 RefreshViewModel();
             }
         }
@@ -105,6 +107,7 @@ namespace EEPK_Organiser.View
             get => _selectedMaterial?.Name;
             set
             {
+                if (_selectedMaterial == null) return;
                 if (value != _selectedMaterial.Name)
                 {
                     SetName(value);
@@ -113,9 +116,10 @@ namespace EEPK_Organiser.View
         }
         public string SelectedMaterialShaderProgram
         {
-            get => _selectedMaterial.ShaderProgram;
+            get => _selectedMaterial?.ShaderProgram;
             set
             {
+                if (_selectedMaterial == null) return;
                 if (value != _selectedMaterial.ShaderProgram)
                 {
                     SetShaderProgram(value);
@@ -308,8 +312,6 @@ namespace EEPK_Organiser.View
                 CustomFlag,
                 BackFace,
                 TwoSidedRender,
-                LowRez,
-                LowRezSmoke,
                 IncidencePower,
                 IncidenceAlphaBias,
                 ReflectCoeff,

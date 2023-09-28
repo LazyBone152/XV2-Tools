@@ -374,7 +374,6 @@ namespace Xv2CoreLib.EEPK
         }
         #endregion
 
-        //Props
         [YAXSerializeAs("ID")]
         [YAXAttributeForClass]
         public ushort IndexNum
@@ -397,24 +396,32 @@ namespace Xv2CoreLib.EEPK
         public ushort I_02 { get; set; }
         [YAXSerializeAs("EffectParts")]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "EffectPart")]
-        public AsyncObservableCollection<EffectPart> EffectParts
+        public AsyncObservableCollection<EffectPart> EffectParts { get; set; } = new AsyncObservableCollection<EffectPart>();
+
+        //Installer
+        [YAXDontSerialize]
+        public VfxPackageExtendedEffect ExtendedEffectData { get; set; }
+
+        #region View
+        [YAXDontSerialize]
+        public ushort UndoableId
         {
-            get
-            {
-                return this._effectParts;
-            }
+            get { return IndexNum; }
             set
             {
-                if (value != this._effectParts)
+                if (value != IndexNum)
                 {
-                    this._effectParts = value;
-                    NotifyPropertyChanged(nameof(EffectParts));
+                    UndoManager.Instance.AddUndo(new CompositeUndo(new List<IUndoRedo>() { new UndoableProperty<Effect>(nameof(IndexNum), this, IndexNum, value), new UndoActionDelegate(this, nameof(RefreshProperties), true) }, "Effect ID"));
+                    IndexNum = value;
                 }
             }
         }
-        private AsyncObservableCollection<EffectPart> _effectParts = null;
 
-        //ViewModel
+        public void RefreshProperties()
+        {
+            NotifyPropertyChanged(nameof(UndoableId));
+        }
+
         [NonSerialized]
         private ObservableCollection<EffectPart> _selectedEffectParts = new ObservableCollection<EffectPart>();
         [YAXDontSerialize]
@@ -444,29 +451,6 @@ namespace Xv2CoreLib.EEPK
             }
         }
 
-        //Installer
-        [YAXDontSerialize]
-        public VfxPackageExtendedEffect ExtendedEffectData { get; set; }
-
-        #region Undoable
-        [YAXDontSerialize]
-        public ushort UndoableId
-        {
-            get { return IndexNum; }
-            set
-            {
-                if (value != IndexNum)
-                {
-                    UndoManager.Instance.AddUndo(new CompositeUndo(new List<IUndoRedo>() { new UndoableProperty<Effect>(nameof(IndexNum), this, IndexNum, value), new UndoActionDelegate(this, nameof(RefreshProperties), true) }, "Effect ID"));
-                    IndexNum = value;
-                }
-            }
-        }
-
-        public void RefreshProperties()
-        {
-            NotifyPropertyChanged(nameof(UndoableId));
-        }
         #endregion
 
         public Effect Clone()
@@ -535,6 +519,7 @@ namespace Xv2CoreLib.EEPK
             "b_C_Chest",
             "b_C_Spine1",
             "b_C_Spine2",
+            "b_C_Hand",
             "b_L_Shoulder",
             "b_L_Arm1",
             "b_L_Arm2",
@@ -621,7 +606,7 @@ namespace Xv2CoreLib.EEPK
         public OrientationType Orientation { get; set; }
         [YAXAttributeFor("Deactivation")]
         [YAXSerializeAs("Mode")]
-        public DeactivationMode Deactivation { get; set; }//int8
+        public DeactivationMode Deactivation { get; set; }
         [YAXAttributeFor("I_06")]
         [YAXSerializeAs("value")]
         public byte I_06 { get; set; }
@@ -666,7 +651,7 @@ namespace Xv2CoreLib.EEPK
         public bool UseBoneDirection { get; set; } //I_32_5
         [YAXAttributeFor("StartEffectPosition")]
         [YAXSerializeAs("UseBoneToCameraDirection")]
-        public bool UseBoneToCameraDirection { get; set; } //I_32_6
+        public bool EnableRotationValues { get; set; } //I_32_6
         [YAXAttributeFor("StartEffectPosition")]
         [YAXSerializeAs("UseSceneCenterToBoneDirection")]
         public bool UseScreenCenterToBoneDirection { get; set; } //I_32_7
@@ -799,11 +784,11 @@ namespace Xv2CoreLib.EEPK
         [YAXAttributeFor("Scale")]
         [YAXSerializeAs("Min")]
         [YAXFormat("0.0#######")]
-        public float ScaleMin { get; set; }
+        public float ScaleMin { get; set; } = 1f;
         [YAXAttributeFor("Scale")]
         [YAXSerializeAs("Max")]
         [YAXFormat("0.0#######")]
-        public float ScaleMax { get; set; }
+        public float ScaleMax { get; set; } = 1f;
         [YAXAttributeFor("NearFadeDistance")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#######")]
@@ -826,13 +811,13 @@ namespace Xv2CoreLib.EEPK
         public bool EMA_Loop { get; set; } //I_36_0
         [YAXAttributeFor("BoneToAttach")]
         [YAXSerializeAs("name")]
-        public string ESK { get; set; } //if NULL, then make it 4 zero bytes instead of an offset
+        public string ESK { get; set; }
 
         public enum DeactivationMode : byte
         {
             Never = 0,
-            Always = 1,
-            AfterAnimLoop = 2
+            Immediate = 1,
+            LoopCancel = 2
         }
 
         public enum Attachment : byte
@@ -849,7 +834,7 @@ namespace Xv2CoreLib.EEPK
             User = 1,
             AttachmentBone = 2,
             Camera = 3,
-            Unk4 = 4
+            RotateMovement = 4
         }
 
 
@@ -892,7 +877,7 @@ namespace Xv2CoreLib.EEPK
                 OnGroundOnly = OnGroundOnly,
                 UseTimeScale = UseTimeScale,
                 UseBoneDirection = UseBoneDirection,
-                UseBoneToCameraDirection = UseBoneToCameraDirection,
+                EnableRotationValues = EnableRotationValues,
                 UseScreenCenterToBoneDirection = UseScreenCenterToBoneDirection,
                 I_34 = I_34,
                 EMA_Loop = EMA_Loop,

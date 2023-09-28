@@ -44,6 +44,13 @@
                   dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" dd:DragDrop.UseDefaultDragAdorner="True" dd:DragDrop.SelectDroppedItems="True" dd:DragDrop.DropScrollingMode="Both" PreviewDrop="etrDataGrid_PreviewDrop">
 
                         <DataGrid.Columns>
+                            <DataGridTemplateColumn MinWidth="50" Header="Color">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Grid Width="50" Height="15" Margin="5, 0" Background="{Binding PreviewBrush}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                             <DataGridTextColumn Binding="{Binding AttachBone}" Width="*" Header="Node" IsReadOnly="True"/>
                         </DataGrid.Columns>
                         <DataGrid.ContextMenu>
@@ -54,6 +61,9 @@
                                 <Separator/>
                                 <MenuItem Header="Copy" Command="{Binding Source={StaticResource Proxy}, Path=Data.CopyNodeCommand}"/>
                                 <MenuItem Header="Paste" Command="{Binding Source={StaticResource Proxy}, Path=Data.PasteNodeCommand}"/>
+                                <Separator/>
+                                <MenuItem Header="Hue Adjustment" Command="{Binding Source={StaticResource Proxy}, Path=Data.HueAdjustment_Command}"/>
+                                <MenuItem Header="Hue Set" Command="{Binding Source={StaticResource Proxy}, Path=Data.HueSet_Command}"/>
                             </ContextMenu>
                         </DataGrid.ContextMenu>
                         <DataGrid.InputBindings>

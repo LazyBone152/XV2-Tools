@@ -189,6 +189,9 @@
     <Compile Include="Forms\EtrScale.xaml.cs">
       <DependentUpon>EtrScale.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Forms\KeyframeScale.xaml.cs">
+      <DependentUpon>KeyframeScale.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Forms\LogPrompt.xaml.cs">
       <DependentUpon>LogPrompt.xaml</DependentUpon>
     </Compile>
@@ -319,6 +322,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Forms\EtrScale.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Forms\KeyframeScale.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

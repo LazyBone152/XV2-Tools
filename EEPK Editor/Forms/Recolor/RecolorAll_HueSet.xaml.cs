@@ -10,6 +10,8 @@ using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.EMM;
 using Xv2CoreLib.EMP_NEW;
+using Xv2CoreLib.ECF;
+using Xv2CoreLib.ETR;
 using Xv2CoreLib.HslColor;
 using Xv2CoreLib.Resource.App;
 using Xv2CoreLib.Resource.UndoRedo;
@@ -36,7 +38,9 @@ namespace EEPK_Organiser.Forms.Recolor
             Asset,
             Material,
             Global,
-            ParticleEffect
+            ParticleNode,
+            TraceNode,
+            ColorFadeNode
         }
 
         private AssetType assetType = AssetType.EMO;
@@ -44,6 +48,8 @@ namespace EEPK_Organiser.Forms.Recolor
         private EmmMaterial material = null;
         private EffectContainerFile effectContainerFile = null;
         private ParticleNode particleNode = null;
+        private ETR_Node etrNode = null;
+        private ECF_Node ecfNode = null;
 
         private Mode currentMode = Mode.Asset;
 
@@ -176,8 +182,28 @@ namespace EEPK_Organiser.Forms.Recolor
         /// </summary>
         public RecolorAll_HueSet(ParticleNode node, Window parent)
         {
-            currentMode = Mode.ParticleEffect;
+            currentMode = Mode.ParticleNode;
             particleNode = node;
+
+            InitializeComponent();
+            Owner = parent;
+            DataContext = this;
+        }
+
+        public RecolorAll_HueSet(ETR_Node node, Window parent)
+        {
+            currentMode = Mode.TraceNode;
+            etrNode = node;
+
+            InitializeComponent();
+            Owner = parent;
+            DataContext = this;
+        }
+
+        public RecolorAll_HueSet(ECF_Node node, Window parent)
+        {
+            currentMode = Mode.ColorFadeNode;
+            ecfNode = node;
 
             InitializeComponent();
             Owner = parent;
@@ -206,9 +232,17 @@ namespace EEPK_Organiser.Forms.Recolor
             {
                 colors = GetUsedColorsByEverything();
             }
-            else if (currentMode == Mode.ParticleEffect)
+            else if (currentMode == Mode.ParticleNode)
             {
                 colors = particleNode.GetUsedColors();
+            }
+            else if (currentMode == Mode.TraceNode)
+            {
+                colors = etrNode.GetUsedColors();
+            }
+            else if (currentMode == Mode.ColorFadeNode)
+            {
+                colors = ecfNode.GetUsedColors();
             }
 
 
@@ -250,12 +284,14 @@ namespace EEPK_Organiser.Forms.Recolor
         private void Ok_Click(object sender, RoutedEventArgs e)
         {
             List<IUndoRedo> undos = new List<IUndoRedo>();
+            object context = null;
 
             hueChange = hslColor.Hue;
 
             if (currentMode == Mode.Asset)
             {
                 ChangeHueForAsset(asset, undos);
+                context = asset;
             }
             else if (currentMode == Mode.Material)
             {
@@ -264,14 +300,26 @@ namespace EEPK_Organiser.Forms.Recolor
             else if (currentMode == Mode.Global)
             {
                 ChangeHueForEverything(undos);
+                context = effectContainerFile;
             }
-            else if (currentMode == Mode.ParticleEffect)
+            else if (currentMode == Mode.ParticleNode)
             {
                 particleNode.ChangeHue(hueChange, 0f, 0f, undos, true, Variance);
+                context = particleNode;
+            }
+            else if (currentMode == Mode.TraceNode)
+            {
+                etrNode.ChangeHue(hueChange, 0f, 0f, undos, true, Variance);
+                context = etrNode;
+            }
+            else if (currentMode == Mode.ColorFadeNode)
+            {
+                ecfNode.ChangeHue(hueChange, 0f, 0f, undos, true, Variance);
+                context = ecfNode;
             }
 
-            UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Hue Set"));
-            UndoManager.Instance.ForceEventCall();
+            UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Hue Set"), UndoGroup.ColorControl, null, context);
+            UndoManager.Instance.ForceEventCall(UndoGroup.ColorControl, null, context);
 
             Close();
         }

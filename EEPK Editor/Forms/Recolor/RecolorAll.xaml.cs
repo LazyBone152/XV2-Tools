@@ -5,11 +5,13 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
+using Xv2CoreLib.ECF;
 using Xv2CoreLib.EEPK;
 using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.EMM;
 using Xv2CoreLib.EMP_NEW;
+using Xv2CoreLib.ETR;
 using Xv2CoreLib.HslColor;
 using Xv2CoreLib.Resource.App;
 using Xv2CoreLib.Resource.UndoRedo;
@@ -36,7 +38,9 @@ namespace EEPK_Organiser.Forms
             Asset,
             Material,
             Global,
-            ParticleNode
+            ParticleNode,
+            TraceNode,
+            ColorFadeNode
         }
 
         private AssetType assetType = AssetType.EMO;
@@ -44,6 +48,8 @@ namespace EEPK_Organiser.Forms
         private EmmMaterial material = null;
         private EffectContainerFile effectContainerFile = null;
         private ParticleNode particleNode = null;
+        private ETR_Node etrNode = null;
+        private ECF_Node ecfNode = null;
 
         private Mode currentMode = Mode.Asset;
 
@@ -166,6 +172,26 @@ namespace EEPK_Organiser.Forms
             DataContext = this;
         }
 
+        public RecolorAll(ETR_Node node, Window parent)
+        {
+            currentMode = Mode.TraceNode;
+            etrNode = node;
+
+            InitializeComponent();
+            Owner = parent;
+            DataContext = this;
+        }
+
+        public RecolorAll(ECF_Node node, Window parent)
+        {
+            currentMode = Mode.ColorFadeNode;
+            ecfNode = node;
+
+            InitializeComponent();
+            Owner = parent;
+            DataContext = this;
+        }
+
         public bool Initialize()
         {
             if (((currentMode == Mode.Asset && assetType == AssetType.EMO) || currentMode == Mode.Global) && !SettingsManager.Instance.LoadTextures)
@@ -192,9 +218,16 @@ namespace EEPK_Organiser.Forms
             {
                 colors = particleNode.GetUsedColors();
             }
-            
+            else if (currentMode == Mode.TraceNode)
+            {
+                colors = etrNode.GetUsedColors();
+            }
+            else if (currentMode == Mode.ColorFadeNode)
+            {
+                colors = ecfNode.GetUsedColors();
+            }
 
-            if(colors.Count == 0)
+            if (colors.Count == 0)
             {
                 MessageBox.Show("No color information was found on this asset so it cannot be hue shifted.\n\nThe most likely cause of this is that all color sources for this asset were either all white (1,1,1) or all black (0,0,0).", "No color information", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return false;
@@ -236,6 +269,7 @@ namespace EEPK_Organiser.Forms
         private void Ok_Click(object sender, RoutedEventArgs e)
         {
             List<IUndoRedo> undos = new List<IUndoRedo>();
+            object context = null;
 
             hueChange = hslColor.Hue - initialHue;
             saturationChange = hslColor.Saturation - initialSaturation;
@@ -244,6 +278,7 @@ namespace EEPK_Organiser.Forms
             if (currentMode == Mode.Asset)
             {
                 ChangeHueForAsset(asset, hueChange, saturationChange, lightnessChange, undos);
+                context = asset;
             }
             else if(currentMode == Mode.Material)
             {
@@ -252,14 +287,26 @@ namespace EEPK_Organiser.Forms
             else if(currentMode == Mode.Global)
             {
                 ChangeHueForEverything(hueChange, _saturationChangeMulti, lightnessChange, undos);
+                context = effectContainerFile;
             }
             else if (currentMode == Mode.ParticleNode)
             {
                 particleNode.ChangeHue(hueChange, saturationChange, lightnessChange, undos);
+                context = particleNode;
+            }
+            else if (currentMode == Mode.TraceNode)
+            {
+                etrNode.ChangeHue(hueChange, saturationChange, lightnessChange, undos);
+                context = etrNode;
+            }
+            else if (currentMode == Mode.ColorFadeNode)
+            {
+                ecfNode.ChangeHue(hueChange, saturationChange, lightnessChange, undos);
+                context = ecfNode;
             }
 
-            UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Hue Adjustment"));
-            UndoManager.Instance.ForceEventCall();
+            UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Hue Adjustment"), UndoGroup.ColorControl, null, context);
+            UndoManager.Instance.ForceEventCall(UndoGroup.ColorControl, null, context);
 
             Close();
         }

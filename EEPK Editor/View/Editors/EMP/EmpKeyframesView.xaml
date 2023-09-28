@@ -206,7 +206,7 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                     <DataGridTemplateColumn.CellEditingTemplate>
                                         <DataTemplate>
-                                            <vector:CustomRgbColor Value="{Binding Value}" HideUpDownButtons="False" TextAlignment="Left"/>
+                                            <vector:CustomRgbColor UndoContext="{Binding Source={StaticResource Proxy}, Path=Data.Node}" Value="{Binding Value}" HideUpDownButtons="False" TextAlignment="Left"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellEditingTemplate>
                                 </DataGridTemplateColumn>

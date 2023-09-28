@@ -9,6 +9,7 @@ using System.Diagnostics;
 using AForge;
 using MahApps.Metro.Controls;
 using Xv2CoreLib.Resource.UndoRedo;
+using System.Collections.Generic;
 
 namespace EEPK_Organiser.Forms
 {
@@ -125,7 +126,14 @@ namespace EEPK_Organiser.Forms
         {
             cancelled = false;
             CurrentTexture.wasEdited = true;
-            UndoManager.Instance.AddUndo(new UndoableProperty<EmbEntry>(nameof(EmbEntry.Texture), CurrentTexture, OriginalTextureBackup, CurrentTexture.Texture, "Hue Adjustment"));
+
+            List<IUndoRedo> undos = new List<IUndoRedo>()
+            {
+                new UndoableProperty<EmbEntry>(nameof(EmbEntry.Texture), CurrentTexture, OriginalTextureBackup, CurrentTexture.Texture)
+            };
+            CurrentTexture.SaveDds(true, undos);
+
+            UndoManager.Instance.AddCompositeUndo(undos, "Hue Adjustment");
             UndoManager.Instance.ForceEventCall();
 
             Close();

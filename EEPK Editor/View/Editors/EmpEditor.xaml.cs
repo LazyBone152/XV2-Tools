@@ -113,6 +113,11 @@ namespace EEPK_Organiser.View
             if(e.NewValue is ParticleNode node)
             {
                 SelectedNode = node;
+
+                if(!node.IsEmission && nodeView.tabControl.SelectedIndex == 1)
+                {
+                    nodeView.tabControl.SelectedIndex = 0;
+                }
             }
         }
 
@@ -324,6 +329,14 @@ namespace EEPK_Organiser.View
         {
             tabItems.SelectedIndex = 1;
             textureView.SelectTexture(texture);
+        }
+
+        private void Grid_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if(e.LeftButton == MouseButtonState.Pressed)
+            {
+                nodeView.tabControl.SelectedIndex = 1;
+            }
         }
     }
 }

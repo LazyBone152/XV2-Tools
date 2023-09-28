@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Xv2CoreLib.EMP_NEW;
 using Xv2CoreLib.EMP_NEW.Keyframes;
+using EEPK_Organiser.Forms;
 using GalaSoft.MvvmLight.CommandWpf;
 using System.Windows.Media;
 
@@ -131,6 +132,18 @@ namespace EEPK_Organiser.View.Editors.EMP
         {
             if (KeyframedValue == null) return false;
             return KeyframedValue.IsAnimated;
+        }
+
+        private void Button_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (KeyframedValue is KeyframedFloatValue value)
+            {
+                if (value.IsAnimated)
+                {
+                    KeyframeScale scaleWindow = new KeyframeScale(value, Window.GetWindow(this));
+                    scaleWindow.ShowDialog();
+                }
+            }
         }
     }
 }

@@ -43,9 +43,16 @@ namespace Xv2CoreLib
         private FileManager() { }
         #endregion
 
+        public static string GameDir => Instance.fileIO?.GameDir;
+
         internal FileWatcher fileWatcher { get; private set; } = new FileWatcher();
         public Xv2FileIO fileIO { get; private set; }
         private List<CachedFile> CachedFiles = new List<CachedFile>();
+
+        /// <summary>
+        /// Use direct references when caching loaded files, preventing them from being removed by the garbage collector. These files can later be freed up by calling <see cref="ClearStrongReferneces"/>.
+        /// </summary>
+        public bool UseStrongReferences { get; set; }
 
         //Events
         /// <summary>
@@ -351,10 +358,10 @@ namespace Xv2CoreLib
         }
 
         #endregion
-
         
         public string GetAbsolutePath(string relativePath)
         {
+            CheckInitState();
             return (fileIO != null) ? fileIO.PathInGameDir(relativePath) : relativePath;
         }
 
@@ -367,7 +374,7 @@ namespace Xv2CoreLib
         {
             RemoveDeadReferences();
 
-            var file = CachedFiles.FirstOrDefault(x => x.Path == Utils.SanitizePath(path));
+            CachedFile file = CachedFiles.FirstOrDefault(x => x.Path == Utils.SanitizePath(path));
 
             if (file == null)
                 return null;
@@ -381,9 +388,17 @@ namespace Xv2CoreLib
             int idx = CachedFiles.IndexOf(CachedFiles.FirstOrDefault(x => x.Path == path));
 
             if (idx == -1)
-                CachedFiles.Add(new CachedFile(path, data));
+                CachedFiles.Add(new CachedFile(path, data, UseStrongReferences));
             else
-                CachedFiles[idx] = new CachedFile(path, data);
+                CachedFiles[idx] = new CachedFile(path, data, UseStrongReferences);
+        }
+    
+        public void ClearStrongReferneces()
+        {
+            foreach(CachedFile file in CachedFiles)
+            {
+                file.ClearStrongReference();
+            }
         }
     }
 
@@ -391,11 +406,20 @@ namespace Xv2CoreLib
     {
         internal string Path { get; private set; }
         internal WeakReference ObjectReference { get; private set; }
+        private object StrongReference { get; set; }
 
-        internal CachedFile(string path, object file)
+        internal CachedFile(string path, object file, bool strongReference)
         {
             Path = path;
             ObjectReference = new WeakReference(file);
+
+            if (strongReference)
+                StrongReference = file;
+        }
+
+        internal void ClearStrongReference()
+        {
+            StrongReference = null;
         }
 
     }

@@ -17,11 +17,6 @@
                 <x:Type TypeName="eepk:EffectPart+Attachment"/>
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
-        <ObjectDataProvider x:Key="DeactivationModeEnum" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="eepk:EffectPart+DeactivationMode"/>
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
         <ObjectDataProvider x:Key="OrientationEnum" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
             <ObjectDataProvider.MethodParameters>
                 <x:Type TypeName="eepk:EffectPart+OrientationType"/>
@@ -45,7 +40,7 @@
                         <ColumnDefinition Width="*" MinWidth="500" MaxWidth="800"/>
                     </Grid.ColumnDefinitions>
 
-                    <DataGrid x:Name="effectDataGrid" Grid.Column="1" Tag="{Binding DataContext, ElementName=rootGrid}" SelectionChanged="effectPart_SelectionChanged" VirtualizingPanel.ScrollUnit="Pixel" ItemsSource="{Binding effectContainerFile.ViewEffects}" SelectedItem="{Binding SelectedEffect, UpdateSourceTrigger=PropertyChanged}" EnableRowVirtualization="True" EnableColumnVirtualization="True" SelectionMode="Extended" RowDetailsVisibilityMode="VisibleWhenSelected" CanUserResizeRows="False" CanUserAddRows="False" AutoGenerateColumns="False" CanUserDeleteRows="False" RowHeaderWidth="0">
+                    <DataGrid x:Name="effectDataGrid" Grid.Column="1" Tag="{Binding DataContext, ElementName=rootGrid}" SelectionChanged="effectDataGrid_SelectionChanged" VirtualizingPanel.ScrollUnit="Pixel" ItemsSource="{Binding effectContainerFile.ViewEffects}" SelectedItem="{Binding SelectedEffect, UpdateSourceTrigger=PropertyChanged}" EnableRowVirtualization="True" EnableColumnVirtualization="True" SelectionMode="Extended" RowDetailsVisibilityMode="VisibleWhenSelected" CanUserResizeRows="False" CanUserAddRows="False" AutoGenerateColumns="False" CanUserDeleteRows="False" RowHeaderWidth="0">
                         
                         <DataGrid.InputBindings>
                             <KeyBinding Key="Delete" Command="{Binding Effect_DeleteEffect_Command}"/>
@@ -57,8 +52,11 @@
 
                         <DataGrid.ContextMenu>
                             <ContextMenu FontSize="12">
-                                <MenuItem Header="New EffectPart" Command="{Binding PlacementTarget.Tag.Effect_AddEffectPart_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
-                                <MenuItem Header="Paste EffectPart" Command="{Binding PlacementTarget.Tag.EffectPart_Paste_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                <MenuItem Header="Play" Command="{Binding PlacementTarget.Tag.Effect_Play_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Visibility="{Binding PlacementTarget.Tag.XenoKitVisible, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                <Separator Visibility="{Binding PlacementTarget.Tag.XenoKitVisible, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+
+                                <MenuItem Header="New Effect Part" Command="{Binding PlacementTarget.Tag.Effect_AddEffectPart_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                <MenuItem Header="Paste Effect Part" Command="{Binding PlacementTarget.Tag.EffectPart_Paste_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                 <Separator/>
                                 <MenuItem Header="Copy" Command="{Binding PlacementTarget.Tag.Effect_Copy_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                 <MenuItem Header="Paste" Command="{Binding PlacementTarget.Tag.Effect_Paste_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
@@ -69,7 +67,7 @@
                             </ContextMenu>
                         </DataGrid.ContextMenu>
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="ID" Width="Auto" MinWidth="50" SortMemberPath="IndexNum">
+                            <DataGridTemplateColumn Header="ID" Width="Auto" MinWidth="90" SortMemberPath="IndexNum">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding IndexNum}"/>
@@ -77,7 +75,7 @@
                                 </DataGridTemplateColumn.CellTemplate>
                                 <DataGridTemplateColumn.CellEditingTemplate>
                                     <DataTemplate>
-                                        <TextBox Text="{Binding ElementName=UserControl, Path=SelectedEffectID}"/>
+                                        <Controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=SelectedEffectID, UpdateSourceTrigger=LostFocus}" Minimum="0" Maximum="65535" TextAlignment="Left"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellEditingTemplate>
                             </DataGridTemplateColumn>
@@ -121,6 +119,7 @@
                                             <MenuItem Header="Change Asset" Command="{Binding Data.EffectPart_ChangeAsset_Command, Source={StaticResource proxy}}"/>
                                             <Separator/>
                                             <MenuItem Header="Go To Asset" Command="{Binding Data.EffectPart_GoToAsset_Command, Source={StaticResource proxy}}"/>
+                                            <MenuItem Header="Edit Asset" Command="{Binding Data.EffectPart_EditAsset_Command, Source={StaticResource proxy}}"/>
                                         </ContextMenu>
                                     </ListBox.ContextMenu>
                                 </ListBox>
@@ -131,9 +130,9 @@
                     <ScrollViewer Grid.Column="2" Margin="5, 0">
                         <Grid Background="Transparent">
                             <StackPanel>
-                                <Expander x:Name="effectPartGeneral" Header="General" IsExpanded="True" Expanded="effectPartTabs_ExpandedOrCollapsed" Collapsed="effectPartTabs_ExpandedOrCollapsed">
+                                <Expander x:Name="effectPartGeneral" Header="General" IsExpanded="True">
                                     <StackPanel>
-                                        <WrapPanel>
+                                        <StackPanel HorizontalAlignment="Left">
                                             <Grid Margin="3,3,0,0" Width="400">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="125"/>
@@ -143,11 +142,10 @@
                                                 <Label Content="Asset"/>
                                                 <TextBox Grid.Column="1" IsEnabled="False" Text="{Binding SelectedEffect.SelectedEffectPart.AssetRefDetails, Mode=OneWay}" IsReadOnly="True"  TextWrapping="NoWrap" VerticalAlignment="Top"/>
                                                 <Button Grid.Column="2" Margin="5,0" Command="{Binding EffectPart_ChangeAsset_Command}" Content="Change"/>
-
                                             </Grid>
-                                        </WrapPanel>
+                                        </StackPanel>
 
-                                        <WrapPanel>
+                                        <StackPanel Orientation="Horizontal">
                                             <Grid Margin="3,5,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
@@ -161,33 +159,23 @@
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
+                                                <Label Content="Deactivation" ToolTip="Controls how this effect will be externally deactivated (from BAC, BSA, DEM...). Regardless of this setting the effect will be deactivated when it naturally ends, as long as it is not looped.&#x0a;&#x0a;Never:&#x0a;This effect can not be deactivated&#x0a;&#x0a;Immediate:&#x0a;This effect will immediately end when deactivated&#x0a;&#x0a;Loop Cancel:&#x0a;This effect will end when deactivated, but not immediately. &#x0a;[PBIND] Looped particles will end immediately, however any non-looped particles will remain active for their remaining lifetime, and can still create new (non-looped) particles."/>
+                                                <ComboBox Grid.Column="1" SelectedIndex="{Binding effectPartViewModel.Deactivation, UpdateSourceTrigger=PropertyChanged}">
+                                                    <ComboBoxItem Content="Never"/>
+                                                    <ComboBoxItem Content="Immediate"/>
+                                                    <ComboBoxItem Content="Loop Cancel"/>
+                                                </ComboBox>
+                                            </Grid>
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal">
+                                            <Grid Margin="3,5,0,0" Width="250">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
                                                 <Label Content="Attachment"/>
                                                 <ComboBox Grid.Column="1" SelectedItem="{Binding effectPartViewModel.Attachment, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={StaticResource ResourceKey=PlacementEnum}}"/>
-                                            </Grid>
-                                            <Grid Margin="3,5,0,0" Width="250">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <Label Content="Orientation Type"/>
-                                                <ComboBox Grid.Column="1" SelectedItem="{Binding effectPartViewModel.OrientationType, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={StaticResource ResourceKey=OrientationEnum}}"/>
-                                            </Grid>
-                                            <Grid Margin="3,5,0,0" Width="250">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <Label Content="Deactivation"/>
-                                                <ComboBox Grid.Column="1" SelectedItem="{Binding effectPartViewModel.Deactivation, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={StaticResource ResourceKey=DeactivationModeEnum}}"/>
-                                            </Grid>
-
-                                            <Grid Margin="3,5,0,0" Width="250">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <Label Content="Avoid Sphere"/>
-                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.F_24, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.05"/>
                                             </Grid>
                                             <Grid Margin="3,5,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
@@ -197,8 +185,26 @@
                                                 <Label Content="Attachment Bone"/>
                                                 <ComboBox Grid.Column="1" IsEditable="True" Text="{Binding effectPartViewModel.ESK, UpdateSourceTrigger=LostFocus}" ItemsSource="{x:Static eepk:EffectPart.CommonBones}"/>
                                             </Grid>
-
-                                        </WrapPanel>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Grid Margin="3,5,0,0" Width="250">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="Orientation Type"/>
+                                                <ComboBox Grid.Column="1" SelectedItem="{Binding effectPartViewModel.OrientationType, UpdateSourceTrigger=PropertyChanged}" ItemsSource="{Binding Source={StaticResource ResourceKey=OrientationEnum}}"/>
+                                            </Grid>
+                                            <Grid Margin="3,3,0,0" Width="250">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="Direction"/>
+                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.I_06, UpdateSourceTrigger=PropertyChanged}" Maximum="2" Minimum="0"/>
+                                            </Grid>
+                                            
+                                        </StackPanel>
 
                                         <WrapPanel>
                                             <Grid Margin="3,5,0,0" Width="250">
@@ -217,30 +223,29 @@
                                                 <Label Content="Far Fade Distance"/>
                                                 <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.F_88, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.05"/>
                                             </Grid>
-                                        </WrapPanel>
-                                        <WrapPanel>
                                             <Grid Margin="3,5,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
-                                                <Label Content="Scale (Min)" ToolTip="Scales the EffectPart. The actual scale will be randomly chosen between the Min and Max value.&#x0a;&#x0a;Not applicable for TBIND."/>
-                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.SIZE_1, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01" IsEnabled="{Binding effectPartViewModel.IsNotTBIND}"/>
-                                            </Grid>
-                                            <Grid Margin="3,5,0,0" Width="250">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <Label Content="Scale (Max)" ToolTip="Scales the EffectPart. The actual scale will be randomly chosen between the Min and Max value.&#x0a;&#x0a;Not applicable for TBIND."/>
-                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.SIZE_2, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01" IsEnabled="{Binding effectPartViewModel.IsNotTBIND}"/>
+                                                <Label Content="Avoid Sphere"/>
+                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.F_24, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.05"/>
                                             </Grid>
                                         </WrapPanel>
                                     </StackPanel>
 
                                 </Expander>
-                                <Expander x:Name="effectPartPos" Header="Positioning" IsExpanded="True" Expanded="effectPartTabs_ExpandedOrCollapsed" Collapsed="effectPartTabs_ExpandedOrCollapsed">
-                                    <WrapPanel>
+                                <Expander Header="Position / Rotation / Scale" IsExpanded="True" Visibility="{Binding ElementName=UserControl, Path=effectPartViewModel.IsNotCBIND, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <StackPanel MaxWidth="550" HorizontalAlignment="Left">
+                                        <TextBlock Text="Position" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0, 2"/>
+                                        <Grid Margin="3,5,0,0" Width="250" HorizontalAlignment="Left">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="Bone Direction" ToolTip="These position values will be relative to the bone direction if enabled, otherwise they will be in world space."/>
+                                            <CheckBox Grid.Column="1" IsChecked="{Binding effectPartViewModel.I_32_5, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </Grid>
                                         <Grid Margin="3,5,0,0" Width="900">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="104"/>
@@ -253,7 +258,7 @@
                                                 <ColumnDefinition Width="20"/>
                                                 <ColumnDefinition Width="112"/>
                                             </Grid.ColumnDefinitions>
-                                            <Label Content="Position"/>
+                                            <Label Content="Position" ToolTip="Applies a position offset to the effect in addition to its spawn location (as determined by Attachment).&#x0a;&#x0a;When Bone Direction is enabled, the position offset will be applied relative to the Attachment Bone."/>
                                             <Label Grid.Column="1" Content="X" HorizontalContentAlignment="Right"/>
                                             <Controls:NumericUpDown Grid.Column="2" Value="{Binding effectPartViewModel.POSITION_X, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
 
@@ -262,6 +267,16 @@
 
                                             <Label Grid.Column="5" Content="Z" HorizontalContentAlignment="Right"/>
                                             <Controls:NumericUpDown Grid.Column="6" Value="{Binding effectPartViewModel.POSITION_Z, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
+                                        </Grid>
+
+                                        <TextBlock Text="Rotation" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0, 2"/>
+                                        <Grid Margin="3,5,0,0" Width="250" HorizontalAlignment="Left">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="Enable Rotation"/>
+                                            <CheckBox Grid.Column="1" IsChecked="{Binding effectPartViewModel.I_32_6, UpdateSourceTrigger=PropertyChanged}"/>
                                         </Grid>
                                         <Grid Margin="3,5,0,0" Width="900">
                                             <Grid.ColumnDefinitions>
@@ -308,9 +323,28 @@
                                             <Controls:NumericUpDown Grid.Column="6" Value="{Binding effectPartViewModel.F_72, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01"/>
                                         </Grid>
 
-                                    </WrapPanel>
+                                        <TextBlock Text="Scale" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0, 2"/>
+                                        <WrapPanel>
+                                            <Grid Margin="3,5,0,0" Width="250" Visibility="{Binding ElementName=UserControl, Path=effectPartViewModel.IsNotCBIND, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="Scale (Min)" ToolTip="Scales the Effect Part. The actual scale will be randomly chosen between the Min and Max value.&#x0a;&#x0a;Not applicable for TBIND."/>
+                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.SIZE_1, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01" IsEnabled="{Binding effectPartViewModel.IsNotTBIND}"/>
+                                            </Grid>
+                                            <Grid Margin="3,5,0,0" Width="250" Visibility="{Binding ElementName=UserControl, Path=effectPartViewModel.IsNotCBIND, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Label Content="Scale (Max)" ToolTip="Scales the Effect Part. The actual scale will be randomly chosen between the Min and Max value.&#x0a;&#x0a;Not applicable for TBIND."/>
+                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.SIZE_2, UpdateSourceTrigger=PropertyChanged}" StringFormat="0.00" Interval="0.01" IsEnabled="{Binding effectPartViewModel.IsNotTBIND}"/>
+                                            </Grid>
+                                        </WrapPanel>
+                                    </StackPanel>
                                 </Expander>
-                                <Expander x:Name="effectPartAnimation" Header="EMA Animation" Expanded="effectPartTabs_ExpandedOrCollapsed" Collapsed="effectPartTabs_ExpandedOrCollapsed">
+                                <Expander Header="Animation" Visibility="{Binding ElementName=UserControl, Path=effectPartViewModel.IsUsingEma, Converter={StaticResource BooleanToVisibilityConverter}}" IsExpanded="True">
                                     <StackPanel>
                                         <WrapPanel>
                                             <Grid Margin="3,5,0,0" Width="250">
@@ -318,7 +352,7 @@
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
-                                                <Label Content="EMA Index"/>
+                                                <Label Content="Animation ID" ToolTip="ID of animation within the EMA file for this asset."/>
                                                 <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.I_30, UpdateSourceTrigger=PropertyChanged}" Minimum="0"/>
                                             </Grid>
 
@@ -351,46 +385,41 @@
                                         </WrapPanel>
                                     </StackPanel>
                                 </Expander>
-                                <Expander x:Name="effectPartFlags" Header="Main Flags" Expanded="effectPartTabs_ExpandedOrCollapsed" Collapsed="effectPartTabs_ExpandedOrCollapsed">
-                                    <StackPanel>
-                                        <Label Content="Attach" HorizontalContentAlignment="Center" VerticalContentAlignment="Top" FontSize="10" FontWeight="SemiBold"/>
+                                <Expander Header="Primary Flags" IsExpanded="True">
+                                    <StackPanel MaxWidth="550" HorizontalAlignment="Left">
+                                        <Label Content="Attachment" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0, 2" ToolTip="These flags control how the attachment bone is updated throughout the effects life cycle."/>
                                         <WrapPanel>
                                             <CheckBox Width="160" Margin="3,1" Content="Position Update" IsChecked="{Binding effectPartViewModel.I_32_0, UpdateSourceTrigger=PropertyChanged}" ToolTip="Continually update the effects position to match its attached bone."/>
                                             <CheckBox Width="160" Margin="3,1" Content="Rotation Update" IsChecked="{Binding effectPartViewModel.I_32_1, UpdateSourceTrigger=PropertyChanged}" ToolTip="Continually update the effects rotation to match its attached bone."/>
                                             <CheckBox Width="160" Margin="3,1" Content="Instant Particle Update" IsChecked="{Binding effectPartViewModel.I_32_2, UpdateSourceTrigger=PropertyChanged}" ToolTip="Instantly update particle position and rotation to move with the attached bone (requires either the Position Update or Rotation Update flag to have any effect).&#x0a;&#x0a;Without this, particle nodes will only be created at the bone position, but wont update with it throughout their lifetime."/>
-                                            <CheckBox Width="160" Margin="3,1" Content="Ground Only" IsChecked="{Binding effectPartViewModel.I_32_3, UpdateSourceTrigger=PropertyChanged}" ToolTip="The effect will only appear when on (or near) the ground."/>
+                                            
                                         </WrapPanel>
 
-                                        <Label Content="Start Effect Position" Margin="0, 3" HorizontalContentAlignment="Center" VerticalContentAlignment="Top" FontSize="10" FontWeight="SemiBold"/>
-                                        <WrapPanel>
-                                            <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_32_5, UpdateSourceTrigger=PropertyChanged}" Content="Bone Direction" ToolTip="Sets the attached bone to be used as the local world. Any position set will be relative to this."/>
-                                            <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_32_6, UpdateSourceTrigger=PropertyChanged}" Content="BoneToCameraDir"/>
-                                            <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_32_7, UpdateSourceTrigger=PropertyChanged}" Content="SceneCenterToBoneDir"/>
-                                        </WrapPanel>
-
-                                        <Label Content="Light Flags" ToolTip="By default all these flags are active, but if any of them are enabled here then the others will become inactive." Margin="0, 3" HorizontalContentAlignment="Center" VerticalContentAlignment="Top" FontSize="10" FontWeight="SemiBold"/>
+                                        <Label Content="Light Flags" ToolTip="By default all these flags are active, but if any of them are enabled here then the others will become inactive." FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0, 2"/>
                                         <WrapPanel>
                                             <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_36_4, UpdateSourceTrigger=PropertyChanged}" Content="Apply to Characters"/>
                                             <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_36_5, UpdateSourceTrigger=PropertyChanged}" Content="Apply to Stages"/>
                                             <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_36_6, UpdateSourceTrigger=PropertyChanged}" Content="Unk 6" ToolTip="Related to the other light flags somehow. Likely for the light affecting something else."/>
                                         </WrapPanel>
-                                        
-                                        <Label Content="Link Flags" Margin="0, 3" HorizontalContentAlignment="Center" VerticalContentAlignment="Top" FontSize="10" FontWeight="SemiBold"/>
+
+                                        <Label Content="Link Flags" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0, 2"/>
                                         <WrapPanel>
                                             <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_39_3, UpdateSourceTrigger=PropertyChanged}" Content="_RelativePosZ_To_AbsPosZ"/>
                                             <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_39_4, UpdateSourceTrigger=PropertyChanged}" Content="_ScaleZ_To_BonePosZ"/>
                                             <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_39_7, UpdateSourceTrigger=PropertyChanged}" Content="_ObjectRotation_To_XXXX" ToolTip="Dont ask"/>
                                         </WrapPanel>
 
-                                        <Label Content="Other" Margin="0, 3" HorizontalContentAlignment="Center" VerticalContentAlignment="Top" FontSize="10" FontWeight="SemiBold"/>
+                                        <Label Content="Other" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0, 2"/>
                                         <WrapPanel>
-                                            <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_32_4, UpdateSourceTrigger=PropertyChanged}" Content="Allow Time Scale" ToolTip="Allows the effect to be time scaled."/>
-                                            <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_39_0, UpdateSourceTrigger=PropertyChanged}" Content="No Glare" ToolTip="Disables all glare for this effect."/>
-                                            <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_39_2, UpdateSourceTrigger=PropertyChanged}" Content="InverseTransparenDrawOrder" ToolTip="InverseTransparentDrawOrder"/>
+                                            <CheckBox Width="160" Margin="3,1, 0, 3" IsChecked="{Binding effectPartViewModel.I_32_4, UpdateSourceTrigger=PropertyChanged}" Content="Allow Time Scale" ToolTip="Allows the effect to be time scaled."/>
+                                            <CheckBox Width="160" Margin="3,1, 0, 3" IsChecked="{Binding effectPartViewModel.I_39_0, UpdateSourceTrigger=PropertyChanged}" Content="No Glare" ToolTip="Disables all glare for this effect."/>
+                                            <CheckBox Width="160" Margin="3,1, 0, 3" IsChecked="{Binding effectPartViewModel.I_39_2, UpdateSourceTrigger=PropertyChanged}" Content="InverseTransparenDrawOrder" ToolTip="InverseTransparentDrawOrder"/>
+                                            <CheckBox Width="160" Margin="3,1, 0, 3" IsChecked="{Binding effectPartViewModel.I_32_7, UpdateSourceTrigger=PropertyChanged}" Content="SceneCenterToBoneDir"/>
+                                            <CheckBox Width="160" Margin="3,1,0,3" Content="Ground Only" IsChecked="{Binding effectPartViewModel.I_32_3, UpdateSourceTrigger=PropertyChanged}" ToolTip="The effect will only appear when on (or near) the ground."/>
                                         </WrapPanel>
                                     </StackPanel>
                                 </Expander>
-                                <Expander x:Name="effectPartUnkFlags" Header="Unknown Flags" Expanded="effectPartTabs_ExpandedOrCollapsed" Collapsed="effectPartTabs_ExpandedOrCollapsed">
+                                <Expander Header="Unknown Flags" IsExpanded="False">
                                     <WrapPanel>
                                         <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_39_1, UpdateSourceTrigger=PropertyChanged}" Content="Flag__39__Unk1"/>
                                         <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_39_5, UpdateSourceTrigger=PropertyChanged}" Content="Flag__39__Unk5"/>
@@ -411,17 +440,9 @@
                                         <CheckBox Width="160" Margin="3,1" IsChecked="{Binding effectPartViewModel.I_37_7, UpdateSourceTrigger=PropertyChanged}" Content="Flag__37__Unk7"/>
                                     </WrapPanel>
                                 </Expander>
-                                <Expander x:Name="effectPartUnkValues" Header="Unknown Values" Expanded="effectPartTabs_ExpandedOrCollapsed" Collapsed="effectPartTabs_ExpandedOrCollapsed">
+                                <Expander Header="Unknown Values" IsExpanded="False">
                                     <StackPanel>
                                         <WrapPanel HorizontalAlignment="Left">
-                                            <Grid Margin="3,3,0,0" Width="250">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <Label Content="I__06"/>
-                                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding effectPartViewModel.I_06, UpdateSourceTrigger=PropertyChanged}" />
-                                            </Grid>
                                             <Grid Margin="3,3,0,0" Width="250">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
@@ -547,7 +568,7 @@
             <Controls:MetroTabItem Header="PBIND" Controls:HeaderedControlHelper.HeaderFontSize="14">
                 <Grid Background="Transparent">
 
-                    <DataGrid MouseDoubleClick="PBIND_MouseDoubleClick" PreviewKeyDown="PbindDataGrid_Hotkeys_PreviewKeyDown" SelectionMode="Extended" x:Name="pbindDataGrid" RowDetailsVisibilityMode="Collapsed" ItemsSource="{Binding effectContainerFile.Pbind.ViewAssets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False">
+                    <DataGrid MouseDoubleClick="PBIND_MouseDoubleClick" PreviewKeyDown="PbindDataGrid_Hotkeys_PreviewKeyDown" SelectionMode="Extended" x:Name="pbindDataGrid" RowDetailsVisibilityMode="Collapsed" ItemsSource="{Binding effectContainerFile.Pbind.ViewAssets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False" SelectionChanged="pbindDataGrid_SelectionChanged">
                         
                         <DataGrid.ContextMenu>
                             <ContextMenu FontSize="12">
@@ -624,7 +645,7 @@
             <Controls:MetroTabItem Header="TBIND" Controls:HeaderedControlHelper.HeaderFontSize="14">
                 <Grid Background="Transparent">
 
-                    <DataGrid MouseDoubleClick="TBIND_MouseDoubleClick" PreviewKeyDown="TbindDataGrid_Hotkeys_PreviewKeyDown" SelectionMode="Extended" x:Name="tbindDataGrid" RowDetailsVisibilityMode="Collapsed" ItemsSource="{Binding effectContainerFile.Tbind.ViewAssets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False">
+                    <DataGrid MouseDoubleClick="TBIND_MouseDoubleClick" PreviewKeyDown="TbindDataGrid_Hotkeys_PreviewKeyDown" SelectionMode="Extended" x:Name="tbindDataGrid" RowDetailsVisibilityMode="Collapsed" ItemsSource="{Binding effectContainerFile.Tbind.ViewAssets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False" SelectionChanged="tbindDataGrid_SelectionChanged">
                         
                         <DataGrid.ContextMenu>
                             <ContextMenu FontSize="12">
@@ -701,7 +722,7 @@
             <Controls:MetroTabItem Header="CBIND" Controls:HeaderedControlHelper.HeaderFontSize="14">
                 <Grid Background="Transparent">
 
-                    <DataGrid MouseDoubleClick="CBIND_MouseDoubleClick" PreviewKeyDown="CbindDataGrid_Hotkeys_PreviewKeyDown" SelectionMode="Extended" x:Name="cbindDataGrid" RowDetailsVisibilityMode="Collapsed" ItemsSource="{Binding effectContainerFile.Cbind.ViewAssets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False">
+                    <DataGrid MouseDoubleClick="CBIND_MouseDoubleClick" PreviewKeyDown="CbindDataGrid_Hotkeys_PreviewKeyDown" SelectionMode="Extended" x:Name="cbindDataGrid" RowDetailsVisibilityMode="Collapsed" ItemsSource="{Binding effectContainerFile.Cbind.ViewAssets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False" SelectionChanged="cbindDataGrid_SelectionChanged">
                         
                         <DataGrid.ContextMenu>
                             <ContextMenu FontSize="12">
@@ -774,7 +795,7 @@
             <Controls:MetroTabItem Header="EMO" Controls:HeaderedControlHelper.HeaderFontSize="14">
                 <Grid Background="Transparent">
 
-                    <DataGrid PreviewKeyDown="EmoDataGrid_Hotkeys_PreviewKeyDown" SelectionMode="Extended" x:Name="emoDataGrid" RowDetailsVisibilityMode="VisibleWhenSelected" ItemsSource="{Binding effectContainerFile.Emo.ViewAssets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False">
+                    <DataGrid PreviewKeyDown="EmoDataGrid_Hotkeys_PreviewKeyDown" SelectionMode="Extended" x:Name="emoDataGrid" RowDetailsVisibilityMode="VisibleWhenSelected" ItemsSource="{Binding effectContainerFile.Emo.ViewAssets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False" SelectionChanged="emoDataGrid_SelectionChanged">
                         
                         <DataGrid.ContextMenu>
                             <ContextMenu FontSize="12">
@@ -869,7 +890,7 @@
             <Controls:MetroTabItem Header="LIGHT" Controls:HeaderedControlHelper.HeaderFontSize="14">
                 <Grid Background="Transparent">
 
-                    <DataGrid PreviewKeyDown="LightEmaDataGrid_Hotkeys_PreviewKeyDown" SelectionMode="Extended" x:Name="lightDataGrid" RowDetailsVisibilityMode="Collapsed" ItemsSource="{Binding effectContainerFile.LightEma.ViewAssets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False">
+                    <DataGrid PreviewKeyDown="LightEmaDataGrid_Hotkeys_PreviewKeyDown" SelectionMode="Extended" x:Name="lightDataGrid" RowDetailsVisibilityMode="Collapsed" ItemsSource="{Binding effectContainerFile.LightEma.ViewAssets}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="True" Margin="10,10,246.8,13.909" CanUserResizeRows="False" SelectionChanged="lightDataGrid_SelectionChanged">
                         <DataGrid.ContextMenu>
                             <ContextMenu FontSize="12">
                                 <MenuItem Header="Rename" Click="LIGHT_AssetContainer_RenameAsset_Click"/>

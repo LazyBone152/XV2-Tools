@@ -234,6 +234,20 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
                         }
                     }
                 }
+
+                //Interpolation bug fix:
+                //Forces the first value in a vector/color keyframd value to always be written to file IF animation is enabled. This is needed because the decompilation code relies on the first value for the interpolation flag for these grouped values.
+                if (empKeyframes[0] == null)
+                {
+                    empKeyframes[0] = new EMP_KeyframedValue();
+                    empKeyframes[0].Loop = Loop;
+                    empKeyframes[0].Interpolate = Interpolate;
+                    empKeyframes[0].Parameter = Parameter;
+                    empKeyframes[0].Component = Components[0];
+                    empKeyframes[0].DefaultValue = constant[0];
+                    empKeyframes[0].ETR_InterpolationType = ETR_InterpolationType;
+                    empKeyframes[0].Keyframes.Add(new EMP_Keyframe(0, constant[0]));
+                }
             }
             else if (IsModifierValue)
             {

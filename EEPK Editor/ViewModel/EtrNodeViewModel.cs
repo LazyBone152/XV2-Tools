@@ -152,7 +152,7 @@ namespace EEPK_Organiser.ViewModel
             get => !node.Flags.HasFlag(ETR_Node.ExtrudeFlags.NoDegrade);
             set
             {
-                SetNodeFlags(ETR_Node.ExtrudeFlags.NoDegrade, !value);
+                SetNodeFlags(ETR_Node.ExtrudeFlags.NoDegrade, !value, UndoGroup.ColorControl);
                 RaisePropertyChanged(() => Flag_UseColor2);
             }
         }
@@ -352,13 +352,13 @@ namespace EEPK_Organiser.ViewModel
             RaisePropertyChanged(nameof(Flag_Unk18));
         }
 
-        private void SetNodeFlags(ETR_Node.ExtrudeFlags flag, bool state)
+        private void SetNodeFlags(ETR_Node.ExtrudeFlags flag, bool state, UndoGroup undoGroup = UndoGroup.Default)
         {
             ETR_Node.ExtrudeFlags newFlag = node.Flags.SetFlag(flag, state);
 
             if (node.Flags != newFlag)
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<ETR_Node>(nameof(ETR_Node.Flags), node, node.Flags, newFlag, "ETR -> Flags"));
+                UndoManager.Instance.AddUndo(new UndoableProperty<ETR_Node>(nameof(ETR_Node.Flags), node, node.Flags, newFlag, "ETR -> Flags"), undoGroup, null, node);
                 node.Flags = newFlag;
             }
         }

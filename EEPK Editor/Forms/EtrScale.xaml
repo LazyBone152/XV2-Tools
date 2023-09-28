@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:EEPK_Organiser.Forms"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
-        Title="ETR Scale" Height="155.42" Width="377.193" ShowInTaskbar="True" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" WindowStyle="ToolWindow">
+        Title="ETR Scale" Height="155.42" Width="377.193" ShowInTaskbar="True" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" WindowStyle="ToolWindow" TitleCharacterCasing="Normal">
     <Grid>
         <Button Click="Button_OK_Click" Content="Ok" HorizontalAlignment="Left" Margin="89,91,0,0" VerticalAlignment="Top" Width="75"/>
         <Button Click="Button_Cancel_Click" Content="Cancel" HorizontalAlignment="Left" Margin="196,91,0,0" VerticalAlignment="Top" Width="75"/>

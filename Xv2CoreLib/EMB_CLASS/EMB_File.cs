@@ -819,7 +819,7 @@ namespace Xv2CoreLib.EMB_CLASS
         /// <summary>
         /// Saves DdsImage into Data.
         /// </summary>
-        public void SaveDds(bool onlySaveIfEdited = true)
+        public void SaveDds(bool onlySaveIfEdited = true, List<IUndoRedo> undos = null)
         {
             if (Texture == null || (!wasEdited && onlySaveIfEdited))
                 return;
@@ -827,7 +827,12 @@ namespace Xv2CoreLib.EMB_CLASS
             try
             {
                 _loadDdsLock = true;
-                Data = TextureHelper.SaveToBytes(Texture, ImageFormat);
+                byte[] data = TextureHelper.SaveToBytes(Texture, ImageFormat);
+
+                if (undos != null)
+                    undos.Add(new UndoablePropertyGeneric(nameof(Data), this, Data, data));
+
+                Data = data;
             }
             finally
             {

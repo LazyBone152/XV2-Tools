@@ -1,10 +1,25 @@
 ﻿using System;
 using System.Security.Cryptography;
+using Xv2CoreLib.Resource;
 
 namespace Xv2CoreLib
 {
     public static class Random
     {
+        private static int _randomSeed = 0;
+        public static int RandomSeed
+        {
+            get => _randomSeed;
+            set
+            {
+                if(_randomSeed != value)
+                {
+                    _randomSeed = value;
+                    RandomGenerator = new System.Random(_randomSeed);
+                }
+            }
+        }
+
         private static System.Random RandomGenerator;
         private static readonly RNGCryptoServiceProvider _generator = new RNGCryptoServiceProvider();
 
@@ -31,6 +46,7 @@ namespace Xv2CoreLib
 
         public static float Range(float min, float max)
         {
+            if (MathHelpers.FloatEquals(min, max)) return max;
             InitRandomGenerator();
 
             return (float)RandomGenerator.NextDouble() * (max - min) + min;
@@ -46,6 +62,10 @@ namespace Xv2CoreLib
         public static int Range(int min, int max)
         {
             InitRandomGenerator();
+
+            //RandomGenerator.Next returns an int equal or greater than min and less than max, but we need a random value that can also include max, so we increment it here
+            if (max != int.MaxValue) //This ensures there is no overflow back to 0
+                max++;
 
             return RandomGenerator.Next(min, max);
         }
@@ -67,6 +87,11 @@ namespace Xv2CoreLib
             return result;
         }
 
+        public static bool RandomBool()
+        {
+            return Range(0, 1) == 0;
+        }
+
         public static double Next()
         {
             InitRandomGenerator();
@@ -75,9 +100,18 @@ namespace Xv2CoreLib
 
         private static void InitRandomGenerator()
         {
-            if (RandomGenerator == null) RandomGenerator = new System.Random(_getRandomInt(352, 242142142));
+            if (RandomGenerator == null) GenerateNewSeed();
         }
-    
+
+        public static void GenerateNewSeed()
+        {
+            RandomSeed = _getRandomInt(352, 242142142);
+        }
+
+        public static void ResetWithCurrentSeed()
+        {
+            RandomGenerator = new System.Random(_randomSeed);
+        }
     }
 
 }

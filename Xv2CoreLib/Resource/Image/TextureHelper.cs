@@ -266,19 +266,19 @@ namespace Xv2CoreLib.Resource.Image
                     {
                         case 0:
                             x = 546;
-                            y = 116;
+                            y = 146;
                             break;
                         case 1:
                             x = 298;
-                            y = 51;
+                            y = 81;
                             break;
                         case 2:
                             x = 92;
-                            y = 116;
+                            y = 146;
                             break;
                         case 3:
                             x = 285;
-                            y = 181;
+                            y = 211;
                             break;
                     }
 

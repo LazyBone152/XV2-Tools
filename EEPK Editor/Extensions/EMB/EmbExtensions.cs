@@ -17,6 +17,7 @@ namespace Xv2CoreLib.EMB_CLASS
             foreach(var entry in embFile.Entry)
             {
                 entry.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
+                entry.SaveDds(true, undos);
             }
         }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Windows.Media.Imaging;
@@ -184,12 +185,21 @@ namespace Xv2CoreLib.Resource
             archive = _archive;
         }
 
+
+        public void DeleteFile(string path)
+        {
+            ZipArchiveEntry existingEntry = archive.GetEntry(path);
+
+            if (existingEntry != null)
+                existingEntry.Delete();
+        }
+
         public void AddFile(string path, byte[] bytes, CompressionLevel compression = CompressionLevel.Optimal, bool createMode = false)
         {
             if (!createMode)
             {
                 //First look for an existing entry, and if it exists delete it.
-                var existingEntry = archive.GetEntry(path);
+                ZipArchiveEntry existingEntry = archive.GetEntry(path);
                 if (existingEntry != null)
                     existingEntry.Delete();
             }

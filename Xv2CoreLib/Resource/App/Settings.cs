@@ -261,7 +261,12 @@ namespace Xv2CoreLib.Resource.App
 
         public string GetAppFolder()
         {
-            switch (CurrentApp)
+            return GetAppFolder(CurrentApp);
+        }
+
+        public string GetAppFolder(Application app)
+        {
+            switch (app)
             {
                 case Application.EepkOrganiser:
                     return GetAbsolutePathRelativeToExe("eepk_tool");
@@ -274,13 +279,13 @@ namespace Xv2CoreLib.Resource.App
                 default:
                     return "";
             }
-        } 
+        }
 
         public string GetAbsPathInAppFolder(string relativePath)
         {
             return $"{GetAppFolder()}/{relativePath}";
         }
-        
+
         public static bool IsGameDirValid(string path)
         {
             return (File.Exists(String.Format("{0}/bin/DBXV2.exe", path)));
@@ -333,7 +338,7 @@ namespace Xv2CoreLib.Resource.App
         #endregion
 
         #region Common
-        public int SettingsVersion { get; set; } = 1;
+        public int SettingsVersion { get; set; } = 2;
 
         public bool UpdateNotifications { get; set; } = true;
         public string GameDirectory
@@ -558,13 +563,18 @@ namespace Xv2CoreLib.Resource.App
         public bool XenoKit_PreserveCameraState { get; set; } = true;
         public bool XenoKit_RenderBoneNames { get; set; } = true;
         public bool XenoKit_RenderBoneNamesMouseOverOnly { get; set; } = true;
-        public bool XenoKit_RimLightingEnabled { get; set; } = true;
-        public bool XenoKit_EnableDynamicLighting { get; set; } = false;
         public bool XenoKit_WireframeMode { get; set; } = false;
         public bool XenoKit_HideLessImportantBones { get; set; } = true;
         public bool XenoKit_AutoResolvePasteReferences { get; set; } = false;
         internal int XenoKit_BacTypeSortMode { get; set; }
         public bool XenoKit_SuppressErrorsToLogOnly { get; set; } = false;
+
+        //Render Settings:
+        public bool XenoKit_RimLightingEnabled { get; set; } = true;
+        public bool XenoKit_EnableDynamicLighting { get; set; } = false;
+        public int XenoKit_SuperSamplingFactor { get; set; } = 2;
+        public int XenoKit_ShadowMapRes { get; set; } = 2048;
+        public bool XenoKit_FullLowRez { get; set; } = false;
 
         //Enums, which are not-serialized directly
         [DontSerialize]
@@ -612,6 +622,19 @@ namespace Xv2CoreLib.Resource.App
             if (UndoLimit > UndoManager.MaximumMaxCapacity) UndoLimit = UndoManager.MaximumMaxCapacity;
 
             UndoManager.Instance.SetCapacity(UndoLimit);
+
+            //Allowed SuperSamplingFactors: 1, 2, 4 and 8
+            if (XenoKit_SuperSamplingFactor != 1 && XenoKit_SuperSamplingFactor != 2 && XenoKit_SuperSamplingFactor != 4 && XenoKit_SuperSamplingFactor != 8)
+            {
+                XenoKit_SuperSamplingFactor = 1;
+            }
+
+            //Disable SuperSampling by default
+            if(SettingsVersion == 1)
+            {
+                SettingsVersion = 2;
+                XenoKit_SuperSamplingFactor = 1;
+            }
 
             //Theme
             InitTheme();

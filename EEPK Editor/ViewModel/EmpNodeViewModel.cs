@@ -10,6 +10,7 @@ namespace EEPK_Organiser.ViewModel
 {
     public class EmpNodeViewModel : ObservableObject
     {
+        private EMP_File empFile;
         private ParticleNode node;
 
         public string Name
@@ -33,9 +34,15 @@ namespace EEPK_Organiser.ViewModel
             {
                 if (node.NodeType != value)
                 {
-                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.NodeType), node, node.NodeType, value, "NodeType"));
+                    UndoManager.Instance.AddCompositeUndo(new System.Collections.Generic.List<IUndoRedo>()
+                    {
+                        new UndoablePropertyGeneric(nameof(node.NodeType), node, node.NodeType, value),
+                        new UndoablePropertyGeneric(nameof(empFile.HasBeenEdited), empFile, true, true, true)
+                    }, "Node Type");
+
                     node.NodeType = value;
                     RaisePropertyChanged(nameof(NodeType));
+                    empFile.HasBeenEdited = true;
                 }
             }
         }
@@ -258,6 +265,19 @@ namespace EEPK_Organiser.ViewModel
                 }
             }
         }
+        public float Emitter_EdgeIncrement
+        {
+            get => node.EmitterNode.EdgeIncrement;
+            set
+            {
+                if (node.EmitterNode.EdgeIncrement != value)
+                {
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmitterNode.EdgeIncrement), node.EmitterNode, node.EmitterNode.EdgeIncrement, value, "Edge Increment"));
+                    node.EmitterNode.EdgeIncrement = value;
+                    RaisePropertyChanged(nameof(Emitter_EdgeIncrement));
+                }
+            }
+        }
         public float Emitter_F1
         {
             get => node.EmitterNode.F_1;
@@ -293,9 +313,15 @@ namespace EEPK_Organiser.ViewModel
             {
                 if (node.EmissionNode.EmissionType != value)
                 {
-                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.EmissionType), node.EmissionNode, node.EmissionNode.EmissionType, value, "Emission Type"));
+                    UndoManager.Instance.AddCompositeUndo(new System.Collections.Generic.List<IUndoRedo>()
+                    {
+                        new UndoablePropertyGeneric(nameof(node.EmissionNode.EmissionType), node.EmissionNode, node.EmissionNode.EmissionType, value),
+                        new UndoablePropertyGeneric(nameof(empFile.HasBeenEdited), empFile, true, true, true)
+                    }, "Emission Type");
+
                     node.EmissionNode.EmissionType = value;
                     RaisePropertyChanged(nameof(EmissionType));
+                    empFile.HasBeenEdited = true;
                 }
             }
         }
@@ -315,13 +341,13 @@ namespace EEPK_Organiser.ViewModel
         public bool BillboardEnabled => BillboardType != ParticleBillboardType.Front;
         public bool VisibleOnlyOnMotion
         {
-            get => node.EmissionNode.VisibleOnlyOnMotion;
+            get => node.EmissionNode.VelocityOriented;
             set
             {
-                if (node.EmissionNode.VisibleOnlyOnMotion != value)
+                if (node.EmissionNode.VelocityOriented != value)
                 {
-                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.VisibleOnlyOnMotion), node.EmissionNode, node.EmissionNode.VisibleOnlyOnMotion, value, "Emission VisibleOnlyOnMotion"));
-                    node.EmissionNode.VisibleOnlyOnMotion = value;
+                    UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(node.EmissionNode.VelocityOriented), node.EmissionNode, node.EmissionNode.VelocityOriented, value, "Emission VisibleOnlyOnMotion"));
+                    node.EmissionNode.VelocityOriented = value;
                     RaisePropertyChanged(nameof(VisibleOnlyOnMotion));
                 }
             }
@@ -983,6 +1009,7 @@ namespace EEPK_Organiser.ViewModel
             RaisePropertyChanged(nameof(EmitterSize2_Variance));
             RaisePropertyChanged(nameof(EmitterAngle));
             RaisePropertyChanged(nameof(EmitterAngle_Variance));
+            RaisePropertyChanged(nameof(Emitter_EdgeIncrement));
             RaisePropertyChanged(nameof(Emitter_F1));
             RaisePropertyChanged(nameof(Emitter_F2));
 
@@ -1061,9 +1088,10 @@ namespace EEPK_Organiser.ViewModel
 
         }
 
-        public void SetContext(ParticleNode node)
+        public void SetContext(ParticleNode node, EMP_File empFile)
         {
            this.node = node;
+           this.empFile = empFile;
            UpdateProperties();
         }
 

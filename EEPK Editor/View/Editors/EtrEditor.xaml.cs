@@ -12,6 +12,7 @@ using GalaSoft.MvvmLight.CommandWpf;
 using EEPK_Organiser.Forms;
 using Xv2CoreLib.EMP_NEW;
 using EEPK_Organiser.View.Controls;
+using EEPK_Organiser.Forms.Recolor;
 
 namespace EEPK_Organiser.View.Editors
 {
@@ -104,6 +105,35 @@ namespace EEPK_Organiser.View.Editors
 
         private void Instance_UndoOrRedoCalled(object source, UndoEventRaisedEventArgs e)
         {
+            //Update PreviewBrush when color has been changed externally
+            if (e.UndoGroup == UndoGroup.ColorControl)
+            {
+                if (e.UndoContext is ETR_Node node)
+                {
+                    node.UpdatePreviewBrush();
+                    return;
+                }
+                else if (e.UndoContext is Asset asset)
+                {
+                    if (asset.assetType == Xv2CoreLib.EEPK.AssetType.TBIND)
+                    {
+                        if (asset.Files[0].EtrFile == EtrFile)
+                        {
+                            EtrFile.UpdateBrushPreview();
+                        }
+                    }
+                }
+                else if (e.UndoContext is EffectContainerFile eepk)
+                {
+                    if (eepk.Tbind == AssetContainer)
+                    {
+                        EtrFile.UpdateBrushPreview();
+                    }
+                }
+
+                return;
+            }
+
             ViewModel?.UpdateProperties();
             NotifyPropertyChanged(nameof(IsNodeEnabled));
         }
@@ -170,6 +200,28 @@ namespace EEPK_Organiser.View.Editors
             }
 
             UndoManager.Instance.AddCompositeUndo(undos, "ETR -> Duplicate Node");
+        }
+
+        public RelayCommand HueAdjustment_Command => new RelayCommand(HueAdjustment, IsNodeSelected);
+        private void HueAdjustment()
+        {
+            Window editorWindow = ((Grid)System.Windows.Media.VisualTreeHelper.GetParent(this)).DataContext as Window;
+
+            Forms.RecolorAll recolor = new Forms.RecolorAll(SelectedNode, editorWindow);
+
+            if (recolor.Initialize())
+                recolor.ShowDialog();
+        }
+
+        public RelayCommand HueSet_Command => new RelayCommand(HueSet, IsNodeSelected);
+        private void HueSet()
+        {
+            Window editorWindow = ((Grid)System.Windows.Media.VisualTreeHelper.GetParent(this)).DataContext as Window;
+
+            RecolorAll_HueSet recolor = new RecolorAll_HueSet(SelectedNode, editorWindow);
+
+            if (recolor.Initialize())
+                recolor.ShowDialog();
         }
 
         private bool IsETRLoaded()

@@ -7,6 +7,7 @@
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:view="clr-namespace:EEPK_Organiser.View"
         xmlns:undoRedo="clr-namespace:Xv2CoreLib.Resource.UndoRedo;assembly=Xv2CoreLib"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         mc:Ignorable="d"
         Title="Particle Editor" Height="720" Width="1280" MinHeight="720" MinWidth="1280" ResizeMode="CanResizeWithGrip" SaveWindowPosition="True" WindowStartupLocation="CenterOwner" x:Name="Window" TitleCharacterCasing="Normal">
     <Window.InputBindings>
@@ -15,5 +16,12 @@
     </Window.InputBindings>
     <Grid>
         <view:EmpEditor EmpFile="{Binding ElementName=Window, Path=EmpFile}" AssetContainer="{Binding ElementName=Window, Path=AssetContainer}"/>
+
+        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Margin="10, 2, 5, 0" Height="20" VerticalAlignment="Top" Visibility="{Binding ElementName=Window,Path=XenoKitVisible}">
+            <CheckBox Content="Topmost" Checked="CheckBox_CheckedChanged" Unchecked="CheckBox_CheckedChanged" ToolTip="Pin the window to the top layer so that it always appears over all other windows."/>
+            <Button Margin="10, 0" Command="{Binding ElementName=Window, Path=RefreshParticleSystemCommand}" Foreground="{DynamicResource MahApps.Brushes.Accent}" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="Transparent" Style="{DynamicResource MahApps.Styles.Button.Circle}" ToolTip="Refresh any active simulations of this Particle System.&#x0a;&#x0a;You may need to do this periodically when editing Particle Systems because not all changes are automatically reflected in the viewport." Width="20" Height="20">
+                <iconPacks:Material Kind="Refresh"/>
+            </Button>
+        </StackPanel>
     </Grid>
 </Controls:MetroWindow>

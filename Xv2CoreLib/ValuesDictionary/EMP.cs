@@ -7,7 +7,7 @@ namespace Xv2CoreLib.ValuesDictionary
     {
         public static Dictionary<ParticleNodeType, string> NodeType { get; private set; } = new Dictionary<ParticleNodeType, string>()
         {
-            { ParticleNodeType.Null , "None" },
+            { ParticleNodeType.Null , "Null Emitter" },
             { ParticleNodeType.Emitter , "Emitter" },
             { ParticleNodeType.Emission , "Emission" },
         };

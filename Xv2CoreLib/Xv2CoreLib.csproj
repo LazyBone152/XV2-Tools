@@ -258,6 +258,7 @@
     <Compile Include="IDB\Deserializer.cs" />
     <Compile Include="IDB\IDB_File.cs" />
     <Compile Include="IDB\Parser.cs" />
+    <Compile Include="Iggy\IggyFile.cs" />
     <Compile Include="Interfaces\Interfaces.cs" />
     <Compile Include="LCP\LCP_File.cs" />
     <Compile Include="MSG\Deserializer.cs" />

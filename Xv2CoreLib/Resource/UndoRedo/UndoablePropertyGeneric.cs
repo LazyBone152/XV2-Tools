@@ -19,6 +19,11 @@
             Message = description;
         }
 
+        public UndoablePropertyGeneric(string property, object instance, object oldValue, object newValue, bool doLast, string description = "") : this(property, instance, oldValue, newValue, description)
+        {
+            this.doLast = doLast;
+        }
+
         public void Undo()
         {
             _instance.GetType().GetProperty(_field).SetValue(_instance, _oldValue, null);

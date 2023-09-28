@@ -51,11 +51,11 @@
                                     <StackPanel Background="{DynamicResource MahApps.Brushes.Accent2}" Margin="0,0,5,0" Visibility="{Binding IsEmitter, Converter={StaticResource visibilityConverter}}" Orientation="Horizontal">
                                         <TextBlock Text="EMITTER" Margin="5, 0"/>
                                     </StackPanel>
-                                    <StackPanel Background="{DynamicResource MahApps.Brushes.AccentBase}" Margin="0,0,5,0" Visibility="{Binding IsEmission, Converter={StaticResource visibilityConverter}}" Orientation="Horizontal">
-                                        <TextBlock Text="EMISSION" Margin="5, 0"/>
+                                    <StackPanel Background="Transparent" Margin="0,0,5,0" Visibility="{Binding IsEmission, Converter={StaticResource visibilityConverter}}" Orientation="Horizontal">
+                                        <Grid Background="{Binding PreviewBrush}" Width="50" Margin="5, 0" MouseDown="Grid_MouseDown"/>
                                     </StackPanel>
-                                    <Grid Background="{DynamicResource MahApps.Brushes.Gray.SemiTransparent}" Margin="0,0,5,0" Visibility="{Binding IsNull, Converter={StaticResource visibilityConverter}}">
-                                        <TextBlock Text="NULL" Margin="5, 0"/>
+                                    <Grid Background="{DynamicResource MahApps.Brushes.Accent4}" Margin="0,0,5,0" Visibility="{Binding IsNull, Converter={StaticResource visibilityConverter}}">
+                                        <TextBlock Text="NULL EMITTER" Margin="5, 0"/>
                                     </Grid>
 
                                     <TextBlock Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" MinWidth="100" Tag="{Binding DataContext, ElementName=UserControl}"/>

@@ -94,13 +94,13 @@ namespace Xv2CoreLib.Properties {
         ///    &lt;Parameter Name=&quot;AlphaBlend&quot; /&gt;
         ///    &lt;Parameter Name=&quot;AlphaBlendType&quot; /&gt;
         ///    &lt;Parameter Name=&quot;ZWriteMask&quot; /&gt;
+        ///    &lt;Parameter Name=&quot;LowRez&quot; /&gt;
         ///    &lt;Parameter Name=&quot;Glare&quot; /&gt;
         ///    &lt;Parameter Name=&quot;BackFace&quot; /&gt;
-        ///    &lt;Parameter Name=&quot;LowRez&quot; /&gt;
         ///    &lt;Parameter Name=&quot;LowRezSmoke&quot; /&gt;
-        ///    &lt;Parameter Name=&quot;AlphaSortMask&quot; /&gt;
-        ///    &lt;Parameter Name=&quot;AlphaTest&quot; /&gt;
         ///    &lt;Parameter Name=&quot;TwoSidedRender&quot; /&gt;
+        ///    &lt;Parameter Name=&quot;AlphaTest&quot; /&gt;
+        ///    &lt;Parameter Name=&quot;AlphaSortMask&quot; /&gt;
         ///    &lt;Para [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string ShaderHelper {
@@ -115,6 +115,53 @@ namespace Xv2CoreLib.Properties {
         internal static byte[] silence {
             get {
                 object obj = ResourceManager.GetObject("silence", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;Xv2StageDef&gt;
+        ///  &lt;Stage idx=&quot;0&quot; ssid=&quot;0&quot;&gt;
+        ///    &lt;BASE_DIR value=&quot;data/stage/&quot; /&gt;
+        ///    &lt;CODE value=&quot;LBY&quot; /&gt;
+        ///    &lt;DIR value=&quot;LBY&quot; /&gt;
+        ///    &lt;STR4 value=&quot;LBY&quot; /&gt;
+        ///    &lt;EVE value=&quot;template&quot; /&gt;
+        ///    &lt;UNK5 value=&quot;0&quot; /&gt;
+        ///    &lt;F6 value=&quot;200.0&quot; /&gt;
+        ///    &lt;SE value=&quot;&quot; /&gt;
+        ///    &lt;BGM_CUE_ID value=&quot;0&quot; /&gt;
+        ///    &lt;OVERRIDE_FAR_CLIP value=&quot;0.0&quot; /&gt;
+        ///    &lt;LIMIT value=&quot;500.0&quot; /&gt;
+        ///    &lt;Gate&gt;
+        ///      &lt;NAME value=&quot;&quot; /&gt;
+        ///      &lt;TARGET_STAGE_IDX value=&quot;4294967295&quot; /&gt;
+        ///      &lt;U_0C value=&quot;0x0&quot; /&gt;
+        ///    [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string xv2_stage_def {
+            get {
+                return ResourceManager.GetString("xv2_stage_def", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] XV2P_SLOTS_STAGE {
+            get {
+                object obj = ResourceManager.GetObject("XV2P_SLOTS_STAGE", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] XV2P_SLOTS_STAGE_LOCAL {
+            get {
+                object obj = ResourceManager.GetObject("XV2P_SLOTS_STAGE_LOCAL", resourceCulture);
                 return ((byte[])(obj));
             }
         }

@@ -69,8 +69,18 @@ namespace Xv2CoreLib.EMP_NEW
     }
 
     [Serializable]
-    public class EMP_File : ITexture
+    public class EMP_File : ITexture, INotifyPropertyChanged
     {
+        #region INotifyPropChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public void NotifyPropertyChanged(string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        #endregion
+
         public const int EMP_SIGNATURE = 1347241251;
         public const string CLIPBOARD_NODE = "EMP_NODE";
         public const string CLIPBOARD_TEXTURE_SAMPLER = "EMP_TEXTURE_SAMPLER";
@@ -89,6 +99,13 @@ namespace Xv2CoreLib.EMP_NEW
 
         public AsyncObservableCollection<ParticleNode> ParticleNodes { get; set; } = new AsyncObservableCollection<ParticleNode>();
         public AsyncObservableCollection<EMP_TextureSamplerDef> Textures { get; set; } = new AsyncObservableCollection<EMP_TextureSamplerDef>();
+
+        //Exists to raise an event when the EMP has been edited. Actual value is irrelevant!
+        public bool HasBeenEdited
+        {
+            get => true;
+            set => NotifyPropertyChanged(nameof(HasBeenEdited));
+        }
 
         #region LoadSave
         public byte[] SaveToBytes()
@@ -315,7 +332,7 @@ namespace Xv2CoreLib.EMP_NEW
         /// </summary>
         public AsyncObservableCollection<ParticleNode> GetParentList(ParticleNode particleNode)
         {
-            if (particleNode == null) return ParticleNodes;
+            if (particleNode == null || ParticleNodes.Count == 0) return ParticleNodes;
 
             foreach (ParticleNode node in ParticleNodes)
             {
@@ -336,7 +353,7 @@ namespace Xv2CoreLib.EMP_NEW
                 }
             }
 
-            return null;
+            return ParticleNodes;
         }
 
         private AsyncObservableCollection<ParticleNode> GetParentList_Recursive(AsyncObservableCollection<ParticleNode> children, ParticleNode particleEffect)
@@ -550,6 +567,14 @@ namespace Xv2CoreLib.EMP_NEW
             return undos;
         }
 
+        public void UpdateBrushPreview()
+        {
+            foreach(ParticleNode node in ParticleNodes)
+            {
+                node.UpdatePreviewBrush(true);
+            }
+
+        }
         #endregion
 
         public EMP_File Clone()
@@ -629,6 +654,31 @@ namespace Xv2CoreLib.EMP_NEW
         public bool IsEmitter => NodeType == ParticleNodeType.Emitter;
         public bool IsEmission => NodeType == ParticleNodeType.Emission;
         public bool IsNull => NodeType == ParticleNodeType.Null;
+
+        public System.Windows.Media.LinearGradientBrush PreviewBrush
+        {
+            get
+            {
+                RgbColor color1_Value = EmissionNode.Texture.Color1.GetAverageColor();
+                RgbColor color2_Value = EmissionNode.Texture.Color2.GetAverageColor();
+                RgbColor colorVariance = new RgbColor(EmissionNode.Texture.Color_Variance.R, EmissionNode.Texture.Color_Variance.G, EmissionNode.Texture.Color_Variance.B);
+
+                if(EmissionNode.Texture.MaterialRef?.DecompiledParameters?.AlphaBlend == 1 && EmissionNode.Texture.MaterialRef?.DecompiledParameters?.AlphaBlendType == 2)
+                {
+                    color1_Value.Invert();
+                    color2_Value.Invert();
+                    colorVariance.Invert();
+                }
+
+                var color1 = System.Windows.Media.Color.FromRgb((byte)MathHelpers.Clamp(0, 255, color1_Value.R_int + colorVariance.R_int), (byte)MathHelpers.Clamp(0, 255, color1_Value.G_int + colorVariance.G_int), (byte)MathHelpers.Clamp(0, 255, color1_Value.B_int + colorVariance.B_int));
+                var color2 = color1;
+
+                if(NodeFlags.HasFlag(NodeFlags1.EnableSecondaryColor))
+                    color2 = System.Windows.Media.Color.FromRgb((byte)MathHelpers.Clamp(0, 255, color2_Value.R_int + colorVariance.R_int), (byte)MathHelpers.Clamp(0, 255, color2_Value.G_int + colorVariance.G_int), (byte)MathHelpers.Clamp(0, 255, color2_Value.B_int + colorVariance.B_int));
+
+                return new System.Windows.Media.LinearGradientBrush(color1, color2, 0);
+            }
+        }
 
         //Exposed directly to TreeView.
         public bool UndoableIsVisible
@@ -748,6 +798,25 @@ namespace Xv2CoreLib.EMP_NEW
         public AsyncObservableCollection<EMP_Modifier> Modifiers { get; set; } = new AsyncObservableCollection<EMP_Modifier>();
         public AsyncObservableCollection<ParticleNode> ChildParticleNodes { get; set; } = new AsyncObservableCollection<ParticleNode>();
 
+        public ParticleNode()
+        {
+            PropertyChanged += ParticleNode_PropertyChanged;
+            EmissionNode.Texture.Color1.Keyframes.CollectionChanged += ColorKeyframes_CollectionChanged;
+            EmissionNode.Texture.Color2.Keyframes.CollectionChanged += ColorKeyframes_CollectionChanged;
+        }
+
+        private void ColorKeyframes_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            NotifyPropertyChanged(nameof(PreviewBrush));
+        }
+
+        private void ParticleNode_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if(e.PropertyName == nameof(NodeFlags))
+            {
+                NotifyPropertyChanged(nameof(PreviewBrush));
+            }
+        }
 
         public ParticleNode Clone(bool ignoreChildren = false)
         {
@@ -946,7 +1015,7 @@ namespace Xv2CoreLib.EMP_NEW
             if (!color1.IsWhiteOrBlack)
                 colors.Add(color1);
 
-            if (!color2.IsWhiteOrBlack)
+            if (!color2.IsWhiteOrBlack && NodeFlags.HasFlag(NodeFlags1.EnableSecondaryColor))
                 colors.Add(color2);
 
 
@@ -975,6 +1044,8 @@ namespace Xv2CoreLib.EMP_NEW
                 EmissionNode.Texture.Color1.ChangeHue(hue, saturation, lightness, undos, hueSet, variance, invertColor);
                 EmissionNode.Texture.Color2.ChangeHue(hue, saturation, lightness, undos, hueSet, variance, invertColor);
                 EmissionNode.Texture.Color_Variance.ChangeHue(hue, saturation, lightness, undos, hueSet, variance, invertColor);
+
+                NotifyPropertyChanged(nameof(PreviewBrush));
             }
 
             //Children
@@ -1095,6 +1166,19 @@ namespace Xv2CoreLib.EMP_NEW
                     }
 
                     KeyframedValues.Add(values[i]);
+                }
+            }
+        }
+    
+        public void UpdatePreviewBrush(bool recursive = false)
+        {
+            NotifyPropertyChanged(nameof(PreviewBrush));
+
+            if (recursive)
+            {
+                foreach (var node in ChildParticleNodes)
+                {
+                    node.UpdatePreviewBrush(true);
                 }
             }
         }
@@ -1292,9 +1376,9 @@ namespace Xv2CoreLib.EMP_NEW
                 F_100 = F_100,
                 F_104 = F_104,
                 F_108 = F_108,
-                ScaleBase = ScaleBase,
+                ScaleBase = ScaleBase.Copy(),
                 ScaleBase_Variance = ScaleBase_Variance,
-                ScaleXY = ScaleXY,
+                ScaleXY = ScaleXY.Copy(),
                 Color1 = Color1.Copy(),
                 Color_Variance = Color_Variance.Copy(),
                 Color2 = Color2.Copy(),
@@ -1331,6 +1415,7 @@ namespace Xv2CoreLib.EMP_NEW
 
             return 0;
         }
+    
     }
 
     [Serializable]
@@ -1369,7 +1454,10 @@ namespace Xv2CoreLib.EMP_NEW
         public KeyframedFloatValue Angle { get; set; } = new KeyframedFloatValue(0f, KeyframedValueType.Angle);
         public float Angle_Variance { get; set; }
 
-        //Two unknowns on "Cone", and one on "Cirlce" and "Square"
+        //Last value for Circle and Square. Only used when EmitFromEdge is true and RandomDirection NodeFlag is set.
+        public float EdgeIncrement { get; set; }
+
+        //Two unknowns on "Cone"
         public float F_1 { get; set; }
         public float F_2 { get; set; }
 
@@ -1422,7 +1510,7 @@ namespace Xv2CoreLib.EMP_NEW
                 emitter.Size_Variance = BitConverter.ToSingle(bytes, offset + 28);
                 emitter.Size2.Constant = BitConverter.ToSingle(bytes, offset + 32);
                 emitter.Size2_Variance = BitConverter.ToSingle(bytes, offset + 36);
-                emitter.F_1 = BitConverter.ToSingle(bytes, offset + 44);
+                emitter.EdgeIncrement = BitConverter.ToSingle(bytes, offset + 44);
             }
 
             return emitter;
@@ -1466,7 +1554,7 @@ namespace Xv2CoreLib.EMP_NEW
                 bytes.AddRange(BitConverter.GetBytes(Size2.Constant));
                 bytes.AddRange(BitConverter.GetBytes(Size2_Variance));
                 bytes.AddRange(BitConverter.GetBytes((int)Shape));
-                bytes.AddRange(BitConverter.GetBytes(F_1));
+                bytes.AddRange(BitConverter.GetBytes(EdgeIncrement));
             }
 
             return bytes.ToArray();
@@ -1506,7 +1594,7 @@ namespace Xv2CoreLib.EMP_NEW
 
         //Default:
         public bool BillboardEnabled => BillboardType != ParticleBillboardType.None;
-        public bool VisibleOnlyOnMotion { get; set; } //Requires AutoRotation
+        public bool VelocityOriented { get; set; } //Requires AutoRotation
 
         //Particle starts at this angle
         public float StartRotation { get; set; }
@@ -1542,7 +1630,7 @@ namespace Xv2CoreLib.EMP_NEW
             {
                 //AutoOriented
                 emission.EmissionType = ParticleEmissionType.Plane;
-                emission.VisibleOnlyOnMotion = false;
+                emission.VelocityOriented = false;
                 emission.StartRotation = BitConverter.ToSingle(bytes, offset + 0);
                 emission.StartRotation_Variance = BitConverter.ToSingle(bytes, offset + 4);
                 emission.ActiveRotation.Constant = BitConverter.ToSingle(bytes, offset + 8);
@@ -1551,13 +1639,13 @@ namespace Xv2CoreLib.EMP_NEW
             else if(emissionType == 1)
             {
                 emission.EmissionType = ParticleEmissionType.Plane;
-                emission.VisibleOnlyOnMotion = true;
+                emission.VelocityOriented = true;
             }
             else if(emissionType == 2)
             {
                 emission.EmissionType = ParticleEmissionType.Plane;
                 emission.BillboardType = ParticleBillboardType.None;
-                emission.VisibleOnlyOnMotion = false;
+                emission.VelocityOriented = false;
                 emission.StartRotation = BitConverter.ToSingle(bytes, offset + 0);
                 emission.StartRotation_Variance = BitConverter.ToSingle(bytes, offset + 4);
                 emission.ActiveRotation.Constant = BitConverter.ToSingle(bytes, offset + 8);
@@ -1680,7 +1768,7 @@ namespace Xv2CoreLib.EMP_NEW
             switch (EmissionType)
             {
                 case ParticleEmissionType.Plane:
-                    if(BillboardEnabled && VisibleOnlyOnMotion)
+                    if(BillboardType == ParticleBillboardType.Camera && VelocityOriented)
                     {
                         //"VisibleOnSpeed"
                         emissionType = 1;
@@ -1830,7 +1918,7 @@ namespace Xv2CoreLib.EMP_NEW
             {
                 EmissionType = EmissionType,
                 BillboardType = BillboardType,
-                VisibleOnlyOnMotion = VisibleOnlyOnMotion,
+                VelocityOriented = VelocityOriented,
                 StartRotation = StartRotation,
                 StartRotation_Variance = StartRotation_Variance,
                 ActiveRotation = ActiveRotation.Copy(),
@@ -1848,7 +1936,7 @@ namespace Xv2CoreLib.EMP_NEW
             switch (EmissionType)
             {
                 case ParticleEmissionType.Plane:
-                    if (BillboardEnabled && VisibleOnlyOnMotion)
+                    if (BillboardType == ParticleBillboardType.Camera && VelocityOriented)
                     {
                         return NodeSpecificType.AutoOriented_VisibleOnSpeed;
                     }
@@ -2298,7 +2386,7 @@ namespace Xv2CoreLib.EMP_NEW
         }
 
         /// <summary>
-        /// Returns the Parameter, Component and Looped value as an Int16 for writing a binary EMP file.
+        /// Returns the Parameter, Component and Interpolate value as an Int16 for writing a binary EMP file.
         /// </summary>
         public short GetParameters()
         {

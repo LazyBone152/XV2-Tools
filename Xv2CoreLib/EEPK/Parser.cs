@@ -126,7 +126,7 @@ namespace Xv2CoreLib.EEPK
                     eepkFile.Effects[i].EffectParts[a].OnGroundOnly = composite_I_32[3];
                     eepkFile.Effects[i].EffectParts[a].UseTimeScale = composite_I_32[4];
                     eepkFile.Effects[i].EffectParts[a].UseBoneDirection = composite_I_32[5];
-                    eepkFile.Effects[i].EffectParts[a].UseBoneToCameraDirection = composite_I_32[6];
+                    eepkFile.Effects[i].EffectParts[a].EnableRotationValues = composite_I_32[6];
                     eepkFile.Effects[i].EffectParts[a].UseScreenCenterToBoneDirection = composite_I_32[7];
                     eepkFile.Effects[i].EffectParts[a].I_34 = BitConverter.ToInt16(rawBytes, effectOffsets[i] + effectInfoOffsets[i] + addedOffset + 34);
                     eepkFile.Effects[i].EffectParts[a].EMA_Loop = composite_I_36[0];

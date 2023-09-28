@@ -384,6 +384,15 @@ namespace Xv2CoreLib.EMM
             };
         }
 
+        public static EmmMaterial CreateDefaultMaterial(string shaderProgram)
+        {
+            EmmMaterial mat = new EmmMaterial();
+            mat.Name = "DefaultMat";
+            mat.ShaderProgram = shaderProgram;
+            mat.DecompiledParameters = DecompiledMaterial.Default();
+
+            return mat;
+        }
         public void ChangeHsl(double hue, double saturation = 0.0, double lightness = 0.0, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0)
         {
             if (Parameters == null) return;

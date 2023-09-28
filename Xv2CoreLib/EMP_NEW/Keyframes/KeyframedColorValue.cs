@@ -132,17 +132,20 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
         /// <summary>
         /// Gets the average color between the constant value and all keyframes.
         /// </summary>
-        public RgbColor GetAverageColor()
+        public RgbColor GetAverageColor(bool allowWhiteAndBlack = false)
         {
             List<RgbColor> colors = new List<RgbColor>();
 
-            if (!Constant.IsWhiteOrBlack())
+            if (!Constant.IsWhiteOrBlack() || allowWhiteAndBlack)
                 colors.Add(new RgbColor(Constant));
 
-            foreach (var keyframe in Keyframes)
+            if (IsAnimated)
             {
-                if (!keyframe.Value.IsWhiteOrBlack())
-                    colors.Add(new RgbColor(keyframe.Value));
+                foreach (KeyframeColorValue keyframe in Keyframes)
+                {
+                    if (!keyframe.Value.IsWhiteOrBlack() || allowWhiteAndBlack)
+                        colors.Add(new RgbColor(keyframe.Value));
+                }
             }
 
             return colors.Count > 0 ? ColorEx.GetAverageColor(colors) : new RgbColor(Constant);

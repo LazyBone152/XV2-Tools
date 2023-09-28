@@ -30,7 +30,7 @@ namespace Xv2CoreLib.EMM.Analyzer
 
         public void AnalyzeMaterials()
         {
-            const string path = @"E:\VS_Test\EMM\ALL EMM";
+            const string path = @"D:\VS_Test\EMM\ALL EMM - XV1 included";
 
             string[] files = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
             ShaderHelper shaders = new ShaderHelper();

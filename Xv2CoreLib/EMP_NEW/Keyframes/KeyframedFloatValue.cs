@@ -161,6 +161,20 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             return undos;
         }
 
+        public float GetAverageValue()
+        {
+            if (Keyframes.Count == 0) return Constant;
+
+            float avgValue = 0f;
+
+            foreach (KeyframeFloatValue keyframe in Keyframes)
+            {
+                avgValue += keyframe.Value;
+            }
+
+            return avgValue / Keyframes.Count;
+        }
+
         public float GetInterpolatedValue(float time)
         {
             if (Keyframes.Count == 0 || !IsAnimated) return Constant;

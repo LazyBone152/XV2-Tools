@@ -46,16 +46,18 @@ namespace EEPK_Organiser.ViewModel
                 effectPart.Orientation = value;
             }
         }
-        public DeactivationMode Deactivation
+        public byte Deactivation
         {
-            get
-            {
-                return effectPart.Deactivation;
-            }
+            get => (byte)effectPart.Deactivation;
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.Deactivation), effectPart, effectPart.Deactivation, value, "Deactivation"));
-                effectPart.Deactivation = value;
+                DeactivationMode newValue = (DeactivationMode)value;
+
+                if(newValue != effectPart.Deactivation)
+                {
+                    UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.Deactivation), effectPart, effectPart.Deactivation, newValue, "Deactivation"));
+                    effectPart.Deactivation = newValue;
+                }
             }
         }
         public byte I_06
@@ -218,12 +220,12 @@ namespace EEPK_Organiser.ViewModel
         {
             get
             {
-                return effectPart.UseBoneToCameraDirection;
+                return effectPart.EnableRotationValues;
             }
             set
             {
-                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.UseBoneToCameraDirection), effectPart, effectPart.UseBoneToCameraDirection, value, "UseBoneToCameraDirection"));
-                effectPart.UseBoneToCameraDirection = value;
+                UndoManager.Instance.AddUndo(new UndoableProperty<EffectPart>(nameof(effectPart.EnableRotationValues), effectPart, effectPart.EnableRotationValues, value, "UseBoneToCameraDirection"));
+                effectPart.EnableRotationValues = value;
             }
         }
         public bool I_32_7
@@ -777,6 +779,8 @@ namespace EEPK_Organiser.ViewModel
             }
         }
 
+        public bool IsUsingEma => effectPart?.AssetType == AssetType.EMO || effectPart?.AssetType == AssetType.LIGHT;
+        public bool IsNotCBIND => effectPart?.AssetType != AssetType.CBIND;
 
         public EffectPartViewModel(EffectPart _effectPart)
         {
@@ -863,6 +867,8 @@ namespace EEPK_Organiser.ViewModel
             RaisePropertyChanged(() => I_94);
             RaisePropertyChanged(() => ESK);
             RaisePropertyChanged(() => IsNotTBIND);
+            RaisePropertyChanged(() => IsNotCBIND);
+            RaisePropertyChanged(() => IsUsingEma);
         }
 
     }

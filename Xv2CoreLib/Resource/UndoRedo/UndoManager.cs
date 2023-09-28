@@ -253,7 +253,8 @@ namespace Xv2CoreLib.Resource.UndoRedo
         Effect,
         Action,
         BCS,
-        EMD
+        EMD,
+        ColorControl
     }
 
     public delegate void UndoEventRaisedEventHandler(object source, UndoEventRaisedEventArgs e);

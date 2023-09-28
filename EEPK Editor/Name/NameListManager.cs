@@ -44,7 +44,7 @@ namespace EEPK_Organiser.NameList
             }
         }
 
-        public string NameListDir { get { return SettingsManager.Instance.GetAbsPathInAppFolder("namelist"); } }
+        public string NameListDir { get { return SettingsManager.Instance.GetAppFolder(Xv2CoreLib.Resource.App.Application.EepkOrganiser) + "/namelist"; } }
 
         public NameListManager()
         {

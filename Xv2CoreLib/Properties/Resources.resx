@@ -127,4 +127,13 @@
   <data name="silence" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\silence.hca;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="XV2P_SLOTS_STAGE" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\XV2P_SLOTS_STAGE.x2s;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="XV2P_SLOTS_STAGE_LOCAL" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\XV2P_SLOTS_STAGE_LOCAL.x2s;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="xv2_stage_def" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\xv2_stage_def.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
 </root>

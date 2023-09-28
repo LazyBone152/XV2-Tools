@@ -11,8 +11,10 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Xv2CoreLib;
 using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.EMG;
+using Xv2CoreLib.EMO;
 using Xv2CoreLib.EMP_NEW;
 using Xv2CoreLib.Resource.UndoRedo;
 
@@ -82,7 +84,7 @@ namespace EEPK_Organiser.View.Editors.EMP
         private void NodeChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (Node != null)
-                _nodeViewModel.SetContext(Node);
+                _nodeViewModel.SetContext(Node, EmpFile);
 
             NotifyPropertyChanged(nameof(Node));
             NotifyPropertyChanged(nameof(NodeViewModel));
@@ -99,25 +101,27 @@ namespace EEPK_Organiser.View.Editors.EMP
         //Emitter:
         public Visibility EmitterFromAreaVisibility => IsEmitterShape(ParticleEmitter.ParticleEmitterShape.Circle, ParticleEmitter.ParticleEmitterShape.Square) ? Visibility.Visible : Visibility.Collapsed;
         public Visibility EmitterPositionVisibility => IsEmitterShape(ParticleEmitter.ParticleEmitterShape.Circle, ParticleEmitter.ParticleEmitterShape.Square, ParticleEmitter.ParticleEmitterShape.Point) ? Visibility.Visible : Visibility.Collapsed;
-        public Visibility EmitterSizeVisibility => IsEmitterShape(ParticleEmitter.ParticleEmitterShape.Circle, ParticleEmitter.ParticleEmitterShape.Square, ParticleEmitter.ParticleEmitterShape.Sphere) ? Visibility.Visible : Visibility.Collapsed;
-        public Visibility EmitterSize2Visibility => IsEmitterShape(ParticleEmitter.ParticleEmitterShape.Circle, ParticleEmitter.ParticleEmitterShape.Square) ? Visibility.Visible : Visibility.Collapsed;
         public Visibility EmitterAngleVisibility => IsEmitterShape(ParticleEmitter.ParticleEmitterShape.Circle, ParticleEmitter.ParticleEmitterShape.Square, ParticleEmitter.ParticleEmitterShape.Point) ? Visibility.Visible : Visibility.Collapsed;
-        public Visibility EmitterF1Visibility => IsEmitterShape(ParticleEmitter.ParticleEmitterShape.Circle, ParticleEmitter.ParticleEmitterShape.Square, ParticleEmitter.ParticleEmitterShape.Point) ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility EmitterEdgeVisibility => IsEmitterShape(ParticleEmitter.ParticleEmitterShape.Circle, ParticleEmitter.ParticleEmitterShape.Square) && Node?.EmitterNode?.EmitFromArea == true ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility EmitterF1Visibility => IsEmitterShape(ParticleEmitter.ParticleEmitterShape.Point) ? Visibility.Visible : Visibility.Collapsed;
         public Visibility EmitterF2Visibility => IsEmitterShape(ParticleEmitter.ParticleEmitterShape.Point) ? Visibility.Visible : Visibility.Collapsed;
+
+        public Visibility EmitterSquareSizeVisibility => IsEmitterShape(ParticleEmitter.ParticleEmitterShape.Square) ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility EmitterCircleSizeVisibility => IsEmitterShape(ParticleEmitter.ParticleEmitterShape.Circle) ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility EmitterSphereSizeVisibility => IsEmitterShape(ParticleEmitter.ParticleEmitterShape.Sphere) ? Visibility.Visible : Visibility.Collapsed;
 
         //Emission
         public Visibility BillboardVisibility => IsEmissionType(ParticleEmission.ParticleEmissionType.Plane, ParticleEmission.ParticleEmissionType.ShapeDraw) ? Visibility.Visible : Visibility.Collapsed;
-        public Visibility EmissionRotationValuesVisibility => IsEmissionType(ParticleEmission.ParticleEmissionType.Mesh, ParticleEmission.ParticleEmissionType.ShapeDraw) || (IsEmissionType(ParticleEmission.ParticleEmissionType.Plane) && Node?.EmissionNode?.VisibleOnlyOnMotion == false) ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility EmissionRotationValuesVisibility => IsEmissionType(ParticleEmission.ParticleEmissionType.Mesh, ParticleEmission.ParticleEmissionType.ShapeDraw) || (IsEmissionType(ParticleEmission.ParticleEmissionType.Plane) && Node?.EmissionNode?.VelocityOriented == false) ? Visibility.Visible : Visibility.Collapsed;
         public Visibility EmissionDefaultVisibility => IsEmissionType(ParticleEmission.ParticleEmissionType.Plane) ? Visibility.Visible : Visibility.Collapsed;
         public Visibility EmissionAutoRotationVisibility => IsEmissionType(ParticleEmission.ParticleEmissionType.Plane) && Node?.EmissionNode?.BillboardEnabled == true ? Visibility.Visible : Visibility.Collapsed;
-        public Visibility EmissionRotAxisVisibility => IsEmissionType(ParticleEmission.ParticleEmissionType.Plane) && Node?.EmissionNode?.BillboardEnabled == false ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility EmissionAutoRotationCameraVisibility => IsEmissionType(ParticleEmission.ParticleEmissionType.Plane) && Node?.EmissionNode?.BillboardEnabled == true && Node?.EmissionNode?.BillboardType == ParticleBillboardType.Camera ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility EmissionRotAxisVisibility => (IsEmissionType(ParticleEmission.ParticleEmissionType.Plane) && Node?.EmissionNode?.BillboardEnabled == false) || IsEmissionType(ParticleEmission.ParticleEmissionType.Mesh) ? Visibility.Visible : Visibility.Collapsed;
         public Visibility EmissionShapeDrawVisibility => IsEmissionType(ParticleEmission.ParticleEmissionType.ShapeDraw) ? Visibility.Visible : Visibility.Collapsed;
         public Visibility EmissionMeshVisibility => IsEmissionType(ParticleEmission.ParticleEmissionType.Mesh) ? Visibility.Visible : Visibility.Collapsed;
         public Visibility EmissionConeExtrudeVisibility => IsEmissionType(ParticleEmission.ParticleEmissionType.ConeExtrude) ? Visibility.Visible : Visibility.Collapsed;
-        
-        public bool RandomUpVectorEnabled => IsNodeType(NodeSpecificType.Mesh, NodeSpecificType.Default) ? true : false;
-        public bool RandomDirEnabled => IsNodeType(NodeSpecificType.AutoOriented, NodeSpecificType.Default, NodeSpecificType.ShapeDraw, NodeSpecificType.Mesh, NodeSpecificType.ShapeAreaDistribution, NodeSpecificType.ShapePerimeterDistribution, NodeSpecificType.VerticalDistribution) ? true : false;
-        public bool EmissionRotEnabled => !(Node?.EmissionNode?.BillboardEnabled == true && Node?.EmissionNode?.VisibleOnlyOnMotion == true);
+
+        public bool EmissionRotEnabled => !(Node?.EmissionNode?.BillboardEnabled == true && Node?.EmissionNode?.VelocityOriented == true);
         public bool IsEmitterOrNull => Node != null ? (Node.IsEmitter || Node.IsNull) : false;
 
         private bool IsEmitterShape(params ParticleEmitter.ParticleEmitterShape[] shapes)
@@ -165,7 +169,7 @@ namespace EEPK_Organiser.View.Editors.EMP
 
         private void SelectedShapeDrawPoint_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if(shapeDrawPointDataGrid != null && SelectedShapeDrawPoint.Point != null)
+            if (shapeDrawPointDataGrid != null && SelectedShapeDrawPoint.Point != null)
             {
                 shapeDrawPointDataGrid.ScrollIntoView(SelectedShapeDrawPoint.Point);
             }
@@ -173,7 +177,8 @@ namespace EEPK_Organiser.View.Editors.EMP
 
         private void NodeViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(NodeViewModel.Shape) || e.PropertyName == nameof(NodeViewModel.NodeType) || e.PropertyName == nameof(NodeViewModel.EmissionType) || e.PropertyName == nameof(NodeViewModel.BillboardType) || e.PropertyName == nameof(NodeViewModel.VisibleOnlyOnMotion))
+            if (e.PropertyName == nameof(NodeViewModel.Shape) || e.PropertyName == nameof(NodeViewModel.NodeType) || e.PropertyName == nameof(NodeViewModel.EmissionType) || e.PropertyName == nameof(NodeViewModel.BillboardType) || 
+                e.PropertyName == nameof(NodeViewModel.VisibleOnlyOnMotion) || e.PropertyName == nameof(NodeViewModel.EmitFromArea))
             {
                 UpdateVisibilities();
             }
@@ -181,6 +186,35 @@ namespace EEPK_Organiser.View.Editors.EMP
 
         private void Instance_UndoOrRedoCalled(object source, UndoEventRaisedEventArgs e)
         {
+            //Update PreviewBrush when color has been changed externally
+            if(e.UndoGroup == UndoGroup.ColorControl)
+            {
+                if (e.UndoContext is ParticleNode node)
+                {
+                    node.UpdatePreviewBrush();
+                    return;
+                }
+                else if (e.UndoContext is Asset asset)
+                {
+                    if(asset.assetType == Xv2CoreLib.EEPK.AssetType.PBIND)
+                    {
+                        if(asset.Files[0].EmpFile == EmpFile)
+                        {
+                            EmpFile.UpdateBrushPreview();
+                        }
+                    }
+                }
+                else if(e.UndoContext is EffectContainerFile eepk)
+                {
+                    if(eepk.Pbind == AssetContainer)
+                    {
+                        EmpFile.UpdateBrushPreview();
+                    }
+                }
+
+                return;
+            }
+
             UpdateVisibilities();
             NodeViewModel?.UpdateProperties();
         }
@@ -193,14 +227,17 @@ namespace EEPK_Organiser.View.Editors.EMP
 
             NotifyPropertyChanged(nameof(EmitterFromAreaVisibility));
             NotifyPropertyChanged(nameof(EmitterPositionVisibility));
-            NotifyPropertyChanged(nameof(EmitterSizeVisibility));
-            NotifyPropertyChanged(nameof(EmitterSize2Visibility));
             NotifyPropertyChanged(nameof(EmitterAngleVisibility));
+            NotifyPropertyChanged(nameof(EmitterEdgeVisibility));
             NotifyPropertyChanged(nameof(EmitterF1Visibility));
             NotifyPropertyChanged(nameof(EmitterF2Visibility));
+            NotifyPropertyChanged(nameof(EmitterSquareSizeVisibility));
+            NotifyPropertyChanged(nameof(EmitterCircleSizeVisibility));
+            NotifyPropertyChanged(nameof(EmitterSphereSizeVisibility));
 
             NotifyPropertyChanged(nameof(EmissionDefaultVisibility));
             NotifyPropertyChanged(nameof(EmissionAutoRotationVisibility));
+            NotifyPropertyChanged(nameof(EmissionAutoRotationCameraVisibility));
             NotifyPropertyChanged(nameof(EmissionRotAxisVisibility));
             NotifyPropertyChanged(nameof(EmissionShapeDrawVisibility));
             NotifyPropertyChanged(nameof(EmissionMeshVisibility));
@@ -210,8 +247,6 @@ namespace EEPK_Organiser.View.Editors.EMP
             NotifyPropertyChanged(nameof(IsEmitterOrNull));
             NotifyPropertyChanged(nameof(EmissionRotationValuesVisibility));
 
-            NotifyPropertyChanged(nameof(RandomUpVectorEnabled));
-            NotifyPropertyChanged(nameof(RandomDirEnabled));
         }
 
         #region Texture
@@ -290,7 +325,7 @@ namespace EEPK_Organiser.View.Editors.EMP
             List<ShapeDrawPoint> selectedPoints = shapeDrawPointDataGrid.SelectedItems.Cast<ShapeDrawPoint>().ToList();
             List<IUndoRedo> undos = new List<IUndoRedo>();
 
-            foreach(var point in selectedPoints)
+            foreach (var point in selectedPoints)
             {
                 if (Node.EmissionNode.ShapeDraw.Points.Count <= 2) break;
 
@@ -313,7 +348,7 @@ namespace EEPK_Organiser.View.Editors.EMP
         {
             List<ShapeDrawPoint> points = (List<ShapeDrawPoint>)Clipboard.GetData(EMP_File.CLIPBOARD_SHAP_DRAW_POINT);
 
-            if(points != null)
+            if (points != null)
             {
                 List<IUndoRedo> undos = new List<IUndoRedo>();
 
@@ -338,7 +373,7 @@ namespace EEPK_Organiser.View.Editors.EMP
             {
                 List<IUndoRedo> undos = new List<IUndoRedo>();
 
-                foreach(var point in selectedPoints)
+                foreach (var point in selectedPoints)
                 {
                     point.PasteValues(points[0], undos);
                 }
@@ -365,24 +400,69 @@ namespace EEPK_Organiser.View.Editors.EMP
         {
             OpenFileDialog openFile = new OpenFileDialog();
             openFile.Title = "Import Mesh...";
-            openFile.Filter = string.Format("XV2 Mesh File | *.emd; *.emg");
+            openFile.Filter = string.Format("XV2 Mesh File | *.emd; *.emo; *.emg");
             //openFile.Filter = string.Format("XV2 Mesh File | *.emd");
 
             if (openFile.ShowDialog() == true)
             {
                 EMG_File emgFile;
 
-                if (Path.GetExtension(openFile.FileName) == ".emd")
+                if (Path.GetExtension(openFile.FileName).Equals(".emd", StringComparison.OrdinalIgnoreCase))
                 {
                     emgFile = EMG_File.ConvertToEmg(Xv2CoreLib.EMD.EMD_File.Load(openFile.FileName));
                 }
-                else if (Path.GetExtension(openFile.FileName) == ".emg")
+                else if (Path.GetExtension(openFile.FileName).Equals(".emg", StringComparison.OrdinalIgnoreCase))
                 {
                     emgFile = EMG_File.Load(openFile.FileName);
+                }
+                else if (Path.GetExtension(openFile.FileName).Equals(".emo", StringComparison.OrdinalIgnoreCase))
+                {
+                    EMO_File emo = EMO_File.Load(openFile.FileName);
+
+                    if (emo.Parts.Count != 1)
+                    {
+                        MessageBox.Show($"Cannot set this model as the particle mesh because it has too many meshes! A particle can only have 1 mesh.", "Invalid Mesh File", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    if (emo.Parts[0].EmgFiles.Count != 1)
+                    {
+                        MessageBox.Show($"Cannot set this model as the particle mesh because it has too many meshes! A particle can only have 1 mesh.", "Invalid Mesh File", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    emgFile = emo.Parts[0].EmgFiles[0];
                 }
                 else
                 {
                     throw new InvalidDataException("Mesh_ImportMesh: File must either be an EMD or EMG.");
+                }
+
+                //Validate material and texture counts within this EMG:
+                //A particle mesh can only have 1 mesh, and up to 1 texture def on that mesh (though, sometimes none... not sure on the purpose of this since the EMP has a texture def too).
+                if (emgFile.EmgMeshes.Count != 1)
+                {
+                    MessageBox.Show($"The model can only have 1 mesh, while this file has {emgFile.EmgMeshes.Count}.\n\nCannot set this model as the particle mesh. Import failed.", "Invalid Mesh File", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                //if (emgFile.EmgMeshes[0].TextureLists.Count > 1)
+                //{
+                //    MessageBox.Show($"The mesh may only have up to 1 texture definition, while this file has {emgFile.EmgMeshes[0].TextureLists.Count}.\n\nCannot set this model as the particle mesh. Import failed.", "Invalid Mesh File", MessageBoxButton.OK, MessageBoxImage.Error);
+                //}
+
+                if (emgFile.EmgMeshes[0].VertexFlags.HasFlag(Xv2CoreLib.EMD.VertexFlags.BlendWeight) || emgFile.EmgMeshes[0].VertexFlags.HasFlag(Xv2CoreLib.EMD.VertexFlags.Tangent) || emgFile.EmgMeshes[0].VertexFlags.HasFlag(Xv2CoreLib.EMD.VertexFlags.Tex2UV))
+                {
+                    MessageBoxResult result = MessageBox.Show($"The mesh has invalid vertex flags.\n\nDetected flags: {emgFile.EmgMeshes[0].VertexFlags}\nAllowed flags: Position, Normal, TexUV, Color, CompressedFormat.\n\nIf you choose to continue with the import then these flags, along with any associated vertex data, will be removed.", "Invalid Vertex Flags", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        emgFile.EmgMeshes[0].VertexFlags = emgFile.EmgMeshes[0].VertexFlags.RemoveFlag(Xv2CoreLib.EMD.VertexFlags.BlendWeight) | emgFile.EmgMeshes[0].VertexFlags.RemoveFlag(Xv2CoreLib.EMD.VertexFlags.Tangent) | emgFile.EmgMeshes[0].VertexFlags.RemoveFlag(Xv2CoreLib.EMD.VertexFlags.Tex2UV);
+                    }
+                    else
+                    {
+                        return;
+                    }
                 }
 
                 UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(ParticleStaticMesh.EmgFile), Node.EmissionNode.Mesh, Node.EmissionNode.Mesh.EmgFile, emgFile, "Import Static Mesh"));

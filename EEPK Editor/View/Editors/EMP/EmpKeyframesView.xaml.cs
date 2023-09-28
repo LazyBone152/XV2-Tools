@@ -38,6 +38,7 @@ namespace EEPK_Organiser.View.Editors.EMP
             set => SetValue(NodeProperty, value);
         }
 
+        public ParticleNode ParticleNode => Node as ParticleNode;
 
         private static void OnKeyframedValueChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {

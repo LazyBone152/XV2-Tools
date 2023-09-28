@@ -372,6 +372,13 @@ namespace Xv2CoreLib.ETR
             }
         }
    
+        public void UpdateBrushPreview()
+        {
+            foreach(ETR_Node node in Nodes)
+            {
+                node.UpdatePreviewBrush();
+            }
+        }
     }
 
     [Serializable]
@@ -444,6 +451,29 @@ namespace Xv2CoreLib.ETR
 
         #endregion
 
+        public System.Windows.Media.LinearGradientBrush PreviewBrush
+        {
+            get
+            {
+                RgbColor color1_Value = Color1.GetAverageColor();
+                RgbColor color2_Value = Color2.GetAverageColor();
+
+                if (MaterialRef?.DecompiledParameters?.AlphaBlend == 1 && MaterialRef?.DecompiledParameters?.AlphaBlendType == 2)
+                {
+                    color1_Value.Invert();
+                    color2_Value.Invert();
+                }
+
+                var color1 = System.Windows.Media.Color.FromRgb((byte)MathHelpers.Clamp(0, 255, color1_Value.R_int), (byte)MathHelpers.Clamp(0, 255, color1_Value.G_int), (byte)MathHelpers.Clamp(0, 255, color1_Value.B_int));
+                var color2 = color1;
+
+                if (!Flags.HasFlag(ExtrudeFlags.NoDegrade))
+                    color2 = System.Windows.Media.Color.FromRgb((byte)MathHelpers.Clamp(0, 255, color2_Value.R_int), (byte)MathHelpers.Clamp(0, 255, color2_Value.G_int), (byte)MathHelpers.Clamp(0, 255, color2_Value.B_int));
+
+                return new System.Windows.Media.LinearGradientBrush(color1, color2, 0);
+            }
+        }
+
         //Selected KeyframedValue is binded here for the Keyframe Editor to access
         [NonSerialized]
         private KeyframedBaseValue _selectedKeyframedValue = null;
@@ -501,6 +531,17 @@ namespace Xv2CoreLib.ETR
         public AsyncObservableCollection<ShapeDrawPoint> ExtrudeShapePoints { get; set; } = new AsyncObservableCollection<ShapeDrawPoint>();
         public AsyncObservableCollection<EMP_KeyframedValue> KeyframedValues { get; set; } = new AsyncObservableCollection<EMP_KeyframedValue>();
         public AsyncObservableCollection<EMP_Modifier> Modifiers { get; set; } = new AsyncObservableCollection<EMP_Modifier>();
+
+        public ETR_Node()
+        {
+            Color1.Keyframes.CollectionChanged += ColorKeyframes_CollectionChanged;
+            Color2.Keyframes.CollectionChanged += ColorKeyframes_CollectionChanged;
+        }
+
+        private void ColorKeyframes_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            NotifyPropertyChanged(nameof(PreviewBrush));
+        }
 
         #region LoadSave
         public static ETR_Node Read(byte[] bytes, int nodeOffset, int texturesOffset, IList<EMP_TextureSamplerDef> textures)
@@ -816,6 +857,11 @@ namespace Xv2CoreLib.ETR
             }
 
             return scale / (Scale.Keyframes.Count + 1);
+        }
+    
+        public void UpdatePreviewBrush()
+        {
+            NotifyPropertyChanged(nameof(PreviewBrush));
         }
     }
 

@@ -159,20 +159,20 @@ namespace EEPK_Organiser.ViewModel
         }
 
         //Mask
-        public int AlphaSortMask
+        public bool AlphaSortMask
         {
-            get => CurrentMaterial.AlphaSortMask;
-            set => SetIntValue(value, nameof(CurrentMaterial.AlphaSortMask), 2);
+            get => CurrentMaterial.AlphaSortMask == 1;
+            set => SetIntBoolValue(value, nameof(CurrentMaterial.AlphaSortMask), 2);
         }
-        public int ZTestMask
+        public bool ZTestMask
         {
-            get => CurrentMaterial.ZTestMask;
-            set => SetIntValue(value, nameof(CurrentMaterial.ZTestMask), 2);
+            get => CurrentMaterial.ZTestMask == 1;
+            set => SetIntBoolValue(value, nameof(CurrentMaterial.ZTestMask), 2);
         }
-        public int ZWriteMask
+        public bool ZWriteMask
         {
-            get => CurrentMaterial.ZWriteMask;
-            set => SetIntValue(value, nameof(CurrentMaterial.ZWriteMask));
+            get => CurrentMaterial.ZWriteMask == 1;
+            set => SetIntBoolValue(value, nameof(CurrentMaterial.ZWriteMask));
         }
 
 
@@ -225,6 +225,46 @@ namespace EEPK_Organiser.ViewModel
         {
             get => CurrentMaterial.LowRezSmoke == 1;
             set => SetIntBoolValue(value, nameof(CurrentMaterial.LowRezSmoke));
+        }
+        public int RenderRes
+        {
+            get
+            {
+                if (LowRez) return 1;
+                if (LowRezSmoke) return 2;
+                return 0;
+            }
+            set
+            {
+                int lowRez = CurrentMaterial.LowRez;
+                int lowRezSmoke = CurrentMaterial.LowRezSmoke;
+
+                if (value == 0)
+                {
+                    CurrentMaterial.LowRez = 0;
+                    CurrentMaterial.LowRezSmoke = 0;
+                }
+                else if (value == 1)
+                {
+                    CurrentMaterial.LowRez = 1;
+                    CurrentMaterial.LowRezSmoke = 0;
+                }
+                if (value == 2)
+                {
+                    CurrentMaterial.LowRez = 0;
+                    CurrentMaterial.LowRezSmoke = 1;
+                }
+
+                if(lowRez != CurrentMaterial.LowRez || lowRezSmoke != CurrentMaterial.LowRezSmoke)
+                {
+                    UndoManager.Instance.AddCompositeUndo(new System.Collections.Generic.List<IUndoRedo>()
+                    {
+                        new UndoableField(nameof(CurrentMaterial.LowRez), CurrentMaterial, lowRez, CurrentMaterial.LowRez),
+                        new UndoableField(nameof(CurrentMaterial.LowRezSmoke), CurrentMaterial, lowRezSmoke, CurrentMaterial.LowRezSmoke),
+                        new UndoablePropertyGeneric(nameof(CurrentMaterial.ParametersChanged), CurrentMaterial, 1, 1)
+                    }, $"Render Res");
+                }
+            }
         }
 
         //Incidence

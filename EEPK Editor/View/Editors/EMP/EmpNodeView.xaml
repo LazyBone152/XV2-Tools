@@ -40,7 +40,7 @@
                                             <ColumnDefinition Width="125"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <Label Content="Node Type" ToolTip="The node type determines the function of this node:&#x0a;-Emitter: A node specifically for emitting other nodes (particles). Does not render anything itself.&#x0a;-Emission: A node with geometry and visual state (a particle). Any child nodes will be emitted once the node expires."/>
+                                        <Label Content="Node Type" ToolTip="The node type determines the function of this node:&#x0a;&#x0a;-Null Emitter: A basic particle emitter that emits particles once on creation and once when destroyed. If a loop is enabled, it will also emit once per loop.&#x0a;-Emitter: A complex particle emitter that can continually emit particles with various starting parameters.&#x0a;-Emission: A particle with geometry (depending on emission type). Also serves as a one-shot emitter when the particle dies."/>
                                         <ComboBox Grid.Column="1" ItemsSource="{x:Static empDic:EMP.NodeType}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding ElementName=UserControl, Path=NodeViewModel.NodeType}"/>
                                     </Grid>
                                 </StackPanel>
@@ -125,7 +125,7 @@
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="*"/>
                                                 </Grid.ColumnDefinitions>
-                                                <Label Content="Max Instances" ToolTip="The maximum amount of individual instances of this node that can exist at the same time."/>
+                                                <Label Content="Max Instances" ToolTip="The maximum amount of individual instances of this node that can exist at the same time (0 = unlimited).&#x0a;&#x0a;If this node is the root, this value is always ignored and only 1 instance will be created."/>
                                                 <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.MaxInstances}" Minimum="-1" Maximum="10000"/>
                                             </Grid>
                                         </StackPanel>
@@ -194,22 +194,6 @@
                                         <Label Content="Hide" ToolTip="The particle will be hidden in game (never rendered). Could be useful in testing."/>
                                         <CheckBox Grid.Column="1" IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_Hide}" VerticalAlignment="Center"/>
                                     </Grid>
-                                    <Grid Margin="3,5,0,0" Width="250" IsEnabled="{Binding ElementName=UserControl, Path=RandomDirEnabled}">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="125"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Content="Random Rotation Dir" ToolTip="Enables a random direction for the Start Rotation, Active Rotation (Emissions) and Angle (Emitters) parameters (does not affect the Rotation X/Y/Z values)."/>
-                                        <CheckBox Grid.Column="1" IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags2_RandomRotationDir}" VerticalAlignment="Center"/>
-                                    </Grid>
-                                    <Grid Margin="3,5,0,0" Width="250" IsEnabled="{Binding ElementName=UserControl, Path=RandomUpVectorEnabled}">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="125"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Label Content="Random Up Vector"/>
-                                        <CheckBox Grid.Column="1" IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags2_RandomUpVector}" VerticalAlignment="Center"/>
-                                    </Grid>
                                 </WrapPanel>
                             </StackPanel>
                         </Expander>
@@ -269,13 +253,13 @@
                                         <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.EmitterVelocity_Variance}" StringFormat="0.0###" Interval="0.05"/>
                                     </Grid>
                                 </StackPanel>
-                                <StackPanel Orientation="Horizontal" Visibility="{Binding ElementName=UserControl, Path=EmitterSizeVisibility}">
+                                <StackPanel Orientation="Horizontal" Visibility="{Binding ElementName=UserControl, Path=EmitterSquareSizeVisibility}">
                                     <Grid Margin="3,5,0,0" Width="275">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="125"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <Label Content="Size"/>
+                                        <Label Content="Size X" ToolTip="The size of the emitter on the X axis."/>
                                         <local:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding ElementName=UserControl, Path=NodeViewModel.EmitterSize}" Node="{Binding ElementName=UserControl, Path=Node}"/>
                                     </Grid>
                                     <Grid Margin="3,5,0,0" Width="225">
@@ -288,13 +272,13 @@
                                     </Grid>
                                 </StackPanel>
 
-                                <StackPanel Orientation="Horizontal" Visibility="{Binding ElementName=UserControl, Path=EmitterSize2Visibility}">
+                                <StackPanel Orientation="Horizontal" Visibility="{Binding ElementName=UserControl, Path=EmitterSquareSizeVisibility}">
                                     <Grid Margin="3,5,0,0" Width="275">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="125"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <Label Content="Size 2"/>
+                                        <Label Content="Size Z" ToolTip="The size of the emitter on the Z axis."/>
                                         <local:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding ElementName=UserControl, Path=NodeViewModel.EmitterSize2}" Node="{Binding ElementName=UserControl, Path=Node}"/>
                                     </Grid>
                                     <Grid Margin="3,5,0,0" Width="225">
@@ -306,6 +290,64 @@
                                         <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.EmitterSize2_Variance}" StringFormat="0.0###" Interval="0.05"/>
                                     </Grid>
                                 </StackPanel>
+
+                                <StackPanel Orientation="Horizontal" Visibility="{Binding ElementName=UserControl, Path=EmitterCircleSizeVisibility}">
+                                    <Grid Margin="3,5,0,0" Width="275">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="125"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Content="Radius" ToolTip="The radius of the circle."/>
+                                        <local:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding ElementName=UserControl, Path=NodeViewModel.EmitterSize}" Node="{Binding ElementName=UserControl, Path=Node}"/>
+                                    </Grid>
+                                    <Grid Margin="3,5,0,0" Width="225">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="100"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Content="Variance" ToolTip="{Binding ElementName=UserControl, Path=VarianceToolTip}"/>
+                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.EmitterSize_Variance}" StringFormat="0.0###" Interval="0.05"/>
+                                    </Grid>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal" Visibility="{Binding ElementName=UserControl, Path=EmitterCircleSizeVisibility}">
+                                    <Grid Margin="3,5,0,0" Width="275">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="125"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Content="Size 2" ToolTip="The purpose of this is unknown."/>
+                                        <local:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding ElementName=UserControl, Path=NodeViewModel.EmitterSize2}" Node="{Binding ElementName=UserControl, Path=Node}"/>
+                                    </Grid>
+                                    <Grid Margin="3,5,0,0" Width="225">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="100"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Content="Variance" ToolTip="{Binding ElementName=UserControl, Path=VarianceToolTip}"/>
+                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.EmitterSize2_Variance}" StringFormat="0.0###" Interval="0.05"/>
+                                    </Grid>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal" Visibility="{Binding ElementName=UserControl, Path=EmitterSphereSizeVisibility}">
+                                    <Grid Margin="3,5,0,0" Width="275">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="125"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Content="Radius" ToolTip="The radius of the sphere."/>
+                                        <local:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding ElementName=UserControl, Path=NodeViewModel.EmitterSize}" Node="{Binding ElementName=UserControl, Path=Node}"/>
+                                    </Grid>
+                                    <Grid Margin="3,5,0,0" Width="225">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="100"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Content="Variance" ToolTip="{Binding ElementName=UserControl, Path=VarianceToolTip}"/>
+                                        <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.EmitterSize_Variance}" StringFormat="0.0###" Interval="0.05"/>
+                                    </Grid>
+                                </StackPanel>
+
                                 <StackPanel Orientation="Horizontal" Visibility="{Binding ElementName=UserControl, Path=EmitterAngleVisibility}">
                                     <Grid Margin="3,5,0,0" Width="275">
                                         <Grid.ColumnDefinitions>
@@ -324,6 +366,22 @@
                                         <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.EmitterAngle_Variance}" StringFormat="0.0####" Interval="0.05"/>
                                     </Grid>
                                 </StackPanel>
+                                <Grid Margin="3,5,0,0" Width="250" HorizontalAlignment="Left" Visibility="{Binding ElementName=UserControl, Path=EmitterEdgeVisibility}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="125"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Use Edge Increment" ToolTip="Disables random particle placement and instead spawns particles sequentially along the edge of the shape, incrementing the position with each particle spawned by the Edge Increment value."/>
+                                    <CheckBox Grid.Column="1" IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags2_RandomRotationDir}" VerticalAlignment="Center"/>
+                                </Grid>
+                                <Grid Margin="3,5,0,0" Width="252" HorizontalAlignment="Left" Visibility="{Binding ElementName=UserControl, Path=EmitterEdgeVisibility}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="125"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Edge Increment" ToolTip="Value range of 0 to 1, where a value of 1 represents a complete lap of the shape, 0.5 half, and 0 no movement at all."/>
+                                    <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Emitter_EdgeIncrement}" StringFormat="0.0####" Interval="0.01" Minimum="0" Maximum="1"/>
+                                </Grid>
                                 <Grid Margin="3,5,0,0" Width="252" HorizontalAlignment="Left" Visibility="{Binding ElementName=UserControl, Path=EmitterF1Visibility}">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="125"/>
@@ -352,7 +410,7 @@
                                                 <ColumnDefinition Width="125"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            <Label Content="Particle Geometry" ToolTip="-Plane: The particle will be rendered as a plane. &#x0a;-Shape Draw: The particle will be rendered as a number of planes, in the form of a more complex drawn shape. &#x0a;-Mesh: A mesh file (EMG) will be used as the particles geometry. &#x0a;-Cone Extrude: This is currently unknown."/>
+                                            <Label Content="Particle Geometry" ToolTip="-Plane: The particle will be rendered as a plane. &#x0a;-Shape Draw: The particle will be rendered as a number of planes, in the form of a more complex drawn shape. &#x0a;-Static Mesh: A mesh file (EMG) will be used as the particles geometry. You can import an EMD for this, but you may only have 1 mesh within it. &#x0a;-Cone Extrude: This is currently unknown."/>
                                             <ComboBox Grid.Column="1" ItemsSource="{x:Static empDic:EMP.EmissionTypes}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding ElementName=UserControl, Path=NodeViewModel.EmissionType}"/>
                                         </Grid>
                                     </StackPanel>
@@ -362,17 +420,26 @@
                                                 <ColumnDefinition Width="125"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            <Label Content="Billboard Type" ToolTip="Determines how the particle will Auto-Orient. &#x0a;&#x0a;-None: Particle will not auto-orient &#x0a;-Camera: Always faces the camera &#x0a;-Front: Always faces the bone declared on the EffectPart spawning this particle (eepk)"/>
+                                            <Label Content="Billboard Type" ToolTip="Determines how the particle will Auto-Orient. &#x0a;&#x0a;-None: Particle will not auto-orient. Rotation is instead defined in a Rotation Axis. &#x0a;-Camera: Always faces the camera. &#x0a;-Front: Always face directly AWAY from the Attachment Bone."/>
                                             <ComboBox Grid.Column="1" ItemsSource="{x:Static empDic:EMP.BillboardTypes}" DisplayMemberPath="Value" SelectedValuePath="Key" SelectedValue="{Binding ElementName=UserControl, Path=NodeViewModel.BillboardType}"/>
                                         </Grid>
                                     </StackPanel>
-                                    <Grid Margin="3,5,0,0" Width="250" HorizontalAlignment="Left" Visibility="{Binding ElementName=UserControl, Path=EmissionAutoRotationVisibility}">
+                                    <Grid Margin="3,5,0,0" Width="250" HorizontalAlignment="Left" Visibility="{Binding ElementName=UserControl, Path=EmissionAutoRotationCameraVisibility}">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <Label Content="Motion Only" ToolTip="When enabled, the particle will only be visible if it has any velocity. Also disables the usage of the Start Rotation and Active Rotation values."/>
+                                        <Label Content="Velocity Oriented" ToolTip="The particle will auto-orient to face the camera lateral to its translation vector. It will not orient &quot;down&quot; or &quot;up&quot;. Will be completely invisible if there is no velocity at all."/>
                                         <CheckBox Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.VisibleOnlyOnMotion}"/>
+                                    </Grid>
+
+                                    <Grid Margin="3,5,0,0" Width="250" HorizontalAlignment="Left" Visibility="{Binding ElementName=UserControl, Path=EmissionRotAxisVisibility}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="125"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Content="Random Rotation Axis" FontSize="11.5"/>
+                                        <CheckBox Grid.Column="1" IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags2_RandomUpVector}" VerticalAlignment="Center"/>
                                     </Grid>
                                     <StackPanel Orientation="Horizontal" Visibility="{Binding ElementName=UserControl, Path=EmissionRotAxisVisibility}">
                                         <Grid Margin="3,5,0,0" Width="500">
@@ -380,11 +447,21 @@
                                                 <ColumnDefinition Width="105"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            <Label Content="Rotation Axis" ToolTip="The axis that Rotation / Active Rotation will use."/>
+                                            <Label Content="Rotation Axis" ToolTip="The axis that Start Rotation / Active Rotation will use.&#x0a;&#x0a;Usage:&#x0a;-Values should be constrained to 0 to 1.&#x0a;-When an axis is set to 1, it will be rotated by however many degrees is set in Start Rotation and Active Rotation.&#x0a;-If set to 0.5, it will be rotated by half."/>
                                             <vector:CustomVector3 Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.EmissionRotationAxis}" MinValue="0" MaxValue="1"/>
                                         </Grid>
                                     </StackPanel>
+
+                                    <Grid Margin="3,5,0,0" Width="250" HorizontalAlignment="Left" Visibility="{Binding ElementName=UserControl, Path=EmissionRotationValuesVisibility}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="125"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Content="Random Direction" ToolTip="Enables a random direction for the Start Rotation and Active Rotation values."/>
+                                        <CheckBox Grid.Column="1" IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags2_RandomRotationDir}" VerticalAlignment="Center"/>
+                                    </Grid>
                                     <StackPanel Orientation="Horizontal" Visibility="{Binding ElementName=UserControl, Path=EmissionRotationValuesVisibility}">
+
                                         <Grid Margin="3,5,0,0" Width="250">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
@@ -410,7 +487,7 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="2"/>
                                             </Grid.ColumnDefinitions>
-                                            <Label Content="Active Rotation" ToolTip="The amount of rotation per second, relative to the Rotation Axis or Billboard Type."/>
+                                            <Label Content="Active Rotation" ToolTip="The amount of rotation per frame, relative to the Rotation Axis or Billboard Type."/>
                                             <local:KeyframedValueView Grid.Column="1" KeyframedValue="{Binding ElementName=UserControl, Path=NodeViewModel.ActiveRotation}" Node="{Binding ElementName=UserControl, Path=Node}"/>
                                         </Grid>
                                         <Grid Margin="3,5,0,0" Width="225">
@@ -440,7 +517,7 @@
                                             </GroupBox>
                                         </StackPanel>
 
-                                        <DataGrid x:Name="shapeDrawPointDataGrid" Height="540" Grid.Column="1" VerticalAlignment="Top" Margin="20, 10, 0,0" BorderBrush="{DynamicResource MahApps.Brushes.SystemControlForegroundListMedium}" BorderThickness="1" ItemsSource="{Binding ElementName=UserControl, Path=Node.EmissionNode.ShapeDraw.Points.Binding}" SelectedItem="{Binding ElementName=UserControl, Path=SelectedShapeDrawPoint.Point}" CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False" AutoGenerateColumns="False">
+                                        <DataGrid x:Name="shapeDrawPointDataGrid" Height="540" Grid.Column="1" VerticalAlignment="Top" Margin="20, 10, 0,0" BorderBrush="{DynamicResource MahApps.Brushes.SystemControlForegroundListMedium}" BorderThickness="1" ItemsSource="{Binding ElementName=UserControl, Path=Node.EmissionNode.ShapeDraw.Points.Binding}" SelectedItem="{Binding ElementName=UserControl, Path=SelectedShapeDrawPoint.Point}" CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False" AutoGenerateColumns="False" EnableRowVirtualization="True" EnableColumnVirtualization="True">
                                             <DataGrid.Columns>
                                                 <Controls:DataGridNumericUpDownColumn Binding="{Binding UndoableX}" StringFormat="0.0###" TextAlignment="Left" Interval="0.05" Minimum="-1" Maximum="1" Width="*" Header="X"/>
                                                 <Controls:DataGridNumericUpDownColumn Binding="{Binding UndoableY}" StringFormat="0.0###" TextAlignment="Left" Interval="0.05" Minimum="-1" Maximum="1" Width="*" Header="Y"/>
@@ -541,7 +618,7 @@
                                     </StackPanel>
 
 
-                                    <DataGrid x:Name="extrudeDataGrid" Margin="20" Height="500"  BorderBrush="{DynamicResource MahApps.Brushes.SystemControlForegroundListMedium}" BorderThickness="1" ItemsSource="{Binding ElementName=UserControl, Path=Node.EmissionNode.ConeExtrude.Points.Binding}" SelectedItem="{Binding ElementName=UserControl, Path=SelectedExtrudePoint}" Controls:ControlsHelper.ContentCharacterCasing="Normal" CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False" AutoGenerateColumns="False">
+                                    <DataGrid x:Name="extrudeDataGrid" Margin="20" Height="500"  BorderBrush="{DynamicResource MahApps.Brushes.SystemControlForegroundListMedium}" BorderThickness="1" ItemsSource="{Binding ElementName=UserControl, Path=Node.EmissionNode.ConeExtrude.Points.Binding}" SelectedItem="{Binding ElementName=UserControl, Path=SelectedExtrudePoint}" Controls:ControlsHelper.ContentCharacterCasing="Normal" CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False" AutoGenerateColumns="False" EnableRowVirtualization="True" EnableColumnVirtualization="True">
                                         <DataGrid.InputBindings>
                                             <KeyBinding Key="Delete" Command="{Binding ElementName=UserControl, Path=DeleteExtrudePointCommand}"/>
                                             <KeyBinding Modifiers="Ctrl" Key="C" Command="{Binding ElementName=UserControl, Path=CopyExtrudePointCommand}"/>
@@ -632,6 +709,24 @@
                                 </Button>
                             </Grid>
 
+                            <Grid Margin="3,3" Width="400" HorizontalAlignment="Left">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="120"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Content="_I_00" ToolTip="Exact function unknown. Appears to affect the texture used in some cases, and can result in the wrong colors/texture being used when 2 different effects are on screen with the same value (???).&#x0a;&#x0a;Known values:&#x0a;0 = Use material of previous particle &#x0a;177 = Uses texture of previous particle (but not keyframe/UVs)"/>
+                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Texture_I_00}" Minimum="0" Maximum="255"/>
+
+                            </Grid>
+                            <Grid Margin="3,3" Width="400" HorizontalAlignment="Left">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="120"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Content="Camera Offset" ToolTip="Defines a translation applied to the particle at render time, relative to the camera (directly towards or away from). This alters the apparant depth of the particle, allowing it to be rendered behind or infront of other particles or objects.&#x0a;&#x0a;Negative values = closer to the front&#x0a;Positive values = render in the back, behind other objects."/>
+                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Texture_RenderDepth}" Interval="0.025" StringFormat="0.0####"/>
+
+                            </Grid>
 
                             <TextBlock Text="Color" FontWeight="Bold" HorizontalAlignment="Center"/>
                             <Grid Margin="3,5,0,0" Width="250" HorizontalAlignment="Left">
@@ -639,16 +734,8 @@
                                     <ColumnDefinition Width="120"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <Label Content="Use Secondary" ToolTip="Enables the usage of an additional color."/>
+                                <Label Content="Use Secondary" ToolTip="Enables the usage of an additional color, creating a blend between Primary Color (top) and Secondary Color (bottom), where they blend together in the middle.&#x0a;&#x0a;NOTES:&#x0a;-Not used for Mesh Emission types.&#x0a;-Disabled when Flash On Creation is enabled."/>
                                 <CheckBox Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_SecondaryColor}"/>
-                            </Grid>
-                            <Grid Margin="3,5,0,0" Width="250" HorizontalAlignment="Left" IsEnabled="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_SecondaryColor}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="120"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Label Content="Flash On Creation" ToolTip="On particle creation, the particles color will quickly flash the Secondary Color for a single frame. The particle will then use just Primary Color for the rest of its life."/>
-                                <CheckBox Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_FlashOnGen}"/>
                             </Grid>
                             <StackPanel Orientation="Horizontal">
                                 <Grid Margin="3,3" Width="400" HorizontalAlignment="Left">
@@ -696,7 +783,7 @@
                                         <ColumnDefinition Width="25"/>
                                     </Grid.ColumnDefinitions>
                                     <Label Content="Color Variance"/>
-                                    <vector:CustomRgbColor Grid.Column="1" Value="{Binding Path=NodeViewModel.Color_Variance, ElementName=UserControl}" HideUpDownButtons="True"/>
+                                    <vector:CustomRgbColor Grid.Column="1" UndoContext="{Binding ElementName=UserControl, Path=Node}" Value="{Binding Path=NodeViewModel.Color_Variance, ElementName=UserControl}" HideUpDownButtons="True"/>
                                 </Grid>
                                 <Grid Margin="3,3" Width="88" HorizontalAlignment="Left">
                                     <Grid.ColumnDefinitions>
@@ -714,7 +801,7 @@
                                     <ColumnDefinition Width="120"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <Label Content="Use XY" ToolTip="Enables the usage of Scale XY values, which can scale the particle on each axis individually.&#x0a;&#x0a;NOTE: ScaleBase must be set to the same value as Scale X, or the particle plane will deform. If ScaleBase was set to 0, then you would just have a single triangle."/>
+                                <Label Content="Use XY" ToolTip="Enables the usage of Scale XY values, which can scale the particle on each axis individually.&#x0a;&#x0a;NOTE: ScaleBase must be set to the same value as Scale X, or the particle plane will deform. If Scale was set to 0, then you would just have a single triangle. (This is because the game internally uses this value for the first vertex of the particle, possibly due to a bug)"/>
                                 <CheckBox Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_ScaleXY}"/>
                             </Grid>
                             <Grid Margin="3,3" Width="400" HorizontalAlignment="Left">
@@ -750,26 +837,6 @@
                                 </Grid.ColumnDefinitions>
                                 <Label Content="Scale XY Variance" FontSize="11"/>
                                 <vector:CustomVector2 Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.ScaleXY_Variance}"/>
-                            </Grid>
-
-                            <TextBlock Text="Other" FontWeight="Bold" HorizontalAlignment="Center"/>
-                            <Grid Margin="3,3" Width="400" HorizontalAlignment="Left">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="120"/>
-                                    <ColumnDefinition Width="120"/>
-                                </Grid.ColumnDefinitions>
-                                <Label Content="Render Depth" ToolTip="Controls the depth at which the particle effect is rendered at.&#x0a;&#x0a;Negative values = closer to the front&#x0a;Positive values = render in the back, behind other objects."/>
-                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Texture_RenderDepth}" Interval="0.025" StringFormat="0.0####"/>
-
-                            </Grid>
-                            <Grid Margin="3,3" Width="400" HorizontalAlignment="Left">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="120"/>
-                                    <ColumnDefinition Width="120"/>
-                                </Grid.ColumnDefinitions>
-                                <Label Content="_I_00" ToolTip="Exact function unknown. Appears to affect the texture used in some cases, and can result in the wrong colors/texture being used when 2 different effects are on screen with the same value (???)."/>
-                                <Controls:NumericUpDown Grid.Column="1" Value="{Binding ElementName=UserControl, Path=NodeViewModel.Texture_I_00}" Minimum="0" Maximum="255"/>
-
                             </Grid>
                         </StackPanel>
 
@@ -814,7 +881,7 @@
                                             <StackPanel Margin="20, 5" Width="200">
                                                 <CheckBox Content="Unk1"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_Unk1}"/>
                                                 <CheckBox Content="Unk3"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_Unk3}"/>
-                                                <CheckBox Content="Unk4" ToolTip="This is Flash On Creation for Emission Node types. Function is unknown for other types."  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_FlashOnGen}" IsEnabled="{Binding ElementName=UserControl, Path=IsEmitterOrNull}"/>
+                                                <CheckBox Content="Flash On Creation" ToolTip="This flags purpose is unknown, but some of its affects are quite apparant:&#x0a;&#x0a;1. On particle creation, the particles color will quickly flash the Secondary Color for a single frame. The particle will then use just Primary Color for the rest of its life.&#x0a;2. Active Rotation is disabled."  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_FlashOnGen}"/>
                                             </StackPanel>
                                             <StackPanel Margin="20, 5" Width="200">
                                                 <CheckBox Content="Unk5"  IsChecked="{Binding ElementName=UserControl, Path=NodeViewModel.NodeFlags_Unk5}"/>

@@ -55,6 +55,14 @@ namespace Xv2CoreLib.ECF
                 entry.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
             }
         }
+        
+        public void UpdatePreviewBrush()
+        {
+            foreach(ECF_Node node in Nodes)
+            {
+                node.UpdatePreviewBrush();
+            }
+        }
     }
 
     [Serializable]
@@ -79,6 +87,22 @@ namespace Xv2CoreLib.ECF
             UseMaterialName_Loop = 1,
             AllMaterials_NoLoop = 2, //Material name is usually some variant of "node", which is apparantly just a placeholder
             AllMaterials_Loop = 3 //Material name is usually some variant of "node", which is apparantly just a placeholder
+        }
+
+        public System.Windows.Media.SolidColorBrush PreviewBrush
+        {
+            get
+            {
+                RgbColor multColor = MultiColor.GetAverageColor();
+                RgbColor rimColor = RimColor.GetAverageColor();
+                RgbColor addColor = AddColor.GetAverageColor();
+
+                byte r = (byte)((multColor.R_int + rimColor.R_int + addColor.R_int) / 3);
+                byte g = (byte)((rimColor.G_int + rimColor.G_int + addColor.G_int) / 3);
+                byte b = (byte)((multColor.B_int + rimColor.B_int + addColor.B_int) / 3);
+
+                return new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(r, g, b));
+            }
         }
 
         //Selected KeyframedValue is binded here for the Keyframe Editor to access
@@ -213,6 +237,11 @@ namespace Xv2CoreLib.ECF
         public override string ToString()
         {
             return $"{Material}: {StartTime}, {EndTime}";
+        }
+    
+        public void UpdatePreviewBrush()
+        {
+            NotifyPropertyChanged(nameof(PreviewBrush));
         }
     }
     /*
