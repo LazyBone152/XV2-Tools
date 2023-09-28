@@ -113,6 +113,9 @@ namespace Xv2CoreLib.ODF
                 bytes.AddRange(BitConverter.GetBytes(subEntryCount));
                 bytes.AddRange(BitConverter.GetBytes(0)); //Offset
                 bytes.AddRange(BitConverter.GetBytes((long)0)); //Padding
+
+                //Sort children
+                SubHeader[i].Entries.Sort((x, y) => x.SortID - y.SortID);
             }
 
             //Odf Sub Entries
@@ -147,8 +150,20 @@ namespace Xv2CoreLib.ODF
     }
 
     [YAXSerializeAs("PartnerEntry")]
-    public class ODF_Entry
+    public class ODF_Entry : IInstallable
     {
+        #region Install
+        [YAXDontSerialize]
+        public string Index
+        {
+            set => I_00 = Utils.TryParseInt(value);
+            get => I_00.ToString();
+        }
+
+        [YAXDontSerialize]
+        public int SortID => I_00;
+        #endregion
+
         [YAXAttributeForClass]
         [YAXSerializeAs("Partner_ID")]
         public int I_00 { get; set; }

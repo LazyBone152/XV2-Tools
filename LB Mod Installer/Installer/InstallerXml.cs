@@ -1116,7 +1116,8 @@ namespace LB_Mod_Installer.Installer
         VfxPackage,
         AudioPackage,
         Binding,
-        SkillDir
+        SkillDir,
+        EPatch
     }
 
     //Localisation

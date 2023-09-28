@@ -54,6 +54,7 @@ using Xv2CoreLib.QBT;
 using Xv2CoreLib.QSL;
 using Xv2CoreLib.QED;
 using Xv2CoreLib.TNN;
+using Xv2CoreLib.ODF;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -217,6 +218,10 @@ namespace LB_Mod_Installer.Installer
                     case FileType.Binding:
                         bindingManager.ParseString(File.Binding, GeneralInfo.InstallerXml, "Binding");
                         break;
+                    case FileType.EPatch:
+                        UpdateProgessBarText(string.Format("_EPatch \"{0}\"...", Path.GetFileNameWithoutExtension(File.SourcePath)));
+                        fileManager.AddStreamFile($"../XV2PATCHER/Epatches/{File.SourcePath}", zipManager.GetZipEntry(string.Format("Epatches/{0}", File.SourcePath)), true);
+                        break;
                     default:
                         MessageBox.Show($"Unknown File.Type: {type}");
                         break;
@@ -261,7 +266,7 @@ namespace LB_Mod_Installer.Installer
                 Install_StageSlots(xmlPath, installPath);
                 return;
             }
-            else if(installPath?.Equals(CharaSlotsFile.FILE_NAME_BIN, StringComparison.OrdinalIgnoreCase) == true)
+            else if(xmlPath.Contains(CharaSlotsFile.FILE_NAME_BIN))
             {
                 Install_CharaSlots(xmlPath);
                 return;
@@ -387,9 +392,12 @@ namespace LB_Mod_Installer.Installer
                 case ".tnn":
                     Install_TNN(xmlPath, installPath, isXml, useSkipBindings);
                     break;
+                case ".odf":
+                    Install_ODF(xmlPath, installPath, isXml, useSkipBindings);
+                    break;
                 default:
-                    if (TryTransformationInstall(xmlPath))
-                        break;
+                    //if (TryTransformationInstall(xmlPath))
+                    //    break;
 
                     throw new InvalidDataException(string.Format("The filetype of \"{0}\" is not supported.", xmlPath));
             }
@@ -1093,7 +1101,7 @@ namespace LB_Mod_Installer.Installer
 #endif
             {
                 StageSlotsFile xmlFile = zipManager.DeserializeXmlFromArchive_Ext<StageSlotsFile>(GeneralInfo.GetPathInZipDataDir(xmlPath));
-                StageSlotsFile slotsFile = (StageSlotsFile)GetParsedFile<StageSlotsFile>(StageSlotsFile.FILE_NAME_BIN, false, false);
+                StageSlotsFile slotsFile = (StageSlotsFile)GetParsedFile<StageSlotsFile>(installPath, false, false);
 
                 if (slotsFile == null)
                 {
@@ -2058,6 +2066,36 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
+        private void Install_ODF(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                ODF_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<ODF_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : ODF_File.Read(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                ODF_File binaryFile = (ODF_File)GetParsedFile<ODF_File>(installPath);
+
+                if(xmlFile.SubHeader.Count != 1)
+                {
+                    MessageBox.Show("ODF: Invalid number of \"Header\" elements in XML file. There should only be 1.");
+                    return;
+                }
+
+                //Parse bindings
+                bindingManager.ParseProperties(xmlFile.SubHeader[0].Entries, binaryFile.SubHeader[0].Entries, installPath);
+
+                //Install entries
+                InstallEntries(xmlFile.SubHeader[0].Entries, binaryFile.SubHeader[0].Entries, installPath, Sections.ODF_Entry, useSkipBindings);
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at ODF install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
 
         //Generic Install Methods
         //We need generic methods for IInstallable via List and ObservableCollection. Most file types will be handled with this.
@@ -2277,7 +2315,7 @@ namespace LB_Mod_Installer.Installer
             }
 
             //Stage slot file (.x2s)
-            if (path.Equals(StageSlotsFile.FILE_NAME_BIN, StringComparison.OrdinalIgnoreCase))
+            if (path.Equals(StageSlotsFile.FILE_NAME_BIN, StringComparison.OrdinalIgnoreCase) || path.Equals(StageSlotsFile.FILE_NAME_LOCAL_BIN, StringComparison.OrdinalIgnoreCase))
             {
                 return StageSlotsFile.Load(fileIO.GetFileFromGame(path, false, false));
             }
@@ -2384,6 +2422,8 @@ namespace LB_Mod_Installer.Installer
                     return DML_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".tnn":
                     return TNN_File.Parse(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".odf":
+                    return ODF_File.Read(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 default:
                     throw new InvalidDataException(String.Format("GetParsedFileFromGame: The filetype of \"{0}\" is not supported.", path));
             }
@@ -2494,6 +2534,8 @@ namespace LB_Mod_Installer.Installer
                     return ((DML_File)data).SaveToBytes();
                 case ".tnn":
                     return ((TNN_File)data).Write();
+                case ".odf":
+                    return ((ODF_File)data).Write();
                 default:
                     throw new InvalidDataException(String.Format("GetBytesFromParsedFile: The filetype of \"{0}\" is not supported.", path));
             }

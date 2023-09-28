@@ -59,6 +59,7 @@
         public const string QED_Entry = "QED_Entry";
         public const string DML_Entry = "DML_Entry";
         public const string TNN_Tutorial = "TNN_Tutorial";
+        public const string ODF_Entry = "ODF_Entry";
 
         public const string TTB_Entry = "TTB_Entry";
         public const string TTC_Entry = "TTC_Entry";

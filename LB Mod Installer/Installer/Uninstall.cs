@@ -48,6 +48,7 @@ using Xv2CoreLib.QED;
 using Xv2CoreLib.QSL;
 using Xv2CoreLib.QBT;
 using Xv2CoreLib.TNN;
+using Xv2CoreLib.ODF;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -316,6 +317,9 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".tnn":
                     Uninstall_TNN(path, file);
+                    break;
+                case ".odf":
+                    Uninstall_ODF(path, file);
                     break;
                 default:
                     throw new Exception(string.Format("The filetype of \"{0}\" is unsupported. Uninstall failed.\n\nThis mod was likely installed by a newer version of the installer.", path));
@@ -1507,6 +1511,28 @@ namespace LB_Mod_Installer.Installer
             catch (Exception ex)
             {
                 string error = string.Format("Failed at TNN uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
+
+        private void Uninstall_ODF(string path, _File file)
+        {
+            try
+            {
+                ODF_File binaryFile = (ODF_File)GetParsedFile<ODF_File>(path, false);
+                ODF_File cpkBinFile = (ODF_File)GetParsedFile<ODF_File>(path, true, true);
+
+                Section section = file.GetSection(Sections.ODF_Entry);
+
+                if (section != null)
+                {
+                    UninstallEntries(binaryFile.SubHeader[0].Entries, (cpkBinFile != null) ? cpkBinFile.SubHeader[0].Entries : null, section.IDs);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at ODF uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }
