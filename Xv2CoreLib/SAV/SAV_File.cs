@@ -1167,7 +1167,8 @@ namespace Xv2CoreLib.SAV
             List<byte> bytes = FileBytes;
 
             //Validate
-            bytes = ValidatePartnerKeyFlags(bytes);
+            if(DLC6)
+                bytes = ValidatePartnerKeyFlags(bytes);
 
             //Header
             bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(SteamID ^ VERSION_XOR), 8);
@@ -5251,17 +5252,17 @@ namespace Xv2CoreLib.SAV
             }
 
             //Add padding for remaining entries
-            if (quests.Count < 48)
-            {
-                newBytes.AddRange(new byte[(Offsets.TOKIPEDIA_COUNT - quests.Count) * 8]);
-            }
+            //if (quests.Count < 48)
+            //{
+            //    newBytes.AddRange(new byte[(Offsets.TOKIPEDIA_COUNT - quests.Count) * 8]);
+            //}
 
             //Validate size
-            int expectedSize = Offsets.TOKIPEDIA_COUNT * 8;
-            if (newBytes.Count != expectedSize)
-            {
-                throw new Exception(String.Format("Tokipedia data is an invalid size.\nSize = {0}\nExpected = {1}", newBytes.Count, expectedSize));
-            }
+            //int expectedSize = Offsets.TOKIPEDIA_COUNT * 8;
+            //if (newBytes.Count != expectedSize)
+            //{
+            //    throw new Exception(String.Format("Tokipedia data is an invalid size.\nSize = {0}\nExpected = {1}", newBytes.Count, expectedSize));
+            //}
 
             return newBytes;
         }
