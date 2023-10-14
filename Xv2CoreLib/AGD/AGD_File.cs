@@ -126,6 +126,10 @@ namespace Xv2CoreLib.AGD
             }
         }
 
+        public int GetMaximumLevel()
+        {
+            return AGD_Entries.Max(x => x.Level);
+        }
     }
 
     public class AGD_Entry
