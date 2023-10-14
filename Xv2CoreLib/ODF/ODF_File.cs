@@ -212,10 +212,20 @@ namespace Xv2CoreLib.ODF
         [YAXSerializeAs("value")]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public int I_56 { get; set; }
-        [YAXAttributeFor("I_60")]
-        [YAXSerializeAs("value")]
+        [YAXAttributeFor("ExtraItem")]
+        [YAXSerializeAs("IDB_ID")]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public int I_60 { get; set; }
+
+        //Old value name; kept for compatibility with old installers
+        [YAXAttributeFor("I_60")]
+        [YAXSerializeAs("value")]
+        [YAXDontSerializeIfNull]
+        public string I_60_OLD
+        {
+            get => null;
+            set => I_60 = Utils.TryParseInt(value);
+        }
 
         public static ODF_Entry Read(byte[] rawBytes, int offset, ushort version)
         {

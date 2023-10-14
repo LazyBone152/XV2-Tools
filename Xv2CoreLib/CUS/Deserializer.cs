@@ -159,9 +159,11 @@ namespace Xv2CoreLib.CUS
                     bytes.AddRange(BitConverter.GetBytes(skills[i].I_66));
 
                     if(cusFile.Version >= 1)
-                    {
                         bytes.AddRange(BitConverter.GetBytes(skills[i].I_68));
-                    }
+                    
+                    if (cusFile.Version >= 2)
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].I_72));
+                    
                 }
             }
 

@@ -304,6 +304,16 @@ namespace Xv2CoreLib.QXD
         [YAXSerializeAs("value")]
         public int I_280 { get; set; }
 
+        //New in 1.21:
+        [YAXAttributeFor("NEW_I_108")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0)]
+        public int NEW_I_108 { get; set; }
+        [YAXAttributeFor("NEW_I_112")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0)]
+        public int NEW_I_112 { get; set; }
+
         [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
         [YAXSerializeAs("StageIDs")]
@@ -594,6 +604,17 @@ namespace Xv2CoreLib.QXD
         [YAXAttributeFor("I_106")]
         [YAXSerializeAs("values")]
         public short[] I_106 { get; set; }
+
+        //New in 1.21+
+        [YAXAttributeFor("I_124")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (ushort)0)]
+        public ushort I_124 { get; set; }
+        [YAXAttributeFor("I_126")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (ushort)0)]
+        public ushort I_126 { get; set; }
+
         [BindingSubClass]
         [YAXSerializeAs("Skills")]
         public Skills _Skills { get; set; }

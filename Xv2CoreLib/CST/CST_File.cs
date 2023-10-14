@@ -87,16 +87,16 @@ namespace Xv2CoreLib.CST
             uint numCostumes = BitConverter.ToUInt32(bytes, 12);
 
             if (bytes.Length != CST_HEADER_SIZE + (CST_CharaCostumeSlot.CST_ENTRY_SIZE * numCostumes))
-                throw new InvalidDataException("CST_File.Load: Invalid file size!");
+                throw new InvalidDataException($"CST_File.Load: This CST version is not supported.");
 
             //Parse the file
             CST_File cstFile = new CST_File();
 
-            for(int i = 0; i < numCostumes; i++)
+            for (int i = 0; i < numCostumes; i++)
             {
                 var slot = CST_CharaCostumeSlot.Read(bytes, (int)(CST_HEADER_SIZE + (CST_CharaCostumeSlot.CST_ENTRY_SIZE * i)));
 
-                if(slot.CostumeSlotID == 0)
+                if (slot.CostumeSlotID == 0)
                 {
                     //New slot
                     cstFile.CharaSlots.Add(new CST_CharaSlot(slot));
@@ -105,7 +105,7 @@ namespace Xv2CoreLib.CST
                 {
                     //New costume for last slot
 
-                    if(cstFile.CharaSlots.Count - 1 >= 0)
+                    if (cstFile.CharaSlots.Count - 1 >= 0)
                     {
                         cstFile.CharaSlots[cstFile.CharaSlots.Count - 1].CharaCostumeSlots.Add(slot);
                     }
@@ -135,11 +135,11 @@ namespace Xv2CoreLib.CST
             bytes.AddRange(BitConverter.GetBytes(numCostumes));
 
             //Write entries
-            foreach(var slot in CharaSlots)
+            foreach (var slot in CharaSlots)
             {
                 slot.OrderCostumeSlotIDs();
 
-                foreach(var costume in slot.CharaCostumeSlots)
+                foreach (var costume in slot.CharaCostumeSlots)
                 {
                     bytes.AddRange(costume.Write());
                 }
@@ -162,7 +162,7 @@ namespace Xv2CoreLib.CST
         {
             int count = 0;
 
-            foreach(var slot in CharaSlots)
+            foreach (var slot in CharaSlots)
             {
                 count += slot.CharaCostumeSlots.Count;
             }
@@ -300,7 +300,7 @@ namespace Xv2CoreLib.CST
         {
             Eternity.CharaSlotsFile patcherSlots = new Eternity.CharaSlotsFile();
 
-            foreach(var slot in CharaSlots)
+            foreach (var slot in CharaSlots)
             {
                 patcherSlots.CharaSlots.Add(new Eternity.CharaSlot(slot));
             }
@@ -310,9 +310,9 @@ namespace Xv2CoreLib.CST
 
         public CST_CharaCostumeSlot GetEntry(string installID)
         {
-            foreach(var slot in CharaSlots)
+            foreach (var slot in CharaSlots)
             {
-                foreach(var costume in slot.CharaCostumeSlots)
+                foreach (var costume in slot.CharaCostumeSlots)
                 {
                     if (costume.InstallID == installID) return costume;
                 }
@@ -353,7 +353,7 @@ namespace Xv2CoreLib.CST
             SortBefore = charaSlot.SortBefore;
             SortAfter = charaSlot.SortAfter;
 
-            foreach(var costumeSlot in charaSlot.CostumeSlots)
+            foreach (var costumeSlot in charaSlot.CostumeSlots)
             {
                 CharaCostumeSlots.Add(new CST_CharaCostumeSlot(costumeSlot));
             }
@@ -382,7 +382,7 @@ namespace Xv2CoreLib.CST
     [YAXSerializeAs("CharaCostumeSlot")]
     public class CST_CharaCostumeSlot
     {
-        public const uint CST_ENTRY_SIZE = 0x28;
+        public const uint CST_ENTRY_SIZE = 0x30;
 
         [YAXDontSerialize]
         public string InstallID { get { return $"{CharaCode}_{Costume}_{Preset}"; } }
@@ -425,6 +425,15 @@ namespace Xv2CoreLib.CST
         [YAXSerializeAs("value")]
         public int var_type_after_TU9_order { get; set; } // 0x24 - Added in game 1.14. Whatever this shit is, is -1 in all chars, except TU0 ant TU1 where it is 0 and 1 respectively.
 
+        [YAXAttributeFor("I_40")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = -1)]
+        public int I_40 { get; set; }
+        [YAXAttributeFor("I_44")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0)]
+        public int I_44 { get; set; }
+
         public CST_CharaCostumeSlot() { }
 
         public CST_CharaCostumeSlot(Eternity.CharaCostumeSlot slot)
@@ -446,20 +455,22 @@ namespace Xv2CoreLib.CST
             {
                 CostumeSlotID = BitConverter.ToInt32(bytes, offset + 0x0),
                 CharaCode = StringEx.GetString(bytes, offset + 0x4, false, StringEx.EncodingType.ASCII, 4),
-                Costume = BitConverter.ToUInt16(bytes, offset + 0x8), 
-                Preset = BitConverter.ToUInt16(bytes, offset + 0xA), 
-                UnlockIndex = BitConverter.ToUInt16(bytes, offset + 0xC), 
-                flag_gk2 = BitConverter.ToUInt16(bytes, offset + 0xE), 
-                CssVoice1 = BitConverter.ToUInt16(bytes, offset + 0x10), 
-                CssVoice2 = BitConverter.ToUInt16(bytes, offset + 0x12), 
-                DlcFlag1 = (CstDlcVer)BitConverter.ToUInt32(bytes, offset + 0x14), 
-                DlcFlag2 = (CstDlcVer2)BitConverter.ToUInt32(bytes, offset + 0x18), 
-                IsCustomCostume = BitConverter.ToInt32(bytes, offset + 0x1c), 
-                CacIndex = BitConverter.ToInt32(bytes, offset + 0x20), 
-                var_type_after_TU9_order = BitConverter.ToInt32(bytes, offset + 0x24)
+                Costume = BitConverter.ToUInt16(bytes, offset + 0x8),
+                Preset = BitConverter.ToUInt16(bytes, offset + 0xA),
+                UnlockIndex = BitConverter.ToUInt16(bytes, offset + 0xC),
+                flag_gk2 = BitConverter.ToUInt16(bytes, offset + 0xE),
+                CssVoice1 = BitConverter.ToUInt16(bytes, offset + 0x10),
+                CssVoice2 = BitConverter.ToUInt16(bytes, offset + 0x12),
+                DlcFlag1 = (CstDlcVer)BitConverter.ToUInt32(bytes, offset + 0x14),
+                DlcFlag2 = (CstDlcVer2)BitConverter.ToUInt32(bytes, offset + 0x18),
+                IsCustomCostume = BitConverter.ToInt32(bytes, offset + 0x1c),
+                CacIndex = BitConverter.ToInt32(bytes, offset + 0x20),
+                var_type_after_TU9_order = BitConverter.ToInt32(bytes, offset + 0x24),
+                I_40 = BitConverter.ToInt32(bytes, offset + 40),
+                I_44 = BitConverter.ToInt32(bytes, offset + 44)
             };
         }
-    
+
         public byte[] Write()
         {
             List<byte> bytes = new List<byte>();
@@ -477,13 +488,15 @@ namespace Xv2CoreLib.CST
             bytes.AddRange(BitConverter.GetBytes(IsCustomCostume));
             bytes.AddRange(BitConverter.GetBytes(CacIndex));
             bytes.AddRange(BitConverter.GetBytes(var_type_after_TU9_order));
+            bytes.AddRange(BitConverter.GetBytes(I_40));
+            bytes.AddRange(BitConverter.GetBytes(I_44));
 
             if (bytes.Count != CST_ENTRY_SIZE)
                 throw new InvalidDataException($"CST_Entry.Write: Invalid entry size!");
 
             return bytes.ToArray();
         }
-    
+
         public Eternity.CharaCostumeSlot ConvertToEternityFile()
         {
             return new Eternity.CharaCostumeSlot()

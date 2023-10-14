@@ -310,6 +310,8 @@ namespace Xv2CoreLib.CUS
                     return 0;
                 case 72:
                     return 1;
+                case 76:
+                    return 2; //1.21
                 default:
                     throw new InvalidDataException("CUS file version not supported.");
             }
@@ -572,6 +574,11 @@ namespace Xv2CoreLib.CUS
         [YAXSerializeAs("value")]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (uint)0xffffff00)]
         public uint I_68 { get; set; } = 0xffffff00;
+        [YAXHexValue]
+        [YAXAttributeFor("I_72")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (uint)0)]
+        public uint I_72 { get; set; }
 
 
         #region Installer

@@ -143,6 +143,12 @@ namespace Xv2CoreLib.CUS
                     skillEntries[i].I_68 = BitConverter.ToUInt32(rawBytes, offset + 68);
                     offset += 72;
                 }
+                else if (cusFile.Version == 2)
+                {
+                    skillEntries[i].I_68 = BitConverter.ToUInt32(rawBytes, offset + 68);
+                    skillEntries[i].I_72 = BitConverter.ToUInt32(rawBytes, offset + 72);
+                    offset += 76;
+                }
                 else
                 {
                     offset += 68;
