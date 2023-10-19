@@ -27,6 +27,20 @@ namespace Xv2CoreLib.SAV
     //Fixing this will require way too much time that is better spent elsewhere, so like this it will remain...
 
     #region EnumsAndOffsets
+    public static class SysFlags
+    {
+        public const int UNLOCK_MAXIMUM_LV_STAGE1 = 17;
+        public const int UNLOCK_MAXIMUM_LV_STAGE2 = 18;
+        public const int UNLOCK_MAXIMUM_LV_STAGE3 = 19;
+        public const int UNLOCK_MAXIMUM_LV_STAGE4 = 20;
+        public const int TEACHER_WIS_LEVELCAP_FIRST_TALK = 5227;
+        public const int NOTICE_MAXIMUM_LV_STAGE1 = 291;
+        public const int NOTICE_MAXIMUM_LV_STAGE2 = 292;
+        public const int NOTICE_MAXIMUM_LV_STAGE3 = 293;
+        public const int NOTICE_MAXIMUM_LV_STAGE4 = 294;
+        public const int NOTICE_LEVELCAP5_COMPLETE = 7316;
+    }
+
     public static class Offsets
     {
         //Misc
@@ -291,40 +305,40 @@ namespace Xv2CoreLib.SAV
     }
 
     [Flags]
-    public enum AccountFlags : int
+    public enum AccountFlags1 : uint
     {
-        Unk1 = 1,
-        Unk2 = 2,
-        Unk3 = 4,
-        Unk4 = 8,
-        Unk5 = 16,
-        Unk6 = 32,
-        Level85Unlock = 64, //7
-        Level90Unlock = 128, //8
-        Level95Unlock = 256, //9
-        Level99Unlock = 512, //10
-        Unk11 = 1024,
-        Unk12 = 2048,
-        Unk13 = 4096,
-        Unk14 = 8192,
-        Unk15 = 16384,
-        Unk16 = 16384,
-        Unk17 = 32768,
-        Unk18 = 65536,
-        Unk19 = 131072,
-        Unk20 = 262144,
-        Unk21 = 524288,
-        Unk22 = 1048576,
-        Unk23 = 2097152,
-        Unk24 = 4194304,
-        Unk25 = 8388608,
-        Unk26 = 16777216,
-        Unk27 = 33554432,
-        Unk28 = 67108864,
-        Unk29 = 134217728,
-        Unk30 = 268435456,
-        Unk31 = 536870912,
-        Unk32 = 1073741824
+        Unk1 = 0x1,
+        Unk2 = 0x2,
+        Unk3 = 0x4,
+        Unk4 = 0x8,
+        Unk5 = 0x10,
+        Unk6 = 0x20,
+        Level85Unlock = 0x40, //7
+        Level90Unlock = 0x80, //8
+        Level95Unlock = 0x100, //9
+        Level99Unlock = 0x200, //10
+        Unk11 = 0x400,
+        Unk12 = 0x800,
+        Unk13 = 0x1000,
+        Unk14 = 0x2000,
+        Unk15 = 0x4000,
+        Unk16 = 0x8000,
+        Unk17 = 0x10000,
+        Unk18 = 0x20000,
+        Unk19 = 0x40000,
+        Unk20 = 0x80000,
+        Unk21 = 0x100000,
+        Unk22 = 0x200000,
+        Unk23 = 0x400000,
+        Unk24 = 0x800000,
+        Unk25 = 0x1000000,
+        Unk26 = 0x2000000,
+        Unk27 = 0x4000000,
+        Unk28 = 0x8000000,
+        Unk29 = 0x10000000,
+        Unk30 = 0x20000000,
+        Level120Unlock = 0x40000000, //30
+        Unk32 = 0x80000000
     }
 
     [Flags]
@@ -865,7 +879,7 @@ namespace Xv2CoreLib.SAV
         public UInt32 TPMedals { get; set; }
         [YAXAttributeFor("AccFlags")]
         [YAXSerializeAs("values")]
-        public AccountFlags AccFlags { get; set; }
+        public AccountFlags1 AccFlags { get; set; }
 
         private ObservableCollection<CaC> _characters = null;
         public ObservableCollection<CaC> Characters //Size 8
@@ -1113,7 +1127,7 @@ namespace Xv2CoreLib.SAV
             savFile.SteamID = BitConverter.ToUInt64(rawBytes, 8) ^ VERSION_XOR;
             savFile.Zeni = BitConverter.ToUInt32(rawBytes, 44);
             savFile.TPMedals = BitConverter.ToUInt32(rawBytes, 48);
-            savFile.AccFlags = (AccountFlags)BitConverter.ToUInt32(rawBytes, 76);
+            savFile.AccFlags = (AccountFlags1)BitConverter.ToUInt32(rawBytes, 76);
 
             //CaCs
             savFile.Characters = CaC.ReadAll(bytes, rawBytes, Offsets.CAC, savFile);
@@ -1244,47 +1258,91 @@ namespace Xv2CoreLib.SAV
             bytes = FileBytes.ToArray();
         }
 
-        internal void SetAccFlag(AccountFlags flag)
+        internal void SetAccFlag(AccountFlags1 flag, bool state = true)
         {
-            if (!AccFlags.HasFlag(flag))
+            if (state)
             {
-                AccFlags = flag | AccFlags;
+                if (!AccFlags.HasFlag(flag))
+                {
+                    AccFlags = flag | AccFlags;
+                }
             }
+            else
+            {
+                AccFlags = AccFlags.RemoveFlag(flag);
+            }
+        }
+
+        public void SetSysFlag(int index, bool state, int charaSlot)
+        {
+            if (index < 0 || index > Offsets.SYSTEM_FLAGS_COUNT * 8) throw new ArgumentOutOfRangeException($"SAV_File.SetSysFlag: index is out of range ({index}).");
+            if (charaSlot < 0 || charaSlot > 7) throw new ArgumentOutOfRangeException($"SAV_File.SetSysFlag: charaSlot is out of range ({charaSlot}). Must be between 0 and 7.");
+
+            Characters[charaSlot].SystemFlags[index].Flag = state;
         }
 
         public void ValidateLevelFlags()
         {
-            int maxLvl = 1;
-            foreach (var chara in Characters)
+            //Set AccFlag based on maximum level
+            int maxLvl = Characters.Max(x => x.I_172);
+
+            if (maxLvl > 99)
             {
-                if (!String.IsNullOrWhiteSpace(chara.Name))
-                {
-                    if (chara.I_172 > maxLvl) maxLvl = chara.I_172;
-                }
+                SetAccFlag(AccountFlags1.Level120Unlock);
             }
 
-            //Set account flags
             if (maxLvl > 95)
             {
-                SetAccFlag(AccountFlags.Level85Unlock);
-                SetAccFlag(AccountFlags.Level90Unlock);
-                SetAccFlag(AccountFlags.Level95Unlock);
-                SetAccFlag(AccountFlags.Level99Unlock);
+                SetAccFlag(AccountFlags1.Level99Unlock);
             }
-            else if (maxLvl > 90)
+
+            if (maxLvl > 90)
             {
-                SetAccFlag(AccountFlags.Level85Unlock);
-                SetAccFlag(AccountFlags.Level90Unlock);
-                SetAccFlag(AccountFlags.Level95Unlock);
+                SetAccFlag(AccountFlags1.Level95Unlock);
             }
-            else if (maxLvl > 85)
+
+            if (maxLvl > 85)
             {
-                SetAccFlag(AccountFlags.Level85Unlock);
-                SetAccFlag(AccountFlags.Level90Unlock);
+                SetAccFlag(AccountFlags1.Level90Unlock);
             }
-            else if (maxLvl > 80)
+
+            if (maxLvl > 80)
             {
-                SetAccFlag(AccountFlags.Level85Unlock);
+                SetAccFlag(AccountFlags1.Level85Unlock);
+            }
+
+            //Set SysFlag (per character), based on that characters own level
+            for (int i = 0; i < Characters.Count; i++)
+            {
+                if(Characters[i].I_172 > 99)
+                {
+                    SetSysFlag(SysFlags.NOTICE_LEVELCAP5_COMPLETE, true, i);
+                    SetSysFlag(SysFlags.TEACHER_WIS_LEVELCAP_FIRST_TALK, true, i);
+                }
+
+                if (Characters[i].I_172 > 95)
+                {
+                    SetSysFlag(SysFlags.UNLOCK_MAXIMUM_LV_STAGE4, true, i);
+                    SetSysFlag(SysFlags.NOTICE_MAXIMUM_LV_STAGE4, true, i);
+                }
+
+                if (Characters[i].I_172 > 90)
+                {
+                    SetSysFlag(SysFlags.UNLOCK_MAXIMUM_LV_STAGE3, true, i);
+                    SetSysFlag(SysFlags.NOTICE_MAXIMUM_LV_STAGE3, true, i);
+                }
+
+                if (Characters[i].I_172 > 85)
+                {
+                    SetSysFlag(SysFlags.UNLOCK_MAXIMUM_LV_STAGE2, true, i);
+                    SetSysFlag(SysFlags.NOTICE_MAXIMUM_LV_STAGE2, true, i);
+                }
+
+                if (Characters[i].I_172 > 80)
+                {
+                    SetSysFlag(SysFlags.UNLOCK_MAXIMUM_LV_STAGE1, true, i);
+                    SetSysFlag(SysFlags.NOTICE_MAXIMUM_LV_STAGE1, true, i);
+                }
             }
         }
 
