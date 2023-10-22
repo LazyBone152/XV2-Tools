@@ -89,7 +89,7 @@ namespace Xv2CoreLib.Resource.App
             if (reloadTriggered) return;
 
             //Reload settings becuase it was changed externally
-            if (lastSaveTime < (DateTime.Now - new TimeSpan(0,0, 5)) && !reloadTriggered)
+            if (lastSaveTime < (DateTime.Now - new TimeSpan(0, 0, 5)) && !reloadTriggered)
             {
                 reloadTriggered = true;
 
@@ -100,7 +100,7 @@ namespace Xv2CoreLib.Resource.App
 
                     while (Utils.IsFileWriteLocked(GetSetingsPath()))
                     {
-                        if(locked >= 30000)
+                        if (locked >= 30000)
                         {
                             break;
                         }
@@ -145,14 +145,14 @@ namespace Xv2CoreLib.Resource.App
             try
             {
 
-            //Try to load the settings
-            var oldSettings = Settings;
-            var settings = Settings.Load(GetSetingsPath());
-            settings.InitSettings();
-            settings.ValidateSettings();
+                //Try to load the settings
+                var oldSettings = Settings;
+                var settings = Settings.Load(GetSetingsPath());
+                settings.InitSettings();
+                settings.ValidateSettings();
 
-            Settings = settings;
-            SettingsReloaded?.Invoke(oldSettings, EventArgs.Empty);
+                Settings = settings;
+                SettingsReloaded?.Invoke(oldSettings, EventArgs.Empty);
 
             }
             catch
@@ -182,21 +182,21 @@ namespace Xv2CoreLib.Resource.App
             try
             {
 #endif
-            Settings.ValidateSettings();
-            Directory.CreateDirectory(Path.GetDirectoryName(GetSetingsPath()));
+                Settings.ValidateSettings();
+                Directory.CreateDirectory(Path.GetDirectoryName(GetSetingsPath()));
 
-            Settings.Save(GetSetingsPath());
-            lastSaveTime = DateTime.Now;
+                Settings.Save(GetSetingsPath());
+                lastSaveTime = DateTime.Now;
 #if !DEBUG
             }
             catch (UnauthorizedAccessException)
             {
-                if(errorIfFail)
+                if (errorIfFail)
                     MessageBox.Show("Failed to save settings.\n\nThe application does not have write access in the current directory. Try moving it somewhere else or running it as administrator.", "Settings", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
             catch
             {
-                if(errorIfFail)
+                if (errorIfFail)
                     MessageBox.Show("Failed to save settings.", "Settings", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 #endif
@@ -222,7 +222,7 @@ namespace Xv2CoreLib.Resource.App
             return $"{baseTheme}.{accent.ToString()}";
         }
 
-#region PathHelpers
+        #region PathHelpers
         public static string GetAbsolutePathRelativeToExe(string relativePath)
         {
             return String.Format("{0}/{1}", Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), relativePath);
@@ -290,13 +290,13 @@ namespace Xv2CoreLib.Resource.App
         {
             return (File.Exists(String.Format("{0}/bin/DBXV2.exe", path)));
         }
-#endregion
-    
+        #endregion
+
     }
 
     public class Settings : INotifyPropertyChanged
     {
-#region NotifyPropertyChanged
+        #region NotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
 
         public void NotifyPropertyChanged(String propertyName = "")
@@ -321,9 +321,10 @@ namespace Xv2CoreLib.Resource.App
         }
 
 
-#region Values
+        #region Values
         //Common
         private string _gameDir = string.Empty;
+        private string _savFile = string.Empty;
         private int _undoLimit = UndoManager.DefaultMaxCapacity;
         private AppTheme _currentTheme = AppTheme.Light;
         private AppAccent _currentLightAccent = AppAccent.Blue;
@@ -343,26 +344,32 @@ namespace Xv2CoreLib.Resource.App
         public bool UpdateNotifications { get; set; } = true;
         public string GameDirectory
         {
-            get
-            {
-                return this._gameDir;
-            }
+            get => _gameDir;
             set
             {
-                if (value != this._gameDir)
+                if (value != _gameDir)
                 {
-                    this._gameDir = value;
+                    _gameDir = value;
                     NotifyPropertyChanged(nameof(GameDirectory));
+                }
+            }
+        }
+        public string SaveFile
+        {
+            get => _savFile;
+            set
+            {
+                if (value != _savFile)
+                {
+                    _savFile = value;
+                    NotifyPropertyChanged(nameof(SaveFile));
                 }
             }
         }
 
         public bool UseLightTheme
         {
-            get
-            {
-                return _currentTheme == AppTheme.Light;
-            }
+            get => _currentTheme == AppTheme.Light;
             set
             {
                 if (value)
@@ -373,10 +380,7 @@ namespace Xv2CoreLib.Resource.App
         }
         public bool UseDarkTheme
         {
-            get
-            {
-                return _currentTheme == AppTheme.Dark;
-            }
+            get => _currentTheme == AppTheme.Dark;
             set
             {
                 if (value)
@@ -387,53 +391,44 @@ namespace Xv2CoreLib.Resource.App
         }
         public int UndoLimit
         {
-            get
-            {
-                return this._undoLimit;
-            }
+            get => _undoLimit;
             set
             {
-                if (value != this._undoLimit)
+                if (value != _undoLimit)
                 {
-                    this._undoLimit = value;
+                    _undoLimit = value;
                     NotifyPropertyChanged(nameof(UndoLimit));
                 }
             }
         }
 
-        public AppAccent CurrentLightAccent { get { return _currentLightAccent; } set { _currentLightAccent = value; NotifyPropertyChanged(nameof(CurrentLightAccent)); } }
-        public AppAccent CurrentDarkAccent { get { return _currentDarkAccent; } set { _currentDarkAccent = value; NotifyPropertyChanged(nameof(CurrentDarkAccent)); } }
+        public AppAccent CurrentLightAccent { get => _currentLightAccent; set { _currentLightAccent = value; NotifyPropertyChanged(nameof(CurrentLightAccent)); } }
+        public AppAccent CurrentDarkAccent { get => _currentDarkAccent; set { _currentDarkAccent = value; NotifyPropertyChanged(nameof(CurrentDarkAccent)); } }
         public bool DefaultThemeSet { get; set; }
-#endregion
+        #endregion
 
-#region EepkOrganiser
+        #region EepkOrganiser
         public bool LoadTextures { get; set; } = true;
         public bool AssetReuse_NameMatch
         {
-            get
-            {
-                return this._assetReuseNameMatch;
-            }
+            get => _assetReuseNameMatch;
             set
             {
-                if (value != this._assetReuseNameMatch)
+                if (value != _assetReuseNameMatch)
                 {
-                    this._assetReuseNameMatch = value;
+                    _assetReuseNameMatch = value;
                     NotifyPropertyChanged(nameof(AssetReuse_NameMatch));
                 }
             }
         }
         public bool TextureReuse_Identical
         {
-            get
-            {
-                return _textureReuse == EepkTextureReuse.Identical;
-            }
+            get => _textureReuse == EepkTextureReuse.Identical;
             set
             {
                 if (value && !TextureReuse_Identical)
                 {
-                    this._textureReuse = EepkTextureReuse.Identical;
+                    _textureReuse = EepkTextureReuse.Identical;
                     NotifyPropertyChanged(nameof(TextureReuse_NameMatch));
                     NotifyPropertyChanged(nameof(TextureReuse_Identical));
                 }
@@ -441,15 +436,12 @@ namespace Xv2CoreLib.Resource.App
         }
         public bool TextureReuse_NameMatch
         {
-            get
-            {
-                return _textureReuse == EepkTextureReuse.NameMatch;
-            }
+            get => _textureReuse == EepkTextureReuse.NameMatch;
             set
             {
                 if (value && !TextureReuse_NameMatch)
                 {
-                    this._textureReuse = EepkTextureReuse.NameMatch;
+                    _textureReuse = EepkTextureReuse.NameMatch;
                     NotifyPropertyChanged(nameof(TextureReuse_NameMatch));
                     NotifyPropertyChanged(nameof(TextureReuse_Identical));
                 }
@@ -457,15 +449,12 @@ namespace Xv2CoreLib.Resource.App
         }
         public bool FileCleanUp_Delete
         {
-            get
-            {
-                return this._fileCleanUp == EepkFileCleanUp.Delete;
-            }
+            get => _fileCleanUp == EepkFileCleanUp.Delete;
             set
             {
                 if (value && !FileCleanUp_Delete)
                 {
-                    this._fileCleanUp = EepkFileCleanUp.Delete;
+                    _fileCleanUp = EepkFileCleanUp.Delete;
                     NotifyPropertyChanged(nameof(FileCleanUp_Ignore));
                     NotifyPropertyChanged(nameof(FileCleanUp_Prompt));
                     NotifyPropertyChanged(nameof(FileCleanUp_Delete));
@@ -474,15 +463,12 @@ namespace Xv2CoreLib.Resource.App
         }
         public bool FileCleanUp_Prompt
         {
-            get
-            {
-                return this._fileCleanUp == EepkFileCleanUp.Prompt;
-            }
+            get => _fileCleanUp == EepkFileCleanUp.Prompt;
             set
             {
                 if (value && !FileCleanUp_Prompt)
                 {
-                    this._fileCleanUp = EepkFileCleanUp.Prompt;
+                    _fileCleanUp = EepkFileCleanUp.Prompt;
                     NotifyPropertyChanged(nameof(FileCleanUp_Ignore));
                     NotifyPropertyChanged(nameof(FileCleanUp_Prompt));
                     NotifyPropertyChanged(nameof(FileCleanUp_Delete));
@@ -491,15 +477,12 @@ namespace Xv2CoreLib.Resource.App
         }
         public bool FileCleanUp_Ignore
         {
-            get
-            {
-                return this._fileCleanUp == EepkFileCleanUp.Ignore;
-            }
+            get => _fileCleanUp == EepkFileCleanUp.Ignore;
             set
             {
                 if (value && !FileCleanUp_Ignore)
                 {
-                    this._fileCleanUp = EepkFileCleanUp.Ignore;
+                    _fileCleanUp = EepkFileCleanUp.Ignore;
                     NotifyPropertyChanged(nameof(FileCleanUp_Ignore));
                     NotifyPropertyChanged(nameof(FileCleanUp_Prompt));
                     NotifyPropertyChanged(nameof(FileCleanUp_Delete));
@@ -508,30 +491,24 @@ namespace Xv2CoreLib.Resource.App
         }
         public bool AutoContainerRename
         {
-            get
-            {
-                return this._autoContainerRename;
-            }
+            get => _autoContainerRename;
             set
             {
-                if (value != this._autoContainerRename)
+                if (value != _autoContainerRename)
                 {
-                    this._autoContainerRename = value;
+                    _autoContainerRename = value;
                     NotifyPropertyChanged(nameof(AutoContainerRename));
                 }
             }
         }
         public int FileCacheLimit
         {
-            get
-            {
-                return this._fileCacheLimit;
-            }
+            get => _fileCacheLimit;
             set
             {
-                if (value != this._fileCacheLimit)
+                if (value != _fileCacheLimit)
                 {
-                    this._fileCacheLimit = value;
+                    _fileCacheLimit = value;
                     NotifyPropertyChanged(nameof(FileCacheLimit));
                 }
             }
@@ -581,10 +558,7 @@ namespace Xv2CoreLib.Resource.App
         public BacTypeSortMode XenoKit_BacTypeSortModeEnum
         {
             get => (BacTypeSortMode)XenoKit_BacTypeSortMode;
-            set
-            {
-                XenoKit_BacTypeSortMode = (int)value;
-            }
+            set => XenoKit_BacTypeSortMode = (int)value;
         }
 
         #endregion
@@ -630,7 +604,7 @@ namespace Xv2CoreLib.Resource.App
             }
 
             //Disable SuperSampling by default
-            if(SettingsVersion == 1)
+            if (SettingsVersion == 1)
             {
                 SettingsVersion = 2;
                 XenoKit_SuperSamplingFactor = 1;
@@ -719,7 +693,7 @@ namespace Xv2CoreLib.Resource.App
             NameMatch
         }
 
-        
+
         #endregion
     }
 
