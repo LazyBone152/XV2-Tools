@@ -39,7 +39,8 @@ namespace Xv2CoreLib.BCS
         Bust = 0x40,
         Pants = 0x80,
         Rist = 0x100,
-        Boots = 0x200
+        Boots = 0x200,
+        AllParts = FaceBase | FaceForehead | FaceEye | FaceNose | FaceEar | Hair | Bust | Pants | Rist | Boots
     }
 
     public enum Race : byte

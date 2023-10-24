@@ -2089,7 +2089,6 @@ namespace Xv2CoreLib.SAV
             };
         }
 
-
         public static CaCAppearence Read(byte[] rawBytes, int cacIndex)
         {
             int offset = Offsets.CAC + (Offsets.CAC_SIZE * cacIndex);
@@ -2161,7 +2160,7 @@ namespace Xv2CoreLib.SAV
             }
         }
 
-        private int GetBcsBodyFromHeightWidth()
+        public int GetBcsBodyFromHeightWidth()
         {
             switch (Height)
             {
@@ -2220,6 +2219,15 @@ namespace Xv2CoreLib.SAV
             }
         }
 
+        public void ResetBasicAppearence()
+        {
+            I_132 = 0;
+            I_136 = 0;
+            I_140 = 0;
+            I_144 = 0;
+            I_148 = 0;
+            I_152 = 0;
+        }
     }
 
     public class CacPreset : INotifyPropertyChanged

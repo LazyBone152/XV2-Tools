@@ -111,6 +111,11 @@ namespace Xv2CoreLib
         public const string PSC_PATH = "system/parameter_spec_char.psc";
         public const string SKILL_IDB_PATH = "system/item/skill_item.idb";
         public const string TALISMAN_IDB_PATH = "system/item/talisman_item.idb";
+        public const string TOP_IDB_PATH = "system/item/costume_top_item.idb";
+        public const string BOTTOM_IDB_PATH = "system/item/costume_bottom_item.idb";
+        public const string GLOVES_IDB_PATH = "system/item/costume_gloves_item.idb";
+        public const string SHOES_IDB_PATH = "system/item/costume_shoes_item.idb";
+        public const string ACCESSORY_IDB_PATH = "system/item/accessory_item.idb";
         public const string CMN_BAC_PATH = "chara/CMN/CMN.bac";
         public const string CMN_EAN_PATH = "chara/CMN/CMN.ean";
         public const string CMN_CAM_EAN_PATH = "chara/CMN/CMN.cam.ean";
@@ -141,10 +146,17 @@ namespace Xv2CoreLib
         private CUS_File cusFile = null;
         private CMS_File cmsFile = null;
         private ERS_File ersFile = null;
-        private IDB_File skillIdbFile = null;
         private PUP_File pupFile = null;
         private CSO_File csoFile = null;
         private PSC_File pscFile = null;
+        private IDB_File skillIdbFile = null;
+
+        //Costume Files
+        private IDB_File topIdbFile = null;
+        private IDB_File bottomIdbFile = null;
+        private IDB_File shoesIdbFile = null;
+        private IDB_File glovesIdbFile = null;
+        private IDB_File accessoryIdbFile = null;
 
         //Cmn Files
         public EAN_File CmnEan = null;
@@ -1443,6 +1455,41 @@ namespace Xv2CoreLib
             {
                 charaNameMsgFile[i].SetCharacterName(names[i], shortName);
             }
+        }
+
+        #endregion
+
+        #region Costumes
+        public int GetTopPartSetID(int idbID)
+        {
+            if (topIdbFile == null)
+                topIdbFile = (IDB_File)FileManager.Instance.GetParsedFileFromGame(TOP_IDB_PATH);
+
+            return topIdbFile.Entries.Any(x => x.ID == idbID) ? topIdbFile.Entries.FirstOrDefault(x => x.ID == idbID).I_32 : -1;
+        }
+
+        public int GetBottomPartSetID(int idbID)
+        {
+            if (bottomIdbFile == null)
+                bottomIdbFile = (IDB_File)FileManager.Instance.GetParsedFileFromGame(BOTTOM_IDB_PATH);
+
+            return bottomIdbFile.Entries.Any(x => x.ID == idbID) ? bottomIdbFile.Entries.FirstOrDefault(x => x.ID == idbID).I_32 : -1;
+        }
+
+        public int GetGlovesPartSetID(int idbID)
+        {
+            if (glovesIdbFile == null)
+                glovesIdbFile = (IDB_File)FileManager.Instance.GetParsedFileFromGame(GLOVES_IDB_PATH);
+
+            return glovesIdbFile.Entries.Any(x => x.ID == idbID) ? glovesIdbFile.Entries.FirstOrDefault(x => x.ID == idbID).I_32 : -1;
+        }
+
+        public int GetShoesPartSetID(int idbID)
+        {
+            if (shoesIdbFile == null)
+                shoesIdbFile = (IDB_File)FileManager.Instance.GetParsedFileFromGame(SHOES_IDB_PATH);
+
+            return shoesIdbFile.Entries.Any(x => x.ID == idbID) ? shoesIdbFile.Entries.FirstOrDefault(x => x.ID == idbID).I_32 : -1;
         }
 
         #endregion
