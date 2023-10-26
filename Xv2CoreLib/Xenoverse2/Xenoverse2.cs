@@ -136,11 +136,14 @@ namespace Xv2CoreLib
         public const string AWOKEN_SKILL_DESC_MSG_PATH = "msg/proper_noun_skill_met_info_";
         public const string EVASIVE_SKILL_DESC_MSG_PATH = "msg/proper_noun_skill_esc_info_";
         public const string BTLHUD_MSG_PATH = "msg/quest_btlhud_";
+        public const string COSTUME_MSG_PATH = "msg/proper_noun_costume_name_";
+        public const string ACCESSORY_MSG_PATH = "msg/proper_noun_accessory_name_";
 
         //Load bools
         public bool loadCmn = false;
         public bool loadSkills = true;
         public bool loadCharacters = true;
+        public bool loadCostumes = false;
 
         //System Files
         private CUS_File cusFile = null;
@@ -152,11 +155,11 @@ namespace Xv2CoreLib
         private IDB_File skillIdbFile = null;
 
         //Costume Files
-        private IDB_File topIdbFile = null;
-        private IDB_File bottomIdbFile = null;
-        private IDB_File shoesIdbFile = null;
-        private IDB_File glovesIdbFile = null;
-        private IDB_File accessoryIdbFile = null;
+        public IDB_File TopIdbFile { get; private set; }
+        public IDB_File BottomIdbFile { get; private set; }
+        public IDB_File ShoesIdbFile { get; private set; }
+        public IDB_File GlovesIdbFile { get; private set; }
+        public IDB_File AccessoryIdbFile { get; private set; }
 
         //Cmn Files
         public EAN_File CmnEan = null;
@@ -175,6 +178,8 @@ namespace Xv2CoreLib
         private MSG_File[] evaSkillDescMsgFile = new MSG_File[(int)Language.NumLanguages];
         private MSG_File[] metSkillDescMsgFile = new MSG_File[(int)Language.NumLanguages];
         private MSG_File[] btlHudMsgFile = new MSG_File[(int)Language.NumLanguages];
+        private MSG_File[] costumeMsgFile = new MSG_File[(int)Language.NumLanguages];
+        private MSG_File[] accessoryMsgFile = new MSG_File[(int)Language.NumLanguages];
 
         //Misc variables
         private FileWatcher fileWatcher => FileManager.Instance.fileWatcher;
@@ -204,11 +209,52 @@ namespace Xv2CoreLib
 
                 if (loadCmn)
                     InitCmn();
+
+                if (loadCostumes)
+                    InitCostumes();
             }
             finally
             {
                 IsInitialized = true;
             }
+        }
+
+        private void InitCostumes()
+        {
+            loadCostumes = true;
+
+            if (fileWatcher.WasFileModified(fileIO.PathInGameDir(TOP_IDB_PATH)) || TopIdbFile == null)
+            {
+                TopIdbFile = (IDB_File)FileManager.Instance.GetParsedFileFromGame(TOP_IDB_PATH);
+                fileWatcher.FileLoadedOrSaved(fileIO.PathInGameDir(TOP_IDB_PATH));
+            }
+
+            if (fileWatcher.WasFileModified(fileIO.PathInGameDir(BOTTOM_IDB_PATH)) || BottomIdbFile == null)
+            {
+                BottomIdbFile = (IDB_File)FileManager.Instance.GetParsedFileFromGame(BOTTOM_IDB_PATH);
+                fileWatcher.FileLoadedOrSaved(fileIO.PathInGameDir(BOTTOM_IDB_PATH));
+            }
+
+            if (fileWatcher.WasFileModified(fileIO.PathInGameDir(GLOVES_IDB_PATH)) || GlovesIdbFile == null)
+            {
+                GlovesIdbFile = (IDB_File)FileManager.Instance.GetParsedFileFromGame(GLOVES_IDB_PATH);
+                fileWatcher.FileLoadedOrSaved(fileIO.PathInGameDir(GLOVES_IDB_PATH));
+            }
+
+            if (fileWatcher.WasFileModified(fileIO.PathInGameDir(SHOES_IDB_PATH)) || ShoesIdbFile == null)
+            {
+                ShoesIdbFile = (IDB_File)FileManager.Instance.GetParsedFileFromGame(SHOES_IDB_PATH);
+                fileWatcher.FileLoadedOrSaved(fileIO.PathInGameDir(SHOES_IDB_PATH));
+            }
+
+            if (fileWatcher.WasFileModified(fileIO.PathInGameDir(ACCESSORY_IDB_PATH)) || AccessoryIdbFile == null)
+            {
+                AccessoryIdbFile = (IDB_File)FileManager.Instance.GetParsedFileFromGame(ACCESSORY_IDB_PATH);
+                fileWatcher.FileLoadedOrSaved(fileIO.PathInGameDir(ACCESSORY_IDB_PATH));
+            }
+
+            LoadMsgFiles(ref costumeMsgFile, COSTUME_MSG_PATH);
+            LoadMsgFiles(ref accessoryMsgFile, ACCESSORY_MSG_PATH);
         }
 
         private void InitCharacters()
@@ -1462,36 +1508,91 @@ namespace Xv2CoreLib
         #region Costumes
         public int GetTopPartSetID(int idbID)
         {
-            if (topIdbFile == null)
-                topIdbFile = (IDB_File)FileManager.Instance.GetParsedFileFromGame(TOP_IDB_PATH);
+            if (idbID == -1) return 0;
+            InitCostumes();
 
-            return topIdbFile.Entries.Any(x => x.ID == idbID) ? topIdbFile.Entries.FirstOrDefault(x => x.ID == idbID).I_32 : -1;
+            return TopIdbFile.Entries.Any(x => x.ID == idbID) ? TopIdbFile.Entries.FirstOrDefault(x => x.ID == idbID).I_32 : -1;
         }
 
         public int GetBottomPartSetID(int idbID)
         {
-            if (bottomIdbFile == null)
-                bottomIdbFile = (IDB_File)FileManager.Instance.GetParsedFileFromGame(BOTTOM_IDB_PATH);
+            if (idbID == -1) return 0;
+            InitCostumes();
 
-            return bottomIdbFile.Entries.Any(x => x.ID == idbID) ? bottomIdbFile.Entries.FirstOrDefault(x => x.ID == idbID).I_32 : -1;
+            return BottomIdbFile.Entries.Any(x => x.ID == idbID) ? BottomIdbFile.Entries.FirstOrDefault(x => x.ID == idbID).I_32 : -1;
         }
 
         public int GetGlovesPartSetID(int idbID)
         {
-            if (glovesIdbFile == null)
-                glovesIdbFile = (IDB_File)FileManager.Instance.GetParsedFileFromGame(GLOVES_IDB_PATH);
+            if (idbID == -1) return 0;
+            InitCostumes();
 
-            return glovesIdbFile.Entries.Any(x => x.ID == idbID) ? glovesIdbFile.Entries.FirstOrDefault(x => x.ID == idbID).I_32 : -1;
+            return GlovesIdbFile.Entries.Any(x => x.ID == idbID) ? GlovesIdbFile.Entries.FirstOrDefault(x => x.ID == idbID).I_32 : -1;
         }
 
         public int GetShoesPartSetID(int idbID)
         {
-            if (shoesIdbFile == null)
-                shoesIdbFile = (IDB_File)FileManager.Instance.GetParsedFileFromGame(SHOES_IDB_PATH);
+            if (idbID == -1) return 0;
+            InitCostumes();
 
-            return shoesIdbFile.Entries.Any(x => x.ID == idbID) ? shoesIdbFile.Entries.FirstOrDefault(x => x.ID == idbID).I_32 : -1;
+            return ShoesIdbFile.Entries.Any(x => x.ID == idbID) ? ShoesIdbFile.Entries.FirstOrDefault(x => x.ID == idbID).I_32 : -1;
         }
 
+        public int GetAccessoryPartSetID(int idbID)
+        {
+            InitCostumes();
+
+            return AccessoryIdbFile.Entries.Any(x => x.ID == idbID) ? AccessoryIdbFile.Entries.FirstOrDefault(x => x.ID == idbID).I_32 : -1;
+        }
+
+        public List<Xv2Item> GetTopCostumeNames(SAV.Race race, bool includeDefault = true)
+        {
+            InitCostumes();
+            return GetCostumeNames(TopIdbFile, costumeMsgFile[(int)PreferedLanguage], race, includeDefault);
+        }
+
+        public List<Xv2Item> GetBottomCostumeNames(SAV.Race race, bool includeDefault = true)
+        {
+            InitCostumes();
+            return GetCostumeNames(BottomIdbFile, costumeMsgFile[(int)PreferedLanguage], race, includeDefault);
+        }
+
+        public List<Xv2Item> GetGlovesCostumeNames(SAV.Race race, bool includeDefault = true)
+        {
+            InitCostumes();
+            return GetCostumeNames(GlovesIdbFile, costumeMsgFile[(int)PreferedLanguage], race, includeDefault);
+        }
+
+        public List<Xv2Item> GetShoesCostumeNames(SAV.Race race, bool includeDefault = true)
+        {
+            InitCostumes();
+            return GetCostumeNames(ShoesIdbFile, costumeMsgFile[(int)PreferedLanguage], race, includeDefault);
+        }
+
+        public List<Xv2Item> GetAccessoryCostumeNames(SAV.Race race, bool includeDefault = true)
+        {
+            InitCostumes();
+            return GetCostumeNames(AccessoryIdbFile, accessoryMsgFile[(int)PreferedLanguage], race, includeDefault);
+        }
+
+        private List<Xv2Item> GetCostumeNames(IDB_File idbFile, MSG_File msgFile, SAV.Race race, bool includeDefault)
+        {
+            List<Xv2Item> costumes = new List<Xv2Item>();
+
+            if (includeDefault)
+                costumes.Add(new Xv2Item(-1, "---"));
+
+            foreach (IDB_Entry entry in idbFile.Entries)
+            {
+                if (entry.CanRaceUseItem(race))
+                {
+                    string name = msgFile.GetEntryText(entry.NameMsgID);
+                    costumes.Add(new Xv2Item(entry.ID, string.IsNullOrWhiteSpace(name) ? $"Unknown Item ({entry.ID})" : name));
+                }
+            }
+
+            return costumes;
+        }
         #endregion
 
         public static Language SystemLanguageToXv2()
@@ -1539,6 +1640,7 @@ namespace Xv2CoreLib
             ID = id;
             Name = name;
         }
+
     }
 
 }

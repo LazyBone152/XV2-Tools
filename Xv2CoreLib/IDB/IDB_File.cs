@@ -12,14 +12,14 @@ namespace Xv2CoreLib.IDB
     [Flags]
     public enum IdbRaceLock
     {
-        HUM = 1,
-        HUF = 2,
-        SYM = 4,
-        SYF = 8,
-        NMC = 16,
-        FRI = 32,
-        MAM = 64,
-        MAF = 128
+        HUM = 0x1,
+        HUF = 0x2,
+        SYM = 0x4,
+        SYF = 0x8,
+        NMC = 0x10,
+        FRI = 0x20,
+        MAM = 0x40,
+        MAF = 0x80
     }
 
     public enum LB_Color : ushort
@@ -258,6 +258,7 @@ namespace Xv2CoreLib.IDB
 
             return null;
         }
+    
     }
 
     [YAXSerializeAs("IDB_Entry")]
@@ -472,6 +473,29 @@ namespace Xv2CoreLib.IDB
             idbEntry.Effects[0].F_100 = kiCost;
 
             return idbEntry;
+        }
+
+        public bool CanRaceUseItem(SAV.Race race)
+        {
+            switch (race)
+            {
+                case SAV.Race.HUM:
+                    return RaceLock.HasFlag(IdbRaceLock.HUM);
+                case SAV.Race.HUF:
+                    return RaceLock.HasFlag(IdbRaceLock.HUF);
+                case SAV.Race.SYM:
+                    return RaceLock.HasFlag(IdbRaceLock.SYM);
+                case SAV.Race.SYF:
+                    return RaceLock.HasFlag(IdbRaceLock.SYF);
+                case SAV.Race.NMC:
+                    return RaceLock.HasFlag(IdbRaceLock.NMC);
+                case SAV.Race.MAM:
+                    return RaceLock.HasFlag(IdbRaceLock.MAM);
+                case SAV.Race.MAF:
+                    return RaceLock.HasFlag(IdbRaceLock.MAF);
+                default:
+                    return RaceLock.HasFlag(IdbRaceLock.FRI);
+            }
         }
     }
 

@@ -1119,6 +1119,13 @@ namespace Xv2CoreLib.BCS
                 }
             }
         }
+
+        public Brush GetPreview(int color)
+        {
+            Colors colorEntry = ColorsList.FirstOrDefault(x => x.ID == color);
+
+            return colorEntry != null ? colorEntry.ColorPreview : Brushes.White;
+        }
     }
 
     [YAXSerializeAs("Colors")]
