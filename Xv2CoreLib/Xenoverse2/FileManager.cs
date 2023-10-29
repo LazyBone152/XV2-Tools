@@ -53,6 +53,10 @@ namespace Xv2CoreLib
         /// Use direct references when caching loaded files, preventing them from being removed by the garbage collector. These files can later be freed up by calling <see cref="ClearStrongReferneces"/>.
         /// </summary>
         public bool UseStrongReferences { get; set; }
+        /// <summary>
+        /// When enabled, the file cache is ignored and files are always reloaded from loose files or CPK, with the cache entry being overwritten.
+        /// </summary>
+        public bool ForceReloadFiles { get; set; }
 
         //Events
         /// <summary>
@@ -150,12 +154,12 @@ namespace Xv2CoreLib
         #endregion
 
         #region Load
-        public object GetParsedFileFromGame(string path, bool onlyFromCpk = false, bool raiseEx = true, bool forceReload = false)
+        public object GetParsedFileFromGame(string path, bool onlyFromCpk = false, bool raiseEx = true)
         {
             CheckInitState();
 
             //Check cache and return an existing file, if allowed (caching doesn't occur for CPK-only loads)
-            if (!onlyFromCpk && !forceReload)
+            if (!onlyFromCpk && !ForceReloadFiles)
             {
                 object cached = GetCachedFile(path);
                 if (cached != null) return cached;
