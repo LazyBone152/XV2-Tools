@@ -224,9 +224,9 @@ namespace Xv2CoreLib.Resource
         }
 
         /// <summary>
-        /// Get files in the specified directly and returns their names (including relative path). Not recursive.
+        /// Get files in the specified directly and returns their names (including relative path). Can be partially recursive (loose files only).
         /// </summary>
-        public string[] GetFilesInDirectory(string directory, string extension)
+        public string[] GetFilesInDirectory(string directory, string extension, bool includeSubFolders = false)
         {
             if (!extension.Contains('.'))
                 extension = "." + extension;
@@ -240,12 +240,12 @@ namespace Xv2CoreLib.Resource
 
             //From game directory (data folder)
             if (Directory.Exists(PathInGameDir(directory)))
-                foreach (var file in Directory.GetFiles(PathInGameDir(directory)))
-                    if(Path.GetExtension(file) == extension)
+                foreach (string file in Directory.GetFiles(PathInGameDir(directory), $"*{extension}", includeSubFolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
+                    if (Path.GetExtension(file) == extension)
                         files.Add(Utils.GetRelativePath(string.Format("{0}/{1}", directory, Path.GetFileName(file))));
 
             //From cpks
-            var cpkFiles = cpkReader.GetFilesInDirectory("data/" + directory);
+            string[] cpkFiles = cpkReader.GetFilesInDirectory("data/" + directory);
 
             foreach(var _file in cpkFiles)
             {
