@@ -49,6 +49,27 @@ namespace Xv2CoreLib.ESK
         {
             new Deserializer(this, path);
         }
+
+        public static ESK_File MergeSkeletons(ESK_File baseSkeleton, ESK_File scdSkeleton)
+        {
+            ESK_File mergedEsk = baseSkeleton.Copy();
+
+            for(int i = 0; i < scdSkeleton.Skeleton.NonRecursiveBones.Count; i++)
+            {
+                //Skip bones that already exist
+                if (mergedEsk.Skeleton.NonRecursiveBones.FirstOrDefault(x => x.Name == scdSkeleton.Skeleton.NonRecursiveBones[i].Name) != null) continue;
+
+                if (scdSkeleton.Skeleton.NonRecursiveBones[i].Parent != null)
+                {
+                    mergedEsk.Skeleton.AddBone(scdSkeleton.Skeleton.NonRecursiveBones[i].Parent.Name, scdSkeleton.Skeleton.NonRecursiveBones[i]);
+                }
+            }
+
+            //Reload bone list
+            mergedEsk.Skeleton.CreateNonRecursiveBoneList();
+
+            return mergedEsk;
+        }
     }
 
 
@@ -416,7 +437,7 @@ namespace Xv2CoreLib.ESK
 
         public bool AddBone(string parent, ESK_Bone boneToAdd, bool reloadListBones = true)
         {
-            if (parent == string.Empty)
+            if (string.IsNullOrWhiteSpace(parent))
             {
                 ESKBones.Add(boneToAdd.Copy());
 
@@ -944,6 +965,10 @@ namespace Xv2CoreLib.ESK
             return null;
         }
 
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 
     [YAXSerializeAs("RelativeTransform")]

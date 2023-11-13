@@ -134,19 +134,6 @@
                 </DataGrid.ContextMenu>
 
                 <DataGrid.Columns>
-                    <DataGridTemplateColumn x:Name="idColumn" Header="ID" Width="70" SortMemberPath="Index">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Index}"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                        <DataGridTemplateColumn.CellEditingTemplate>
-                            <DataTemplate>
-                                <Controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=SelectedMaterialID, UpdateSourceTrigger=LostFocus}" Minimum="0" HideUpDownButtons="True" HorizontalContentAlignment="Left" TextAlignment="Left"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellEditingTemplate>
-                    </DataGridTemplateColumn>
-                    
                     <DataGridTemplateColumn Header="Name" Width="150">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>

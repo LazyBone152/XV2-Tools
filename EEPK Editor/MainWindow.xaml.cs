@@ -499,6 +499,7 @@ namespace EEPK_Organiser
                 "Ctrl + A = Add File (EMO Tab)\n" +
                 "Ctrl + H = Hue Adjustment\n" +
                 "Alt + H = Hue Set\n",
+                "S = Toggle Selection (Effect Selector)\n" +
                 "Hotkeys", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 

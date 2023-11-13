@@ -1,20 +1,12 @@
-﻿using EEPK_Organiser.View;
+﻿using GalaSoft.MvvmLight.CommandWpf;
 using MahApps.Metro.Controls;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using Xv2CoreLib.EEPK;
 using Xv2CoreLib.EffectContainer;
 
@@ -257,28 +249,44 @@ namespace EEPK_Organiser.Forms
 
         private void ContextMenu_Select_Click(object sender, RoutedEventArgs e)
         {
-            var selected = effectDataGrid.SelectedItems.Cast<Effect>().ToList();
-
-            if (selected != null)
-            {
-                foreach (var effect in selected)
-                {
-                    effect.IsSelected = true;
-                }
-            }
+            SetSelectState(true);
         }
 
         private void ContextMenu_Unselect_Click(object sender, RoutedEventArgs e)
         {
-            var selected = effectDataGrid.SelectedItems.Cast<Effect>().ToList();
+            SetSelectState(false);
+        }
+
+        public RelayCommand ToggleSelectionCommand => new RelayCommand(ToggleSelection);
+        private void ToggleSelection()
+        {
+            //First set them as selected
+            bool toggleState = SetSelectState(true);
+
+            //If already selected, then unselect them
+            if (toggleState)
+                SetSelectState(false);
+        }
+
+        private bool SetSelectState(bool state)
+        {
+            bool alreadyThisState = true;
+
+            List<Effect> selected = effectDataGrid.SelectedItems.Cast<Effect>().ToList();
 
             if (selected != null)
             {
-                foreach (var effect in selected)
+                foreach (Effect effect in selected)
                 {
-                    effect.IsSelected = false;
+                    if(effect.IsSelected != state)
+                    {
+                        effect.IsSelected = state;
+                        alreadyThisState = false;
+                    }
                 }
             }
+
+            return alreadyThisState;
         }
     }
 }

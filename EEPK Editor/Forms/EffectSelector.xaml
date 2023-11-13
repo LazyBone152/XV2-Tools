@@ -102,6 +102,9 @@
                 </DataTemplate>
             </DataGrid.RowDetailsTemplate>
 
+            <DataGrid.InputBindings>
+                <KeyBinding Key="S" Command="{Binding ToggleSelectionCommand}"/>
+            </DataGrid.InputBindings>
         </DataGrid>
         <Button Click="Done_Click" Content="Done" HorizontalAlignment="Left" Margin="173,400,0,0" VerticalAlignment="Top" Width="75"/>
         <TextBox VerticalContentAlignment="Center" HorizontalAlignment="Left" Height="23" Margin="61,351,0,0" TextWrapping="Wrap" Text="{Binding IdIncreaseValue, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top" Width="120"/>

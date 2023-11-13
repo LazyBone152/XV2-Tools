@@ -89,19 +89,6 @@ namespace EEPK_Organiser.View
         //ViewModel
         public MaterialViewModel MaterialViewModel { get; set; } = new MaterialViewModel();
 
-        //Selected Material Editing
-        public int SelectedMaterialID
-        {
-            get => _selectedMaterial != null ? _selectedMaterial.Index : -1;
-            set
-            {
-                if (value != _selectedMaterial.Index)
-                {
-                    SetID(value);
-                }
-            }
-        }
-
         public string SelectedMaterialName
         {
             get => _selectedMaterial?.Name;
@@ -238,9 +225,6 @@ namespace EEPK_Organiser.View
             NotifyPropertyChanged(nameof(ContainerVisiblility));
             NotifyPropertyChanged(nameof(InverseContainerVisiblility));
             RefreshViewMaterials();
-
-            if (AssetContainer != null)
-                idColumn.Visibility = Visibility.Collapsed;
 
             ScaleOffsetParameters = new FrameworkElement[]
             {
@@ -795,20 +779,6 @@ namespace EEPK_Organiser.View
         {
             Loaded -= MaterialsEditor_Loaded;
             UndoManager.Instance.UndoOrRedoCalled -= Instance_UndoOrRedoCalled;
-        }
-
-        private async void SetID(int newId)
-        {
-            if (EmmFile.Materials.Any(x => x.Index == newId && x != _selectedMaterial))
-            {
-                await DialogCoordinator.Instance.ShowMessageAsync(this, "ID Already Used", $"Another material is already using ID \"{newId}\".", MessageDialogStyle.Affirmative, DialogSettings.Default);
-                NotifyPropertyChanged(nameof(SelectedMaterialID));
-                return;
-            }
-
-            UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(_selectedMaterial.Index), _selectedMaterial, _selectedMaterial.Index, newId, "Material ID"));
-            _selectedMaterial.Index = newId;
-            NotifyPropertyChanged(nameof(SelectedMaterialID));
         }
 
         private async void SetName(string name)
