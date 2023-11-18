@@ -1189,6 +1189,7 @@ namespace Xv2CoreLib.SAV
                 bytes = ValidatePartnerKeyFlags(bytes);
 
             //Header
+            bytes[5] = Version;
             bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(SteamID ^ VERSION_XOR), 8);
             bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(Zeni), 44);
             bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(TPMedals), 48);
