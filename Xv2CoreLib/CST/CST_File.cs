@@ -45,6 +45,13 @@ namespace Xv2CoreLib.CST
         public const string CST_PATH = "system/chara_select_table.cst";
         public const string CST_PRB_PATH = "system/chara_select_table_prb.cst";
 
+        public const int CST_ENTRY_SIZE_1 = 0x28; //Ver 1 (original)
+        public const int CST_ENTRY_SIZE_2 = 0x30; //Ver 2
+
+        [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 1)]
+        public int Version { get; set; }
+
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "CharaSlot")]
         public List<CST_CharaSlot> CharaSlots { get; set; } = new List<CST_CharaSlot>();
 
@@ -83,18 +90,18 @@ namespace Xv2CoreLib.CST
             if (BitConverter.ToUInt32(bytes, 4) != CST_HEADER_SIZE)
                 throw new InvalidDataException("CST_File.Load: Header size incorrect!");
 
+
             uint numSlots = BitConverter.ToUInt32(bytes, 8);
             uint numCostumes = BitConverter.ToUInt32(bytes, 12);
+            int entrySize = (int)((bytes.Length - CST_HEADER_SIZE) / numCostumes);
 
-            if (bytes.Length != CST_HEADER_SIZE + (CST_CharaCostumeSlot.CST_ENTRY_SIZE * numCostumes))
-                throw new InvalidDataException($"CST_File.Load: This CST version is not supported.");
+            CST_File cstFile = new CST_File();
+            cstFile.Version = EntrySizeToVersion(entrySize);
 
             //Parse the file
-            CST_File cstFile = new CST_File();
-
             for (int i = 0; i < numCostumes; i++)
             {
-                var slot = CST_CharaCostumeSlot.Read(bytes, (int)(CST_HEADER_SIZE + (CST_CharaCostumeSlot.CST_ENTRY_SIZE * i)));
+                var slot = CST_CharaCostumeSlot.Read(bytes, (int)(CST_HEADER_SIZE + (entrySize * i)), cstFile.Version);
 
                 if (slot.CostumeSlotID == 0)
                 {
@@ -141,12 +148,12 @@ namespace Xv2CoreLib.CST
 
                 foreach (var costume in slot.CharaCostumeSlots)
                 {
-                    bytes.AddRange(costume.Write());
+                    bytes.AddRange(costume.Write(Version));
                 }
             }
 
             //Validate size
-            if (bytes.Count != CST_HEADER_SIZE + (CST_CharaCostumeSlot.CST_ENTRY_SIZE * numCostumes))
+            if (bytes.Count != CST_HEADER_SIZE + (VersionToEntrySize(Version) * numCostumes))
                 throw new InvalidDataException("CST_File.SaveToBytes: Invalid file size!");
 
             return bytes.ToArray();
@@ -168,6 +175,32 @@ namespace Xv2CoreLib.CST
             }
 
             return count;
+        }
+
+        public static int VersionToEntrySize(int version)
+        {
+            switch (version)
+            {
+                case 1:
+                    return CST_ENTRY_SIZE_1;
+                case 2:
+                    return CST_ENTRY_SIZE_2;
+                default:
+                    throw new InvalidDataException($"CST: This CST version is not supported (Version: {version}).");
+            }
+        }
+
+        public static int EntrySizeToVersion(int entrySize)
+        {
+            switch (entrySize)
+            {
+                case CST_ENTRY_SIZE_1:
+                    return 1;
+                case CST_ENTRY_SIZE_2:
+                    return 2;
+                default:
+                    throw new InvalidDataException($"CST: This CST version is not supported (EntrySize: {entrySize}).");
+            }
         }
         #endregion
 
@@ -382,8 +415,6 @@ namespace Xv2CoreLib.CST
     [YAXSerializeAs("CharaCostumeSlot")]
     public class CST_CharaCostumeSlot
     {
-        public const uint CST_ENTRY_SIZE = 0x30;
-
         [YAXDontSerialize]
         public string InstallID { get { return $"{CharaCode}_{Costume}_{Preset}"; } }
 
@@ -449,9 +480,9 @@ namespace Xv2CoreLib.CST
             DlcFlag2 = slot.DLC_Flag2;
         }
 
-        public static CST_CharaCostumeSlot Read(byte[] bytes, int offset)
+        public static CST_CharaCostumeSlot Read(byte[] bytes, int offset, int version)
         {
-            return new CST_CharaCostumeSlot()
+            CST_CharaCostumeSlot entry = new CST_CharaCostumeSlot()
             {
                 CostumeSlotID = BitConverter.ToInt32(bytes, offset + 0x0),
                 CharaCode = StringEx.GetString(bytes, offset + 0x4, false, StringEx.EncodingType.ASCII, 4),
@@ -465,13 +496,19 @@ namespace Xv2CoreLib.CST
                 DlcFlag2 = (CstDlcVer2)BitConverter.ToUInt32(bytes, offset + 0x18),
                 IsCustomCostume = BitConverter.ToInt32(bytes, offset + 0x1c),
                 CacIndex = BitConverter.ToInt32(bytes, offset + 0x20),
-                var_type_after_TU9_order = BitConverter.ToInt32(bytes, offset + 0x24),
-                I_40 = BitConverter.ToInt32(bytes, offset + 40),
-                I_44 = BitConverter.ToInt32(bytes, offset + 44)
+                var_type_after_TU9_order = BitConverter.ToInt32(bytes, offset + 0x24)
             };
+
+            if(version >= 2)
+            {
+                entry.I_40 = BitConverter.ToInt32(bytes, offset + 40);
+                entry.I_44 = BitConverter.ToInt32(bytes, offset + 44);
+            }
+
+            return entry;
         }
 
-        public byte[] Write()
+        public byte[] Write(int version)
         {
             List<byte> bytes = new List<byte>();
 
@@ -488,10 +525,14 @@ namespace Xv2CoreLib.CST
             bytes.AddRange(BitConverter.GetBytes(IsCustomCostume));
             bytes.AddRange(BitConverter.GetBytes(CacIndex));
             bytes.AddRange(BitConverter.GetBytes(var_type_after_TU9_order));
-            bytes.AddRange(BitConverter.GetBytes(I_40));
-            bytes.AddRange(BitConverter.GetBytes(I_44));
 
-            if (bytes.Count != CST_ENTRY_SIZE)
+            if(version >= 2)
+            {
+                bytes.AddRange(BitConverter.GetBytes(I_40));
+                bytes.AddRange(BitConverter.GetBytes(I_44));
+            }
+
+            if (bytes.Count != CST_File.VersionToEntrySize(version))
                 throw new InvalidDataException($"CST_Entry.Write: Invalid entry size!");
 
             return bytes.ToArray();

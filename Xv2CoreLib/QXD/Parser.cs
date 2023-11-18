@@ -33,26 +33,9 @@ namespace Xv2CoreLib.QXD
             writeXml = _writeXml;
             rawBytes = File.ReadAllBytes(location);
             saveLocation = location;
-            chara1Offset = BitConverter.ToInt32(rawBytes, 20);
-            chara2Offset = BitConverter.ToInt32(rawBytes, 28);
-            questsOffset = BitConverter.ToInt32(rawBytes, 12);
-            lastSectionOffset = BitConverter.ToInt32(rawBytes, 36);
-            floatSectionOffset = BitConverter.ToInt32(rawBytes, 44);
-            chara1Count = BitConverter.ToInt32(rawBytes, 16);
-            chara2Count = BitConverter.ToInt32(rawBytes, 24);
-            questsCount = BitConverter.ToInt32(rawBytes, 8);
-            lastSectionCount = BitConverter.ToInt32(rawBytes, 32);
-            qxd_File.Characters1 = new List<Quest_Characters>();
-            qxd_File.Characters2 = new List<Quest_Characters>();
-            qxd_File.Quests = new List<Quest_Data>();
-            if (lastSectionCount > 0)
-            {
-                qxd_File.Collections = new List<QXD_CollectionEntry>();
-            }
-            ParseCharacters();
-            ParseUnknownData();
-            ParseQuestData();
-            ParseEndFloats();
+
+            ParseQxd();
+
             if (writeXml == true)
             {
                 WriteXmlFile();
@@ -62,6 +45,17 @@ namespace Xv2CoreLib.QXD
         public Parser(byte[] _bytes)
         {
             rawBytes = _bytes;
+            ParseQxd();
+        }
+
+
+        public QXD_File GetQxdFile()
+        {
+            return qxd_File;
+        }
+
+        private void ParseQxd()
+        {
             chara1Offset = BitConverter.ToInt32(rawBytes, 20);
             chara2Offset = BitConverter.ToInt32(rawBytes, 28);
             questsOffset = BitConverter.ToInt32(rawBytes, 12);
@@ -74,20 +68,31 @@ namespace Xv2CoreLib.QXD
             qxd_File.Characters1 = new List<Quest_Characters>();
             qxd_File.Characters2 = new List<Quest_Characters>();
             qxd_File.Quests = new List<Quest_Data>();
+
+            //Check for older (or newer?) QXD version. This way a better error message can be displayed instead of a generic "index out of range"...
+            if(chara2Offset != 0 && chara1Offset != 0 && chara1Count > 0 && chara2Count > 0)
+            {
+                int entrySize = (chara2Offset - chara1Offset) / chara1Count;
+
+                if (entrySize == 124)
+                {
+                    throw new Exception("The QXD format of this game version is no longer supported by the tool. Only game version 1.21 (and later) are supported.");
+                }
+                else if(entrySize != 128)
+                {
+                    throw new Exception("Unknown QXD version. Cannot parse file.");
+                }
+            }
+
             if (lastSectionCount > 0)
             {
                 qxd_File.Collections = new List<QXD_CollectionEntry>();
             }
+
             ParseCharacters();
             ParseUnknownData();
             ParseQuestData();
             ParseEndFloats();
-        }
-
-
-        public QXD_File GetQxdFile()
-        {
-            return qxd_File;
         }
 
         private void ParseCharacters()
