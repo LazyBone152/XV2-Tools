@@ -19,7 +19,6 @@ namespace Xv2CoreLib.BCS
         {
             saveLocation = location;
             rawBytes = File.ReadAllBytes(location);
-            Validation();
             Parse();
             if (_writeXml)
             {
@@ -31,7 +30,6 @@ namespace Xv2CoreLib.BCS
         public Parser(byte[] _bytes)
         {
             rawBytes = _bytes;
-            Validation();
             Parse();
         }
 
@@ -40,33 +38,59 @@ namespace Xv2CoreLib.BCS
             return bcsFile;
         }
 
-        private void Validation()
-        {
-            if(BitConverter.ToInt16(rawBytes, 6) == 72)
-            {
-                throw new InvalidDataException("Xenoverse 1 BCS not supported.");
-            }
-        }
-
         private void Parse()
         {
+            switch(BitConverter.ToInt16(rawBytes, 6))
+            {
+                case 72:
+                    bcsFile.Version = Version.XV1;
+                    break;
+                case 0: //Some Xv2 BCS files dont have a signature (first 8 bytes all null)
+                case 76:
+                    bcsFile.Version = Version.XV2;
+                    break;
+                default:
+                    throw new InvalidDataException("BCS: Unknown BCS version!");
+            }
+
             //counts
             int partsetCount = BitConverter.ToInt16(rawBytes, 12);
             int partcolorsCount = BitConverter.ToInt16(rawBytes, 14);
             int bodyCount = BitConverter.ToInt16(rawBytes, 16);
 
             //offsets
-            int partsetOffset = BitConverter.ToInt32(rawBytes, 24);
-            int partcolorsOffset = BitConverter.ToInt32(rawBytes, 28);
-            int bodyOffset = BitConverter.ToInt32(rawBytes, 32);
-            int skeleton2Offset = BitConverter.ToInt32(rawBytes, 36);
-            int skeleton1Offset = BitConverter.ToInt32(rawBytes, 40);
+            int partsetOffset;
+            int partcolorsOffset;
+            int bodyOffset;
+            int skeleton2Offset;
+            int skeleton1Offset;
 
-            //Header
-            byte[] _I_44 = rawBytes.GetRange(44, 4);
-            bcsFile.Race = (Race)_I_44[0];
-            bcsFile.Gender = (Gender)_I_44[1];
-            bcsFile.F_48 = BitConverter_Ex.ToFloat32Array(rawBytes, 48, 7);
+            if(bcsFile.Version == Version.XV1)
+            {
+                partsetOffset = BitConverter.ToInt32(rawBytes, 20);
+                partcolorsOffset = BitConverter.ToInt32(rawBytes, 24);
+                bodyOffset = BitConverter.ToInt32(rawBytes, 28);
+                skeleton2Offset = 0;
+                skeleton1Offset = 64; //XV1 BCS files have a skeleton instance directly in the header
+                bcsFile.F_48 = BitConverter_Ex.ToFloat32Array(rawBytes, 36, 7);
+
+                byte[] _I_44 = rawBytes.GetRange(32, 4);
+                bcsFile.Race = (Race)_I_44[0];
+                bcsFile.Gender = (Gender)_I_44[1];
+            }
+            else
+            {
+                partsetOffset = BitConverter.ToInt32(rawBytes, 24);
+                partcolorsOffset = BitConverter.ToInt32(rawBytes, 28);
+                bodyOffset = BitConverter.ToInt32(rawBytes, 32);
+                skeleton2Offset = BitConverter.ToInt32(rawBytes, 36);
+                skeleton1Offset = BitConverter.ToInt32(rawBytes, 40);
+                bcsFile.F_48 = BitConverter_Ex.ToFloat32Array(rawBytes, 48, 7);
+
+                byte[] _I_44 = rawBytes.GetRange(44, 4);
+                bcsFile.Race = (Race)_I_44[0];
+                bcsFile.Gender = (Gender)_I_44[1];
+            }
 
             //PartSets
             int actualIndex = 0;
@@ -150,7 +174,7 @@ namespace Xv2CoreLib.BCS
 
             if(skeleton1Offset != 0)
             {
-                bcsFile.SkeletonData1 = ParseSkeleton(BitConverter.ToInt32(rawBytes, skeleton1Offset));
+                bcsFile.SkeletonData1 = ParseSkeleton(bcsFile.Version == Version.XV1 ? skeleton1Offset : BitConverter.ToInt32(rawBytes, skeleton1Offset));
             }
 
             if(skeleton2Offset != 0)
@@ -161,7 +185,7 @@ namespace Xv2CoreLib.BCS
 
 
         //Part Parsers
-        private Part ParsePart (int offset, int partOffset)
+        private Part ParsePart(int offset, int partOffset)
         {
             if(offset != 0)
             {
@@ -177,7 +201,7 @@ namespace Xv2CoreLib.BCS
                 if (i_32 > 0x3FF)
                     throw new InvalidDataException($"Unexpected I_32 value: {i_32}.");
 
-                return new Part()
+                var part = new Part()
                 {
                     Model = BitConverter.ToInt16(rawBytes, offset + 0),
                     Model2 = BitConverter.ToInt16(rawBytes, offset + 2),
@@ -196,9 +220,15 @@ namespace Xv2CoreLib.BCS
                     EmbPath = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 64), offset),
                     EanPath = GetStringWrapper(BitConverter.ToInt32(rawBytes, offset + 68), offset),
                     ColorSelectors = ParseColorSelector(BitConverter.ToInt32(rawBytes, offset + 20) + offset, BitConverter.ToInt16(rawBytes, offset + 18)),
-                    PhysicsParts = ParsePhysicsObject(BitConverter.ToInt32(rawBytes, offset + 76) + offset, BitConverter.ToInt16(rawBytes, offset + 74)),
-                    Unk_3 = ParseUnk3(BitConverter.ToInt32(rawBytes, offset + 84) + offset, BitConverter.ToInt16(rawBytes, offset + 82))
+                    PhysicsParts = ParsePhysicsObject(BitConverter.ToInt32(rawBytes, offset + 76) + offset, BitConverter.ToInt16(rawBytes, offset + 74))
                 };
+
+                if(bcsFile.Version == Version.XV2)
+                {
+                    part.Unk_3 = ParseUnk3(BitConverter.ToInt32(rawBytes, offset + 84) + offset, BitConverter.ToInt16(rawBytes, offset + 82));
+                }
+
+                return part;
 
             } 
             else
@@ -364,9 +394,11 @@ namespace Xv2CoreLib.BCS
 
             if (offset != 0)
             {
+                int relativeTo = bcsFile.Version == Version.XV1 ? 32 : offset;
+
                 skeleton.I_00 = BitConverter.ToInt16(rawBytes, offset);
                 int boneCount = BitConverter.ToInt16(rawBytes, offset + 2);
-                int boneOffset = BitConverter.ToInt32(rawBytes, offset + 4) + offset;
+                int boneOffset = BitConverter.ToInt32(rawBytes, offset + 4) + relativeTo;
 
                 if (boneCount > 0)
                 {
@@ -374,21 +406,42 @@ namespace Xv2CoreLib.BCS
 
                     for (int i = 0; i < boneCount; i++)
                     {
-                        skeleton.Bones.Add(new Bone()
+                        if(bcsFile.Version == Version.XV1)
                         {
-                            I_00 = BitConverter.ToInt32(rawBytes, boneOffset + 0),
-                            I_04 = BitConverter.ToInt32(rawBytes, boneOffset + 4),
-                            F_12 = BitConverter.ToSingle(rawBytes, boneOffset + 12),
-                            F_16 = BitConverter.ToSingle(rawBytes, boneOffset + 16),
-                            F_20 = BitConverter.ToSingle(rawBytes, boneOffset + 20),
-                            F_24 = BitConverter.ToSingle(rawBytes, boneOffset + 24),
-                            F_28 = BitConverter.ToSingle(rawBytes, boneOffset + 28),
-                            F_32 = BitConverter.ToSingle(rawBytes, boneOffset + 32),
-                            F_36 = BitConverter.ToSingle(rawBytes, boneOffset + 36),
-                            F_40 = BitConverter.ToSingle(rawBytes, boneOffset + 40),
-                            F_44 = BitConverter.ToSingle(rawBytes, boneOffset + 44),
-                            BoneName = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, boneOffset + 48) + boneOffset, false)
-                        });
+                            skeleton.Bones.Add(new Bone()
+                            {
+                                I_00 = BitConverter.ToInt32(rawBytes, boneOffset + 0),
+                                I_04 = BitConverter.ToInt32(rawBytes, boneOffset + 4),
+                                F_12 = BitConverter.ToSingle(rawBytes, boneOffset + 16),
+                                F_16 = BitConverter.ToSingle(rawBytes, boneOffset + 20),
+                                F_20 = BitConverter.ToSingle(rawBytes, boneOffset + 24),
+                                F_24 = BitConverter.ToSingle(rawBytes, boneOffset + 28),
+                                F_28 = BitConverter.ToSingle(rawBytes, boneOffset + 32),
+                                F_32 = BitConverter.ToSingle(rawBytes, boneOffset + 36),
+                                F_36 = BitConverter.ToSingle(rawBytes, boneOffset + 40),
+                                F_40 = BitConverter.ToSingle(rawBytes, boneOffset + 44),
+                                F_44 = BitConverter.ToSingle(rawBytes, boneOffset + 48),
+                                BoneName = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, boneOffset + 12) + boneOffset, false)
+                            });
+                        }
+                        else
+                        {
+                            skeleton.Bones.Add(new Bone()
+                            {
+                                I_00 = BitConverter.ToInt32(rawBytes, boneOffset + 0),
+                                I_04 = BitConverter.ToInt32(rawBytes, boneOffset + 4),
+                                F_12 = BitConverter.ToSingle(rawBytes, boneOffset + 12),
+                                F_16 = BitConverter.ToSingle(rawBytes, boneOffset + 16),
+                                F_20 = BitConverter.ToSingle(rawBytes, boneOffset + 20),
+                                F_24 = BitConverter.ToSingle(rawBytes, boneOffset + 24),
+                                F_28 = BitConverter.ToSingle(rawBytes, boneOffset + 28),
+                                F_32 = BitConverter.ToSingle(rawBytes, boneOffset + 32),
+                                F_36 = BitConverter.ToSingle(rawBytes, boneOffset + 36),
+                                F_40 = BitConverter.ToSingle(rawBytes, boneOffset + 40),
+                                F_44 = BitConverter.ToSingle(rawBytes, boneOffset + 44),
+                                BoneName = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, boneOffset + 48) + boneOffset, false)
+                            });
+                        }
 
                         boneOffset += 52;
                     }

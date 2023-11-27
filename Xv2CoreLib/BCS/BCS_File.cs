@@ -12,6 +12,12 @@ using YAXLib;
 
 namespace Xv2CoreLib.BCS
 {
+    public enum Version
+    {
+        XV1 = 1,
+        XV2 = 0
+    }
+
     public enum PartType
     {
         FaceBase,
@@ -63,6 +69,9 @@ namespace Xv2CoreLib.BCS
     [Serializable]
     public class BCS_File : ISorting
     {
+        [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Error, DefaultValue = Version.XV2)]
+        public Version Version { get; set; } = Version.XV2;
 
         [YAXAttributeFor("Race")]
         [YAXSerializeAs("value")]

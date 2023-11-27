@@ -14,7 +14,7 @@ namespace Xv2CoreLib.BCS
     {
         string saveLocation;
         BCS_File bcsFile;
-        public List<byte> bytes { get; private set; } = new List<byte>() { 35, 66, 67, 83, 254, 255, 76, 0, 0, 0, 0, 0 };
+        public List<byte> bytes { get; private set; } = new List<byte>() { 35, 66, 67, 83, 254, 255 };
 
         //Counts
         int PartSetCount { get; set; }
@@ -69,20 +69,60 @@ namespace Xv2CoreLib.BCS
             //Header
             int I_18 = (bcsFile.SkeletonData2?.Bones?.Count > 0) ? 1 : 0;
             byte[] _i_44 = { (byte)bcsFile.Race, (byte)bcsFile.Gender, 0, 0 };
-            bytes.AddRange(BitConverter.GetBytes((short)PartSetCount));
-            bytes.AddRange(BitConverter.GetBytes((short)PartColorCount));
-            bytes.AddRange(BitConverter.GetBytes((short)BodyCount));
-            bytes.AddRange(BitConverter.GetBytes((short)I_18));
-            bytes.AddRange(new byte[24]);
-            bytes.AddRange(_i_44);
-            Assertion.AssertArraySize(bcsFile.F_48, 7, "BCS", "F_48");
-            bytes.AddRange(BitConverter_Ex.GetBytes(bcsFile.F_48));
+            int partSetOffset;
+            int partColorOffset;
+            int bodyOffset;
+
+            if (bcsFile.Version == Version.XV1)
+            {
+                bytes.AddRange(BitConverter.GetBytes((ushort)72));
+                bytes.AddRange(BitConverter.GetBytes(0));
+                bytes.AddRange(BitConverter.GetBytes((short)PartSetCount));
+                bytes.AddRange(BitConverter.GetBytes((short)PartColorCount));
+                bytes.AddRange(BitConverter.GetBytes((short)BodyCount));
+                bytes.AddRange(BitConverter.GetBytes((short)I_18));
+                partSetOffset = 20;
+                partColorOffset = 24;
+                bodyOffset = 28;
+                bytes.AddRange(new byte[12]);
+                bytes.AddRange(_i_44);
+                Assertion.AssertArraySize(bcsFile.F_48, 7, "BCS", "F_48");
+                bytes.AddRange(BitConverter_Ex.GetBytes(bcsFile.F_48));
+
+                if(bcsFile.SkeletonData1?.Bones?.Count > 0)
+                {
+                    bytes.AddRange(new byte[2]);
+                    bytes.AddRange(BitConverter.GetBytes((ushort)bcsFile.SkeletonData1.Bones.Count));
+                    bytes.AddRange(new byte[4]);
+                }
+                else
+                {
+                    bytes.AddRange(new byte[8]);
+                }
+
+            }
+            else
+            {
+                bytes.AddRange(BitConverter.GetBytes((ushort)76));
+                bytes.AddRange(BitConverter.GetBytes(0));
+                bytes.AddRange(BitConverter.GetBytes((short)PartSetCount));
+                bytes.AddRange(BitConverter.GetBytes((short)PartColorCount));
+                bytes.AddRange(BitConverter.GetBytes((short)BodyCount));
+                bytes.AddRange(BitConverter.GetBytes((short)I_18));
+                partSetOffset = 24;
+                partColorOffset = 28;
+                bodyOffset = 32;
+                bytes.AddRange(new byte[24]);
+                bytes.AddRange(_i_44);
+                Assertion.AssertArraySize(bcsFile.F_48, 7, "BCS", "F_48");
+                bytes.AddRange(BitConverter_Ex.GetBytes(bcsFile.F_48));
+            }
 
 
             //PartSet Table
             if(bcsFile.PartSets?.Count > 0)
             {
-                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), 24);
+                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), partSetOffset);
 
                 for (int i = 0; i < PartSetCount; i++)
                 {
@@ -102,7 +142,7 @@ namespace Xv2CoreLib.BCS
             //PartColor Table
             if (bcsFile.PartColors?.Count > 0)
             {
-                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), 28);
+                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), partColorOffset);
 
                 for (int i = 0; i < PartColorCount; i++)
                 {
@@ -122,7 +162,7 @@ namespace Xv2CoreLib.BCS
             //Body Table
             if (bcsFile.Bodies?.Count > 0)
             {
-                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), 32);
+                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), bodyOffset);
 
                 for (int i = 0; i < BodyCount; i++)
                 {
@@ -139,20 +179,23 @@ namespace Xv2CoreLib.BCS
                 }
             }
             
-            //Skeleton1 Table
-            if (bcsFile.SkeletonData1?.Bones?.Count > 0)
+            if(bcsFile.Version == Version.XV2)
             {
-                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), 40);
-                Skeleton1Table = bytes.Count;
-                bytes.AddRange(new byte[4]);
-            }
+                //Skeleton1 Table
+                if (bcsFile.SkeletonData1?.Bones?.Count > 0)
+                {
+                    bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), 40);
+                    Skeleton1Table = bytes.Count;
+                    bytes.AddRange(new byte[4]);
+                }
 
-            //Skeleton2 Table
-            if (bcsFile.SkeletonData2?.Bones?.Count > 0)
-            {
-                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), 36);
-                Skeleton2Table = bytes.Count;
-                bytes.AddRange(new byte[4]);
+                //Skeleton2 Table
+                if (bcsFile.SkeletonData2?.Bones?.Count > 0)
+                {
+                    bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), 36);
+                    Skeleton2Table = bytes.Count;
+                    bytes.AddRange(new byte[4]);
+                }
             }
 
             //PartSets
@@ -323,11 +366,18 @@ namespace Xv2CoreLib.BCS
                 }
             }
 
-            //Skeleton1
-            WriteSkeleton(bcsFile.SkeletonData1, Skeleton1Table);
+            if(bcsFile.Version == Version.XV1)
+            {
+                WriteSkeleton(bcsFile.SkeletonData1, 68);
+            }
+            else
+            {
+                //Skeleton1
+                WriteSkeleton(bcsFile.SkeletonData1, Skeleton1Table);
 
-            //Skeleton2
-            WriteSkeleton(bcsFile.SkeletonData2, Skeleton2Table);
+                //Skeleton2
+                WriteSkeleton(bcsFile.SkeletonData2, Skeleton2Table);
+            }
 
             //Strings
             bytes = StringWriter.WritePointerStrings(stringInfo, bytes);
@@ -396,14 +446,23 @@ namespace Xv2CoreLib.BCS
                 });
                 bytes.AddRange(new byte[6]);
                 bytes.AddRange(BitConverter.GetBytes((short)PhysicsObjectCount));
-                bytes.AddRange(new byte[6]);
-                bytes.AddRange(BitConverter.GetBytes((short)Unk3Count));
                 bytes.AddRange(new byte[4]);
+
+                if(bcsFile.Version == Version.XV2)
+                {
+                    bytes.AddRange(new byte[2]);
+                    bytes.AddRange(BitConverter.GetBytes((short)Unk3Count));
+                    bytes.AddRange(new byte[4]);
+                }
 
                 //Extended data
                 WriteColorSelectors(part.ColorSelectors, partStartOffset + 20, partStartOffset);
                 WritePhysicsObjects(part.PhysicsParts, partStartOffset + 76, partStartOffset);
-                WriteUnk3(part.Unk_3, partStartOffset + 84, partStartOffset);
+
+                if(bcsFile.Version == Version.XV2)
+                {
+                    WriteUnk3(part.Unk_3, partStartOffset + 84, partStartOffset);
+                }
             }
         }
 
@@ -514,35 +573,62 @@ namespace Xv2CoreLib.BCS
         {
             if(skeleton?.Bones?.Count > 0)
             {
-                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), offsetToFill);
-                int boneCount = (skeleton.Bones != null) ? skeleton.Bones.Count : 0;
-                int boneOffset = (skeleton.Bones != null) ? 8 : 0;
+                int relativeTo = bcsFile.Version == Version.XV1 ? 32 : 0;
 
-                bytes.AddRange(BitConverter.GetBytes(skeleton.I_00));
-                bytes.AddRange(BitConverter.GetBytes((short)boneCount));
-                bytes.AddRange(BitConverter.GetBytes(boneOffset));
+                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - relativeTo), offsetToFill);
+                int boneCount = (skeleton.Bones != null) ? skeleton.Bones.Count : 0;
+
+                if(bcsFile.Version == Version.XV2)
+                {
+                    bytes.AddRange(BitConverter.GetBytes(skeleton.I_00));
+                    bytes.AddRange(BitConverter.GetBytes((short)boneCount));
+                    bytes.AddRange(BitConverter.GetBytes((skeleton.Bones != null) ? 8 : 0));
+                }
                 
                 for(int i = 0; i < boneCount; i++)
                 {
                     bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].I_00));
                     bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].I_04));
                     bytes.AddRange(new byte[4]);
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].F_12));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].F_16));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].F_20));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].F_24));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].F_28));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].F_32));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].F_36));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].F_40));
-                    bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].F_44));
-                    stringInfo.Add(new StringWriter.StringInfo()
+
+                    if(bcsFile.Version == Version.XV1)
                     {
-                        Offset = bytes.Count,
-                        RelativeOffset = bytes.Count - 48,
-                        StringToWrite = skeleton.Bones[i].BoneName
-                    });
-                    bytes.AddRange(new byte[4]);
+                        stringInfo.Add(new StringWriter.StringInfo()
+                        {
+                            Offset = bytes.Count,
+                            RelativeOffset = bytes.Count - 12,
+                            StringToWrite = skeleton.Bones[i].BoneName
+                        });
+                        bytes.AddRange(new byte[4]);
+                        bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].F_12));
+                        bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].F_16));
+                        bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].F_20));
+                        bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].F_24));
+                        bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].F_28));
+                        bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].F_32));
+                        bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].F_36));
+                        bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].F_40));
+                        bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].F_44));
+                    }
+                    else
+                    {
+                        bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].F_12));
+                        bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].F_16));
+                        bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].F_20));
+                        bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].F_24));
+                        bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].F_28));
+                        bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].F_32));
+                        bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].F_36));
+                        bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].F_40));
+                        bytes.AddRange(BitConverter.GetBytes(skeleton.Bones[i].F_44));
+                        stringInfo.Add(new StringWriter.StringInfo()
+                        {
+                            Offset = bytes.Count,
+                            RelativeOffset = bytes.Count - 48,
+                            StringToWrite = skeleton.Bones[i].BoneName
+                        });
+                        bytes.AddRange(new byte[4]);
+                    }
                 }
 
             }
