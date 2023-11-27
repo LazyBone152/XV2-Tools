@@ -553,11 +553,14 @@ namespace Xv2CoreLib.EMB_CLASS
             }
         }
         [YAXAttributeForClass]
-        [YAXSerializeAs("UseLocalCopy")]
-        public bool LocalCopy { get; set; }
-        [YAXAttributeForClass]
         [YAXSerializeAs("Index")]
+        [YAXDontSerializeIfNull]
+        [BindingAutoId]
         public string Index { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("Alias")]
+        [YAXDontSerializeIfNull]
+        public string InstallerAlias { get; set; } //Alias to use when installing with NameMatch mode. The ID of the name matched entry, or a newly added entry (if no entry with that name was found) will be assigned to this alias.
         [YAXAttributeFor("Data")]
         [YAXSerializeAs("bytes")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]
@@ -741,7 +744,6 @@ namespace Xv2CoreLib.EMB_CLASS
             newEntry.Name = Name;
             newEntry.Data = Data;
             newEntry.Texture = Texture;
-            newEntry.LocalCopy = LocalCopy;
             return newEntry;
         }
         

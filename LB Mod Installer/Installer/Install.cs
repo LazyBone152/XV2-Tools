@@ -242,6 +242,7 @@ namespace LB_Mod_Installer.Installer
                 ProcessJungle(JUNGLE2, false);
             }
 
+            Parent.SaveSelectedOptions();
         }
 
         private void ResolveFileType(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
@@ -1015,14 +1016,22 @@ namespace LB_Mod_Installer.Installer
                     if (xmlFile.installMode == InstallMode.MatchName && !binaryFile.UseFileNames)
                         throw new Exception("InstallMode.NameMatch not possible when UseFileNames is false.");
 
-                    foreach (var entry in xmlFile.Entry)
+                    foreach (EmbEntry entry in xmlFile.Entry)
                     {
                         int idx = binaryFile.AddEntry(entry, entry.Index, xmlFile.installMode);
 
                         if (xmlFile.installMode == InstallMode.MatchIndex)
+                        {
                             GeneralInfo.Tracker.AddID(installPath, Sections.EMB_Entry, idx.ToString());
+                        }
                         else if (xmlFile.installMode == InstallMode.MatchName)
+                        {
                             GeneralInfo.Tracker.AddID(installPath, Sections.EMB_Entry, entry.Name);
+
+                            if(!string.IsNullOrWhiteSpace(entry.InstallerAlias))
+                                bindingManager.AddAlias(idx.ToString(), entry.InstallerAlias);
+
+                        }
                     }
                 }
             }

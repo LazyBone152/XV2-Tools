@@ -31,7 +31,11 @@ namespace LB_Mod_Installer
         {
             get
             {
-                return GetPathInGameDir(string.Format("LB Mod Installer/{0}_{1}.xml", InstallerXmlInfo.Name.ToLower(), InstallerXmlInfo.Author.ToLower()));
+                string name = $"{InstallerXmlInfo.Name.ToLower().Trim()}_{InstallerXmlInfo.Author.ToLower().Trim()}";
+
+                //Replace illegal file name characters with _
+                name = name.Replace("/", "_").Replace(@"\", "_").Replace("@", "_").Replace(":", "_").Replace("?", "_").Replace("<", "_").Replace(">", "_").Replace("|", "_").Replace("*", "_");
+                return GetPathInGameDir($"LB Mod Installer/{name}.xml");
             }
         }
         public const string InstallerXml = "InstallerXml.xml";

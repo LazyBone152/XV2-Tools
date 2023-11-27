@@ -124,6 +124,7 @@ namespace Xv2CoreLib.QSF
     }
 
     [YAXSerializeAs("QuestType")]
+    [Serializable]
     public class QSF_QuestType 
     {
         [YAXSerializeAs("Type")]
@@ -141,6 +142,7 @@ namespace Xv2CoreLib.QSF
     }
 
     [YAXSerializeAs("QuestGroup")]
+    [Serializable]
     public class QSF_QuestGroup 
     {
         [YAXAttributeForClass]
@@ -152,6 +154,7 @@ namespace Xv2CoreLib.QSF
     }
 
     [YAXSerializeAs("QuestEntry")]
+    [Serializable]
     public class QuestEntry 
     {
         [YAXAttributeForClass]
