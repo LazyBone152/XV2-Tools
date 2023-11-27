@@ -146,13 +146,13 @@ namespace Xv2CoreLib
         public bool loadCostumes = false;
 
         //System Files
-        private CUS_File cusFile = null;
-        private CMS_File cmsFile = null;
-        private ERS_File ersFile = null;
-        private PUP_File pupFile = null;
-        private CSO_File csoFile = null;
-        private PSC_File pscFile = null;
-        private IDB_File skillIdbFile = null;
+        public CUS_File CusFile { get; private set; }
+        public CMS_File CmsFile { get; private set; }
+        public ERS_File ErsFile { get; private set; }
+        public PUP_File PupFile { get; private set; }
+        public CSO_File CsoFile { get; private set; }
+        public PSC_File PscFile { get; private set; }
+        public IDB_File SkillIdbFile { get; private set; }
 
         //Costume Files
         public IDB_File TopIdbFile { get; private set; }
@@ -162,10 +162,10 @@ namespace Xv2CoreLib
         public IDB_File AccessoryIdbFile { get; private set; }
 
         //Cmn Files
-        public EAN_File CmnEan = null;
-        public EAN_File CmnCamEan = null;
-        public BAC_File CmnBac = null;
-        public BDM_File CmnBdm = null;
+        public EAN_File CmnEan { get; private set; }
+        public EAN_File CmnCamEan { get; private set; }
+        public BAC_File CmnBac { get; private set; }
+        public BDM_File CmnBdm { get; private set; }
 
         //Msg Files
         private MSG_File[] charaNameMsgFile = new MSG_File[(int)Language.NumLanguages];
@@ -259,27 +259,27 @@ namespace Xv2CoreLib
 
         private void InitCharacters()
         {
-            if (fileWatcher.WasFileModified(fileIO.PathInGameDir(CMS_PATH)) || cmsFile == null)
+            if (fileWatcher.WasFileModified(fileIO.PathInGameDir(CMS_PATH)) || CmsFile == null)
             {
-                cmsFile = (CMS_File)FileManager.Instance.GetParsedFileFromGame(CMS_PATH);
+                CmsFile = (CMS_File)FileManager.Instance.GetParsedFileFromGame(CMS_PATH);
                 fileWatcher.FileLoadedOrSaved(fileIO.PathInGameDir(CMS_PATH));
             }
 
-            if (fileWatcher.WasFileModified(fileIO.PathInGameDir(ERS_PATH)) || ersFile == null)
+            if (fileWatcher.WasFileModified(fileIO.PathInGameDir(ERS_PATH)) || ErsFile == null)
             {
-                ersFile = (ERS_File)FileManager.Instance.GetParsedFileFromGame(ERS_PATH);
+                ErsFile = (ERS_File)FileManager.Instance.GetParsedFileFromGame(ERS_PATH);
                 fileWatcher.FileLoadedOrSaved(fileIO.PathInGameDir(ERS_PATH));
             }
 
-            if (fileWatcher.WasFileModified(fileIO.PathInGameDir(CSO_PATH)) || csoFile == null)
+            if (fileWatcher.WasFileModified(fileIO.PathInGameDir(CSO_PATH)) || CsoFile == null)
             {
-                csoFile = (CSO_File)FileManager.Instance.GetParsedFileFromGame(CSO_PATH);
+                CsoFile = (CSO_File)FileManager.Instance.GetParsedFileFromGame(CSO_PATH);
                 fileWatcher.FileLoadedOrSaved(fileIO.PathInGameDir(CSO_PATH));
             }
 
-            if (fileWatcher.WasFileModified(fileIO.PathInGameDir(PSC_PATH)) || pscFile == null)
+            if (fileWatcher.WasFileModified(fileIO.PathInGameDir(PSC_PATH)) || PscFile == null)
             {
-                pscFile = (PSC_File)FileManager.Instance.GetParsedFileFromGame(PSC_PATH);
+                PscFile = (PSC_File)FileManager.Instance.GetParsedFileFromGame(PSC_PATH);
                 fileWatcher.FileLoadedOrSaved(fileIO.PathInGameDir(PSC_PATH));
             }
 
@@ -289,27 +289,27 @@ namespace Xv2CoreLib
 
         private void InitSkills()
         {
-            if (fileWatcher.WasFileModified(fileIO.PathInGameDir(CUS_PATH)) || cusFile == null)
+            if (fileWatcher.WasFileModified(fileIO.PathInGameDir(CUS_PATH)) || CusFile == null)
             {
-                cusFile = (CUS_File)FileManager.Instance.GetParsedFileFromGame(CUS_PATH);
+                CusFile = (CUS_File)FileManager.Instance.GetParsedFileFromGame(CUS_PATH);
                 fileWatcher.FileLoadedOrSaved(fileIO.PathInGameDir(CUS_PATH));
             }
 
-            if (fileWatcher.WasFileModified(fileIO.PathInGameDir(CMS_PATH)) || cmsFile == null)
+            if (fileWatcher.WasFileModified(fileIO.PathInGameDir(CMS_PATH)) || CmsFile == null)
             {
-                cmsFile = (CMS_File)FileManager.Instance.GetParsedFileFromGame(CMS_PATH);
+                CmsFile = (CMS_File)FileManager.Instance.GetParsedFileFromGame(CMS_PATH);
                 fileWatcher.FileLoadedOrSaved(fileIO.PathInGameDir(CMS_PATH));
             }
 
-            if (fileWatcher.WasFileModified(fileIO.PathInGameDir(SKILL_IDB_PATH)) || skillIdbFile == null)
+            if (fileWatcher.WasFileModified(fileIO.PathInGameDir(SKILL_IDB_PATH)) || SkillIdbFile == null)
             {
-                skillIdbFile = (IDB_File)FileManager.Instance.GetParsedFileFromGame(SKILL_IDB_PATH);
+                SkillIdbFile = (IDB_File)FileManager.Instance.GetParsedFileFromGame(SKILL_IDB_PATH);
                 fileWatcher.FileLoadedOrSaved(fileIO.PathInGameDir(SKILL_IDB_PATH));
             }
 
-            if (fileWatcher.WasFileModified(fileIO.PathInGameDir(PUP_PATH)) || pupFile == null)
+            if (fileWatcher.WasFileModified(fileIO.PathInGameDir(PUP_PATH)) || PupFile == null)
             {
-                pupFile = (PUP_File)FileManager.Instance.GetParsedFileFromGame(PUP_PATH);
+                PupFile = (PUP_File)FileManager.Instance.GetParsedFileFromGame(PUP_PATH);
                 fileWatcher.FileLoadedOrSaved(fileIO.PathInGameDir(PUP_PATH));
             }
 
@@ -350,6 +350,11 @@ namespace Xv2CoreLib
                 fileWatcher.FileLoadedOrSaved(fileIO.PathInGameDir(CMN_CAM_EAN_PATH));
             }
 
+            if (fileWatcher.WasFileModified(fileIO.PathInGameDir(ERS_PATH)) || ErsFile == null)
+            {
+                ErsFile = (ERS_File)FileManager.Instance.GetParsedFileFromGame(ERS_PATH);
+                fileWatcher.FileLoadedOrSaved(fileIO.PathInGameDir(ERS_PATH));
+            }
         }
 
         private void LoadMsgFiles(ref MSG_File[] msgFiles, string path)
@@ -407,7 +412,7 @@ namespace Xv2CoreLib
                 Description = GetSkillDescs(skillType, cusEntry.ID2),
                 Name = GetSkillNames(skillType, cusEntry.ID2, cusEntry.ShortName),
                 IdbEntry = GetSkillIdbEntry(skillType, cusEntry.ID2),
-                PupEntries = new ObservableCollection<PUP_Entry>(pupFile.GetSequence(cusEntry.PUP, cusEntry.NumTransformations)),
+                PupEntries = new ObservableCollection<PUP_Entry>(PupFile.GetSequence(cusEntry.PUP, cusEntry.NumTransformations)),
                 Files = GetSkillFiles(cusEntry, skillType, loadFiles, onlyLoadFromCPK)
             };
 
@@ -636,15 +641,15 @@ namespace Xv2CoreLib
             switch (skillType)
             {
                 case CUS_File.SkillType.Super:
-                    return cusFile.SuperSkills.FirstOrDefault(s => s.ID1 == id1);
+                    return CusFile.SuperSkills.FirstOrDefault(s => s.ID1 == id1);
                 case CUS_File.SkillType.Ultimate:
-                    return cusFile.UltimateSkills.FirstOrDefault(s => s.ID1 == id1);
+                    return CusFile.UltimateSkills.FirstOrDefault(s => s.ID1 == id1);
                 case CUS_File.SkillType.Evasive:
-                    return cusFile.EvasiveSkills.FirstOrDefault(s => s.ID1 == id1);
+                    return CusFile.EvasiveSkills.FirstOrDefault(s => s.ID1 == id1);
                 case CUS_File.SkillType.Blast:
-                    return cusFile.BlastSkills.FirstOrDefault(s => s.ID1 == id1);
+                    return CusFile.BlastSkills.FirstOrDefault(s => s.ID1 == id1);
                 case CUS_File.SkillType.Awoken:
-                    return cusFile.AwokenSkills.FirstOrDefault(s => s.ID1 == id1);
+                    return CusFile.AwokenSkills.FirstOrDefault(s => s.ID1 == id1);
                 default:
                     throw new InvalidDataException("GetSkill: unknown skilltype = " + skillType);
             }
@@ -652,14 +657,14 @@ namespace Xv2CoreLib
 
         public IDB_Entry GetSkillIdbEntry(CUS_File.SkillType skillType, int id2)
         {
-            return skillIdbFile.Entries.FirstOrDefault(i => i.ID == id2 && i.Type == (int)skillType);
+            return SkillIdbFile.Entries.FirstOrDefault(i => i.ID == id2 && i.Type == (int)skillType);
         }
 
         public List<Xv2Item> GetSkillList(CUS_File.SkillType skillType)
         {
             List<Xv2Item> items = new List<Xv2Item>();
 
-            foreach (var skill in cusFile.GetSkills(skillType))
+            foreach (var skill in CusFile.GetSkills(skillType))
             {
                 if (skillType == CUS_File.SkillType.Blast)
                 {
@@ -697,7 +702,7 @@ namespace Xv2CoreLib
         public string GetSkillFolderName(Skill cusEntry)
         {
             int cmsId = (int)Math.Floor(cusEntry.ID2 / 10f);
-            string charaShortName = cmsFile.GetEntry(cmsId.ToString()).Str_04;
+            string charaShortName = CmsFile.GetEntry(cmsId.ToString()).Str_04;
 
             //If chara ID belongs to a CAC, the skill is tagged as CMN instead.
             if (cmsId >= 100 && cmsId < 109)
@@ -737,7 +742,7 @@ namespace Xv2CoreLib
             {
                 for (int i = 0; i < names.Length; i++)
                 {
-                    names[i] = cusFile.BlastSkills.FirstOrDefault(x => x.ID2 == id2).ShortName;
+                    names[i] = CusFile.BlastSkills.FirstOrDefault(x => x.ID2 == id2).ShortName;
                 }
 
                 return names;
@@ -844,11 +849,11 @@ namespace Xv2CoreLib
         {
             if (!loadCharacters) throw new InvalidOperationException("Xenoverse2.GetCharacter: Cannot get character as characters have not been loaded.");
 
-            CMS_Entry cmsEntry = cmsFile.CMS_Entries.FirstOrDefault(x => x.ID == cmsId);
+            CMS_Entry cmsEntry = CmsFile.CMS_Entries.FirstOrDefault(x => x.ID == cmsId);
             if (cmsEntry == null) throw new InvalidOperationException($"Xenoverse2.GetCharacter: Character was not found in the system (ID: {cmsId}).");
             string[] names = (IsCac(cmsId)) ? new string[1] { GetCacRaceName(cmsId) } : GetCharacterName(cmsEntry.ShortName);
-            List<CSO_Entry> csoEntries = csoFile.CsoEntries.Where(x => x.CharaID == cmsId).ToList();
-            ERS_MainTableEntry ersEntry = ersFile.GetEntry(2, cmsId);
+            List<CSO_Entry> csoEntries = CsoFile.CsoEntries.Where(x => x.CharaID == cmsId).ToList();
+            ERS_MainTableEntry ersEntry = ErsFile.GetEntry(2, cmsId);
 
             List<string> loadedFiles = new List<string>();
 
@@ -936,7 +941,7 @@ namespace Xv2CoreLib
             if (!loadCharacters) throw new InvalidOperationException("Xenoverse2.GetCharacterList: characters are not loaded.");
             List<Xv2Item> items = new List<Xv2Item>();
 
-            foreach (var character in cmsFile.CMS_Entries)
+            foreach (var character in CmsFile.CMS_Entries)
             {
                 string name = (IsCac(character.ID)) ? GetCacRaceName(character.ID) : charaNameMsgFile[(int)PreferedLanguage].GetCharacterName(character.ShortName);
 
@@ -948,7 +953,7 @@ namespace Xv2CoreLib
 
         public List<Xv2Item> GetPartSetList(int cmsId)
         {
-            var cmsEntry = cmsFile.CMS_Entries.FirstOrDefault(x => x.ID == cmsId);
+            var cmsEntry = CmsFile.CMS_Entries.FirstOrDefault(x => x.ID == cmsId);
             if (cmsEntry == null) throw new InvalidOperationException($"Xenoverse2.GetPartSetList: Character was not found in the system (ID: {cmsId}).");
 
             string bcsPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.bcs", cmsEntry.ShortName, cmsEntry.BcsPath));
@@ -964,7 +969,7 @@ namespace Xv2CoreLib
 
         public BCS_File GetBcsFile(int cmsId)
         {
-            var cmsEntry = cmsFile.CMS_Entries.FirstOrDefault(x => x.ID == cmsId);
+            var cmsEntry = CmsFile.CMS_Entries.FirstOrDefault(x => x.ID == cmsId);
             if (cmsEntry == null) throw new InvalidOperationException($"Xenoverse2.GetBcsFile: Character was not found in the system (ID: {cmsId}).");
 
             string bcsPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.bcs", cmsEntry.ShortName, cmsEntry.BcsPath));
@@ -988,7 +993,7 @@ namespace Xv2CoreLib
         {
             if (!loadCharacters) throw new InvalidOperationException("Xenoverse2.GetCharacterName: Characters have not been loaded.");
 
-            string shortName = cmsFile.CMS_Entries.FirstOrDefault(x => x.ID == id)?.ShortName;
+            string shortName = CmsFile.CMS_Entries.FirstOrDefault(x => x.ID == id)?.ShortName;
             return GetCharacterName(shortName);
         }
 
@@ -1230,9 +1235,9 @@ namespace Xv2CoreLib
         {
             if (!loadSkills) throw new InvalidOperationException("Xenoverse2.SaveSkills: loadSkills was null, operation not valid.");
 
-            FileManager.Instance.SaveFileToGame(CUS_PATH, cusFile);
-            FileManager.Instance.SaveFileToGame(SKILL_IDB_PATH, skillIdbFile);
-            FileManager.Instance.SaveFileToGame(PUP_PATH, pupFile);
+            FileManager.Instance.SaveFileToGame(CUS_PATH, CusFile);
+            FileManager.Instance.SaveFileToGame(SKILL_IDB_PATH, SkillIdbFile);
+            FileManager.Instance.SaveFileToGame(PUP_PATH, PupFile);
 
             FileManager.Instance.SaveMsgFilesToGame(SUPER_SKILL_MSG_PATH, spaSkillNameMsgFile);
             FileManager.Instance.SaveMsgFilesToGame(SUPER_SKILL_DESC_MSG_PATH, spaSkillDescMsgFile);
@@ -1289,10 +1294,10 @@ namespace Xv2CoreLib
 
         public void SaveCharacters()
         {
-            FileManager.Instance.SaveFileToGame(CMS_PATH, cmsFile);
-            FileManager.Instance.SaveFileToGame(ERS_PATH, ersFile);
-            FileManager.Instance.SaveFileToGame(CSO_PATH, csoFile);
-            FileManager.Instance.SaveFileToGame(PSC_PATH, pscFile);
+            FileManager.Instance.SaveFileToGame(CMS_PATH, CmsFile);
+            FileManager.Instance.SaveFileToGame(ERS_PATH, ErsFile);
+            FileManager.Instance.SaveFileToGame(CSO_PATH, CsoFile);
+            FileManager.Instance.SaveFileToGame(PSC_PATH, PscFile);
             FileManager.Instance.SaveMsgFilesToGame(CHARACTER_MSG_PATH, charaNameMsgFile);
         }
 
@@ -1345,8 +1350,8 @@ namespace Xv2CoreLib
             }
 
             //Install CSO Entries
-            csoFile.CsoEntries.RemoveAll(x => x.CharaID == chara.CmsEntry.ID);
-            csoFile.CsoEntries.AddRange(csoEntries);
+            CsoFile.CsoEntries.RemoveAll(x => x.CharaID == chara.CmsEntry.ID);
+            CsoFile.CsoEntries.AddRange(csoEntries);
         }
 
         //Skill
@@ -1355,12 +1360,12 @@ namespace Xv2CoreLib
             if (entries?.Count == 0) return ushort.MaxValue;
 
             //First check if sequence already exists, and return the ID if it does
-            int id = pupFile.CheckForSequence(entries);
+            int id = PupFile.CheckForSequence(entries);
 
             //Check if old IDs are used by any other skill, and reuse them if not (If prev check failed)
             if (entries[0].ID != -1 && skillId1 != -1 && id == -1)
             {
-                if (!cusFile.IsPupEntryUsed(entries[0].ID, entries.Count, skillId1))
+                if (!CusFile.IsPupEntryUsed(entries[0].ID, entries.Count, skillId1))
                 {
                     id = entries[0].ID;
                 }
@@ -1368,13 +1373,13 @@ namespace Xv2CoreLib
 
             if (id == -1)
             {
-                id = pupFile.GetNewPupId(entries.Count);
+                id = PupFile.GetNewPupId(entries.Count);
             }
 
             if (id != -1)
             {
                 PUP_File.SetPupId(entries, id);
-                pupFile.PupEntries.AddRange(entries);
+                PupFile.PupEntries.AddRange(entries);
                 return (ushort)id;
             }
             else
@@ -1386,7 +1391,7 @@ namespace Xv2CoreLib
 
         public void InstallSkillCusEntry(Skill cusEntry, CUS_File.SkillType skillType)
         {
-            IList<Skill> skills = cusFile.GetSkills(skillType);
+            IList<Skill> skills = CusFile.GetSkills(skillType);
 
             int existingIdx = skills.IndexOf(skills.FirstOrDefault(x => x.ID2 == cusEntry.ID2));
 
@@ -1402,15 +1407,15 @@ namespace Xv2CoreLib
 
         public void InstallSkillIdbEntry(IDB_Entry idbEntry)
         {
-            var existingIdx = skillIdbFile.Entries.IndexOf(skillIdbFile.Entries.FirstOrDefault(x => x.ID_Binding == idbEntry.ID_Binding && x.Type == idbEntry.Type));
+            var existingIdx = SkillIdbFile.Entries.IndexOf(SkillIdbFile.Entries.FirstOrDefault(x => x.ID_Binding == idbEntry.ID_Binding && x.Type == idbEntry.Type));
 
             if (existingIdx != -1)
             {
-                skillIdbFile.Entries[existingIdx] = idbEntry;
+                SkillIdbFile.Entries[existingIdx] = idbEntry;
             }
             else
             {
-                skillIdbFile.Entries.Add(idbEntry);
+                SkillIdbFile.Entries.Add(idbEntry);
             }
         }
 
@@ -1456,7 +1461,7 @@ namespace Xv2CoreLib
         //Moveset/Character
         public void InstallErsCharacterEntry(string charaShortName, int id, bool hasEepk, bool borrowed)
         {
-            var ersEntries = ersFile.GetSubentryList(2);
+            var ersEntries = ErsFile.GetSubentryList(2);
 
             var entry = ersEntries.FirstOrDefault(x => x.ID == id);
             string path = $"chara/{charaShortName}/{charaShortName}.eepk";
@@ -1481,15 +1486,15 @@ namespace Xv2CoreLib
 
         public void InstallCmsEntry(CMS_Entry cmsEntry)
         {
-            var existingIdx = cmsFile.CMS_Entries.IndexOf(cmsFile.CMS_Entries.FirstOrDefault(x => x.ID == cmsEntry.ID));
+            var existingIdx = CmsFile.CMS_Entries.IndexOf(CmsFile.CMS_Entries.FirstOrDefault(x => x.ID == cmsEntry.ID));
 
             if (existingIdx != -1)
             {
-                cmsFile.CMS_Entries[existingIdx] = cmsEntry;
+                CmsFile.CMS_Entries[existingIdx] = cmsEntry;
             }
             else
             {
-                cmsFile.CMS_Entries.Add(cmsEntry);
+                CmsFile.CMS_Entries.Add(cmsEntry);
             }
         }
 

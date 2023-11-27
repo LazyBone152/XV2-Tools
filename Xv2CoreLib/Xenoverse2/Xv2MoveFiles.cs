@@ -24,9 +24,21 @@ namespace Xv2CoreLib
         public Xv2File<BDM_File> BdmFile { get; set; } = null;
         public AsyncObservableCollection<Xv2File<EAN_File>> EanFile { get; set; } = new AsyncObservableCollection<Xv2File<EAN_File>>();
         public AsyncObservableCollection<Xv2File<EAN_File>> CamEanFile { get; set; } = new AsyncObservableCollection<Xv2File<EAN_File>>();
-        public Xv2File<EffectContainerFile> EepkFile { get; set; } = null;
+        public AsyncObservableCollection<Xv2File<EffectContainerFile>> EepkFiles { get; set; } = new AsyncObservableCollection<Xv2File<EffectContainerFile>>();
         public AsyncObservableCollection<Xv2File<ACB_Wrapper>> SeAcbFile { get; set; } = new AsyncObservableCollection<Xv2File<ACB_Wrapper>>();
         public AsyncObservableCollection<Xv2File<ACB_Wrapper>> VoxAcbFile { get; set; } = new AsyncObservableCollection<Xv2File<ACB_Wrapper>>();
+
+        public Xv2File<EffectContainerFile> EepkFile
+        {
+            get => (EepkFiles.Count > 0) ? EepkFiles[0] : null;
+            set
+            {
+                if (EepkFiles.Count == 0)
+                    EepkFiles.Add(value);
+                else
+                    EepkFiles[0] = value;
+            }
+        }
 
         //Skill
         public Xv2File<BSA_File> BsaFile { get; set; } = null;
@@ -244,10 +256,12 @@ namespace Xv2CoreLib
             UpdateTypeString(BdmFile, Xenoverse2.MoveFileTypes.BDM);
             UpdateTypeString(ShotBdmFile, Xenoverse2.MoveFileTypes.SHOT_BDM);
             UpdateTypeString(BsaFile, Xenoverse2.MoveFileTypes.BSA);
-            UpdateTypeString(EepkFile, Xenoverse2.MoveFileTypes.EEPK);
             UpdateTypeString(BasFile, Xenoverse2.MoveFileTypes.BAS);
             UpdateTypeString(AfterBacFile, Xenoverse2.MoveFileTypes.AFTER_BAC);
             UpdateTypeString(AfterBcmFile, Xenoverse2.MoveFileTypes.AFTER_BCM);
+
+            foreach(var file in EepkFiles)
+                UpdateTypeString(file, Xenoverse2.MoveFileTypes.EEPK);
 
             foreach (var file in VoxAcbFile)
                 UpdateTypeString(file, Xenoverse2.MoveFileTypes.VOX_ACB);
@@ -278,9 +292,16 @@ namespace Xv2CoreLib
             if (BasFile == xv2FileObject) return BasFile.UnborrowFile();
             if (AfterBacFile == xv2FileObject) return AfterBacFile.UnborrowFile();
             if (AfterBcmFile == xv2FileObject) return AfterBcmFile.UnborrowFile();
-            if (EepkFile == xv2FileObject) return EepkFile.UnborrowFile();
 
             List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            if (EepkFiles.Contains(xv2FileObject))
+            {
+                foreach (var file in EepkFiles)
+                {
+                    undos.AddRange(file.UnborrowFile());
+                }
+            }
 
             if (EanFile.Contains(xv2FileObject))
             {
@@ -327,9 +348,16 @@ namespace Xv2CoreLib
             if (BasFile == xv2FileObject) return BasFile.ReplaceFile(path);
             if (AfterBacFile == xv2FileObject) return AfterBacFile.ReplaceFile(path);
             if (AfterBcmFile == xv2FileObject) return AfterBcmFile.ReplaceFile(path);
-            if (EepkFile == xv2FileObject) return EepkFile.ReplaceFile(path);
 
             List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            if (EepkFiles.Contains(xv2FileObject))
+            {
+                foreach (var file in EepkFiles)
+                {
+                    undos.AddRange(file.ReplaceFile(path));
+                }
+            }
 
             if (EanFile.Contains(xv2FileObject))
             {

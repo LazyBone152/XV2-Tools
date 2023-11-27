@@ -41,6 +41,8 @@ namespace Xv2CoreLib
             {
                 switch (FileType)
                 {
+                    case MoveFileTypes.EEPK:
+                        return System.IO.Path.GetFileNameWithoutExtension(Path);
                     case Xenoverse2.MoveFileTypes.TAL_EAN:
                         return "Tail"; //Only ever loaded for Common
                     case Xenoverse2.MoveFileTypes.FCE_EAN:
@@ -69,7 +71,7 @@ namespace Xv2CoreLib
                                 return "invalid_ACB_Type";
                         }
                     default:
-                        return "invalid";
+                        return "";
                 }
             }
         }
@@ -230,7 +232,7 @@ namespace Xv2CoreLib
             IsDefault = isDefault;
             MoveType = moveType;
 
-            if (fileType == Xenoverse2.MoveFileTypes.SE_ACB || fileType == Xenoverse2.MoveFileTypes.VOX_ACB || fileType == Xenoverse2.MoveFileTypes.AMK)
+            if (fileType == Xenoverse2.MoveFileTypes.SE_ACB || fileType == Xenoverse2.MoveFileTypes.VOX_ACB || fileType == Xenoverse2.MoveFileTypes.AMK || fileType == MoveFileTypes.EEPK)
             {
                 Costumes = new List<int>();
                 Costumes.Add(costume);

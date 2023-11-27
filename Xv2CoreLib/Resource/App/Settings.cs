@@ -540,7 +540,6 @@ namespace Xv2CoreLib.Resource.App
         public bool XenoKit_PreserveCameraState { get; set; } = true;
         public bool XenoKit_RenderBoneNames { get; set; } = true;
         public bool XenoKit_RenderBoneNamesMouseOverOnly { get; set; } = true;
-        public bool XenoKit_WireframeMode { get; set; } = false;
         public bool XenoKit_HideLessImportantBones { get; set; } = true;
         public bool XenoKit_AutoResolvePasteReferences { get; set; } = false;
         internal int XenoKit_BacTypeSortMode { get; set; }
@@ -552,6 +551,7 @@ namespace Xv2CoreLib.Resource.App
         public int XenoKit_SuperSamplingFactor { get; set; } = 2;
         public int XenoKit_ShadowMapRes { get; set; } = 2048;
         public bool XenoKit_FullLowRez { get; set; } = false;
+        public bool XenoKit_UseOutlinePostEffect { get; set; } = true;
 
         //Enums, which are not-serialized directly
         [DontSerialize]
