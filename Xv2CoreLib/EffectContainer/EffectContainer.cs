@@ -1096,19 +1096,23 @@ namespace Xv2CoreLib.EffectContainer
 
         private void ValidateContainerFileNames()
         {
+            //Apparantly long paths (128 characters and above) cannot be read by the game (or patcher?), at least for EEPKs. If a container file has such a long path the game will just hang as it cant find the file.
+            //So... best to ensure we dont rename our containers if the final path is gonna be too long for the game to even load
+            bool allowContainerRename = ($"{Directory}/{Name}.xxxxx.xxx".Length >= 128 ? false : true) && EepkToolInterlop.AutoRenameContainers;
+
             //Ensure that all containers have a valid name
             //PBIND
-            if (Pbind.File2_Name == "NULL" || EepkToolInterlop.AutoRenameContainers)
+            if (Pbind.File2_Name == "NULL" || allowContainerRename)
                 Pbind.File2_Name = String.Format("{0}.ptcl.emm", GetDefaultEepkName());
 
-            if (Pbind.File3_Name == "NULL" || EepkToolInterlop.AutoRenameContainers)
+            if (Pbind.File3_Name == "NULL" || allowContainerRename)
                 Pbind.File3_Name = String.Format("{0}.ptcl.emb", GetDefaultEepkName());
 
             if (Pbind.File1_Name == "NULL" && !Pbind.LooseFiles)
             {
                 Pbind.File1_Name = String.Format("{0}.pbind.emb", GetDefaultEepkName());
             }
-            else if (!Pbind.LooseFiles && EepkToolInterlop.AutoRenameContainers)
+            else if (!Pbind.LooseFiles && allowContainerRename)
             {
                 Pbind.File1_Name = String.Format("{0}.pbind.emb", GetDefaultEepkName());
             }
@@ -1118,17 +1122,17 @@ namespace Xv2CoreLib.EffectContainer
             }
 
             //TBIND
-            if (Tbind.File2_Name == "NULL" || EepkToolInterlop.AutoRenameContainers)
+            if (Tbind.File2_Name == "NULL" || allowContainerRename)
                 Tbind.File2_Name = String.Format("{0}.trc.emm", GetDefaultEepkName());
 
-            if (Tbind.File3_Name == "NULL" || EepkToolInterlop.AutoRenameContainers)
+            if (Tbind.File3_Name == "NULL" || allowContainerRename)
                 Tbind.File3_Name = String.Format("{0}.trc.emb", GetDefaultEepkName());
 
             if (Tbind.File1_Name == "NULL" && !Tbind.LooseFiles)
             {
                 Tbind.File1_Name = String.Format("{0}.tbind.emb", GetDefaultEepkName());
             }
-            else if (!Tbind.LooseFiles && EepkToolInterlop.AutoRenameContainers)
+            else if (!Tbind.LooseFiles && allowContainerRename)
             {
                 Tbind.File1_Name = String.Format("{0}.tbind.emb", GetDefaultEepkName());
             }
@@ -1142,7 +1146,7 @@ namespace Xv2CoreLib.EffectContainer
             {
                 Cbind.File1_Name = String.Format("{0}.cbind.emb", GetDefaultEepkName());
             }
-            else if (!Cbind.LooseFiles && EepkToolInterlop.AutoRenameContainers)
+            else if (!Cbind.LooseFiles && allowContainerRename)
             {
                 Cbind.File1_Name = String.Format("{0}.cbind.emb", GetDefaultEepkName());
             }
@@ -1156,7 +1160,7 @@ namespace Xv2CoreLib.EffectContainer
             {
                 LightEma.File1_Name = String.Format("{0}.light.emb", GetDefaultEepkName());
             }
-            else if (!LightEma.LooseFiles && EepkToolInterlop.AutoRenameContainers)
+            else if (!LightEma.LooseFiles && allowContainerRename)
             {
                 LightEma.File1_Name = String.Format("{0}.light.emb", GetDefaultEepkName());
             }
