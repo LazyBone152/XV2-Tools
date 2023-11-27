@@ -14,6 +14,8 @@ using System.Threading;
 using System.ComponentModel;
 using Xv2CoreLib.Resource;
 using MahApps.Metro.Controls;
+using LB_Mod_Installer.Tracking;
+using System.Linq;
 
 namespace LB_Mod_Installer
 {
@@ -58,6 +60,7 @@ namespace LB_Mod_Installer
                 }
             }
         }
+        public SavedSelectedOptions savedOptions = null;
 
         //Settings
         private Settings.GameDirXml settings = null;
@@ -297,6 +300,7 @@ namespace LB_Mod_Installer
 
                 //Load installinfo
                 LoadInstallInfoZip();
+                InitSelectedOptions();
                 LoadDefaultBrushes();
                 LoadTitleBarBrushes();
 
@@ -324,6 +328,52 @@ namespace LB_Mod_Installer
                 ShutdownApp();
             }
 #endif
+        }
+
+        private void InitSelectedOptions()
+        {
+            if (InstallerInfo == null) throw new InvalidOperationException("InitSavedOptions: Mod has not been loaded!");
+
+            savedOptions = SavedSelectedOptions.Load(Path.GetFileName(GeneralInfo.TrackerPath));
+
+            foreach(InstallStep step in InstallerInfo.InstallOptionSteps.Where(x => !string.IsNullOrWhiteSpace(x.StepID)))
+            {
+                List<int> selectedOptions = savedOptions.GetSelectedOptions(step.StepID);
+
+                if (selectedOptions != null)
+                {
+                    switch (step.StepType)
+                    {
+                        case InstallStep.StepTypes.Options:
+                            step.SelectedOptionBinding = selectedOptions.Count > 0 ? selectedOptions[0] : 0;
+                            break;
+                        case InstallStep.StepTypes.OptionsMultiSelect:
+                            step.SetSelectedOptions(selectedOptions);
+                            break;
+                    }
+
+                }
+            }
+
+            savedOptions.SavedInstallSteps.Clear();
+        }
+
+        public void SaveSelectedOptions()
+        {
+            foreach (InstallStep step in InstallerInfo.InstallOptionSteps.Where(x => !string.IsNullOrWhiteSpace(x.StepID)))
+            {
+                switch (step.StepType)
+                {
+                    case InstallStep.StepTypes.Options:
+                        savedOptions.SetSelectedOptions(step.StepID, new List<int>() { step.SelectedOptionBinding });
+                        break;
+                    case InstallStep.StepTypes.OptionsMultiSelect:
+                        savedOptions.SetSelectedOptions(step.StepID, step.GetSelectedOptions());
+                        break;
+                }
+            }
+
+            savedOptions.Save(Path.GetFileName(GeneralInfo.TrackerPath));
         }
 
         private void InitGameDir()

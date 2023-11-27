@@ -157,6 +157,7 @@
     <Compile Include="Installer\Transformation\TransformSkill.cs" />
     <Compile Include="Installer\Uninstall.cs" />
     <Compile Include="Tracking\GameDir.cs" />
+    <Compile Include="Tracking\SavedSelectedOptions.cs" />
     <Compile Include="Tracking\Sections.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

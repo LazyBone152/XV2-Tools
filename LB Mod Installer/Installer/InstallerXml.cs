@@ -75,11 +75,11 @@ namespace LB_Mod_Installer.Installer
                     }
                     else if (split[3] == "0")
                     {
-                        return String.Format("{0}.{1}{2}", split[0], split[1], split[2]);
+                        return String.Format("{0}.{1}.{2}", split[0], split[1], split[2]);
                     }
                     else
                     {
-                        return String.Format("{0}.{1}{2}{3}", split[0], split[1], split[2], split[3]);
+                        return String.Format("{0}.{1}.{2}.{3}", split[0], split[1], split[2], split[3]);
                     }
                 }
                 catch
@@ -705,6 +705,10 @@ namespace LB_Mod_Installer.Installer
         [YAXAttributeForClass]
         [YAXDontSerializeIfNull]
         public string IsEnabled { get; set; }
+        [YAXAttributeForClass]
+        [YAXDontSerializeIfNull]
+        public string StepID { get; set; }
+
 
         //Elements
         [YAXAttributeFor("Type")]
