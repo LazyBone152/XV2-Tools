@@ -22,8 +22,8 @@ namespace Xv2CoreLib.EMB_CLASS
     }
 
     [YAXComment("InstallMode values (used by LB Mod Installer):" +
-        "\nMatchIndex: install entry into this index" +
-        "\nMatchName: if entry with same name exists, overwrite it, else add as new")]
+        "\nMatchIndex: install entry into this index (can use AutoID)" +
+        "\nMatchName: if entry with same name exists, overwrite it, else add as new (can rename Index to Alias and type an alias in, without the binding brackets)")]
     [Serializable]
     public class EMB_File
     {
@@ -375,10 +375,10 @@ namespace Xv2CoreLib.EMB_CLASS
 
         public int AddEntry(EmbEntry embEntry, string _idx, InstallMode _installMode)
         {
-            int idx = int.Parse(_idx);
-
             if(_installMode == InstallMode.MatchIndex)
             {
+                int idx = int.Parse(_idx);
+
                 if (idx <= (Entry.Count - 1))
                 {
                     Entry[idx] = embEntry;

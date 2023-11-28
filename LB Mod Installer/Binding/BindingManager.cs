@@ -13,6 +13,7 @@ using Xv2CoreLib.CSO;
 using Xv2CoreLib.CUS;
 using Xv2CoreLib.Eternity;
 using Xv2CoreLib.HCI;
+using Xv2CoreLib.IDB;
 using Xv2CoreLib.PSC;
 using Xv2CoreLib.TSD;
 using Xv2CoreLib.TTB;
@@ -40,7 +41,11 @@ namespace LB_Mod_Installer.Binding
         private const string MAF_BCS_PATH = "chara/MAF/MAF.bcs";
         private const string FRI_BCS_PATH = "chara/FRI/FRI.bcs";
         private const string NMC_BCS_PATH = "chara/NMC/NMC.bcs";
-        
+        public const string TOP_IDB_PATH = "system/item/costume_top_item.idb";
+        public const string BOTTOM_IDB_PATH = "system/item/costume_bottom_item.idb";
+        public const string GLOVES_IDB_PATH = "system/item/costume_gloves_item.idb";
+        public const string SHOES_IDB_PATH = "system/item/costume_shoes_item.idb";
+
 
         private Install install;
         public List<AliasValue> Aliases { get; private set; } = new List<AliasValue>();
@@ -59,6 +64,7 @@ namespace LB_Mod_Installer.Binding
         private List<int> AssignedAwokenSkillIDs = new List<int>();
         private List<int> AssignedStageIDs = new List<int>();
         private List<int> AssignedStageSelectIDs = new List<int>();
+        private List<int> AssignedIdbCostumeIDs = new List<int>();
 
         /// <summary>
         /// Stores a reference to the current entry during the Memory Pass (second pass). 
@@ -336,6 +342,9 @@ namespace LB_Mod_Installer.Binding
 
                                 retID = nextId;
                             }
+                            break;
+                        case Function.AutoIdbCostume:
+                            retID = GetFreeIdbCostumeID();
                             break;
                         case Function.X2MSkillPath:
                             {
@@ -751,6 +760,9 @@ namespace LB_Mod_Installer.Binding
                     case "autostageselect":
                         bindings.Add(new BindingValue() { Function = Function.AutoStageSelect, Arguments = arguments });
                         break;
+                    case "autoidbcostume":
+                        bindings.Add(new BindingValue() { Function = Function.AutoIdbCostume, Arguments = arguments });
+                        break;
                     default:
                         throw new FormatException(String.Format("Invalid ID Binding Function (Function = {0}, Argument = {1})\nFull binding: {2}", function, argument, originalBinding));
                 }
@@ -816,6 +828,7 @@ namespace LB_Mod_Installer.Binding
             {
                 switch (bindings[i].Function)
                 {
+                    case Function.AutoIdbCostume:
                     case Function.AutoTtbEvent:
                     case Function.Skip:
                         //Cant have arguments
@@ -1334,6 +1347,29 @@ namespace LB_Mod_Installer.Binding
             return false;
         }
 
+        public int GetFreeIdbCostumeID()
+        {
+            int id = 358;
+
+            while (IsIdbCostumeUsed(id))
+            {
+                id++;
+            }
+
+            AssignedIdbCostumeIDs.Add(id);
+            return id;
+        }
+
+        private bool IsIdbCostumeUsed(int id)
+        {
+            if (AssignedIdbCostumeIDs.Contains(id)) return true;
+            if (((IDB_File)install.GetParsedFile<IDB_File>(TOP_IDB_PATH)).Entries.Any(x => x.ID == id)) return true;
+            if (((IDB_File)install.GetParsedFile<IDB_File>(BOTTOM_IDB_PATH)).Entries.Any(x => x.ID == id)) return true;
+            if (((IDB_File)install.GetParsedFile<IDB_File>(GLOVES_IDB_PATH)).Entries.Any(x => x.ID == id)) return true;
+            if (((IDB_File)install.GetParsedFile<IDB_File>(SHOES_IDB_PATH)).Entries.Any(x => x.ID == id)) return true;
+            return false;
+        }
+
         //Characters:
         public int GetFreeCharacterID(int min, int max)
         {
@@ -1548,6 +1584,7 @@ namespace LB_Mod_Installer.Binding
         AutoSkillID,
         AutoStage,
         AutoStageSelect,
+        AutoIdbCostume,
         GetAlias,
         SkillID1,
         SkillID2,
