@@ -92,6 +92,7 @@ namespace Xv2CoreLib.ValuesDictionary
             { 5 , "Character" },
             { 65534 , "Skill" },
             { 9 , "Commom (tail)" },
+            { 2 , "Commom MCM.DBA" },
             { 10 , "Face Base" },
             { 11 , "Face Forehead" }
         };
@@ -165,6 +166,7 @@ namespace Xv2CoreLib.ValuesDictionary
             { 0x20 , "Disable Extended Camera" },
 
             //Everything else
+            { 9 , "MCM" },
             { 0 , "Target (0x0)" },
             { 1 , "Heavy Rumble (0x1)" },
             { 2 , "Extreme Rumble (0x2)" },

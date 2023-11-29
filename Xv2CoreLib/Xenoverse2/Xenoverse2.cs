@@ -116,6 +116,9 @@ namespace Xv2CoreLib
         public const string GLOVES_IDB_PATH = "system/item/costume_gloves_item.idb";
         public const string SHOES_IDB_PATH = "system/item/costume_shoes_item.idb";
         public const string ACCESSORY_IDB_PATH = "system/item/accessory_item.idb";
+        public const string CMN_M_BAC_PATH = "chara/CMN/CMN_M.bac";
+        public const string CMN_DBA_BAC_PATH = "chara/CMN/CMN_M_DBA.bac";
+        public const string CMN_QEA_BAC_PATH = "chara/CMN/CMN_M_QEA.bac";
         public const string CMN_BAC_PATH = "chara/CMN/CMN.bac";
         public const string CMN_EAN_PATH = "chara/CMN/CMN.ean";
         public const string CMN_CAM_EAN_PATH = "chara/CMN/CMN.cam.ean";
@@ -599,7 +602,7 @@ namespace Xv2CoreLib
                     moveFiles.AfterBacPath = String.Format("{0}/{1}/{1}_AFTER.bac", skillDir, folderName);
 
                     if (loadSkillFiles)
-                        moveFiles.AfterBacFile = new Xv2File<BAC_File>((BAC_File)FileManager.Instance.GetParsedFileFromGame(moveFiles.AfterBacPath, loadFromCpk), fileIO.PathInGameDir(moveFiles.AfterBacPath), false, null, false, MoveFileTypes.BAC, 0, false, MoveType.Skill);
+                        moveFiles.AfterBacFile = new Xv2File<BAC_File>((BAC_File)FileManager.Instance.GetParsedFileFromGame(moveFiles.AfterBacPath, loadFromCpk), fileIO.PathInGameDir(moveFiles.AfterBacPath), false, null, false, MoveFileTypes.AFTER_BAC, 0, false, MoveType.Skill);
                 }
                 else
                 {
@@ -607,7 +610,7 @@ namespace Xv2CoreLib
                     moveFiles.AfterBacPath = String.Format("skill/{0}.bac", cusEntry.AfterBacPath);
 
                     if (loadSkillFiles)
-                        moveFiles.AfterBacFile = new Xv2File<BAC_File>((BAC_File)FileManager.Instance.GetParsedFileFromGame(moveFiles.AfterBacPath, loadFromCpk), fileIO.PathInGameDir(moveFiles.AfterBacPath), true, null, false, MoveFileTypes.BAC, 0, false, MoveType.Skill);
+                        moveFiles.AfterBacFile = new Xv2File<BAC_File>((BAC_File)FileManager.Instance.GetParsedFileFromGame(moveFiles.AfterBacPath, loadFromCpk), fileIO.PathInGameDir(moveFiles.AfterBacPath), true, null, false, MoveFileTypes.AFTER_BAC, 0, false, MoveType.Skill);
                 }
             }
 

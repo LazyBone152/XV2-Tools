@@ -1220,6 +1220,7 @@ namespace Xv2CoreLib.BAC
         public enum EanTypeEnum : ushort
         {
             Common = 0,
+            MCM_DBA = 2,
             Character = 5,
             CommonTail = 9,
             FaceBase = 10,
@@ -2703,7 +2704,8 @@ namespace Xv2CoreLib.BAC
             Target = 0,
             Common = 3,
             Character = 4,
-            Skill = 5
+            Skill = 5,
+            MCM = 9
         }
 
         [Flags]

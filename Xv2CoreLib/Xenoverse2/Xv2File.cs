@@ -49,7 +49,9 @@ namespace Xv2CoreLib
                         return "Face"; //Loaded on characters
                     case Xenoverse2.MoveFileTypes.EAN:
                     case Xenoverse2.MoveFileTypes.CAM_EAN:
-                        return (IsDefault) ? "Main" : CharaCode;
+                        if (Costumes.Count == 0 && IsDefault)
+                            return "Main";
+                        return (Costumes.Count == 1) ? System.IO.Path.GetFileNameWithoutExtension(Path) : CharaCode;
                     case Xenoverse2.MoveFileTypes.VOX_ACB:
                     case Xenoverse2.MoveFileTypes.SE_ACB:
                         string lang = (IsEnglish) ? "EN" : "JP";
@@ -70,6 +72,10 @@ namespace Xv2CoreLib
                             default:
                                 return "invalid_ACB_Type";
                         }
+                    case MoveFileTypes.BAC:
+                        return Costumes.Count == 1 ? System.IO.Path.GetFileNameWithoutExtension(Path) : "Main";
+                    case MoveFileTypes.AFTER_BAC:
+                        return "AFTER";
                     default:
                         return "";
                 }
@@ -112,7 +118,7 @@ namespace Xv2CoreLib
         #region Args
         private string _charaCode = string.Empty;
         private bool _isEnglish = false;
-        private List<int> _costumes = null;
+        private List<int> _costumes = new List<int>();
 
         /// <summary>
         /// Used to specify character code for VOX ACB and EAN files.
@@ -231,12 +237,7 @@ namespace Xv2CoreLib
             FileType = fileType;
             IsDefault = isDefault;
             MoveType = moveType;
-
-            if (fileType == Xenoverse2.MoveFileTypes.SE_ACB || fileType == Xenoverse2.MoveFileTypes.VOX_ACB || fileType == Xenoverse2.MoveFileTypes.AMK || fileType == MoveFileTypes.EEPK)
-            {
-                Costumes = new List<int>();
-                Costumes.Add(costume);
-            }
+            Costumes.Add(costume);
         }
 
         public Xv2File(T file, List<int> costume = null, Xenoverse2.MoveFileTypes fileType = 0, Xenoverse2.MoveType moveType = 0, bool isEnglish = false, bool isDefault = true)
@@ -247,12 +248,7 @@ namespace Xv2CoreLib
             IsDefault = isDefault;
             Costumes = costume;
             MoveType = moveType;
-
-            if (costume == null && (fileType == Xenoverse2.MoveFileTypes.SE_ACB || fileType == Xenoverse2.MoveFileTypes.VOX_ACB || fileType == Xenoverse2.MoveFileTypes.AMK))
-            {
-                Costumes = new List<int>();
-                Costumes.Add(0);
-            }
+            Costumes.Add(0);
         }
 
 

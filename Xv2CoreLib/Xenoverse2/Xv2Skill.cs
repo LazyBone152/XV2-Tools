@@ -31,8 +31,11 @@ namespace Xv2CoreLib
 
         public void SaveMoveFiles()
         {
-            if (Files.BacFile?.File?.IsNull() == false)
-                Files.BacFile.File.Save(Files.BacFile.Path);
+            foreach (var bac in Files.BacFiles)
+            {
+                if (!bac.File.IsNull())
+                    bac.File.Save(bac.Path);
+            }
 
             if (Files.BcmFile?.File?.IsNull() == false)
                 Files.BcmFile.File.Save(Files.BcmFile.Path);
@@ -88,9 +91,6 @@ namespace Xv2CoreLib
                         vox.File.AcbFile.Save(vox.Path);
                 }
             }
-
-            if (Files.AfterBacFile?.File?.IsNull() == false)
-                Files.AfterBacFile.File.Save(Files.AfterBacFile.Path);
 
             if (Files.AfterBcmFile?.File?.IsNull() == false)
                 Files.AfterBcmFile.File.Save(Files.AfterBcmFile.Path);

@@ -18,16 +18,51 @@ namespace Xv2CoreLib
     [Serializable]
     public class Xv2MoveFiles
     {
-        //Generic
-        public Xv2File<BAC_File> BacFile { get; set; } = null;
-        public Xv2File<BCM_File> BcmFile { get; set; } = null;
+        //Base
         public Xv2File<BDM_File> BdmFile { get; set; } = null;
         public AsyncObservableCollection<Xv2File<EAN_File>> EanFile { get; set; } = new AsyncObservableCollection<Xv2File<EAN_File>>();
         public AsyncObservableCollection<Xv2File<EAN_File>> CamEanFile { get; set; } = new AsyncObservableCollection<Xv2File<EAN_File>>();
-        public AsyncObservableCollection<Xv2File<EffectContainerFile>> EepkFiles { get; set; } = new AsyncObservableCollection<Xv2File<EffectContainerFile>>();
         public AsyncObservableCollection<Xv2File<ACB_Wrapper>> SeAcbFile { get; set; } = new AsyncObservableCollection<Xv2File<ACB_Wrapper>>();
         public AsyncObservableCollection<Xv2File<ACB_Wrapper>> VoxAcbFile { get; set; } = new AsyncObservableCollection<Xv2File<ACB_Wrapper>>();
 
+        //Skill
+        public Xv2File<BSA_File> BsaFile { get; set; } = null;
+        public Xv2File<BDM_File> ShotBdmFile { get; set; } = null;
+        public Xv2File<BAS_File> BasFile { get; set; } = null;
+
+        //BCM
+        public Xv2File<BCM_File> BcmFile { get; set; } = null;
+        public Xv2File<BCM_File> AfterBcmFile { get; set; } = null;
+
+        //BAC
+        public AsyncObservableCollection<Xv2File<BAC_File>> BacFiles { get; set; } = new AsyncObservableCollection<Xv2File<BAC_File>>();
+        public Xv2File<BAC_File> BacFile
+        {
+            get => BacFiles.Count > 0 ? BacFiles[0] : null;
+            set
+            {
+                if (BacFiles.Count > 0)
+                    BacFiles[0] = value;
+                else
+                    BacFiles.Add(value);
+            }
+        }
+        public Xv2File<BAC_File> AfterBacFile
+        {
+            get => BacFiles.Count > 1 ? BacFiles[1] : null;
+            set
+            {
+                if (BacFiles.Count > 1)
+                    BacFiles[1] = value;
+                else if (BacFiles.Count == 1)
+                    BacFiles.Add(value);
+                else
+                    throw new Exception("Cannot set AfterBacFile without a Base BacFile existing!");
+            }
+        }
+
+        //EEPK
+        public AsyncObservableCollection<Xv2File<EffectContainerFile>> EepkFiles { get; set; } = new AsyncObservableCollection<Xv2File<EffectContainerFile>>();
         public Xv2File<EffectContainerFile> EepkFile
         {
             get => (EepkFiles.Count > 0) ? EepkFiles[0] : null;
@@ -40,15 +75,7 @@ namespace Xv2CoreLib
             }
         }
 
-        //Skill
-        public Xv2File<BSA_File> BsaFile { get; set; } = null;
-        public Xv2File<BDM_File> ShotBdmFile { get; set; } = null;
-        public Xv2File<BAS_File> BasFile { get; set; } = null;
-
-        //After / Awoken specific
-        public Xv2File<BAC_File> AfterBacFile { get; set; } = null;
-        public Xv2File<BCM_File> AfterBcmFile { get; set; } = null;
-
+        
         //Paths (read-only, always re-calcate paths when saving. These are the paths as they were when the skill/character was first loaded.)
         public string BacPath = string.Empty;
         public string BcmPath = string.Empty;
