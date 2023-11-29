@@ -522,10 +522,11 @@ namespace Xv2CoreLib
             if (cusEntry.FilesLoadedFlags1.HasFlag(Skill.FilesLoadedFlags.CharaVOX))
             {
                 //Japanese
-                string[] files = fileIO.GetFilesInDirectory("sound/VOX/Battle/Skill", "acb", true);
                 string name = (!cusEntry.HasVoxAcbPath) ? string.Format(@"CAR_BTL_{2}{1}_{0}_", cusEntry.ShortName, cusEntry.ID2.ToString("D3"), GetAcbSkillTypeLetter(skillType)) : cusEntry.VoxPath;
+                string nameWithoutDir = Path.GetFileName(name);
+                string[] files = fileIO.GetFilesInDirectory($"sound/VOX/Battle/Skill/{Path.GetDirectoryName(name)}/", "acb");
 
-                foreach (var file in files.Where(f => f.Contains(name) && f.Contains("_VOX.acb")))
+                foreach (var file in files.Where(f => f.Contains(nameWithoutDir) && f.Contains("_VOX.acb")))
                 {
                     string[] split = Path.GetFileNameWithoutExtension(file).Split('_');
                     string charaSuffix = split[(split.Length - 2 > 0) ? split.Length - 2 : 0];
@@ -536,9 +537,9 @@ namespace Xv2CoreLib
                 }
 
                 //English
-                files = fileIO.GetFilesInDirectory("sound/VOX/Battle/Skill/en", "acb", true);
+                files = fileIO.GetFilesInDirectory($"sound/VOX/Battle/Skill/en/{Path.GetDirectoryName(name)}/", "acb");
 
-                foreach (var file in files.Where(f => f.Contains(name) && f.Contains("_VOX.acb")))
+                foreach (var file in files.Where(f => f.Contains(nameWithoutDir) && f.Contains("_VOX.acb")))
                 {
                     string[] split = Path.GetFileNameWithoutExtension(file).Split('_');
                     string charaSuffix = split[(split.Length - 2 > 0) ? split.Length - 2 : 0];

@@ -240,9 +240,15 @@ namespace Xv2CoreLib.Resource
 
             //From game directory (data folder)
             if (Directory.Exists(PathInGameDir(directory)))
+            {
                 foreach (string file in Directory.GetFiles(PathInGameDir(directory), $"*{extension}", includeSubFolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
+                {
                     if (Path.GetExtension(file) == extension)
+                    {
                         files.Add(Utils.GetRelativePath(string.Format("{0}/{1}", directory, Path.GetFileName(file))));
+                    }
+                }
+            }
 
             //From cpks
             string[] cpkFiles = cpkReader.GetFilesInDirectory("data/" + directory);
