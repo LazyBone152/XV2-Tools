@@ -1235,6 +1235,18 @@ namespace LB_Mod_Installer.Installer
                     var ids = gameFile.InstallAnyDualSkill(installFile.AnyDualSkillList);
                     GeneralInfo.Tracker.AddIDs(installPath, Sections.PrebakedAnyDualSkillList, ids);
                 }
+
+                if (installFile?.AuraExtras != null)
+                {
+                    var ids = gameFile.InstallAuraExtraData(installFile.AuraExtras);
+                    GeneralInfo.Tracker.AddIDs(installPath, Sections.PrebakedAuraExtraData, ids);
+                }
+
+                if (installFile?.CellMaxes != null)
+                {
+                    var ids = gameFile.InstallCellMaxes(installFile.CellMaxes);
+                    GeneralInfo.Tracker.AddIDs(installPath, Sections.PrebakedCellMax, ids);
+                }
             }
 #if !DEBUG
             catch (Exception ex)

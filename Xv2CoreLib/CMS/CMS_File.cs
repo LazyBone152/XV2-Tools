@@ -161,8 +161,9 @@ namespace Xv2CoreLib.CMS
         {
             int cmsId = skillId2 / 10;
 
-            //If chara ID belongs to a CAC, it is owned by "CMN" instead
-            if (cmsId >= 100 && cmsId < 109)
+            //If skillID is within the range of IDs of CACs, then it is owned by "CMN".
+            //Note: CMS ID 109 isn't used for a character in the CMS, but any skill IDs within that range is also CMN
+            if (cmsId >= 100 && cmsId <= 109)
                 return "CMN";
 
             return CMS_Entries.FirstOrDefault(x => x.ID == cmsId)?.ShortName;

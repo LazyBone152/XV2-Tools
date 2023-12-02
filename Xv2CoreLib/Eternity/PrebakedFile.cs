@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AForge.Imaging.Filters;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -16,6 +17,11 @@ namespace Xv2CoreLib.Eternity
         [YAXSerializeAs("value")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
         public List<string> Ozarus { get; set; } = new List<string>();
+
+        [YAXAttributeFor("CELL_MAXES")]
+        [YAXSerializeAs("value")]
+        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
+        public List<string> CellMaxes { get; set; } = new List<string>();
 
         [YAXAttributeFor("AUTO_BTL_PORT")]
         [YAXSerializeAs("value")]
@@ -38,14 +44,23 @@ namespace Xv2CoreLib.Eternity
         [YAXDontSerializeIfNull]
         public string XML_AnyDualSkillListString { get; set; }
 
-        //These are just for CaC2X2Ms as far as I can tell, so they are not parsed. The orignal XML structures are just saved back as they were read.
-        private List<XElement> BcsColorMaps = null;
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "AuraExtraData")]
+        [YAXDontSerializeIfNull]
+        public List<PreBakedAuraExtraData> AuraExtras { get; set; } = new List<PreBakedAuraExtraData>();
 
         //Parsed Lists:
         [YAXDontSerialize]
         public List<int> AutoBattlePortraits { get; set; } = new List<int>();
         [YAXDontSerialize]
         public List<int> AnyDualSkillList { get; set; } = new List<int>();
+
+        //A list of all current supported XML elements for pre-baked.xml. Any element not on this list will not be parsed but will have its original XML structure saved so that it can be added back into the XML when saving the file.
+        private static List<string> SupportedXmlElements = new List<string>()
+        {
+            "OZARUS", "CELL_MAXES", "AUTO_BTL_PORT", "BodyShape", "CusAuraData", "Alias", "ANY_DUAL_SKILL", "AuraExtraData"
+        };
+        private List<XElement> UnsupportedElements = new List<XElement>();
+
 
         #region LoadSave
         //Load:
@@ -66,27 +81,21 @@ namespace Xv2CoreLib.Eternity
             using (StringReader reader = new StringReader(xmlText))
                 xml = XDocument.Load(reader);
 
-            //Find BcsColorMaps and remove it (if it exists)
-            List<XElement> bcsColorMaps = new List<XElement>();
+            //Find all unsupported XML elements and extract them
+            List<XElement> unsupportedElements = new List<XElement>();
 
-            foreach(var element in xml.Element("Xv2PreBaked").Elements())
+            foreach (var element in xml.Element("Xv2PreBaked").Elements())
             {
-                if(element.Name == "ColorsMap")
+                if(!SupportedXmlElements.Contains(element.Name.ToString()))
                 {
-                    bcsColorMaps.Add(element);
+                    unsupportedElements.Add(element);
                 }
             }
 
             //Deserialize XML
             YAXSerializer serializer = new YAXSerializer(typeof(PrebakedFile), YAXSerializationOptions.DontSerializeNullObjects);
             PrebakedFile prebaked = (PrebakedFile)serializer.Deserialize(xml.Root);
-            
-            if(prebaked != null)
-            {
-                prebaked.BcsColorMaps = bcsColorMaps;
-            }
-
-            //Parse int lists
+            prebaked.UnsupportedElements = unsupportedElements;
             prebaked.LoadLists();
 
             return prebaked;
@@ -100,7 +109,9 @@ namespace Xv2CoreLib.Eternity
             if (CusAuras == null) CusAuras = new List<CusAuraData>();
             if (PreBakedAliases == null) PreBakedAliases = new List<PreBakedAlias>();
             if (BodyShapes == null) BodyShapes = new List<PrebakedBodyShape>();
+            if (AuraExtras == null) AuraExtras = new List<PreBakedAuraExtraData>();
             if (Ozarus == null) Ozarus = new List<string>();
+            if (CellMaxes == null) CellMaxes = new List<string>();
         }
 
         //Save:
@@ -136,14 +147,14 @@ namespace Xv2CoreLib.Eternity
             YAXSerializer serializer = new YAXSerializer(typeof(PrebakedFile));
             XDocument xml = serializer.SerializeToXDocument(this);
 
-            //Add BcsColorMaps back in
-            if(BcsColorMaps != null)
+            //Add unsupported elements back in
+            if(UnsupportedElements?.Count > 0)
             {
                 var root = xml.Element("Xv2PreBaked");
 
-                foreach(var colorMap in BcsColorMaps)
+                foreach(var element in UnsupportedElements)
                 {
-                    root.Add(colorMap);
+                    root.Add(element);
                 }
             }
 
@@ -157,6 +168,7 @@ namespace Xv2CoreLib.Eternity
             BodyShapes?.Sort((x, y) => (int)x.CmsEntryID - (int)y.CmsEntryID);
             CusAuras?.Sort((x, y) => x.CusAuraID - y.CusAuraID);
             PreBakedAliases?.Sort((x, y) => (int)x.CmsEntryID - (int)y.CmsEntryID);
+            AuraExtras?.Sort((x, y) => x.AuraID - y.AuraID);
         }
         #endregion
 
@@ -209,6 +221,22 @@ namespace Xv2CoreLib.Eternity
                 {
                     Ozarus.Add(ozaru);
                     ids.Add(ozaru);
+                }
+            }
+
+            return ids;
+        }
+
+        public List<string> InstallCellMaxes(List<string> cellMaxes)
+        {
+            List<string> ids = new List<string>();
+
+            foreach (var cellMax in cellMaxes)
+            {
+                if (!CellMaxes.Contains(cellMax))
+                {
+                    CellMaxes.Add(cellMax);
+                    ids.Add(cellMax);
                 }
             }
 
@@ -286,6 +314,19 @@ namespace Xv2CoreLib.Eternity
             return ids;
         }
 
+        public List<string> InstallAuraExtraData(List<PreBakedAuraExtraData> auras)
+        {
+            List<string> ids = new List<string>();
+
+            foreach (var aura in auras)
+            {
+                InstallAuraExtraData(aura);
+                ids.Add(aura.AuraID.ToString());
+            }
+
+            return ids;
+        }
+
         public void InstallCusAura(CusAuraData cusAura)
         {
             int index = CusAuras.IndexOf(CusAuras.FirstOrDefault(x => x.CusAuraID == cusAura.CusAuraID));
@@ -328,10 +369,29 @@ namespace Xv2CoreLib.Eternity
             }
         }
 
+        public void InstallAuraExtraData(PreBakedAuraExtraData aura)
+        {
+            int index = AuraExtras.IndexOf(AuraExtras.FirstOrDefault(x => x.AuraID == aura.AuraID));
+
+            if (index == -1)
+            {
+                AuraExtras.Add(aura);
+            }
+            else
+            {
+                AuraExtras[index] = aura;
+            }
+        }
+
 
         public void UninstallOzarus(List<string> ids)
         {
             Ozarus.RemoveAll(x => ids.Contains(x));
+        }
+
+        public void UninstallCellMaxes(List<string> ids)
+        {
+            CellMaxes.RemoveAll(x => ids.Contains(x));
         }
 
         public void UninstallAutoBattlePortraits(List<string> ids)
@@ -383,6 +443,19 @@ namespace Xv2CoreLib.Eternity
             }
         }
 
+        public void UninstallAuraExtraData(List<string> ids)
+        {
+            foreach (var stringId in ids)
+            {
+                int id;
+
+                if (int.TryParse(stringId, out id))
+                {
+                    UninstallAuraExtraData(id);
+                }
+            }
+        }
+
         public void UninstallCusAura(int cusAuraId)
         {
             CusAuras.RemoveAll(x => x.CusAuraID == cusAuraId);
@@ -396,6 +469,11 @@ namespace Xv2CoreLib.Eternity
         public void UninstallAlias(int cmsId)
         {
             PreBakedAliases.RemoveAll(x => x.CmsEntryID == cmsId);
+        }
+
+        public void UninstallAuraExtraData(int auraId)
+        {
+            AuraExtras.RemoveAll(x => x.AuraID == auraId);
         }
         #endregion
     }
@@ -468,12 +546,21 @@ namespace Xv2CoreLib.Eternity
 
         [YAXAttributeFor("BCS_HAIR_COLOR")]
         [YAXSerializeAs("value")]
-        [YAXHexValue]
         public uint BcsHairColor { get; set; }
         [YAXAttributeFor("BCS_EYES_COLOR")]
         [YAXSerializeAs("value")]
-        [YAXHexValue]
         public uint BcsEyesColor { get; set; }
+
+        [YAXAttributeFor("BCS_ADDITIONAL_COLORS")]
+        [YAXSerializeAs("value")]
+        [YAXDontSerializeIfNull]
+        public string ExtraBcsColors { get; set; }
+
+        [YAXAttributeFor("BEHAVIOUR_64")]
+        [YAXSerializeAs("value")]
+        [YAXHexValue]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = byte.MaxValue)]
+        public byte Behaviour_64 { get; set; }
 
         public CusAuraData() { }
 
@@ -501,4 +588,33 @@ namespace Xv2CoreLib.Eternity
         public string TTC_Files { get; set; } // Will load the ttc files of this char (audio, msg subs, and msg voice)
     }
 
+    [YAXSerializeAs("AuraExtraData")]
+    public class PreBakedAuraExtraData
+    {
+        [YAXAttributeForClass]
+        [YAXSerializeAs("aur_id")]
+        public int AuraID { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("bpe_id")]
+        public ushort BPE_ID { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("flag1")]
+        public string XML_BPE_Flag1
+        {
+            get => BPE_Flag1.ToString().ToLower();
+            set => BPE_Flag1 = bool.Parse(value);
+        }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("flag2")]
+        public string XML_BPE_Flag2
+        {
+            get => BPE_Flag2.ToString().ToLower();
+            set => BPE_Flag2 = bool.Parse(value);
+        }
+
+        [YAXDontSerialize]
+        public bool BPE_Flag1 = false;
+        [YAXDontSerialize]
+        public bool BPE_Flag2 = false;
+    }
 }

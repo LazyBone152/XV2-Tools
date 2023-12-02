@@ -79,8 +79,10 @@
         public const string PrebakedBodyShape = "PrebakedBodyShape";
         public const string PrebakedAlias = "PrebakedAlias";
         public const string PrebakedOzarus = "PrebakedOzarus";
+        public const string PrebakedCellMax = "PrebakedCelMax";
         public const string PrebakedAutoBattlePortrait = "PrebakedAutoBattlePortrait";
         public const string PrebakedAnyDualSkillList = "PrebakedAnyDualSkillList";
+        public const string PrebakedAuraExtraData = "PrebakedAuraExtraData";
 
 
         public static string GetBcsPartColor(string id) { return string.Format("{0}{1}", BCS_PartColors, id); }

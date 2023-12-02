@@ -70,7 +70,7 @@ namespace Xv2CoreLib.BCS
     public class BCS_File : ISorting
     {
         [YAXAttributeForClass]
-        [YAXErrorIfMissed(YAXExceptionTypes.Error, DefaultValue = Version.XV2)]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = Version.XV2)]
         public Version Version { get; set; } = Version.XV2;
 
         [YAXAttributeFor("Race")]

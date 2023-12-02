@@ -1311,6 +1311,18 @@ namespace LB_Mod_Installer.Installer
                 if (anyDualSkillSection != null)
                     prebakedFile.UninstallAnyDualSkill(anyDualSkillSection.IDs);
 
+                //Aura Extra Data:
+                Section auraExtraSection = file.GetSection(Sections.PrebakedAuraExtraData);
+
+                if (auraExtraSection != null)
+                    prebakedFile.UninstallAuraExtraData(auraExtraSection.IDs);
+
+                //Cell Maxes:
+                Section cellMaxSection = file.GetSection(Sections.PrebakedCellMax);
+
+                if (cellMaxSection != null)
+                    prebakedFile.UninstallCellMaxes(cellMaxSection.IDs);
+
             }
             catch (Exception ex)
             {
