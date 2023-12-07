@@ -46,6 +46,13 @@ namespace Xv2CoreLib.Resource
             return value;
         }
 
+        public static double Clamp(double min, double max, double value)
+        {
+            if (value < min) return min;
+            if (value > max) return max;
+            return value;
+        }
+
         /// <summary>
         /// Returns a value with the magnitude of x and the sign of y.
         /// </summary>

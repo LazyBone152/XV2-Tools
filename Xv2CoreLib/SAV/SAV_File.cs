@@ -4,9 +4,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using YAXLib;
 using System.Windows.Data;
@@ -21,11 +18,6 @@ using LB_Save_Editor.ID;
 
 namespace Xv2CoreLib.SAV
 {
-    //WARNING: Very sloppy code in here. 
-    //I made the mistake of mixing the code of the save editor with the base save file class, and the result was this abomination...
-    //The code that relied on the save editor has been separated out and turned into extension methods, but a lot still remians (mostly properties).
-    //Fixing this will require way too much time that is better spent elsewhere, so like this it will remain...
-
     #region EnumsAndOffsets
     public static class SysFlags
     {

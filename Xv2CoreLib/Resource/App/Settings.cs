@@ -339,7 +339,7 @@ namespace Xv2CoreLib.Resource.App
         #endregion
 
         #region Common
-        public int SettingsVersion { get; set; } = 2;
+        public int SettingsVersion { get; set; } = 3;
 
         public bool UpdateNotifications { get; set; } = true;
         public string GameDirectory
@@ -604,11 +604,12 @@ namespace Xv2CoreLib.Resource.App
                 XenoKit_SuperSamplingFactor = 1;
             }
 
-            //Disable SuperSampling by default
-            if (SettingsVersion == 1)
+            //Enable SSAA and dynamic lighting by default
+            if (SettingsVersion == 2)
             {
-                SettingsVersion = 2;
-                XenoKit_SuperSamplingFactor = 1;
+                SettingsVersion = 3;
+                XenoKit_SuperSamplingFactor = 2;
+                XenoKit_EnableDynamicLighting = true;
             }
 
             //Theme

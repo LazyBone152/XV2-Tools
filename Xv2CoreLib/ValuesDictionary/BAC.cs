@@ -631,7 +631,7 @@ namespace Xv2CoreLib.ValuesDictionary
             { 79, "Consecutive transparent flashes/shakes [95]" },
             { 80, "Flashing Green Body Outline 1 [30]" },
             { 81, "Red Body Outline [160]" },
-            { 82, "Flashing Putple Body Outline [130]" },
+            { 82, "Flashing Purple Body Outline [130]" },
             { 83, "Flashing White Body Outline 1 [100]" },
             { 84, "Flashing White Body Outline 2 [100]" },
             { 85, "Flashing White Body Outline 3 [60]" },

@@ -148,35 +148,18 @@ namespace EEPK_Organiser.Forms
 
             if (selectedEffect != null)
             {
-                string value = ((TextBox)e.EditingElement).Text;
-                ushort ret = 0;
-
-                if (!ushort.TryParse(value, out ret))
+                if(e.EditingElement is TextBox textBpx)
                 {
-                    //Value contained invalid text
-                    e.Cancel = true;
-                    try
-                    {
-                        MessageBox.Show(string.Format("The entered Effect ID contained invalid characters. Please enter a number between {0} and {1}.", ushort.MinValue, ushort.MaxValue), "Invalid ID", MessageBoxButton.OK, MessageBoxImage.Error);
-                        editModeCancelling = true;
-                        (sender as DataGrid).CancelEdit();
-                    }
-                    finally
-                    {
-                        editModeCancelling = false;
-                    }
-                }
-                else
-                {
-                    //Value is a valid number.
+                    string value = textBpx.Text;
+                    ushort ret = 0;
 
-                    //Now check if it is used by another Effect
-                    if (ImportEffectIdInceaseUsedByOtherEffects(ret, selectedEffect))
+                    if (!ushort.TryParse(value, out ret))
                     {
+                        //Value contained invalid text
                         e.Cancel = true;
                         try
                         {
-                            MessageBox.Show(string.Format("The entered New ID is already taken.", ushort.MinValue, ushort.MaxValue), "Invalid ID", MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessageBox.Show(string.Format("The entered Effect ID contained invalid characters. Please enter a number between {0} and {1}.", ushort.MinValue, ushort.MaxValue), "Invalid ID", MessageBoxButton.OK, MessageBoxImage.Error);
                             editModeCancelling = true;
                             (sender as DataGrid).CancelEdit();
                         }
@@ -185,6 +168,27 @@ namespace EEPK_Organiser.Forms
                             editModeCancelling = false;
                         }
                     }
+                    else
+                    {
+                        //Value is a valid number.
+
+                        //Now check if it is used by another Effect
+                        if (ImportEffectIdInceaseUsedByOtherEffects(ret, selectedEffect))
+                        {
+                            e.Cancel = true;
+                            try
+                            {
+                                MessageBox.Show(string.Format("The entered New ID is already taken.", ushort.MinValue, ushort.MaxValue), "Invalid ID", MessageBoxButton.OK, MessageBoxImage.Error);
+                                editModeCancelling = true;
+                                (sender as DataGrid).CancelEdit();
+                            }
+                            finally
+                            {
+                                editModeCancelling = false;
+                            }
+                        }
+                    }
+
                 }
             }
         }
