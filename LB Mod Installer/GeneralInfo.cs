@@ -198,9 +198,6 @@ namespace LB_Mod_Installer
         public static SpecialFailStates SpecialFailState = SpecialFailStates.None;
         public static bool isInstalled = false;
 
-        //CultureInfo
-        public static CultureInfo SystemCulture = CultureInfo.CurrentUICulture;
-
         //Safe InstallerXml requests
         public static string CurrentModName
         {

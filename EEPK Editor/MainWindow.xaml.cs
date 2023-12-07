@@ -20,6 +20,7 @@ using LB_Common.Utils;
 using AutoUpdater;
 using EEPK_Organiser.Forms.Recolor;
 using xv2 = Xv2CoreLib.Xenoverse2;
+using System.Globalization;
 
 namespace EEPK_Organiser
 {
@@ -120,6 +121,10 @@ namespace EEPK_Organiser
 
         public MainWindow()
         {
+            //Force en-US culture accross whole application to ensure error messages will always be in english
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("en-US");
+            CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.GetCultureInfo("en-US");
+
             //Allows decimal points to be typed in float values with UpdateSourceTrigger=PropertyChanged
             FrameworkCompatibilityPreferences.KeepTextBoxDisplaySynchronizedWithTextProperty = false;
 

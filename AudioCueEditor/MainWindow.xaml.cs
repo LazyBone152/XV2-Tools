@@ -22,6 +22,7 @@ using System.Diagnostics;
 using LB_Common.Utils;
 using ControlzEx.Theming;
 using System.Linq;
+using System.Globalization;
 
 namespace AudioCueEditor
 {
@@ -90,6 +91,10 @@ namespace AudioCueEditor
 
         public MainWindow()
         {
+            //Force en-US culture accross whole application to ensure error messages will always be in english
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("en-US");
+            CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.GetCultureInfo("en-US");
+
             //Tooltips
             ToolTipService.ShowDurationProperty.OverrideMetadata(
             typeof(DependencyObject), new FrameworkPropertyMetadata(Int32.MaxValue));

@@ -284,14 +284,13 @@ namespace LB_Mod_Installer
             try
 #endif
             {
+                //Force en-US culture accross whole application to ensure error messages will always be in english
+                CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("en-US");
+                CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.GetCultureInfo("en-US");
+
                 //Tooltip
                 ToolTipService.ShowDurationProperty.OverrideMetadata(
                 typeof(DependencyObject), new FrameworkPropertyMetadata(Int32.MaxValue));
-
-
-                //CultureInfo
-                GeneralInfo.SystemCulture = Thread.CurrentThread.CurrentCulture;
-                Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
 
                 //Init window
                 InitializeComponent();
