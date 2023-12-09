@@ -284,6 +284,8 @@ namespace LB_Mod_Installer
             try
 #endif
             {
+                GeneralInfo.SystemCulture = CultureInfo.CurrentCulture;
+
                 //Force en-US culture accross whole application to ensure error messages will always be in english
                 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("en-US");
                 CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.GetCultureInfo("en-US");
