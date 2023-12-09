@@ -12,6 +12,7 @@ namespace Xv2CoreLib.Eternity
     public class StageDefFile
     {
         public const string PATH = "xv2_stage_def.xml";
+        private const int SUPPORTED_VERSION = 0;
 
         private static StageDefFile _defaultFile = null;
         /// <summary>
@@ -28,6 +29,10 @@ namespace Xv2CoreLib.Eternity
                 return _defaultFile;
             }
         }
+
+        [YAXAttributeForClass]
+        [YAXDontSerializeIfNull]
+        public string Version { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Stage")]
         public List<StageDef> Stages { get; set; }
@@ -52,6 +57,18 @@ namespace Xv2CoreLib.Eternity
 
             using (StringReader reader = new StringReader(xmlText))
                 xml = XDocument.Load(reader);
+
+            //Version check
+            XAttribute versionAttr = xml.Element("Xv2StageDef").Attribute("Version");
+
+            if (versionAttr != null)
+            {
+                if (!int.TryParse(versionAttr.Value, out int version))
+                    throw new InvalidDataException("StageDefFile.Load: Version is not in the correct format.");
+
+                if (version > SUPPORTED_VERSION)
+                    throw new InvalidDataException("StageDefFile.Load: This xv2_stage_def.xml version is not supported by the installer. An update is required.");
+            }
 
             //Deserialize XML
             YAXSerializer serializer = new YAXSerializer(typeof(StageDefFile), YAXSerializationOptions.DontSerializeNullObjects);

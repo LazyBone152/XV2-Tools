@@ -12,6 +12,11 @@ namespace Xv2CoreLib.Eternity
     public class PrebakedFile
     {
         public const string PATH = "pre-baked.xml";
+        private const int SUPPORTED_VERSION = 0;
+
+        [YAXAttributeForClass]
+        [YAXDontSerializeIfNull]
+        public string Version { get; set; }
 
         [YAXAttributeFor("OZARUS")]
         [YAXSerializeAs("value")]
@@ -80,6 +85,18 @@ namespace Xv2CoreLib.Eternity
 
             using (StringReader reader = new StringReader(xmlText))
                 xml = XDocument.Load(reader);
+
+            //Version check
+            XAttribute versionAttr = xml.Element("Xv2PreBaked").Attribute("Version");
+
+            if(versionAttr != null)
+            {
+                if (!int.TryParse(versionAttr.Value, out int version))
+                    throw new InvalidDataException("PrebakedFile.Load: Version is not in the correct format.");
+
+                if (version > SUPPORTED_VERSION)
+                    throw new InvalidDataException("PrebakedFile.Load: This pre-baked.xml version is not supported by the installer. An update is required.");
+            }
 
             //Find all unsupported XML elements and extract them
             List<XElement> unsupportedElements = new List<XElement>();
