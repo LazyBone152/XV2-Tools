@@ -525,9 +525,6 @@ namespace LB_Mod_Installer.Binding
                                         retID = CUS_File.ConvertToID1(skillId2, skillType);
                                         AddAlias(skillId2.ToString(), id2Alias);
 
-                                        if (!string.IsNullOrWhiteSpace(parentCmsAlias))
-                                            AddAlias(parentCmsEntry.ShortName, parentCmsAlias);
-
                                         assignedSkillIds.Add(skillId2);
                                     }
                                 }
