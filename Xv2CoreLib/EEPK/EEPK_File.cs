@@ -164,21 +164,24 @@ namespace Xv2CoreLib.EEPK
             {
                 string I_16 = container.I_16.ToString();
 
-                if (I_16 == "PBIND" || I_16 == "CBIND" || I_16 == "TBIND")
+                if (I_16 == "PBIND" || I_16 == "CBIND" || I_16 == "TBIND" || I_16 == "LIGHT")
                 {
                     List<string> filesList = container.FILES.ToList();
 
                     for (int i = 0; i < filesList.Count; i++)
                     {
                         string file = filesList[i];
-                        string name = Path.GetFileNameWithoutExtension(file);
-                        string ext1 = Path.GetExtension(file);
-                        string ext2 = Path.GetExtension(Path.GetFileNameWithoutExtension(file));
-                        name = name.Replace(name, newName);
+                        if (file != "NULL")
+                        {
+                            string name = Path.GetFileNameWithoutExtension(file);
+                            string ext1 = Path.GetExtension(file);
+                            string ext2 = Path.GetExtension(Path.GetFileNameWithoutExtension(file));
+                            name = name.Replace(name, newName);
 
-                        string newFileName = string.Format("{0}{1}{2}", name, ext2, ext1);
+                            string newFileName = string.Format("{0}{1}{2}", name, ext2, ext1);
 
-                        container.FILES[i] = newFileName;
+                            container.FILES[i] = newFileName;
+                        }
                     }
                 }
             }
