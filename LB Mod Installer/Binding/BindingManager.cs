@@ -499,7 +499,7 @@ namespace LB_Mod_Installer.Binding
 
                                 if (!string.IsNullOrWhiteSpace(parentCmsAlias))
                                 {
-                                    parentCmsEntry = cmsFile.AssignCMSEntryForSkill(parentCmsAlias.ToUpper(), cusFile, skillType, assignedSkillIds);
+                                    parentCmsEntry = cmsFile.AssignCMSEntryForSkill(parentCmsAlias, cusFile, skillType, assignedSkillIds);
                                 }
                                 else
                                 {
