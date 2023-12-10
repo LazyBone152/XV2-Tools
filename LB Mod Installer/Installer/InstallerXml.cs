@@ -1063,6 +1063,9 @@ namespace LB_Mod_Installer.Installer
         [YAXAttributeForClass]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = -1)]
         public string SkillID { get; set; }
+        [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = false)]
+        public bool RenameEEPKContainers { get; set; }
 
 
         public FileType GetFileType()

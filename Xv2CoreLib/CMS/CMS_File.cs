@@ -157,6 +157,16 @@ namespace Xv2CoreLib.CMS
             return dummyCmsEntry;
         }
 
+        public CMS_Entry AssignCMSEntryForSkill(string charaCode, CUS.CUS_File cusFile, CUS.CUS_File.SkillType skillType, List<int> assignedIds = null)
+        {
+            CMS_Entry cmsEntry = GetEntryByCharaCode(charaCode.ToUpper());
+
+            if (!cusFile.IsSkillIdRangeUsed(cmsEntry, skillType, assignedIds))
+                return cmsEntry;
+
+            return null;
+        }
+
         public string GetSkillOwner(int skillId2)
         {
             int cmsId = skillId2 / 10;

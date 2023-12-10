@@ -55,6 +55,7 @@ using Xv2CoreLib.QSL;
 using Xv2CoreLib.QED;
 using Xv2CoreLib.TNN;
 using Xv2CoreLib.ODF;
+using Xv2CoreLib.EEPK;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -628,6 +629,12 @@ namespace LB_Mod_Installer.Installer
                             BDM_File bdmFile = BDM_File.Load(zipManager.GetFileFromArchive(file.FullName));
                             bdmFile.ChangeNeutralSkillId((ushort)id2);
                             fileManager.AddParsedFile(newFilePath, bdmFile);
+                        }
+                        else if (ext == ".eepk" && fileInstance.RenameEEPKContainers)
+                        {
+                            EEPK_File eepkFile = EEPK_File.LoadEepk(zipManager.GetFileFromArchive(file.FullName));
+                            eepkFile.RenameContainersToSkillFolder(folderName);
+                            fileManager.AddParsedFile(newFilePath, eepkFile);
                         }
                         else
                         {
@@ -2557,6 +2564,8 @@ namespace LB_Mod_Installer.Installer
                     return ((TNN_File)data).Write();
                 case ".odf":
                     return ((ODF_File)data).Write();
+                case ".eepk":
+                    return ((EEPK_File)data).SaveToBytes();
                 default:
                     throw new InvalidDataException(String.Format("GetBytesFromParsedFile: The filetype of \"{0}\" is not supported.", path));
             }
