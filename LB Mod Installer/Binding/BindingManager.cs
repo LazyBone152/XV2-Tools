@@ -494,29 +494,41 @@ namespace LB_Mod_Installer.Binding
 
                                 CMS_File cmsFile = (CMS_File)install.GetParsedFile<CMS_File>(CMS_PATH);
                                 CUS_File cusFile = (CUS_File)install.GetParsedFile<CUS_File>(CUS_PATH);
-                                CMS_Entry parentCmsEntry = cmsFile.AssignDummyEntryForSkill(cusFile, skillType, assignedSkillIds);
-                                
-                                if(parentCmsEntry == null)
+
+                                CMS_Entry parentCmsEntry;
+
+                                if (!string.IsNullOrWhiteSpace(parentCmsAlias))
+                                {
+                                    parentCmsEntry = cmsFile.AssignCMSEntryForSkill(parentCmsAlias, cusFile, skillType, assignedSkillIds);
+                                }
+                                else
+                                {
+                                    parentCmsEntry = cmsFile.AssignDummyEntryForSkill(cusFile, skillType, assignedSkillIds);
+                                }
+
+                                if (parentCmsEntry == null)
                                 {
                                     retID = NullTokenInt;
                                     break;
                                 }
-
-                                int skillId2 = cusFile.AssignNewSkillId(parentCmsEntry, skillType, assignedSkillIds);
-
-                                if(skillId2 == -1)
+                                else
                                 {
-                                    retID = NullTokenInt;
-                                    break;
+                                    int skillId2 = cusFile.AssignNewSkillId(parentCmsEntry, skillType, assignedSkillIds);
+
+                                    if (skillId2 == -1)
+                                    {
+                                        retID = NullTokenInt;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        retID = CUS_File.ConvertToID1(skillId2, skillType);
+                                        AddAlias(skillId2.ToString(), id2Alias);
+
+                                        assignedSkillIds.Add(skillId2);
+                                    }
                                 }
 
-                                retID = CUS_File.ConvertToID1(skillId2, skillType);
-                                AddAlias(skillId2.ToString(), id2Alias);
-
-                                if(!string.IsNullOrWhiteSpace(parentCmsAlias))
-                                    AddAlias(parentCmsEntry.ShortName, parentCmsAlias);
-
-                                assignedSkillIds.Add(skillId2);
                             }
                             break;
                         case Function.Addition:
