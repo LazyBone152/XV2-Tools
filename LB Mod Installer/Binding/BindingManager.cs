@@ -488,7 +488,7 @@ namespace LB_Mod_Installer.Binding
                             {
                                 CUS_File.SkillType skillType = GetSkillType(b.GetArgument1());
                                 string id2Alias = b.GetArgument2();
-                                string parentCmsAlias = b.HasArgument(3) ? b.GetArgument3() : null;
+                                string userSpecifiedParentCms = b.HasArgument(3) ? b.GetArgument3() : null;
 
                                 List<int> assignedSkillIds = GetAssignedSkillList(skillType);
 
@@ -497,40 +497,40 @@ namespace LB_Mod_Installer.Binding
 
                                 CMS_Entry parentCmsEntry;
 
-                                if (!string.IsNullOrWhiteSpace(parentCmsAlias))
+                                if (!string.IsNullOrWhiteSpace(userSpecifiedParentCms))
                                 {
-                                    parentCmsEntry = cmsFile.AssignCMSEntryForSkill(parentCmsAlias, cusFile, skillType, assignedSkillIds);
+                                    parentCmsEntry = cmsFile.AssignCMSEntryForSkill(userSpecifiedParentCms, cusFile, skillType, assignedSkillIds);
+
+                                    if (parentCmsEntry == null && errorHandler == ErrorHandling.Stop)
+                                        throw new ArgumentException($"AutoSkillID: Could not assign a {skillType} ID on the specified CMS entry ({userSpecifiedParentCms.ToUpper()}).\n\n" +
+                                            $"The 2 likely reasons for this are:" +
+                                            $"\n1. There are already 10 skills of this type assigned to this CMS entry (10 is the max)." +
+                                            $"\n2. The CMS entry does not exist.");
                                 }
                                 else
                                 {
                                     parentCmsEntry = cmsFile.AssignDummyEntryForSkill(cusFile, skillType, assignedSkillIds);
                                 }
 
-                                if (parentCmsEntry == null)
-                                {
-                                    retID = NullTokenInt;
-                                    break;
-                                }
-                                else
+                                if(parentCmsEntry != null)
                                 {
                                     int skillId2 = cusFile.AssignNewSkillId(parentCmsEntry, skillType, assignedSkillIds);
 
-                                    if (skillId2 == -1)
+                                    if(skillId2 != -1)
                                     {
-                                        retID = NullTokenInt;
-                                        break;
-                                    }
-                                    else
-                                    {
+                                        //Skill ID has been assigned
                                         retID = CUS_File.ConvertToID1(skillId2, skillType);
                                         AddAlias(skillId2.ToString(), id2Alias);
 
                                         assignedSkillIds.Add(skillId2);
+                                        break;
                                     }
                                 }
 
+                                //No ID could be assigned
+                                retID = NullTokenInt;
+                                break;
                             }
-                            break;
                         case Function.Addition:
                             int increment;
                             if (!int.TryParse(b.GetArgument1(), out increment))
