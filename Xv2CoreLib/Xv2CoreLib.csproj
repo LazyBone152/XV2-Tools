@@ -260,6 +260,7 @@
     <Compile Include="IDB\Parser.cs" />
     <Compile Include="Iggy\IggyFile.cs" />
     <Compile Include="Interfaces\Interfaces.cs" />
+    <Compile Include="ITimeLineItem.cs" />
     <Compile Include="LCP\LCP_File.cs" />
     <Compile Include="MSG\Deserializer.cs" />
     <Compile Include="MSG\MSG_File.cs" />

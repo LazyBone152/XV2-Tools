@@ -68,6 +68,11 @@ namespace Xv2CoreLib.Resource
             return -x;
         }
 
+        public static bool FloatEquals(double value1, double value2)
+        {
+            return Math.Abs(value1 - value2) < Epsilon;
+        }
+
         public static bool FloatEquals(float value1, float value2)
         {
             return Math.Abs(value1 - value2) < Epsilon;

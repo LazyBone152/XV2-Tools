@@ -415,6 +415,7 @@
     <Compile Include="Converters\FloatConverter.cs" />
     <Compile Include="Converters\InverseVisibilityToNullableBoolean.cs" />
     <Compile Include="Converters\NullToFalseConverter.cs" />
+    <Compile Include="Converters\UInt16ToDoubleConverter.cs" />
     <Compile Include="Converters\VisibilityToNullableBoolean.cs" />
     <Compile Include="Numbers\CustomColor.cs" />
     <Compile Include="Numbers\CustomMatRepUV.cs" />

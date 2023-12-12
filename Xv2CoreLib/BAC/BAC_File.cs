@@ -7,6 +7,9 @@ using System.Linq;
 using System.Text;
 using YAXLib;
 using Xv2CoreLib.Resource;
+using static Xv2CoreLib.BAC.BAC_Entry;
+using System.Windows.Media;
+using Xv2CoreLib.Resource.App;
 
 #if UndoRedo
 using Xv2CoreLib.Resource.UndoRedo;
@@ -14,7 +17,7 @@ using Xv2CoreLib.Resource.UndoRedo;
 
 namespace Xv2CoreLib.BAC
 {
-    public interface IBacType
+    public interface IBacType : ITimeLineItem
     {
         int TypeID { get; }
 
@@ -436,6 +439,7 @@ namespace Xv2CoreLib.BAC
             }
         }
 
+        private const int BAC_TYPE_COUNT = 31;
 
         [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Animation")]
@@ -538,13 +542,6 @@ namespace Xv2CoreLib.BAC
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BacType30")]
         public List<BAC_Type30> Type30 { get; set; }
 
-        //[YAXDontSerializeIfNull]
-        //[YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BAC_Type29")]
-        //public List<BAC_Type29> Type29 { get; set; }
-        //[YAXDontSerializeIfNull]
-        //[YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BAC_Type31")]
-        //public List<BAC_Type31> Type31 { get; set; }
-
         [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
         [YAXSerializeAs("Types")]
@@ -553,6 +550,175 @@ namespace Xv2CoreLib.BAC
 
         [YAXDontSerialize]
         public AsyncObservableCollection<IBacType> IBacTypes { get; set; } = new AsyncObservableCollection<IBacType>();
+
+        #region TimeLine
+        public void SortTimeLineLayers()
+        {
+            for(int i = 0; i < BAC_TYPE_COUNT; i++) 
+            {
+                SortTimeLineLayers(i);
+            }
+        }
+
+        public void SortTimeLineLayer(IBacType entry)
+        {
+            entry.Layer = 0;
+
+            while (IsTimingCollision(entry, IBacTypes))
+            {
+                entry.Layer++;
+            }
+        }
+
+        private void SortTimeLineLayers(int type)
+        {
+            if(type == 0)
+            {
+                int lastLayer = 0;
+
+                //Full Body Animations
+                foreach (IBacType bacType in IBacTypes.Where(x => x.TypeID == type && x.Layer == -1))
+                {
+                    if(bacType is BAC_Type0 anim)
+                    {
+                        if (BAC_Type0.IsFullBodyAnimation(anim.EanType))
+                        {
+                            bacType.Layer = 0;
+
+                            while (IsTimingCollision(bacType, IBacTypes))
+                            {
+                                bacType.Layer++;
+
+                                if (bacType.Layer > lastLayer)
+                                    lastLayer = bacType.Layer;
+                            }
+                        }
+                    }
+                }
+
+                //Face Animations
+                int faceStart = ++lastLayer;
+
+                foreach (IBacType bacType in IBacTypes.Where(x => x.TypeID == type && x.Layer == -1))
+                {
+                    if (bacType is BAC_Type0 anim)
+                    {
+                        if (BAC_Type0.IsFaceAnimation(anim.EanType))
+                        {
+                            bacType.Layer = faceStart;
+
+                            while (IsTimingCollision(bacType, IBacTypes))
+                            {
+                                bacType.Layer++;
+
+                                if (bacType.Layer > lastLayer)
+                                    lastLayer = bacType.Layer;
+                            }
+                        }
+                    }
+                }
+
+                //Everything else
+                lastLayer++;
+                foreach (IBacType bacType in IBacTypes.Where(x => x.TypeID == type && x.Layer == -1))
+                {
+                    if (bacType is BAC_TypeBase typeBase)
+                    {
+                        bacType.Layer = lastLayer;
+
+                        while (IsTimingCollision(bacType, IBacTypes))
+                        {
+                            bacType.Layer++;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                //We will add types to layers in batches based on the flags value. This is so that entries marked as "CAC" or "Roster" will tend to have their own layers, assuming there are a lot of entries.
+                //In the event where they can all fit on one layer, they will all be placed there.
+                int lastLayer = 0;
+
+                foreach (IBacType bacType in IBacTypes.Where(x => x.TypeID == type && x.Layer == -1 && x.Flags == 0))
+                {
+                    bacType.Layer = 0;
+
+                    while (IsTimingCollision(bacType, IBacTypes))
+                    {
+                        bacType.Layer++;
+
+                        if (bacType.Layer > lastLayer)
+                            lastLayer = bacType.Layer;
+                    }
+                }
+
+                //Now we place FLAGS 1 and 2 entries
+                foreach (IBacType bacType in IBacTypes.Where(x => x.TypeID == type && x.Layer == -1 && x.Flags == 1))
+                {
+                    bacType.Layer = lastLayer;
+
+                    while (IsTimingCollision(bacType, IBacTypes))
+                    {
+                        bacType.Layer++;
+                    }
+                }
+
+                foreach (IBacType bacType in IBacTypes.Where(x => x.TypeID == type && x.Layer == -1 && x.Flags == 2))
+                {
+                    bacType.Layer = lastLayer;
+
+                    while (IsTimingCollision(bacType, IBacTypes))
+                    {
+                        bacType.Layer++;
+                    }
+                }
+            }
+        }
+
+        public bool DoesLayerExist(int layer, int layerGroup)
+        {
+            foreach(var type in IBacTypes.Where(x => x.LayerGroup == layerGroup))
+            {
+                if (type.Layer == layer) return true;
+            }
+
+            return false;
+        }
+
+        private static bool IsTimingCollision(IBacType item, IList<IBacType> items)
+        {
+            foreach (ITimeLineItem current in items.Where(x => x.Layer == item.Layer && x.LayerGroup == item.LayerGroup && x != item))
+            {
+                int currentEndTime = current.TimeLine_StartTime + current.TimeLine_Duration;
+                int endTime = item.TimeLine_StartTime + item.TimeLine_Duration;
+
+                //StartTime is within another entry
+                if (item.TimeLine_StartTime >= current.TimeLine_StartTime && item.TimeLine_StartTime < currentEndTime)
+                    return true;
+
+                //StartTime is before another entry, but it ends within another
+                if (item.TimeLine_StartTime < current.TimeLine_StartTime && endTime >= current.TimeLine_StartTime)
+                    return true;
+            }
+
+            return false;
+        }
+        
+        public int GetTimeLineLength()
+        {
+            int endFrame = 0;
+
+            foreach(IBacType type in IBacTypes)
+            {
+                if(type.StartTime + type.Duration > endFrame)
+                {
+                    endFrame = type.StartTime + type.Duration;
+                }
+            }
+
+            return endFrame;
+        }
+        #endregion
 
         #region IBacTypeMethods
         public void InitializeIBacTypes()
@@ -1122,22 +1288,183 @@ namespace Xv2CoreLib.BAC
     }
 
     [Serializable]
-    public class BAC_TypeBase : IBacType, INotifyPropertyChanged
+    public class BAC_TypeBase : IBacType
     {
         #region NotifyPropertyChanged
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
 
-        internal void NotifyPropertyChanged(String propertyName = "")
+        internal void NotifyPropertyChanged(string propertyName = "")
         {
-            if (PropertyChanged != null)
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        #endregion
+
+        #region TimeLineItem
+        private bool _isSelected = false;
+        [YAXDontSerialize]
+        public bool TimeLine_IsSelected
+        {
+            get => _isSelected;
+            set
             {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+                if(_isSelected != value)
+                {
+                    _isSelected = value;
+                    NotifyPropertyChanged(nameof(TimeLine_IsSelected));
+                    NotifyPropertyChanged(nameof(TimeLineMainBrush));
+                    NotifyPropertyChanged(nameof(TimeLineTextBrush));
+                }
             }
         }
 
+        [YAXDontSerialize]
+        public int TimeLine_StartTime
+        {
+            get => _startTime;
+            set => _startTime = (ushort)value;
+        }
+        [YAXDontSerialize]
+        public int TimeLine_Duration
+        {
+            get => _duration;
+            set => _duration = (ushort)value;
+        }
+        [YAXDontSerialize]
+        public int Layer { get; set; } = -1;
+        [YAXDontSerialize]
+        public int LayerGroup => TypeID;
+
+        [YAXDontSerialize]
+        public string DisplayName => $"{Type}";
+
+        [YAXDontSerialize]
+        public Brush TimeLineMainBrush => GetMainBrush();
+        [YAXDontSerialize]
+        public Brush TimeLineTextBrush => GetTextBrush();
+        [YAXDontSerialize]
+        public Brush TimeLineBorderBrush => GetBorderBrush();
+
+        private Brush GetMainBrush()
+        {
+            if (_isSelected && SettingsManager.settings.UseDarkTheme) return Brushes.White;
+            if (_isSelected && SettingsManager.settings.UseLightTheme) return Brushes.Black;
+
+            switch (TypeID)
+            {
+                case 2: //Animation and Movement Group
+                case 14:
+                case 18:
+                case 20:
+                case 21:
+                    return Brushes.Blue;
+                case 0: //Animation. Brush will change slightly based on type of animation.
+                    //BAC_Type0.EanTypeEnum ean = (BAC_Type0.EanTypeEnum)GetValue(0);
+
+                    //if (BAC_Type0.IsFullBodyAnimation(ean))
+                    //    return Brushes.Aqua;
+
+                    //if (BAC_Type0.IsFaceAnimation(ean))
+                    //    return Brushes.Blue;
+
+                    return Brushes.Blue;
+                case 8: //Effect Group
+                case 16:
+                case 19:
+                case 23:
+                case 27:
+                    return Brushes.Green;
+                case 1: //Attack Group
+                case 9:
+                    return Brushes.Red;
+                case 6: //Flow Control Group
+                case 7:
+                case 17:
+                case 24:
+                case 25:
+                    return Brushes.Yellow;
+                case 10:
+                case 26:
+                    return Brushes.MediumPurple;
+                case 11: //Sound
+                    return Brushes.HotPink;
+                case 3:
+                case 4:
+                case 5:
+                case 12:
+                case 13:
+                    return Brushes.DarkGray;
+                case 15: //Functions. This is dependent on the actual selected function.
+                    int function = GetValue(0);
+
+                    //Flow Control functions
+                    if (function == 0 || function == 0x22 || function == 0x10 || function == 0x1d || function == 0x25 || function == 0x26 || function == 0x3d)
+                        goto case 7;
+
+                    //Attack functions
+                    if (function == 0x2)
+                        goto case 1;
+
+                    goto case 3;
+                default:
+                    return Brushes.LightGray;
+            }
+        }
+        
+        private Brush GetTextBrush()
+        {
+            if (_isSelected && SettingsManager.settings.UseDarkTheme) return Brushes.Black;
+            if (_isSelected && SettingsManager.settings.UseLightTheme) return Brushes.White;
+
+            switch (TypeID)
+            {
+                case 6: //Flow Control Group
+                case 7:
+                case 17:
+                case 24:
+                case 25:
+                    return Brushes.Black;
+                case 15:
+                    int function = GetValue(0);
+
+                    //Flow Control functions
+                    if (function == 0 || function == 0x22 || function == 0x10 || function == 0x1d || function == 0x25 || function == 0x26 || function == 0x3d)
+                        goto case 7;
+
+                    goto default;
+                default:
+                    return Brushes.White;
+            }
+        }
+        
+        private Brush GetBorderBrush()
+        {
+            switch (Flags)
+            {
+                case 1: //CAC
+                    return Brushes.Purple;
+                case 2: //Roster
+                    return Brushes.White;
+                default: //Both CAC and Roster, and whatever 5 is
+                    return Brushes.Black;
+            }
+        }
+
+        public void UpdateSourceValues(ushort newStartTime, ushort newDuration, List<IUndoRedo> undos = null)
+        {
+            if (undos != null)
+            {
+                undos.Add(new UndoablePropertyGeneric(nameof(StartTime), this, StartTime, newStartTime));
+                undos.Add(new UndoablePropertyGeneric(nameof(Duration), this, Duration, newDuration));
+            }
+
+            StartTime = newStartTime;
+            Duration = newDuration;
+        }
         #endregion
 
+        [YAXDontSerialize]
+        public virtual string Type => "";
         [YAXDontSerialize]
         public virtual int TypeID => -1;
 
@@ -1160,7 +1487,7 @@ namespace Xv2CoreLib.BAC
                 if (_startTime != value)
                 {
                     _startTime = value;
-                    NotifyPropertyChanged("StartTime");
+                    NotifyPropertyChanged(nameof(StartTime));
                 }
             }
         }
@@ -1177,7 +1504,7 @@ namespace Xv2CoreLib.BAC
                 if (_duration != value)
                 {
                     _duration = value;
-                    NotifyPropertyChanged("Duration");
+                    NotifyPropertyChanged(nameof(Duration));
                 }
             }
         }
@@ -1204,7 +1531,13 @@ namespace Xv2CoreLib.BAC
 
         public void RefreshType()
         {
-            NotifyPropertyChanged("Type");
+            NotifyPropertyChanged(nameof(Type));
+            NotifyPropertyChanged(nameof(DisplayName));
+        }
+        
+        public virtual int GetValue(int i)
+        {
+            return 0;
         }
     }
 
@@ -1213,7 +1546,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type0 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type => $"Animation ({EanType}, {EanIndex})";
+        public override string Type => $"Animation ({EanType}, {EanIndex})";
         [YAXDontSerialize]
         public override int TypeID => 0;
 
@@ -1395,6 +1728,21 @@ namespace Xv2CoreLib.BAC
 
         }
 
+        public override int GetValue(int i)
+        {
+            return (int)EanType;
+        }
+
+        public static bool IsFullBodyAnimation(EanTypeEnum ean)
+        {
+            return ean == EanTypeEnum.Common || ean == EanTypeEnum.Character || ean == EanTypeEnum.Skill || ean == EanTypeEnum.MCM_DBA;
+        }
+
+        public static bool IsFaceAnimation(EanTypeEnum ean)
+        {
+            return ean == EanTypeEnum.FaceForehead || ean == EanTypeEnum.FaceBase;
+        }
+
         //XenoKit
         public static int CalculateNumOfBlendingFrames(IList<IBacType> types, int frame)
         {
@@ -1434,7 +1782,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type1 : BAC_TypeBase, IBacBone, IBacTypeMatrix
     {
         [YAXDontSerialize]
-        public string Type => $"Hitbox ({bdmFile})";
+        public override string Type => $"Hitbox ({bdmFile})";
         [YAXDontSerialize]
         public override int TypeID => 1;
 
@@ -1815,7 +2163,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type2 : BAC_TypeBase, IBacTypeMatrix
     {
         [YAXDontSerialize]
-        public string Type => $"Movement";
+        public override string Type => $"Movement";
         [YAXDontSerialize]
         public override int TypeID => 2;
 
@@ -1937,7 +2285,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type3 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type => $"Invulnerability";
+        public override string Type => $"Invulnerability";
         [YAXDontSerialize]
         public override int TypeID => 3;
 
@@ -1994,7 +2342,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type4 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type => $"TimeScale ({TimeScale})";
+        public override string Type => $"TimeScale ({TimeScale})";
         [YAXDontSerialize]
         public override int TypeID => 4;
 
@@ -2048,7 +2396,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type5 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type => "Tracking";
+        public override string Type => "Tracking";
         [YAXDontSerialize]
         public override int TypeID => 5;
 
@@ -2132,7 +2480,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type6 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type => "ChargeControl";
+        public override string Type => "ChargeControl";
         [YAXDontSerialize]
         public override int TypeID => 6;
 
@@ -2195,7 +2543,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type7 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type => "BcmCallback";
+        public override string Type => "BcmCallback";
         [YAXDontSerialize]
         public override int TypeID => 7;
 
@@ -2274,7 +2622,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type8 : BAC_TypeBase, IBacTypeMatrix, IBacBone
     {
         [YAXDontSerialize]
-        public string Type => CalculateTypeString();
+        public override string Type => CalculateTypeString();
         [YAXDontSerialize]
         public override int TypeID => 8;
 
@@ -2457,7 +2805,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type9 : BAC_TypeBase, IBacTypeMatrix, IBacBone
     {
         [YAXDontSerialize]
-        public string Type => $"Projectile ({BsaType})";
+        public override string Type => $"Projectile ({BsaType})";
         [YAXDontSerialize]
         public override int TypeID => 9;
 
@@ -2694,7 +3042,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type10 : BAC_TypeBase, IBacBone
     {
         [YAXDontSerialize]
-        public string Type => $"Camera ({EanType}, {EanIndex})";
+        public override string Type => $"Camera ({EanType}, {EanIndex})";
         [YAXDontSerialize]
         public override int TypeID => 10;
 
@@ -2942,7 +3290,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type11 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type => $"Sound ({AcbType}, {CueId})";
+        public override string Type => $"Sound ({AcbType}, {CueId})";
         [YAXDontSerialize]
         public override int TypeID => 11;
 
@@ -3014,7 +3362,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type12 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type => $"TargetingAssistance ({Axis})";
+        public override string Type => $"TargetingAssistance ({Axis})";
         [YAXDontSerialize]
         public override int TypeID => 12;
 
@@ -3070,7 +3418,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type13 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type => $"BcsPartSetInvisibility ({Part}, {Visibility})";
+        public override string Type => $"BcsPartSetInvisibility ({Part}, {Visibility})";
         [YAXDontSerialize]
         public override int TypeID => 13;
 
@@ -3127,7 +3475,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type14 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type => "BoneModification";
+        public override string Type => "BoneModification";
         [YAXDontSerialize]
         public override int TypeID => 14;
 
@@ -3205,7 +3553,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type15 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type
+        public override string Type
         {
             get
             {
@@ -3243,7 +3591,6 @@ namespace Xv2CoreLib.BAC
         [YAXSerializeAs("Param5")]
         [YAXFormat("0.0########")]
         public float Param5 { get; set; }
-
 
         public static List<BAC_Type15> Read(byte[] rawBytes, int offset, int count)
         {
@@ -3291,6 +3638,11 @@ namespace Xv2CoreLib.BAC
 
             return bytes;
         }
+
+        public override int GetValue(int i)
+        {
+            return FunctionType;
+        }
     }
 
     [YAXSerializeAs("ScreenEffect")]
@@ -3298,7 +3650,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type16 : BAC_TypeBase, IBacBone, IBacTypeMatrix
     {
         [YAXDontSerialize]
-        public string Type
+        public override string Type
         {
             get
             {
@@ -3429,7 +3781,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type17 : BAC_TypeBase, IBacBone
     {
         [YAXDontSerialize]
-        public string Type => "ThrowHandler";
+        public override string Type => "ThrowHandler";
         [YAXDontSerialize]
         public override int TypeID => 17;
 
@@ -3570,7 +3922,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type18 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type => $"PhysicsPartControl ({Function})";
+        public override string Type => $"PhysicsPartControl ({Function})";
         [YAXDontSerialize]
         public override int TypeID => 18;
 
@@ -3666,7 +4018,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type19 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type => $"Aura ({AuraType})";
+        public override string Type => $"Aura ({AuraType})";
         [YAXDontSerialize]
         public override int TypeID => 19;
 
@@ -3750,7 +4102,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type20 : BAC_TypeBase, IBacBone
     {
         [YAXDontSerialize]
-        public string Type => $"HomingMovement ({HomingMovementType})";
+        public override string Type => $"HomingMovement ({HomingMovementType})";
         [YAXDontSerialize]
         public override int TypeID => 20;
 
@@ -3908,7 +4260,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type21 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type => $"EyeMovement ({EyeDirectionNext})";
+        public override string Type => $"EyeMovement ({EyeDirectionNext})";
         [YAXDontSerialize]
         public override int TypeID => 21;
 
@@ -4009,7 +4361,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type22 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type => "BAC_Type22";
+        public override string Type => "BAC_Type22";
         [YAXDontSerialize]
         public override int TypeID => 22;
 
@@ -4085,7 +4437,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type23 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type => "TransparencyEffect";
+        public override string Type => "TransparencyEffect";
         [YAXDontSerialize]
         public override int TypeID => 23;
 
@@ -4252,7 +4604,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type24 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type => "DualSkillHandler";
+        public override string Type => "DualSkillHandler";
         [YAXDontSerialize]
         public override int TypeID => 24;
 
@@ -4412,7 +4764,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type25 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type => "Extended Charge";
+        public override string Type => "Extended Charge";
         [YAXDontSerialize]
         public override int TypeID => 25;
 
@@ -4469,7 +4821,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type26 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type => "Extended Camera";
+        public override string Type => "Extended Camera";
         [YAXDontSerialize]
         public override int TypeID => 26;
 
@@ -4624,7 +4976,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type27 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type => $"EffectPropertyControl ({SkillType})";
+        public override string Type => $"EffectPropertyControl ({SkillType})";
         [YAXDontSerialize]
         public override int TypeID => 27;
 
@@ -4717,7 +5069,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type28 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type => $"BacType28 ({I_08})";
+        public override string Type => $"BacType28 ({I_08})";
         [YAXDontSerialize]
         public override int TypeID => 28;
 
@@ -4810,7 +5162,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type29 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type => $"BAC_Type29";
+        public override string Type => $"BAC_Type29";
         [YAXDontSerialize]
         public override int TypeID => 29;
 
@@ -4941,7 +5293,7 @@ namespace Xv2CoreLib.BAC
     public class BAC_Type30 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public string Type => $"BAC_Type30";
+        public override string Type => $"BAC_Type30";
         [YAXDontSerialize]
         public override int TypeID => 30;
 
