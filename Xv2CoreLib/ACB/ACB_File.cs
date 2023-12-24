@@ -1377,7 +1377,7 @@ namespace Xv2CoreLib.ACB
             {
                 var newStringValues = ACB_StringValue.DefaultStringTable();
                 undos.Add(new UndoableProperty<ACB_File>(nameof(StringValues), this, StringValues, newStringValues));
-                StringValues = ACB_StringValue.DefaultStringTable();
+                StringValues = newStringValues;
             }
 
             //Add the command
@@ -1998,6 +1998,8 @@ namespace Xv2CoreLib.ACB
             return undos;
         }
 
+        /* 
+         *OLD, crash prone copy method for StringValue. At least for Xenoverse 2, only copying a single string reference causes the game to randomly crash sometimes when the cue is called.
         private List<IUndoRedo> CopyStringValue(AcbTableReference tableRef, ACB_File copyAcb)
         {
             List<IUndoRedo> undos = new List<IUndoRedo>();
@@ -2023,6 +2025,62 @@ namespace Xv2CoreLib.ACB
 
             return undos;
         }
+        */
+
+        private List<IUndoRedo> CopyStringValue(AcbTableReference tableRef, ACB_File copyAcb)
+        {
+            //I've redone this method to copy ALL the string values when copying, instead of just the one referenced. Seems to fix a random crashing issue.
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            //Check if String Values are the same on both ACBs
+            bool sameStringValues = StringValues.Count == copyAcb.StringValues.Count && StringValues.Count > 0;
+
+            if (sameStringValues)
+            {
+                for(int i = 0; i < StringValues.Count; i++)
+                {
+                    if (StringValues[i].StringValue != copyAcb.StringValues[i].StringValue)
+                    {
+                        sameStringValues = false;
+                        break;
+                    }
+                }
+            }
+
+            //Copy over ALL StringValues if there is a mismatch
+            if (!sameStringValues)
+            {
+                for(int i = StringValues.Count; i < copyAcb.StringValues.Count; i++)
+                {
+                    StringValues.Add(copyAcb.StringValues[i]);
+                    undos.Add(new UndoableListAdd<ACB_StringValue>(StringValues, copyAcb.StringValues[i]));
+                }
+            }
+
+            //Adjust the GUID reference
+            ACB_StringValue strValue = copyAcb.GetStringValue(tableRef.TableGuid);
+
+            if (strValue != null)
+            {
+                ACB_StringValue strValueInThisAcb = GetStringValue(strValue.StringValue);
+
+                if (strValueInThisAcb != null)
+                {
+                    //Set the GUID
+                    tableRef.TableGuid = strValueInThisAcb.InstanceGuid;
+                }
+                else
+                {
+                    //FALLBACK path. This will only be triggered if there is a mismatch between the StringValues in this and the copy ACB.
+                    //In this case the StringValue was never copied over in the above code, so we have to add it now.
+                    StringValues.Add(strValue);
+                    undos.Add(new UndoableListAdd<ACB_StringValue>(StringValues, strValue));
+                }
+            }
+
+            return undos;
+        }
+
 
         #endregion
 
