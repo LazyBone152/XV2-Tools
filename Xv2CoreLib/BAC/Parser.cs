@@ -105,8 +105,6 @@ namespace Xv2CoreLib.BAC
 
         private void ParseBac()
         {
-
-            
             int offset = BitConverter.ToInt32(rawBytes, 16);
             int count = BitConverter.ToInt32(rawBytes, 8);
 
@@ -125,144 +123,157 @@ namespace Xv2CoreLib.BAC
                 int typeListOffset = BitConverter.ToInt32(rawBytes, offset + 8);
                 int typeListCount = BitConverter.ToInt16(rawBytes, offset + 4);
 
-                bacFile.BacEntries.Add(new BAC_Entry()
+                var flags = (BAC_Entry.Flags)BitConverter.ToUInt32(rawBytes, offset + 0);
+
+                //Skip loading entries with the "Empty" (0x80000000) flag. These are ALWAYS empty.
+                if (!flags.HasFlag(BAC_Entry.Flags.Empty))
                 {
-                    Flag = (BAC_Entry.Flags)BitConverter.ToUInt32(rawBytes, offset + 0),
-                    Index = i.ToString()
-                });
+                    int bacIdx = bacFile.BacEntries.Count;
 
-                for (int a = 0; a < typeListCount; a++)
-                {
-                    int thisType = BitConverter.ToInt16(rawBytes, typeListOffset + 0);
-                    int thisTypeCount = BitConverter.ToInt16(rawBytes, typeListOffset + 2);
-                    int thisTypeOffset = BitConverter.ToInt32(rawBytes, typeListOffset + 8);
+                    bacFile.BacEntries.Add(new BAC_Entry()
+                    {
+                        Flag = flags,
+                        Index = i.ToString()
+                    });
 
-                    if (hasUnknownType)
+
+                    for (int a = 0; a < typeListCount; a++)
                     {
-                        throw new InvalidDataException($"{errorMessage}\nNext Offset = {thisTypeOffset - unknownTypeOffset}");
-                    }
-                    
-                    if(thisTypeOffset != 0)
-                    {
-                        switch (thisType)
+                        int thisType = BitConverter.ToInt16(rawBytes, typeListOffset + 0);
+                        int thisTypeCount = BitConverter.ToInt16(rawBytes, typeListOffset + 2);
+                        int thisTypeOffset = BitConverter.ToInt32(rawBytes, typeListOffset + 8);
+
+                        if (hasUnknownType)
                         {
-                            case 0:
-                                bacFile.BacEntries[i].Type0 = BAC_Type0.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 1:
-                                bacFile.BacEntries[i].Type1 = BAC_Type1.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 2:
-                                bacFile.BacEntries[i].Type2 = BAC_Type2.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 3:
-                                bacFile.BacEntries[i].Type3 = BAC_Type3.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 4:
-                                bacFile.BacEntries[i].Type4 = BAC_Type4.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 5:
-                                bacFile.BacEntries[i].Type5 = BAC_Type5.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 6:
-                                bacFile.BacEntries[i].Type6 = BAC_Type6.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 7:
-                                bacFile.BacEntries[i].Type7 = BAC_Type7.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 8:
-                                bacFile.BacEntries[i].Type8 = BAC_Type8.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 9:
-                                bacFile.BacEntries[i].Type9 = BAC_Type9.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 10:
-                                bacFile.BacEntries[i].Type10 = BAC_Type10.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 11:
-                                bacFile.BacEntries[i].Type11 = BAC_Type11.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 12:
-                                bacFile.BacEntries[i].Type12 = BAC_Type12.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 13:
-                                bacFile.BacEntries[i].Type13 = BAC_Type13.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 14:
-                                bacFile.BacEntries[i].Type14 = BAC_Type14.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 15:
-                                bacFile.BacEntries[i].Type15 = BAC_Type15.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 16:
-                                bacFile.BacEntries[i].Type16 = BAC_Type16.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 17:
-                                bacFile.BacEntries[i].Type17 = BAC_Type17.Read(rawBytes, thisTypeOffset, thisTypeCount, IsType17Small(thisTypeOffset, thisTypeCount, i));
-                                break;
-                            case 18:
-                                bacFile.BacEntries[i].Type18 = BAC_Type18.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 19:
-                                bacFile.BacEntries[i].Type19 = BAC_Type19.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 20:
-                                bacFile.BacEntries[i].Type20 = BAC_Type20.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 21:
-                                bacFile.BacEntries[i].Type21 = BAC_Type21.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 22:
-                                bacFile.BacEntries[i].Type22 = BAC_Type22.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 23:
-                                bacFile.BacEntries[i].Type23 = BAC_Type23.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 24:
-                                bacFile.BacEntries[i].Type24 = BAC_Type24.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 25:
-                                bacFile.BacEntries[i].Type25 = BAC_Type25.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 26:
-                                bacFile.BacEntries[i].Type26 = BAC_Type26.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 27:
-                                bacFile.BacEntries[i].Type27 = BAC_Type27.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 28:
-                                bacFile.BacEntries[i].Type28 = BAC_Type28.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 29:
-                                bacFile.BacEntries[i].Type29 = BAC_Type29.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-                            case 30:
-                                bacFile.BacEntries[i].Type30 = BAC_Type30.Read(rawBytes, thisTypeOffset, thisTypeCount);
-                                break;
-
-                            default:
-                                //Wait until we reach the next bac type before throwing, so we can calc the size
-
-                                hasUnknownType = true;
-                                errorMessage = String.Format("Parse failed. Unknown BacType encountered ({0})\nOffset: {1}\nCount: {2}", thisType, thisTypeOffset, thisTypeCount);
-                                unknownTypeOffset = thisTypeOffset;
-                                break;
-                                //throw new InvalidDataException(String.Format("Parse failed. Unknown BacType encountered ({0})\nOffset: {1}\nCount: {2}.", thisType, thisTypeOffset, thisTypeCount));
+                            throw new InvalidDataException($"{errorMessage}\nNext Offset = {thisTypeOffset - unknownTypeOffset}");
                         }
-                    } 
-                    else
-                    {
-                        if(bacFile.BacEntries[i].TypeDummy == null)
+
+                        if (thisTypeOffset != 0)
                         {
-                            bacFile.BacEntries[i].TypeDummy = new List<int>();
-                        }
-                        bacFile.BacEntries[i].TypeDummy.Add(thisType);
-                    }
-                    
+                            switch (thisType)
+                            {
+                                case 0:
+                                    bacFile.BacEntries[bacIdx].Type0 = BAC_Type0.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 1:
+                                    bacFile.BacEntries[bacIdx].Type1 = BAC_Type1.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 2:
+                                    bacFile.BacEntries[bacIdx].Type2 = BAC_Type2.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 3:
+                                    bacFile.BacEntries[bacIdx].Type3 = BAC_Type3.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 4:
+                                    bacFile.BacEntries[bacIdx].Type4 = BAC_Type4.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 5:
+                                    bacFile.BacEntries[bacIdx].Type5 = BAC_Type5.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 6:
+                                    bacFile.BacEntries[bacIdx].Type6 = BAC_Type6.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 7:
+                                    bacFile.BacEntries[bacIdx].Type7 = BAC_Type7.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 8:
+                                    bacFile.BacEntries[bacIdx].Type8 = BAC_Type8.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 9:
+                                    bacFile.BacEntries[bacIdx].Type9 = BAC_Type9.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 10:
+                                    bacFile.BacEntries[bacIdx].Type10 = BAC_Type10.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 11:
+                                    bacFile.BacEntries[bacIdx].Type11 = BAC_Type11.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 12:
+                                    bacFile.BacEntries[bacIdx].Type12 = BAC_Type12.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 13:
+                                    bacFile.BacEntries[bacIdx].Type13 = BAC_Type13.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 14:
+                                    bacFile.BacEntries[bacIdx].Type14 = BAC_Type14.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 15:
+                                    bacFile.BacEntries[bacIdx].Type15 = BAC_Type15.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 16:
+                                    bacFile.BacEntries[bacIdx].Type16 = BAC_Type16.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 17:
+                                    bacFile.BacEntries[bacIdx].Type17 = BAC_Type17.Read(rawBytes, thisTypeOffset, thisTypeCount, IsType17Small(thisTypeOffset, thisTypeCount, i));
+                                    break;
+                                case 18:
+                                    bacFile.BacEntries[bacIdx].Type18 = BAC_Type18.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 19:
+                                    bacFile.BacEntries[bacIdx].Type19 = BAC_Type19.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 20:
+                                    bacFile.BacEntries[bacIdx].Type20 = BAC_Type20.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 21:
+                                    bacFile.BacEntries[bacIdx].Type21 = BAC_Type21.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 22:
+                                    bacFile.BacEntries[bacIdx].Type22 = BAC_Type22.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 23:
+                                    bacFile.BacEntries[bacIdx].Type23 = BAC_Type23.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 24:
+                                    bacFile.BacEntries[bacIdx].Type24 = BAC_Type24.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 25:
+                                    bacFile.BacEntries[bacIdx].Type25 = BAC_Type25.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 26:
+                                    bacFile.BacEntries[bacIdx].Type26 = BAC_Type26.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 27:
+                                    bacFile.BacEntries[bacIdx].Type27 = BAC_Type27.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 28:
+                                    bacFile.BacEntries[bacIdx].Type28 = BAC_Type28.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 29:
+                                    bacFile.BacEntries[bacIdx].Type29 = BAC_Type29.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
+                                case 30:
+                                    bacFile.BacEntries[bacIdx].Type30 = BAC_Type30.Read(rawBytes, thisTypeOffset, thisTypeCount);
+                                    break;
 
-                    typeListOffset += 16;
+                                default:
+                                    //Wait until we reach the next bac type before throwing, so we can calc the size
+
+                                    hasUnknownType = true;
+                                    errorMessage = String.Format("Parse failed. Unknown BacType encountered ({0})\nOffset: {1}\nCount: {2}", thisType, thisTypeOffset, thisTypeCount);
+                                    unknownTypeOffset = thisTypeOffset;
+                                    break;
+                                    //throw new InvalidDataException(String.Format("Parse failed. Unknown BacType encountered ({0})\nOffset: {1}\nCount: {2}.", thisType, thisTypeOffset, thisTypeCount));
+                            }
+                        }
+                        else
+                        {
+                            if (bacFile.BacEntries[bacIdx].TypeDummy == null)
+                            {
+                                bacFile.BacEntries[bacIdx].TypeDummy = new List<int>();
+                            }
+                            bacFile.BacEntries[bacIdx].TypeDummy.Add(thisType);
+                        }
+
+
+                        typeListOffset += 16;
+                    }
+
                 }
-
+                else
+                {
+                    bacFile.DefaultEmptyEndIndex = i;
+                }
 
                 offset += 16;
             }
@@ -272,8 +283,6 @@ namespace Xv2CoreLib.BAC
                 throw new InvalidDataException(errorMessage);
             }
         }
-
-        //Utility
 
         private bool IsType17Small(int offset, int count, int bacIndex)
         {

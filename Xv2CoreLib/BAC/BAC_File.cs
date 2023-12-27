@@ -26,6 +26,8 @@ namespace Xv2CoreLib.BAC
         ushort I_04 { get; set; } //4
         ushort Flags { get; set; } //6
 
+        int TimesActivated { get; set; }
+
         void RefreshType();
     }
 
@@ -33,6 +35,22 @@ namespace Xv2CoreLib.BAC
     [Serializable]
     public class BAC_File : ISorting, IIsNull
     {
+        public const int BAC_TYPE_COUNT = 31;
+
+        public static Dictionary<int, string> BacTypeNames { get; private set; } = new Dictionary<int, string>()
+        {
+            {0, "Animation" }, {1, "Hitbox"}, {2, "Movement"}, {3, "Invulnerability"}, {4, "Time Scale"}, {5, "Tracking" },
+            {6, "Charge Control" }, {7, "BCM Callback"}, {8, "Effect"}, {9, "Projectile" }, {10, "Camera" }, {11, "Sound" },
+            {12, "Targeting Assistance" }, {13, "BCS Part Visibility" }, {14, "Bone Modification" }, {15, "Functions" },
+            {16, "Post Effect" }, {17, "Throw Handler" }, {18, "Physics Object" }, {19, "Aura" }, {20, "Homing Movement" },
+            {21, "Eye Movement" }, {22, "BAC_Type22" }, {23, "Transparency Effect" }, {24, "Dual Skill Handler"}, {25, "Extended Charge Control"},
+            {26, "Extended Camera Control" }, {27, "Effect Property Control" }, {28, "BAC_Type28"}, {29, "BAC_Type29"}, {30, "BAC_Type30"}
+        };
+
+        [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0)]
+        public int DefaultEmptyEndIndex { get; set; }
+
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
         [YAXAttributeFor("I_20")]
         [YAXSerializeAs("values")]
@@ -94,28 +112,32 @@ namespace Xv2CoreLib.BAC
         /// Adds a BAC Entry and returns the assigned index.
         /// </summary>
         /// <param name="entry">The BAC Entry to add.</param>
-        /// <param name="idx">The index to add the BAC entry at. If this is -1, then one will be automatically assigned.</param>
+        /// <param name="id">The index to add the BAC entry at. If this is -1, then one will be automatically assigned.</param>
         /// <returns></returns>
-        public int AddEntry(BAC_Entry entry, int idx = -1)
+        public int AddEntry(BAC_Entry entry, int id = -1)
         {
-            if (idx <= (BacEntries.Count - 1) && idx != -1)
+            int idx = BacEntries.IndexOf(BacEntries.FirstOrDefault(x => x.SortID == id));
+
+            if (idx != -1)
             {
                 BacEntries[idx] = entry;
-                BacEntries[idx].SortID = idx;
-                return idx;
+                BacEntries[idx].SortID = id;
+                return id;
             }
 
-            idx = GetFreeId();
-            entry.SortID = idx;
+            if (id == -1)
+                id = GetFreeId();
+
+            entry.SortID = id;
             BacEntries.Add(entry);
-            return idx;
+            return id;
         }
 
         public BAC_Entry AddNewEntry()
         {
             BAC_Entry newEntry = new BAC_Entry();
-            int idx = AddEntry(newEntry);
-            return BacEntries[idx];
+            int id = AddEntry(newEntry);
+            return BacEntries.FirstOrDefault(x => x.SortID == id);
         }
 
 
@@ -185,7 +207,7 @@ namespace Xv2CoreLib.BAC
             return true;
         }
 
-        private int GetFreeId()
+        public int GetFreeId()
         {
             int id = 0;
             while (BacEntries.Any(c => c.SortID == id) && id < int.MaxValue)
@@ -421,6 +443,8 @@ namespace Xv2CoreLib.BAC
         }
 
         private Flags _flag = 0;
+
+        public bool NewEntry = false;
         #endregion
 
 
@@ -438,8 +462,6 @@ namespace Xv2CoreLib.BAC
                 NotifyPropertyChanged(nameof(FlagStr));
             }
         }
-
-        private const int BAC_TYPE_COUNT = 31;
 
         [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Animation")]
@@ -554,7 +576,7 @@ namespace Xv2CoreLib.BAC
         #region TimeLine
         public void SortTimeLineLayers()
         {
-            for(int i = 0; i < BAC_TYPE_COUNT; i++) 
+            for(int i = 0; i < BAC_File.BAC_TYPE_COUNT; i++) 
             {
                 SortTimeLineLayers(i);
             }
@@ -685,7 +707,17 @@ namespace Xv2CoreLib.BAC
             return false;
         }
 
-        private static bool IsTimingCollision(IBacType item, IList<IBacType> items)
+        public int AssignNewLayer(int layerGroup)
+        {
+            int layer = 0;
+
+            while (DoesLayerExist(layer, layerGroup))
+                layer++;
+
+            return layer;
+        }
+
+        public static bool IsTimingCollision(IBacType item, IList<IBacType> items)
         {
             foreach (ITimeLineItem current in items.Where(x => x.Layer == item.Layer && x.LayerGroup == item.LayerGroup && x != item))
             {
@@ -704,6 +736,26 @@ namespace Xv2CoreLib.BAC
             return false;
         }
         
+        public static bool IsTimingCollision(int startTime, int duration, int layer, int layerGroup, IList<IBacType> items, IBacType exclusion = null)
+        {
+            foreach (ITimeLineItem current in items.Where(x => x.Layer == layer && x.LayerGroup == layerGroup))
+            {
+                if(current == exclusion) continue;
+                int currentEndTime = current.TimeLine_StartTime + current.TimeLine_Duration;
+                int endTime = startTime + duration;
+
+                //StartTime is within another entry
+                if (startTime >= current.TimeLine_StartTime && startTime < currentEndTime)
+                    return true;
+
+                //StartTime is before another entry, but it ends within another
+                if (startTime < current.TimeLine_StartTime && endTime > current.TimeLine_StartTime)
+                    return true;
+            }
+
+            return false;
+        }
+
         public int GetTimeLineLength()
         {
             int endFrame = 0;
@@ -1062,7 +1114,7 @@ namespace Xv2CoreLib.BAC
         /// </summary>
         /// <param name="bacType"></param>
         /// <returns></returns>
-        public void UndoableAddIBacType(int bacType)
+        public IBacType UndoableAddIBacType(int bacType, int layer = -1, int startTime = 0)
         {
             IBacType iBacType;
 
@@ -1165,8 +1217,13 @@ namespace Xv2CoreLib.BAC
                     throw new InvalidOperationException($"UndoableAddIBacType: Invalid bacType {bacType}!");
             }
 
+            iBacType.StartTime = (ushort)startTime;
+            iBacType.Layer = layer;
+
             var undo = AddEntry(iBacType);
             UndoManager.Instance.AddUndo(undo);
+
+            return iBacType;
         }
 
         /// <summary>
@@ -1206,6 +1263,14 @@ namespace Xv2CoreLib.BAC
         public void RefreshIBacTypes()
         {
             NotifyPropertyChanged(nameof(IBacTypes));
+        }
+        
+        public void ResetTimesActivated()
+        {
+            foreach(var type in IBacTypes)
+            {
+                type.TimesActivated = 0;
+            }
         }
         #endregion
 
@@ -1467,6 +1532,8 @@ namespace Xv2CoreLib.BAC
         public virtual string Type => "";
         [YAXDontSerialize]
         public virtual int TypeID => -1;
+        [YAXDontSerialize]
+        public int TimesActivated { get; set; }
 
         //Values:
         private ushort _startTime = 0;
@@ -1802,6 +1869,33 @@ namespace Xv2CoreLib.BAC
             Unk4 = 4
         }
 
+        [Flags]
+        public enum HitboxFlagsEnum : ushort
+        {
+            Unk1 = 0x1,
+            Unk2 = 0x2,
+            Unk3 = 0x4,
+            Unk4 = 0x8,
+
+            //If no spawn source flag: use User
+            SpawnSource_Unk1 = 0x10,
+            SpawnSource_Unk2 = 0x20,
+            SpawnSource_User = 0x40,
+            SpawnSource_Target = 0x80,
+
+            //If no damage flag: use Health
+            DamageType_Unk1 = 0x100, //No Impact
+            DamageType_None = 0x200,
+            DamageType_Ki = 0x400,
+            DamageType_Unk4 = 0x800, //No Impact
+
+            //If no impact flag: use Continuous
+            ImpactType_Unk1 = 0x1000, //No Impact
+            ImpactType_Single = 0x2000,
+            ImpactType_Continuous = 0x4000,
+            ImpactType_Unk4 = 0x8000 //No Impact
+        }
+
 
         [YAXAttributeFor("BDM")]
         [YAXSerializeAs("File")]
@@ -1829,10 +1923,27 @@ namespace Xv2CoreLib.BAC
         [YAXAttributeFor("Flag_18")]
         [YAXSerializeAs("D")]
         public byte I_18_d { get; set; } //always 0
+        [YAXAttributeFor("HitboxFlags")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public HitboxFlagsEnum HitboxFlags { get; set; }
+
+        //HitboxFlags as a hex value. Required for reading older XML files where the value was stored this way.
         [YAXAttributeFor("Hitbox_Flags")]
         [YAXSerializeAs("value")]
-        [YAXHexValue]
-        public ushort HitboxFlags { get; set; } //uint16
+        [YAXDontSerializeIfNull]
+        public string XML_HitboxFlags
+        {
+            set
+            {
+                if(value != null)
+                {
+                    ushort val = (ushort)HexConverter.ToInt16(value);
+                    HitboxFlags = (HitboxFlagsEnum)val;
+                }
+            }
+        }
+
         [YAXAttributeFor("Damage")]
         [YAXSerializeAs("value")]
         public ushort Damage { get; set; }
@@ -2049,7 +2160,7 @@ namespace Xv2CoreLib.BAC
                     I_04 = BitConverter.ToUInt16(rawBytes, offset + 4),
                     Flags = BitConverter.ToUInt16(rawBytes, offset + 6),
                     BdmEntryID = BitConverter.ToUInt16(rawBytes, offset + 8),
-                    HitboxFlags = BitConverter.ToUInt16(rawBytes, offset + 10),
+                    HitboxFlags = (HitboxFlagsEnum)BitConverter.ToUInt16(rawBytes, offset + 10),
                     Damage = BitConverter.ToUInt16(rawBytes, offset + 12),
                     DamageWhenBlocked = BitConverter.ToUInt16(rawBytes, offset + 14),
                     StaminaTakenWhenBlocked = BitConverter.ToUInt16(rawBytes, offset + 16),
@@ -2088,7 +2199,7 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.I_04));
                 bytes.AddRange(BitConverter.GetBytes(type.Flags));
                 bytes.AddRange(BitConverter.GetBytes(type.BdmEntryID));
-                bytes.AddRange(BitConverter.GetBytes(type.HitboxFlags));
+                bytes.AddRange(BitConverter.GetBytes((ushort)type.HitboxFlags));
                 bytes.AddRange(BitConverter.GetBytes(type.Damage));
                 bytes.AddRange(BitConverter.GetBytes(type.DamageWhenBlocked));
                 bytes.AddRange(BitConverter.GetBytes(type.StaminaTakenWhenBlocked));
@@ -2110,7 +2221,6 @@ namespace Xv2CoreLib.BAC
 
             return bytes;
         }
-
 
         public static List<BAC_Type1> Clone(List<BAC_Type1> types)
         {
@@ -2156,6 +2266,24 @@ namespace Xv2CoreLib.BAC
 
         }
 
+        public HitboxFlagsEnum GetImpactType()
+        {
+            int value = ((ushort)HitboxFlags & 0xF000);
+            return value != 0 ? (HitboxFlagsEnum)value : HitboxFlagsEnum.ImpactType_Continuous;
+        }
+
+        public HitboxFlagsEnum GetSpawnSource()
+        {
+            int value = ((ushort)HitboxFlags & 0x00F0);
+            return value != 0 ? (HitboxFlagsEnum)value : HitboxFlagsEnum.SpawnSource_User;
+        }
+
+        public HitboxFlagsEnum GetDamageType()
+        {
+            int value = ((ushort)HitboxFlags & 0x0F00);
+            return (HitboxFlagsEnum)value;
+            //return value != 0 ? (HitboxFlagsEnum)value : 0;
+        }
     }
 
     [YAXSerializeAs("Movement")]
@@ -2825,7 +2953,7 @@ namespace Xv2CoreLib.BAC
             TerminatePreviousProjectile = 0x1,
             Unk2 = 0x2,
             Unk3 = 0x4,
-            Unk4 = 0x8,
+            AllowLoop = 0x8,
             Unk5 = 0x10, //unused
             Unk6 = 0x20, //unused
             Unk7 = 0x40, //unused
@@ -2838,6 +2966,8 @@ namespace Xv2CoreLib.BAC
             Unk14 = 0x2000,
             MarkRandomID = 0x4000,
             MarkUniqueID = 0x8000,
+
+            Unk4 = 0x8,
         }
 
 
@@ -3670,7 +3800,7 @@ namespace Xv2CoreLib.BAC
             Unk1 = 0x1,
             DisableEffect = 0x2,
             Unk3 = 0x4,
-            Unk4 = 0x8,
+            AllowLoop = 0x8,
             Unk5 = 0x10,
             Unk6 = 0x20,
             Unk7 = 0x40,
@@ -3682,7 +3812,9 @@ namespace Xv2CoreLib.BAC
             Unk13 = 0x1000,
             Unk14 = 0x2000,
             Unk15 = 0x4000,
-            Unk16 = 0x8000
+            Unk16 = 0x8000,
+
+            Unk4 = 0x8,
         }
 
         [YAXAttributeFor("BPE_Index")]
@@ -4029,7 +4161,7 @@ namespace Xv2CoreLib.BAC
             DisableAura = 0x1,
             Unk2 = 0x2,
             Unk3 = 0x4,
-            Unk4 = 0x8,
+            AllowLoop = 0x8,
             Unk5 = 0x10,
             Unk6 = 0x20,
             Unk7 = 0x40,
@@ -4041,7 +4173,9 @@ namespace Xv2CoreLib.BAC
             Unk13 = 0x1000,
             Unk14 = 0x2000,
             Unk15 = 0x4000,
-            Unk16 = 0x8000
+            Unk16 = 0x8000,
+
+            Unk4 = 0x8,
         }
 
         [YAXAttributeFor("Aura")]

@@ -36,10 +36,8 @@ namespace Xv2CoreLib.BAC
             WriteBac();
         }
 
-
         private void WriteBac()
         {
-         
             SortEntries();
        
             int count = (bacFile.BacEntries != null) ? bacFile.BacEntries.Count() : 0;
@@ -204,10 +202,7 @@ namespace Xv2CoreLib.BAC
                         }
                     }
                 }
-
             }
-            
-
         }
 
         /// <summary>
@@ -223,12 +218,15 @@ namespace Xv2CoreLib.BAC
                 throw new Exception($"Multiple BAC entries with the ID {conflicts.First().SortID} were found!");
             }
 
-            //Duplicate bacFile so changes here dont affect the original (would really cause havok with the undo stack on XenoKit...)
+            //Duplicate bacFile so changes here dont affect the original object
             bacFile = bacFile.Copy();
             bacFile.SortEntries();
             if (bacFile.BacEntries.Count == 0) return; //No bac entries. Gtfo
 
             int lastIndex = bacFile.BacEntries[bacFile.BacEntries.Count - 1].SortID;
+
+            if(lastIndex < bacFile.DefaultEmptyEndIndex)
+                lastIndex = bacFile.DefaultEmptyEndIndex;
 
             for(int a = 0; a <= lastIndex; a++)
             {
