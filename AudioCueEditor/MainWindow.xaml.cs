@@ -108,6 +108,8 @@ namespace AudioCueEditor
             InitTheme();
             LoadOnStartUp();
 
+            //Update title
+            Title += $" ({SettingsManager.Instance.CurrentVersionString})";
 
             //Check for updates silently
 #if !DEBUG
@@ -152,10 +154,13 @@ namespace AudioCueEditor
 
             if (appUpdate.HasUpdate)
             {
-                //Update is forced to appear even if notifications are disabled. Only to be used for the most vital updates.
-                bool updateIsForced = appUpdate.ForceUpdate && !SettingsManager.settings.UpdateNotifications;
+                MetroDialogSettings dialogSettings = DialogSettings.ScrollDialog;
+                dialogSettings.FirstAuxiliaryButtonText = "Ignore";
+                dialogSettings.AffirmativeButtonText = "Update";
+                dialogSettings.NegativeButtonText = "Open in Browser";
+                dialogSettings.DefaultButtonFocus = MessageDialogResult.Affirmative;
 
-                var messageResult = await this.ShowMessageAsync(updateIsForced ? "Update Available (Forced)" : "Update Available", $"An update is available ({appUpdate.Version}). Do you want to download and install it?\n\nNote: All instances of the application will be closed and any unsaved work will be lost.\n\nChangelog:\n{appUpdate.Changelog}", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.ScrollDialog);
+                MessageDialogResult messageResult = await this.ShowMessageAsync("Update Available", $"An update is available ({appUpdate.Version}). The application can automatically download and update itself (confirmation may be required), or you may also open the website in a browser and download the update manually. \n\nNote: All instances of the application will be closed and any unsaved work will be lost if Update is selected.\n\nChangelog:\n{appUpdate.Changelog}", MessageDialogStyle.AffirmativeAndNegativeAndSingleAuxiliary, dialogSettings);
 
                 if (messageResult == MessageDialogResult.Affirmative)
                 {
@@ -183,6 +188,10 @@ namespace AudioCueEditor
                         await this.ShowMessageAsync("Download Failed", Update.FailedErrorMessage, MessageDialogStyle.Affirmative, DialogSettings.Default);
                     }
 
+                }
+                else if (messageResult == MessageDialogResult.Negative)
+                {
+                    Process.Start("https://github.com/LazyBone152/ACE/releases");
                 }
             }
             else if (userInitiated)

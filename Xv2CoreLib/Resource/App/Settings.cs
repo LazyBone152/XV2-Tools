@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using Xv2CoreLib.Resource.UndoRedo;
@@ -307,6 +308,7 @@ namespace Xv2CoreLib.Resource.App
 
         //Binary
         private SettingsFormat settingsBinary = null;
+        private bool _isSaving = false;
 
         //Only basic value types are allowed + AppAccent. This is because SettingsFormat only supports these types, and adding more is not allowed because it will break backwards-compatibility.
         //All props with a Get/Setter will be serialized to a txt file, everything else is ignored
@@ -525,6 +527,7 @@ namespace Xv2CoreLib.Resource.App
         #endregion
 
         #region XenoKit
+        public bool XenoKit_WindowMaximized { get; set; } = false;
         public int XenoKit_WindowSizeX { get; set; } = -1;
         public int XenoKit_WindowSizeY { get; set; } = -1;
         public int XenoKit_DelayedUpdateFrameInterval { get; set; } = 30;
@@ -542,7 +545,6 @@ namespace Xv2CoreLib.Resource.App
         public bool XenoKit_RenderBoneNamesMouseOverOnly { get; set; } = true;
         public bool XenoKit_HideLessImportantBones { get; set; } = true;
         public bool XenoKit_AutoResolvePasteReferences { get; set; } = false;
-        internal int XenoKit_BacTypeSortMode { get; set; }
         public bool XenoKit_SuppressErrorsToLogOnly { get; set; } = false;
         public bool XenoKit_DelayLoadingCMN { get; set; } = false;
 
@@ -553,14 +555,6 @@ namespace Xv2CoreLib.Resource.App
         public int XenoKit_ShadowMapRes { get; set; } = 2048;
         public bool XenoKit_FullLowRez { get; set; } = false;
         public bool XenoKit_UseOutlinePostEffect { get; set; } = true;
-
-        //Enums, which are not-serialized directly
-        [DontSerialize]
-        public BacTypeSortMode XenoKit_BacTypeSortModeEnum
-        {
-            get => (BacTypeSortMode)XenoKit_BacTypeSortMode;
-            set => XenoKit_BacTypeSortMode = (int)value;
-        }
 
         #endregion
 
@@ -580,8 +574,27 @@ namespace Xv2CoreLib.Resource.App
             if (settingsBinary == null)
                 settingsBinary = new SettingsFormat();
 
+            if (_isSaving) return;
+            _isSaving = true;
+
             settingsBinary.SerializeProps(this);
-            File.WriteAllText(path, settingsBinary.Write());
+
+            string settingsFile = settingsBinary.Write();
+
+            try
+            {
+                File.WriteAllText(path, settingsFile);
+            }
+            catch 
+            {
+                //Wait a short while and then retry
+                Thread.Sleep(200);
+                File.WriteAllText(path, settingsFile);
+            }
+            finally
+            {
+                _isSaving = false;
+            }
         }
 
         public virtual void InitSettings()
