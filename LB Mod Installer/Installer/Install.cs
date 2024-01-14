@@ -46,7 +46,6 @@ using Xv2CoreLib.OCS;
 using Xv2CoreLib.QML;
 using Xv2CoreLib.OCO;
 using Xv2CoreLib.BCM;
-using LB_Mod_Installer.Installer.Transformation;
 using Xv2CoreLib.QSF;
 using Xv2CoreLib.DML;
 using Xv2CoreLib.AFS2;
@@ -56,6 +55,7 @@ using Xv2CoreLib.QED;
 using Xv2CoreLib.TNN;
 using Xv2CoreLib.ODF;
 using Xv2CoreLib.EEPK;
+//using LB_Mod_Installer.Installer.Transformation;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -72,7 +72,7 @@ namespace LB_Mod_Installer.Installer
         public Xv2FileIO FileIO;
         public FileCacheManager fileManager;
         public MsgComponentInstall msgComponentInstall;
-        public TransformInstaller transformInstaller;
+        //public TransformInstaller transformInstaller;
 
         //Needs to be static for Binding.Xml.XmlParser to access it. SHOULD be refactored entirely to be a singleton, but it relies on Install and i dont have time to untangle it all right now.
         public static BindingManager bindingManager;
@@ -93,7 +93,7 @@ namespace LB_Mod_Installer.Installer
             fileManager = _fileManager;
 
             bindingManager = new BindingManager(this);
-            transformInstaller = new TransformInstaller(this);
+            //transformInstaller = new TransformInstaller(this);
         }
 
         public void Start()
@@ -397,6 +397,9 @@ namespace LB_Mod_Installer.Installer
                 case ".odf":
                     Install_ODF(xmlPath, installPath, isXml, useSkipBindings);
                     break;
+                case ".bcm":
+                    Install_BCM(xmlPath, installPath, isXml, useSkipBindings);
+                    break;
                 default:
                     //if (TryTransformationInstall(xmlPath))
                     //    break;
@@ -405,6 +408,7 @@ namespace LB_Mod_Installer.Installer
             }
         }
 
+        /*
         private bool TryTransformationInstall(string xmlPath)
         {
 #if !DEBUG
@@ -478,6 +482,7 @@ namespace LB_Mod_Installer.Installer
 
             return false;
         }
+        */
 
         private void JungleCheck()
         {
@@ -971,7 +976,13 @@ namespace LB_Mod_Installer.Installer
                     installFile = EffectContainerFile.LoadVfxPackage(stream, xmlPath);
                 }
 
-                EffectContainerFile binaryFile = (EffectContainerFile)GetParsedFile<EffectContainerFile>(installPath);
+                EffectContainerFile binaryFile = (EffectContainerFile)GetParsedFile<EffectContainerFile>(installPath, false, false);
+
+                if (binaryFile == null)
+                {
+                    binaryFile = EffectContainerFile.New();
+                    fileManager.AddParsedFile(installPath, binaryFile);
+                }
 
                 //Crash fix for when too many auras are installed.
                 binaryFile.Pbind.AssetListLimit = 0x9C40;
@@ -2119,6 +2130,28 @@ namespace LB_Mod_Installer.Installer
             catch (Exception ex)
             {
                 string error = string.Format("Failed at ODF install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
+        private void Install_BCM(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                BCM_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<BCM_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : BCM_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                BCM_File binaryFile = (BCM_File)GetParsedFile<BCM_File>(installPath);
+
+                //Install entries
+                List<string> ids = binaryFile.InstallEntries(xmlFile.BCMEntries[0].BCMEntries);
+                GeneralInfo.Tracker.AddIDs(installPath, Sections.BCM_Entry, ids);
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at BCM install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif

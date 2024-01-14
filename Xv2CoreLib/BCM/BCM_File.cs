@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 using System.IO;
 
@@ -12,109 +10,76 @@ namespace Xv2CoreLib.BCM
     [Flags]
     public enum ButtonInput : uint
     {
-        [YAXEnum("Light")]
-        light = 1, //Square
-        [YAXEnum("Heavy")]
-        heavy = 2, //Trianlge
-        [YAXEnum("Blast")]
-        blast = 4, //Circle
-        [YAXEnum("Jump")]
-        jump = 8, //X
-        [YAXEnum("SkillMenu")]
-        skillmenu = 16, //R2
-        [YAXEnum("Boost")]
-        boost = 32, //L2
-        [YAXEnum("Guard")]
-        guard = 64, //L1
-        [YAXEnum("LockOn")]
-        unk8 = 128,
-        [YAXEnum("SuperSkill1")]
-        superskill1 = 256,
-        [YAXEnum("SuperSkill2")]
-        superskill2 = 512,
-        [YAXEnum("SuperSkill3")]
-        superskill3 = 1024,
-        [YAXEnum("SuperSkill4")]
-        superskill4 = 2048,
-        [YAXEnum("UltimateSkill1")]
-        ultimateskill1 = 4096,
-        [YAXEnum("UltimateSkill2")]
-        ultimateskill2 = 8192,
-        [YAXEnum("AwokenSkill")]
-        awokenskill = 16384,
-        [YAXEnum("EvasiveSkill")]
-        evasiveskill = 32768,
-        [YAXEnum("AdditionalInput")]
-        additionalinput = 65536,
-        [YAXEnum("SuperMenu_Duplicate")]
-        supermenu_duplicate = 131072,
-        [YAXEnum("UltimateMenu")]
-        ultimatemenu = 262144,
-        unk20 = 524288,
-        [YAXEnum("LockOn")]
-        lockon = 1048576, //unk21
-        [YAXEnum("Descend")]
-        descend = 2097152,
-        [YAXEnum("DragonRadar")]
-        dragonradar = 4194304,
-        unk24 = 8388608,
-        unk25 = 16777216,
-        unk26 = 33554432,
-        unk27 = 67108864,
-        unk28 = 134217728,
-        [YAXEnum("UltimateMenu_Duplicate")]
-        ultimatemenu_duplicate = 268435456,
-        unk30 = 536870912,
-        unk31 = 1073741824,
-        unk32 = 2147483648
+        Light = 0x1, //Square
+        Heavy = 0x2, //Trianlge
+        Blast = 0x4, //Circle
+        Jump = 0x8, //X
+        SkillMenu = 0x10, //R2
+        Boost = 0x20, //L2
+        Guard = 0x40, //L1
+        Unk8 = 0x80,
+        SuperSkill1 = 0x100,
+        SuperSkill2 = 0x200,
+        SuperSkill3 = 0x400,
+        SuperSkill4 = 0x800,
+        UltimateSkill1 = 0x1000,
+        UltimateSkill2 = 0x2000,
+        AwokenSkill = 0x4000,
+        EvasiveSkill = 0x8000,
+        SkillInput = 0x10000,
+        SuperMenuPlusSkillInput = 0x20000,
+        UltimateMenuPlusSkillInput = 0x40000,
+        Unk20 = 0x80000,
+        LockOn = 0x100000,
+        Descend = 0x200000,
+        DragonRadar = 0x400000,
+        Jump_2 = 0x800000,
+        UltimateMenu = 0x1000000,
+        Unk26 = 0x2000000,
+        Unk27 = 0x4000000,
+        Unk28 = 0x8000000,
+        UltimateMenu_2 = 0x10000000,
+        Unk30 = 0x20000000,
+        Unk31 = 0x40000000,
+        Unk32 = 0x80000000
     }
 
     [Flags]
     public enum DirectionalInput : uint
     {
-        [YAXEnum("Forward")]
-        forward = 1,
-        [YAXEnum("Backwards")]
-        backwards = 2,
-        [YAXEnum("LeftRelative")]
-        leftrelative = 4,
-        [YAXEnum("RightRelative")]
-        rightrelative = 8,
-        [YAXEnum("SingleActivation")]
-        singleactivation = 16,
-        [YAXEnum("Up")]
-        up = 32,
-        [YAXEnum("Down")]
-        down = 64,
-        [YAXEnum("Right")]
-        right = 128,
-        [YAXEnum("Left")]
-        left = 256,
-        dirunk10 = 512,
-        dirunk11 = 1024,
-        dirunk12 = 2048,
-        dirunk13 = 4096,
-        dirunk14 = 8192,
-        dirunk15 = 16384,
-        dirunk16 = 32768,
-        dirunk17 = 65536,
-        dirunk18 = 131072,
-        dirunk19 = 262144,
-        dirunk20 = 524288,
-        dirunk21 = 1048576,
-        dirunk22 = 2097152,
-        dirunk23 = 4194304,
-        dirunk24 = 8388608,
-        dirunk25 = 16777216,
-        dirunk26 = 33554432,
-        dirunk27 = 67108864,
-        dirunk28 = 134217728,
-        dirunk29 = 268435456,
-        dirunk30 = 536870912,
-        dirunk31 = 1073741824,
-        dirunk32 = 2147483648
+        Forward = 0x1,
+        Backwards = 0x2,
+        LeftRelative = 0x4,
+        RightRelative = 0x8,
+        SingleActivation = 0x10,
+        Up = 0x20,
+        Down = 0x40,
+        Right = 0x80,
+        Left = 0x100,
+        Unk10 = 0x200,
+        Unk11 = 0x400,
+        Unk12 = 0x800,
+        Unk13 = 0x1000,
+        Unk14 = 0x2000,
+        Unk15 = 0x4000,
+        Unk16 = 0x8000,
+        Unk17 = 0x10000,
+        Unk18 = 0x20000,
+        Unk19 = 0x40000,
+        Unk20 = 0x80000,
+        Unk21 = 0x100000,
+        Unk22 = 0x200000,
+        Unk23 = 0x400000,
+        Unk24 = 0x800000,
+        Unk25 = 0x1000000,
+        Unk26 = 0x2000000,
+        Unk27 = 0x4000000,
+        Unk28 = 0x8000000,
+        Unk29 = 0x10000000,
+        Unk30 = 0x20000000,
+        Unk31 = 0x40000000,
+        Unk32 = 0x80000000
     }
-
 
     [Flags]
     public enum BacCases
@@ -132,157 +97,91 @@ namespace Xv2CoreLib.BCM
     [Flags]
     public enum ActivatorState : uint
     {
-        [YAXEnum("Idle")]
-        idle = 1,
-        [YAXEnum("Attacking")]
-        attacking = 2,
-        [YAXEnum("Boosting")]
-        boosting = 4,
-        [YAXEnum("Guarding")]
-        guarding = 8,
-        [YAXEnum("ReceiveDamage")]
-        receivedamage = 16,
-        [YAXEnum("Jumping")]
-        jumping = 32,
-        unk7 = 64,
-        [YAXEnum("TargetAttacking")]
-        targetattacking = 128,
-        unk9 = 256,
-        unk10 = 512,
-        unk11 = 1024,
-        unk12 = 2048,
-        unk13 = 4096,
-        unk14 = 8192,
-        unk15 = 16384,
-        unk16 = 32768,
-        unk17 = 65536,
-        unk18 = 131072,
-        unk19 = 262144,
-        unk20 = 524288,
-        unk21 = 1048576,
-        unk22 = 2097152,
-        unk23 = 4194304,
-        unk24 = 8388608,
-        unk25 = 16777216,
-        unk26 = 33554432,
-        unk27 = 67108864,
-        unk28 = 134217728,
-        unk29 = 268435456,
-        unk30 = 536870912,
-        unk31 = 1073741824,
-        unk32 = 2147483648
+        Idle = 0x1,
+        Attacking = 0x2,
+        Boosting = 0x4,
+        Guarding = 0x8,
+        ReceivingDamage = 0x10,
+        Jumping = 0x20,
+        NotReceivingDamage = 0x40,
+        TargetIsAttacking = 0x80,
+        Unk9 = 0x100,
+        Unk10 = 0x200,
+        Unk11 = 0x400,
+        Unk12 = 0x800,
+        Unk13 = 0x1000,
+        Unk14 = 0x2000,
+        Unk15 = 0x4000,
+        Unk16 = 0x8000,
+        Unk17 = 0x10000,
+        Unk18 = 0x20000,
+        Unk19 = 0x40000,
+        Unk20 = 0x80000,
+        Unk21 = 0x100000,
+        Unk22 = 0x200000,
+        Unk23 = 0x400000,
+        Unk24 = 0x800000,
+        Unk25 = 0x1000000,
+        Unk26 = 0x2000000,
+        Unk27 = 0x4000000,
+        Unk28 = 0x8000000,
+        Unk29 = 0x10000000,
+        Unk30 = 0x20000000,
+        Unk31 = 0x40000000,
+        Unk32 = 0x80000000
     }
 
-    public static class EnumValues
+    [Flags]
+    public enum PrimaryActivatorConditions : uint
     {
-        public static Dictionary<ButtonInput, string> ButtonInput = new Dictionary<ButtonInput, string>()
-        {
-            { BCM.ButtonInput.blast , "Blast" },
-            { BCM.ButtonInput.boost , "Boost" },
-            { BCM.ButtonInput.guard , "Guard" },
-            { BCM.ButtonInput.heavy , "Heavy" },
-            { BCM.ButtonInput.jump , "Jump" },
-            { BCM.ButtonInput.light , "Light" },
-            { BCM.ButtonInput.unk8 , "Unk8" },
-            { BCM.ButtonInput.skillmenu , "SuperMenu" },
-            { BCM.ButtonInput.superskill1 , "SuperSkill1" },
-            { BCM.ButtonInput.superskill2 , "SuperSkill2" },
-            { BCM.ButtonInput.superskill3 , "SuperSkill3" },
-            { BCM.ButtonInput.superskill4 , "SuperSkill4" },
-            { BCM.ButtonInput.ultimateskill1 , "UltimateSkill1" },
-            { BCM.ButtonInput.ultimateskill2 , "UltimateSkill2" },
-            { BCM.ButtonInput.awokenskill , "AwokenSkill" },
-            { BCM.ButtonInput.evasiveskill , "EvasiveSkill" },
-            { BCM.ButtonInput.additionalinput , "AdditionalInput" },
-            { BCM.ButtonInput.supermenu_duplicate , "SuperMenu2" },
-            { BCM.ButtonInput.ultimatemenu , "UltimateMenu" },
-            { BCM.ButtonInput.unk20 , "Unk20" },
-            { BCM.ButtonInput.lockon , "LockOn" },
-            { BCM.ButtonInput.descend , "Descend" },
-            { BCM.ButtonInput.dragonradar , "DragonRadar" },
-            { BCM.ButtonInput.unk24 , "Unk24" },
-            { BCM.ButtonInput.unk25 , "Unk25" },
-            { BCM.ButtonInput.unk26 , "Unk26" },
-            { BCM.ButtonInput.unk27 , "Unk27" },
-            { BCM.ButtonInput.unk28 , "Unk28" },
-            { BCM.ButtonInput.ultimatemenu_duplicate , "UltimateMenu2" },
-            { BCM.ButtonInput.unk30 , "Unk30" },
-            { BCM.ButtonInput.unk31 , "Unk31" },
-            { BCM.ButtonInput.unk32 , "Unk32" },
-         };
+        Standing = 0x1,
+        Floating = 0x2,
+        TouchingGround = 0x4,
+        OnAttackHit = 0x8,
+        AttackBlocked = 0x10,
+        CloseToTarget = 0x20,
+        FarFromTarget = 0x40,
+        InBaseForm = 0x80,
+        InTransformedState = 0x100,
+        Unk10 = 0x200,
+        Unk11 = 0x400,
+        Idle = 0x800,
+        CounterMelee = 0x1000,
+        CounterProjectile = 0x2000,
+        KiBelow100 = 0x4000,
+        KiAboveZero = 0x8000,
+        Unk17 = 0x10000,
+        Unk18 = 0x20000,
+        Ground = 0x40000,
+        Opponent = 0x80000,
+        OpponentKnockback = 0x100000,
+        Unk22 = 0x200000,
+        TargetingOpponent = 0x400000,
+        Unk24 = 0x800000,
+        ActiveProjectile = 0x1000000,
+        StaminaAboveZero = 0x2000000,
+        NotNearStageCeiling = 0x4000000,
+        NotNearCertainObjects = 0x8000000,
+        UsersHealth_OneUse = 0x10000000,
+        TargetsHealthLessThan25 = 0x20000000,
+        CurrentBacEntryHits = 0x40000000,
+        UsersHealth = 0x80000000
+    }
 
-        public static Dictionary<DirectionalInput, string> DirInput = new Dictionary<DirectionalInput, string>()
-        {
-            { DirectionalInput.forward , "Forward" },
-            { DirectionalInput.backwards , "Backwards" },
-            { DirectionalInput.leftrelative , "LeftRelative" },
-            { DirectionalInput.rightrelative , "RightRelative" },
-            { DirectionalInput.singleactivation , "SingleActivation" },
-            { DirectionalInput.up , "Up" },
-            { DirectionalInput.down , "Down" },
-            { DirectionalInput.right , "Right" },
-            { DirectionalInput.left , "Left" },
-            { DirectionalInput.dirunk10 , "DirUnk10" },
-            { DirectionalInput.dirunk11 , "DirUnk11" },
-            { DirectionalInput.dirunk12 , "DirUnk12" },
-            { DirectionalInput.dirunk13 , "DirUnk13" },
-            { DirectionalInput.dirunk14 , "DirUnk14" },
-            { DirectionalInput.dirunk15 , "DirUnk15" },
-            { DirectionalInput.dirunk16 , "DirUnk16" },
-            { DirectionalInput.dirunk17 , "DirUnk17" },
-            { DirectionalInput.dirunk18 , "DirUnk18" },
-            { DirectionalInput.dirunk19 , "DirUnk19" },
-            { DirectionalInput.dirunk20 , "DirUnk20" },
-            { DirectionalInput.dirunk21 , "DirUnk21" },
-            { DirectionalInput.dirunk22 , "DirUnk22" },
-            { DirectionalInput.dirunk23 , "DirUnk23" },
-            { DirectionalInput.dirunk24 , "DirUnk24" },
-            { DirectionalInput.dirunk25 , "DirUnk25" },
-            { DirectionalInput.dirunk26 , "DirUnk26" },
-            { DirectionalInput.dirunk27 , "DirUnk27" },
-            { DirectionalInput.dirunk28 , "DirUnk28" },
-            { DirectionalInput.dirunk29 , "DirUnk29" },
-            { DirectionalInput.dirunk30 , "DirUnk30" },
-            { DirectionalInput.dirunk31 , "DirUnk31" },
-            { DirectionalInput.dirunk32 , "DirUnk32" },
-         };
-
-        public static Dictionary<ActivatorState, string> ActivatorStates = new Dictionary<ActivatorState, string>()
-        {
-            { ActivatorState.boosting , "Boosting" },
-            { ActivatorState.guarding , "Guarding" },
-            { ActivatorState.idle , "Idle" },
-            { ActivatorState.jumping , "Jumping" },
-            { ActivatorState.receivedamage , "ReceiveDamage" },
-            { ActivatorState.unk7 , "Unk7" },
-            { ActivatorState.attacking , "Attacking" },
-            { ActivatorState.targetattacking , "TargetAttacking" },
-            { ActivatorState.unk9 , "Unk9" },
-            { ActivatorState.unk10 , "Unk10" },
-            { ActivatorState.unk11 , "Unk11" },
-            { ActivatorState.unk12 , "Unk12" },
-            { ActivatorState.unk13 , "Unk13" },
-            { ActivatorState.unk14 , "Unk14" },
-            { ActivatorState.unk15 , "Unk15" },
-            { ActivatorState.unk16 , "Unk16" },
-            { ActivatorState.unk17 , "Unk17" },
-            { ActivatorState.unk18 , "Unk18" },
-            { ActivatorState.unk19 , "Unk19" },
-            { ActivatorState.unk20 , "Unk20" },
-            { ActivatorState.unk21 , "Unk21" },
-            { ActivatorState.unk22 , "Unk22" },
-            { ActivatorState.unk23 , "Unk23" },
-            { ActivatorState.unk24 , "Unk24" },
-            { ActivatorState.unk25 , "Unk25" },
-            { ActivatorState.unk26 , "Unk26" },
-            { ActivatorState.unk27 , "Unk27" },
-            { ActivatorState.unk28 , "Unk28" },
-            { ActivatorState.unk29 , "Unk29" },
-            { ActivatorState.unk30 , "Unk30" },
-            { ActivatorState.unk31 , "Unk31" },
-            { ActivatorState.unk32 , "Unk32" },
-         };
-
+    public enum InstallInsetAt
+    {
+        /// <summary>
+        /// Will install new entries at end of file, but keep any overriden entry at its original position. Default value to be used if no InsertAt value is provided.
+        /// </summary>
+        Default,
+        /// <summary>
+        /// Will install new entries at start of file, and move any overriden entries there
+        /// </summary>
+        Start,
+        /// <summary>
+        /// Will install new entries at end of file, and move any overriden entries there
+        /// </summary>
+        End
     }
 
     #endregion
@@ -295,6 +194,7 @@ namespace Xv2CoreLib.BCM
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BCMEntry")]
         public List<BCM_Entry> BCMEntries { get; set; } = new List<BCM_Entry>();
 
+        #region LoadSave
         public static BCM_File Load(string path)
         {
             if(Path.GetExtension(path) == ".bcm")
@@ -330,17 +230,175 @@ namespace Xv2CoreLib.BCM
         {
             return new Deserializer(this).bytes.ToArray();
         }
+        #endregion
+
+        #region Install
+        public List<string> InstallEntries(IList<BCM_Entry> entries)
+        {
+            List<string> ids = new List<string>();
+
+            //Update index and goto references on all the BCM entries to avoid conflict with the existing BCM entries. (these aren't actually numbers, so appending to the string is a good enough solution)
+            AppendIndex_Recursive(BCMEntries[0].BCMEntries.Count.ToString(), entries);
+
+            //Installed in reverse order to ensure they get installed into the same order as they are declared in the XML, as each successive entry is inserted into index 0
+            foreach (BCM_Entry entry in entries.Where(x => x.GetInstallInsertAt() == InstallInsetAt.Start).Reverse())
+            {
+                ids.Add(InstallEntry(entry).ToString());
+            }
+
+            foreach (BCM_Entry entry in entries.Where(x => x.GetInstallInsertAt() != InstallInsetAt.Start))
+            {
+                ids.Add(InstallEntry(entry).ToString());
+            }
+
+            return ids;
+        }
+
+        private int InstallEntry(BCM_Entry entry)
+        {
+            int hash = entry.CalculateInstanceHash();
+            InstallInsetAt insertAt = entry.GetInstallInsertAt();
+
+            BCM_Entry existingEntry = BCMEntries[0].BCMEntries.FirstOrDefault(x => x.CalculateInstanceHash() == hash);
+
+            if (existingEntry != null)
+            {
+                switch (insertAt)
+                {
+                    case InstallInsetAt.Start:
+                        BCMEntries[0].BCMEntries.Remove(existingEntry);
+                        BCMEntries[0].BCMEntries.Insert(0, entry);
+                        return hash;
+                    case InstallInsetAt.End:
+                        BCMEntries[0].BCMEntries.Remove(existingEntry);
+                        BCMEntries[0].BCMEntries.Add(entry);
+                        return hash;
+                    default:
+                        BCMEntries[0].BCMEntries[BCMEntries[0].BCMEntries.IndexOf(existingEntry)] = entry;
+                        return hash;
+                }
+            }
+            else
+            {
+                switch (insertAt)
+                {
+                    case InstallInsetAt.Start:
+                        BCMEntries[0].BCMEntries.Insert(0, entry);
+                        return hash;
+                    default:
+                        BCMEntries[0].BCMEntries.Add(entry);
+                        return hash;
+                }
+            }
+        }
+
+        public void UninstallEntries(List<string> ids, BCM_File cpkFile)
+        {
+            foreach (string id in ids)
+            {
+                int hash = int.Parse(id);
+                UninstallEntry(hash, cpkFile);
+            }
+        }
+
+        private void UninstallEntry(int id, BCM_File cpkFile)
+        {
+            int cpkInsertIdx = -1;
+            BCM_Entry cpkEntry = cpkFile?.BCMEntries[0].BCMEntries.FirstOrDefault(x => x.CalculateInstanceHash() == id);
+            BCM_Entry entry = BCMEntries[0].BCMEntries.FirstOrDefault(x => x.CalculateInstanceHash() == id);
+
+            //Get index to restore original BCM entry into. This needs to be done because the positioning can change with the InsertAt parameter
+            if(cpkEntry != null)
+            {
+                int idx = cpkFile.BCMEntries[0].BCMEntries.IndexOf(cpkEntry);
+
+                if (idx < cpkFile.BCMEntries[0].BCMEntries.Count - 1)
+                {
+                    int nextEntryHash = cpkFile.BCMEntries[0].BCMEntries[idx + 1].CalculateInstanceHash();
+                    cpkInsertIdx = BCMEntries[0].BCMEntries.IndexOf(BCMEntries[0].BCMEntries.FirstOrDefault(x => x.CalculateInstanceHash() == nextEntryHash));
+                }
+            }
+
+            if(entry != null)
+            {
+                if(cpkEntry != null)
+                {
+                    if(cpkInsertIdx != -1)
+                    {
+                        BCMEntries[0].BCMEntries.Insert(cpkInsertIdx, cpkEntry);
+                        BCMEntries[0].BCMEntries.Remove(entry);
+                    }
+                    else
+                    {
+                        BCMEntries[0].BCMEntries.Remove(entry);
+                        BCMEntries[0].BCMEntries.Add(cpkEntry);
+                    }
+                }
+                else
+                {
+                    BCMEntries[0].BCMEntries.Remove(entry);
+                }
+            }
+        }
+        #endregion
+
+        public bool IsNull()
+        {
+            if (BCMEntries?.Count == 0) return true;
+
+            if (BCMEntries.Count == 1)
+            {
+                if (BCMEntries[0].BCMEntries?.Count == 0) return true;
+            }
+
+            return false;
+
+        }
+
+        public static BCM_File DefaultBcmFile()
+        {
+            return new BCM_File()
+            {
+                BCMEntries = new List<BCM_Entry>()
+            };
+        }
+
+        #region DumbShit
+        public void AppendIndex(string append)
+        {
+            if (BCMEntries != null)
+                AppendIndex_Recursive(append, BCMEntries);
+        }
+
+        private static void AppendIndex_Recursive(string append, IList<BCM_Entry> entries)
+        {
+            if (entries != null)
+            {
+                foreach (var entry in entries)
+                {
+                    entry.Index += $"_{append}";
+
+                    if(entry.LoopAsChild != null)
+                        entry.LoopAsChild += $"_{append}";
+
+                    if (entry.LoopAsSibling != null)
+                        entry.LoopAsSibling += $"_{append}";
+
+                    AppendIndex_Recursive(append, entry.BCMEntries);
+                }
+            }
+        }
 
         public void IncreaseIds(int increaseAmount)
         {
             if (increaseAmount == 0) return;
-            if(BCMEntries != null)
+            if (BCMEntries != null)
                 IncreaseIds_Recursive(increaseAmount, BCMEntries);
         }
 
         private void IncreaseIds_Recursive(int increaseAmount, IList<BCM_Entry> entries)
         {
-            if(entries != null)
+            if (entries != null)
             {
                 foreach (var entry in entries)
                 {
@@ -359,48 +417,31 @@ namespace Xv2CoreLib.BCM
         {
             if (entries == null) return;
 
-            foreach(var entry in entries)
+            foreach (var entry in entries)
             {
-                if(entry.BCMEntries != null)
+                if (entry.BCMEntries != null)
                 {
                     TestSearch_Recursive(entry.BCMEntries);
                 }
 
-                if (entry.ButtonInput.HasFlag(ButtonInput.boost))
+                if (entry.ButtonInput.HasFlag(ButtonInput.Boost))
                 {
                     Console.WriteLine("This");
                     Console.Read();
                 }
             }
         }
-    
-        public bool IsNull()
-        {
-            if (BCMEntries?.Count == 0) return true;
-
-            if(BCMEntries.Count == 1)
-            {
-                if (BCMEntries[0].BCMEntries?.Count == 0) return true;
-            }
-
-            return false;
-        
-        }
-
-        public static BCM_File DefaultBcmFile()
-        {
-            return new BCM_File()
-            {
-                BCMEntries = new List<BCM_Entry>()
-            };
-        }
-
+        #endregion
     }
 
     [YAXSerializeAs("BCMEntry")]
     [Serializable]
     public class BCM_Entry
     {
+        [YAXAttributeForClass]
+        [YAXDontSerializeIfNull]
+        public string InsertAt { get; set; }
+
         [YAXAttributeForClass]
         [YAXSerializeAs("Idx")]
         public string Index { get; set; }
@@ -439,7 +480,7 @@ namespace Xv2CoreLib.BCM
         [YAXAttributeFor("PrimaryActivatorConditions")]
         [YAXSerializeAs("value")]
         [YAXHexValue]
-        public uint PrimaryActivatorConditions { get; set; }
+        public PrimaryActivatorConditions PrimaryActivatorConditions { get; set; }
         [YAXAttributeFor("ActivatorState")]
         [YAXSerializeAs("value")]
         public ActivatorState ActivatorState { get; set; }
@@ -461,9 +502,9 @@ namespace Xv2CoreLib.BCM
         [YAXAttributeFor("BacEntryVictimConnect")]
         [YAXSerializeAs("value")]
         public short BacEntryVictimConnect { get; set; }
-        [YAXAttributeFor("BacEntryUnknown")]
+        [YAXAttributeFor("BacEntryTargetingOverride")]
         [YAXSerializeAs("value")]
-        public ushort BacEntryUnknown { get; set; } = 65535;
+        public ushort BacEntryTargetingOverride { get; set; } = 65535;
         [YAXAttributeFor("RandomFlag")]
         [YAXSerializeAs("value")]
         public ushort RandomFlag { get; set; }
@@ -478,9 +519,10 @@ namespace Xv2CoreLib.BCM
         public uint I_72 { get; set; }
 
 
-        [YAXAttributeFor("Bac_Cases")]
-        [YAXSerializeAs("values")]
-        public BacCases BacCase { get; set; }
+        [YAXAttributeFor("ReceiverLinkID")]
+        [YAXSerializeAs("value")]
+        [YAXHexValue]
+        public uint ReceiverLinkID { get; set; }
 
         [YAXAttributeFor("I_80")]
         [YAXSerializeAs("value")]
@@ -506,9 +548,11 @@ namespace Xv2CoreLib.BCM
         public short CusAura { get; set; } = -1;
         [YAXAttributeFor("I_104")]
         [YAXSerializeAs("value")]
+        [YAXHexValue]
         public uint I_104 { get; set; }
         [YAXAttributeFor("I_108")]
         [YAXSerializeAs("value")]
+        [YAXHexValue]
         public uint I_108 { get; set; }
 
 
@@ -518,13 +562,13 @@ namespace Xv2CoreLib.BCM
 
         public BCM_Entry() { }
 
-        public static BCM_Entry CreateAwokenEntry(ButtonInput buttonInput, int bacIdPrimary, BacCases cases = BacCases.Case3, ActivatorState activatorState = ActivatorState.attacking | ActivatorState.idle)
+        public static BCM_Entry CreateAwokenEntry(ButtonInput buttonInput, int bacIdPrimary, BacCases cases = BacCases.Case3, ActivatorState activatorState = ActivatorState.Attacking | ActivatorState.Idle)
         {
             return new BCM_Entry()
             {
                 ButtonInput = buttonInput,
                 BacEntryPrimary = (short)bacIdPrimary,
-                BacCase = cases,
+                ReceiverLinkID = (uint)cases,
                 ActivatorState = activatorState
             };
         }
@@ -553,12 +597,12 @@ namespace Xv2CoreLib.BCM
                 BacEntryUserConnect = BacEntryUserConnect,
                 BacEntryVictimConnect = BacEntryVictimConnect,
                 BacEntryAirborne = BacEntryAirborne,
-                BacEntryUnknown = BacEntryUnknown,
+                BacEntryTargetingOverride = BacEntryTargetingOverride,
                 RandomFlag = RandomFlag,
                 I_64 = I_64,
                 I_68 = I_68,
                 I_72 = I_72,
-                BacCase = BacCase,
+                ReceiverLinkID = ReceiverLinkID,
                 I_80 = I_80,
                 StaminaCost = StaminaCost,
                 I_88 = I_88,
@@ -581,13 +625,13 @@ namespace Xv2CoreLib.BCM
                 BacEntryPrimary == entry.BacEntryPrimary && BacEntryCharge == entry.BacEntryCharge &&
                 I_36 == entry.I_36 && BacEntryUserConnect == entry.BacEntryUserConnect &&
                 BacEntryVictimConnect == entry.BacEntryVictimConnect && BacEntryAirborne == entry.BacEntryAirborne &&
-                BacEntryUnknown == entry.BacEntryUnknown && RandomFlag == entry.RandomFlag &&
+                BacEntryTargetingOverride == entry.BacEntryTargetingOverride && RandomFlag == entry.RandomFlag &&
                 I_64 == entry.I_64 && I_68 == entry.I_68 &&
                 I_72 == entry.I_72 && I_80 == entry.I_80 &&
                 StaminaCost == entry.StaminaCost && I_88 == entry.I_88 &&
                 KiRequired == entry.KiRequired && TransStage == entry.TransStage &&
                 CusAura == entry.CusAura && I_104 == entry.I_104 &&
-                I_108 == entry.I_108 && BacCase == entry.BacCase
+                I_108 == entry.I_108 && ReceiverLinkID == entry.ReceiverLinkID
                 )
             {
                 return true;
@@ -598,6 +642,45 @@ namespace Xv2CoreLib.BCM
             }
         }
 
+        public int CalculateInstanceHash()
+        {
+            unchecked
+            {
+                int hash = I_00.GetHashCode();
+                hash = 31 * hash + DirectionalInput.GetHashCode();
+                hash = 31 * hash + ButtonInput.GetHashCode();
+                hash = 31 * hash + HoldDownConditions.GetHashCode();
+                hash = 31 * hash + OpponentSizeConditions.GetHashCode();
+                hash = 31 * hash + PrimaryActivatorConditions.GetHashCode();
+                hash = 31 * hash + ActivatorState.GetHashCode();
+                hash = 31 * hash + I_64.GetHashCode();
+                hash = 31 * hash + ReceiverLinkID.GetHashCode();
+                hash = 31 * hash + I_80.GetHashCode();
+                hash = 31 * hash + StaminaCost.GetHashCode();
+                hash = 31 * hash + I_88.GetHashCode();
+                hash = 31 * hash + KiRequired.GetHashCode();
+                hash = 31 * hash + HealthRequired.GetHashCode();
+                hash = 31 * hash + TransStage.GetHashCode();
+                hash = 31 * hash + CusAura.GetHashCode();
+                hash = 31 * hash + I_104.GetHashCode();
+                return 31 * hash + I_108.GetHashCode();
+            }
+        }
+    
+        public InstallInsetAt GetInstallInsertAt()
+        {
+            if (string.IsNullOrWhiteSpace(InsertAt)) return InstallInsetAt.Default;
+
+            switch (InsertAt.ToLower())
+            {
+                case "start":
+                    return InstallInsetAt.Start;
+                case "end":
+                    return InstallInsetAt.End;
+                default:
+                    throw new ArgumentException("InsertAt value is invalid. Only Start and End are valid options.");
+            }
+        }
     }
     
 

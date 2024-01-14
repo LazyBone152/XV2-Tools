@@ -148,9 +148,6 @@
     <Compile Include="BCM\BCM_File.cs" />
     <Compile Include="BCM\Deserializer.cs" />
     <Compile Include="BCM\Parser.cs" />
-    <Compile Include="BCM_XML\BCM_File.cs" />
-    <Compile Include="BCM_XML\Deserializer.cs" />
-    <Compile Include="BCM_XML\Parser.cs" />
     <Compile Include="BCS\BCS_File.cs" />
     <Compile Include="BCS\Deserializer.cs" />
     <Compile Include="BCS\Parser.cs" />

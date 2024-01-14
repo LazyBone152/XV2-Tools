@@ -55,13 +55,14 @@ namespace Xv2CoreLib.BCM
                 bcmFile.BCMEntries = ParseChild(offset, true);
             }
             
+            /*
             if(totalTestCount != count)
             {
                 Console.WriteLine(String.Format("Count mismatch! (Declared: {0}, Parsed: {1})\n" +
                     "Probably caused by some manual edits done to this file. You can ignore this error, but make sure you have a back up!", count, totalTestCount));
                 Console.ReadLine();
             }
-
+            */
         }
 
         private List<BCM_Entry> ParseChild(int offset, bool ignoreLoop, int parentOffset = 16)
@@ -112,7 +113,7 @@ namespace Xv2CoreLib.BCM
                 OpponentSizeConditions = BitConverter.ToUInt32(rawBytes, offset + 16),
                 MinimumLoopDuration = BitConverter.ToUInt16(rawBytes, offset + 20),
                 MaximumLoopDuration = BitConverter.ToUInt16(rawBytes, offset + 22),
-                PrimaryActivatorConditions = BitConverter.ToUInt32(rawBytes, offset + 24),
+                PrimaryActivatorConditions = (PrimaryActivatorConditions)BitConverter.ToUInt32(rawBytes, offset + 24),
                 ActivatorState = (ActivatorState)BitConverter.ToUInt32(rawBytes, offset + 28),
                 BacEntryPrimary = BitConverter.ToInt16(rawBytes, offset + 32),
                 BacEntryCharge = BitConverter.ToInt16(rawBytes, offset + 34),
@@ -120,12 +121,12 @@ namespace Xv2CoreLib.BCM
                 BacEntryUserConnect = BitConverter.ToInt16(rawBytes, offset + 38),
                 BacEntryVictimConnect = BitConverter.ToInt16(rawBytes, offset + 40),
                 BacEntryAirborne = BitConverter.ToInt16(rawBytes, offset + 42),
-                BacEntryUnknown = BitConverter.ToUInt16(rawBytes, offset + 44),
+                BacEntryTargetingOverride = BitConverter.ToUInt16(rawBytes, offset + 44),
                 RandomFlag = BitConverter.ToUInt16(rawBytes, offset + 46),
                 I_64 = BitConverter.ToUInt32(rawBytes, offset + 64),
                 I_68 = BitConverter.ToUInt32(rawBytes, offset + 68),
                 I_72 = BitConverter.ToUInt32(rawBytes, offset + 72),
-                BacCase = (BacCases)BitConverter.ToUInt32(rawBytes, offset + 76),
+                ReceiverLinkID = BitConverter.ToUInt32(rawBytes, offset + 76),
                 I_80 = BitConverter.ToUInt32(rawBytes, offset + 80),
                 StaminaCost = BitConverter.ToUInt32(rawBytes, offset + 84),
                 I_88 = BitConverter.ToUInt32(rawBytes, offset + 88),

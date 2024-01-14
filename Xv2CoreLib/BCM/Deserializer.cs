@@ -144,7 +144,7 @@ namespace Xv2CoreLib.BCM
             bytes.AddRange(BitConverter.GetBytes(bcmEntry.OpponentSizeConditions));
             bytes.AddRange(BitConverter.GetBytes(bcmEntry.MinimumLoopDuration));
             bytes.AddRange(BitConverter.GetBytes(bcmEntry.MaximumLoopDuration));
-            bytes.AddRange(BitConverter.GetBytes(bcmEntry.PrimaryActivatorConditions));
+            bytes.AddRange(BitConverter.GetBytes((uint)bcmEntry.PrimaryActivatorConditions));
             bytes.AddRange(BitConverter.GetBytes((uint)bcmEntry.ActivatorState));
             bytes.AddRange(BitConverter.GetBytes(bcmEntry.BacEntryPrimary));
             bytes.AddRange(BitConverter.GetBytes(bcmEntry.BacEntryCharge));
@@ -152,7 +152,7 @@ namespace Xv2CoreLib.BCM
             bytes.AddRange(BitConverter.GetBytes(bcmEntry.BacEntryUserConnect));
             bytes.AddRange(BitConverter.GetBytes(bcmEntry.BacEntryVictimConnect));
             bytes.AddRange(BitConverter.GetBytes(bcmEntry.BacEntryAirborne));
-            bytes.AddRange(BitConverter.GetBytes(bcmEntry.BacEntryUnknown));
+            bytes.AddRange(BitConverter.GetBytes(bcmEntry.BacEntryTargetingOverride));
             bytes.AddRange(BitConverter.GetBytes(bcmEntry.RandomFlag));
 
             if (bcmEntry.LoopAsSibling != null)
@@ -182,7 +182,7 @@ namespace Xv2CoreLib.BCM
             bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_64));
             bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_68));
             bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_72));
-            bytes.AddRange(BitConverter.GetBytes((int)bcmEntry.BacCase));
+            bytes.AddRange(BitConverter.GetBytes(bcmEntry.ReceiverLinkID));
             bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_80));
             bytes.AddRange(BitConverter.GetBytes(bcmEntry.StaminaCost));
             bytes.AddRange(BitConverter.GetBytes(bcmEntry.I_88));

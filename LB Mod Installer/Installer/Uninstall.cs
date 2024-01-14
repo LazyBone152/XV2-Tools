@@ -49,6 +49,7 @@ using Xv2CoreLib.QSL;
 using Xv2CoreLib.QBT;
 using Xv2CoreLib.TNN;
 using Xv2CoreLib.ODF;
+using Xv2CoreLib.BCM;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -320,6 +321,9 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".odf":
                     Uninstall_ODF(path, file);
+                    break;
+                case ".bcm":
+                    Uninstall_BCM(path, file);
                     break;
                 default:
                     throw new Exception(string.Format("The filetype of \"{0}\" is unsupported. Uninstall failed.\n\nThis mod was likely installed by a newer version of the installer.", path));
@@ -1548,7 +1552,28 @@ namespace LB_Mod_Installer.Installer
                 throw new Exception(error, ex);
             }
         }
+        
+        private void Uninstall_BCM(string path, _File file)
+        {
+            try
+            {
+                BCM_File binaryFile = (BCM_File)GetParsedFile<BCM_File>(path, false);
+                BCM_File cpkBinFile = (BCM_File)GetParsedFile<BCM_File>(path, true, false);
 
+                Section section = file.GetSection(Sections.BCM_Entry);
+
+                if (section != null)
+                {
+                    binaryFile.UninstallEntries(section.IDs, cpkBinFile);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at BCM uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
 
         //Generic uninstallers
         private void UninstallEntries<T>(IList<T> entries, IList<T> ogEntries, List<string> ids) where T : IInstallable
