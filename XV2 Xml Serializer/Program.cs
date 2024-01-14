@@ -23,7 +23,7 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
-            args = new string[1] { @"E:\SteamLibrary\steamapps\common\DB Xenoverse 2\data\demo\D15_12\ALL_DEM_TYPES.dem.xml" };
+            args = new string[1] { @"E:\VS_Test\EMM/ALL EMM" };
             //args = new string[1] { @"E:\VS_Test\EMA" };
 
             DEBUG_MODE = true;
