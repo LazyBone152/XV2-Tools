@@ -239,7 +239,7 @@ namespace Xv2CoreLib.DEM
                 case DEM_Type.DemoDataTypes.ScdForce:
                     subEntry.Type1_17_6 = Type1_17_6.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type1_19_3:
+                case DEM_Type.DemoDataTypes.ScdThreshold:
                     subEntry.Type1_19_3 = Type1_19_3.Read(rawBytes, bytes, offset);
                     break;
                 case DEM_Type.DemoDataTypes.Camera:
