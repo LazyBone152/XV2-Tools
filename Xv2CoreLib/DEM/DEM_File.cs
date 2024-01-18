@@ -147,6 +147,7 @@ namespace Xv2CoreLib.DEM
         [YAXSerializeAs("ScdForce")]
         public Type1_17_6 Type1_17_6 { get; set; }
         [YAXDontSerializeIfNull]
+        [YAXSerializeAs("ScdThreshold")]
         public Type1_19_3 Type1_19_3 { get; set; }
         [YAXDontSerializeIfNull]
         [YAXSerializeAs("Camera")]
@@ -331,7 +332,7 @@ namespace Xv2CoreLib.DEM
             ResetEyesColor,//1_14_1
             Type1_16_2,
             ScdForce, //1_17_6
-            Type1_19_3,
+            ScdThreshold, //1_19_3
             ScdWind, //1_20_12
             Scale, //1_26_2
             SetHologramMaterial, //1_27_2
@@ -407,6 +408,8 @@ namespace Xv2CoreLib.DEM
                     return DemoDataTypes.EyeColor;
                 case "1_17_6":
                     return DemoDataTypes.ScdForce;
+                case "1_19_3":
+                    return DemoDataTypes.ScdThreshold;
                 case "1_20_12":
                     return DemoDataTypes.ScdWind;
                 case "1_26_2":
@@ -1861,13 +1864,13 @@ namespace Xv2CoreLib.DEM
 
     public class Type1_19_3
     {
-        [YAXAttributeFor("I_1")]
+        [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
-        [YAXAttributeFor("I_2")]
+        [YAXAttributeFor("Threshold")]
         [YAXSerializeAs("value")]
         public int I_2 { get; set; }
-        [YAXAttributeFor("I_3")]
+        [YAXAttributeFor("Switch")]
         [YAXSerializeAs("value")]
         public int I_3 { get; set; }
 

@@ -265,7 +265,7 @@ namespace Xv2CoreLib.DEM
                         case DEM_Type.DemoDataTypes.ScdForce:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type1_17_6.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
-                        case DEM_Type.DemoDataTypes.Type1_19_3:
+                        case DEM_Type.DemoDataTypes.ScdThreshold:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type1_19_3.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
                         case DEM_Type.DemoDataTypes.Type2_6_3:
