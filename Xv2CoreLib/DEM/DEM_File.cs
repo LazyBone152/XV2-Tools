@@ -2420,7 +2420,7 @@ namespace Xv2CoreLib.DEM
         {
             return new Type3_4_2()
             {
-                Str_1 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 9)),
+                Str_1 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 0)),
                 I_2 = BitConverter.ToInt32(rawBytes, BitConverter.ToInt32(rawBytes, offset + 8)),
             };
         }
