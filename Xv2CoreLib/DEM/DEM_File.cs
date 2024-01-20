@@ -518,9 +518,9 @@ namespace Xv2CoreLib.DEM
                     return new int[3] { 1, 13, 10 };
                 case DemoDataTypes.ScdForce:
                     return new int[3] { 1, 17, 6 };
-                case DemoDataTypes.ScdWind:
-                    return new int[3] { 1, 19, 3 };
                 case DemoDataTypes.ScdThreshold:
+                    return new int[3] { 1, 19, 3 };
+                case DemoDataTypes.ScdWind:
                     return new int[3] { 1, 20, 12 };
                 case DemoDataTypes.ResetEyesColor:
                     return new int[3] { 1, 14, 1 };
