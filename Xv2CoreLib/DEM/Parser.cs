@@ -158,7 +158,7 @@ namespace Xv2CoreLib.DEM
                 case DEM_Type.DemoDataTypes.ScreenFade:
                     subEntry.Type0_2_7 = Type0_2_7.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type0_3_8:
+                case DEM_Type.DemoDataTypes.LightDir:
                     subEntry.Type0_3_8 = Type0_3_8.Read(rawBytes, bytes, offset);
                     break;
                 case DEM_Type.DemoDataTypes.Type0_16_1:
@@ -212,7 +212,7 @@ namespace Xv2CoreLib.DEM
                 case DEM_Type.DemoDataTypes.Type1_16_2:
                     subEntry.Type1_16_2 = Type1_16_2.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type1_20_12:
+                case DEM_Type.DemoDataTypes.ScdWind:
                     subEntry.Type1_20_12 = Type1_20_12.Read(rawBytes, bytes, offset);
                     break;
                 case DEM_Type.DemoDataTypes.Scale:
@@ -236,10 +236,10 @@ namespace Xv2CoreLib.DEM
                 case DEM_Type.DemoDataTypes.Type1_10_8:
                     subEntry.Type1_10_8 = Type1_10_8.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type1_17_6:
+                case DEM_Type.DemoDataTypes.ScdForce:
                     subEntry.Type1_17_6 = Type1_17_6.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type1_19_3:
+                case DEM_Type.DemoDataTypes.ScdThreshold:
                     subEntry.Type1_19_3 = Type1_19_3.Read(rawBytes, bytes, offset);
                     break;
                 case DEM_Type.DemoDataTypes.Camera:
@@ -251,28 +251,28 @@ namespace Xv2CoreLib.DEM
                 case DEM_Type.DemoDataTypes.Type2_7_5:
                     subEntry.Type2_7_5 = Type2_7_5.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type2_7_8:
+                case DEM_Type.DemoDataTypes.SetTargetLook:
                     subEntry.Type2_7_8 = Type2_7_8.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type2_9_2:
+                case DEM_Type.DemoDataTypes.SetNearClip:
                     subEntry.Type2_9_2 = Type2_9_2.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type2_10_2:
+                case DEM_Type.DemoDataTypes.SetFarClip:
                     subEntry.Type2_10_2 = Type2_10_2.Read(rawBytes, bytes, offset);
                     break;
                 case DEM_Type.DemoDataTypes.Type2_11_1:
                     subEntry.Type2_11_1 = Type2_11_1.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type3_0_1:
+                case DEM_Type.DemoDataTypes.ToggleMap:
                     subEntry.Type3_0_1 = Type3_0_1.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type3_1_1:
+                case DEM_Type.DemoDataTypes.ChangeMap:
                     subEntry.Type3_1_1 = Type3_1_1.Read(rawBytes, bytes, offset);
                     break;
                 case DEM_Type.DemoDataTypes.Type3_2_1:
                     subEntry.Type3_2_1 = Type3_2_1.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type3_3_1:
+                case DEM_Type.DemoDataTypes.ToggleFRZShip:
                     subEntry.Type3_3_1 = Type3_3_1.Read(rawBytes, bytes, offset);
                     break;
                 case DEM_Type.DemoDataTypes.Type3_4_2:
@@ -293,7 +293,7 @@ namespace Xv2CoreLib.DEM
                 case DEM_Type.DemoDataTypes.PostEffect:
                     subEntry.Type4_1_8 = Type4_1_8.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type5_0_2:
+                case DEM_Type.DemoDataTypes.SoundSmall:
                     subEntry.Type5_0_2 = Type5_0_2.Read(rawBytes, bytes, offset);
                     break;
                 case DEM_Type.DemoDataTypes.Type5_1_2:
@@ -311,13 +311,16 @@ namespace Xv2CoreLib.DEM
                 case DEM_Type.DemoDataTypes.Type5_4_3:
                     subEntry.Type5_4_3 = Type5_4_3.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type6_0_1:
+                case DEM_Type.DemoDataTypes.Type5_4_6:
+                    subEntry.Type5_4_6 = Type5_4_6.Read(rawBytes, bytes, offset);
+                    break;
+                case DEM_Type.DemoDataTypes.SetSpm:
                     subEntry.Type6_0_1 = Type6_0_1.Read(rawBytes, bytes, offset);
                     break;
                 case DEM_Type.DemoDataTypes.DistanceFocus:
                     subEntry.Type6_16_6 = Type6_16_6.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.SpmControl:
+                case DEM_Type.DemoDataTypes.SetColorFilter:
                     subEntry.Type6_17_19 = Type6_17_19.Read(rawBytes, bytes, offset);
                     break;
                 case DEM_Type.DemoDataTypes.Type6_18_7:
@@ -329,7 +332,7 @@ namespace Xv2CoreLib.DEM
                 case DEM_Type.DemoDataTypes.Type6_20_2:
                     subEntry.Type6_20_2 = Type6_20_2.Read(rawBytes, bytes, offset);
                     break;
-                case DEM_Type.DemoDataTypes.Type7_0_5:
+                case DEM_Type.DemoDataTypes.Picture:
                     subEntry.Type7_0_5 = Type7_0_5.Read(rawBytes, bytes, offset);
                     break;
                 case DEM_Type.DemoDataTypes.YearDisplay:
@@ -339,7 +342,7 @@ namespace Xv2CoreLib.DEM
                     subEntry.Type9_1_5 = Type9_1_5.Read(rawBytes, bytes, offset);
                     break;
                 case DEM_Type.DemoDataTypes.Type0_17_0:
-                case DEM_Type.DemoDataTypes.Type9_8_0:
+                case DEM_Type.DemoDataTypes.PlaySprite:
                 case DEM_Type.DemoDataTypes.Type0_16_0:
                     //No values
                     break;
