@@ -311,6 +311,9 @@ namespace Xv2CoreLib.DEM
                 case DEM_Type.DemoDataTypes.Type5_4_3:
                     subEntry.Type5_4_3 = Type5_4_3.Read(rawBytes, bytes, offset);
                     break;
+                case DEM_Type.DemoDataTypes.Type5_4_6:
+                    subEntry.Type5_4_6 = Type5_4_6.Read(rawBytes, bytes, offset);
+                    break;
                 case DEM_Type.DemoDataTypes.SetSpm:
                     subEntry.Type6_0_1 = Type6_0_1.Read(rawBytes, bytes, offset);
                     break;

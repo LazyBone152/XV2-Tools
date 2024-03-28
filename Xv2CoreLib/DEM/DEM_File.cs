@@ -297,6 +297,9 @@ namespace Xv2CoreLib.DEM
         [YAXDontSerializeIfNull]
         public Type5_4_3 Type5_4_3 { get; set; } //Added in 1.14
 
+        [YAXDontSerializeIfNull]
+        public Type5_4_6 Type5_4_6 { get; set; } //Added in 1.14
+
         public static string GetTypeFlag(int I_04, int I_06, int count)
         {
             return String.Format("{0}_{1}_{2}", I_04, I_06, count);
@@ -359,6 +362,7 @@ namespace Xv2CoreLib.DEM
             Music, //5_2_3
             Type5_3_2, //5_3_2
             Type5_4_3, //5_4_3
+            Type5_4_6, //5_4_6
             SetSpm, //6_0_1
             DistanceFocus, //6_16_6
             SetColorFilter, //6_17_19
@@ -2900,6 +2904,64 @@ namespace Xv2CoreLib.DEM
             writer.WriteValue(I_1);
             writer.WriteValue(I_2);
             writer.WriteValue(I_3);
+
+            return writer.bytes;
+        }
+
+    }
+
+    public class Type5_4_6
+    {
+        [YAXAttributeFor("I_1")]
+        [YAXSerializeAs("value")]
+        public int I_1 { get; set; }
+        [YAXAttributeFor("I_2")]
+        [YAXSerializeAs("value")]
+        public int I_2 { get; set; }
+        [YAXAttributeFor("I_3")]
+        [YAXSerializeAs("value")]
+        public int I_3 { get; set; }
+
+        [YAXAttributeFor("I_4")]
+        [YAXSerializeAs("value")]
+        public int I_4 { get; set; }
+        [YAXAttributeFor("I_5")]
+        [YAXSerializeAs("value")]
+        public int I_5 { get; set; }
+        [YAXAttributeFor("I_6")]
+        [YAXSerializeAs("value")]
+        public int I_6 { get; set; }
+
+        [YAXAttributeFor("I_7")]
+        [YAXSerializeAs("value")]
+        public int I_7 { get; set; }
+
+        public static Type5_4_6 Read(byte[] rawBytes, List<byte> bytes, int offset)
+        {
+            return new Type5_4_6()
+            {
+                I_1 = BitConverter.ToInt32(rawBytes, BitConverter.ToInt32(rawBytes, offset + 0)),
+                I_2 = BitConverter.ToInt32(rawBytes, BitConverter.ToInt32(rawBytes, offset + 8)),
+                I_3 = BitConverter.ToInt32(rawBytes, BitConverter.ToInt32(rawBytes, offset + 16)),
+                I_4 = BitConverter.ToInt32(rawBytes, BitConverter.ToInt32(rawBytes, offset + 24)),
+                I_5 = BitConverter.ToInt32(rawBytes, BitConverter.ToInt32(rawBytes, offset + 32)),
+                I_6 = BitConverter.ToInt32(rawBytes, BitConverter.ToInt32(rawBytes, offset + 40)),
+                I_7 = BitConverter.ToInt32(rawBytes, BitConverter.ToInt32(rawBytes, offset + 48))
+            };
+        }
+
+        public List<byte> Write(List<byte> bytes, List<int> valueOffsets)
+        {
+            ValueWriter writer = new ValueWriter(valueOffsets, bytes);
+
+            //Values
+            writer.WriteValue(I_1);
+            writer.WriteValue(I_2);
+            writer.WriteValue(I_3);
+            writer.WriteValue(I_4);
+            writer.WriteValue(I_5);
+            writer.WriteValue(I_6);
+            writer.WriteValue(I_7);
 
             return writer.bytes;
         }
