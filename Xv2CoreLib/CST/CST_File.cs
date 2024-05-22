@@ -47,6 +47,7 @@ namespace Xv2CoreLib.CST
 
         public const int CST_ENTRY_SIZE_1 = 0x28; //Ver 1 (original)
         public const int CST_ENTRY_SIZE_2 = 0x30; //Ver 2
+        public const int CST_ENTRY_SIZE_3 = 0x34; //Ver 3
 
         [YAXAttributeForClass]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 1)]
@@ -185,6 +186,8 @@ namespace Xv2CoreLib.CST
                     return CST_ENTRY_SIZE_1;
                 case 2:
                     return CST_ENTRY_SIZE_2;
+                case 3:
+                    return CST_ENTRY_SIZE_3;
                 default:
                     throw new InvalidDataException($"CST: This CST version is not supported (Version: {version}).");
             }
@@ -198,6 +201,8 @@ namespace Xv2CoreLib.CST
                     return 1;
                 case CST_ENTRY_SIZE_2:
                     return 2;
+                case CST_ENTRY_SIZE_3:
+                    return 3;
                 default:
                     throw new InvalidDataException($"CST: This CST version is not supported (EntrySize: {entrySize}).");
             }
@@ -464,6 +469,13 @@ namespace Xv2CoreLib.CST
         [YAXSerializeAs("value")]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0)]
         public int I_44 { get; set; }
+        [YAXAttributeFor("flag_cgk2")]
+        [YAXSerializeAs("value")]
+        public ushort flag_cgk2 { get; set; } // 0x30 - Added in game v 1.22. Adds the "Ultra Supervillain" to the name in CSS
+        [YAXAttributeFor("I_50")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0)]
+        public ushort I_50 { get; set; }
 
         public CST_CharaCostumeSlot() { }
 
@@ -505,6 +517,12 @@ namespace Xv2CoreLib.CST
                 entry.I_44 = BitConverter.ToInt32(bytes, offset + 44);
             }
 
+            if(version >= 3)
+            {
+                entry.flag_cgk2 = BitConverter.ToUInt16(bytes, offset + 0x30);
+                entry.I_50 = BitConverter.ToUInt16(bytes, offset + 0x32);
+            }
+
             return entry;
         }
 
@@ -530,6 +548,12 @@ namespace Xv2CoreLib.CST
             {
                 bytes.AddRange(BitConverter.GetBytes(I_40));
                 bytes.AddRange(BitConverter.GetBytes(I_44));
+            }
+
+            if(version >= 3)
+            {
+                bytes.AddRange(BitConverter.GetBytes(flag_cgk2));
+                bytes.AddRange(BitConverter.GetBytes(I_50));
             }
 
             if (bytes.Count != CST_File.VersionToEntrySize(version))
