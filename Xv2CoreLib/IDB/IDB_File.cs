@@ -298,9 +298,9 @@ namespace Xv2CoreLib.IDB
         [YAXAttributeFor("Description")]
         [YAXSerializeAs("MSG_ID")]
         public ushort DescMsgID { get; set; }
-        [YAXAttributeFor("NEW_I_08")]
-        [YAXSerializeAs("value")]
-        public ushort NEW_I_08 { get; set; }
+        [YAXAttributeFor("HowMsgID")]
+        [YAXSerializeAs("MSG_ID")]
+        public ushort HowMsgID { get; set; } = ushort.MaxValue;
         [YAXAttributeFor("NEW_I_10")]
         [YAXSerializeAs("value")]
         public ushort NEW_I_10 { get; set; }

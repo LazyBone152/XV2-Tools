@@ -212,7 +212,7 @@ namespace Xv2CoreLib.IDB
                         I_02 = BitConverter.ToUInt16(rawBytes, offset + 2),
                         NameMsgID = BitConverter.ToUInt16(rawBytes, offset + 4),
                         DescMsgID = BitConverter.ToUInt16(rawBytes, offset + 6),
-                        NEW_I_08 = BitConverter.ToUInt16(rawBytes, offset + 8),
+                        HowMsgID = BitConverter.ToUInt16(rawBytes, offset + 8),
                         NEW_I_10 = BitConverter.ToUInt16(rawBytes, offset + 10),
                         Type = BitConverter.ToUInt16(rawBytes, offset + 12),
                         I_10 = BitConverter.ToUInt16(rawBytes, offset + 14),

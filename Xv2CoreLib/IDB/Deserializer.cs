@@ -155,7 +155,7 @@ namespace Xv2CoreLib.IDB
                     bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].DescMsgID));
                     if (version >= 2)
                     {
-                        bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].NEW_I_08));
+                        bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].HowMsgID));
                         bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].NEW_I_10));
                     }
                     bytes.AddRange(BitConverter.GetBytes((ushort)idbFile.Entries[i].Type));
