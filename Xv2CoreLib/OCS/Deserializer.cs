@@ -89,9 +89,15 @@ namespace Xv2CoreLib.OCS
                         bytes.AddRange(BitConverter.GetBytes((int)ocsFile.Partners[i].SkillTypes[a].Skill_Type));
                         bytes.AddRange(BitConverter.GetBytes(ocsFile.Partners[i].SkillTypes[a].Skills[s].SkillID2));
 
-                        if(ocsFile.Version == 20)
+                        if(ocsFile.Version >= 20)
                         {
                             bytes.AddRange(BitConverter.GetBytes(ocsFile.Partners[i].SkillTypes[a].Skills[s].DLC_Flag));
+                        }
+
+                        if(ocsFile.Version >= 28)
+                        {
+                            bytes.AddRange(BitConverter.GetBytes(ocsFile.Partners[i].SkillTypes[a].Skills[s].STP_Cost));
+                            bytes.AddRange(BitConverter.GetBytes(ocsFile.Partners[i].SkillTypes[a].Skills[s].NEW_I_32));
                         }
                     }
                 }
@@ -106,6 +112,7 @@ namespace Xv2CoreLib.OCS
             {
                 case 16:
                 case 20:
+                case 28:
                     return;
                 default:
                     throw new Exception("Unknown OCS version: " + ocsFile.Version);

@@ -54,6 +54,7 @@ namespace Xv2CoreLib.OCT
                     bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].OctSubEntries[a].Index));
                     bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].OctSubEntries[a].I_08));
                     bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].OctSubEntries[a].I_12));
+                    bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].OctSubEntries[a].STP_Cost));
                     bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].OctSubEntries[a].I_16));
                     bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].OctSubEntries[a].I_20));
                 }

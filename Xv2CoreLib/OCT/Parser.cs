@@ -30,7 +30,7 @@ namespace Xv2CoreLib.OCT
             uint count = BitConverter.ToUInt32(rawBytes, 8);
             int offset = 16;
 
-            if (rawBytes[6] != 20)
+            if (rawBytes[6] != 24)
                 throw new Exception($"Unsupported OCT format: {rawBytes[6]}");
 
             if (count > 0)
@@ -40,7 +40,7 @@ namespace Xv2CoreLib.OCT
                 for (int i = 0; i < count; i++)
                 {
                     int subEntryCount = BitConverter.ToInt32(rawBytes, offset);
-                    int subDataOffset = BitConverter.ToInt32(rawBytes, offset + 4) + (24 * BitConverter.ToInt32(rawBytes, offset + 8)) + 16;
+                    int subDataOffset = BitConverter.ToInt32(rawBytes, offset + 4) + (28 * BitConverter.ToInt32(rawBytes, offset + 8)) + 16;
                     octFile.OctTableEntries.Add(new OCT_TableEntry() { Index = BitConverter.ToUInt32(rawBytes, offset + 12) });
 
                     if (subEntryCount > 0)
@@ -55,11 +55,12 @@ namespace Xv2CoreLib.OCT
                             Index = BitConverter.ToInt32(rawBytes, subDataOffset + 4),
                             I_08 = BitConverter.ToInt32(rawBytes, subDataOffset + 8),
                             I_12 = BitConverter.ToInt32(rawBytes, subDataOffset + 12),
-                            I_16 = BitConverter.ToInt32(rawBytes, subDataOffset + 16),
-                            I_20 = BitConverter.ToInt32(rawBytes, subDataOffset + 20)
+                            STP_Cost = BitConverter.ToInt32(rawBytes, subDataOffset + 16),
+                            I_16 = BitConverter.ToInt32(rawBytes, subDataOffset + 20),
+                            I_20 = BitConverter.ToInt32(rawBytes, subDataOffset + 24)
                         });
 
-                        subDataOffset += 24;
+                        subDataOffset += 28;
                     }
 
                     offset += 16;
