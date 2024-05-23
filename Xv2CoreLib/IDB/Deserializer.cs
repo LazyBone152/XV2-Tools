@@ -144,18 +144,20 @@ namespace Xv2CoreLib.IDB
 
         private void WriteEntriesNew(int count, int version)
         {
-            // These version checks can definitely be better...
             if (version != 1 && version != 2)
                 throw new InvalidDataException($"IDB: This IDB version is not supported (Version: {version}).");
 
-            if (version == 1)
-            {
                 for (int i = 0; i < count; i++)
                 {
                     bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].ID));
                     bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_02));
                     bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].NameMsgID));
                     bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].DescMsgID));
+                    if (version >= 2)
+                    {
+                        bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].NEW_I_08));
+                        bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].NEW_I_10));
+                    }
                     bytes.AddRange(BitConverter.GetBytes((ushort)idbFile.Entries[i].Type));
                     bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_10));
 
@@ -168,6 +170,11 @@ namespace Xv2CoreLib.IDB
                     bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_20));
                     bytes.AddRange(BitConverter.GetBytes((int)idbFile.Entries[i].RaceLock));
                     bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_28));
+                    if (version >= 2)
+                    {
+                        bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].NEW_I_32));
+                        bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].NEW_I_36));
+                    }
                     bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_32));
                     bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_36));
                     bytes.AddRange(BitConverter.GetBytes((ushort)idbFile.Entries[i].I_38));
@@ -183,48 +190,6 @@ namespace Xv2CoreLib.IDB
                     WriteEffectNew(idbFile.Entries[i].Effects[1], version);
                     WriteEffectNew(idbFile.Entries[i].Effects[2], version);
                 }
-            }
-
-            if (version == 2)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].ID));
-                    bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_02));
-                    bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].NameMsgID));
-                    bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].DescMsgID));
-                    bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].NEW_I_08));
-                    bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].NEW_I_10));
-                    bytes.AddRange(BitConverter.GetBytes((ushort)idbFile.Entries[i].Type));
-                    bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_10));
-
-                    bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].NEW_I_12));
-                    bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].NEW_I_14));
-
-                    bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_12));
-                    bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_14));
-                    bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_16));
-                    bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_20));
-                    bytes.AddRange(BitConverter.GetBytes((int)idbFile.Entries[i].RaceLock));
-                    bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_28));
-                    bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].NEW_I_32));
-                    bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].NEW_I_36));
-                    bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_32));
-                    bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_36));
-                    bytes.AddRange(BitConverter.GetBytes((ushort)idbFile.Entries[i].I_38));
-                    bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_40));
-                    bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_42));
-                    bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_44));
-                    bytes.AddRange(BitConverter.GetBytes(idbFile.Entries[i].I_46));
-
-                    if (idbFile.Entries[i].Effects.Count() != 3)
-                        throw new InvalidDataException(String.Format("Effect entry count mismatch. There must be 3. (ID: {0})", idbFile.Entries[i].Index));
-
-                    WriteEffectNew(idbFile.Entries[i].Effects[0], version);
-                    WriteEffectNew(idbFile.Entries[i].Effects[1], version);
-                    WriteEffectNew(idbFile.Entries[i].Effects[2], version);
-                }
-            }
 
         }
 
