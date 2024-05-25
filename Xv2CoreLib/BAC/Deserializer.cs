@@ -201,6 +201,9 @@ namespace Xv2CoreLib.BAC
                             case 30:
                                 bytes.AddRange(BAC_Type30.Write(bacFile.BacEntries[i].Type30));
                                 break;
+                            case 31:
+                                bytes.AddRange(BAC_Type31.Write(bacFile.BacEntries[i].Type31));
+                                break;
                         }
                     }
                 }
