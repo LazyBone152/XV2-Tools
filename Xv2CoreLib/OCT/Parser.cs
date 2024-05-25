@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Xv2CoreLib.OCS;
 using YAXLib;
 
 namespace Xv2CoreLib.OCT
@@ -27,11 +28,9 @@ namespace Xv2CoreLib.OCT
 
         private void Parse()
         {
+            octFile.Version = BitConverter.ToUInt16(rawBytes, 6);
             uint count = BitConverter.ToUInt32(rawBytes, 8);
             int offset = 16;
-
-            if (rawBytes[6] != 20)
-                throw new Exception($"Unsupported OCT format: {rawBytes[6]}");
 
             if (count > 0)
             {
@@ -40,7 +39,13 @@ namespace Xv2CoreLib.OCT
                 for (int i = 0; i < count; i++)
                 {
                     int subEntryCount = BitConverter.ToInt32(rawBytes, offset);
-                    int subDataOffset = BitConverter.ToInt32(rawBytes, offset + 4) + (24 * BitConverter.ToInt32(rawBytes, offset + 8)) + 16;
+                    int subDataOffset;
+
+                    if (octFile.Version >= 24)
+                        subDataOffset = BitConverter.ToInt32(rawBytes, offset + 4) + (28 * BitConverter.ToInt32(rawBytes, offset + 8)) + 16;
+                    else
+                        subDataOffset = BitConverter.ToInt32(rawBytes, offset + 4) + (24 * BitConverter.ToInt32(rawBytes, offset + 8)) + 16;
+
                     octFile.OctTableEntries.Add(new OCT_TableEntry() { Index = BitConverter.ToUInt32(rawBytes, offset + 12) });
 
                     if (subEntryCount > 0)
@@ -50,16 +55,36 @@ namespace Xv2CoreLib.OCT
 
                     for (int a = 0; a < subEntryCount; a++)
                     {
-                        octFile.OctTableEntries[i].OctSubEntries.Add(new OCT_SubEntry()
+                        switch (octFile.Version)
                         {
-                            Index = BitConverter.ToInt32(rawBytes, subDataOffset + 4),
-                            I_08 = BitConverter.ToInt32(rawBytes, subDataOffset + 8),
-                            I_12 = BitConverter.ToInt32(rawBytes, subDataOffset + 12),
-                            I_16 = BitConverter.ToInt32(rawBytes, subDataOffset + 16),
-                            I_20 = BitConverter.ToInt32(rawBytes, subDataOffset + 20)
-                        });
+                            case 20:
+                                octFile.OctTableEntries[i].OctSubEntries.Add(new OCT_SubEntry()
+                                {
+                                    Index = BitConverter.ToInt32(rawBytes, subDataOffset + 4),
+                                    I_08 = BitConverter.ToInt32(rawBytes, subDataOffset + 8),
+                                    I_12 = BitConverter.ToInt32(rawBytes, subDataOffset + 12),
+                                    I_16 = BitConverter.ToInt32(rawBytes, subDataOffset + 16),
+                                    I_20 = BitConverter.ToInt32(rawBytes, subDataOffset + 20)
+                                });
 
-                        subDataOffset += 24;
+                                subDataOffset += 24;
+                                break;
+                            case 24:
+                                octFile.OctTableEntries[i].OctSubEntries.Add(new OCT_SubEntry()
+                                {
+                                    Index = BitConverter.ToInt32(rawBytes, subDataOffset + 4),
+                                    I_08 = BitConverter.ToInt32(rawBytes, subDataOffset + 8),
+                                    I_12 = BitConverter.ToInt32(rawBytes, subDataOffset + 12),
+                                    STP_Cost = BitConverter.ToInt32(rawBytes, subDataOffset + 16),
+                                    I_16 = BitConverter.ToInt32(rawBytes, subDataOffset + 20),
+                                    I_20 = BitConverter.ToInt32(rawBytes, subDataOffset + 24)
+                                });
+
+                                subDataOffset += 28;
+                                break;
+                            default:
+                                throw new Exception("Unknown OCT version.");
+                        }
                     }
 
                     offset += 16;

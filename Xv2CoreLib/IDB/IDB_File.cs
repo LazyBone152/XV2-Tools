@@ -43,9 +43,10 @@ namespace Xv2CoreLib.IDB
     {
         [YAXAttributeForClass]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 1)]
-        public int Version { get; set; } = 1;
+        public int Version { get; set; } = 2;
         //0 = original IDB version (used from 1.00 to 1.17)
         //1 = updated IDB version first used since 1.18
+        //2 = updated IDB version first used since 1.22
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "IDB_Entry")]
         public List<IDB_Entry> Entries { get; set; }
@@ -265,7 +266,8 @@ namespace Xv2CoreLib.IDB
     public class IDB_Entry : IInstallable
     {
         public const int OLD_ENTRY_SIZE = 48;
-        public const int NEW_ENTRY_SIZE = 52; //New in 1.18
+        public const int ENTRY_SIZE_V1 = 52; //New in 1.18
+        public const int ENTRY_SIZE_V2 = 64; //New in 1.22
 
         public const string TALISMAN_NAME_MSG = "msg/proper_noun_talisman_info_";
         public const string TALISMAN_DESCRIPTION_MSG = "msg/proper_noun_talisman_name_";
@@ -296,6 +298,12 @@ namespace Xv2CoreLib.IDB
         [YAXAttributeFor("Description")]
         [YAXSerializeAs("MSG_ID")]
         public ushort DescMsgID { get; set; }
+        [YAXAttributeFor("HowMsgID")]
+        [YAXSerializeAs("MSG_ID")]
+        public ushort HowMsgID { get; set; } = ushort.MaxValue;
+        [YAXAttributeFor("NEW_I_10")]
+        [YAXSerializeAs("value")]
+        public ushort NEW_I_10 { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("Type")]
         public ushort Type { get; set; } //ushort
@@ -320,6 +328,12 @@ namespace Xv2CoreLib.IDB
         [YAXAttributeFor("TPMedals")]
         [YAXSerializeAs("value")]
         public int I_28 { get; set; }
+        [YAXAttributeFor("NEW_I_32")]
+        [YAXSerializeAs("value")]
+        public int NEW_I_32 { get; set; }
+        [YAXAttributeFor("NEW_I_36")]
+        [YAXSerializeAs("value")]
+        public int NEW_I_36 { get; set; }
         [YAXAttributeFor("Model")]
         [YAXSerializeAs("value")]
         public int I_32 { get; set; } //int32
@@ -503,7 +517,8 @@ namespace Xv2CoreLib.IDB
     public class IBD_Effect
     {
         public const int OLD_ENTRY_SIZE = 224;
-        public const int NEW_ENTRY_SIZE = 232;
+        public const int ENTRY_SIZE_V1 = 232;
+        public const int ENTRY_SIZE_V2 = 236;
 
         [YAXAttributeFor("Type")]
         [YAXSerializeAs("value")]
@@ -514,6 +529,9 @@ namespace Xv2CoreLib.IDB
         [YAXAttributeFor("NumActTimes")]
         [YAXSerializeAs("value")]
         public int I_08 { get; set; } = -1;
+        [YAXAttributeFor("NEW_I_12")]
+        [YAXSerializeAs("value")]
+        public int NEW_I_12 { get; set; } = 0;
         [YAXAttributeFor("Timer")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]

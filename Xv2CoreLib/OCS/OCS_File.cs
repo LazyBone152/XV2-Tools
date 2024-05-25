@@ -10,7 +10,7 @@ namespace Xv2CoreLib.OCS
     public class OCS_File
     {
         [YAXAttributeForClass]
-        public ushort Version { get; set; } //0x6: 16 = pre 1.13, 20 = 1.13 or later
+        public ushort Version { get; set; } // 0x6: 16 = pre 1.13, 20 = 1.13 or later, 28 = 1.22 or later
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Partner")]
         public List<OCS_Partner> Partners { get; set; }
@@ -33,7 +33,7 @@ namespace Xv2CoreLib.OCS
         #region LoadSave
         public static OCS_File Load(byte[] bytes)
         {
-            return new Parser(bytes).octFile;
+            return new Parser(bytes).ocsFile;
         }
 
         public byte[] SaveToBytes()
@@ -230,10 +230,16 @@ namespace Xv2CoreLib.OCS
         [YAXSerializeAs("TP_Cost")]
         public int TP_Cost { get; set; }
         [YAXAttributeForClass]
+        [YAXSerializeAs("STP_Cost")]
+        public int STP_Cost { get; set; } // Added in 1.22
+        [YAXAttributeForClass]
         [YAXSerializeAs("ID2")]
         public int SkillID2 { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("DLC_Flag")]
         public int DLC_Flag { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("NEW_I_32")]
+        public int NEW_I_32 { get; set; } // Added in 1.22
     }
 }
