@@ -922,9 +922,9 @@ namespace XV2_Xml_Serializer
                                             //Console.ReadLine();
                                         }
 
-                                        if (!values.Contains((ushort)(type.HitboxFlags & 0x000F)))
+                                        if (!values.Contains((ushort)((int)type.HitboxFlags & 0x000F)))
                                         {
-                                            values.Add((ushort)(type.HitboxFlags & 0x000F));
+                                            values.Add((ushort)((int)type.HitboxFlags & 0x000F));
                                         }
                                     }
                                 }
