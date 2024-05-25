@@ -12,7 +12,7 @@ namespace Xv2CoreLib.OCT
     {
         string saveLocation;
         OCT_File octFile;
-        List<byte> bytes = new List<byte>() { 35, 79, 67, 84, 254, 255, 20, 0 };
+        List<byte> bytes = new List<byte>() { 35, 79, 67, 84, 254, 255};
 
         public Deserializer(string location)
         {
@@ -25,6 +25,8 @@ namespace Xv2CoreLib.OCT
 
         private void Write()
         {
+            VersionCheck();
+            bytes.AddRange(BitConverter.GetBytes(octFile.Version));
             int count = (octFile.OctTableEntries != null) ? octFile.OctTableEntries.Count() : 0;
             bytes.AddRange(BitConverter.GetBytes(count));
             bytes.AddRange(new byte[4]);
@@ -54,13 +56,31 @@ namespace Xv2CoreLib.OCT
                     bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].OctSubEntries[a].Index));
                     bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].OctSubEntries[a].I_08));
                     bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].OctSubEntries[a].I_12));
-                    bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].OctSubEntries[a].STP_Cost));
+
+                    if (octFile.Version >= 24)
+                    {
+                        bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].OctSubEntries[a].STP_Cost));
+                    }
+
                     bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].OctSubEntries[a].I_16));
                     bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].OctSubEntries[a].I_20));
                 }
 
             }
+        }
+
+        private void VersionCheck()
+        {
+            switch (octFile.Version)
+            {
+                case 20:
+                case 24:
+                    return;
+                default:
+                    throw new Exception("Unknown OCT version: " + octFile.Version);
+            }
 
         }
+
     }
 }

@@ -6,6 +6,9 @@ namespace Xv2CoreLib.OCT
     [YAXSerializeAs("OCT")]
     class OCT_File
     {
+        [YAXAttributeForClass]
+        public ushort Version { get; set; } // 0x6: 0x14 = pre 1.22, 0x18 = 1.22 or later
+
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Partner")]
         public List<OCT_TableEntry> OctTableEntries { get; set; }
     }
@@ -39,7 +42,7 @@ namespace Xv2CoreLib.OCT
         [YAXSerializeAs("TP_Cost")]
         public int I_12 { get; set; }
         [YAXAttributeForClass]
-        [YAXSerializeAs("STP_Cost")]
+        [YAXSerializeAs("STP_Cost")] // New in 1.22
         public int STP_Cost { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("DLC_Flag")]
