@@ -199,6 +199,9 @@ namespace Xv2CoreLib.BAC
                             case 30:
                                 bytes.AddRange(BAC_Type30.Write(bacFile.BacEntries[i].Type30));
                                 break;
+                            case 31:
+                                bytes.AddRange(BAC_Type31.Write(bacFile.BacEntries[i].Type31));
+                                break;
                         }
                     }
                 }
@@ -397,6 +400,11 @@ namespace Xv2CoreLib.BAC
                 bacEntry.TypeDummy.Remove(30);
                 count++;
             }
+            if (bacEntry.Type31?.Count > 0)
+            {
+                bacEntry.TypeDummy.Remove(31);
+                count++;
+            }
             if (bacEntry.TypeDummy != null)
             {
                 count += bacEntry.TypeDummy.Count();
@@ -532,6 +540,10 @@ namespace Xv2CoreLib.BAC
             if (bacEntry.Type30?.Count > 0)
             {
                 types.Add(30);
+            }
+            if (bacEntry.Type31?.Count > 0)
+            {
+                types.Add(31);
             }
             if (bacEntry.TypeDummy != null)
             {
@@ -679,6 +691,10 @@ namespace Xv2CoreLib.BAC
             else if (type == 30)
             {
                 return (bacEntry.Type30 != null) ? bacEntry.Type30.Count() : 0;
+            }
+            else if (type == 31)
+            {
+                return (bacEntry.Type31 != null) ? bacEntry.Type31.Count() : 0;
             }
             else
             {
