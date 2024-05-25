@@ -5244,9 +5244,9 @@ namespace Xv2CoreLib.BAC
         [YAXAttributeFor("I_10")]
         [YAXSerializeAs("value")]
         public ushort I_10 { get; set; }
-        [YAXAttributeFor("I_12")]
+        [YAXAttributeFor("F_12")]
         [YAXSerializeAs("value")]
-        public int I_12 { get; set; }
+        public float F_12 { get; set; }
         [YAXAttributeFor("F_16")]
         [YAXSerializeAs("value")]
         public float F_16 { get; set; }
@@ -5278,7 +5278,7 @@ namespace Xv2CoreLib.BAC
 
                     I_08 = BitConverter.ToUInt16(rawBytes, offset + 8),
                     I_10 = BitConverter.ToUInt16(rawBytes, offset + 10),
-                    I_12 = BitConverter.ToInt32(rawBytes, offset + 12),
+                    F_12 = BitConverter.ToSingle(rawBytes, offset + 12),
                     F_16 = BitConverter.ToSingle(rawBytes, offset + 16),
                     F_20 = BitConverter.ToSingle(rawBytes, offset + 20),
                     I_24 = BitConverter.ToInt32(rawBytes, offset + 24),
@@ -5306,7 +5306,7 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.Flags));
                 bytes.AddRange(BitConverter.GetBytes(type.I_08));
                 bytes.AddRange(BitConverter.GetBytes(type.I_10));
-                bytes.AddRange(BitConverter.GetBytes(type.I_12));
+                bytes.AddRange(BitConverter.GetBytes(type.F_12));
                 bytes.AddRange(BitConverter.GetBytes(type.F_16));
                 bytes.AddRange(BitConverter.GetBytes(type.F_20));
                 bytes.AddRange(BitConverter.GetBytes(type.I_24));
