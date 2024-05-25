@@ -1305,7 +1305,8 @@ namespace Xv2CoreLib.BAC
             if (Type0?.Count != 0 || Type1?.Count != 0 || Type2?.Count != 0 || Type3?.Count != 0 || Type4?.Count != 0 || Type5?.Count != 0 || Type6?.Count != 0 ||
                 Type7?.Count != 0 || Type8?.Count != 0 || Type9?.Count != 0 || Type10?.Count != 0 || Type11?.Count != 0 || Type12?.Count != 0 || Type13?.Count != 0 ||
                 Type14?.Count != 0 || Type15?.Count != 0 || Type16?.Count != 0 || Type17?.Count != 0 || Type18?.Count != 0 || Type19?.Count != 0 || Type20?.Count != 0 ||
-                Type21?.Count != 0 || Type22?.Count != 0 || Type23?.Count != 0 || Type24?.Count != 0 || Type25?.Count != 0 || Type26?.Count != 0 || Type27?.Count != 0 || Type28?.Count != 0 || Type29?.Count != 0 || Type30?.Count != 0)
+                Type21?.Count != 0 || Type22?.Count != 0 || Type23?.Count != 0 || Type24?.Count != 0 || Type25?.Count != 0 || Type26?.Count != 0 || Type27?.Count != 0 || 
+                Type28?.Count != 0 || Type29?.Count != 0 || Type30?.Count != 0 | Type31?.Count != 0)
             {
                 return false;
             }
@@ -5578,9 +5579,12 @@ namespace Xv2CoreLib.BAC
         [YAXAttributeFor("I_18")]
         [YAXSerializeAs("value")]
         public ushort I_18 { get; set; }
-        [YAXAttributeFor("I_20")]
+        [YAXAttributeFor("SkillID")]
         [YAXSerializeAs("value")]
-        public int I_20 { get; set; } //Skill ID?
+        public ushort I_20 { get; set; }
+        [YAXAttributeFor("I_22")]
+        [YAXSerializeAs("value")]
+        public ushort I_22 { get; set; }
         [YAXAttributeFor("F_24")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
@@ -5631,7 +5635,8 @@ namespace Xv2CoreLib.BAC
                     I_12 = BitConverter.ToInt32(rawBytes, offset + 12),
                     I_16 = BitConverter.ToUInt16(rawBytes, offset + 16),
                     I_18 = BitConverter.ToUInt16(rawBytes, offset + 18),
-                    I_20 = BitConverter.ToInt32(rawBytes, offset + 20),
+                    I_20 = BitConverter.ToUInt16(rawBytes, offset + 20),
+                    I_22 = BitConverter.ToUInt16(rawBytes, offset + 22),
                     F_24 = BitConverter.ToSingle(rawBytes, offset + 24),
                     F_28 = BitConverter.ToSingle(rawBytes, offset + 28),
                     I_32 = BitConverter.ToInt32(rawBytes, offset + 32),
@@ -5665,6 +5670,7 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.I_16));
                 bytes.AddRange(BitConverter.GetBytes(type.I_18));
                 bytes.AddRange(BitConverter.GetBytes(type.I_20));
+                bytes.AddRange(BitConverter.GetBytes(type.I_22));
                 bytes.AddRange(BitConverter.GetBytes(type.F_24));
                 bytes.AddRange(BitConverter.GetBytes(type.F_28));
                 bytes.AddRange(BitConverter.GetBytes(type.I_32));
