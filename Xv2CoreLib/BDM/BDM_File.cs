@@ -273,7 +273,7 @@ namespace Xv2CoreLib.BDM
                             VictimBpeID = subEntry.I_102,
                             StaminaBrokenOverrideBdmId = -1,
                             TransformationType = subEntry.I_76,
-                            StumbleType = subEntry.I_92,
+                            StumbleType = (Stumble)subEntry.I_92,
                             I_58 = subEntry.I_50,
                             I_76 = subEntry.I_68,
                             I_02 = subEntry.I_02,
@@ -346,7 +346,7 @@ namespace Xv2CoreLib.BDM
                             VictimBpeID = subEntry.I_102,
                             StaminaBrokenOverrideBdmId = -1,
                             TransformationType = subEntry.I_76,
-                            StumbleType = subEntry.I_92,
+                            StumbleType = (Stumble)subEntry.I_92,
                             I_58 = subEntry.I_50,
                             I_76 = subEntry.I_68,
                             I_02 = subEntry.I_02,
@@ -442,7 +442,7 @@ namespace Xv2CoreLib.BDM
                             VictimBpeID = subEntry.I_102,
                             StaminaBrokenOverrideBdmId = -1,
                             TransformationType = subEntry.I_76,
-                            StumbleType = subEntry.I_92,
+                            StumbleType = (Stumble)subEntry.I_92,
                             I_58 = subEntry.I_50,
                             I_76 = subEntry.I_68,
                             I_02 = subEntry.I_02,
@@ -714,7 +714,7 @@ namespace Xv2CoreLib.BDM
         public ushort TransformationType { get; set; }
         [YAXAttributeFor("Stumble")]
         [YAXSerializeAs("value")]
-        public ushort StumbleType { get; set; }
+        public Stumble StumbleType { get; set; }
 
 
         [YAXAttributeFor("I_02")]
@@ -770,7 +770,7 @@ namespace Xv2CoreLib.BDM
                 I_02 = I_02,
                 DamageAmount = DamageAmount,
                 I_06 = I_06,
-                StumbleType = StumbleType,
+                StumbleType = (Stumble)StumbleType,
                 DamageSecondaryType = DamageSecondaryType,
                 CameraShakeType = CameraShakeType,
                 AcbType = AcbType,
@@ -1144,5 +1144,26 @@ namespace Xv2CoreLib.BDM
         Unk6 = 0x20,
         Unk7 = 0x40,
         Unk8 = 0x80
+    }
+
+    [Flags]
+    public enum Stumble : ushort
+    {
+        StumbleSet1 = 0x1,
+        StumbleSet2 = 0x2,
+        StumbleSet3 = 0x4,
+        StumbleSet4 = 0x8,
+        StumbleSet5 = 0x10,
+        StumbleSet6 = 0x20,
+        AllStumbleSets = 0x40,
+        Unk8 = 0x80,
+        Unk9 = 0x100,
+        Unk10 = 0x200,
+        Unk11 = 0x400,
+        Unk12 = 0x800,
+        Unk13 = 0x1000,
+        Unk14 = 0x2000,
+        Unk15 = 0x4000,
+        Unk16 = 0x8000
     }
 }

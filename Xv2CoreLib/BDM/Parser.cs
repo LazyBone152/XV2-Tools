@@ -165,7 +165,7 @@ namespace Xv2CoreLib.BDM
                 type0[i].TransformationType = BitConverter.ToUInt16(rawBytes, offset + 84);
                 type0[i].AlimentType = (AlimentFlags)BitConverter.ToInt16(rawBytes, offset + 86);
                 type0[i].DamageSpecial = BitConverter.ToUInt16(rawBytes, offset + 94);
-                type0[i].StumbleType = BitConverter.ToUInt16(rawBytes, offset + 100);
+                type0[i].StumbleType = (Stumble)BitConverter.ToUInt16(rawBytes, offset + 100);
                 type0[i].DamageSecondaryType = (SecondaryTypeFlags)BitConverter.ToUInt16(rawBytes, offset + 102);
                 type0[i].CameraShakeType = (SByte)rawBytes[offset + 104];
                 type0[i].CameraShakeTime = BitConverter.ToUInt16(rawBytes, offset + 106);

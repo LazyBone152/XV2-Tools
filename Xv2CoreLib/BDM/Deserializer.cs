@@ -269,7 +269,7 @@ namespace Xv2CoreLib.BDM
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].DamageSpecial));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_96[0]));
                 bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].I_96[1]));
-                bytes.AddRange(BitConverter.GetBytes(type0[properOrder[i]].StumbleType));
+                bytes.AddRange(BitConverter.GetBytes((ushort)type0[properOrder[i]].StumbleType));
                 bytes.AddRange(BitConverter.GetBytes((ushort)type0[properOrder[i]].DamageSecondaryType));
                 bytes.Add((Byte)type0[properOrder[i]].CameraShakeType);
                 bytes.Add(0);

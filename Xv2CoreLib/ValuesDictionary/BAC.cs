@@ -203,15 +203,16 @@ namespace Xv2CoreLib.ValuesDictionary
         //EepkType
         public static Dictionary<ushort, string> EepkType { get; private set; } = new Dictionary<ushort, string>()
         {
-            { 0 , "Common" },
-            { 2 , "Character" },
-            { 5 , "Super Skill" },
-            { 6 , "Ultimate Skill" },
-            { 3 , "Awoken Skill" },
-            { 7 , "Evasive Skill" },
-            { 9 , "Ki Blast Skill" },
-            { 1 , "Stage BG" },
-            { 11 , "Stage" }
+            { 0, "Common" },
+            { 2, "Character" },
+            { 3, "Any Skill" },
+            { 5, "Super Skill" },
+            { 6, "Ultimate Skill" },
+            { 12, "Awoken Skill" },
+            { 7, "Evasive Skill" },
+            { 9, "Ki Blast Skill" },
+            { 1, "Stage BG" },
+            { 11, "Stage" }
         };
 
         //EepkGlobalSkillIds
@@ -229,13 +230,14 @@ namespace Xv2CoreLib.ValuesDictionary
         //BsaType
         public static Dictionary<byte, string> BsaType { get; private set; } = new Dictionary<byte, string>()
         {
-            { 0 , "Common" },
-            { 5 , "Super Skill" },
-            { 6 , "Ultimate Skill" },
-            { 3 , "Awoken Skill" },
-            { 7 , "Evasive Skill" },
-            { 8,  "Unknown (8)" }, 
-            { 9 , "Ki Blast Skill" },
+            { 0, "Common" },
+            { 3, "Any Skill" },
+            { 5, "Super Skill" },
+            { 6, "Ultimate Skill" },
+            { 12, "Awoken Skill" },
+            { 7, "Evasive Skill" },
+            { 8, "Unknown (8)" }, 
+            { 9, "Ki Blast Skill" },
         };
 
         //BsaSpawnSource
@@ -822,8 +824,16 @@ namespace Xv2CoreLib.ValuesDictionary
             { 71 , "Recover KO (Start, Air)" },
             { 72 , "Recover KO (Middle, Air)" },
             { 73 , "Recover KO (End, Air)" },
-            { 74 , "KO Ground Impact" },
+            { 74 , "KO Ground Impact (Front Knockback)" },
+            { 75 , "KO Ground Impact (Back Knockback)" },
+            { 76 , "Ground Impact (Front Knockback)" },
+            { 77 , "Ground Impact (Back Knockback)" },
             { 80 , "Knockback Ground Impact" },
+
+            { 81 , "Lie on Ground (Face Up)" },
+            { 82 , "Lie on Ground (Face Down)" },
+            { 83 , "Get Up From Ground (Face Up)" },
+            { 84 , "Get Up From Ground (Face Down)" },
 
             //Various Stumble animation sets
             { 93 , "Stumble 1 (Frontal)" },
