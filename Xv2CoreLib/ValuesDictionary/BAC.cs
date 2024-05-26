@@ -563,6 +563,16 @@ namespace Xv2CoreLib.ValuesDictionary
             { 7f , "Evasive Skill" },
             { 9f , "Ki Blast Skill" }
         };
+
+        //BacFunctionSkillUpgradeSkillType
+        public static Dictionary<float, string> BacFunctionSkillUpgradeSkillType { get; private set; } = new Dictionary<float, string>()
+        {
+            { 0f , "Super Skill" },
+            { 1f , "Ultimate Skill" },
+            { 2f , "Awoken Skill (?)" },
+            { 3f , "Evasive Skill (?)" },
+            { 4f , "Ki Blast Skill (?)" }
+        };
         #endregion
 
         //ScreenEffect IDs (BPE)
