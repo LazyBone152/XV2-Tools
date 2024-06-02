@@ -328,7 +328,7 @@ namespace Xv2CoreLib.IDB
         [YAXAttributeFor("TPMedals")]
         [YAXSerializeAs("value")]
         public int I_28 { get; set; }
-        [YAXAttributeFor("NEW_I_32")]
+        [YAXAttributeFor("STPMedals")]
         [YAXSerializeAs("value")]
         public int NEW_I_32 { get; set; }
         [YAXAttributeFor("NEW_I_36")]
