@@ -21,7 +21,9 @@ namespace Xv2CoreLib.CSO
 
         public void SortEntries()
         {
-            CsoEntries.Sort((x, y) => x.SortID - y.SortID);
+            //CsoEntries.Sort((x, y) => x.SortID - y.SortID);
+
+            CsoEntries = CsoEntries.OrderBy(x => x.SortID).ThenBy(x => x.Costume).ToList();
         }
 
         public static CSO_File Load(byte[] rawBytes)
