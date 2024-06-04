@@ -738,9 +738,10 @@ namespace Xv2CoreLib.ValuesDictionary
         //Bac PhysicsObjectControl
         public static Dictionary<ushort, string> PhysicsObjectControlType { get; private set; } = new Dictionary<ushort, string>()
         {
-            { 0 , "Simulate Physics" },
-            { 1 , "Play SCD Animation" },
-            { 2 , "Unknown (2)" }
+            { 0 , "Unknown (0)" },
+            { 1 , "Simulate Physics (1)" },
+            { 2 , "Play SCD Animation (2)" },
+            { 1026 , "Play SCD Animation (1026)" }, //Used in Super Gamma Blast
         };
 
         //BacAuraType
