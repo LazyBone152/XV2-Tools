@@ -88,11 +88,11 @@ namespace Xv2CoreLib.ValuesDictionary
         //Animation Ean Type
         public static Dictionary<ushort, string> AnimationEanType { get; private set; } = new Dictionary<ushort, string>()
         {
-            { 0 , "Commom" },
+            { 0 , "Common" },
             { 5 , "Character" },
             { 65534 , "Skill" },
-            { 9 , "Commom (tail)" },
-            { 2 , "Commom MCM.DBA" },
+            { 9 , "Common (tail)" },
+            { 2 , "Common MCM.DBA" },
             { 10 , "Face Base" },
             { 11 , "Face Forehead" }
         };
@@ -100,7 +100,7 @@ namespace Xv2CoreLib.ValuesDictionary
         //BdmType
         public static Dictionary<byte, string> BdmType { get; private set; } = new Dictionary<byte, string>()
         {
-            { 0 , "Commom" },
+            { 0 , "Common" },
             { 1 , "Character" },
             { 2 , "Skill" }
         };
