@@ -167,7 +167,7 @@ namespace Xv2CoreLib.ValuesDictionary
 
             //Everything else
             { 9 , "MCM" },
-            { 0 , "Target (0x0)" },
+            { 0 , "Rumble (0x0)" },
             { 1 , "Heavy Rumble (0x1)" },
             { 2 , "Extreme Rumble (0x2)" },
             { 6 , "Zoom (0x6)" },
