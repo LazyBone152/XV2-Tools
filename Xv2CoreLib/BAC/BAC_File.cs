@@ -4282,7 +4282,7 @@ namespace Xv2CoreLib.BAC
         [Flags]
         public enum HomingFlagsEnum : ushort
         {
-            Left = 0x1,
+            EnableAutoTracking = 0x1,
             UseFloatSpeedModifier = 0x2,
             Unk3 = 0x4,
             UseBones = 0x8,
