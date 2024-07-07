@@ -52,6 +52,7 @@ using Xv2CoreLib.ODF;
 using Xv2CoreLib.BCM;
 using Xv2CoreLib.OCT;
 using Xv2CoreLib.PSO;
+using Xv2CoreLib.OCP;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -305,6 +306,9 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".oct":
                     Uninstall_OCT(path, file);
+                    break;
+                case ".ocp":
+                    Uninstall_OCP(path, file);
                     break;
                 case ".dml":
                     Uninstall_DML(path, file);
@@ -1414,6 +1418,22 @@ namespace LB_Mod_Installer.Installer
             catch (Exception ex)
             {
                 string error = string.Format("Failed at OCT uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
+
+        private void Uninstall_OCP(string path, _File file)
+        {
+            try
+            {
+                OCP_File binaryFile = (OCP_File)GetParsedFile<OCP_File>(path, false);
+                OCP_File cpkBinFile = (OCP_File)GetParsedFile<OCP_File>(path, true);
+
+                UninstallSubEntries<OCP_SubEntry, OCP_TableEntry>(binaryFile.TableEntries, (cpkBinFile != null) ? cpkBinFile.TableEntries : null, file, true);
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at OCP uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }
