@@ -50,6 +50,7 @@ using Xv2CoreLib.QBT;
 using Xv2CoreLib.TNN;
 using Xv2CoreLib.ODF;
 using Xv2CoreLib.BCM;
+using Xv2CoreLib.OCT;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -300,6 +301,9 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".oco":
                     Uninstall_OCO(path, file);
+                    break;
+                case ".oct":
+                    Uninstall_OCT(path, file);
                     break;
                 case ".dml":
                     Uninstall_DML(path, file);
@@ -1390,6 +1394,22 @@ namespace LB_Mod_Installer.Installer
             catch (Exception ex)
             {
                 string error = string.Format("Failed at OCO uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
+
+        private void Uninstall_OCT(string path, _File file)
+        {
+            try
+            {
+                OCT_File binaryFile = (OCT_File)GetParsedFile<OCT_File>(path, false);
+                OCT_File cpkBinFile = (OCT_File)GetParsedFile<OCT_File>(path, true);
+
+                UninstallSubEntries<OCT_SubEntry, OCT_TableEntry>(binaryFile.OctTableEntries, (cpkBinFile != null) ? cpkBinFile.OctTableEntries : null, file, true);
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at OCT uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }

@@ -55,6 +55,7 @@ using Xv2CoreLib.QED;
 using Xv2CoreLib.TNN;
 using Xv2CoreLib.ODF;
 using Xv2CoreLib.EEPK;
+using Xv2CoreLib.OCT;
 //using LB_Mod_Installer.Installer.Transformation;
 
 namespace LB_Mod_Installer.Installer
@@ -375,6 +376,9 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".oco":
                     Install_OCO(xmlPath, installPath, isXml, useSkipBindings);
+                    break;
+                case ".oct":
+                    Install_OCT(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".dml":
                     Install_DML(xmlPath, installPath, isXml, useSkipBindings);
@@ -1939,6 +1943,27 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
+        private void Install_OCT(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                OCT_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<OCT_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : OCT_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                OCT_File binaryFile = (OCT_File)GetParsedFile<OCT_File>(installPath);
+
+                //Install entries
+                InstallSubEntries<OCT_SubEntry, OCT_TableEntry>(xmlFile.OctTableEntries, binaryFile.OctTableEntries, installPath, Sections.OCT_Entry, useSkipBindings);
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at OCT install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
         private void Install_DML(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
@@ -2467,6 +2492,8 @@ namespace LB_Mod_Installer.Installer
                     return OCS_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".oco":
                     return OCO_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".oct":
+                    return OCT_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".qml":
                     return QML_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".qbt":
@@ -2579,6 +2606,8 @@ namespace LB_Mod_Installer.Installer
                     return ((OCS_File)data).SaveToBytes();
                 case ".oco":
                     return ((OCO_File)data).SaveToBytes();
+                case ".oct":
+                    return ((OCT_File)data).SaveToBytes();
                 case ".qml":
                     return ((QML_File)data).SaveToBytes();
                 case ".qbt":
