@@ -51,6 +51,7 @@ using Xv2CoreLib.TNN;
 using Xv2CoreLib.ODF;
 using Xv2CoreLib.BCM;
 using Xv2CoreLib.OCT;
+using Xv2CoreLib.PSO;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -325,6 +326,9 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".odf":
                     Uninstall_ODF(path, file);
+                    break;
+                case ".pso":
+                    Uninstall_PSO(path, file);
                     break;
                 case ".bcm":
                     Uninstall_BCM(path, file);
@@ -1572,7 +1576,29 @@ namespace LB_Mod_Installer.Installer
                 throw new Exception(error, ex);
             }
         }
-        
+
+        private void Uninstall_PSO(string path, _File file)
+        {
+            try
+            {
+                PSO_File binaryFile = (PSO_File)GetParsedFile<PSO_File>(path, false);
+                PSO_File cpkBinFile = (PSO_File)GetParsedFile<PSO_File>(path, true, true);
+
+                Section section = file.GetSection(Sections.PSO_Entry);
+
+                if (section != null)
+                {
+                    UninstallEntries(binaryFile.PsoEntries[0].PsoSubEntries, (cpkBinFile != null) ? cpkBinFile.PsoEntries[0].PsoSubEntries : null, section.IDs);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at PSO uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
+
         private void Uninstall_BCM(string path, _File file)
         {
             try

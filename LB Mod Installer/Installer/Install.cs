@@ -56,6 +56,7 @@ using Xv2CoreLib.TNN;
 using Xv2CoreLib.ODF;
 using Xv2CoreLib.EEPK;
 using Xv2CoreLib.OCT;
+using Xv2CoreLib.PSO;
 //using LB_Mod_Installer.Installer.Transformation;
 
 namespace LB_Mod_Installer.Installer
@@ -400,6 +401,9 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".odf":
                     Install_ODF(xmlPath, installPath, isXml, useSkipBindings);
+                    break;
+                case ".pso":
+                    Install_PSO(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".bcm":
                     Install_BCM(xmlPath, installPath, isXml, useSkipBindings);
@@ -2160,6 +2164,36 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
+        private void Install_PSO(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                PSO_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<PSO_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : PSO_File.Read(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                PSO_File binaryFile = (PSO_File)GetParsedFile<PSO_File>(installPath);
+
+                if (xmlFile.PsoEntries.Count != 1)
+                {
+                    MessageBox.Show("PSO: Invalid number of \"PsoEntries\" elements in XML file. There should only be 1.");
+                    return;
+                }
+
+                //Parse bindings
+                bindingManager.ParseProperties(xmlFile.PsoEntries[0].PsoSubEntries, binaryFile.PsoEntries[0].PsoSubEntries, installPath);
+
+                //Install entries
+                InstallEntries(xmlFile.PsoEntries[0].PsoSubEntries, binaryFile.PsoEntries[0].PsoSubEntries, installPath, Sections.ODF_Entry, useSkipBindings);
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at PSO install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
         private void Install_BCM(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
@@ -2512,6 +2546,8 @@ namespace LB_Mod_Installer.Installer
                     return TNN_File.Parse(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".odf":
                     return ODF_File.Read(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".pso":
+                    return PSO_File.Read(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 default:
                     throw new InvalidDataException(String.Format("GetParsedFileFromGame: The filetype of \"{0}\" is not supported.", path));
             }
@@ -2626,6 +2662,8 @@ namespace LB_Mod_Installer.Installer
                     return ((TNN_File)data).Write();
                 case ".odf":
                     return ((ODF_File)data).Write();
+                case ".pso":
+                    return ((PSO_File)data).Write();
                 case ".eepk":
                     return ((EEPK_File)data).SaveToBytes();
                 default:
