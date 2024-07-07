@@ -12,7 +12,7 @@ namespace Xv2CoreLib.OCP
     {
         string saveLocation;
         byte[] rawBytes;
-        private OCP_File octFile = new OCP_File();
+        public OCP_File ocpFile = new OCP_File();
 
         public Parser(string path, bool _writeXml)
         {
@@ -24,8 +24,15 @@ namespace Xv2CoreLib.OCP
             if (_writeXml)
             {
                 YAXSerializer serializer = new YAXSerializer(typeof(OCP_File));
-                serializer.SerializeToFile(octFile, saveLocation + ".xml");
+                serializer.SerializeToFile(ocpFile, saveLocation + ".xml");
             }
+        }
+
+        public Parser(byte[] bytes)
+        {
+            rawBytes = bytes;
+
+            Parse();
         }
 
         private void Parse()
@@ -35,24 +42,24 @@ namespace Xv2CoreLib.OCP
 
             if (count > 0)
             {
-                octFile.TableEntries = new List<OCP_TableEntry>();
+                ocpFile.TableEntries = new List<OCP_TableEntry>();
 
                 for(int i = 0; i < count; i++)
                 {
                     int subEntryCount = BitConverter.ToInt32(rawBytes, offset);
                     int subDataOffset = BitConverter.ToInt32(rawBytes, offset + 4) + (20 * BitConverter.ToInt32(rawBytes, offset + 8)) + 16;
-                    octFile.TableEntries.Add(new OCP_TableEntry() { Index = BitConverter.ToUInt32(rawBytes, offset + 12) });
+                    ocpFile.TableEntries.Add(new OCP_TableEntry() { PartnerID = BitConverter.ToInt32(rawBytes, offset + 12) });
                     
                     if(subEntryCount > 0)
                     {
-                        octFile.TableEntries[i].SubEntries = new List<OCP_SubEntry>();
+                        ocpFile.TableEntries[i].SubEntries = new List<OCP_SubEntry>();
                     }
 
                     for (int a = 0; a < subEntryCount; a++)
                     {
-                        octFile.TableEntries[i].SubEntries.Add(new OCP_SubEntry()
+                        ocpFile.TableEntries[i].SubEntries.Add(new OCP_SubEntry()
                         {
-                            Index = BitConverter.ToUInt32(rawBytes, subDataOffset + 4),
+                            I_04 = BitConverter.ToInt32(rawBytes, subDataOffset + 4),
                             I_08 = BitConverter.ToInt32(rawBytes, subDataOffset + 8),
                             I_12 = BitConverter.ToUInt32(rawBytes, subDataOffset + 12),
                             I_16 = BitConverter.ToUInt32(rawBytes, subDataOffset + 16)
