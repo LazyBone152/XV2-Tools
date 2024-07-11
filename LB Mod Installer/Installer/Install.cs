@@ -1980,7 +1980,7 @@ namespace LB_Mod_Installer.Installer
 #endif
             {
                 OCP_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<OCP_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : OCP_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
-                OCP_File binaryFile = (OCP_File)GetParsedFile<OCO_File>(installPath);
+                OCP_File binaryFile = (OCP_File)GetParsedFile<OCP_File>(installPath);
 
                 //Install entries
                 InstallSubEntries<OCP_SubEntry, OCP_TableEntry>(xmlFile.TableEntries, binaryFile.TableEntries, installPath, Sections.OCP_Entry, useSkipBindings);
