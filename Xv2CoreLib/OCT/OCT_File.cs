@@ -43,6 +43,7 @@ namespace Xv2CoreLib.OCT
         public int I_12 { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("STP_Cost")] // New in 1.22
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public int STP_Cost { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("DLC_Flag")]
