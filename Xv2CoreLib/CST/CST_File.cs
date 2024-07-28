@@ -491,6 +491,7 @@ namespace Xv2CoreLib.CST
             CssVoice2 = slot.CssVoice2 < 0 ? ushort.MaxValue : (ushort)slot.CssVoice2;
             DlcFlag1 = slot.DLC_Flag1;
             DlcFlag2 = slot.DLC_Flag2;
+            flag_cgk2 = (ushort)(slot.flag_cgk2 == true ? 1 : 0);
         }
 
         public static CST_CharaCostumeSlot Read(byte[] bytes, int offset, int version)
@@ -574,7 +575,8 @@ namespace Xv2CoreLib.CST
                 CssVoice1 = CssVoice1,
                 CssVoice2 = CssVoice2,
                 DLC_Flag1 = DlcFlag1,
-                Costume = Costume
+                Costume = Costume,
+                flag_cgk2 = (flag_cgk2 == 0) ? false : true
             };
         }
     };
