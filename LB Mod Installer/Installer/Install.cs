@@ -148,7 +148,6 @@ namespace LB_Mod_Installer.Installer
                 else
                 {
                     MessageBox.Show("No changes were made to the installation. The installer will now close.", "Install Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                    Parent.ShutdownApp();
                 }
                 Parent.ShutdownApp();
             }
