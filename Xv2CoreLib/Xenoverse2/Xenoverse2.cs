@@ -49,6 +49,7 @@ namespace Xv2CoreLib
             Chinese1,
             Chinese2,
             Korean,
+            Japanese,
 
             NumLanguages
         }
