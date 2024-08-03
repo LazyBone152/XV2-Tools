@@ -67,6 +67,7 @@
         public const string SEV_Entry = "SEV_Entry";
         public const string HCI_Entry = "HCI_Entry";
         public const string CML_Entry = "CML_Entry";
+        public const string IKD_Entry = "IKD_Entry";
         public const string OCS_Skill = "OCS_Skill";
         public const string OCO_Entry = "OCO_Entry";
         public const string QML_Entry = "QML_Entry";
