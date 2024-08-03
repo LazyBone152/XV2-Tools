@@ -55,6 +55,7 @@ using Xv2CoreLib.QED;
 using Xv2CoreLib.TNN;
 using Xv2CoreLib.ODF;
 using Xv2CoreLib.EEPK;
+using xv2Utils = Xv2CoreLib.Utils;
 //using LB_Mod_Installer.Installer.Transformation;
 
 namespace LB_Mod_Installer.Installer
@@ -222,6 +223,10 @@ namespace LB_Mod_Installer.Installer
                     case FileType.EPatch:
                         UpdateProgessBarText(string.Format("_EPatch \"{0}\"...", Path.GetFileNameWithoutExtension(File.SourcePath)));
                         fileManager.AddStreamFile($"../XV2PATCHER/Epatches/{File.SourcePath}", zipManager.GetZipEntry(string.Format("Epatches/{0}", File.SourcePath)), true);
+                        break;
+                    case FileType.MSG: // Not sure if this is the best approach
+                        UpdateProgessBarText(String.Format("_Installing \"{0}\"...", Path.GetFileName(File.InstallPath)));
+                        Install_MSG(File.SourcePath, File.InstallPath, Path.GetExtension(File.SourcePath) == ".xml", File.UseSkipBinding, File.InstallToAllLanguages);
                         break;
                     default:
                         MessageBox.Show($"Unknown File.Type: {type}");
@@ -1493,17 +1498,34 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_MSG(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
+        private void Install_MSG(string xmlPath, string installPath, bool isXml, bool useSkipBindings, bool installAllLanguages = false)
         {
 #if !DEBUG
             try
 #endif
             {
+                if (installAllLanguages)
+                {
+                    for (int i = 0; i < GeneralInfo.LanguageSuffix.Length; i++)
+                    {
+                        installPath = $"{xv2Utils.GetPathWithoutExtension(installPath).Substring(0, xv2Utils.GetPathWithoutExtension(installPath).LastIndexOf('_') + 1)}{GeneralInfo.LanguageSuffix[i]}";
+                        Install_MSG(xmlPath, installPath, isXml, useSkipBindings, false);
+                    }
+                    return;
+                }
+
                 MSG_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<MSG_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : MSG_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 MSG_File binaryFile = (MSG_File)GetParsedFile<MSG_File>(installPath, raiseEx: false);
 
                 if (binaryFile == null)
-                    binaryFile = new MSG_File();
+                {
+                    binaryFile = new MSG_File
+                    {
+                        unicode_msg = xmlFile.unicode_msg,
+                        unicode_names = xmlFile.unicode_names
+                    };
+                    fileManager.AddParsedFile(installPath, binaryFile);
+                }
 
                 //Parse bindings
                 bindingManager.ParseProperties(xmlFile.MSG_Entries, binaryFile.MSG_Entries, installPath);

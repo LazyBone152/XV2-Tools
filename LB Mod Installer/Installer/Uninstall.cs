@@ -742,7 +742,7 @@ namespace LB_Mod_Installer.Installer
             try
             {
                 MSG_File binaryFile = (MSG_File)GetParsedFile<MSG_File>(path, false);
-                MSG_File cpkBinFile = (MSG_File)GetParsedFile<MSG_File>(path, true);
+                MSG_File cpkBinFile = (MSG_File)GetParsedFile<MSG_File>(path, true, false);
 
                 Section section = file.GetSection(Sections.MSG_Entries);
 
