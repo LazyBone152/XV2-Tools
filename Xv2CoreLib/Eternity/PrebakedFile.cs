@@ -515,7 +515,7 @@ namespace Xv2CoreLib.Eternity
         /// <summary>
         /// Custom CusAura IDs start from this point. Do not allow any IDs below this.
         /// </summary>
-        public const int CUS_DATA_ID_START = 0x30;
+        public const int CUS_DATA_ID_START = 0x33;
 
         [YAXAttributeForClass]
         [YAXSerializeAs("cus_aura_id")]
