@@ -322,6 +322,9 @@ namespace XV2_Xml_Serializer
                                 case ".ems":
                                     Xv2CoreLib.EMS.EMS_File.CreateXml(fileLocation);
                                     break;
+                                case ".vlc":
+                                    Xv2CoreLib.VLC.VLC_File.Parse(fileLocation, true);
+                                    break;
                                 case ".xml":
                                     LoadXmlInitial(fileLocation);
                                     break;
