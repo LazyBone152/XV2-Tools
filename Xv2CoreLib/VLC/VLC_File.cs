@@ -101,11 +101,11 @@ namespace Xv2CoreLib.VLC
 
             List<byte> bytes = new List<byte>();
 
-            //Offset / Padding
-            bytes.AddRange(BitConverter.GetBytes(16));
-            bytes.AddRange(BitConverter.GetBytes(16));
-            bytes.AddRange(BitConverter.GetBytes(16));
-            bytes.AddRange(BitConverter.GetBytes(16));
+            //Header
+            bytes.AddRange(BitConverter.GetBytes(ZoomInCamera.Count));
+            bytes.AddRange(BitConverter.GetBytes(0));
+            bytes.AddRange(BitConverter.GetBytes(0));
+            bytes.AddRange(BitConverter.GetBytes(0));
 
             if (ZoomInCamera.Count != UnkCamera.Count)
             {
@@ -118,7 +118,7 @@ namespace Xv2CoreLib.VLC
                 bytes.AddRange(BitConverter.GetBytes(ZoomInCamera[i].OffsetXYZ[0]));
                 bytes.AddRange(BitConverter.GetBytes(ZoomInCamera[i].OffsetXYZ[1]));
                 bytes.AddRange(BitConverter.GetBytes(ZoomInCamera[i].OffsetXYZ[2]));
-                bytes.AddRange(BitConverter.GetBytes(ZoomInCamera[i].CharaId));
+                bytes.AddRange(BitConverter.GetBytes((float)ZoomInCamera[i].CharaId));
 
                 if (ZoomInCamera[i].CharaId != UnkCamera[i].CharaId)
                     throw new Exception("Chara ID mismatch at CameraLeft ID = " + ZoomInCamera[i].CharaId + "!\nCameraRight ID = " + UnkCamera[i].CharaId);
@@ -126,10 +126,10 @@ namespace Xv2CoreLib.VLC
 
             for (int i = 0; i < UnkCamera.Count; i++)
             {
-                bytes.AddRange(BitConverter.GetBytes(ZoomInCamera[i].OffsetXYZ[0]));
-                bytes.AddRange(BitConverter.GetBytes(ZoomInCamera[i].OffsetXYZ[1]));
-                bytes.AddRange(BitConverter.GetBytes(ZoomInCamera[i].OffsetXYZ[2]));
-                bytes.AddRange(BitConverter.GetBytes(ZoomInCamera[i].CharaId));
+                bytes.AddRange(BitConverter.GetBytes(UnkCamera[i].OffsetXYZ[0]));
+                bytes.AddRange(BitConverter.GetBytes(UnkCamera[i].OffsetXYZ[1]));
+                bytes.AddRange(BitConverter.GetBytes(UnkCamera[i].OffsetXYZ[2]));
+                bytes.AddRange(BitConverter.GetBytes((float)UnkCamera[i].CharaId));
 
                 if (ZoomInCamera[i].CharaId != UnkCamera[i].CharaId)
                     throw new Exception("Chara ID mismatch at CameraLeft ID = " + ZoomInCamera[i].CharaId + "!\nCameraRight ID = " + UnkCamera[i].CharaId);
@@ -163,7 +163,7 @@ namespace Xv2CoreLib.VLC
         {
             get
             {
-                return $"{CharaId}_{OffsetXYZ[0]}_{OffsetXYZ[1]}_{OffsetXYZ[2]}";
+                return $"{CharaId}";
             }
             set
             {
@@ -172,12 +172,6 @@ namespace Xv2CoreLib.VLC
                 if (split.Length == 2)
                 {
                     CharaId = int.Parse(split[0]);
-                    OffsetXYZ = new float[]
-                    {
-                        float.Parse(split[1]),
-                        float.Parse(split[2]),
-                        float.Parse(split[3])
-                    };
                 }
             }
         }
