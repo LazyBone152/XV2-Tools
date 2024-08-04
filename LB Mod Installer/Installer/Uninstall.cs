@@ -50,6 +50,7 @@ using Xv2CoreLib.QBT;
 using Xv2CoreLib.TNN;
 using Xv2CoreLib.ODF;
 using Xv2CoreLib.BCM;
+using Xv2CoreLib.VLC;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -324,6 +325,9 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".bcm":
                     Uninstall_BCM(path, file);
+                    break;
+                case ".vlc":
+                    Uninstall_VLC(path, file);
                     break;
                 default:
                     throw new Exception(string.Format("The filetype of \"{0}\" is unsupported. Uninstall failed.\n\nThis mod was likely installed by a newer version of the installer.", path));
@@ -1175,6 +1179,28 @@ namespace LB_Mod_Installer.Installer
             catch (Exception ex)
             {
                 string error = string.Format("Failed at CML uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
+
+        private void Uninstall_VLC(string path, _File file)
+        {
+            try
+            {
+                VLC_File binaryFile = (VLC_File)GetParsedFile<VLC_File>(path, false);
+                VLC_File cpkBinFile = (VLC_File)GetParsedFile<VLC_File>(path, true);
+
+                Section zoomInCameraSection = file.GetSection(Sections.VLC_ZoomInCamera);
+                Section unkCameraSection = file.GetSection(Sections.VLC_UnkCamera);
+
+                if (zoomInCameraSection != null)
+                    UninstallEntries(binaryFile.ZoomInCamera, (cpkBinFile != null) ? cpkBinFile.ZoomInCamera : null, zoomInCameraSection.IDs);
+                if (unkCameraSection != null)
+                    UninstallEntries(binaryFile.UnkCamera, (cpkBinFile != null) ? cpkBinFile.UnkCamera : null, unkCameraSection.IDs);
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at VLC uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }

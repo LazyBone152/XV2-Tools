@@ -71,6 +71,8 @@
         public const string OCO_Entry = "OCO_Entry";
         public const string QML_Entry = "QML_Entry";
         public const string CST_Entry = "CST_Entry";
+        public const string VLC_ZoomInCamera = "VLC_ZoomInCamera";
+        public const string VLC_UnkCamera = "VLC_UnkCamera";
         public const string CharaSlotEntry = "CharaSlotEntry";
         public const string StageSlotEntry = "StageSlotEntry";
         public const string StageDefEntry = "StageDefEntry";

@@ -55,6 +55,7 @@ using Xv2CoreLib.QED;
 using Xv2CoreLib.TNN;
 using Xv2CoreLib.ODF;
 using Xv2CoreLib.EEPK;
+using Xv2CoreLib.VLC;
 //using LB_Mod_Installer.Installer.Transformation;
 
 namespace LB_Mod_Installer.Installer
@@ -399,6 +400,9 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".bcm":
                     Install_BCM(xmlPath, installPath, isXml, useSkipBindings);
+                    break;
+                case ".vlc":
+                    Install_VLC(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 default:
                     //if (TryTransformationInstall(xmlPath))
@@ -1841,6 +1845,28 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
+        private void Install_VLC(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                VLC_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<VLC_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : VLC_File.Parse(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                VLC_File binaryFile = (VLC_File)GetParsedFile<VLC_File>(installPath);
+
+                //Install entries
+                InstallEntries(xmlFile.ZoomInCamera, binaryFile.ZoomInCamera, installPath, Sections.VLC_ZoomInCamera, useSkipBindings);
+                InstallEntries(xmlFile.UnkCamera, binaryFile.UnkCamera, installPath, Sections.VLC_UnkCamera, useSkipBindings);
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at VLC install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
         private void Install_ERS(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
@@ -2485,6 +2511,8 @@ namespace LB_Mod_Installer.Installer
                     return TNN_File.Parse(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".odf":
                     return ODF_File.Read(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".vlc":
+                    return VLC_File.Parse(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 default:
                     throw new InvalidDataException(String.Format("GetParsedFileFromGame: The filetype of \"{0}\" is not supported.", path));
             }
@@ -2597,6 +2625,8 @@ namespace LB_Mod_Installer.Installer
                     return ((TNN_File)data).Write();
                 case ".odf":
                     return ((ODF_File)data).Write();
+                case ".vlc":
+                    return ((VLC_File)data).SaveToBytes();
                 case ".eepk":
                     return ((EEPK_File)data).SaveToBytes();
                 default:
