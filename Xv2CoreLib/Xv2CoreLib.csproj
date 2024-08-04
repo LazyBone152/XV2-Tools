@@ -367,6 +367,7 @@
     <Compile Include="ValuesDictionary\BAC.cs" />
     <Compile Include="ValuesDictionary\BCS.cs" />
     <Compile Include="ValuesDictionary\EMP.cs" />
+    <Compile Include="VLC\VLC_File.cs" />
     <Compile Include="Xenoverse2\FileManager.cs" />
     <Compile Include="Xenoverse2\FileWatcher.cs" />
     <Compile Include="Xenoverse2\Xenoverse2.cs" />
