@@ -615,6 +615,9 @@ namespace XV2_Xml_Serializer
                     case ".ems":
                         Xv2CoreLib.EMS.EMS_File.SaveXml(fileLocation);
                         break;
+                    case ".vlc":
+                        Xv2CoreLib.VLC.VLC_File.Write(fileLocation);
+                        break;
                     default:
                         FileTypeNotSupported(fileLocation);
                         break;
