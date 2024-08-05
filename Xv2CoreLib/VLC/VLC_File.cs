@@ -109,7 +109,7 @@ namespace Xv2CoreLib.VLC
 
             if (ZoomInCamera.Count != UnkCamera.Count)
             {
-                throw new InvalidDataException($"Error on building vlc: ZoomInCamera and UnkCamera count mismatch!\ZoomInCamera Count = " + ZoomInCamera.Count + "\UnkCamera Count = " + UnkCamera.Count);
+                throw new InvalidDataException($"Error on building vlc: ZoomInCamera and UnkCamera count mismatch!\nZoomInCamera Count = " + ZoomInCamera.Count + "\nUnkCamera Count = " + UnkCamera.Count);
             }
 
             //Entries
