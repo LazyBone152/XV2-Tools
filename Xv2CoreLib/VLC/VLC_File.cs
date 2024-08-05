@@ -109,7 +109,7 @@ namespace Xv2CoreLib.VLC
 
             if (ZoomInCamera.Count != UnkCamera.Count)
             {
-                throw new InvalidDataException($"Error on building vlc: CameraLeft and CameraLeft count mismatch!\nCameraLeft Count = " + ZoomInCamera.Count + "\nCameraRight Count = " + UnkCamera.Count);
+                throw new InvalidDataException($"Error on building vlc: ZoomInCamera and UnkCamera count mismatch!\ZoomInCamera Count = " + ZoomInCamera.Count + "\UnkCamera Count = " + UnkCamera.Count);
             }
 
             //Entries
@@ -121,7 +121,7 @@ namespace Xv2CoreLib.VLC
                 bytes.AddRange(BitConverter.GetBytes((float)ZoomInCamera[i].CharaId));
 
                 if (ZoomInCamera[i].CharaId != UnkCamera[i].CharaId)
-                    throw new Exception("Chara ID mismatch at CameraLeft ID = " + ZoomInCamera[i].CharaId + "!\nCameraRight ID = " + UnkCamera[i].CharaId);
+                    throw new Exception("Chara ID mismatch at ZoomInCamera ID = " + ZoomInCamera[i].CharaId + "!\nUnkCamera ID = " + UnkCamera[i].CharaId);
             }
 
             for (int i = 0; i < UnkCamera.Count; i++)
@@ -132,7 +132,7 @@ namespace Xv2CoreLib.VLC
                 bytes.AddRange(BitConverter.GetBytes((float)UnkCamera[i].CharaId));
 
                 if (ZoomInCamera[i].CharaId != UnkCamera[i].CharaId)
-                    throw new Exception("Chara ID mismatch at CameraLeft ID = " + ZoomInCamera[i].CharaId + "!\nCameraRight ID = " + UnkCamera[i].CharaId);
+                    throw new Exception("Chara ID mismatch at ZoomInCamera ID = " + ZoomInCamera[i].CharaId + "!\nUnkCamera ID = " + UnkCamera[i].CharaId);
             }
 
             //validation
