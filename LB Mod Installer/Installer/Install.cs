@@ -55,6 +55,7 @@ using Xv2CoreLib.QED;
 using Xv2CoreLib.TNN;
 using Xv2CoreLib.ODF;
 using Xv2CoreLib.EEPK;
+using Xv2CoreLib.AIT;
 //using LB_Mod_Installer.Installer.Transformation;
 
 namespace LB_Mod_Installer.Installer
@@ -399,6 +400,9 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".bcm":
                     Install_BCM(xmlPath, installPath, isXml, useSkipBindings);
+                    break;
+                case ".ait":
+                    Install_AIT(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 default:
                     //if (TryTransformationInstall(xmlPath))
@@ -1841,6 +1845,31 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
+        private void Install_AIT(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                AIT_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<AIT_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : AIT_File.Parse(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                AIT_File binaryFile = (AIT_File)GetParsedFile<AIT_File>(installPath);
+
+                //Parse bindings
+                bindingManager.ParseProperties(xmlFile.AIT_Entries, binaryFile.AIT_Entries, installPath);
+
+                //Install entries
+                InstallEntries(xmlFile.AIT_Entries, binaryFile.AIT_Entries, installPath, Sections.AIT_Entry, useSkipBindings);
+
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at AIT install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
         private void Install_ERS(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
@@ -2485,6 +2514,8 @@ namespace LB_Mod_Installer.Installer
                     return TNN_File.Parse(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".odf":
                     return ODF_File.Read(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".ait":
+                    return AIT_File.Parse(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 default:
                     throw new InvalidDataException(String.Format("GetParsedFileFromGame: The filetype of \"{0}\" is not supported.", path));
             }
@@ -2597,6 +2628,8 @@ namespace LB_Mod_Installer.Installer
                     return ((TNN_File)data).Write();
                 case ".odf":
                     return ((ODF_File)data).Write();
+                case ".ait":
+                    return ((AIT_File)data).SaveToBytes();
                 case ".eepk":
                     return ((EEPK_File)data).SaveToBytes();
                 default:

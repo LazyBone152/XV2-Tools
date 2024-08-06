@@ -71,6 +71,7 @@
         public const string OCO_Entry = "OCO_Entry";
         public const string QML_Entry = "QML_Entry";
         public const string CST_Entry = "CST_Entry";
+        public const string AIT_Entry = "AIT_Entry";
         public const string CharaSlotEntry = "CharaSlotEntry";
         public const string StageSlotEntry = "StageSlotEntry";
         public const string StageDefEntry = "StageDefEntry";

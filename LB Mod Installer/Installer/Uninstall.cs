@@ -50,6 +50,7 @@ using Xv2CoreLib.QBT;
 using Xv2CoreLib.TNN;
 using Xv2CoreLib.ODF;
 using Xv2CoreLib.BCM;
+using Xv2CoreLib.AIT;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -321,6 +322,9 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".odf":
                     Uninstall_ODF(path, file);
+                    break;
+                case ".ait":
+                    Uninstall_AIT(path, file);
                     break;
                 case ".bcm":
                     Uninstall_BCM(path, file);
@@ -1175,6 +1179,28 @@ namespace LB_Mod_Installer.Installer
             catch (Exception ex)
             {
                 string error = string.Format("Failed at CML uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
+
+        private void Uninstall_AIT(string path, _File file)
+        {
+            try
+            {
+                AIT_File binaryFile = (AIT_File)GetParsedFile<AIT_File>(path, false);
+                AIT_File cpkBinFile = (AIT_File)GetParsedFile<AIT_File>(path, true);
+
+                Section section = file.GetSection(Sections.AIT_Entry);
+
+                if (section != null)
+                {
+                    UninstallEntries(binaryFile.AIT_Entries, (cpkBinFile != null) ? cpkBinFile.AIT_Entries : null, section.IDs);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at AIT uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }

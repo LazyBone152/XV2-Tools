@@ -224,7 +224,7 @@ namespace XV2_Xml_Serializer
                                     Xv2CoreLib.PSC.PSC_File.Serialize(fileLocation, true);
                                     break;
                                 case ".ait":
-                                    new Xv2CoreLib.AIT.AIT_File(fileLocation, true);
+                                    Xv2CoreLib.AIT.AIT_File.Parse(fileLocation, true);
                                     break;
                                 case ".cus":
                                     new Xv2CoreLib.CUS.Parser(fileLocation, true);
@@ -513,8 +513,7 @@ namespace XV2_Xml_Serializer
                         Xv2CoreLib.SAV.SAV_File.SaveXml(fileLocation);
                         break;
                     case ".ait":
-                        var ait = (Xv2CoreLib.AIT.AIT_File)File_Ex.LoadXml(fileLocation, typeof(Xv2CoreLib.AIT.AIT_File));
-                        ait.WriteFile(String.Format("{0}/{1}", Path.GetDirectoryName(fileLocation), Path.GetFileNameWithoutExtension(fileLocation)));
+                        Xv2CoreLib.AIT.AIT_File.Write(fileLocation);
                         break;
                     case ".bac":
                         new Xv2CoreLib.BAC.Deserializer(fileLocation);
