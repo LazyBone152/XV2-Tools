@@ -12,7 +12,7 @@ namespace Xv2CoreLib.OCP
     {
         string saveLocation;
         OCP_File ocpFile;
-        public List<byte> bytes = new List<byte>() { 35, 79, 67, 80, 254, 255, 16, 0 };
+        public List<byte> bytes = new List<byte>() { 35, 79, 67, 80, 254, 255 };
 
         public Deserializer(string location)
         {
@@ -31,6 +31,9 @@ namespace Xv2CoreLib.OCP
 
         private void Write()
         {
+            // Header
+            VersionCheck();
+            bytes.AddRange(BitConverter.GetBytes(ocpFile.Version));
             int count = (ocpFile.TableEntries != null) ? ocpFile.TableEntries.Count() : 0;
             bytes.AddRange(BitConverter.GetBytes(count));
             bytes.AddRange(new byte[4]);
@@ -60,9 +63,26 @@ namespace Xv2CoreLib.OCP
                     bytes.AddRange(BitConverter.GetBytes(ocpFile.TableEntries[i].SubEntries[a].I_04));
                     bytes.AddRange(BitConverter.GetBytes(ocpFile.TableEntries[i].SubEntries[a].I_08));
                     bytes.AddRange(BitConverter.GetBytes(ocpFile.TableEntries[i].SubEntries[a].I_12));
+
+                    if (ocpFile.Version >= 20)
+                    {
+                        bytes.AddRange(BitConverter.GetBytes(ocpFile.TableEntries[i].SubEntries[a].NEW_I_16));
+                    }
+
                     bytes.AddRange(BitConverter.GetBytes(ocpFile.TableEntries[i].SubEntries[a].I_16));
                 }
+            }
+        }
 
+        private void VersionCheck()
+        {
+            switch (ocpFile.Version)
+            {
+                case 16:
+                case 20:
+                    return;
+                default:
+                    throw new Exception("Unknown OCP version: " + ocpFile.Version);
             }
 
         }

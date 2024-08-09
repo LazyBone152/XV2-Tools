@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using YAXLib;
 
 namespace Xv2CoreLib.OCP
@@ -10,6 +6,8 @@ namespace Xv2CoreLib.OCP
     [YAXSerializeAs("OCP")]
     public class OCP_File
     {
+        [YAXAttributeForClass]
+        public ushort Version { get; set; } // 16 = pre 1.22, 20 = 1.22 or later
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Partner")]
         public List<OCP_TableEntry> TableEntries { get; set; }
 
@@ -64,6 +62,10 @@ namespace Xv2CoreLib.OCP
         [YAXAttributeFor("TP_Cost")]
         [YAXSerializeAs("value")]
         public uint I_12 { get; set; }
+        [YAXAttributeFor("STP_Cost")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public uint NEW_I_16 { get; set; } = 0; //Added in v1.22
         [YAXAttributeFor("StatType")]
         [YAXSerializeAs("ID")]
         public uint I_16 { get; set; }
