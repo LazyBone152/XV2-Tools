@@ -75,7 +75,7 @@ namespace LB_Mod_Installer
             }
         }
 
-        public static string[] LanguageSuffix = new string[12] { "en.msg", "es.msg", "ca.msg", "fr.msg", "de.msg", "it.msg", "pt.msg", "pl.msg", "ru.msg", "tw.msg", "zh.msg", "kr.msg" };
+        public static string[] LanguageSuffix = new string[13] { "en.msg", "es.msg", "ca.msg", "fr.msg", "de.msg", "it.msg", "pt.msg", "pl.msg", "ru.msg", "tw.msg", "zh.msg", "kr.msg", "ja.msg" };
         public static List<string> JungleBlacklist = new List<string>()
         {
             "HUM.bcs",
