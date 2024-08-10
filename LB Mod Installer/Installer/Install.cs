@@ -56,6 +56,9 @@ using Xv2CoreLib.TNN;
 using Xv2CoreLib.ODF;
 using Xv2CoreLib.EEPK;
 using Xv2CoreLib.IKD;
+using Xv2CoreLib.OCT;
+using Xv2CoreLib.PSO;
+using Xv2CoreLib.OCP;
 //using LB_Mod_Installer.Installer.Transformation;
 
 namespace LB_Mod_Installer.Installer
@@ -377,6 +380,9 @@ namespace LB_Mod_Installer.Installer
                 case ".oco":
                     Install_OCO(xmlPath, installPath, isXml, useSkipBindings);
                     break;
+                case ".oct":
+                    Install_OCT(xmlPath, installPath, isXml, useSkipBindings);
+                    break;
                 case ".dml":
                     Install_DML(xmlPath, installPath, isXml, useSkipBindings);
                     break;
@@ -398,11 +404,16 @@ namespace LB_Mod_Installer.Installer
                 case ".odf":
                     Install_ODF(xmlPath, installPath, isXml, useSkipBindings);
                     break;
+                case ".pso":
+                    Install_PSO(xmlPath, installPath, isXml, useSkipBindings);
+                    break;
                 case ".bcm":
                     Install_BCM(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".ikd":
                     Install_IKD(xmlPath, installPath, isXml, useSkipBindings);
+                case ".ocp":
+                    Install_OCP(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 default:
                     //if (TryTransformationInstall(xmlPath))
@@ -616,8 +627,12 @@ namespace LB_Mod_Installer.Installer
                                     bdmFile.ChangeNeutralSkillId((ushort)id2);
                                     fileManager.AddParsedFile(newFilePath, bdmFile);
                                     break;
+                                case ".bcm":
+                                    BCM_File bcmFile = zipManager.DeserializeXmlFromArchive_Ext<BCM_File>(file.FullName);
+                                    fileManager.AddParsedFile(newFilePath, bcmFile);
+                                    break;
                                 default:
-                                    throw new Exception($"Error while installing SkillDir \"{fileInstance.SourcePath}\".\n\nAn unknown .xml file was detected in the skill dir ({file.FullName}). Only .bac, .bdm and .bsa xmls are allowed.");
+                                    throw new Exception($"Error while installing SkillDir \"{fileInstance.SourcePath}\".\n\nAn unknown .xml file was detected in the skill dir ({file.FullName}). Only .bac, .bcm, .bdm and .bsa xmls are allowed.");
                             }
 
                         }
@@ -1965,6 +1980,48 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
+        private void Install_OCT(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                OCT_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<OCT_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : OCT_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                OCT_File binaryFile = (OCT_File)GetParsedFile<OCT_File>(installPath);
+
+                //Install entries
+                InstallSubEntries<OCT_SubEntry, OCT_TableEntry>(xmlFile.OctTableEntries, binaryFile.OctTableEntries, installPath, Sections.OCT_Entry, useSkipBindings);
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at OCT install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
+        private void Install_OCP(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                OCP_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<OCP_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : OCP_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                OCP_File binaryFile = (OCP_File)GetParsedFile<OCP_File>(installPath);
+
+                //Install entries
+                InstallSubEntries<OCP_SubEntry, OCP_TableEntry>(xmlFile.TableEntries, binaryFile.TableEntries, installPath, Sections.OCP_Entry, useSkipBindings);
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at OCP install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
         private void Install_DML(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
@@ -2156,6 +2213,36 @@ namespace LB_Mod_Installer.Installer
             catch (Exception ex)
             {
                 string error = string.Format("Failed at ODF install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
+        private void Install_PSO(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                PSO_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<PSO_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : PSO_File.Read(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                PSO_File binaryFile = (PSO_File)GetParsedFile<PSO_File>(installPath);
+
+                if (xmlFile.PsoEntries.Count != 1)
+                {
+                    MessageBox.Show("PSO: Invalid number of \"PsoEntries\" elements in XML file. There should only be 1.");
+                    return;
+                }
+
+                //Parse bindings
+                bindingManager.ParseProperties(xmlFile.PsoEntries[0].PsoSubEntries, binaryFile.PsoEntries[0].PsoSubEntries, installPath);
+
+                //Install entries
+                InstallEntries(xmlFile.PsoEntries[0].PsoSubEntries, binaryFile.PsoEntries[0].PsoSubEntries, installPath, Sections.ODF_Entry, useSkipBindings);
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at PSO install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
@@ -2493,6 +2580,8 @@ namespace LB_Mod_Installer.Installer
                     return OCS_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".oco":
                     return OCO_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".oct":
+                    return OCT_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".qml":
                     return QML_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".qbt":
@@ -2513,6 +2602,10 @@ namespace LB_Mod_Installer.Installer
                     return ODF_File.Read(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".ikd":
                     return IKD_File.Parse(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".pso":
+                    return PSO_File.Read(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".ocp":
+                    return OCP_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 default:
                     throw new InvalidDataException(String.Format("GetParsedFileFromGame: The filetype of \"{0}\" is not supported.", path));
             }
@@ -2607,6 +2700,8 @@ namespace LB_Mod_Installer.Installer
                     return ((OCS_File)data).SaveToBytes();
                 case ".oco":
                     return ((OCO_File)data).SaveToBytes();
+                case ".oct":
+                    return ((OCT_File)data).SaveToBytes();
                 case ".qml":
                     return ((QML_File)data).SaveToBytes();
                 case ".qbt":
@@ -2627,6 +2722,10 @@ namespace LB_Mod_Installer.Installer
                     return ((ODF_File)data).Write();
                 case ".ikd":
                     return ((IKD_File)data).SaveToBytes();
+                case ".pso":
+                    return ((PSO_File)data).Write();
+                case ".ocp":
+                    return ((OCP_File)data).SaveToBytes();
                 case ".eepk":
                     return ((EEPK_File)data).SaveToBytes();
                 default:

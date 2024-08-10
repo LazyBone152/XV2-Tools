@@ -10,7 +10,7 @@ namespace Xv2CoreLib.OCT
     {
         string saveLocation;
         byte[] rawBytes;
-        private OCT_File octFile = new OCT_File();
+        public OCT_File octFile = new OCT_File();
 
         public Parser(string path, bool _writeXml)
         {
@@ -24,6 +24,13 @@ namespace Xv2CoreLib.OCT
                 YAXSerializer serializer = new YAXSerializer(typeof(OCT_File));
                 serializer.SerializeToFile(octFile, saveLocation + ".xml");
             }
+        }
+
+        public Parser(byte[] bytes)
+        {
+            rawBytes = bytes;
+
+            Parse();
         }
 
         private void Parse()
@@ -46,11 +53,11 @@ namespace Xv2CoreLib.OCT
                     else
                         subDataOffset = BitConverter.ToInt32(rawBytes, offset + 4) + (24 * BitConverter.ToInt32(rawBytes, offset + 8)) + 16;
 
-                    octFile.OctTableEntries.Add(new OCT_TableEntry() { Index = BitConverter.ToUInt32(rawBytes, offset + 12) });
+                    octFile.OctTableEntries.Add(new OCT_TableEntry() { PartnerID = BitConverter.ToInt32(rawBytes, offset + 12) });
 
                     if (subEntryCount > 0)
                     {
-                        octFile.OctTableEntries[i].OctSubEntries = new List<OCT_SubEntry>();
+                        octFile.OctTableEntries[i].SubEntries = new List<OCT_SubEntry>();
                     }
 
                     for (int a = 0; a < subEntryCount; a++)
@@ -58,9 +65,9 @@ namespace Xv2CoreLib.OCT
                         switch (octFile.Version)
                         {
                             case 20:
-                                octFile.OctTableEntries[i].OctSubEntries.Add(new OCT_SubEntry()
+                                octFile.OctTableEntries[i].SubEntries.Add(new OCT_SubEntry()
                                 {
-                                    Index = BitConverter.ToInt32(rawBytes, subDataOffset + 4),
+                                    I_04 = BitConverter.ToInt32(rawBytes, subDataOffset + 4),
                                     I_08 = BitConverter.ToInt32(rawBytes, subDataOffset + 8),
                                     I_12 = BitConverter.ToInt32(rawBytes, subDataOffset + 12),
                                     I_16 = BitConverter.ToInt32(rawBytes, subDataOffset + 16),
@@ -70,9 +77,9 @@ namespace Xv2CoreLib.OCT
                                 subDataOffset += 24;
                                 break;
                             case 24:
-                                octFile.OctTableEntries[i].OctSubEntries.Add(new OCT_SubEntry()
+                                octFile.OctTableEntries[i].SubEntries.Add(new OCT_SubEntry()
                                 {
-                                    Index = BitConverter.ToInt32(rawBytes, subDataOffset + 4),
+                                    I_04 = BitConverter.ToInt32(rawBytes, subDataOffset + 4),
                                     I_08 = BitConverter.ToInt32(rawBytes, subDataOffset + 8),
                                     I_12 = BitConverter.ToInt32(rawBytes, subDataOffset + 12),
                                     STP_Cost = BitConverter.ToInt32(rawBytes, subDataOffset + 16),

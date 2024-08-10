@@ -10,9 +10,9 @@ namespace Xv2CoreLib.OCP
 {
     public class Parser
     {
-        string saveLocation;
-        byte[] rawBytes;
-        private OCP_File octFile = new OCP_File();
+        private string saveLocation;
+        private byte[] rawBytes;
+        public OCP_File ocpFile { get; private set; } = new OCP_File();
 
         public Parser(string path, bool _writeXml)
         {
@@ -24,50 +24,86 @@ namespace Xv2CoreLib.OCP
             if (_writeXml)
             {
                 YAXSerializer serializer = new YAXSerializer(typeof(OCP_File));
-                serializer.SerializeToFile(octFile, saveLocation + ".xml");
+                serializer.SerializeToFile(ocpFile, saveLocation + ".xml");
             }
+        }
+
+        public Parser(byte[] bytes)
+        {
+            rawBytes = bytes;
+
+            Parse();
         }
 
         private void Parse()
         {
+            ocpFile.Version = BitConverter.ToUInt16(rawBytes, 6);
             uint count = BitConverter.ToUInt32(rawBytes, 8);
             int offset = 16;
 
             if (count > 0)
             {
-                octFile.TableEntries = new List<OCP_TableEntry>();
+                ocpFile.TableEntries = new List<OCP_TableEntry>();
 
                 for(int i = 0; i < count; i++)
                 {
                     int subEntryCount = BitConverter.ToInt32(rawBytes, offset);
-                    int subDataOffset = BitConverter.ToInt32(rawBytes, offset + 4) + (20 * BitConverter.ToInt32(rawBytes, offset + 8)) + 16;
-                    octFile.TableEntries.Add(new OCP_TableEntry() { Index = BitConverter.ToUInt32(rawBytes, offset + 12) });
+                    int subDataOffset = BitConverter.ToInt32(rawBytes, offset + 4) + (GetSubEntryDataSize() * BitConverter.ToInt32(rawBytes, offset + 8)) + 16;
+                    ocpFile.TableEntries.Add(new OCP_TableEntry() { PartnerID = BitConverter.ToInt32(rawBytes, offset + 12) });
                     
                     if(subEntryCount > 0)
                     {
-                        octFile.TableEntries[i].SubEntries = new List<OCP_SubEntry>();
+                        ocpFile.TableEntries[i].SubEntries = new List<OCP_SubEntry>();
                     }
 
                     for (int a = 0; a < subEntryCount; a++)
                     {
-                        octFile.TableEntries[i].SubEntries.Add(new OCP_SubEntry()
+                        switch (ocpFile.Version)
                         {
-                            Index = BitConverter.ToUInt32(rawBytes, subDataOffset + 4),
-                            I_08 = BitConverter.ToInt32(rawBytes, subDataOffset + 8),
-                            I_12 = BitConverter.ToUInt32(rawBytes, subDataOffset + 12),
-                            I_16 = BitConverter.ToUInt32(rawBytes, subDataOffset + 16)
-                        });
+                            case 16:
+                                ocpFile.TableEntries[i].SubEntries.Add(new OCP_SubEntry()
+                                {
+                                    I_04 = BitConverter.ToInt32(rawBytes, subDataOffset + 4), //Order
+                                    I_08 = BitConverter.ToInt32(rawBytes, subDataOffset + 8), //TP_Cost_Toggle
+                                    I_12 = BitConverter.ToUInt32(rawBytes, subDataOffset + 12), //TP_Cost
+                                    I_16 = BitConverter.ToUInt32(rawBytes, subDataOffset + 16) //StatType
+                                });
 
-                        subDataOffset += 20;
+                                subDataOffset += 20;
+                                break;
+                            case 20:
+                                ocpFile.TableEntries[i].SubEntries.Add(new OCP_SubEntry()
+                                {
+                                    I_04 = BitConverter.ToInt32(rawBytes, subDataOffset + 4), //Order
+                                    I_08 = BitConverter.ToInt32(rawBytes, subDataOffset + 8), //TP_Cost_Toggle
+                                    I_12 = BitConverter.ToUInt32(rawBytes, subDataOffset + 12), //TP_Cost
+                                    NEW_I_16 = BitConverter.ToUInt32(rawBytes, subDataOffset + 16), //STP_Cost
+                                    I_16 = BitConverter.ToUInt32(rawBytes, subDataOffset + 20) //StatType
+                                });
+
+                                subDataOffset += 24;
+                                break;
+                            default:
+                                throw new Exception("Unknown OCP version.");
+                        }
                     }
-
                     offset += 16;
                 }
-                
+
             }
         }
 
-
-
+        private int GetSubEntryDataSize()
+        {
+            switch (ocpFile.Version)
+            {
+                case 16:
+                    return 20;
+                case 20:
+                    return 24;
+                default:
+                    throw new Exception("Unknown OCP version.");
+            }
+        }
     }
 }

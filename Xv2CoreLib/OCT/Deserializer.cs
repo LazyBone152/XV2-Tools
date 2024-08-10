@@ -12,7 +12,7 @@ namespace Xv2CoreLib.OCT
     {
         string saveLocation;
         OCT_File octFile;
-        List<byte> bytes = new List<byte>() { 35, 79, 67, 84, 254, 255};
+        public List<byte> bytes = new List<byte>() { 35, 79, 67, 84, 254, 255};
 
         public Deserializer(string location)
         {
@@ -21,6 +21,12 @@ namespace Xv2CoreLib.OCT
             octFile = (OCT_File)serializer.DeserializeFromFile(location);
             Write();
             File.WriteAllBytes(saveLocation, bytes.ToArray());
+        }
+
+        public Deserializer(OCT_File octFile)
+        {
+            this.octFile = octFile;
+            Write();
         }
 
         private void Write()
@@ -37,33 +43,33 @@ namespace Xv2CoreLib.OCT
 
             for(int i = 0; i < count; i++)
             {
-                int subDataCount = (octFile.OctTableEntries[i].OctSubEntries != null) ? octFile.OctTableEntries[i].OctSubEntries.Count() : 0;
+                int subDataCount = (octFile.OctTableEntries[i].SubEntries != null) ? octFile.OctTableEntries[i].SubEntries.Count() : 0;
                 bytes.AddRange(BitConverter.GetBytes(subDataCount));
                 bytes.AddRange(BitConverter.GetBytes(dataOffset));
                 bytes.AddRange(BitConverter.GetBytes(currentIndex));
-                bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].Index));
+                bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].PartnerID));
                 currentIndex += subDataCount;
             }
 
             //Table Entries
             for (int i = 0; i < count; i++)
             {
-                int subDataCount = (octFile.OctTableEntries[i].OctSubEntries != null) ? octFile.OctTableEntries[i].OctSubEntries.Count() : 0;
+                int subDataCount = (octFile.OctTableEntries[i].SubEntries != null) ? octFile.OctTableEntries[i].SubEntries.Count() : 0;
 
                 for(int a = 0; a < subDataCount; a++)
                 {
-                    bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].Index));
-                    bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].OctSubEntries[a].Index));
-                    bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].OctSubEntries[a].I_08));
-                    bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].OctSubEntries[a].I_12));
+                    bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].PartnerID));
+                    bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].SubEntries[a].I_04));
+                    bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].SubEntries[a].I_08));
+                    bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].SubEntries[a].I_12));
 
                     if (octFile.Version >= 24)
                     {
-                        bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].OctSubEntries[a].STP_Cost));
+                        bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].SubEntries[a].STP_Cost));
                     }
 
-                    bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].OctSubEntries[a].I_16));
-                    bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].OctSubEntries[a].I_20));
+                    bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].SubEntries[a].I_16));
+                    bytes.AddRange(BitConverter.GetBytes(octFile.OctTableEntries[i].SubEntries[a].I_20));
                 }
 
             }

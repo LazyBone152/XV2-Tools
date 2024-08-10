@@ -471,10 +471,11 @@ namespace Xv2CoreLib.CST
         public int I_44 { get; set; }
         [YAXAttributeFor("flag_cgk2")]
         [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public ushort flag_cgk2 { get; set; } // 0x30 - Added in game v 1.22. Adds the "Ultra Supervillain" to the name in CSS
         [YAXAttributeFor("I_50")]
         [YAXSerializeAs("value")]
-        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0)]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public ushort I_50 { get; set; }
 
         public CST_CharaCostumeSlot() { }
@@ -490,6 +491,7 @@ namespace Xv2CoreLib.CST
             CssVoice2 = slot.CssVoice2 < 0 ? ushort.MaxValue : (ushort)slot.CssVoice2;
             DlcFlag1 = slot.DLC_Flag1;
             DlcFlag2 = slot.DLC_Flag2;
+            flag_cgk2 = (ushort)(slot.flag_cgk2 == true ? 1 : 0);
         }
 
         public static CST_CharaCostumeSlot Read(byte[] bytes, int offset, int version)
@@ -573,7 +575,8 @@ namespace Xv2CoreLib.CST
                 CssVoice1 = CssVoice1,
                 CssVoice2 = CssVoice2,
                 DLC_Flag1 = DlcFlag1,
-                Costume = Costume
+                Costume = Costume,
+                flag_cgk2 = (flag_cgk2 == 0) ? false : true
             };
         }
     };
