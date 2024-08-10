@@ -50,6 +50,7 @@ using Xv2CoreLib.QBT;
 using Xv2CoreLib.TNN;
 using Xv2CoreLib.ODF;
 using Xv2CoreLib.BCM;
+using Xv2CoreLib.IKD;
 using Xv2CoreLib.OCT;
 using Xv2CoreLib.PSO;
 using Xv2CoreLib.OCP;
@@ -331,6 +332,8 @@ namespace LB_Mod_Installer.Installer
                 case ".odf":
                     Uninstall_ODF(path, file);
                     break;
+                case ".ikd":
+                    Uninstall_IKD(path, file);
                 case ".pso":
                     Uninstall_PSO(path, file);
                     break;
@@ -1187,6 +1190,28 @@ namespace LB_Mod_Installer.Installer
             catch (Exception ex)
             {
                 string error = string.Format("Failed at CML uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
+
+        private void Uninstall_IKD(string path, _File file)
+        {
+            try
+            {
+                IKD_File binaryFile = (IKD_File)GetParsedFile<IKD_File>(path, false);
+                IKD_File cpkBinFile = (IKD_File)GetParsedFile<IKD_File>(path, true);
+
+                Section section = file.GetSection(Sections.IKD_Entry);
+
+                if (section != null)
+                {
+                    UninstallEntries(binaryFile.Entries, (cpkBinFile != null) ? cpkBinFile.Entries : null, section.IDs);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at IKD uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }

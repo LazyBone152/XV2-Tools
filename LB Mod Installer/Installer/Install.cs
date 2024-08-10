@@ -55,6 +55,7 @@ using Xv2CoreLib.QED;
 using Xv2CoreLib.TNN;
 using Xv2CoreLib.ODF;
 using Xv2CoreLib.EEPK;
+using Xv2CoreLib.IKD;
 using Xv2CoreLib.OCT;
 using Xv2CoreLib.PSO;
 using Xv2CoreLib.OCP;
@@ -409,6 +410,8 @@ namespace LB_Mod_Installer.Installer
                 case ".bcm":
                     Install_BCM(xmlPath, installPath, isXml, useSkipBindings);
                     break;
+                case ".ikd":
+                    Install_IKD(xmlPath, installPath, isXml, useSkipBindings);
                 case ".ocp":
                     Install_OCP(xmlPath, installPath, isXml, useSkipBindings);
                     break;
@@ -1857,6 +1860,28 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
+        private void Install_IKD(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                IKD_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<IKD_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : IKD_File.Parse(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                IKD_File binaryFile = (IKD_File)GetParsedFile<IKD_File>(installPath);
+
+                //Install entries
+                InstallEntries(xmlFile.Entries, binaryFile.Entries, installPath, Sections.IKD_Entry, useSkipBindings);
+
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at IKD install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
         private void Install_ERS(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
@@ -2575,6 +2600,8 @@ namespace LB_Mod_Installer.Installer
                     return TNN_File.Parse(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".odf":
                     return ODF_File.Read(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".ikd":
+                    return IKD_File.Parse(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".pso":
                     return PSO_File.Read(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".ocp":
@@ -2693,6 +2720,8 @@ namespace LB_Mod_Installer.Installer
                     return ((TNN_File)data).Write();
                 case ".odf":
                     return ((ODF_File)data).Write();
+                case ".ikd":
+                    return ((IKD_File)data).SaveToBytes();
                 case ".pso":
                     return ((PSO_File)data).Write();
                 case ".ocp":
