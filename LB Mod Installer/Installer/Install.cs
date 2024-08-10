@@ -624,8 +624,12 @@ namespace LB_Mod_Installer.Installer
                                     bdmFile.ChangeNeutralSkillId((ushort)id2);
                                     fileManager.AddParsedFile(newFilePath, bdmFile);
                                     break;
+                                case ".bcm":
+                                    BCM_File bcmFile = zipManager.DeserializeXmlFromArchive_Ext<BCM_File>(file.FullName);
+                                    fileManager.AddParsedFile(newFilePath, bcmFile);
+                                    break;
                                 default:
-                                    throw new Exception($"Error while installing SkillDir \"{fileInstance.SourcePath}\".\n\nAn unknown .xml file was detected in the skill dir ({file.FullName}). Only .bac, .bdm and .bsa xmls are allowed.");
+                                    throw new Exception($"Error while installing SkillDir \"{fileInstance.SourcePath}\".\n\nAn unknown .xml file was detected in the skill dir ({file.FullName}). Only .bac, .bcm, .bdm and .bsa xmls are allowed.");
                             }
 
                         }
