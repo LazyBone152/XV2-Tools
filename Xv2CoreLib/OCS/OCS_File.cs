@@ -231,6 +231,7 @@ namespace Xv2CoreLib.OCS
         public int TP_Cost { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("STP_Cost")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public int STP_Cost { get; set; } // Added in 1.22
         [YAXAttributeForClass]
         [YAXSerializeAs("ID2")]
@@ -240,6 +241,7 @@ namespace Xv2CoreLib.OCS
         public int DLC_Flag { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("NEW_I_32")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public int NEW_I_32 { get; set; } // Added in 1.22
     }
 }

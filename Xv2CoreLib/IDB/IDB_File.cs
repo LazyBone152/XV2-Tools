@@ -300,9 +300,11 @@ namespace Xv2CoreLib.IDB
         public ushort DescMsgID { get; set; }
         [YAXAttributeFor("HowMsgID")]
         [YAXSerializeAs("MSG_ID")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public ushort HowMsgID { get; set; } = ushort.MaxValue;
         [YAXAttributeFor("NEW_I_10")]
         [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public ushort NEW_I_10 { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("Type")]
@@ -330,9 +332,11 @@ namespace Xv2CoreLib.IDB
         public int I_28 { get; set; }
         [YAXAttributeFor("STPMedals")]
         [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public int NEW_I_32 { get; set; }
         [YAXAttributeFor("NEW_I_36")]
         [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public int NEW_I_36 { get; set; }
         [YAXAttributeFor("Model")]
         [YAXSerializeAs("value")]
@@ -531,6 +535,7 @@ namespace Xv2CoreLib.IDB
         public int I_08 { get; set; } = -1;
         [YAXAttributeFor("NEW_I_12")]
         [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public int NEW_I_12 { get; set; } = 0;
         [YAXAttributeFor("Timer")]
         [YAXSerializeAs("value")]
