@@ -60,6 +60,7 @@
         public const string DML_Entry = "DML_Entry";
         public const string TNN_Tutorial = "TNN_Tutorial";
         public const string ODF_Entry = "ODF_Entry";
+        public const string PSO_Entry = "PSO_Entry";
         public const string BCM_Entry = "BCM_Entry";
 
         public const string TTB_Entry = "TTB_Entry";
@@ -69,6 +70,8 @@
         public const string CML_Entry = "CML_Entry";
         public const string OCS_Skill = "OCS_Skill";
         public const string OCO_Entry = "OCO_Entry";
+        public const string OCT_Entry = "OCT_Entry";
+        public const string OCP_Entry = "OCP_Entry";
         public const string QML_Entry = "QML_Entry";
         public const string CST_Entry = "CST_Entry";
         public const string CharaSlotEntry = "CharaSlotEntry";

@@ -50,6 +50,9 @@ using Xv2CoreLib.QBT;
 using Xv2CoreLib.TNN;
 using Xv2CoreLib.ODF;
 using Xv2CoreLib.BCM;
+using Xv2CoreLib.OCT;
+using Xv2CoreLib.PSO;
+using Xv2CoreLib.OCP;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -301,6 +304,12 @@ namespace LB_Mod_Installer.Installer
                 case ".oco":
                     Uninstall_OCO(path, file);
                     break;
+                case ".oct":
+                    Uninstall_OCT(path, file);
+                    break;
+                case ".ocp":
+                    Uninstall_OCP(path, file);
+                    break;
                 case ".dml":
                     Uninstall_DML(path, file);
                     break;
@@ -321,6 +330,9 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".odf":
                     Uninstall_ODF(path, file);
+                    break;
+                case ".pso":
+                    Uninstall_PSO(path, file);
                     break;
                 case ".bcm":
                     Uninstall_BCM(path, file);
@@ -1394,6 +1406,38 @@ namespace LB_Mod_Installer.Installer
             }
         }
 
+        private void Uninstall_OCT(string path, _File file)
+        {
+            try
+            {
+                OCT_File binaryFile = (OCT_File)GetParsedFile<OCT_File>(path, false);
+                OCT_File cpkBinFile = (OCT_File)GetParsedFile<OCT_File>(path, true);
+
+                UninstallSubEntries<OCT_SubEntry, OCT_TableEntry>(binaryFile.OctTableEntries, (cpkBinFile != null) ? cpkBinFile.OctTableEntries : null, file, true);
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at OCT uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
+
+        private void Uninstall_OCP(string path, _File file)
+        {
+            try
+            {
+                OCP_File binaryFile = (OCP_File)GetParsedFile<OCP_File>(path, false);
+                OCP_File cpkBinFile = (OCP_File)GetParsedFile<OCP_File>(path, true);
+
+                UninstallSubEntries<OCP_SubEntry, OCP_TableEntry>(binaryFile.TableEntries, (cpkBinFile != null) ? cpkBinFile.TableEntries : null, file, true);
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at OCP uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
+
         private void Uninstall_DML(string path, _File file)
         {
             try
@@ -1552,7 +1596,29 @@ namespace LB_Mod_Installer.Installer
                 throw new Exception(error, ex);
             }
         }
-        
+
+        private void Uninstall_PSO(string path, _File file)
+        {
+            try
+            {
+                PSO_File binaryFile = (PSO_File)GetParsedFile<PSO_File>(path, false);
+                PSO_File cpkBinFile = (PSO_File)GetParsedFile<PSO_File>(path, true, true);
+
+                Section section = file.GetSection(Sections.PSO_Entry);
+
+                if (section != null)
+                {
+                    UninstallEntries(binaryFile.PsoEntries[0].PsoSubEntries, (cpkBinFile != null) ? cpkBinFile.PsoEntries[0].PsoSubEntries : null, section.IDs);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at PSO uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
+
         private void Uninstall_BCM(string path, _File file)
         {
             try
