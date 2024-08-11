@@ -132,8 +132,19 @@ namespace Xv2CoreLib.PSO
 
     }
 
-    public class PSO_SubEntry
+    public class PSO_SubEntry : IInstallable
     {
+        #region Install
+        [YAXDontSerialize]
+        public string Index
+        {
+            set => I_00 = Utils.TryParseInt(value);
+            get => I_00.ToString();
+        }
+
+        [YAXDontSerialize]
+        public int SortID => I_00;
+        #endregion
         [YAXAttributeForClass]
         [YAXSerializeAs("ID")]
         public int I_00 { get; set; }

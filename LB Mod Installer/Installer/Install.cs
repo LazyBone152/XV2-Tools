@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -1524,6 +1524,7 @@ namespace LB_Mod_Installer.Installer
                         unicode_msg = xmlFile.unicode_msg,
                         unicode_names = xmlFile.unicode_names
                     };
+                  
                     fileManager.AddParsedFile(installPath, binaryFile);
                 }
 
@@ -2662,5 +2663,4 @@ namespace LB_Mod_Installer.Installer
         }
 
     }
-
 }

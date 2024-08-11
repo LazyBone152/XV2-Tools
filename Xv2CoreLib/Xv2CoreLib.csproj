@@ -166,6 +166,7 @@
     <Compile Include="BSA_XV1\BSA_File.cs" />
     <Compile Include="BSA_XV1\Deserializer.cs" />
     <Compile Include="BSA_XV1\Parser.cs" />
+    <Compile Include="IKD\IKD_File.cs" />
     <Compile Include="CML\CML_File.cs" />
     <Compile Include="CMS\CMS_File.cs" />
     <Compile Include="CMS\Deserializer.cs" />
