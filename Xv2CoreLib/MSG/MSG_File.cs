@@ -20,6 +20,13 @@ namespace Xv2CoreLib.MSG
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Msg_Entry")]
         public List<MSG_Entry> MSG_Entries { get; set; } = new List<MSG_Entry>();
 
+        public MSG_File() { }
+
+        public MSG_File(bool unicode)
+        {
+            unicode_names = unicode_msg = unicode;
+        }
+
         public byte[] SaveToBytes()
         {
             return new Deserializer(this).bytes.ToArray();

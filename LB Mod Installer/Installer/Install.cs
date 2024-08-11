@@ -59,6 +59,7 @@ using Xv2CoreLib.IKD;
 using Xv2CoreLib.OCT;
 using Xv2CoreLib.PSO;
 using Xv2CoreLib.OCP;
+using xv2Utils = Xv2CoreLib.Utils;
 //using LB_Mod_Installer.Installer.Transformation;
 
 namespace LB_Mod_Installer.Installer
@@ -186,7 +187,7 @@ namespace LB_Mod_Installer.Installer
                     case FileType.XML:
                         //Install XML or Binary
                         UpdateProgessBarText(String.Format("_Installing \"{0}\"...", Path.GetFileName(File.InstallPath)));
-                        ResolveFileType(File.SourcePath, File.InstallPath, type == FileType.XML, File.UseSkipBinding);
+                        ResolveFileType(File.SourcePath, File.InstallPath, type == FileType.XML, File.UseSkipBinding, File);
                         break;
                     case FileType.VfxPackage:
                         //Install effects
@@ -250,7 +251,7 @@ namespace LB_Mod_Installer.Installer
             Parent.SaveSelectedOptions();
         }
 
-        private void ResolveFileType(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
+        private void ResolveFileType(string xmlPath, string installPath, bool isXml, bool useSkipBindings, FilePath file)
         {
             //Special case: prebaked.xml
             if (installPath?.Equals(PrebakedFile.PATH, StringComparison.OrdinalIgnoreCase) == true)
@@ -327,7 +328,7 @@ namespace LB_Mod_Installer.Installer
                     Install_EAN(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".msg":
-                    Install_MSG(xmlPath, installPath, isXml, useSkipBindings);
+                    Install_MSG(xmlPath, installPath, isXml, useSkipBindings, file.InstallToAllLanguages);
                     break;
                 case ".psc":
                     Install_PSC(xmlPath, installPath, isXml, useSkipBindings);
@@ -412,6 +413,7 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".ikd":
                     Install_IKD(xmlPath, installPath, isXml, useSkipBindings);
+                    break;
                 case ".ocp":
                     Install_OCP(xmlPath, installPath, isXml, useSkipBindings);
                     break;
@@ -1512,17 +1514,30 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_MSG(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
+        private void Install_MSG(string xmlPath, string installPath, bool isXml, bool useSkipBindings, bool installAllLanguages)
         {
 #if !DEBUG
             try
 #endif
             {
+                if (installAllLanguages)
+                {
+                    for (int i = 0; i < GeneralInfo.LanguageSuffix.Length; i++)
+                    {
+                        installPath = $"{xv2Utils.GetPathWithoutExtension(installPath).Substring(0, xv2Utils.GetPathWithoutExtension(installPath).LastIndexOf('_') + 1)}{GeneralInfo.LanguageSuffix[i]}";
+                        Install_MSG(xmlPath, installPath, isXml, useSkipBindings, false);
+                    }
+                    return;
+                }
+
                 MSG_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<MSG_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : MSG_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
                 MSG_File binaryFile = (MSG_File)GetParsedFile<MSG_File>(installPath, raiseEx: false);
 
                 if (binaryFile == null)
-                    binaryFile = new MSG_File();
+                {
+                    binaryFile = new MSG_File(true);
+                    fileManager.AddParsedFile(installPath, binaryFile);
+                }
 
                 //Parse bindings
                 bindingManager.ParseProperties(xmlFile.MSG_Entries, binaryFile.MSG_Entries, installPath);

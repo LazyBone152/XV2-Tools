@@ -334,6 +334,7 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".ikd":
                     Uninstall_IKD(path, file);
+                    break;
                 case ".pso":
                     Uninstall_PSO(path, file);
                     break;
@@ -757,7 +758,7 @@ namespace LB_Mod_Installer.Installer
             try
             {
                 MSG_File binaryFile = (MSG_File)GetParsedFile<MSG_File>(path, false);
-                MSG_File cpkBinFile = (MSG_File)GetParsedFile<MSG_File>(path, true);
+                MSG_File cpkBinFile = (MSG_File)GetParsedFile<MSG_File>(path, true, false);
 
                 Section section = file.GetSection(Sections.MSG_Entries);
 

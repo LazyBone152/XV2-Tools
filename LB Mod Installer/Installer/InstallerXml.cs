@@ -1056,6 +1056,11 @@ namespace LB_Mod_Installer.Installer
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = "True")]
         public string IsEnabled { get; set; }
 
+        //For MSG files
+        [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = false)]
+        public bool InstallToAllLanguages { get; set; }
+
         //SkillDir
         [YAXAttributeForClass]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = SkillType.NotSet)]
