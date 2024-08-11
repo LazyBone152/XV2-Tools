@@ -325,6 +325,9 @@ namespace XV2_Xml_Serializer
                                 case ".ikd":
                                     Xv2CoreLib.IKD.IKD_File.Parse(fileLocation, true);
                                     break;
+                                case ".vlc":
+                                    Xv2CoreLib.VLC.VLC_File.Parse(fileLocation, true);
+                                    break;
                                 case ".xml":
                                     LoadXmlInitial(fileLocation);
                                     break;
@@ -617,6 +620,9 @@ namespace XV2_Xml_Serializer
                         break;
                     case ".ikd":
                         Xv2CoreLib.IKD.IKD_File.Write(fileLocation);
+                        break;
+                    case ".vlc":
+                        Xv2CoreLib.VLC.VLC_File.Write(fileLocation);
                         break;
                     default:
                         FileTypeNotSupported(fileLocation);
