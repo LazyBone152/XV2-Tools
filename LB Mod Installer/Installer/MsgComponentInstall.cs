@@ -20,6 +20,7 @@ namespace LB_Mod_Installer.Installer
         {
             Name,
             Info,
+            How,
             BtlHud
         }
 
@@ -127,6 +128,9 @@ namespace LB_Mod_Installer.Installer
                 case SkillMode.Info:
                     path = IDB_File.SkillInfoMsgFile(skillType);
                     break;
+                case SkillMode.How:
+                    path = IDB_File.SkillHowMsgFile(skillType);
+                    break;
                 case SkillMode.BtlHud:
                     path = "quest_btlhud_";
                     break;
@@ -167,14 +171,25 @@ namespace LB_Mod_Installer.Installer
 
             switch (Path.GetFileName(path))
             {
+                case "proper_noun_skill_spa_how_":
+                    return $"spa_skill_how_{numArgs.ToString("D4")}";
+                case "proper_noun_skill_ult_how_":
+                    return $"ult_skill_how_{numArgs.ToString("D4")}";
+                case "proper_noun_skill_esc_how_":
+                    return $"esc_skill_how_{numArgs.ToString("D4")}";
+                case "proper_noun_skill_met_how_":
+                    return $"met_skill_how_{numArgs.ToString("D4")}";
                 case "proper_noun_skill_met_name_":
                     return $"met_skill_{numArgs.ToString("D4")}";
                 case "proper_noun_skill_met_info_":
                     return $"met_skill_eff_{numArgs.ToString("D4")}";
+
                 case "proper_noun_talisman_info_":
                     return String.Format("talisman_eff_{0}", numArgs.ToString("D3"));
                 case "proper_noun_talisman_name_":
                     return String.Format("talisman_{0}", numArgs.ToString("D3"));
+                case "proper_noun_talisman_how_":
+                    return String.Format("talisman_how_{0}", numArgs.ToString("D3"));
                 case "proper_noun_costume_name_":
                     {
                         string name = MSG_Entry.ChooseCostumeEntryName(idbEntry);

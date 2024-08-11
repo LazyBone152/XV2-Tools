@@ -663,6 +663,7 @@ namespace Xv2CoreLib.MSG
         {
             Name,
             Info,
+            How,
             LimitBurst,
             LimitBurstBattle
         }
@@ -672,7 +673,7 @@ namespace Xv2CoreLib.MSG
         public MsgComponentType MsgType { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "MsgEntry")]
-        public List<MSG_Entry> MsgEntries { get; set; } // Size 1 or 12 (if 1, then duplicate until 12)
+        public List<MSG_Entry> MsgEntries { get; set; } // Size 1 or 13 (if 1, then duplicate until 13)
     }
 
 }

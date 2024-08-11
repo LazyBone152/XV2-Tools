@@ -2435,6 +2435,16 @@ namespace LB_Mod_Installer.Installer
                         string infoMsgPath = String.Format("msg/{0}", IDB_File.InfoMsgFile(Path.GetFileName(filePath)));
                         IdbEntry.DescMsgID = (ushort)msgComponentInstall.WriteMsgEntries(msgComponent, infoMsgPath, MsgComponentInstall.ComponentMode.IDB, null, IdbEntry);
                     }
+                    else if (msgComponent.MsgType == Msg_Component.MsgComponentType.How)
+                    {
+                        if(!filePath.Equals("talisman_item.idb", StringComparison.OrdinalIgnoreCase))
+                        {
+                            throw new Exception("The \"How\" MsgComponent can only be used talisman_item.idb.");
+                        }
+
+                        string howMsgPath = "msg/proper_noun_talisman_how_";
+                        IdbEntry.HowMsgID = (ushort)msgComponentInstall.WriteMsgEntries(msgComponent, howMsgPath, MsgComponentInstall.ComponentMode.IDB, null, IdbEntry);
+                    }
                     else if (msgComponent.MsgType == Msg_Component.MsgComponentType.LimitBurst)
                     {
                         string lbMsgPath = String.Format("msg/{0}", IDB_File.LimitBurstMsgFile(Path.GetFileName(filePath)));

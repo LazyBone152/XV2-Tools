@@ -203,7 +203,7 @@ namespace Xv2CoreLib.IDB
                     throw new Exception(String.Format("IDB \"{0}\" has no info msg file.", idbName));
             }
         }
-        
+
         public static string LimitBurstMsgFile(string idbName)
         {
             switch (idbName)
@@ -259,7 +259,23 @@ namespace Xv2CoreLib.IDB
 
             return null;
         }
-    
+
+        public static string SkillHowMsgFile(CUS.CUS_File.SkillType skillType)
+        {
+            switch (skillType)
+            {
+                case CUS.CUS_File.SkillType.Super:
+                    return "proper_noun_skill_spa_how_";
+                case CUS.CUS_File.SkillType.Ultimate:
+                    return "proper_noun_skill_ult_how_";
+                case CUS.CUS_File.SkillType.Evasive:
+                    return "proper_noun_skill_esc_how_";
+                case CUS.CUS_File.SkillType.Awoken:
+                    return "proper_noun_skill_met_how_";
+            }
+
+            return null;
+        }
     }
 
     [YAXSerializeAs("IDB_Entry")]
