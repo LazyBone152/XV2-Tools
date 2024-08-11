@@ -55,6 +55,7 @@ using Xv2CoreLib.IKD;
 using Xv2CoreLib.OCT;
 using Xv2CoreLib.PSO;
 using Xv2CoreLib.OCP;
+using Xv2CoreLib.AIT;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -344,6 +345,9 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".vlc":
                     Uninstall_VLC(path, file);
+                    break;
+                case ".ait":
+                    Uninstall_AIT(path, file);
                     break;
                 default:
                     throw new Exception(string.Format("The filetype of \"{0}\" is unsupported. Uninstall failed.\n\nThis mod was likely installed by a newer version of the installer.", path));
@@ -1217,6 +1221,27 @@ namespace LB_Mod_Installer.Installer
             catch (Exception ex)
             {
                 string error = string.Format("Failed at IKD uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
+        private void Uninstall_AIT(string path, _File file)
+        {
+            try
+            {
+                AIT_File binaryFile = (AIT_File)GetParsedFile<AIT_File>(path, false);
+                AIT_File cpkBinFile = (AIT_File)GetParsedFile<AIT_File>(path, true);
+
+                Section section = file.GetSection(Sections.AIT_Entry);
+
+                if (section != null)
+                {
+                    UninstallEntries(binaryFile.AIT_Entries, (cpkBinFile != null) ? cpkBinFile.AIT_Entries : null, section.IDs);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at AIT uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }

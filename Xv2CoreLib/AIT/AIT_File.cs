@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace Xv2CoreLib.AIT
@@ -29,40 +26,27 @@ namespace Xv2CoreLib.AIT
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "AIT_Entry")]
         public List<AIT_Entry> AIT_Entries { get; set; }
 
-        //Parsing values
-        string SaveLocation { get; set; }
-        private byte[] rawBytes;
-
-        //Desierlization values
-        private List<byte> bytes { get; set; }
-        
-
-        public AIT_File(string path, bool _writeXml)
+        #region LoadSave
+        public static AIT_File Parse(string path, bool writeXml)
         {
-            SaveLocation = path;
-            rawBytes = File.ReadAllBytes(path);
-            
-            AIT_Entries = new List<AIT_Entry>();
-            ParseAit();
+            AIT_File file = Parse(File.ReadAllBytes(path));
 
-            if (_writeXml)
+            if (writeXml)
             {
                 YAXSerializer serializer = new YAXSerializer(typeof(AIT_File));
-                serializer.SerializeToFile(this, SaveLocation + ".xml");
+                serializer.SerializeToFile(file, path + ".xml");
             }
-        }
-        
-        public AIT_File()
-        {
 
+            return file;
         }
 
-        #region LoadSave
-        private void ParseAit()
+        public static AIT_File Parse(byte[] bytes)
         {
-            int count = BitConverter.ToInt32(rawBytes, 8);
-            I_12 = BitConverter.ToUInt32(rawBytes, 12);
-            AitType = GetAitType();
+            AIT_File ait = new AIT_File();
+            if (ait.AIT_Entries == null) ait.AIT_Entries = new List<AIT_Entry>();
+            int count = BitConverter.ToInt32(bytes, 8);
+            ait.I_12 = BitConverter.ToUInt32(bytes, 12);
+            ait.AitType = GetAitType(bytes);
 
             int offset = 16;
 
@@ -70,91 +54,93 @@ namespace Xv2CoreLib.AIT
             {
                 AIT_Entry entry = new AIT_Entry()
                 {
-                    I_00 = BitConverter.ToInt32(rawBytes, offset + 0),
-                    I_04 = BitConverter.ToInt32(rawBytes, offset + 4),
-                    I_08 = BitConverter.ToInt32(rawBytes, offset + 8),
-                    I_12 = BitConverter.ToInt32(rawBytes, offset + 12),
-                    I_16 = BitConverter.ToInt32(rawBytes, offset + 16),
-                    I_20 = BitConverter.ToInt32(rawBytes, offset + 20),
-                    I_24 = BitConverter.ToInt32(rawBytes, offset + 24),
-                    I_28 = BitConverter.ToInt32(rawBytes, offset + 28),
-                    I_32 = BitConverter.ToInt32(rawBytes, offset + 32),
-                    I_36 = BitConverter.ToInt32(rawBytes, offset + 36),
+                    I_00 = BitConverter.ToInt32(bytes, offset + 0).ToString(),
+                    I_04 = BitConverter.ToInt32(bytes, offset + 4),
+                    I_08 = BitConverter.ToInt32(bytes, offset + 8),
+                    I_12 = BitConverter.ToInt32(bytes, offset + 12),
+                    I_16 = BitConverter.ToInt32(bytes, offset + 16),
+                    I_20 = BitConverter.ToInt32(bytes, offset + 20),
+                    I_24 = BitConverter.ToInt32(bytes, offset + 24),
+                    I_28 = BitConverter.ToInt32(bytes, offset + 28),
+                    I_32 = BitConverter.ToInt32(bytes, offset + 32),
+                    I_36 = BitConverter.ToInt32(bytes, offset + 36),
                 };
 
-                if (AitType >= AIT_Version.XV2_BASE)
+                if (ait.AitType >= AIT_Version.XV2_BASE)
                 {
-                    entry.I_40 = BitConverter.ToInt32(rawBytes, offset + 40);
-                    entry.I_44 = BitConverter.ToInt32(rawBytes, offset + 44);
-                    entry.I_48 = BitConverter.ToInt32(rawBytes, offset + 48);
-                    entry.I_52 = BitConverter.ToInt32(rawBytes, offset + 52);
-                    entry.I_56 = BitConverter.ToInt32(rawBytes, offset + 56);
-                    entry.I_60 = BitConverter.ToInt32(rawBytes, offset + 60);
-                    entry.I_64 = BitConverter.ToInt32(rawBytes, offset + 64);
-                    entry.I_68 = BitConverter.ToInt32(rawBytes, offset + 68);
-                    entry.I_72 = BitConverter.ToInt32(rawBytes, offset + 72);
-                    entry.I_76 = BitConverter.ToInt32(rawBytes, offset + 76);
-                    entry.I_80 = BitConverter.ToInt32(rawBytes, offset + 80);
-                    entry.I_84 = BitConverter.ToInt32(rawBytes, offset + 84);
-                    entry.I_88 = BitConverter.ToInt32(rawBytes, offset + 88);
-                    entry.I_92 = BitConverter.ToInt32(rawBytes, offset + 92);
-                    entry.I_96 = BitConverter.ToInt32(rawBytes, offset + 96);
-                    entry.I_100 = BitConverter.ToInt32(rawBytes, offset + 100);
-                    entry.I_104 = BitConverter.ToInt32(rawBytes, offset + 104);
-                    entry.I_108 = BitConverter.ToInt32(rawBytes, offset + 108);
-                    entry.I_112 = BitConverter.ToInt32(rawBytes, offset + 112);
-                    entry.I_116 = BitConverter.ToInt32(rawBytes, offset + 116);
-                    entry.I_120 = BitConverter.ToInt32(rawBytes, offset + 120);
-                    entry.I_124 = BitConverter.ToInt32(rawBytes, offset + 124);
-                    entry.I_128 = BitConverter.ToInt32(rawBytes, offset + 128);
-                    entry.I_132 = BitConverter.ToInt32(rawBytes, offset + 132);
-                    entry.I_136 = BitConverter.ToInt32(rawBytes, offset + 136);
-                    entry.I_140 = BitConverter.ToInt32(rawBytes, offset + 140);
-                    entry.I_144 = BitConverter.ToInt32(rawBytes, offset + 144);
+                    entry.I_40 = BitConverter.ToInt32(bytes, offset + 40);
+                    entry.I_44 = BitConverter.ToInt32(bytes, offset + 44);
+                    entry.I_48 = BitConverter.ToInt32(bytes, offset + 48);
+                    entry.I_52 = BitConverter.ToInt32(bytes, offset + 52);
+                    entry.I_56 = BitConverter.ToInt32(bytes, offset + 56);
+                    entry.I_60 = BitConverter.ToInt32(bytes, offset + 60);
+                    entry.I_64 = BitConverter.ToInt32(bytes, offset + 64);
+                    entry.I_68 = BitConverter.ToInt32(bytes, offset + 68);
+                    entry.I_72 = BitConverter.ToInt32(bytes, offset + 72);
+                    entry.I_76 = BitConverter.ToInt32(bytes, offset + 76);
+                    entry.I_80 = BitConverter.ToInt32(bytes, offset + 80);
+                    entry.I_84 = BitConverter.ToInt32(bytes, offset + 84);
+                    entry.I_88 = BitConverter.ToInt32(bytes, offset + 88);
+                    entry.I_92 = BitConverter.ToInt32(bytes, offset + 92);
+                    entry.I_96 = BitConverter.ToInt32(bytes, offset + 96);
+                    entry.I_100 = BitConverter.ToInt32(bytes, offset + 100);
+                    entry.I_104 = BitConverter.ToInt32(bytes, offset + 104);
+                    entry.I_108 = BitConverter.ToInt32(bytes, offset + 108);
+                    entry.I_112 = BitConverter.ToInt32(bytes, offset + 112);
+                    entry.I_116 = BitConverter.ToInt32(bytes, offset + 116);
+                    entry.I_120 = BitConverter.ToInt32(bytes, offset + 120);
+                    entry.I_124 = BitConverter.ToInt32(bytes, offset + 124);
+                    entry.I_128 = BitConverter.ToInt32(bytes, offset + 128);
+                    entry.I_132 = BitConverter.ToInt32(bytes, offset + 132);
+                    entry.I_136 = BitConverter.ToInt32(bytes, offset + 136);
+                    entry.I_140 = BitConverter.ToInt32(bytes, offset + 140);
+                    entry.I_144 = BitConverter.ToInt32(bytes, offset + 144);
                 }
 
-                if (AitType >= AIT_Version.XV2_DLC5)
+                if (ait.AitType >= AIT_Version.XV2_DLC5)
                 {
-                    entry.I_148 = BitConverter.ToInt32(rawBytes, offset + 148);
-                    entry.I_152 = BitConverter.ToInt32(rawBytes, offset + 152);
-                    entry.I_156 = BitConverter.ToInt32(rawBytes, offset + 156);
-                    entry.I_160 = BitConverter.ToInt32(rawBytes, offset + 160);
-                    entry.I_164 = BitConverter.ToInt32(rawBytes, offset + 164);
-                    entry.I_168 = BitConverter.ToInt32(rawBytes, offset + 168);
-                    entry.I_172 = BitConverter.ToInt32(rawBytes, offset + 172);
-                    entry.I_176 = BitConverter.ToInt32(rawBytes, offset + 176);
-                    entry.I_180 = BitConverter.ToInt32(rawBytes, offset + 180);
-                    entry.I_184 = BitConverter.ToInt32(rawBytes, offset + 184);
-                    entry.I_188 = BitConverter.ToInt32(rawBytes, offset + 188);
-                    entry.I_192 = BitConverter.ToInt32(rawBytes, offset + 192);
+                    entry.I_148 = BitConverter.ToInt32(bytes, offset + 148);
+                    entry.I_152 = BitConverter.ToInt32(bytes, offset + 152);
+                    entry.I_156 = BitConverter.ToInt32(bytes, offset + 156);
+                    entry.I_160 = BitConverter.ToInt32(bytes, offset + 160);
+                    entry.I_164 = BitConverter.ToInt32(bytes, offset + 164);
+                    entry.I_168 = BitConverter.ToInt32(bytes, offset + 168);
+                    entry.I_172 = BitConverter.ToInt32(bytes, offset + 172);
+                    entry.I_176 = BitConverter.ToInt32(bytes, offset + 176);
+                    entry.I_180 = BitConverter.ToInt32(bytes, offset + 180);
+                    entry.I_184 = BitConverter.ToInt32(bytes, offset + 184);
+                    entry.I_188 = BitConverter.ToInt32(bytes, offset + 188);
+                    entry.I_192 = BitConverter.ToInt32(bytes, offset + 192);
                 }
 
-                if (AitType >= AIT_Version.XV2_DLC6)
+                if (ait.AitType >= AIT_Version.XV2_DLC6)
                 {
-                    entry.I_196 = BitConverter.ToInt32(rawBytes, offset + 196);
-                    entry.I_200 = BitConverter.ToInt32(rawBytes, offset + 200);
-                    entry.I_204 = BitConverter.ToInt32(rawBytes, offset + 204);
+                    entry.I_196 = BitConverter.ToInt32(bytes, offset + 196);
+                    entry.I_200 = BitConverter.ToInt32(bytes, offset + 200);
+                    entry.I_204 = BitConverter.ToInt32(bytes, offset + 204);
                 }
 
-                if (AitType >= AIT_Version.XV2_DLC16)
+                if (ait.AitType >= AIT_Version.XV2_DLC16)
                 {
-                    entry.I_208 = BitConverter.ToInt32(rawBytes, offset + 208);
-                    entry.I_212 = BitConverter.ToInt32(rawBytes, offset + 212);
-                    entry.I_216 = BitConverter.ToInt32(rawBytes, offset + 216);
-                    entry.I_220 = BitConverter.ToInt32(rawBytes, offset + 220);
-                    entry.I_224 = BitConverter.ToInt32(rawBytes, offset + 224);
-                    entry.I_228 = BitConverter.ToInt32(rawBytes, offset + 228);
+                    entry.I_208 = BitConverter.ToInt32(bytes, offset + 208);
+                    entry.I_212 = BitConverter.ToInt32(bytes, offset + 212);
+                    entry.I_216 = BitConverter.ToInt32(bytes, offset + 216);
+                    entry.I_220 = BitConverter.ToInt32(bytes, offset + 220);
+                    entry.I_224 = BitConverter.ToInt32(bytes, offset + 224);
+                    entry.I_228 = BitConverter.ToInt32(bytes, offset + 228);
                 }
 
-                AIT_Entries.Add(entry);
-                offset += (int)AitType;
+                ait.AIT_Entries.Add(entry);
+                offset += (int)ait.AitType;
             }
+
+            return ait;
         }
 
-        private AIT_Version GetAitType()
+        private static AIT_Version GetAitType(byte[] bytes)
         {
-            int count = BitConverter.ToInt32(rawBytes, 8);
-            int entrySize = (rawBytes.Length - 16) / count;
+            int count = BitConverter.ToInt32(bytes, 8);
+            int entrySize = (bytes.Length - 16) / count;
 
             switch (entrySize)
             {
@@ -173,11 +159,34 @@ namespace Xv2CoreLib.AIT
             }
         }
 
-        public void WriteFile(string saveLocation)
+        /// <summary>
+        /// Parse the xml at the specified path and convert it into a binary .ait file, and save it at the same path minus the .xml.
+        /// </summary>
+        public static void Write(string xmlPath)
         {
+            string saveLocation = String.Format("{0}/{1}", Path.GetDirectoryName(xmlPath), Path.GetFileNameWithoutExtension(xmlPath));
+            YAXSerializer serializer = new YAXSerializer(typeof(AIT_File), YAXSerializationOptions.DontSerializeNullObjects);
+            var aitFile = (AIT_File)serializer.DeserializeFromFile(xmlPath);
+
+            File.WriteAllBytes(saveLocation, aitFile.Write());
+        }
+
+        /// <summary>
+        /// Save the AIT_File to the specified path.
+        /// </summary>
+        /// <param name="path"></param>
+        public void Save(string path)
+        {
+            File.WriteAllBytes(path, Write());
+        }
+
+        public byte[] Write()
+        {
+            if (AIT_Entries == null) AIT_Entries = new List<AIT_Entry>();
+
             int count = (AIT_Entries != null) ? AIT_Entries.Count : 0;
 
-            bytes = new List<byte>() { 35, 65, 73, 84, 254, 255, 16, 0 };
+            List<byte> bytes = new List<byte>() { 35, 65, 73, 84, 254, 255, 16, 0 };
             bytes.AddRange(BitConverter.GetBytes(count));
             bytes.AddRange(BitConverter.GetBytes(I_12));
 
@@ -190,7 +199,7 @@ namespace Xv2CoreLib.AIT
             {
                 foreach (var e in AIT_Entries)
                 {
-                    bytes.AddRange(BitConverter.GetBytes(e.I_00));
+                    bytes.AddRange(BitConverter.GetBytes(int.Parse(e.I_00)));
                     bytes.AddRange(BitConverter.GetBytes(e.I_04));
                     bytes.AddRange(BitConverter.GetBytes(e.I_08));
                     bytes.AddRange(BitConverter.GetBytes(e.I_12));
@@ -201,7 +210,7 @@ namespace Xv2CoreLib.AIT
                     bytes.AddRange(BitConverter.GetBytes(e.I_32));
                     bytes.AddRange(BitConverter.GetBytes(e.I_36));
 
-                    if(AitType >= AIT_Version.XV2_BASE)
+                    if (AitType >= AIT_Version.XV2_BASE)
                     {
                         bytes.AddRange(BitConverter.GetBytes(e.I_40));
                         bytes.AddRange(BitConverter.GetBytes(e.I_44));
@@ -232,7 +241,7 @@ namespace Xv2CoreLib.AIT
                         bytes.AddRange(BitConverter.GetBytes(e.I_144));
                     }
 
-                    if(AitType >= AIT_Version.XV2_DLC5)
+                    if (AitType >= AIT_Version.XV2_DLC5)
                     {
                         bytes.AddRange(BitConverter.GetBytes(e.I_148));
                         bytes.AddRange(BitConverter.GetBytes(e.I_152));
@@ -248,7 +257,7 @@ namespace Xv2CoreLib.AIT
                         bytes.AddRange(BitConverter.GetBytes(e.I_192));
                     }
 
-                    if(AitType >= AIT_Version.XV2_DLC6)
+                    if (AitType >= AIT_Version.XV2_DLC6)
                     {
                         bytes.AddRange(BitConverter.GetBytes(e.I_196));
                         bytes.AddRange(BitConverter.GetBytes(e.I_200));
@@ -267,19 +276,41 @@ namespace Xv2CoreLib.AIT
                 }
             }
 
-            File.WriteAllBytes(saveLocation, bytes.ToArray());
-
+            return bytes.ToArray();
         }
-
+        public byte[] SaveToBytes()
+        {
+            return Write();
+        }
         #endregion
 
     }
 
-    public class AIT_Entry
+    public class AIT_Entry : IInstallable
     {
+        #region NonSerialized
+
+        //interface
+        [YAXDontSerialize]
+        public int SortID { get { return int.Parse(I_00); } }
+        [YAXDontSerialize]
+        public string Index
+        {
+            get
+            {
+                return $"{I_00}";
+            }
+            set
+            {
+                I_00 = value.ToString();
+            }
+        }
+        #endregion
+
         [YAXAttributeForClass]
         [YAXSerializeAs("ID")]
-        public int I_00 { get; set; }
+        [BindingAutoId]
+        public string I_00 { get; set; } //Int32
         [YAXAttributeFor("BAI_Entry")]
         [YAXSerializeAs("ID")]
         public int I_04 { get; set; }
@@ -433,8 +464,6 @@ namespace Xv2CoreLib.AIT
         [YAXAttributeFor("I_204")]
         [YAXSerializeAs("value")]
         public int I_204 { get; set; }
-
-
         [YAXAttributeFor("I_208")]
         [YAXSerializeAs("value")]
         public int I_208 { get; set; }
