@@ -53,7 +53,7 @@ namespace Xv2CoreLib.IKD
                 IKD_Entry entry = new IKD_Entry();
 
                 entry.CharaId = BitConverter.ToUInt16(bytes, offset + 0);
-                entry.BoneScaleIdx = BitConverter.ToUInt16(bytes, offset + 2);
+                entry.Costume = BitConverter.ToUInt16(bytes, offset + 2);
                 entry.F_04 = BitConverter.ToSingle(bytes, offset + 4);
                 entry.F_08 = BitConverter.ToSingle(bytes, offset + 8);
                 entry.F_12 = BitConverter.ToSingle(bytes, offset + 12);
@@ -115,7 +115,7 @@ namespace Xv2CoreLib.IKD
             foreach (var entry in Entries)
             {
                 bytes.AddRange(BitConverter.GetBytes(entry.CharaId));
-                bytes.AddRange(BitConverter.GetBytes(entry.BoneScaleIdx));
+                bytes.AddRange(BitConverter.GetBytes(entry.Costume));
                 bytes.AddRange(BitConverter.GetBytes(entry.F_04));
                 bytes.AddRange(BitConverter.GetBytes(entry.F_08));
                 bytes.AddRange(BitConverter.GetBytes(entry.F_12));
@@ -182,7 +182,7 @@ namespace Xv2CoreLib.IKD
         { 
             get
             { 
-                return $"{CharaId}_{BoneScaleIdx}";
+                return $"{CharaId}_{Costume}";
             }
             set
             {
@@ -191,7 +191,7 @@ namespace Xv2CoreLib.IKD
                 if (split.Length == 2)
                 {
                     CharaId = ushort.Parse(split[0]);
-                    BoneScaleIdx = ushort.Parse(split[1]);
+                    Costume = ushort.Parse(split[1]);
                 }
             }
         }
@@ -201,8 +201,8 @@ namespace Xv2CoreLib.IKD
         [YAXSerializeAs("CharaId")]
         public ushort CharaId { get; set; }
         [YAXAttributeForClass]
-        [YAXSerializeAs("BoneScaleIdx")]
-        public ushort BoneScaleIdx { get; set; }
+        [YAXSerializeAs("Costume")]
+        public ushort Costume { get; set; }
         [YAXAttributeFor("F_04")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
