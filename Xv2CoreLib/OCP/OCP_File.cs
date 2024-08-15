@@ -7,6 +7,7 @@ namespace Xv2CoreLib.OCP
     public class OCP_File
     {
         [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 16)]
         public ushort Version { get; set; } // 16 = pre 1.22, 20 = 1.22 or later
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Partner")]
         public List<OCP_TableEntry> TableEntries { get; set; }
