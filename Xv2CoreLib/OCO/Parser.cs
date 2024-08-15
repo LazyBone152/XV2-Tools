@@ -10,9 +10,9 @@ namespace Xv2CoreLib.OCO
 {
     public class Parser
     {
-        string saveLocation;
-        byte[] rawBytes;
-        public OCO_File ocoFile = new OCO_File();
+        private string saveLocation;
+        private byte[] rawBytes;
+        public OCO_File ocoFile { get; private set; } = new OCO_File();
 
         public Parser(string path, bool _writeXml)
         {
@@ -37,6 +37,7 @@ namespace Xv2CoreLib.OCO
 
         private void Parse()
         {
+            ocoFile.Version = BitConverter.ToUInt16(rawBytes, 6);
             uint count = BitConverter.ToUInt32(rawBytes, 8);
             int offset = 16;
 
@@ -47,7 +48,7 @@ namespace Xv2CoreLib.OCO
                 for(int i = 0; i < count; i++)
                 {
                     int subEntryCount = BitConverter.ToInt32(rawBytes, offset);
-                    int subDataOffset = BitConverter.ToInt32(rawBytes, offset + 4) + (20 * BitConverter.ToInt32(rawBytes, offset + 8)) + 16;
+                    int subDataOffset = BitConverter.ToInt32(rawBytes, offset + 4) + (GetSubEntryDataSize() * BitConverter.ToInt32(rawBytes, offset + 8)) + 16;
                     ocoFile.Partners.Add(new OCO_Partner() { PartnerID = BitConverter.ToInt32(rawBytes, offset + 12) });
                     
                     if(subEntryCount > 0)
@@ -57,24 +58,51 @@ namespace Xv2CoreLib.OCO
 
                     for (int a = 0; a < subEntryCount; a++)
                     {
-                        ocoFile.Partners[i].SubEntries.Add(new OCO_Costume()
+                        switch (ocoFile.Version)
                         {
-                            I_04 = BitConverter.ToInt32(rawBytes, subDataOffset + 4),
-                            I_08 = BitConverter.ToInt32(rawBytes, subDataOffset + 8),
-                            I_12 = BitConverter.ToInt32(rawBytes, subDataOffset + 12),
-                            I_16 = BitConverter.ToInt32(rawBytes, subDataOffset + 16)
-                        });
+                            case 16:
+                                ocoFile.Partners[i].SubEntries.Add(new OCO_Costume()
+                                {
+                                    I_04 = BitConverter.ToInt32(rawBytes, subDataOffset + 4),
+                                    I_08 = BitConverter.ToInt32(rawBytes, subDataOffset + 8),
+                                    I_12 = BitConverter.ToInt32(rawBytes, subDataOffset + 12),
+                                    I_16 = BitConverter.ToInt32(rawBytes, subDataOffset + 16)
+                                });
 
-                        subDataOffset += 20;
+                                subDataOffset += 20;
+                                break;
+                            case 20:
+                                ocoFile.Partners[i].SubEntries.Add(new OCO_Costume()
+                                {
+                                    I_04 = BitConverter.ToInt32(rawBytes, subDataOffset + 4),
+                                    I_08 = BitConverter.ToInt32(rawBytes, subDataOffset + 8),
+                                    I_12 = BitConverter.ToInt32(rawBytes, subDataOffset + 12),
+                                    NEW_I_16 = BitConverter.ToInt32(rawBytes, subDataOffset + 16),
+                                    I_16 = BitConverter.ToInt32(rawBytes, subDataOffset + 20)
+                                });
+
+                                subDataOffset += 24;
+                                break;
+                            default:
+                                throw new Exception("Unknown OCO version.");
+                        }
                     }
-
                     offset += 16;
                 }
                 
             }
         }
-
-
-
+        private int GetSubEntryDataSize()
+        {
+            switch (ocoFile.Version)
+            {
+                case 16:
+                    return 20;
+                case 20:
+                    return 24;
+                default:
+                    throw new Exception("Unknown OCP version.");
+            }
+        }
     }
 }
