@@ -8,6 +8,9 @@ namespace Xv2CoreLib.OCO
     [YAXSerializeAs("OCO")]
     public class OCO_File
     {
+        [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 16)]
+        public ushort Version { get; set; } // 16 = pre 1.22, 20 = 1.22 or later
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Partner")]
         public List<OCO_Partner> Partners { get; set; }
 
@@ -63,6 +66,10 @@ namespace Xv2CoreLib.OCO
         [YAXAttributeForClass]
         [YAXSerializeAs("I_12")]
         public int I_12 { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("NEW_I_16")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public int NEW_I_16 { get; set; } //Added in v1.22
         [YAXAttributeForClass]
         [YAXSerializeAs("PartSet")]
         public int I_16 { get; set; }
