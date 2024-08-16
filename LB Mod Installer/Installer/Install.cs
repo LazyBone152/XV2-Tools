@@ -1543,7 +1543,12 @@ namespace LB_Mod_Installer.Installer
 
                 if (binaryFile == null)
                 {
-                    binaryFile = new MSG_File(true);
+                    binaryFile = new MSG_File
+                    {
+                        //We need these both individually because there are cases where one can be false whilst the other is true
+                        unicode_msg = xmlFile.unicode_msg, 
+                        unicode_names = xmlFile.unicode_names
+                    };
                     fileManager.AddParsedFile(installPath, binaryFile);
                 }
 

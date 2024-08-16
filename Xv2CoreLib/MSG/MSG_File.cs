@@ -22,11 +22,6 @@ namespace Xv2CoreLib.MSG
 
         public MSG_File() { }
 
-        public MSG_File(bool unicode)
-        {
-            unicode_names = unicode_msg = unicode;
-        }
-
         public byte[] SaveToBytes()
         {
             return new Deserializer(this).bytes.ToArray();
