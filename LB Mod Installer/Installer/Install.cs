@@ -2442,7 +2442,7 @@ namespace LB_Mod_Installer.Installer
                     }
                     else if (msgComponent.MsgType == Msg_Component.MsgComponentType.How)
                     {
-                        if(!filePath.Equals("talisman_item.idb", StringComparison.OrdinalIgnoreCase))
+                        if(!filePath.Contains("talisman_item.idb"))
                         {
                             throw new Exception("The \"How\" MsgComponent can only be used talisman_item.idb.");
                         }
