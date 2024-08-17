@@ -669,6 +669,8 @@ namespace Xv2CoreLib.SAV
                         return "1.21.02";
                     case 34:
                         return "1.22.01";
+                    case 35:
+                        return "1.22.02";
                     default:
                         return String.Format("Unknown ({0})", Version);
 
@@ -764,6 +766,7 @@ namespace Xv2CoreLib.SAV
                     case 32:
                     case 33:
                     case 34:
+                    case 35:
                         return Brushes.Blue;
                     default:
                         return Brushes.Orange;
