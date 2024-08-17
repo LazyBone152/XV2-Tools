@@ -720,6 +720,7 @@ namespace Xv2CoreLib.SAV
                     case 32:
                     case 33:
                     case 34:
+                    case 35:
                         return null;
                     default:
                         return "This save version is not supported. It is recommened to update the application (if one is available).";
