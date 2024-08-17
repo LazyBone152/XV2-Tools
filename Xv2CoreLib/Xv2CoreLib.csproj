@@ -268,6 +268,9 @@
     <Compile Include="OCC\Deserializer.cs" />
     <Compile Include="OCC\OCC_File.cs" />
     <Compile Include="OCC\Parser.cs" />
+    <Compile Include="CDT\Deserializer.cs" />
+    <Compile Include="CDT\CDT_File.cs" />
+    <Compile Include="CDT\Parser.cs" />
     <Compile Include="OCO\Deserializer.cs" />
     <Compile Include="OCO\OCO_File.cs" />
     <Compile Include="OCO\Parser.cs" />

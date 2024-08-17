@@ -328,6 +328,9 @@ namespace XV2_Xml_Serializer
                                 case ".vlc":
                                     Xv2CoreLib.VLC.VLC_File.Parse(fileLocation, true);
                                     break;
+                                case ".cdt":
+                                    new Xv2CoreLib.CDT.Parser(fileLocation, true);
+                                    break;
                                 case ".xml":
                                     LoadXmlInitial(fileLocation);
                                     break;
@@ -622,6 +625,9 @@ namespace XV2_Xml_Serializer
                         break;
                     case ".vlc":
                         Xv2CoreLib.VLC.VLC_File.Write(fileLocation);
+                        break;
+                    case ".cdt":
+                        new Xv2CoreLib.CDT.Deserializer(fileLocation);
                         break;
                     default:
                         FileTypeNotSupported(fileLocation);
