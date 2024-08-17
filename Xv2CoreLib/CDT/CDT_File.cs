@@ -9,6 +9,10 @@ namespace Xv2CoreLib.CDT
     public class CDT_File
     {
         [YAXAttributeForClass]
+        [YAXDontSerializeIfNull]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public bool Reindex { get; set; } = false; // Boolean that "reindexes" the file so we can add entries anywhere without worrying about the ID
+        [YAXAttributeForClass]
         public uint I_08 { get; set; }
         [YAXAttributeForClass]
         public uint I_12 { get; set; }
@@ -33,14 +37,15 @@ namespace Xv2CoreLib.CDT
     {
         #region Installer
         [YAXDontSerialize]
-        public int SortID { get { return ID; } set { ID = value; } }
+        public int SortID { get { return int.Parse(ID); } set { ID = value.ToString(); } }
         [YAXDontSerialize]
-        public string Index { get { return ID.ToString(); } set { ID = Utils.TryParseInt(value); } }
+        public string Index { get { return ID.ToString(); } set { ID = value.ToString(); } }
         #endregion
 
         [YAXAttributeForClass]
         [YAXSerializeAs("ID")]
-        public int ID { get; set; }
+        [BindingAutoId]
+        public string ID { get; set; } //uint32
         [YAXAttributeForClass]
         [YAXSerializeAs("TextLeftLength")]
         [YAXDontSerialize]

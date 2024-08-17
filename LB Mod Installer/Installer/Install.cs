@@ -61,6 +61,7 @@ using Xv2CoreLib.OCT;
 using Xv2CoreLib.PSO;
 using Xv2CoreLib.OCP;
 using Xv2CoreLib.AIT;
+using Xv2CoreLib.CDT;
 using xv2Utils = Xv2CoreLib.Utils;
 //using LB_Mod_Installer.Installer.Transformation;
 
@@ -424,6 +425,9 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".ait":
                     Install_AIT(xmlPath, installPath, isXml, useSkipBindings);
+                    break;
+                case ".cdt":
+                    Install_CDT(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 default:
                     //if (TryTransformationInstall(xmlPath))
@@ -2344,6 +2348,30 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
+        private void Install_CDT(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                CDT_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<CDT_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : CDT_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                CDT_File binaryFile = (CDT_File)GetParsedFile<CDT_File>(installPath);
+
+                //Parse bindings
+                bindingManager.ParseProperties(xmlFile.Entries, binaryFile.Entries, installPath);
+
+                //Install entries
+                InstallEntries(xmlFile.Entries, binaryFile.Entries, installPath, Sections.CDT_Entry, useSkipBindings);
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at CDT install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
 
         //Generic Install Methods
         //We need generic methods for IInstallable via List and ObservableCollection. Most file types will be handled with this.
@@ -2694,6 +2722,8 @@ namespace LB_Mod_Installer.Installer
                     return OCP_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".ait":
                     return AIT_File.Parse(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".cdt":
+                    return CDT_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 default:
                     throw new InvalidDataException(String.Format("GetParsedFileFromGame: The filetype of \"{0}\" is not supported.", path));
             }
@@ -2820,6 +2850,8 @@ namespace LB_Mod_Installer.Installer
                     return ((EEPK_File)data).SaveToBytes();
                 case ".ait":
                     return ((AIT_File)data).SaveToBytes();
+                case ".cdt":
+                    return ((CDT_File)data).SaveToBytes();
                 default:
                     throw new InvalidDataException(String.Format("GetBytesFromParsedFile: The filetype of \"{0}\" is not supported.", path));
             }

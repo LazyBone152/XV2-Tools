@@ -48,7 +48,7 @@ namespace Xv2CoreLib.CDT
 
                 for(int i = 0; i < count; i++)
                 {
-                    cdtFile.Entries.Add(new CDT_Entry() { ID = BitConverter.ToInt32(rawBytes, offset) });
+                    cdtFile.Entries.Add(new CDT_Entry() { ID = BitConverter.ToInt32(rawBytes, offset).ToString() });
 
                     cdtFile.Entries[i].TextLeftLength = BitConverter.ToInt32(rawBytes, offset + 4);
                     cdtFile.Entries[i].TextLeft = StringEx.GetString(rawBytes, offset + 8, false, StringEx.EncodingType.Unicode, (int)cdtFile.Entries[i].TextLeftLength);

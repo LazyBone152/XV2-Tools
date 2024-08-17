@@ -41,7 +41,7 @@ namespace Xv2CoreLib.CDT
             {
                 for (int i = 0; i < count; i++)
                 {
-                    bytes.AddRange(BitConverter.GetBytes(i));
+                    bytes.AddRange(BitConverter.GetBytes(cdtFile.Reindex ? i : int.Parse(cdtFile.Entries[i].ID)));
                     if (cdtFile.Entries[i].TextLeft == null) cdtFile.Entries[i].TextLeft = string.Empty;
                     bytes.AddRange(BitConverter.GetBytes(cdtFile.Entries[i].TextLeft.Length * 2 + 2));
                     bytes.AddRange(Encoding.Unicode.GetBytes(cdtFile.Entries[i].TextLeft));
