@@ -56,6 +56,7 @@ using Xv2CoreLib.OCT;
 using Xv2CoreLib.PSO;
 using Xv2CoreLib.OCP;
 using Xv2CoreLib.AIT;
+using Xv2CoreLib.CDT;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -348,6 +349,9 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".ait":
                     Uninstall_AIT(path, file);
+                    break;
+                case ".cdt":
+                    Uninstall_CDT(path, file);
                     break;
                 default:
                     throw new Exception(string.Format("The filetype of \"{0}\" is unsupported. Uninstall failed.\n\nThis mod was likely installed by a newer version of the installer.", path));
@@ -1714,6 +1718,24 @@ namespace LB_Mod_Installer.Installer
             catch (Exception ex)
             {
                 string error = string.Format("Failed at BCM uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
+
+        private void Uninstall_CDT(string path, _File file)
+        {
+            try
+            {
+                CDT_File binaryFile = (CDT_File)GetParsedFile<CDT_File>(path, false);
+                CDT_File cpkBinFile = (CDT_File)GetParsedFile<CDT_File>(path, true);
+
+                Section section = file.GetSection(Sections.CDT_Entry);
+
+                UninstallEntries(binaryFile.Entries, (cpkBinFile != null) ? cpkBinFile.Entries : null, section.IDs);
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at CDT uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }
