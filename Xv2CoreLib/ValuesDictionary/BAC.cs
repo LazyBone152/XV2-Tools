@@ -378,7 +378,7 @@ namespace Xv2CoreLib.ValuesDictionary
             { 0x44 , "Damages User (x10)" },
             { 0x48 , "Enable Hitbox for Victim (ThrowHandler)" },
             { 0x4a , "Skill Cooldown" },
-            { 0x4c , "Activate Talisman" },
+            { 0x4c , "Activate Power Up (Stackable)" },
             { 0x4e , "Skill Upgrade" },
             { 0x57 , "Extended Set BCS Partset (Permanent)" },
             { 0x5f , "Auto-Dodge 2" }
@@ -408,7 +408,7 @@ namespace Xv2CoreLib.ValuesDictionary
             { 0x43 , "Stamina Cost" },
             { 0x44 , "Damage Amount" },
             { 0x4a , "Cooldown Duration" },
-            { 0x4c , "Talisman ID" },
+            { 0x4c , "PUP ID" },
             { 0x4e , "Skill ID" },
             { 0x57 , "Partset (Colorable)" },
             { 0x5f , "Stamina Cost" },
@@ -447,7 +447,8 @@ namespace Xv2CoreLib.ValuesDictionary
             { 0x26 , "Should match the BAC condition on the projectile BSA entry (BsaEntryPassing type)." },
             { 0x2a , "This is either the BoneScale entry ID, or -1 to deactivate (return to default bone scale)." },
             { 0x31 , "Positive values for health gain. An amount of 100 is equal to 3 bars." },
-            { 0x43 , "Positive values for stamina drain, negative for gain." }
+            { 0x43 , "Positive values for stamina drain, negative for gain." },
+            { 0x4c , "ID of the PUP entry to activate. Unlike the first function (27 / Activate Power Up) this can stack, and does not need to be defined on the CUS entry of the skill, allowing for multiple different power ups to be active at the same time." },
         };
 
         //Param1 ToolTips

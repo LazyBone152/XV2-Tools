@@ -41,7 +41,7 @@ namespace Xv2CoreLib.BAC
         {
             {0, "Animation" }, {1, "Hitbox"}, {2, "Movement"}, {3, "Invulnerability"}, {4, "Time Scale"}, {5, "Tracking" },
             {6, "Charge Control" }, {7, "BCM Callback"}, {8, "Effect"}, {9, "Projectile" }, {10, "Camera" }, {11, "Sound" },
-            {12, "Targeting Assistance" }, {13, "BCS Part Visibility" }, {14, "Bone Modification" }, {15, "Functions" },
+            {12, "Targeting Assistance" }, {13, "BCS Part Visibility" }, {14, "Bone Modification" }, {15, "Function" },
             {16, "Post Effect" }, {17, "Throw Handler" }, {18, "Physics Object" }, {19, "Aura" }, {20, "Homing Movement" },
             {21, "Eye Movement" }, {22, "BAC_Type22" }, {23, "Transparency Effect" }, {24, "Dual Skill Handler"}, {25, "Extended Charge Control"},
             {26, "Extended Camera Control" }, {27, "Effect Property Control" }, {28, "BAC_Type28"}, {29, "BAC_Type29"}, {30, "BAC_Type30"}, {31, "BAC_Type31"}
