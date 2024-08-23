@@ -707,11 +707,22 @@ namespace Xv2CoreLib
         public string GetSkillFolderName(Skill cusEntry)
         {
             int cmsId = (int)Math.Floor(cusEntry.ID2 / 10f);
-            string charaShortName = CmsFile.GetEntry(cmsId.ToString()).Str_04;
+            CMS_Entry cmsEntry = CmsFile.GetEntry(cmsId.ToString());
+            string charaShortName;
 
-            //If chara ID belongs to a CAC, the skill is tagged as CMN instead.
-            if (cmsId >= 100 && cmsId < 109)
+            if (cmsId >= 100 && cmsId <= 109)
+            {
+                //If chara ID belongs to a CAC, the skill is tagged as CMN instead.
                 charaShortName = "CMN";
+            }
+            else if (cmsEntry == null)
+            {
+                throw new Exception("Skill belongs to a character that doesn't have a CMS entry. Load failed.");
+            }
+            else
+            {
+                charaShortName = cmsEntry.Str_04;
+            }
 
             return String.Format("{0}_{1}_{2}", cusEntry.ID2.ToString("D3"), charaShortName, cusEntry.ShortName);
         }
