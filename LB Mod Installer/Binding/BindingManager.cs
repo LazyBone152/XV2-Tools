@@ -446,6 +446,7 @@ namespace LB_Mod_Installer.Binding
                         case Function.GetEntry:
                             {
                                 string alias = b.GetArgument1();
+                                string alias2 = b.GetArgument1() + "_event";
 
                                 if(CurrentEntry is TSD_Trigger trigger)
                                 {
@@ -454,6 +455,7 @@ namespace LB_Mod_Installer.Binding
                                     if(entry != null)
                                     {
                                         AddAlias(entry.SortID.ToString(), alias);
+                                       AddAlias(entry.I_24.ToString(), alias2);
 
                                         //Entry will be removed and not installed
                                         retID = NullTokenInt;

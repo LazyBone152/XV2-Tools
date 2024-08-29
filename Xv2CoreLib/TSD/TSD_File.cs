@@ -86,7 +86,6 @@ namespace Xv2CoreLib.TSD
             if (I_12 != trigger.I_12) return false;
             if (I_16 != trigger.I_16) return false;
             if (I_20 != trigger.I_20) return false;
-            if (I_24 != trigger.I_24) return false;
             if (I_28 != trigger.I_28) return false;
             if (Condition != trigger.Condition) return false;
 
