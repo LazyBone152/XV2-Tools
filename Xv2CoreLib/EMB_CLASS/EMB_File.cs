@@ -31,11 +31,15 @@ namespace Xv2CoreLib.EMB_CLASS
         public const int MAX_EFFECT_TEXTURES = 128;
 
         [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public bool IsEMZ { get; set; }
+
+        [YAXAttributeForClass]
         [YAXSerializeAs("I_08")]
-        public UInt16 I_08 { get; set; }
+        public ushort I_08 { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("I_10")]
-        public UInt16 I_10 { get; set; }
+        public ushort I_10 { get; set; }
         [YAXAttributeForClass]
         public bool UseFileNames { get; set; }
         [YAXAttributeForClass]

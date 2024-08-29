@@ -9,6 +9,8 @@ using YAXLib;
 using Xv2CoreLib;
 using System.Collections.ObjectModel;
 using Xv2CoreLib.Resource;
+using VGAudio.Utilities;
+using Xv2CoreLib.EMZ;
 
 namespace Xv2CoreLib.EMB_CLASS
 {
@@ -31,6 +33,7 @@ namespace Xv2CoreLib.EMB_CLASS
         {
             rawBytes = File.ReadAllBytes(fileLocation);
             saveLocation = String.Format("{0}.xml", fileLocation);
+            DecompressEmz();
             Validation();
             totalEntries = BitConverter.ToInt32(rawBytes, 12);
             contentsOffset = BitConverter.ToInt32(rawBytes, 24);
@@ -47,11 +50,22 @@ namespace Xv2CoreLib.EMB_CLASS
         public Parser(byte[] _rawBytes)
         {
             rawBytes = _rawBytes;
+            DecompressEmz();
             Validation();
             totalEntries = BitConverter.ToInt32(rawBytes, 12);
             contentsOffset = BitConverter.ToInt32(rawBytes, 24);
             fileNameTableOffset = BitConverter.ToInt32(rawBytes, 28);
             ParseFile();
+        }
+        private void DecompressEmz()
+        {
+            if (BitConverter.ToInt32(rawBytes, 0) == EMZ_File.SIGNATURE)
+            {
+                //Unpack the EMB if it is within an EMZ file
+                EMZ_File emz = EMZ_File.Load(rawBytes);
+                rawBytes = emz.Data;
+                embFile.IsEMZ = true;
+            }
         }
 
         public EMB_File GetEmbFile()

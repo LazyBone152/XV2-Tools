@@ -63,6 +63,11 @@ using Xv2CoreLib.OCP;
 using Xv2CoreLib.AIT;
 using Xv2CoreLib.CDT;
 using xv2Utils = Xv2CoreLib.Utils;
+using Xv2CoreLib.EMZ;
+using Xv2CoreLib.SDS;
+using System.Xml.Linq;
+using System.Windows.Controls;
+using YAXLib;
 //using LB_Mod_Installer.Installer.Transformation;
 
 namespace LB_Mod_Installer.Installer
@@ -428,6 +433,23 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".cdt":
                     Install_CDT(xmlPath, installPath, isXml, useSkipBindings);
+                    break;
+                case ".emz":
+                    XDocument emzXml = zipManager.GetXmlDocumentFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath));
+
+                    if (emzXml.Root.Name == "SDS")
+                    {
+                        SDS_File sdsFile = zipManager.DeserializeXmlFromArchive<SDS_File>(emzXml);
+                        Install_SDS(xmlPath, installPath, true, sdsFile);
+                    }
+                    else if (emzXml.Root.Name == "EMB_File")
+                    {
+                        EMB_File embFile = zipManager.DeserializeXmlFromArchive<EMB_File>(emzXml);
+                        Install_EMB(xmlPath, installPath, true, embFile);
+                    }
+                    break;
+                case ".sds":
+                    Install_SDS(xmlPath, installPath, isXml);
                     break;
                 default:
                     //if (TryTransformationInstall(xmlPath))
@@ -1049,13 +1071,15 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
-        private void Install_EMB(string xmlPath, string installPath, bool isXml)
+        private void Install_EMB(string xmlPath, string installPath, bool isXml, EMB_File xmlFile = null)
         {
 #if !DEBUG
             try
 #endif
             {
-                EMB_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<EMB_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : EMB_File.LoadEmb(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                if(xmlFile == null)
+                    xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<EMB_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : EMB_File.LoadEmb(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                
                 EMB_File binaryFile = (EMB_File)GetParsedFile<EMB_File>(installPath);
 
                 //Parse bindings
@@ -1085,6 +1109,9 @@ namespace LB_Mod_Installer.Installer
                         }
                     }
                 }
+
+                //Set IsEMZ based on InstallPath extension
+                xmlFile.IsEMZ = Path.GetExtension(installPath).Equals(".emz", StringComparison.OrdinalIgnoreCase);
             }
 #if !DEBUG
             catch (Exception ex)
@@ -1303,6 +1330,38 @@ namespace LB_Mod_Installer.Installer
             catch (Exception ex)
             {
                 string error = string.Format("Failed at Prebaked install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
+        private void Install_SDS(string xmlPath, string installPath, bool isXml, SDS_File xmlFile = null)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                if (xmlFile == null)
+                    xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<SDS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : SDS_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+
+                SDS_File binaryFile = (SDS_File)GetParsedFile<SDS_File>(installPath);
+
+                //Install entries
+                List<string> ids = binaryFile.InstallEntries(xmlFile.ShaderPrograms);
+                GeneralInfo.Tracker.AddIDs(installPath, Sections.SDS_ShaderProgram, ids);
+
+                //SDS files are always EMZ
+                xmlFile.IsEMZ = true;
+
+                if(!Path.GetExtension(installPath).Equals(".emz", StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new Exception($"Invalid InstallPath for a SDS file. Extension MUST be .emz! ({installPath})");
+                }
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at SDS install phase ({0}).", xmlPath);
                 throw new Exception(error, ex);
             }
 #endif
@@ -2724,6 +2783,8 @@ namespace LB_Mod_Installer.Installer
                     return AIT_File.Parse(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".cdt":
                     return CDT_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".emz":
+                    return EMZ_File.LoadData(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 default:
                     throw new InvalidDataException(String.Format("GetParsedFileFromGame: The filetype of \"{0}\" is not supported.", path));
             }
@@ -2852,6 +2913,19 @@ namespace LB_Mod_Installer.Installer
                     return ((AIT_File)data).SaveToBytes();
                 case ".cdt":
                     return ((CDT_File)data).SaveToBytes();
+                case ".emz":
+                    if(data is EMB_File emb)
+                    {
+                        return emb.SaveToBytes();
+                    }
+                    else if(data is SDS_File sds)
+                    {
+                        return sds.Write();
+                    }
+                    else
+                    {
+                        throw new InvalidDataException(String.Format("GetBytesFromParsedFile: EMZ does not support this file type ({0}, {1})", data.GetType(), path));
+                    }
                 default:
                     throw new InvalidDataException(String.Format("GetBytesFromParsedFile: The filetype of \"{0}\" is not supported.", path));
             }

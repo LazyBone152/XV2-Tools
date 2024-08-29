@@ -12,6 +12,9 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Windows.Media.Imaging;
 using Xv2CoreLib.Resource;
+using Xv2CoreLib.EMZ;
+using Xv2CoreLib.EMB_CLASS;
+using Xv2CoreLib.SDS;
 
 namespace XV2_Xml_Serializer
 {
@@ -316,8 +319,20 @@ namespace XV2_Xml_Serializer
                                     Xv2CoreLib.SDS.SDS_File.Parse(fileLocation, true);
                                     break;
                                 case ".emz":
-                                    if(!Path.GetFileName(fileLocation).Contains("_sds.")) goto default;
-                                    Xv2CoreLib.SDS.SDS_File.Parse(fileLocation, true);
+                                    //if(!Path.GetFileName(fileLocation).Contains("_sds.")) goto default;
+                                    //Xv2CoreLib.SDS.SDS_File.Parse(fileLocation, true);
+
+                                    object emzData = EMZ_File.LoadData(File.ReadAllBytes(fileLocation));
+
+                                    if(emzData is EMB_File emb)
+                                    {
+                                        emb.SaveXmlEmbFile(fileLocation + ".xml");
+                                    }
+                                    else if (emzData is SDS_File sds)
+                                    {
+                                        sds.SaveXml(fileLocation + ".xml");
+                                    }
+
                                     break;
                                 case ".ems":
                                     Xv2CoreLib.EMS.EMS_File.CreateXml(fileLocation);
@@ -614,8 +629,21 @@ namespace XV2_Xml_Serializer
                         Xv2CoreLib.SDS.SDS_File.Write(fileLocation);
                         break;
                     case ".emz":
-                        if (!Path.GetFileName(fileLocation).Contains("_sds.")) goto default;
-                        Xv2CoreLib.SDS.SDS_File.Write(fileLocation);
+                        //if (!Path.GetFileName(fileLocation).Contains("_sds.")) goto default;
+                        //Xv2CoreLib.SDS.SDS_File.Write(fileLocation);
+
+                        string saveLocation = String.Format("{0}/{1}", Path.GetDirectoryName(fileLocation), Path.GetFileNameWithoutExtension(fileLocation));
+                        object data = EMZ_File.LoadFromXml(fileLocation);
+
+                        if(data is EMB_File emb)
+                        {
+                            emb.SaveBinaryEmbFile(saveLocation);
+                        }
+                        else if (data is SDS_File sds)
+                        {
+                            sds.Save(saveLocation);
+                        }
+
                         break;
                     case ".ems":
                         Xv2CoreLib.EMS.EMS_File.SaveXml(fileLocation);

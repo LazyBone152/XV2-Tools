@@ -57,6 +57,7 @@ using Xv2CoreLib.PSO;
 using Xv2CoreLib.OCP;
 using Xv2CoreLib.AIT;
 using Xv2CoreLib.CDT;
+using Xv2CoreLib.SDS;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -352,6 +353,25 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".cdt":
                     Uninstall_CDT(path, file);
+                    break;
+                case ".emz":
+                    //The normal file loading methods are problematic for emz, since it can technically be multiple different files.
+                    //So a slightly custom approach is needed...
+                    object data = fileManager.GetParsedFile_NonGeneric(path);
+
+                    if(data == null)
+                    {
+                        data = GetParsedFile<EMB_File>(path, false);
+                    }
+
+                    if(data is EMB_File)
+                    {
+                        Uninstall_EMB(path, file);
+                    }
+                    else if(data is SDS_File)
+                    {
+                        Uninstall_SDS(path, file);
+                    }
                     break;
                 default:
                     throw new Exception(string.Format("The filetype of \"{0}\" is unsupported. Uninstall failed.\n\nThis mod was likely installed by a newer version of the installer.", path));
@@ -1739,6 +1759,28 @@ namespace LB_Mod_Installer.Installer
                 throw new Exception(error, ex);
             }
         }
+
+        private void Uninstall_SDS(string path, _File file)
+        {
+            try
+            {
+                SDS_File binaryFile = (SDS_File)GetParsedFile<SDS_File>(path, false);
+                SDS_File cpkBinFile = (SDS_File)GetParsedFile<SDS_File>(path, true, false);
+
+                Section section = file.GetSection(Sections.SDS_ShaderProgram);
+
+                if (section != null)
+                {
+                    binaryFile.UninstallEntries(section.IDs, cpkBinFile);
+                }
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at SDS uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
+
 
         //Generic uninstallers
         private void UninstallEntries<T>(IList<T> entries, IList<T> ogEntries, List<string> ids) where T : IInstallable

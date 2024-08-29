@@ -79,6 +79,7 @@
         public const string CDT_Entry = "CDT_Entry";
         public const string VLC_ZoomInCamera = "VLC_ZoomInCamera";
         public const string VLC_UnkCamera = "VLC_UnkCamera";
+        public const string SDS_ShaderProgram = "SDS_ShaderProgram";
         public const string CharaSlotEntry = "CharaSlotEntry";
         public const string StageSlotEntry = "StageSlotEntry";
         public const string StageDefEntry = "StageDefEntry";

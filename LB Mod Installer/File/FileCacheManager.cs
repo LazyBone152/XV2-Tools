@@ -111,6 +111,29 @@ namespace LB_Mod_Installer.Installer
             }
         }
 
+        public object GetParsedFile_NonGeneric(string path)
+        {
+            path = Utils.SanitizePath(path);
+            CachedFile existing = GetCachedFile(path);
+
+            if (existing == null)
+            {
+                return null;
+            }
+            else
+            {
+                if (existing.FileType == CachedFileType.Parsed)
+                {
+                    return existing.Data;
+                }
+                else
+                {
+                    //It exists but in binary form, and we are trying to load it from xml...
+                    throw new InvalidDataException(string.Format("File \"{0}\" is being used as both binary and xml.", path));
+                }
+            }
+        }
+
         private void Add(string path, object data, CachedFileType type, bool allowOverwrite = true)
         {
             path = Utils.SanitizePath(path);

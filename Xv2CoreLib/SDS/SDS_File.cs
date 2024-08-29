@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using UsefulThings;
+using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.EMZ;
 using YAXLib;
 
@@ -118,6 +119,16 @@ namespace Xv2CoreLib.SDS
         #endregion
 
         #region Save
+        public void SaveXml(string path)
+        {
+            YAXSerializer serializer = new YAXSerializer(typeof(SDS_File));
+            serializer.SerializeToFile(this, path);
+        }
+
+        public void Save(string path)
+        {
+            File.WriteAllBytes(path, Write());
+        }
 
         public static void Write(string xmlPath)
         {
@@ -234,6 +245,49 @@ namespace Xv2CoreLib.SDS
             return fileBytes;
         }
 
+        #endregion
+
+        #region Install
+        public List<string> InstallEntries(List<SDSShaderProgram> shaders)
+        {
+            List<string> ids = new List<string>();
+
+            foreach(var shader in shaders)
+            {
+                SDSShaderProgram existing = ShaderPrograms.FirstOrDefault(x => x.Name == shader.Name);
+
+                if (existing != null)
+                {
+                    ShaderPrograms[ShaderPrograms.IndexOf(existing)] = shader;
+                }
+                else
+                {
+                    ShaderPrograms.Add(shader);
+                }
+
+                ids.Add(shader.Name);
+            }
+
+            return ids;
+        }
+
+        public void UninstallEntries(List<string> ids, SDS_File cpkSdsFile)
+        {
+            foreach (string id in ids)
+            {
+                SDSShaderProgram cpkEntry = cpkSdsFile.ShaderPrograms.FirstOrDefault(x => x.Name == id);
+                SDSShaderProgram entry = ShaderPrograms.FirstOrDefault(x => x.Name == id);
+
+                if(cpkEntry != null)
+                {
+                    ShaderPrograms[ShaderPrograms.IndexOf(entry)] = cpkEntry;
+                }
+                else
+                {
+                    ShaderPrograms.Remove(entry);
+                }
+            }
+        }
         #endregion
 
     }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using YAXLib;
 using Xv2CoreLib;
+using Xv2CoreLib.EMZ;
 
 namespace Xv2CoreLib.EMB_CLASS
 {
@@ -115,8 +116,12 @@ namespace Xv2CoreLib.EMB_CLASS
                 }
 
             }
-            
-            
+
+            if (embFile.IsEMZ)
+            {
+                EMZ_File emz = new EMZ_File(bytes.ToArray());
+                bytes = emz.Write().ToList();
+            }
         }
 
     }
