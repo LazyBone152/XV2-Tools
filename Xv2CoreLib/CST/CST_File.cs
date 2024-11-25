@@ -48,6 +48,7 @@ namespace Xv2CoreLib.CST
         public const int CST_ENTRY_SIZE_1 = 0x28; //Ver 1 (original)
         public const int CST_ENTRY_SIZE_2 = 0x30; //Ver 2
         public const int CST_ENTRY_SIZE_3 = 0x34; //Ver 3
+        public const int CST_ENTRY_SIZE_4 = 0x38; //Ver 4
 
         [YAXAttributeForClass]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 1)]
@@ -188,6 +189,8 @@ namespace Xv2CoreLib.CST
                     return CST_ENTRY_SIZE_2;
                 case 3:
                     return CST_ENTRY_SIZE_3;
+                case 4:
+                    return CST_ENTRY_SIZE_4;
                 default:
                     throw new InvalidDataException($"CST: This CST version is not supported (Version: {version}).");
             }
@@ -203,6 +206,8 @@ namespace Xv2CoreLib.CST
                     return 2;
                 case CST_ENTRY_SIZE_3:
                     return 3;
+                case CST_ENTRY_SIZE_4:
+                    return 4;
                 default:
                     throw new InvalidDataException($"CST: This CST version is not supported (EntrySize: {entrySize}).");
             }
@@ -477,6 +482,10 @@ namespace Xv2CoreLib.CST
         [YAXSerializeAs("value")]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public ushort I_50 { get; set; }
+        [YAXAttributeFor("I_54")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public int I_54 { get; set; }
 
         public CST_CharaCostumeSlot() { }
 
@@ -513,16 +522,21 @@ namespace Xv2CoreLib.CST
                 var_type_after_TU9_order = BitConverter.ToInt32(bytes, offset + 0x24)
             };
 
-            if(version >= 2)
+            if (version >= 2)
             {
                 entry.I_40 = BitConverter.ToInt32(bytes, offset + 40);
                 entry.I_44 = BitConverter.ToInt32(bytes, offset + 44);
             }
 
-            if(version >= 3)
+            if (version >= 3)
             {
                 entry.flag_cgk2 = BitConverter.ToUInt16(bytes, offset + 0x30);
                 entry.I_50 = BitConverter.ToUInt16(bytes, offset + 0x32);
+            }
+
+            if (version >= 4)
+            {
+                entry.I_54 = BitConverter.ToInt32(bytes, offset + 0x34);
             }
 
             return entry;
@@ -546,16 +560,21 @@ namespace Xv2CoreLib.CST
             bytes.AddRange(BitConverter.GetBytes(CacIndex));
             bytes.AddRange(BitConverter.GetBytes(var_type_after_TU9_order));
 
-            if(version >= 2)
+            if (version >= 2)
             {
                 bytes.AddRange(BitConverter.GetBytes(I_40));
                 bytes.AddRange(BitConverter.GetBytes(I_44));
             }
 
-            if(version >= 3)
+            if (version >= 3)
             {
                 bytes.AddRange(BitConverter.GetBytes(flag_cgk2));
                 bytes.AddRange(BitConverter.GetBytes(I_50));
+            }
+
+            if (version >= 4)
+            {
+                bytes.AddRange(BitConverter.GetBytes(I_54));
             }
 
             if (bytes.Count != CST_File.VersionToEntrySize(version))
