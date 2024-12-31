@@ -99,6 +99,9 @@ namespace Xv2CoreLib.BDM
             int size = rawBytes.Count() - 16;
             int count = BitConverter.ToInt32(rawBytes, 8);
 
+            if (count == 0 || size == 0) // If BDM is empty (happens with 2211_NTV_RGT in version 1.23)
+                return BDM_Type.XV2_0;
+
             switch (size / count) {
                 case 1284:
                     return BDM_Type.XV2_0;
