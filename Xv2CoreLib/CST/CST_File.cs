@@ -482,10 +482,10 @@ namespace Xv2CoreLib.CST
         [YAXSerializeAs("value")]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public ushort I_50 { get; set; }
-        [YAXAttributeFor("I_54")]
+        [YAXAttributeFor("I_52")]
         [YAXSerializeAs("value")]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
-        public int I_54 { get; set; }
+        public int I_52 { get; set; }
 
         public CST_CharaCostumeSlot() { }
 
@@ -536,7 +536,7 @@ namespace Xv2CoreLib.CST
 
             if (version >= 4)
             {
-                entry.I_54 = BitConverter.ToInt32(bytes, offset + 0x34);
+                entry.I_52 = BitConverter.ToInt32(bytes, offset + 0x34);
             }
 
             return entry;
@@ -574,7 +574,7 @@ namespace Xv2CoreLib.CST
 
             if (version >= 4)
             {
-                bytes.AddRange(BitConverter.GetBytes(I_54));
+                bytes.AddRange(BitConverter.GetBytes(I_52));
             }
 
             if (bytes.Count != CST_File.VersionToEntrySize(version))
