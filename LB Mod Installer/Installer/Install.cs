@@ -1325,6 +1325,12 @@ namespace LB_Mod_Installer.Installer
                     var ids = gameFile.InstallCellMaxes(installFile.CellMaxes);
                     GeneralInfo.Tracker.AddIDs(installPath, Sections.PrebakedCellMax, ids);
                 }
+
+                if (installFile?.DestructionLevels != null)
+                {
+                    var ids = gameFile.InstallDestructionLevels(installFile.DestructionLevels);
+                    GeneralInfo.Tracker.AddIDs(installPath, Sections.PrebakedDestructionLevelSet, ids);
+                }
             }
 #if !DEBUG
             catch (Exception ex)

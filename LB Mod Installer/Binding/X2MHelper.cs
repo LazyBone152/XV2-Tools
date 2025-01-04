@@ -30,7 +30,8 @@ namespace LB_Mod_Installer.Binding
         {
             get
             {
-                return $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}/XV2INS/Installed";
+                //return $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}/XV2INS/Installed";
+                return $"{GeneralInfo.GameDataFolder}/InstallData"; //New X2M installed mod location
             }
         }
         private const string X2M_XML = "x2m.xml";

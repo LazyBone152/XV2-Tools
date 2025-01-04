@@ -1,5 +1,4 @@
-﻿using AForge.Imaging.Filters;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -53,6 +52,11 @@ namespace Xv2CoreLib.Eternity
         [YAXDontSerializeIfNull]
         public List<PreBakedAuraExtraData> AuraExtras { get; set; } = new List<PreBakedAuraExtraData>();
 
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "DestructionLevelSet")]
+        [YAXDontSerializeIfNull]
+        public List<DestructionLevelSet> DestructionLevels { get; set; } = new List<DestructionLevelSet>();
+
+
         //Parsed Lists:
         [YAXDontSerialize]
         public List<int> AutoBattlePortraits { get; set; } = new List<int>();
@@ -62,7 +66,7 @@ namespace Xv2CoreLib.Eternity
         //A list of all current supported XML elements for pre-baked.xml. Any element not on this list will not be parsed but will have its original XML structure saved so that it can be added back into the XML when saving the file.
         private static List<string> SupportedXmlElements = new List<string>()
         {
-            "OZARUS", "CELL_MAXES", "AUTO_BTL_PORT", "BodyShape", "CusAuraData", "Alias", "ANY_DUAL_SKILL", "AuraExtraData"
+            "OZARUS", "CELL_MAXES", "AUTO_BTL_PORT", "BodyShape", "CusAuraData", "Alias", "ANY_DUAL_SKILL", "AuraExtraData", "DestructionLevelSet"
         };
         private List<XElement> UnsupportedElements = new List<XElement>();
 
@@ -129,6 +133,7 @@ namespace Xv2CoreLib.Eternity
             if (AuraExtras == null) AuraExtras = new List<PreBakedAuraExtraData>();
             if (Ozarus == null) Ozarus = new List<string>();
             if (CellMaxes == null) CellMaxes = new List<string>();
+            if (DestructionLevels == null) DestructionLevels = new List<DestructionLevelSet>();
         }
 
         //Save:
@@ -186,6 +191,7 @@ namespace Xv2CoreLib.Eternity
             CusAuras?.Sort((x, y) => x.CusAuraID - y.CusAuraID);
             PreBakedAliases?.Sort((x, y) => (int)x.CmsEntryID - (int)y.CmsEntryID);
             AuraExtras?.Sort((x, y) => x.AuraID - y.AuraID);
+            DestructionLevels?.Sort((x, y) => x.CmsEntryID - y.CmsEntryID);
         }
         #endregion
 
@@ -343,6 +349,19 @@ namespace Xv2CoreLib.Eternity
 
             return ids;
         }
+        
+        public List<string> InstallDestructionLevels(List<DestructionLevelSet> levels)
+        {
+            List<string> ids = new List<string>();
+
+            foreach (var aura in levels)
+            {
+                InstallDestructionLevel(aura);
+                ids.Add(aura.CmsEntryID.ToString());
+            }
+
+            return ids;
+        }
 
         public void InstallCusAura(CusAuraData cusAura)
         {
@@ -397,6 +416,20 @@ namespace Xv2CoreLib.Eternity
             else
             {
                 AuraExtras[index] = aura;
+            }
+        }
+
+        public void InstallDestructionLevel(DestructionLevelSet destructionSet)
+        {
+            int index = DestructionLevels.IndexOf(DestructionLevels.FirstOrDefault(x => x.CmsEntryID == destructionSet.CmsEntryID));
+
+            if (index == -1)
+            {
+                DestructionLevels.Add(destructionSet);
+            }
+            else
+            {
+                DestructionLevels[index] = destructionSet;
             }
         }
 
@@ -472,6 +505,19 @@ namespace Xv2CoreLib.Eternity
                 }
             }
         }
+       
+        public void UninstallDestructionLevelSets(List<string> ids)
+        {
+            foreach (var stringId in ids)
+            {
+                int id;
+
+                if (int.TryParse(stringId, out id))
+                {
+                    UninstallDestructionSet(id);
+                }
+            }
+        }
 
         public void UninstallCusAura(int cusAuraId)
         {
@@ -491,6 +537,11 @@ namespace Xv2CoreLib.Eternity
         public void UninstallAuraExtraData(int auraId)
         {
             AuraExtras.RemoveAll(x => x.AuraID == auraId);
+        }
+
+        public void UninstallDestructionSet(int cmsId)
+        {
+            DestructionLevels.RemoveAll(x => x.CmsEntryID == cmsId);
         }
         #endregion
     }
@@ -633,5 +684,37 @@ namespace Xv2CoreLib.Eternity
         public bool BPE_Flag1 = false;
         [YAXDontSerialize]
         public bool BPE_Flag2 = false;
+    }
+
+    [YAXSerializeAs("DestructionLevelSet")]
+    public class DestructionLevelSet
+    {
+        [YAXAttributeForClass]
+        [YAXSerializeAs("cms_id")]
+        [YAXHexValue]
+        public ushort CmsEntryID { get; set; }
+
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "DestructionLevel")]
+        public List<DestructionLevel> DesturctionLevels { get; set; } = new List<DestructionLevel>();
+    }
+
+    [YAXSerializeAs("DestructionLevel")]
+    public class DestructionLevel
+    {
+        [YAXAttributeFor("MAP_IN")]
+        [YAXSerializeAs("value")]
+        public string MAP_IN { get; set; }
+        [YAXAttributeFor("MAP_OUT")]
+        [YAXSerializeAs("value")]
+        public string MAP_OUT { get; set; }
+        [YAXAttributeFor("DAMAGE")]
+        [YAXSerializeAs("value")]
+        public uint DAMAGE { get; set; }
+        [YAXAttributeFor("TIME")]
+        [YAXSerializeAs("value")]
+        public uint TIME { get; set; }
+        [YAXAttributeFor("PERCENTAGE")]
+        [YAXSerializeAs("value")]
+        public bool PERCENTAGE { get; set; }
     }
 }

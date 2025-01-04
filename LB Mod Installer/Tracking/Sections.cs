@@ -93,6 +93,7 @@
         public const string PrebakedAutoBattlePortrait = "PrebakedAutoBattlePortrait";
         public const string PrebakedAnyDualSkillList = "PrebakedAnyDualSkillList";
         public const string PrebakedAuraExtraData = "PrebakedAuraExtraData";
+        public const string PrebakedDestructionLevelSet = "PrebakedDestructionLevelSet";
 
 
         public static string GetBcsPartColor(string id) { return string.Format("{0}{1}", BCS_PartColors, id); }

@@ -1440,6 +1440,12 @@ namespace LB_Mod_Installer.Installer
                 if (cellMaxSection != null)
                     prebakedFile.UninstallCellMaxes(cellMaxSection.IDs);
 
+                //Destruction Levels:
+                Section destructionLevelsSection = file.GetSection(Sections.PrebakedDestructionLevelSet);
+
+                if (destructionLevelsSection != null)
+                    prebakedFile.UninstallDestructionLevelSets(destructionLevelsSection.IDs);
+
             }
             catch (Exception ex)
             {
