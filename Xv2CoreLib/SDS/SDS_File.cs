@@ -10,6 +10,14 @@ using YAXLib;
 
 namespace Xv2CoreLib.SDS
 {
+    public enum SDS_Type
+    {
+        AGE,
+        DEFAULT,
+        AGE_NGG,
+        DEFAULT_NGG
+    }
+
     [YAXSerializeAs("SDS")]
     public class SDS_File
     {
@@ -290,6 +298,63 @@ namespace Xv2CoreLib.SDS
         }
         #endregion
 
+        #region Helper
+        public SDSShaderProgram GetShader(string shaderName)
+        {
+            return ShaderPrograms.FirstOrDefault(x => x.Name == shaderName);
+        }
+
+        public static string GetVsEmzPath(SDS_Type type)
+        {
+            switch (type)
+            {
+                case SDS_Type.AGE:
+                    return "adam_shader/shader_age_vs.emz";
+                case SDS_Type.AGE_NGG:
+                    return "adam_shader/shader_age_vs_ngg.emz";
+                case SDS_Type.DEFAULT:
+                    return "adam_shader/shader_default_vs.emz";
+                case SDS_Type.DEFAULT_NGG:
+                    return "adam_shader/shader_default_vs_ngg.emz";
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        public static string GetPsEmzPath(SDS_Type type)
+        {
+            switch (type)
+            {
+                case SDS_Type.AGE:
+                    return "adam_shader/shader_age_ps.emz";
+                case SDS_Type.AGE_NGG:
+                    return "adam_shader/shader_age_ps_ngg.emz";
+                case SDS_Type.DEFAULT:
+                    return "adam_shader/shader_default_ps.emz";
+                case SDS_Type.DEFAULT_NGG:
+                    return "adam_shader/shader_default_ps_ngg.emz";
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        public static string GetSdsPath(SDS_Type type)
+        {
+            switch (type)
+            {
+                case SDS_Type.AGE:
+                    return "adam_shader/technique_age_sds.emz";
+                case SDS_Type.AGE_NGG:
+                    return "adam_shader/technique_age_sds_ngg.emz";
+                case SDS_Type.DEFAULT:
+                    return "adam_shader/technique_default_sds.emz";
+                case SDS_Type.DEFAULT_NGG:
+                    return "adam_shader/technique_default_sds_ngg.emz";
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+        #endregion
     }
 
     public class SDSShaderProgram
@@ -306,7 +371,6 @@ namespace Xv2CoreLib.SDS
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "SDSParameter")]
         public List<SDSParameter> Parameters { get; set; } = new List<SDSParameter>();
-
     }
 
     public class SDSParameter

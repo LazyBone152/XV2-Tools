@@ -868,7 +868,7 @@ namespace Xv2CoreLib.ETR
     public enum ETR_InterpolationType
     {
         ShapeStartToEnd = 2, //Interpolate down the length of the extruded parts, where the first keyframe is the end of the extrusion.
-        Default = 1, //Interpolation is based on duration, where the first keyframe applies at the start, the last one at the end (so, like a regular animation)
-        DefaultEnd = 0 //Interpolation is based on duration, and only starts at the end of the effect
+        Default = 1, //Interpolation is based on duration, where the first keyframe applies at the start, the last one at the end (so, like a regular animation) (Extrude State)
+        DefaultEnd = 0 //Interpolation is based on duration, and only starts at the end of the effect (Hold State)
     }
 }

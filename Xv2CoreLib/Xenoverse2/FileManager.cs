@@ -154,12 +154,12 @@ namespace Xv2CoreLib
         #endregion
 
         #region Load
-        public object GetParsedFileFromGame(string path, bool onlyFromCpk = false, bool raiseEx = true)
+        public object GetParsedFileFromGame(string path, bool onlyFromCpk = false, bool raiseEx = true, bool ignoreCache = false)
         {
             CheckInitState();
 
             //Check cache and return an existing file, if allowed (caching doesn't occur for CPK-only loads)
-            if (!onlyFromCpk && !ForceReloadFiles)
+            if (!onlyFromCpk && !ForceReloadFiles && !ignoreCache)
             {
                 object cached = GetCachedFile(path);
                 if (cached != null) return cached;

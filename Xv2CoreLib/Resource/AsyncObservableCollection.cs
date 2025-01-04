@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Reflection;
 using System.Threading;
 using Xv2CoreLib.Resource.UndoRedo;
 using YAXLib;
@@ -293,6 +294,8 @@ namespace Xv2CoreLib.Resource
                     IsListBeingModified = false;
                 }
             }
+
+            CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
         public int IndexOf(T item)

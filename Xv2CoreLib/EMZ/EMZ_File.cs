@@ -135,5 +135,17 @@ namespace Xv2CoreLib.EMZ
 
             return bytes.ToArray();
         }
+    
+        public bool IsDataEmb()
+        {
+            if(Data == null) return false;
+            return BitConverter.ToInt32(Data, 0) == EMB_File.SIGNATURE;
+        }
+
+        public bool IsDataSds()
+        {
+            if (Data == null) return false;
+            return BitConverter.ToInt32(Data, 0) == SDS_File.SIGNATURE;
+        }
     }
 }
