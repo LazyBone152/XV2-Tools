@@ -558,6 +558,9 @@ namespace Xv2CoreLib.Resource.App
 
         public bool XenoKit_AutoReloadShaders { get; set; } = false;
         public bool XenoKit_NextGenShaders { get; set; } = false;
+        public int XenoKit_GlareLevel { get; set; } = 1; //DISABLE = -1, OFF = 0, LOW = 1, HIGH = 2
+        public bool XenoKit_GlareLevelHighRes { get; set; } = false;
+
 
         #endregion
 

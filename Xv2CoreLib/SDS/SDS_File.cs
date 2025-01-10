@@ -371,6 +371,22 @@ namespace Xv2CoreLib.SDS
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "SDSParameter")]
         public List<SDSParameter> Parameters { get; set; } = new List<SDSParameter>();
+
+        public bool Compare(SDSShaderProgram otherProgram)
+        {
+            if (Parameters.Count != otherProgram.Parameters.Count || VertexShader != otherProgram.VertexShader || PixelShader != otherProgram.PixelShader) return false;
+
+            //Parameters.Sort((x, y) => (int)x.Type - (int)y.Type);
+            //otherProgram.Parameters.Sort((x, y) => (int)x.Type - (int)y.Type);
+
+            for (int i = 0; i < Parameters.Count; i++)
+            {
+                if (Parameters[i].Name != otherProgram.Parameters[i].Name || Parameters[i].Type != otherProgram.Parameters[i].Type)
+                    return false;
+            }
+
+            return true;
+        }
     }
 
     public class SDSParameter

@@ -44,6 +44,8 @@ namespace LB_Common.Numbers
             if (Values == null)
                 Values = new float[4];
 
+            if (Values[idx] == value) return;
+
             Values[idx] = value;
 
             switch (idx)
