@@ -99,9 +99,12 @@ namespace Xv2CoreLib.CPK
         {
             if (!ValidCpkDirectory) throw new Exception("Invalid CPK Directory. Cannot retrieve the file.");
 
-            for(int i = 0; i < CpkFiles.Count; i++)
-            { 
-                if (GetFileFromCpk(CpkFiles[i], binaryReader[i], fileName, outputPath)) return true;
+            for (int i = 0; i < CpkFiles.Count; i++)
+            {
+                lock (binaryReader[i])
+                {
+                    if (GetFileFromCpk(CpkFiles[i], binaryReader[i], fileName, outputPath)) return true;
+                }
             }
 
             return false;
@@ -155,12 +158,15 @@ namespace Xv2CoreLib.CPK
         public byte[] GetFile(string fileName)
         {
             if (!ValidCpkDirectory) throw new Exception("Invalid CPK Directory. Cannot retrieve the file.");
-            
+
             for (int i = 0; i < CpkFiles.Count; i++)
             {
-                var bytes = GetFileFromCpkAsByteArray(CpkFiles[i], binaryReader[i], fileName);
+                lock (binaryReader[i])
+                {
+                    var bytes = GetFileFromCpkAsByteArray(CpkFiles[i], binaryReader[i], fileName);
 
-                if (bytes != null) return bytes;
+                    if (bytes != null) return bytes;
+                }
             }
 
             return null;
@@ -211,7 +217,10 @@ namespace Xv2CoreLib.CPK
 
             for (int i = 0; i < CpkFiles.Count; i++)
             {
-                if (DoesFileExist(CpkFiles[i], binaryReader[i], fileName)) return true;
+                lock (binaryReader[i])
+                {
+                    if (DoesFileExist(CpkFiles[i], binaryReader[i], fileName)) return true;
+                }
             }
 
             return false;
@@ -247,7 +256,10 @@ namespace Xv2CoreLib.CPK
 
             for (int i = 0; i < CpkFiles.Count; i++)
             {
-                files.AddRange(GetFilesinDirectoryFromCpk(CpkFiles[i], binaryReader[i], directory));
+                lock (binaryReader[i])
+                {
+                    files.AddRange(GetFilesinDirectoryFromCpk(CpkFiles[i], binaryReader[i], directory));
+                }
             }
 
             return files.ToArray();
