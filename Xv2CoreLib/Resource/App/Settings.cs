@@ -550,7 +550,6 @@ namespace Xv2CoreLib.Resource.App
 
         //Render Settings:
         public bool XenoKit_RimLightingEnabled { get; set; } = true;
-        public bool XenoKit_EnableDynamicLighting { get; set; } = false;
         public int XenoKit_SuperSamplingFactor { get; set; } = 2;
         public int XenoKit_ShadowMapRes { get; set; } = 2048;
         public bool XenoKit_FullLowRez { get; set; } = false;
@@ -618,17 +617,9 @@ namespace Xv2CoreLib.Resource.App
             UndoManager.Instance.SetCapacity(UndoLimit);
 
             //Allowed SuperSamplingFactors: 1, 2, 4 and 8
-            if (XenoKit_SuperSamplingFactor != 1 && XenoKit_SuperSamplingFactor != 2 && XenoKit_SuperSamplingFactor != 4 && XenoKit_SuperSamplingFactor != 8)
+            if (XenoKit_SuperSamplingFactor > 2 || XenoKit_SuperSamplingFactor < 1)
             {
-                XenoKit_SuperSamplingFactor = 1;
-            }
-
-            //Enable SSAA and dynamic lighting by default
-            if (SettingsVersion == 2)
-            {
-                SettingsVersion = 3;
                 XenoKit_SuperSamplingFactor = 2;
-                XenoKit_EnableDynamicLighting = true;
             }
 
             //Theme
