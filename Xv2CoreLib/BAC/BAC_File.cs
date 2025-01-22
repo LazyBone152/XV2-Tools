@@ -4620,23 +4620,43 @@ namespace Xv2CoreLib.BAC
             Unk8 = 0x80
         }
 
+        public enum ShaderPathOptions : byte
+        {
+            Default = 0,
+            Vanish = 1,
+            Vanish2 = 2,
+            Vanish3 = 3,
+            Unk4 = 4,
+            HC = 5
+        }
+
+        [YAXDontSerialize]
+        public ShaderPathOptions ShaderOptions
+        {
+            get => (ShaderPathOptions)TransparencyFlags;
+            set => TransparencyFlags = (TransparencyFlagsEnum)value;
+        }
+
+        //NOTE: Not actually a flags value, it seems.
         [YAXAttributeFor("Transparency_Flags")]
         [YAXSerializeAs("value")]
-        public TransparencyFlagsEnum TransparencyFlags { get; set; } //int8
+        public TransparencyFlagsEnum TransparencyFlags { get; set; }
 
+        //NOTE: The XML names for these values are old and confusing, but can't be changed now to maintain old XML compat for installers.
+        //Renamed in code for clarity
         [YAXAttributeFor("VerticalGapWidth")]
         [YAXSerializeAs("value")]
-        public byte VerticalGapWidth { get; set; }
+        public byte HorizontalLineSize { get; set; }
         [YAXAttributeFor("HorizontalGapHeight")]
         [YAXSerializeAs("value")]
-        public byte HorizontalGapHeight { get; set; }
+        public byte VerticalLineSize { get; set; }
         [YAXAttributeFor("VisiblePixelWidth")]
         [YAXSerializeAs("value")]
-        public byte VisiblePixelWidth { get; set; }
-
+        public byte HorizontalLineSpacing { get; set; }
         [YAXAttributeFor("Dilution")]
         [YAXSerializeAs("value")]
-        public ushort Dilution { get; set; }
+        public ushort VerticalLineSpacing { get; set; }
+
         [YAXAttributeFor("I_14")]
         [YAXSerializeAs("value")]
         public byte I_14 { get; set; } //0, 1
@@ -4703,10 +4723,10 @@ namespace Xv2CoreLib.BAC
                     I_04 = BitConverter.ToUInt16(rawBytes, offset + 4),
                     Flags = BitConverter.ToUInt16(rawBytes, offset + 6),
                     TransparencyFlags = (TransparencyFlagsEnum)rawBytes[offset + 8],
-                    VerticalGapWidth = rawBytes[offset + 9],
-                    HorizontalGapHeight = rawBytes[offset + 10],
-                    VisiblePixelWidth = rawBytes[offset + 11],
-                    Dilution = BitConverter.ToUInt16(rawBytes, offset + 12),
+                    HorizontalLineSize = rawBytes[offset + 9],
+                    VerticalLineSize = rawBytes[offset + 10],
+                    HorizontalLineSpacing = rawBytes[offset + 11],
+                    VerticalLineSpacing = BitConverter.ToUInt16(rawBytes, offset + 12),
                     I_14 = rawBytes[offset + 14],
                     I_15 = rawBytes[offset + 15],
                     I_16 = BitConverter.ToInt32(rawBytes, offset + 16),
@@ -4740,10 +4760,10 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.I_04));
                 bytes.AddRange(BitConverter.GetBytes(type.Flags));
                 bytes.Add((byte)type.TransparencyFlags);
-                bytes.Add(type.VerticalGapWidth);
-                bytes.Add(type.HorizontalGapHeight);
-                bytes.Add(type.VisiblePixelWidth);
-                bytes.AddRange(BitConverter.GetBytes(type.Dilution)); //12
+                bytes.Add(type.HorizontalLineSize);
+                bytes.Add(type.VerticalLineSize);
+                bytes.Add(type.HorizontalLineSpacing);
+                bytes.AddRange(BitConverter.GetBytes(type.VerticalLineSpacing)); //12
                 bytes.Add(type.I_14); //14
                 bytes.Add(type.I_15); //15
                 bytes.AddRange(BitConverter.GetBytes(type.I_16)); //16
