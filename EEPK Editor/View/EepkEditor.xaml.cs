@@ -36,6 +36,8 @@ using EEPK_Organiser.ViewModel;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using GalaSoft.MvvmLight.CommandWpf;
+using CriPakTools;
+
 
 #if XenoKit
 using XenoKit;
@@ -91,10 +93,12 @@ namespace EEPK_Organiser.View
             NotifyPropertyChanged(nameof(effectContainerFile));
             NotifyPropertyChanged(nameof(IsFileLoaded));
 
+#if !XenoKit
             if(effectContainerFile != null)
                 nameListManager.EepkLoaded(effectContainerFile);
+#endif
         }
-        #endregion
+#endregion
 
         public EffectContainerFile effectContainerFile
         {
@@ -163,6 +167,8 @@ namespace EEPK_Organiser.View
             }
         }
 
+
+#if !XenoKit
         //NameLists
         private NameList.NameListManager _nameListManager = null;
         public NameList.NameListManager nameListManager
@@ -180,6 +186,7 @@ namespace EEPK_Organiser.View
                 }
             }
         }
+#endif
 
         //Cache
         public CacheManager cacheManager { get; set; } = new CacheManager();
@@ -241,8 +248,11 @@ namespace EEPK_Organiser.View
             InitializeComponent();
             rootGrid.DataContext = this;
 
+
+#if !XenoKit
             //Load NameLists
             nameListManager = new NameList.NameListManager();
+#endif
 
             EepkChanged += EepkInstanceChanged;
             UndoManager.Instance.UndoOrRedoCalled += UndoManager_UndoOrRedoCalled;
@@ -292,8 +302,11 @@ namespace EEPK_Organiser.View
                 {
                     var loadedFile = await LoadFileAsync(path, false, false);
 
+
+#if !XenoKit
                     //Apply namelist
                     nameListManager.EepkLoaded(loadedFile);
+#endif
 
                     //Cache the file
                     if (cacheFile)
@@ -328,8 +341,11 @@ namespace EEPK_Organiser.View
             {
                 var loadedFile = await LoadFileAsync(entitySelector.SelectedEntity.EepkPath, true, entitySelector.OnlyLoadFromCPK);
 
+
+#if !XenoKit
                 //Apply namelist
                 nameListManager.EepkLoaded(loadedFile);
+#endif
 
                 //Cache the file
                 if (cacheFile)
@@ -3460,6 +3476,7 @@ namespace EEPK_Organiser.View
 
 
         #region EFFECT
+
         public RelayCommand Effect_Play_Command => new RelayCommand(PlaySelectedEffect, IsEffectSelected);
 
         public RelayCommand Effect_AddEffectPart_Command => new RelayCommand(Effect_AddEffectPart, IsEffectSelected);
@@ -4890,6 +4907,7 @@ namespace EEPK_Organiser.View
 
         }
 
+#if !XenoKit
         private void NameList_Item_Click(object sender, RoutedEventArgs e)
         {
             if (effectContainerFile == null) return;
@@ -4916,7 +4934,7 @@ namespace EEPK_Organiser.View
         {
             nameListManager.SaveNameList(effectContainerFile.Effects);
         }
-
+#endif
 
         /// <summary>
         /// Returns the SelectedEffectParts for the first SelectedEffect, if it exists.
@@ -4965,5 +4983,51 @@ namespace EEPK_Organiser.View
                 SceneManager.MainGameInstance.VfxPreview.PreviewAsset(asset);
 #endif
         }
+
+
+        #region EffectName
+        public RelayCommand Effect_Name_Command => new RelayCommand(RenameEffect, IsEffectSelected);
+        private void RenameEffect()
+        {
+            nameListColumn.IsReadOnly = false;
+            effectDataGrid.CurrentColumn = nameListColumn;
+            effectDataGrid.BeginEdit();
+        }
+
+        private void effectDataGrid_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.F2)
+            {
+                var dataGrid = sender as DataGrid;
+
+                if (dataGrid.CurrentCell.Column is DataGridTextColumn column && dataGrid.CurrentItem != null && column == nameListColumn)
+                {
+                    column.IsReadOnly = false;
+                    dataGrid.BeginEdit();
+                    e.Handled = true;
+                }
+            }
+            else if (e.Key == Key.Enter)
+            {
+                var dataGrid = sender as DataGrid;
+
+                if (dataGrid.CurrentCell.Column is DataGridTextColumn column && dataGrid.CurrentItem != null && column == nameListColumn)
+                {
+                    column.IsReadOnly = true;
+                    dataGrid.CommitEdit();
+                    e.Handled = true;
+                }
+            }
+        }
+
+        private void effectDataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        {
+            if (e.Column == nameListColumn)
+            {
+                nameListColumn.IsReadOnly = true;
+            }
+        }
+        #endregion
+
     }
 }

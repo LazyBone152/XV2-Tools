@@ -40,7 +40,10 @@
                         <ColumnDefinition Width="*" MinWidth="500" MaxWidth="800"/>
                     </Grid.ColumnDefinitions>
 
-                    <DataGrid x:Name="effectDataGrid" Grid.Column="1" Tag="{Binding DataContext, ElementName=rootGrid}" SelectionChanged="effectDataGrid_SelectionChanged" VirtualizingPanel.ScrollUnit="Pixel" ItemsSource="{Binding effectContainerFile.ViewEffects}" SelectedItem="{Binding SelectedEffect, UpdateSourceTrigger=PropertyChanged}" EnableRowVirtualization="True" EnableColumnVirtualization="True" SelectionMode="Extended" RowDetailsVisibilityMode="VisibleWhenSelected" CanUserResizeRows="False" CanUserAddRows="False" AutoGenerateColumns="False" CanUserDeleteRows="False" RowHeaderWidth="0">
+                    <DataGrid x:Name="effectDataGrid" Grid.Column="1" Tag="{Binding DataContext, ElementName=rootGrid}" SelectionChanged="effectDataGrid_SelectionChanged" VirtualizingPanel.ScrollUnit="Pixel" 
+                              ItemsSource="{Binding effectContainerFile.ViewEffects}" SelectedItem="{Binding SelectedEffect, UpdateSourceTrigger=PropertyChanged}" EnableRowVirtualization="True" 
+                              EnableColumnVirtualization="True" SelectionMode="Extended" RowDetailsVisibilityMode="VisibleWhenSelected" CanUserResizeRows="False" CanUserAddRows="False" 
+                              AutoGenerateColumns="False" CanUserDeleteRows="False" RowHeaderWidth="0" PreviewKeyDown="effectDataGrid_PreviewKeyDown" CellEditEnding="effectDataGrid_CellEditEnding">
                         
                         <DataGrid.InputBindings>
                             <KeyBinding Key="Delete" Command="{Binding Effect_DeleteEffect_Command}"/>
@@ -52,8 +55,9 @@
 
                         <DataGrid.ContextMenu>
                             <ContextMenu FontSize="12">
+                                <MenuItem Header="Rename" Command="{Binding PlacementTarget.Tag.Effect_Name_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/> 
                                 <MenuItem Header="Play" Command="{Binding PlacementTarget.Tag.Effect_Play_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Visibility="{Binding PlacementTarget.Tag.XenoKitVisible, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
-                                <Separator Visibility="{Binding PlacementTarget.Tag.XenoKitVisible, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                <Separator/>
 
                                 <MenuItem Header="New Effect Part" Command="{Binding PlacementTarget.Tag.Effect_AddEffectPart_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                 <MenuItem Header="Paste Effect Part" Command="{Binding PlacementTarget.Tag.EffectPart_Paste_Command, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
@@ -79,7 +83,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellEditingTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn x:Name="nameListColumn" Header="Name" Width="*" Binding="{Binding NameList, UpdateSourceTrigger=PropertyChanged}"/>
+                            <DataGridTextColumn x:Name="nameListColumn" Header="Name" Width="*" Binding="{Binding UserDefinedName, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True"/>
 
                         </DataGrid.Columns>
 
@@ -969,18 +973,6 @@
                     <ContextMenu>
                         <MenuItem Header="Hue Adjustment" Click="ToolMenu_HueAdjustment_Click"/>
                         <MenuItem Header="Hue Set" Click="ToolMenu_HueSet_Click"/>
-                        <MenuItem Header="Namelist">
-                            <MenuItem Header="Save Name List" Click="NameList_Save_Click"/>
-                            <MenuItem Header="Clear Name List" Click="NameList_Clear_Click"/>
-                            <MenuItem x:Name="nameListMenu" Header="Apply..." IsEnabled="{Binding IsFileLoaded}" ItemsSource="{Binding nameListManager.LoadedNameLists}" Click="NameList_Item_Click">
-                                <MenuItem.ItemContainerStyle>
-                                    <Style>
-                                        <Setter Property="MenuItem.Header" Value="{Binding DisplayName}" />
-                                    </Style>
-                                </MenuItem.ItemContainerStyle>
-                            </MenuItem>
-
-                        </MenuItem>
                     </ContextMenu>
                 </Button.ContextMenu>
 

@@ -99,15 +99,16 @@ namespace Xv2CoreLib
                 if (string.IsNullOrWhiteSpace(Path)) return "";
 
                 const string removeToken = "DB Xenoverse 2/data";
+                string sanitizedPath = Utils.SanitizePath(Path);
 
-                if (Path.Contains(removeToken))
+                if (sanitizedPath.Contains(removeToken))
                 {
-                    int idx = Path.IndexOf(removeToken) + removeToken.Length + 1;
-                    string str = Path.Remove(0, idx);
+                    int idx = sanitizedPath.IndexOf(removeToken) + removeToken.Length + 1;
+                    string str = sanitizedPath.Remove(0, idx);
                     return str;
                 }
 
-                return Path;
+                return sanitizedPath;
             }
         }
         /// <summary>

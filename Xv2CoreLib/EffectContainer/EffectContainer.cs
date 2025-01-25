@@ -242,7 +242,7 @@ namespace Xv2CoreLib.EffectContainer
                 }
 
                 //Search is for either a string or number but is not an Effect ID, so look for EffectPart asset names and Effect Name/Description (from namelist)
-                if (!String.IsNullOrWhiteSpace(_effect.NameList) && _effect.NameList.ToLower().Contains(flattenedSearchParam))
+                if (!string.IsNullOrWhiteSpace(_effect.UserDefinedName) && _effect.UserDefinedName.ToLower().Contains(flattenedSearchParam))
                 {
                     return true;
                 }

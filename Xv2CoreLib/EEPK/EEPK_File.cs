@@ -317,7 +317,7 @@ namespace Xv2CoreLib.EEPK
 
     [Serializable]
     [YAXSerializeAs("Effect")]
-    public class Effect : IInstallable, INotifyPropertyChanged
+    public class Effect : IUserDefinedName, IInstallable, INotifyPropertyChanged
     {
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
@@ -330,7 +330,7 @@ namespace Xv2CoreLib.EEPK
             }
         }
 
-        #region IInstallable
+        #region NonSerialized
         [YAXDontSerialize]
         public int SortID { get { return IndexNum; } set { IndexNum = (ushort)value; } }
         [YAXDontSerialize]
@@ -338,24 +338,25 @@ namespace Xv2CoreLib.EEPK
         #endregion
 
         #region EepkOrganiser
-        //Namelist
-        private string _nameList = null;
+        private string _userDefinedName = null; //New UserDefineName system (used in XenoKit, but still pulls names from the old system as a fallback)
         [YAXDontSerialize]
-        public string NameList
+        public string UserDefinedName
         {
             get
             {
-                return this._nameList;
+                return _userDefinedName;
             }
             set
             {
-                if (value != this._nameList)
+                if (value != _userDefinedName)
                 {
-                    this._nameList = value;
-                    NotifyPropertyChanged("NameList");
+                    _userDefinedName = value;
+                    NotifyPropertyChanged(nameof(UserDefinedName));
                 }
             }
         }
+        [YAXDontSerialize]
+        public bool HasUserDefinedName => !string.IsNullOrWhiteSpace(_userDefinedName);
 
         //UI Code.
         private ushort _index = 0;

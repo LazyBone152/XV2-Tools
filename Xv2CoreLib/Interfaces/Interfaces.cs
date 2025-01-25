@@ -3,6 +3,12 @@ using System.Collections.Generic;
 
 namespace Xv2CoreLib
 {
+    public interface IUserDefinedName : ISortable
+    {
+        string UserDefinedName { get; set; }
+        bool HasUserDefinedName { get; }
+    }
+
     /// <summary>
     /// Provides a function for detecting if a file has any meaningful data in it.
     /// </summary>

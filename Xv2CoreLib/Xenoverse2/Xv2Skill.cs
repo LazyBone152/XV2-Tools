@@ -13,6 +13,7 @@ using Xv2CoreLib.ACB;
 using Xv2CoreLib.BAS;
 using Xv2CoreLib.EffectContainer;
 using static Xv2CoreLib.CUS.CUS_File;
+using Xv2CoreLib.ValuesDictionary;
 
 namespace Xv2CoreLib
 {
@@ -34,7 +35,10 @@ namespace Xv2CoreLib
             foreach (var bac in Files.BacFiles)
             {
                 if (!bac.File.IsNull())
+                {
                     bac.File.Save(bac.Path);
+                }
+                CustomEntryNames.SaveNames(bac.RelativePath, bac.File);
             }
 
             if (Files.BcmFile?.File?.IsNull() == false)
@@ -43,11 +47,20 @@ namespace Xv2CoreLib
             if (Files.BsaFile?.File?.IsNull() == false)
                 Files.BsaFile.File.Save(Files.BsaFile.Path);
 
+            if (Files.BsaFile?.File != null)
+                CustomEntryNames.SaveNames(Files.BsaFile.RelativePath, Files.BsaFile.File);
+
             if (Files.BdmFile?.File?.IsNull() == false)
                 Files.BdmFile.File.Save(Files.BdmFile.Path);
 
+            if(Files.BdmFile?.File != null)
+                CustomEntryNames.SaveNames(Files.BdmFile.RelativePath, Files.BdmFile.File);
+
             if (Files.ShotBdmFile?.File?.IsNull() == false)
                 Files.ShotBdmFile.File.Save(Files.ShotBdmFile.Path);
+
+            if(Files.ShotBdmFile?.File != null)
+                CustomEntryNames.SaveNames(Files.ShotBdmFile.RelativePath, Files.ShotBdmFile.File);
 
             if (Files.BasFile?.File?.IsNull() == false)
                 Files.BasFile.File.Save(Files.BasFile.Path);
@@ -64,6 +77,9 @@ namespace Xv2CoreLib
                 Files.EepkFile.File.ChangeFilePath(Files.EepkFile.Path);
                 Files.EepkFile.File.Save();
             }
+
+            if(Files.EepkFile?.File != null)
+                CustomEntryNames.SaveNames(Files.EepkFile.RelativePath, Files.EepkFile.File);
 
             if (Files.EanFile != null)
             {

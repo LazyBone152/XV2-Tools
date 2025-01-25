@@ -50,13 +50,19 @@ namespace Xv2CoreLib
         public void SaveFiles()
         {
             if (MovesetFiles.BacFile?.File?.IsNull() == false)
+            {
                 MovesetFiles.BacFile.File.Save(MovesetFiles.BacFile.Path);
+                CustomEntryNames.SaveNames(MovesetFiles.BacFile.RelativePath, MovesetFiles.BacFile.File);
+            }
 
             if (MovesetFiles.BcmFile?.File?.IsNull() == false)
                 MovesetFiles.BcmFile.File.Save(MovesetFiles.BcmFile.Path);
 
             if (MovesetFiles.BdmFile?.File?.IsNull() == false)
+            {
                 MovesetFiles.BdmFile.File.Save(MovesetFiles.BdmFile.Path);
+                CustomEntryNames.SaveNames(MovesetFiles.BdmFile.RelativePath, MovesetFiles.BdmFile.File);
+            }
 
             if (BaiFile?.File?.IsNull() == false)
                 BaiFile.File.Save(BaiFile.Path);
@@ -73,6 +79,7 @@ namespace Xv2CoreLib
             {
                 MovesetFiles.EepkFile.File.ChangeFilePath(MovesetFiles.EepkFile.Path);
                 MovesetFiles.EepkFile.File.Save();
+                CustomEntryNames.SaveNames(MovesetFiles.EepkFile.RelativePath, MovesetFiles.EepkFile.File);
             }
 
             foreach (var vox in MovesetFiles.VoxAcbFile)

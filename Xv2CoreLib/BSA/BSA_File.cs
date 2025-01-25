@@ -170,12 +170,15 @@ namespace Xv2CoreLib.BSA
 
     [YAXSerializeAs("BSA_Entry")]
     [Serializable]
-    public class BSA_Entry : IInstallable
+    public class BSA_Entry : IUserDefinedName, IInstallable
     {
-        #region WrapperProps
+        #region NonSerialized
         [YAXDontSerialize]
         public int SortID { get { return int.Parse(Index); } set { Index = value.ToString(); } }
-
+        [YAXDontSerialize]
+        public string UserDefinedName { get; set; }
+        [YAXDontSerialize]
+        public bool HasUserDefinedName => !string.IsNullOrWhiteSpace(UserDefinedName);
         #endregion
 
         [YAXAttributeForClass]

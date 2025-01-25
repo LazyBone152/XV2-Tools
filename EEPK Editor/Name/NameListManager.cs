@@ -19,7 +19,7 @@ namespace EEPK_Organiser.NameList
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void NotifyPropertyChanged(String propertyName = "")
+        private void NotifyPropertyChanged(string propertyName = "")
         {
             if (PropertyChanged != null)
             {
@@ -82,7 +82,7 @@ namespace EEPK_Organiser.NameList
 
             foreach(var effect in effects)
             {
-                effect.NameList = _namelist.GetName(effect.IndexNum);
+                effect.UserDefinedName = _namelist.GetName(effect.IndexNum);
             }
         }
 
@@ -90,7 +90,7 @@ namespace EEPK_Organiser.NameList
         {
             foreach (var effect in effects)
             {
-                effect.NameList = null;
+                effect.UserDefinedName = null;
             }
         }
 
@@ -113,12 +113,12 @@ namespace EEPK_Organiser.NameList
 
                 foreach(var effect in effects)
                 {
-                    if(effect.NameList != null)
+                    if(effect.UserDefinedName != null)
                     {
                         nameList.Names.Add(new NameListEntry()
                         {
                             EffectID = effect.IndexNum,
-                            Description = effect.NameList
+                            Description = effect.UserDefinedName
                         });
                     }
                 }

@@ -476,7 +476,7 @@ namespace Xv2CoreLib.BDM
     }
 
     [Serializable]
-    public class BDM_Entry : IInstallable, INotifyPropertyChanged
+    public class BDM_Entry : IUserDefinedName, IInstallable, INotifyPropertyChanged
     {
         #region INotifyPropChanged
         [field: NonSerialized]
@@ -492,7 +492,7 @@ namespace Xv2CoreLib.BDM
 
         #endregion
 
-        #region WrapperProperties
+        #region NonSerialized
         [YAXDontSerialize]
         public int SortID => ID;
         [YAXDontSerialize]
@@ -502,6 +502,10 @@ namespace Xv2CoreLib.BDM
             set => Index = value.ToString();
         }
 
+        [YAXDontSerialize]
+        public string UserDefinedName { get; set; }
+        [YAXDontSerialize]
+        public bool HasUserDefinedName => !string.IsNullOrWhiteSpace(UserDefinedName);
         #endregion
 
         [YAXAttributeForClass]

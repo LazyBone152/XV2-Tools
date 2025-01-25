@@ -614,6 +614,11 @@ namespace Xv2CoreLib
                     if (loadSkillFiles)
                         moveFiles.AfterBacFile = new Xv2File<BAC_File>((BAC_File)FileManager.Instance.GetParsedFileFromGame(moveFiles.AfterBacPath, loadFromCpk), fileIO.PathInGameDir(moveFiles.AfterBacPath), true, null, false, MoveFileTypes.AFTER_BAC, 0, false, MoveType.Skill);
                 }
+
+                if(moveFiles.AfterBacFile != null)
+                {
+                    ValuesDictionary.BAC.AddDefaultMovesetNamesToBac(moveFiles.AfterBacFile.File);
+                }
             }
 
             //AFTER BCM
@@ -1036,7 +1041,10 @@ namespace Xv2CoreLib
             moveFiles.BacPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}_PLAYER.bac", cmsEntry.ShortName, cmsEntry.BacPath));
 
             if (loadFiles)
+            {
                 moveFiles.BacFile = new Xv2File<BAC_File>((BAC_File)FileManager.Instance.GetParsedFileFromGame(moveFiles.BacPath), fileIO.PathInGameDir(moveFiles.BacPath), !cmsEntry.IsSelfReference(cmsEntry.BacPath), null, false, MoveFileTypes.BAC, 0, true, MoveType.Character);
+                ValuesDictionary.BAC.AddDefaultMovesetNamesToBac(moveFiles.BacFile.File);
+            }
 
             //BCM
             moveFiles.BcmPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}_PLAYER.bcm", cmsEntry.ShortName, cmsEntry.BcmPath));

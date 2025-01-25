@@ -374,6 +374,8 @@
     <Compile Include="VLC\VLC_File.cs" />
     <Compile Include="Xenoverse2\FileManager.cs" />
     <Compile Include="Xenoverse2\FileWatcher.cs" />
+    <Compile Include="Xenoverse2\Name\CustomEntryNames.cs" />
+    <Compile Include="Xenoverse2\Name\LegacyNameList.cs" />
     <Compile Include="Xenoverse2\Xenoverse2.cs" />
     <Compile Include="Xenoverse2\Xv2Character.cs" />
     <Compile Include="Xenoverse2\Xv2File.cs" />

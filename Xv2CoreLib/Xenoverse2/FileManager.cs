@@ -156,6 +156,18 @@ namespace Xv2CoreLib
         #region Load
         public object GetParsedFileFromGame(string path, bool onlyFromCpk = false, bool raiseEx = true, bool ignoreCache = false)
         {
+            object file = GetParsedFileFromGameInternal(path, onlyFromCpk, raiseEx, ignoreCache);
+
+            if(SettingsManager.Instance.CurrentApp == Application.XenoKit && file != null)
+            {
+                CustomEntryNames.LoadNames(path, file);
+            }
+
+            return file;
+        }
+
+        private object GetParsedFileFromGameInternal(string path, bool onlyFromCpk = false, bool raiseEx = true, bool ignoreCache = false)
+        {
             CheckInitState();
 
             //Check cache and return an existing file, if allowed (caching doesn't occur for CPK-only loads)
@@ -284,17 +296,6 @@ namespace Xv2CoreLib
             if (fileIO == null && raiseEx) throw new NullReferenceException("FileManager.GetBytesFromGame: fileIO is null.");
             if (fileIO == null) return null;
 
-            var bytes = fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk);
-            if (bytes == null) FileNotFoundEvent.Invoke(this, new Xv2FileNotFoundEventArgs(path));
-            return bytes;
-
-            //return GetBytesFromGameWrapper(path, raiseEx, onlyFromCpk);
-        }
-
-        private byte[] GetBytesFromGameWrapper(string path, bool onlyFromCpk = false, bool raiseEx = false)
-        {
-            //Why does this method even exist?
-            //TODO: delete if nothing goes wrong
             var bytes = fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk);
             if (bytes == null) FileNotFoundEvent.Invoke(this, new Xv2FileNotFoundEventArgs(path));
             return bytes;

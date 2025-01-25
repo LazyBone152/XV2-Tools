@@ -379,7 +379,7 @@ namespace Xv2CoreLib.BAC
     }
 
     [Serializable]
-    public class BAC_Entry : IInstallable, INotifyPropertyChanged
+    public class BAC_Entry : IInstallable, IUserDefinedName, INotifyPropertyChanged
     {
         #region NotifyPropertyChanged
         [field: NonSerialized]
@@ -439,18 +439,31 @@ namespace Xv2CoreLib.BAC
         public int SortID { get { return int.Parse(Index); } set { Index = value.ToString(); NotifyPropertyChanged(nameof(Index)); } }
         [YAXDontSerialize]
         public string FlagStr => HexConverter.GetHexString((uint)Flag);
+
+        private string _defaultName = null;
+        private string _userDefinedName = null;
         [YAXDontSerialize]
-        public string MovesetBacEntryName
+        public string UserDefinedName
         {
             get
             {
-                string name;
-                if (ValuesDictionary.BAC.MovesetBacEntry.TryGetValue(SortID, out name))
-                    return name;
-
-                return null;
+                if (string.IsNullOrWhiteSpace(_userDefinedName))
+                {
+                    return _defaultName;
+                }
+                return _userDefinedName;
+            }
+            set
+            {
+                if (value != _userDefinedName && value != _defaultName)
+                {
+                    _userDefinedName = value;
+                    NotifyPropertyChanged(nameof(UserDefinedName));
+                }
             }
         }
+        [YAXDontSerialize]
+        public bool HasUserDefinedName => !string.IsNullOrWhiteSpace(_userDefinedName);
 
         private Flags _flag = 0;
 
@@ -1375,7 +1388,13 @@ namespace Xv2CoreLib.BAC
 
         public void UpdateEntryName()
         {
-            NotifyPropertyChanged(nameof(MovesetBacEntryName));
+            NotifyPropertyChanged(nameof(UserDefinedName));
+        }
+
+        public void SetDefaultName(string defaultName)
+        {
+            _defaultName = defaultName;
+            NotifyPropertyChanged(nameof(UserDefinedName));
         }
     }
 

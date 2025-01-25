@@ -85,6 +85,17 @@ namespace Xv2CoreLib.ValuesDictionary
             }
         }
 
+        public static void AddDefaultMovesetNamesToBac(BAC_File bacFile)
+        {
+            if (bacFile == null) return;
+
+            foreach(BAC_Entry bacEntry in bacFile.BacEntries)
+            {
+                if(MovesetBacEntry.TryGetValue(bacEntry.SortID, out string name))
+                    bacEntry.SetDefaultName(name);
+            }
+        }
+
         //Animation Ean Type
         public static Dictionary<ushort, string> AnimationEanType { get; private set; } = new Dictionary<ushort, string>()
         {
