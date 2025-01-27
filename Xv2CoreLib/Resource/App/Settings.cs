@@ -617,7 +617,8 @@ namespace Xv2CoreLib.Resource.App
             UndoManager.Instance.SetCapacity(UndoLimit);
 
             //Allowed SuperSamplingFactors: 1, 2, 4 and 8
-            if (XenoKit_SuperSamplingFactor > 2 || XenoKit_SuperSamplingFactor < 1)
+            if (XenoKit_SuperSamplingFactor != 1 && XenoKit_SuperSamplingFactor != 2 &&
+                XenoKit_SuperSamplingFactor != 4 && XenoKit_SuperSamplingFactor != 8)
             {
                 XenoKit_SuperSamplingFactor = 2;
             }
