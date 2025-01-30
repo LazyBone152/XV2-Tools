@@ -14,6 +14,7 @@ namespace Xv2CoreLib.ESK
     [Serializable]
     public class ESK_File
     {
+        public const int SIGNATURE = 1263748387;
         public const string BaseBone = "b_C_Base";
         public const string PelvisBone = "b_C_Pelvis";
         public const string LeftEyeIrisBone = "f_L_EyeIris";
@@ -22,9 +23,12 @@ namespace Xv2CoreLib.ESK
         public const string RightHandBone = "b_R_Hand";
 
         [YAXAttributeForClass]
-        public int I_12 { get; set; }
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (ushort)37568)]
+        public ushort Version { get; set; } = 37568;//I_08
         [YAXAttributeForClass]
-        public int I_20 { get; set; }
+        public ushort I_10 { get; set; }
+        [YAXAttributeForClass]
+        public int I_12 { get; set; }
         [YAXAttributeForClass]
         public int I_24 { get; set; }
 
@@ -125,7 +129,7 @@ namespace Xv2CoreLib.ESK
         }
 
         #region Load/Save
-        public byte[] Write(bool writeAbsTransform)
+        public byte[] Write()
         {
             List<byte> bytes = new List<byte>();
 
@@ -145,6 +149,8 @@ namespace Xv2CoreLib.ESK
             {
                 //Writing Index List
                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - startOffset), startOffset + 4);
+
+                bool writeAbsTransform = NonRecursiveBones[0].AbsoluteTransform != null;
 
                 for (int i = 0; i < count; i++)
                 {
@@ -290,7 +296,7 @@ namespace Xv2CoreLib.ESK
             {
                 I_02 = BitConverter.ToInt16(rawBytes, offset + 2),
                 SkeletonID = BitConverter.ToUInt64(rawBytes, offset + 28),
-                Unk1 = ESK_Unk1.Read(rawBytes, ikOffset),
+                Unk1 = ikOffset > offset ? ESK_Unk1.Read(rawBytes, ikOffset) : null,
                 UseExtraValues = boneExtraInfoOffset - offset != 0
             };
 

@@ -96,7 +96,7 @@ namespace Xv2CoreLib.EAN
             bytes.AddRange(new byte[8]);
 
             //Skeleton
-            bytes.AddRange(eanFile.Skeleton.Write(false));
+            bytes.AddRange(eanFile.Skeleton.Write());
 
             //Animation
             if(AnimationCount > 0)

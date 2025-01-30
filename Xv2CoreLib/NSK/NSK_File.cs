@@ -39,6 +39,7 @@ namespace Xv2CoreLib.NSK
             List<byte> bytes = new List<byte>();
 
             bytes.AddRange(EskFile.SaveToBytes());
+            bytes.AddRange(new byte[Utils.CalculatePadding(bytes.Count, 16)]);
             Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), 20);
             bytes.AddRange(EmdFile.SaveToBytes());
 

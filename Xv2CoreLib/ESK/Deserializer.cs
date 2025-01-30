@@ -9,7 +9,7 @@ namespace Xv2CoreLib.ESK
     {
         string saveLocation;
         ESK_File eskFile;
-        public List<byte> bytes = new List<byte>() { 35, 69, 83, 75, 254, 255, 28, 0, 192, 146,0,0 };
+        public List<byte> bytes = new List<byte>() { 35, 69, 83, 75, 254, 255, 28, 0 };
 
         public Deserializer(string location)
         {
@@ -37,14 +37,16 @@ namespace Xv2CoreLib.ESK
         private void WriteFile()
         {
             //Header
-            bytes.AddRange(BitConverter.GetBytes(eskFile.I_12));
-            bytes.AddRange(BitConverter.GetBytes((int)32)); //Offset to skeleton
-            bytes.AddRange(BitConverter.GetBytes(eskFile.I_20));
-            bytes.AddRange(BitConverter.GetBytes(eskFile.I_24));
+            bytes.AddRange(BitConverter.GetBytes(eskFile.Version)); //8
+            bytes.AddRange(BitConverter.GetBytes(eskFile.I_10)); //10
+            bytes.AddRange(BitConverter.GetBytes(eskFile.I_12)); //12
+            bytes.AddRange(BitConverter.GetBytes((int)32)); //Offset to skeleton, 16
+            bytes.AddRange(BitConverter.GetBytes((int)0)); //20 (Next part in NSKs)
+            bytes.AddRange(BitConverter.GetBytes(eskFile.I_24)); //24
             bytes.AddRange(new byte[4]);
 
             //Skeleton
-            bytes.AddRange(eskFile.Skeleton.Write(true));
+            bytes.AddRange(eskFile.Skeleton.Write());
         }
 
 

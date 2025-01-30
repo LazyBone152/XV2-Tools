@@ -34,8 +34,9 @@ namespace Xv2CoreLib.ESK
         private void Parse()
         {
             //Header
+            eskFile.Version = BitConverter.ToUInt16(rawBytes, 8);
+            eskFile.I_10 = BitConverter.ToUInt16(rawBytes, 10);
             eskFile.I_12 = BitConverter.ToInt32(rawBytes, 12);
-            eskFile.I_20 = BitConverter.ToInt32(rawBytes, 20);
             eskFile.I_24 = BitConverter.ToInt32(rawBytes, 24);
 
             //Skeleton
