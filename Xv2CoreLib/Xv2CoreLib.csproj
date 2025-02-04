@@ -70,8 +70,8 @@
     <Reference Include="Microsoft.IO.RecyclableMemoryStream, Version=1.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.IO.RecyclableMemoryStream.1.2.2\lib\net45\Microsoft.IO.RecyclableMemoryStream.dll</HintPath>
     </Reference>
-    <Reference Include="Pfim, Version=0.10.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Pfim.0.10.3\lib\netstandard2.0\Pfim.dll</HintPath>
+    <Reference Include="Pfim, Version=0.11.3.0, Culture=neutral, PublicKeyToken=c0ebc20d008ae134, processorArchitecture=MSIL">
+      <HintPath>..\packages\Pfim.0.11.3\lib\netstandard2.0\Pfim.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
