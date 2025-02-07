@@ -21,7 +21,8 @@ namespace Xv2CoreLib.NSK
         public static NSK_File Load(byte[] bytes)
         {
             int eskAddress = LB_Common.Utils.ArraySearch.IndexOf(bytes, "#ESK");
-            int emdAddress = LB_Common.Utils.ArraySearch.IndexOf(bytes, "#EMD");
+            //int emdAddress = LB_Common.Utils.ArraySearch.IndexOf(bytes, "#EMD");
+            int emdAddress = BitConverter.ToInt32(bytes, 20);
 
             if (eskAddress == -1) throw new InvalidDataException("NSK_File.Load: Could not locate \"#ESK\".");
             if (emdAddress == -1) throw new InvalidDataException("NSK_File.Load: Could not locate \"#EMD\".");

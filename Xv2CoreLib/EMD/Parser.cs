@@ -120,6 +120,8 @@ namespace Xv2CoreLib.EMD
                                 submesh.Name = String.Empty;
                             }
 
+                            //Console.WriteLine($"Submesh: {submesh.Name}, VertexFlags: {submesh.VertexFlags}, Offset: {submeshOffset}, VertOffset: {vertexOffset}");
+
                             //Texture Definitions
                             int textureDefinitionCount = rawBytes[submeshOffset + 69];
                             int textureDefinitionOffset = BitConverter.ToInt32(rawBytes, submeshOffset + 72) + submeshOffset;
@@ -132,19 +134,28 @@ namespace Xv2CoreLib.EMD
                             for (int z = 0; z < triangleCount; z++)
                             {
                                 int triangleOffset = BitConverter.ToInt32(rawBytes, trianglesTableOffset) + submeshOffset;
-                                EMD_Triangle triangle = new EMD_Triangle() { Bones = new List<string>(), Faces = new List<ushort>() };
+                                EMD_Triangle triangle = new EMD_Triangle() { Bones = new List<string>(), Faces = new List<int>() };
 
                                 //Offsets & counts
                                 int faceCount = BitConverter.ToInt32(rawBytes, triangleOffset + 0);
                                 int faceNameCount = BitConverter.ToInt32(rawBytes, triangleOffset + 4);
                                 int faceTableOffset = (BitConverter.ToInt32(rawBytes, triangleOffset + 8) != 0) ? BitConverter.ToInt32(rawBytes, triangleOffset + 8) + triangleOffset : triangleOffset + 16;
+                                bool is32Bit = faceCount > ushort.MaxValue;
 
                                 int faceNameTableOffset = BitConverter.ToInt32(rawBytes, triangleOffset + 12) + triangleOffset;
 
                                 for (int h = 0; h < faceCount; h++)
                                 {
-                                    triangle.Faces.Add(BitConverter.ToUInt16(rawBytes, faceTableOffset));
-                                    faceTableOffset += 2;
+                                    if (is32Bit)
+                                    {
+                                        triangle.Faces.Add(BitConverter.ToInt32(rawBytes, faceTableOffset));
+                                        faceTableOffset += 4;
+                                    }
+                                    else
+                                    {
+                                        triangle.Faces.Add(BitConverter.ToUInt16(rawBytes, faceTableOffset));
+                                        faceTableOffset += 2;
+                                    }
                                 }
 
                                 for (int h = 0; h < faceNameCount; h++)

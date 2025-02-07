@@ -183,11 +183,19 @@ namespace Xv2CoreLib.EMD
                             bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].Submeshes[s].Triangles[t].BonesCount));
                             bytes.AddRange(BitConverter.GetBytes(16));
                             bytes.AddRange(new byte[4]);
+                            bool is32Bit = emdFile.Models[i].Meshes[a].Submeshes[s].Triangles[t].FaceCount > ushort.MaxValue;
 
                             //Faces
                             for (int f = 0; f < emdFile.Models[i].Meshes[a].Submeshes[s].Triangles[t].FaceCount; f++)
                             {
-                                bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].Submeshes[s].Triangles[t].Faces[f]));
+                                if(is32Bit)
+                                {
+                                    bytes.AddRange(BitConverter.GetBytes(emdFile.Models[i].Meshes[a].Submeshes[s].Triangles[t].Faces[f]));
+                                }
+                                else
+                                {
+                                    bytes.AddRange(BitConverter.GetBytes((ushort)emdFile.Models[i].Meshes[a].Submeshes[s].Triangles[t].Faces[f]));
+                                }
                             }
 
                             //The cause of all that "emd corruption" 
@@ -195,7 +203,8 @@ namespace Xv2CoreLib.EMD
 
                             //Bones ptr list
                             int boneTablePos = bytes.Count;
-                            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - triangleStart), triangleStart + 12);
+                            if(emdFile.Models[i].Meshes[a].Submeshes[s].Triangles[t].BonesCount > 0)
+                                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - triangleStart), triangleStart + 12);
 
                             for (int b = 0; b < emdFile.Models[i].Meshes[a].Submeshes[s].Triangles[t].BonesCount; b++)
                             {

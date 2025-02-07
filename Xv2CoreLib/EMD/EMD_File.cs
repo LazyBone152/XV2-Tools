@@ -582,7 +582,7 @@ namespace Xv2CoreLib.EMD
             }
         }
 
-        public List<ushort> Faces { get; set; } = new List<ushort>();
+        public List<int> Faces { get; set; } = new List<int>();
         public List<string> Bones { get; set; } = new List<string>();
     }
 
@@ -604,62 +604,78 @@ namespace Xv2CoreLib.EMD
 
         [YAXAttributeFor("Normal")]
         [YAXSerializeAs("X")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public float NormalX { get; set; }
         [YAXAttributeFor("Normal")]
         [YAXSerializeAs("Y")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public float NormalY { get; set; }
         [YAXAttributeFor("Normal")]
         [YAXSerializeAs("Z")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public float NormalZ { get; set; }
 
 
         [YAXAttributeFor("Tangent")]
         [YAXSerializeAs("X")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public float TangentX { get; set; }
         [YAXAttributeFor("Tangent")]
         [YAXSerializeAs("Y")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public float TangentY { get; set; }
         [YAXAttributeFor("Tangent")]
         [YAXSerializeAs("Z")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public float TangentZ { get; set; }
 
 
         [YAXAttributeFor("Texture1")]
         [YAXSerializeAs("U")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public float TextureU { get; set; }
         [YAXAttributeFor("Texture1")]
         [YAXSerializeAs("V")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public float TextureV { get; set; }
 
 
         [YAXAttributeFor("Texture2")]
         [YAXSerializeAs("U")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public float Texture2U { get; set; }
         [YAXAttributeFor("Texture2")]
         [YAXSerializeAs("V")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public float Texture2V { get; set; }
 
 
         [YAXAttributeFor("Color")]
         [YAXSerializeAs("R")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public byte ColorR { get; set; } = 255;
         [YAXAttributeFor("Color")]
         [YAXSerializeAs("G")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public byte ColorG { get; set; } = 255;
         [YAXAttributeFor("Color")]
         [YAXSerializeAs("B")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public byte ColorB { get; set; } = 255;
         [YAXAttributeFor("Color")]
         [YAXSerializeAs("A")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public byte ColorA { get; set; } = 255;
 
 
         [YAXAttributeFor("BlendIndexes")]
         [YAXSerializeAs("values")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
         public byte[] BlendIndexes { get; set; } = new byte[4]; //Size 4
         [YAXAttributeFor("BlendWeights")]
         [YAXSerializeAs("values")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
         public float[] BlendWeights { get; set; } = new float[4]; //Size 3 (if float16, then 2 bytes of padding after)
 
