@@ -56,9 +56,9 @@
 *.rar
 *.zip
 
-bin
-obj
-!packages
+bin/
+obj/
+packages/
 
 LB Mod Installer/obj/Release/
 LB Mod Installer/obj/Debug/

@@ -143,8 +143,7 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="YAXLib, Version=2.15.0.0, Culture=neutral, PublicKeyToken=15c43682c986900f, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="YAXLib">
       <HintPath>..\DLLs\YAXLib.dll</HintPath>
     </Reference>
   </ItemGroup>

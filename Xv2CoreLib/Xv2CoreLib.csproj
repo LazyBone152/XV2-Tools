@@ -57,6 +57,7 @@
     </Reference>
     <Reference Include="CSharpImageLibrary, Version=3.2.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\CSharpImageLibrary.3.2.0.0\lib\net462\CSharpImageLibrary.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="GalaSoft.MvvmLight, Version=5.4.1.0, Culture=neutral, PublicKeyToken=e7570ab207bcb616, processorArchitecture=MSIL">
       <HintPath>..\packages\MvvmLightLibs.5.4.1.1\lib\net45\GalaSoft.MvvmLight.dll</HintPath>
@@ -72,19 +73,24 @@
     </Reference>
     <Reference Include="Pfim, Version=0.11.3.0, Culture=neutral, PublicKeyToken=c0ebc20d008ae134, processorArchitecture=MSIL">
       <HintPath>..\packages\Pfim.0.11.3\lib\netstandard2.0\Pfim.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="SharpNoise, Version=0.12.1.1, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpNoise.0.12.1.1\lib\netstandard2.0\SharpNoise.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Shim, Version=2.0.1.0, Culture=neutral, PublicKeyToken=c55ec16d10c4b366, processorArchitecture=MSIL">
       <HintPath>..\packages\shim.2.0.1\lib\net40\Shim.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.Common, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Data.Common.4.3.0\lib\net451\System.Data.Common.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System.Drawing" />
     <Reference Include="System.Half">
@@ -93,8 +99,13 @@
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Numerics" />
-    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    <Reference Include="System.Numerics.Vectors, Version=4.1.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.6.0\lib\net462\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.4.1.2\lib\net462\System.Runtime.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System.Threading.Tasks.Dataflow, Version=4.5.24.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Tpl.Dataflow.4.5.24\lib\portable-net45+win8+wpa81\System.Threading.Tasks.Dataflow.dll</HintPath>
@@ -111,10 +122,12 @@
     <Reference Include="System.Xml" />
     <Reference Include="UsefulThings, Version=1.7.3.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\UsefulCSharpThings.1.7.3\lib\net462\UsefulThings.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="WriteableBitmapEx.Wpf, Version=1.6.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\WriteableBitmapEx.1.6.2\lib\net40\WriteableBitmapEx.Wpf.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="YAXLib">
       <HintPath>..\DLLs\YAXLib.dll</HintPath>
@@ -390,10 +403,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="packages.config" />
     <EmbeddedResource Include="Resources\silence.hca" />
     <EmbeddedResource Include="Resources\XV2P_SLOTS_STAGE.x2s" />
     <EmbeddedResource Include="Resources\XV2P_SLOTS_STAGE_LOCAL.x2s" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <None Include="FodyWeavers.xml" />
