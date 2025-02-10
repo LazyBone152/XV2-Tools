@@ -346,6 +346,9 @@ namespace XV2_Xml_Serializer
                                 case ".cdt":
                                     new Xv2CoreLib.CDT.Parser(fileLocation, true);
                                     break;
+                                case ".map":
+                                    Xv2CoreLib.FMP.FMP_File.SerializeToXml(fileLocation);
+                                    break;
                                 case ".xml":
                                     LoadXmlInitial(fileLocation);
                                     break;
@@ -656,6 +659,9 @@ namespace XV2_Xml_Serializer
                         break;
                     case ".cdt":
                         new Xv2CoreLib.CDT.Deserializer(fileLocation);
+                        break;
+                    case ".map":
+                        Xv2CoreLib.FMP.FMP_File.DeserializeFromXml(fileLocation);
                         break;
                     default:
                         FileTypeNotSupported(fileLocation);

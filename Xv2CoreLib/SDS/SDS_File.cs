@@ -474,6 +474,7 @@ namespace Xv2CoreLib.SDS
         UserFlag2_VS, //g_vUserFlag2_VS
         UserFlag3_VS, //g_vUserFlag3_VS
         EyePos_VS, //g_vEyePos_VS
+        EyePos_PS, //g_vEyePos_PS (not used in game, but is in the shaders)
         Fade_VS, //g_AlphaFade_VS
         FadeColor, //Apply ECF values (g_vFadeMulti_PS, g_vFadeRim_PS and g_vFadeAdd_PS)
         Reflection_VS, //g_Reflection_VS (Possibly sets fog values as well?)

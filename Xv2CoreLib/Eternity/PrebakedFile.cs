@@ -630,6 +630,11 @@ namespace Xv2CoreLib.Eternity
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = byte.MaxValue)]
         public byte Behaviour_64 { get; set; }
 
+        [YAXAttributeFor("golden_freezer_skin_bh")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = false)]
+        public bool golden_freezer_skin_bh { get; set; }
+
         public CusAuraData() { }
 
         public CusAuraData(int cusAuraId)

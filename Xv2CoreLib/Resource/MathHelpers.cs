@@ -12,6 +12,16 @@ namespace Xv2CoreLib.Resource
         public const double Epsilon = 0.00001;
         public const float Radians90Degrees = 1.570796f;
 
+        public static float ToDegrees(float radians)
+        {
+            return (180 / (float)Math.PI) * radians;
+        }
+
+        public static float ToRadians(float degrees)
+        {
+            return ((float)Math.PI / 180) * degrees;
+        }
+
         public static double ConvertRadiansToDegrees(double radians)
         {
             return (180 / Math.PI) * radians;
