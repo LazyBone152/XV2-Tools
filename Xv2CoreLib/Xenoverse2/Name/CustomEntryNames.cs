@@ -7,6 +7,7 @@ using Xv2CoreLib.BSA;
 using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.Resource.App;
 using YAXLib;
+using YAXLib.Attributes;
 
 namespace Xv2CoreLib
 {

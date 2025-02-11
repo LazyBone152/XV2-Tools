@@ -707,8 +707,16 @@ namespace Xv2CoreLib
             return BitConverter.ToInt32(bytes, 0);
         }
 
-
         public static int CalculatePadding(int fileSize, int byteAlignment)
+        {
+            if (byteAlignment <= 0)
+                throw new ArgumentException("CalculatePadding: Alignment must be greater than zero.", nameof(byteAlignment));
+
+            int remainder = (fileSize % byteAlignment);
+            return remainder == 0 ? 0 : byteAlignment - remainder;
+        }
+
+        public static int CalculatePaddingOld(int fileSize, int byteAlignment)
         {
             //return (byteAlignment - (fileSize % byteAlignment)) % byteAlignment;
 

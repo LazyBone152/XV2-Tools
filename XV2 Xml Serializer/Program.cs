@@ -7,14 +7,13 @@ using System.Globalization;
 using System.Threading;
 using Xv2CoreLib;
 using Xv2CoreLib.Eternity;
-using YAXLib;
-using System.Threading.Tasks;
 using System.Diagnostics;
-using System.Windows.Media.Imaging;
-using Xv2CoreLib.Resource;
 using Xv2CoreLib.EMZ;
 using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.SDS;
+using YAXLib;
+using System.Xml.Linq;
+using YAXLib.Exceptions;
 
 namespace XV2_Xml_Serializer
 {
@@ -26,7 +25,7 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
-            args = new string[1] { @"E:\VS_Test\EMM/ALL EMM" };
+            //args = new string[1] { @"test.map.xml" };
             //args = new string[1] { @"E:\VS_Test\EMA" };
 
             DEBUG_MODE = true;

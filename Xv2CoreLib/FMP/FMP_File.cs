@@ -1077,7 +1077,7 @@ namespace Xv2CoreLib.FMP
             {
                 if(node.Transforms?.Count > 0)
                 {
-                    node.NodeTransformIndex = nodes.Capacity;
+                    node.NodeTransformIndex = nodes.Count;
                     nodes.AddRange(node.Transforms);
                 }
                 else
@@ -1211,6 +1211,9 @@ namespace Xv2CoreLib.FMP
             bytes.AddRange(BitConverter.GetBytes(ScaleY));
             bytes.AddRange(BitConverter.GetBytes(ScaleZ));
 
+            if (bytes.Count != SIZE)
+                throw new Exception("FMP_NodeTransform.Write: Incorrect size!");
+
             return bytes.ToArray();
         }
 
@@ -1243,6 +1246,7 @@ namespace Xv2CoreLib.FMP
         }
     }
 
+    [YAXSerializeAs("HierarchyNode")]
     public class FMP_HierarchyNode
     {
         [YAXAttributeForClass]
@@ -1265,7 +1269,7 @@ namespace Xv2CoreLib.FMP
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "HierarchyNode")]
         [YAXDontSerializeIfNull]
-        public List<FMP_HierarchyNode> HierarchyNode { get; set; }
+        public List<FMP_HierarchyNode> HierarchyNodes { get; set; }
 
         public void Write(List<byte> bytes)
         {
@@ -1288,7 +1292,7 @@ namespace Xv2CoreLib.FMP
 
                 for (int i = 0; i < 8; i++)
                 {
-                    FMP_HierarchyNode child = HierarchyNode.FirstOrDefault(x => x.Index == i);
+                    FMP_HierarchyNode child = HierarchyNodes.FirstOrDefault(x => x.Index == i);
 
                     if(child != null)
                     {
@@ -1325,13 +1329,13 @@ namespace Xv2CoreLib.FMP
                 //Has children
                 node.Values = BitConverter_Ex.ToFloat32Array(bytes, offset + 4, 3);
                 int[] offsets = BitConverter_Ex.ToInt32Array(bytes, offset + 16, 8);
-                node.HierarchyNode = new List<FMP_HierarchyNode>();
+                node.HierarchyNodes = new List<FMP_HierarchyNode>();
 
                 for(int i = 0; i < offsets.Length; i++)
                 {
                     if (offsets[i] != 0 && offsets[i] != offset)
                     {
-                        node.HierarchyNode.Add(Read(bytes, offsets[i], i));
+                        node.HierarchyNodes.Add(Read(bytes, offsets[i], i));
                     }
                 }
             }
@@ -1643,6 +1647,8 @@ namespace Xv2CoreLib.FMP
 
                         vector4[i] = val;
                     }
+
+                    Value = vector4;
                     break;
                 default:
                     throw new Exception("FMP_Parameter: Unknown parameter type " + Type);
@@ -1666,7 +1672,6 @@ namespace Xv2CoreLib.FMP
                     {
                         throw new InvalidDataException("FMP_Parameter.GetXmlFormattedValue: Type does not match the internal value.");
                     }
-                    break;
                 case ParameterType.Int:
                 case ParameterType.Bool:
                 case ParameterType.Float:

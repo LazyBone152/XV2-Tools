@@ -58,7 +58,15 @@
 
 bin/
 obj/
-packages/
+
+*.nupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+
+project.lock.json
+project.assets.json
 
 LB Mod Installer/obj/Release/
 LB Mod Installer/obj/Debug/
