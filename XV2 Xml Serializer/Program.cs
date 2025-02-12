@@ -348,6 +348,9 @@ namespace XV2_Xml_Serializer
                                 case ".map":
                                     Xv2CoreLib.FMP.FMP_File.SerializeToXml(fileLocation);
                                     break;
+                                case ".spm":
+                                    Xv2CoreLib.SPM.SPM_File.SerializeToXml(fileLocation);
+                                    break;
                                 case ".xml":
                                     LoadXmlInitial(fileLocation);
                                     break;
@@ -661,6 +664,9 @@ namespace XV2_Xml_Serializer
                         break;
                     case ".map":
                         Xv2CoreLib.FMP.FMP_File.DeserializeFromXml(fileLocation);
+                        break;
+                    case ".spm":
+                        Xv2CoreLib.SPM.SPM_File.DeserializeFromXml(fileLocation);
                         break;
                     default:
                         FileTypeNotSupported(fileLocation);

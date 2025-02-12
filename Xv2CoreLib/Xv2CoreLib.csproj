@@ -369,6 +369,7 @@
     <Compile Include="SAV\SAV_File.cs" />
     <Compile Include="SDS\SDS_File.cs" />
     <Compile Include="SEV\SEV_File.cs" />
+    <Compile Include="SPM\SPM_File.cs" />
     <Compile Include="TDB\TDB_File.cs" />
     <Compile Include="TNL\Deserializer.cs" />
     <Compile Include="TNL\Parser.cs" />

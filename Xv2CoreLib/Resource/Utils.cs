@@ -1122,6 +1122,18 @@ namespace Xv2CoreLib
             return ints;
         }
 
+        public static ulong[] ToUInt64Array(byte[] bytes, int index, int count)
+        {
+            ulong[] ints = new ulong[count];
+
+            for (int i = 0; i < count * 8; i += 8)
+            {
+                ints[i / 8] = BitConverter.ToUInt64(bytes, index + i);
+            }
+
+            return ints;
+        }
+
         public static bool ToBoolean(byte[] bytes, int index)
         {
             return (bytes[index] == 0) ? false : true;
@@ -1180,7 +1192,7 @@ namespace Xv2CoreLib
         public static byte[] GetBytes(int[] intArray, int fixedSize = -1)
         {
             if (intArray == null)
-                return new byte[2 * fixedSize];
+                return new byte[4 * fixedSize];
 
             if (fixedSize == -1)
                 fixedSize = intArray.Length;
@@ -1197,7 +1209,7 @@ namespace Xv2CoreLib
             {
                 for (int i = 0; i < fixedSize - intArray.Length; i++)
                 {
-                    bytes.AddRange(BitConverter.GetBytes((ushort)0));
+                    bytes.AddRange(BitConverter.GetBytes((int)0));
                 }
             }
 
@@ -1207,7 +1219,7 @@ namespace Xv2CoreLib
         public static byte[] GetBytes(float[] floatArray, int fixedSize = -1)
         {
             if (floatArray == null)
-                return new byte[2 * fixedSize];
+                return new byte[4 * fixedSize];
 
             if (fixedSize == -1)
                 fixedSize = floatArray.Length;
@@ -1224,7 +1236,7 @@ namespace Xv2CoreLib
             {
                 for (int i = 0; i < fixedSize - floatArray.Length; i++)
                 {
-                    bytes.AddRange(BitConverter.GetBytes((ushort)0));
+                    bytes.AddRange(BitConverter.GetBytes((int)0));
                 }
             }
 
@@ -1279,6 +1291,33 @@ namespace Xv2CoreLib
                 for (int i = 0; i < fixedSize - intArray.Length; i++)
                 {
                     bytes.AddRange(BitConverter.GetBytes((ushort)0));
+                }
+            }
+
+            return bytes.ToArray();
+        }
+        
+        public static byte[] GetBytes(ulong[] intArray, int fixedSize = -1)
+        {
+            if (intArray == null)
+                return new byte[8 * fixedSize];
+
+            if (fixedSize == -1)
+                fixedSize = intArray.Length;
+
+            List<byte> bytes = new List<byte>();
+
+            for (int i = 0; i < intArray.Length; i++)
+            {
+                if (i == fixedSize) break;
+                bytes.AddRange(BitConverter.GetBytes(intArray[i]));
+            }
+
+            if (intArray.Length < fixedSize)
+            {
+                for (int i = 0; i < fixedSize - intArray.Length; i++)
+                {
+                    bytes.AddRange(BitConverter.GetBytes((ulong)0));
                 }
             }
 

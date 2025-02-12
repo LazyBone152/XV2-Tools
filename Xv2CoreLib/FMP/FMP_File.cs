@@ -150,6 +150,7 @@ namespace Xv2CoreLib.FMP
             bytes.AddRange(new byte[4]);
             bytes.AddRange(BitConverter.GetBytes(depot4.Count));
             bytes.AddRange(new byte[4]);
+            Assertion.AssertArraySize(I_96, 4, "FMP Header", nameof(I_96));
             bytes.AddRange(BitConverter_Ex.GetBytes(I_96));
 
             if (bytes.Count != 112)
