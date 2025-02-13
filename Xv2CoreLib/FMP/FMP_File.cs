@@ -215,8 +215,7 @@ namespace Xv2CoreLib.FMP
             }
 
             //Write name strings
-            StringWriter.WritePointerStrings(stringsWriter, bytes);
-
+            StringWriter.WriteStrings(stringsWriter, bytes, true);
 
             return bytes.ToArray();
         }
@@ -1452,7 +1451,7 @@ namespace Xv2CoreLib.FMP
                                 break;
                             case FMP_Parameter.ParameterType.Bool:
                                 bool value = ((bool)Commands[i].Parameters[a].Value);
-                                bytes.AddRange(BitConverter.GetBytes(value));
+                                bytes.AddRange(BitConverter.GetBytes(value ? 1 : 0)); //Write as a 32 bit value
                                 break;
                         }
                     }
@@ -2196,9 +2195,9 @@ namespace Xv2CoreLib.FMP
     public class FMP_IndexPair
     {
         [YAXAttributeForClass]
-        public ushort Index0 { get; set; }
+        public int Index0 { get; set; }
         [YAXAttributeForClass]
-        public ushort Index1 { get; set; }
+        public int Index1 { get; set; }
 
         public static List<FMP_IndexPair> ReadAll(byte[] bytes, int offset, int count)
         {
@@ -2208,8 +2207,8 @@ namespace Xv2CoreLib.FMP
             {
                 indices.Add(new FMP_IndexPair()
                 {
-                    Index0 = BitConverter.ToUInt16(bytes, offset + (4 * i)),
-                    Index1 = BitConverter.ToUInt16(bytes, offset + 2 + (4 * i))
+                    Index0 = BitConverter.ToInt32(bytes, offset + (8 * i)),
+                    Index1 = BitConverter.ToInt32(bytes, offset + 4 + (8 * i))
                 });
             }
 

@@ -1622,17 +1622,55 @@ namespace Xv2CoreLib
             /// </summary>
             public int RelativeOffset { get; set; }
 
-
-            public string AdditionalInfo1 { get; set; }
-            public int AdditionalInfo2 { get; set; }
         }
 
+        /// <summary>
+        /// Writes strings to a binary file.
+        /// </summary>
+        /// <param name="strings">Strings to write, including any offset info</param>
+        /// <param name="bytes">The byte list containing the files data</param>
+        /// <param name="compressStrings">If true, identical strings will be compressed down into only one instance, and only written to file once.</param>
+        public static void WriteStrings(List<StringInfo> strings, List<byte> bytes, bool compressStrings = false)
+        {
+            List<StringInfo> stringsToWrite = new List<StringInfo>();
 
+            if (compressStrings)
+            {
+                foreach(StringInfo stringInfo in strings)
+                {
+                    if(stringsToWrite.All(x => x.StringToWrite != stringInfo.StringToWrite))
+                    {
+                        stringsToWrite.Add(stringInfo);
+                    }
+                }
+            }
+            else
+            {
+                stringsToWrite = strings;
+            }
+
+            foreach(StringInfo _string  in stringsToWrite)
+            {
+                if (string.IsNullOrWhiteSpace(_string.StringToWrite)) continue;
+
+                int offset = bytes.Count;
+                bytes.AddRange(Encoding.ASCII.GetBytes(_string.StringToWrite));
+                bytes.Add(0);
+
+                //Update offsets
+                foreach(StringInfo offsets in strings.Where(x => x.StringToWrite == _string.StringToWrite))
+                {
+                    Utils.ReplaceRange(bytes, BitConverter.GetBytes(offset - offsets.RelativeOffset), offsets.Offset);
+                }
+            }
+        }
+
+        [Obsolete(@"Replaced by WriteStrings method. This should only be used for the few old parsers that made use of it originally, as null/empty strings were handled differently in those.")]
         public static List<byte> WritePointerStrings(List<StringInfo> _strings, List<byte> bytes)
         {
             if (_strings != null)
             {
-                for (int i = 0; i < _strings.Count(); i++)
+                for (int i = 0; i < _strings.Count; i++)
                 {
                     if ((_strings[i].StringToWrite == "NULL" || string.IsNullOrWhiteSpace(_strings[i].StringToWrite)) == false)
                     {
