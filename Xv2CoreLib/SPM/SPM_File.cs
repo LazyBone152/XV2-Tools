@@ -43,6 +43,11 @@ namespace Xv2CoreLib.SPM
             File.WriteAllBytes(saveLocation, spmFile.Write());
         }
 
+        public static SPM_File Load(string path)
+        {
+            return Load(File.ReadAllBytes(path));
+        }
+
         public static SPM_File Load(byte[] bytes)
         {
             SPM_File spm = new SPM_File();
@@ -213,21 +218,29 @@ namespace Xv2CoreLib.SPM
         [CustomSerialize]
         public int I_236 { get; set; }
 
-        [CustomSerialize]
-        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public float[] F_240 { get; set; }
+        [CustomSerialize("FogMultiColor", "R")]
+        public float FogMultiColorR { get; set; }
 
-        [CustomSerialize("FogColor", "R")]
-        public float FogColorR { get; set; }
+        [CustomSerialize("FogMultiColor", "G")]
+        public float FogMultiColorG { get; set; }
 
-        [CustomSerialize("FogColor", "G")]
-        public float FogColorG { get; set; }
+        [CustomSerialize("FogMultiColor", "B")]
+        public float FogMultiColorB { get; set; }
 
-        [CustomSerialize("FogColor", "B")]
-        public float FogColorB { get; set; }
+        [CustomSerialize("FogMultiColor", "A")]
+        public float FogMultiColorA { get; set; }
 
-        [CustomSerialize("FogColor", "A")]
-        public float FogColorA { get; set; }
+        [CustomSerialize("FogAddColor", "R")]
+        public float FogAddColorR { get; set; }
+
+        [CustomSerialize("FogAddColor", "G")]
+        public float FogAddColorG { get; set; }
+
+        [CustomSerialize("FogAddColor", "B")]
+        public float FogAddColorB { get; set; }
+
+        [CustomSerialize("FogAddColor", "A")]
+        public float FogAddColorA { get; set; }
 
         [CustomSerialize]
         public float FogStartDist { get; set; }
@@ -500,7 +513,6 @@ namespace Xv2CoreLib.SPM
             Assertion.AssertArraySize(F_32, 4, "SPMEntry", nameof(F_32));
             Assertion.AssertArraySize(F_64, 19, "SPMEntry", nameof(F_64));
             Assertion.AssertArraySize(F_144, 23, "SPMEntry", nameof(F_144));
-            Assertion.AssertArraySize(F_240, 4, "SPMEntry", nameof(F_240));
             Assertion.AssertArraySize(F_416, 6, "SPMEntry", nameof(F_416));
             Assertion.AssertArraySize(F_480, 4, "SPMEntry", nameof(F_480));
             Assertion.AssertArraySize(F_500, 3, "SPMEntry", nameof(F_500));
@@ -527,11 +539,14 @@ namespace Xv2CoreLib.SPM
             bytes.AddRange(BitConverter.GetBytes(I_140));
             bytes.AddRange(BitConverter_Ex.GetBytes(F_144));
             bytes.AddRange(BitConverter.GetBytes(I_236));
-            bytes.AddRange(BitConverter_Ex.GetBytes(F_240));
-            bytes.AddRange(BitConverter.GetBytes(FogColorR));
-            bytes.AddRange(BitConverter.GetBytes(FogColorG));
-            bytes.AddRange(BitConverter.GetBytes(FogColorB));
-            bytes.AddRange(BitConverter.GetBytes(FogColorA));
+            bytes.AddRange(BitConverter.GetBytes(FogMultiColorR));
+            bytes.AddRange(BitConverter.GetBytes(FogMultiColorG));
+            bytes.AddRange(BitConverter.GetBytes(FogMultiColorB));
+            bytes.AddRange(BitConverter.GetBytes(FogMultiColorA));
+            bytes.AddRange(BitConverter.GetBytes(FogAddColorR));
+            bytes.AddRange(BitConverter.GetBytes(FogAddColorG));
+            bytes.AddRange(BitConverter.GetBytes(FogAddColorB));
+            bytes.AddRange(BitConverter.GetBytes(FogAddColorA));
             bytes.AddRange(BitConverter.GetBytes(FogStartDist));
             bytes.AddRange(BitConverter.GetBytes(FogEndDist));
             bytes.AddRange(BitConverter.GetBytes(F_280));
@@ -645,11 +660,14 @@ namespace Xv2CoreLib.SPM
                 I_140 = BitConverter.ToInt32(bytes, offset + 140),
                 F_144 = BitConverter_Ex.ToFloat32Array(bytes, offset + 144, 23),
                 I_236 = BitConverter.ToInt32(bytes, offset + 236),
-                F_240 = BitConverter_Ex.ToFloat32Array(bytes, offset + 240, 4),
-                FogColorR = BitConverter.ToSingle(bytes, offset + 256),
-                FogColorG = BitConverter.ToSingle(bytes, offset + 260),
-                FogColorB = BitConverter.ToSingle(bytes, offset + 264),
-                FogColorA = BitConverter.ToSingle(bytes, offset + 268),
+                FogMultiColorR = BitConverter.ToSingle(bytes, offset + 240),
+                FogMultiColorG = BitConverter.ToSingle(bytes, offset + 244),
+                FogMultiColorB = BitConverter.ToSingle(bytes, offset + 248),
+                FogMultiColorA = BitConverter.ToSingle(bytes, offset + 252),
+                FogAddColorR = BitConverter.ToSingle(bytes, offset + 256),
+                FogAddColorG = BitConverter.ToSingle(bytes, offset + 260),
+                FogAddColorB = BitConverter.ToSingle(bytes, offset + 264),
+                FogAddColorA = BitConverter.ToSingle(bytes, offset + 268),
                 FogStartDist = BitConverter.ToSingle(bytes, offset + 272),
                 FogEndDist = BitConverter.ToSingle(bytes, offset + 276),
                 F_280 = BitConverter.ToSingle(bytes, offset + 280),

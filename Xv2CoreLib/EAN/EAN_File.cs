@@ -77,6 +77,15 @@ namespace Xv2CoreLib.EAN
             new Deserializer(this, path);
         }
 
+        public EMA_File ConvertToEma()
+        {
+            EMA_File ema = new EMA_File();
+            ema.EmaType = EmaType.obj;
+            ema.Skeleton = Skeleton.ConvertToEmaSkeleton();
+            ema.Animations.AddRange(SerializedAnimation.DeserializeToEma(SerializedAnimation.Serialize(Animations, Skeleton)));
+
+            return ema;
+        }
 
         //Helpers
         /// <summary>
@@ -2568,6 +2577,32 @@ namespace Xv2CoreLib.EAN
             SerializedBone.SetNeutralBindPose(Bones, bindPose);
         }
 
+        public SerializedAnimation(EMA_Animation animation, ESK_Skeleton bindPose)
+        {
+            ID = animation.Index;
+            Name = animation.Name;
+            FloatType = (EAN_Animation.FloatPrecision)animation.FloatPrecision;
+            Bones = new List<SerializedBone>(animation.Nodes.Count);
+
+            for(int i = 0; i < animation.Nodes.Count; i++)
+            {
+                Bones.Add(new SerializedBone(animation.Nodes[i]));
+            }
+
+            ConvertRotationFormat(KeyframeRotationFormat.Quaternion);
+            SerializedBone.SetNeutralBindPose(Bones, bindPose);
+        }
+
+        public static List<SerializedAnimation> Serialize(IList<EMA_Animation> animations, ESK_Skeleton bindPose)
+        {
+            List<SerializedAnimation> serializedAnims = new List<SerializedAnimation>();
+
+            foreach (var animation in animations)
+                serializedAnims.Add(new SerializedAnimation(animation, bindPose));
+
+            return serializedAnims;
+        }
+
         public static List<SerializedAnimation> Serialize(IList<EAN_Animation> animations, ESK_Skeleton bindPose)
         {
             List<SerializedAnimation> serializedAnims = new List<SerializedAnimation>();
@@ -2588,12 +2623,24 @@ namespace Xv2CoreLib.EAN
             return animations;
         }
 
+        public static List<EMA_Animation> DeserializeToEma(IList<SerializedAnimation> serialziedAnimations)
+        {
+            List<EMA_Animation> animations = new List<EMA_Animation>();
+
+            foreach (var animation in serialziedAnimations)
+                animations.Add(animation.DeserializeToEma());
+
+            return animations;
+        }
+
         public EAN_Animation Deserialize(ESK_Skeleton bindPose)
         {
             if (isDeserialized)
                 throw new InvalidOperationException($"SerializedAnimation.Deserialize: This animation has already been deserialized!");
 
+            ConvertRotationFormat(KeyframeRotationFormat.Quaternion);
             SerializedBone.SetBindPose(Bones, bindPose);
+
 
             EAN_Animation animation = new EAN_Animation();
             animation.eskSkeleton = bindPose;
@@ -2605,6 +2652,32 @@ namespace Xv2CoreLib.EAN
             isDeserialized = true;
             return animation;
         }
+
+        public EMA_Animation DeserializeToEma()
+        {
+            if (isDeserialized)
+                throw new InvalidOperationException($"SerializedAnimation.DeserializeToEma: This animation has already been deserialized!");
+
+            ConvertRotationFormat(KeyframeRotationFormat.EulerAngles);
+
+            EMA_Animation animation = new EMA_Animation();
+            animation.Index = ID;
+            animation.Name = Name;
+            animation.FloatPrecision = (EMA.ValueType)FloatType;
+            animation.AddKeyframes(Bones, false, false, true, true, true);
+
+            isDeserialized = true;
+            return animation;
+        }
+
+        internal void ConvertRotationFormat(KeyframeRotationFormat format)
+        {
+            foreach(var bone in Bones)
+            {
+                bone.ConvertRotation(format);
+            }
+        }
+
     }
 
     [Serializable]
@@ -2616,9 +2689,11 @@ namespace Xv2CoreLib.EAN
         public bool HasPos { get; set; }
         public bool HasRot { get; set; }
         public bool HasScale { get; set; }
+        private KeyframeRotationFormat RotationFormat { get; set; }
 
         public SerializedBone(EAN_Node node, int startFrame = -1, int endFrame = -1, bool pos = true, bool rot = true, bool scale = true)
         {
+            RotationFormat = KeyframeRotationFormat.Quaternion;
             Name = node.BoneName;
             
             List<ushort> keyframes = node.GetAllKeyframes(pos, rot, scale);
@@ -2636,9 +2711,9 @@ namespace Xv2CoreLib.EAN
 
             Keyframes = new SerializedKeyframe[keyframes.Count];
 
-            HasPos = pos & node.HasComponent(EAN_AnimationComponent.ComponentType.Position);
-            HasRot = rot & node.HasComponent(EAN_AnimationComponent.ComponentType.Rotation);
-            HasScale = scale & node.HasComponent(EAN_AnimationComponent.ComponentType.Scale);
+            HasPos = pos && node.HasComponent(EAN_AnimationComponent.ComponentType.Position);
+            HasRot = rot && node.HasComponent(EAN_AnimationComponent.ComponentType.Rotation);
+            HasScale = scale && node.HasComponent(EAN_AnimationComponent.ComponentType.Scale);
 
             for (int i = 0; i < keyframes.Count; i++)
                 Keyframes[i] = new SerializedKeyframe(keyframes[i], node.GetKeyframeValues(keyframes[i], pos, rot, scale));
@@ -2646,6 +2721,7 @@ namespace Xv2CoreLib.EAN
 
         public SerializedBone(EAN_Node node, List<int> frames, bool usePos, bool useRot, bool useScale, bool isCamera)
         {
+            RotationFormat = KeyframeRotationFormat.Quaternion;
             Name = node.BoneName;
             IsCamera = isCamera;
 
@@ -2655,12 +2731,35 @@ namespace Xv2CoreLib.EAN
 
             Keyframes = new SerializedKeyframe[keyframes.Count];
 
-            HasPos = usePos & node.HasComponent(EAN_AnimationComponent.ComponentType.Position);
-            HasRot = useRot & node.HasComponent(EAN_AnimationComponent.ComponentType.Rotation);
-            HasScale = useScale & node.HasComponent(EAN_AnimationComponent.ComponentType.Scale);
+            HasPos = usePos && node.HasComponent(EAN_AnimationComponent.ComponentType.Position);
+            HasRot = useRot && node.HasComponent(EAN_AnimationComponent.ComponentType.Rotation);
+            HasScale = useScale && node.HasComponent(EAN_AnimationComponent.ComponentType.Scale);
 
             for (int i = 0; i < keyframes.Count; i++)
                 Keyframes[i] = new SerializedKeyframe(keyframes[i], node.GetKeyframeValues(keyframes[i], usePos, useRot, useScale));
+        }
+
+        public SerializedBone(EMA_Node node, int startFrame = -1, int endFrame = -1, bool pos = true, bool rot = true, bool scale = true)
+        {
+            RotationFormat = KeyframeRotationFormat.EulerAngles;
+            Name = node.BoneName;
+
+            List<ushort> keyframes = node.GetAllKeyframes(pos, rot, scale);
+
+            if (startFrame != -1)
+                keyframes.RemoveAll(x => x < startFrame);
+
+            if (endFrame != -1)
+                keyframes.RemoveAll(x => x > endFrame);
+
+            Keyframes = new SerializedKeyframe[keyframes.Count];
+
+            HasPos = pos && node.HasParameter(EMA_Command.PARAMETER_POSITION);
+            HasRot = rot && node.HasParameter(EMA_Command.PARAMETER_ROTATION);
+            HasScale = scale && node.HasParameter(EMA_Command.PARAMETER_SCALE);
+
+            for (int i = 0; i < keyframes.Count; i++)
+                Keyframes[i] = new SerializedKeyframe(keyframes[i], node.GetKeyframeValues(keyframes[i], pos, rot, scale));
         }
 
         /// <summary>
@@ -2729,6 +2828,43 @@ namespace Xv2CoreLib.EAN
                 names.Add(bone.Name);
 
             return names;
+        }
+
+        internal void ConvertRotation(KeyframeRotationFormat format)
+        {
+            if (format == RotationFormat) return; //Already in correct format
+
+            if (format == KeyframeRotationFormat.EulerAngles)
+            {
+                //Convert Quaternion -> Euler Angles
+                foreach(var keyframe in Keyframes)
+                {
+                    Vector3 angles = MathHelpers.QuaternionToEuler(new Quaternion(keyframe.RotX, keyframe.RotY, keyframe.RotZ, keyframe.RotW));
+                    keyframe.RotX = angles.X;
+                    keyframe.RotY = angles.Y;
+                    keyframe.RotZ = angles.Z;
+                    keyframe.RotW = 1;
+                }
+            }
+            else if(format == KeyframeRotationFormat.Quaternion)
+            {
+                //Convert Euler Angles -> Quaternion
+                foreach (var keyframe in Keyframes)
+                {
+                    //Quaternion tempX = MathHelpers.AxisAngleToQuaternion(Vector3.UnitX, keyframe.RotX);
+                    //Quaternion tempY = MathHelpers.AxisAngleToQuaternion(Vector3.UnitY, keyframe.RotY);
+                    //Quaternion tempZ = MathHelpers.AxisAngleToQuaternion(Vector3.UnitZ, keyframe.RotZ);
+                    //Quaternion quaternion = MathHelpers.MultiplyQuaternions(tempZ, MathHelpers.MultiplyQuaternions(tempY, tempX));
+
+                    Quaternion quaternion = MathHelpers.EulerToQuaternion(new Vector3(keyframe.RotX, keyframe.RotY, keyframe.RotZ) * keyframe.RotW);
+                    keyframe.RotX = quaternion.X;
+                    keyframe.RotY = quaternion.Y;
+                    keyframe.RotZ = quaternion.Z;
+                    keyframe.RotW = quaternion.W;
+                }
+            }
+
+            RotationFormat = format;
         }
 
         #region BindPose
@@ -2867,7 +3003,9 @@ namespace Xv2CoreLib.EAN
 
     }
 
-
-
-
+    public enum KeyframeRotationFormat
+    {
+        EulerAngles,
+        Quaternion
+    }
 }

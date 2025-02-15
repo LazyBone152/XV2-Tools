@@ -352,6 +352,9 @@ namespace Xv2CoreLib.ESK
             //Parse extra data
             skeleton.CreateNonRecursiveBoneList();
 
+            //Update bone count to account for any skipped self-referencing bones
+            boneCount = (short)skeleton.NonRecursiveBones.Count;
+
             for(int i = 0; i < boneCount; i++)
             {
                 skeleton.NonRecursiveBones[i].ExtraValue_1 = BitConverter.ToUInt16(rawBytes, boneExtraInfoOffset + 0);
@@ -380,12 +383,18 @@ namespace Xv2CoreLib.ESK
                 ESK_Bone bone = ESK_Bone.Read(rawBytes, offsets, _index, parent, loadAbsTransform);
                 newBones.Add(bone);
                 _index += 1;
-                if (BitConverter.ToInt16(rawBytes, boneIndexOffset + 2) != -1)
+                short childIdx = BitConverter.ToInt16(rawBytes, boneIndexOffset + 2);
+
+                //SOME ESKs have bones that have themselves as a child - not sure why...
+                if (childIdx != -1 && childIdx != indexOfFirstSibling)
                 {
-                    newBones[idx].ESK_Bones = ParseChildrenBones(rawBytes, BitConverter.ToInt16(rawBytes, boneIndexOffset + 2), offset, bone, ref _index, loadAbsTransform);
+                    newBones[idx].ESK_Bones = ParseChildrenBones(rawBytes, childIdx, offset, bone, ref _index, loadAbsTransform);
                 }
+
                 //Loop management
-                if (BitConverter.ToInt16(rawBytes, boneIndexOffset + 4) != -1)
+                short siblingIdx = BitConverter.ToInt16(rawBytes, boneIndexOffset + 4);
+
+                if (siblingIdx != -1)
                 {
                     //There is a sibling
                     offsets = GetBoneOffset(rawBytes, BitConverter.ToInt16(rawBytes, boneIndexOffset + 4), offset);
@@ -796,6 +805,10 @@ namespace Xv2CoreLib.ESK
         }
         #endregion
 
+        public EMA.Skeleton ConvertToEmaSkeleton()
+        {
+            return EMA.Skeleton.Convert(this);
+        }
 
     }
 
@@ -884,7 +897,7 @@ namespace Xv2CoreLib.ESK
 
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Bone")]
-        public AsyncObservableCollection<ESK_Bone> ESK_Bones { get; set; }
+        public AsyncObservableCollection<ESK_Bone> ESK_Bones { get; set; } = new AsyncObservableCollection<ESK_Bone>();
 
         public ESK_Bone Clone()
         {
