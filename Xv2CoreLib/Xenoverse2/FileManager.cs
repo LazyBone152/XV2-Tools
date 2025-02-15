@@ -31,6 +31,9 @@ using static Xv2CoreLib.CUS.CUS_File;
 using System.IO;
 using Xv2CoreLib.Resource.App;
 using Xv2CoreLib.AFS2;
+using Xv2CoreLib.SPM;
+using Xv2CoreLib.FMP;
+using Xv2CoreLib.NSK;
 
 namespace Xv2CoreLib
 {
@@ -254,6 +257,9 @@ namespace Xv2CoreLib
                 case ".emd":
                     file = EMD_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
                     break;
+                case ".nsk":
+                    file = NSK_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
+                    break;
                 case ".emb":
                     file = EMB_File.LoadEmb(GetBytesFromGame(path, onlyFromCpk, raiseEx));
                     break;
@@ -278,6 +284,12 @@ namespace Xv2CoreLib
                         AFS2_File awbFile = awbBytes != null ? AFS2_File.LoadFromArray(awbBytes) : null;
                         file = new ACB_Wrapper(ACB_File.Load(GetBytesFromGame(path), awbFile));
                     }
+                    break;
+                case ".spm":
+                    file = SPM_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
+                    break;
+                case ".map":
+                    file = FMP_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
                     break;
                 default:
                     throw new InvalidDataException(string.Format("FileManager.GetParsedFileFromGame: The filetype of \"{0}\" is not supported.", path));
@@ -355,8 +367,14 @@ namespace Xv2CoreLib
                     return ((EMB_File)data).SaveToBytes();
                 case ".emd":
                     return ((EMD_File)data).SaveToBytes();
+                case ".nsk":
+                    return ((NSK_File)data).Write();
                 case ".emm":
                     return ((EMM_File)data).SaveToBytes();
+                case ".spm":
+                    return ((SPM_File)data).Write();
+                case ".fmp":
+                    return ((FMP_File)data).Write();
                 default:
                     throw new InvalidDataException(String.Format("Xenoverse2.GetBytesFromParsedFile: The filetype of \"{0}\" is not supported.", path));
             }

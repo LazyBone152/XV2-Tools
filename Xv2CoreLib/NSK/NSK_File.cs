@@ -37,6 +37,11 @@ namespace Xv2CoreLib.NSK
 
         public void SaveFile(string path)
         {
+            File.WriteAllBytes(path, Write());
+        }
+
+        public byte[] Write()
+        {
             List<byte> bytes = new List<byte>();
 
             bytes.AddRange(EskFile.SaveToBytes());
@@ -44,7 +49,7 @@ namespace Xv2CoreLib.NSK
             Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), 20);
             bytes.AddRange(EmdFile.SaveToBytes());
 
-            File.WriteAllBytes(path, bytes.ToArray());
+            return bytes.ToArray();
         }
 
         #endregion

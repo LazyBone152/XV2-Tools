@@ -809,7 +809,8 @@ namespace Xv2CoreLib.SPM
         [CustomSerialize]
         public int I_76 { get; set; }
 
-        public ulong[] UnknownData { get; set; }
+        [YAXDontSerializeIfNull]
+        public SPM_UnknownData UnknownData { get; set; }
 
         internal byte[] Write()
         {
@@ -849,13 +850,11 @@ namespace Xv2CoreLib.SPM
             //Write unknown values
             if(UnknownData != null)
             {
-                Assertion.AssertArraySize(UnknownData, 32, "ExtendedData", nameof(UnknownData));
-                bytes.AddRange(BitConverter_Ex.GetBytes(UnknownData));
+                bytes.AddRange(UnknownData.Write());
             }
             else
             {
                 //If missing, add null bytes.
-                //I'm sure at least some of these values is junk data, anyway...
                 bytes.AddRange(new byte[256]);
             }
 
@@ -891,7 +890,209 @@ namespace Xv2CoreLib.SPM
                 I_64 = BitConverter.ToInt32(bytes, offset + 64),
                 F_68 = BitConverter_Ex.ToFloat32Array(bytes, offset + 68, 2),
                 I_76 = BitConverter.ToInt32(bytes, offset + 76),
-                UnknownData = BitConverter_Ex.ToUInt64Array(bytes, offset + 80, 32)
+                UnknownData = SPM_UnknownData.Read(bytes, offset + 80)
+            };
+        }
+    }
+
+    public class SPM_UnknownData
+    {
+        [CustomSerialize(IsHex = true)]
+        public int I_00 { get; set; }
+        [CustomSerialize(IsHex = true)]
+        public int I_04 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_08 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_12 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_16 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_20 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_24 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_28 { get; set; }
+        [CustomSerialize]
+        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
+        public int[] I_32 { get; set; } //Size 5
+
+        [CustomSerialize(isFloat: true)]
+        public float F_52 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_56 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_60 { get; set; }
+        [CustomSerialize]
+        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
+        public int[] I_64 { get; set; } //Size 2
+        [CustomSerialize(isFloat: true)]
+        public float F_72 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_76 { get; set; }
+        [CustomSerialize]
+        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
+        public int[] I_80 { get; set; } //Size 4
+        [CustomSerialize(isFloat: true)]
+        public float F_96 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_100 { get; set; }
+        [CustomSerialize]
+        public int I_104 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_108 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_112 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_116 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_120 { get; set; }
+        [CustomSerialize]
+        public int I_124 { get; set; }
+        [CustomSerialize]
+        public int I_128 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_132 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_136 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_140 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_144 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_148 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_152 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_156 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_160 { get; set; }
+        [CustomSerialize]
+        public int I_164 { get; set; }
+        [CustomSerialize]
+        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
+        public int[] I_168 { get; set; } //Size 6
+        [CustomSerialize(isFloat: true)]
+        public float F_192 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_196 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_200 { get; set; }
+        [CustomSerialize(isFloat: true)]
+        public float F_204 { get; set; }
+        [CustomSerialize]
+        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
+        public int[] I_208 { get; set; } //Size 10
+        [CustomSerialize(isFloat: true)]
+        public float F_248 { get; set; }
+        [CustomSerialize]
+        public int I_252 { get; set; }
+
+        public byte[] Write()
+        {
+            List<byte> bytes = new List<byte>();
+
+            Assertion.AssertArraySize(I_32, 5, nameof(SPM_UnknownData), nameof(I_32));
+            Assertion.AssertArraySize(I_64, 2, nameof(SPM_UnknownData), nameof(I_64));
+            Assertion.AssertArraySize(I_80, 4, nameof(SPM_UnknownData), nameof(I_80));
+            Assertion.AssertArraySize(I_168, 6, nameof(SPM_UnknownData), nameof(I_168));
+            Assertion.AssertArraySize(I_208, 10, nameof(SPM_UnknownData), nameof(I_208));
+
+            bytes.AddRange(BitConverter.GetBytes(I_00));
+            bytes.AddRange(BitConverter.GetBytes(I_04));
+            bytes.AddRange(BitConverter.GetBytes(F_08));
+            bytes.AddRange(BitConverter.GetBytes(F_12));
+            bytes.AddRange(BitConverter.GetBytes(F_16));
+            bytes.AddRange(BitConverter.GetBytes(F_20));
+            bytes.AddRange(BitConverter.GetBytes(F_24));
+            bytes.AddRange(BitConverter.GetBytes(F_28));
+            bytes.AddRange(BitConverter_Ex.GetBytes(I_32));
+            bytes.AddRange(BitConverter.GetBytes(F_52));
+            bytes.AddRange(BitConverter.GetBytes(F_56));
+            bytes.AddRange(BitConverter.GetBytes(F_60));
+            bytes.AddRange(BitConverter_Ex.GetBytes(I_64));
+            bytes.AddRange(BitConverter.GetBytes(F_72));
+            bytes.AddRange(BitConverter.GetBytes(F_76));
+            bytes.AddRange(BitConverter_Ex.GetBytes(I_80));
+            bytes.AddRange(BitConverter.GetBytes(F_96));
+            bytes.AddRange(BitConverter.GetBytes(F_100));
+            bytes.AddRange(BitConverter.GetBytes(I_104));
+            bytes.AddRange(BitConverter.GetBytes(F_108));
+            bytes.AddRange(BitConverter.GetBytes(F_112));
+            bytes.AddRange(BitConverter.GetBytes(F_116));
+            bytes.AddRange(BitConverter.GetBytes(F_120));
+            bytes.AddRange(BitConverter.GetBytes(I_124));
+            bytes.AddRange(BitConverter.GetBytes(I_128));
+            bytes.AddRange(BitConverter.GetBytes(F_132));
+            bytes.AddRange(BitConverter.GetBytes(F_136));
+            bytes.AddRange(BitConverter.GetBytes(F_140));
+            bytes.AddRange(BitConverter.GetBytes(F_144));
+            bytes.AddRange(BitConverter.GetBytes(F_148));
+            bytes.AddRange(BitConverter.GetBytes(F_152));
+            bytes.AddRange(BitConverter.GetBytes(F_156));
+            bytes.AddRange(BitConverter.GetBytes(F_160));
+            bytes.AddRange(BitConverter.GetBytes(I_164));
+            bytes.AddRange(BitConverter_Ex.GetBytes(I_168));
+            bytes.AddRange(BitConverter.GetBytes(F_192));
+            bytes.AddRange(BitConverter.GetBytes(F_196));
+            bytes.AddRange(BitConverter.GetBytes(F_200));
+            bytes.AddRange(BitConverter.GetBytes(F_204));
+            bytes.AddRange(BitConverter_Ex.GetBytes(I_208));
+            bytes.AddRange(BitConverter.GetBytes(F_248));
+            bytes.AddRange(BitConverter.GetBytes(I_252));
+
+            if (bytes.Count != 256)
+                throw new Exception("SPM_UnknownData: Invalid size");
+
+            return bytes.ToArray();
+        }
+
+        public static SPM_UnknownData Read(byte[] bytes, int offset)
+        {
+            return new SPM_UnknownData()
+            {
+                I_00 = BitConverter.ToInt32(bytes, offset),
+                I_04 = BitConverter.ToInt32(bytes, offset + 4),
+                F_08 = BitConverter.ToSingle(bytes, offset + 8),
+                F_12 = BitConverter.ToSingle(bytes, offset + 12),
+                F_16 = BitConverter.ToSingle(bytes, offset + 16),
+                F_20 = BitConverter.ToSingle(bytes, offset + 20),
+                F_24 = BitConverter.ToSingle(bytes, offset + 24),
+                F_28 = BitConverter.ToSingle(bytes, offset + 28),
+                I_32 = BitConverter_Ex.ToInt32Array(bytes, offset + 32, 5),
+                F_52 = BitConverter.ToSingle(bytes, offset + 52),
+                F_56 = BitConverter.ToSingle(bytes, offset + 56),
+                F_60 = BitConverter.ToSingle(bytes, offset + 60),
+                I_64 = BitConverter_Ex.ToInt32Array(bytes, offset + 64, 2),
+                F_72 = BitConverter.ToSingle(bytes, offset + 72),
+                F_76 = BitConverter.ToSingle(bytes, offset + 76),
+                I_80 = BitConverter_Ex.ToInt32Array(bytes, offset + 80, 4),
+                F_96 = BitConverter.ToSingle(bytes, offset + 96),
+                F_100 = BitConverter.ToSingle(bytes, offset + 100),
+                I_104 = BitConverter.ToInt32(bytes, offset + 104),
+                F_108 = BitConverter.ToSingle(bytes, offset + 108),
+                F_112 = BitConverter.ToSingle(bytes, offset + 112),
+                F_116 = BitConverter.ToSingle(bytes, offset + 116),
+                F_120 = BitConverter.ToSingle(bytes, offset + 120),
+                I_124 = BitConverter.ToInt32(bytes, offset + 124),
+                I_128 = BitConverter.ToInt32(bytes, offset + 128),
+                F_132 = BitConverter.ToSingle(bytes, offset + 132),
+                F_136 = BitConverter.ToSingle(bytes, offset + 136),
+                F_140 = BitConverter.ToSingle(bytes, offset + 140),
+                F_144 = BitConverter.ToSingle(bytes, offset + 144),
+                F_148 = BitConverter.ToSingle(bytes, offset + 148),
+                F_152 = BitConverter.ToSingle(bytes, offset + 152),
+                F_156 = BitConverter.ToSingle(bytes, offset + 156),
+                F_160 = BitConverter.ToSingle(bytes, offset + 160),
+                I_164 = BitConverter.ToInt32(bytes, offset + 164),
+                I_168 = BitConverter_Ex.ToInt32Array(bytes, offset + 168, 6),
+                F_192 = BitConverter.ToSingle(bytes, offset + 192),
+                F_196 = BitConverter.ToSingle(bytes, offset + 196),
+                F_200 = BitConverter.ToSingle(bytes, offset + 200),
+                F_204 = BitConverter.ToSingle(bytes, offset + 204),
+                I_208 = BitConverter_Ex.ToInt32Array(bytes, offset + 208, 10),
+                F_248 = BitConverter.ToSingle(bytes, offset + 248),
+                I_252 = BitConverter.ToInt32(bytes, offset + 252)
             };
         }
     }
