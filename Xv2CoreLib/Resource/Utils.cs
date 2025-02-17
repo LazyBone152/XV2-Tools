@@ -173,6 +173,18 @@ namespace Xv2CoreLib
 
             return newList;
         }
+    
+        public static int[] ConvertToIntArray(short[] array)
+        {
+            int[] newArray = new int[array.Length];
+
+            for(int i = 0; i < array.Length; i++)
+            {
+                newArray[i] = array[i];
+            }
+
+            return newArray;
+        }
     }
 
     public static class Xv2ColorConverter
