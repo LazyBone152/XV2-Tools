@@ -9,6 +9,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <converters:VisibilityToNullableBooleanConverter x:Key="visibilityConverter"/>
+            <converters:InverseVisibilityConverter x:Key="inverseVisibilityConverter"/>
 
             <BitmapImage x:Key="gridlines" UriSource="Resources/transparent_checkerboard.png" />
 

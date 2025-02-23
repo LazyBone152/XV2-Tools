@@ -23,6 +23,45 @@
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
 
+        <Style x:Key="ExpandableDataGridHeaderStyle" TargetType="{x:Type DataGridRowHeader}">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="{DynamicResource MahApps.Brushes.Gray5}" />
+            <Setter Property="BorderThickness" Value="0 0 1 0" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type DataGridRowHeader}">
+                        <Grid>
+                            <Grid HorizontalAlignment="Center" VerticalAlignment="Stretch" Margin="0,0,0,0" Background="{DynamicResource MahApps.Brushes.Accent}">
+                                <ToggleButton x:Name="ExpanderToggleButton" Focusable="False"
+                                      IsChecked="{Binding Path=DetailsVisibility,
+                                                          RelativeSource={RelativeSource AncestorType=DataGridRow},
+                                                          Converter={StaticResource visibilityConverter},
+                                                          Mode=TwoWay}"
+                                      Style="{StaticResource {x:Static ToolBar.ToggleButtonStyleKey}}"
+                                      Foreground="Transparent" Background="Transparent" BorderBrush="Transparent"
+                                      Width="{Binding Path=RowHeaderWidth, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                            </Grid>
+                            <Grid HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,5,0,0">
+                                <iconPacks:PackIconMaterialLight Kind="ArrowDown" Width="12" Height="12" VerticalAlignment="Center"
+                                                             Visibility="{Binding Path=DetailsVisibility, 
+                                                             RelativeSource={RelativeSource AncestorType=DataGridRow},
+                                                             Converter={StaticResource inverseVisibilityConverter}}"
+                                                             HorizontalAlignment="Center"/>
+                                <iconPacks:PackIconMaterialLight Kind="ArrowUp" Width="12" Height="12" VerticalAlignment="Center"
+                                                             Visibility="{Binding Path=DetailsVisibility, 
+                                                             RelativeSource={RelativeSource AncestorType=DataGridRow}}"
+                                                             HorizontalAlignment="Center"/>
+                            </Grid>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    
     </UserControl.Resources>
     <Grid x:Name="rootGrid">
         <Grid.Resources>
@@ -42,9 +81,10 @@
 
                     <DataGrid x:Name="effectDataGrid" Grid.Column="1" Tag="{Binding DataContext, ElementName=rootGrid}" SelectionChanged="effectDataGrid_SelectionChanged" VirtualizingPanel.ScrollUnit="Pixel" 
                               ItemsSource="{Binding effectContainerFile.ViewEffects}" SelectedItem="{Binding SelectedEffect, UpdateSourceTrigger=PropertyChanged}" EnableRowVirtualization="True" 
-                              EnableColumnVirtualization="True" SelectionMode="Extended" RowDetailsVisibilityMode="VisibleWhenSelected" CanUserResizeRows="False" CanUserAddRows="False" 
-                              AutoGenerateColumns="False" CanUserDeleteRows="False" RowHeaderWidth="0" PreviewKeyDown="effectDataGrid_PreviewKeyDown" CellEditEnding="effectDataGrid_CellEditEnding">
-                        
+                              EnableColumnVirtualization="True" SelectionMode="Extended" CanUserResizeRows="False" CanUserAddRows="False" 
+                              AutoGenerateColumns="False" CanUserDeleteRows="False" PreviewKeyDown="effectDataGrid_PreviewKeyDown" CellEditEnding="effectDataGrid_CellEditEnding"
+                              HeadersVisibility="Row" RowHeaderWidth="25" RowDetailsVisibilityMode="Collapsed" RowHeaderStyle="{DynamicResource ExpandableDataGridHeaderStyle}"
+                              SelectionUnit="FullRow">
                         <DataGrid.InputBindings>
                             <KeyBinding Key="Delete" Command="{Binding Effect_DeleteEffect_Command}"/>
                             <KeyBinding Key="N" Modifiers="Ctrl" Command="{Binding EffectOptions_AddEffect_Command}"/>
@@ -74,12 +114,12 @@
                             <DataGridTemplateColumn Header="ID" Width="Auto" MinWidth="90" SortMemberPath="IndexNum">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding IndexNum}"/>
+                                        <TextBlock Text="{Binding IndexNum}" TextAlignment="Left" Margin="5,0,0,0"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                                 <DataGridTemplateColumn.CellEditingTemplate>
                                     <DataTemplate>
-                                        <Controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=SelectedEffectID, UpdateSourceTrigger=LostFocus}" Minimum="0" Maximum="65535" TextAlignment="Left"/>
+                                        <Controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=SelectedEffectID, UpdateSourceTrigger=LostFocus}" Minimum="0" Maximum="65535" TextAlignment="Left" Margin="0,0,0,0"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellEditingTemplate>
                             </DataGridTemplateColumn>
