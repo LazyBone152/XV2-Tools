@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Controls;
+using Xv2CoreLib.AnimationFramework;
 using Xv2CoreLib.EAN;
-using Xv2CoreLib.ESK;
 using Xv2CoreLib.HslColor;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
@@ -184,7 +181,7 @@ namespace Xv2CoreLib.EMA
 
                 List<float> values = anim.GetValues();
 
-                bytes.AddRange(BitConverter.GetBytes(anim.EndFrame));
+                bytes.AddRange(BitConverter.GetBytes((ushort)anim.GetEndFrame()));
                 bytes.AddRange(BitConverter.GetBytes((ushort)anim.CommandCount));
                 bytes.AddRange(BitConverter.GetBytes((int)values.Count));
                 bytes.Add((byte)anim.EmaType);
@@ -388,7 +385,7 @@ namespace Xv2CoreLib.EMA
 
             EAN_File ean = new EAN_File();
             ean.Skeleton = Skeleton.Convert().Skeleton;
-            ean.Animations.AddRange(SerializedAnimation.Deserialize(SerializedAnimation.Serialize(copyEma.Animations, ean.Skeleton), ean.Skeleton));
+            ean.Animations.AddRange(SerializedAnimation.DeserializeToEan(SerializedAnimation.Serialize(copyEma.Animations, ean.Skeleton), ean.Skeleton));
 
             return ean;
         }
@@ -404,7 +401,9 @@ namespace Xv2CoreLib.EMA
                 {
                     foreach (EMA_Command command in node.Commands)
                     {
-                        for (int i = 0; i < animation.EndFrame; i++)
+                        int endFrame = animation.GetEndFrame();
+
+                        for (int i = 0; i < endFrame; i++)
                         {
                             EMA_Keyframe keyframe = command.Keyframes.FirstOrDefault(x => x.Time == i);
                             if (keyframe == null) continue;
@@ -556,9 +555,6 @@ namespace Xv2CoreLib.EMA
         [YAXSerializeAs("Name")]
         public string Name { get; set; }
         [YAXAttributeForClass]
-        [YAXSerializeAs("EndFrame")]
-        public ushort EndFrame { get; set; }
-        [YAXAttributeForClass]
         [YAXSerializeAs("Type")]
         public EmaAnimationType EmaType { get; set; }
         [YAXAttributeForClass]
@@ -575,7 +571,7 @@ namespace Xv2CoreLib.EMA
         {
             EMA_Animation animation = new EMA_Animation();
             animation.Index = index;
-            animation.EndFrame = BitConverter.ToUInt16(rawBytes, offset + 0);
+            //animation.EndFrame = BitConverter.ToUInt16(rawBytes, offset + 0);
             animation.EmaType = (EmaAnimationType)rawBytes[offset + 8];
             animation.LightUnknown = rawBytes[offset + 9];
             animation.FloatPrecision = (ValueType)BitConverter.ToUInt16(rawBytes, offset + 10);
@@ -768,6 +764,7 @@ namespace Xv2CoreLib.EMA
             //MatCol = 4 (x,y,z,w), TexScrl = 2 (u,v)
             //int numComponents = parameter > 3 ? 2 : 4;
             int numComponents = 3; //Hardcode to 3 components for RGB.
+            int endFrame = GetEndFrame();
 
             foreach (EMA_Node node in Nodes)
             {
@@ -793,7 +790,7 @@ namespace Xv2CoreLib.EMA
                     {
                         components[i] = EMA_Command.GetNew(parameter, i, EmaAnimationType.mat);
                         components[i].Keyframes.Add(new EMA_Keyframe(0, defaultValues[i]));
-                        components[i].Keyframes.Add(new EMA_Keyframe(EndFrame, defaultValues[i]));
+                        components[i].Keyframes.Add(new EMA_Keyframe(endFrame, defaultValues[i]));
                         AddCommand(node.BoneName, components[i], undos);
                     }
                 }
@@ -828,6 +825,8 @@ namespace Xv2CoreLib.EMA
             EMA_Command g_command = GetCommand(EMA_Command.PARAMETER_COLOR, EMA_Command.COMPONENT_G);
             EMA_Command b_command = GetCommand(EMA_Command.PARAMETER_COLOR, EMA_Command.COMPONENT_B);
 
+            int endFrame = GetEndFrame();
+
             //There is atleast one color component on this animation
             if (r_command != null || g_command != null || b_command != null)
             {
@@ -837,7 +836,7 @@ namespace Xv2CoreLib.EMA
                     EMA_Command newCommand = EMA_Command.GetNewLight();
                     newCommand.Component = EMA_Command.COMPONENT_R;
                     newCommand.Keyframes.Add(new EMA_Keyframe() { Time = 0, Value = 0 }); //First keyframe
-                    newCommand.Keyframes.Add(new EMA_Keyframe() { Time = EndFrame, Value = 0 }); //Last keyframe
+                    newCommand.Keyframes.Add(new EMA_Keyframe() { Time = (ushort)endFrame, Value = 0 }); //Last keyframe
                     AddCommand(null, newCommand, undos);
                 }
 
@@ -846,7 +845,7 @@ namespace Xv2CoreLib.EMA
                     EMA_Command newCommand = EMA_Command.GetNewLight();
                     newCommand.Component = EMA_Command.COMPONENT_G;
                     newCommand.Keyframes.Add(new EMA_Keyframe() { Time = 0, Value = 0 }); //First keyframe
-                    newCommand.Keyframes.Add(new EMA_Keyframe() { Time = EndFrame, Value = 0 }); //Last keyframe
+                    newCommand.Keyframes.Add(new EMA_Keyframe() { Time = (ushort)endFrame, Value = 0 }); //Last keyframe
                     AddCommand(null, newCommand, undos);
                 }
 
@@ -855,7 +854,7 @@ namespace Xv2CoreLib.EMA
                     EMA_Command newCommand = EMA_Command.GetNewLight();
                     newCommand.Component = EMA_Command.COMPONENT_B;
                     newCommand.Keyframes.Add(new EMA_Keyframe() { Time = 0, Value = 0 }); //First keyframe
-                    newCommand.Keyframes.Add(new EMA_Keyframe() { Time = EndFrame, Value = 0 }); //Last keyframe
+                    newCommand.Keyframes.Add(new EMA_Keyframe() { Time = (ushort)endFrame, Value = 0 }); //Last keyframe
                     AddCommand(null, newCommand, undos);
                 }
 
@@ -1044,6 +1043,24 @@ namespace Xv2CoreLib.EMA
                 undos?.Add(new UndoableListAdd<EMA_Command>(node.Commands, command));
             }
         }
+
+        public int GetEndFrame()
+        {
+            int max = 0;
+
+            foreach(var node in Nodes)
+            {
+                foreach(var command in node.Commands)
+                {
+                    if (command.Keyframes.Count == 0) continue;
+
+                    if (command.Keyframes[command.Keyframes.Count - 1].Time > max)
+                        max = command.Keyframes[command.Keyframes.Count - 1].Time;
+                }
+            }
+
+            return max;
+        }
     }
 
     [Serializable]
@@ -1197,10 +1214,16 @@ namespace Xv2CoreLib.EMA
             EMA_Command zCommand = GetCommand(parameter, 2, true, undos);
             EMA_Command wCommand = GetCommand(parameter, 3, true, undos);
 
-            xCommand.AddKeyframe(time, x, undos);
-            yCommand.AddKeyframe(time, y, undos);
-            zCommand.AddKeyframe(time, z, undos);
-            wCommand.AddKeyframe(time, w, undos);
+            xCommand.AddKeyframe(time, x, undos: undos);
+            yCommand.AddKeyframe(time, y, undos: undos);
+            zCommand.AddKeyframe(time, z, undos: undos);
+            wCommand.AddKeyframe(time, w, undos: undos);
+        }
+
+        public void AddKeyframe(int parameter, int component, int time, float value, float cp1, float cp2, KeyframeInterpolation interpolation, List<IUndoRedo> undos = null)
+        {
+            EMA_Command command = GetCommand(parameter, component, true, undos);
+            command.AddKeyframe(time, value, cp1, cp2, interpolation, undos);
         }
 
         public void RemoveCollisions(int startFrame, int endFrame, List<IUndoRedo> undos = null)
@@ -1948,22 +1971,33 @@ namespace Xv2CoreLib.EMA
         #endregion
 
         #region KeyframeManipulation
-        public void AddKeyframe(int frame, float value, List<IUndoRedo> undos = null)
+        public void AddKeyframe(int frame, float value, float cp1 = 0f, float cp2 = 0f, KeyframeInterpolation interpolation = KeyframeInterpolation.Linear, List<IUndoRedo> undos = null)
         {
             EMA_Keyframe keyframe = Keyframes.FirstOrDefault(x => x.Time == frame);
 
             if(keyframe != null)
             {
                 if (undos != null)
+                {
                     undos.Add(new UndoablePropertyGeneric(nameof(keyframe.Value), keyframe, keyframe.Value, value));
+                    undos.Add(new UndoablePropertyGeneric(nameof(keyframe.ControlPoint1), keyframe, keyframe.ControlPoint1, cp1));
+                    undos.Add(new UndoablePropertyGeneric(nameof(keyframe.ControlPoint2), keyframe, keyframe.ControlPoint2, cp2));
+                    undos.Add(new UndoablePropertyGeneric(nameof(keyframe.InterpolationType), keyframe, keyframe.InterpolationType, interpolation));
+                }
 
                 keyframe.Value = value;
+                keyframe.ControlPoint1 = cp1;
+                keyframe.ControlPoint2 = cp2;
+                keyframe.InterpolationType = interpolation;
             }
             else
             {
                 keyframe = new EMA_Keyframe();
                 keyframe.Value = value;
                 keyframe.Time = (ushort)frame;
+                keyframe.ControlPoint1 = cp1;
+                keyframe.ControlPoint2 = cp2;
+                keyframe.InterpolationType = interpolation;
 
                 if(undos != null)
                     undos.Add(new UndoableListAdd<EMA_Keyframe>(Keyframes, keyframe));

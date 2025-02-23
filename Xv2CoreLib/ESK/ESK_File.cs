@@ -5,6 +5,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using Xv2CoreLib.EAN;
+using Xv2CoreLib.EMA;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
 using YAXLib;
@@ -112,7 +113,12 @@ namespace Xv2CoreLib.ESK
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Bone")]
         [YAXDontSerializeIfNull]
         public AsyncObservableCollection<ESK_Bone> ESKBones { get; set; } = new AsyncObservableCollection<ESK_Bone>();
+        [YAXDontSerializeIfNull]
         public ESK_Unk1 Unk1 { get; set; }
+
+        [YAXCollection(YAXCollectionSerializationTypes.Recursive, EachElementName = "IKRelation")]
+        [YAXDontSerializeIfNull]
+        public List<IKRelation> IKRelations { get; set; }
 
         //Non-hierarchy list - Save it here for better performance when using GetBone. (mostly for XenoKit, since it needs to use this method several dozen times each frame)
         private List<ESK_Bone> _nonRecursiveBones = null;
@@ -157,7 +163,7 @@ namespace Xv2CoreLib.ESK
                     bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].Index1));
                     bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].Index2));
                     bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].Index3));
-                    bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].Index4));
+                    bytes.AddRange(BitConverter.GetBytes(NonRecursiveBones[i].IKFlag));
                 }
 
                 //Writing Name Table and List
@@ -229,9 +235,19 @@ namespace Xv2CoreLib.ESK
                     }
                 }
 
-                //Writing Unk1
-                if (Unk1 != null)
+                //Writing IK
+                if(IKRelations?.Count > 0)
                 {
+                    bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - startOffset), startOffset + 20);
+
+                    //IK Header; count of IK relations
+                    bytes.AddRange(BitConverter.GetBytes(IKRelations.Count));
+
+                    IKRelation.WriteAll(bytes, IKRelations, NonRecursiveBones);
+                }
+                else if (Unk1 != null)
+                {
+                    //Alternative path for XMLs with the old "Unk1" section instead of IKRelations
                     bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - startOffset), startOffset + 20);
                     bytes.AddRange(BitConverter.GetBytes(Unk1.I_00));
                     bytes.AddRange(BitConverter.GetBytes(Unk1.I_04));
@@ -288,7 +304,7 @@ namespace Xv2CoreLib.ESK
         public static ESK_Skeleton Read(byte[] rawBytes, int offset, bool loadAbsTransform)
         {
             //Init
-            int ikOffset = BitConverter.ToInt32(rawBytes, offset + 20) + offset; //Unk1
+            int ikOffset = BitConverter.ToInt32(rawBytes, offset + 20); //Unk1
             int boneExtraInfoOffset = BitConverter.ToInt32(rawBytes, offset + 24) + offset; //Unk2
 
             //Skeleton init
@@ -296,7 +312,7 @@ namespace Xv2CoreLib.ESK
             {
                 I_02 = BitConverter.ToInt16(rawBytes, offset + 2),
                 SkeletonID = BitConverter.ToUInt64(rawBytes, offset + 28),
-                Unk1 = ikOffset > offset ? ESK_Unk1.Read(rawBytes, ikOffset) : null,
+                //Unk1 = ikOffset > offset ? ESK_Unk1.Read(rawBytes, ikOffset) : null,
                 UseExtraValues = boneExtraInfoOffset - offset != 0
             };
 
@@ -361,6 +377,18 @@ namespace Xv2CoreLib.ESK
                 skeleton.NonRecursiveBones[i].ExtraValue_2 = BitConverter.ToUInt16(rawBytes, boneExtraInfoOffset + 2);
                 skeleton.NonRecursiveBones[i].ExtraValue_3 = BitConverter.ToUInt16(rawBytes, boneExtraInfoOffset + 4);
                 skeleton.NonRecursiveBones[i].ExtraValue_4 = BitConverter.ToUInt16(rawBytes, boneExtraInfoOffset + 6);
+            }
+
+            //Read IK relations
+            if (ikOffset > 0)
+            {
+                ikOffset += offset;
+
+                int ikCount = BitConverter.ToInt32(rawBytes, ikOffset);
+                ikOffset += 4;
+
+                skeleton.IKRelations = IKRelation.ReadAll(rawBytes, ikOffset, ikCount, skeleton.NonRecursiveBones);
+
             }
 
             return skeleton;
@@ -524,6 +552,21 @@ namespace Xv2CoreLib.ESK
                     return NonRecursiveBones[i];
 
             return null;
+        }
+
+        public ESK_Bone GetBone(int boneIndex, bool checkID)
+        {
+            if (checkID)
+            {
+                return NonRecursiveBones.FirstOrDefault(x => x.Index == boneIndex);
+            }
+            else
+            {
+                if (boneIndex < 0 || boneIndex >= NonRecursiveBones.Count)
+                    throw new ArgumentOutOfRangeException("ESK_Skeleton.GetBone: Index out of range");
+
+                return NonRecursiveBones[boneIndex];
+            }
         }
 
         public string NameOf(int index)
@@ -788,6 +831,7 @@ namespace Xv2CoreLib.ESK
             {
                 I_02 = I_02,
                 SkeletonID = SkeletonID,
+                IKRelations = IKRelation.CloneAll(IKRelations),
                 Unk1 = Unk1,
                 UseExtraValues = UseExtraValues,
                 ESKBones = bones
@@ -814,7 +858,7 @@ namespace Xv2CoreLib.ESK
 
     [YAXSerializeAs("Bone")]
     [Serializable]
-    public class ESK_Bone : INotifyPropertyChanged
+    public class ESK_Bone : INotifyPropertyChanged, IName
     {
         #region NotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
@@ -853,7 +897,7 @@ namespace Xv2CoreLib.ESK
         public short Index { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("UnkIndex")]
-        public short Index4 { get; set; }
+        public short IKFlag { get; set; }
 
         //Transforms
         public ESK_RelativeTransform RelativeTransform { get; set; }
@@ -904,7 +948,7 @@ namespace Xv2CoreLib.ESK
             return new ESK_Bone()
             {
                 Name = (string)Name.Clone(),
-                Index4 = Index4,
+                IKFlag = IKFlag,
                 RelativeTransform = RelativeTransform.Clone(),
                 AbsoluteTransform = AbsoluteTransform?.Clone(),
                 ESK_Bones = CloneChildrenRecursive(ESK_Bones),
@@ -940,7 +984,7 @@ namespace Xv2CoreLib.ESK
 
             return new ESK_Bone()
             {
-                Index4 = BitConverter.ToInt16(bytes, boneIndexOffset + 6),
+                IKFlag = BitConverter.ToInt16(bytes, boneIndexOffset + 6),
                 Index = (short)idx,
                 Name = StringEx.GetString(bytes, nameOffset, false),
                 RelativeTransform = ESK_RelativeTransform.Read(bytes, skinningMatrixOffset),
@@ -1045,6 +1089,24 @@ namespace Xv2CoreLib.ESK
         [YAXFormat("0.0##########")]
         public float ScaleW { get; set; }
 
+        public ESK_RelativeTransform() { }
+
+        public ESK_RelativeTransform(Vector3 pos, float posW, Quaternion rot, Vector3 scale)
+        {
+            PositionX = pos.X;
+            PositionY = pos.Y;
+            PositionZ = pos.Z;
+            PositionW = posW;
+            RotationX = rot.X;
+            RotationY = rot.Y;
+            RotationZ = rot.Z;
+            RotationW = rot.W;
+            ScaleX = scale.X;
+            ScaleY = scale.Y;
+            ScaleZ = scale.Z;
+            ScaleW = 1f;
+        }
+
         public ESK_RelativeTransform Clone()
         {
             return new ESK_RelativeTransform()
@@ -1085,8 +1147,31 @@ namespace Xv2CoreLib.ESK
             };
         }
 
+        public void SetAsIdentity()
+        {
+            PositionX = PositionY = PositionZ = 0;
+            PositionW = 1f;
+            RotationX = RotationY = RotationY = 0;
+            RotationW = 1f;
+            ScaleX = ScaleY = ScaleZ = ScaleW = 1f;
+        }
 
         #region Convert
+        public Vector3 PositionToVector3()
+        {
+            return new Vector3(PositionX, PositionY, PositionZ) * PositionW;
+        }
+
+        public Vector3 ScaleToVector3()
+        {
+            return new Vector3(ScaleX, ScaleY, ScaleZ) * ScaleW;
+        }
+
+        public Quaternion RotationToQuaternion()
+        {
+            return new Quaternion(RotationX, RotationY, RotationZ, RotationW);
+        }
+
         public Matrix4x4 ToMatrix()
         {
             Matrix4x4 matrix = Matrix4x4.Identity;
@@ -1380,7 +1465,5 @@ namespace Xv2CoreLib.ESK
         }
 
     }
-
-
 
 }

@@ -9,6 +9,8 @@ using Xv2CoreLib.Resource;
 using System.Numerics;
 using Xv2CoreLib.ESK;
 using Xv2CoreLib.EMA;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace Xv2CoreLib.EAN
 {
@@ -31,7 +33,7 @@ namespace Xv2CoreLib.EAN
         [YAXAttributeForClass]
         public int I_08 { get; set; }
         [YAXAttributeForClass]
-        public byte I_17 { get; set; }
+        public byte I_17 { get; set; } = 4;
 
         /// <summary>
         /// If the EAN is unique to a specific character (either a character EAN file, or a skill EAN with a chara suffix).
@@ -56,11 +58,13 @@ namespace Xv2CoreLib.EAN
 
         public void Save(string path)
         {
-            if (!Directory.Exists(Path.GetDirectoryName(path)))
+            string dirname = Path.GetDirectoryName(path);
+            if (!Directory.Exists(dirname) && !string.IsNullOrWhiteSpace(dirname))
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
             }
-            new Deserializer(this.Copy(), path);
+
+            new Deserializer(Clone(), path);
         }
 
         public byte[] SaveToBytes()
@@ -353,7 +357,7 @@ namespace Xv2CoreLib.EAN
         #region Helper
         public EAN_File Clone()
         {
-            AsyncObservableCollection<EAN_Animation> anims = AsyncObservableCollection<EAN_Animation>.Create();
+            AsyncObservableCollection<EAN_Animation> anims = new AsyncObservableCollection<EAN_Animation>();
             foreach (var a in Animations)
             {
                 anims.Add(a.Clone());
@@ -1048,11 +1052,6 @@ namespace Xv2CoreLib.EAN
         }
 
         #endregion
-
-        private static float CalculateBlendFactor(float blendFactor, float blendStep, int startFrame, int currentFrame)
-        {
-            return MathHelpers.Clamp(0f, 1f, blendFactor * (blendStep * (currentFrame - startFrame)));
-        }
     }
 
     [YAXSerializeAs("AnimationNode")]
@@ -1095,6 +1094,12 @@ namespace Xv2CoreLib.EAN
                 var scale = GetComponent(EAN_AnimationComponent.ComponentType.Scale, true, undos, BoneName == CAM_NODE);
                 scale.AddKeyframe(frame, scaleX, scaleY, scaleZ, scaleW, undos);
             }
+        }
+
+        public void AddKeyframe(int frame, EAN_AnimationComponent.ComponentType type, float x, float y, float z, float w, List<IUndoRedo> undos = null)
+        {
+            var pos = GetComponent(type, true, undos, BoneName == CAM_NODE);
+            pos.AddKeyframe(frame, x, y, z, w, undos);
         }
 
         public void RemoveKeyframe(int keyframe, List<IUndoRedo> undos = null, bool removePos = true, bool removeRot = true, bool removeScale = true)
@@ -1375,7 +1380,7 @@ namespace Xv2CoreLib.EAN
             {
                 component = new EAN_AnimationComponent(_type, isCamera, EskRelativeTransform);
                 component.EskRelativeTransform = EskRelativeTransform;
-                undos.Add(new UndoableListAdd<EAN_AnimationComponent>(AnimationComponents, component));
+                undos?.Add(new UndoableListAdd<EAN_AnimationComponent>(AnimationComponents, component));
                 AnimationComponents.Add(component);
             }
 
@@ -1455,24 +1460,29 @@ namespace Xv2CoreLib.EAN
 
             if (pos != null && usePos)
             {
-                values[0] = pos.GetKeyframeValue(frame, Axis.X);
-                values[1] = pos.GetKeyframeValue(frame, Axis.Y);
-                values[2] = pos.GetKeyframeValue(frame, Axis.Z);
-                values[3] = pos.GetKeyframeValue(frame, Axis.W);
+                EAN_Keyframe posKeyframe = pos.GetKeyframe(frame);
+                values[0] = posKeyframe.X;
+                values[1] = posKeyframe.Y;
+                values[2] = posKeyframe.Z;
+                values[3] = posKeyframe.W;
             }
             if (rot != null && useRot)
             {
-                values[4] = rot.GetKeyframeValue(frame, Axis.X);
-                values[5] = rot.GetKeyframeValue(frame, Axis.Y);
-                values[6] = rot.GetKeyframeValue(frame, Axis.Z);
-                values[7] = rot.GetKeyframeValue(frame, Axis.W);
+                EAN_Keyframe rotKeyframe = rot.GetKeyframe(frame);
+
+                values[4] = rotKeyframe.X;
+                values[5] = rotKeyframe.Y;
+                values[6] = rotKeyframe.Z;
+                values[7] = rotKeyframe.W;
             }
             if (scale != null && useScale)
             {
-                values[8] = scale.GetKeyframeValue(frame, Axis.X);
-                values[9] = scale.GetKeyframeValue(frame, Axis.Y);
-                values[10] = scale.GetKeyframeValue(frame, Axis.Z);
-                values[11] = scale.GetKeyframeValue(frame, Axis.W);
+                EAN_Keyframe scaleKeyframe = scale.GetKeyframe(frame);
+
+                values[8] = scaleKeyframe.X;
+                values[9] = scaleKeyframe.Y;
+                values[10] = scaleKeyframe.Z;
+                values[11] = scaleKeyframe.W;
             }
 
             return values;
@@ -1532,7 +1542,7 @@ namespace Xv2CoreLib.EAN
 
         public EAN_Node Clone()
         {
-            AsyncObservableCollection<EAN_AnimationComponent> _AnimationComponent = AsyncObservableCollection<EAN_AnimationComponent>.Create();
+            AsyncObservableCollection<EAN_AnimationComponent> _AnimationComponent = new AsyncObservableCollection<EAN_AnimationComponent>();
             for (int i = 0; i < AnimationComponents.Count; i++)
             {
                 _AnimationComponent.Add(AnimationComponents[i].Clone());
@@ -1669,7 +1679,7 @@ namespace Xv2CoreLib.EAN
         public short I_02 { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Keyframe")]
-        public AsyncObservableCollection<EAN_Keyframe> Keyframes { get; set; } = AsyncObservableCollection<EAN_Keyframe>.Create();
+        public AsyncObservableCollection<EAN_Keyframe> Keyframes { get; set; } = new AsyncObservableCollection<EAN_Keyframe>();
 
         public EAN_AnimationComponent() { }
 
@@ -1992,12 +2002,15 @@ namespace Xv2CoreLib.EAN
 
         public EAN_Keyframe GetKeyframe(int frame)
         {
+            return Keyframes.FirstOrDefault(x => x.FrameIndex == frame);
+            /*
             foreach (var keyframe in Keyframes)
             {
                 if (keyframe.FrameIndex == frame) return keyframe;
             }
 
             return null;
+            */
         }
 
         private EAN_Keyframe GetDefaultKeyframe(int frame = 0)
@@ -2595,45 +2608,53 @@ namespace Xv2CoreLib.EAN
 
         public static List<SerializedAnimation> Serialize(IList<EMA_Animation> animations, ESK_Skeleton bindPose)
         {
-            List<SerializedAnimation> serializedAnims = new List<SerializedAnimation>();
+            ConcurrentBag<SerializedAnimation> serializedAnims = new ConcurrentBag<SerializedAnimation>();
 
-            foreach (var animation in animations)
+            Parallel.ForEach(animations, animation =>
+            {
                 serializedAnims.Add(new SerializedAnimation(animation, bindPose));
+            });
 
-            return serializedAnims;
+            return serializedAnims.ToList();
         }
 
         public static List<SerializedAnimation> Serialize(IList<EAN_Animation> animations, ESK_Skeleton bindPose)
         {
-            List<SerializedAnimation> serializedAnims = new List<SerializedAnimation>();
+            ConcurrentBag<SerializedAnimation> serializedAnims = new ConcurrentBag<SerializedAnimation>();
 
-            foreach (var animation in animations)
+            Parallel.ForEach(animations, animation =>
+            {
                 serializedAnims.Add(new SerializedAnimation(animation, bindPose));
+            });
 
-            return serializedAnims;
+            return serializedAnims.ToList();
         }
 
-        public static List<EAN_Animation> Deserialize(IList<SerializedAnimation> serialziedAnimations, ESK_Skeleton bindPose)
+        public static List<EAN_Animation> DeserializeToEan(IList<SerializedAnimation> serialziedAnimations, ESK_Skeleton bindPose)
         {
-            List<EAN_Animation> animations = new List<EAN_Animation>();
+            ConcurrentBag<EAN_Animation> animations = new ConcurrentBag<EAN_Animation>();
 
-            foreach (var animation in serialziedAnimations)
-                animations.Add(animation.Deserialize(bindPose));
+            Parallel.ForEach(serialziedAnimations, animation =>
+            {
+                animations.Add(animation.DeserializeToEan(bindPose));
+            });
 
-            return animations;
+            return animations.ToList();
         }
 
         public static List<EMA_Animation> DeserializeToEma(IList<SerializedAnimation> serialziedAnimations)
         {
-            List<EMA_Animation> animations = new List<EMA_Animation>();
+            ConcurrentBag<EMA_Animation> animations = new ConcurrentBag<EMA_Animation>();
 
-            foreach (var animation in serialziedAnimations)
+            Parallel.ForEach(serialziedAnimations, animation =>
+            {
                 animations.Add(animation.DeserializeToEma());
+            });
 
-            return animations;
+            return animations.ToList();
         }
 
-        public EAN_Animation Deserialize(ESK_Skeleton bindPose)
+        public EAN_Animation DeserializeToEan(ESK_Skeleton bindPose)
         {
             if (isDeserialized)
                 throw new InvalidOperationException($"SerializedAnimation.Deserialize: This animation has already been deserialized!");
@@ -2716,7 +2737,7 @@ namespace Xv2CoreLib.EAN
             HasScale = scale && node.HasComponent(EAN_AnimationComponent.ComponentType.Scale);
 
             for (int i = 0; i < keyframes.Count; i++)
-                Keyframes[i] = new SerializedKeyframe(keyframes[i], node.GetKeyframeValues(keyframes[i], pos, rot, scale));
+                Keyframes[i] = new SerializedKeyframe(keyframes[i], node.GetKeyframeValues(keyframes[i], HasPos, HasRot, HasScale));
         }
 
         public SerializedBone(EAN_Node node, List<int> frames, bool usePos, bool useRot, bool useScale, bool isCamera)

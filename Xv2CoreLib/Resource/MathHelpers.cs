@@ -126,6 +126,15 @@ namespace Xv2CoreLib.Resource
             return new Vector3(roll, pitch, yaw) * (180f / PI); // Convert to degrees
         }
 
+        public static Vector3 ExtractScaleFromMatrix(Matrix4x4 matrix)
+        {
+            return new Vector3(
+                new Vector3(matrix.M11, matrix.M12, matrix.M13).Length(),  //X scale
+                new Vector3(matrix.M21, matrix.M22, matrix.M23).Length(),  //Y scale
+                new Vector3(matrix.M31, matrix.M32, matrix.M33).Length()   //Z scale
+            );
+        }
+
         //Unused, testing;
         public static Quaternion AxisAngleToQuaternion(Vector3 axis, float angleDegrees)
         {

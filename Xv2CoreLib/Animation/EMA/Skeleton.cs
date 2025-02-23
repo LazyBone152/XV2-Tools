@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 using System.Text;
+using Xv2CoreLib.Resource;
 using YAXLib;
 
 namespace Xv2CoreLib.EMA
@@ -12,9 +15,6 @@ namespace Xv2CoreLib.EMA
     [Serializable]
     public class Skeleton
     {
-        [YAXAttributeFor("I_06")]
-        [YAXSerializeAs("value")]
-        public ushort I_06 { get; set; }
         [YAXAttributeFor("I_36")]
         [YAXSerializeAs("value")]
         public int I_36 { get; set; }
@@ -30,21 +30,19 @@ namespace Xv2CoreLib.EMA
         [YAXAttributeFor("I_52")]
         [YAXSerializeAs("value")]
         public ushort I_52 { get; set; }
-        [YAXAttributeFor("I_54")]
-        [YAXSerializeAs("value")]
-        public ushort I_54 { get; set; }
-        [YAXAttributeFor("SkeletonID")]
-        [YAXSerializeAs("value")]
-        public ulong SkeletonID { get; set; }
+        [YAXAttributeForClass]
+        public ushort Flag { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("UseExtraValues")]
         public bool UseExtraValues { get; set; }
+        [YAXAttributeForClass]
+        public ulong SkeletonID { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Bone")]
         public List<Bone> Bones { get; set; } = new List<Bone>();
 
         [YAXDontSerializeIfNull]
-        public List<IKEntry> IKEntries { get; set; }
+        public List<IKRelation> IKRelations { get; set; }
 
         #region LoadSave
         public static Skeleton Parse(byte[] rawBytes, int skeletonOffset)
@@ -58,22 +56,28 @@ namespace Xv2CoreLib.EMA
             }
 
             //Header
-            skeleton.I_06 = BitConverter.ToUInt16(rawBytes, skeletonOffset + 6);
             skeleton.I_36 = BitConverter.ToInt32(rawBytes, skeletonOffset + 36);
             skeleton.I_40 = BitConverter.ToInt32(rawBytes, skeletonOffset + 40);
             skeleton.I_44 = BitConverter.ToInt32(rawBytes, skeletonOffset + 44);
             skeleton.I_48 = BitConverter.ToInt32(rawBytes, skeletonOffset + 48);
             skeleton.I_52 = BitConverter.ToUInt16(rawBytes, skeletonOffset + 52);
-            skeleton.I_54 = BitConverter.ToUInt16(rawBytes, skeletonOffset + 54);
+            skeleton.Flag = BitConverter.ToUInt16(rawBytes, skeletonOffset + 54);
             skeleton.SkeletonID = BitConverter.ToUInt64(rawBytes, skeletonOffset + 56);
 
             int boneCount = BitConverter.ToUInt16(rawBytes, skeletonOffset + 0);
-            int ikCount = BitConverter.ToUInt16(rawBytes, skeletonOffset + 4);
+            int ikCount2 = BitConverter.ToUInt16(rawBytes, skeletonOffset + 2);
+            int ikCount = BitConverter.ToInt32(rawBytes, skeletonOffset + 4);
             int boneOffset = BitConverter.ToInt32(rawBytes, skeletonOffset + 8);
             int namesOffset = BitConverter.ToInt32(rawBytes, skeletonOffset + 12);
             int extraValuesOffset = BitConverter.ToInt32(rawBytes, skeletonOffset + 24);
             int absMatrixDataOffset = BitConverter.ToInt32(rawBytes, skeletonOffset + 28);
             int ikOffset = BitConverter.ToInt32(rawBytes, skeletonOffset + 32);
+
+            if(ikCount2 > 0)
+            {
+                Console.WriteLine("WARNING: This ema has ik2 data which is not supported. It will be skipped.");
+                Console.ReadLine();
+            }
 
             skeleton.UseExtraValues = extraValuesOffset > 0;
 
@@ -100,13 +104,7 @@ namespace Xv2CoreLib.EMA
 
             if (ikCount > 0)
             {
-                //if (ikCount > 1) throw new Exception("ikCount > 1. Load failed.");
-                skeleton.IKEntries = new List<IKEntry>();
-
-                for (int i = 0; i < ikCount; i++)
-                {
-                    skeleton.IKEntries.Add(IKEntry.Read(rawBytes, ikOffset + skeletonOffset + (24 * i)));
-                }
+                skeleton.IKRelations = IKRelation.ReadAll(rawBytes, ikOffset + skeletonOffset, ikCount, skeleton.Bones);
             }
 
             return skeleton;
@@ -117,14 +115,13 @@ namespace Xv2CoreLib.EMA
             List<byte> bytes = new List<byte>();
 
             int boneCount = (Bones != null) ? Bones.Count : 0;
-            int ikCount = (IKEntries != null) ? IKEntries.Count : 0;
+            int ikCount = (IKRelations != null) ? IKRelations.Count : 0;
             bool useAbsMatrix = false;
 
             //Header
             bytes.AddRange(BitConverter.GetBytes((ushort)boneCount)); //Bone count (0)
             bytes.AddRange(BitConverter.GetBytes((ushort)0)); //IK2 count (2)
-            bytes.AddRange(BitConverter.GetBytes((ushort)ikCount));//IK count (4)
-            bytes.AddRange(BitConverter.GetBytes(I_06)); //(6)
+            bytes.AddRange(BitConverter.GetBytes(ikCount));//IK count (4)
             bytes.AddRange(new byte[4]);//Bone offset (8)
             bytes.AddRange(new byte[4]);//Names offset (12)
             bytes.AddRange(BitConverter.GetBytes(0)); //IK2 offset (16)
@@ -137,7 +134,7 @@ namespace Xv2CoreLib.EMA
             bytes.AddRange(BitConverter.GetBytes(I_44));
             bytes.AddRange(BitConverter.GetBytes(I_48));
             bytes.AddRange(BitConverter.GetBytes(I_52));
-            bytes.AddRange(BitConverter.GetBytes(I_54));
+            bytes.AddRange(BitConverter.GetBytes(Flag));
             bytes.AddRange(BitConverter.GetBytes(SkeletonID));
 
             //Bones
@@ -209,11 +206,7 @@ namespace Xv2CoreLib.EMA
             if (ikCount > 0)
             {
                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), 32);
-
-                for (int i = 0; i < ikCount; i++)
-                {
-                    bytes.AddRange(IKEntries[i].Write());
-                }
+                IKRelation.WriteAll(bytes, IKRelations, Bones);
             }
 
             return bytes;
@@ -223,6 +216,9 @@ namespace Xv2CoreLib.EMA
         {
             Skeleton skeleton = new Skeleton();
             skeleton.SkeletonID = eskSkeleton.SkeletonID;
+            skeleton.IKRelations = IKRelation.CloneAll(eskSkeleton.IKRelations);
+            skeleton.UseExtraValues = eskSkeleton.UseExtraValues;
+            skeleton.Flag = (ushort)eskSkeleton.I_02; //The "Flag" in ESK header. Not sure if this has a counterpart in EMO land, try putting it on this unused (?) value to preserve it when converting
 
             foreach (ESK.ESK_Bone bone in eskSkeleton.NonRecursiveBones)
             {
@@ -236,6 +232,9 @@ namespace Xv2CoreLib.EMA
         {
             ESK.ESK_Skeleton skeleton = new ESK.ESK_Skeleton();
             skeleton.SkeletonID = SkeletonID;
+            skeleton.IKRelations = IKRelation.CloneAll(IKRelations);
+            skeleton.UseExtraValues = UseExtraValues;
+            skeleton.I_02 = (short)Flag;
 
             foreach (Bone bone in Bones)
             {
@@ -263,7 +262,7 @@ namespace Xv2CoreLib.EMA
     }
 
     [Serializable]
-    public class Bone
+    public class Bone : IName
     {
         [YAXAttributeForClass]
         public string Name { get; set; }
@@ -287,12 +286,8 @@ namespace Xv2CoreLib.EMA
         [YAXAttributeFor("IK_Flag")]
         [YAXSerializeAs("value")]
         public ushort IKFlag { get; set; }
-        [YAXAttributeFor("I_12")]
-        [YAXSerializeAs("value")]
-        public ushort I_12 { get; set; }
-        [YAXAttributeFor("I_14")]
-        [YAXSerializeAs("value")]
-        public ushort I_14 { get; set; }
+        [CustomSerialize]
+        public float F_12 { get; set; }
 
         public SkeletonMatrix RelativeMatrix { get; set; }
         [YAXDontSerialize]
@@ -330,8 +325,7 @@ namespace Xv2CoreLib.EMA
             bone.EmoPartIndex = BitConverter.ToUInt16(rawBytes, offset + 6);
             bone.I_08 = BitConverter.ToUInt16(rawBytes, offset + 8);
             bone.IKFlag = BitConverter.ToUInt16(rawBytes, offset + 10);
-            bone.I_12 = BitConverter.ToUInt16(rawBytes, offset + 12);
-            bone.I_14 = BitConverter.ToUInt16(rawBytes, offset + 14);
+            bone.F_12 = BitConverter.ToSingle(rawBytes, offset + 12);
             bone.RelativeMatrix = SkeletonMatrix.Read(rawBytes, offset + 16);
             bone.EskRelativeTransform = bone.RelativeMatrix.ConvertToEskRelativeTransform();
 
@@ -361,8 +355,7 @@ namespace Xv2CoreLib.EMA
             bytes.AddRange(BitConverter.GetBytes(EmoPartIndex));
             bytes.AddRange(BitConverter.GetBytes(I_08));
             bytes.AddRange(BitConverter.GetBytes(IKFlag));
-            bytes.AddRange(BitConverter.GetBytes(I_12));
-            bytes.AddRange(BitConverter.GetBytes(I_14));
+            bytes.AddRange(BitConverter.GetBytes(F_12));
             bytes.AddRange(RelativeMatrix.Write());
 
             if (bytes.Count != 80) throw new InvalidDataException("EMA.Bone must be 80 bytes.");
@@ -377,6 +370,7 @@ namespace Xv2CoreLib.EMA
             bone.ParentIndex = (ushort)eskBone.Index1;
             bone.ChildIndex = (ushort)eskBone.Index2;
             bone.SiblingIndex = (ushort)eskBone.Index3;
+            bone.IKFlag = (ushort)eskBone.IKFlag;
             bone.ExtraValue_1 = eskBone.ExtraValue_1;
             bone.ExtraValue_2 = eskBone.ExtraValue_2;
             bone.ExtraValue_3 = eskBone.ExtraValue_3;
@@ -418,6 +412,7 @@ namespace Xv2CoreLib.EMA
             bone.Index1 = (short)ParentIndex;
             bone.Index2 = (short)ChildIndex;
             bone.Index3 = (short)SiblingIndex;
+            bone.IKFlag = (short)IKFlag;
             bone.ExtraValue_1 = ExtraValue_1;
             bone.ExtraValue_2 = ExtraValue_2;
             bone.ExtraValue_3 = ExtraValue_3;
@@ -440,69 +435,37 @@ namespace Xv2CoreLib.EMA
     [Serializable]
     public class SkeletonMatrix
     {
-        [YAXAttributeFor("Row1")]
-        [YAXSerializeAs("X")]
-        [YAXFormat("0.0##########")]
+        [CustomSerialize("Row1", "M11", IsFloat = true)]
         public float M11 { get; set; } = 1f;
-        [YAXAttributeFor("Row1")]
-        [YAXSerializeAs("Y")]
-        [YAXFormat("0.0##########")]
+        [CustomSerialize("Row1", "M12", IsFloat = true)]
         public float M12 { get; set; }
-        [YAXAttributeFor("Row1")]
-        [YAXSerializeAs("Z")]
-        [YAXFormat("0.0##########")]
+        [CustomSerialize("Row1", "M13", IsFloat = true)]
         public float M13 { get; set; }
-        [YAXAttributeFor("Row1")]
-        [YAXSerializeAs("W")]
-        [YAXFormat("0.0##########")]
+        [CustomSerialize("Row1", "M14", IsFloat = true)]
         public float M14 { get; set; }
-        [YAXAttributeFor("Row2")]
-        [YAXSerializeAs("X")]
-        [YAXFormat("0.0##########")]
+        [CustomSerialize("Row2", "M21", IsFloat = true)]
         public float M21 { get; set; }
-        [YAXAttributeFor("Row2")]
-        [YAXSerializeAs("Y")]
-        [YAXFormat("0.0##########")]
+        [CustomSerialize("Row2", "M22", IsFloat = true)]
         public float M22 { get; set; } = 1f;
-        [YAXAttributeFor("Row2")]
-        [YAXSerializeAs("Z")]
-        [YAXFormat("0.0##########")]
+        [CustomSerialize("Row2", "M23", IsFloat = true)]
         public float M23 { get; set; }
-        [YAXAttributeFor("Row2")]
-        [YAXSerializeAs("W")]
-        [YAXFormat("0.0##########")]
+        [CustomSerialize("Row2", "M24", IsFloat = true)]
         public float M24 { get; set; }
-        [YAXAttributeFor("Row3")]
-        [YAXSerializeAs("X")]
-        [YAXFormat("0.0##########")]
+        [CustomSerialize("Row3", "M31", IsFloat = true)]
         public float M31 { get; set; }
-        [YAXAttributeFor("Row3")]
-        [YAXSerializeAs("Y")]
-        [YAXFormat("0.0##########")]
+        [CustomSerialize("Row3", "M32", IsFloat = true)]
         public float M32 { get; set; }
-        [YAXAttributeFor("Row3")]
-        [YAXSerializeAs("Z")]
-        [YAXFormat("0.0##########")]
+        [CustomSerialize("Row3", "M33", IsFloat = true)]
         public float M33 { get; set; } = 1f;
-        [YAXAttributeFor("Row3")]
-        [YAXSerializeAs("W")]
-        [YAXFormat("0.0##########")]
+        [CustomSerialize("Row3", "M34", IsFloat = true)]
         public float M34 { get; set; }
-        [YAXAttributeFor("Row4")]
-        [YAXSerializeAs("X")]
-        [YAXFormat("0.0##########")]
+        [CustomSerialize("Row4", "M41", IsFloat = true)]
         public float M41 { get; set; }
-        [YAXAttributeFor("Row4")]
-        [YAXSerializeAs("Y")]
-        [YAXFormat("0.0##########")]
+        [CustomSerialize("Row4", "M42", IsFloat = true)]
         public float M42 { get; set; }
-        [YAXAttributeFor("Row4")]
-        [YAXSerializeAs("Z")]
-        [YAXFormat("0.0##########")]
+        [CustomSerialize("Row4", "M43", IsFloat = true)]
         public float M43 { get; set; }
-        [YAXAttributeFor("Row4")]
-        [YAXSerializeAs("W")]
-        [YAXFormat("0.0##########")]
+        [CustomSerialize("Row4", "M44", IsFloat = true)]
         public float M44 { get; set; } = 1f;
 
         public static SkeletonMatrix Read(byte[] rawBytes, int offset)
@@ -671,44 +634,50 @@ namespace Xv2CoreLib.EMA
             // No projection term
             matrix.M44 = relativeTransform.PositionW;                //m33 = pos.w
 
-            matrix.Transpose4x4();
-
-            return matrix;
+            return matrix.Transpose4x4();
         }
 
-        private void Transpose4x4()
+        public Matrix4x4 ToMatrix()
+        {
+            return new Matrix4x4(M11, M12, M13, M14, M21, M22, M23, M24, M31, M32, M33, M34, M41, M42, M43, M44);
+        }
+
+        private SkeletonMatrix Transpose4x4()
         {
             float m11 = M11, m12 = M12, m13 = M13, m14 = M14;
             float m21 = M21, m22 = M22, m23 = M23, m24 = M24;
             float m31 = M31, m32 = M32, m33 = M33, m34 = M34;
             float m41 = M41, m42 = M42, m43 = M43, m44 = M44;
 
-            M11 = m11;
-            M12 = m21;
-            M13 = m31;
-            M14 = m41;
+            SkeletonMatrix matrix = new SkeletonMatrix();
 
-            M21 = m12;
-            M22 = m22;
-            M23 = m32;
-            M24 = m42;
+            matrix.M11 = m11;
+            matrix.M12 = m21;
+            matrix.M13 = m31;
+            matrix.M14 = m41;
 
-            M31 = m13;
-            M32 = m23;
-            M33 = m33;
-            M34 = m43;
+            matrix.M21 = m12;
+            matrix.M22 = m22;
+            matrix.M23 = m32;
+            matrix.M24 = m42;
 
-            M41 = m14;
-            M42 = m24;
-            M43 = m34;
-            M44 = m44;
+            matrix.M31 = m13;
+            matrix.M32 = m23;
+            matrix.M33 = m33;
+            matrix.M34 = m43;
+
+            matrix.M41 = m14;
+            matrix.M42 = m24;
+            matrix.M43 = m34;
+            matrix.M44 = m44;
+
+            return matrix;
         }
 
         //EMO -> ESK
         public ESK.ESK_RelativeTransform ConvertToEskRelativeTransform()
         {
-            SkeletonMatrix transformMatrix = this.Copy();
-            transformMatrix.Transpose4x4();
+            SkeletonMatrix transformMatrix = Transpose4x4();
 
             double[] resultPosOrientScaleMatrix = new double[12];
 
@@ -719,21 +688,11 @@ namespace Xv2CoreLib.EMA
             double m31 = transformMatrix.M31, m32 = transformMatrix.M32, m33 = transformMatrix.M33, m34 = transformMatrix.M34;
             double m41 = transformMatrix.M41, m42 = transformMatrix.M42, m43 = transformMatrix.M43, m44 = transformMatrix.M44;
 
-            //if (!((Math.Abs(m41) <= 0.000001) && (Math.Abs(m42) <= 0.000001) && (Math.Abs(m43) <= 0.000001) && (Math.Abs(m44 - 1) <= 0.000001)))        //assert(isAffine());
-            //    return;
-
             //position
             resultPosOrientScaleMatrix[0] = transformMatrix.M14;
             resultPosOrientScaleMatrix[1] = transformMatrix.M24;
             resultPosOrientScaleMatrix[2] = transformMatrix.M34;
             resultPosOrientScaleMatrix[3] = transformMatrix.M44;
-
-
-            //Matrix3 matQ;
-            //Vector3 vecU;
-            //m3x3.QDUDecomposition(matQ, scale, vecU);
-
-
 
             // Factor M = QR = QDU where Q is orthogonal, D is diagonal,
             // and U is upper triangular with ones on its diagonal.  Algorithm uses
@@ -855,37 +814,10 @@ namespace Xv2CoreLib.EMA
             }
             else
             {
-                /*
-                // |w| <= 1/2
-                static size_t s_iNext[3] = { 1, 2, 0 };
-                size_t i = 0;
-                if (kQ_11 > kQ_00)
-                    i = 1;
-                if (kQ_22 > kQ_[i][i])
-                    i = 2;
-                size_t j = s_iNext[i];
-                size_t k = s_iNext[j];
-
-                fRoot = 1.0 / sqrt(kQ_[i][i] - kQ_[j][j] - kQ_[k][k] + 1.0f);
-                double* apkQuat[3] = { &x, &y, &z };
-                *apkQuat[i] = 0.5f*fRoot;
-                fRoot = 0.5f / fRoot;
-                resultPosOrientScaleMatrix[4] = (kQ_[k][j] - kQ_[j][k])*fRoot;		//w
-                *apkQuat[j] = (kQ_[j][i] + kQ_[i][j])*fRoot;
-                *apkQuat[k] = (kQ_[k][i] + kQ_[i][k])*fRoot;
-                */
-
-                // |w| <= 1/2
-                //static size_t s_iNext[3] = { 1, 2, 0 };
-
                 if (kQ_11 > kQ_00)
                 {
                     if (kQ_22 > kQ_11)
                     {
-                        //i = 2;
-                        //size_t j = 0;
-                        //size_t k = 1;
-
                         fRoot = Math.Sqrt(kQ_22 - kQ_00 - kQ_11 + 1.0);
 
                         resultPosOrientScaleMatrix[6] = 0.5f * fRoot;                   //z
@@ -896,10 +828,6 @@ namespace Xv2CoreLib.EMA
                     }
                     else
                     {
-                        //i = 1
-                        //size_t j = 2;
-                        //size_t k = 0;
-
                         fRoot = Math.Sqrt(kQ_11 - kQ_22 - kQ_00 + 1.0);
                         resultPosOrientScaleMatrix[5] = 0.5f * fRoot;                           //y
                         fRoot = 0.5f / fRoot;
@@ -914,10 +842,6 @@ namespace Xv2CoreLib.EMA
 
                     if (kQ_22 > kQ_00)
                     {
-                        //i = 2;
-                        //size_t j = 0;
-                        //size_t k = 1;
-
                         fRoot = Math.Sqrt(kQ_22 - kQ_00 - kQ_11 + 1.0);
 
                         resultPosOrientScaleMatrix[6] = 0.5f * fRoot;                   //z
@@ -928,10 +852,6 @@ namespace Xv2CoreLib.EMA
                     }
                     else
                     {
-                        //i = 0
-                        //size_t j = 1;
-                        //size_t k = 2;
-
                         fRoot = Math.Sqrt(kQ_00 - kQ_11 - kQ_22 + 1.0f);
 
                         resultPosOrientScaleMatrix[4] = 0.5f * fRoot;                   //x
@@ -987,79 +907,164 @@ namespace Xv2CoreLib.EMA
     }
 
     [Serializable]
-    public class IKEntry
+    public class IKRelation
     {
-        [YAXAttributeFor("I_00")]
-        [YAXSerializeAs("value")]
-        public ushort I_00 { get; set; }
-        [YAXAttributeFor("I_02")]
-        [YAXSerializeAs("value")]
-        public ushort I_02 { get; set; }
-        [YAXAttributeFor("I_04")]
-        [YAXSerializeAs("value")]
+        [YAXAttributeForClass]
         public byte I_04 { get; set; }
-        [YAXAttributeFor("I_05")]
-        [YAXSerializeAs("value")]
-        public byte I_05 { get; set; }
-        [YAXAttributeFor("I_06")]
-        [YAXSerializeAs("value")]
-        public ushort I_06 { get; set; }
-        [YAXAttributeFor("I_08")]
-        [YAXSerializeAs("value")]
-        public ushort I_08 { get; set; }
-        [YAXAttributeFor("I_10")]
-        [YAXSerializeAs("value")]
-        public ushort I_10 { get; set; }
-        [YAXAttributeFor("I_12")]
-        [YAXSerializeAs("value")]
-        public ushort I_12 { get; set; }
-        [YAXAttributeFor("I_14")]
-        [YAXSerializeAs("value")]
-        public ushort I_14 { get; set; }
-        [YAXAttributeFor("I_16")]
-        [YAXSerializeAs("value")]
-        public int I_16 { get; set; }
-        [YAXAttributeFor("I_20")]
-        [YAXSerializeAs("value")]
-        public int I_20 { get; set; }
 
-        public static IKEntry Read(byte[] rawBytes, int offset)
+
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "IKBone")]
+        public List<IKBone> IKBones { get; set; } = new List<IKBone>();
+
+        public static List<IKRelation> ReadAll<T>(byte[] bytes, int offset, int count, IList<T> bones) where T : IName
         {
-            IKEntry ikEntry = new IKEntry();
+            List<IKRelation> ikRelations = new List<IKRelation>();
 
-            ikEntry.I_00 = BitConverter.ToUInt16(rawBytes, offset + 0);
-            ikEntry.I_02 = BitConverter.ToUInt16(rawBytes, offset + 2);
-            ikEntry.I_04 = rawBytes[offset + 4];
-            ikEntry.I_05 = rawBytes[offset + 5];
-            ikEntry.I_06 = BitConverter.ToUInt16(rawBytes, offset + 6);
-            ikEntry.I_08 = BitConverter.ToUInt16(rawBytes, offset + 8);
-            ikEntry.I_10 = BitConverter.ToUInt16(rawBytes, offset + 10);
-            ikEntry.I_12 = BitConverter.ToUInt16(rawBytes, offset + 12);
-            ikEntry.I_14 = BitConverter.ToUInt16(rawBytes, offset + 14);
-            ikEntry.I_16 = BitConverter.ToInt32(rawBytes, offset + 16);
-            ikEntry.I_20 = BitConverter.ToInt32(rawBytes, offset + 20);
+            for(int i = 0; i < count; i++)
+            {
+                ikRelations.Add(Read(bytes, offset, bones, out int size));
+                offset += size;
+            }
 
-            return ikEntry;
+            return ikRelations;
         }
 
-        public List<byte> Write()
+        private static IKRelation Read<T>(byte[] bytes, int offset, IList<T> bones, out int size) where T : IName
         {
-            List<byte> bytes = new List<byte>();
+            IKRelation relation = new IKRelation();
 
-            bytes.AddRange(BitConverter.GetBytes(I_00));
-            bytes.AddRange(BitConverter.GetBytes(I_02));
+            ushort type = BitConverter.ToUInt16(bytes, offset);
+
+            if (type != 1)
+                throw new Exception($"IKRelation: unknown/unsupported type ({type}). Parse failed.");
+
+            size = BitConverter.ToUInt16(bytes, offset + 2);
+            relation.I_04 = bytes[offset + 4];
+            byte boneCount = bytes[offset + 5];
+
+            offset += 6;
+
+            ushort[] boneIndices = BitConverter_Ex.ToUInt16Array(bytes, offset, boneCount + 1);
+            offset += sizeof(ushort) * (boneCount + 1);
+            offset += Utils.CalculatePadding(offset, 4);
+            float[] weights = BitConverter_Ex.ToFloat32Array(bytes, offset, boneCount + 1);
+
+            for(int i = 0; i <= boneCount; i++)
+            {
+                if (boneIndices[i] < 0 || boneIndices[i] >= bones.Count)
+                    throw new ArgumentOutOfRangeException("IKRelation.Read: IK Bone is an invalid index.");
+
+                relation.IKBones.Add(new IKBone()
+                {
+                    Bone = bones[boneIndices[i]].Name,
+                    Weight = weights[i]
+                });
+            }
+
+            return relation;
+        }
+
+        public static void WriteAll<T>(List<byte> bytes, List<IKRelation> ikRelations, IList<T> bones) where T : IName
+        {
+            for(int i = 0; i < ikRelations.Count; i++)
+            {
+                bytes.AddRange(ikRelations[i].Write(bytes.Count, bones));
+            }
+        }
+
+        private byte[] Write<T>(int startOffset, IList<T> bones) where T : IName
+        {
+            int size = CalculateSize(startOffset);
+            int count = IKBones?.Count ?? 0;
+
+            if (count == 0)
+                throw new Exception("An IKRelation cannot have zero IKBones");
+
+            List<byte> bytes = new List<byte>(size);
+
+            bytes.AddRange(BitConverter.GetBytes((ushort)1)); //Default type value. Only type 1 is used in DBXV2, so no need to worry about any other value
+            bytes.AddRange(BitConverter.GetBytes((ushort)size));
             bytes.Add(I_04);
-            bytes.Add(I_05);
-            bytes.AddRange(BitConverter.GetBytes(I_06));
-            bytes.AddRange(BitConverter.GetBytes(I_08));
-            bytes.AddRange(BitConverter.GetBytes(I_10));
-            bytes.AddRange(BitConverter.GetBytes(I_12));
-            bytes.AddRange(BitConverter.GetBytes(I_14));
-            bytes.AddRange(BitConverter.GetBytes(I_16));
-            bytes.AddRange(BitConverter.GetBytes(I_20));
+            bytes.Add((byte)(count - 1));
 
-            return bytes;
+            for(int i = 0; i < count; i++)
+            {
+                int boneIdx = bones.IndexOf(bones.FirstOrDefault(x => x.Name == IKBones[i].Bone));
+                if (boneIdx == -1)
+                    throw new Exception($"IKRelation: cannot find referenced bone ({IKBones[i].Bone}) in the skeleton.");
+
+                bytes.AddRange(BitConverter.GetBytes((ushort)boneIdx));
+            }
+
+            bytes.AddRange(new byte[Utils.CalculatePadding(bytes.Count + startOffset, 4)]);
+
+            for (int i = 0; i < count; i++)
+            {
+                bytes.AddRange(BitConverter.GetBytes(IKBones[i].Weight));
+            }
+
+            if (bytes.Count != size)
+            throw new Exception("IKRelation: size mismatch");
+
+            return bytes.ToArray();
+        }
+
+        internal int CalculateSize(int startOffset)
+        {
+            int offset = startOffset;
+            offset += 4;
+            offset += 2; //unk and boneCount
+            offset += (IKBones.Count * 2);
+            offset += Utils.CalculatePadding(startOffset, 4);
+            offset += (IKBones.Count * 4);
+
+            return offset - startOffset;
+        }
+    
+        public static List<IKRelation> CloneAll(IList<IKRelation> relations)
+        {
+            List<IKRelation> newRelations = new List<IKRelation>();
+            if (relations == null) return newRelations;
+
+            foreach(var relation in relations)
+            {
+                newRelations.Add(relation.Clone());
+            }
+
+            return newRelations;
+        }
+
+        public IKRelation Clone()
+        {
+            IKRelation relation = new IKRelation();
+            relation.I_04 = I_04;
+            relation.IKBones = new List<IKBone>();
+
+            foreach(var bone in IKBones)
+            {
+                relation.IKBones.Add(bone.Clone());
+            }
+
+            return relation;
         }
     }
 
+    [Serializable]
+    public class IKBone
+    {
+        [YAXAttributeForClass]
+        public string Bone { get; set; }
+        [YAXAttributeForClass]
+        [YAXFormat("0.0#########")]
+        public float Weight { get; set; }
+
+        public IKBone Clone()
+        {
+            return new IKBone()
+            {
+                Bone = Bone,
+                Weight = Weight
+            };
+        }
+    }
 }

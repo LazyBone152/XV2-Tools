@@ -145,6 +145,8 @@
     <Compile Include="AIG\AIG_File.cs" />
     <Compile Include="AIT\AIT_File.cs" />
     <Compile Include="AMK\AMK_File.cs" />
+    <Compile Include="Animation\AnimationFramework\AnimationFile.cs" />
+    <Compile Include="Animation\AnimationFramework\Enums.cs" />
     <Compile Include="ATA\ATA_File.cs" />
     <Compile Include="AUR\AUR_File.cs" />
     <Compile Include="BAC\BAC_File.cs" />
@@ -179,6 +181,7 @@
     <Compile Include="BSA_XV1\BSA_File.cs" />
     <Compile Include="BSA_XV1\Deserializer.cs" />
     <Compile Include="BSA_XV1\Parser.cs" />
+    <Compile Include="Animation\AnimationFramework\Interfaces.cs" />
     <Compile Include="FMP\FMP_File.cs" />
     <Compile Include="IKD\IKD_File.cs" />
     <Compile Include="CML\CML_File.cs" />
@@ -204,9 +207,9 @@
     <Compile Include="DEM\Parser.cs" />
     <Compile Include="DML\DML_File.cs" />
     <Compile Include="DSE\DSE_File.cs" />
-    <Compile Include="EAN\Deserializer.cs" />
-    <Compile Include="EAN\EAN_File.cs" />
-    <Compile Include="EAN\Parser.cs" />
+    <Compile Include="Animation\EAN\Deserializer.cs" />
+    <Compile Include="Animation\EAN\EAN_File.cs" />
+    <Compile Include="Animation\EAN\Parser.cs" />
     <Compile Include="ECF\Deserializer.cs" />
     <Compile Include="ECF\ECF_File.cs" />
     <Compile Include="ECF\Parser.cs" />
@@ -219,8 +222,8 @@
     <Compile Include="EffectContainer\EepkToolInterlop.cs" />
     <Compile Include="EffectContainer\EffectContainer.cs" />
     <Compile Include="EffectContainer\VfxPackageExtension.cs" />
-    <Compile Include="EMA\EMA_File.cs" />
-    <Compile Include="EMA\Skeleton.cs" />
+    <Compile Include="Animation\EMA\EMA_File.cs" />
+    <Compile Include="Animation\EMA\Skeleton.cs" />
     <Compile Include="EMB\EmbIndex.cs" />
     <Compile Include="EMB\Extractor.cs" />
     <Compile Include="EMB\Repacker.cs" />
