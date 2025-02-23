@@ -268,6 +268,10 @@ namespace Xv2CoreLib.Eternity
         [YAXDontSerializeIfNull]
         public List<GateDef> Gates { get; set; }
 
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "GateGBB")]
+        [YAXDontSerializeIfNull]
+        public List<GateDef> GatesGGB { get; set; }
+
 
         //Optional, for Installer purposes:
         [YAXAttributeForClass]
@@ -303,17 +307,21 @@ namespace Xv2CoreLib.Eternity
         [YAXAttributeFor("NAME")]
         [YAXSerializeAs("value")]
         public string NAME { get; set; }
-        [YAXAttributeFor("TARGET_STAGE_IDX")]
-        [YAXSerializeAs("value")]
+
+        [CustomSerialize(MaxHex = true)]
         public uint TARGET_STAGE_IDX { get; set; }
-        [YAXAttributeFor("U_0C")]
-        [YAXSerializeAs("value")]
-        [YAXHexValue]
+        [CustomSerialize(IsHex = true)]
         public uint U_0C { get; set; }
-        [YAXAttributeFor("U_10")]
-        [YAXSerializeAs("value")]
-        [YAXHexValue]
-        public ulong U_10 { get; set; }
+        [CustomSerialize(IsHex = true)]
+        public uint U_10 { get; set; }
+
+        [CustomSerialize]
+        [YAXDontSerializeIfNull]
+        public string U_14 { get; set; }
+
+        [CustomSerialize]
+        [YAXDontSerializeIfNull]
+        public string U_18 { get; set; }
 
         public GateDef()
         {

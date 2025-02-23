@@ -509,7 +509,7 @@
                                                 <ColumnDefinition Width="120"/>
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
-                                            <Label Content="AlphaSortMask"/>
+                                            <Label Content="AlphaSortMask" ToolTip="Disable alpha sorting for alpha blended materials."/>
                                             <CheckBox IsChecked="{Binding MaterialViewModel.AlphaSortMask}" Grid.Column="1" Width="102"/>
                                         </Grid>
                                         <Grid Margin="3,3" x:Name="ZTestMask">

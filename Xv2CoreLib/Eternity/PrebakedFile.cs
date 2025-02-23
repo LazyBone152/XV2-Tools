@@ -612,11 +612,9 @@ namespace Xv2CoreLib.Eternity
         [YAXHexValue]
         public byte RemoveHairAccessories { get; set; } = byte.MaxValue; // Troolean, 0xFF = default game behaviour, 0 = don't remove, 1 = remove
 
-        [YAXAttributeFor("BCS_HAIR_COLOR")]
-        [YAXSerializeAs("value")]
+        [CustomSerialize(Parent = "BCS_HAIR_COLOR", MaxHex = true)]
         public uint BcsHairColor { get; set; }
-        [YAXAttributeFor("BCS_EYES_COLOR")]
-        [YAXSerializeAs("value")]
+        [CustomSerialize(Parent = "BCS_EYES_COLOR", MaxHex = true)]
         public uint BcsEyesColor { get; set; }
 
         [YAXAttributeFor("BCS_ADDITIONAL_COLORS")]
