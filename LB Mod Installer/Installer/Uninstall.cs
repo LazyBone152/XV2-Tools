@@ -58,6 +58,7 @@ using Xv2CoreLib.OCP;
 using Xv2CoreLib.AIT;
 using Xv2CoreLib.CDT;
 using Xv2CoreLib.SDS;
+using Xv2CoreLib.FMP;
 
 namespace LB_Mod_Installer.Installer
 {
@@ -353,6 +354,9 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".cdt":
                     Uninstall_CDT(path, file);
+                    break;
+                case ".map":
+                    Uninstall_FMP(path, file);
                     break;
                 case ".emz":
                     //The normal file loading methods are problematic for emz, since it can technically be multiple different files.
@@ -1787,6 +1791,31 @@ namespace LB_Mod_Installer.Installer
             }
         }
 
+        private void Uninstall_FMP(string path, _File file)
+        {
+            try
+            {
+                FMP_File binaryFile = (FMP_File)GetParsedFile<FMP_File>(path, false);
+                FMP_File cpkBinFile = (FMP_File)GetParsedFile<FMP_File>(path, true);
+
+                Section fragmentGroups = file.GetSection(Sections.FMP_FragmentGroup);
+                Section hitboxGroups = file.GetSection(Sections.FMP_HitboxGroup);
+                Section objects = file.GetSection(Sections.FMP_ObjectEntry);
+                Section section1 = file.GetSection(Sections.FMP_Section1Entry);
+                Section section2 = file.GetSection(Sections.FMP_Section2Entry);
+
+                UninstallEntries(binaryFile.FragmentGroups, (cpkBinFile != null) ? cpkBinFile.FragmentGroups : null, fragmentGroups.IDs);
+                UninstallEntries(binaryFile.HitboxGroups, (cpkBinFile != null) ? cpkBinFile.HitboxGroups : null, hitboxGroups.IDs);
+                UninstallEntries(binaryFile.Objects, (cpkBinFile != null) ? cpkBinFile.Objects : null, objects.IDs);
+                UninstallEntries(binaryFile.Section1List, (cpkBinFile != null) ? cpkBinFile.Section1List : null, section1.IDs);
+                UninstallEntries(binaryFile.Section2List, (cpkBinFile != null) ? cpkBinFile.Section2List : null, section2.IDs);
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at FMP uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
 
         //Generic uninstallers
         private void UninstallEntries<T>(IList<T> entries, IList<T> ogEntries, List<string> ids) where T : IInstallable

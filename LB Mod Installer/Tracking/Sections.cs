@@ -77,6 +77,11 @@
         public const string CST_Entry = "CST_Entry";
         public const string AIT_Entry = "AIT_Entry";
         public const string CDT_Entry = "CDT_Entry";
+        public const string FMP_Section1Entry = "FMP_Section1Entry";
+        public const string FMP_Section2Entry = "FMP_Section2Entry";
+        public const string FMP_FragmentGroup = "FMP_FragmentGroup";
+        public const string FMP_ObjectEntry = "FMP_ObjectEntry";
+        public const string FMP_HitboxGroup = "FMP_HitboxGroup";
         public const string VLC_ZoomInCamera = "VLC_ZoomInCamera";
         public const string VLC_UnkCamera = "VLC_UnkCamera";
         public const string SDS_ShaderProgram = "SDS_ShaderProgram";
