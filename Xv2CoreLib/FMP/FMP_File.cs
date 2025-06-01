@@ -2624,11 +2624,12 @@ namespace Xv2CoreLib.FMP
         [CustomSerialize(isFloat: true)]
         public float Roll { get; set; }
         [CustomSerialize(isFloat: true)]
-        public float F_28 { get; set; }
+        public float ScaleX { get; set; } // F_28
         [CustomSerialize(isFloat: true)]
-        public float F_32 { get; set; }
+        public float ScaleY { get; set; } // F_32
         [CustomSerialize(isFloat: true)]
-        public float F_36 { get; set; }
+        // For some reason YAXAttributeFor doesn't work for F_36
+        public float ScaleZ { get; set; } // F_36
         [CustomSerialize(isFloat: true)]
         public float F_40 { get; set; }
         [CustomSerialize(isFloat: true)]
@@ -2649,9 +2650,9 @@ namespace Xv2CoreLib.FMP
             bytes.AddRange(BitConverter.GetBytes(Yaw));
             bytes.AddRange(BitConverter.GetBytes(Pitch));
             bytes.AddRange(BitConverter.GetBytes(Roll));
-            bytes.AddRange(BitConverter.GetBytes(F_28));
-            bytes.AddRange(BitConverter.GetBytes(F_32));
-            bytes.AddRange(BitConverter.GetBytes(F_36));
+            bytes.AddRange(BitConverter.GetBytes(ScaleX));
+            bytes.AddRange(BitConverter.GetBytes(ScaleY));
+            bytes.AddRange(BitConverter.GetBytes(ScaleZ));
             bytes.AddRange(BitConverter.GetBytes(F_40));
             bytes.AddRange(BitConverter.GetBytes(F_44));
             bytes.AddRange(BitConverter.GetBytes(F_48));
@@ -2674,9 +2675,9 @@ namespace Xv2CoreLib.FMP
                 Yaw = BitConverter.ToSingle(bytes, offset + 16),
                 Pitch = BitConverter.ToSingle(bytes, offset + 20),
                 Roll = BitConverter.ToSingle(bytes, offset + 24),
-                F_28 = BitConverter.ToSingle(bytes, offset + 28),
-                F_32 = BitConverter.ToSingle(bytes, offset + 32),
-                F_36 = BitConverter.ToSingle(bytes, offset + 36),
+                ScaleX = BitConverter.ToSingle(bytes, offset + 28),
+                ScaleY = BitConverter.ToSingle(bytes, offset + 32),
+                ScaleZ = BitConverter.ToSingle(bytes, offset + 36),
                 F_40 = BitConverter.ToSingle(bytes, offset + 40),
                 F_44 = BitConverter.ToSingle(bytes, offset + 44),
                 F_48 = BitConverter.ToSingle(bytes, offset + 48),
