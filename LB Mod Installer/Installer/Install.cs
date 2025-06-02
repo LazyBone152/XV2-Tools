@@ -68,6 +68,7 @@ using Xv2CoreLib.SDS;
 using System.Xml.Linq;
 using System.Windows.Controls;
 using YAXLib;
+using Xv2CoreLib.FMP;
 //using LB_Mod_Installer.Installer.Transformation;
 
 namespace LB_Mod_Installer.Installer
@@ -433,6 +434,9 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".cdt":
                     Install_CDT(xmlPath, installPath, isXml, useSkipBindings);
+                    break;
+                case ".map":
+                    Install_FMP(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".emz":
                     XDocument emzXml = zipManager.GetXmlDocumentFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath));
@@ -2436,6 +2440,37 @@ namespace LB_Mod_Installer.Installer
             }
 #endif
         }
+        private void Install_FMP(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                FMP_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<FMP_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : FMP_File.Load(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                FMP_File binaryFile = (FMP_File)GetParsedFile<FMP_File>(installPath);
+
+                //Parse bindings
+                bindingManager.ParseProperties(xmlFile.Section1List, binaryFile.Section1List, installPath);
+                bindingManager.ParseProperties(xmlFile.Section2List, binaryFile.Section2List, installPath);
+                bindingManager.ParseProperties(xmlFile.FragmentGroups, binaryFile.FragmentGroups, installPath);
+                bindingManager.ParseProperties(xmlFile.HitboxGroups, binaryFile.HitboxGroups, installPath);
+                bindingManager.ParseProperties(xmlFile.Objects, binaryFile.Objects, installPath);
+
+                //Install entries
+                InstallEntries(xmlFile.Section1List, binaryFile.Section1List, installPath, Sections.FMP_Section1Entry, useSkipBindings);
+                InstallEntries(xmlFile.Section2List, binaryFile.Section2List, installPath, Sections.FMP_Section2Entry, useSkipBindings);
+                InstallEntries(xmlFile.FragmentGroups, binaryFile.FragmentGroups, installPath, Sections.FMP_FragmentGroup, useSkipBindings);
+                InstallEntries(xmlFile.HitboxGroups, binaryFile.HitboxGroups, installPath, Sections.FMP_HitboxGroup, useSkipBindings);
+                InstallEntries(xmlFile.Objects, binaryFile.Objects, installPath, Sections.FMP_ObjectEntry, useSkipBindings);
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at FMP install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
 
 
         //Generic Install Methods
@@ -2791,6 +2826,8 @@ namespace LB_Mod_Installer.Installer
                     return CDT_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".emz":
                     return EMZ_File.LoadData(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".map":
+                    return FMP_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 default:
                     throw new InvalidDataException(String.Format("GetParsedFileFromGame: The filetype of \"{0}\" is not supported.", path));
             }
@@ -2919,6 +2956,8 @@ namespace LB_Mod_Installer.Installer
                     return ((AIT_File)data).SaveToBytes();
                 case ".cdt":
                     return ((CDT_File)data).SaveToBytes();
+                case ".map":
+                    return ((FMP_File)data).Write();
                 case ".emz":
                     if(data is EMB_File emb)
                     {
