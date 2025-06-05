@@ -243,12 +243,12 @@ namespace Xv2CoreLib.CUS
 
         public static SkillType GetSkillTypeFromID1(int ID1)
         {
-            if (ID1 > 30000) return SkillType.NotSet;
-            if (ID1 > 25000) return SkillType.Awoken;
-            if (ID1 > 20000) return SkillType.Blast;
-            if (ID1 > 10000) return SkillType.Evasive;
-            if (ID1 > 5000) return SkillType.Ultimate;
-            if (ID1 > 0) return SkillType.Super;
+            if (ID1 >= 30000) return SkillType.NotSet;
+            if (ID1 >= 25000) return SkillType.Awoken;
+            if (ID1 >= 20000) return SkillType.Blast;
+            if (ID1 >= 10000) return SkillType.Evasive;
+            if (ID1 >= 5000) return SkillType.Ultimate;
+            if (ID1 >= 0) return SkillType.Super;
 
             return SkillType.NotSet;
         }
