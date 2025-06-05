@@ -119,7 +119,7 @@ namespace Xv2CoreLib.SAV
         public const int QUESTS_TFB = 533176;
 
         public const int QUESTS_TPQ_COUNT = 128;
-        public const int QUESTS_TPQ_EXPANDED_COUNT = 32;
+        public const int QUESTS_TPQ_EXPANDED_COUNT = 30;
         public const int QUESTS_TMQ_COUNT = 192;
         public const int QUESTS_BAQ_COUNT = 128;
         public const int QUESTS_TCQ_COUNT = 256;
@@ -204,7 +204,7 @@ namespace Xv2CoreLib.SAV
         public const int MASCOT_FLAGS_OFFSET = 204;
         public const int MASCOT_COUNT = 64; //64 bytes (512 bits)
         public const int ARTWORK_FLAGS_OFFSET = 506228;
-        public const int ARTWORK_COUNT = 64; //64 bytes (assumption)
+        public const int ARTWORK_COUNT = 128; //If more artwork is added in the future, it could continue on from this offset
 
         //New stuff in 1.17
         public const int PARTNER_KEY_FLAGS2 = 724484; //Like the previous keys, these need to be set if the keys are in the inventory. (11 - 15)
@@ -671,6 +671,10 @@ namespace Xv2CoreLib.SAV
                         return "1.22.01";
                     case 35:
                         return "1.22.02";
+                    case 36:
+                        return "1.23";
+                    case 37:
+                        return "1.24.02";
                     default:
                         return String.Format("Unknown ({0})", Version);
 
@@ -721,6 +725,8 @@ namespace Xv2CoreLib.SAV
                     case 33:
                     case 34:
                     case 35:
+                    case 36:
+                    case 37:
                         return null;
                     default:
                         return "This save version is not supported. It is recommened to update the application (if one is available).";
@@ -768,6 +774,8 @@ namespace Xv2CoreLib.SAV
                     case 33:
                     case 34:
                     case 35:
+                    case 36:
+                    case 37:
                         return Brushes.Blue;
                     default:
                         return Brushes.Orange;

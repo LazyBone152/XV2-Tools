@@ -99,6 +99,12 @@ namespace Xv2CoreLib.BEV
                                 bevFile.Entries[i].Type6 = GetType6(typeCount, typeoffset, bevFile.Entries[i].Type6, type6);
                                 type6++;
                                 break;
+                            case 7:
+                                if(typeCount != 0 || typeoffset != 0)
+                                {
+                                    goto default;
+                                }
+                                break;
                             default:
                                 Console.WriteLine(String.Format("Encountered undefined BEV_Type = {0} (offset = {1}). Unable to continue.", type, offset));
                                 Utils.WaitForInputThenQuit();
