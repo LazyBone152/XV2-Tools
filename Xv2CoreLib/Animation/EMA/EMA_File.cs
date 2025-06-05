@@ -1319,15 +1319,15 @@ namespace Xv2CoreLib.EMA
         public bool Int16ForValueIndex = false; //Calculated on save
         [YAXAttributeFor("Flags")]
         [YAXSerializeAs("Unk1")]
-        public bool I_03_b1 { get; set; }
+        public bool I_03_b1 { get; set; } //Always false
         [YAXAttributeFor("Flags")]
         [YAXSerializeAs("Unk4")]
-        public bool I_03_b4 { get; set; }
+        public bool I_03_b4 { get; set; } //Always false
         [YAXAttributeFor("Flags")]
         [YAXSerializeAs("Unk5")]
-        public bool I_03_a4 { get; set; }
+        public bool I_03_a4 { get; set; } //No obvious effect in game. Also could be an optimization thing; its only true when the last keyframe is the same as the first. So, looping animations, or ones that reset?
         [YAXAttributeFor("Flags")]
-        public bool NoInterpolation { get; set; }
+        public bool NoInterpolation { get; set; } //No obvious effect in game from testing. Might be for an optimization; its only true when no interpolation is used in the keyframes (values all the same OR a keyframe on every frame)
 
         public AsyncObservableCollection<EMA_Keyframe> Keyframes { get; set; } = new AsyncObservableCollection<EMA_Keyframe>();
 

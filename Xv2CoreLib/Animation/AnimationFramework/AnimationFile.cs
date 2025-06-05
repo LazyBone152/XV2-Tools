@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.Remoting.Channels;
 using System.Threading.Tasks;
 using Xv2CoreLib.EAN;
 using Xv2CoreLib.EMA;
@@ -163,15 +166,43 @@ namespace Xv2CoreLib.AnimationFramework
     }
 
     [Serializable]
-    public class Animation
+    public class Animation : INotifyPropertyChanged
     {
+        #region NotifyPropertyChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+        #endregion
+
+        private int _endFrame = -1;
+
         public int ID { get; set; }
         public string Name { get; set; }
+        public int EndFrame
+        {
+            get => _endFrame;
+            set
+            {
+                if (_endFrame != value)
+                {
+                    _endFrame = value;
+                    NotifyPropertyChanged(nameof(EndFrame));
+                }
+            }
+        }
         public KeyframeFloatType KeyframeFloatType { get; set; }
         public List<AnimationBone> Bones { get; set; } = new List<AnimationBone>();
 
         private readonly AnimationFileType AnimationType;
 
+        #region Load
         public Animation(AnimationFileType animType, EMA_Animation animation, ESK_Skeleton skeleton)
         {
             AnimationType = animType;
@@ -179,9 +210,9 @@ namespace Xv2CoreLib.AnimationFramework
             Name = animation.Name;
             KeyframeFloatType = (KeyframeFloatType)animation.FloatPrecision;
 
-            foreach(var bone in animation.Nodes)
+            foreach (var bone in animation.Nodes)
             {
-                if(skeleton != null)
+                if (skeleton != null)
                 {
                     //Object animation - only parse the keyframes IF the bone exists in the skeleton
                     ESK_RelativeTransform esk = skeleton.GetBone(bone.BoneName)?.RelativeTransform ?? null;
@@ -197,6 +228,8 @@ namespace Xv2CoreLib.AnimationFramework
                     Bones.Add(new AnimationBone(animType, bone, null));
                 }
             }
+
+            EndFrame = GetLastFrame();
         }
 
         public Animation(AnimationFileType animType, EAN_Animation animation, ESK_Skeleton skeleton)
@@ -206,7 +239,7 @@ namespace Xv2CoreLib.AnimationFramework
             Name = animation.Name;
             KeyframeFloatType = (KeyframeFloatType)animation.FloatType;
 
-            foreach(var bone in animation.Nodes)
+            foreach (var bone in animation.Nodes)
             {
                 if (skeleton != null)
                 {
@@ -223,6 +256,8 @@ namespace Xv2CoreLib.AnimationFramework
                     Bones.Add(new AnimationBone(animType, bone, null));
                 }
             }
+
+            EndFrame = GetLastFrame();
         }
 
         public EMA_Animation ConvertToObjectEma(ESK_Skeleton skeleton)
@@ -485,6 +520,38 @@ namespace Xv2CoreLib.AnimationFramework
 
             return animation;
         }
+        #endregion
+
+        #region Editing
+        public List<IUndoRedo> RebaseKeyframes(int startFrame, int amount)
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+
+            foreach(var bone in Bones)
+            {
+                bone.RebaseKeyframes(startFrame, amount, undos);
+            }
+
+            return undos;
+        }
+
+        #endregion
+
+        #region Helpers
+        public int GetMinFrame()
+        {
+            int min = 0;
+
+            foreach (var bone in Bones)
+            {
+                int boneMin = bone.GetMinFrame();
+
+                if (boneMin < min)
+                    min = boneMin;
+            }
+
+            return min;
+        }
 
         public static AnimationInterpolationType ConvertEmaInterpolation(KeyframeInterpolation emaInterp)
         {
@@ -508,20 +575,93 @@ namespace Xv2CoreLib.AnimationFramework
             }
         }
 
+        private int GetLastFrame()
+        {
+            //Get last frame of animation
+            //Method will only be used when loading, and since animations always need a keyframe on the last frame of the animation on all components, we only need to check the first
+            if(Bones?.Count > 0)
+            {
+                if (Bones[0]?.Components?.Count > 0)
+                {
+                    if (Bones[0].Components[0].Channels?.Count > 0)
+                    {
+                        if (Bones[0].Components[0].Channels[0].Keyframes.Count > 0)
+                        {
+                            return Bones[0].Components[0].Channels[0].Keyframes[Bones[0].Components[0].Channels[0].Keyframes.Count - 1].Frame;
+                        }
+                    }
+                }
+            }
+
+            return 0;
+        }
+
         public override string ToString()
         {
             return $"Animation: {Name}, ID: {ID}, NumBones: {Bones.Count}";
         }
+        #endregion
     }
 
     [Serializable]
-    public class AnimationBone
+    public class AnimationBone :IAnimationNode, INotifyPropertyChanged
     {
+        #region NotifyPropertyChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+        #endregion
+
+        #region IAnimationNode
+        private bool _isExpanded = false;
+        public bool IsExpanded
+        {
+            get => _isExpanded;
+            set
+            {
+                _isExpanded = value;
+                NotifyPropertyChanged(nameof(IsExpanded));
+            }
+        }
+
+        public IAnimationNode ParentNode => null;
+
+        public IEnumerable<int> GetAllKeyframes()
+        {
+            List<int> frames = new List<int>();
+
+            foreach(var component in Components)
+            {
+                foreach (var channel in component.Channels)
+                {
+                    foreach (var keyframe in channel.Keyframes)
+                    {
+                        if (!frames.Contains(keyframe.Frame))
+                        {
+                            frames.Add(keyframe.Frame);
+                        }
+                    }
+                }
+            }
+
+            frames.Sort();
+            return frames;
+        }
+        #endregion
+
         public string Name { get; set; }
         public List<AnimationComponent> Components { get; set; } = new List<AnimationComponent>();
 
         private readonly AnimationFileType AnimationType;
 
+        #region Load
         public AnimationBone(AnimationFileType animType, EMA_Node bone, ESK_RelativeTransform relativeTransform)
         {
             AnimationType = animType;
@@ -555,9 +695,9 @@ namespace Xv2CoreLib.AnimationFramework
                 throw new Exception("AnimationFile: This EMA has a W rotation channel");
             }
 
-            AnimationComponent posComponent = new AnimationComponent(AnimationComponentType.Position, animType);
-            AnimationComponent rotComponent = new AnimationComponent(AnimationComponentType.Rotation, animType);
-            AnimationComponent scaleComponent = new AnimationComponent(AnimationComponentType.Scale, animType);
+            AnimationComponent posComponent = new AnimationComponent(AnimationComponentType.Position, animType, this);
+            AnimationComponent rotComponent = new AnimationComponent(AnimationComponentType.Rotation, animType, this);
+            AnimationComponent scaleComponent = new AnimationComponent(AnimationComponentType.Scale, animType, this);
 
             Matrix4x4 inverseBindPose = relativeTransform.ToMatrix();
             if (!Matrix4x4.Invert(inverseBindPose, out inverseBindPose))
@@ -692,9 +832,9 @@ namespace Xv2CoreLib.AnimationFramework
             EAN_AnimationComponent eanRotComponent = bone.GetComponent(EAN_AnimationComponent.ComponentType.Rotation);
             EAN_AnimationComponent eanScaleComponent = bone.GetComponent(EAN_AnimationComponent.ComponentType.Scale);
 
-            AnimationComponent posComponent = new AnimationComponent(AnimationComponentType.Position, animType);
-            AnimationComponent rotComponent = new AnimationComponent(AnimationComponentType.Rotation, animType);
-            AnimationComponent scaleComponent = new AnimationComponent(AnimationComponentType.Scale, animType);
+            AnimationComponent posComponent = new AnimationComponent(AnimationComponentType.Position, animType, this);
+            AnimationComponent rotComponent = new AnimationComponent(AnimationComponentType.Rotation, animType, this);
+            AnimationComponent scaleComponent = new AnimationComponent(AnimationComponentType.Scale, animType, this);
 
             Matrix4x4 inverseBindPose = Matrix4x4.Identity;
             Vector3 bonePos = Vector3.Zero;
@@ -780,14 +920,31 @@ namespace Xv2CoreLib.AnimationFramework
             if (scaleComponent.Channels.Count > 0)
                 Components.Add(scaleComponent);
         }
+        #endregion
 
+        #region Editing
+        public void RebaseKeyframes(int startFrame, int amount, List<IUndoRedo> undos = null)
+        {
+            foreach(var component in Components)
+            {
+                component.RebaseKeyframes(startFrame, amount, undos);
+            }
+        }
+
+        //public static List<AnimationBone> CopyKeyframes(List<AnimationBone> selectedBones, List<int> selectedKeyframes)
+        //{
+        //
+        //}
+        #endregion
+
+        #region Helpers
         public AnimationComponent GetComponent(AnimationComponentType componentType, bool createIfMissing = false, List<IUndoRedo> undos = null)
         {
             AnimationComponent component = Components.FirstOrDefault(x => x.Type == componentType);
 
             if(component == null && createIfMissing)
             {
-                component = new AnimationComponent(componentType, AnimationType);
+                component = new AnimationComponent(componentType, AnimationType, this);
                 Components.Add(component);
 
                 if (undos != null)
@@ -795,6 +952,21 @@ namespace Xv2CoreLib.AnimationFramework
             }
 
             return component;
+        }
+
+        public int GetMinFrame()
+        {
+            int min = 0;
+
+            foreach (var component in Components)
+            {
+                int componentMin = component.GetMinFrame();
+
+                if (componentMin < min)
+                    min = componentMin;
+            }
+
+            return min;
         }
 
         public int[] GetAllKeyframedFrames()
@@ -821,22 +993,72 @@ namespace Xv2CoreLib.AnimationFramework
         {
             return $"Bone: {Name}";
         }
+        #endregion
     }
 
     [Serializable]
-    public class AnimationComponent
+    public class AnimationComponent : IAnimationNode, INotifyPropertyChanged
     {
+        #region NotifyPropertyChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+        #endregion
+
+        #region IAnimationNode
+        private bool _isExpanded = false;
+        public bool IsExpanded
+        {
+            get => _isExpanded;
+            set
+            {
+                _isExpanded = value;
+                NotifyPropertyChanged(nameof(IsExpanded));
+            }
+        }
+
+        public IAnimationNode ParentNode { get; private set; }
+        
+        public IEnumerable<int> GetAllKeyframes()
+        {
+            List<int> frames = new List<int>();
+
+            foreach(var channel in Channels)
+            {
+                foreach (var keyframe in channel.Keyframes)
+                {
+                    if (!frames.Contains(keyframe.Frame))
+                    {
+                        frames.Add(keyframe.Frame);
+                    }
+                }
+            }
+
+            frames.Sort();
+            return frames;
+        }
+        #endregion
+
         public AnimationComponentType Type { get; private set; }
         public AsyncObservableCollection<AnimationChannel> Channels { get; set; } = new AsyncObservableCollection<AnimationChannel>();
 
         private readonly AnimationFileType AnimationType;
 
-        public AnimationComponent(AnimationComponentType componentType, AnimationFileType animationType)
+        public AnimationComponent(AnimationComponentType componentType, AnimationFileType animationType, IAnimationNode parent)
         {
             Type = componentType;
             AnimationType = animationType;
+            ParentNode = parent;
         }
 
+        #region Editing
         public void AddKeyframe(AnimationChannelType channel, int frame, float value, AnimationInterpolationType interpolation = AnimationInterpolationType.Linear, float cp1 = 0, float cp2 = 0, List<IUndoRedo> undos = null)
         {
             AnimationChannel animChannel = GetChannel(channel, true, undos);
@@ -844,13 +1066,24 @@ namespace Xv2CoreLib.AnimationFramework
             animChannel.AddKeyframe(frame, value, interpolation, cp1, cp2, undos);
         }
 
+        public void RebaseKeyframes(int startFrame, int amount, List<IUndoRedo> undos = null)
+        {
+            foreach (var channel in Channels)
+            {
+                channel.RebaseKeyframes(startFrame, amount, undos);
+            }
+        }
+        #endregion
+
+        #region Helpers
+
         public AnimationChannel GetChannel(AnimationChannelType channel, bool createIfMissing = false, List<IUndoRedo> undos = null)
         {
             AnimationChannel chn = Channels.FirstOrDefault(x => x.Type == channel);
 
             if (chn == null && createIfMissing)
             {
-                chn = new AnimationChannel(channel, GetDefaultKeyframeValue(channel));
+                chn = new AnimationChannel(channel, GetDefaultKeyframeValue(channel), this);
                 Channels.Add(chn);
 
                 if (undos != null)
@@ -861,26 +1094,41 @@ namespace Xv2CoreLib.AnimationFramework
 
             return chn;
         }
-    
+
         public AnimationKeyframe GetKeyframeOrDefault(AnimationChannelType channel, int frame, bool isScale, out bool hasKeyframe)
         {
             AnimationChannel chn = GetChannel(channel);
 
-            if(chn != null)
+            if (chn != null)
             {
                 AnimationKeyframe keyframe = chn.GetKeyframe(frame);
 
-                if(keyframe != null)
+                if (keyframe != null)
                 {
                     hasKeyframe = true;
                     return keyframe;
                 }
             }
-            
+
             hasKeyframe = false;
             return isScale ? AnimationChannel.DefaultOneKeyframe : AnimationChannel.DefaultZeroKeyframe;
         }
-    
+
+        public int GetMinFrame()
+        {
+            int min = 0;
+
+            foreach(var channel in Channels)
+            {
+                int channelMin = channel.GetMinFrame();
+
+                if(channelMin < min)
+                    min = channelMin;
+            }
+
+            return min;
+        }
+
         internal void SortKeyframes()
         {
             foreach(var channel in Channels)
@@ -930,31 +1178,48 @@ namespace Xv2CoreLib.AnimationFramework
         {
             return $"Component: {Type} (NumChannels: {Channels.Count})";
         }
+        #endregion
     }
 
     [Serializable]
-    public class AnimationChannel
+    public class AnimationChannel : IAnimationNode
     {
         internal readonly static AnimationKeyframe DefaultZeroKeyframe = AnimationKeyframe.CreateReadOnly(0);
         internal readonly static AnimationKeyframe DefaultOneKeyframe = AnimationKeyframe.CreateReadOnly(1);
         internal readonly static AnimationKeyframe DefaultCameraFOVKeyframe = AnimationKeyframe.CreateReadOnly(EAN_File.DefaultFoV);
+
+        #region IAnimationNode
+        public bool IsExpanded { get; set; }
+        public IAnimationNode ParentNode { get; private set; }
+        public IEnumerable<int> GetAllKeyframes()
+        {
+            int[] frames = new int[Keyframes.Count];
+
+            for (int i = 0; i < Keyframes.Count; i++)
+                frames[i] = Keyframes[i].Frame;
+
+            return frames;
+        }
+        #endregion
 
         public AnimationChannelType Type { get; private set; }
         public List<AnimationKeyframe> Keyframes { get; set; } = new List<AnimationKeyframe>();
 
         private readonly float DefaultKeyframe;
 
-        public AnimationChannel(AnimationChannelType channelType, float defaultKeyframe)
+        public AnimationChannel(AnimationChannelType channelType, float defaultKeyframe, IAnimationNode parent)
         {
             Type = channelType;
             DefaultKeyframe = defaultKeyframe;
+            ParentNode = parent;
         }
 
+        #region Editing
         public void AddKeyframe(int frame, float value, AnimationInterpolationType interpolation, float cp1 = 0, float cp2 = 0, List<IUndoRedo> undos = null)
         {
             AnimationKeyframe keyframe = GetKeyframe(frame);
 
-            if(keyframe != null)
+            if (keyframe != null)
             {
                 if (undos != null)
                 {
@@ -979,7 +1244,7 @@ namespace Xv2CoreLib.AnimationFramework
                 keyframe.ControlPoint1 = cp1;
                 keyframe.ControlPoint2 = cp2;
 
-                if(undos != null)
+                if (undos != null)
                 {
                     int insertIdx = GetInsertIndex(frame);
                     Keyframes.Insert(insertIdx, keyframe);
@@ -993,21 +1258,25 @@ namespace Xv2CoreLib.AnimationFramework
             }
         }
 
-        public AnimationKeyframe GetKeyframe(int frame)
+        public void RebaseKeyframes(int startFrame, int amount, List<IUndoRedo> undos = null)
         {
-            return Keyframes.FirstOrDefault(x => x.Frame == frame);
-        }
+            if (startFrame + amount < 0)
+                throw new Exception("RebaseKeyframes: Frame cannot be less than zero");
 
-        private int GetInsertIndex(int frame)
-        {
-            for(int i = 0; i < Keyframes.Count; i++)
+            foreach(var keyframe in Keyframes.OrderBy(x => x.Frame))
             {
-                if (Keyframes[i].Frame >= frame)
-                    return i;
-            }
+                if(keyframe.Frame >= startFrame)
+                {
+                    int newFrame = keyframe.Frame + amount;
 
-            return Keyframes.Count;
+                    if (undos != null)
+                        undos.Add(new UndoablePropertyGeneric(nameof(keyframe.Frame), keyframe, keyframe.Frame, newFrame));
+
+                    keyframe.Frame = newFrame;
+                }
+            }
         }
+        #endregion
 
         #region Interpolation
         private readonly AnimationKeyframe keyframeSearchObject = new AnimationKeyframe();
@@ -1161,10 +1430,33 @@ namespace Xv2CoreLib.AnimationFramework
         }
         #endregion
 
+        #region Helpers
         public override string ToString()
         {
             return $"Channel: {Type} (NumKeyframes: {Keyframes.Count})";
         }
+
+        public AnimationKeyframe GetKeyframe(int frame)
+        {
+            return Keyframes.FirstOrDefault(x => x.Frame == frame);
+        }
+
+        private int GetInsertIndex(int frame)
+        {
+            for (int i = 0; i < Keyframes.Count; i++)
+            {
+                if (Keyframes[i].Frame >= frame)
+                    return i;
+            }
+
+            return Keyframes.Count;
+        }
+
+        public int GetMinFrame()
+        {
+            return Keyframes.Count > 0 ? Keyframes[0].Frame : 0;
+        }
+        #endregion
     }
 
     [Serializable]

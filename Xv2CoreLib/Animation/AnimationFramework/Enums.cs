@@ -32,6 +32,7 @@
 
     public enum AnimationInterpolationType
     {
+        //None,
         Linear,
         QuadraticBezier,
         CubicBezier
