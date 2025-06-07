@@ -152,7 +152,19 @@ namespace Xv2CoreLib.Eternity
 
             }
         }
-        
+
+        #endregion
+
+        #region Helpers
+        public StageDef GetStage(int index)
+        {
+            return Stages.FirstOrDefault(x => x.Index == (uint)index);
+        }
+
+        public StageDef GetStage(string code)
+        {
+            return Stages.FirstOrDefault(x => x.CODE == code);
+        }
         #endregion
     }
 

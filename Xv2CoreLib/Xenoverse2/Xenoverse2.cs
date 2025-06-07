@@ -30,6 +30,7 @@ using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.Resource;
 using static Xv2CoreLib.CUS.CUS_File;
 using System.Threading.Tasks;
+using Xv2CoreLib.Eternity;
 
 namespace Xv2CoreLib
 {
@@ -142,12 +143,14 @@ namespace Xv2CoreLib
         public const string BTLHUD_MSG_PATH = "msg/quest_btlhud_";
         public const string COSTUME_MSG_PATH = "msg/proper_noun_costume_name_";
         public const string ACCESSORY_MSG_PATH = "msg/proper_noun_accessory_name_";
+        public const string STAGE_NAME_MSG_PATH = "msg/proper_noun_stage_name_";
 
         //Load bools
         public bool loadCmn = false;
         public bool loadSkills = true;
         public bool loadCharacters = true;
         public bool loadCostumes = false;
+        public bool loadStage = false;
 
         //System Files
         public CUS_File CusFile { get; private set; }
@@ -157,6 +160,7 @@ namespace Xv2CoreLib
         public CSO_File CsoFile { get; private set; }
         public PSC_File PscFile { get; private set; }
         public IDB_File SkillIdbFile { get; private set; }
+        public StageDefFile StageDefFile { get; private set; }
 
         //Costume Files
         public IDB_File TopIdbFile { get; private set; }
@@ -184,6 +188,7 @@ namespace Xv2CoreLib
         private MSG_File[] btlHudMsgFile = new MSG_File[(int)Language.NumLanguages];
         private MSG_File[] costumeMsgFile = new MSG_File[(int)Language.NumLanguages];
         private MSG_File[] accessoryMsgFile = new MSG_File[(int)Language.NumLanguages];
+        private MSG_File[] stageNameMsgFile = new MSG_File[(int)Language.NumLanguages];
 
         //Misc variables
         private FileWatcher fileWatcher => FileManager.Instance.fileWatcher;
@@ -216,6 +221,17 @@ namespace Xv2CoreLib
 
                 if (loadCostumes)
                     InitCostumes();
+
+                if (loadStage)
+                {
+                    if (fileWatcher.WasFileModified(fileIO.PathInGameDir(StageDefFile.PATH)) || StageDefFile == null)
+                    {
+                        StageDefFile = (StageDefFile)FileManager.Instance.GetParsedFileFromGame(StageDefFile.PATH);
+                        fileWatcher.FileLoadedOrSaved(fileIO.PathInGameDir(StageDefFile.PATH));
+                    }
+
+                    LoadMsgFiles(ref stageNameMsgFile, STAGE_NAME_MSG_PATH);
+                }
             }
             finally
             {
@@ -1252,6 +1268,41 @@ namespace Xv2CoreLib
         {
             return cmsId >= 100 && cmsId <= 108;
         }
+        #endregion
+
+        #region Stages
+
+        public List<Xv2Item> GetStageList()
+        {
+            List<Xv2Item> items = new List<Xv2Item>();
+
+            foreach(StageDef stage in StageDefFile.Stages)
+            {
+                string name = GetStageName(stage.CODE, stage.NAME_EN, PreferedLanguage);
+
+                items.Add(new Xv2Item((int)stage.Index, name != null ? name : stage.NAME_EN));
+            }   
+
+            return items;
+        }
+
+        public string GetStageName(string code)
+        {
+            StageDef stageDef = StageDefFile.GetStage(code);
+
+            return stageDef != null ? GetStageName(code, stageDef.NAME_EN, PreferedLanguage) : null;
+        }
+
+        private string GetStageName(string code, string defName, Language language)
+        {
+            string name = stageNameMsgFile[(int)language].GetStageName(code);
+
+            if (string.IsNullOrWhiteSpace(name))
+                name = defName;
+
+            return string.IsNullOrWhiteSpace(name) ? code : name;
+        }
+
         #endregion
 
         #region Save/Install

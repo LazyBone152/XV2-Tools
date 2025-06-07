@@ -34,6 +34,7 @@ using Xv2CoreLib.AFS2;
 using Xv2CoreLib.SPM;
 using Xv2CoreLib.FMP;
 using Xv2CoreLib.NSK;
+using Xv2CoreLib.Eternity;
 
 namespace Xv2CoreLib
 {
@@ -192,109 +193,117 @@ namespace Xv2CoreLib
                 }
             }
 
-            //Handle missing files
-            if (!fileIO.FileExists(path))
-            {
-                if (raiseEx)
-                    throw new FileNotFoundException(string.Format("The file \"{0}\" does not exist in the game directory or cpks.", path));
-                else
-                    return null;
-            }
-
             //File loading
             object file;
 
-            switch (Path.GetExtension(path))
+            if (path.Equals(StageDefFile.PATH, StringComparison.OrdinalIgnoreCase))
             {
-                case ".bac":
-                    file = BAC_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
-                    break;
-                case ".bcm":
-                    file = BCM_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
-                    break;
-                case ".bcs":
-                    file = BCS_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
-                    break;
-                case ".bdm":
-                    file = BDM_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx), true);
-                    break;
-                case ".bsa":
-                    file = BSA_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
-                    break;
-                case ".cms":
-                    file = CMS_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
-                    break;
-                case ".cso":
-                    file = CSO_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
-                    break;
-                case ".cus":
-                    file = CUS_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
-                    break;
-                case ".ean":
-                    file = EAN_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx), true);
-                    break;
-                case ".ers":
-                    file = ERS_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
-                    break;
-                case ".idb":
-                    file = IDB_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
-                    break;
-                case ".pup":
-                    file = PUP_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
-                    break;
-                case ".bas":
-                    file = BAS_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
-                    break;
-                case ".bai":
-                    file = BAI_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
-                    break;
-                case ".amk":
-                    file = AMK_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
-                    break;
-                case ".esk":
-                    file = ESK_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
-                    break;
-                case ".emd":
-                    file = EMD_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
-                    break;
-                case ".nsk":
-                    file = NSK_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
-                    break;
-                case ".emb":
-                    file = EMB_File.LoadEmb(GetBytesFromGame(path, onlyFromCpk, raiseEx));
-                    break;
-                case ".emm":
-                    file = EMM_File.LoadEmm(GetBytesFromGame(path, onlyFromCpk, raiseEx));
-                    break;
-                case ".msg":
-                    file = MSG_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
-                    break;
-                case ".psc":
-                    file = PSC_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
-                    break;
-                case ".eepk":
-                    file = EffectContainerFile.Load(path, fileIO, onlyFromCpk);
-                    break;
-                case ".emz":
-                    file = EMZ.EMZ_File.LoadData(GetBytesFromGame(path, onlyFromCpk, raiseEx));
-                    break;
-                case ".acb":
-                    {
-                        byte[] awbBytes = fileIO.GetFileFromGame(string.Format("{0}/{1}.awb", Path.GetFileNameWithoutExtension(path), Path.GetDirectoryName(path)), false);
-                        AFS2_File awbFile = awbBytes != null ? AFS2_File.LoadFromArray(awbBytes) : null;
-                        file = new ACB_Wrapper(ACB_File.Load(GetBytesFromGame(path), awbFile));
-                    }
-                    break;
-                case ".spm":
-                    file = SPM_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
-                    break;
-                case ".map":
-                    file = FMP_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
-                    break;
-                default:
-                    throw new InvalidDataException(string.Format("FileManager.GetParsedFileFromGame: The filetype of \"{0}\" is not supported.", path));
+                byte[] stageDefBytes = GetBytesFromGame(path, false, false);
+                file = stageDefBytes != null ? StageDefFile.Load(stageDefBytes) : StageDefFile.DefaultFile;
             }
+            else
+            {
+                //Handle missing files
+                if (!fileIO.FileExists(path))
+                {
+                    if (raiseEx)
+                        throw new FileNotFoundException(string.Format("The file \"{0}\" does not exist in the game directory or cpks.", path));
+                    else
+                        return null;
+                }
 
+                switch (Path.GetExtension(path))
+                {
+                    case ".bac":
+                        file = BAC_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
+                        break;
+                    case ".bcm":
+                        file = BCM_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
+                        break;
+                    case ".bcs":
+                        file = BCS_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
+                        break;
+                    case ".bdm":
+                        file = BDM_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx), true);
+                        break;
+                    case ".bsa":
+                        file = BSA_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
+                        break;
+                    case ".cms":
+                        file = CMS_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
+                        break;
+                    case ".cso":
+                        file = CSO_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
+                        break;
+                    case ".cus":
+                        file = CUS_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
+                        break;
+                    case ".ean":
+                        file = EAN_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx), true);
+                        break;
+                    case ".ers":
+                        file = ERS_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
+                        break;
+                    case ".idb":
+                        file = IDB_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
+                        break;
+                    case ".pup":
+                        file = PUP_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
+                        break;
+                    case ".bas":
+                        file = BAS_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
+                        break;
+                    case ".bai":
+                        file = BAI_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
+                        break;
+                    case ".amk":
+                        file = AMK_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
+                        break;
+                    case ".esk":
+                        file = ESK_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
+                        break;
+                    case ".emd":
+                        file = EMD_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
+                        break;
+                    case ".nsk":
+                        file = NSK_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
+                        break;
+                    case ".emb":
+                        file = EMB_File.LoadEmb(GetBytesFromGame(path, onlyFromCpk, raiseEx));
+                        break;
+                    case ".emm":
+                        file = EMM_File.LoadEmm(GetBytesFromGame(path, onlyFromCpk, raiseEx));
+                        break;
+                    case ".msg":
+                        file = MSG_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
+                        break;
+                    case ".psc":
+                        file = PSC_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
+                        break;
+                    case ".eepk":
+                        file = EffectContainerFile.Load(path, fileIO, onlyFromCpk);
+                        break;
+                    case ".emz":
+                        file = EMZ.EMZ_File.LoadData(GetBytesFromGame(path, onlyFromCpk, raiseEx));
+                        break;
+                    case ".acb":
+                        {
+                            byte[] awbBytes = fileIO.GetFileFromGame(string.Format("{0}/{1}.awb", Path.GetFileNameWithoutExtension(path), Path.GetDirectoryName(path)), false);
+                            AFS2_File awbFile = awbBytes != null ? AFS2_File.LoadFromArray(awbBytes) : null;
+                            file = new ACB_Wrapper(ACB_File.Load(GetBytesFromGame(path), awbFile));
+                        }
+                        break;
+                    case ".spm":
+                        file = SPM_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
+                        break;
+                    case ".map":
+                        file = FMP_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
+                        break;
+                    default:
+                        throw new InvalidDataException(string.Format("FileManager.GetParsedFileFromGame: The filetype of \"{0}\" is not supported.", path));
+                }
+            }
+            
             if(!onlyFromCpk)
                 AddCachedFile(path, file);
 
@@ -309,7 +318,7 @@ namespace Xv2CoreLib
             if (fileIO == null) return null;
 
             var bytes = fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk);
-            if (bytes == null) FileNotFoundEvent.Invoke(this, new Xv2FileNotFoundEventArgs(path));
+            if (bytes == null) FileNotFoundEvent?.Invoke(this, new Xv2FileNotFoundEventArgs(path));
             return bytes;
         }
 

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using YAXLib;
 using System.Net;
 using Xv2CoreLib.IDB;
+using static Xv2CoreLib.QED.QED_Types;
 
 namespace Xv2CoreLib.MSG
 {
@@ -428,6 +429,20 @@ namespace Xv2CoreLib.MSG
             return null;
         }
 
+        public string GetStageName(string code)
+        {
+            string entryName = $"stage_{code}";
+
+            foreach (var entry in MSG_Entries)
+            {
+                if (entry.Name == entryName)
+                {
+                    return WebUtility.HtmlDecode(entry.Msg_Content[0].Text);
+                }
+            }
+
+            return null;
+        }
 
         private static string GetMsgEntryName_SkillName(int skillID2, CUS.CUS_File.SkillType skillType)
         {
