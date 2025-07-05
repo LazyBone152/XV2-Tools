@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Numerics;
+using Xv2CoreLib.FMP;
+using Xv2CoreLib.Havok;
 using Xv2CoreLib.Resource;
 using YAXLib;
 
@@ -152,7 +155,6 @@ namespace Xv2CoreLib.EMD
             return null;
         }
     
-
         public void CopyTextureSamplers(EMD_File copyEmdFile)
         {
             //Simple foreach loop over all submeshes
@@ -450,6 +452,56 @@ namespace Xv2CoreLib.EMD
         {
             NotifyPropertyChanged(nameof(Name));
         }
+
+        public HavokCollisionMesh ConvertToHavokCollisionMesh()
+        {
+            HavokCollisionMesh mesh = new HavokCollisionMesh();
+            List<Vector3> verts = new List<Vector3>();
+            List<int> faces = new List<int>();
+
+            for (int i = 0; i < Triangles.Count; i++)
+            {
+                for (int a = 0; a < Triangles[i].Faces.Count; a++)
+                {
+                    faces.Add(Triangles[i].Faces[a]);
+                }
+            }
+
+            for (int i = 0; i < Vertexes.Count; i++)
+            {
+                verts.Add(new Vector3(Vertexes[i].PositionX, Vertexes[i].PositionY, Vertexes[i].PositionZ));
+            }
+
+            mesh.Vertices = verts.ToArray();
+            mesh.Indices = faces.ToArray();
+            return mesh;
+        }
+
+        public FMP_CollisionVertexData ConvertToFmpCollisionMesh()
+        {
+            FMP_CollisionVertexData mesh = new FMP_CollisionVertexData();
+            List<ushort> faces = new List<ushort>();
+
+            for(int i = 0; i < Triangles.Count; i++)
+            {
+                for(int a = 0; a < Triangles[i].Faces.Count; a++)
+                {
+                    faces.Add((ushort)Triangles[i].Faces[a]);
+                }
+            }
+
+            for(int i = 0; i < Vertexes.Count; i++)
+            {
+                mesh.Vertices.Add(new FMP_Vertex()
+                {
+                    Pos = new float[3] { Vertexes[i].PositionX, Vertexes[i].PositionY, Vertexes[i].PositionZ }
+                });
+            }
+
+            mesh.Faces = faces.ToArray();
+            return mesh;
+        }
+    
     }
 
     [YAXSerializeAs("TextureSamplerDef")]

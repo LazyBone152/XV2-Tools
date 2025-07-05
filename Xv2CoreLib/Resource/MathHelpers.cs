@@ -38,6 +38,11 @@ namespace Xv2CoreLib.Resource
             return value1 + ((value2 - value1) * amount);
         }
 
+        public static bool IsEven(int value)
+        {
+            return (value % 2 == 0);
+        }
+
         public static bool IsPowerOfTwo(int value)
         {
             return (value & (value - 1)) == 0 && value != 0;

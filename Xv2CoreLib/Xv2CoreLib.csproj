@@ -68,6 +68,9 @@
     <Reference Include="GalaSoft.MvvmLight.Platform, Version=5.4.1.0, Culture=neutral, PublicKeyToken=5f873c45e98af8a1, processorArchitecture=MSIL">
       <HintPath>..\packages\MvvmLightLibs.5.4.1.1\lib\net45\GalaSoft.MvvmLight.Platform.dll</HintPath>
     </Reference>
+    <Reference Include="MIConvexHull, Version=1.1.19.1018, Culture=neutral, PublicKeyToken=2644b6f8be52c998, processorArchitecture=MSIL">
+      <HintPath>..\packages\MIConvexHull.1.1.19.1019\lib\netstandard2.0\MIConvexHull.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.IO.RecyclableMemoryStream, Version=1.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.IO.RecyclableMemoryStream.1.2.2\lib\net45\Microsoft.IO.RecyclableMemoryStream.dll</HintPath>
     </Reference>
@@ -182,7 +185,12 @@
     <Compile Include="BSA_XV1\Deserializer.cs" />
     <Compile Include="BSA_XV1\Parser.cs" />
     <Compile Include="Animation\AnimationFramework\Interfaces.cs" />
+    <Compile Include="FMP\CollisionCreator.cs" />
     <Compile Include="FMP\FMP_File.cs" />
+    <Compile Include="Havok\BoundingVolumeHierarchy.cs" />
+    <Compile Include="Havok\ConvexVertex.cs" />
+    <Compile Include="Havok\HavokCollisionMesh.cs" />
+    <Compile Include="Havok\HavokTagFile.cs" />
     <Compile Include="IKD\IKD_File.cs" />
     <Compile Include="CML\CML_File.cs" />
     <Compile Include="CMS\CMS_File.cs" />
@@ -412,6 +420,8 @@
     <EmbeddedResource Include="Resources\XV2P_SLOTS_STAGE.x2s" />
     <EmbeddedResource Include="Resources\XV2P_SLOTS_STAGE_LOCAL.x2s" />
     <None Include="packages.config" />
+    <EmbeddedResource Include="Resources\HavokConvexTemplate.hkx" />
+    <EmbeddedResource Include="Resources\HavokMeshTemplate.hkx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="FodyWeavers.xml" />

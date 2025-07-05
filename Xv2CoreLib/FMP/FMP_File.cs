@@ -2,8 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
+using System.Xml.Linq;
+using Xv2CoreLib.EMD;
+using Xv2CoreLib.ESK;
+using Xv2CoreLib.Havok;
+using Xv2CoreLib.Properties;
 using Xv2CoreLib.Resource;
 using YAXLib;
+using static Xv2CoreLib.FMP.CollisionCreator;
 
 namespace Xv2CoreLib.FMP
 {
@@ -34,8 +41,8 @@ namespace Xv2CoreLib.FMP
         public List<FMP_FragmentGroup> FragmentGroups { get; set; }
         [YAXCollection(YAXCollectionSerializationTypes.Recursive, EachElementName = "Object")]
         public List<FMP_Object> Objects { get; set; }
-        [YAXCollection(YAXCollectionSerializationTypes.Recursive, EachElementName = "HitboxGroup")]
-        public List<FMP_HitboxGroup> HitboxGroups { get; set; }
+        [YAXCollection(YAXCollectionSerializationTypes.Recursive, EachElementName = "CollisionGroup")]
+        public List<FMP_CollisionGroup> CollisionGroups { get; set; }
 
         #region SaveLoad
         public static void SerializeToXml(string path)
@@ -53,6 +60,11 @@ namespace Xv2CoreLib.FMP
             FMP_File fmpFile = (FMP_File)serializer.DeserializeFromFile(path);
 
             File.WriteAllBytes(saveLocation, fmpFile.Write());
+        }
+
+        public static FMP_File Load(string path)
+        {
+            return Load(File.ReadAllBytes(path));
         }
 
         public static FMP_File Load(byte[] bytes)
@@ -101,7 +113,7 @@ namespace Xv2CoreLib.FMP
             fmpFile.Section1List = FMP_Section1.ReadAll(bytes, section1_Offset, section1_Count);
             fmpFile.Section2List = FMP_Section2.ReadAll(bytes, section2_Offset, section2_Count);
             fmpFile.FragmentGroups = FMP_FragmentGroup.ReadAll(bytes, fragmentGroup_Offset, fragmentGroup_Count);
-            fmpFile.HitboxGroups = FMP_HitboxGroup.ReadAll(bytes, hitboxGroup_Offset, hitboxGroup_Count, fmpFile.IsOldVersion);
+            fmpFile.CollisionGroups = FMP_CollisionGroup.ReadAll(bytes, hitboxGroup_Offset, hitboxGroup_Count, fmpFile.IsOldVersion);
             fmpFile.Objects = FMP_Object.ReadAll(bytes, object_Offset, object_Count, depot1, depot2, depot3, depot4, fmpFile);
 
             return fmpFile;
@@ -109,6 +121,11 @@ namespace Xv2CoreLib.FMP
     
         public byte[] Write()
         {
+            foreach(var hitboxGroup in CollisionGroups)
+            {
+                hitboxGroup.CreateUnorderedHitboxList();
+            }
+
             List<byte> bytes = new List<byte>();
 
             List<string> depot1 = new List<string>();
@@ -121,7 +138,7 @@ namespace Xv2CoreLib.FMP
             int section2Count = Section2List != null ? Section2List.Count : 0;
             int fragmentCount = FragmentGroups != null ? FragmentGroups.Count : 0;
             int objectCount = Objects != null ? Objects.Count : 0;
-            int hitboxGroupCount = HitboxGroups != null ? HitboxGroups.Count : 0;
+            int hitboxGroupCount = CollisionGroups != null ? CollisionGroups.Count : 0;
 
             List<StringWriter.StringInfo> stringsWriter = new List<StringWriter.StringInfo>();
 
@@ -180,13 +197,13 @@ namespace Xv2CoreLib.FMP
             if (objectCount > 0)
             {
                 Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), 52);
-                FMP_Object.WriteAll(Objects, bytes, stringsWriter);
+                FMP_Object.WriteAll(Objects, CollisionGroups, bytes, stringsWriter);
             }
 
             if (hitboxGroupCount > 0)
             {
                 Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), 60);
-                FMP_HitboxGroup.WriteAll(HitboxGroups, bytes, stringsWriter, IsOldVersion);
+                FMP_CollisionGroup.WriteAll(CollisionGroups, bytes, stringsWriter, IsOldVersion);
             }
 
             //Write depots
@@ -267,6 +284,36 @@ namespace Xv2CoreLib.FMP
             }
         }
         #endregion
+
+        public void GetCollisionCount(out int collisionGroups, out int havokCount)
+        {
+            collisionGroups = CollisionGroups.Count;
+            havokCount = 0;
+
+            foreach(var collisionGroup in CollisionGroups)
+            {
+                collisionGroup.CreateUnorderedHitboxList();
+
+                foreach(var collider in collisionGroup.UnorderedHitboxList)
+                {
+                    foreach(var havok in collider.HavokColliders)
+                    {
+                        if(havok.HvkFile?.Length > 0)
+                            havokCount++;
+                    }
+                }
+            }
+        }
+    
+        public void CreateCollision(FMP_Object obj, EMD_File emdModel, ESK_File eskSkeleton = null)
+        {
+            CollisionCreator.CreateCollision(this, obj, emdModel, eskSkeleton);
+        }
+
+        public EMD_File ExportCollision(FMP_Object obj)
+        {
+            return CollisionCreator.ExportCollisionAsEmd(this, obj);
+        }
     }
 
     public class FMP_SettingsA
@@ -839,8 +886,6 @@ namespace Xv2CoreLib.FMP
         [CustomSerialize(isHex: true)]
         public int I_04 { get; set; }
         [CustomSerialize]
-        public ushort HitboxGroupIndex { get; set; } //8
-        [CustomSerialize]
         public ushort I_10 { get; set; }
 
         [CustomSerialize(isFloat: true)]
@@ -851,24 +896,23 @@ namespace Xv2CoreLib.FMP
         [YAXDontSerializeIfNull]
         public List<FMP_Entity> Entities { get; set; }
         [YAXDontSerializeIfNull]
-        public FMP_Action Action { get; set; }
+        public FMP_CollisionGroupInstance CollisionGroupInstance { get; set; }
         [YAXDontSerializeIfNull]
-        public List<FMP_VirtualSubPart> VirtualSubParts { get; set; }
+        public FMP_Action Action { get; set; }
         [YAXDontSerializeIfNull]
         public FMP_Hierarchy Hierarchy { get; set; }
         public FMP_Matrix Matrix { get; set; }
 
-        internal static void WriteAll(List<FMP_Object> objects, List<byte> bytes, List<StringWriter.StringInfo> stringWriter)
+        internal static void WriteAll(List<FMP_Object> objects, List<FMP_CollisionGroup> hitboxGroups, List<byte> bytes, List<StringWriter.StringInfo> stringWriter)
         {
             int objectStart = bytes.Count;
-
             //Write main Object entries
-            for(int i = 0; i < objects.Count; i++)
+            for (int i = 0; i < objects.Count; i++)
             {
                 stringWriter.Add(new StringWriter.StringInfo() { Offset = bytes.Count, StringToWrite = objects[i].Name });
                 bytes.AddRange(new byte[4]);
                 bytes.AddRange(BitConverter.GetBytes(objects[i].I_04));
-                bytes.AddRange(BitConverter.GetBytes(objects[i].HitboxGroupIndex));
+                bytes.AddRange(BitConverter.GetBytes(objects[i].CollisionGroupInstance != null ? objects[i].CollisionGroupInstance.CollisionGroupIndex : ushort.MaxValue));
                 bytes.AddRange(BitConverter.GetBytes(objects[i].I_10));
                 bytes.AddRange(new byte[8]); //VirtualSubPart and Action offsets
                 bytes.AddRange(BitConverter.GetBytes(objects[i].Entities != null ? objects[i].Entities.Count : 0));
@@ -880,25 +924,26 @@ namespace Xv2CoreLib.FMP
             //Write sub data, per object
             for (int i = 0; i < objects.Count; i++)
             {
-                int virtualSubObjectsCount = objects[i].VirtualSubParts?.Count ?? 0; //Should be equal to number of hitboxes in hitboxGroup
                 int entityCount = objects[i].Entities?.Count ?? 0;
-                int virtualObjectStart = bytes.Count;
-                
+                int hitboxInstancesStart = bytes.Count;
+                List<FMP_ColliderInstance> hitboxInstances = objects[i].CollisionGroupInstance?.WriteHitboxTree(hitboxGroups, objects[i]);
+                int hitboxInstanceCount = hitboxInstances != null ? hitboxInstances.Count : 0;
+
                 //Write main bodies of virtualSubObject
-                if(virtualSubObjectsCount > 0)
+                if (hitboxInstanceCount > 0)
                 {
                     Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), objectStart + 12 + (84 * i));
 
-                    for (int a = 0; a < virtualSubObjectsCount; a++)
+                    for (int a = 0; a < hitboxInstanceCount; a++)
                     {
-                        FMP_VirtualSubPart virtualPart = objects[i].VirtualSubParts[a];
-                        bytes.AddRange(BitConverter.GetBytes(virtualPart.IndexPairs?.Count ?? 0));
+                        FMP_ColliderInstance hitboxInstance = hitboxInstances[a];
+                        bytes.AddRange(BitConverter.GetBytes(hitboxInstance.HavokGroupParameters?.Count ?? 0));
                         bytes.AddRange(new byte[16]); //IndexPair, ObjectSubPart1, ObjectSubPart2, Action offsets
-                        bytes.AddRange(BitConverter.GetBytes(virtualPart.I_20));
-                        bytes.AddRange(BitConverter.GetBytes(virtualPart.I_22));
-                        bytes.AddRange(BitConverter.GetBytes(virtualPart.F_24));
-                        bytes.AddRange(BitConverter.GetBytes(virtualPart.F_28));
-                        bytes.AddRange(virtualPart.Matrix.Write());
+                        bytes.AddRange(BitConverter.GetBytes(hitboxInstance.I_20));
+                        bytes.AddRange(BitConverter.GetBytes(hitboxInstance.I_22));
+                        bytes.AddRange(BitConverter.GetBytes(hitboxInstance.F_24));
+                        bytes.AddRange(BitConverter.GetBytes(hitboxInstance.F_28));
+                        bytes.AddRange(hitboxInstance.Matrix.Write());
                     }
                 }
 
@@ -909,46 +954,46 @@ namespace Xv2CoreLib.FMP
                     objects[i].Action.Write(bytes, stringWriter);
                 }
 
-                //Write VirtualSubObject subdata
-                if (virtualSubObjectsCount > 0)
+                //Write HitboxInstance subdata
+                if (hitboxInstanceCount > 0)
                 {
-                    for (int a = 0; a < virtualSubObjectsCount; a++)
+                    for (int a = 0; a < hitboxInstanceCount; a++)
                     {
-                        FMP_VirtualSubPart virtualPart = objects[i].VirtualSubParts[a];
+                        FMP_ColliderInstance hitboxInstance = hitboxInstances[a];
 
                         //First SubPart
-                        if(virtualPart.SubPart1 != null)
+                        if(hitboxInstance.SubPart1 != null)
                         {
-                            Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), virtualObjectStart + 8 + (a * 80));
-                            bytes.AddRange(virtualPart.SubPart1.Write());
+                            Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), hitboxInstancesStart + 8 + (a * 80));
+                            bytes.AddRange(hitboxInstance.SubPart1.Write());
                         }
 
                         //Second SubPart (unsure on the order of this one - assume its after SubPart1 for now)
-                        if (virtualPart.SubPart2 != null)
+                        if (hitboxInstance.SubPart2 != null)
                         {
-                            Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), virtualObjectStart + 12 + (a * 80));
-                            bytes.AddRange(virtualPart.SubPart2.Write());
+                            Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), hitboxInstancesStart + 12 + (a * 80));
+                            bytes.AddRange(hitboxInstance.SubPart2.Write());
                         }
 
                         //Index pairs come next
-                        int indexPairs = virtualPart.IndexPairs?.Count ?? 0;
+                        int indexPairs = hitboxInstance.HavokGroupParameters?.Count ?? 0;
 
                         if(indexPairs > 0)
                         {
-                            Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), virtualObjectStart + 4 + (a * 80));
+                            Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), hitboxInstancesStart + 4 + (a * 80));
 
                             for(int p = 0; p < indexPairs; p++)
                             {
-                                bytes.AddRange(BitConverter.GetBytes(virtualPart.IndexPairs[p].Index0));
-                                bytes.AddRange(BitConverter.GetBytes(virtualPart.IndexPairs[p].Index1));
+                                bytes.AddRange(BitConverter.GetBytes(hitboxInstance.HavokGroupParameters[p].Param1));
+                                bytes.AddRange(BitConverter.GetBytes(hitboxInstance.HavokGroupParameters[p].Param2));
                             }
                         }
 
                         //Action
-                        if(virtualPart.Action != null)
+                        if(hitboxInstance.Action != null)
                         {
-                            Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), virtualObjectStart + 16 + (a * 80));
-                            virtualPart.Action.Write(bytes, stringWriter);
+                            Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), hitboxInstancesStart + 16 + (a * 80));
+                            hitboxInstance.Action.Write(bytes, stringWriter);
                         }
                     }
                 }
@@ -987,21 +1032,21 @@ namespace Xv2CoreLib.FMP
             FMP_Object obj = new FMP_Object();
             obj.Name = StringEx.GetString(bytes, BitConverter.ToInt32(bytes, offset));
             obj.I_04 = BitConverter.ToInt32(bytes, offset + 4);
-            obj.HitboxGroupIndex = BitConverter.ToUInt16(bytes, offset + 8);
             obj.I_10 = BitConverter.ToUInt16(bytes, offset + 10);
             obj.F_32 = BitConverter.ToSingle(bytes, offset + 32);
             obj.Matrix = FMP_Matrix.Read(bytes, offset + 36);
 
-            int virtualSubPartOffset = BitConverter.ToInt32(bytes, offset + 12);
+            ushort hitboxGroupIndex = BitConverter.ToUInt16(bytes, offset + 8);
+            int hitboxInstancesOffset = BitConverter.ToInt32(bytes, offset + 12);
             int actionOffset = BitConverter.ToInt32(bytes, offset + 16);
             int entityCount = BitConverter.ToInt32(bytes, offset + 20);
             int entityOffset = BitConverter.ToInt32(bytes, offset + 24);
             int hierarchyOffset = BitConverter.ToInt32(bytes, offset + 28);
 
-            if(obj.HitboxGroupIndex < fmpFile.HitboxGroups.Count && obj.HitboxGroupIndex >= 0)
+            if(hitboxGroupIndex < fmpFile.CollisionGroups.Count && hitboxGroupIndex >= 0)
             {
-                FMP_HitboxGroup hitboxGroup = fmpFile.HitboxGroups[obj.HitboxGroupIndex];
-                obj.VirtualSubParts = FMP_VirtualSubPart.ReadAll(bytes, virtualSubPartOffset, hitboxGroup.Hitboxes.Count);
+                FMP_CollisionGroup hitboxGroup = fmpFile.CollisionGroups[hitboxGroupIndex];
+                obj.CollisionGroupInstance = FMP_CollisionGroupInstance.Read(bytes, hitboxInstancesOffset, hitboxGroup);
             }
 
             if(entityCount > 0)
@@ -1476,7 +1521,26 @@ namespace Xv2CoreLib.FMP
 
             return action;
         }
+        
+        public bool IsEqual(FMP_Action other)
+        {
+            if (I_00 != other.I_00) return false;
+            if (I_04 != other.I_04) return false;
+            if (I_05 != other.I_05) return false;
+            if (I_06 != other.I_06) return false;
+            if (I_07 != other.I_07) return false;
+            if ((Commands != null && other.Commands == null) || (Commands == null && other.Commands != null)) return false;
 
+            if(Commands != null)
+            {
+                for(int i = 0; i < Commands.Count; i++)
+                {
+                    if (!Commands[i].IsEqual(other.Commands[i])) return false;
+                }
+            }
+
+            return true;
+        }
     }
 
     public class FMP_Command
@@ -1526,6 +1590,28 @@ namespace Xv2CoreLib.FMP
             command.Parameters = FMP_Parameter.ReadAll(bytes, parameterOffset, parameterCount);
 
             return command;
+        }
+    
+        public bool IsEqual(FMP_Command command)
+        {
+            if(Name !=  command.Name) return false;
+            if (I_04 != command.I_04) return false;
+            if (I_05 != command.I_05) return false;
+            if (I_06 != command.I_06) return false;
+            if (I_07 != command.I_07) return false;
+            if ((Parameters != null && command.Parameters == null) || (Parameters == null && command.Parameters != null)) return false;
+            
+            if(Parameters != null)
+            {
+                for(int i = 0; i < Parameters.Count; i++)
+                {
+                    if (Parameters[i].Type != command.Parameters[i].Type) return false;
+                    if (Parameters[i].XmlValue != command.Parameters[i].XmlValue) return false;
+                    if (Parameters[i].Name != command.Parameters[i].Name) return false;
+                }
+            }
+
+            return true;
         }
     }
 
@@ -1966,16 +2052,24 @@ namespace Xv2CoreLib.FMP
     {
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]
         [CustomSerialize]
-        public float[] L0 { get; set; }
+        public float[] L0 { get; private set; }
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]
         [CustomSerialize]
-        public float[] L1 { get; set; }
+        public float[] L1 { get; private set; }
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]
         [CustomSerialize]
-        public float[] L2 { get; set; }
+        public float[] L2 { get; private set; }
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]
         [CustomSerialize]
-        public float[] L3 { get; set; }
+        public float[] L3 { get; private set; }
+
+        public FMP_Matrix()
+        {
+            L0 = new float[3];
+            L1 = new float[3];
+            L2 = new float[3];
+            L3 = new float[3];
+        }
 
         public byte[] Write()
         {
@@ -2007,15 +2101,227 @@ namespace Xv2CoreLib.FMP
                 L3 = BitConverter_Ex.ToFloat32Array(bytes, offset + 36, 3)
             };
         }
+    
+        public bool IsEqual(FMP_Matrix matrix)
+        {
+            if (L0[0] != matrix.L0[0] || L0[1] != matrix.L0[1] || L0[2] != matrix.L0[2]) return false;
+            if (L1[0] != matrix.L1[0] || L1[1] != matrix.L1[1] || L1[2] != matrix.L1[2]) return false;
+            if (L2[0] != matrix.L2[0] || L2[1] != matrix.L2[1] || L2[2] != matrix.L2[2]) return false;
+            if (L3[0] != matrix.L3[0] || L3[1] != matrix.L3[1] || L3[2] != matrix.L3[2]) return false;
+            return true;
+        }
+    
+        /// <summary>
+        /// Returns an instance of <see cref="FMP_Matrix"/> set to identity values.
+        /// </summary>
+        /// <returns></returns>
+        public static FMP_Matrix GetDefault()
+        {
+            return new FMP_Matrix()
+            {
+                L0 = new float[3] { 1, 0, 0},
+                L1 = new float[3] { 0, 1, 0 },
+                L2 = new float[3] { 0, 0, 1 },
+                L3 = new float[3] { 0, 0, 0 }
+            };
+        }
+
+        public static FMP_Matrix CreateFromBone(ESK_RelativeTransform transform)
+        {
+            return new FMP_Matrix()
+            {
+                L0 = new float[3] { 1, 0, 0 },
+                L1 = new float[3] { 0, 1, 0 },
+                L2 = new float[3] { 0, 0, 1 },
+                L3 = new float[3] { transform.PositionX * transform.PositionW, transform.PositionY * transform.PositionW, transform.PositionZ * transform.PositionW }
+            };
+        }
+
+        public static FMP_Matrix CreateFromMatrix(Matrix4x4 matrix)
+        {
+            return new FMP_Matrix()
+            {
+                L0 = new float[3] { matrix.M11, matrix.M12, matrix.M13 },
+                L1 = new float[3] { matrix.M21, matrix.M22, matrix.M23 },
+                L2 = new float[3] { matrix.M31, matrix.M32, matrix.M33 },
+                L3 = new float[3] { matrix.M41, matrix.M42, matrix.M43 }
+            };
+        }
+
+        public Matrix4x4 ToMatrix()
+        {
+            return new Matrix4x4(L0[0], L0[1], L0[2], 0f, L1[0], L1[1], L1[2], 0f, L2[0], L2[1], L2[2], 0f, L3[0], L3[1], L3[2], 1f);
+        }
     }
 
-    [YAXSerializeAs("VirtualSubPart")]
-    public class FMP_VirtualSubPart
+    [YAXSerializeAs("CollisionGroupInstance")]
+    public class FMP_CollisionGroupInstance
     {
+        [YAXAttributeForClass]
+        public ushort CollisionGroupIndex { get; set; } = ushort.MaxValue;
+
+        [YAXComment("Names are for reference only. The order of entries is all that matters for linking a ColliderInstance with a Collider in the CollisionGroup")]
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "ColliderInstance")]
+        public List<FMP_ColliderInstance> ColliderInstances { get; set; } = new List<FMP_ColliderInstance>();
+
+        internal static FMP_CollisionGroupInstance Read(byte[] bytes, int offset, FMP_CollisionGroup hitboxGroup)
+        {
+            FMP_CollisionGroupInstance hitboxGroupInstance = new FMP_CollisionGroupInstance();
+            hitboxGroupInstance.CollisionGroupIndex = (ushort)hitboxGroup.Index;
+
+            List<FMP_ColliderInstance> hitboxInstances = FMP_ColliderInstance.ReadAll(bytes, offset, hitboxGroup.UnorderedHitboxList.Count);
+            hitboxGroupInstance.ColliderInstances = CreateHitboxTree(hitboxGroup, hitboxInstances, 0);
+
+            return hitboxGroupInstance;
+        }
+
+        private static List<FMP_ColliderInstance> CreateHitboxTree(FMP_CollisionGroup hitboxGroup, List<FMP_ColliderInstance> hitboxes, ushort index)
+        {
+            List<FMP_ColliderInstance> hitboxTree = new List<FMP_ColliderInstance>();
+
+            int next = index;
+
+            while (next != ushort.MaxValue)
+            {
+                if (next == ushort.MaxValue || next >= hitboxes.Count)
+                    throw new ArgumentException($"FMP_HitboxGroup.CreateHitboxTree: Hitbox index was out of range");
+
+                hitboxes[next].Name = hitboxGroup.UnorderedHitboxList[next].Name;
+                hitboxTree.Add(hitboxes[next]);
+
+                if (hitboxGroup.UnorderedHitboxList[next].ChildIdx != ushort.MaxValue)
+                    hitboxes[next].ColliderInstances.AddRange(CreateHitboxTree(hitboxGroup, hitboxes, hitboxGroup.UnorderedHitboxList[next].ChildIdx));
+
+                next = hitboxGroup.UnorderedHitboxList[next].SiblingIdx;
+            }
+
+            return hitboxTree;
+        }
+
+        private static List<FMP_ColliderInstance> WriteDefaultTree(List<FMP_Collider> colliders, int defaultParam1 = 1, int defaultParam2 = 4)
+        {
+            List<FMP_ColliderInstance> hitboxes = new List<FMP_ColliderInstance>();
+
+            for(int i = 0; i < colliders.Count; i++)
+            {
+                FMP_ColliderInstance colliderInstance = new FMP_ColliderInstance();
+                colliderInstance.Matrix = FMP_Matrix.GetDefault();
+
+                var numHavokGroups = colliders[i].HavokColliders.GroupBy(x => x.Group).Select(g => new { Name = g.Key, Count = g.Count() });
+                colliderInstance.HavokGroupParameters = new List<FMP_HavokGroupParameters>();
+
+                foreach (var havokGroup in numHavokGroups)
+                    colliderInstance.HavokGroupParameters.Add(new FMP_HavokGroupParameters() { Param1 = defaultParam1, Param2 = defaultParam2 });
+
+                hitboxes.Add(colliderInstance);
+            }
+
+            return hitboxes;
+        }
+
+        internal List<FMP_ColliderInstance> WriteHitboxTree(List<FMP_CollisionGroup> hitboxGroups, FMP_Object parentObj)
+        {
+            List<FMP_ColliderInstance> hitboxes = new List<FMP_ColliderInstance>();
+            if (CollisionGroupIndex == ushort.MaxValue) return hitboxes;
+
+            FMP_CollisionGroup hitboxGroup = hitboxGroups.FirstOrDefault(x => x.Index == CollisionGroupIndex);
+            int numColliders = hitboxGroup.ColliderCount;
+
+            if ((ColliderInstances?.Count == 0 || ColliderInstances == null) && numColliders > 0)
+            {
+                //In the event where no collider instances are provided, we can automatically generate default ones
+                return WriteDefaultTree(hitboxGroup.UnorderedHitboxList);
+            }
+            else
+            {
+                WriteHitboxTreeRecursive(hitboxes, ColliderInstances);
+
+
+                if (hitboxGroup == null)
+                    throw new Exception("HitboxInstanceGroup: Cannot find HitboxGroup with ID " + CollisionGroupIndex);
+
+                if (numColliders != hitboxes.Count)
+                    throw new Exception($"HitboxInstanceGroup: The amount of HitboxInstances does not match the number of Hitboxes in the connected HitboxGroup (Object: {parentObj.Name}, HitboxGroup: {hitboxGroup.Index})");
+
+                return hitboxes;
+            }
+        }
+
+        private static void WriteHitboxTreeRecursive(List<FMP_ColliderInstance> hitboxes, List<FMP_ColliderInstance> hitboxTree)
+        {
+            for (int i = 0; i < hitboxTree.Count; i++)
+            {
+                hitboxes.Add(hitboxTree[i]);
+
+                if (hitboxTree[i].ColliderInstances?.Count > 0)
+                    WriteHitboxTreeRecursive(hitboxes, hitboxTree[i].ColliderInstances);
+            }
+        }
+    
+        public void CreateHitboxTreeFromGeneratedCollision(FMP_CollisionGroup collisionGroup, Dictionary<int, FMP_Matrix> matrices)
+        {
+            collisionGroup.CreateUnorderedHitboxList();
+            ColliderInstances = WriteDefaultTree(collisionGroup.UnorderedHitboxList, 2, 3);
+
+            for(int i = 0; i < ColliderInstances.Count; i++)
+            {
+                if (matrices.TryGetValue(i, out FMP_Matrix matrix))
+                {
+                    ColliderInstances[i].Matrix = matrix;
+                }
+            }
+        }
+
+        internal void CreateCollisionInstanceTree(FMP_CollisionGroup collisionGroup, Dictionary<int, FMP_Matrix> matrices, Dictionary<int, MeshOptions[]> flags)
+        {
+            ColliderInstances.Clear();
+            CreateHitboxTreeFromGeneratedCollision(collisionGroup, matrices);
+
+            //Set flag values
+            //note: ColliderInstances wont be recursive when the tree was made with a CreateHitboxTreeFromGeneratedCollision call, so the following is okay
+            for (int i = 0; i < ColliderInstances.Count; i++)
+            {
+                if (flags.TryGetValue(i, out MeshOptions[] options))
+                {
+                    if (options.Length != ColliderInstances[i].HavokGroupParameters.Count)
+                        throw new Exception("CreateCollisionInstanceTree: Exported MeshOptions count is not the same as HavokGroupParameters");
+
+                    for (int a = 0; a < options.Length; a++)
+                    {
+                        if (options[a].Param1_Custom != -1)
+                        {
+                            ColliderInstances[i].HavokGroupParameters[a].Param1 = options[a].Param1_Custom;
+                        }
+                        else if (options[a].Param1_EdgeVFX)
+                        {
+                            ColliderInstances[i].HavokGroupParameters[a].Param1 = 3;
+                        }
+                        else if (options[a].Param1_Float)
+                        {
+                            ColliderInstances[i].HavokGroupParameters[a].Param1 = 1;
+                        }
+
+
+                        if (options[a].Param2_Custom != -1)
+                        {
+                            ColliderInstances[i].HavokGroupParameters[a].Param2 = options[a].Param2_Custom;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    [YAXSerializeAs("ColliderInstance")]
+    public class FMP_ColliderInstance
+    {
+        [YAXAttributeForClass]
+        public string Name { get; set; }
+
         [CustomSerialize]
         public ushort I_20 { get; set; }
         [CustomSerialize]
-        public ushort I_22 { get; set; }
+        public ushort I_22 { get; set; } = ushort.MaxValue;
         [CustomSerialize(isFloat: true)]
         public float F_24 { get; set; }
         [CustomSerialize(isFloat: true)]
@@ -2023,7 +2329,7 @@ namespace Xv2CoreLib.FMP
         public FMP_Matrix Matrix { get; set; }
 
         [YAXDontSerializeIfNull]
-        public List<FMP_IndexPair> IndexPairs { get; set; }
+        public List<FMP_HavokGroupParameters> HavokGroupParameters { get; set; }
         [YAXDontSerializeIfNull]
         public FMP_ObjectSubPart SubPart1 { get; set; }
         [YAXDontSerializeIfNull]
@@ -2031,9 +2337,12 @@ namespace Xv2CoreLib.FMP
         [YAXDontSerializeIfNull]
         public FMP_Action Action { get; set; }
 
-        public static List<FMP_VirtualSubPart> ReadAll(byte[] bytes, int offset, int count)
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "ColliderInstance")]
+        public List<FMP_ColliderInstance> ColliderInstances { get; set; } = new List<FMP_ColliderInstance>();
+
+        public static List<FMP_ColliderInstance> ReadAll(byte[] bytes, int offset, int count)
         {
-            List<FMP_VirtualSubPart> entries = new List<FMP_VirtualSubPart>();
+            List<FMP_ColliderInstance> entries = new List<FMP_ColliderInstance>();
 
             for (int i = 0; i < count; i++)
             {
@@ -2043,9 +2352,9 @@ namespace Xv2CoreLib.FMP
             return entries;
         }
 
-        public static FMP_VirtualSubPart Read(byte[] bytes, int offset)
+        public static FMP_ColliderInstance Read(byte[] bytes, int offset)
         {
-            FMP_VirtualSubPart virtualPart = new FMP_VirtualSubPart();
+            FMP_ColliderInstance virtualPart = new FMP_ColliderInstance();
             virtualPart.I_20 = BitConverter.ToUInt16(bytes, offset + 20);
             virtualPart.I_22 = BitConverter.ToUInt16(bytes, offset + 22);
             virtualPart.F_24 = BitConverter.ToSingle(bytes, offset + 24);
@@ -2058,7 +2367,7 @@ namespace Xv2CoreLib.FMP
             int subPart2 = BitConverter.ToInt32(bytes, offset + 12);
             int nextD_Offset = BitConverter.ToInt32(bytes, offset + 16);
 
-            virtualPart.IndexPairs = FMP_IndexPair.ReadAll(bytes, indexPairOffset, indexPairCount);
+            virtualPart.HavokGroupParameters = FMP_HavokGroupParameters.ReadAll(bytes, indexPairOffset, indexPairCount);
 
             if (subPart1 > 0)
                 virtualPart.SubPart1 = FMP_ObjectSubPart.Read(bytes, subPart1);
@@ -2073,6 +2382,45 @@ namespace Xv2CoreLib.FMP
             return virtualPart;
         }
 
+        public bool IsEqual(FMP_ColliderInstance other)
+        {
+            if (I_20 != other.I_20) return false;
+            if (I_22 != other.I_22) return false;
+            if (F_24 != other.F_24) return false;
+            if (F_28 != other.F_28) return false;
+            if (!Matrix.IsEqual(other.Matrix)) return false;
+            if (HavokGroupParameters.Count !=  other.HavokGroupParameters.Count) return false;
+            if ((SubPart1 == null && other.SubPart1 != null) || (SubPart1 != null && other.SubPart1 == null)) return false;
+            if ((SubPart2 == null && other.SubPart2 != null) || (SubPart2 != null && other.SubPart2 == null)) return false;
+            if ((Action == null && other.Action != null) || (Action != null && other.Action == null)) return false;
+
+            if(HavokGroupParameters != null)
+            {
+                for(int i = 0; i < HavokGroupParameters.Count; i++)
+                {
+                    //if (IndexPairs[i].Index1 != other.IndexPairs[i].Index1) return false;
+                    //if (IndexPairs[i].Index0 != other.IndexPairs[i].Index0) return false;
+                }
+            }
+
+            if(SubPart1 != null)
+            {
+                if(!SubPart1.IsEqual(other.SubPart1)) return false;
+            }
+
+            if (SubPart2 != null)
+            {
+                if (!SubPart2.IsEqual(other.SubPart2)) return false;
+            }
+
+            if (Action != null)
+            {
+                if (!Action.IsEqual(other.Action)) return false;
+            }
+
+            return true;
+
+        }
     }
 
     [YAXSerializeAs("ObjectSubPart")]
@@ -2189,26 +2537,55 @@ namespace Xv2CoreLib.FMP
                 QuaternionW = BitConverter.ToSingle(bytes, offset + 80),
             };
         }
+    
+        public bool IsEqual(FMP_ObjectSubPart other)
+        {
+            if (WidthX != other.WidthX) return false;
+            if (WidthY != other.WidthY) return false;
+            if (WidthZ != other.WidthZ) return false;
+            if (QuaternionX != other.QuaternionX) return false;
+            if (QuaternionY != other.QuaternionY) return false;
+            if (QuaternionZ != other.QuaternionZ) return false;
+            if (QuaternionW != other.QuaternionW) return false;
+            if (I_00 != other.I_00) return false;
+            if (I_02 != other.I_02) return false;
+            if (I_04 != other.I_04) return false;
+            if (I_06 != other.I_06) return false;
+            if (I_08 != other.I_08) return false;
+            if (F_12 != other.F_12) return false;
+            if (F_16 != other.F_16) return false;
+            if (F_20 != other.F_20) return false;
+            if (F_24 != other.F_24) return false;
+            if (F_28 != other.F_28) return false;
+            if (F_32 != other.F_32) return false;
+            if (F_36 != other.F_36) return false;
+            if (F_40 != other.F_40) return false;
+            if (F_44 != other.F_44) return false;
+            if (F_48 != other.F_48) return false;
+            if (F_52 != other.F_52) return false;
+
+            return true;
+        }
     }
 
-    [YAXSerializeAs("IndexPair")]
-    public class FMP_IndexPair
+    [YAXSerializeAs("HavokGroupParameters")]
+    public class FMP_HavokGroupParameters
     {
         [YAXAttributeForClass]
-        public int Index0 { get; set; }
+        public int Param1 { get; set; }
         [YAXAttributeForClass]
-        public int Index1 { get; set; }
+        public int Param2 { get; set; }
 
-        public static List<FMP_IndexPair> ReadAll(byte[] bytes, int offset, int count)
+        public static List<FMP_HavokGroupParameters> ReadAll(byte[] bytes, int offset, int count)
         {
-            List<FMP_IndexPair> indices = new List<FMP_IndexPair>();
+            List<FMP_HavokGroupParameters> indices = new List<FMP_HavokGroupParameters>();
 
             for(int i = 0; i < count; i++)
             {
-                indices.Add(new FMP_IndexPair()
+                indices.Add(new FMP_HavokGroupParameters()
                 {
-                    Index0 = BitConverter.ToInt32(bytes, offset + (8 * i)),
-                    Index1 = BitConverter.ToInt32(bytes, offset + 4 + (8 * i))
+                    Param1 = BitConverter.ToInt32(bytes, offset + (8 * i)),
+                    Param2 = BitConverter.ToInt32(bytes, offset + 4 + (8 * i))
                 });
             }
 
@@ -2216,47 +2593,63 @@ namespace Xv2CoreLib.FMP
         }
     }
 
-    [YAXSerializeAs("HitboxGroup")]
-    public class FMP_HitboxGroup
+    [YAXSerializeAs("CollisionGroup")]
+    public class FMP_CollisionGroup
     {
         [YAXAttributeForClass]
         public int Index { get; set; }
         [YAXAttributeForClass]
         public string Name { get; set; }
 
-        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Hitbox")]
-        public List<FMP_Hitbox> Hitboxes { get; set; } = new List<FMP_Hitbox>();
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Collider")]
+        public List<FMP_Collider> Colliders { get; set; } = new List<FMP_Collider>();
 
-        internal static void WriteAll(List<FMP_HitboxGroup> hitboxGroups, List<byte> bytes, List<StringWriter.StringInfo> stringWriter, bool oldVersion)
+        public List<FMP_Collider> UnorderedHitboxList = new List<FMP_Collider>();
+
+        [YAXDontSerialize]
+        public int ColliderCount => GetColliderCount(Colliders);
+
+        #region Read/Write
+        internal static void WriteAll(List<FMP_CollisionGroup> collisionGroups, List<byte> bytes, List<StringWriter.StringInfo> stringWriter, bool oldVersion)
         {
             int hitboxGroupStart = bytes.Count;
 
             //Write HitboxGroup
-            for(int i = 0; i < hitboxGroups.Count; i++)
+            for (int i = 0; i < collisionGroups.Count; i++)
             {
-                stringWriter.Add(new StringWriter.StringInfo() { StringToWrite = hitboxGroups[i].Name, Offset = bytes.Count });
+                stringWriter.Add(new StringWriter.StringInfo() { StringToWrite = collisionGroups[i].Name, Offset = bytes.Count });
                 bytes.AddRange(new byte[4]);
-                bytes.AddRange(BitConverter.GetBytes(hitboxGroups[i].Hitboxes?.Count ?? 0));
+                bytes.AddRange(BitConverter.GetBytes(collisionGroups[i].UnorderedHitboxList?.Count ?? 0));
                 bytes.AddRange(new byte[4]);
             }
 
             //Write Hitboxes, per group
             
-            for(int i = 0; i < hitboxGroups.Count; i++)
+            for(int i = 0; i < collisionGroups.Count; i++)
             {
-                if ((hitboxGroups[i].Hitboxes?.Count ?? 0) == 0) continue;
+                if ((collisionGroups[i].UnorderedHitboxList?.Count ?? 0) == 0) continue;
                 Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), hitboxGroupStart + 8 + (i * 12));
 
                 int hitboxStart = bytes.Count;
 
-                for (int a = 0; a < hitboxGroups[i].Hitboxes.Count; a++)
+                for (int a = 0; a < collisionGroups[i].UnorderedHitboxList.Count; a++)
                 {
-                    FMP_Hitbox hitbox = hitboxGroups[i].Hitboxes[a];
+                    FMP_Collider hitbox = collisionGroups[i].UnorderedHitboxList[a];
+
+                    //TODO: Remove after testing
+                    if(hitbox.HavokFile != null)
+                    {
+                        if (hitbox.HvkCollisionData == null)
+                            hitbox.HvkCollisionData = new FMP_HvkCollisionData();
+
+                        hitbox.HavokFile.ResolveReferences();
+                        hitbox.HvkCollisionData.HvkFile = hitbox.HavokFile.Write();
+                    }
 
                     if(!string.IsNullOrWhiteSpace(hitbox.Name))
                         stringWriter.Add(new StringWriter.StringInfo() { Offset = bytes.Count, StringToWrite = hitbox.Name });
 
-                    bytes.AddRange(new byte[4]);
+                    bytes.AddRange(BitConverter.GetBytes((int)-1));
                     bytes.AddRange(BitConverter.GetBytes(hitbox.ChildIdx));
                     bytes.AddRange(BitConverter.GetBytes(hitbox.unk_a0));
                     bytes.AddRange(BitConverter.GetBytes(hitbox.SiblingIdx));
@@ -2274,21 +2667,21 @@ namespace Xv2CoreLib.FMP
                 }
 
                 //Write sub data
-                for (int a = 0; a < hitboxGroups[i].Hitboxes.Count; a++)
+                for (int a = 0; a < collisionGroups[i].UnorderedHitboxList.Count; a++)
                 {
-                    FMP_Hitbox hitbox = hitboxGroups[i].Hitboxes[a];
+                    FMP_Collider hitbox = collisionGroups[i].UnorderedHitboxList[a];
                     int hitboxSize = oldVersion ? 36 : 40;
 
                     //Destruction Groups
-                    if(hitbox.Destructions != null)
+                    if(hitbox.HavokColliders != null)
                     {
-                        List<List<FMP_Destruction>> destructionGroups = FMP_Destruction.CreateDesructionGroups(hitbox.Destructions);
+                        List<List<FMP_Havok>> destructionGroups = FMP_Havok.CreateHavokGroups(hitbox.HavokColliders);
 
                         if (destructionGroups.Count > 0)
                         {
                             Utils.ReplaceRange(bytes, BitConverter.GetBytes(destructionGroups.Count), hitboxStart + 12 + (hitboxSize * a));
                             Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), hitboxStart + 16 + (hitboxSize * a));
-                            FMP_Destruction.Write(destructionGroups, bytes);
+                            FMP_Havok.Write(destructionGroups, bytes);
                         }
                     }
 
@@ -2313,7 +2706,11 @@ namespace Xv2CoreLib.FMP
                         int indicesOffset = oldVersion ? 32 : 36;
                         Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), hitboxStart + indicesOffset + (hitboxSize * a));
                         
-                        bytes.AddRange(BitConverter_Ex.GetBytes(hitbox.CollisionVertexData.Faces));
+                        foreach(var face in hitbox.CollisionVertexData.Faces)
+                        {
+                            bytes.AddRange(BitConverter.GetBytes((ushort)face));
+                        }
+
                         bytes.AddRange(new byte[Utils.CalculatePadding(bytes.Count, 4)]);
                     }
 
@@ -2336,9 +2733,9 @@ namespace Xv2CoreLib.FMP
             }
         }
 
-        public static List<FMP_HitboxGroup> ReadAll(byte[] bytes, int offset, int count, bool oldVersion)
+        public static List<FMP_CollisionGroup> ReadAll(byte[] bytes, int offset, int count, bool oldVersion)
         {
-            List<FMP_HitboxGroup> hitboxes = new List<FMP_HitboxGroup>();
+            List<FMP_CollisionGroup> hitboxes = new List<FMP_CollisionGroup>();
 
             for(int i = 0; i < count; i++)
             {
@@ -2348,9 +2745,9 @@ namespace Xv2CoreLib.FMP
             return hitboxes;
         }
 
-        public static FMP_HitboxGroup Read(byte[] bytes, int offset, int index, bool oldVersion)
+        public static FMP_CollisionGroup Read(byte[] bytes, int offset, int index, bool oldVersion)
         {
-            FMP_HitboxGroup hitboxGroup = new FMP_HitboxGroup();
+            FMP_CollisionGroup hitboxGroup = new FMP_CollisionGroup();
             hitboxGroup.Index = index;
             hitboxGroup.Name = StringEx.GetString(bytes, BitConverter.ToInt32(bytes, offset));
 
@@ -2359,42 +2756,147 @@ namespace Xv2CoreLib.FMP
 
             for(int i = 0; i < hitboxCount; i++)
             {
-                hitboxGroup.Hitboxes.Add(FMP_Hitbox.Read(bytes, hitboxOffset + (i * 40), oldVersion));
+                hitboxGroup.UnorderedHitboxList.Add(FMP_Collider.Read(bytes, hitboxOffset + (i * 40), i, oldVersion));
             }
+
+            hitboxGroup.Colliders = CreateHitboxTree(hitboxGroup.UnorderedHitboxList, 0);
 
             return hitboxGroup;
         }
+    
+        private static List<FMP_Collider> CreateHitboxTree(List<FMP_Collider> hitboxes, ushort index)
+        {
+            List<FMP_Collider> hitboxTree = new List<FMP_Collider>();
+
+            int next = index;
+
+            while(next != ushort.MaxValue)
+            {
+                if (next == ushort.MaxValue || next >= hitboxes.Count)
+                    throw new ArgumentException($"FMP_HitboxGroup.CreateHitboxTree: Hitbox index was out of range");
+
+                hitboxTree.Add(hitboxes[next]);
+
+                if (hitboxes[next].ChildIdx != ushort.MaxValue)
+                    hitboxes[next].Colliders.AddRange(CreateHitboxTree(hitboxes, hitboxes[next].ChildIdx));
+
+                next = hitboxes[next].SiblingIdx;
+            }
+
+            return hitboxTree;
+        }
+
+        private static List<FMP_Collider> WriteHitboxTree(List<FMP_Collider> hitboxTree)
+        {
+            List<FMP_Collider> hitboxes = new List<FMP_Collider>();
+            WriteHitboxTreeRecursive(hitboxes, hitboxTree, ushort.MaxValue);
+            return hitboxes;
+        }
+
+        internal void CreateUnorderedHitboxList()
+        {
+            UnorderedHitboxList = WriteHitboxTree(Colliders);
+        } 
+
+        private static void WriteHitboxTreeRecursive(List<FMP_Collider> hitboxes, List<FMP_Collider> hitboxTree, ushort parentIdx)
+        {
+            for(int i = 0; i < hitboxTree.Count; i++)
+            {
+                hitboxTree[i].Index = hitboxes.Count;
+                hitboxes.Add(hitboxTree[i]);
+                hitboxTree[i].ParentIdx = (ushort)((i == hitboxTree.Count - 1) ? ushort.MaxValue : 0);
+
+                if (hitboxTree[i].Colliders?.Count > 0)
+                {
+                    hitboxTree[i].ChildIdx = (ushort)hitboxes.Count;
+                    WriteHitboxTreeRecursive(hitboxes, hitboxTree[i].Colliders, (ushort)hitboxTree[i].Index);
+                }
+                else
+                {
+                    hitboxTree[i].ChildIdx = ushort.MaxValue;
+                }
+
+                hitboxTree[i].SiblingIdx = (ushort)((i == hitboxTree.Count - 1) ? ushort.MaxValue : hitboxes.Count);
+            }
+        }
+        #endregion
+
+        private static int GetColliderCount(List<FMP_Collider> hitboxTree)
+        {
+            int count = 0;
+
+            foreach(var hitbox in  hitboxTree)
+            {
+                count++;
+
+                if (hitbox.Colliders?.Count > 0)
+                    count += GetColliderCount(hitbox.Colliders);
+            }
+
+            return count;
+        }
+    
+        public bool HasHavokCollisionData()
+        {
+            if (UnorderedHitboxList == null || UnorderedHitboxList?.Count == 0)
+                CreateUnorderedHitboxList();
+
+            foreach (var collider in UnorderedHitboxList)
+            {
+                if (collider.HavokColliders == null) continue;
+
+                foreach(var havok in collider.HavokColliders)
+                {
+                    if (havok.HvkFile?.Length > 0)
+                        return true;
+                }
+            }
+
+            return false;
+        }
     }
 
-    [YAXSerializeAs("Hitbox")]
-    public class FMP_Hitbox
+    [YAXSerializeAs("Collider")]
+    public class FMP_Collider
     {
+        [YAXDontSerialize]
+        public int Index { get; set; }
+
         [YAXAttributeForClass]
         public string Name { get; set; }
 
-        [CustomSerialize]
+        [YAXDontSerialize]
         public ushort ChildIdx { get; set; }
-        [CustomSerialize]
+        [YAXAttributeForClass]
         public ushort unk_a0 { get; set; }
-        [CustomSerialize]
+        [YAXDontSerialize]
         public ushort SiblingIdx { get; set; }
-        [CustomSerialize]
+        [YAXDontSerialize]
         public ushort ParentIdx { get; set; }
 
-        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Destruction")]
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Havok")]
         [YAXDontSerializeIfNull]
-        public List<FMP_Destruction> Destructions { get; set; } = new List<FMP_Destruction>();
+        public List<FMP_Havok> HavokColliders { get; set; } = new List<FMP_Havok>();
 
         [YAXDontSerializeIfNull]
         public FMP_CollisionVertexData CollisionVertexData { get; set; }
         [YAXDontSerializeIfNull]
         public FMP_HvkCollisionData HvkCollisionData { get; set; }
 
-        public static FMP_Hitbox Read(byte[] bytes, int offset, bool oldVersion) 
-        {
-            FMP_Hitbox hitbox = new FMP_Hitbox();
+        //To allow embedded XMLs for easier testing; TODO remove after, this doesn't need to stay
+        [YAXDontSerializeIfNull]
+        public HavokTagFile HavokFile { get; set; }
 
-            hitbox.Name = StringEx.GetString(bytes, BitConverter.ToInt32(bytes, offset));
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Collider")]
+        public List<FMP_Collider> Colliders { get; set; } = new List<FMP_Collider>();
+
+        public static FMP_Collider Read(byte[] bytes, int offset, int index, bool oldVersion) 
+        {
+            FMP_Collider hitbox = new FMP_Collider();
+
+            int nameOffset = BitConverter.ToInt32(bytes, offset);
+            hitbox.Index = index;
+            hitbox.Name = nameOffset != -1 ? StringEx.GetString(bytes, nameOffset) : null;
             hitbox.ChildIdx = BitConverter.ToUInt16(bytes, offset + 4);
             hitbox.unk_a0 = BitConverter.ToUInt16(bytes, offset + 6);
             hitbox.SiblingIdx = BitConverter.ToUInt16(bytes, offset + 8);
@@ -2424,7 +2926,7 @@ namespace Xv2CoreLib.FMP
                 faceIndicesOffset = BitConverter.ToInt32(bytes, offset + 36);
             }
 
-            hitbox.Destructions = FMP_Destruction.ReadAll(bytes, destructionListOffset, destructionListCount);
+            hitbox.HavokColliders = FMP_Havok.ReadAll(bytes, destructionListOffset, destructionListCount);
             hitbox.CollisionVertexData = FMP_CollisionVertexData.Read(bytes, vertexDataOffset, vertexDataCount, faceIndicesOffset, faceIndicesCount);
 
             if (hvkGeometryOffset > 0 && !oldVersion)
@@ -2433,15 +2935,56 @@ namespace Xv2CoreLib.FMP
             return hitbox;
         }
 
+        public override string ToString()
+        {
+            return $"sibling: {SiblingIdx}, child: {ChildIdx}, parent: {ParentIdx}";
+        }
     }
 
-    [YAXSerializeAs("Destruction")]
-    public class FMP_Destruction
+    [YAXSerializeAs("Havok")]
+    public class FMP_Havok
     {
+        [Flags]
+        public enum HavokFlags1 : uint
+        {
+            unk1 = 0x1,
+            unk2 = 0x2,
+            unk3 = 0x4,
+            unk4 = 0x8,
+            NoWalk = 0x10,
+            unk6 = 0x20,
+            unk7 = 0x40,
+            unk8 = 0x80,
+            unk9 = 0x100,
+            unk10 = 0x200,
+            unk11 = 0x400,
+            unk12 = 0x800,
+            unk13 = 0x1000,
+            unk14 = 0x2000,
+            unk15 = 0x4000,
+            unk16 = 0x8000,
+            unk17 = 0x10000,
+            unk18 = 0x20000,
+            unk19 = 0x40000,
+            unk20 = 0x80000,
+            unk21 = 0x100000,
+            unk22 = 0x200000,
+            unk23 = 0x400000,
+            unk24 = 0x800000,
+            unk25 = 0x1000000,
+            unk26 = 0x2000000,
+            unk27 = 0x4000000,
+            unk28 = 0x8000000,
+            unk29 = 0x10000000,
+            unk30 = 0x20000000,
+            unk31 = 0x40000000,
+            unl32 = 0x80000000
+        }
+
         [YAXAttributeForClass]
         public int Group { get; set; }
         [CustomSerialize]
-        public int I_00 { get; set; }
+        public HavokFlags1 Flags1 { get; set; }
         [CustomSerialize]
         public int I_08 { get; set; }
         [CustomSerialize]
@@ -2451,20 +2994,25 @@ namespace Xv2CoreLib.FMP
         [CustomSerialize]
         public int I_32 { get; set; }
         [CustomSerialize(isFloat: true)]
-        public float F_36 { get; set; }
+        public float F_36 { get; set; } = 0.01f;
 
         [YAXDontSerializeIfNull]
-        public FMP_DestructionSubPart SubPart1 { get; set; }
+        public FMP_HavokSubPart SubPart1 { get; set; }
         [YAXDontSerializeIfNull]
-        public FMP_DestructionSubPart SubPart2 { get; set; }
+        public FMP_HavokSubPart SubPart2 { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]
         [CustomSerialize]
+        [YAXDontSerializeIfNull]
         public byte[] HvkFile { get; set; }
 
-        public static List<FMP_Destruction> ReadAll(byte[] bytes, int offset, int count)
+        //To allow embedded XMLs for easier testing; TODO remove after, this doesn't need to stay
+        [YAXDontSerializeIfNull]
+        public HavokTagFile HavokFile { get; set; }
+
+        public static List<FMP_Havok> ReadAll(byte[] bytes, int offset, int count)
         {
-            List<FMP_Destruction> destructionList = new List<FMP_Destruction>();
+            List<FMP_Havok> destructionList = new List<FMP_Havok>();
 
             for(int i = 0; i < count; i++)
             {
@@ -2480,12 +3028,12 @@ namespace Xv2CoreLib.FMP
             return destructionList;
         }
 
-        public static FMP_Destruction Read(byte[] bytes, int offset, int group)
+        public static FMP_Havok Read(byte[] bytes, int offset, int group)
         {
-            FMP_Destruction destruction = new FMP_Destruction();
+            FMP_Havok destruction = new FMP_Havok();
 
             destruction.Group = group;
-            destruction.I_00 = BitConverter.ToInt32(bytes, offset);
+            destruction.Flags1 = (FMP_Havok.HavokFlags1)BitConverter.ToInt32(bytes, offset);
             destruction.I_08 = BitConverter.ToInt32(bytes, offset + 8);
             destruction.I_12 = BitConverter.ToInt32(bytes, offset + 12);
             destruction.I_28 = BitConverter.ToInt32(bytes, offset + 28);
@@ -2500,15 +3048,15 @@ namespace Xv2CoreLib.FMP
             destruction.HvkFile = bytes.GetRange(hvkFileOffset, hvkFileSize);
 
             if (subPartOffset > 0)
-                destruction.SubPart1 = FMP_DestructionSubPart.Read(bytes, subPartOffset);
+                destruction.SubPart1 = FMP_HavokSubPart.Read(bytes, subPartOffset);
 
             if (subPartOffset2 > 0)
-                destruction.SubPart2 = FMP_DestructionSubPart.Read(bytes, subPartOffset2);
+                destruction.SubPart2 = FMP_HavokSubPart.Read(bytes, subPartOffset2);
 
             return destruction;
         }
 
-        internal static void Write(List<List<FMP_Destruction>> groups, List<byte> bytes)
+        internal static void Write(List<List<FMP_Havok>> groups, List<byte> bytes)
         {
             int listStart = bytes.Count;
 
@@ -2527,8 +3075,16 @@ namespace Xv2CoreLib.FMP
 
                 for(int a = 0; a < groups[i].Count; a++)
                 {
-                    FMP_Destruction destruction = groups[i][a];
-                    bytes.AddRange(BitConverter.GetBytes(destruction.I_00));
+                    FMP_Havok destruction = groups[i][a];
+
+                    //TODO: Remove after testing
+                    if (destruction.HavokFile != null)
+                    {
+                        destruction.HavokFile.ResolveReferences();
+                        destruction.HvkFile = destruction.HavokFile.Write();
+                    }
+
+                    bytes.AddRange(BitConverter.GetBytes((uint)destruction.Flags1));
                     bytes.AddRange(new byte[4]);
                     bytes.AddRange(BitConverter.GetBytes(destruction.I_08));
                     bytes.AddRange(BitConverter.GetBytes(destruction.I_12));
@@ -2543,7 +3099,7 @@ namespace Xv2CoreLib.FMP
                 //Write sub data, per Destruction
                 for (int a = 0; a < groups[i].Count; a++)
                 {
-                    FMP_Destruction destruction = groups[i][a];
+                    FMP_Havok destruction = groups[i][a];
 
                     if(destruction.SubPart1 != null)
                     {
@@ -2568,25 +3124,35 @@ namespace Xv2CoreLib.FMP
             }
         }
 
-        internal static List<List<FMP_Destruction>> CreateDesructionGroups(List<FMP_Destruction> destructions)
+        internal static List<List<FMP_Havok>> CreateHavokGroups(List<FMP_Havok> havokEntries)
         {
-            List<int> groupValues = destructions.Select(x => x.Group).ToList();
-            groupValues.Sort();
+            var groupValues = havokEntries.OrderBy(x => x.Group).GroupBy(x => x.Group).ToList();
 
-            List<List<FMP_Destruction>> groups = new List<List<FMP_Destruction>>();
-
+            List<List<FMP_Havok>> groups = new List<List<FMP_Havok>>();
             foreach(var group in groupValues)
             {
-                List<FMP_Destruction> destructionGroup = destructions.Where(x => x.Group == group).ToList();
-                groups.Add(destructionGroup);
+                List<FMP_Havok> havokGroup = havokEntries.Where(x => x.Group == group.Key).ToList();
+
+                foreach(var _group in groups)
+                {
+                    foreach(var _havok in havokGroup)
+                    {
+                        if (_group.Contains(_havok))
+                        {
+                            throw new Exception("FMP_Havok.CreateHavokGroups: Attempted to add a havok entry to the list a second time");
+                        }
+                    }
+                }
+
+                groups.Add(havokGroup);
             }
 
             return groups;
         }
     }
 
-    [YAXSerializeAs("DestructionSubPart")]
-    public class FMP_DestructionSubPart
+    [YAXSerializeAs("HavokSubPart")]
+    public class FMP_HavokSubPart
     {
         [CustomSerialize]
         public int I_00 { get; set; }
@@ -2642,9 +3208,9 @@ namespace Xv2CoreLib.FMP
             return bytes.ToArray();
         }
 
-        public static FMP_DestructionSubPart Read(byte[] bytes, int offset)
+        public static FMP_HavokSubPart Read(byte[] bytes, int offset)
         {
-            return new FMP_DestructionSubPart()
+            return new FMP_HavokSubPart()
             {
                 I_00 = BitConverter.ToInt32(bytes, offset),
                 F_04 = BitConverter.ToSingle(bytes, offset + 4),
@@ -2668,7 +3234,7 @@ namespace Xv2CoreLib.FMP
     [YAXSerializeAs("VertexData")]
     public class FMP_CollisionVertexData
     {
-        [YAXCollection(YAXCollectionSerializationTypes.Recursive, EachElementName = "VertexIndex")]
+        [YAXCollection(YAXCollectionSerializationTypes.Recursive, EachElementName = "idx")]
         public ushort[] Faces { get; set; }
 
         public List<FMP_Vertex> Vertices { get; set; } = new List<FMP_Vertex>();
@@ -2690,6 +3256,12 @@ namespace Xv2CoreLib.FMP
 
             return data;
         }
+    
+        public bool HasData()
+        {
+            return Vertices?.Count > 0 && Faces?.Length > 0;
+        }
+    
     }
 
     [YAXSerializeAs("Vertex")]
@@ -2701,6 +3273,29 @@ namespace Xv2CoreLib.FMP
         [YAXAttributeForClass]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]
         public float[] Normal { get; set; } //3
+
+        public FMP_Vertex() { }
+
+        public FMP_Vertex(Vector3 pos)
+        {
+            Pos = new float[3] { pos.X, pos.Y, pos.Z };
+            Normal = new float[3];
+        }
+
+        public Vector3 GetPositionVector()
+        {
+            return new Vector3(Pos[0], Pos[1], Pos[2]);
+        }
+
+        public void SetPositionVector(Vector3 pos)
+        {
+            if (Pos?.Length != 3)
+                Pos = new float[3];
+
+            Pos[0] = pos.X;
+            Pos[1] = pos.Y;
+            Pos[2] = pos.Z;
+        }
     }
 
     [YAXSerializeAs("HvkCollisionData")]

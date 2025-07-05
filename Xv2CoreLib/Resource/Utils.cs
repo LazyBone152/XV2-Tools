@@ -163,7 +163,7 @@ namespace Xv2CoreLib
 
             return convertedList;
         }
-
+        
         public static List<int> ConvertToIntList(List<ushort> list)
         {
             List<int> newList = new List<int>();
@@ -185,6 +185,19 @@ namespace Xv2CoreLib
 
             return newArray;
         }
+
+        public static int[] ConvertToIntArray(ushort[] array)
+        {
+            int[] newArray = new int[array.Length];
+
+            for (int i = 0; i < array.Length; i++)
+            {
+                newArray[i] = array[i];
+            }
+
+            return newArray;
+        }
+
     }
 
     public static class Xv2ColorConverter

@@ -121,6 +121,12 @@
   <data name="AcbFormatHelper" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\AcbFormatHelper.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="HavokConvexTemplate" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\HavokConvexTemplate.hkx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="HavokMeshTemplate" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\HavokMeshTemplate.hkx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="ShaderHelper" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ShaderHelper.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>

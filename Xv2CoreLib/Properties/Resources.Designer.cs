@@ -87,6 +87,26 @@ namespace Xv2CoreLib.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] HavokConvexTemplate {
+            get {
+                object obj = ResourceManager.GetObject("HavokConvexTemplate", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] HavokMeshTemplate {
+            get {
+                object obj = ResourceManager.GetObject("HavokMeshTemplate", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
         ///&lt;ShaderHelper&gt;
         ///  &lt;Shader ShaderProgram=&quot;ParticleDecal&quot;&gt;

@@ -854,6 +854,13 @@ namespace Xv2CoreLib.ESK
             return EMA.Skeleton.Convert(this);
         }
 
+        public void GenerateAbsoluteMatrices()
+        {
+            foreach(var bone in ESKBones)
+            {
+                bone.GenerateAbsoluteMatrix(Matrix4x4.Identity);
+            }
+        }
     }
 
     [YAXSerializeAs("Bone")]
@@ -903,6 +910,9 @@ namespace Xv2CoreLib.ESK
         public ESK_RelativeTransform RelativeTransform { get; set; }
         [YAXDontSerializeIfNull]
         public ESK_AbsoluteTransform AbsoluteTransform { get; set; }
+
+        [YAXDontSerialize]
+        public Matrix4x4 GeneratedAbsoluteMatrix { get; set; }
 
         //Parent reference
         [YAXDontSerialize]
@@ -1031,6 +1041,18 @@ namespace Xv2CoreLib.ESK
         public override string ToString()
         {
             return Name;
+        }
+    
+        public void GenerateAbsoluteMatrix(Matrix4x4 parent)
+        {
+            Matrix4x4 relativeMatrix = RelativeTransform.ToMatrix();
+
+            GeneratedAbsoluteMatrix = relativeMatrix * parent;
+
+            foreach (var child in ESK_Bones)
+            {
+                child.GenerateAbsoluteMatrix(GeneratedAbsoluteMatrix);
+            }
         }
     }
 

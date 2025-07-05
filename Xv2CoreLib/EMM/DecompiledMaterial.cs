@@ -283,6 +283,11 @@ namespace Xv2CoreLib.EMM
             }
         }
 
+        /// <summary>
+        /// Force wireframe mode in the XenoKit viewport. Not an actual game material parameter!
+        /// </summary>
+        public bool ForceWireframeMode { get; set; }
+
         #region Compile
         public List<Parameter> Compile()
         {
