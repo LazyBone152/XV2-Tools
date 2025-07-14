@@ -66,8 +66,6 @@ using xv2Utils = Xv2CoreLib.Utils;
 using Xv2CoreLib.EMZ;
 using Xv2CoreLib.SDS;
 using System.Xml.Linq;
-using System.Windows.Controls;
-using YAXLib;
 //using LB_Mod_Installer.Installer.Transformation;
 
 namespace LB_Mod_Installer.Installer
@@ -458,82 +456,6 @@ namespace LB_Mod_Installer.Installer
                     throw new InvalidDataException(string.Format("The filetype of \"{0}\" is not supported.", xmlPath));
             }
         }
-
-        /*
-        private bool TryTransformationInstall(string xmlPath)
-        {
-#if !DEBUG
-            try
-#endif
-            {
-                if (xmlPath.Contains("_CusAuraDefine.xml"))
-                {
-                    UpdateProgessBarText("_Loading CusAuraDefines...", false);
-
-                    var xml = zipManager.DeserializeXmlFromArchive_Ext<TransformCusAuras>(GeneralInfo.GetPathInZipDataDir(xmlPath));
-                    transformInstaller.LoadCusAuras(xml);
-                    return true;
-                }
-
-                if (xmlPath.Contains("_PartSetDefine.xml"))
-                {
-                    UpdateProgessBarText("_Loading PartSetDefines...", false);
-
-                    var xml = zipManager.DeserializeXmlFromArchive_Ext<TransformPartSets>(GeneralInfo.GetPathInZipDataDir(xmlPath));
-                    transformInstaller.LoadPartSets(xml);
-                    return true;
-                }
-
-                if (xmlPath.Contains("_PowerUpDefine.xml"))
-                {
-                    UpdateProgessBarText("_Loading PowerUpDefines...", false);
-
-                    var xml = zipManager.DeserializeXmlFromArchive_Ext<TransformPowerUps>(GeneralInfo.GetPathInZipDataDir(xmlPath));
-                    transformInstaller.LoadPupEntries(xml);
-                    return true;
-                }
-
-                if (xmlPath.Contains("_TransformDefine.xml"))
-                {
-                    UpdateProgessBarText("_Loading TransformDefines...", false);
-
-                    var xml = zipManager.DeserializeXmlFromArchive_Ext<TransformDefines>(GeneralInfo.GetPathInZipDataDir(xmlPath));
-                    transformInstaller.LoadTransformations(xml);
-                    return true;
-                }
-            }
-#if !DEBUG
-            catch (Exception ex)
-            {
-                string error = string.Format("Failed at Awoken Skill Defines load phase ({0}).", xmlPath);
-                throw new Exception(error, ex);
-            }
-#endif
-
-            if (xmlPath.Contains("_TransformSkill.xml"))
-            {
-                UpdateProgessBarText("_Installing Awoken Skill...", false);
-                TransformSkill xml = null;
-#if !DEBUG
-                try
-#endif
-                {
-                    xml = zipManager.DeserializeXmlFromArchive_Ext<TransformSkill>(GeneralInfo.GetPathInZipDataDir(xmlPath));
-                    transformInstaller.InstallSkill(xml);
-                    return true;
-                }
-#if !DEBUG
-                catch (Exception ex)
-                {
-                    string error = string.Format("Failed at Awoken Skill ({1}) install phase ({0}).", xmlPath, xml != null ? installerXml.GetLocalisedString(xml.Name) : "Load Failed");
-                    throw new Exception(error, ex);
-                }
-#endif
-            }
-
-            return false;
-        }
-        */
 
         private void JungleCheck()
         {
