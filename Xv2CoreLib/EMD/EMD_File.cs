@@ -6,6 +6,7 @@ using System.Numerics;
 using Xv2CoreLib.FMP;
 using Xv2CoreLib.Havok;
 using Xv2CoreLib.Resource;
+using Xv2CoreLib.Resource.UndoRedo;
 using YAXLib;
 
 namespace Xv2CoreLib.EMD
@@ -32,37 +33,20 @@ namespace Xv2CoreLib.EMD
     }
 
     [Serializable]
-    public class EMD_File : INotifyPropertyChanged
+    public class EMD_File
     {
-        #region NotifyPropertyChanged
+        #region Notify
         [field: NonSerialized]
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event ModelModifiedEventHandler ModelModified;
 
-        private void NotifyPropertyChanged(String propertyName = "")
+        public void TriggerModelModifiedEvent(EditTypeEnum editType, object context, object parent)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            ModelModified?.Invoke(this, new ModelModifiedEventArgs(editType, context, parent));
         }
 
-        [YAXDontSerialize]
-        public bool ModelChanged { get; set; }
-        [YAXDontSerialize]
-        public bool TextureSamplersChanged { get; set; }
-        [YAXDontSerialize]
-        public bool MaterialsChanged { get; set; }
-
-        public void TriggerModelChanged()
+        public static object[] CreateTriggerParams(EditTypeEnum editType, object context, object parent = null)
         {
-            NotifyPropertyChanged(nameof(ModelChanged));
-        }
-
-        public void TriggerTexturesChanged()
-        {
-            NotifyPropertyChanged(nameof(TextureSamplersChanged));
-        }
-
-        public void TriggerMaterialsChanged()
-        {
-            NotifyPropertyChanged(nameof(MaterialsChanged));
+            return new object[3] { editType, context, parent };
         }
         #endregion
 
@@ -280,6 +264,28 @@ namespace Xv2CoreLib.EMD
         {
             NotifyPropertyChanged(nameof(Name));
         }
+    
+        public void RecalculateAABB(List<IUndoRedo> undos = null)
+        {
+            Vector3 min = new Vector3(float.PositiveInfinity);
+            Vector3 max = new Vector3(float.NegativeInfinity);
+
+            foreach(var submesh in Submeshes)
+            {
+                submesh.RecalculateAABB(undos);
+                min = Vector3.Min(submesh.AABB.GetMinVec(), min);
+                max = Vector3.Max(submesh.AABB.GetMaxVec(), max);
+            }
+
+            EMD_AABB aabb = EMD_AABB.Create(min, max);
+
+            if (undos != null)
+            {
+                undos.Add(new UndoablePropertyGeneric(nameof(AABB), this, AABB, aabb));
+            }
+
+            AABB = aabb;
+        }
     }
 
     [Serializable]
@@ -296,7 +302,7 @@ namespace Xv2CoreLib.EMD
         public float CenterZ { get; set; }
         [YAXAttributeFor("AABB_Center")]
         [YAXSerializeAs("W")]
-        public float CenterW { get; set; }
+        public float CenterW { get; set; } = 1f;
         [YAXAttributeFor("AABB_Min")]
         [YAXSerializeAs("X")]
         public float MinX { get; set; }
@@ -308,7 +314,7 @@ namespace Xv2CoreLib.EMD
         public float MinZ { get; set; }
         [YAXAttributeFor("AABB_Min")]
         [YAXSerializeAs("W")]
-        public float MinW { get; set; }
+        public float MinW { get; set; } =  1f;
         [YAXAttributeFor("AABB_Max")]
         [YAXSerializeAs("X")]
         public float MaxX { get; set; }
@@ -320,7 +326,7 @@ namespace Xv2CoreLib.EMD
         public float MaxZ { get; set; }
         [YAXAttributeFor("AABB_Max")]
         [YAXSerializeAs("W")]
-        public float MaxW { get; set; }
+        public float MaxW { get; set; } = 1f;
 
         public static EMD_AABB Read(byte[] bytes, int offset)
         {
@@ -359,6 +365,34 @@ namespace Xv2CoreLib.EMD
             bytes.AddRange(BitConverter.GetBytes(MaxW));
 
             return bytes.ToArray();
+        }
+    
+        public Vector3 GetMinVec()
+        {
+            return new Vector3(MinX, MinY, MinZ) * MinW;
+        }
+
+        public Vector3 GetMaxVec()
+        {
+            return new Vector3(MaxX, MaxY, MaxZ) * MaxW;
+        }
+
+        public static EMD_AABB Create(Vector3 min, Vector3 max)
+        {
+            Vector3 center = (min + max) * 0.5f;
+
+            EMD_AABB aabb = new EMD_AABB();
+            aabb.MinX = min.X;
+            aabb.MinY = min.Y;
+            aabb.MinZ = min.Z;
+            aabb.MaxX = max.X;
+            aabb.MaxY = max.Y;
+            aabb.MaxZ = max.Z;
+            aabb.CenterX = center.X;
+            aabb.CenterY = center.Y;
+            aabb.CenterZ = center.Z;
+
+            return aabb;
         }
     }
 
@@ -502,6 +536,27 @@ namespace Xv2CoreLib.EMD
             return mesh;
         }
     
+        public void RecalculateAABB(List<IUndoRedo> undos = null)
+        {
+            Vector3 min = new Vector3(float.PositiveInfinity);
+            Vector3 max = new Vector3(float.NegativeInfinity);
+
+            foreach(var vertex in Vertexes)
+            {
+                Vector3 vertPos = new Vector3(vertex.PositionX, vertex.PositionY, vertex.PositionZ);
+                min = Vector3.Min(min, vertPos);
+                max = Vector3.Max(max, vertPos);
+            }
+
+            EMD_AABB aabb = EMD_AABB.Create(min, max);
+
+            if(undos != null)
+            {
+                undos.Add(new UndoablePropertyGeneric(nameof(AABB), this, AABB, aabb));
+            }
+
+            AABB = aabb;
+        }
     }
 
     [YAXSerializeAs("TextureSamplerDef")]
@@ -642,7 +697,6 @@ namespace Xv2CoreLib.EMD
     [Serializable]
     public class EMD_Vertex
     {
-
         [YAXAttributeFor("Position")]
         [YAXSerializeAs("X")]
         public float PositionX { get; set; }

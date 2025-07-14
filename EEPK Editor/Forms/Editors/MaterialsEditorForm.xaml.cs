@@ -61,5 +61,11 @@ namespace EEPK_Organiser.Forms
             Closing -= MaterialsEditorForm_Closing;
             materialsEditor.Dispose();
         }
+    
+        public void SelectMaterial(EmmMaterial material)
+        {
+            materialsEditor.SelectedMaterial = material;
+            materialsEditor.materialDataGrid.ScrollIntoView(material);
+        }
     }
 }

@@ -410,7 +410,12 @@ namespace EEPK_Organiser.View
             SelectedMaterial = material;
             materialDataGrid.ScrollIntoView(material);
 
-            UndoManager.Instance.AddUndo(new UndoableListAdd<EmmMaterial>(EmmFile.Materials, material, "New Material"));
+            UndoManager.Instance.AddCompositeUndo(new List<IUndoRedo>()
+            {
+                new UndoableListAdd<EmmMaterial>(EmmFile.Materials, material),
+                new UndoActionDelegate(EmmFile, nameof(EmmFile.TriggerMaterialsChanged), true)
+            }, "New Material");
+            EmmFile.TriggerMaterialsChanged();
         }
 
         public RelayCommand DeleteMaterialCommand => new RelayCommand(DeleteMaterial, IsMaterialSelected);
@@ -459,7 +464,10 @@ namespace EEPK_Organiser.View
 
                 if (removed > 0)
                 {
+                    undos.Add(new UndoActionDelegate(EmmFile, nameof(EmmFile.TriggerMaterialsChanged), true));
                     UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Delete Material"));
+
+                    EmmFile.TriggerMaterialsChanged();
                 }
             }
         }
@@ -490,6 +498,8 @@ namespace EEPK_Organiser.View
             }
             finally
             {
+                undos.Add(new UndoActionDelegate(EmmFile, nameof(EmmFile.TriggerMaterialsChanged), true));
+                EmmFile.TriggerMaterialsChanged();
                 UndoManager.Instance.AddCompositeUndo(undos, "Duplicate Material(s)");
             }
         }
@@ -601,6 +611,8 @@ namespace EEPK_Organiser.View
                     undos.Add(new UndoableListAdd<EmmMaterial>(EmmFile.Materials, material));
                 }
 
+                undos.Add(new UndoActionDelegate(EmmFile, nameof(EmmFile.TriggerMaterialsChanged), true));
+                EmmFile.TriggerMaterialsChanged();
                 UndoManager.Instance.AddCompositeUndo(undos, copiedMaterials.Count > 1 ? "Paste Materials" : "Paste Material");
             }
 
@@ -794,7 +806,13 @@ namespace EEPK_Organiser.View
                 return;
             }
 
-            UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(_selectedMaterial.Name), _selectedMaterial, _selectedMaterial.Name, name, "Material Name"));
+            UndoManager.Instance.AddCompositeUndo(new List<IUndoRedo>()
+            {
+                new UndoablePropertyGeneric(nameof(_selectedMaterial.Name), _selectedMaterial, _selectedMaterial.Name, name),
+                new UndoActionDelegate(EmmFile, nameof(EmmFile.TriggerMaterialsChanged), true)
+            }, "Material Name");
+            EmmFile.TriggerMaterialsChanged();
+
             _selectedMaterial.Name = name;
             NotifyPropertyChanged(nameof(SelectedMaterialName));
         }

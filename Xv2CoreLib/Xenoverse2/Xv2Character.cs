@@ -589,7 +589,7 @@ namespace Xv2CoreLib
         /// </summary>
         public string Name { get; set; }
         public string NameNoExt => Path.GetFileNameWithoutExtension(Name);
-        private string RelativePath => $"chara/{Owner.CmsEntry.ShortName}/{Name}";
+        public string RelativePath => $"chara/{Owner.CmsEntry.ShortName}/{Name}";
         [NonSerialized]
         public Xv2Character Owner;
 

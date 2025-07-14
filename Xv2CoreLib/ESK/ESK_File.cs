@@ -912,6 +912,7 @@ namespace Xv2CoreLib.ESK
         public ESK_AbsoluteTransform AbsoluteTransform { get; set; }
 
         [YAXDontSerialize]
+        [field: NonSerialized]
         public Matrix4x4 GeneratedAbsoluteMatrix { get; set; }
 
         //Parent reference

@@ -61,5 +61,11 @@ namespace EEPK_Organiser.Forms
             Closing -= MaterialsEditorForm_Closing;
             textureEditor.Dispose();
         }
+    
+        public void SelectTexture(EmbEntry embEntry)
+        {
+            textureEditor.SelectedTexture = embEntry;
+            textureEditor.textureDataGrid.ScrollIntoView(embEntry);
+        }
     }
 }

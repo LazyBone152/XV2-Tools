@@ -13,7 +13,7 @@
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
              Dialog:DialogParticipation.Register="{Binding}"
-             d:DesignHeight="600" d:DesignWidth="900" Name="UserControl">
+             d:DesignHeight="600" d:DesignWidth="930" Name="UserControl">
     <Grid>
 
         <Grid.RowDefinitions>
@@ -23,7 +23,7 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="40"/>
-            <ColumnDefinition Width="320"/>
+            <ColumnDefinition Width="350"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
@@ -36,6 +36,24 @@
             <TextBox VerticalContentAlignment="Center" HorizontalAlignment="Right" Height="23" Margin="0,0,0,0" TextWrapping="Wrap" Text="{Binding ElementName=UserControl, Path=SearchFilter, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top" Width="250" Controls:TextBoxHelper.Watermark="Search..." Controls:TextBoxHelper.ButtonCommand="{Binding ElementName=UserControl, Path=ClearSearchCommand}" Controls:TextBoxHelper.ClearTextButton="True">
 
             </TextBox>
+        </StackPanel>
+
+        <StackPanel Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" Orientation="Horizontal" Margin="15,0">
+            <Grid VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="Thumbnail Size" VerticalAlignment="Center"/>
+                <ComboBox Grid.Column="1" Width="100" SelectedIndex="{Binding ElementName=UserControl, Path=ThumbnailSizeBinding}">
+                    <ComboBoxItem Content="Small"/>
+                    <ComboBoxItem Content="Medium"/>
+                    <ComboBoxItem Content="Large"/>
+                </ComboBox>
+            </Grid>
+            <CheckBox Margin="5,0" Content="Use File Names" IsChecked="{Binding ElementName=UserControl, Path=AllowTextureNames}" Width="120" VerticalAlignment="Center" HorizontalAlignment="Left" ToolTip="Allow the use of file names in this EMB file"/>
+
         </StackPanel>
 
         <!-- Buttons -->
@@ -113,35 +131,24 @@
                 </DataGrid.ContextMenu>
 
                 <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="Preview">
+                    <DataGridTextColumn x:Name="idColumn" Header="ID" Binding="{Binding ID, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True"/>
+                    <DataGridTemplateColumn Header="Preview" Width="{Binding ElementName=UserControl, Path=ThumbnailSize}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Grid Background="#1c1c1c">
-                                    <Image Source="{Binding Texture}" Height="32" Width="32" Canvas.Left="8" Canvas.Top="8" ToolTip="{Binding TextureToolTip}"/>
+                                    <Image Source="{Binding Texture}" Height="{Binding ElementName=UserControl, Path=ThumbnailSize}" Width="{Binding ElementName=UserControl, Path=ThumbnailSize}" Canvas.Left="8" Canvas.Top="8" ToolTip="{Binding TextureToolTip}"/>
                                 </Grid>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                         <DataGridTemplateColumn.CellEditingTemplate>
                             <DataTemplate>
                                 <Grid Background="#1c1c1c">
-                                    <Image Source="{Binding Texture}" Height="32" Width="32" Canvas.Left="8" Canvas.Top="8" ToolTip="{Binding TextureToolTip}"/>
+                                    <Image Source="{Binding Texture}" Height="{Binding ElementName=UserControl, Path=ThumbnailSize}" Width="{Binding ElementName=UserControl, Path=ThumbnailSize}" Canvas.Left="8" Canvas.Top="8" ToolTip="{Binding TextureToolTip}"/>
                                 </Grid>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn x:Name="idColumn" Header="ID" Width="70" SortMemberPath="ID">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding ID}"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                        <DataGridTemplateColumn.CellEditingTemplate>
-                            <DataTemplate>
-                                <Controls:NumericUpDown Value="{Binding ElementName=UserControl, Path=SelectedTextureID, UpdateSourceTrigger=Default}" Minimum="0" HideUpDownButtons="True" HorizontalContentAlignment="Left" TextAlignment="Left"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellEditingTemplate>
-                    </DataGridTemplateColumn>
                     <DataGridTemplateColumn x:Name="nameColumn" Header="Name" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -154,7 +161,9 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>
                     </DataGridTemplateColumn>
-            </DataGrid.Columns>
+                    <DataGridTextColumn x:Name="nameNullColumn" Header="Name" Width="*" IsReadOnly="True"/>
+
+                </DataGrid.Columns>
             </DataGrid>
         </Grid>
 

@@ -6,7 +6,6 @@ using System.Linq;
 using YAXLib;
 using System.Windows.Media.Imaging;
 using Xv2CoreLib.EffectContainer;
-using System.Windows.Data;
 using Xv2CoreLib.HslColor;
 using Xv2CoreLib.Resource.UndoRedo;
 using Xv2CoreLib.Resource;
@@ -29,6 +28,13 @@ namespace Xv2CoreLib.EMB_CLASS
     {
         internal const int SIGNATURE = 1112360227;
         public const int MAX_EFFECT_TEXTURES = 128;
+
+        public event EventHandler TexturesChanged;
+
+        public void TriggerTexturesChanged()
+        {
+            TexturesChanged?.Invoke(this, EventArgs.Empty);
+        }
 
         [YAXAttributeForClass]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
@@ -228,6 +234,11 @@ namespace Xv2CoreLib.EMB_CLASS
             return Entry[index];
         }
 
+        public EmbEntry GetEntryWithID(int id)
+        {
+            return Entry.FirstOrDefault(x => x.ID == id);
+        }
+
         public EmbEntry GetEntry(string name)
         {
             foreach(var entry in Entry)
@@ -239,13 +250,13 @@ namespace Xv2CoreLib.EMB_CLASS
         }
 
 
-        public EmbEntry Compare(EmbEntry embEntry2)
+        public EmbEntry Compare(EmbEntry embEntry2, bool ignoreName = false)
         {
             foreach(var entry in Entry)
             {
                 if (entry == embEntry2) return entry;
 
-                if (entry.Compare(embEntry2))
+                if (entry.Compare(embEntry2, ignoreName))
                 {
                     return entry;
                 }
@@ -500,6 +511,14 @@ namespace Xv2CoreLib.EMB_CLASS
                 Entry.Add(newEntry);
             }
         }
+    
+        public void UpdateEntryIndex()
+        {
+            for(int i = 0; i < Entry.Count; i++)
+            {
+                Entry[i].ID = i;
+            }
+        }
     }
 
     [Serializable]
@@ -523,6 +542,7 @@ namespace Xv2CoreLib.EMB_CLASS
         private string _name = null;
         private byte[] _dataValue = new byte[0];
 
+        #region ID
         [YAXDontSerialize]
         public int SortID
         {
@@ -540,7 +560,7 @@ namespace Xv2CoreLib.EMB_CLASS
                 NotifyPropertyChanged(nameof(Index));
             }
         }
-
+        #endregion
 
         [YAXAttributeForClass]
         [YAXSerializeAs("Name")]

@@ -196,6 +196,7 @@ namespace Xv2CoreLib
         public Language PreferedLanguage = Language.English;
         public bool IsInitialized = false;
 
+        private static string[] BlacklistedStageCodes = { "Random", "NMC", "SANDBOX", "CHR", "TRN", "Err", "DMdom" };
 
         #region Initialization
         private Xenoverse2()
@@ -1278,8 +1279,10 @@ namespace Xv2CoreLib
 
             foreach(StageDef stage in StageDefFile.Stages)
             {
-                string name = GetStageName(stage.CODE, stage.NAME_EN, PreferedLanguage);
+                if (BlacklistedStageCodes.Contains(stage.CODE)) continue;
+                if (!fileIO.FileExists($"stage/{stage.CODE}.map")) continue;
 
+                string name = GetStageName(stage.CODE, stage.NAME_EN, PreferedLanguage);
                 items.Add(new Xv2Item((int)stage.Index, name != null ? name : stage.NAME_EN));
             }   
 

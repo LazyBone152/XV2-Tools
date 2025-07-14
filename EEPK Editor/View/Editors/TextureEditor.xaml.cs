@@ -94,6 +94,53 @@ namespace EEPK_Organiser.View
             }
         }
 
+        public bool AllowTextureNames
+        {
+            get => EmbFile?.UseFileNames == true;
+            set
+            {
+                if(EmbFile.UseFileNames != value)
+                {
+                    EmbFile.UseFileNames = value;
+                    nameColumn.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
+                    nameNullColumn.Visibility = !value ? Visibility.Visible : Visibility.Collapsed;
+                    NotifyPropertyChanged(nameof(AllowTextureNames));
+                }
+            }
+        }
+
+        private int _thumbnailSizeBinding = 0;
+        public int ThumbnailSizeBinding
+        {
+            get => _thumbnailSizeBinding;
+            set
+            {
+                if(value != _thumbnailSizeBinding)
+                {
+                    _thumbnailSizeBinding = value;
+                    NotifyPropertyChanged(nameof(ThumbnailSizeBinding));
+                    NotifyPropertyChanged(nameof(ThumbnailSize));
+                }
+            }
+        }
+        public int ThumbnailSize
+        {
+            get
+            {
+                switch (_thumbnailSizeBinding)
+                {
+                    case 0:
+                        return 32;
+                    case 1:
+                        return 96;
+                    case 2:
+                        return 164;
+                    default:
+                        return 0;
+                }
+            }
+        }
+
         //Other
         public string TextureCount
         {
@@ -136,6 +183,7 @@ namespace EEPK_Organiser.View
         public Visibility ContainerVisiblility => IsForContainer ? Visibility.Visible : Visibility.Collapsed;
         public Visibility InverseContainerVisiblility => IsForContainer ? Visibility.Collapsed : Visibility.Visible;
         public Visibility PbindVisiblility => TextureEditorType == TextureEditorType.Pbind ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility NameVisibility => EmbFile.UseFileNames ? Visibility.Visible : Visibility.Collapsed;
         #endregion
 
         #region FilteredTextureList
@@ -222,11 +270,9 @@ namespace EEPK_Organiser.View
             RefreshViewTextures();
             UpdateProperties();
 
-            if(EmbFile?.UseFileNames == false)
-                nameColumn.Visibility = Visibility.Collapsed;
-
-            if (AssetContainer != null)
-                idColumn.Visibility = Visibility.Collapsed;
+            nameColumn.Visibility = EmbFile.UseFileNames ? Visibility.Visible : Visibility.Collapsed;
+            nameNullColumn.Visibility = EmbFile.UseFileNames ? Visibility.Collapsed : Visibility.Visible;
+            idColumn.Visibility = InverseContainerVisiblility;
         }
 
         private void Instance_UndoOrRedoCalled(object sender, UndoEventRaisedEventArgs e)
@@ -278,8 +324,14 @@ namespace EEPK_Organiser.View
                     return;
                 }
 
-                UndoManager.Instance.AddUndo(new UndoablePropertyGeneric(nameof(_selectedTexture.ID), _selectedTexture, SelectedTexture.ID, newId, "Texture ID"));
+                UndoManager.Instance.AddCompositeUndo(new List<IUndoRedo>()
+                {
+                    new UndoablePropertyGeneric(nameof(_selectedTexture.ID), _selectedTexture, SelectedTexture.ID, newId),
+                    new UndoActionDelegate(EmbFile, nameof(EmbFile.TriggerTexturesChanged), true)
+                }, "Texture ID");
                 SelectedTexture.ID = newId;
+
+                EmbFile.TriggerTexturesChanged();
             }
         }
         
@@ -347,7 +399,14 @@ namespace EEPK_Organiser.View
             }
 
             if (added > 0)
+            {
+                undos.Add(new UndoActionDelegate(EmbFile, nameof(EmbFile.TriggerTexturesChanged), true));
+                undos.Add(new UndoActionDelegate(EmbFile, nameof(EmbFile.UpdateEntryIndex), true));
+                EmbFile.TriggerTexturesChanged();
+                EmbFile.UpdateEntryIndex();
+
                 UndoManager.Instance.AddUndo(new CompositeUndo(undos, added > 1 ? "Add Textures" : "Add Texture"));
+            }
 
             if (renameCount > 0)
             {
@@ -435,6 +494,10 @@ namespace EEPK_Organiser.View
                     MessageBox.Show("One or more of the selected textures cannot be deleted because they are currently being used.", "Delete", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
 
+                undos.Add(new UndoActionDelegate(EmbFile, nameof(EmbFile.TriggerTexturesChanged), true));
+                undos.Add(new UndoActionDelegate(EmbFile, nameof(EmbFile.UpdateEntryIndex), true));
+                EmbFile.TriggerTexturesChanged();
+                EmbFile.UpdateEntryIndex();
                 UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Texture Delete"));
             }
 
@@ -464,6 +527,10 @@ namespace EEPK_Organiser.View
 
             if (selectedTextures.Count > 0)
             {
+                undos.Add(new UndoActionDelegate(EmbFile, nameof(EmbFile.TriggerTexturesChanged), true));
+                undos.Add(new UndoActionDelegate(EmbFile, nameof(EmbFile.UpdateEntryIndex), true));
+                EmbFile.TriggerTexturesChanged();
+                EmbFile.UpdateEntryIndex();
                 UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Texture Duplicate"));
 
                 textureDataGrid.SelectedItem = EmbFile.Entry[EmbFile.Entry.Count - 1];
@@ -513,6 +580,11 @@ namespace EEPK_Organiser.View
                 {
                     SelectedTexture = EmbFile.Entry[EmbFile.Entry.Count - 1];
                     textureDataGrid.ScrollIntoView(EmbFile.Entry[EmbFile.Entry.Count - 1]);
+
+                    undos.Add(new UndoActionDelegate(EmbFile, nameof(EmbFile.TriggerTexturesChanged), true));
+                    undos.Add(new UndoActionDelegate(EmbFile, nameof(EmbFile.UpdateEntryIndex), true));
+                    EmbFile.TriggerTexturesChanged();
+                    EmbFile.UpdateEntryIndex();
 
                     UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Texture Paste"));
                 }
@@ -646,6 +718,8 @@ namespace EEPK_Organiser.View
                 undos.Add(new UndoableProperty<EmbEntry>(nameof(SelectedTexture.Data), SelectedTexture, SelectedTexture.Data, newData));
                 SelectedTexture.Data = newData;
 
+                undos.Add(new UndoActionDelegate(EmbFile, nameof(EmbFile.TriggerTexturesChanged), true));
+                EmbFile.TriggerTexturesChanged();
                 UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Replace Texture"));
             }
 
@@ -738,10 +812,12 @@ namespace EEPK_Organiser.View
                 List<IUndoRedo> undos = new List<IUndoRedo>();
                 int merged = AssetContainer.MergeDuplicateTextures(undos);
 
-                UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Merge Duplicates (Texture)"));
-
                 if (merged > 0)
                 {
+                    undos.Add(new UndoActionDelegate(EmbFile, nameof(EmbFile.TriggerTexturesChanged), true));
+                    EmbFile.TriggerTexturesChanged();
+                    UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Merge Duplicates (Texture)"));
+
                     await DialogCoordinator.Instance.ShowMessageAsync(this, "Merge Duplicates", string.Format("{0} texture instances were merged.", merged), MessageDialogStyle.Affirmative, DialogSettings.Default);
                 }
                 else
@@ -756,6 +832,7 @@ namespace EEPK_Organiser.View
         public RelayCommand RemoveUnusedTexturesCommand => new RelayCommand(RemoveUnusedTextures);
         private async void RemoveUnusedTextures()
         {
+            if (!IsForContainer) return;
             var result = await DialogCoordinator.Instance.ShowMessageAsync(this, "Remove Unused", "Any texture that is not currently used by a asset will be deleted.\n\nDo you want to continue?", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.Default);
 
             if (result == MessageDialogResult.Affirmative)

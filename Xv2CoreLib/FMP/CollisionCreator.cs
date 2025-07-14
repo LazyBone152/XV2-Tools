@@ -21,7 +21,7 @@ namespace Xv2CoreLib.FMP
             if (!fmp.Objects.Contains(obj))
                 throw new ArgumentException($"CreateCollision: the input object does not exist in the map file!");
 
-            obj.I_10 = 21; //Unsure what this is, but if its not 21 and the object has custom collision, the game will crash
+            obj.Flags = (ObjectFlags)21; //Unsure what this is, but if its not 21 and the object has custom collision, the game will crash
 
             FMP_CollisionGroup collisionGroup = CreateCollisionGroup(emd, esk, obj.Name, out Dictionary<int, FMP_Matrix> matrices, out Dictionary<int, MeshOptions[]> flags);
             FMP_CollisionGroup existingGroup = null;
@@ -181,9 +181,8 @@ namespace Xv2CoreLib.FMP
                             havok.F_36 = 0.01f;
                             havok.HvkFile = havokFile.Write();
 
-                            //Set flags
-                            if (options.Float)
-                                havok.Flags1 |= FMP_Havok.HavokFlags1.NoWalk;
+                            //Set fragment group
+                            havok.FragmentGroup = options.FragmentGroup;
 
                             collider.HavokColliders.Add(havok);
 
@@ -313,14 +312,11 @@ namespace Xv2CoreLib.FMP
             if (isConvex)
                 flags.Add("convex");
 
-            if (havokEntry.Flags1.HasFlag(FMP_Havok.HavokFlags1.NoWalk))
-                flags.Add("float");
+            if (havokEntry.FragmentGroup > 0)
+                flags.Add("fragment=" + havokEntry.FragmentGroup);
 
-            if (havokGroupParams.Param1 == 3)
-                flags.Add("param1_edgeVfx");
-
-            if (havokGroupParams.Param1 == 1)
-                flags.Add("param1_float");
+            flags.Add($"param1={havokGroupParams.Param1}");
+            flags.Add($"param2={havokGroupParams.Param2}");
 
             if (flags.Count == 0) return null;
             string flag = "@[";
@@ -356,7 +352,7 @@ namespace Xv2CoreLib.FMP
         {
             //Flags on Havok entry
             public bool Convex;
-            public bool Float;
+            public int FragmentGroup;
 
             //HavokGroupParameter.Param1
             public bool Param1_EdgeVFX;
@@ -397,15 +393,17 @@ namespace Xv2CoreLib.FMP
                                     case "convex":
                                         meshOptions.Convex = true;
                                         break;
-                                    case "nowalk":
-                                    case "float":
-                                        meshOptions.Float = true;
+                                    case "fragment":
+                                    case "fragments":
+                                    case "fragmentGroup":
+                                        int.TryParse(argument, out meshOptions.FragmentGroup);
                                         break;
                                     case "edgevfx":
                                     case "param1_edgevfx":
                                         meshOptions.Param1_EdgeVFX = true;
                                         break;
                                     case "param1_float":
+                                    case "float":
                                         meshOptions.Param1_Float = true;
                                         break;
                                     case "param1":
@@ -429,7 +427,7 @@ namespace Xv2CoreLib.FMP
             {
                 if (Convex != meshOptions.Convex) return false;
                 if (Param1_EdgeVFX != meshOptions.Param1_EdgeVFX) return false;
-                if (Float != meshOptions.Float) return false;
+                if (FragmentGroup != meshOptions.FragmentGroup) return false;
                 if (Param1_Float != meshOptions.Param1_Float) return false;
                 if (Param1_Custom != meshOptions.Param1_Custom) return false;
                 if (Param2_Custom != meshOptions.Param2_Custom) return false;

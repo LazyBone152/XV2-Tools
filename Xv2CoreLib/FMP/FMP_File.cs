@@ -3,17 +3,36 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Xml.Linq;
 using Xv2CoreLib.EMD;
 using Xv2CoreLib.ESK;
 using Xv2CoreLib.Havok;
-using Xv2CoreLib.Properties;
 using Xv2CoreLib.Resource;
 using YAXLib;
 using static Xv2CoreLib.FMP.CollisionCreator;
 
 namespace Xv2CoreLib.FMP
 {
+    [Flags]
+    public enum ObjectFlags : ushort
+    {
+        Enabled = 0x1,
+        CastShadow = 0x2,
+        Unk3 = 0x4,
+        Instancing = 0x8,
+        Unk5 = 0x10,
+        Unk6 = 0x20,
+        Unk7 = 0x40,
+        Unk8 = 0x80, //unused
+        Unk9 = 0x100, //unused
+        Unk10 = 0x200, //unused
+        Unk11 = 0x400, //unused
+        Unk12 = 0x800, //unused
+        Unk13 = 0x1000, //unused
+        Unk14 = 0x2000, //unused
+        Unk15 = 0x4000, //unused
+        Unk16 = 0x8000
+    }
+
     [YAXSerializeAs("FMP")]
     public class FMP_File
     {
@@ -58,6 +77,7 @@ namespace Xv2CoreLib.FMP
             string saveLocation = String.Format("{0}/{1}", Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
             YAXSerializer serializer = new YAXSerializer(typeof(FMP_File), YAXSerializationOptions.DontSerializeNullObjects);
             FMP_File fmpFile = (FMP_File)serializer.DeserializeFromFile(path);
+            fmpFile.ResolveObjectReferences(); //Also add this in the installer INSTALL method when loading the xml for map
 
             File.WriteAllBytes(saveLocation, fmpFile.Write());
         }
@@ -116,11 +136,15 @@ namespace Xv2CoreLib.FMP
             fmpFile.CollisionGroups = FMP_CollisionGroup.ReadAll(bytes, hitboxGroup_Offset, hitboxGroup_Count, fmpFile.IsOldVersion);
             fmpFile.Objects = FMP_Object.ReadAll(bytes, object_Offset, object_Count, depot1, depot2, depot3, depot4, fmpFile);
 
+            fmpFile.ResolveObjectReferences();
+
             return fmpFile;
         }
     
         public byte[] Write()
         {
+            ResolveIndexReferences();
+
             foreach(var hitboxGroup in CollisionGroups)
             {
                 hitboxGroup.CreateUnorderedHitboxList();
@@ -281,6 +305,54 @@ namespace Xv2CoreLib.FMP
                     stringWriter.Add(new StringWriter.StringInfo() { Offset = bytes.Count, StringToWrite = depotString });
 
                 bytes.AddRange(new byte[4]);
+            }
+        }
+        
+        private void ResolveObjectReferences()
+        {
+            foreach(var fragment in FragmentGroups)
+            {
+                foreach(var index in fragment.ObjectIndices)
+                {
+                    index.Object = Objects.FirstOrDefault(x => x.Index == index.Index);
+                }
+            }
+
+            foreach(var obj in Objects)
+            {
+                if(obj.CollisionGroupInstance != null)
+                {
+                    obj.CollisionGroupInstance.CollisionGroup = CollisionGroups.FirstOrDefault(x => x.Index == obj.CollisionGroupInstance.CollisionGroupIndex);
+                }
+            }
+        }
+
+        private void ResolveIndexReferences()
+        {
+            foreach (var fragment in FragmentGroups)
+            {
+                for (int i = fragment.ObjectIndices.Count - 1; i >= 0; i--)
+                {
+                    int idx = Objects.IndexOf(fragment.ObjectIndices[i].Object);
+
+                    if(idx == -1)
+                    {
+                        fragment.ObjectIndices.RemoveAt(i);
+                        continue;
+                    }
+
+                    fragment.ObjectIndices[i].Index = (ushort)idx;
+                }
+            }
+
+            foreach (var obj in Objects)
+            {
+                if (obj.CollisionGroupInstance != null)
+                {
+                    int idx = CollisionGroups.IndexOf(obj.CollisionGroupInstance.CollisionGroup);
+
+                    obj.CollisionGroupInstance.CollisionGroupIndex = (ushort)(idx == -1 ? ushort.MaxValue : idx);
+                }
             }
         }
         #endregion
@@ -807,7 +879,7 @@ namespace Xv2CoreLib.FMP
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "ObjectIndex")]
         [YAXAttributeFor("ObjectIndex")]
-        public List<FMP_ObjectIndex> Indices { get; set; } = new List<FMP_ObjectIndex>();
+        public List<FMP_ObjectIndex> ObjectIndices { get; set; } = new List<FMP_ObjectIndex>();
 
         internal static void WriteAll(List<FMP_FragmentGroup> entries, List<byte> bytes, List<StringWriter.StringInfo> stringWriter)
         {
@@ -818,20 +890,20 @@ namespace Xv2CoreLib.FMP
             {
                 stringWriter.Add(new StringWriter.StringInfo() { Offset = bytes.Count, StringToWrite = entries[i].Name });
                 bytes.AddRange(new byte[4]);
-                bytes.AddRange(BitConverter.GetBytes(entries[i].Indices != null ? entries[i].Indices.Count : 0));
+                bytes.AddRange(BitConverter.GetBytes(entries[i].ObjectIndices != null ? entries[i].ObjectIndices.Count : 0));
                 bytes.AddRange(new byte[4]);
             }
 
             //Values
             for (int i = 0; i < entries.Count; i++)
             {
-                int indicesCount = entries[i].Indices != null ? entries[i].Indices.Count : 0;
+                int indicesCount = entries[i].ObjectIndices != null ? entries[i].ObjectIndices.Count : 0;
 
                 if(indicesCount > 0)
                 {
                     Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), fragmentStart + (12 * i) + 8);
 
-                    foreach(var entry in entries[i].Indices)
+                    foreach(var entry in entries[i].ObjectIndices)
                     {
                         bytes.AddRange(BitConverter.GetBytes(entry.Index));
                     }
@@ -863,7 +935,7 @@ namespace Xv2CoreLib.FMP
 
             for(int i = 0; i < indexCount; i++)
             {
-                fragmentGroup.Indices.Add(new FMP_ObjectIndex() { Index = BitConverter.ToUInt16(bytes, indexOffset + (2 * i)) });
+                fragmentGroup.ObjectIndices.Add(new FMP_ObjectIndex() { Index = BitConverter.ToUInt16(bytes, indexOffset + (2 * i)) });
             }
 
             return fragmentGroup;
@@ -875,18 +947,28 @@ namespace Xv2CoreLib.FMP
     {
         [YAXAttributeForClass]
         public ushort Index { get; set; }
+
+        [YAXDontSerialize]
+        public FMP_Object Object { get; set; }
     }
 
     [YAXSerializeAs("Object")]
     public class FMP_Object
     {
         [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public int Index { get; set; }
+
+        [YAXAttributeForClass]
         public string Name { get; set; }
 
         [CustomSerialize(isHex: true)]
-        public int I_04 { get; set; }
+        public ushort I_04 { get; set; }
+
         [CustomSerialize]
-        public ushort I_10 { get; set; }
+        public ushort InitialEntityIndex { get; set; } //I_06
+        [CustomSerialize]
+        public ObjectFlags Flags { get; set; } //I_10
 
         [CustomSerialize(isFloat: true)]
         public float F_32 { get; set; }
@@ -912,8 +994,9 @@ namespace Xv2CoreLib.FMP
                 stringWriter.Add(new StringWriter.StringInfo() { Offset = bytes.Count, StringToWrite = objects[i].Name });
                 bytes.AddRange(new byte[4]);
                 bytes.AddRange(BitConverter.GetBytes(objects[i].I_04));
+                bytes.AddRange(BitConverter.GetBytes(objects[i].InitialEntityIndex));
                 bytes.AddRange(BitConverter.GetBytes(objects[i].CollisionGroupInstance != null ? objects[i].CollisionGroupInstance.CollisionGroupIndex : ushort.MaxValue));
-                bytes.AddRange(BitConverter.GetBytes(objects[i].I_10));
+                bytes.AddRange(BitConverter.GetBytes((ushort)objects[i].Flags));
                 bytes.AddRange(new byte[8]); //VirtualSubPart and Action offsets
                 bytes.AddRange(BitConverter.GetBytes(objects[i].Entities != null ? objects[i].Entities.Count : 0));
                 bytes.AddRange(new byte[8]); //Entity and Hiearchy offsets
@@ -1021,18 +1104,20 @@ namespace Xv2CoreLib.FMP
 
             for (int i = 0; i < count; i++)
             {
-                entries.Add(Read(bytes, offset + (84 * i), depot1, depot2, depot3, depot4, fmpFile));
+                entries.Add(Read(i, bytes, offset + (84 * i), depot1, depot2, depot3, depot4, fmpFile));
             }
 
             return entries;
         }
 
-        public static FMP_Object Read(byte[] bytes, int offset, string[] depot1, string[] depot2, string[] depot3, string[] depot4, FMP_File fmpFile)
+        public static FMP_Object Read(int index, byte[] bytes, int offset, string[] depot1, string[] depot2, string[] depot3, string[] depot4, FMP_File fmpFile)
         {
             FMP_Object obj = new FMP_Object();
+            obj.Index = index;
             obj.Name = StringEx.GetString(bytes, BitConverter.ToInt32(bytes, offset));
-            obj.I_04 = BitConverter.ToInt32(bytes, offset + 4);
-            obj.I_10 = BitConverter.ToUInt16(bytes, offset + 10);
+            obj.I_04 = BitConverter.ToUInt16(bytes, offset + 4);
+            obj.InitialEntityIndex = BitConverter.ToUInt16(bytes, offset + 6);
+            obj.Flags = (ObjectFlags)BitConverter.ToUInt16(bytes, offset + 10);
             obj.F_32 = BitConverter.ToSingle(bytes, offset + 32);
             obj.Matrix = FMP_Matrix.Read(bytes, offset + 36);
 
@@ -2159,6 +2244,8 @@ namespace Xv2CoreLib.FMP
     {
         [YAXAttributeForClass]
         public ushort CollisionGroupIndex { get; set; } = ushort.MaxValue;
+        [YAXDontSerialize]
+        public FMP_CollisionGroup CollisionGroup { get; set; }
 
         [YAXComment("Names are for reference only. The order of entries is all that matters for linking a ColliderInstance with a Collider in the CollisionGroup")]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "ColliderInstance")]
@@ -2845,6 +2932,8 @@ namespace Xv2CoreLib.FMP
             {
                 if (collider.HavokColliders == null) continue;
 
+                if (collider.HvkCollisionData?.HvkFile?.Length > 0) return true;
+
                 foreach(var havok in collider.HavokColliders)
                 {
                     if (havok.HvkFile?.Length > 0)
@@ -2944,47 +3033,11 @@ namespace Xv2CoreLib.FMP
     [YAXSerializeAs("Havok")]
     public class FMP_Havok
     {
-        [Flags]
-        public enum HavokFlags1 : uint
-        {
-            unk1 = 0x1,
-            unk2 = 0x2,
-            unk3 = 0x4,
-            unk4 = 0x8,
-            NoWalk = 0x10,
-            unk6 = 0x20,
-            unk7 = 0x40,
-            unk8 = 0x80,
-            unk9 = 0x100,
-            unk10 = 0x200,
-            unk11 = 0x400,
-            unk12 = 0x800,
-            unk13 = 0x1000,
-            unk14 = 0x2000,
-            unk15 = 0x4000,
-            unk16 = 0x8000,
-            unk17 = 0x10000,
-            unk18 = 0x20000,
-            unk19 = 0x40000,
-            unk20 = 0x80000,
-            unk21 = 0x100000,
-            unk22 = 0x200000,
-            unk23 = 0x400000,
-            unk24 = 0x800000,
-            unk25 = 0x1000000,
-            unk26 = 0x2000000,
-            unk27 = 0x4000000,
-            unk28 = 0x8000000,
-            unk29 = 0x10000000,
-            unk30 = 0x20000000,
-            unk31 = 0x40000000,
-            unl32 = 0x80000000
-        }
 
         [YAXAttributeForClass]
         public int Group { get; set; }
         [CustomSerialize]
-        public HavokFlags1 Flags1 { get; set; }
+        public int FragmentGroup { get; set; } //I_00
         [CustomSerialize]
         public int I_08 { get; set; }
         [CustomSerialize]
@@ -3033,7 +3086,7 @@ namespace Xv2CoreLib.FMP
             FMP_Havok destruction = new FMP_Havok();
 
             destruction.Group = group;
-            destruction.Flags1 = (FMP_Havok.HavokFlags1)BitConverter.ToInt32(bytes, offset);
+            destruction.FragmentGroup = BitConverter.ToInt32(bytes, offset);
             destruction.I_08 = BitConverter.ToInt32(bytes, offset + 8);
             destruction.I_12 = BitConverter.ToInt32(bytes, offset + 12);
             destruction.I_28 = BitConverter.ToInt32(bytes, offset + 28);
@@ -3084,7 +3137,7 @@ namespace Xv2CoreLib.FMP
                         destruction.HvkFile = destruction.HavokFile.Write();
                     }
 
-                    bytes.AddRange(BitConverter.GetBytes((uint)destruction.Flags1));
+                    bytes.AddRange(BitConverter.GetBytes((uint)destruction.FragmentGroup));
                     bytes.AddRange(new byte[4]);
                     bytes.AddRange(BitConverter.GetBytes(destruction.I_08));
                     bytes.AddRange(BitConverter.GetBytes(destruction.I_12));
@@ -3302,7 +3355,7 @@ namespace Xv2CoreLib.FMP
     public class FMP_HvkCollisionData
     {
         [CustomSerialize]
-        public int I_00 { get; set; }
+        public int I_00 { get; set; } //always 1
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]
         [CustomSerialize]
         public byte[] HvkFile { get; set; }

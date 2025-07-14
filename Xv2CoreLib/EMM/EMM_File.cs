@@ -15,6 +15,13 @@ namespace Xv2CoreLib.EMM
     [YAXSerializeAs("EMM")]
     public class EMM_File
     {
+        public event EventHandler MaterialsChanged;
+
+        public void TriggerMaterialsChanged()
+        {
+            MaterialsChanged?.Invoke(this, EventArgs.Empty);
+        }
+
         [YAXAttributeForClass]
         [YAXSerializeAs("Version")]
         public int Version { get; set; }

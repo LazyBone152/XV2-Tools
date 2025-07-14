@@ -432,6 +432,7 @@
     <Compile Include="Utils\LeftClickContextMenu.cs" />
     <Compile Include="Utils\ListBoxSelectedItemsBinding.cs" />
     <Compile Include="Utils\DragInsideCanvasBehavior.cs" />
+    <Compile Include="Utils\TreeViewMultiSelect.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="readme.txt" />
