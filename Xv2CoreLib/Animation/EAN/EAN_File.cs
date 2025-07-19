@@ -2002,15 +2002,14 @@ namespace Xv2CoreLib.EAN
 
         public EAN_Keyframe GetKeyframe(int frame)
         {
-            return Keyframes.FirstOrDefault(x => x.FrameIndex == frame);
-            /*
-            foreach (var keyframe in Keyframes)
+            for(int i = 0; i < Keyframes.Count; i++)
             {
-                if (keyframe.FrameIndex == frame) return keyframe;
+                if (Keyframes[i].FrameIndex == frame)
+                    return Keyframes[i];
             }
 
             return null;
-            */
+            //return Keyframes.FirstOrDefault(x => x.FrameIndex == frame);
         }
 
         private EAN_Keyframe GetDefaultKeyframe(int frame = 0)

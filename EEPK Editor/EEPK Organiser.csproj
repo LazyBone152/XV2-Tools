@@ -63,7 +63,7 @@
     <DefineConstants>TRACE;DEBUG;UndoRedo, NvvmLight, EepkOrg</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <LangVersion>7.1</LangVersion>
+    <LangVersion>8</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>x64</PlatformTarget>
@@ -73,7 +73,7 @@
     <DefineConstants>TRACE;UndoRedo, NvvmLight, EepkOrg</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <LangVersion>7.1</LangVersion>
+    <LangVersion>8</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>Resources\eepk organiser.ico</ApplicationIcon>

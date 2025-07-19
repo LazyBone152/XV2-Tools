@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Xv2CoreLib.EMP_NEW.Keyframes
 {
@@ -180,45 +182,50 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             if (Keyframes.Count == 0 || !IsAnimated) return Constant;
 
             //Check for a direct keyframe
-            KeyframeFloatValue currentKeyframe = Keyframes.FirstOrDefault(x => x.Time == time);
-
-            if (currentKeyframe != null)
-                return currentKeyframe.Value;
+            for (int i = 0; i < Keyframes.Count; i++)
+            {
+                if (time == Keyframes[i].Time)
+                {
+                    return Keyframes[i].Value;
+                }
+            }
 
             //Interpolate the value from existing keyframes
-            float prev = -1;
-            float next = -1;
+            KeyframeFloatValue prevKeyframe = null;
+            KeyframeFloatValue nextKeyframe = null;
 
-            foreach (var keyframe in Keyframes.OrderBy(x => x.Time))
+            for (int i = 0; i < Keyframes.Count; i++)
             {
-                if (keyframe.Time > prev && prev < time && keyframe.Time < time)
-                    prev = keyframe.Time;
+                var keyframe = Keyframes[i];
 
-                if (keyframe.Time > time)
+                if (keyframe.Time < time && (prevKeyframe?.Time < keyframe.Time || prevKeyframe == null))
                 {
-                    next = keyframe.Time;
-                    break;
+                    prevKeyframe = keyframe;
+                }
+
+                if(keyframe.Time >= time && (nextKeyframe?.Time > keyframe.Time || nextKeyframe == null))
+                {
+                    nextKeyframe = keyframe;
                 }
             }
 
             //No prev keyframe exists, so no interpolation is possible. Just use next keyframe then
-            if (prev == -1)
+            if (prevKeyframe == null)
             {
-                return Keyframes.FirstOrDefault(x => x.Time == next).Value;
+                return nextKeyframe.Value;
             }
 
             //Same, but for next keyframe. We will use the prev keyframe here.
-            if (next == -1 || prev == next)
+            if (nextKeyframe == null || prevKeyframe == nextKeyframe)
             {
-                return Keyframes.FirstOrDefault(x => x.Time == prev).Value;
+                return prevKeyframe.Value;
             }
 
-            float factor = (time - prev) / (next - prev);
-            var prevKeyframe = Keyframes.FirstOrDefault(x => x.Time == prev).Value;
-            var nextKeyframe = Keyframes.FirstOrDefault(x => x.Time == next).Value;
+            float factor = (time - prevKeyframe.Time) / (nextKeyframe.Time - prevKeyframe.Time);
 
-            return Interpolate ? MathHelpers.Lerp(prevKeyframe, nextKeyframe, factor) : prevKeyframe;
+            return Interpolate ? MathHelpers.Lerp(prevKeyframe.Value, nextKeyframe.Value, factor) : prevKeyframe.Value;
         }
+
     }
 
     [Serializable]

@@ -13,6 +13,13 @@ namespace Xv2CoreLib.Resource
         public const double Epsilon = 0.00001;
         public const float Radians90Degrees = 1.570796f;
 
+        public readonly static Vector3 Right = new Vector3(1, 0, 0);
+        public readonly static Vector3 Left = new Vector3(-1, 0, 0);
+        public readonly static Vector3 Down = new Vector3(0, -1f, 0);
+        public readonly static Vector3 Up = new Vector3(0, 1f, 0);
+        public readonly static Vector3 Forward = new Vector3(0, 0, -1f);
+        public readonly static Vector3 Backward = new Vector3(0, 0, 1f);
+
         public static float ToDegrees(float radians)
         {
             return (180 / (float)Math.PI) * radians;
@@ -36,6 +43,11 @@ namespace Xv2CoreLib.Resource
         public static float Lerp(float value1, float value2, float amount)
         {
             return value1 + ((value2 - value1) * amount);
+        }
+
+        public static bool IsEven(ulong value)
+        {
+            return (value % 2 == 0);
         }
 
         public static bool IsEven(int value)
@@ -138,6 +150,12 @@ namespace Xv2CoreLib.Resource
                 new Vector3(matrix.M21, matrix.M22, matrix.M23).Length(),  //Y scale
                 new Vector3(matrix.M31, matrix.M32, matrix.M33).Length()   //Z scale
             );
+        }
+
+        public static Matrix4x4 Invert(Matrix4x4 matrix)
+        {
+            Matrix4x4.Invert(matrix, out var result);
+            return result;
         }
 
         //Unused, testing;

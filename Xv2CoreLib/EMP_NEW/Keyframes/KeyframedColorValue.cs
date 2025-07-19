@@ -166,60 +166,66 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
             if (Keyframes.Count == 0 || !IsAnimated) return Constant.Values;
 
             //Check for a direct keyframe
-            KeyframeColorValue currentKeyframe = Keyframes.FirstOrDefault(x => x.Time == time);
-
-            if (currentKeyframe != null)
-                return currentKeyframe.Value.Values;
-
-            float prev = -1;
-            float next = -1;
-
-            foreach (KeyframeColorValue keyframe in Keyframes.OrderBy(x => x.Time))
+            for (int i = 0; i < Keyframes.Count; i++)
             {
-                if (keyframe.Time > prev && prev < time && keyframe.Time < time)
-                    prev = keyframe.Time;
-
-                if (keyframe.Time > time)
+                if (time == Keyframes[i].Time)
                 {
-                    next = keyframe.Time;
-                    break;
+                    return Keyframes[i].Value.Values;
+                }
+            }
+
+            //Interpolate the value from existing keyframes
+            KeyframeColorValue prevKeyframe = null;
+            KeyframeColorValue nextKeyframe = null;
+
+            for (int i = 0; i < Keyframes.Count; i++)
+            {
+                var keyframe = Keyframes[i];
+
+                if (keyframe.Time < time && (prevKeyframe?.Time < keyframe.Time || prevKeyframe == null))
+                {
+                    prevKeyframe = keyframe;
+                }
+
+                if (keyframe.Time >= time && (nextKeyframe?.Time > keyframe.Time || nextKeyframe == null))
+                {
+                    nextKeyframe = keyframe;
                 }
             }
 
             //No prev keyframe exists, so no interpolation is possible. Just use next keyframe then
-            if (prev == -1)
+            if (prevKeyframe == null)
             {
-                return Keyframes.FirstOrDefault(x => x.Time == next).Value.Values;
+                return nextKeyframe.Value.Values;
             }
 
             //Same, but for next keyframe. We will use the prev keyframe here.
-            if (next == -1 || prev == next)
+            if (nextKeyframe == null || prevKeyframe == nextKeyframe)
             {
-                return Keyframes.FirstOrDefault(x => x.Time == prev).Value.Values;
+                return prevKeyframe.Value.Values;
             }
 
-            float factor = (time - prev) / (next - prev);
-            CustomColor prevKeyframe = Keyframes.FirstOrDefault(x => x.Time == prev).Value;
-            CustomColor nextKeyframe = Keyframes.FirstOrDefault(x => x.Time == next).Value;
+            float factor = (time - prevKeyframe.Time) / (nextKeyframe.Time - prevKeyframe.Time);
 
             //Reuse the same array to save on performance
             if (Interpolate)
             {
-                InterpolatedValues[0] = MathHelpers.Lerp(prevKeyframe.R, nextKeyframe.R, factor);
-                InterpolatedValues[1] = MathHelpers.Lerp(prevKeyframe.G, nextKeyframe.G, factor);
-                InterpolatedValues[2] = MathHelpers.Lerp(prevKeyframe.B, nextKeyframe.B, factor);
+                InterpolatedValues[0] = MathHelpers.Lerp(prevKeyframe.Value.R, nextKeyframe.Value.R, factor);
+                InterpolatedValues[1] = MathHelpers.Lerp(prevKeyframe.Value.G, nextKeyframe.Value.G, factor);
+                InterpolatedValues[2] = MathHelpers.Lerp(prevKeyframe.Value.B, nextKeyframe.Value.B, factor);
             }
             else
             {
-                InterpolatedValues[0] = prevKeyframe.R;
-                InterpolatedValues[1] = prevKeyframe.G;
-                InterpolatedValues[2] = prevKeyframe.B;
+                InterpolatedValues[0] = prevKeyframe.Value.R;
+                InterpolatedValues[1] = prevKeyframe.Value.G;
+                InterpolatedValues[2] = prevKeyframe.Value.B;
             }
 
             return InterpolatedValues;
 
             //return Interpolate ? new CustomColor(MathHelpers.Lerp(prevKeyframe.R, nextKeyframe.R, factor), MathHelpers.Lerp(prevKeyframe.G, nextKeyframe.G, factor), MathHelpers.Lerp(prevKeyframe.B, nextKeyframe.B, factor), 0f) : prevKeyframe;
         }
+
     }
 
     [Serializable]

@@ -26,7 +26,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <LangVersion>7.1</LangVersion>
+    <LangVersion>8</LangVersion>
     <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -37,7 +37,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
-    <LangVersion>7.1</LangVersion>
+    <LangVersion>8</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AForge.Imaging">
@@ -347,6 +347,7 @@
     <Compile Include="Resource\App\SettingsFormat.cs" />
     <Compile Include="Resource\AsyncObservableCollection.cs" />
     <Compile Include="Resource\BinaryConverter.cs" />
+    <Compile Include="Resource\BitmapExtensions.cs" />
     <Compile Include="Resource\ColorEx.cs" />
     <Compile Include="Resource\Image\TextureHelper.cs" />
     <Compile Include="Resource\MathHelpers.cs" />
