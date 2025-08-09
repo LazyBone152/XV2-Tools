@@ -8,7 +8,8 @@ namespace Xv2CoreLib.EMD
         Remove,
         Vertex,
         Sampler,
-        Material
+        Material,
+        Bone
     }
 
     public delegate void ModelModifiedEventHandler(object source, ModelModifiedEventArgs e);
@@ -26,4 +27,12 @@ namespace Xv2CoreLib.EMD
             Parent = parent;
         }
     }
+
+    public interface IModelFile 
+    {
+        event ModelModifiedEventHandler ModelModified;
+
+        void TriggerModelModifiedEvent(EditTypeEnum editType, object context, object parent);
+    }
+
 }

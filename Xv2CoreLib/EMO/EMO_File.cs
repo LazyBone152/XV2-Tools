@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Text;
 using Xv2CoreLib.EMA;
@@ -7,14 +8,25 @@ using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.EMD;
 using Xv2CoreLib.EMG;
 using Xv2CoreLib.EMM;
+using Xv2CoreLib.Resource;
 using YAXLib;
 
 namespace Xv2CoreLib.EMO
 {
     [YAXSerializeAs("EMO")]
     [Serializable]
-    public class EMO_File
+    public class EMO_File : IModelFile
     {
+        #region Notify
+        [field: NonSerialized]
+        public event ModelModifiedEventHandler ModelModified;
+
+        public void TriggerModelModifiedEvent(EditTypeEnum editType, object context, object parent)
+        {
+            ModelModified?.Invoke(this, new ModelModifiedEventArgs(editType, context, parent));
+        }
+        #endregion
+        
         public const int EMO_SIGNATURE = 0x4F4D4523;
 
         [YAXAttributeFor("MaterialsCount")]
@@ -29,9 +41,8 @@ namespace Xv2CoreLib.EMO
         [YAXHexValue]
         public ulong I_24 { get; set; }
 
-
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Part")]
-        public List<EMO_Part> Parts { get; set; } = new List<EMO_Part>();
+        public AsyncObservableCollection<EMO_Part> Parts { get; set; } = new AsyncObservableCollection<EMO_Part>();
         public Skeleton Skeleton { get; set; }
 
         #region XmlLoadSave
@@ -91,10 +102,10 @@ namespace Xv2CoreLib.EMO
 
             //Skeleton:
             emoFile.Skeleton = Skeleton.Parse(bytes, skeletonOffset);
+            emoFile.ResolveBoneLinks();
 
             return emoFile;
         }
-
 
         public void SaveFile(string path)
         {
@@ -107,6 +118,8 @@ namespace Xv2CoreLib.EMO
             List<byte> bytes = new List<byte>();
 
             int partsCount = Parts != null ? Parts.Count : 0;
+
+            ResolvePartIndices();
 
             //Header:
             bytes.AddRange(BitConverter.GetBytes(EMO_SIGNATURE));
@@ -150,7 +163,7 @@ namespace Xv2CoreLib.EMO
             for (int i = 0; i < partsCount; i++)
             {
                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - partsHeaderStart), pointerList + (4 * i));
-                bytes.AddRange(Encoding.UTF8.GetBytes(Parts[i].Name));
+                bytes.AddRange(Encoding.UTF8.GetBytes(Parts[i].LinkedBone != null ? Parts[i].LinkedBone.Name : Parts[i].Name));
                 bytes.Add(0);
             }
 
@@ -192,6 +205,47 @@ namespace Xv2CoreLib.EMO
         public byte[] SaveToBytes()
         {
             return Write();
+        }
+        
+        private void ResolveBoneLinks()
+        {
+            if(Skeleton != null)
+            {
+                for (int i = 0; i < Skeleton.Bones.Count; i++)
+                {
+                    if (Skeleton.Bones[i].EmoPartIndex != ushort.MaxValue && Skeleton.Bones[i].EmoPartIndex < Parts.Count)
+                    {
+                        Parts[Skeleton.Bones[i].EmoPartIndex].LinkedBone = Skeleton.Bones[i];
+                    }
+                }
+            }
+        }
+
+        private void ResolvePartIndices()
+        {
+            //Update EMO PartIndex in the skeleton with the current part indices, as long as they have a LinkedBone
+            //Also update the bone link on all Emg files to match the parent EMO_Part bone link
+
+            if(Skeleton != null)
+            {
+                for (int i = 0; i < Parts.Count; i++)
+                {
+                    if (Parts[i].LinkedBone != null)
+                    {
+                        int boneIdx = Skeleton.Bones.IndexOf(Parts[i].LinkedBone);
+
+                        if (boneIdx != -1)
+                        {
+                            Skeleton.Bones[boneIdx].EmoPartIndex = (ushort)i;
+                        }
+
+                        for(int a = 0; a < Parts[i].EmgFiles.Count; a++)
+                        {
+                            Parts[i].EmgFiles[a].LinkedBoneIdx = (ushort)boneIdx;
+                        }
+                    }
+                }
+            }
         }
         #endregion
 
@@ -301,24 +355,135 @@ namespace Xv2CoreLib.EMO
                 {
                     foreach(var mesh in emg.EmgMeshes)
                     {
-                        count += mesh.Submeshes.Count;
+                        count += mesh.SubmeshGroups.Count;
                     }
                 }
             }
 
             return count;
         }
+    
+        public bool ModelExists(EMO_Part emoPart, EMG_File emg)
+        {
+            for(int i = 0; i < Parts.Count; i++)
+            {
+                if (Parts[i] == emoPart)
+                {
+                    for(int a = 0; a < Parts[i].EmgFiles.Count; a++)
+                    {
+                        if (Parts[i].EmgFiles[a] == emg)
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+            }
+
+            return false;
+        }
+
+        #region Helpers
+        public EMO_Part GetParentPart(EMG_File emg)
+        {
+            foreach (var model in Parts)
+            {
+                if (model.EmgFiles.Contains(emg)) return model;
+            }
+
+            return null;
+        }
+
+        public EMG_File GetParentEmg(EMG_Mesh mesh)
+        {
+            foreach (var model in Parts)
+            {
+                foreach (var emg in model.EmgFiles)
+                {
+                    if(emg.EmgMeshes.Contains(mesh)) return emg;
+                }
+            }
+
+            return null;
+        }
+
+        public EMG_Mesh GetParentMesh(EMG_SubmeshGroup submeshGroup)
+        {
+            foreach (var model in Parts)
+            {
+                foreach (var emg in model.EmgFiles)
+                {
+                    foreach (var mesh in emg.EmgMeshes)
+                    {
+                        if(mesh.SubmeshGroups.Contains(submeshGroup)) return mesh;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        public EMG_SubmeshGroup GetParentSubmeshGroup(EMD_TextureSamplerDef textureSampler)
+        {
+            foreach (var model in Parts)
+            {
+                foreach(var emg in model.EmgFiles)
+                {
+                    foreach(var mesh in emg.EmgMeshes)
+                    {
+                        foreach(var submeshGroup in mesh.SubmeshGroups)
+                        {
+                            if(submeshGroup.TextureSamplerDefs.Contains(textureSampler)) return submeshGroup;
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+        #endregion
     }
 
     [YAXSerializeAs("Part")]
     [Serializable]
-    public class EMO_Part
+    public class EMO_Part : INotifyPropertyChanged
     {
+        #region NotifyPropertyChanged
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        #endregion
+
         [YAXAttributeForClass]
         public string Name { get; set; }
 
+        private Bone _linkedBone = null;
+        [YAXDontSerialize]
+        public Bone LinkedBone
+        {
+            get => _linkedBone;
+            set
+            {
+                if(value != _linkedBone)
+                {
+                    _linkedBone = value;
+                    if(_linkedBone != null)
+                    {
+                        Name = _linkedBone.Name;
+                        NotifyPropertyChanged(nameof(Name));
+                    }
+                    NotifyPropertyChanged(nameof(LinkedBone));
+                }
+            }
+        }
+
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "EMG")]
-        public List<EMG_File> EmgFiles { get; set; } = new List<EMG_File>();
+        public AsyncObservableCollection<EMG_File> EmgFiles { get; set; } = new AsyncObservableCollection<EMG_File>();
 
         public static EMO_Part Read(byte[] bytes, int offset, int nameOffset)
         {

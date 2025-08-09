@@ -250,6 +250,27 @@ namespace Xv2CoreLib.EMA
 
         #endregion
 
+        public string[] GetBoneNames()
+        {
+            string[] bones = new string[Bones.Count];
+
+            for(int i = 0; i < Bones.Count; i++)
+            {
+                bones[i] = Bones[i].Name;
+            }
+
+            return bones;
+        }
+
+        public int GetBoneIndex(string boneName)
+        {
+            for (int i = 0; i < Bones.Count; i++)
+                if (Bones[i].Name == boneName)
+                    return i;
+
+            return -1;
+        }
+
         public Bone GetBone(string boneName)
         {
             for (int i = 0; i < Bones.Count; i++)

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Numerics;
+using System.Windows.Documents;
+using Xv2CoreLib.EMG;
 using Xv2CoreLib.FMP;
 using Xv2CoreLib.Havok;
 using Xv2CoreLib.Resource;
@@ -33,7 +35,7 @@ namespace Xv2CoreLib.EMD
     }
 
     [Serializable]
-    public class EMD_File
+    public class EMD_File : IModelFile
     {
         #region Notify
         [field: NonSerialized]
@@ -181,6 +183,22 @@ namespace Xv2CoreLib.EMD
 
             return null;
         }
+
+        public List<IUndoRedo> RecalculateAABB()
+        {
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+            Vector3 min = new Vector3(float.PositiveInfinity);
+            Vector3 max = new Vector3(float.NegativeInfinity);
+
+            foreach (var model in Models)
+            {
+                model.RecalculateAABB(undos);
+            }
+
+            return undos;
+        }
+    
+        
     }
 
     [YAXSerializeAs("Model")]
@@ -219,6 +237,17 @@ namespace Xv2CoreLib.EMD
             }
 
             return submeshes;
+        }
+
+        public void RecalculateAABB(List<IUndoRedo> undos = null)
+        {
+            Vector3 min = new Vector3(float.PositiveInfinity);
+            Vector3 max = new Vector3(float.NegativeInfinity);
+
+            foreach (var mesh in Meshes)
+            {
+                mesh.RecalculateAABB(undos);
+            }
         }
     }
 
@@ -285,6 +314,56 @@ namespace Xv2CoreLib.EMD
             }
 
             AABB = aabb;
+        }
+    
+        public static EMG_Mesh[] ConvertToEmg(EMD_Mesh[] meshes, EMA.Skeleton targetSkeleton)
+        {
+            EMG_Mesh[] emgMeshes = new EMG_Mesh[meshes.Length];
+
+            for(int i = 0; i < meshes.Length; i++)
+            {
+                EMG_Mesh emgMesh = new EMG_Mesh();
+
+                foreach(EMD_Submesh submesh in meshes[i].Submeshes)
+                {
+                    int vertStart = emgMesh.Vertices.Count;
+                    emgMesh.Vertices.AddRange(submesh.Vertexes);
+                    emgMesh.VertexFlags |= submesh.VertexFlags;
+
+                    EMG_SubmeshGroup emgSubmeshGroup = new EMG_SubmeshGroup();
+                    emgSubmeshGroup.MaterialName = submesh.Name;
+                    emgSubmeshGroup.TextureSamplerDefs = submesh.TextureSamplerDefs;
+
+                    foreach(EMD_Triangle emdTriangleList in submesh.Triangles)
+                    {
+                        EMG_Submesh emgSubmesh = new EMG_Submesh();
+                        emgSubmesh.Faces = new short[emdTriangleList.Faces.Count];
+                        emgSubmesh.Bones = new List<ushort>();
+
+                        for(int a = 0; a < emdTriangleList.Faces.Count; a++)
+                        {
+                            emgSubmesh.Faces[a] = (short)(emdTriangleList.Faces[a] + vertStart);
+                        }
+
+                        for(int a = 0; a < emdTriangleList.Bones.Count; a++)
+                        {
+                            int boneIdx = targetSkeleton.GetBoneIndex(emdTriangleList.Bones[a]);
+                            if (boneIdx == -1)
+                                throw new Exception("EMD_Mesh.ConvertToEmg: Target skeleton does not have all the nessecary bones.");
+
+                            emgSubmesh.Bones.Add((ushort)boneIdx);
+                        }
+
+                        emgSubmeshGroup.Submeshes.Add(emgSubmesh);
+                    }
+
+                    emgMesh.SubmeshGroups.Add(emgSubmeshGroup);
+                }
+
+                emgMeshes[i] = emgMesh;
+            }
+
+            return emgMeshes;
         }
     }
 
@@ -557,6 +636,11 @@ namespace Xv2CoreLib.EMD
 
             AABB = aabb;
         }
+    
+        public void TransformVertices(Matrix4x4 world, List<IUndoRedo> undos = null)
+        {
+            EMD_Vertex.TransformVertices(world, Vertexes, undos);
+        }
     }
 
     [YAXSerializeAs("TextureSamplerDef")]
@@ -794,7 +878,9 @@ namespace Xv2CoreLib.EMD
                 int addedOffset = 0;
                 EMD_Vertex vertex = new EMD_Vertex();
 
-                if (flags.HasFlag(VertexFlags.Position))
+                bool isCompressed = ((flags & VertexFlags.CompressedFormat) != 0);
+
+                if ((flags & VertexFlags.Position) != 0)
                 {
                     vertex.PositionX = BitConverter.ToSingle(rawBytes, offset + addedOffset + 0);
                     vertex.PositionY = BitConverter.ToSingle(rawBytes, offset + addedOffset + 4);
@@ -802,9 +888,9 @@ namespace Xv2CoreLib.EMD
                     addedOffset += GetVertexSizeFromFlags(VertexFlags.Position);
                 }
 
-                if (flags.HasFlag(VertexFlags.Normal))
+                if ((flags & VertexFlags.Normal) != 0)
                 {
-                    if (flags.HasFlag(VertexFlags.CompressedFormat))
+                    if (isCompressed)
                     {
                         vertex.NormalX = Half.ToHalf(rawBytes, offset + addedOffset + 0);
                         vertex.NormalY = Half.ToHalf(rawBytes, offset + addedOffset + 2);
@@ -822,9 +908,9 @@ namespace Xv2CoreLib.EMD
 
 
 
-                if (flags.HasFlag(VertexFlags.TexUV))
+                if ((flags & VertexFlags.TexUV) != 0)
                 {
-                    if (flags.HasFlag(VertexFlags.CompressedFormat))
+                    if (isCompressed)
                     {
                         vertex.TextureU = Half.ToHalf(rawBytes, offset + addedOffset + 0);
                         vertex.TextureV = Half.ToHalf(rawBytes, offset + addedOffset + 2);
@@ -838,9 +924,9 @@ namespace Xv2CoreLib.EMD
                     }
                 }
 
-                if (flags.HasFlag(VertexFlags.Tex2UV))
+                if ((flags & VertexFlags.Tex2UV) != 0)
                 {
-                    if (flags.HasFlag(VertexFlags.CompressedFormat))
+                    if (isCompressed)
                     {
                         vertex.Texture2U = Half.ToHalf(rawBytes, offset + addedOffset + 0);
                         vertex.Texture2V = Half.ToHalf(rawBytes, offset + addedOffset + 2);
@@ -854,9 +940,9 @@ namespace Xv2CoreLib.EMD
                     }
                 }
 
-                if (flags.HasFlag(VertexFlags.Tangent))
+                if ((flags & VertexFlags.Tangent) != 0)
                 {
-                    if (flags.HasFlag(VertexFlags.CompressedFormat))
+                    if (isCompressed)
                     {
                         vertex.TangentX = Half.ToHalf(rawBytes, offset + addedOffset + 0);
                         vertex.TangentY = Half.ToHalf(rawBytes, offset + addedOffset + 2);
@@ -872,7 +958,7 @@ namespace Xv2CoreLib.EMD
                     }
                 }
 
-                if (flags.HasFlag(VertexFlags.Color))
+                if ((flags & VertexFlags.Color) != 0)
                 {
                     vertex.ColorR = rawBytes[offset + addedOffset + 0];
                     vertex.ColorG = rawBytes[offset + addedOffset + 1];
@@ -881,14 +967,14 @@ namespace Xv2CoreLib.EMD
                     addedOffset += GetVertexSizeFromFlags(VertexFlags.Color);
                 }
 
-                if (flags.HasFlag(VertexFlags.BlendWeight))
+                if ((flags & VertexFlags.BlendWeight) != 0)
                 {
                     vertex.BlendIndexes[0] = rawBytes[offset + addedOffset + 0];
                     vertex.BlendIndexes[1] = rawBytes[offset + addedOffset + 1];
                     vertex.BlendIndexes[2] = rawBytes[offset + addedOffset + 2];
                     vertex.BlendIndexes[3] = rawBytes[offset + addedOffset + 3];
 
-                    if (flags.HasFlag(VertexFlags.CompressedFormat))
+                    if (isCompressed)
                     {
                         vertex.BlendWeights[0] = Half.ToHalf(rawBytes, offset + addedOffset + 4);
                         vertex.BlendWeights[1] = Half.ToHalf(rawBytes, offset + addedOffset + 6);
@@ -923,27 +1009,27 @@ namespace Xv2CoreLib.EMD
         public static int GetVertexSizeFromFlags(VertexFlags flags)
         {
             int size = 0;
-            bool isCompressed = flags.HasFlag(VertexFlags.CompressedFormat);
+            bool isCompressed = (flags & VertexFlags.CompressedFormat) != 0;
 
-            if (flags.HasFlag(VertexFlags.Position))
+            if ((flags & VertexFlags.Position) != 0)
                 size += 3 * 4;
 
-            if (flags.HasFlag(VertexFlags.Normal))
+            if ((flags & VertexFlags.Normal) != 0)
                 size += isCompressed ? (4 * 2) : (3 * 4);
 
-            if (flags.HasFlag(VertexFlags.TexUV))
+            if ((flags & VertexFlags.TexUV) != 0)
                 size += 2 * (isCompressed ? 2 : 4);
 
-            if (flags.HasFlag(VertexFlags.Tex2UV))
+            if ((flags & VertexFlags.Tex2UV) != 0)
                 size += 2 * (isCompressed ? 2 : 4);
 
-            if (flags.HasFlag(VertexFlags.Tangent))
+            if ((flags & VertexFlags.Tangent) != 0)
                 size += isCompressed ? (4 * 2) : (3 * 4);
 
-            if (flags.HasFlag(VertexFlags.Color))
+            if ((flags & VertexFlags.Color) != 0)
                 size += 4;
 
-            if (flags.HasFlag(VertexFlags.BlendWeight))
+            if ((flags & VertexFlags.BlendWeight) != 0)
                 size += 4 + (isCompressed ? (4 * 2) : (3 * 4));
 
             return size;
@@ -963,8 +1049,9 @@ namespace Xv2CoreLib.EMD
         {
             List<byte> bytes = new List<byte>();
             int size = 0;
+            bool isCompressed = ((flags & VertexFlags.CompressedFormat) != 0);
 
-            if (flags.HasFlag(VertexFlags.Position))
+            if ((flags & VertexFlags.Position) != 0)
             {
                 bytes.AddRange(BitConverter.GetBytes(PositionX));
                 bytes.AddRange(BitConverter.GetBytes(PositionY));
@@ -972,9 +1059,9 @@ namespace Xv2CoreLib.EMD
                 size += GetVertexSizeFromFlags(VertexFlags.Position);
             }
 
-            if (flags.HasFlag(VertexFlags.Normal))
+            if ((flags & VertexFlags.Normal) != 0)
             {
-                if (flags.HasFlag(VertexFlags.CompressedFormat))
+                if (isCompressed)
                 {
                     bytes.AddRange(Half.GetBytes((Half)NormalX));
                     bytes.AddRange(Half.GetBytes((Half)NormalY));
@@ -991,9 +1078,9 @@ namespace Xv2CoreLib.EMD
                 }
             }
 
-            if (flags.HasFlag(VertexFlags.TexUV))
+            if ((flags & VertexFlags.TexUV) != 0)
             {
-                if (flags.HasFlag(VertexFlags.CompressedFormat))
+                if (isCompressed)
                 {
                     bytes.AddRange(Half.GetBytes((Half)TextureU));
                     bytes.AddRange(Half.GetBytes((Half)TextureV));
@@ -1007,9 +1094,9 @@ namespace Xv2CoreLib.EMD
                 }
             }
 
-            if (flags.HasFlag(VertexFlags.Tex2UV))
+            if ((flags & VertexFlags.Tex2UV) != 0)
             {
-                if (flags.HasFlag(VertexFlags.CompressedFormat))
+                if (isCompressed)
                 {
                     bytes.AddRange(Half.GetBytes((Half)Texture2U));
                     bytes.AddRange(Half.GetBytes((Half)Texture2V));
@@ -1023,9 +1110,9 @@ namespace Xv2CoreLib.EMD
                 }
             }
 
-            if (flags.HasFlag(VertexFlags.Tangent))
+            if ((flags & VertexFlags.Tangent) != 0)
             {
-                if (flags.HasFlag(VertexFlags.CompressedFormat))
+                if (isCompressed)
                 {
                     bytes.AddRange(Half.GetBytes((Half)TangentX));
                     bytes.AddRange(Half.GetBytes((Half)TangentY));
@@ -1042,7 +1129,7 @@ namespace Xv2CoreLib.EMD
                 }
             }
 
-            if (flags.HasFlag(VertexFlags.Color))
+            if ((flags & VertexFlags.Color) != 0)
             {
                 bytes.Add(ColorR);
                 bytes.Add(ColorG);
@@ -1051,14 +1138,14 @@ namespace Xv2CoreLib.EMD
                 size += GetVertexSizeFromFlags(VertexFlags.Color);
             }
 
-            if (flags.HasFlag(VertexFlags.BlendWeight))
+            if ((flags & VertexFlags.BlendWeight) != 0)
             {
                 bytes.Add(BlendIndexes[0]);
                 bytes.Add(BlendIndexes[1]);
                 bytes.Add(BlendIndexes[2]);
                 bytes.Add(BlendIndexes[3]);
 
-                if (flags.HasFlag(VertexFlags.CompressedFormat))
+                if (isCompressed)
                 {
                     bytes.AddRange(Half.GetBytes((Half)BlendWeights[0]));
                     bytes.AddRange(Half.GetBytes((Half)BlendWeights[1]));
@@ -1085,6 +1172,36 @@ namespace Xv2CoreLib.EMD
         public int GetColorAsInt()
         {
             return BitConverter.ToInt32(new byte[4] { ColorR, ColorG, ColorB, ColorA }, 0);
+        }
+    
+        public static void TransformVertices(Matrix4x4 world, IList<EMD_Vertex> vertices, List<IUndoRedo> undos = null)
+        {
+            foreach (EMD_Vertex vertex in vertices)
+            {
+                Vector3 position = new Vector3(vertex.PositionX, vertex.PositionY, vertex.PositionZ);
+                Vector3 normal = new Vector3(vertex.NormalX, vertex.NormalY, vertex.NormalZ);
+
+                position = Vector3.Transform(position, world);
+                normal = Vector3.Normalize(Vector3.TransformNormal(normal, world));
+
+                if (undos != null)
+                {
+                    undos.Add(new UndoablePropertyGeneric(nameof(vertex.PositionX), vertex, vertex.PositionX, position.X));
+                    undos.Add(new UndoablePropertyGeneric(nameof(vertex.PositionY), vertex, vertex.PositionY, position.Y));
+                    undos.Add(new UndoablePropertyGeneric(nameof(vertex.PositionZ), vertex, vertex.PositionZ, position.Z));
+
+                    undos.Add(new UndoablePropertyGeneric(nameof(vertex.NormalX), vertex, vertex.NormalX, normal.X));
+                    undos.Add(new UndoablePropertyGeneric(nameof(vertex.NormalY), vertex, vertex.NormalY, normal.Y));
+                    undos.Add(new UndoablePropertyGeneric(nameof(vertex.NormalZ), vertex, vertex.NormalZ, normal.Z));
+                }
+
+                vertex.PositionX = position.X;
+                vertex.PositionY = position.Y;
+                vertex.PositionZ = position.Z;
+                vertex.NormalX = normal.X;
+                vertex.NormalY = normal.Y;
+                vertex.NormalZ = normal.Z;
+            }
         }
     }
 
