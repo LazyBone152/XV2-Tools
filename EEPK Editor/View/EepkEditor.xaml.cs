@@ -38,10 +38,12 @@ using MahApps.Metro.Controls.Dialogs;
 using GalaSoft.MvvmLight.CommandWpf;
 using CriPakTools;
 
-
 #if XenoKit
 using XenoKit;
 using XenoKit.Engine;
+using XenoKit.Engine.Model;
+using XenoKit.Editor;
+using XenoKit.Views;
 #endif
 
 namespace EEPK_Organiser.View
@@ -796,7 +798,7 @@ namespace EEPK_Organiser.View
             try
             {
                 var menuItem = sender as MenuItem;
-
+                
                 if (menuItem != null)
                 {
                     var nestedListBox = ((ContextMenu)menuItem.Parent).PlacementTarget as ListBox;
@@ -849,6 +851,40 @@ namespace EEPK_Organiser.View
                             }
                         }
                         break;
+#if XenoKit
+                    case EffectFile.FileType.EMO:
+                        if (emoDataGrid.SelectedItem is Asset asset)
+                        {
+                            EffectFile emb = asset.Files.FirstOrDefault(x => x.fileType == EffectFile.FileType.EMB);
+                            EffectFile emm = asset.Files.FirstOrDefault(x => x.fileType == EffectFile.FileType.EMM);
+
+                            if(emb == null || emb.EmbFile == null)
+                            {
+                                MessageBox.Show("The Model Editor requires a .emb file.", "No Textures", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                return;
+                            }
+
+                            if (emm == null || emm.EmmFile == null)
+                            {
+                                MessageBox.Show("The Model Editor requires a .emm file.", "No Materials", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                return;
+                            }
+
+                            Xv2ModelFile compiledModel = Viewport.Instance.CompiledObjectManager.GetCompiledObject<Xv2ModelFile>(selectedFile.EmoFile);
+                            ModelScene modelScene = Viewport.Instance.CompiledObjectManager.GetCompiledObject<ModelScene>(compiledModel);
+
+                            if (!TabManager.FocusTab(modelScene))
+                            {
+                                modelScene.SetFiles(XenoKit.Engine.Shader.ShaderType.Chara, emb.EmbFile, emm.EmmFile);
+                                modelScene.SetPaths(true, $"{effectContainerFile.Directory}/{selectedFile.FullFileName}", $"{effectContainerFile.Directory}/{emb.FullFileName}", $"{effectContainerFile.Directory}/{emm.FullFileName}", null);
+
+                                ModelSceneView modelSceneView = new ModelSceneView(modelScene);
+
+                                TabManager.AddTab($"{Path.GetFileName(selectedFile.FullFileName)}", modelSceneView, modelScene, Files.Instance.SelectedItem, null);
+                            }
+                        }
+                        break;
+#endif
                     default:
                         if(showError)
                             MessageBox.Show(string.Format("Edit not possible for {0} files.", selectedFile.Extension), "Edit", MessageBoxButton.OK, MessageBoxImage.Stop);
@@ -4547,9 +4583,9 @@ namespace EEPK_Organiser.View
         private void PlaySelectedEffect()
         {
 #if XenoKit
-            if (SelectedEffect != null && SceneManager.MainGameInstance != null)
+            if (SelectedEffect != null && Viewport.Instance != null)
             {
-                SceneManager.MainGameInstance.VfxPreview.PreviewEffect(SelectedEffect);
+                Viewport.Instance.VfxPreview.PreviewEffect(SelectedEffect);
             }
 #endif
         }
@@ -4979,8 +5015,8 @@ namespace EEPK_Organiser.View
         private void PlayAsset(Asset asset)
         {
 #if XenoKit
-            if (SceneManager.MainGameInstance != null && asset != null)
-                SceneManager.MainGameInstance.VfxPreview.PreviewAsset(asset);
+            if (Viewport.Instance != null && asset != null)
+                Viewport.Instance.VfxPreview.PreviewAsset(asset);
 #endif
         }
 

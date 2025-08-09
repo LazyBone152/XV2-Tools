@@ -11,7 +11,7 @@ namespace Xv2CoreLib.HslColor
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void NotifyPropertyChanged(String propertyName = "")
+        private void NotifyPropertyChanged(string propertyName = "")
         {
             if (PropertyChanged != null)
             {
@@ -358,6 +358,12 @@ namespace Xv2CoreLib.HslColor
         // Convert an RGB value into an HLS value.
         public static HslColor RgbToHls(double r, double g, double b)
         {
+            RgbToHls(r, g, b, out double h, out double l, out double s);
+            return new HslColor(h, l, s);
+        }
+
+        public static void RgbToHls(double r, double g, double b, out double hue, out double lightness, out double saturation)
+        {
             double h;
             double l;
             double s;
@@ -395,11 +401,20 @@ namespace Xv2CoreLib.HslColor
                 if (h < 0) h += 360;
             }
 
-            return new HslColor(h, l, s);
+            hue = h;
+            lightness = l;
+            saturation = s;
         }
+
 
         // Convert an HLS value into an RGB value.
         public static RgbColor HlsToRgb(double h, double l, double s)
+        {
+            HlsToRgb(h, l, s, out double r, out double g, out double b);
+            return new RgbColor(r, g, b);
+        }
+
+        public static void HlsToRgb(double h, double l, double s, out double r, out double g, out double b)
         {
             double p2;
             if (l <= 0.5) p2 = l * (1 + s);
@@ -421,7 +436,9 @@ namespace Xv2CoreLib.HslColor
             }
 
             //Return color
-            return new RgbColor(double_r, double_g, double_b);
+            r = double_r;
+            g = double_g;
+            b = double_b;
         }
 
         private static double QqhToRgb(double q1, double q2, double hue)
@@ -436,4 +453,3 @@ namespace Xv2CoreLib.HslColor
         }
     }
 }
-

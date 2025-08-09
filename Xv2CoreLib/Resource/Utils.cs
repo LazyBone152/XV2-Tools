@@ -25,6 +25,16 @@ namespace Xv2CoreLib
             return newArray;
         }
 
+        public static bool Exists<T>(this IList<T> list, object _object) where T : class
+        {
+            for(int i = 0; i < list.Count; i++)
+            {
+                if (list[i] == _object)
+                    return true;
+            }
+
+            return false;
+        }
     }
 
     public static class EnumEx
@@ -163,8 +173,8 @@ namespace Xv2CoreLib
 
             return convertedList;
         }
-        
-        public static List<int> ConvertToIntList(List<ushort> list)
+
+        public static List<int> ConvertToIntList(IEnumerable<ushort> list)
         {
             List<int> newList = new List<int>();
 
@@ -173,7 +183,17 @@ namespace Xv2CoreLib
 
             return newList;
         }
-    
+
+        public static List<int> ConvertToIntList(IEnumerable<short> list)
+        {
+            List<int> newList = new List<int>();
+
+            foreach (var value in list)
+                newList.Add((int)value);
+
+            return newList;
+        }
+
         public static int[] ConvertToIntArray(short[] array)
         {
             int[] newArray = new int[array.Length];
@@ -398,10 +418,35 @@ namespace Xv2CoreLib
 
             return idx == int.MaxValue ? -1 : idx;
         }
+    
+        public static bool IsFloat(this string str)
+        {
+            if (str == null || str.Length == 0) return false;
+            bool hasDecimalPoint = false;
+
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (str[i] == '.' && !hasDecimalPoint && i > 0)
+                {
+                    hasDecimalPoint = true;
+                    continue;
+                }
+                if (!char.IsDigit(str[i])) return false;
+            }
+
+            return true;
+        }
     }
 
     public static class Utils
     {
+        public static void RemoveAll<K, V>(this IDictionary<K, V> dict, Func<K, V, bool> match)
+        {
+            foreach (var key in dict.Keys.ToArray()
+                    .Where(key => match(key, dict[key])))
+                dict.Remove(key);
+        }
+
         /// <summary>
         /// Remove tailing zeros from a version in string format.
         /// </summary>

@@ -554,6 +554,7 @@ namespace Xv2CoreLib.Resource.App
         public int XenoKit_ShadowMapRes { get; set; } = 2048;
         public bool XenoKit_FullLowRez { get; set; } = false;
         public bool XenoKit_UseOutlinePostEffect { get; set; } = true;
+        public bool XenoKit_HalfRenderRate { get; set; }
 
         public bool XenoKit_AutoReloadShaders { get; set; } = false;
         public bool XenoKit_NextGenShaders { get; set; } = false;

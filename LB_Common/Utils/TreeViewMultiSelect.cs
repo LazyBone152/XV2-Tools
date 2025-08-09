@@ -4,7 +4,6 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Collections;
-using System.Collections.Specialized;
 
 namespace LB_Common.Utils
 {
@@ -39,13 +38,51 @@ namespace LB_Common.Utils
                     {
                         treeView.AddHandler(TreeViewItem.MouseLeftButtonDownEvent,
                           new MouseButtonEventHandler(OnTreeViewItemClicked), true);
+
+                        treeView.AddHandler(TreeViewItem.PreviewKeyDownEvent,
+                          new KeyEventHandler(OnTreeViewKeyboardInput), true);
+
+                        treeView.AddHandler(TreeViewItem.SelectedEvent,
+                          new RoutedEventHandler(OnTreeViewItemSelectecd), true);
                     }
                     else
                     {
                         treeView.RemoveHandler(TreeViewItem.MouseLeftButtonDownEvent,
                              new MouseButtonEventHandler(OnTreeViewItemClicked));
+
+                        treeView.RemoveHandler(TreeViewItem.PreviewKeyDownEvent,
+                          new KeyEventHandler(OnTreeViewKeyboardInput));
+
+                        treeView.RemoveHandler(TreeViewItem.SelectedEvent,
+                          new RoutedEventHandler(OnTreeViewItemSelectecd));
                     }
                 }
+            }
+        }
+
+        private static void OnTreeViewItemSelectecd(object sender, RoutedEventArgs e)
+        {
+            TreeViewItem treeViewItem = FindTreeViewItem(
+                                            e.OriginalSource as DependencyObject);
+            TreeView treeView = sender as TreeView;
+
+            if (treeViewItem != null && treeView != null)
+            {
+                treeViewItem.IsSelected = false; //Disable the TreeViews original selection logic
+            }
+        }
+
+        private static void OnTreeViewKeyboardInput(object sender, KeyboardEventArgs e)
+        {
+            TreeViewItem treeViewItem = FindTreeViewItem(
+                                            e.OriginalSource as DependencyObject);
+            TreeView treeView = sender as TreeView;
+
+            if (treeViewItem != null && treeView != null)
+            {
+                //TODO: Implement entry selecting with keyboard (arrow keys)
+                if(Keyboard.IsKeyDown(Key.Down) || Keyboard.IsKeyDown(Key.Up) || Keyboard.IsKeyDown(Key.Left) || Keyboard.IsKeyDown(Key.Right))
+                    e.Handled = true;
             }
         }
 
@@ -57,6 +94,8 @@ namespace LB_Common.Utils
 
             if (treeViewItem != null && treeView != null)
             {
+                treeViewItem.IsSelected = false; //Disable the TreeViews original selection logic
+
                 if (Keyboard.Modifiers == ModifierKeys.Control)
                 {
                     SelectMultipleItemsRandomly(treeView, treeViewItem);
@@ -154,13 +193,15 @@ namespace LB_Common.Utils
                 {
                     if (GetIsItemSelected(treeViewItem))
                     {
-                        selectedItems.Add(treeViewItem.Header);
+                        if(!selectedItems.Contains(treeViewItem.Header))
+                            selectedItems.Add(treeViewItem.Header);
                     }
                     else
                     {
                         selectedItems.Remove(treeViewItem.Header);
                     }
                 }
+                SetSelectedItems(treeView, selectedItems);
             }
         }
 

@@ -14,7 +14,7 @@ namespace Xv2CoreLib.Havok
 
         public HavokCollisionMesh() { }
 
-        public HavokCollisionMesh(EMD_Submesh emdSubmesh)
+        public HavokCollisionMesh(EMD_Submesh emdSubmesh, Matrix4x4 world)
         {
             List<int> faces = new List<int>();
             Vertices = new Vector3[emdSubmesh.Vertexes.Count];
@@ -30,6 +30,11 @@ namespace Xv2CoreLib.Havok
             for (int i = 0; i < emdSubmesh.Vertexes.Count; i++)
             {
                 Vertices[i] = new Vector3(emdSubmesh.Vertexes[i].PositionX, emdSubmesh.Vertexes[i].PositionY, emdSubmesh.Vertexes[i].PositionZ);
+
+                if(world != Matrix4x4.Identity)
+                {
+                    Vertices[i] = Vector3.Transform(Vertices[i], world);
+                }
             }
 
             Indices = faces.ToArray();

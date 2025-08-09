@@ -346,7 +346,7 @@ namespace Xv2CoreLib.BCS
                 {
                     foreach (var physicsPart in part.PhysicsParts)
                     {
-                        if (Path.GetFileNameWithoutExtension(physicsPart.GetEmbPath()) == emdPath) return physicsPart;
+                        if (Path.GetFileName(physicsPart.GetModelPath()) == emdPath) return physicsPart;
                     }
                 }
             }

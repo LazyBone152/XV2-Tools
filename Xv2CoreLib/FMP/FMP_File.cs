@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using Xv2CoreLib.ACB;
 using Xv2CoreLib.EMD;
 using Xv2CoreLib.ESK;
 using Xv2CoreLib.Havok;
@@ -312,9 +313,12 @@ namespace Xv2CoreLib.FMP
         {
             foreach(var fragment in FragmentGroups)
             {
-                foreach(var index in fragment.ObjectIndices)
+                if(fragment.ObjectIndices != null)
                 {
-                    index.Object = Objects.FirstOrDefault(x => x.Index == index.Index);
+                    foreach (var index in fragment.ObjectIndices)
+                    {
+                        index.Object = Objects.FirstOrDefault(x => x.Index == index.Index);
+                    }
                 }
             }
 
@@ -331,17 +335,20 @@ namespace Xv2CoreLib.FMP
         {
             foreach (var fragment in FragmentGroups)
             {
-                for (int i = fragment.ObjectIndices.Count - 1; i >= 0; i--)
+                if(fragment.ObjectIndices != null)
                 {
-                    int idx = Objects.IndexOf(fragment.ObjectIndices[i].Object);
-
-                    if(idx == -1)
+                    for (int i = fragment.ObjectIndices.Count - 1; i >= 0; i--)
                     {
-                        fragment.ObjectIndices.RemoveAt(i);
-                        continue;
-                    }
+                        int idx = Objects.IndexOf(fragment.ObjectIndices[i].Object);
 
-                    fragment.ObjectIndices[i].Index = (ushort)idx;
+                        if (idx == -1)
+                        {
+                            fragment.ObjectIndices.RemoveAt(i);
+                            continue;
+                        }
+
+                        fragment.ObjectIndices[i].Index = (ushort)idx;
+                    }
                 }
             }
 
@@ -377,9 +384,9 @@ namespace Xv2CoreLib.FMP
             }
         }
     
-        public void CreateCollision(FMP_Object obj, EMD_File emdModel, ESK_File eskSkeleton = null)
+        public void CreateCollision(FMP_Object obj, EMD_File emdModel, ESK_File eskSkeleton = null, List<MeshFlags> externalFlags = null)
         {
-            CollisionCreator.CreateCollision(this, obj, emdModel, eskSkeleton);
+            CollisionCreator.CreateCollision(this, obj, emdModel, eskSkeleton, externalFlags);
         }
 
         public EMD_File ExportCollision(FMP_Object obj)
@@ -982,8 +989,8 @@ namespace Xv2CoreLib.FMP
         [YAXDontSerializeIfNull]
         public FMP_Action Action { get; set; }
         [YAXDontSerializeIfNull]
-        public FMP_Hierarchy Hierarchy { get; set; }
-        public FMP_Matrix Matrix { get; set; }
+        public FMP_InstanceData InstanceData { get; set; }
+        public FMP_Transform Transform { get; set; }
 
         internal static void WriteAll(List<FMP_Object> objects, List<FMP_CollisionGroup> hitboxGroups, List<byte> bytes, List<StringWriter.StringInfo> stringWriter)
         {
@@ -1001,7 +1008,7 @@ namespace Xv2CoreLib.FMP
                 bytes.AddRange(BitConverter.GetBytes(objects[i].Entities != null ? objects[i].Entities.Count : 0));
                 bytes.AddRange(new byte[8]); //Entity and Hiearchy offsets
                 bytes.AddRange(BitConverter.GetBytes(objects[i].F_32));
-                bytes.AddRange(objects[i].Matrix.Write());
+                bytes.AddRange(objects[i].Transform.Write());
             }
 
             //Write sub data, per object
@@ -1089,10 +1096,10 @@ namespace Xv2CoreLib.FMP
                 }
 
                 //Hierarchy
-                if (objects[i].Hierarchy != null)
+                if (objects[i].InstanceData != null)
                 {
                     Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), objectStart + 28 + (84 * i));
-                    objects[i].Hierarchy.Write(bytes);
+                    objects[i].InstanceData.Write(bytes);
                 }
             }
 
@@ -1119,7 +1126,7 @@ namespace Xv2CoreLib.FMP
             obj.InitialEntityIndex = BitConverter.ToUInt16(bytes, offset + 6);
             obj.Flags = (ObjectFlags)BitConverter.ToUInt16(bytes, offset + 10);
             obj.F_32 = BitConverter.ToSingle(bytes, offset + 32);
-            obj.Matrix = FMP_Matrix.Read(bytes, offset + 36);
+            obj.Transform = FMP_Transform.Read(bytes, offset + 36);
 
             ushort hitboxGroupIndex = BitConverter.ToUInt16(bytes, offset + 8);
             int hitboxInstancesOffset = BitConverter.ToInt32(bytes, offset + 12);
@@ -1141,22 +1148,34 @@ namespace Xv2CoreLib.FMP
                 obj.Action = FMP_Action.Read(bytes, actionOffset);
 
             if (hierarchyOffset > 0)
-                obj.Hierarchy = FMP_Hierarchy.Read(bytes, hierarchyOffset);
+                obj.InstanceData = FMP_InstanceData.Read(bytes, hierarchyOffset);
 
             return obj;
         }
+    
+        public bool HasCommand(string commandName)
+        {
+            var command = Action?.GetCommand(commandName);
+
+            return command != null;
+        }
+
+        public override string ToString()
+        {
+            return $"{Name}";
+        }
     }
 
-    [YAXSerializeAs("Hierarchy")]
-    public class FMP_Hierarchy
+    [YAXSerializeAs("InstanceData")]
+    public class FMP_InstanceData
     {
-        public List<FMP_Node> Nodes { get; set; }
-        public FMP_HierarchyNode HierarchyNode { get; set; }
+        public List<FMP_InstanceGroup> InstanceGroups { get; set; }
+        public FMP_InstanceBVHNode BVHRoot { get; set; }
 
         public void Write(List<byte> bytes)
         {
-            List<FMP_NodeTransform> transforms = GetNodeTransforms();
-            int nodeCount = Nodes?.Count ?? 0;
+            List<FMP_InstanceTransform> transforms = GetNodeTransforms();
+            int nodeCount = InstanceGroups?.Count ?? 0;
             int start = bytes.Count;
 
             bytes.AddRange(BitConverter.GetBytes(transforms.Count));
@@ -1166,18 +1185,18 @@ namespace Xv2CoreLib.FMP
 
             for(int i = 0; i < nodeCount; i++)
             {
-                bytes.AddRange(BitConverter.GetBytes(Nodes[i].F_00));
-                bytes.AddRange(BitConverter.GetBytes(Nodes[i].F_04));
-                bytes.AddRange(BitConverter.GetBytes(Nodes[i].F_08));
-                bytes.AddRange(BitConverter.GetBytes(Nodes[i].F_12));
-                bytes.AddRange(BitConverter.GetBytes(Nodes[i].F_16));
-                bytes.AddRange(BitConverter.GetBytes(Nodes[i].F_20));
-                bytes.AddRange(BitConverter.GetBytes(Nodes[i].F_24));
-                bytes.AddRange(BitConverter.GetBytes(Nodes[i].F_28));
-                bytes.AddRange(BitConverter.GetBytes(Nodes[i].F_32));
-                bytes.AddRange(BitConverter.GetBytes(Nodes[i].F_36));
-                bytes.AddRange(BitConverter.GetBytes(Nodes[i].Transforms?.Count > 0 ? Nodes[i].Transforms.Count : 0));
-                bytes.AddRange(BitConverter.GetBytes(Nodes[i].NodeTransformIndex));
+                bytes.AddRange(BitConverter.GetBytes(InstanceGroups[i].CenterX));
+                bytes.AddRange(BitConverter.GetBytes(InstanceGroups[i].CenterY));
+                bytes.AddRange(BitConverter.GetBytes(InstanceGroups[i].CenterZ));
+                bytes.AddRange(BitConverter.GetBytes(InstanceGroups[i].MaxDistanceFromCenter));
+                bytes.AddRange(BitConverter.GetBytes(InstanceGroups[i].MinX));
+                bytes.AddRange(BitConverter.GetBytes(InstanceGroups[i].MinY));
+                bytes.AddRange(BitConverter.GetBytes(InstanceGroups[i].MinZ));
+                bytes.AddRange(BitConverter.GetBytes(InstanceGroups[i].MaxX));
+                bytes.AddRange(BitConverter.GetBytes(InstanceGroups[i].MaxY));
+                bytes.AddRange(BitConverter.GetBytes(InstanceGroups[i].MaxZ));
+                bytes.AddRange(BitConverter.GetBytes(InstanceGroups[i].Transforms?.Count > 0 ? InstanceGroups[i].Transforms.Count : 0));
+                bytes.AddRange(BitConverter.GetBytes(InstanceGroups[i].NodeTransformIndex));
             }
 
             //NodeTransforms
@@ -1192,18 +1211,18 @@ namespace Xv2CoreLib.FMP
             }
 
             //HierarchyNode
-            if(HierarchyNode != null)
+            if(BVHRoot != null)
             {
                 Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), start + 12);
-                HierarchyNode.Write(bytes);
+                BVHRoot.Write(bytes);
             }
         }
 
-        private List<FMP_NodeTransform> GetNodeTransforms()
+        private List<FMP_InstanceTransform> GetNodeTransforms()
         {
-            List<FMP_NodeTransform> nodes = new List<FMP_NodeTransform>();
+            List<FMP_InstanceTransform> nodes = new List<FMP_InstanceTransform>();
 
-            foreach(var node in Nodes)
+            foreach(var node in InstanceGroups)
             {
                 if(node.Transforms?.Count > 0)
                 {
@@ -1219,7 +1238,7 @@ namespace Xv2CoreLib.FMP
             return nodes;
         }
 
-        public static FMP_Hierarchy Read(byte[] bytes, int offset)
+        public static FMP_InstanceData Read(byte[] bytes, int offset)
         {
             int nodeTransformCount = BitConverter.ToInt32(bytes, offset);
             int nodeCount = BitConverter.ToInt32(bytes, offset + 4);
@@ -1227,47 +1246,58 @@ namespace Xv2CoreLib.FMP
             int hierarchyNodeOffset = BitConverter.ToInt32(bytes, offset + 12);
             int nodeTransformOffset = BitConverter.ToInt32(bytes, offset + 16);
 
-            return new FMP_Hierarchy()
+            return new FMP_InstanceData()
             {
-                HierarchyNode = FMP_HierarchyNode.Read(bytes, hierarchyNodeOffset),
-                Nodes = FMP_Node.ReadAll(bytes, nodeOffset, nodeCount, nodeTransformOffset)
+                BVHRoot = FMP_InstanceBVHNode.Read(bytes, hierarchyNodeOffset),
+                InstanceGroups = FMP_InstanceGroup.ReadAll(bytes, nodeOffset, nodeCount, nodeTransformOffset)
             };
+        }
+
+        public IEnumerable<FMP_InstanceTransform> GetTransforms()
+        {
+            foreach (FMP_InstanceGroup instanceGroup in InstanceGroups)
+            {
+                foreach (FMP_InstanceTransform transform in instanceGroup.Transforms)
+                    yield return transform;
+            }
         }
     }
 
-    [YAXSerializeAs("Node")]
-    public class FMP_Node
+    [YAXSerializeAs("InstanceGroup")]
+    public class FMP_InstanceGroup
     {
         [YAXAttributeForClass]
         public int Index { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_00 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_04 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_08 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_12 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_16 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_20 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_24 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_28 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_32 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_36 { get; set; }
+        [YAXComment("These values represent the bounding box for the children InstanceTransforms (used for frustum culling)")]
+        [CustomSerialize(isFloat: true, serializeAs: "X", parent: "Center")]
+        public float CenterX { get; set; }
+        [CustomSerialize(isFloat: true, serializeAs: "Y", parent: "Center")]
+        public float CenterY { get; set; }
+        [CustomSerialize(isFloat: true, serializeAs: "Z", parent: "Center")]
+        public float CenterZ { get; set; }
+        [CustomSerialize(isFloat: true, serializeAs: "MaxDistance", parent: "Center")]
+        public float MaxDistanceFromCenter { get; set; } //Max distance from center to min/max point on any axis
+        [CustomSerialize(isFloat: true, serializeAs: "X", parent: "Min")]
+        public float MinX { get; set; }
+        [CustomSerialize(isFloat: true, serializeAs: "Y", parent: "Min")]
+        public float MinY { get; set; }
+        [CustomSerialize(isFloat: true, serializeAs: "Z", parent: "Min")]
+        public float MinZ { get; set; }
+        [CustomSerialize(isFloat: true, serializeAs: "X", parent: "Max")]
+        public float MaxX { get; set; }
+        [CustomSerialize(isFloat: true, serializeAs: "Y", parent: "Max")]
+        public float MaxY { get; set; }
+        [CustomSerialize(isFloat: true, serializeAs: "Z", parent: "Max")]
+        public float MaxZ { get; set; }
 
-        public List<FMP_NodeTransform> Transforms { get; set; }
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "InstanceTransform")]
+        public List<FMP_InstanceTransform> Transforms { get; set; }
 
         internal int NodeTransformIndex { get; set; }
 
-        public static List<FMP_Node> ReadAll(byte[] bytes, int offset, int count, int nodeTransformsOffset)
+        public static List<FMP_InstanceGroup> ReadAll(byte[] bytes, int offset, int count, int nodeTransformsOffset)
         {
-            List<FMP_Node> entries = new List<FMP_Node>();
+            List<FMP_InstanceGroup> entries = new List<FMP_InstanceGroup>();
 
             for (int i = 0; i < count; i++)
             {
@@ -1277,32 +1307,32 @@ namespace Xv2CoreLib.FMP
             return entries;
         }
 
-        public static FMP_Node Read(byte[] bytes, int offset, int nodeTransformsOffset, int index)
+        public static FMP_InstanceGroup Read(byte[] bytes, int offset, int nodeTransformsOffset, int index)
         {
-            FMP_Node node = new FMP_Node();
+            FMP_InstanceGroup node = new FMP_InstanceGroup();
             node.Index = index;
-            node.F_00 = BitConverter.ToSingle(bytes, offset);
-            node.F_04 = BitConverter.ToSingle(bytes, offset + 4);
-            node.F_08 = BitConverter.ToSingle(bytes, offset + 8);
-            node.F_12 = BitConverter.ToSingle(bytes, offset + 12);
-            node.F_16 = BitConverter.ToSingle(bytes, offset + 16);
-            node.F_20 = BitConverter.ToSingle(bytes, offset + 20);
-            node.F_24 = BitConverter.ToSingle(bytes, offset + 24);
-            node.F_28 = BitConverter.ToSingle(bytes, offset + 28);
-            node.F_32 = BitConverter.ToSingle(bytes, offset + 32);
-            node.F_36 = BitConverter.ToSingle(bytes, offset + 36);
+            node.CenterX = BitConverter.ToSingle(bytes, offset);
+            node.CenterY = BitConverter.ToSingle(bytes, offset + 4);
+            node.CenterZ = BitConverter.ToSingle(bytes, offset + 8);
+            node.MaxDistanceFromCenter = BitConverter.ToSingle(bytes, offset + 12);
+            node.MinX = BitConverter.ToSingle(bytes, offset + 16);
+            node.MinY = BitConverter.ToSingle(bytes, offset + 20);
+            node.MinZ = BitConverter.ToSingle(bytes, offset + 24);
+            node.MaxX = BitConverter.ToSingle(bytes, offset + 28);
+            node.MaxY = BitConverter.ToSingle(bytes, offset + 32);
+            node.MaxZ = BitConverter.ToSingle(bytes, offset + 36);
 
             int transformCount = BitConverter.ToInt32(bytes, offset + 40);
-            int transformOffset = nodeTransformsOffset + (FMP_NodeTransform.SIZE * BitConverter.ToInt32(bytes, offset + 44));
+            int transformOffset = nodeTransformsOffset + (FMP_InstanceTransform.SIZE * BitConverter.ToInt32(bytes, offset + 44));
 
-            node.Transforms = FMP_NodeTransform.ReadAll(bytes, transformOffset, transformCount);
+            node.Transforms = FMP_InstanceTransform.ReadAll(bytes, transformOffset, transformCount);
             return node;
         }
 
     }
 
-    [YAXSerializeAs("NodeTransform")]
-    public class FMP_NodeTransform
+    [YAXSerializeAs("InstanceTransfor")]
+    public class FMP_InstanceTransform
     {
         internal const int SIZE = 36;
 
@@ -1347,9 +1377,9 @@ namespace Xv2CoreLib.FMP
             return bytes.ToArray();
         }
 
-        public static List<FMP_NodeTransform> ReadAll(byte[] bytes, int offset, int count)
+        public static List<FMP_InstanceTransform> ReadAll(byte[] bytes, int offset, int count)
         {
-            List<FMP_NodeTransform> entries = new List<FMP_NodeTransform>();
+            List<FMP_InstanceTransform> entries = new List<FMP_InstanceTransform>();
 
             for (int i = 0; i < count; i++)
             {
@@ -1359,9 +1389,9 @@ namespace Xv2CoreLib.FMP
             return entries;
         }
 
-        public static FMP_NodeTransform Read(byte[] bytes, int offset)
+        public static FMP_InstanceTransform Read(byte[] bytes, int offset)
         {
-            return new FMP_NodeTransform()
+            return new FMP_InstanceTransform()
             {
                 PositionX = BitConverter.ToSingle(bytes, offset),
                 PositionY = BitConverter.ToSingle(bytes, offset + 4),
@@ -1374,55 +1404,74 @@ namespace Xv2CoreLib.FMP
                 ScaleZ = BitConverter.ToSingle(bytes, offset + 32),
             };
         }
+    
+        public Matrix4x4 ToMatrix()
+        {
+            Matrix4x4 matrix = Matrix4x4.CreateScale(ScaleX, ScaleY, ScaleZ);
+            matrix *= Matrix4x4.CreateFromQuaternion(MathHelpers.EulerToQuaternion(new Vector3(RotationX, RotationY, RotationZ)));
+            matrix *= Matrix4x4.CreateTranslation(PositionX, PositionY, PositionZ);
+            return matrix;
+        }
     }
 
-    [YAXSerializeAs("HierarchyNode")]
-    public class FMP_HierarchyNode
+    [YAXSerializeAs("BVH_Node")]
+    public class FMP_InstanceBVHNode
     {
         [YAXAttributeForClass]
-        public byte Type { get; set; } //Test value range for this. Maybe its a a boolean, 1 = transforms, 0 = children
-        [YAXAttributeForClass]
         [YAXHexValue]
-        public byte TypeB { get; set; }
+        public byte Flags { get; set; }
         [YAXAttributeForClass]
         public int Index { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]
         [YAXDontSerializeIfNull]
         [CustomSerialize]
-        public ushort[] Indices { get; set; }
+        public ushort[] GroupIndices { get; set; }
 
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]
         [YAXDontSerializeIfNull]
         [CustomSerialize]
-        public float[] Values { get; set; } //size 3 array
+        public float[] Center { get; set; } //size 3 array
 
-        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "HierarchyNode")]
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BVH_Node")]
         [YAXDontSerializeIfNull]
-        public List<FMP_HierarchyNode> HierarchyNodes { get; set; }
+        public List<FMP_InstanceBVHNode> BVHNodes { get; set; }
 
         public void Write(List<byte> bytes)
         {
-            bytes.Add(Type);
-            bytes.Add(TypeB);
-            int indicesCount = Indices?.Length ?? 0;
+            byte isLeaf = (byte)(GroupIndices?.Length > 0 ? 1 : 0);
+
+            bytes.Add(isLeaf);
+            bytes.Add(Flags);
+            int indicesCount = GroupIndices?.Length ?? 0;
             bytes.AddRange(BitConverter.GetBytes((ushort)indicesCount));
 
-            if (Type == 0)
+            if (isLeaf == 0)
             {
                 //Has children
-                if (Values?.Length != 3)
-                    throw new Exception("FMP_HierarchyNode: Invalid number of Values.");
+                float[] values = Center;
 
-                bytes.AddRange(BitConverter.GetBytes(Values[0]));
-                bytes.AddRange(BitConverter.GetBytes(Values[1]));
-                bytes.AddRange(BitConverter.GetBytes(Values[2]));
+                if (values?.Length != 3)
+                {
+                    values = new float[3];
+                    //throw new Exception("FMP_HierarchyNode: Invalid number of Values.");
+                }
+                    
+
+                bytes.AddRange(BitConverter.GetBytes(values[0]));
+                bytes.AddRange(BitConverter.GetBytes(values[1]));
+                bytes.AddRange(BitConverter.GetBytes(values[2]));
                 int childrenOffsets = bytes.Count;
                 bytes.AddRange(new byte[4 * 8]); //Offsets for children
 
+                if(BVHNodes.Count > 8)
+                {
+                    Console.WriteLine($"WARNING: A InstanceTreeNode cannot have more than 8 InstanceTreeNodes as children.");
+                }
+
                 for (int i = 0; i < 8; i++)
                 {
-                    FMP_HierarchyNode child = HierarchyNodes.FirstOrDefault(x => x.Index == i);
+                    FMP_InstanceBVHNode child = BVHNodes.FirstOrDefault(x => x.Index == i);
 
                     if(child != null)
                     {
@@ -1431,11 +1480,11 @@ namespace Xv2CoreLib.FMP
                     }
                 }
             }
-            else if (Type == 1)
+            else if (isLeaf == 1)
             {
                 for(int i = 0; i < indicesCount; i++)
                 {
-                    bytes.AddRange(BitConverter.GetBytes(Indices[i]));
+                    bytes.AddRange(BitConverter.GetBytes(GroupIndices[i]));
                 }
 
                 bytes.AddRange(new byte[Utils.CalculatePadding(bytes.Count, 4)]);
@@ -1447,41 +1496,38 @@ namespace Xv2CoreLib.FMP
 
         }
 
-        public static FMP_HierarchyNode Read(byte[] bytes, int offset, int index = 0)
+        public static FMP_InstanceBVHNode Read(byte[] bytes, int offset, int index = 0)
         {
-            FMP_HierarchyNode node = new FMP_HierarchyNode();
-            node.Type = bytes[offset];
-            node.TypeB = bytes[offset + 1];
+            FMP_InstanceBVHNode node = new FMP_InstanceBVHNode();
+            byte isLeaf = bytes[offset];
+            node.Flags = bytes[offset + 1];
             node.Index = index;
             
-            if(node.Type == 0)
+            if(isLeaf == 0)
             {
                 //Has children
-                node.Values = BitConverter_Ex.ToFloat32Array(bytes, offset + 4, 3);
+                node.Center = BitConverter_Ex.ToFloat32Array(bytes, offset + 4, 3);
                 int[] offsets = BitConverter_Ex.ToInt32Array(bytes, offset + 16, 8);
-                node.HierarchyNodes = new List<FMP_HierarchyNode>();
+                node.BVHNodes = new List<FMP_InstanceBVHNode>();
 
                 for(int i = 0; i < offsets.Length; i++)
                 {
                     if (offsets[i] != 0 && offsets[i] != offset)
                     {
-                        node.HierarchyNodes.Add(Read(bytes, offsets[i], i));
+                        node.BVHNodes.Add(Read(bytes, offsets[i], i));
                     }
                 }
             }
-            else if(node.Type == 1)
+            else if(isLeaf == 1)
             {
                 //No children, instead has indices (of a FMP_Node)
                 int indicesCount = BitConverter.ToUInt16(bytes, offset + 2);
-                node.Indices = BitConverter_Ex.ToUInt16Array(bytes, offset + 4, indicesCount);
-            }
-            else
-            {
-                throw new Exception("FMP_HierarchyNode: Unexpected Type value of " + node.Type);
+                node.GroupIndices = BitConverter_Ex.ToUInt16Array(bytes, offset + 4, indicesCount);
             }
 
             return node;
         }
+        
     }
 
     public class FMP_Action
@@ -1625,6 +1671,17 @@ namespace Xv2CoreLib.FMP
             }
 
             return true;
+        }
+    
+        public FMP_Command GetCommand(string commandName)
+        {
+            for(int i = 0; i < Commands.Count; i++)
+            {
+                if(Commands[i].Name == commandName)
+                    return Commands[i];
+            }
+
+            return null;
         }
     }
 
@@ -1860,7 +1917,7 @@ namespace Xv2CoreLib.FMP
         [CustomSerialize]
         public int I_04 { get; set; }
         public FMP_Visual Visual { get; set; }
-        public FMP_Matrix Matrix { get; set; }
+        public FMP_Transform Transform { get; set; }
 
         internal static void Write(List<FMP_Entity> entities, List<byte> bytes, List<StringWriter.StringInfo> stringWriter)
         {
@@ -1870,7 +1927,7 @@ namespace Xv2CoreLib.FMP
             {
                 bytes.AddRange(new byte[4]);
                 bytes.AddRange(BitConverter.GetBytes(entities[i].I_04));
-                bytes.AddRange(entities[i].Matrix.Write());
+                bytes.AddRange(entities[i].Transform.Write());
             }
 
             //Write visual subcomponent
@@ -1963,7 +2020,7 @@ namespace Xv2CoreLib.FMP
             {
                 I_04 = BitConverter.ToInt32(bytes, offset + 4),
                 Visual = visualOffset > 0 ? FMP_Visual.Read(bytes, visualOffset, depot1, depot2, depot3, depot4) : null,
-                Matrix = FMP_Matrix.Read(bytes, offset + 8)
+                Transform = FMP_Transform.Read(bytes, offset + 8)
             };
         }
 
@@ -2132,35 +2189,40 @@ namespace Xv2CoreLib.FMP
         }
     }
 
-    [YAXSerializeAs("Matrix")]
-    public class FMP_Matrix
+    [YAXSerializeAs("Transform")]
+    public class FMP_Transform
     {
-        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]
-        [CustomSerialize]
-        public float[] L0 { get; private set; }
-        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]
-        [CustomSerialize]
-        public float[] L1 { get; private set; }
-        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]
-        [CustomSerialize]
-        public float[] L2 { get; private set; }
-        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ",")]
-        [CustomSerialize]
-        public float[] L3 { get; private set; }
-
-        public FMP_Matrix()
-        {
-            L0 = new float[3];
-            L1 = new float[3];
-            L2 = new float[3];
-            L3 = new float[3];
-        }
+        [CustomSerialize(parent: "Position", serializeAs: "X", isFloat: true)]
+        public float PosX { get; set; }
+        [CustomSerialize(parent: "Position", serializeAs: "Y", isFloat: true)]
+        public float PosY { get; set; }
+        [CustomSerialize(parent: "Position", serializeAs: "Z", isFloat: true)]
+        public float PosZ { get; set; }
+        [CustomSerialize(parent: "Rotation", serializeAs: "X", isFloat: true)]
+        public float RotX { get; set; }
+        [CustomSerialize(parent: "Rotation", serializeAs: "Y", isFloat: true)]
+        public float RotY { get; set; }
+        [CustomSerialize(parent: "Rotation", serializeAs: "Z", isFloat: true)]
+        public float RotZ { get; set; }
+        [CustomSerialize(parent: "Scale", serializeAs: "X", isFloat: true)]
+        public float ScaleX { get; set; } = 1f;
+        [CustomSerialize(parent: "Scale", serializeAs: "Y", isFloat: true)]
+        public float ScaleY { get; set; } = 1f;
+        [CustomSerialize(parent: "Scale", serializeAs: "Z", isFloat: true)]
+        public float ScaleZ { get; set; } = 1f;
 
         public byte[] Write()
         {
             List<byte> bytes = new List<byte>();
 
-            if(L0.Length != 3 || L1.Length != 3 || L2.Length != 3 || L3.Length != 3)
+            Matrix4x4 matrix = ToMatrix();
+
+            float[] L0 = new float[3] { matrix.M11, matrix.M12, matrix.M13 };
+            float[] L1 = new float[3] { matrix.M21, matrix.M22, matrix.M23 };
+            float[] L2 = new float[3] { matrix.M31, matrix.M32, matrix.M33 };
+            float[] L3 = new float[3] { matrix.M41, matrix.M42, matrix.M43 };
+
+            if (L0.Length != 3 || L1.Length != 3 || L2.Length != 3 || L3.Length != 3)
             {
                 throw new Exception("FMP_Matrix: invalid number of elements in array. There must be 3 values per line.");
             }
@@ -2176,66 +2238,77 @@ namespace Xv2CoreLib.FMP
             return bytes.ToArray();
         }
 
-        public static FMP_Matrix Read(byte[] bytes, int offset)
+        public static FMP_Transform Read(byte[] bytes, int offset)
         {
-            return new FMP_Matrix()
-            {
-                L0 = BitConverter_Ex.ToFloat32Array(bytes, offset, 3),
-                L1 = BitConverter_Ex.ToFloat32Array(bytes, offset + 12, 3),
-                L2 = BitConverter_Ex.ToFloat32Array(bytes, offset + 24, 3),
-                L3 = BitConverter_Ex.ToFloat32Array(bytes, offset + 36, 3)
-            };
+            float[] L0 = BitConverter_Ex.ToFloat32Array(bytes, offset, 3);
+            float[] L1 = BitConverter_Ex.ToFloat32Array(bytes, offset + 12, 3);
+            float[] L2 = BitConverter_Ex.ToFloat32Array(bytes, offset + 24, 3);
+            float[] L3 = BitConverter_Ex.ToFloat32Array(bytes, offset + 36, 3);
+
+            Matrix4x4 matrix = new Matrix4x4(L0[0], L0[1], L0[2], 0f, L1[0], L1[1], L1[2], 0f, L2[0], L2[1], L2[2], 0f, L3[0], L3[1], L3[2], 1f); ;
+
+            return CreateFromMatrix(ref matrix);
         }
     
-        public bool IsEqual(FMP_Matrix matrix)
+        public bool IsEqual(FMP_Transform matrix)
         {
-            if (L0[0] != matrix.L0[0] || L0[1] != matrix.L0[1] || L0[2] != matrix.L0[2]) return false;
-            if (L1[0] != matrix.L1[0] || L1[1] != matrix.L1[1] || L1[2] != matrix.L1[2]) return false;
-            if (L2[0] != matrix.L2[0] || L2[1] != matrix.L2[1] || L2[2] != matrix.L2[2]) return false;
-            if (L3[0] != matrix.L3[0] || L3[1] != matrix.L3[1] || L3[2] != matrix.L3[2]) return false;
+            if (!MathHelpers.FloatEquals(matrix.PosX, PosX) || !MathHelpers.FloatEquals(matrix.PosY, PosY) || !MathHelpers.FloatEquals(matrix.PosZ, PosZ)) return false;
+            if (!MathHelpers.FloatEquals(matrix.RotX, RotX) || !MathHelpers.FloatEquals(matrix.RotY, RotY) || !MathHelpers.FloatEquals(matrix.RotZ, RotZ)) return false;
+            if (!MathHelpers.FloatEquals(matrix.ScaleX, ScaleX) || !MathHelpers.FloatEquals(matrix.ScaleY, ScaleY) || !MathHelpers.FloatEquals(matrix.ScaleZ, ScaleZ)) return false;
+
             return true;
         }
     
         /// <summary>
-        /// Returns an instance of <see cref="FMP_Matrix"/> set to identity values.
+        /// Returns an instance of <see cref="FMP_Transform"/> set to identity values.
         /// </summary>
         /// <returns></returns>
-        public static FMP_Matrix GetDefault()
+        public static FMP_Transform GetDefault()
         {
-            return new FMP_Matrix()
+            return new FMP_Transform();
+        }
+
+        public static FMP_Transform CreateFromBone(ESK_RelativeTransform transform)
+        {
+            return new FMP_Transform()
             {
-                L0 = new float[3] { 1, 0, 0},
-                L1 = new float[3] { 0, 1, 0 },
-                L2 = new float[3] { 0, 0, 1 },
-                L3 = new float[3] { 0, 0, 0 }
+                PosX = transform.PositionX * transform.PositionW,
+                PosY = transform.PositionY * transform.PositionW,
+                PosZ = transform.PositionZ * transform.PositionW
             };
         }
 
-        public static FMP_Matrix CreateFromBone(ESK_RelativeTransform transform)
+        public static FMP_Transform CreateFromMatrix(ref Matrix4x4 matrix)
         {
-            return new FMP_Matrix()
+            if (Matrix4x4.Decompose(matrix, out Vector3 scale, out Quaternion rot, out Vector3 translation))
             {
-                L0 = new float[3] { 1, 0, 0 },
-                L1 = new float[3] { 0, 1, 0 },
-                L2 = new float[3] { 0, 0, 1 },
-                L3 = new float[3] { transform.PositionX * transform.PositionW, transform.PositionY * transform.PositionW, transform.PositionZ * transform.PositionW }
-            };
-        }
+                Vector3 rotationEuler = MathHelpers.QuaternionToEuler(rot);
 
-        public static FMP_Matrix CreateFromMatrix(Matrix4x4 matrix)
-        {
-            return new FMP_Matrix()
+                return new FMP_Transform()
+                {
+                    PosX = translation.X,
+                    PosY = translation.Y,
+                    PosZ = translation.Z,
+                    RotX = rotationEuler.X,
+                    RotY = rotationEuler.Y,
+                    RotZ = rotationEuler.Z,
+                    ScaleX = scale.X,
+                    ScaleY = scale.Y,
+                    ScaleZ = scale.Z,
+                };
+            }
+            else
             {
-                L0 = new float[3] { matrix.M11, matrix.M12, matrix.M13 },
-                L1 = new float[3] { matrix.M21, matrix.M22, matrix.M23 },
-                L2 = new float[3] { matrix.M31, matrix.M32, matrix.M33 },
-                L3 = new float[3] { matrix.M41, matrix.M42, matrix.M43 }
-            };
+                return new FMP_Transform();
+            }
         }
 
         public Matrix4x4 ToMatrix()
         {
-            return new Matrix4x4(L0[0], L0[1], L0[2], 0f, L1[0], L1[1], L1[2], 0f, L2[0], L2[1], L2[2], 0f, L3[0], L3[1], L3[2], 1f);
+            Matrix4x4 matrix = Matrix4x4.CreateScale(ScaleX, ScaleY, ScaleZ);
+            matrix *= Matrix4x4.CreateFromQuaternion(MathHelpers.EulerToQuaternion(new Vector3(RotX, RotY, RotZ)));
+            matrix *= Matrix4x4.CreateTranslation(PosX, PosY, PosZ);
+            return matrix;
         }
     }
 
@@ -2292,7 +2365,7 @@ namespace Xv2CoreLib.FMP
             for(int i = 0; i < colliders.Count; i++)
             {
                 FMP_ColliderInstance colliderInstance = new FMP_ColliderInstance();
-                colliderInstance.Matrix = FMP_Matrix.GetDefault();
+                colliderInstance.Matrix = FMP_Transform.GetDefault();
 
                 var numHavokGroups = colliders[i].HavokColliders.GroupBy(x => x.Group).Select(g => new { Name = g.Key, Count = g.Count() });
                 colliderInstance.HavokGroupParameters = new List<FMP_HavokGroupParameters>();
@@ -2345,21 +2418,21 @@ namespace Xv2CoreLib.FMP
             }
         }
     
-        public void CreateHitboxTreeFromGeneratedCollision(FMP_CollisionGroup collisionGroup, Dictionary<int, FMP_Matrix> matrices)
+        public void CreateHitboxTreeFromGeneratedCollision(FMP_CollisionGroup collisionGroup, Dictionary<int, FMP_Transform> matrices)
         {
             collisionGroup.CreateUnorderedHitboxList();
             ColliderInstances = WriteDefaultTree(collisionGroup.UnorderedHitboxList, 2, 3);
 
             for(int i = 0; i < ColliderInstances.Count; i++)
             {
-                if (matrices.TryGetValue(i, out FMP_Matrix matrix))
+                if (matrices.TryGetValue(i, out FMP_Transform matrix))
                 {
                     ColliderInstances[i].Matrix = matrix;
                 }
             }
         }
 
-        internal void CreateCollisionInstanceTree(FMP_CollisionGroup collisionGroup, Dictionary<int, FMP_Matrix> matrices, Dictionary<int, MeshOptions[]> flags)
+        internal void CreateCollisionInstanceTree(FMP_CollisionGroup collisionGroup, Dictionary<int, FMP_Transform> matrices, Dictionary<int, MeshFlags[]> flags)
         {
             ColliderInstances.Clear();
             CreateHitboxTreeFromGeneratedCollision(collisionGroup, matrices);
@@ -2368,7 +2441,7 @@ namespace Xv2CoreLib.FMP
             //note: ColliderInstances wont be recursive when the tree was made with a CreateHitboxTreeFromGeneratedCollision call, so the following is okay
             for (int i = 0; i < ColliderInstances.Count; i++)
             {
-                if (flags.TryGetValue(i, out MeshOptions[] options))
+                if (flags.TryGetValue(i, out MeshFlags[] options))
                 {
                     if (options.Length != ColliderInstances[i].HavokGroupParameters.Count)
                         throw new Exception("CreateCollisionInstanceTree: Exported MeshOptions count is not the same as HavokGroupParameters");
@@ -2413,7 +2486,7 @@ namespace Xv2CoreLib.FMP
         public float F_24 { get; set; }
         [CustomSerialize(isFloat: true)]
         public float F_28 { get; set; }
-        public FMP_Matrix Matrix { get; set; }
+        public FMP_Transform Matrix { get; set; }
 
         [YAXDontSerializeIfNull]
         public List<FMP_HavokGroupParameters> HavokGroupParameters { get; set; }
@@ -2446,7 +2519,7 @@ namespace Xv2CoreLib.FMP
             virtualPart.I_22 = BitConverter.ToUInt16(bytes, offset + 22);
             virtualPart.F_24 = BitConverter.ToSingle(bytes, offset + 24);
             virtualPart.F_28 = BitConverter.ToSingle(bytes, offset + 28);
-            virtualPart.Matrix = FMP_Matrix.Read(bytes, offset + 32);
+            virtualPart.Matrix = FMP_Transform.Read(bytes, offset + 32);
 
             int indexPairCount = BitConverter.ToInt32(bytes, offset);
             int indexPairOffset = BitConverter.ToInt32(bytes, offset + 4);
@@ -2513,6 +2586,8 @@ namespace Xv2CoreLib.FMP
     [YAXSerializeAs("ObjectSubPart")]
     public class FMP_ObjectSubPart
     {
+        [CustomSerialize(isFloat: true)]
+        public float Mass { get; set; } //F_12
         [CustomSerialize(parent: "Width", serializeAs: "X", isFloat: true)]
         public float WidthX { get; set; }
         [CustomSerialize(parent: "Width", serializeAs: "Y", isFloat: true)]
@@ -2538,8 +2613,6 @@ namespace Xv2CoreLib.FMP
         public ushort I_06 { get; set; }
         [CustomSerialize]
         public int I_08 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_12 { get; set; }
         [CustomSerialize(isFloat: true)]
         public float F_16 { get; set; }
         [CustomSerialize(isFloat: true)]
@@ -2570,7 +2643,7 @@ namespace Xv2CoreLib.FMP
             bytes.AddRange(BitConverter.GetBytes(I_04));
             bytes.AddRange(BitConverter.GetBytes(I_06));
             bytes.AddRange(BitConverter.GetBytes(I_08));
-            bytes.AddRange(BitConverter.GetBytes(F_12));
+            bytes.AddRange(BitConverter.GetBytes(Mass));
             bytes.AddRange(BitConverter.GetBytes(F_16));
             bytes.AddRange(BitConverter.GetBytes(F_20));
             bytes.AddRange(BitConverter.GetBytes(F_24));
@@ -2604,7 +2677,7 @@ namespace Xv2CoreLib.FMP
                 I_04 = BitConverter.ToUInt16(bytes, offset + 4),
                 I_06 = BitConverter.ToUInt16(bytes, offset + 6),
                 I_08 = BitConverter.ToInt32(bytes, offset + 8),
-                F_12 = BitConverter.ToSingle(bytes, offset + 12),
+                Mass = BitConverter.ToSingle(bytes, offset + 12),
                 F_16 = BitConverter.ToSingle(bytes, offset + 16),
                 F_20 = BitConverter.ToSingle(bytes, offset + 20),
                 F_24 = BitConverter.ToSingle(bytes, offset + 24),
@@ -2639,7 +2712,7 @@ namespace Xv2CoreLib.FMP
             if (I_04 != other.I_04) return false;
             if (I_06 != other.I_06) return false;
             if (I_08 != other.I_08) return false;
-            if (F_12 != other.F_12) return false;
+            if (Mass != other.Mass) return false;
             if (F_16 != other.F_16) return false;
             if (F_20 != other.F_20) return false;
             if (F_24 != other.F_24) return false;
@@ -3221,12 +3294,12 @@ namespace Xv2CoreLib.FMP
         public float Pitch { get; set; }
         [CustomSerialize(isFloat: true)]
         public float Roll { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_28 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_32 { get; set; }
-        [CustomSerialize(isFloat: true)]
-        public float F_36 { get; set; }
+        [CustomSerialize(isFloat: true, parent: "Scale", serializeAs: "X")]
+        public float ScaleX { get; set; } //F_28
+        [CustomSerialize(isFloat: true, parent: "Scale", serializeAs: "Y")]
+        public float ScaleY { get; set; } //F_32
+        [CustomSerialize(isFloat: true, parent: "Scale", serializeAs: "Z")]
+        public float ScaleZ { get; set; } //F_36
         [CustomSerialize(isFloat: true)]
         public float F_40 { get; set; }
         [CustomSerialize(isFloat: true)]
@@ -3247,9 +3320,9 @@ namespace Xv2CoreLib.FMP
             bytes.AddRange(BitConverter.GetBytes(Yaw));
             bytes.AddRange(BitConverter.GetBytes(Pitch));
             bytes.AddRange(BitConverter.GetBytes(Roll));
-            bytes.AddRange(BitConverter.GetBytes(F_28));
-            bytes.AddRange(BitConverter.GetBytes(F_32));
-            bytes.AddRange(BitConverter.GetBytes(F_36));
+            bytes.AddRange(BitConverter.GetBytes(ScaleX));
+            bytes.AddRange(BitConverter.GetBytes(ScaleY));
+            bytes.AddRange(BitConverter.GetBytes(ScaleZ));
             bytes.AddRange(BitConverter.GetBytes(F_40));
             bytes.AddRange(BitConverter.GetBytes(F_44));
             bytes.AddRange(BitConverter.GetBytes(F_48));
@@ -3272,9 +3345,9 @@ namespace Xv2CoreLib.FMP
                 Yaw = BitConverter.ToSingle(bytes, offset + 16),
                 Pitch = BitConverter.ToSingle(bytes, offset + 20),
                 Roll = BitConverter.ToSingle(bytes, offset + 24),
-                F_28 = BitConverter.ToSingle(bytes, offset + 28),
-                F_32 = BitConverter.ToSingle(bytes, offset + 32),
-                F_36 = BitConverter.ToSingle(bytes, offset + 36),
+                ScaleX = BitConverter.ToSingle(bytes, offset + 28),
+                ScaleY = BitConverter.ToSingle(bytes, offset + 32),
+                ScaleZ = BitConverter.ToSingle(bytes, offset + 36),
                 F_40 = BitConverter.ToSingle(bytes, offset + 40),
                 F_44 = BitConverter.ToSingle(bytes, offset + 44),
                 F_48 = BitConverter.ToSingle(bytes, offset + 48),
