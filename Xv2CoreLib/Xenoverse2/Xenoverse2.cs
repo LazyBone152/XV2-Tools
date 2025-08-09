@@ -203,36 +203,54 @@ namespace Xv2CoreLib
         {
         }
 
-        public void Init()
+        public async void Init()
         {
             try
             {
                 fileWatcher.ClearAll();
                 IsInitialized = false;
                 FileManager.Instance.Init();
+                List<Task> tasks = new List<Task>(5);
 
-                if (loadCharacters)
-                    InitCharacters();
-
-                if (loadSkills)
-                    InitSkills();
-
-                if (loadCmn)
-                    InitCmn();
-
-                if (loadCostumes)
-                    InitCostumes();
-
-                if (loadStage)
+                tasks.Add(Task.Run(() =>
                 {
-                    if (fileWatcher.WasFileModified(fileIO.PathInGameDir(StageDefFile.PATH)) || StageDefFile == null)
-                    {
-                        StageDefFile = (StageDefFile)FileManager.Instance.GetParsedFileFromGame(StageDefFile.PATH);
-                        fileWatcher.FileLoadedOrSaved(fileIO.PathInGameDir(StageDefFile.PATH));
-                    }
+                    if (loadCharacters)
+                        InitCharacters();
+                }));
 
-                    LoadMsgFiles(ref stageNameMsgFile, STAGE_NAME_MSG_PATH);
-                }
+                tasks.Add(Task.Run(() =>
+                {
+                    if (loadSkills)
+                        InitSkills(!loadCharacters);
+                }));
+
+                tasks.Add(Task.Run(() =>
+                {
+                    if (loadCmn)
+                        InitCmn();
+                }));
+
+                tasks.Add(Task.Run(() =>
+                {
+                    if (loadCostumes)
+                        InitCostumes();
+                }));
+
+                tasks.Add(Task.Run(() =>
+                {
+                    if (loadStage)
+                    {
+                        if (fileWatcher.WasFileModified(fileIO.PathInGameDir(StageDefFile.PATH)) || StageDefFile == null)
+                        {
+                            StageDefFile = (StageDefFile)FileManager.Instance.GetParsedFileFromGame(StageDefFile.PATH);
+                            fileWatcher.FileLoadedOrSaved(fileIO.PathInGameDir(StageDefFile.PATH));
+                        }
+
+                        LoadMsgFiles(ref stageNameMsgFile, STAGE_NAME_MSG_PATH);
+                    }
+                }));
+
+                Task.WaitAll(tasks.ToArray());
             }
             finally
             {
@@ -308,7 +326,7 @@ namespace Xv2CoreLib
 
         }
 
-        private void InitSkills()
+        private void InitSkills(bool loadCms = true)
         {
             if (fileWatcher.WasFileModified(fileIO.PathInGameDir(CUS_PATH)) || CusFile == null)
             {

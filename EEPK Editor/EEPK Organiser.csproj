@@ -88,9 +88,6 @@
     <Reference Include="AForge.Imaging.Formats">
       <HintPath>..\DLLs\AForge.Imaging.Formats.dll</HintPath>
     </Reference>
-    <Reference Include="AForge.Math">
-      <HintPath>..\DLLs\AForge.Math.dll</HintPath>
-    </Reference>
     <Reference Include="AutoUpdater">
       <HintPath>..\DLLs\AutoUpdater.dll</HintPath>
     </Reference>

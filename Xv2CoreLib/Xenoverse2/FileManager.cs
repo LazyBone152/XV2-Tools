@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xv2CoreLib.CMS;
 using Xv2CoreLib.CUS;
 using Xv2CoreLib.MSG;
@@ -27,7 +25,6 @@ using Xv2CoreLib.EMM;
 using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.Resource;
-using static Xv2CoreLib.CUS.CUS_File;
 using System.IO;
 using Xv2CoreLib.Resource.App;
 using Xv2CoreLib.AFS2;
@@ -51,7 +48,7 @@ namespace Xv2CoreLib
 
         internal FileWatcher fileWatcher { get; private set; } = new FileWatcher();
         public Xv2FileIO fileIO { get; private set; }
-        private List<CachedFile> CachedFiles = new List<CachedFile>();
+        private Dictionary<string, CachedFile> CachedFiles;
 
         /// <summary>
         /// Use direct references when caching loaded files, preventing them from being removed by the garbage collector. These files can later be freed up by calling <see cref="ClearStrongReferneces"/>.
@@ -61,6 +58,8 @@ namespace Xv2CoreLib
         /// When enabled, the file cache is ignored and files are always reloaded from loose files or CPK, with the cache entry being overwritten.
         /// </summary>
         public bool ForceReloadFiles { get; set; }
+
+        private object _lock = new object();
 
         //Events
         /// <summary>
@@ -86,6 +85,8 @@ namespace Xv2CoreLib
                 {
                     throw new FileNotFoundException("FileManager.Init: GameDirectory was not set or is not valid.");
                 }
+
+                CachedFiles = SettingsManager.Instance.CurrentApp == Application.XenoKit ? new Dictionary<string, CachedFile>(1024) : new Dictionary<string, CachedFile>();
             }
         }
 
@@ -160,14 +161,19 @@ namespace Xv2CoreLib
         #region Load
         public object GetParsedFileFromGame(string path, bool onlyFromCpk = false, bool raiseEx = true, bool ignoreCache = false)
         {
-            object file = GetParsedFileFromGameInternal(path, onlyFromCpk, raiseEx, ignoreCache);
+            if (string.IsNullOrWhiteSpace(path)) return null;
 
-            if(SettingsManager.Instance.CurrentApp == Application.XenoKit && file != null)
+            lock (_lock)
             {
-                CustomEntryNames.LoadNames(path, file);
-            }
+                object file = GetParsedFileFromGameInternal(path, onlyFromCpk, raiseEx, ignoreCache);
 
-            return file;
+                if (SettingsManager.Instance.CurrentApp == Application.XenoKit && file != null)
+                {
+                    CustomEntryNames.LoadNames(path, file);
+                }
+
+                return file;
+            }
         }
 
         private object GetParsedFileFromGameInternal(string path, bool onlyFromCpk = false, bool raiseEx = true, bool ignoreCache = false)
@@ -399,37 +405,41 @@ namespace Xv2CoreLib
 
         private void RemoveDeadReferences()
         {
-            CachedFiles.RemoveAll(x => !x.ObjectReference.IsAlive);
+            CachedFiles.RemoveAll((k, v) => !v.ObjectReference.IsAlive);
         }
 
         private object GetCachedFile(string path)
         {
             RemoveDeadReferences();
 
-            CachedFile file = CachedFiles.FirstOrDefault(x => x.Path == Utils.SanitizePath(path));
+            if(CachedFiles.TryGetValue(path, out CachedFile file))
+            {
+                return file.ObjectReference.IsAlive ? file.ObjectReference.Target : null;
+            }
 
-            if (file == null)
-                return null;
-
-            return file.ObjectReference.IsAlive ? file.ObjectReference.Target : null;
+            return null;
         }
 
         private void AddCachedFile(string path, object data)
         {
             path = Utils.SanitizePath(path);
-            int idx = CachedFiles.IndexOf(CachedFiles.FirstOrDefault(x => x.Path == path));
+            CachedFile newCachedFile = new CachedFile(path, data, UseStrongReferences);
 
-            if (idx == -1)
-                CachedFiles.Add(new CachedFile(path, data, UseStrongReferences));
+            if (CachedFiles.TryGetValue(path, out CachedFile file))
+            {
+                CachedFiles[path] = newCachedFile;
+            }
             else
-                CachedFiles[idx] = new CachedFile(path, data, UseStrongReferences);
+            {
+                CachedFiles.Add(path, newCachedFile);
+            }
         }
     
         public void ClearStrongReferneces()
         {
-            foreach(CachedFile file in CachedFiles)
+            foreach(var file in CachedFiles)
             {
-                file.ClearStrongReference();
+                file.Value?.ClearStrongReference();
             }
         }
     }

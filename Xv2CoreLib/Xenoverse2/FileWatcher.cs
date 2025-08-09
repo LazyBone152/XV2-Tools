@@ -9,33 +9,52 @@ namespace Xv2CoreLib
     public class FileWatcher
     {
         private List<LastFileWriteTime> files = new List<LastFileWriteTime>();
-
+        
         public void FileLoadedOrSaved(string path)
         {
-            var entry = files.FirstOrDefault(x => x.FilePath == path);
-
-            if (entry == null)
+            lock (files)
             {
-                entry = new LastFileWriteTime(path);
-                files.Add(entry);
-                return;
+                var entry = GetFile(path);
+
+                if (entry == null)
+                {
+                    entry = new LastFileWriteTime(path);
+                    files.Add(entry);
+                    return;
+                }
+                entry.SetCurrentTime();
             }
 
-            entry.SetCurrentTime();
         }
 
         public bool WasFileModified(string path)
         {
-            var entry = files.FirstOrDefault(x => x.FilePath == path);
-            //if (entry == null) throw new NullReferenceException($"FileWatcher: no LastFileWriteTime entry for file: \"{path}\" was found.");
-            if (entry == null) return true;
+            lock (files)
+            {
+                var entry = GetFile(path);
+                //if (entry == null) throw new NullReferenceException($"FileWatcher: no LastFileWriteTime entry for file: \"{path}\" was found.");
+                if (entry == null) return true;
 
-            return entry.HasBeenModified();
+                return entry.HasBeenModified();
+            }
+        }
+
+        private LastFileWriteTime GetFile(string path)
+        {
+            for(int i = 0; i < files.Count; i++)
+            {
+                if (files[i].FilePath == path) return files[i];
+            }
+
+            return null;
         }
 
         public void ClearAll()
         {
-            files.Clear();
+            lock (files)
+            {
+                files.Clear();
+            }
         }
     }
 

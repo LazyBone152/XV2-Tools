@@ -1,19 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text;
+using Xv2CoreLib;
 
 namespace CriPakTools
 {
     public class CPK
     {
+
         public List<FileEntry> FileTable;
         public Dictionary<string, object> cpkdata;
         public UTF utf;
 
-        Tools tools;
-        UTF files;
+        public readonly Dictionary<string, FileEntry> Files = new Dictionary<string, FileEntry>();
+
+        private Tools tools;
+        private UTF files;
+        private static readonly int[] vle_lens = new int[4] { 2, 3, 5, 8 };
+        private const int vle_lens_length = 4; 
+        private static readonly ushort[] BitMask =
+                                                {
+                                                    0x0000, 0x0001, 0x0003, 0x0007,
+                                                    0x000F, 0x001F, 0x003F, 0x007F, 0x00FF,
+                                                    0x01FF, 0x03FF, 0x07FF, 0x0FFF,
+                                                    0x1FFF, 0x3FFF, 0x7FFF, 0xFFFF
+                                                };
 
         public CPK(Tools tool)
         {
@@ -152,9 +166,24 @@ namespace CriPakTools
 
                 //utf = null;
                 files = null;
+                CreateDictionary();
                 return true;
             }
             return false;
+        }
+
+        private void CreateDictionary()
+        {
+            for(int i = 0; i < FileTable.Count; i++)
+            {
+                FileEntry fileEntry = FileTable[i];
+                string fileName = Utils.SanitizePath($"{FileTable[i].DirName}/{FileTable[i].FileName}").ToLower();
+
+                if (!Files.TryGetValue(fileName, out FileEntry value))
+                {
+                    Files.Add(fileName, fileEntry);
+                }
+            }
         }
 
         FileEntry CreateFileEntry(string FileName, ulong FileOffset, Type FileOffsetType, long FileOffsetPos, string TOCName, string FileType, bool encrypted)
@@ -594,20 +623,12 @@ namespace CriPakTools
 
             return result;
         }
-
-        public static byte[] DecompressCRILAYLA(byte[] input, int USize)
+        
+        public static byte[] DecompressCRILAYLA(byte[] input)
         {
-            byte[] result;// = new byte[USize];
-
-            MemoryStream ms = new MemoryStream(input);
-            EndianReader br = new EndianReader(ms, true);
-
-            br.BaseStream.Seek(8, SeekOrigin.Begin); // Skip CRILAYLA
-            int uncompressed_size = br.ReadInt32();
-            int uncompressed_header_offset = br.ReadInt32();
-            result = new byte[uncompressed_size + 0x100];
-
-            // do some error checks here.........
+            int uncompressed_size = BitConverter.ToInt32(input, 8);
+            int uncompressed_header_offset = BitConverter.ToInt32(input, 12);
+            byte[] result = new byte[uncompressed_size + 0x100];
 
             // copy uncompressed 0x100 header to start of file
             Array.Copy(input, uncompressed_header_offset + 0x10, result, 0, 0x100);
@@ -617,54 +638,55 @@ namespace CriPakTools
             int output_end = 0x100 + uncompressed_size - 1;
             byte bit_pool = 0;
             int bits_left = 0, bytes_output = 0;
-            int[] vle_lens = new int[4] { 2, 3, 5, 8 };
+            int indexer = output_end;
+            int _1 = 1, _8 = 8, _13 = 13;
 
             while (bytes_output < uncompressed_size)
             {
-                if (get_next_bits(input, ref input_offset, ref bit_pool, ref bits_left, 1) > 0)
+                if (get_next_bits(input, ref input_offset, ref bit_pool, ref bits_left, ref _1) > 0)
                 {
-                    int backreference_offset = output_end - bytes_output + get_next_bits(input, ref input_offset, ref bit_pool, ref bits_left, 13) + 3;
+                    int backreference_offset = indexer + get_next_bits(input, ref input_offset, ref bit_pool, ref bits_left, ref _13) + 3;
                     int backreference_length = 3;
                     int vle_level;
 
-                    for (vle_level = 0; vle_level < vle_lens.Length; vle_level++)
+                    for (vle_level = 0; vle_level < vle_lens_length; vle_level++)
                     {
-                        int this_level = get_next_bits(input, ref input_offset, ref bit_pool, ref bits_left, vle_lens[vle_level]);
+                        int this_level = get_next_bits(input, ref input_offset, ref bit_pool, ref bits_left, ref vle_lens[vle_level]);
                         backreference_length += this_level;
                         if (this_level != ((1 << vle_lens[vle_level]) - 1)) break;
                     }
 
-                    if (vle_level == vle_lens.Length)
+                    if (vle_level == vle_lens_length)
                     {
                         int this_level;
                         do
                         {
-                            this_level = get_next_bits(input, ref input_offset, ref bit_pool, ref bits_left, 8);
+                            this_level = get_next_bits(input, ref input_offset, ref bit_pool, ref bits_left, ref _8);
                             backreference_length += this_level;
                         } while (this_level == 255);
                     }
 
                     for (int i = 0; i < backreference_length; i++)
                     {
-                        result[output_end - bytes_output] = result[backreference_offset--];
+                        result[indexer] = result[backreference_offset--];
                         bytes_output++;
+                        indexer--;
                     }
                 }
                 else
                 {
                     // verbatim byte
-                    result[output_end - bytes_output] = (byte)get_next_bits(input, ref input_offset, ref bit_pool, ref bits_left, 8);
+                    result[indexer] = (byte)get_next_bits(input, ref input_offset, ref bit_pool, ref bits_left, ref _8);
                     bytes_output++;
+                    indexer--;
                 }
             }
-
-            br.Close();
-            ms.Close();
 
             return result;
         }
 
-        private static ushort get_next_bits(byte[] input, ref int offset_p, ref byte bit_pool_p, ref int bits_left_p, int bit_count)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static ushort get_next_bits(byte[] input, ref int offset_p, ref byte bit_pool_p, ref int bits_left_p, ref int bit_count)
         {
             ushort out_bits = 0;
             int num_bits_produced = 0;
@@ -679,10 +701,7 @@ namespace CriPakTools
                     offset_p--;
                 }
 
-                if (bits_left_p > (bit_count - num_bits_produced))
-                    bits_this_round = bit_count - num_bits_produced;
-                else
-                    bits_this_round = bits_left_p;
+                bits_this_round = Math.Min(bits_left_p, bit_count - num_bits_produced);
 
                 out_bits <<= bits_this_round;
 

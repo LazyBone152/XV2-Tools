@@ -197,7 +197,7 @@ namespace Xv2CoreLib.CPK
                             if (isComp == "CRILAYLA")
                             {
                                 int size = (int)((extractSize > fileSize) ? extractSize : fileSize);
-                                data = _cpk.DecompressCRILAYLA(data, size);
+                                data = _cpk.DecompressCRILAYLA(data);
                             }
                         }
 

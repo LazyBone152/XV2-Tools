@@ -9,7 +9,6 @@ namespace Xv2CoreLib.EMB_CLASS
     public static class EmbExtensions
     {
         //AFORGE Extensions:
-
         public static void ChangeHue(this EMB_File embFile, double hue, double saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0)
         {
             if (embFile.Entry == null) return;
@@ -85,9 +84,8 @@ namespace Xv2CoreLib.EMB_CLASS
             entry.Texture = (WriteableBitmap)bitmap;
             entry.wasEdited = true;
 
-            if(undos != null)
+            if (undos != null)
                 undos.Add(new UndoableProperty<EmbEntry>(nameof(EmbEntry.Texture), entry, oldBitmap, entry.Texture));
         }
-    
     }
 }
