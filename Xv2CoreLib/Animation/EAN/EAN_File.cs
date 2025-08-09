@@ -1461,28 +1461,38 @@ namespace Xv2CoreLib.EAN
             if (pos != null && usePos)
             {
                 EAN_Keyframe posKeyframe = pos.GetKeyframe(frame);
-                values[0] = posKeyframe.X;
-                values[1] = posKeyframe.Y;
-                values[2] = posKeyframe.Z;
-                values[3] = posKeyframe.W;
+
+                if(posKeyframe != null)
+                {
+                    values[0] = posKeyframe.X;
+                    values[1] = posKeyframe.Y;
+                    values[2] = posKeyframe.Z;
+                    values[3] = posKeyframe.W;
+                }
             }
             if (rot != null && useRot)
             {
                 EAN_Keyframe rotKeyframe = rot.GetKeyframe(frame);
 
-                values[4] = rotKeyframe.X;
-                values[5] = rotKeyframe.Y;
-                values[6] = rotKeyframe.Z;
-                values[7] = rotKeyframe.W;
+                if(rotKeyframe != null)
+                {
+                    values[4] = rotKeyframe.X;
+                    values[5] = rotKeyframe.Y;
+                    values[6] = rotKeyframe.Z;
+                    values[7] = rotKeyframe.W;
+                }
             }
             if (scale != null && useScale)
             {
                 EAN_Keyframe scaleKeyframe = scale.GetKeyframe(frame);
 
-                values[8] = scaleKeyframe.X;
-                values[9] = scaleKeyframe.Y;
-                values[10] = scaleKeyframe.Z;
-                values[11] = scaleKeyframe.W;
+                if(scaleKeyframe != null)
+                {
+                    values[8] = scaleKeyframe.X;
+                    values[9] = scaleKeyframe.Y;
+                    values[10] = scaleKeyframe.Z;
+                    values[11] = scaleKeyframe.W;
+                }
             }
 
             return values;
@@ -2000,8 +2010,17 @@ namespace Xv2CoreLib.EAN
             return keyframe;
         }
 
-        public EAN_Keyframe GetKeyframe(int frame)
+        public EAN_Keyframe GetKeyframe(int frame, int tryIndex = -1)
         {
+            //First try seeking a keyframe from the provided index, avoiding the for loop lookup all together (optional)
+            if (tryIndex != -1)
+            {
+                EAN_Keyframe keyframeMatch = TrySeekKeyframe(frame, tryIndex);
+
+                if (keyframeMatch != null)
+                    return keyframeMatch;
+            }
+
             for(int i = 0; i < Keyframes.Count; i++)
             {
                 if (Keyframes[i].FrameIndex == frame)
@@ -2009,7 +2028,24 @@ namespace Xv2CoreLib.EAN
             }
 
             return null;
+            //return DefaultKeyframe;
             //return Keyframes.FirstOrDefault(x => x.FrameIndex == frame);
+        }
+
+        private EAN_Keyframe TrySeekKeyframe(int frame, int startIndex)
+        {
+            if (startIndex < Keyframes.Count && Keyframes[startIndex].FrameIndex == frame)
+                return Keyframes[startIndex];
+
+            int seekIdx = startIndex + 1;
+            if (seekIdx < Keyframes.Count && Keyframes[seekIdx].FrameIndex == frame)
+                return Keyframes[seekIdx];
+
+            seekIdx = startIndex - 1;
+            if (seekIdx >= 0 && seekIdx < Keyframes.Count && Keyframes[seekIdx].FrameIndex == frame)
+                return Keyframes[seekIdx];
+
+            return null;
         }
 
         private EAN_Keyframe GetDefaultKeyframe(int frame = 0)
@@ -2124,7 +2160,7 @@ namespace Xv2CoreLib.EAN
         /// </summary>
         public float GetKeyframeValue(int frame, Axis axis, ref int index, int startIdx = 0)
         {
-            EAN_Keyframe existing = GetKeyframe(frame);
+            EAN_Keyframe existing = GetKeyframe(frame, startIdx);
 
             if (existing != null)
             {
