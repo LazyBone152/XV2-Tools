@@ -97,6 +97,9 @@ namespace Xv2CoreLib.BEV
         [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BEV_Type6")]
         public List<Type_6> Type6 { get; set; }
+        [YAXDontSerializeIfNull]
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BEV_Type8")]
+        public List<Type_8> Type8 { get; set; }
     }
     
     //Data Types below
@@ -482,6 +485,76 @@ namespace Xv2CoreLib.BEV
         public int I_44 { get; set; }
     }
 
+    [YAXSerializeAs("BEV_Type8")]
+    public class Type_8 : TypeDef
+    {
+        [YAXAttributeForClass]
+        [YAXSerializeAs("StartTime")]
+        public ushort I_00 { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("Duration")]
+        public ushort I_02 { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("Layer")]
+        public int Idx { get; set; }
+        [YAXAttributeFor("I_04")]
+        [YAXSerializeAs("value")]
+        public uint I_04 { get; set; }
+        [YAXAttributeFor("I_08")]
+        [YAXSerializeAs("value")]
+        public uint I_08 { get; set; }
+        [YAXAttributeFor("I_12")]
+        [YAXSerializeAs("value")]
+        public uint I_12 { get; set; }
+        [YAXAttributeFor("I_16")]
+        [YAXSerializeAs("value")]
+        public uint I_16 { get; set; }
+        [YAXAttributeFor("I_20")]
+        [YAXSerializeAs("value")]
+        public uint I_20 { get; set; }
+        [YAXAttributeFor("I_24")]
+        [YAXSerializeAs("value")]
+        public uint I_24 { get; set; }
+        [YAXAttributeFor("I_28")]
+        [YAXSerializeAs("value")]
+        public uint I_28 { get; set; }
+        [YAXAttributeFor("I_32")]
+        [YAXSerializeAs("value")]
+        public uint I_32 { get; set; }
+        [YAXAttributeFor("I_36")]
+        [YAXSerializeAs("value")]
+        public uint I_36 { get; set; }
+        [YAXAttributeFor("I_40")]
+        [YAXSerializeAs("value")]
+        public uint I_40 { get; set; }
+        [YAXAttributeFor("I_44")]
+        [YAXSerializeAs("value")]
+        public uint I_44 { get; set; }
+        [YAXAttributeFor("I_48")]
+        [YAXSerializeAs("value")]
+        public uint I_48 { get; set; }
+        [YAXAttributeFor("I_52")]
+        [YAXSerializeAs("value")]
+        public uint I_52 { get; set; }
+        [YAXAttributeFor("I_56")]
+        [YAXSerializeAs("value")]
+        public uint I_56 { get; set; }
+        [YAXAttributeFor("I_60")]
+        [YAXSerializeAs("value")]
+        public uint I_60 { get; set; }
+        [YAXAttributeFor("I_64")]
+        [YAXSerializeAs("value")]
+        public uint I_64 { get; set; }
+        [YAXAttributeFor("I_68")]
+        [YAXSerializeAs("value")]
+        public uint I_68 { get; set; }
+        [YAXAttributeFor("I_72")]
+        [YAXSerializeAs("value")]
+        public uint I_72 { get; set; }
+        [YAXAttributeFor("I_76")]
+        [YAXSerializeAs("value")]
+        public uint I_76 { get; set; }
+    }
 
     public interface TypeDef
     {

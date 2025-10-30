@@ -106,6 +106,9 @@ namespace Xv2CoreLib.BEV
                             case 6:
                                 typeCount = bevFile.Entries[i].Type6.Count(entry => entry.Idx == e._Idx);
                                 break;
+                            case 8:
+                                typeCount = bevFile.Entries[i].Type8.Count(entry => entry.Idx == e._Idx);
+                                break;
                         }
 
                         bytes.AddRange(BitConverter.GetBytes((short)e._Type));
@@ -176,7 +179,11 @@ namespace Xv2CoreLib.BEV
                                 break;
                             case 6:
                                 WriteType6(bevFile.Entries[i].Type6, e._Idx);
-                                SizeCheck(size, bytes.Count(), 48, 5, bevFile.Entries[i].Type6.Count(entry => entry.Idx == e._Idx));
+                                SizeCheck(size, bytes.Count(), 48, 6, bevFile.Entries[i].Type6.Count(entry => entry.Idx == e._Idx));
+                                break;
+                            case 8:
+                                WriteType8(bevFile.Entries[i].Type8, e._Idx);
+                                SizeCheck(size, bytes.Count(), 80, 8, bevFile.Entries[i].Type8.Count(entry => entry.Idx == e._Idx));
                                 break;
                         }
 
@@ -281,6 +288,17 @@ namespace Xv2CoreLib.BEV
                 });
             }
 
+            //Type8
+            List<int> _type8 = TotalCount(entry.Type8);
+            foreach (int e in _type8)
+            {
+                _types.Add(new TypeEntry()
+                {
+                    _Idx = e,
+                    _Type = 8
+                });
+            }
+
             return _types;
         }
 
@@ -295,6 +313,7 @@ namespace Xv2CoreLib.BEV
             count += TotalCount(entry.Type4).Count;
             count += TotalCount(entry.Type5).Count;
             count += TotalCount(entry.Type6).Count;
+            count += TotalCount(entry.Type8).Count;
 
             return count;
         }
@@ -396,6 +415,22 @@ namespace Xv2CoreLib.BEV
         }
 
         private List<int> TotalCount(List<Type_6> types)
+        {
+            List<int> count = new List<int>();
+            if (types != null)
+            {
+                for (int i = 0; i < types.Count; i++)
+                {
+                    if (count.IndexOf(types[i].Idx) == -1)
+                    {
+                        count.Add(types[i].Idx);
+                    }
+                }
+            }
+            return count;
+        }
+
+        private List<int> TotalCount(List<Type_8> types)
         {
             List<int> count = new List<int>();
             if (types != null)
@@ -601,6 +636,39 @@ namespace Xv2CoreLib.BEV
                     bytes.AddRange(BitConverter.GetBytes(type[i].I_36));
                     bytes.AddRange(BitConverter.GetBytes(type[i].I_40));
                     bytes.AddRange(BitConverter.GetBytes(type[i].I_44));
+                }
+            }
+
+        }
+
+        void WriteType8(List<Type_8> type, int _idx)
+        {
+
+            for (int i = 0; i < type.Count(); i++)
+            {
+                if (type[i].Idx == _idx)
+                {
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_00));
+                    bytes.AddRange(BitConverter.GetBytes((ushort)(type[i].I_00 + type[i].I_02)));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_04));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_08));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_12));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_16));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_20));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_24));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_28));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_32));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_36));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_40));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_44));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_48));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_52));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_56));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_60));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_64));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_68));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_72));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_76));
                 }
             }
 
