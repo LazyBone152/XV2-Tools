@@ -108,7 +108,7 @@ namespace Xv2CoreLib.BEV
                                 break;
                             case 8:
                                 bevFile.Entries[i].Type8 = GetType8(typeCount, typeoffset, bevFile.Entries[i].Type8, type8);
-                                type6++;
+                                type8++;
                                 break;
                             default:
                                 Console.WriteLine(String.Format("Encountered undefined BEV_Type = {0} (offset = {1}). Unable to continue.", type, offset));
