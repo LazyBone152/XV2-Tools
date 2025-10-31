@@ -136,6 +136,9 @@ namespace Xv2CoreLib.BSA
                                 case 13:
                                     bsaFile.BSA_Entries[thisEntry].Type13 = ParseType13(hdrOffset, dataOffset, typeCount);
                                     break;
+                                case 14:
+                                    bsaFile.BSA_Entries[thisEntry].Type14 = ParseType14(hdrOffset, dataOffset, typeCount);
+                                    break;
                                 default:
                                     //Attempt to estimate the unknown type size
                                     int estSize = (a + 1 < typesCount) ? BitConverter.ToInt16(rawBytes, typesOffset + 6 + 16) : -1;
@@ -147,7 +150,6 @@ namespace Xv2CoreLib.BSA
                                     }
 
                                     Console.WriteLine(String.Format("Undefined BSA Type encountered: {0}, at: def offset: {1}, data offset: {2}, count: {3}, estTypeSize: {4}", type, typesOffset, dataOffset, typeCount, estSize));
-                                    Console.ReadLine();
                                     break;
                             }
 
@@ -596,6 +598,55 @@ namespace Xv2CoreLib.BSA
                     });
                     hdrOffset += 4;
                     offset += 32;
+                }
+
+                return Type;
+
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        private List<BSA_Type14> ParseType14(int hdrOffset, int offset, int count)
+        {
+            if (count > 0)
+            {
+                List<BSA_Type14> Type = new List<BSA_Type14>();
+
+                for (int i = 0; i < count; i++)
+                {
+                    Type.Add(new BSA_Type14()
+                    {
+                        I_00 = BitConverter.ToUInt16(rawBytes, offset + 0),
+                        I_02 = BitConverter.ToUInt16(rawBytes, offset + 2),
+                        F_04 = BitConverter.ToSingle(rawBytes, offset + 4),
+                        I_08 = BitConverter.ToUInt32(rawBytes, offset + 8),
+                        F_12 = BitConverter.ToSingle(rawBytes, offset + 12),
+                        I_16 = BitConverter.ToUInt32(rawBytes, offset + 16),
+                        F_20 = BitConverter.ToSingle(rawBytes, offset + 20),
+                        I_24 = BitConverter.ToUInt32(rawBytes, offset + 24),
+                        F_28 = BitConverter.ToSingle(rawBytes, offset + 28),
+                        I_32 = BitConverter.ToUInt32(rawBytes, offset + 32),
+                        I_36 = BitConverter.ToUInt32(rawBytes, offset + 36),
+                        I_40 = BitConverter.ToUInt32(rawBytes, offset + 40),
+                        F_44 = BitConverter.ToSingle(rawBytes, offset + 44),
+                        I_48 = BitConverter.ToUInt32(rawBytes, offset + 48),
+                        F_52 = BitConverter.ToSingle(rawBytes, offset + 52),
+                        I_56 = BitConverter.ToUInt32(rawBytes, offset + 56),
+                        F_60 = BitConverter.ToSingle(rawBytes, offset + 60),
+                        I_64 = BitConverter.ToUInt32(rawBytes, offset + 64),
+                        F_68 = BitConverter.ToSingle(rawBytes, offset + 68),
+                        I_72 = BitConverter.ToUInt32(rawBytes, offset + 72),
+                        I_76 = BitConverter.ToUInt32(rawBytes, offset + 76),
+                        I_80 = BitConverter.ToUInt32(rawBytes, offset + 80),
+                        I_84 = BitConverter.ToUInt32(rawBytes, offset + 84),
+                        StartTime = BitConverter.ToUInt16(rawBytes, hdrOffset + 0),
+                        Duration = GetTypeDuration(BitConverter.ToUInt16(rawBytes, hdrOffset + 0), BitConverter.ToUInt16(rawBytes, hdrOffset + 2)),
+                    });
+                    hdrOffset += 4;
+                    offset += 88;
                 }
 
                 return Type;
