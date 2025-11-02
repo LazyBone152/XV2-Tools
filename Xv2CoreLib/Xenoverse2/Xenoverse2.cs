@@ -605,7 +605,7 @@ namespace Xv2CoreLib
 
                 //Create default EAN if none was loaded (duplicate chara-unique one)
                 if (!moveFiles.EanFile.Any(x => x.IsDefault) && loadSkillFiles)
-                    moveFiles.AddEanFile(moveFiles.EanFile[0].File.Copy(), null, name);
+                    moveFiles.AddEanFile(moveFiles.EanFile[0].File.Clone(), null, name);
             }
 
             //CAM
@@ -628,7 +628,7 @@ namespace Xv2CoreLib
 
                 //Create default CAM.EAN if none was loaded (duplicate chara-unique one)
                 if (!moveFiles.CamEanFile.Any(x => x.IsDefault) && loadSkillFiles)
-                    moveFiles.AddCamEanFile(moveFiles.CamEanFile[0].File.Copy(), null, name);
+                    moveFiles.AddCamEanFile(moveFiles.CamEanFile[0].File.Clone(), null, name);
             }
 
             //AFTER BAC
@@ -1203,9 +1203,9 @@ namespace Xv2CoreLib
             //Load fce ean
             if (!string.IsNullOrWhiteSpace(cmsEntry.FceEanPath))
             {
-            string fceEanPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.fce.ean", cmsEntry.ShortName, cmsEntry.FceEanPath));
-            moveFiles.EanPaths.Add(fceEanPath);
-            moveFiles.EanFile.Add(new Xv2File<EAN_File>((EAN_File)FileManager.Instance.GetParsedFileFromGame(fceEanPath), fileIO.PathInGameDir(fceEanPath), !cmsEntry.IsSelfReference(cmsEntry.FceEanPath), null, false, MoveFileTypes.FCE_EAN, 0, true, MoveType.Character));
+                string fceEanPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.fce.ean", cmsEntry.ShortName, cmsEntry.FceEanPath));
+                moveFiles.EanPaths.Add(fceEanPath);
+                moveFiles.EanFile.Add(new Xv2File<EAN_File>((EAN_File)FileManager.Instance.GetParsedFileFromGame(fceEanPath), fileIO.PathInGameDir(fceEanPath), !cmsEntry.IsSelfReference(cmsEntry.FceEanPath), null, false, MoveFileTypes.FCE_EAN, 0, true, MoveType.Character));
             }
 
             //fce.ean for foreheads

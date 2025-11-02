@@ -348,7 +348,7 @@ namespace Xv2CoreLib.EAN
             {
                 IsCamera = true,
                 I_08 = 37508,
-                Skeleton = skeleton.Copy()
+                Skeleton = skeleton.Clone()
             };
         }
 
@@ -402,7 +402,6 @@ namespace Xv2CoreLib.EAN
         }
 
         #endregion
-
     }
 
     [YAXSerializeAs("Animation")]
