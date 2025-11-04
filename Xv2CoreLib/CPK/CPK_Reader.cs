@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -36,9 +38,12 @@ namespace Xv2CoreLib.CPK
 
         //Load order includes the XV1 Legend Patrol cpk (data_d4_5_xv1.cpk), but I dont know the exact load order for that...
         private readonly string[] CPK_LOAD_ORDER = new string[12] { "data_d4_5_xv1.cpk", "data_d6_dlc.cpk", "data_d0_stv.cpk", "movie_d6_dlc.cpk", "movie_p4.cpk", "movie_p2.cpk", "movie.cpk", "movie0.cpk", "data2.cpk", "data1.cpk", "data0.cpk", "data.cpk" };
-        private List<CriPakTools.CPK> CpkFiles = null;
-        private List<BinaryReader> binaryReader = null;
+        private CriPakTools.CPK[] _cpkFiles = null;
+        private BinaryReader[] _binaryReaders = null;
         
+        public ReadOnlyCollection<CriPakTools.CPK> CpkFiles { get; private set; }
+        //public ReadOnlyCollection<BinaryReader> BinaryReaders { get; private set; }
+
         /// <summary>
         /// Reads the CRIWARE CPK files for Xenoverse 2 and extracts specified files.
         /// </summary>
@@ -72,6 +77,40 @@ namespace Xv2CoreLib.CPK
         {
             if (ValidCpkDirectory)
             {
+                ConcurrentBag<CpkReadHelper> cpkReaders = new ConcurrentBag<CpkReadHelper>();
+
+                Parallel.ForEach(CPK_LOAD_ORDER, cpkFile =>
+                {
+                    string fullCpkPath = GetFullCpkPath(cpkFile);
+
+                    if (File.Exists(fullCpkPath))
+                    {
+                        var cpk = new CriPakTools.CPK(new Tools());
+                        cpk.ReadCPK(fullCpkPath);
+                        cpkReaders.Add(new CpkReadHelper() { CPK = cpk, BinaryReader = new BinaryReader(File.OpenRead(fullCpkPath)), Name = cpkFile });
+                    }
+                });
+
+                //Sort CPK files 
+                List<CriPakTools.CPK> cpks = new List<_cpk>(CPK_LOAD_ORDER.Length);
+                List<BinaryReader> binaryReaders = new List<BinaryReader>(CPK_LOAD_ORDER.Length);
+
+                for(int i = 0; i < CPK_LOAD_ORDER.Length; i++)
+                {
+                    CpkReadHelper cpkHelper = cpkReaders.FirstOrDefault(x => x.Name == CPK_LOAD_ORDER[i]);
+
+                    if(cpkHelper != null)
+                    {
+                        cpks.Add(cpkHelper.CPK);
+                        binaryReaders.Add(cpkHelper.BinaryReader);
+                    }
+                }
+
+                _cpkFiles = cpks.ToArray();
+                _binaryReaders = binaryReaders.ToArray();
+
+                CpkFiles = new ReadOnlyCollection<_cpk>(_cpkFiles);
+                /*
                 CpkFiles = new List<CriPakTools.CPK>(CPK_LOAD_ORDER.Length);
                 binaryReader = new List<BinaryReader>(CPK_LOAD_ORDER.Length);
                 
@@ -85,6 +124,7 @@ namespace Xv2CoreLib.CPK
                         binaryReader.Add(new BinaryReader(File.OpenRead(GetFullCpkPath(s))));
                     }
                 }
+                */
             }
         }
 
@@ -121,11 +161,11 @@ namespace Xv2CoreLib.CPK
 
             string fileToFind = Utils.SanitizePath(fileName).ToLower();
 
-            for (int i = 0; i < CpkFiles.Count; i++)
+            for (int i = 0; i < _cpkFiles.Length; i++)
             {
-                lock (binaryReader[i])
+                lock (_binaryReaders[i])
                 {
-                    var bytes = GetFileFromCpkAsByteArray(CpkFiles[i], binaryReader[i], fileToFind);
+                    var bytes = GetFileFromCpkAsByteArray(_cpkFiles[i], _binaryReaders[i], fileToFind);
 
                     if (bytes != null) return bytes;
                 }
@@ -193,11 +233,11 @@ namespace Xv2CoreLib.CPK
 
             string fileToFind = Utils.SanitizePath(fileName).ToLower();
 
-            for (int i = 0; i < CpkFiles.Count; i++)
+            for (int i = 0; i < _cpkFiles.Length; i++)
             {
-                lock (binaryReader[i])
+                lock (_binaryReaders[i])
                 {
-                    if (DoesFileExist(CpkFiles[i], binaryReader[i], fileToFind)) return true;
+                    if (DoesFileExist(_cpkFiles[i], _binaryReaders[i], fileToFind)) return true;
                 }
             }
 
@@ -213,11 +253,11 @@ namespace Xv2CoreLib.CPK
         {
             List<string> files = new List<string>();
 
-            for (int i = 0; i < CpkFiles.Count; i++)
+            for (int i = 0; i < _cpkFiles.Length; i++)
             {
-                lock (binaryReader[i])
+                lock (_binaryReaders[i])
                 {
-                    files.AddRange(GetFilesinDirectoryFromCpk(CpkFiles[i], directory));
+                    files.AddRange(GetFilesinDirectoryFromCpk(_cpkFiles[i], directory));
                 }
             }
 
@@ -259,9 +299,9 @@ namespace Xv2CoreLib.CPK
         {
             List<object> extracted = new List<object>(); //string
 
-            for (int i = CpkFiles.Count - 1; i >= 0; i--)
+            for (int i = _cpkFiles.Length - 1; i >= 0; i--)
             {
-                var results = CpkFiles[i].FileTable.Where(p => p.FileType == "FILE" && (string)p.FileName != null);
+                var results = _cpkFiles[i].FileTable.Where(p => p.FileType == "FILE" && (string)p.FileName != null);
 
                 foreach (var file in results)
                 {
@@ -274,11 +314,11 @@ namespace Xv2CoreLib.CPK
                         extracted.Add(file.FileName);
 
                         //Extract it
-                        binaryReader[i].BaseStream.Seek((long)file.FileOffset, SeekOrigin.Begin);
-                        string isComp = Encoding.ASCII.GetString(binaryReader[i].ReadBytes(8));
-                        binaryReader[i].BaseStream.Seek((long)file.FileOffset, SeekOrigin.Begin);
+                        _binaryReaders[i].BaseStream.Seek((long)file.FileOffset, SeekOrigin.Begin);
+                        string isComp = Encoding.ASCII.GetString(_binaryReaders[i].ReadBytes(8));
+                        _binaryReaders[i].BaseStream.Seek((long)file.FileOffset, SeekOrigin.Begin);
 
-                        byte[] chunk = binaryReader[i].ReadBytes(Int32.Parse(file.FileSize.ToString()));
+                        byte[] chunk = _binaryReaders[i].ReadBytes(Int32.Parse(file.FileSize.ToString()));
                         if (isComp == "CRILAYLA")
                         {
                             int size = Int32.Parse((file.ExtractSize ?? file.FileSize).ToString());
@@ -296,6 +336,12 @@ namespace Xv2CoreLib.CPK
         }
         #endregion
 
+        private class CpkReadHelper
+        {
+            public string Name;
+            public CriPakTools.CPK CPK;
+            public BinaryReader BinaryReader;
+        }
     }
 
     public class CPK_MultiThreadedExtractor : INotifyPropertyChanged

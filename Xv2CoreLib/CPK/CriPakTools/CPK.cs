@@ -10,7 +10,7 @@ namespace CriPakTools
 {
     public class CPK
     {
-
+        public string Name { get; private set; }
         public List<FileEntry> FileTable;
         public Dictionary<string, object> cpkdata;
         public UTF utf;
