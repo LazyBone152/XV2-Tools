@@ -351,6 +351,10 @@ namespace XV2_Xml_Serializer
                                 case ".spm":
                                     Xv2CoreLib.SPM.SPM_File.SerializeToXml(fileLocation);
                                     break;
+                                case ".hkx":
+                                case ".hvk":
+                                    Xv2CoreLib.Havok.HavokTagFile.SerializeToXml(fileLocation);
+                                    break;
                                 case ".xml":
                                     LoadXmlInitial(fileLocation);
                                     break;
@@ -667,6 +671,10 @@ namespace XV2_Xml_Serializer
                         break;
                     case ".spm":
                         Xv2CoreLib.SPM.SPM_File.DeserializeFromXml(fileLocation);
+                        break;
+                    case ".hkx":
+                    case ".hvk":
+                        Xv2CoreLib.Havok.HavokTagFile.DeserializeFromXml(fileLocation);
                         break;
                     default:
                         FileTypeNotSupported(fileLocation);
