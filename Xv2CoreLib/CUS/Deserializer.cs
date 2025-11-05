@@ -42,6 +42,9 @@ namespace Xv2CoreLib.CUS
 
         private void Validation()
         {
+            if (!cusFile.IsVersionValid())
+                throw new Exception($"CUS: The version of the CUS file ({cusFile.Version}) is not supported.");
+
             cusFile.SortEntries();
         }
 
@@ -122,47 +125,104 @@ namespace Xv2CoreLib.CUS
                     {
                         throw new Exception(String.Format("The skill ShortName: \"{0}\" exceeds the maximum length of 4!", skills[i].ShortName));
                     }
-                    
-                    bytes.AddRange(Encoding.ASCII.GetBytes(skills[i].ShortName));
-                    bytes.AddRange(new byte[4 - skills[i].ShortName.Length]);
-                    bytes.AddRange(BitConverter.GetBytes(skills[i].I_04));
-                    bytes.AddRange(BitConverter.GetBytes((ushort)skills[i].ID1));
-                    bytes.AddRange(BitConverter.GetBytes((ushort)skills[i].ID2));
-                    bytes.Add((byte)skills[i].I_12);
-                    bytes.Add(skills[i].I_13);
-                    bytes.AddRange(BitConverter.GetBytes((ushort)skills[i].FilesLoadedFlags1));
-                    bytes.AddRange(BitConverter.GetBytes(skills[i].I_16));
-                    bytes.AddRange(BitConverter.GetBytes(skills[i].I_18));
-                    strOffsets[i].Add(bytes.Count());
-                    bytes.AddRange(new byte[4]);
-                    strOffsets[i].Add(bytes.Count());
-                    bytes.AddRange(new byte[4]);
-                    strOffsets[i].Add(bytes.Count());
-                    bytes.AddRange(new byte[4]);
-                    strOffsets[i].Add(bytes.Count());
-                    bytes.AddRange(new byte[4]);
-                    strOffsets[i].Add(bytes.Count());
-                    bytes.AddRange(new byte[4]);
-                    strOffsets[i].Add(bytes.Count());
-                    bytes.AddRange(new byte[4]);
-                    strOffsets[i].Add(bytes.Count());
-                    bytes.AddRange(new byte[4]);
-                    bytes.AddRange(BitConverter.GetBytes(skills[i].I_48));
-                    bytes.AddRange(BitConverter.GetBytes(skills[i].I_50));
-                    bytes.AddRange(BitConverter.GetBytes(skills[i].I_52));
-                    bytes.AddRange(BitConverter.GetBytes(skills[i].I_54));
-                    bytes.AddRange(BitConverter.GetBytes(skills[i].PUP));
-                    bytes.AddRange(BitConverter.GetBytes(skills[i].CusAura));
-                    bytes.AddRange(BitConverter.GetBytes(skills[i].CharaSwapId));
-                    bytes.AddRange(BitConverter.GetBytes(skills[i].I_62));
-                    bytes.AddRange(BitConverter.GetBytes(skills[i].NumTransformations));
-                    bytes.AddRange(BitConverter.GetBytes(skills[i].I_66));
 
-                    if(cusFile.Version >= 1)
-                        bytes.AddRange(BitConverter.GetBytes(skills[i].I_68));
-                    
-                    if (cusFile.Version >= 2)
+                    if(cusFile.Version <= 2)
+                    {
+                        bytes.AddRange(Encoding.ASCII.GetBytes(skills[i].ShortName));
+                        bytes.AddRange(new byte[4 - skills[i].ShortName.Length]);
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].I_04));
+                        bytes.AddRange(BitConverter.GetBytes((ushort)skills[i].ID1));
+                        bytes.AddRange(BitConverter.GetBytes((ushort)skills[i].ID2));
+                        bytes.Add((byte)skills[i].I_12);
+                        bytes.Add(skills[i].I_13);
+                        bytes.AddRange(BitConverter.GetBytes((ushort)skills[i].FilesLoadedFlags1));
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].PartSet));
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].I_18));
+                        strOffsets[i].Add(bytes.Count());
+                        bytes.AddRange(new byte[4]);
+                        strOffsets[i].Add(bytes.Count());
+                        bytes.AddRange(new byte[4]);
+                        strOffsets[i].Add(bytes.Count());
+                        bytes.AddRange(new byte[4]);
+                        strOffsets[i].Add(bytes.Count());
+                        bytes.AddRange(new byte[4]);
+                        strOffsets[i].Add(bytes.Count());
+                        bytes.AddRange(new byte[4]);
+                        strOffsets[i].Add(bytes.Count());
+                        bytes.AddRange(new byte[4]);
+                        strOffsets[i].Add(bytes.Count());
+                        bytes.AddRange(new byte[4]);
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].I_48));
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].I_50));
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].I_52));
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].I_54));
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].PUP));
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].CusAura));
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].CharaSwapId));
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].SkillsetChange1));
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].NumTransformations));
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].I_66));
+
+                        if (cusFile.Version >= 1)
+                            bytes.AddRange(BitConverter.GetBytes(skills[i].I_68));
+
+                        if (cusFile.Version == 2)
+                            bytes.AddRange(BitConverter.GetBytes(skills[i].I_72));
+                    }
+                    else
+                    {
+                        //Version 3 (1.25)
+                        bytes.AddRange(Encoding.ASCII.GetBytes(skills[i].ShortName));
+                        bytes.AddRange(new byte[4 - skills[i].ShortName.Length]);
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].I_04));
+                        bytes.AddRange(BitConverter.GetBytes((ushort)skills[i].ID1));
+                        bytes.AddRange(BitConverter.GetBytes((ushort)skills[i].ID2));
+                        bytes.Add((byte)skills[i].I_12);
+                        bytes.Add(skills[i].I_13);
+                        bytes.AddRange(BitConverter.GetBytes((ushort)skills[i].FilesLoadedFlags1));
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].I_18));
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].NEW_I_18));
+                        strOffsets[i].Add(bytes.Count());
+                        bytes.AddRange(new byte[4]);
+                        strOffsets[i].Add(bytes.Count());
+                        bytes.AddRange(new byte[4]);
+                        strOffsets[i].Add(bytes.Count());
+                        bytes.AddRange(new byte[4]);
+                        strOffsets[i].Add(bytes.Count());
+                        bytes.AddRange(new byte[4]);
+                        strOffsets[i].Add(bytes.Count());
+                        bytes.AddRange(new byte[4]);
+                        strOffsets[i].Add(bytes.Count());
+                        bytes.AddRange(new byte[4]);
+                        strOffsets[i].Add(bytes.Count());
+                        bytes.AddRange(new byte[4]);
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].I_48));
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].I_50));
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].I_52));
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].I_54));
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].PUP));
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].CusAura));
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].NumTransformations));
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].I_66));
+
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].PartSet));
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].PartSet2));
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].PartSet3));
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].CharaSwapId));
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].CharaSwapId2));
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].CharaSwapId3));
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].SkillsetChange1));
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].SkillsetChange2));
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].SkillsetChange3));
+
+                        byte[] i_68 = BitConverter.GetBytes(skills[i].I_68);
+                        bytes.AddRange(BitConverter.GetBytes(BitConverter.ToUInt16(i_68, 2)));
+                        bytes.AddRange(BitConverter.GetBytes(BitConverter.ToUInt16(i_68, 0)));
+
+                        bytes.AddRange(BitConverter.GetBytes(skills[i].NEW_I_86));
                         bytes.AddRange(BitConverter.GetBytes(skills[i].I_72));
+                    }
+                        
                     
                 }
             }

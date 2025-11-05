@@ -12,9 +12,11 @@ namespace Xv2CoreLib.CUS
     [YAXSerializeAs("CUS")]
     public class CUS_File : ISorting
     {
+        internal const byte CURRENT_VERSION = 3;
+
         [YAXAttributeForClass]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (byte)0)]
-        public byte Version { get; set; } = 1;
+        public byte Version { get; set; } = CURRENT_VERSION;
 
         public List<Skillset> Skillsets { get; set; }
         public List<Skill> SuperSkills { get; set; }
@@ -302,6 +304,11 @@ namespace Xv2CoreLib.CUS
             return -1;
         }
 
+        public bool IsVersionValid()
+        {
+            return Version >= 0 && Version <= CURRENT_VERSION;
+        }
+
         public static byte GetCusVersion(int skillSectionOffset, int skillCount, int nextSectionOffset)
         {
             switch ((nextSectionOffset - skillSectionOffset) / skillCount)
@@ -312,6 +319,8 @@ namespace Xv2CoreLib.CUS
                     return 1;
                 case 76:
                     return 2; //1.21
+                case 92:
+                    return 3; //1.25
                 default:
                     throw new InvalidDataException("CUS file version not supported.");
             }
@@ -446,7 +455,6 @@ namespace Xv2CoreLib.CUS
             Flag7 = 0x80
         }
 
-
         #region WrapperProperties
         [YAXDontSerialize]
         public int SortID { get { return ID1; } }
@@ -498,10 +506,10 @@ namespace Xv2CoreLib.CUS
         public int I_04 { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("ID1")]
-        public ushort ID1 { get; set; } //uint16
+        public ushort ID1 { get; set; }
         [YAXAttributeForClass]
         [YAXSerializeAs("ID2")]
-        public ushort ID2 { get; set; } //uint16
+        public ushort ID2 { get; set; }
         [YAXAttributeFor("Race_Lock")]
         [YAXSerializeAs("value")]
         public CusRaceLock I_12 { get; set; }
@@ -510,13 +518,15 @@ namespace Xv2CoreLib.CUS
         public byte I_13 { get; set; }
         [YAXAttributeFor("FilesLoaded")]
         [YAXSerializeAs("Flags")]
-        public FilesLoadedFlags FilesLoadedFlags1 { get; set; } //uint16
-        [YAXAttributeFor("PartSet")]
-        [YAXSerializeAs("value")]
-        public short I_16 { get; set; }
+        public FilesLoadedFlags FilesLoadedFlags1 { get; set; }
+        
         [YAXAttributeFor("I_18")]
         [YAXSerializeAs("value")]
-        public ushort I_18 { get; set; }
+        public ushort I_18 { get; set; } //Is now at offset 16 in 1.25 CUS
+        [YAXAttributeFor("NEW_I_18")]
+        [YAXSerializeAs("value")]
+        public ushort NEW_I_18 { get; set; } = ushort.MaxValue; //New in 1.25
+
         [YAXAttributeFor("EAN")]
         [YAXSerializeAs("Path")]
         public string EanPath { get; set; }
@@ -552,16 +562,10 @@ namespace Xv2CoreLib.CUS
         public ushort I_54 { get; set; }
         [YAXAttributeFor("PUP")]
         [YAXSerializeAs("ID")]
-        public ushort PUP { get; set; } //ushort
+        public ushort PUP { get; set; }
         [YAXAttributeFor("CUS_Aura")]
         [YAXSerializeAs("value")]
         public short CusAura { get; set; }
-        [YAXAttributeFor("TransformCharaSwap")]
-        [YAXSerializeAs("Chara_ID")]
-        public ushort CharaSwapId { get; set; } //ushort
-        [YAXAttributeFor("Skillset_Change")]
-        [YAXSerializeAs("ModelPreset")]
-        public short I_62 { get; set; }
         [YAXAttributeFor("Num_Of_Transforms")]
         [YAXSerializeAs("value")]
         public ushort NumTransformations { get; set; }
@@ -580,6 +584,46 @@ namespace Xv2CoreLib.CUS
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (uint)0)]
         public uint I_72 { get; set; }
 
+        //New 1.25 format:
+        [YAXAttributeFor("PartSet")]
+        [YAXSerializeAs("value")]
+        public short PartSet { get; set; }
+        [YAXAttributeFor("PartSet2")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (short)-1)]
+        public short PartSet2 { get; set; }
+        [YAXAttributeFor("PartSet3")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (short)-1)]
+        public short PartSet3 { get; set; }
+
+        [YAXAttributeFor("TransformCharaSwap")]
+        [YAXSerializeAs("Chara_ID")]
+        public ushort CharaSwapId { get; set; }
+        [YAXAttributeFor("TransformCharaSwap2")]
+        [YAXSerializeAs("Chara_ID")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = ushort.MaxValue)]
+        public ushort CharaSwapId2 { get; set; }
+        [YAXAttributeFor("TransformCharaSwap3")]
+        [YAXSerializeAs("Chara_ID")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = ushort.MaxValue)]
+        public ushort CharaSwapId3 { get; set; }
+
+        [YAXAttributeFor("Skillset_Change")]
+        [YAXSerializeAs("ModelPreset")]
+        public short SkillsetChange1 { get; set; }
+        [YAXAttributeFor("Skillset_Change2")]
+        [YAXSerializeAs("ModelPreset")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (short)-1)]
+        public short SkillsetChange2 { get; set; }
+        [YAXAttributeFor("Skillset_Change3")]
+        [YAXSerializeAs("ModelPreset")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (short)-1)]
+        public short SkillsetChange3 { get; set; }
+
+        [YAXAttributeFor("NEW_I_86")]
+        [YAXSerializeAs("value")]
+        public ushort NEW_I_86 { get; set; }
 
         #region Installer
         [YAXDontSerializeIfNull]

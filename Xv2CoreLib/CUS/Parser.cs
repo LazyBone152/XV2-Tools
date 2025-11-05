@@ -108,51 +108,102 @@ namespace Xv2CoreLib.CUS
 
             for (int i = 0; i < count; i++)
             {
-                skillEntries.Add(new Skill()
+                if(cusFile.Version <= 2)
                 {
-                    ShortName = StringEx.GetString(rawBytes, offset, false, StringEx.EncodingType.ASCII, 4),
-                    I_04 = BitConverter.ToInt32(rawBytes, offset + 4),
-                    ID1 = BitConverter.ToUInt16(rawBytes, offset + 8),
-                    ID2 = BitConverter.ToUInt16(rawBytes, offset + 10),
-                    I_12 = (CusRaceLock)rawBytes[offset + 12],
-                    I_13 = rawBytes[offset + 13],
-                    FilesLoadedFlags1 = (Skill.FilesLoadedFlags)BitConverter.ToUInt16(rawBytes, offset + 14),
-                    I_16 = BitConverter.ToInt16(rawBytes, offset + 16),
-                    I_18 = BitConverter.ToUInt16(rawBytes, offset + 18),
-                    EanPath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 20), false),
-                    CamEanPath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 24), false),
-                    EepkPath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 28), false),
-                    SePath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 32), false),
-                    VoxPath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 36), false),
-                    AfterBacPath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 40), false),
-                    AfterBcmPath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 44), false),
-                    I_48 = BitConverter.ToUInt16(rawBytes, offset + 48),
-                    I_50 = BitConverter.ToUInt16(rawBytes, offset + 50),
-                    I_52 = BitConverter.ToUInt16(rawBytes, offset + 52),
-                    I_54 = BitConverter.ToUInt16(rawBytes, offset + 54),
-                    PUP = BitConverter.ToUInt16(rawBytes, offset + 56),
-                    CusAura = BitConverter.ToInt16(rawBytes, offset + 58),
-                    CharaSwapId = BitConverter.ToUInt16(rawBytes, offset + 60),
-                    I_62 = BitConverter.ToInt16(rawBytes, offset + 62),
-                    NumTransformations = BitConverter.ToUInt16(rawBytes, offset + 64),
-                    I_66 = BitConverter.ToUInt16(rawBytes, offset + 66)
-                });
+                    skillEntries.Add(new Skill()
+                    {
+                        ShortName = StringEx.GetString(rawBytes, offset, false, StringEx.EncodingType.ASCII, 4),
+                        I_04 = BitConverter.ToInt32(rawBytes, offset + 4),
+                        ID1 = BitConverter.ToUInt16(rawBytes, offset + 8),
+                        ID2 = BitConverter.ToUInt16(rawBytes, offset + 10),
+                        I_12 = (CusRaceLock)rawBytes[offset + 12],
+                        I_13 = rawBytes[offset + 13],
+                        FilesLoadedFlags1 = (Skill.FilesLoadedFlags)BitConverter.ToUInt16(rawBytes, offset + 14),
+                        PartSet = BitConverter.ToInt16(rawBytes, offset + 16),
+                        I_18 = BitConverter.ToUInt16(rawBytes, offset + 18),
+                        EanPath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 20), false),
+                        CamEanPath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 24), false),
+                        EepkPath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 28), false),
+                        SePath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 32), false),
+                        VoxPath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 36), false),
+                        AfterBacPath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 40), false),
+                        AfterBcmPath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 44), false),
+                        I_48 = BitConverter.ToUInt16(rawBytes, offset + 48),
+                        I_50 = BitConverter.ToUInt16(rawBytes, offset + 50),
+                        I_52 = BitConverter.ToUInt16(rawBytes, offset + 52),
+                        I_54 = BitConverter.ToUInt16(rawBytes, offset + 54),
+                        PUP = BitConverter.ToUInt16(rawBytes, offset + 56),
+                        CusAura = BitConverter.ToInt16(rawBytes, offset + 58),
+                        CharaSwapId = BitConverter.ToUInt16(rawBytes, offset + 60),
+                        SkillsetChange1 = BitConverter.ToInt16(rawBytes, offset + 62),
+                        NumTransformations = BitConverter.ToUInt16(rawBytes, offset + 64),
+                        I_66 = BitConverter.ToUInt16(rawBytes, offset + 66)
+                    });
 
-                if(cusFile.Version == 1)
-                {
-                    skillEntries[i].I_68 = BitConverter.ToUInt32(rawBytes, offset + 68);
-                    offset += 72;
-                }
-                else if (cusFile.Version == 2)
-                {
-                    skillEntries[i].I_68 = BitConverter.ToUInt32(rawBytes, offset + 68);
-                    skillEntries[i].I_72 = BitConverter.ToUInt32(rawBytes, offset + 72);
-                    offset += 76;
+                    if (cusFile.Version == 1)
+                    {
+                        skillEntries[i].I_68 = BitConverter.ToUInt32(rawBytes, offset + 68);
+                        offset += 72;
+                    }
+                    else if (cusFile.Version == 2)
+                    {
+                        skillEntries[i].I_68 = BitConverter.ToUInt32(rawBytes, offset + 68);
+                        skillEntries[i].I_72 = BitConverter.ToUInt32(rawBytes, offset + 72);
+                        offset += 76;
+                    }
+                    else
+                    {
+                        offset += 68;
+                    }
                 }
                 else
                 {
-                    offset += 68;
+                    //Version 3 (1.25)
+                    skillEntries.Add(new Skill()
+                    {
+                        ShortName = StringEx.GetString(rawBytes, offset, false, StringEx.EncodingType.ASCII, 4),
+                        I_04 = BitConverter.ToInt32(rawBytes, offset + 4),
+                        ID1 = BitConverter.ToUInt16(rawBytes, offset + 8),
+                        ID2 = BitConverter.ToUInt16(rawBytes, offset + 10),
+                        I_12 = (CusRaceLock)rawBytes[offset + 12],
+                        I_13 = rawBytes[offset + 13],
+                        FilesLoadedFlags1 = (Skill.FilesLoadedFlags)BitConverter.ToUInt16(rawBytes, offset + 14),
+                        I_18 = BitConverter.ToUInt16(rawBytes, offset + 16), //Changed offset (18 -> 16)
+                        NEW_I_18 = BitConverter.ToUInt16(rawBytes, offset + 18), //New in 1.25
+                        EanPath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 20), false),
+                        CamEanPath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 24), false),
+                        EepkPath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 28), false),
+                        SePath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 32), false),
+                        VoxPath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 36), false),
+                        AfterBacPath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 40), false),
+                        AfterBcmPath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 44), false),
+                        I_48 = BitConverter.ToUInt16(rawBytes, offset + 48),
+                        I_50 = BitConverter.ToUInt16(rawBytes, offset + 50),
+                        I_52 = BitConverter.ToUInt16(rawBytes, offset + 52),
+                        I_54 = BitConverter.ToUInt16(rawBytes, offset + 54),
+                        PUP = BitConverter.ToUInt16(rawBytes, offset + 56),
+                        CusAura = BitConverter.ToInt16(rawBytes, offset + 58),
+
+                        //Updated values. Uncommented values are new in 1.25
+                        NumTransformations = BitConverter.ToUInt16(rawBytes, offset + 60), //Changed offset (64 -> 60)
+                        I_66 = BitConverter.ToUInt16(rawBytes, offset + 62), //Changed offset (66 -> 62)
+                        PartSet = BitConverter.ToInt16(rawBytes, offset + 64), //Changed offset (16 -> 64)
+                        PartSet2 = BitConverter.ToInt16(rawBytes, offset + 66),
+                        PartSet3 = BitConverter.ToInt16(rawBytes, offset + 68),
+                        CharaSwapId = BitConverter.ToUInt16(rawBytes, offset + 70), //Changed offset (60 -> 70)
+                        CharaSwapId2 = BitConverter.ToUInt16(rawBytes, offset + 72),
+                        CharaSwapId3 = BitConverter.ToUInt16(rawBytes, offset + 74),
+                        SkillsetChange1 = BitConverter.ToInt16(rawBytes, offset + 76), //Changed offset (62 -> 76)
+                        SkillsetChange2 = BitConverter.ToInt16(rawBytes, offset + 78),
+                        SkillsetChange3 = BitConverter.ToInt16(rawBytes, offset + 80),
+                        I_68 = BitConverter.ToUInt32(new byte[] { rawBytes[offset + 84], rawBytes[offset + 85], rawBytes[offset + 82], rawBytes[offset + 83] }, 0), //Changed offset (68 -> 82), and the values in I_68 swapped places in 1.25 - likely two different uint16s entirely
+                        NEW_I_86 = BitConverter.ToUInt16(rawBytes, offset + 86),
+                        I_72 = BitConverter.ToUInt32(rawBytes, offset + 88) //Changed offset (72 -> 88)
+                    });
+
+                    offset += 92;
                 }
+                    
             }
 
             return skillEntries;
