@@ -72,7 +72,6 @@ namespace Xv2CoreLib.BAC
         {
             int offset = BitConverter.ToInt32(rawBytes, 16);
             int count = BitConverter.ToInt32(rawBytes, 8);
-            int totalEntryIndex = 0;
 
             //I need to seperate the "Flag" value, since it is atleast 2 multiple values (the last byte is a "Use this or CMN Bac" flag)
             //Instead of checking the Flag for this, simply check if any types exist on the BacEntry. Perfect compatibility (but still seperate the flags)
@@ -89,14 +88,13 @@ namespace Xv2CoreLib.BAC
                         int thisTypeCount = BitConverter.ToInt16(rawBytes, typeListOffset + 2);
                         int thisTypeOffset = BitConverter.ToInt32(rawBytes, typeListOffset + 8);
 
-
-                        BacType_Offsets.Add(thisTypeOffset);
+                        if(thisTypeOffset > 0)
+                            BacType_Offsets.Add(thisTypeOffset);
 
                         typeListOffset += 16;
                     }
                 }
 
-                totalEntryIndex++;
                 offset += 16;
             }
             BacType_Offsets.Add(rawBytes.Count());
@@ -308,7 +306,6 @@ namespace Xv2CoreLib.BAC
                 //Unknown size. For debugging purposes only.
                 throw new Exception(String.Format("Unknown BacType17 size! (Index = {0}, Size = {1}, Offset = {2})", bacIndex, size / count, offset));
             }
-
 
         }
 
