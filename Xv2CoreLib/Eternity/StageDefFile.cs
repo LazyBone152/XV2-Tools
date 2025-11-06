@@ -214,6 +214,10 @@ namespace Xv2CoreLib.Eternity
         [YAXAttributeFor("BGM_CUE_ID")]
         [YAXSerializeAs("value")]
         public uint BGM_CUE_ID { get; set; }
+        [YAXAttributeFor("BGM_UNK1")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = -1)]
+        public int BGM_UNK1 { get; set; } = -1;
 
         [YAXAttributeFor("NAME_EN")]
         [YAXSerializeAs("value")]

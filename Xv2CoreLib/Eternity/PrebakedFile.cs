@@ -633,6 +633,20 @@ namespace Xv2CoreLib.Eternity
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = false)]
         public bool golden_freezer_skin_bh { get; set; }
 
+        [YAXAttributeFor("TRANS_STAGE")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0)]
+        public uint TRANS_STAGE { get; set; }
+        [YAXAttributeFor("KI_REQ")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0)]
+        public int KI_REQ { get; set; }
+        [YAXAttributeFor("CUS_ID2_OWNER")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = -1)]
+        public int CUS_ID2_OWNER { get; set; } = -1;
+
+
         public CusAuraData() { }
 
         public CusAuraData(int cusAuraId)
