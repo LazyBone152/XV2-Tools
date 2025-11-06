@@ -104,6 +104,9 @@ namespace Xv2CoreLib.ValuesDictionary
             { 65534 , "Skill" },
             { 9 , "Common (tail)" },
             { 2 , "Common MCM.DBA" },
+            { 42, "Common MCM.TTL" },
+            { 43, "Common MCM.TU6" },
+            { 94, "Common MCM.TU13.5" },
             { 10 , "Face Base" },
             { 11 , "Face Forehead" }
         };
