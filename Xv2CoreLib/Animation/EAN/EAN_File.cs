@@ -348,7 +348,7 @@ namespace Xv2CoreLib.EAN
             {
                 IsCamera = true,
                 I_08 = 37508,
-                Skeleton = skeleton.Clone()
+                Skeleton = skeleton.Copy()
             };
         }
 
@@ -400,6 +400,7 @@ namespace Xv2CoreLib.EAN
         {
             return (Animations.Count == 0);
         }
+
 
         #endregion
     }
