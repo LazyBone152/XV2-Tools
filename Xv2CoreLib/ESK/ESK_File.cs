@@ -868,6 +868,7 @@ namespace Xv2CoreLib.ESK
     public class ESK_Bone : INotifyPropertyChanged, IName
     {
         #region NotifyPropertyChanged
+        [field:NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void NotifyPropertyChanged(String propertyName = "")
