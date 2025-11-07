@@ -93,7 +93,6 @@ namespace LB_Mod_Installer.Installer
 
         private bool startedSaving = false;
 
-
         public Install(InstallerXml _installerXml, ZipReader _zipManager, MainWindow parent, Xv2FileIO fileIO, FileCacheManager _fileManager)
         {
             installerXml = _installerXml;
@@ -254,6 +253,7 @@ namespace LB_Mod_Installer.Installer
                 ProcessJungle(JUNGLE2, false);
             }
 
+            FixCusAuraOwners();
             Parent.SaveSelectedOptions();
         }
 
@@ -674,6 +674,47 @@ namespace LB_Mod_Installer.Installer
             {
                 return false;
             }
+        }
+
+        private void FixCusAuraOwners()
+        {
+            //Set prebaked CUS_ID2_OWNER value for installed skills (matching cus skill entry + prebaked aura entry)
+            //Only modifies prebaked aura entries that were installed with the mod
+
+            Section prebakedAuras = GeneralInfo.Tracker.GetCurrentMod().GetFileEntry("pre-baked.xml")?.GetSection("PrebakedCusAura");
+            Section cusAwokens = GeneralInfo.Tracker.GetCurrentMod().GetFileEntry(Xenoverse2.CUS_PATH)?.GetSection("CUS_AwokenSkills");
+
+            if(cusAwokens?.IDs?.Count > 0 && prebakedAuras?.IDs?.Count > 0)
+            {
+                CUS_File cusFile = (CUS_File)GetParsedFile<CUS_File>(Xenoverse2.CUS_PATH);
+                PrebakedFile prebaked = (PrebakedFile)GetParsedFile<PrebakedFile>("pre-baked.xml");
+
+                foreach (string cusId in cusAwokens.IDs)
+                {
+                    if(int.TryParse(cusId, out int id))
+                    {
+                        int id2 = CUS_File.ConvertToID2(id, CUS_File.SkillType.Awoken);
+                        Skill skill = cusFile.GetSkill(id2, CUS_File.SkillType.Awoken);
+
+                        if(skill != null)
+                        {
+                            if(skill.CusAura != -1)
+                            {
+                                for(int i = 0; i < skill.NumTransformations; i++)
+                                {
+                                    if(prebakedAuras.IDs.Contains((skill.CusAura + i).ToString()))
+                                    {
+                                        CusAuraData cusAura = prebaked.CusAuras.FirstOrDefault(x => x.CusAuraID == skill.CusAura + i);
+                                        cusAura.CUS_ID2_OWNER = id2;
+                                    }
+                                }
+                            }
+                        }
+                        
+                    }
+                }
+            }
+
         }
 
         //File Install Methods
@@ -1900,6 +1941,7 @@ namespace LB_Mod_Installer.Installer
             }
 #endif
         }
+        
         private void Install_AIT(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
         {
 #if !DEBUG
