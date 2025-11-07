@@ -1672,7 +1672,10 @@ namespace Xv2CoreLib.BAC
             CommonTail = 9,
             FaceBase = 10,
             FaceForehead = 11,
-            Skill = 65534,
+            Skill = 65534, 
+            MCM_TTL = 42,
+            MCM_TU6 = 43,
+            MCM_TU13_5 = 94,
 
             //Legacy options (installer compat):
             FaceA = 10,
@@ -1849,7 +1852,8 @@ namespace Xv2CoreLib.BAC
 
         public static bool IsFullBodyAnimation(EanTypeEnum ean)
         {
-            return ean == EanTypeEnum.Common || ean == EanTypeEnum.Character || ean == EanTypeEnum.Skill || ean == EanTypeEnum.MCM_DBA;
+            return ean == EanTypeEnum.Common || ean == EanTypeEnum.Character || ean == EanTypeEnum.Skill || ean == EanTypeEnum.MCM_DBA
+                || ean == EanTypeEnum.MCM_TTL || ean == EanTypeEnum.MCM_TU6 || ean == EanTypeEnum.MCM_TU13_5;
         }
 
         public static bool IsFaceAnimation(EanTypeEnum ean)

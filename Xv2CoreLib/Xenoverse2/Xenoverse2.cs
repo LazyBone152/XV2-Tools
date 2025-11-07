@@ -129,7 +129,12 @@ namespace Xv2CoreLib
         public const string CMN_SHOT_BDM_PATH = "skill/CMN/CMN_PLAYER.shot.bdm";
         public const string CMN_SE_ACB_PATH = "sound/SE/Battle/Common/CAR_BTL_CMN.acb";
         public const string CMN_EEPK_PATH = "vfx/cmn/BTL_CMN.eepk";
-        public const string CMN_TAL_EAN = "chara/CMN/CMN.tal.ean";
+        public const string CMN_TAL_EAN_PATH = "chara/CMN/CMN.tal.ean";
+        public const string CMN_MCM_CAM_EAN_PATH = "chara/CMN/MCM.cam.ean";
+        public const string CMN_MCM_DBA_EAN_PATH = "chara/CMN/MCM.DBA.ean";
+        public const string CMN_MCM_TTL_EAN_PATH = "chara/CMN/MCM.TTL.ean";
+        public const string CMN_MCM_TU6_EAN_PATH = "chara/CMN/MCM.TU6.ean";
+        public const string CMN_MCM_TU13_5_EAN_PATH = "chara/CMN/MCM.TU13.5.ean";
 
         public const string CHARACTER_MSG_PATH = "msg/proper_noun_character_name_";
         public const string SUPER_SKILL_MSG_PATH = "msg/proper_noun_skill_spa_name_";
