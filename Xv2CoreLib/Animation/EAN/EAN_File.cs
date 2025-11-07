@@ -401,8 +401,8 @@ namespace Xv2CoreLib.EAN
             return (Animations.Count == 0);
         }
 
-        #endregion
 
+        #endregion
     }
 
     [YAXSerializeAs("Animation")]

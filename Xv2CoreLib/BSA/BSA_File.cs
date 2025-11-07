@@ -275,6 +275,11 @@ namespace Xv2CoreLib.BSA
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BSA_Type13")]
         [BindingSubList]
         public List<BSA_Type13> Type13 { get; set; }
+
+        [YAXDontSerializeIfNull]
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BSA_Type14")]
+        [BindingSubList]
+        public List<BSA_Type14> Type14 { get; set; }
         #region IBsaTypes
         [YAXDontSerialize]
         public AsyncObservableCollection<IBsaType> IBsaTypes { get; set; }
@@ -304,6 +309,8 @@ namespace Xv2CoreLib.BSA
             foreach (var bsaEntry in Type12)
                 IBsaTypes.Add(bsaEntry);
             foreach (var bsaEntry in Type13)
+                IBsaTypes.Add(bsaEntry);
+            foreach (var bsaEntry in Type14)
                 IBsaTypes.Add(bsaEntry);
 
         }
@@ -354,6 +361,10 @@ namespace Xv2CoreLib.BSA
                 {
                     Type13.Add(type13);
                 }
+                else if (bsaEntry is BSA_Type14 type14)
+                {
+                    Type14.Add(type14);
+                }
             }
         }
 
@@ -379,6 +390,8 @@ namespace Xv2CoreLib.BSA
                 Type12 = new List<BSA_Type12>();
             if (Type13 == null)
                 Type13 = new List<BSA_Type13>();
+            if (Type14 == null)
+                Type14 = new List<BSA_Type14>();
         }
 
         private void ClearBsaLists()
@@ -395,6 +408,7 @@ namespace Xv2CoreLib.BSA
             Type8.Clear();
             Type12.Clear();
             Type13.Clear();
+            Type14.Clear();
         }
 
         #endregion
@@ -997,6 +1011,93 @@ namespace Xv2CoreLib.BSA
         public int I_28 { get; set; }
 
 
+    }
+
+    [YAXSerializeAs("BSA_Type14")]
+    [Serializable]
+    public class BSA_Type14 : IBsaType
+    {
+        [YAXAttributeFor("Start_Time")]
+        [YAXSerializeAs("frames")]
+        public ushort StartTime { get; set; }
+        [YAXAttributeFor("Duration")]
+        [YAXSerializeAs("frames")]
+        public ushort Duration { get; set; }
+        [YAXAttributeFor("I_00")]
+        [YAXSerializeAs("value")]
+        public ushort I_00 { get; set; }
+        [YAXAttributeFor("I_02")]
+        [YAXSerializeAs("value")]
+        public ushort I_02 { get; set; }
+        [YAXAttributeFor("F_04")]
+        [YAXSerializeAs("value")]
+        public float F_04 { get; set; } // For some reason if we add YAXFormat to this, it always formats to 0
+        [YAXAttributeFor("I_08")]
+        [YAXSerializeAs("value")]
+        public uint I_08 { get; set; }
+        [YAXAttributeFor("F_12")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0##########")]
+        public float F_12 { get; set; }
+        [YAXAttributeFor("I_16")]
+        [YAXSerializeAs("value")]
+        public uint I_16 { get; set; }
+        [YAXAttributeFor("F_20")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0##########")]
+        public float F_20 { get; set; }
+        [YAXAttributeFor("I_24")]
+        [YAXSerializeAs("value")]
+        public uint I_24 { get; set; }
+        [YAXAttributeFor("F_28")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0##########")]
+        public float F_28 { get; set; }
+        [YAXAttributeFor("I_32")]
+        [YAXSerializeAs("value")]
+        public uint I_32 { get; set; }
+        [YAXAttributeFor("I_36")]
+        [YAXSerializeAs("value")]
+        public uint I_36 { get; set; }
+        [YAXAttributeFor("I_40")]
+        [YAXSerializeAs("value")]
+        public uint I_40 { get; set; }
+        [YAXAttributeFor("F_44")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0##########")]
+        public float F_44 { get; set; }
+        [YAXAttributeFor("I_48")]
+        [YAXSerializeAs("value")]
+        public uint I_48 { get; set; }
+        [YAXAttributeFor("F_52")]
+        [YAXSerializeAs("value")]
+        public float F_52 { get; set; }
+        [YAXAttributeFor("I_56")]
+        [YAXSerializeAs("value")]
+        public uint I_56 { get; set; }
+        [YAXAttributeFor("F_60")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0##########")]
+        public float F_60 { get; set; }
+        [YAXAttributeFor("I_64")]
+        [YAXSerializeAs("value")]
+        public uint I_64 { get; set; }
+        [YAXAttributeFor("F_68")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0##########")]
+        public float F_68 { get; set; }
+        [YAXAttributeFor("I_72")]
+        [YAXSerializeAs("value")]
+        public uint I_72 { get; set; }
+        [YAXAttributeFor("I_76")]
+        [YAXSerializeAs("value")]
+        public uint I_76 { get; set; }
+        [YAXAttributeFor("I_80")]
+        [YAXSerializeAs("value")]
+        public uint I_80 { get; set; }
+        [YAXAttributeFor("I_84")]
+        [YAXSerializeAs("value")]
+        public uint I_84 { get; set; }
     }
 
     public interface IBsaType

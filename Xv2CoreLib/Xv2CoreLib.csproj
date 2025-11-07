@@ -182,6 +182,7 @@
     <Compile Include="BSA_XV1\Deserializer.cs" />
     <Compile Include="BSA_XV1\Parser.cs" />
     <Compile Include="Animation\AnimationFramework\Interfaces.cs" />
+    <Compile Include="CAT\CAT_File.cs" />
     <Compile Include="EMD\ModelModifiedEvent.cs" />
     <Compile Include="FMP\CollisionCreator.cs" />
     <Compile Include="FMP\FMP_File.cs" />

@@ -1201,9 +1201,13 @@ namespace Xv2CoreLib
             }
 
             //Load fce ean
-            string fceEanPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.fce.ean", cmsEntry.ShortName, cmsEntry.FceEanPath));
-            moveFiles.EanPaths.Add(fceEanPath);
-            moveFiles.EanFile.Add(new Xv2File<EAN_File>((EAN_File)FileManager.Instance.GetParsedFileFromGame(fceEanPath), fileIO.PathInGameDir(fceEanPath), !cmsEntry.IsSelfReference(cmsEntry.FceEanPath), null, false, MoveFileTypes.FCE_EAN, 0, true, MoveType.Character));
+            if (!string.IsNullOrWhiteSpace(cmsEntry.FceEanPath))
+            {
+                string fceEanPath = Utils.ResolveRelativePath(string.Format("chara/{0}/{1}.fce.ean", cmsEntry.ShortName, cmsEntry.FceEanPath));
+                moveFiles.EanPaths.Add(fceEanPath);
+                moveFiles.EanFile.Add(new Xv2File<EAN_File>((EAN_File)FileManager.Instance.GetParsedFileFromGame(fceEanPath), fileIO.PathInGameDir(fceEanPath), !cmsEntry.IsSelfReference(cmsEntry.FceEanPath), null, false, MoveFileTypes.FCE_EAN, 0, true, MoveType.Character));
+            }
+
 
             //fce.ean for foreheads
             if (!string.IsNullOrWhiteSpace(cmsEntry.FceForeheadEanPath))

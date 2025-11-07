@@ -252,6 +252,13 @@ namespace Xv2CoreLib.BSA
                     dataOffset.Add(results[1]);
                     typeList.Add(13);
                 }
+                if (types.Type14 != null)
+                {
+                    var results = WriteTypeHeader(14, types.Type14.Count);
+                    hdrOffset.Add(results[0]);
+                    dataOffset.Add(results[1]);
+                    typeList.Add(14);
+                }
 
                 //Type Data
                 for (int i = 0; i < typeList.Count; i++)
@@ -290,6 +297,9 @@ namespace Xv2CoreLib.BSA
                             break;
                         case 13:
                             WriteType13(types.Type13, hdrOffset[i], dataOffset[i]);
+                            break;
+                        case 14:
+                            WriteType14(types.Type14, hdrOffset[i], dataOffset[i]);
                             break;
                     }
 
@@ -690,7 +700,53 @@ namespace Xv2CoreLib.BSA
             }
 
         }
+        private void WriteType14(List<BSA_Type14> type, int hdrOffset, int dataOffset)
+        {
+            if (type != null)
+            {
 
+                //Hdr data
+                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - hdrOffset + 8), hdrOffset);
+
+                for (int i = 0; i < type.Count; i++)
+                {
+                    bytes.AddRange(BitConverter.GetBytes(type[i].StartTime));
+                    bytes.AddRange(BitConverter.GetBytes(GetTypeEndTime(type[i].StartTime, type[i].Duration)));
+                }
+
+                //Main Type Data
+                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - dataOffset + 12), dataOffset);
+
+                for (int i = 0; i < type.Count; i++)
+                {
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_00));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_02));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].F_04));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_08));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].F_12));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_16));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].F_20));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_24));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].F_28));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_32));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_36));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_40));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].F_44));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_48));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].F_52));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_56));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].F_60));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_64));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].F_68));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_72));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_76));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_80));
+                    bytes.AddRange(BitConverter.GetBytes(type[i].I_84));
+                }
+
+            }
+
+        }
 
         //Utility 
         private int BsaTypeCount(BSA_Entry bsaEntry)
@@ -737,6 +793,10 @@ namespace Xv2CoreLib.BSA
                 count++;
             }
             if (bsaEntry.Type13 != null)
+            {
+                count++;
+            }
+            if (bsaEntry.Type14 != null)
             {
                 count++;
             }

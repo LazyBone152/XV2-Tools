@@ -25,7 +25,7 @@ namespace XV2_Xml_Serializer
         {
 #if DEBUG
             //for debugging only
-            //args = new string[1] { @"test.map.xml" };
+            args = new string[1] { @"E:\SteamLibrary\steamapps\common\DB Xenoverse 2\cpk\data\data\system\char_advance_transform.cat.xml" };
             //args = new string[1] { @"E:\VS_Test\EMA" };
 
             DEBUG_MODE = true;
@@ -351,6 +351,9 @@ namespace XV2_Xml_Serializer
                                 case ".spm":
                                     Xv2CoreLib.SPM.SPM_File.SerializeToXml(fileLocation);
                                     break;
+                                case ".cat":
+                                    Xv2CoreLib.CAT.CAT_File.Parse(fileLocation, true);
+									break;
                                 case ".hkx":
                                 case ".hvk":
                                     Xv2CoreLib.Havok.HavokTagFile.SerializeToXml(fileLocation);
@@ -671,6 +674,9 @@ namespace XV2_Xml_Serializer
                         break;
                     case ".spm":
                         Xv2CoreLib.SPM.SPM_File.DeserializeFromXml(fileLocation);
+                        break;
+                    case ".cat":
+                        Xv2CoreLib.CAT.CAT_File.Write(fileLocation);
                         break;
                     case ".hkx":
                     case ".hvk":
