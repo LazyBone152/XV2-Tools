@@ -149,7 +149,8 @@ namespace Xv2CoreLib.BSA
                                         estSize = BitConverter.ToInt32(rawBytes, offset + 4) - dataOffset;
                                     }
 
-                                    Console.WriteLine(String.Format("Undefined BSA Type encountered: {0}, at: def offset: {1}, data offset: {2}, count: {3}, estTypeSize: {4}", type, typesOffset, dataOffset, typeCount, estSize));
+                                    Console.WriteLine(string.Format("Undefined BSA Type encountered: {0}, at: def offset: {1}, data offset: {2}, count: {3}, estTypeSize: {4}", type, typesOffset, dataOffset, typeCount, estSize));
+                                    Console.ReadLine();
                                     break;
                             }
 
