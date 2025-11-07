@@ -31,7 +31,7 @@ namespace EEPK_Organiser
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void NotifyPropertyChanged(String propertyName = "")
+        private void NotifyPropertyChanged(string propertyName = "")
         {
             if (PropertyChanged != null)
             {
@@ -39,38 +39,31 @@ namespace EEPK_Organiser
             }
         }
 
-        private EffectContainerFile _effectContainerFileValue = null;
-        public EffectContainerFile effectContainerFile
+        private EffectContainerFile _eepkFile = null;
+        public EffectContainerFile EepkFile
         {
             get
             {
-                return this._effectContainerFileValue;
+                return this._eepkFile;
             }
             set
             {
-                if (value != this._effectContainerFileValue)
+                if (value != _eepkFile)
                 {
-                    this._effectContainerFileValue = value;
-                    NotifyPropertyChanged("effectContainerFile");
-                    NotifyPropertyChanged("IsFileLoaded");
-                    NotifyPropertyChanged("CanSave");
+                    _eepkFile = value;
+                    NotifyPropertyChanged(nameof(IsFileLoaded));
+                    NotifyPropertyChanged(nameof(EepkFile));
+                    NotifyPropertyChanged(nameof(CanSave));
                 }
             }
         }
-        public bool IsFileLoaded
-        {
-            get
-            {
-                if (effectContainerFile == null) return false;
-                return true;
-            }
-        }
+        public bool IsFileLoaded => _eepkFile != null;
         public bool CanSave
         {
             get
             {
-                if (effectContainerFile == null) return false;
-                return effectContainerFile.CanSave;
+                if (EepkFile == null) return false;
+                return EepkFile.CanSave;
             }
         }
 
@@ -79,14 +72,14 @@ namespace EEPK_Organiser
         {
             get
             {
-                if (effectContainerFile == null) return false;
-                return (effectContainerFile.Version == Xv2CoreLib.EMP_NEW.VersionEnum.DBXV2);
+                if (EepkFile == null) return false;
+                return (EepkFile.Version == Xv2CoreLib.EMP_NEW.VersionEnum.DBXV2);
             }
             set
             {
-                if (effectContainerFile != null)
+                if (EepkFile != null)
                 {
-                    effectContainerFile.Version = Xv2CoreLib.EMP_NEW.VersionEnum.DBXV2;
+                    EepkFile.Version = Xv2CoreLib.EMP_NEW.VersionEnum.DBXV2;
                     UpdateSelectedVersion();
                 }
             }
@@ -95,14 +88,14 @@ namespace EEPK_Organiser
         {
             get
             {
-                if (effectContainerFile == null) return false;
-                return (effectContainerFile.Version == Xv2CoreLib.EMP_NEW.VersionEnum.SDBH);
+                if (EepkFile == null) return false;
+                return (EepkFile.Version == Xv2CoreLib.EMP_NEW.VersionEnum.SDBH);
             }
             set
             {
-                if (effectContainerFile != null)
+                if (EepkFile != null)
                 {
-                    effectContainerFile.Version = Xv2CoreLib.EMP_NEW.VersionEnum.SDBH;
+                    EepkFile.Version = Xv2CoreLib.EMP_NEW.VersionEnum.SDBH;
                     UpdateSelectedVersion();
                 }
             }
@@ -203,13 +196,13 @@ namespace EEPK_Organiser
         private async void Load(string path = null)
         {
             //If a file is already loaded then ask for confirmation
-            if (effectContainerFile != null)
+            if (EepkFile != null)
             {
-                var ret = MessageBox.Show(App.Current.MainWindow, String.Format("Do you want to save the currently opened file first?", effectContainerFile.Name), "Open", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+                var ret = MessageBox.Show(App.Current.MainWindow, String.Format("Do you want to save the currently opened file first?", EepkFile.Name), "Open", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
 
                 if (ret == MessageBoxResult.Yes)
                 {
-                    if (effectContainerFile.CanSave)
+                    if (EepkFile.CanSave)
                     {
                         Menu_Save_Click(null, null);
                     }
@@ -242,7 +235,7 @@ namespace EEPK_Organiser
             if (file != null)
             {
                 View.EepkEditor.CloseAllEditorForms();
-                effectContainerFile = file;
+                EepkFile = file;
                 UpdateSelectedVersion();
             }
 
@@ -363,13 +356,13 @@ namespace EEPK_Organiser
 
         private void Menu_New_Click(object sender, RoutedEventArgs e)
         {
-            if (effectContainerFile != null)
+            if (EepkFile != null)
             {
-                var ret = MessageBox.Show(this, String.Format("Do you want to save the currently opened file first?", effectContainerFile.Name), "Open", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+                var ret = MessageBox.Show(this, String.Format("Do you want to save the currently opened file first?", EepkFile.Name), "Open", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
 
                 if (ret == MessageBoxResult.Yes)
                 {
-                    if (effectContainerFile.CanSave)
+                    if (EepkFile.CanSave)
                     {
                         Menu_Save_Click(null, null);
                     }
@@ -384,7 +377,7 @@ namespace EEPK_Organiser
                 }
             }
 
-            effectContainerFile = EffectContainerFile.New();
+            EepkFile = EffectContainerFile.New();
             UpdateSelectedVersion();
             View.EepkEditor.CloseAllEditorForms();
         }
@@ -396,20 +389,20 @@ namespace EEPK_Organiser
 
         private void Menu_Save_Click(object sender, RoutedEventArgs e)
         {
-            if (effectContainerFile == null) return;
+            if (EepkFile == null) return;
 
 #if !DEBUG
             try
 #endif
             {
-                if(effectContainerFile.saveFormat == SaveFormat.EEPK)
+                if(EepkFile.saveFormat == SaveFormat.EEPK)
                 {
-                    effectContainerFile.Save();
+                    EepkFile.Save();
                     FileCleanUp();
                 }
-                else if(effectContainerFile.saveFormat == SaveFormat.VfxPackage)
+                else if(EepkFile.saveFormat == SaveFormat.VfxPackage)
                 {
-                    effectContainerFile.SaveVfxPackage();
+                    EepkFile.SaveVfxPackage();
                     FileCleanUp();
                 }
 
@@ -427,7 +420,7 @@ namespace EEPK_Organiser
 
         private void Menu_SaveAs_Click(object sender, RoutedEventArgs e)
         {
-            if (effectContainerFile == null) return;
+            if (EepkFile == null) return;
 
             try
             {
@@ -442,16 +435,16 @@ namespace EEPK_Organiser
                 {
                     if(System.IO.Path.GetExtension(saveDialog.FileName) == EffectContainerFile.ZipExtension)
                     {
-                        effectContainerFile.Directory = string.Format("{0}/{1}", System.IO.Path.GetDirectoryName(saveDialog.FileName), System.IO.Path.GetFileNameWithoutExtension(saveDialog.FileName));
-                        effectContainerFile.saveFormat = SaveFormat.VfxPackage;
-                        effectContainerFile.SaveVfxPackage();
+                        EepkFile.Directory = string.Format("{0}/{1}", System.IO.Path.GetDirectoryName(saveDialog.FileName), System.IO.Path.GetFileNameWithoutExtension(saveDialog.FileName));
+                        EepkFile.saveFormat = SaveFormat.VfxPackage;
+                        EepkFile.SaveVfxPackage();
                     }
                     else if (System.IO.Path.GetExtension(saveDialog.FileName) == ".eepk")
                     {
-                        effectContainerFile.Directory = System.IO.Path.GetDirectoryName(saveDialog.FileName);
-                        effectContainerFile.Name = System.IO.Path.GetFileNameWithoutExtension(saveDialog.FileName);
-                        effectContainerFile.saveFormat = SaveFormat.EEPK;
-                        effectContainerFile.Save();
+                        EepkFile.Directory = System.IO.Path.GetDirectoryName(saveDialog.FileName);
+                        EepkFile.Name = System.IO.Path.GetFileNameWithoutExtension(saveDialog.FileName);
+                        EepkFile.saveFormat = SaveFormat.EEPK;
+                        EepkFile.Save();
                     }
                     else
                     {
@@ -564,13 +557,13 @@ namespace EEPK_Organiser
         
         private void ToolMenu_ExportEffects_Click(object sender, RoutedEventArgs e)
         {
-            if (effectContainerFile == null) return;
+            if (EepkFile == null) return;
 
             try
             {
-                if (effectContainerFile.Effects.Count > 0)
+                if (EepkFile.Effects.Count > 0)
                 {
-                    eepkEditor.ExportVfxPackage(effectContainerFile.Effects);
+                    eepkEditor.ExportVfxPackage(EepkFile.Effects);
                 }
             }
             catch (Exception ex)
@@ -586,7 +579,7 @@ namespace EEPK_Organiser
             try
 #endif
             {
-                Forms.RecolorAll recolor = new Forms.RecolorAll(effectContainerFile, this);
+                Forms.RecolorAll recolor = new Forms.RecolorAll(EepkFile, this);
 
                 if(recolor.Initialize())
                     recolor.ShowDialog();
@@ -607,7 +600,7 @@ namespace EEPK_Organiser
             try
 #endif
             {
-                RecolorAll_HueSet recolor = new RecolorAll_HueSet(effectContainerFile, this);
+                RecolorAll_HueSet recolor = new RecolorAll_HueSet(EepkFile, this);
 
                 if (recolor.Initialize())
                     recolor.ShowDialog();
@@ -632,7 +625,7 @@ namespace EEPK_Organiser
 
                 if(messageResult == MessageDialogResult.Affirmative)
                 {
-                    int[] ret = effectContainerFile.MergeAllTexturesIntoSuperTextures_PBIND();
+                    int[] ret = EepkFile.MergeAllTexturesIntoSuperTextures_PBIND();
 
                     await this.ShowMessageAsync("Optimize Textures (SuperTexture)", $"{ret[0]} textures were merged together to create {ret[1]} Super Textures.", MessageDialogStyle.Affirmative, DialogSettings.Default);
                 }
@@ -649,12 +642,12 @@ namespace EEPK_Organiser
 
         private async void ToolMenu_CleanAll_Click(object sender, RoutedEventArgs e)
         {
-            var messageResult = await this.ShowMessageAsync("Clean All", $"Delete all unused or duplicate assets, texture and material from this {effectContainerFile.saveFormat}?", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.Default);
+            var messageResult = await this.ShowMessageAsync("Clean All", $"Delete all unused or duplicate assets, texture and material from this {EepkFile.saveFormat}?", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.Default);
 
             if (messageResult == MessageDialogResult.Affirmative)
             {
                 List<IUndoRedo> undos = new List<IUndoRedo>();
-                int[] totals = effectContainerFile.RemoveAllUnusedOrDuplicates(undos);
+                int[] totals = EepkFile.RemoveAllUnusedOrDuplicates(undos);
 
                 int emp = totals[0];
                 int etr = totals[1];
@@ -680,13 +673,13 @@ namespace EEPK_Organiser
 
         private void FileCleanUp()
         {
-            if (effectContainerFile.LoadedExternalFilesNotSaved.Count > 0 && !SettingsManager.Instance.Settings.FileCleanUp_Ignore)
+            if (EepkFile.LoadedExternalFilesNotSaved.Count > 0 && !SettingsManager.Instance.Settings.FileCleanUp_Ignore)
             {
                 if (SettingsManager.Instance.Settings.FileCleanUp_Prompt)
                 {
                     StringBuilder str = new StringBuilder();
 
-                    foreach (var file in effectContainerFile.LoadedExternalFilesNotSaved)
+                    foreach (var file in EepkFile.LoadedExternalFilesNotSaved)
                     {
                         str.Append(String.Format("{0}\r", file));
                     }
@@ -696,7 +689,7 @@ namespace EEPK_Organiser
 
                     if (log.Result == MessageBoxResult.Yes)
                     {
-                        foreach (var file in effectContainerFile.LoadedExternalFilesNotSaved)
+                        foreach (var file in EepkFile.LoadedExternalFilesNotSaved)
                         {
                             if (File.Exists(file))
                                 File.Delete(file);
@@ -705,7 +698,7 @@ namespace EEPK_Organiser
                 }
                 else if (SettingsManager.Instance.Settings.FileCleanUp_Delete)
                 {
-                    foreach (var file in effectContainerFile.LoadedExternalFilesNotSaved)
+                    foreach (var file in EepkFile.LoadedExternalFilesNotSaved)
                     {
                         if (File.Exists(file))
                             File.Delete(file);
@@ -729,7 +722,7 @@ namespace EEPK_Organiser
         //NameList
         private void NameList_Item_Click(object sender, RoutedEventArgs e)
         {
-            if (effectContainerFile == null) return;
+            if (EepkFile == null) return;
 
             try
             {
@@ -741,7 +734,7 @@ namespace EEPK_Organiser
 
                     if (nameList != null)
                     {
-                        eepkEditor.nameListManager.ApplyNameList(effectContainerFile.Effects, nameList.GetNameList());
+                        eepkEditor.nameListManager.ApplyNameList(EepkFile.Effects, nameList.GetNameList());
                     }
                 }
             }
@@ -754,12 +747,12 @@ namespace EEPK_Organiser
 
         private void NameList_Clear_Click(object sender, RoutedEventArgs e)
         {
-            eepkEditor.nameListManager.ClearNameList(effectContainerFile.Effects);
+            eepkEditor.nameListManager.ClearNameList(EepkFile.Effects);
         }
 
         private void NameList_Save_Click(object sender, RoutedEventArgs e)
         {
-            eepkEditor.nameListManager.SaveNameList(effectContainerFile.Effects);
+            eepkEditor.nameListManager.SaveNameList(EepkFile.Effects);
         }
 
         //Load From Game
@@ -775,7 +768,7 @@ namespace EEPK_Organiser
                 UndoManager.Instance.Clear();
                 View.EepkEditor.CloseAllEditorForms();
 
-                effectContainerFile = effectFile;
+                EepkFile = effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
             }
@@ -794,7 +787,7 @@ namespace EEPK_Organiser
                 UndoManager.Instance.Clear();
                 View.EepkEditor.CloseAllEditorForms();
 
-                effectContainerFile = effectFile;
+                EepkFile = effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
             }
@@ -812,7 +805,7 @@ namespace EEPK_Organiser
                 UndoManager.Instance.Clear();
                 View.EepkEditor.CloseAllEditorForms();
 
-                effectContainerFile = effectFile;
+                EepkFile = effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
             }
@@ -830,7 +823,7 @@ namespace EEPK_Organiser
                 UndoManager.Instance.Clear();
                 View.EepkEditor.CloseAllEditorForms();
 
-                effectContainerFile = effectFile;
+                EepkFile = effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
             }
@@ -848,7 +841,7 @@ namespace EEPK_Organiser
                 UndoManager.Instance.Clear();
                 View.EepkEditor.CloseAllEditorForms();
 
-                effectContainerFile = effectFile;
+                EepkFile = effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
             }
@@ -866,7 +859,7 @@ namespace EEPK_Organiser
                 UndoManager.Instance.Clear();
                 View.EepkEditor.CloseAllEditorForms();
 
-                effectContainerFile = effectFile;
+                EepkFile = effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
             }
@@ -884,7 +877,7 @@ namespace EEPK_Organiser
                 UndoManager.Instance.Clear();
                 View.EepkEditor.CloseAllEditorForms();
 
-                effectContainerFile = effectFile;
+                EepkFile = effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
             }
@@ -902,7 +895,7 @@ namespace EEPK_Organiser
                 UndoManager.Instance.Clear();
                 View.EepkEditor.CloseAllEditorForms();
 
-                effectContainerFile = effectFile;
+                EepkFile = effectFile;
                 NotifyPropertyChanged("CanSave");
                 UpdateSelectedVersion();
             }
@@ -919,11 +912,11 @@ namespace EEPK_Organiser
         //File Path Display
         private void FilePath_MenuItem_CopyFullPath_Click(object sender, RoutedEventArgs e)
         {
-            if (effectContainerFile == null) return;
+            if (EepkFile == null) return;
 
             try
             {
-                Clipboard.SetText(effectContainerFile.FullFilePath, TextDataFormat.Text);
+                Clipboard.SetText(EepkFile.FullFilePath, TextDataFormat.Text);
             }
             catch
             {
@@ -933,11 +926,11 @@ namespace EEPK_Organiser
 
         private void FilePath_MenuItem_CopyDirectory_Click(object sender, RoutedEventArgs e)
         {
-            if (effectContainerFile == null) return;
+            if (EepkFile == null) return;
 
             try
             {
-                Clipboard.SetText(effectContainerFile.Directory, TextDataFormat.Text);
+                Clipboard.SetText(EepkFile.Directory, TextDataFormat.Text);
             }
             catch
             {

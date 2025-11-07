@@ -77,17 +77,19 @@ namespace Xv2CoreLib.BPE
             {
                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count()), MainEntryOffsets[i]);
 
+                int subEntryCount = bpeFile.Entries[i].SubEntries?.Count() ?? 0;
+
                 //Entry Data
                 bytes.AddRange(BitConverter.GetBytes(bpeFile.Entries[i].I_00));
                 bytes.AddRange(BitConverter.GetBytes(bpeFile.Entries[i].I_04));
                 bytes.AddRange(BitConverter.GetBytes(bpeFile.Entries[i].I_06));
                 bytes.AddRange(BitConverter.GetBytes(bpeFile.Entries[i].I_08));
-                bytes.AddRange(BitConverter.GetBytes((short)bpeFile.Entries[i].SubEntries.Count()));
-                bytes.AddRange(BitConverter.GetBytes(16));
+                bytes.AddRange(BitConverter.GetBytes((short)subEntryCount));
+                bytes.AddRange(BitConverter.GetBytes(subEntryCount > 0 ? 16 : 0));
 
                 List<int> TypeOffsets = new List<int>();
                 //SubEntries
-                for(int a = 0; a < bpeFile.Entries[i].SubEntries.Count(); a++)
+                for(int a = 0; a < subEntryCount; a++)
                 {
                     TypeValidation(bpeFile.Entries[i].SubEntries[a], bpeFile.Entries[i]);
                     bytes.AddRange(BitConverter.GetBytes((int)bpeFile.Entries[i].SubEntries[a].BpeType));
@@ -108,7 +110,7 @@ namespace Xv2CoreLib.BPE
                     bytes.AddRange(new byte[4]);
                 }
 
-                for(int a = 0; a < bpeFile.Entries[i].SubEntries.Count(); a++)
+                for(int a = 0; a < subEntryCount; a++)
                 {
                     switch ((int)bpeFile.Entries[i].SubEntries[a].BpeType)
                     {

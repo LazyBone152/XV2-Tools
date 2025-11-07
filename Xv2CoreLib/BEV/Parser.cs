@@ -102,11 +102,6 @@ namespace Xv2CoreLib.BEV
                                 type6++;
                                 break;
                             case 7:
-                                //if (typeCount == 0 || typeoffset == 0)
-                                {
-                                    // In common.bev there's still a reference to a type7 with count as 0
-                                    //break;
-                                }
                                 bevFile.Entries[i].Type7 = GetType7(typeCount, typeoffset, bevFile.Entries[i].Type7, type7);
                                 type7++;
                                 break;

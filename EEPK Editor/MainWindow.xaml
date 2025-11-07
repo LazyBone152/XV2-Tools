@@ -9,7 +9,7 @@
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:undoRedo="clr-namespace:Xv2CoreLib.Resource.UndoRedo;assembly=Xv2CoreLib"
         mc:Ignorable="d"
-        Title="EEPK Organiser" TitleCharacterCasing="Normal" MinHeight="400" MinWidth="850" Height="700" Width="1280" ResizeMode="CanResizeWithGrip" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen">
+        Title="EEPK Organiser" TitleCharacterCasing="Normal" MinHeight="400" MinWidth="850" Height="700" Width="1280" ResizeMode="CanResizeWithGrip" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen" Name="Window">
     <Window.InputBindings>
         <KeyBinding Key="Z" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=UndoCommand}"/>
         <KeyBinding Key="Y" Modifiers="Ctrl"  Command="{Binding Source={x:Static undoRedo:UndoManager.Instance}, Path=RedoCommand}"/>
@@ -234,9 +234,9 @@
 
 
         </Menu>
-        <view:EepkEditor x:Name="eepkEditor" Grid.Row="1" effectContainerFile="{Binding effectContainerFile}" IsEnabled="{Binding IsFileLoaded}"/>
+        <view:EepkEditor x:Name="eepkEditor" Grid.Row="1" effectContainerFile="{Binding ElementName=Window, Path=EepkFile}" IsEnabled="{Binding ElementName=Window, Path=IsFileLoaded}"/>
 
-        <Label Grid.Row="1" Content="{Binding effectContainerFile.DisplayName, Mode=OneWay}" IsEnabled="{Binding IsFileLoaded}" HorizontalContentAlignment="Right" Margin="10,0,11.333,-0.333" VerticalAlignment="Bottom" Height="26" Grid.RowSpan="2">
+        <Label Grid.Row="1" Content="{Binding Path=EepkFile.DisplayName, Mode=OneWay, ElementName=Window}" IsEnabled="{Binding IsFileLoaded}" HorizontalContentAlignment="Right" Margin="10,0,11.333,-0.333" VerticalAlignment="Bottom" Height="26" Grid.RowSpan="2">
             <Label.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Copy Full Path" Click="FilePath_MenuItem_CopyFullPath_Click"/>

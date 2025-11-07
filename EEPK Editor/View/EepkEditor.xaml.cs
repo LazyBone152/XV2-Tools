@@ -36,7 +36,6 @@ using EEPK_Organiser.ViewModel;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using GalaSoft.MvvmLight.CommandWpf;
-using CriPakTools;
 
 #if XenoKit
 using XenoKit;
@@ -128,6 +127,7 @@ namespace EEPK_Organiser.View
         private bool editModeCancelling = false;
 
         //Selected Effect
+        public ObservableCollection<object> SelectedItems { get; private set; } = new ObservableCollection<object>();
         private Effect _selectedEffect = null;
         public Effect SelectedEffect
         {
@@ -248,6 +248,7 @@ namespace EEPK_Organiser.View
         public EepkEditor()
         {
             InitializeComponent();
+            DataContext = this;
             rootGrid.DataContext = this;
 
 

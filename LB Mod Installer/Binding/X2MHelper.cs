@@ -30,13 +30,10 @@ namespace LB_Mod_Installer.Binding
         {
             get
             {
-                string newInstallDataLocation = $"{GeneralInfo.GameDataFolder}/InstallData";
-
-                if (Directory.Exists(newInstallDataLocation))
-                    return newInstallDataLocation;
+                return $"{GeneralInfo.GameDataFolder}/InstallData";
 
                 //Old InstallData location
-                return $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}/XV2INS/Installed";
+                //return $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}/XV2INS/Installed";
             }
         }
         private const string X2M_XML = "x2m.xml";
