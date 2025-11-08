@@ -2,12 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 using System.Net;
 using Xv2CoreLib.IDB;
-using static Xv2CoreLib.QED.QED_Types;
 
 namespace Xv2CoreLib.MSG
 {

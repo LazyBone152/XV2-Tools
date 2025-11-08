@@ -107,6 +107,7 @@ namespace Xv2CoreLib.SAV
         public const int QUESTS_TPQ = 97840;
         public const int QUESTS_TPQ_EXPANDED = 527144;
         public const int QUESTS_TMQ = 100912;
+        public const int QUESTS_TMQ_EXPANDED = 530120;
         public const int QUESTS_BAQ = 105520;
         public const int QUESTS_TCQ = 108592;
         public const int QUESTS_HLQ = 114736;
@@ -121,6 +122,7 @@ namespace Xv2CoreLib.SAV
         public const int QUESTS_TPQ_COUNT = 128;
         public const int QUESTS_TPQ_EXPANDED_COUNT = 30;
         public const int QUESTS_TMQ_COUNT = 192;
+        public const int QUESTS_TMQ_EXPANDED_COUNT = 31; //It looks like there could be space for 48
         public const int QUESTS_BAQ_COUNT = 128;
         public const int QUESTS_TCQ_COUNT = 256;
         public const int QUESTS_HLQ_COUNT = 96;
@@ -675,6 +677,8 @@ namespace Xv2CoreLib.SAV
                         return "1.23";
                     case 37:
                         return "1.24.02";
+                    case 38:
+                        return "1.25.01";
                     default:
                         return String.Format("Unknown ({0})", Version);
 
@@ -727,6 +731,7 @@ namespace Xv2CoreLib.SAV
                     case 35:
                     case 36:
                     case 37:
+                    case 38:
                         return null;
                     default:
                         return "This save version is not supported. It is recommened to update the application (if one is available).";
@@ -776,6 +781,7 @@ namespace Xv2CoreLib.SAV
                     case 35:
                     case 36:
                     case 37:
+                    case 38:
                         return Brushes.Blue;
                     default:
                         return Brushes.Orange;
@@ -4923,6 +4929,11 @@ namespace Xv2CoreLib.SAV
                 bytes = Utils.ReplaceRange(bytes, Quest.WriteAll(TimePatrols, Offsets.QUESTS_TPQ_EXPANDED_COUNT, Offsets.QUESTS_TPQ_COUNT).ToArray(), Offsets.QUESTS_TPQ_EXPANDED + (Offsets.CAC_DLC_SIZE * charaIdx));
             }
 
+            if (sav.Version >= 38)
+            {
+                bytes = Utils.ReplaceRange(bytes, Quest.WriteAll(ParallelQuests, Offsets.QUESTS_TMQ_EXPANDED_COUNT, Offsets.QUESTS_TMQ_COUNT).ToArray(), Offsets.QUESTS_TMQ_EXPANDED + (Offsets.CAC_DLC_SIZE * charaIdx));
+            }
+
             return bytes;
         }
 
@@ -4930,6 +4941,7 @@ namespace Xv2CoreLib.SAV
         {
             //Check if save file has DLC data
             List<Quest> timePatrolQuests = Quest.ReadAll(rawBytes, Offsets.QUESTS_TPQ + (Offsets.CAC_SIZE * charaIdx), 128, charaIdx).ToList();
+            List<Quest> parallelQuests = Quest.ReadAll(rawBytes, Offsets.QUESTS_TMQ + (Offsets.CAC_SIZE * charaIdx), 192, charaIdx).ToList();
             ObservableCollection<Quest> inf = null;
             ObservableCollection<Quest> prb = null;
 
@@ -4944,13 +4956,20 @@ namespace Xv2CoreLib.SAV
 
             if(sav.Version >= 30)
             {
-                timePatrolQuests.AddRange(Quest.ReadAll(rawBytes, Offsets.QUESTS_TPQ_EXPANDED + (Offsets.CAC_DLC_SIZE * charaIdx), Offsets.QUESTS_TPQ_EXPANDED, charaIdx));
+                timePatrolQuests.AddRange(Quest.ReadAll(rawBytes, Offsets.QUESTS_TPQ_EXPANDED + (Offsets.CAC_DLC_SIZE * charaIdx), Offsets.QUESTS_TPQ_EXPANDED_COUNT, charaIdx));
+            }
+
+            if(sav.Version >= 38) 
+            {
+                //Added in 1.25.01
+                //31 more quests (according to eternity). Save file looks like it has space for more though (48)
+                parallelQuests.AddRange(Quest.ReadAll(rawBytes, Offsets.QUESTS_TMQ_EXPANDED + (Offsets.CAC_DLC_SIZE * charaIdx), Offsets.QUESTS_TMQ_EXPANDED_COUNT, charaIdx));
             }
 
             return new Quests()
             {
                 TimePatrols = new ObservableCollection<Quest>(timePatrolQuests),
-                ParallelQuests = Quest.ReadAll(rawBytes, Offsets.QUESTS_TMQ + (Offsets.CAC_SIZE * charaIdx), 192, charaIdx),
+                ParallelQuests = new ObservableCollection<Quest>(parallelQuests),
                 TimeRiftQuests = Quest.ReadAll(rawBytes, Offsets.QUESTS_BAQ + (Offsets.CAC_SIZE * charaIdx), 128, charaIdx),
                 MasterQuests = Quest.ReadAll(rawBytes, Offsets.QUESTS_TCQ + (Offsets.CAC_SIZE * charaIdx), 256, charaIdx),
                 ExpertMissions = Quest.ReadAll(rawBytes, Offsets.QUESTS_HLQ + (Offsets.CAC_SIZE * charaIdx), 96, charaIdx),
