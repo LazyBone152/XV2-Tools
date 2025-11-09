@@ -1529,6 +1529,13 @@ namespace Xv2CoreLib.BAC
 
             switch (TypeID)
             {
+                case 3:
+                case 4:
+                case 5:
+                case 12:
+                case 11:
+                case 13:
+                    return Brushes.Black;
                 case 6: //Flow Control Group
                 case 7:
                 case 17:
