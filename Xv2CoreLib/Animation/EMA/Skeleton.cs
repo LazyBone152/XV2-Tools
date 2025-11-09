@@ -115,7 +115,7 @@ namespace Xv2CoreLib.EMA
             List<byte> bytes = new List<byte>();
 
             int boneCount = (Bones != null) ? Bones.Count : 0;
-            int ikCount = (IKRelations != null) ? IKRelations.Count : 0;
+            int ikCount = (IKRelations != null) ? IKRelation.GetValidRelationCount(IKRelations, Bones) : 0;
             bool useAbsMatrix = false;
 
             //Header
@@ -943,7 +943,11 @@ namespace Xv2CoreLib.EMA
 
             for(int i = 0; i < count; i++)
             {
-                ikRelations.Add(Read(bytes, offset, bones, out int size));
+                IKRelation ikRelation = Read(bytes, offset, bones, out int size);
+
+                if (ikRelation == null) return null;
+
+                ikRelations.Add(ikRelation);
                 offset += size;
             }
 
@@ -957,7 +961,12 @@ namespace Xv2CoreLib.EMA
             ushort type = BitConverter.ToUInt16(bytes, offset);
 
             if (type != 1)
-                throw new Exception($"IKRelation: unknown/unsupported type ({type}). Parse failed.");
+            {
+                Console.WriteLine($"IKRelation: unknown/unsupported type ({type}). IK bones will be skipped in this file.");
+                size = 0;
+                return null;
+                //throw new Exception($"IKRelation: unknown/unsupported type ({type}). Parse failed.");
+            }
 
             size = BitConverter.ToUInt16(bytes, offset + 2);
             relation.I_04 = bytes[offset + 4];
@@ -973,7 +982,11 @@ namespace Xv2CoreLib.EMA
             for(int i = 0; i <= boneCount; i++)
             {
                 if (boneIndices[i] < 0 || boneIndices[i] >= bones.Count)
-                    throw new ArgumentOutOfRangeException("IKRelation.Read: IK Bone is an invalid index.");
+                {
+                    //IK Bone index is out of range. This could happen on older EANs where bones were removed, but IK bones were not adjusted (they weren't parsed in older tools)
+                    break;
+                    //throw new ArgumentOutOfRangeException("IKRelation.Read: IK Bone is an invalid index.");
+                }
 
                 relation.IKBones.Add(new IKBone()
                 {
@@ -989,7 +1002,8 @@ namespace Xv2CoreLib.EMA
         {
             for(int i = 0; i < ikRelations.Count; i++)
             {
-                bytes.AddRange(ikRelations[i].Write(bytes.Count, bones));
+                if (ikRelations[i].IsValid(bones))
+                    bytes.AddRange(ikRelations[i].Write(bytes.Count, bones));
             }
         }
 
@@ -1028,6 +1042,35 @@ namespace Xv2CoreLib.EMA
             throw new Exception("IKRelation: size mismatch");
 
             return bytes.ToArray();
+        }
+
+        internal static int GetValidRelationCount<T>(IList<IKRelation> relations, IList<T> bones) where T : IName
+        {
+            if (bones == null || relations == null) return 0;
+            int count = 0;
+
+            for(int i = 0; i < relations.Count; i++)
+            {
+                if (relations[i].IsValid(bones))
+                    count++;
+            }
+
+            return count;
+        }
+
+        private bool IsValid<T>(IList<T> bones) where T : IName
+        {
+            if (IKBones.Count == 0) return false;
+
+            foreach(var ikBone in IKBones)
+            {
+                int boneIdx = bones.IndexOf(bones.FirstOrDefault(x => x.Name == ikBone.Bone));
+
+                if (boneIdx == -1)
+                    return false;
+            }
+
+            return true;
         }
 
         internal int CalculateSize(int startOffset)

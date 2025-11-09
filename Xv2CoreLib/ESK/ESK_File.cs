@@ -236,12 +236,13 @@ namespace Xv2CoreLib.ESK
                 }
 
                 //Writing IK
-                if(IKRelations?.Count > 0)
+                int ikCount = IKRelations != null ? IKRelation.GetValidRelationCount(IKRelations, NonRecursiveBones) : 0;
+                if(ikCount > 0)
                 {
                     bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - startOffset), startOffset + 20);
 
                     //IK Header; count of IK relations
-                    bytes.AddRange(BitConverter.GetBytes(IKRelations.Count));
+                    bytes.AddRange(BitConverter.GetBytes(ikCount));
 
                     IKRelation.WriteAll(bytes, IKRelations, NonRecursiveBones);
                 }
