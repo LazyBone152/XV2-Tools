@@ -2211,16 +2211,37 @@ namespace Xv2CoreLib.FMP
         [CustomSerialize(parent: "Scale", serializeAs: "Z", isFloat: true)]
         public float ScaleZ { get; set; } = 1f;
 
+
+        [YAXDontSerialize]
+        public bool IsDecomposed => RawMatrixValues == null || RawMatrixValues?.Length != 12;
+        [CustomSerialize(parent: "RawMatrix")]
+        [YAXDontSerializeIfNull]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public float[] RawMatrixValues { get; set; }
+
         public byte[] Write()
         {
             List<byte> bytes = new List<byte>();
 
-            Matrix4x4 matrix = ToMatrix();
+            float[] L0, L1, L2, L3;
 
-            float[] L0 = new float[3] { matrix.M11, matrix.M12, matrix.M13 };
-            float[] L1 = new float[3] { matrix.M21, matrix.M22, matrix.M23 };
-            float[] L2 = new float[3] { matrix.M31, matrix.M32, matrix.M33 };
-            float[] L3 = new float[3] { matrix.M41, matrix.M42, matrix.M43 };
+            if (IsDecomposed)
+            {
+                Matrix4x4 matrix = ToMatrix();
+
+                L0 = new float[3] { matrix.M11, matrix.M12, matrix.M13 };
+                L1 = new float[3] { matrix.M21, matrix.M22, matrix.M23 };
+                L2 = new float[3] { matrix.M31, matrix.M32, matrix.M33 };
+                L3 = new float[3] { matrix.M41, matrix.M42, matrix.M43 };
+            }
+            else
+            {
+                L0 = new float[3] { RawMatrixValues[0], RawMatrixValues[1], RawMatrixValues[2] };
+                L1 = new float[3] { RawMatrixValues[3], RawMatrixValues[4], RawMatrixValues[5] };
+                L2 = new float[3] { RawMatrixValues[6], RawMatrixValues[7], RawMatrixValues[8] };
+                L3 = new float[3] { RawMatrixValues[9], RawMatrixValues[10], RawMatrixValues[11] };
+            }
+
 
             if (L0.Length != 3 || L1.Length != 3 || L2.Length != 3 || L3.Length != 3)
             {
@@ -2245,13 +2266,14 @@ namespace Xv2CoreLib.FMP
             float[] L2 = BitConverter_Ex.ToFloat32Array(bytes, offset + 24, 3);
             float[] L3 = BitConverter_Ex.ToFloat32Array(bytes, offset + 36, 3);
 
-            Matrix4x4 matrix = new Matrix4x4(L0[0], L0[1], L0[2], 0f, L1[0], L1[1], L1[2], 0f, L2[0], L2[1], L2[2], 0f, L3[0], L3[1], L3[2], 1f); ;
+            Matrix4x4 matrix = new Matrix4x4(L0[0], L0[1], L0[2], 0f, L1[0], L1[1], L1[2], 0f, L2[0], L2[1], L2[2], 0f, L3[0], L3[1], L3[2], 1f);
 
-            return CreateFromMatrix(ref matrix);
+            return CreateFromMatrix(ref matrix, L0, L1, L2, L3);
         }
     
         public bool IsEqual(FMP_Transform matrix)
         {
+            if (!IsDecomposed) return false;
             if (!MathHelpers.FloatEquals(matrix.PosX, PosX) || !MathHelpers.FloatEquals(matrix.PosY, PosY) || !MathHelpers.FloatEquals(matrix.PosZ, PosZ)) return false;
             if (!MathHelpers.FloatEquals(matrix.RotX, RotX) || !MathHelpers.FloatEquals(matrix.RotY, RotY) || !MathHelpers.FloatEquals(matrix.RotZ, RotZ)) return false;
             if (!MathHelpers.FloatEquals(matrix.ScaleX, ScaleX) || !MathHelpers.FloatEquals(matrix.ScaleY, ScaleY) || !MathHelpers.FloatEquals(matrix.ScaleZ, ScaleZ)) return false;
@@ -2278,7 +2300,7 @@ namespace Xv2CoreLib.FMP
             };
         }
 
-        public static FMP_Transform CreateFromMatrix(ref Matrix4x4 matrix)
+        public static FMP_Transform CreateFromMatrix(ref Matrix4x4 matrix, float[] L0, float[] L1, float[] L2, float[] L3)
         {
             if (Matrix4x4.Decompose(matrix, out Vector3 scale, out Quaternion rot, out Vector3 translation))
             {
@@ -2299,16 +2321,27 @@ namespace Xv2CoreLib.FMP
             }
             else
             {
-                return new FMP_Transform();
+                return new FMP_Transform()
+                {
+                    RawMatrixValues = new float[12] { L0[0], L0[1], L0[2], L1[0], L1[1], L1[2], L2[0], L2[1], L2[2], L3[0], L3[1], L3[2] }
+                };
             }
         }
 
         public Matrix4x4 ToMatrix()
         {
-            Matrix4x4 matrix = Matrix4x4.CreateScale(ScaleX, ScaleY, ScaleZ);
-            matrix *= Matrix4x4.CreateFromQuaternion(MathHelpers.EulerToQuaternion(new Vector3(RotX, RotY, RotZ)));
-            matrix *= Matrix4x4.CreateTranslation(PosX, PosY, PosZ);
-            return matrix;
+            if (IsDecomposed)
+            {
+                Matrix4x4 matrix = Matrix4x4.CreateScale(ScaleX, ScaleY, ScaleZ);
+                matrix *= Matrix4x4.CreateFromQuaternion(MathHelpers.EulerToQuaternion(new Vector3(RotX, RotY, RotZ)));
+                matrix *= Matrix4x4.CreateTranslation(PosX, PosY, PosZ);
+                return matrix;
+            }
+            else
+            {
+                return new Matrix4x4(RawMatrixValues[0], RawMatrixValues[1], RawMatrixValues[2], 0f, RawMatrixValues[3], RawMatrixValues[4], RawMatrixValues[5], 0f,
+                                    RawMatrixValues[6], RawMatrixValues[7], RawMatrixValues[8], 0f, RawMatrixValues[9], RawMatrixValues[10], RawMatrixValues[11], 1f);
+            }
         }
     }
 
