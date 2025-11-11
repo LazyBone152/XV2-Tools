@@ -1469,6 +1469,13 @@ namespace Xv2CoreLib.EAN
                     values[2] = posKeyframe.Z;
                     values[3] = posKeyframe.W;
                 }
+                else
+                {
+                    values[0] = pos.GetKeyframeValue(frame, Axis.X);
+                    values[1] = pos.GetKeyframeValue(frame, Axis.Y);
+                    values[2] = pos.GetKeyframeValue(frame, Axis.Z);
+                    values[3] = pos.GetKeyframeValue(frame, Axis.W);
+                }
             }
             if (rot != null && useRot)
             {
@@ -1481,6 +1488,13 @@ namespace Xv2CoreLib.EAN
                     values[6] = rotKeyframe.Z;
                     values[7] = rotKeyframe.W;
                 }
+                else
+                {
+                    values[4] = rot.GetKeyframeValue(frame, Axis.X);
+                    values[5] = rot.GetKeyframeValue(frame, Axis.Y);
+                    values[6] = rot.GetKeyframeValue(frame, Axis.Z);
+                    values[7] = rot.GetKeyframeValue(frame, Axis.W);
+                }
             }
             if (scale != null && useScale)
             {
@@ -1492,6 +1506,13 @@ namespace Xv2CoreLib.EAN
                     values[9] = scaleKeyframe.Y;
                     values[10] = scaleKeyframe.Z;
                     values[11] = scaleKeyframe.W;
+                }
+                else
+                {
+                    values[8] = scale.GetKeyframeValue(frame, Axis.X);
+                    values[9] = scale.GetKeyframeValue(frame, Axis.Y);
+                    values[10] = scale.GetKeyframeValue(frame, Axis.Z);
+                    values[11] = scale.GetKeyframeValue(frame, Axis.W);
                 }
             }
 
