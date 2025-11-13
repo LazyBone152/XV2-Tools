@@ -629,9 +629,7 @@ namespace Xv2CoreLib.EMA
         public List<float> GetValues()
         {
             //Merges all unique keyframe values into an array and assigns the index value
-            List<float> floats = new List<float>();
-
-            List<int> dualIndex = new List<int>();
+            List<float> values = new List<float>();
 
             foreach (var node in Nodes)
             {
@@ -639,61 +637,68 @@ namespace Xv2CoreLib.EMA
                 {
                     foreach (var keyframe in command.Keyframes)
                     {
-                        //Sloppy code for now, refactor it later...
                         if (keyframe.InterpolationType == KeyframeInterpolation.QuadraticBezier)
                         {
-                            //Always add new dual values. Don't reuse, and dont let them be used by other keyframes.
-                            floats.Add(keyframe.Value);
-                            keyframe.index = floats.Count - 1;
-                            floats.Add(keyframe.ControlPoint1);
-                            dualIndex.Add(keyframe.index);
-                            dualIndex.Add(keyframe.index + 1);
+                            keyframe.index = AddValue(values, keyframe.Value, keyframe.ControlPoint1);
                         }
                         else if (keyframe.InterpolationType == KeyframeInterpolation.CubicBezier)
                         {
-                            //Always add new dual values. Don't reuse, and dont let them be used by other keyframes.
-                            floats.Add(keyframe.Value);
-                            keyframe.index = floats.Count - 1;
-                            floats.Add(keyframe.ControlPoint1);
-                            floats.Add(keyframe.ControlPoint2);
-                            dualIndex.Add(keyframe.index);
-                            dualIndex.Add(keyframe.index + 1);
-                            dualIndex.Add(keyframe.index + 2);
+                            keyframe.index = AddValue(values, keyframe.Value, keyframe.ControlPoint1, keyframe.ControlPoint2);
                         }
                         else
                         {
-                            //Value is not dual, so reuse any NON-DUAL value or add a new value
-                            int idx = -1;
-                            for (int i = 0; i < floats.Count; i++)
-                            {
-                                if (floats[i] == keyframe.Value && !dualIndex.Contains(i))
-                                {
-                                    //Reuse this index
-                                    idx = i;
-                                    break;
-                                }
-                            }
-
-                            if (idx != -1)
-                            {
-                                keyframe.index = idx;
-                            }
-                            else
-                            {
-                                //Value not found. Add it.
-                                floats.Add(keyframe.Value);
-                                keyframe.index = floats.Count - 1;
-                            }
-
+                            keyframe.index = AddValue(values, keyframe.Value);
                         }
                     }
                 }
 
             }
 
-            return floats;
+            if(values.Count > ushort.MaxValue)
+            {
+                throw new Exception($"EMA: Error on save, there are too many values on this animation ({Name}).");
+            }
+
+            return values;
         }
 
+        private static int AddValue(List<float> values, params float[] valuesToAdd)
+        {
+            if (valuesToAdd.Length != 1 && valuesToAdd.Length != 2 && valuesToAdd.Length != 3) throw new ArgumentException($"EMA_Animation.AddValue: argument {nameof(valuesToAdd)} must contain 1, 2 or 3 values.");
+
+            //Search for existing value to reuse index from
+            for(int i = 0; i < values.Count; i++)
+            {
+                if (values[i] == valuesToAdd[0])
+                {
+                    bool failedSearch = false;
+
+                    for(int a = 0; a < valuesToAdd.Length; a++)
+                    {
+                        if (i + a >= values.Count || values[i + a] != valuesToAdd[a])
+                        {
+                            failedSearch = true;
+                            break;
+                        }    
+                    }
+
+                    if (!failedSearch)
+                    {
+                        return i;
+                    }
+                }
+            }
+
+            //If the values not found in existing value list, then add them
+            int idx = values.Count;
+
+            for(int a = 0; a < valuesToAdd.Length; a++)
+            {
+                values.Add(valuesToAdd[a]);
+            }
+
+            return idx;
+        }
         #endregion
 
         #region KeyframeManipulation
@@ -1375,6 +1380,7 @@ namespace Xv2CoreLib.EMA
 
             for (int i = 0; i < keyframeCount; i++)
             {
+                int index;
                 ushort time;
                 float value;
                 float controlPoint1 = 0f;
@@ -1392,13 +1398,14 @@ namespace Xv2CoreLib.EMA
 
                 if (command.Int16ForValueIndex)
                 {
-                    value = values[BitConverter.ToUInt16(rawBytes, offset + indexOffset + (i * 4))];
+                    index = BitConverter.ToUInt16(rawBytes, offset + indexOffset + (i * 4));
+                    value = values[index];
                     interpolation = (KeyframeInterpolation)rawBytes[offset + indexOffset + 3 + (i * 4)];
                     int extraOffset = 0;
 
                     if (interpolation == KeyframeInterpolation.QuadraticBezier)
                     {
-                        ushort idx = (ushort)(BitConverter.ToUInt16(rawBytes, offset + indexOffset + (i * 4)) + 1);
+                        ushort idx = (ushort)(index + 1);
 
                         if (idx <= values.Length - 1)
                             controlPoint1 = values[idx];
@@ -1407,7 +1414,7 @@ namespace Xv2CoreLib.EMA
                     }
                     else if (interpolation == KeyframeInterpolation.CubicBezier)
                     {
-                        ushort idx = (ushort)(BitConverter.ToUInt16(rawBytes, offset + indexOffset + (i * 4)) + 1 + extraOffset);
+                        ushort idx = (ushort)(index + 1 + extraOffset);
 
                         if (idx + 1 <= values.Length - 1)
                         {
@@ -1422,6 +1429,7 @@ namespace Xv2CoreLib.EMA
                 else
                 {
                     int valueIdx = BitConverter.ToUInt16(rawBytes, offset + indexOffset + (i * 2)) & 0x3fff;
+                    index = valueIdx;
 
                     //The index could be bad for older serialized EMAs since the value index was handled incorrectly in old versions
                     if (values.Length - 1 < valueIdx)
@@ -1456,7 +1464,8 @@ namespace Xv2CoreLib.EMA
                     Value = value,
                     InterpolationType = interpolation,
                     ControlPoint1 = controlPoint1,
-                    ControlPoint2 = controlPoint2
+                    ControlPoint2 = controlPoint2,
+                    index = index
                 });
             }
 
@@ -2076,8 +2085,8 @@ namespace Xv2CoreLib.EMA
         [YAXSerializeAs("Interpolation")]
         public KeyframeInterpolation InterpolationType { get; set; }
 
-        [YAXDontSerialize]
         public int index = -1;
+
         public EMA_Keyframe() { }
 
         public EMA_Keyframe(int frame, float value)
