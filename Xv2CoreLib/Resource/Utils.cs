@@ -242,6 +242,15 @@ namespace Xv2CoreLib
             Unicode
         }
 
+        public static string GetStringUTF8(byte[] bytes)
+        {
+            if (bytes[0] == 254)
+                throw new Exception("GetStringUTF8: invalid BOM");
+
+            string xmlText = Encoding.UTF8.GetString(bytes);
+            return bytes[0] == 239 ? xmlText.Substring(1, xmlText.Length - 1) : xmlText;
+        }
+
         /// <summary>
         /// Search for a string at the inputted index and return it. Supports ASCII and UTF8 encoding as well as fixed length strings and null terminated ones.
         /// </summary>
