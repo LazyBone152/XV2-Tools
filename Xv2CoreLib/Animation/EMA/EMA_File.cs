@@ -10,6 +10,7 @@ using Xv2CoreLib.EAN;
 using Xv2CoreLib.HslColor;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
+using Xv2CoreLib.ValuesDictionary;
 using YAXLib;
 
 namespace Xv2CoreLib.EMA
@@ -209,7 +210,7 @@ namespace Xv2CoreLib.EMA
                             if (keyframe.Time > byte.MaxValue)
                                 command.Int16ForTime = true;
                             if (keyframe.index > byte.MaxValue)
-                                command.Int16ForValueIndex = true;
+                                command.Int24ForValueIndex = true;
                         }
 
                         if (HasSkeleton)
@@ -223,7 +224,7 @@ namespace Xv2CoreLib.EMA
 
                         bytes.Add(command.Parameter);
 
-                        var bitArray_b = new BitArray(new bool[8] { command.I_03_b1, command.Int16ForTime, command.Int16ForValueIndex, command.I_03_b4, false, false, false, false });
+                        var bitArray_b = new BitArray(new bool[8] { command.I_03_b1, command.Int16ForTime, command.Int24ForValueIndex, command.I_03_b4, false, false, false, false });
                         var bitArray_a = new BitArray(new byte[1] { command.Component });
 
                         bitArray_a[2] = command.NoInterpolation;
@@ -254,11 +255,14 @@ namespace Xv2CoreLib.EMA
 
                         foreach (EMA_Keyframe keyframe in command.Keyframes.OrderBy(x => x.Time))
                         {
-                            if (command.Int16ForValueIndex)
+                            if (command.Int24ForValueIndex)
                             {
-                                bytes.AddRange(BitConverter.GetBytes((ushort)keyframe.index));
-                                bytes.Add(0);
-                                bytes.Add((byte)keyframe.InterpolationType);
+                                bytes.AddRange(BitConverter.GetBytes(keyframe.index));
+                                bytes[bytes.Count - 1] = (byte)keyframe.InterpolationType;
+
+                                //bytes.AddRange(BitConverter.GetBytes((ushort)keyframe.index));
+                                //bytes.Add(0);
+                                //bytes.Add((byte)keyframe.InterpolationType);
                             }
                             else
                             {
@@ -580,6 +584,7 @@ namespace Xv2CoreLib.EMA
             int valueCount = BitConverter.ToInt32(rawBytes, offset + 4);
             int valueOffset = BitConverter.ToInt32(rawBytes, offset + 16) + offset;
             int nameOffset = (BitConverter.ToInt32(rawBytes, offset + 12) != 0) ? BitConverter.ToInt32(rawBytes, offset + 12) + offset : 0;
+            
 
             //Name
             if (nameOffset > 0)
@@ -652,11 +657,6 @@ namespace Xv2CoreLib.EMA
                     }
                 }
 
-            }
-
-            if(values.Count > ushort.MaxValue)
-            {
-                throw new Exception($"EMA: Error on save, there are too many values on this animation ({Name}).");
             }
 
             return values;
@@ -1321,7 +1321,7 @@ namespace Xv2CoreLib.EMA
         [YAXDontSerialize]
         public bool Int16ForTime = false; //Calculated on save
         [YAXDontSerialize]
-        public bool Int16ForValueIndex = false; //Calculated on save
+        public bool Int24ForValueIndex = false; //Calculated on save.
         [YAXAttributeFor("Flags")]
         [YAXSerializeAs("Unk1")]
         public bool I_03_b1 { get; set; } //Always false
@@ -1367,7 +1367,7 @@ namespace Xv2CoreLib.EMA
             BitArray flags_a = new BitArray(new byte[1] { Int4Converter.ToInt4(rawBytes[offset + 3])[0] });
             command.I_03_b1 = flags_b[0];
             command.Int16ForTime = flags_b[1];
-            command.Int16ForValueIndex = flags_b[2];
+            command.Int24ForValueIndex = flags_b[2];
             command.I_03_b4 = flags_b[3];
             command.I_03_a4 = flags_a[3];
             command.NoInterpolation = flags_a[2];
@@ -1396,33 +1396,31 @@ namespace Xv2CoreLib.EMA
                     time = rawBytes[offset + 8 + i];
                 }
 
-                if (command.Int16ForValueIndex)
+                if (command.Int24ForValueIndex)
                 {
-                    index = BitConverter.ToUInt16(rawBytes, offset + indexOffset + (i * 4));
+                    int rawIndex = BitConverter.ToInt32(rawBytes, offset + indexOffset + (i * 4));
+                    index = rawIndex & 0x00FFFFFF;
+                    //index = BitConverter.ToUInt16(rawBytes, offset + indexOffset + (i * 4));
                     value = values[index];
-                    interpolation = (KeyframeInterpolation)rawBytes[offset + indexOffset + 3 + (i * 4)];
-                    int extraOffset = 0;
+                    interpolation = (KeyframeInterpolation)((rawIndex >> 24) & 0xFF);
+                    //interpolation = (KeyframeInterpolation)rawBytes[offset + indexOffset + 3 + (i * 4)];
 
                     if (interpolation == KeyframeInterpolation.QuadraticBezier)
                     {
-                        ushort idx = (ushort)(index + 1);
+                        int idx = index + 1;
 
                         if (idx <= values.Length - 1)
                             controlPoint1 = values[idx];
-
-                        extraOffset++;
                     }
                     else if (interpolation == KeyframeInterpolation.CubicBezier)
                     {
-                        ushort idx = (ushort)(index + 1 + extraOffset);
+                        int idx = index + 1;
 
                         if (idx + 1 <= values.Length - 1)
                         {
                             controlPoint1 = values[idx];
                             controlPoint2 = values[idx + 1];
                         }
-
-                        extraOffset++;
                     }
 
                 }
