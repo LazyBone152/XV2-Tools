@@ -54,9 +54,9 @@ namespace Xv2CoreLib.BCS
             }
 
             //counts
-            int partsetCount = BitConverter.ToInt16(rawBytes, 12);
-            int partcolorsCount = BitConverter.ToInt16(rawBytes, 14);
-            int bodyCount = BitConverter.ToInt16(rawBytes, 16);
+            int partsetCount = BitConverter.ToUInt16(rawBytes, 12);
+            int partcolorsCount = BitConverter.ToUInt16(rawBytes, 14);
+            int bodyCount = BitConverter.ToUInt16(rawBytes, 16);
 
             //offsets
             int partsetOffset;

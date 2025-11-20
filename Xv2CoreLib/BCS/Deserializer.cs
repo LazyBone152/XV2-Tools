@@ -66,6 +66,11 @@ namespace Xv2CoreLib.BCS
             PartColorCount = bcsFile.PartColors?.Count > 0 ? bcsFile.PartColors.Max(x => x.ID) + 1 : 0;
             BodyCount = bcsFile.Bodies?.Count > 0 ? bcsFile.Bodies.Max(x => x.ID) + 1 : 0;
 
+            if(PartSetCount > ushort.MaxValue)
+            {
+                throw new InvalidOperationException($"BCS: Some PartSet IDs exceeds the maximum of {ushort.MaxValue}.");
+            }
+
             //Header
             int I_18 = (bcsFile.SkeletonData2?.Bones?.Count > 0) ? 1 : 0;
             byte[] _i_44 = { (byte)bcsFile.Race, (byte)bcsFile.Gender, 0, 0 };
@@ -77,10 +82,10 @@ namespace Xv2CoreLib.BCS
             {
                 bytes.AddRange(BitConverter.GetBytes((ushort)72));
                 bytes.AddRange(BitConverter.GetBytes(0));
-                bytes.AddRange(BitConverter.GetBytes((short)PartSetCount));
-                bytes.AddRange(BitConverter.GetBytes((short)PartColorCount));
-                bytes.AddRange(BitConverter.GetBytes((short)BodyCount));
-                bytes.AddRange(BitConverter.GetBytes((short)I_18));
+                bytes.AddRange(BitConverter.GetBytes((ushort)PartSetCount));
+                bytes.AddRange(BitConverter.GetBytes((ushort)PartColorCount));
+                bytes.AddRange(BitConverter.GetBytes((ushort)BodyCount));
+                bytes.AddRange(BitConverter.GetBytes((ushort)I_18));
                 partSetOffset = 20;
                 partColorOffset = 24;
                 bodyOffset = 28;
@@ -105,10 +110,10 @@ namespace Xv2CoreLib.BCS
             {
                 bytes.AddRange(BitConverter.GetBytes((ushort)76));
                 bytes.AddRange(BitConverter.GetBytes(0));
-                bytes.AddRange(BitConverter.GetBytes((short)PartSetCount));
-                bytes.AddRange(BitConverter.GetBytes((short)PartColorCount));
-                bytes.AddRange(BitConverter.GetBytes((short)BodyCount));
-                bytes.AddRange(BitConverter.GetBytes((short)I_18));
+                bytes.AddRange(BitConverter.GetBytes((ushort)PartSetCount));
+                bytes.AddRange(BitConverter.GetBytes((ushort)PartColorCount));
+                bytes.AddRange(BitConverter.GetBytes((ushort)BodyCount));
+                bytes.AddRange(BitConverter.GetBytes((ushort)I_18));
                 partSetOffset = 24;
                 partColorOffset = 28;
                 bodyOffset = 32;
