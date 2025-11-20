@@ -119,7 +119,7 @@ namespace Xv2CoreLib.CUS
                         I_12 = (CusRaceLock)rawBytes[offset + 12],
                         I_13 = rawBytes[offset + 13],
                         FilesLoadedFlags1 = (Skill.FilesLoadedFlags)BitConverter.ToUInt16(rawBytes, offset + 14),
-                        PartSet = BitConverter.ToInt16(rawBytes, offset + 16),
+                        PartSet = BitConverter.ToUInt16(rawBytes, offset + 16),
                         I_18 = BitConverter.ToUInt16(rawBytes, offset + 18),
                         EanPath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 20), false),
                         CamEanPath = StringEx.GetString(rawBytes, BitConverter.ToInt32(rawBytes, offset + 24), false),
@@ -187,9 +187,9 @@ namespace Xv2CoreLib.CUS
                         //Updated values. Uncommented values are new in 1.25
                         NumTransformations = BitConverter.ToUInt16(rawBytes, offset + 60), //Changed offset (64 -> 60)
                         I_66 = BitConverter.ToUInt16(rawBytes, offset + 62), //Changed offset (66 -> 62)
-                        PartSet = BitConverter.ToInt16(rawBytes, offset + 64), //Changed offset (16 -> 64)
-                        PartSet2 = BitConverter.ToInt16(rawBytes, offset + 66),
-                        PartSet3 = BitConverter.ToInt16(rawBytes, offset + 68),
+                        PartSet = BitConverter.ToUInt16(rawBytes, offset + 64), //Changed offset (16 -> 64)
+                        PartSet2 = BitConverter.ToUInt16(rawBytes, offset + 66),
+                        PartSet3 = BitConverter.ToUInt16(rawBytes, offset + 68),
                         CharaSwapId = BitConverter.ToUInt16(rawBytes, offset + 70), //Changed offset (60 -> 70)
                         CharaSwapId2 = BitConverter.ToUInt16(rawBytes, offset + 72),
                         CharaSwapId3 = BitConverter.ToUInt16(rawBytes, offset + 74),
@@ -203,7 +203,27 @@ namespace Xv2CoreLib.CUS
 
                     offset += 92;
                 }
-                    
+
+                //Adjust default values
+                int idx = skillEntries.Count - 1;
+
+                if (skillEntries[idx].PartSet == ushort.MaxValue)
+                    skillEntries[idx].PartSet = -1;
+
+                if (skillEntries[idx].PartSet2 == ushort.MaxValue)
+                    skillEntries[idx].PartSet2 = -1;
+
+                if (skillEntries[idx].PartSet3 == ushort.MaxValue)
+                    skillEntries[idx].PartSet3 = -1;
+
+                if (skillEntries[idx].CharaSwapId == ushort.MaxValue)
+                    skillEntries[idx].CharaSwapId = -1;
+
+                if (skillEntries[idx].CharaSwapId2 == ushort.MaxValue)
+                    skillEntries[idx].CharaSwapId2 = -1;
+
+                if (skillEntries[idx].CharaSwapId3 == ushort.MaxValue)
+                    skillEntries[idx].CharaSwapId3 = -1;
             }
 
             return skillEntries;

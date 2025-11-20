@@ -136,7 +136,7 @@ namespace Xv2CoreLib.CUS
                         bytes.Add((byte)skills[i].I_12);
                         bytes.Add(skills[i].I_13);
                         bytes.AddRange(BitConverter.GetBytes((ushort)skills[i].FilesLoadedFlags1));
-                        bytes.AddRange(BitConverter.GetBytes(skills[i].PartSet));
+                        bytes.AddRange(BitConverter.GetBytes((ushort)skills[i].PartSet));
                         bytes.AddRange(BitConverter.GetBytes(skills[i].I_18));
                         strOffsets[i].Add(bytes.Count());
                         bytes.AddRange(new byte[4]);
@@ -158,7 +158,7 @@ namespace Xv2CoreLib.CUS
                         bytes.AddRange(BitConverter.GetBytes(skills[i].I_54));
                         bytes.AddRange(BitConverter.GetBytes(skills[i].PUP));
                         bytes.AddRange(BitConverter.GetBytes(skills[i].CusAura));
-                        bytes.AddRange(BitConverter.GetBytes(skills[i].CharaSwapId));
+                        bytes.AddRange(BitConverter.GetBytes((ushort)skills[i].CharaSwapId));
                         bytes.AddRange(BitConverter.GetBytes(skills[i].SkillsetChange1));
                         bytes.AddRange(BitConverter.GetBytes(skills[i].NumTransformations));
                         bytes.AddRange(BitConverter.GetBytes(skills[i].I_66));
@@ -205,12 +205,12 @@ namespace Xv2CoreLib.CUS
                         bytes.AddRange(BitConverter.GetBytes(skills[i].NumTransformations));
                         bytes.AddRange(BitConverter.GetBytes(skills[i].I_66));
 
-                        bytes.AddRange(BitConverter.GetBytes(skills[i].PartSet));
-                        bytes.AddRange(BitConverter.GetBytes(skills[i].PartSet2));
-                        bytes.AddRange(BitConverter.GetBytes(skills[i].PartSet3));
-                        bytes.AddRange(BitConverter.GetBytes(skills[i].CharaSwapId));
-                        bytes.AddRange(BitConverter.GetBytes(skills[i].CharaSwapId2));
-                        bytes.AddRange(BitConverter.GetBytes(skills[i].CharaSwapId3));
+                        bytes.AddRange(BitConverter.GetBytes((ushort)skills[i].PartSet));
+                        bytes.AddRange(BitConverter.GetBytes((ushort)skills[i].PartSet2));
+                        bytes.AddRange(BitConverter.GetBytes((ushort)skills[i].PartSet3));
+                        bytes.AddRange(BitConverter.GetBytes((ushort)skills[i].CharaSwapId));
+                        bytes.AddRange(BitConverter.GetBytes((ushort)skills[i].CharaSwapId2));
+                        bytes.AddRange(BitConverter.GetBytes((ushort)skills[i].CharaSwapId3));
                         bytes.AddRange(BitConverter.GetBytes(skills[i].SkillsetChange1));
                         bytes.AddRange(BitConverter.GetBytes(skills[i].SkillsetChange2));
                         bytes.AddRange(BitConverter.GetBytes(skills[i].SkillsetChange3));

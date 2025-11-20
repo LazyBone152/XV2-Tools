@@ -587,27 +587,27 @@ namespace Xv2CoreLib.CUS
         //New 1.25 format:
         [YAXAttributeFor("PartSet")]
         [YAXSerializeAs("value")]
-        public short PartSet { get; set; }
+        public int PartSet { get; set; } = -1; //uint16
         [YAXAttributeFor("PartSet2")]
         [YAXSerializeAs("value")]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (short)-1)]
-        public short PartSet2 { get; set; }
+        public int PartSet2 { get; set; } = -1; //uint16
         [YAXAttributeFor("PartSet3")]
         [YAXSerializeAs("value")]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (short)-1)]
-        public short PartSet3 { get; set; }
+        public int PartSet3 { get; set; } = -1; //uint16
 
         [YAXAttributeFor("TransformCharaSwap")]
         [YAXSerializeAs("Chara_ID")]
-        public ushort CharaSwapId { get; set; }
+        public int CharaSwapId { get; set; } = -1;
         [YAXAttributeFor("TransformCharaSwap2")]
         [YAXSerializeAs("Chara_ID")]
-        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = ushort.MaxValue)]
-        public ushort CharaSwapId2 { get; set; }
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = -1)]
+        public int CharaSwapId2 { get; set; } = -1;
         [YAXAttributeFor("TransformCharaSwap3")]
         [YAXSerializeAs("Chara_ID")]
-        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = ushort.MaxValue)]
-        public ushort CharaSwapId3 { get; set; }
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = -1)]
+        public int CharaSwapId3 { get; set; } = -1;
 
         [YAXAttributeFor("Skillset_Change")]
         [YAXSerializeAs("ModelPreset")]
