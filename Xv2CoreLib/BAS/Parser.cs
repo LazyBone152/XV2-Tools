@@ -40,7 +40,10 @@ namespace Xv2CoreLib.BAS
             int count = BitConverter.ToInt32(rawBytes, 8);
             int offset = BitConverter.ToInt32(rawBytes, 12);
 
-            if(count > 0)
+            basFile.Version = BAS_File.GetBasVersion(rawBytes.Length, BitConverter.ToInt32(rawBytes, offset + 4));
+            int entrySize = BAS_File.GetSubEntrySize(basFile.Version);
+
+            if (count > 0)
             {
                 basFile.Entries = new List<BAS_Entry>();
 
@@ -51,13 +54,13 @@ namespace Xv2CoreLib.BAS
                     int subEntryCount = BitConverter.ToInt32(rawBytes, offset + 4);
                     int subEntryOffset = BitConverter.ToInt32(rawBytes, offset + 8);
 
-                    if(subEntryCount > 0)
+                    if (subEntryCount > 0)
                     {
                         basFile.Entries[i].SubEntries = new List<BAS_SubEntry>();
 
-                        for(int a = 0; a < subEntryCount; a++)
+                        for (int a = 0; a < subEntryCount; a++)
                         {
-                            basFile.Entries[i].SubEntries.Add(new BAS_SubEntry()
+                            BAS_SubEntry subEntry = new BAS_SubEntry
                             {
                                 Name = StringEx.GetString(rawBytes, subEntryOffset, false, StringEx.EncodingType.ASCII, 8),
                                 I_08 = BitConverter_Ex.ToBooleanFromInt32(rawBytes, subEntryOffset + 8),
@@ -79,9 +82,21 @@ namespace Xv2CoreLib.BAS
                                 F_72 = BitConverter.ToSingle(rawBytes, subEntryOffset + 72),
                                 F_76 = BitConverter.ToSingle(rawBytes, subEntryOffset + 76),
                                 F_80 = BitConverter.ToSingle(rawBytes, subEntryOffset + 80),
-                            });
+                            };
 
-                            subEntryOffset += 84;
+                            if (basFile.Version >= 1)
+                            {
+                                subEntry.I_84 = BitConverter.ToInt32(rawBytes, subEntryOffset + 84);
+                            }
+
+                            if (basFile.Version >= 2)
+                            {
+                                subEntry.I_88 = BitConverter.ToInt32(rawBytes, subEntryOffset + 88);
+                            }
+
+                            basFile.Entries[i].SubEntries.Add(subEntry);
+
+                            subEntryOffset += entrySize;
                         }
 
                     }

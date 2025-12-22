@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,6 +11,15 @@ namespace Xv2CoreLib.BAS
     [YAXSerializeAs("BAS")]
     public class BAS_File : IIsNull
     {
+        internal const byte CURRENT_VERSION = 2;
+        [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (byte)0)]
+        public byte Version { get; set; } = CURRENT_VERSION;
+
+        public const int ENTRY_SIZE_OLD = 84;
+        public const int ENTRY_SIZE_V1 = 88; //When they updated the AI for Crossversus
+        public const int ENTRY_SIZE_V2 = 92; //New in v1.24/1.25(?)
+
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BAS_Entry")]
         public List<BAS_Entry> Entries { get; set; } = new List<BAS_Entry>();
 
@@ -34,10 +44,58 @@ namespace Xv2CoreLib.BAS
             new Deserializer(this, path);
         }
 
+        #region Helper
         public bool IsNull()
         {
             return Entries.Count == 0;
         }
+
+        public bool IsVersionValid()
+        {
+            return Version >= 0 && Version <= CURRENT_VERSION;
+        }
+
+        public static byte GetBasVersion(int size, int entryCount)
+        {
+            if (entryCount <= 0)
+                throw new ArgumentOutOfRangeException(nameof(entryCount));
+
+            int entrySize = (size - 28) / entryCount;
+
+            switch (entrySize)
+            {
+                case ENTRY_SIZE_OLD:
+                    return 0;
+
+                case ENTRY_SIZE_V1:
+                    return 1;
+
+                case ENTRY_SIZE_V2:
+                    return 2;
+
+                default:
+                    throw new InvalidDataException("BAS file version not supported.");
+            }
+        }
+
+        public static int GetSubEntrySize(int version)
+        {
+            switch (version)
+            {
+                case 0:
+                    return ENTRY_SIZE_OLD;
+
+                case 1:
+                    return ENTRY_SIZE_V1;
+
+                case 2:
+                    return ENTRY_SIZE_V2;
+
+                default:
+                    throw new InvalidDataException("BAS file version not supported.");
+            }
+        }
+        #endregion
     }
 
     public class BAS_Entry
@@ -116,6 +174,14 @@ namespace Xv2CoreLib.BAS
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
         public float F_80 { get; set; }
+        [YAXAttributeFor("I_84")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0)]
+        public int I_84 { get; set; }
+        [YAXAttributeFor("I_88")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0)]
+        public int I_88 { get; set; }
 
         public enum ActivationConditionTarget
         {
