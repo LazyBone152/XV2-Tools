@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,6 +11,16 @@ namespace Xv2CoreLib.BAI
     [YAXSerializeAs("BAI")]
     public class BAI_File : IIsNull
     {
+        internal const byte CURRENT_VERSION = 2;
+        [YAXAttributeForClass]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (byte)0)]
+        public byte Version { get; set; } = CURRENT_VERSION;
+
+        public const int ENTRY_HEADER_SIZE = 24;
+        public const int ENTRY_SIZE_OLD = 84;
+        public const int ENTRY_SIZE_V1 = 88; //When they updated the AI for Crossversus
+        public const int ENTRY_SIZE_V2 = 92; //New in v1.24/1.25(?)
+
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "AI")]
         public List<BAI_Entry> Entries { get; set; }
 
@@ -33,10 +44,90 @@ namespace Xv2CoreLib.BAI
             new Deserializer(this, path);
         }
 
+        #region Helper
         public bool IsNull()
         {
             return Entries?.Count == 0;
         }
+
+        public bool IsVersionValid()
+        {
+            return Version >= 0 && Version <= CURRENT_VERSION;
+        }
+
+        public static byte GetBaiVersion(byte[] rawBytes, int entryTableOffset, int entryCount)
+        {
+            if (entryCount <= 0)
+                throw new ArgumentOutOfRangeException(nameof(entryCount));
+
+            // Find the first entry that has subentries
+            int sampleStart = -1;
+            int sampleCount = 0;
+
+            for (int i = 0; i < entryCount; i++)
+            {
+                int offset = entryTableOffset + (i * ENTRY_HEADER_SIZE);
+                int subCount = BitConverter.ToInt32(rawBytes, offset + 16);
+                int subOffset = BitConverter.ToInt32(rawBytes, offset + 20);
+
+                if (subCount > 0)
+                {
+                    sampleStart = subOffset;
+                    sampleCount = subCount;
+                    break;
+                }
+            }
+
+            //No subentries anywhere > return latest version
+            if (sampleStart == -1)
+                return CURRENT_VERSION;
+
+            int end = rawBytes.Length;
+
+            for (int i = 0; i < entryCount; i++)
+            {
+                int offset = entryTableOffset + (i * ENTRY_HEADER_SIZE);
+                int otherOffset = BitConverter.ToInt32(rawBytes, offset + 20);
+
+                if (otherOffset > sampleStart && otherOffset < end)
+                    end = otherOffset;
+            }
+
+            int bytes = end - sampleStart;
+
+            if (bytes <= 0 || (bytes % sampleCount) != 0)
+                throw new InvalidDataException($"Could not detect BAI subEntry size. start={sampleStart}, end={end}, bytes={bytes}, count={sampleCount}");
+
+            int entrySize = bytes / sampleCount;
+
+            switch (entrySize)
+            {
+                case ENTRY_SIZE_OLD: return 0;
+                case ENTRY_SIZE_V1: return 1;
+                case ENTRY_SIZE_V2: return 2;
+                default:
+                    throw new InvalidDataException($"BAI file version not supported. subEntrySize={entrySize}");
+            }
+        }
+
+        public static int GetSubEntrySize(int version)
+        {
+            switch (version)
+            {
+                case 0:
+                    return ENTRY_SIZE_OLD;
+
+                case 1:
+                    return ENTRY_SIZE_V1;
+
+                case 2:
+                    return ENTRY_SIZE_V2;
+
+                default:
+                    throw new InvalidDataException("BAI file version not supported.");
+            }
+        }
+        #endregion
     }
 
     [YAXSerializeAs("AI")]
@@ -125,6 +216,14 @@ namespace Xv2CoreLib.BAI
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
         public float F_80 { get; set; }
+        [YAXAttributeFor("I_84")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0)]
+        public int I_84 { get; set; }
+        [YAXAttributeFor("I_88")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = -1)]
+        public int I_88 { get; set; }
 
         public enum ActivationConditionTarget
         {

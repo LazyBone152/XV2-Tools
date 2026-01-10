@@ -42,7 +42,10 @@ namespace Xv2CoreLib.BAI
             int count = BitConverter.ToInt32(rawBytes, 8);
             int offset = BitConverter.ToInt32(rawBytes, 12);
 
-            if(count > 0)
+            baiFile.Version = BAI_File.GetBaiVersion(rawBytes, offset, count);
+            int entrySize = BAI_File.GetSubEntrySize(baiFile.Version);
+
+            if (count > 0)
             {
                 baiFile.Entries = new List<BAI_Entry>();
 
@@ -62,7 +65,7 @@ namespace Xv2CoreLib.BAI
                         baiFile.Entries[i].SubEntries = new List<BAI_SubEntry>();
                         for(int a = 0; a < subEntryCount; a++)
                         {
-                            baiFile.Entries[i].SubEntries.Add(new BAI_SubEntry()
+                            BAI_SubEntry subEntry = new BAI_SubEntry
                             {
                                 Name = StringEx.GetString(rawBytes, subEntryOffset, false, maxSize: 8),
                                 I_08 = BitConverter_Ex.ToBooleanFromInt32(rawBytes, subEntryOffset + 8),
@@ -83,15 +86,27 @@ namespace Xv2CoreLib.BAI
                                 F_68 = BitConverter.ToSingle(rawBytes, subEntryOffset + 68),
                                 F_72 = BitConverter.ToSingle(rawBytes, subEntryOffset + 72),
                                 F_76 = BitConverter.ToSingle(rawBytes, subEntryOffset + 76),
-                                F_80 = BitConverter.ToSingle(rawBytes, subEntryOffset + 80),
-                            });
+                                F_80 = BitConverter.ToSingle(rawBytes, subEntryOffset + 80)
+                            };
 
-                            if(BitConverter.ToInt32(rawBytes, subEntryOffset + 56) == 10)
+                            if (BitConverter.ToInt32(rawBytes, subEntryOffset + 56) == 10)
                             {
                                 UsedValues.Add(BitConverter.ToInt32(rawBytes, subEntryOffset + 60));
                             }
 
-                            subEntryOffset += 84;
+                            if (baiFile.Version >= 1)
+                            {
+                                subEntry.I_84 = BitConverter.ToInt32(rawBytes, subEntryOffset + 84);
+                            }
+
+                            if (baiFile.Version >= 2)
+                            {
+                                subEntry.I_88 = BitConverter.ToInt32(rawBytes, subEntryOffset + 88);
+                            }
+
+                            baiFile.Entries[i].SubEntries.Add(subEntry);
+
+                            subEntryOffset += entrySize;
                         }
 
                     }
