@@ -10,6 +10,7 @@ using Xv2CoreLib.BAI;
 using Xv2CoreLib.BCM;
 using Xv2CoreLib.BCS;
 using Xv2CoreLib.BDM;
+using Xv2CoreLib.CBS;
 using Xv2CoreLib.CMS;
 using Xv2CoreLib.CSO;
 using Xv2CoreLib.EAN;
@@ -38,6 +39,7 @@ namespace Xv2CoreLib
         public ERS_MainTableEntry ErsEntry { get; set; }
         public Xv2File<BAI_File> BaiFile { get; set; }
         public List<Xv2File<AMK_File>> AmkFile { get; set; }
+        public List<CBS_Entry> CbsEntry { get; set; }
 
         //BCS:
         public Xv2File<BCS_File> BcsFile { get; set; }

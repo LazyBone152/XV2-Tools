@@ -31,6 +31,7 @@ using Xv2CoreLib.Resource;
 using static Xv2CoreLib.CUS.CUS_File;
 using System.Threading.Tasks;
 using Xv2CoreLib.Eternity;
+using Xv2CoreLib.CBS;
 
 namespace Xv2CoreLib
 {
@@ -112,6 +113,7 @@ namespace Xv2CoreLib
         public const string PUP_PATH = "system/powerup_parameter.pup";
         public const string CSO_PATH = "system/chara_sound.cso";
         public const string PSC_PATH = "system/parameter_spec_char.psc";
+        public const string CBS_PATH = "system/chara_body_shape.cbs";
         public const string SKILL_IDB_PATH = "system/item/skill_item.idb";
         public const string TALISMAN_IDB_PATH = "system/item/talisman_item.idb";
         public const string TOP_IDB_PATH = "system/item/costume_top_item.idb";
@@ -167,6 +169,7 @@ namespace Xv2CoreLib
         public PSC_File PscFile { get; private set; }
         public IDB_File SkillIdbFile { get; private set; }
         public StageDefFile StageDefFile { get; private set; }
+        public CBS_File CbsFile { get; private set; }
 
         //Costume Files
         public IDB_File TopIdbFile { get; private set; }
@@ -326,6 +329,12 @@ namespace Xv2CoreLib
             {
                 PscFile = (PSC_File)FileManager.Instance.GetParsedFileFromGame(PSC_PATH);
                 fileWatcher.FileLoadedOrSaved(fileIO.PathInGameDir(PSC_PATH));
+            }
+
+            if (fileWatcher.WasFileModified(fileIO.PathInGameDir(CBS_PATH)) || CbsFile == null)
+            {
+                CbsFile = (CBS_File)FileManager.Instance.GetParsedFileFromGame(CBS_PATH);
+                fileWatcher.FileLoadedOrSaved(fileIO.PathInGameDir(CBS_PATH));
             }
 
             LoadMsgFiles(ref charaNameMsgFile, CHARACTER_MSG_PATH);
@@ -915,6 +924,7 @@ namespace Xv2CoreLib
             if (cmsEntry == null) throw new InvalidOperationException($"Xenoverse2.GetCharacter: Character was not found in the system (ID: {cmsId}).");
             string[] names = (IsCac(cmsId)) ? new string[1] { GetCacRaceName(cmsId) } : GetCharacterName(cmsEntry.ShortName);
             List<CSO_Entry> csoEntries = CsoFile.CsoEntries.Where(x => x.CharaID == cmsId).ToList();
+            List<CBS_Entry> cbsEntries = CbsFile.Entries.Where(x => x.CharaId == cmsId).ToList();
             ERS_MainTableEntry ersEntry = ErsFile.GetEntry(2, cmsId);
 
             List<string> loadedFiles = new List<string>();
@@ -1451,6 +1461,7 @@ namespace Xv2CoreLib
             FileManager.Instance.SaveFileToGame(ERS_PATH, ErsFile);
             FileManager.Instance.SaveFileToGame(CSO_PATH, CsoFile);
             FileManager.Instance.SaveFileToGame(PSC_PATH, PscFile);
+            FileManager.Instance.SaveFileToGame(CBS_PATH, CbsFile);
             FileManager.Instance.SaveMsgFilesToGame(CHARACTER_MSG_PATH, charaNameMsgFile);
         }
 
