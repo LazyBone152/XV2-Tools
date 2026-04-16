@@ -62,11 +62,26 @@ namespace Xv2CoreLib.DEM
 
         private void ParseDem()
         {
-            //Validation
-            if (BitConverter.ToInt16(rawBytes, 6) == 32) throw new Exception("Xenoverse 1 DEM format not supported.");
-            if (BitConverter.ToInt16(rawBytes, 6) != 64 || BitConverter.ToInt32(rawBytes, 0) != DEM_File.DEM_SIGNATURE) throw new Exception("DEM header validation failed.");
-            
-            //Header
+            if (BitConverter.ToInt32(rawBytes, 0) != DEM_File.DEM_SIGNATURE) throw new Exception("DEM header validation failed.");
+            int headerSize = BitConverter.ToInt16(rawBytes, 6);
+
+            switch (headerSize)
+            {
+                case 64:
+                    demFile.Version = DEM_File.DemVersion.XV2;
+                    ParseDemXv2();
+                    break;
+                case 32:
+                    demFile.Version = DEM_File.DemVersion.XV1;
+                    ParseDemXv1();
+                    break;
+                default:
+                    throw new Exception("DEM header validation failed.");
+            }
+        }
+
+        private void ParseDemXv2()
+        {
             demFile.I_08 = BitConverter.ToInt32(rawBytes, 8);
             int unkValuesCount = BitConverter.ToInt32(rawBytes, 16);
             int unkValuesOffset = BitConverter.ToInt32(rawBytes, 56);
@@ -75,10 +90,8 @@ namespace Xv2CoreLib.DEM
             int section2Count = BitConverter.ToInt32(rawBytes, 12);
             int section2Offset = BitConverter.ToInt32(rawBytes, 40);
 
-            //Name
             demFile.Name = Utils.GetString(bytes, nameOffset, 16);
 
-            //Define Section
             demFile.Settings = new DemoSettings()
             {
                 Str_00 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, defineOffset + 0)),
@@ -95,23 +108,21 @@ namespace Xv2CoreLib.DEM
                 Str_88 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, defineOffset + 88)),
                 Str_96 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, defineOffset + 96)),
                 Str_104 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, defineOffset + 104)),
-                Characters = ParseCharacters(BitConverter.ToInt32(rawBytes, defineOffset + 120), BitConverter.ToInt32(rawBytes, defineOffset + 116))
+                Characters = ParseCharacters(BitConverter.ToInt32(rawBytes, defineOffset + 120), BitConverter.ToInt32(rawBytes, defineOffset + 116), false)
             };
 
-            //Section 2
             demFile.Section2Entries = new List<Section2Entry>();
-            for(int i = 0; i < section2Count; i++)
+            for (int i = 0; i < section2Count; i++)
             {
                 demFile.Section2Entries.Add(new Section2Entry()
                 {
                     I_00 = BitConverter.ToInt32(rawBytes, section2Offset + 0),
-                    SubEntries = ParseSection2SubEntry(BitConverter.ToInt32(rawBytes, section2Offset + 8), BitConverter.ToInt32(rawBytes, section2Offset + 4))
+                    SubEntries = ParseSection2SubEntry(BitConverter.ToInt32(rawBytes, section2Offset + 8), BitConverter.ToInt32(rawBytes, section2Offset + 4), false)
                 });
                 section2Offset += 32;
             }
 
-            //UnkValues
-            if(unkValuesCount > 0)
+            if (unkValuesCount > 0)
             {
                 demFile.DEM_UnkValues = new List<DEM_UnknownValues>();
 
@@ -124,10 +135,70 @@ namespace Xv2CoreLib.DEM
                     unkValuesOffset += 80;
                 }
             }
-
         }
 
-        private List<DEM_Type> ParseSection2SubEntry(int offset, int count)
+        private void ParseDemXv1()
+        {
+            demFile.I_08 = BitConverter.ToInt32(rawBytes, 12);
+            int nameOffset = BitConverter.ToInt32(rawBytes, 8);
+            int section2Count = BitConverter.ToInt32(rawBytes, 16);
+            int section2Offset = BitConverter.ToInt32(rawBytes, 20);
+            int defineOffset = BitConverter.ToInt32(rawBytes, 24);
+            int unkValuesOffset = BitConverter.ToInt32(rawBytes, 28);
+
+            demFile.Name = Utils.GetString(bytes, nameOffset, 16);
+
+            demFile.Settings = new DemoSettings()
+            {
+                Str_00 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, defineOffset + 0)),
+                Str_08 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, defineOffset + 4)),
+                Str_16 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, defineOffset + 8)),
+                Str_24 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, defineOffset + 12)),
+                Str_32 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, defineOffset + 16)),
+                Str_40 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, defineOffset + 20)),
+                Str_48 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, defineOffset + 24)),
+                Str_56 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, defineOffset + 28)),
+                Str_64 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, defineOffset + 32)),
+                Str_72 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, defineOffset + 36)),
+                Str_80 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, defineOffset + 40)),
+                Str_88 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, defineOffset + 44)),
+                Str_96 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, defineOffset + 48)),
+                Str_104 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, defineOffset + 52)),
+                Characters = ParseCharacters(BitConverter.ToInt32(rawBytes, defineOffset + 60), BitConverter.ToInt32(rawBytes, defineOffset + 56), true)
+            };
+
+            demFile.Section2Entries = new List<Section2Entry>();
+            for (int i = 0; i < section2Count; i++)
+            {
+                demFile.Section2Entries.Add(new Section2Entry()
+                {
+                    I_00 = BitConverter.ToInt32(rawBytes, section2Offset + 0),
+                    SubEntries = ParseSection2SubEntry(BitConverter.ToInt32(rawBytes, section2Offset + 8), BitConverter.ToInt32(rawBytes, section2Offset + 4), true)
+                });
+                section2Offset += 16;
+            }
+
+            if (unkValuesOffset > 0 && rawBytes.Length > unkValuesOffset)
+            {
+                int remaining = rawBytes.Length - unkValuesOffset;
+                int unkValuesCount = remaining / 80;
+
+                if (unkValuesCount > 0)
+                {
+                    demFile.DEM_UnkValues = new List<DEM_UnknownValues>();
+                    for (int i = 0; i < unkValuesCount; i++)
+                    {
+                        demFile.DEM_UnkValues.Add(new DEM_UnknownValues()
+                        {
+                            Values = BitConverter_Ex.ToUInt16Array(rawBytes, unkValuesOffset, 40)
+                        });
+                        unkValuesOffset += 80;
+                    }
+                }
+            }
+        }
+
+        private List<DEM_Type> ParseSection2SubEntry(int offset, int count, bool isXv1)
         {
             List<DEM_Type> subEntries = new List<DEM_Type>();
 
@@ -136,16 +207,37 @@ namespace Xv2CoreLib.DEM
                 DEM_Type subEntry = new DEM_Type();
 
                 subEntry.I_00 = BitConverter.ToInt32(rawBytes, offset + 0);
-                subEntry.I_04 = DEM_Type.GetDemoDataType(BitConverter.ToUInt16(rawBytes, offset + 4), BitConverter.ToUInt16(rawBytes, offset + 6), BitConverter.ToInt32(rawBytes, offset + 12));
-                subEntry.Offset = BitConverter.ToInt32(rawBytes, offset + 16);
-                int pointerCount = BitConverter.ToInt32(rawBytes, offset + 12);
-                int pointerOffset = BitConverter.ToInt32(rawBytes, offset + 16);
-                subEntry = ParseTypes(subEntry.I_04, subEntry, pointerOffset, BitConverter.ToUInt16(rawBytes, offset + 4), BitConverter.ToUInt16(rawBytes, offset + 6), BitConverter.ToInt32(rawBytes, offset + 12));
+                subEntry.I_04 = DEM_Type.GetDemoDataType(BitConverter.ToUInt16(rawBytes, offset + 4), BitConverter.ToUInt16(rawBytes, offset + 6), BitConverter.ToInt32(rawBytes, isXv1 ? offset + 8 : offset + 12));
+                int pointerCount = BitConverter.ToInt32(rawBytes, isXv1 ? offset + 8 : offset + 12);
+                int pointerOffset = BitConverter.ToInt32(rawBytes, isXv1 ? offset + 12 : offset + 16);
+
+                if (isXv1 && pointerCount > 0)
+                {
+                    pointerOffset = NormalizePointerList(pointerOffset, pointerCount);
+                }
+
+                subEntry.Offset = pointerOffset;
+                subEntry = ParseTypes(subEntry.I_04, subEntry, pointerOffset, BitConverter.ToUInt16(rawBytes, offset + 4), BitConverter.ToUInt16(rawBytes, offset + 6), pointerCount);
                 subEntries.Add(subEntry);
-                offset += 32;
+                offset += isXv1 ? 16 : 32;
             }
 
             return subEntries;
+        }
+
+        private int NormalizePointerList(int pointerOffset, int pointerCount)
+        {
+            int newOffset = bytes.Count;
+
+            for (int i = 0; i < pointerCount; i++)
+            {
+                int ptr = BitConverter.ToInt32(rawBytes, pointerOffset + (i * 4));
+                bytes.AddRange(BitConverter.GetBytes(ptr));
+                bytes.AddRange(new byte[4]);
+            }
+
+            rawBytes = bytes.ToArray();
+            return newOffset;
         }
         
         private DEM_Type ParseTypes(DEM_Type.DemoDataTypes demoType, DEM_Type subEntry, int offset, int type1, int type2, int count)
@@ -160,6 +252,19 @@ namespace Xv2CoreLib.DEM
                     break;
                 case DEM_Type.DemoDataTypes.LightDir:
                     subEntry.Type0_3_8 = Type0_3_8.Read(rawBytes, bytes, offset);
+                    break;
+                case DEM_Type.DemoDataTypes.Type0_3_9:
+                    subEntry.Type0_3_9 = Type0_3_9.Read(rawBytes, bytes, offset);
+                    break;
+                case DEM_Type.DemoDataTypes.Type0_17_3:
+                    subEntry.Type0_17_3 = Type0_17_3.Read(rawBytes, bytes, offset, count);
+                    break;
+                case DEM_Type.DemoDataTypes.Type0_18_1:
+                    subEntry.Type0_18_1 = Type0_18_1.Read(rawBytes, bytes, offset);
+                    break;
+                case DEM_Type.DemoDataTypes.Type0_19_0:
+                case DEM_Type.DemoDataTypes.Type0_20_0:
+                    //No values
                     break;
                 case DEM_Type.DemoDataTypes.Type0_16_1:
                     subEntry.Type0_16_1 = Type0_16_1.Read(rawBytes, bytes, offset);
@@ -236,6 +341,9 @@ namespace Xv2CoreLib.DEM
                 case DEM_Type.DemoDataTypes.Type1_10_8:
                     subEntry.Type1_10_8 = Type1_10_8.Read(rawBytes, bytes, offset);
                     break;
+                case DEM_Type.DemoDataTypes.Type1_4_3:
+                    subEntry.Type1_4_3 = Type1_4_3.Read(rawBytes, bytes, offset);
+                    break;
                 case DEM_Type.DemoDataTypes.ScdForce:
                     subEntry.Type1_17_6 = Type1_17_6.Read(rawBytes, bytes, offset);
                     break;
@@ -245,8 +353,14 @@ namespace Xv2CoreLib.DEM
                 case DEM_Type.DemoDataTypes.Camera:
                     subEntry.Type2_0_1 = Type2_0_1.Read(rawBytes, bytes, offset);
                     break;
+                case DEM_Type.DemoDataTypes.Type2_1_6:
+                    subEntry.Type2_1_6 = Type2_1_6.Read(rawBytes, bytes, offset);
+                    break;
                 case DEM_Type.DemoDataTypes.Type2_6_3:
                     subEntry.Type2_6_3 = Type2_6_3.Read(rawBytes, bytes, offset);
+                    break;
+                case DEM_Type.DemoDataTypes.Type2_2_6:
+                    subEntry.Type2_2_6 = Type2_2_6.Read(rawBytes, bytes, offset);
                     break;
                 case DEM_Type.DemoDataTypes.Type2_7_5:
                     subEntry.Type2_7_5 = Type2_7_5.Read(rawBytes, bytes, offset);
@@ -293,6 +407,9 @@ namespace Xv2CoreLib.DEM
                 case DEM_Type.DemoDataTypes.PostEffect:
                     subEntry.Type4_1_8 = Type4_1_8.Read(rawBytes, bytes, offset);
                     break;
+                case DEM_Type.DemoDataTypes.Type4_1_6:
+                    subEntry.Type4_1_6 = Type4_1_6.Read(rawBytes, bytes, offset);
+                    break;
                 case DEM_Type.DemoDataTypes.SoundSmall:
                     subEntry.Type5_0_2 = Type5_0_2.Read(rawBytes, bytes, offset);
                     break;
@@ -335,6 +452,9 @@ namespace Xv2CoreLib.DEM
                 case DEM_Type.DemoDataTypes.Picture:
                     subEntry.Type7_0_5 = Type7_0_5.Read(rawBytes, bytes, offset);
                     break;
+                case DEM_Type.DemoDataTypes.Type7_1_6:
+                    subEntry.Type7_1_6 = Type7_1_6.Read(rawBytes, bytes, offset, count);
+                    break;
                 case DEM_Type.DemoDataTypes.YearDisplay:
                     subEntry.Type9_0_2 = Type9_0_2.Read(rawBytes, bytes, offset);
                     break;
@@ -356,7 +476,7 @@ namespace Xv2CoreLib.DEM
             return subEntry;
         }
 
-        private List<Character> ParseCharacters(int offset, int count)
+        private List<Character> ParseCharacters(int offset, int count, bool isXv1)
         {
             List<Character> _characters = new List<Character>();
 
@@ -365,11 +485,11 @@ namespace Xv2CoreLib.DEM
                 _characters.Add(new Character()
                 {
                     Str_00 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 0)),
-                    I_08 = BitConverter.ToInt32(rawBytes, offset + 8),
-                    Str_16 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, offset + 16))
+                    I_08 = BitConverter.ToInt32(rawBytes, isXv1 ? offset + 4 : offset + 8),
+                    Str_16 = Utils.GetString(bytes, BitConverter.ToInt32(rawBytes, isXv1 ? offset + 8 : offset + 16))
                 });
 
-                offset += 64;
+                offset += isXv1 ? 32 : 64;
             }
 
             return _characters;
