@@ -1,9 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Xv2CoreLib.ESK;
 using YAXLib;
 
 namespace Xv2CoreLib.FPF
@@ -14,25 +13,31 @@ namespace Xv2CoreLib.FPF
         [YAXDontSerialize]
         public const int FPF_SIGNATURE = 1179665955;
         [YAXDontSerialize]
-        public const int UnknownIndexListOffset = 112;
+        public const int BoneIndexListOffset = 112;
         [YAXDontSerialize]
-        public const int UnknownIndexListCount = 60;
+        public const int BoneIndexListCount = 60;
         [YAXDontSerialize]
         public const int EntryPointerListOffset = 352;
         [YAXDontSerialize]
         public const int EntryPointerListEntryCount = 70;
         [YAXDontSerialize]
         public const int EntryPointerListEntrySize = 8;
+        [YAXDontSerialize]
+        public const int MainSkeletonEntryId = 0;
+        [YAXDontSerialize]
+        public const int FpfBonePoseSize = 320;
+        [YAXDontSerialize]
+        public const int MatrixCountPerBonePose = 5;
 
         [YAXAttributeForClass]
         [YAXSerializeAs("Version")]
-        public ushort I_06 { get; set; }
+        public ushort Version { get; set; }
         [YAXAttributeFor("CharacterID")]
         [YAXSerializeAs("value")]
-        public int I_08 { get; set; }
+        public int CharacterID { get; set; }
         [YAXAttributeFor("Costume")]
         [YAXSerializeAs("value")]
-        public int I_12 { get; set; }
+        public int Costume { get; set; }
         [YAXAttributeFor("F_16")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0###########")]
@@ -116,12 +121,11 @@ namespace Xv2CoreLib.FPF
         [YAXAttributeFor("I_108")]
         [YAXSerializeAs("value")]
         public int I_108 { get; set; }
-        
-        [YAXComment("Dont delete or add entries to this list (entry count must be 60).")]
-        public Unknown_Indexes UnknownIndexes { get; set; }
-        [YAXDontSerializeIfNull]
-        public List<FPF_Entry> FpfEntries { get; set; }
 
+        [YAXComment("Fixed 60-entry bone index table. Values are skeleton bone indexes, -1 means unused.")]
+        public FPF_BoneIndexList BoneIndexes { get; set; }
+        [YAXDontSerializeIfNull]
+        public List<FPF_Entry> Entries { get; set; }
 
         public static FPF_File Parse(string path, bool writeXml)
         {
@@ -138,53 +142,59 @@ namespace Xv2CoreLib.FPF
 
         public static FPF_File Parse(byte[] rawBytes)
         {
-            FPF_File fpfFile = new FPF_File();
+            if (rawBytes == null) throw new ArgumentNullException(nameof(rawBytes));
+            if (rawBytes.Length < EntryPointerListOffset + EntryPointerListEntryCount * EntryPointerListEntrySize)
+                throw new InvalidDataException("FPF file is too small.");
+            if (BitConverter.ToInt32(rawBytes, 0) != FPF_SIGNATURE)
+                throw new InvalidDataException("FPF_SIGNATURE not found at offset 0x0. Parse failed.");
 
-            //Header
-            fpfFile.I_06 = BitConverter.ToUInt16(rawBytes, 6);
-            fpfFile.I_08 = BitConverter.ToInt32(rawBytes, 8);
-            fpfFile.I_12 = BitConverter.ToInt32(rawBytes, 12);
-            fpfFile.F_16 = BitConverter.ToSingle(rawBytes, 16);
-            fpfFile.F_20 = BitConverter.ToSingle(rawBytes, 20);
-            fpfFile.F_24 = BitConverter.ToSingle(rawBytes, 24);
-            fpfFile.F_28 = BitConverter.ToSingle(rawBytes, 28);
-            fpfFile.F_32 = BitConverter.ToSingle(rawBytes, 32);
-            fpfFile.F_36 = BitConverter.ToSingle(rawBytes, 36);
-            fpfFile.I_40 = BitConverter.ToInt32(rawBytes, 40);
-            fpfFile.I_44 = BitConverter.ToInt32(rawBytes, 44);
-            fpfFile.F_48 = BitConverter.ToSingle(rawBytes, 48);
-            fpfFile.F_52 = BitConverter.ToSingle(rawBytes, 52);
-            fpfFile.F_56 = BitConverter.ToSingle(rawBytes, 56);
-            fpfFile.I_60 = BitConverter.ToInt32(rawBytes, 60);
-            fpfFile.I_64 = BitConverter.ToInt32(rawBytes, 64);
-            fpfFile.I_68 = BitConverter.ToInt32(rawBytes, 68);
-            fpfFile.I_72 = BitConverter.ToInt32(rawBytes, 72);
-            fpfFile.I_76 = BitConverter.ToInt32(rawBytes, 76);
-            fpfFile.I_80 = BitConverter.ToInt32(rawBytes, 80);
-            fpfFile.I_84 = BitConverter.ToInt32(rawBytes, 84);
-            fpfFile.I_88 = BitConverter.ToInt32(rawBytes, 88);
-            fpfFile.I_92 = BitConverter.ToInt32(rawBytes, 92);
-            fpfFile.F_96 = BitConverter.ToSingle(rawBytes, 96);
-            fpfFile.I_100 = BitConverter.ToInt32(rawBytes, 100);
-            fpfFile.F_104 = BitConverter.ToSingle(rawBytes, 104);
-            fpfFile.I_108 = BitConverter.ToInt32(rawBytes, 108);
+            FPF_File fpfFile = new FPF_File
+            {
+                Version = BitConverter.ToUInt16(rawBytes, 6),
+                CharacterID = BitConverter.ToInt32(rawBytes, 8),
+                Costume = BitConverter.ToInt32(rawBytes, 12),
+                F_16 = BitConverter.ToSingle(rawBytes, 16),
+                F_20 = BitConverter.ToSingle(rawBytes, 20),
+                F_24 = BitConverter.ToSingle(rawBytes, 24),
+                F_28 = BitConverter.ToSingle(rawBytes, 28),
+                F_32 = BitConverter.ToSingle(rawBytes, 32),
+                F_36 = BitConverter.ToSingle(rawBytes, 36),
+                I_40 = BitConverter.ToInt32(rawBytes, 40),
+                I_44 = BitConverter.ToInt32(rawBytes, 44),
+                F_48 = BitConverter.ToSingle(rawBytes, 48),
+                F_52 = BitConverter.ToSingle(rawBytes, 52),
+                F_56 = BitConverter.ToSingle(rawBytes, 56),
+                I_60 = BitConverter.ToInt32(rawBytes, 60),
+                I_64 = BitConverter.ToInt32(rawBytes, 64),
+                I_68 = BitConverter.ToInt32(rawBytes, 68),
+                I_72 = BitConverter.ToInt32(rawBytes, 72),
+                I_76 = BitConverter.ToInt32(rawBytes, 76),
+                I_80 = BitConverter.ToInt32(rawBytes, 80),
+                I_84 = BitConverter.ToInt32(rawBytes, 84),
+                I_88 = BitConverter.ToInt32(rawBytes, 88),
+                I_92 = BitConverter.ToInt32(rawBytes, 92),
+                F_96 = BitConverter.ToSingle(rawBytes, 96),
+                I_100 = BitConverter.ToInt32(rawBytes, 100),
+                F_104 = BitConverter.ToSingle(rawBytes, 104),
+                I_108 = BitConverter.ToInt32(rawBytes, 108),
+                BoneIndexes = FPF_BoneIndexList.Read(rawBytes, BoneIndexListOffset),
+                Entries = new List<FPF_Entry>()
+            };
 
-            //Unknown indexes
-            fpfFile.UnknownIndexes = Unknown_Indexes.Read(rawBytes, UnknownIndexListOffset);
-
-            //Entries
-            fpfFile.FpfEntries = new List<FPF_Entry>();
-            int offset = EntryPointerListOffset;
             for (int i = 0; i < EntryPointerListEntryCount; i++)
             {
-                if(BitConverter.ToInt32(rawBytes, offset) != 0)
+                int offset = EntryPointerListOffset + i * EntryPointerListEntrySize;
+                int entryOffset = BitConverter.ToInt32(rawBytes, offset);
+
+                if (entryOffset != 0)
                 {
-                    fpfFile.FpfEntries.Add(FPF_Entry.Read(rawBytes, BitConverter.ToInt32(rawBytes, offset), i));
+                    if (entryOffset < EntryPointerListOffset || entryOffset >= rawBytes.Length)
+                        throw new InvalidDataException(String.Format("FPF entry {0} has an invalid offset.", i));
+
+                    fpfFile.Entries.Add(FPF_Entry.Read(rawBytes, entryOffset, i));
                 }
-                offset += EntryPointerListEntrySize;
             }
 
-            //Return
             return fpfFile;
         }
 
@@ -192,23 +202,103 @@ namespace Xv2CoreLib.FPF
         {
             string saveLocation = String.Format("{0}/{1}", Path.GetDirectoryName(xmlPath), Path.GetFileNameWithoutExtension(xmlPath));
             YAXSerializer serializer = new YAXSerializer(typeof(FPF_File), YAXSerializationOptions.DontSerializeNullObjects);
-            var fpfFile = (FPF_File)serializer.DeserializeFromFile(xmlPath);
-            var bytes = fpfFile.Write();
+            FPF_File fpfFile = (FPF_File)serializer.DeserializeFromFile(xmlPath);
+            List<byte> bytes = fpfFile.Write();
             File.WriteAllBytes(saveLocation, bytes.ToArray());
+        }
+
+        public FPF_Entry GetEntry(int id)
+        {
+            return Entries?.FirstOrDefault(entry => entry.ID == id);
+        }
+
+        public FPF_Entry GetMainSkeletonEntry()
+        {
+            return GetEntry(MainSkeletonEntryId);
+        }
+
+        public void ValidateMainSkeleton(ESK_File eskFile)
+        {
+            if (eskFile?.Skeleton == null) throw new ArgumentNullException(nameof(eskFile));
+            ValidateMainSkeleton(eskFile.Skeleton.GetBoneList());
+        }
+
+        public void ValidateMainSkeleton(IList<string> boneNames)
+        {
+            if (boneNames == null) throw new ArgumentNullException(nameof(boneNames));
+
+            FPF_Entry mainEntry = GetMainSkeletonEntry();
+            if (mainEntry == null)
+                throw new InvalidDataException("FPF file does not contain the main skeleton entry.");
+
+            int bonePoseCount = mainEntry.BonePoses?.Count ?? 0;
+            if (bonePoseCount != boneNames.Count)
+                throw new InvalidDataException(String.Format("Main FPF entry has {0} bone transforms, but the skeleton has {1} bones.", bonePoseCount, boneNames.Count));
+
+            BoneIndexes.ValidateAgainstBoneCount(boneNames.Count);
+        }
+
+        public void RemapMainSkeleton(ESK_File sourceSkeleton, ESK_File targetSkeleton)
+        {
+            if (sourceSkeleton?.Skeleton == null) throw new ArgumentNullException(nameof(sourceSkeleton));
+            if (targetSkeleton?.Skeleton == null) throw new ArgumentNullException(nameof(targetSkeleton));
+
+            RemapMainSkeleton(sourceSkeleton.Skeleton.NonRecursiveBones, targetSkeleton.Skeleton.NonRecursiveBones);
+        }
+
+        public void RemapMainSkeleton(IList<ESK_Bone> sourceBones, IList<ESK_Bone> targetBones)
+        {
+            if (sourceBones == null) throw new ArgumentNullException(nameof(sourceBones));
+            if (targetBones == null) throw new ArgumentNullException(nameof(targetBones));
+
+            FPF_Entry mainEntry = GetMainSkeletonEntry();
+            if (mainEntry == null)
+                throw new InvalidDataException("FPF file does not contain the main skeleton entry.");
+            if (mainEntry.BonePoses == null || mainEntry.BonePoses.Count != sourceBones.Count)
+                throw new InvalidDataException(String.Format("Main FPF entry has {0} bone transforms, but the source skeleton has {1} bones.", mainEntry.BonePoses?.Count ?? 0, sourceBones.Count));
+
+            Dictionary<string, FPF_BonePose> sourceEntries = new Dictionary<string, FPF_BonePose>();
+            Dictionary<string, int> targetBoneIndexes = new Dictionary<string, int>();
+
+            for (int i = 0; i < sourceBones.Count; i++)
+                sourceEntries.Add(sourceBones[i].Name, mainEntry.BonePoses[i]);
+
+            for (int i = 0; i < targetBones.Count; i++)
+                targetBoneIndexes.Add(targetBones[i].Name, i);
+
+            List<FPF_BonePose> remappedBonePoses = new List<FPF_BonePose>();
+
+            for (int i = 0; i < targetBones.Count; i++)
+            {
+                FPF_BonePose sourceEntry;
+
+                if (sourceEntries.TryGetValue(targetBones[i].Name, out sourceEntry))
+                {
+                    remappedBonePoses.Add(sourceEntry.Copy(i));
+                }
+                else
+                {
+                    remappedBonePoses.Add(FPF_BonePose.CreateForNewBone(targetBones[i], remappedBonePoses));
+                }
+            }
+
+            mainEntry.BonePoses = remappedBonePoses;
+            BoneIndexes.Remap(sourceBones.Select(bone => bone.Name).ToList(), targetBoneIndexes);
+            ValidateMainSkeleton(targetBones.Select(bone => bone.Name).ToList());
         }
 
         public List<byte> Write()
         {
-            List<byte> bytes = new List<byte>();
-            List<int> entryOffsets = new List<int>();
-            
+            if (BoneIndexes == null) throw new InvalidDataException("BoneIndexes is required.");
 
-            //Header
+            List<FPF_Entry> entries = Entries?.OrderBy(entry => entry.ID).ToList() ?? new List<FPF_Entry>();
+            List<byte> bytes = new List<byte>();
+
             bytes.AddRange(BitConverter.GetBytes(FPF_SIGNATURE));
             bytes.AddRange(BitConverter.GetBytes((ushort)65534));
-            bytes.AddRange(BitConverter.GetBytes((ushort)I_06));
-            bytes.AddRange(BitConverter.GetBytes(I_08));
-            bytes.AddRange(BitConverter.GetBytes(I_12));
+            bytes.AddRange(BitConverter.GetBytes(Version));
+            bytes.AddRange(BitConverter.GetBytes(CharacterID));
+            bytes.AddRange(BitConverter.GetBytes(Costume));
             bytes.AddRange(BitConverter.GetBytes(F_16));
             bytes.AddRange(BitConverter.GetBytes(F_20));
             bytes.AddRange(BitConverter.GetBytes(F_24));
@@ -233,55 +323,91 @@ namespace Xv2CoreLib.FPF
             bytes.AddRange(BitConverter.GetBytes(I_100));
             bytes.AddRange(BitConverter.GetBytes(F_104));
             bytes.AddRange(BitConverter.GetBytes(I_108));
+            bytes.AddRange(BoneIndexes.Write());
 
-            //Unknown indexes
-            bytes.AddRange(UnknownIndexes.Write());
+            if (bytes.Count != EntryPointerListOffset)
+                throw new InvalidDataException("FPF header is an invalid size.");
 
-            //FPF_Entries
-            if (FpfEntries == null) FpfEntries = new List<FPF_Entry>();
-            for(int i = 0; i < EntryPointerListEntryCount; i++)
+            bytes.AddRange(new byte[EntryPointerListEntryCount * EntryPointerListEntrySize]);
+
+            foreach (FPF_Entry entry in entries)
             {
-                var entry = FpfEntries.Find(a => a.ID == i);
+                if (entry.ID < 0 || entry.ID >= EntryPointerListEntryCount)
+                    throw new InvalidDataException(String.Format("FPF entry ID {0} is out of range.", entry.ID));
 
-                if(entry != null)
-                {
-                    entryOffsets.Add(bytes.Count);
-                }
-
-                bytes.AddRange(new byte[8]);
-            }
-
-            for(int i = 0; i < FpfEntries.Count; i++)
-            {
-                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), entryOffsets[i]);
-                bytes.AddRange(FpfEntries[i].Write());
+                int pointerOffset = EntryPointerListOffset + entry.ID * EntryPointerListEntrySize;
+                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), pointerOffset);
+                bytes.AddRange(entry.Write());
             }
 
             return bytes;
         }
-        
     }
 
-    public class Unknown_Indexes
+    public class FPF_BoneIndexList
     {
-        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "UnknownIndex")]
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BoneIndex")]
         public List<int> Indexes { get; set; }
 
-        public static Unknown_Indexes Read(byte[] rawBytes, int offset)
+        public static FPF_BoneIndexList Read(byte[] rawBytes, int offset)
         {
-            return new Unknown_Indexes()
+            return new FPF_BoneIndexList
             {
-                Indexes = BitConverter_Ex.ToInt32Array(rawBytes, offset, FPF_File.UnknownIndexListCount).ToList()
+                Indexes = BitConverter_Ex.ToInt32Array(rawBytes, offset, FPF_File.BoneIndexListCount).ToList()
             };
+        }
+
+        public void ValidateAgainstBoneCount(int boneCount)
+        {
+            if (Indexes == null || Indexes.Count != FPF_File.BoneIndexListCount)
+                throw new InvalidDataException(String.Format("BoneIndexes must contain exactly {0} entries.", FPF_File.BoneIndexListCount));
+
+            for (int i = 0; i < Indexes.Count; i++)
+            {
+                if (Indexes[i] < -1 || Indexes[i] >= boneCount)
+                    throw new InvalidDataException(String.Format("BoneIndexes entry {0} points to invalid bone index {1}.", i, Indexes[i]));
+            }
+        }
+
+        public void Remap(IList<string> sourceBoneNames, IDictionary<string, int> targetBoneIndexes)
+        {
+            if (sourceBoneNames == null) throw new ArgumentNullException(nameof(sourceBoneNames));
+            if (targetBoneIndexes == null) throw new ArgumentNullException(nameof(targetBoneIndexes));
+            if (Indexes == null || Indexes.Count != FPF_File.BoneIndexListCount)
+                throw new InvalidDataException(String.Format("BoneIndexes must contain exactly {0} entries.", FPF_File.BoneIndexListCount));
+
+            for (int i = 0; i < Indexes.Count; i++)
+            {
+                int oldIndex = Indexes[i];
+
+                if (oldIndex >= 0)
+                {
+                    if (oldIndex >= sourceBoneNames.Count)
+                        throw new InvalidDataException(String.Format("BoneIndexes entry {0} points to invalid source bone index {1}.", i, oldIndex));
+
+                    string boneName = sourceBoneNames[oldIndex];
+                    int newIndex;
+
+                    if (!targetBoneIndexes.TryGetValue(boneName, out newIndex))
+                        throw new InvalidDataException(String.Format("Target skeleton is missing bone \"{0}\".", boneName));
+
+                    Indexes[i] = newIndex;
+                }
+            }
         }
 
         public List<byte> Write()
         {
             List<byte> bytes = new List<byte>();
 
+            if (Indexes == null || Indexes.Count != FPF_File.BoneIndexListCount)
+                throw new InvalidDataException(String.Format("BoneIndexes must contain exactly {0} entries.", FPF_File.BoneIndexListCount));
+
             bytes.AddRange(BitConverter_Ex.GetBytes(Indexes.ToArray()));
 
-            if (bytes.Count != FPF_File.UnknownIndexListCount * 4) throw new InvalidDataException("UnknownIndexes is an invalid size.");
+            if (bytes.Count != FPF_File.BoneIndexListCount * 4)
+                throw new InvalidDataException("BoneIndexes is an invalid size.");
+
             return bytes;
         }
     }
@@ -291,78 +417,118 @@ namespace Xv2CoreLib.FPF
         [YAXAttributeForClass]
         public int ID { get; set; }
         [YAXAttributeForClass]
-        public int I_00 { get; set; }
+        [YAXSerializeAs("EntryType")]
+        public int EntryType { get; set; }
 
-        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "FpfSubEntry")]
-        public List<FPF_SubEntry> SubEntries { get; set; }
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BonePose")]
+        public List<FPF_BonePose> BonePoses { get; set; }
 
         public static FPF_Entry Read(byte[] rawBytes, int offset, int index)
         {
-            return new FPF_Entry()
+            int bonePoseCount = BitConverter.ToInt32(rawBytes, offset + 4);
+            int bonePoseOffset = offset + 16;
+            int endOffset = bonePoseOffset + bonePoseCount * FPF_File.FpfBonePoseSize;
+
+            if (bonePoseCount < 0 || endOffset > rawBytes.Length)
+                throw new InvalidDataException(String.Format("FPF entry {0} has an invalid bone pose count.", index));
+
+            return new FPF_Entry
             {
                 ID = index,
-                I_00 = BitConverter.ToInt32(rawBytes, offset + 0),
-                SubEntries = FPF_SubEntry.ReadAll(rawBytes, offset + 16, BitConverter.ToInt32(rawBytes, offset + 4))
+                EntryType = BitConverter.ToInt32(rawBytes, offset + 0),
+                BonePoses = FPF_BonePose.ReadAll(rawBytes, bonePoseOffset, bonePoseCount)
             };
         }
 
         public List<byte> Write()
         {
             List<byte> bytes = new List<byte>();
-            int subEntryCount = (SubEntries != null) ? SubEntries.Count : 0;
+            int bonePoseCount = BonePoses != null ? BonePoses.Count : 0;
 
-            //Header
-            bytes.AddRange(BitConverter.GetBytes(I_00));
-            bytes.AddRange(BitConverter.GetBytes(subEntryCount));
+            bytes.AddRange(BitConverter.GetBytes(EntryType));
+            bytes.AddRange(BitConverter.GetBytes(bonePoseCount));
             bytes.AddRange(new byte[8]);
 
-            //Subentries
-            for(int i = 0; i < subEntryCount; i++)
-            {
-                bytes.AddRange(SubEntries[i].Write());
-            }
+            for (int i = 0; i < bonePoseCount; i++)
+                bytes.AddRange(BonePoses[i].Write());
 
-            //Return
-            if (bytes.Count != (320 * subEntryCount) + 16) throw new InvalidDataException("FPF_Entry is an invalid size.");
+            if (bytes.Count != FPF_File.FpfBonePoseSize * bonePoseCount + 16)
+                throw new InvalidDataException("FPF_Entry is an invalid size.");
+
             return bytes;
         }
     }
 
-    [YAXSerializeAs("FpfSubEntry")]
-    public class FPF_SubEntry
+    [YAXSerializeAs("BonePose")]
+    public class FPF_BonePose
     {
         [YAXAttributeForClass]
         public int Index { get; set; }
 
-        public TransformMatrix4x4 Transform1 { get; set; }
-        public TransformMatrix4x4 Transform2 { get; set; }
-        public TransformMatrix4x4 Transform3 { get; set; }
-        public TransformMatrix4x4 Transform4 { get; set; }
-        public TransformMatrix4x4 Transform5 { get; set; }
+        [YAXComment("Local bind transform. Matches the skeleton relative matrix.")]
+        public TransformMatrix4x4 RelativeTransform { get; set; }
+        [YAXComment("Local baked pose transform. This affects the intro pose path.")]
+        public TransformMatrix4x4 LocalPoseTransform { get; set; }
+        [YAXComment("Absolute baked pose transform.")]
+        public TransformMatrix4x4 AbsolutePoseTransform { get; set; }
+        [YAXComment("Absolute baked pose transform used for attachments and scene placement.")]
+        public TransformMatrix4x4 AttachmentPoseTransform { get; set; }
+        [YAXComment("Formation skinning matrix. Stored as transpose(inverseBind * absolutePose).")]
+        public TransformMatrix4x4 FormationSkinningTransform { get; set; }
 
-        public static List<FPF_SubEntry> ReadAll(byte[] rawBytes, int offset, int count)
+        public static List<FPF_BonePose> ReadAll(byte[] rawBytes, int offset, int count)
         {
-            List<FPF_SubEntry> entries = new List<FPF_SubEntry>();
+            List<FPF_BonePose> entries = new List<FPF_BonePose>();
 
             for (int i = 0; i < count; i++)
             {
                 entries.Add(Read(rawBytes, offset, i));
-                offset += 320;
+                offset += FPF_File.FpfBonePoseSize;
             }
 
             return entries;
         }
 
-        public static FPF_SubEntry Read(byte[] rawBytes, int offset, int index)
+        public static FPF_BonePose Read(byte[] rawBytes, int offset, int index)
         {
-            return new FPF_SubEntry()
+            return new FPF_BonePose
             {
                 Index = index,
-                Transform1 = TransformMatrix4x4.Read(rawBytes, offset + 0),
-                Transform2 = TransformMatrix4x4.Read(rawBytes, offset + 64),
-                Transform3 = TransformMatrix4x4.Read(rawBytes, offset + 128),
-                Transform4 = TransformMatrix4x4.Read(rawBytes, offset + 192),
-                Transform5 = TransformMatrix4x4.Read(rawBytes, offset + 256)
+                RelativeTransform = TransformMatrix4x4.Read(rawBytes, offset + 0),
+                LocalPoseTransform = TransformMatrix4x4.Read(rawBytes, offset + 64),
+                AbsolutePoseTransform = TransformMatrix4x4.Read(rawBytes, offset + 128),
+                AttachmentPoseTransform = TransformMatrix4x4.Read(rawBytes, offset + 192),
+                FormationSkinningTransform = TransformMatrix4x4.Read(rawBytes, offset + 256)
+            };
+        }
+
+        public static FPF_BonePose CreateForNewBone(ESK_Bone bone, IList<FPF_BonePose> targetEntries)
+        {
+            TransformMatrix4x4 localTransform = TransformMatrix4x4.FromRelativeTransform(bone.RelativeTransform);
+            FPF_BonePose parentEntry = bone.Index1 >= 0 && bone.Index1 < targetEntries.Count ? targetEntries[bone.Index1] : null;
+            TransformMatrix4x4 identity = TransformMatrix4x4.Identity();
+
+            return new FPF_BonePose
+            {
+                Index = targetEntries.Count,
+                RelativeTransform = localTransform.Copy(),
+                LocalPoseTransform = localTransform.Copy(),
+                AbsolutePoseTransform = parentEntry?.AbsolutePoseTransform.Copy() ?? identity.Copy(),
+                AttachmentPoseTransform = parentEntry?.AttachmentPoseTransform.Copy() ?? identity.Copy(),
+                FormationSkinningTransform = parentEntry?.FormationSkinningTransform.Copy() ?? identity.Copy()
+            };
+        }
+
+        public FPF_BonePose Copy(int index)
+        {
+            return new FPF_BonePose
+            {
+                Index = index,
+                RelativeTransform = RelativeTransform.Copy(),
+                LocalPoseTransform = LocalPoseTransform.Copy(),
+                AbsolutePoseTransform = AbsolutePoseTransform.Copy(),
+                AttachmentPoseTransform = AttachmentPoseTransform.Copy(),
+                FormationSkinningTransform = FormationSkinningTransform.Copy()
             };
         }
 
@@ -370,105 +536,193 @@ namespace Xv2CoreLib.FPF
         {
             List<byte> bytes = new List<byte>();
 
-            bytes.AddRange(Transform1.Write());
-            bytes.AddRange(Transform2.Write());
-            bytes.AddRange(Transform3.Write());
-            bytes.AddRange(Transform4.Write());
-            bytes.AddRange(Transform5.Write());
+            bytes.AddRange(RelativeTransform.Write());
+            bytes.AddRange(LocalPoseTransform.Write());
+            bytes.AddRange(AbsolutePoseTransform.Write());
+            bytes.AddRange(AttachmentPoseTransform.Write());
+            bytes.AddRange(FormationSkinningTransform.Write());
 
-            if (bytes.Count != 320) throw new InvalidDataException("FPF_SubEntry is an invalid size.");
+            if (bytes.Count != FPF_File.FpfBonePoseSize)
+                throw new InvalidDataException("FPF_BonePose is an invalid size.");
+
             return bytes;
         }
-
     }
 
     public class TransformMatrix4x4
     {
-        [YAXAttributeFor("F_00")]
+        [YAXAttributeFor("M11")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
-        public float F_00 { get; set; }
-        [YAXAttributeFor("F_04")]
+        public float M11 { get; set; }
+        [YAXAttributeFor("M12")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
-        public float F_04 { get; set; }
-        [YAXAttributeFor("F_08")]
+        public float M12 { get; set; }
+        [YAXAttributeFor("M13")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
-        public float F_08 { get; set; }
-        [YAXAttributeFor("F_12")]
+        public float M13 { get; set; }
+        [YAXAttributeFor("M14")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
-        public float F_12 { get; set; }
-        [YAXAttributeFor("F_16")]
+        public float M14 { get; set; }
+        [YAXAttributeFor("M21")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
-        public float F_16 { get; set; }
-        [YAXAttributeFor("F_20")]
+        public float M21 { get; set; }
+        [YAXAttributeFor("M22")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
-        public float F_20 { get; set; }
-        [YAXAttributeFor("F_24")]
+        public float M22 { get; set; }
+        [YAXAttributeFor("M23")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
-        public float F_24 { get; set; }
-        [YAXAttributeFor("F_28")]
+        public float M23 { get; set; }
+        [YAXAttributeFor("M24")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
-        public float F_28 { get; set; }
-        [YAXAttributeFor("F_32")]
+        public float M24 { get; set; }
+        [YAXAttributeFor("M31")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
-        public float F_32 { get; set; }
-        [YAXAttributeFor("F_36")]
+        public float M31 { get; set; }
+        [YAXAttributeFor("M32")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
-        public float F_36 { get; set; }
-        [YAXAttributeFor("F_40")]
+        public float M32 { get; set; }
+        [YAXAttributeFor("M33")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
-        public float F_40 { get; set; }
-        [YAXAttributeFor("F_44")]
+        public float M33 { get; set; }
+        [YAXAttributeFor("M34")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
-        public float F_44 { get; set; }
-        [YAXAttributeFor("F_48")]
+        public float M34 { get; set; }
+        [YAXAttributeFor("M41")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
-        public float F_48 { get; set; }
-        [YAXAttributeFor("F_52")]
+        public float M41 { get; set; }
+        [YAXAttributeFor("M42")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
-        public float F_52 { get; set; }
-        [YAXAttributeFor("F_56")]
+        public float M42 { get; set; }
+        [YAXAttributeFor("M43")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
-        public float F_56 { get; set; }
-        [YAXAttributeFor("F_60")]
+        public float M43 { get; set; }
+        [YAXAttributeFor("M44")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
-        public float F_60 { get; set; }
+        public float M44 { get; set; }
+
+        public static TransformMatrix4x4 Identity()
+        {
+            return new TransformMatrix4x4
+            {
+                M11 = 1f,
+                M22 = 1f,
+                M33 = 1f,
+                M44 = 1f
+            };
+        }
+
+        public static TransformMatrix4x4 FromRelativeTransform(ESK_RelativeTransform transform)
+        {
+            float positionX = transform.PositionX * transform.PositionW;
+            float positionY = transform.PositionY * transform.PositionW;
+            float positionZ = transform.PositionZ * transform.PositionW;
+            float rotationX = transform.RotationX;
+            float rotationY = transform.RotationY;
+            float rotationZ = transform.RotationZ;
+            float rotationW = transform.RotationW;
+            float scaleX = transform.ScaleX * transform.ScaleW;
+            float scaleY = transform.ScaleY * transform.ScaleW;
+            float scaleZ = transform.ScaleZ * transform.ScaleW;
+            float rotationLength = (float)Math.Sqrt(rotationX * rotationX + rotationY * rotationY + rotationZ * rotationZ + rotationW * rotationW);
+
+            if (rotationLength > 0f)
+            {
+                rotationX /= rotationLength;
+                rotationY /= rotationLength;
+                rotationZ /= rotationLength;
+                rotationW /= rotationLength;
+            }
+
+            float xx = rotationX * rotationX;
+            float yy = rotationY * rotationY;
+            float zz = rotationZ * rotationZ;
+            float xy = rotationX * rotationY;
+            float xz = rotationX * rotationZ;
+            float yz = rotationY * rotationZ;
+            float wx = rotationW * rotationX;
+            float wy = rotationW * rotationY;
+            float wz = rotationW * rotationZ;
+
+            return new TransformMatrix4x4
+            {
+                M11 = (1f - 2f * (yy + zz)) * scaleX,
+                M12 = 2f * (xy + wz) * scaleX,
+                M13 = 2f * (xz - wy) * scaleX,
+                M14 = 0f,
+                M21 = 2f * (xy - wz) * scaleY,
+                M22 = (1f - 2f * (xx + zz)) * scaleY,
+                M23 = 2f * (yz + wx) * scaleY,
+                M24 = 0f,
+                M31 = 2f * (xz + wy) * scaleZ,
+                M32 = 2f * (yz - wx) * scaleZ,
+                M33 = (1f - 2f * (xx + yy)) * scaleZ,
+                M34 = 0f,
+                M41 = positionX,
+                M42 = positionY,
+                M43 = positionZ,
+                M44 = 1f
+            };
+        }
 
         public static TransformMatrix4x4 Read(byte[] rawBytes, int offset)
         {
-            return new TransformMatrix4x4()
+            return new TransformMatrix4x4
             {
-                F_00 = BitConverter.ToSingle(rawBytes, offset + 0),
-                F_04 = BitConverter.ToSingle(rawBytes, offset + 4),
-                F_08 = BitConverter.ToSingle(rawBytes, offset + 8),
-                F_12 = BitConverter.ToSingle(rawBytes, offset + 12),
-                F_16 = BitConverter.ToSingle(rawBytes, offset + 16),
-                F_20 = BitConverter.ToSingle(rawBytes, offset + 20),
-                F_24 = BitConverter.ToSingle(rawBytes, offset + 24),
-                F_28 = BitConverter.ToSingle(rawBytes, offset + 28),
-                F_32 = BitConverter.ToSingle(rawBytes, offset + 32),
-                F_36 = BitConverter.ToSingle(rawBytes, offset + 36),
-                F_40 = BitConverter.ToSingle(rawBytes, offset + 40),
-                F_44 = BitConverter.ToSingle(rawBytes, offset + 44),
-                F_48 = BitConverter.ToSingle(rawBytes, offset + 48),
-                F_52 = BitConverter.ToSingle(rawBytes, offset + 52),
-                F_56 = BitConverter.ToSingle(rawBytes, offset + 56),
-                F_60 = BitConverter.ToSingle(rawBytes, offset + 60)
+                M11 = BitConverter.ToSingle(rawBytes, offset + 0),
+                M12 = BitConverter.ToSingle(rawBytes, offset + 4),
+                M13 = BitConverter.ToSingle(rawBytes, offset + 8),
+                M14 = BitConverter.ToSingle(rawBytes, offset + 12),
+                M21 = BitConverter.ToSingle(rawBytes, offset + 16),
+                M22 = BitConverter.ToSingle(rawBytes, offset + 20),
+                M23 = BitConverter.ToSingle(rawBytes, offset + 24),
+                M24 = BitConverter.ToSingle(rawBytes, offset + 28),
+                M31 = BitConverter.ToSingle(rawBytes, offset + 32),
+                M32 = BitConverter.ToSingle(rawBytes, offset + 36),
+                M33 = BitConverter.ToSingle(rawBytes, offset + 40),
+                M34 = BitConverter.ToSingle(rawBytes, offset + 44),
+                M41 = BitConverter.ToSingle(rawBytes, offset + 48),
+                M42 = BitConverter.ToSingle(rawBytes, offset + 52),
+                M43 = BitConverter.ToSingle(rawBytes, offset + 56),
+                M44 = BitConverter.ToSingle(rawBytes, offset + 60)
+            };
+        }
+
+        public TransformMatrix4x4 Copy()
+        {
+            return new TransformMatrix4x4
+            {
+                M11 = M11,
+                M12 = M12,
+                M13 = M13,
+                M14 = M14,
+                M21 = M21,
+                M22 = M22,
+                M23 = M23,
+                M24 = M24,
+                M31 = M31,
+                M32 = M32,
+                M33 = M33,
+                M34 = M34,
+                M41 = M41,
+                M42 = M42,
+                M43 = M43,
+                M44 = M44
             };
         }
 
@@ -476,27 +730,27 @@ namespace Xv2CoreLib.FPF
         {
             List<byte> bytes = new List<byte>();
 
-            bytes.AddRange(BitConverter.GetBytes(F_00));
-            bytes.AddRange(BitConverter.GetBytes(F_04));
-            bytes.AddRange(BitConverter.GetBytes(F_08));
-            bytes.AddRange(BitConverter.GetBytes(F_12));
-            bytes.AddRange(BitConverter.GetBytes(F_16));
-            bytes.AddRange(BitConverter.GetBytes(F_20));
-            bytes.AddRange(BitConverter.GetBytes(F_24));
-            bytes.AddRange(BitConverter.GetBytes(F_28));
-            bytes.AddRange(BitConverter.GetBytes(F_32));
-            bytes.AddRange(BitConverter.GetBytes(F_36));
-            bytes.AddRange(BitConverter.GetBytes(F_40));
-            bytes.AddRange(BitConverter.GetBytes(F_44));
-            bytes.AddRange(BitConverter.GetBytes(F_48));
-            bytes.AddRange(BitConverter.GetBytes(F_52));
-            bytes.AddRange(BitConverter.GetBytes(F_56));
-            bytes.AddRange(BitConverter.GetBytes(F_60));
+            bytes.AddRange(BitConverter.GetBytes(M11));
+            bytes.AddRange(BitConverter.GetBytes(M12));
+            bytes.AddRange(BitConverter.GetBytes(M13));
+            bytes.AddRange(BitConverter.GetBytes(M14));
+            bytes.AddRange(BitConverter.GetBytes(M21));
+            bytes.AddRange(BitConverter.GetBytes(M22));
+            bytes.AddRange(BitConverter.GetBytes(M23));
+            bytes.AddRange(BitConverter.GetBytes(M24));
+            bytes.AddRange(BitConverter.GetBytes(M31));
+            bytes.AddRange(BitConverter.GetBytes(M32));
+            bytes.AddRange(BitConverter.GetBytes(M33));
+            bytes.AddRange(BitConverter.GetBytes(M34));
+            bytes.AddRange(BitConverter.GetBytes(M41));
+            bytes.AddRange(BitConverter.GetBytes(M42));
+            bytes.AddRange(BitConverter.GetBytes(M43));
+            bytes.AddRange(BitConverter.GetBytes(M44));
 
-            if (bytes.Count != 64) throw new InvalidDataException("TransformMatrix4x4 is an invalid size.");
+            if (bytes.Count != 64)
+                throw new InvalidDataException("TransformMatrix4x4 is an invalid size.");
+
             return bytes;
         }
-
     }
-
 }
