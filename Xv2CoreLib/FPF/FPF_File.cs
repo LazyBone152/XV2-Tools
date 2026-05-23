@@ -68,18 +68,18 @@ namespace Xv2CoreLib.FPF
         [YAXAttributeFor("I_44")]
         [YAXSerializeAs("value")]
         public int I_44 { get; set; }
-        [YAXAttributeFor("F_48")]
+        [YAXAttributeFor("FigurePositionX")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0###########")]
-        public float F_48 { get; set; }
-        [YAXAttributeFor("F_52")]
+        public float FigurePositionX { get; set; }
+        [YAXAttributeFor("FigurePositionY")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0###########")]
-        public float F_52 { get; set; }
-        [YAXAttributeFor("F_56")]
+        public float FigurePositionY { get; set; }
+        [YAXAttributeFor("FigurePositionZ")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0###########")]
-        public float F_56 { get; set; }
+        public float FigurePositionZ { get; set; }
         [YAXAttributeFor("I_60")]
         [YAXSerializeAs("value")]
         public int I_60 { get; set; }
@@ -161,9 +161,9 @@ namespace Xv2CoreLib.FPF
                 F_36 = BitConverter.ToSingle(rawBytes, 36),
                 I_40 = BitConverter.ToInt32(rawBytes, 40),
                 I_44 = BitConverter.ToInt32(rawBytes, 44),
-                F_48 = BitConverter.ToSingle(rawBytes, 48),
-                F_52 = BitConverter.ToSingle(rawBytes, 52),
-                F_56 = BitConverter.ToSingle(rawBytes, 56),
+                FigurePositionX = BitConverter.ToSingle(rawBytes, 48),
+                FigurePositionY = BitConverter.ToSingle(rawBytes, 52),
+                FigurePositionZ = BitConverter.ToSingle(rawBytes, 56),
                 I_60 = BitConverter.ToInt32(rawBytes, 60),
                 I_64 = BitConverter.ToInt32(rawBytes, 64),
                 I_68 = BitConverter.ToInt32(rawBytes, 68),
@@ -307,9 +307,9 @@ namespace Xv2CoreLib.FPF
             bytes.AddRange(BitConverter.GetBytes(F_36));
             bytes.AddRange(BitConverter.GetBytes(I_40));
             bytes.AddRange(BitConverter.GetBytes(I_44));
-            bytes.AddRange(BitConverter.GetBytes(F_48));
-            bytes.AddRange(BitConverter.GetBytes(F_52));
-            bytes.AddRange(BitConverter.GetBytes(F_56));
+            bytes.AddRange(BitConverter.GetBytes(FigurePositionX));
+            bytes.AddRange(BitConverter.GetBytes(FigurePositionY));
+            bytes.AddRange(BitConverter.GetBytes(FigurePositionZ));
             bytes.AddRange(BitConverter.GetBytes(I_60));
             bytes.AddRange(BitConverter.GetBytes(I_64));
             bytes.AddRange(BitConverter.GetBytes(I_68));

@@ -28,6 +28,7 @@ namespace Xv2CoreLib
     public class Xv2Character
     {
         public bool IsCaC { get { return CmsEntry?.ID >= 100 && CmsEntry?.ID <= 108; } }
+        public bool OnlyLoadFromCPK { get; set; }
 
         public string[] Name = new string[(int)Xenoverse2.Language.NumLanguages];
 
@@ -348,14 +349,14 @@ namespace Xv2CoreLib
             path = Utils.SanitizePath(path);
 
             //Special case: EMB, EMM and DYT for physics parts can use the parents files if none are found
-            if (!FileManager.Instance.fileIO.FileExists(path))
+            if (!FileExists(path))
             {
                 path = altPath;
                 name = Path.GetFileName(altPath);
             }
 
             //Exit if no file is found
-            if (!FileManager.Instance.fileIO.FileExists(path))
+            if (!FileExists(path))
                 return;
 
             Xv2PartSetFile charaFile = new Xv2PartSetFile(name, this);
@@ -377,6 +378,17 @@ namespace Xv2CoreLib
             }
 
             return null;
+        }
+
+        private bool FileExists(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                return false;
+
+            if (OnlyLoadFromCPK)
+                return FileManager.Instance.fileIO.FileExistsInCpk(path);
+
+            return FileManager.Instance.fileIO.FileExists(path);
         }
 
         //PartSet Editing
@@ -637,6 +649,8 @@ namespace Xv2CoreLib
         {
             if (IsLoaded && !allowReload || WasManualLoaded) return;
 
+            bool onlyLoadFromCPK = Owner?.OnlyLoadFromCPK == true;
+
             switch (FileType)
             {
                 case Type.EMD:
@@ -645,10 +659,10 @@ namespace Xv2CoreLib
                 case Type.EMM:
                 case Type.EAN:
                 case Type.SCD_ESK:
-                    File = FileManager.Instance.GetParsedFileFromGame(RelativePath);
+                    File = FileManager.Instance.GetParsedFileFromGame(RelativePath, onlyLoadFromCPK);
                     break;
                 case Type.SCD:
-                    Bytes = FileManager.Instance.GetBytesFromGame(RelativePath);
+                    Bytes = FileManager.Instance.GetBytesFromGame(RelativePath, onlyLoadFromCPK);
                     break;
                 default:
                     return;

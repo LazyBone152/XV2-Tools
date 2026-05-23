@@ -294,9 +294,9 @@ namespace Xv2CoreLib
                         break;
                     case ".acb":
                         {
-                            byte[] awbBytes = fileIO.GetFileFromGame(string.Format("{0}/{1}.awb", Path.GetFileNameWithoutExtension(path), Path.GetDirectoryName(path)), false);
+                            byte[] awbBytes = fileIO.GetFileFromGame(string.Format("{0}/{1}.awb", Path.GetFileNameWithoutExtension(path), Path.GetDirectoryName(path)), false, onlyFromCpk);
                             AFS2_File awbFile = awbBytes != null ? AFS2_File.LoadFromArray(awbBytes) : null;
-                            file = new ACB_Wrapper(ACB_File.Load(GetBytesFromGame(path), awbFile));
+                            file = new ACB_Wrapper(ACB_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx), awbFile));
                         }
                         break;
                     case ".spm":
