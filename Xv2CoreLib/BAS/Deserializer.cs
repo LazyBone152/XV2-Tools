@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Xv2CoreLib.BCS;
 using YAXLib;
 
 namespace Xv2CoreLib.BAS
@@ -43,7 +44,10 @@ namespace Xv2CoreLib.BAS
             bytes.AddRange(BitConverter.GetBytes(count));
             bytes.AddRange(BitConverter.GetBytes(16));
 
-            if(basFile.Entries != null)
+            if (basFile.Version > BAS_File.CURRENT_VERSION)
+                throw new InvalidDataException($"BAS: This BAS version is not supported (Version: {basFile.Version}).");
+
+            if (basFile.Entries != null)
             {
                 for(int i = 0; i < basFile.Entries.Count; i++)
                 {
@@ -89,6 +93,12 @@ namespace Xv2CoreLib.BAS
                             bytes.AddRange(BitConverter.GetBytes(basFile.Entries[i].SubEntries[a].F_72));
                             bytes.AddRange(BitConverter.GetBytes(basFile.Entries[i].SubEntries[a].F_76));
                             bytes.AddRange(BitConverter.GetBytes(basFile.Entries[i].SubEntries[a].F_80));
+
+                            if (basFile.Version >= 1)
+                                bytes.AddRange(BitConverter.GetBytes(basFile.Entries[i].SubEntries[a].I_84));
+
+                            if (basFile.Version >= 2)
+                                bytes.AddRange(BitConverter.GetBytes(basFile.Entries[i].SubEntries[a].I_88));
                         }
                     }
                 }
