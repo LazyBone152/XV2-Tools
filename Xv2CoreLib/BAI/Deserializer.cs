@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Xv2CoreLib.BAS;
 using YAXLib;
 
 namespace Xv2CoreLib.BAI
@@ -49,7 +50,7 @@ namespace Xv2CoreLib.BAI
             bytes.AddRange(BitConverter.GetBytes(count));
             bytes.AddRange(BitConverter.GetBytes(16));
 
-            if(baiFile.Entries != null)
+            if (baiFile.Entries != null)
             {
                 for(int i = 0; i < baiFile.Entries.Count; i++)
                 {
@@ -98,6 +99,12 @@ namespace Xv2CoreLib.BAI
                             bytes.AddRange(BitConverter.GetBytes(baiFile.Entries[i].SubEntries[a].F_72));
                             bytes.AddRange(BitConverter.GetBytes(baiFile.Entries[i].SubEntries[a].F_76));
                             bytes.AddRange(BitConverter.GetBytes(baiFile.Entries[i].SubEntries[a].F_80));
+
+                            if (baiFile.Version >= 1)
+                                bytes.AddRange(BitConverter.GetBytes(baiFile.Entries[i].SubEntries[a].I_84));
+
+                            if (baiFile.Version >= 2)
+                                bytes.AddRange(BitConverter.GetBytes(baiFile.Entries[i].SubEntries[a].I_88));
                         }
                     }
                 }
