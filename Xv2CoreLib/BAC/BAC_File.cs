@@ -44,7 +44,7 @@ namespace Xv2CoreLib.BAC
             {12, "Targeting Assistance" }, {13, "BCS Part Visibility" }, {14, "Bone Modification" }, {15, "Function" },
             {16, "Post Effect" }, {17, "Throw Handler" }, {18, "Physics Object" }, {19, "Aura" }, {20, "Homing Movement" },
             {21, "Eye Movement" }, {22, "BAC_Type22" }, {23, "Transparency Effect" }, {24, "Dual Skill Handler"}, {25, "Extended Charge Control"},
-            {26, "Extended Camera Control" }, {27, "Effect Property Control" }, {28, "BAC_Type28"}, {29, "BAC_Type29"}, {30, "BAC_Type30"}, {31, "BAC_Type31"}
+            {26, "Extended Camera Control" }, {27, "Effect Property Control" }, {28, "BAC_Type28"}, {29, "BAC_Type29"}, {30, "BAC_Type30"}, {31, "ProjectileCallBack"}
         };
 
         [YAXAttributeForClass]
@@ -587,7 +587,7 @@ namespace Xv2CoreLib.BAC
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BacType30")]
         public List<BAC_Type30> Type30 { get; set; }
         [YAXDontSerializeIfNull]
-        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BacType31")]
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "ProjectileCallBack")]
         public List<BAC_Type31> Type31 { get; set; }
 
         [YAXDontSerializeIfNull]
@@ -5613,15 +5613,14 @@ namespace Xv2CoreLib.BAC
     }
 
 
-    [YAXSerializeAs("BAC_Type31")]
+    [YAXSerializeAs("ProjectileCallBack")]
     [Serializable]
     public class BAC_Type31 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public override string Type => $"BAC_Type31";
+        public override string Type => $"ProjectileCallBack";
         [YAXDontSerialize]
         public override int TypeID => 31;
-
 
         [YAXAttributeFor("I_08")]
         [YAXSerializeAs("value")]
@@ -5629,22 +5628,25 @@ namespace Xv2CoreLib.BAC
         [YAXAttributeFor("I_12")]
         [YAXSerializeAs("value")]
         public int I_12 { get; set; }
-        [YAXAttributeFor("I_16")]
+        [YAXAttributeFor("BACEntryPass")]
         [YAXSerializeAs("value")]
-        public ushort I_16 { get; set; }
+        public ushort I_16{ get; set; }
         [YAXAttributeFor("I_18")]
         [YAXSerializeAs("value")]
-        public ushort I_18 { get; set; }
+        public byte I_18 { get; set; }
+        [YAXAttributeFor("SkillType")]
+        [YAXSerializeAs("value")]
+        public BAC_Type8.EepkTypeEnum SkillType { get; set; }
         [YAXAttributeFor("SkillID")]
         [YAXSerializeAs("value")]
         public ushort I_20 { get; set; }
         [YAXAttributeFor("I_22")]
         [YAXSerializeAs("value")]
         public ushort I_22 { get; set; }
-        [YAXAttributeFor("F_24")]
+        [YAXAttributeFor("HitboxSize")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
-        public float F_24 { get; set; }
+        public float F_24{ get; set; }
         [YAXAttributeFor("F_28")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
@@ -5690,7 +5692,8 @@ namespace Xv2CoreLib.BAC
                     I_08 = BitConverter.ToInt32(rawBytes, offset + 8),
                     I_12 = BitConverter.ToInt32(rawBytes, offset + 12),
                     I_16 = BitConverter.ToUInt16(rawBytes, offset + 16),
-                    I_18 = BitConverter.ToUInt16(rawBytes, offset + 18),
+                    I_18 = (rawBytes)[offset + 18],
+                    SkillType = (BAC_Type8.EepkTypeEnum)(rawBytes)[offset + 19],
                     I_20 = BitConverter.ToUInt16(rawBytes, offset + 20),
                     I_22 = BitConverter.ToUInt16(rawBytes, offset + 22),
                     F_24 = BitConverter.ToSingle(rawBytes, offset + 24),
@@ -5724,7 +5727,8 @@ namespace Xv2CoreLib.BAC
                 bytes.AddRange(BitConverter.GetBytes(type.I_08));
                 bytes.AddRange(BitConverter.GetBytes(type.I_12));
                 bytes.AddRange(BitConverter.GetBytes(type.I_16));
-                bytes.AddRange(BitConverter.GetBytes(type.I_18));
+                bytes.Add(type.I_18);
+                bytes.Add(((byte)type.SkillType));
                 bytes.AddRange(BitConverter.GetBytes(type.I_20));
                 bytes.AddRange(BitConverter.GetBytes(type.I_22));
                 bytes.AddRange(BitConverter.GetBytes(type.F_24));

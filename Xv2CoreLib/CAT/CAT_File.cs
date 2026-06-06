@@ -59,7 +59,10 @@ namespace Xv2CoreLib.CAT
                 entry.Str_08 = StringEx.GetString(bytes, offset + 8, false, StringEx.EncodingType.ASCII, 8);
                 entry.I_12 = BitConverter.ToInt32(bytes, offset + 12);
                 entry.I_16 = BitConverter.ToInt32(bytes, offset + 16);
-                entry.I_20 = BitConverter.ToInt32(bytes, offset + 20);
+                entry.I_20 = bytes[offset + 20];
+                entry.Transformation_Entry = bytes[offset + 21];
+                entry.I_22= BitConverter.ToUInt16(bytes, offset + 22);
+                
 
                 offset += entrySize;
                 CATFile.Entries.Add(entry);
@@ -117,7 +120,9 @@ namespace Xv2CoreLib.CAT
                 bytes.AddRange(new byte[4 - entry.Str_08.Length]);
                 bytes.AddRange(BitConverter.GetBytes(entry.I_12));
                 bytes.AddRange(BitConverter.GetBytes(entry.I_16));
-                bytes.AddRange(BitConverter.GetBytes(entry.I_20));
+                bytes.Add(entry.I_20);
+                bytes.Add(entry.Transformation_Entry);
+                bytes.AddRange(BitConverter.GetBytes(entry.I_22));
             }
 
             //validation
@@ -208,6 +213,12 @@ namespace Xv2CoreLib.CAT
         public int I_16 { get; set; }
         [YAXAttributeFor("I_20")]
         [YAXSerializeAs("value")]
-        public int I_20 { get; set; }
+        public byte I_20 { get; set; }
+        [YAXAttributeFor("Transformation_Entry")]
+        [YAXSerializeAs("value")]
+        public byte Transformation_Entry { get; set; }
+        [YAXAttributeFor("I_22")]
+        [YAXSerializeAs("value")]
+        public ushort I_22 { get; set; }
     }
 }
