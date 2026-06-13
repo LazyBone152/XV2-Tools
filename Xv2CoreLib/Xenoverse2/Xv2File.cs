@@ -75,7 +75,17 @@ namespace Xv2CoreLib
                     case MoveFileTypes.BAC:
                         return Costumes.Count == 1 ? System.IO.Path.GetFileNameWithoutExtension(Path) : "Main";
                     case MoveFileTypes.AFTER_BAC:
-                        return "AFTER";
+                        return "After Action";
+                    case MoveFileTypes.BCM:
+                        return "State";
+                    case MoveFileTypes.AFTER_BCM:
+                        return "After State";
+                    case MoveFileTypes.BDM:
+                        return "Hitbox";
+                    case MoveFileTypes.SHOT_BDM:
+                        return "Shot Hitbox";
+                    case MoveFileTypes.BSA:
+                        return "Projectile";
                     default:
                         return "";
                 }
