@@ -4,6 +4,7 @@ using System.ComponentModel;
 
 #if !SaveEditor
 using GalaSoft.MvvmLight.CommandWpf;
+using System.Windows.Input;
 #endif
 
 
@@ -75,8 +76,7 @@ namespace Xv2CoreLib.Resource.UndoRedo
                     redoStack.Clear();
 
                 undoStack.Push(undo);
-                NotifyPropertyChanged(nameof(UndoDescription));
-                NotifyPropertyChanged(nameof(RedoDescription));
+                RefreshUndoRedoState();
             }
 
             LastAddition = DateTime.Now;
@@ -141,8 +141,7 @@ namespace Xv2CoreLib.Resource.UndoRedo
                 IsUndoing = true;
                 action.Undo();
                 redoStack.Push(action);
-                NotifyPropertyChanged(nameof(UndoDescription));
-                NotifyPropertyChanged(nameof(RedoDescription));
+                RefreshUndoRedoState();
             }
             finally
             {
@@ -162,8 +161,7 @@ namespace Xv2CoreLib.Resource.UndoRedo
                 IsUndoing = true;
                 action.Redo();
                 undoStack.Push(action);
-                NotifyPropertyChanged(nameof(UndoDescription));
-                NotifyPropertyChanged(nameof(RedoDescription));
+                RefreshUndoRedoState();
             }
             finally
             {
@@ -194,8 +192,16 @@ namespace Xv2CoreLib.Resource.UndoRedo
         {
             undoStack.Clear();
             redoStack.Clear();
+            RefreshUndoRedoState();
+        }
+
+        private void RefreshUndoRedoState()
+        {
             NotifyPropertyChanged(nameof(UndoDescription));
             NotifyPropertyChanged(nameof(RedoDescription));
+#if !SaveEditor
+            CommandManager.InvalidateRequerySuggested();
+#endif
         }
 
         /// <summary>
