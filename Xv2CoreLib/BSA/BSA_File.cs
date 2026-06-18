@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using Xv2CoreLib.Resource;
@@ -306,6 +307,8 @@ namespace Xv2CoreLib.BSA
                 IBsaTypes.Add(bsaEntry);
             foreach (var bsaEntry in Type8)
                 IBsaTypes.Add(bsaEntry);
+            foreach (var bsaEntry in Type10)
+                IBsaTypes.Add(bsaEntry);
             foreach (var bsaEntry in Type12)
                 IBsaTypes.Add(bsaEntry);
             foreach (var bsaEntry in Type13)
@@ -353,6 +356,10 @@ namespace Xv2CoreLib.BSA
                 {
                     Type8.Add(type8);
                 }
+                else if (bsaEntry is BSA_Type10 type10)
+                {
+                    Type10.Add(type10);
+                }
                 else if (bsaEntry is BSA_Type12 type12)
                 {
                     Type12.Add(type12);
@@ -386,6 +393,8 @@ namespace Xv2CoreLib.BSA
                 Type7 = new List<BSA_Type7>();
             if (Type8 == null)
                 Type8 = new List<BSA_Type8>();
+            if (Type10 == null)
+                Type10 = new List<BSA_Type10>();
             if (Type12 == null)
                 Type12 = new List<BSA_Type12>();
             if (Type13 == null)
@@ -406,6 +415,7 @@ namespace Xv2CoreLib.BSA
             Type6.Clear();
             Type7.Clear();
             Type8.Clear();
+            Type10.Clear();
             Type12.Clear();
             Type13.Clear();
             Type14.Clear();
@@ -502,14 +512,17 @@ namespace Xv2CoreLib.BSA
     [YAXSerializeAs("BsaEntryPassing")]
     [BindingSubClass]
     [Serializable]
-    public class BSA_Type0 : IBsaType
+    public class BSA_Type0 : BSA_TypeBase
     {
+        [YAXDontSerialize]
+        public override int TypeID => 0;
+
         [YAXAttributeFor("Start_Time")]
         [YAXSerializeAs("frames")]
-        public ushort StartTime { get; set; }
+        public override ushort StartTime { get; set; }
         [YAXAttributeFor("Duration")]
         [YAXSerializeAs("frames")]
-        public ushort Duration { get; set; }
+        public override ushort Duration { get; set; }
         [YAXAttributeFor("I_00")]
         [YAXSerializeAs("value")]
         public short I_00 { get; set; }
@@ -536,14 +549,17 @@ namespace Xv2CoreLib.BSA
 
     [YAXSerializeAs("Movement")]
     [Serializable]
-    public class BSA_Type1 : IBsaType
+    public class BSA_Type1 : BSA_TypeBase
     {
+        [YAXDontSerialize]
+        public override int TypeID => 1;
+
         [YAXAttributeFor("Start_Time")]
         [YAXSerializeAs("frames")]
-        public ushort StartTime { get; set; }
+        public override ushort StartTime { get; set; }
         [YAXAttributeFor("Duration")]
         [YAXSerializeAs("frames")]
-        public ushort Duration { get; set; }
+        public override ushort Duration { get; set; }
         [YAXAttributeFor("Motion_Flags")]
         [YAXSerializeAs("value")]
         [YAXHexValue]
@@ -596,14 +612,17 @@ namespace Xv2CoreLib.BSA
 
     [YAXSerializeAs("BSA_Type2")]
     [Serializable]
-    public class BSA_Type2 : IBsaType
+    public class BSA_Type2 : BSA_TypeBase
     {
+        [YAXDontSerialize]
+        public override int TypeID => 2;
+
         [YAXAttributeFor("Start_Time")]
         [YAXSerializeAs("frames")]
-        public ushort StartTime { get; set; }
+        public override ushort StartTime { get; set; }
         [YAXAttributeFor("Duration")]
         [YAXSerializeAs("frames")]
-        public ushort Duration { get; set; }
+        public override ushort Duration { get; set; }
         [YAXAttributeFor("I_00")]
         [YAXSerializeAs("value")]
         public short I_00 { get; set; }
@@ -621,14 +640,17 @@ namespace Xv2CoreLib.BSA
     [YAXSerializeAs("Hitbox")]
     [BindingSubClass]
     [Serializable]
-    public class BSA_Type3 : IBsaType
+    public class BSA_Type3 : BSA_TypeBase
     {
+        [YAXDontSerialize]
+        public override int TypeID => 3;
+
         [YAXAttributeFor("Start_Time")]
         [YAXSerializeAs("frames")]
-        public ushort StartTime { get; set; }
+        public override ushort StartTime { get; set; }
         [YAXAttributeFor("Duration")]
         [YAXSerializeAs("frames")]
-        public ushort Duration { get; set; }
+        public override ushort Duration { get; set; }
         [YAXAttributeFor("I_00")]
         [YAXSerializeAs("value")]
         public UInt16 I_00 { get; set; }
@@ -719,14 +741,17 @@ namespace Xv2CoreLib.BSA
 
     [YAXSerializeAs("Deflection")]
     [Serializable]
-    public class BSA_Type4 : IBsaType
+    public class BSA_Type4 : BSA_TypeBase
     {
+        [YAXDontSerialize]
+        public override int TypeID => 4;
+
         [YAXAttributeFor("Start_Time")]
         [YAXSerializeAs("frames")]
-        public ushort StartTime { get; set; }
+        public override ushort StartTime { get; set; }
         [YAXAttributeFor("Duration")]
         [YAXSerializeAs("frames")]
-        public ushort Duration { get; set; }
+        public override ushort Duration { get; set; }
         [YAXAttributeFor("I_00")]
         [YAXSerializeAs("value")]
         public int I_00 { get; set; }
@@ -785,14 +810,17 @@ namespace Xv2CoreLib.BSA
     [YAXSerializeAs("Effect")]
     [BindingSubClass]
     [Serializable]
-    public class BSA_Type6 : IBsaType
+    public class BSA_Type6 : BSA_TypeBase
     {
+        [YAXDontSerialize]
+        public override int TypeID => 6;
+
         [YAXAttributeFor("Start_Time")]
         [YAXSerializeAs("frames")]
-        public ushort StartTime { get; set; }
+        public override ushort StartTime { get; set; }
         [YAXAttributeFor("Duration")]
         [YAXSerializeAs("frames")]
-        public ushort Duration { get; set; }
+        public override ushort Duration { get; set; }
         [YAXAttributeFor("EEPK")]
         [YAXSerializeAs("Type")]
         public EepkType EepkType { get; set; } //Int16
@@ -864,14 +892,17 @@ namespace Xv2CoreLib.BSA
 
     [YAXSerializeAs("Sound")]
     [Serializable]
-    public class BSA_Type7 : IBsaType
+    public class BSA_Type7 : BSA_TypeBase
     {
+        [YAXDontSerialize]
+        public override int TypeID => 7;
+
         [YAXAttributeFor("Start_Time")]
         [YAXSerializeAs("frames")]
-        public ushort StartTime { get; set; }
+        public override ushort StartTime { get; set; }
         [YAXAttributeFor("Duration")]
         [YAXSerializeAs("frames")]
-        public ushort Duration { get; set; }
+        public override ushort Duration { get; set; }
         [YAXAttributeFor("ACB_File")]
         [YAXSerializeAs("value")]
         public AcbType AcbType { get; set; } //int16
@@ -888,14 +919,17 @@ namespace Xv2CoreLib.BSA
 
     [YAXSerializeAs("BSA_Type8")]
     [Serializable]
-    public class BSA_Type8 : IBsaType
+    public class BSA_Type8 : BSA_TypeBase
     {
+        [YAXDontSerialize]
+        public override int TypeID => 8;
+
         [YAXAttributeFor("Start_Time")]
         [YAXSerializeAs("frames")]
-        public ushort StartTime { get; set; }
+        public override ushort StartTime { get; set; }
         [YAXAttributeFor("Duration")]
         [YAXSerializeAs("frames")]
-        public ushort Duration { get; set; }
+        public override ushort Duration { get; set; }
         [YAXAttributeFor("I_00")]
         [YAXSerializeAs("value")]
         public ushort I_00 { get; set; }
@@ -921,14 +955,17 @@ namespace Xv2CoreLib.BSA
 
     [YAXSerializeAs("BSA_Type10")]
     [Serializable]
-    public class BSA_Type10 : IBsaType
+    public class BSA_Type10 : BSA_TypeBase
     {
+        [YAXDontSerialize]
+        public override int TypeID => 10;
+
         [YAXAttributeFor("Start_Time")]
         [YAXSerializeAs("frames")]
-        public ushort StartTime { get; set; }
+        public override ushort StartTime { get; set; }
         [YAXAttributeFor("Duration")]
         [YAXSerializeAs("frames")]
-        public ushort Duration { get; set; }
+        public override ushort Duration { get; set; }
         [YAXAttributeFor("Skill_ID")]
         [YAXSerializeAs("value")]
         public int I_00 { get; set; }
@@ -944,14 +981,17 @@ namespace Xv2CoreLib.BSA
 
     [YAXSerializeAs("BSA_Type12")]
     [Serializable]
-    public class BSA_Type12 : IBsaType
+    public class BSA_Type12 : BSA_TypeBase
     {
+        [YAXDontSerialize]
+        public override int TypeID => 12;
+
         [YAXAttributeFor("Start_Time")]
         [YAXSerializeAs("frames")]
-        public ushort StartTime { get; set; }
+        public override ushort StartTime { get; set; }
         [YAXAttributeFor("Duration")]
         [YAXSerializeAs("frames")]
-        public ushort Duration { get; set; }
+        public override ushort Duration { get; set; }
         [YAXAttributeFor("F_00")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
@@ -973,14 +1013,17 @@ namespace Xv2CoreLib.BSA
 
     [YAXSerializeAs("BSA_Type13")]
     [Serializable]
-    public class BSA_Type13 : IBsaType
+    public class BSA_Type13 : BSA_TypeBase
     {
+        [YAXDontSerialize]
+        public override int TypeID => 13;
+
         [YAXAttributeFor("Start_Time")]
         [YAXSerializeAs("frames")]
-        public ushort StartTime { get; set; }
+        public override ushort StartTime { get; set; }
         [YAXAttributeFor("Duration")]
         [YAXSerializeAs("frames")]
-        public ushort Duration { get; set; }
+        public override ushort Duration { get; set; }
         [YAXAttributeFor("I_00")]
         [YAXSerializeAs("value")]
         public ushort I_00 { get; set; }
@@ -1015,14 +1058,17 @@ namespace Xv2CoreLib.BSA
 
     [YAXSerializeAs("BSA_Type14")]
     [Serializable]
-    public class BSA_Type14 : IBsaType
+    public class BSA_Type14 : BSA_TypeBase
     {
+        [YAXDontSerialize]
+        public override int TypeID => 14;
+
         [YAXAttributeFor("Start_Time")]
         [YAXSerializeAs("frames")]
-        public ushort StartTime { get; set; }
+        public override ushort StartTime { get; set; }
         [YAXAttributeFor("Duration")]
         [YAXSerializeAs("frames")]
-        public ushort Duration { get; set; }
+        public override ushort Duration { get; set; }
         [YAXAttributeFor("I_00")]
         [YAXSerializeAs("value")]
         public ushort I_00 { get; set; }
@@ -1100,9 +1146,114 @@ namespace Xv2CoreLib.BSA
         public uint I_84 { get; set; }
     }
 
-    public interface IBsaType
+    public static class BsaTypeNames
+    {
+        public static string GetBaseName(IBsaType type)
+        {
+            switch (type)
+            {
+                case BSA_Type0 _:
+                    return "Entry Passing";
+                case BSA_Type1 _:
+                    return "Movement";
+                case BSA_Type2 _:
+                    return "Type2";
+                case BSA_Type3 _:
+                    return "Hitbox";
+                case BSA_Type4 _:
+                    return "Deflection";
+                case BSA_Type6 _:
+                    return "Effect";
+                case BSA_Type7 _:
+                    return "Sound";
+                case BSA_Type8 _:
+                    return "Screen Effect";
+                case BSA_Type10 _:
+                    return "Unknown 10";
+                case BSA_Type12 _:
+                    return "Unknown 12";
+                case BSA_Type13 _:
+                    return "Unknown 13";
+                case BSA_Type14 _:
+                    return "Unknown 14";
+                default:
+                    return type?.GetType().Name ?? string.Empty;
+            }
+        }
+
+        public static string GetName(IBsaType type)
+        {
+            switch (type)
+            {
+                case BSA_Type0 type0:
+                    return $"Entry Passing ({type0.BSA_EntryID}, 0x{type0.I_02:X}, {type0.F_08:0.###})";
+                case BSA_Type1 _:
+                    return "Movement";
+                case BSA_Type2 type2:
+                    return $"Type2 ({type2.I_00}, {type2.I_02}, {type2.I_04}, {type2.I_06})";
+                case BSA_Type3 _:
+                    return "Hitbox";
+                case BSA_Type4 type4:
+                    return $"Deflection ({type4.I_00}, {type4.I_04})";
+                case BSA_Type6 type6:
+                    return $"Effect ({type6.EepkType}, {type6.SkillID}, {type6.EffectID}, {type6.I_08})";
+                case BSA_Type7 type7:
+                    return $"Sound ({type7.AcbType}, {type7.CueId})";
+                case BSA_Type8 type8:
+                    return $"Screen Effect ({type8.I_00}, {type8.I_02})";
+                case BSA_Type10 type10:
+                    return $"Unknown 10 ({type10.I_00}, {type10.I_04}, {type10.I_06})";
+                case BSA_Type12 type12:
+                    return $"Unknown 12 ({type12.EepkType}, {type12.SkillID}, {type12.I_12})";
+                case BSA_Type13 type13:
+                    return $"Unknown 13 ({type13.I_00}, {type13.I_02}, {type13.I_12})";
+                case BSA_Type14 type14:
+                    return $"Unknown 14 ({type14.I_00}, {type14.I_02})";
+                default:
+                    return type?.GetType().Name ?? string.Empty;
+            }
+        }
+    }
+
+    [Serializable]
+    public abstract class BSA_TypeBase : IBsaType
+    {
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public abstract ushort StartTime { get; set; }
+        public abstract ushort Duration { get; set; }
+
+        [YAXDontSerialize]
+        public abstract int TypeID { get; }
+
+        [YAXDontSerialize]
+        public virtual string Type => BsaTypeNames.GetName(this);
+
+        [YAXDontSerialize]
+        public virtual string TypeName => BsaTypeNames.GetBaseName(this);
+
+        public void RefreshType()
+        {
+            NotifyPropertyChanged(nameof(Type));
+            NotifyPropertyChanged(nameof(TypeName));
+            NotifyPropertyChanged(nameof(StartTime));
+            NotifyPropertyChanged(nameof(Duration));
+        }
+
+        protected void NotifyPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
+    public interface IBsaType : INotifyPropertyChanged
     {
         ushort StartTime { get; set; }
         ushort Duration { get; set; }
+        int TypeID { get; }
+        string Type { get; }
+        string TypeName { get; }
+        void RefreshType();
     }
 }
