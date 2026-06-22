@@ -363,6 +363,140 @@ namespace Xv2CoreLib.BCM
             };
         }
 
+        /// <summary>
+        /// Replaces repeated BCM child lists with Child_GoTo_Idx links.
+        /// This is the same kind of "compression" used by existing compressed BCM files:
+        /// the file is still a normal BCM, but duplicate child subtrees are written once and reused through child links.
+        /// </summary>
+        public int CompressLoops()
+        {
+            ValidateCompressionEntries(BCMEntries);
+
+            int oldCount = FlattenEntries(BCMEntries).Count;
+            Dictionary<BCM_Entry, EntrySignature> entrySignatures = new Dictionary<BCM_Entry, EntrySignature>();
+            Dictionary<IList<BCM_Entry>, ChildListSignature> childListSignatures = new Dictionary<IList<BCM_Entry>, ChildListSignature>();
+
+            // Build all signatures before mutating the tree. If signatures were built during compression,
+            // an earlier replacement would change later comparisons and the result would depend on traversal side effects.
+            GetChildListSignature(BCMEntries, entrySignatures, childListSignatures);
+
+            Dictionary<ChildListSignature, BCM_Entry> seenChildLists = new Dictionary<ChildListSignature, BCM_Entry>();
+            Dictionary<BCM_Entry, BCM_Entry> childLoopTargets = new Dictionary<BCM_Entry, BCM_Entry>();
+            CompressEntries(BCMEntries, childListSignatures, seenChildLists, childLoopTargets);
+
+            int newCount = FlattenEntries(BCMEntries).Count;
+            int removedCount = oldCount - newCount;
+
+            if (removedCount > 0)
+                ReindexCompressedEntries(childLoopTargets);
+
+            return removedCount;
+        }
+
+        private static void CompressEntries(IList<BCM_Entry> entries, Dictionary<IList<BCM_Entry>, ChildListSignature> childListSignatures, Dictionary<ChildListSignature, BCM_Entry> seenChildLists, Dictionary<BCM_Entry, BCM_Entry> childLoopTargets)
+        {
+            if (entries == null) return;
+
+            foreach (BCM_Entry entry in entries)
+            {
+                if (entry.BCMEntries == null || entry.BCMEntries.Count == 0)
+                    continue;
+
+                ChildListSignature childListSignature = childListSignatures[entry.BCMEntries];
+                if (seenChildLists.TryGetValue(childListSignature, out BCM_Entry targetEntry))
+                {
+                    // BCM already has a native way to reuse a child chain: Child_GoTo_Idx.
+                    // Removing the duplicate children and linking to the first matching child keeps the normal serializer format.
+                    entry.BCMEntries = new List<BCM_Entry>();
+                    childLoopTargets[entry] = targetEntry;
+                    continue;
+                }
+
+                // Store the first child, not the parent, because Child_GoTo_Idx points to the child chain entry.
+                seenChildLists.Add(childListSignature, entry.BCMEntries[0]);
+                CompressEntries(entry.BCMEntries, childListSignatures, seenChildLists, childLoopTargets);
+            }
+        }
+
+        private void ReindexCompressedEntries(Dictionary<BCM_Entry, BCM_Entry> childLoopTargets)
+        {
+            List<BCM_Entry> entries = FlattenEntries(BCMEntries);
+
+            for (int index = 0; index < entries.Count; index++)
+            {
+                BCM_Entry entry = entries[index];
+                entry.Index = index.ToString();
+                // The compressor owns the output graph. Clear old loop labels, then write only links that survived compression.
+                entry.LoopAsChild = null;
+                entry.LoopAsSibling = null;
+            }
+
+            foreach (KeyValuePair<BCM_Entry, BCM_Entry> childLoopTarget in childLoopTargets)
+                childLoopTarget.Key.LoopAsChild = childLoopTarget.Value.Index;
+        }
+
+        private static ChildListSignature GetChildListSignature(IList<BCM_Entry> entries, Dictionary<BCM_Entry, EntrySignature> entrySignatures, Dictionary<IList<BCM_Entry>, ChildListSignature> childListSignatures)
+        {
+            if (entries == null)
+                return ChildListSignature.Empty;
+
+            if (childListSignatures.TryGetValue(entries, out ChildListSignature existingSignature))
+                return existingSignature;
+
+            // Child list identity is ordered. Two entries can share children only when the whole child chain matches in order.
+            ChildListSignature signature = new ChildListSignature(entries.Select(entry => GetEntrySignature(entry, entrySignatures, childListSignatures)).ToList());
+            childListSignatures.Add(entries, signature);
+            return signature;
+        }
+
+        private static EntrySignature GetEntrySignature(BCM_Entry entry, Dictionary<BCM_Entry, EntrySignature> entrySignatures, Dictionary<IList<BCM_Entry>, ChildListSignature> childListSignatures)
+        {
+            if (entrySignatures.TryGetValue(entry, out EntrySignature existingSignature))
+                return existingSignature;
+
+            // Indexes and existing loop labels are structural. Only serialized payload data and original child shape define reuse.
+            EntrySignature signature = new EntrySignature(new EntryPayloadSignature(entry), GetChildListSignature(entry.BCMEntries, entrySignatures, childListSignatures));
+            entrySignatures.Add(entry, signature);
+            return signature;
+        }
+
+        private static void ValidateCompressionEntries(IList<BCM_Entry> entries)
+        {
+            if (entries == null) return;
+
+            for (int index = 0; index < entries.Count; index++)
+            {
+                BCM_Entry entry = entries[index];
+                if (entry == null) continue;
+
+                if (entry.LoopAsChild != null && entry.BCMEntries?.Count > 0)
+                    throw new InvalidDataException(string.Format("Invalid Loop_As_Child tag on Idx {0}. Cannot compress an entry that has both a child loop and actual child entries.", entry.Index));
+
+                if (index < entries.Count - 1 && entry.LoopAsSibling != null)
+                    throw new InvalidDataException(string.Format("Invalid Loop_As_Sibling tag on Idx {0}. Cannot compress an entry that has both a sibling loop and an actual following sibling.", entry.Index));
+
+                ValidateCompressionEntries(entry.BCMEntries);
+            }
+        }
+
+        private static List<BCM_Entry> FlattenEntries(IEnumerable<BCM_Entry> entries)
+        {
+            List<BCM_Entry> flatEntries = new List<BCM_Entry>();
+            AddFlattenedEntries(entries, flatEntries);
+            return flatEntries;
+        }
+
+        private static void AddFlattenedEntries(IEnumerable<BCM_Entry> entries, List<BCM_Entry> flatEntries)
+        {
+            if (entries == null) return;
+
+            foreach (BCM_Entry entry in entries)
+            {
+                flatEntries.Add(entry);
+                AddFlattenedEntries(entry.BCMEntries, flatEntries);
+            }
+        }
+
         #region DumbShit
         public void AppendIndex(string append)
         {
@@ -432,6 +566,183 @@ namespace Xv2CoreLib.BCM
             }
         }
         #endregion
+
+        private sealed class ChildListSignature : IEquatable<ChildListSignature>
+        {
+            public static readonly ChildListSignature Empty = new ChildListSignature(new List<EntrySignature>());
+
+            private readonly List<EntrySignature> entries;
+            private readonly int hashCode;
+
+            public ChildListSignature(List<EntrySignature> entries)
+            {
+                this.entries = entries ?? new List<EntrySignature>();
+                hashCode = 17;
+
+                // The cached hash keeps dictionary lookups cheap for large BCM trees.
+                // Equals still compares every entry, so a hash collision cannot merge different child lists.
+                foreach (EntrySignature entry in this.entries)
+                    hashCode = (hashCode * 31) + entry.GetHashCode();
+            }
+
+            public bool Equals(ChildListSignature other)
+            {
+                if (ReferenceEquals(other, null)) return false;
+                if (ReferenceEquals(this, other)) return true;
+                if (entries.Count != other.entries.Count) return false;
+
+                for (int index = 0; index < entries.Count; index++)
+                {
+                    if (!entries[index].Equals(other.entries[index]))
+                        return false;
+                }
+
+                return true;
+            }
+
+            public override bool Equals(object obj)
+            {
+                return Equals(obj as ChildListSignature);
+            }
+
+            public override int GetHashCode()
+            {
+                return hashCode;
+            }
+        }
+
+        private sealed class EntrySignature : IEquatable<EntrySignature>
+        {
+            private readonly EntryPayloadSignature payload;
+            private readonly ChildListSignature children;
+            private readonly int hashCode;
+
+            public EntrySignature(EntryPayloadSignature payload, ChildListSignature children)
+            {
+                this.payload = payload;
+                this.children = children;
+                // Combine payload and child shape so entries only match when both the data and subtree are the same.
+                hashCode = ((payload.GetHashCode() * 397) ^ children.GetHashCode());
+            }
+
+            public bool Equals(EntrySignature other)
+            {
+                if (ReferenceEquals(other, null)) return false;
+                if (ReferenceEquals(this, other)) return true;
+                return payload.Equals(other.payload) && children.Equals(other.children);
+            }
+
+            public override bool Equals(object obj)
+            {
+                return Equals(obj as EntrySignature);
+            }
+
+            public override int GetHashCode()
+            {
+                return hashCode;
+            }
+        }
+
+        private sealed class EntryPayloadSignature : IEquatable<EntryPayloadSignature>
+        {
+            private readonly BCM_Entry entry;
+            private readonly int hashCode;
+
+            public EntryPayloadSignature(BCM_Entry entry)
+            {
+                this.entry = entry;
+                hashCode = CreateHashCode(entry);
+            }
+
+            public bool Equals(EntryPayloadSignature other)
+            {
+                if (ReferenceEquals(other, null)) return false;
+                if (ReferenceEquals(this, other)) return true;
+
+                BCM_Entry otherEntry = other.entry;
+                return entry.I_00 == otherEntry.I_00 &&
+                       entry.DirectionalInput == otherEntry.DirectionalInput &&
+                       entry.ButtonInput == otherEntry.ButtonInput &&
+                       entry.HoldDownConditions == otherEntry.HoldDownConditions &&
+                       entry.OpponentSizeConditions == otherEntry.OpponentSizeConditions &&
+                       entry.MinimumLoopDuration == otherEntry.MinimumLoopDuration &&
+                       entry.MaximumLoopDuration == otherEntry.MaximumLoopDuration &&
+                       entry.PrimaryActivatorConditions == otherEntry.PrimaryActivatorConditions &&
+                       entry.ActivatorState == otherEntry.ActivatorState &&
+                       entry.BacEntryPrimary == otherEntry.BacEntryPrimary &&
+                       entry.BacEntryCharge == otherEntry.BacEntryCharge &&
+                       entry.I_36 == otherEntry.I_36 &&
+                       entry.BacEntryUserConnect == otherEntry.BacEntryUserConnect &&
+                       entry.BacEntryVictimConnect == otherEntry.BacEntryVictimConnect &&
+                       entry.BacEntryAirborne == otherEntry.BacEntryAirborne &&
+                       entry.BacEntryTargetingOverride == otherEntry.BacEntryTargetingOverride &&
+                       entry.RandomFlag == otherEntry.RandomFlag &&
+                       entry.I_64 == otherEntry.I_64 &&
+                       entry.I_68 == otherEntry.I_68 &&
+                       entry.I_72 == otherEntry.I_72 &&
+                       entry.ReceiverLinkID == otherEntry.ReceiverLinkID &&
+                       entry.I_80 == otherEntry.I_80 &&
+                       entry.StaminaCost == otherEntry.StaminaCost &&
+                       entry.I_88 == otherEntry.I_88 &&
+                       entry.KiRequired == otherEntry.KiRequired &&
+                       entry.HealthRequired.Equals(otherEntry.HealthRequired) &&
+                       entry.TransStage == otherEntry.TransStage &&
+                       entry.CusAura == otherEntry.CusAura &&
+                       entry.I_104 == otherEntry.I_104 &&
+                       entry.I_108 == otherEntry.I_108;
+            }
+
+            public override bool Equals(object obj)
+            {
+                return Equals(obj as EntryPayloadSignature);
+            }
+
+            public override int GetHashCode()
+            {
+                return hashCode;
+            }
+
+            private static int CreateHashCode(BCM_Entry entry)
+            {
+                unchecked
+                {
+                    // This mirrors EntryPayloadSignature.Equals. If a serialized field is added there,
+                    // add it here too so dictionary buckets stay useful.
+                    int hash = 17;
+                    hash = (hash * 31) + entry.I_00.GetHashCode();
+                    hash = (hash * 31) + entry.DirectionalInput.GetHashCode();
+                    hash = (hash * 31) + entry.ButtonInput.GetHashCode();
+                    hash = (hash * 31) + entry.HoldDownConditions.GetHashCode();
+                    hash = (hash * 31) + entry.OpponentSizeConditions.GetHashCode();
+                    hash = (hash * 31) + entry.MinimumLoopDuration.GetHashCode();
+                    hash = (hash * 31) + entry.MaximumLoopDuration.GetHashCode();
+                    hash = (hash * 31) + entry.PrimaryActivatorConditions.GetHashCode();
+                    hash = (hash * 31) + entry.ActivatorState.GetHashCode();
+                    hash = (hash * 31) + entry.BacEntryPrimary.GetHashCode();
+                    hash = (hash * 31) + entry.BacEntryCharge.GetHashCode();
+                    hash = (hash * 31) + entry.I_36.GetHashCode();
+                    hash = (hash * 31) + entry.BacEntryUserConnect.GetHashCode();
+                    hash = (hash * 31) + entry.BacEntryVictimConnect.GetHashCode();
+                    hash = (hash * 31) + entry.BacEntryAirborne.GetHashCode();
+                    hash = (hash * 31) + entry.BacEntryTargetingOverride.GetHashCode();
+                    hash = (hash * 31) + entry.RandomFlag.GetHashCode();
+                    hash = (hash * 31) + entry.I_64.GetHashCode();
+                    hash = (hash * 31) + entry.I_68.GetHashCode();
+                    hash = (hash * 31) + entry.I_72.GetHashCode();
+                    hash = (hash * 31) + entry.ReceiverLinkID.GetHashCode();
+                    hash = (hash * 31) + entry.I_80.GetHashCode();
+                    hash = (hash * 31) + entry.StaminaCost.GetHashCode();
+                    hash = (hash * 31) + entry.I_88.GetHashCode();
+                    hash = (hash * 31) + entry.KiRequired.GetHashCode();
+                    hash = (hash * 31) + entry.HealthRequired.GetHashCode();
+                    hash = (hash * 31) + entry.TransStage.GetHashCode();
+                    hash = (hash * 31) + entry.CusAura.GetHashCode();
+                    hash = (hash * 31) + entry.I_104.GetHashCode();
+                    hash = (hash * 31) + entry.I_108.GetHashCode();
+                    return hash;
+                }
+            }
+        }
     }
 
     [YAXSerializeAs("BCMEntry")]
