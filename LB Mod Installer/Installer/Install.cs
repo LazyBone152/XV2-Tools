@@ -62,6 +62,7 @@ using Xv2CoreLib.PSO;
 using Xv2CoreLib.OCP;
 using Xv2CoreLib.AIT;
 using Xv2CoreLib.CDT;
+using Xv2CoreLib.CBS;
 using xv2Utils = Xv2CoreLib.Utils;
 using Xv2CoreLib.EMZ;
 using Xv2CoreLib.SDS;
@@ -431,6 +432,9 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".cdt":
                     Install_CDT(xmlPath, installPath, isXml, useSkipBindings);
+                    break;
+                case ".cbs":
+                    Install_CBS(xmlPath, installPath, isXml, useSkipBindings);
                     break;
                 case ".emz":
                     XDocument emzXml = zipManager.GetXmlDocumentFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath));
@@ -2153,6 +2157,27 @@ namespace LB_Mod_Installer.Installer
 #endif
         }
 
+        private void Install_CBS(string xmlPath, string installPath, bool isXml, bool useSkipBindings)
+        {
+#if !DEBUG
+            try
+#endif
+            {
+                CBS_File xmlFile = (isXml) ? zipManager.DeserializeXmlFromArchive_Ext<CBS_File>(GeneralInfo.GetPathInZipDataDir(xmlPath)) : CBS_File.Parse(zipManager.GetFileFromArchive(GeneralInfo.GetPathInZipDataDir(xmlPath)));
+                CBS_File binaryFile = (CBS_File)GetParsedFile<CBS_File>(installPath);
+
+                //Install entries. CharaId bindings (character aliases) are resolved during the first binding pass on the raw xml.
+                InstallEntries(xmlFile.Entries, binaryFile.Entries, installPath, Sections.CBS_Entry, useSkipBindings);
+            }
+#if !DEBUG
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at CBS install phase ({0}).", xmlPath);
+                throw new Exception(error, ex);
+            }
+#endif
+        }
+
         private void Install_QSF(string xmlPath, string installPath, bool isXml)
         {
 #if !DEBUG
@@ -2753,6 +2778,8 @@ namespace LB_Mod_Installer.Installer
                     return AIT_File.Parse(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".cdt":
                     return CDT_File.Load(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
+                case ".cbs":
+                    return CBS_File.Parse(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 case ".emz":
                     return EMZ_File.LoadData(fileIO.GetFileFromGame(path, raiseEx, onlyFromCpk));
                 default:
@@ -2883,6 +2910,8 @@ namespace LB_Mod_Installer.Installer
                     return ((AIT_File)data).SaveToBytes();
                 case ".cdt":
                     return ((CDT_File)data).SaveToBytes();
+                case ".cbs":
+                    return ((CBS_File)data).SaveToBytes();
                 case ".emz":
                     if(data is EMB_File emb)
                     {

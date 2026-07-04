@@ -57,6 +57,7 @@ using Xv2CoreLib.PSO;
 using Xv2CoreLib.OCP;
 using Xv2CoreLib.AIT;
 using Xv2CoreLib.CDT;
+using Xv2CoreLib.CBS;
 using Xv2CoreLib.SDS;
 
 namespace LB_Mod_Installer.Installer
@@ -353,6 +354,9 @@ namespace LB_Mod_Installer.Installer
                     break;
                 case ".cdt":
                     Uninstall_CDT(path, file);
+                    break;
+                case ".cbs":
+                    Uninstall_CBS(path, file);
                     break;
                 case ".emz":
                     //The normal file loading methods are problematic for emz, since it can technically be multiple different files.
@@ -1223,6 +1227,28 @@ namespace LB_Mod_Installer.Installer
             catch (Exception ex)
             {
                 string error = string.Format("Failed at CML uninstall phase ({0}).", path);
+                throw new Exception(error, ex);
+            }
+        }
+
+        private void Uninstall_CBS(string path, _File file)
+        {
+            try
+            {
+                CBS_File binaryFile = (CBS_File)GetParsedFile<CBS_File>(path, false);
+                CBS_File cpkBinFile = (CBS_File)GetParsedFile<CBS_File>(path, true);
+
+                Section section = file.GetSection(Sections.CBS_Entry);
+
+                if (section != null)
+                {
+                    UninstallEntries(binaryFile.Entries, (cpkBinFile != null) ? cpkBinFile.Entries : null, section.IDs);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                string error = string.Format("Failed at CBS uninstall phase ({0}).", path);
                 throw new Exception(error, ex);
             }
         }
