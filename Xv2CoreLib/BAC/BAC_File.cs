@@ -5630,7 +5630,7 @@ namespace Xv2CoreLib.BAC
         public int I_12 { get; set; }
         [YAXAttributeFor("BACEntryPass")]
         [YAXSerializeAs("value")]
-        public ushort I_16{ get; set; }
+        public ushort I_16 { get; set; }
         [YAXAttributeFor("I_18")]
         [YAXSerializeAs("value")]
         public byte I_18 { get; set; }
@@ -5646,7 +5646,7 @@ namespace Xv2CoreLib.BAC
         [YAXAttributeFor("HitboxSize")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
-        public float F_24{ get; set; }
+        public float F_24 { get; set; }
         [YAXAttributeFor("F_28")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
