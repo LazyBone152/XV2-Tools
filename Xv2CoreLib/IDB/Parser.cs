@@ -14,6 +14,7 @@ namespace Xv2CoreLib.IDB
         public static int ENTRY_SIZE_OLD = IDB_Entry.OLD_ENTRY_SIZE + (IBD_Effect.OLD_ENTRY_SIZE * 3);
         public static int ENTRY_SIZE_V1 = IDB_Entry.ENTRY_SIZE_V1 + (IBD_Effect.ENTRY_SIZE_V1 * 3);
         public static int ENTRY_SIZE_V2 = IDB_Entry.ENTRY_SIZE_V2 + (IBD_Effect.ENTRY_SIZE_V2 * 3);
+        public static int ENTRY_SIZE_V3 = IDB_Entry.ENTRY_SIZE_V2 + (IBD_Effect.ENTRY_SIZE_V3 * 3);
 
 
         public Parser(string location, bool _writeXml = false)
@@ -64,6 +65,10 @@ namespace Xv2CoreLib.IDB
             {
                 idbFile.Version = 2;
             }
+            else if ((rawBytes.Length - 16) == ENTRY_SIZE_V3 * count)
+            {
+                idbFile.Version = 3;
+            }
             else
             {
                 throw new InvalidDataException("IDB version not supported.");
@@ -80,6 +85,7 @@ namespace Xv2CoreLib.IDB
                         break;
                     case 1:
                     case 2:
+                    case 3:
                         ReadEntryNew(count, offset, idbFile.Version);
                         break;
                 }
@@ -169,7 +175,7 @@ namespace Xv2CoreLib.IDB
                 // I wanted to do a similar version check like what is done with the CST files
                 // But I couldn't exactly figure out how I would do that in this case
 
-                if (version != 1 && version != 2)
+                if (version != 1 && version != 2 && version != 3)
                     throw new InvalidDataException($"IDB: This IDB version is not supported (Version: {version}).");
 
                 if (version == 1)
@@ -237,7 +243,7 @@ namespace Xv2CoreLib.IDB
                         Effects = ReadEffectNew(offset + 64, version)
                     });
 
-                    offset += ENTRY_SIZE_V2;
+                    offset += (version >= 3) ? ENTRY_SIZE_V3 : ENTRY_SIZE_V2;
                 }
             }
         }
@@ -247,7 +253,7 @@ namespace Xv2CoreLib.IDB
         {
             List<IBD_Effect> effects = new List<IBD_Effect>();
 
-            if (version != 1 && version != 2)
+            if (version != 1 && version != 2 && version != 3)
                 throw new InvalidDataException($"IDB: This IDB version is not supported (Version: {version}).");
 
             if (version == 1)
@@ -290,7 +296,7 @@ namespace Xv2CoreLib.IDB
                 }
             }
 
-            if (version == 2)
+            if (version >= 2)
             {
                 for (int i = 0; i < 3; i++)
                 {
@@ -325,9 +331,10 @@ namespace Xv2CoreLib.IDB
                         F_144 = BitConverter.ToSingle(rawBytes, offset + 156),
                         F_148 = BitConverter.ToSingle(rawBytes, offset + 160),
                         F_152 = BitConverter.ToSingle(rawBytes, offset + 164),
-                        F_156 = BitConverter_Ex.ToFloat32Array(rawBytes, offset + 168, 17)
+                        F_156 = BitConverter_Ex.ToFloat32Array(rawBytes, offset + 168, 17),
+                        NEW_F_236 = (version >= 3) ? BitConverter.ToSingle(rawBytes, offset + 236) : 0f
                     });
-                    offset += 236;
+                    offset += (version >= 3) ? IBD_Effect.ENTRY_SIZE_V3 : IBD_Effect.ENTRY_SIZE_V2;
                 }
             }
 

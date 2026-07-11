@@ -99,6 +99,12 @@ namespace Xv2CoreLib.BAS
 
                             if (basFile.Version >= 2)
                                 bytes.AddRange(BitConverter.GetBytes(basFile.Entries[i].SubEntries[a].I_88));
+
+                            if (basFile.Version >= 3)
+                            {
+                                bytes.AddRange(BitConverter.GetBytes(basFile.Entries[i].SubEntries[a].F_92));
+                                bytes.AddRange(BitConverter.GetBytes(basFile.Entries[i].SubEntries[a].I_96));
+                            }
                         }
                     }
                 }

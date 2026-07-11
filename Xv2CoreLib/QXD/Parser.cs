@@ -21,6 +21,7 @@ namespace Xv2CoreLib.QXD
         int questsOffset;
         int lastSectionOffset;
         int floatSectionOffset;
+        int characterEntrySize = 128;
 
         //counts
         int chara1Count;
@@ -78,10 +79,12 @@ namespace Xv2CoreLib.QXD
                 {
                     throw new Exception("The QXD format of this game version is no longer supported by the tool. Only game version 1.21 (and later) are supported.");
                 }
-                else if(entrySize != 128)
+                else if(entrySize != 128 && entrySize != 132)
                 {
                     throw new Exception("Unknown QXD version. Cannot parse file.");
                 }
+
+                characterEntrySize = entrySize;
             }
 
             if (lastSectionCount > 0)
@@ -141,9 +144,11 @@ namespace Xv2CoreLib.QXD
                     I_120 = BitConverter.ToInt16(rawBytes, offset + 120),
                     I_122 = BitConverter.ToUInt16(rawBytes, offset + 122),
                     I_124 = BitConverter.ToUInt16(rawBytes, offset + 124),
-                    I_126 = BitConverter.ToUInt16(rawBytes, offset + 126)
+                    I_126 = BitConverter.ToUInt16(rawBytes, offset + 126),
+                    I_128 = (characterEntrySize >= 132) ? BitConverter.ToUInt16(rawBytes, offset + 128) : ushort.MaxValue,
+                    I_130 = (characterEntrySize >= 132) ? BitConverter.ToUInt16(rawBytes, offset + 130) : (ushort)0
                 });
-                offset += 128; //Previosuly 124 in < 1.21
+                offset += characterEntrySize; //Previosuly 124 in < 1.21
             }
 
             offset = chara2Offset;
@@ -188,9 +193,13 @@ namespace Xv2CoreLib.QXD
                     },
                     I_106 = BitConverter_Ex.ToInt16Array(rawBytes, offset + 106, 7),
                     I_120 = BitConverter.ToInt16(rawBytes, offset + 120),
-                    I_122 = BitConverter.ToUInt16(rawBytes, offset + 122)
+                    I_122 = BitConverter.ToUInt16(rawBytes, offset + 122),
+                    I_124 = BitConverter.ToUInt16(rawBytes, offset + 124),
+                    I_126 = BitConverter.ToUInt16(rawBytes, offset + 126),
+                    I_128 = (characterEntrySize >= 132) ? BitConverter.ToUInt16(rawBytes, offset + 128) : ushort.MaxValue,
+                    I_130 = (characterEntrySize >= 132) ? BitConverter.ToUInt16(rawBytes, offset + 130) : (ushort)0
                 });
-                offset += 128; //Previosuly 124 in < 1.21
+                offset += characterEntrySize; //Previosuly 124 in < 1.21
             }
         }
 

@@ -42,11 +42,12 @@ namespace Xv2CoreLib.IDB
     public class IDB_File : ISorting
     {
         [YAXAttributeForClass]
-        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 1)]
-        public int Version { get; set; } = 2;
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 3)]
+        public int Version { get; set; } = 3;
         //0 = original IDB version (used from 1.00 to 1.17)
         //1 = updated IDB version first used since 1.18
         //2 = updated IDB version first used since 1.22
+        //3 = updated IDB version first used since 1.26
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "IDB_Entry")]
         public List<IDB_Entry> Entries { get; set; }
@@ -539,6 +540,7 @@ namespace Xv2CoreLib.IDB
         public const int OLD_ENTRY_SIZE = 224;
         public const int ENTRY_SIZE_V1 = 232;
         public const int ENTRY_SIZE_V2 = 236;
+        public const int ENTRY_SIZE_V3 = 240;
 
         [YAXAttributeFor("Type")]
         [YAXSerializeAs("value")]
@@ -642,6 +644,11 @@ namespace Xv2CoreLib.IDB
         [YAXFormat("0.0##########")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
         public float[] F_156 { get; set; } //size 17
+        [YAXAttributeFor("NEW_F_236")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0##########")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0f)]
+        public float NEW_F_236 { get; set; }
 
         //New in 1.18
         [YAXAttributeFor("NEW_I_48")]

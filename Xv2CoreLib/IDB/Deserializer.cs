@@ -71,6 +71,7 @@ namespace Xv2CoreLib.IDB
                     break;
                 case 1:
                 case 2:
+                case 3:
                     WriteEntriesNew(count, idbFile.Version);
                     break;
             }
@@ -144,7 +145,7 @@ namespace Xv2CoreLib.IDB
 
         private void WriteEntriesNew(int count, int version)
         {
-            if (version != 1 && version != 2)
+            if (version != 1 && version != 2 && version != 3)
                 throw new InvalidDataException($"IDB: This IDB version is not supported (Version: {version}).");
 
                 for (int i = 0; i < count; i++)
@@ -195,14 +196,14 @@ namespace Xv2CoreLib.IDB
 
         private void WriteEffectNew(IBD_Effect effect, int version)
         {
-            if (version != 1 && version != 2)
+            if (version != 1 && version != 2 && version != 3)
                 throw new InvalidDataException($"IDB: This IDB version is not supported (Version: {version}).");
 
             bytes.AddRange(BitConverter.GetBytes(effect.I_00));
             bytes.AddRange(BitConverter.GetBytes(effect.I_04));
             bytes.AddRange(BitConverter.GetBytes(effect.I_08));
 
-            if (version == 2)
+            if (version >= 2)
                 bytes.AddRange(BitConverter.GetBytes(effect.NEW_I_12));
 
             bytes.AddRange(BitConverter.GetBytes(effect.F_12));
@@ -235,6 +236,9 @@ namespace Xv2CoreLib.IDB
             bytes.AddRange(BitConverter.GetBytes(effect.F_152));
             Assertion.AssertArraySize(effect.F_156, 17, "Effect", "F_156");
             bytes.AddRange(BitConverter_Ex.GetBytes(effect.F_156));
+
+            if (version >= 3)
+                bytes.AddRange(BitConverter.GetBytes(effect.NEW_F_236));
         }
 
     }
