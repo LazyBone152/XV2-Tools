@@ -491,7 +491,7 @@ namespace Xv2CoreLib.CST
         [YAXSerializeAs("value")]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public int I_52 { get; set; }
-        [YAXAttributeFor("I_56")]
+        [YAXAttributeFor("flag_kfk")] // Added in game v 1.26. Adds "Ultra Supervillain Quelled" to the name
         [YAXSerializeAs("value")]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public int I_56 { get; set; }
