@@ -505,6 +505,7 @@ namespace Xv2CoreLib.QXD
                 bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters1[i].F_72));
                 bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters1[i].F_76));
                 bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters1[i].F_80));
+                bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters1[i].NEW_F_84));
                 bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters1[i].I_84));
 
 
@@ -524,8 +525,6 @@ namespace Xv2CoreLib.QXD
                 bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters1[i].I_122));
                 bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters1[i].I_124));
                 bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters1[i].I_126));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters1[i].I_128));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters1[i].I_130));
 
             }
 
@@ -564,6 +563,7 @@ namespace Xv2CoreLib.QXD
                 bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters2[i].F_72));
                 bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters2[i].F_76));
                 bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters2[i].F_80));
+                bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters2[i].NEW_F_84));
                 bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters2[i].I_84));
 
 
@@ -583,8 +583,6 @@ namespace Xv2CoreLib.QXD
                 bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters2[i].I_122));
                 bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters2[i].I_124));
                 bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters2[i].I_126));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters2[i].I_128));
-                bytes.AddRange(BitConverter.GetBytes(qxd_File.Characters2[i].I_130));
 
             }
 

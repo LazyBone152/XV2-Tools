@@ -590,6 +590,11 @@ namespace Xv2CoreLib.QXD
         [YAXSerializeAs("value")]
         [YAXFormat("0.0###########")]
         public float F_80 { get; set; }
+        [YAXAttributeFor("NEW_F_84")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0###########")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = -1f)]
+        public float NEW_F_84 { get; set; } = -1f;
         [YAXAttributeFor("AI_Table")]
         [YAXSerializeAs("ID")]
         public int I_84 { get; set; } //Int32
