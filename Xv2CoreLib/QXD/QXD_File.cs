@@ -619,14 +619,6 @@ namespace Xv2CoreLib.QXD
         [YAXSerializeAs("value")]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (ushort)0)]
         public ushort I_126 { get; set; }
-        [YAXAttributeFor("I_128")]
-        [YAXSerializeAs("value")]
-        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = ushort.MaxValue)]
-        public ushort I_128 { get; set; } = ushort.MaxValue;
-        [YAXAttributeFor("I_130")]
-        [YAXSerializeAs("value")]
-        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (ushort)0)]
-        public ushort I_130 { get; set; }
 
         [BindingSubClass]
         [YAXSerializeAs("Skills")]

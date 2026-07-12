@@ -145,9 +145,7 @@ namespace Xv2CoreLib.QXD
                     I_120 = BitConverter.ToInt16(rawBytes, (characterEntrySize >= 132) ? offset + 124 : offset + 120),
                     I_122 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 126 : offset + 122),
                     I_124 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 128 : offset + 124),
-                    I_126 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 130 : offset + 126),
-                    I_128 = ushort.MaxValue,
-                    I_130 = 0
+                    I_126 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 130 : offset + 126)
                 });
                 offset += characterEntrySize; //Previosuly 124 in < 1.21
             }
@@ -197,9 +195,7 @@ namespace Xv2CoreLib.QXD
                     I_120 = BitConverter.ToInt16(rawBytes, (characterEntrySize >= 132) ? offset + 124 : offset + 120),
                     I_122 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 126 : offset + 122),
                     I_124 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 128 : offset + 124),
-                    I_126 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 130 : offset + 126),
-                    I_128 = ushort.MaxValue,
-                    I_130 = 0
+                    I_126 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 130 : offset + 126)
                 });
                 offset += characterEntrySize; //Previosuly 124 in < 1.21
             }
