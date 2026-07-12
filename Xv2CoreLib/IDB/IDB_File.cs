@@ -579,6 +579,10 @@ namespace Xv2CoreLib.IDB
         [YAXSerializeAs("values")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
         public int[] I_72 { get; set; } //size 6
+        [YAXAttributeFor("NEW_I_104")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = -1)]
+        public int NEW_I_104 { get; set; } = -1;
         [YAXAttributeFor("Health")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
@@ -644,11 +648,6 @@ namespace Xv2CoreLib.IDB
         [YAXFormat("0.0##########")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
         public float[] F_156 { get; set; } //size 17
-        [YAXAttributeFor("NEW_F_236")]
-        [YAXSerializeAs("value")]
-        [YAXFormat("0.0##########")]
-        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0f)]
-        public float NEW_F_236 { get; set; }
 
         //New in 1.18
         [YAXAttributeFor("NEW_I_48")]

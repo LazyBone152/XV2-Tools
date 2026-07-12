@@ -218,7 +218,22 @@ namespace Xv2CoreLib.IDB
             Assertion.AssertArraySize(effect.F_48, 6, "Effect", "Multipliers");
             bytes.AddRange(BitConverter_Ex.GetBytes(effect.F_48));
             Assertion.AssertArraySize(effect.I_72, 6, "Effect", "I_72");
-            bytes.AddRange(BitConverter_Ex.GetBytes(effect.I_72));
+
+            if (version >= 3)
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    bytes.AddRange(BitConverter.GetBytes(effect.I_72[i]));
+                }
+
+                bytes.AddRange(BitConverter.GetBytes(effect.NEW_I_104));
+                bytes.AddRange(BitConverter.GetBytes(effect.I_72[5]));
+            }
+            else
+            {
+                bytes.AddRange(BitConverter_Ex.GetBytes(effect.I_72));
+            }
+
             bytes.AddRange(BitConverter.GetBytes(effect.F_96));
             bytes.AddRange(BitConverter.GetBytes(effect.F_100));
             bytes.AddRange(BitConverter.GetBytes(effect.F_104));
@@ -236,9 +251,6 @@ namespace Xv2CoreLib.IDB
             bytes.AddRange(BitConverter.GetBytes(effect.F_152));
             Assertion.AssertArraySize(effect.F_156, 17, "Effect", "F_156");
             bytes.AddRange(BitConverter_Ex.GetBytes(effect.F_156));
-
-            if (version >= 3)
-                bytes.AddRange(BitConverter.GetBytes(effect.NEW_F_236));
         }
 
     }

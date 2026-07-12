@@ -300,6 +300,20 @@ namespace Xv2CoreLib.IDB
             {
                 for (int i = 0; i < 3; i++)
                 {
+                    int statOffset = (version >= 3) ? offset + 112 : offset + 108;
+                    int f156Offset = (version >= 3) ? offset + 172 : offset + 168;
+                    int[] i72 = (version >= 3)
+                        ? new int[]
+                        {
+                            BitConverter.ToInt32(rawBytes, offset + 84),
+                            BitConverter.ToInt32(rawBytes, offset + 88),
+                            BitConverter.ToInt32(rawBytes, offset + 92),
+                            BitConverter.ToInt32(rawBytes, offset + 96),
+                            BitConverter.ToInt32(rawBytes, offset + 100),
+                            BitConverter.ToInt32(rawBytes, offset + 108)
+                        }
+                        : BitConverter_Ex.ToInt32Array(rawBytes, offset + 84, 6);
+
                     effects.Add(new IBD_Effect()
                     {
                         I_00 = BitConverter.ToInt32(rawBytes, offset + 0),
@@ -315,24 +329,24 @@ namespace Xv2CoreLib.IDB
 
 
                         F_48 = BitConverter_Ex.ToFloat32Array(rawBytes, offset + 60, 6),
-                        I_72 = BitConverter_Ex.ToInt32Array(rawBytes, offset + 84, 6),
-                        F_96 = BitConverter.ToSingle(rawBytes, offset + 108),
-                        F_100 = BitConverter.ToSingle(rawBytes, offset + 112),
-                        F_104 = BitConverter.ToSingle(rawBytes, offset + 116),
-                        F_108 = BitConverter.ToSingle(rawBytes, offset + 120),
-                        F_112 = BitConverter.ToSingle(rawBytes, offset + 124),
-                        F_116 = BitConverter.ToSingle(rawBytes, offset + 128),
-                        F_120 = BitConverter.ToSingle(rawBytes, offset + 132),
-                        F_124 = BitConverter.ToSingle(rawBytes, offset + 136),
-                        F_128 = BitConverter.ToSingle(rawBytes, offset + 140),
-                        F_132 = BitConverter.ToSingle(rawBytes, offset + 144),
-                        F_136 = BitConverter.ToSingle(rawBytes, offset + 148),
-                        F_140 = BitConverter.ToSingle(rawBytes, offset + 152),
-                        F_144 = BitConverter.ToSingle(rawBytes, offset + 156),
-                        F_148 = BitConverter.ToSingle(rawBytes, offset + 160),
-                        F_152 = BitConverter.ToSingle(rawBytes, offset + 164),
-                        F_156 = BitConverter_Ex.ToFloat32Array(rawBytes, offset + 168, 17),
-                        NEW_F_236 = (version >= 3) ? BitConverter.ToSingle(rawBytes, offset + 236) : 0f
+                        I_72 = i72,
+                        NEW_I_104 = (version >= 3) ? BitConverter.ToInt32(rawBytes, offset + 104) : -1,
+                        F_96 = BitConverter.ToSingle(rawBytes, statOffset + 0),
+                        F_100 = BitConverter.ToSingle(rawBytes, statOffset + 4),
+                        F_104 = BitConverter.ToSingle(rawBytes, statOffset + 8),
+                        F_108 = BitConverter.ToSingle(rawBytes, statOffset + 12),
+                        F_112 = BitConverter.ToSingle(rawBytes, statOffset + 16),
+                        F_116 = BitConverter.ToSingle(rawBytes, statOffset + 20),
+                        F_120 = BitConverter.ToSingle(rawBytes, statOffset + 24),
+                        F_124 = BitConverter.ToSingle(rawBytes, statOffset + 28),
+                        F_128 = BitConverter.ToSingle(rawBytes, statOffset + 32),
+                        F_132 = BitConverter.ToSingle(rawBytes, statOffset + 36),
+                        F_136 = BitConverter.ToSingle(rawBytes, statOffset + 40),
+                        F_140 = BitConverter.ToSingle(rawBytes, statOffset + 44),
+                        F_144 = BitConverter.ToSingle(rawBytes, statOffset + 48),
+                        F_148 = BitConverter.ToSingle(rawBytes, statOffset + 52),
+                        F_152 = BitConverter.ToSingle(rawBytes, statOffset + 56),
+                        F_156 = BitConverter_Ex.ToFloat32Array(rawBytes, f156Offset, 17)
                     });
                     offset += (version >= 3) ? IBD_Effect.ENTRY_SIZE_V3 : IBD_Effect.ENTRY_SIZE_V2;
                 }
