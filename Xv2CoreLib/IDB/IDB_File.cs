@@ -643,11 +643,41 @@ namespace Xv2CoreLib.IDB
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
         public float F_152 { get; set; }
+        [YAXDontSerialize]
+        public float[] F_156 { get; set; } //size 17
+        [YAXAttributeFor("BasicMeleeDefense")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0##########")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public float BasicMeleeDefense { get; set; }
+        [YAXAttributeFor("BasicKiBlastDefense")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0##########")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public float BasicKiBlastDefense { get; set; }
+        [YAXAttributeFor("KiSuperDefense")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0##########")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public float KiSuperDefense { get; set; }
+        [YAXAttributeFor("StrikeSuperDefense")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0##########")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public float StrikeSuperDefense { get; set; }
+        [YAXAttributeFor("F_172")]
+        [YAXSerializeAs("values")]
+        [YAXFormat("0.0##########")]
+        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public float[] F_172 { get; set; } //size 13
         [YAXAttributeFor("F_156")]
         [YAXSerializeAs("values")]
         [YAXFormat("0.0##########")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public float[] F_156 { get; set; } //size 17
+        [YAXDontSerializeIfNull]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public float[] F_156_Legacy { get; set; }
 
         //New in 1.18
         [YAXAttributeFor("NEW_I_48")]
@@ -667,6 +697,7 @@ namespace Xv2CoreLib.IDB
             F_48 = new float[6];
             I_72 = new int[6];
             F_156 = new float[17];
+            F_172 = new float[13];
         }
     }
 

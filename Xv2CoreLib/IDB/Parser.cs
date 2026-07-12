@@ -160,6 +160,7 @@ namespace Xv2CoreLib.IDB
                     F_152 = BitConverter.ToSingle(rawBytes, offset + 152),
                     F_156 = BitConverter_Ex.ToFloat32Array(rawBytes, offset + 156, 17)
                 });
+                SetF156Fields(effects[effects.Count - 1], effects[effects.Count - 1].F_156);
                 offset += 224;
             }
 
@@ -292,6 +293,7 @@ namespace Xv2CoreLib.IDB
                         F_152 = BitConverter.ToSingle(rawBytes, offset + 160),
                         F_156 = BitConverter_Ex.ToFloat32Array(rawBytes, offset + 164, 17)
                     });
+                    SetF156Fields(effects[effects.Count - 1], effects[effects.Count - 1].F_156);
                     offset += 232;
                 }
             }
@@ -348,11 +350,25 @@ namespace Xv2CoreLib.IDB
                         F_152 = BitConverter.ToSingle(rawBytes, statOffset + 56),
                         F_156 = BitConverter_Ex.ToFloat32Array(rawBytes, f156Offset, 17)
                     });
+                    SetF156Fields(effects[effects.Count - 1], effects[effects.Count - 1].F_156);
                     offset += (version >= 3) ? IBD_Effect.ENTRY_SIZE_V3 : IBD_Effect.ENTRY_SIZE_V2;
                 }
             }
 
             return effects;
+        }
+
+        private void SetF156Fields(IBD_Effect effect, float[] values)
+        {
+            if (values == null || values.Length != 17)
+                throw new InvalidDataException("IDB Effect F_156 must have 17 values.");
+
+            effect.BasicMeleeDefense = values[0];
+            effect.BasicKiBlastDefense = values[1];
+            effect.KiSuperDefense = values[2];
+            effect.StrikeSuperDefense = values[3];
+            effect.F_172 = new float[13];
+            Array.Copy(values, 4, effect.F_172, 0, 13);
         }
     }
 }

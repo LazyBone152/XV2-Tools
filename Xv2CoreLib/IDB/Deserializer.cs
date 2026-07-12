@@ -139,8 +139,7 @@ namespace Xv2CoreLib.IDB
             bytes.AddRange(BitConverter.GetBytes(effect.F_144));
             bytes.AddRange(BitConverter.GetBytes(effect.F_148));
             bytes.AddRange(BitConverter.GetBytes(effect.F_152));
-            Assertion.AssertArraySize(effect.F_156, 17, "Effect", "F_156");
-            bytes.AddRange(BitConverter_Ex.GetBytes(effect.F_156));
+            bytes.AddRange(BitConverter_Ex.GetBytes(GetF156Values(effect)));
         }
 
         private void WriteEntriesNew(int count, int version)
@@ -249,8 +248,39 @@ namespace Xv2CoreLib.IDB
             bytes.AddRange(BitConverter.GetBytes(effect.F_144));
             bytes.AddRange(BitConverter.GetBytes(effect.F_148));
             bytes.AddRange(BitConverter.GetBytes(effect.F_152));
-            Assertion.AssertArraySize(effect.F_156, 17, "Effect", "F_156");
-            bytes.AddRange(BitConverter_Ex.GetBytes(effect.F_156));
+            bytes.AddRange(BitConverter_Ex.GetBytes(GetF156Values(effect)));
+        }
+
+        private float[] GetF156Values(IBD_Effect effect)
+        {
+            if (effect.F_156_Legacy != null)
+                SetF156Fields(effect, effect.F_156_Legacy, "F_156");
+
+            Assertion.AssertArraySize(effect.F_172, 13, "Effect", "F_172");
+
+            float[] values = new float[17];
+            values[0] = effect.BasicMeleeDefense;
+            values[1] = effect.BasicKiBlastDefense;
+            values[2] = effect.KiSuperDefense;
+            values[3] = effect.StrikeSuperDefense;
+            Array.Copy(effect.F_172, 0, values, 4, 13);
+            effect.F_156 = values;
+            return values;
+        }
+
+        private void SetF156Fields(IBD_Effect effect, float[] values, string fieldName)
+        {
+            if (values == null || values.Length != 17)
+                throw new InvalidDataException($"IDB Effect {fieldName} must have 17 values.");
+
+            effect.BasicMeleeDefense = values[0];
+            effect.BasicKiBlastDefense = values[1];
+            effect.KiSuperDefense = values[2];
+            effect.StrikeSuperDefense = values[3];
+            effect.F_172 = new float[13];
+            Array.Copy(values, 4, effect.F_172, 0, 13);
+            effect.F_156 = values;
+            effect.F_156_Legacy = null;
         }
 
     }
