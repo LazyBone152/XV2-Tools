@@ -175,84 +175,84 @@ namespace Xv2CoreLib.BSA
                 List<int> typeList = new List<int>();
 
                 //Type Headers
-                if(types.Type0 != null)
+                if(types.Type0?.Count > 0)
                 {
                     var results = WriteTypeHeader(0, types.Type0.Count);
                     hdrOffset.Add(results[0]);
                     dataOffset.Add(results[1]);
                     typeList.Add(0);
                 }
-                if (types.Type1 != null)
+                if (types.Type1?.Count > 0)
                 {
                     var results = WriteTypeHeader(1, types.Type1.Count);
                     hdrOffset.Add(results[0]);
                     dataOffset.Add(results[1]);
                     typeList.Add(1);
                 }
-                if (types.Type2 != null)
+                if (types.Type2?.Count > 0)
                 {
                     var results = WriteTypeHeader(2, types.Type2.Count);
                     hdrOffset.Add(results[0]);
                     dataOffset.Add(results[1]);
                     typeList.Add(2);
                 }
-                if (types.Type3 != null)
+                if (types.Type3?.Count > 0)
                 {
                     var results = WriteTypeHeader(3, types.Type3.Count);
                     hdrOffset.Add(results[0]);
                     dataOffset.Add(results[1]);
                     typeList.Add(3);
                 }
-                if (types.Type4 != null)
+                if (types.Type4?.Count > 0)
                 {
                     var results = WriteTypeHeader(4, types.Type4.Count);
                     hdrOffset.Add(results[0]);
                     dataOffset.Add(results[1]);
                     typeList.Add(4);
                 }
-                if (types.Type6 != null)
+                if (types.Type6?.Count > 0)
                 {
                     var results = WriteTypeHeader(6, types.Type6.Count);
                     hdrOffset.Add(results[0]);
                     dataOffset.Add(results[1]);
                     typeList.Add(6);
                 }
-                if (types.Type7 != null)
+                if (types.Type7?.Count > 0)
                 {
                     var results = WriteTypeHeader(7, types.Type7.Count);
                     hdrOffset.Add(results[0]);
                     dataOffset.Add(results[1]);
                     typeList.Add(7);
                 }
-                if (types.Type8 != null)
+                if (types.Type8?.Count > 0)
                 {
                     var results = WriteTypeHeader(8, types.Type8.Count);
                     hdrOffset.Add(results[0]);
                     dataOffset.Add(results[1]);
                     typeList.Add(8);
                 }
-                if (types.Type10 != null)
+                if (types.Type10?.Count > 0)
                 {
-                    var results = WriteTypeHeader(8, types.Type10.Count);
+                    var results = WriteTypeHeader(10, types.Type10.Count);
                     hdrOffset.Add(results[0]);
                     dataOffset.Add(results[1]);
                     typeList.Add(10);
                 }
-                if (types.Type12 != null)
+                if (types.Type12?.Count > 0)
                 {
                     var results = WriteTypeHeader(12, types.Type12.Count);
                     hdrOffset.Add(results[0]);
                     dataOffset.Add(results[1]);
                     typeList.Add(12);
                 }
-                if (types.Type13 != null)
+                if (types.Type13?.Count > 0)
                 {
                     var results = WriteTypeHeader(13, types.Type13.Count);
                     hdrOffset.Add(results[0]);
                     dataOffset.Add(results[1]);
                     typeList.Add(13);
                 }
-                if (types.Type14 != null)
+                if (types.Type14?.Count > 0)
                 {
                     var results = WriteTypeHeader(14, types.Type14.Count);
                     hdrOffset.Add(results[0]);
@@ -752,51 +752,51 @@ namespace Xv2CoreLib.BSA
         private int BsaTypeCount(BSA_Entry bsaEntry)
         {
             int count = 0;
-            if(bsaEntry.Type0 != null)
+            if(bsaEntry.Type0?.Count > 0)
             {
                 count++;
             }
-            if (bsaEntry.Type1 != null)
+            if (bsaEntry.Type1?.Count > 0)
             {
                 count++;
             }
-            if (bsaEntry.Type2 != null)
+            if (bsaEntry.Type2?.Count > 0)
             {
                 count++;
             }
-            if (bsaEntry.Type3 != null)
+            if (bsaEntry.Type3?.Count > 0)
             {
                 count++;
             }
-            if (bsaEntry.Type4 != null)
+            if (bsaEntry.Type4?.Count > 0)
             {
                 count++;
             }
-            if (bsaEntry.Type6 != null)
+            if (bsaEntry.Type6?.Count > 0)
             {
                 count++;
             }
-            if (bsaEntry.Type7 != null)
+            if (bsaEntry.Type7?.Count > 0)
             {
                 count++;
             }
-            if (bsaEntry.Type8 != null)
+            if (bsaEntry.Type8?.Count > 0)
             {
                 count++;
             }
-            if (bsaEntry.Type10 != null)
+            if (bsaEntry.Type10?.Count > 0)
             {
                 count++;
             }
-            if (bsaEntry.Type12 != null)
+            if (bsaEntry.Type12?.Count > 0)
             {
                 count++;
             }
-            if (bsaEntry.Type13 != null)
+            if (bsaEntry.Type13?.Count > 0)
             {
                 count++;
             }
-            if (bsaEntry.Type14 != null)
+            if (bsaEntry.Type14?.Count > 0)
             {
                 count++;
             }
