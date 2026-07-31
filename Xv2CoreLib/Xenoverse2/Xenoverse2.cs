@@ -108,6 +108,7 @@ namespace Xv2CoreLib
         public const string ERS_PATH = "vfx/vfx_spec.ers";
         public const string CUS_PATH = "system/custom_skill.cus";
         public const string CMS_PATH = "system/char_model_spec.cms";
+        public const string CHARA_PORTRAIT_EMB_PATH = "ui/texture/CHARA01.emb";
         public const string PUP_PATH = "system/powerup_parameter.pup";
         public const string CSO_PATH = "system/chara_sound.cso";
         public const string PSC_PATH = "system/parameter_spec_char.psc";
@@ -718,11 +719,11 @@ namespace Xv2CoreLib
             {
                 if (skillType == CUS_File.SkillType.Blast)
                 {
-                    items.Add(new Xv2Item(skill.ID1, skill.ShortName));
+                    items.Add(new Xv2CodedItem(skill.ID1, skill.ShortName, skill.ShortName));
                 }
                 else
                 {
-                    items.Add(new Xv2Item(skill.ID1, GetSkillName(skillType, skill.ID2, skill.ShortName, PreferedLanguage)));
+                    items.Add(new Xv2CodedItem(skill.ID1, GetSkillName(skillType, skill.ID2, skill.ShortName, PreferedLanguage), skill.ShortName));
                 }
             }
 
@@ -1002,14 +1003,57 @@ namespace Xv2CoreLib
             if (!loadCharacters) throw new InvalidOperationException("Xenoverse2.GetCharacterList: characters are not loaded.");
             List<Xv2Item> items = new List<Xv2Item>();
 
+            EMB_File portraitEmb = null;
+            try
+            {
+                portraitEmb = (EMB_File)FileManager.Instance.GetParsedFileFromGame(CHARA_PORTRAIT_EMB_PATH);
+            }
+            catch { }
+
+            EmbEntry fallbackPortrait = portraitEmb?.Entry.FirstOrDefault(x => x.Name.Equals("FOF_000.dds", StringComparison.OrdinalIgnoreCase));
+
             foreach (var character in CmsFile.CMS_Entries)
             {
                 string name = (IsCac(character.ID)) ? GetCacRaceName(character.ID) : charaNameMsgFile[(int)PreferedLanguage].GetCharacterName(character.ShortName);
 
-                items.Add(new Xv2Item(character.ID, name));
+                items.Add(new Xv2CharaItem(character.ID, name, character.ShortName, GetCharacterPortrait(character.ShortName, portraitEmb, fallbackPortrait)));
             }
 
             return items;
+        }
+
+        // Picks a character's select portrait: the shared CHARA01 sheet first, then the character's own ui/texture/<code>.emb, then the FOF placeholder.
+        private static EmbEntry GetCharacterPortrait(string shortName, EMB_File sharedEmb, EmbEntry fallback)
+        {
+            if (string.IsNullOrEmpty(shortName))
+                return fallback;
+
+            EmbEntry portrait = FindPortraitByCode(sharedEmb, shortName, false)
+                ?? FindPortraitByCode(TryGetGameEmb($"ui/texture/{shortName}.emb"), shortName, true);
+
+            return portrait ?? fallback;
+        }
+
+        // Finds a portrait entry for a code: exact "<code>.dds", otherwise the lowest "<code>_..." variant.
+        // allowFirstEntry: when nothing matches by name, take the first entry, since a per-character emb can hold one portrait under an unrelated name.
+        private static EmbEntry FindPortraitByCode(EMB_File emb, string shortName, bool allowFirstEntry)
+        {
+            if (emb == null) return null;
+
+            string exact = $"{shortName}.dds";
+            string prefix = $"{shortName}_";
+            EmbEntry match = emb.Entry
+                .Where(x => x.Name != null && (x.Name.Equals(exact, StringComparison.OrdinalIgnoreCase) || x.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
+                .OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase)
+                .FirstOrDefault();
+
+            return match ?? (allowFirstEntry ? emb.Entry.FirstOrDefault() : null);
+        }
+
+        private static EMB_File TryGetGameEmb(string path)
+        {
+            try { return (EMB_File)FileManager.Instance.GetParsedFileFromGame(path); }
+            catch { return null; }
         }
 
         public List<Xv2Item> GetPartSetList(int cmsId)
@@ -1751,6 +1795,32 @@ namespace Xv2CoreLib
             Name = name;
         }
 
+    }
+
+    // Xv2Item plus a short code (a CMS/CUS ShortName) shown as its own selector column.
+    public class Xv2CodedItem : Xv2Item
+    {
+        public string Code { get; private set; }
+
+        public Xv2CodedItem(int id, string name, string code) : base(id, name)
+        {
+            Code = code;
+        }
+    }
+
+    // Character entry: a select portrait on top of the coded ID/Name/Code.
+    public class Xv2CharaItem : Xv2CodedItem
+    {
+        // Decodes on first read, so a virtualized list only decodes the rows it shows.
+        private readonly EmbEntry _portrait;
+        public System.Windows.Media.Imaging.WriteableBitmap Portrait => _portrait?.Texture;
+        // True when a portrait exists, without running the DDS decode that reading Portrait triggers.
+        public bool HasPortrait => _portrait != null;
+
+        public Xv2CharaItem(int id, string name, string code, EmbEntry portrait) : base(id, name, code)
+        {
+            _portrait = portrait;
+        }
     }
 
 }
