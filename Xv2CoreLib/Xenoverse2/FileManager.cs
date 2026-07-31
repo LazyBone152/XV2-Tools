@@ -32,6 +32,7 @@ using Xv2CoreLib.SPM;
 using Xv2CoreLib.FMP;
 using Xv2CoreLib.NSK;
 using Xv2CoreLib.Eternity;
+using Xv2CoreLib.CBS;
 
 namespace Xv2CoreLib
 {
@@ -294,9 +295,9 @@ namespace Xv2CoreLib
                         break;
                     case ".acb":
                         {
-                            byte[] awbBytes = fileIO.GetFileFromGame(string.Format("{0}/{1}.awb", Path.GetFileNameWithoutExtension(path), Path.GetDirectoryName(path)), false);
+                            byte[] awbBytes = fileIO.GetFileFromGame(string.Format("{0}/{1}.awb", Path.GetFileNameWithoutExtension(path), Path.GetDirectoryName(path)), false, onlyFromCpk);
                             AFS2_File awbFile = awbBytes != null ? AFS2_File.LoadFromArray(awbBytes) : null;
-                            file = new ACB_Wrapper(ACB_File.Load(GetBytesFromGame(path), awbFile));
+                            file = new ACB_Wrapper(ACB_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx), awbFile));
                         }
                         break;
                     case ".spm":
@@ -304,6 +305,9 @@ namespace Xv2CoreLib
                         break;
                     case ".map":
                         file = FMP_File.Load(GetBytesFromGame(path, onlyFromCpk, raiseEx));
+                        break;
+                    case ".cbs":
+                        file = CBS_File.Parse(GetBytesFromGame(path, onlyFromCpk, raiseEx));
                         break;
                     default:
                         throw new InvalidDataException(string.Format("FileManager.GetParsedFileFromGame: The filetype of \"{0}\" is not supported.", path));

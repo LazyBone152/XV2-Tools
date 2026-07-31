@@ -358,6 +358,9 @@ namespace XV2_Xml_Serializer
                                 case ".hvk":
                                     Xv2CoreLib.Havok.HavokTagFile.SerializeToXml(fileLocation);
                                     break;
+                                case ".cbs":
+                                    Xv2CoreLib.CBS.CBS_File.Parse(fileLocation, true);
+                                    break;
                                 case ".xml":
                                     LoadXmlInitial(fileLocation);
                                     break;
@@ -681,6 +684,9 @@ namespace XV2_Xml_Serializer
                     case ".hkx":
                     case ".hvk":
                         Xv2CoreLib.Havok.HavokTagFile.DeserializeFromXml(fileLocation);
+                        break;
+                    case ".cbs":
+                        Xv2CoreLib.CBS.CBS_File.Write(fileLocation);
                         break;
                     default:
                         FileTypeNotSupported(fileLocation);
