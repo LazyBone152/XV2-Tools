@@ -73,13 +73,32 @@ namespace Xv2CoreLib
                                 return "invalid_ACB_Type";
                         }
                     case MoveFileTypes.BAC:
-                        return Costumes.Count == 1 ? System.IO.Path.GetFileNameWithoutExtension(Path) : "Main";
+                        return GetFileNameOrDefault(Costumes.Count == 1 ? "Action" : "Main");
                     case MoveFileTypes.AFTER_BAC:
-                        return "AFTER";
+                        return GetFileNameOrDefault("After Action");
+                    case MoveFileTypes.BCM:
+                        return GetFileNameOrDefault("State");
+                    case MoveFileTypes.AFTER_BCM:
+                        return GetFileNameOrDefault("After State");
+                    case MoveFileTypes.BDM:
+                        return GetFileNameOrDefault("Hitbox");
+                    case MoveFileTypes.SHOT_BDM:
+                        return GetFileNameOrDefault("Shot Hitbox");
+                    case MoveFileTypes.BSA:
+                        return GetFileNameOrDefault("Projectile");
                     default:
                         return "";
                 }
             }
+        }
+
+        private string GetFileNameOrDefault(string defaultName)
+        {
+            if (string.IsNullOrWhiteSpace(Path))
+                return defaultName;
+
+            string fileName = System.IO.Path.GetFileNameWithoutExtension(Path);
+            return string.IsNullOrWhiteSpace(fileName) ? defaultName : fileName;
         }
 
         #endregion

@@ -669,7 +669,7 @@ namespace Xv2CoreLib
                     moveFiles.AfterBcmPath = String.Format("{0}/{1}/{1}_AFTER_PLAYER.bcm", skillDir, folderName);
 
                     if (loadSkillFiles)
-                        moveFiles.AfterBcmFile = new Xv2File<BCM_File>((BCM_File)FileManager.Instance.GetParsedFileFromGame(moveFiles.AfterBcmPath, loadFromCpk), fileIO.PathInGameDir(moveFiles.AfterBcmPath), false, null, false, MoveFileTypes.BCM, 0, false, MoveType.Skill);
+                        moveFiles.AfterBcmFile = new Xv2File<BCM_File>((BCM_File)FileManager.Instance.GetParsedFileFromGame(moveFiles.AfterBcmPath, loadFromCpk), fileIO.PathInGameDir(moveFiles.AfterBcmPath), false, null, false, MoveFileTypes.AFTER_BCM, 0, false, MoveType.Skill);
                 }
                 else
                 {
@@ -677,7 +677,7 @@ namespace Xv2CoreLib
                     moveFiles.AfterBcmPath = String.Format("skill/{0}.bcm", cusEntry.AfterBcmPath);
 
                     if (loadSkillFiles)
-                        moveFiles.AfterBcmFile = new Xv2File<BCM_File>((BCM_File)FileManager.Instance.GetParsedFileFromGame(moveFiles.AfterBcmPath, loadFromCpk), fileIO.PathInGameDir(moveFiles.AfterBcmPath), true, null, false, MoveFileTypes.BCM, 0, false, MoveType.Skill);
+                        moveFiles.AfterBcmFile = new Xv2File<BCM_File>((BCM_File)FileManager.Instance.GetParsedFileFromGame(moveFiles.AfterBcmPath, loadFromCpk), fileIO.PathInGameDir(moveFiles.AfterBcmPath), true, null, false, MoveFileTypes.AFTER_BCM, 0, false, MoveType.Skill);
                 }
             }
 
