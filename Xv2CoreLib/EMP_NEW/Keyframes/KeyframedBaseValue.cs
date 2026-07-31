@@ -86,9 +86,11 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
         /// </summary>
         protected List<KeyframedGenericValue>[] Decompile(float[] constant, params EMP_KeyframedValue[] keyframeValues)
         {
-            //Interpolation setting should be shared between all EMP_KeyframedValues for the same parameter/value (and it is the case in all vanilla EMP files for XV2, SDBH and Breakers)
-            Interpolate = keyframeValues[0].Interpolate;
-            ETR_InterpolationType = keyframeValues[0].ETR_InterpolationType;
+            //Grouped values (position XYZ, ScaleXY, color RGB) share one interpolate/ETR flag across their components. Index 0 can be
+            //EMP_KeyframedValue.Default (flags false) when only a later component is animated, so read the flag from the first component actually present in the file.
+            EMP_KeyframedValue reference = keyframeValues.FirstOrDefault(x => !x.IsDefault) ?? keyframeValues[0];
+            Interpolate = reference.Interpolate;
+            ETR_InterpolationType = reference.ETR_InterpolationType;
             IsAnimated = false;
 
             List<KeyframedGenericValue>[] values = new List<KeyframedGenericValue>[keyframeValues.Length];
@@ -128,10 +130,10 @@ namespace Xv2CoreLib.EMP_NEW.Keyframes
                 }
             }
 
-            //Handle loops
+            //Base the loop flag only on components present in the file. Default placeholders carry Loop = false and would push a fully looped group into the mixed-loop path.
             Loop = false;
 
-            if(keyframeValues.All(x => x.Loop))
+            if(keyframeValues.Where(x => !x.IsDefault).All(x => x.Loop) && keyframeValues.Any(x => !x.IsDefault))
             {
                 Loop = true;
             }
