@@ -960,7 +960,7 @@ namespace Xv2CoreLib.FMP
     }
 
     [YAXSerializeAs("Object")]
-    public class FMP_Object
+    public class FMP_Object : IInstallable
     {
         [YAXAttributeForClass]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
@@ -968,6 +968,15 @@ namespace Xv2CoreLib.FMP
 
         [YAXAttributeForClass]
         public string Name { get; set; }
+
+        [YAXDontSerialize]
+        public int SortID => Index;
+
+        string IInstallable.Index
+        {
+            get => Index.ToString();
+            set => Index = int.Parse(value);
+        }
 
         [CustomSerialize(isHex: true)]
         public ushort I_04 { get; set; }
@@ -2787,12 +2796,21 @@ namespace Xv2CoreLib.FMP
     }
 
     [YAXSerializeAs("CollisionGroup")]
-    public class FMP_CollisionGroup
+    public class FMP_CollisionGroup : IInstallable
     {
         [YAXAttributeForClass]
         public int Index { get; set; }
         [YAXAttributeForClass]
         public string Name { get; set; }
+
+        [YAXDontSerialize]
+        public int SortID => Index;
+
+        string IInstallable.Index
+        {
+            get => Index.ToString();
+            set => Index = int.Parse(value);
+        }
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Collider")]
         public List<FMP_Collider> Colliders { get; set; } = new List<FMP_Collider>();
