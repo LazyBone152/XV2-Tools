@@ -42,11 +42,12 @@ namespace Xv2CoreLib.IDB
     public class IDB_File : ISorting
     {
         [YAXAttributeForClass]
-        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 1)]
-        public int Version { get; set; } = 2;
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 3)]
+        public int Version { get; set; } = 3;
         //0 = original IDB version (used from 1.00 to 1.17)
         //1 = updated IDB version first used since 1.18
         //2 = updated IDB version first used since 1.22
+        //3 = updated IDB version first used since 1.26
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "IDB_Entry")]
         public List<IDB_Entry> Entries { get; set; }
@@ -539,6 +540,7 @@ namespace Xv2CoreLib.IDB
         public const int OLD_ENTRY_SIZE = 224;
         public const int ENTRY_SIZE_V1 = 232;
         public const int ENTRY_SIZE_V2 = 236;
+        public const int ENTRY_SIZE_V3 = 240;
 
         [YAXAttributeFor("Type")]
         [YAXSerializeAs("value")]
@@ -577,6 +579,10 @@ namespace Xv2CoreLib.IDB
         [YAXSerializeAs("values")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
         public int[] I_72 { get; set; } //size 6
+        [YAXAttributeFor("NEW_I_104")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = -1)]
+        public int NEW_I_104 { get; set; } = -1;
         [YAXAttributeFor("Health")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
@@ -637,11 +643,41 @@ namespace Xv2CoreLib.IDB
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
         public float F_152 { get; set; }
+        [YAXDontSerialize]
+        public float[] F_156 { get; set; } //size 17
+        [YAXAttributeFor("BasicMeleeDefense")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0##########")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public float BasicMeleeDefense { get; set; }
+        [YAXAttributeFor("BasicKiBlastDefense")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0##########")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public float BasicKiBlastDefense { get; set; }
+        [YAXAttributeFor("KiSuperDefense")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0##########")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public float KiSuperDefense { get; set; }
+        [YAXAttributeFor("StrikeSuperDefense")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0##########")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public float StrikeSuperDefense { get; set; }
+        [YAXAttributeFor("F_172")]
+        [YAXSerializeAs("values")]
+        [YAXFormat("0.0##########")]
+        [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public float[] F_172 { get; set; } //size 13
         [YAXAttributeFor("F_156")]
         [YAXSerializeAs("values")]
         [YAXFormat("0.0##########")]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
-        public float[] F_156 { get; set; } //size 17
+        [YAXDontSerializeIfNull]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public float[] F_156_Legacy { get; set; }
 
         //New in 1.18
         [YAXAttributeFor("NEW_I_48")]
@@ -661,6 +697,7 @@ namespace Xv2CoreLib.IDB
             F_48 = new float[6];
             I_72 = new int[6];
             F_156 = new float[17];
+            F_172 = new float[13];
         }
     }
 

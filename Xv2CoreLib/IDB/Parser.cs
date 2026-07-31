@@ -14,6 +14,7 @@ namespace Xv2CoreLib.IDB
         public static int ENTRY_SIZE_OLD = IDB_Entry.OLD_ENTRY_SIZE + (IBD_Effect.OLD_ENTRY_SIZE * 3);
         public static int ENTRY_SIZE_V1 = IDB_Entry.ENTRY_SIZE_V1 + (IBD_Effect.ENTRY_SIZE_V1 * 3);
         public static int ENTRY_SIZE_V2 = IDB_Entry.ENTRY_SIZE_V2 + (IBD_Effect.ENTRY_SIZE_V2 * 3);
+        public static int ENTRY_SIZE_V3 = IDB_Entry.ENTRY_SIZE_V2 + (IBD_Effect.ENTRY_SIZE_V3 * 3);
 
 
         public Parser(string location, bool _writeXml = false)
@@ -64,6 +65,10 @@ namespace Xv2CoreLib.IDB
             {
                 idbFile.Version = 2;
             }
+            else if ((rawBytes.Length - 16) == ENTRY_SIZE_V3 * count)
+            {
+                idbFile.Version = 3;
+            }
             else
             {
                 throw new InvalidDataException("IDB version not supported.");
@@ -80,6 +85,7 @@ namespace Xv2CoreLib.IDB
                         break;
                     case 1:
                     case 2:
+                    case 3:
                         ReadEntryNew(count, offset, idbFile.Version);
                         break;
                 }
@@ -154,6 +160,7 @@ namespace Xv2CoreLib.IDB
                     F_152 = BitConverter.ToSingle(rawBytes, offset + 152),
                     F_156 = BitConverter_Ex.ToFloat32Array(rawBytes, offset + 156, 17)
                 });
+                SetF156Fields(effects[effects.Count - 1], effects[effects.Count - 1].F_156);
                 offset += 224;
             }
 
@@ -169,7 +176,7 @@ namespace Xv2CoreLib.IDB
                 // I wanted to do a similar version check like what is done with the CST files
                 // But I couldn't exactly figure out how I would do that in this case
 
-                if (version != 1 && version != 2)
+                if (version != 1 && version != 2 && version != 3)
                     throw new InvalidDataException($"IDB: This IDB version is not supported (Version: {version}).");
 
                 if (version == 1)
@@ -237,7 +244,7 @@ namespace Xv2CoreLib.IDB
                         Effects = ReadEffectNew(offset + 64, version)
                     });
 
-                    offset += ENTRY_SIZE_V2;
+                    offset += (version >= 3) ? ENTRY_SIZE_V3 : ENTRY_SIZE_V2;
                 }
             }
         }
@@ -247,7 +254,7 @@ namespace Xv2CoreLib.IDB
         {
             List<IBD_Effect> effects = new List<IBD_Effect>();
 
-            if (version != 1 && version != 2)
+            if (version != 1 && version != 2 && version != 3)
                 throw new InvalidDataException($"IDB: This IDB version is not supported (Version: {version}).");
 
             if (version == 1)
@@ -286,14 +293,29 @@ namespace Xv2CoreLib.IDB
                         F_152 = BitConverter.ToSingle(rawBytes, offset + 160),
                         F_156 = BitConverter_Ex.ToFloat32Array(rawBytes, offset + 164, 17)
                     });
+                    SetF156Fields(effects[effects.Count - 1], effects[effects.Count - 1].F_156);
                     offset += 232;
                 }
             }
 
-            if (version == 2)
+            if (version >= 2)
             {
                 for (int i = 0; i < 3; i++)
                 {
+                    int statOffset = (version >= 3) ? offset + 112 : offset + 108;
+                    int f156Offset = (version >= 3) ? offset + 172 : offset + 168;
+                    int[] i72 = (version >= 3)
+                        ? new int[]
+                        {
+                            BitConverter.ToInt32(rawBytes, offset + 84),
+                            BitConverter.ToInt32(rawBytes, offset + 88),
+                            BitConverter.ToInt32(rawBytes, offset + 92),
+                            BitConverter.ToInt32(rawBytes, offset + 96),
+                            BitConverter.ToInt32(rawBytes, offset + 100),
+                            BitConverter.ToInt32(rawBytes, offset + 108)
+                        }
+                        : BitConverter_Ex.ToInt32Array(rawBytes, offset + 84, 6);
+
                     effects.Add(new IBD_Effect()
                     {
                         I_00 = BitConverter.ToInt32(rawBytes, offset + 0),
@@ -309,29 +331,44 @@ namespace Xv2CoreLib.IDB
 
 
                         F_48 = BitConverter_Ex.ToFloat32Array(rawBytes, offset + 60, 6),
-                        I_72 = BitConverter_Ex.ToInt32Array(rawBytes, offset + 84, 6),
-                        F_96 = BitConverter.ToSingle(rawBytes, offset + 108),
-                        F_100 = BitConverter.ToSingle(rawBytes, offset + 112),
-                        F_104 = BitConverter.ToSingle(rawBytes, offset + 116),
-                        F_108 = BitConverter.ToSingle(rawBytes, offset + 120),
-                        F_112 = BitConverter.ToSingle(rawBytes, offset + 124),
-                        F_116 = BitConverter.ToSingle(rawBytes, offset + 128),
-                        F_120 = BitConverter.ToSingle(rawBytes, offset + 132),
-                        F_124 = BitConverter.ToSingle(rawBytes, offset + 136),
-                        F_128 = BitConverter.ToSingle(rawBytes, offset + 140),
-                        F_132 = BitConverter.ToSingle(rawBytes, offset + 144),
-                        F_136 = BitConverter.ToSingle(rawBytes, offset + 148),
-                        F_140 = BitConverter.ToSingle(rawBytes, offset + 152),
-                        F_144 = BitConverter.ToSingle(rawBytes, offset + 156),
-                        F_148 = BitConverter.ToSingle(rawBytes, offset + 160),
-                        F_152 = BitConverter.ToSingle(rawBytes, offset + 164),
-                        F_156 = BitConverter_Ex.ToFloat32Array(rawBytes, offset + 168, 17)
+                        I_72 = i72,
+                        NEW_I_104 = (version >= 3) ? BitConverter.ToInt32(rawBytes, offset + 104) : -1,
+                        F_96 = BitConverter.ToSingle(rawBytes, statOffset + 0),
+                        F_100 = BitConverter.ToSingle(rawBytes, statOffset + 4),
+                        F_104 = BitConverter.ToSingle(rawBytes, statOffset + 8),
+                        F_108 = BitConverter.ToSingle(rawBytes, statOffset + 12),
+                        F_112 = BitConverter.ToSingle(rawBytes, statOffset + 16),
+                        F_116 = BitConverter.ToSingle(rawBytes, statOffset + 20),
+                        F_120 = BitConverter.ToSingle(rawBytes, statOffset + 24),
+                        F_124 = BitConverter.ToSingle(rawBytes, statOffset + 28),
+                        F_128 = BitConverter.ToSingle(rawBytes, statOffset + 32),
+                        F_132 = BitConverter.ToSingle(rawBytes, statOffset + 36),
+                        F_136 = BitConverter.ToSingle(rawBytes, statOffset + 40),
+                        F_140 = BitConverter.ToSingle(rawBytes, statOffset + 44),
+                        F_144 = BitConverter.ToSingle(rawBytes, statOffset + 48),
+                        F_148 = BitConverter.ToSingle(rawBytes, statOffset + 52),
+                        F_152 = BitConverter.ToSingle(rawBytes, statOffset + 56),
+                        F_156 = BitConverter_Ex.ToFloat32Array(rawBytes, f156Offset, 17)
                     });
-                    offset += 236;
+                    SetF156Fields(effects[effects.Count - 1], effects[effects.Count - 1].F_156);
+                    offset += (version >= 3) ? IBD_Effect.ENTRY_SIZE_V3 : IBD_Effect.ENTRY_SIZE_V2;
                 }
             }
 
             return effects;
+        }
+
+        private void SetF156Fields(IBD_Effect effect, float[] values)
+        {
+            if (values == null || values.Length != 17)
+                throw new InvalidDataException("IDB Effect F_156 must have 17 values.");
+
+            effect.BasicMeleeDefense = values[0];
+            effect.BasicKiBlastDefense = values[1];
+            effect.KiSuperDefense = values[2];
+            effect.StrikeSuperDefense = values[3];
+            effect.F_172 = new float[13];
+            Array.Copy(values, 4, effect.F_172, 0, 13);
         }
     }
 }

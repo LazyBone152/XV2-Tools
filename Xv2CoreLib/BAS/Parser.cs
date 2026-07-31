@@ -40,7 +40,7 @@ namespace Xv2CoreLib.BAS
             int count = BitConverter.ToInt32(rawBytes, 8);
             int offset = BitConverter.ToInt32(rawBytes, 12);
 
-            basFile.Version = BAS_File.GetBasVersion(rawBytes.Length, BitConverter.ToInt32(rawBytes, offset + 4));
+            basFile.Version = BAS_File.GetBasVersion(rawBytes, offset, count);
             int entrySize = BAS_File.GetSubEntrySize(basFile.Version);
 
             if (count > 0)
@@ -92,6 +92,12 @@ namespace Xv2CoreLib.BAS
                             if (basFile.Version >= 2)
                             {
                                 subEntry.I_88 = BitConverter.ToInt32(rawBytes, subEntryOffset + 88);
+                            }
+
+                            if (basFile.Version >= 3)
+                            {
+                                subEntry.F_92 = BitConverter.ToSingle(rawBytes, subEntryOffset + 92);
+                                subEntry.I_96 = BitConverter.ToInt32(rawBytes, subEntryOffset + 96);
                             }
 
                             basFile.Entries[i].SubEntries.Add(subEntry);

@@ -679,6 +679,10 @@ namespace Xv2CoreLib.SAV
                         return "1.24.02";
                     case 38:
                         return "1.25.01";
+                    case 39:
+                        return "1.25.02";
+                    case 40:
+                        return "1.26";
                     default:
                         return String.Format("Unknown ({0})", Version);
 

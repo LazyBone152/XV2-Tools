@@ -11,7 +11,7 @@ namespace Xv2CoreLib.BAS
     [YAXSerializeAs("BAS")]
     public class BAS_File : IIsNull
     {
-        internal const byte CURRENT_VERSION = 2;
+        internal const byte CURRENT_VERSION = 3;
         [YAXAttributeForClass]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (byte)0)]
         public byte Version { get; set; } = CURRENT_VERSION;
@@ -19,6 +19,8 @@ namespace Xv2CoreLib.BAS
         public const int ENTRY_SIZE_OLD = 84;
         public const int ENTRY_SIZE_V1 = 88; //When they updated the AI for Crossversus
         public const int ENTRY_SIZE_V2 = 92; //New in v1.24/1.25(?)
+        public const int ENTRY_SIZE_V3 = 100;
+        public const int ENTRY_HEADER_SIZE = 12;
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BAS_Entry")]
         public List<BAS_Entry> Entries { get; set; } = new List<BAS_Entry>();
@@ -55,12 +57,48 @@ namespace Xv2CoreLib.BAS
             return Version >= 0 && Version <= CURRENT_VERSION;
         }
 
-        public static byte GetBasVersion(int size, int entryCount)
+        public static byte GetBasVersion(byte[] rawBytes, int entryTableOffset, int entryCount)
         {
             if (entryCount <= 0)
                 throw new ArgumentOutOfRangeException(nameof(entryCount));
 
-            int entrySize = (size - 28) / entryCount;
+            int sampleStart = -1;
+            int sampleCount = 0;
+
+            for (int i = 0; i < entryCount; i++)
+            {
+                int offset = entryTableOffset + (i * ENTRY_HEADER_SIZE);
+                int subCount = BitConverter.ToInt32(rawBytes, offset + 4);
+                int subOffset = BitConverter.ToInt32(rawBytes, offset + 8);
+
+                if (subCount > 0)
+                {
+                    sampleStart = subOffset;
+                    sampleCount = subCount;
+                    break;
+                }
+            }
+
+            if (sampleStart == -1)
+                return CURRENT_VERSION;
+
+            int end = rawBytes.Length;
+
+            for (int i = 0; i < entryCount; i++)
+            {
+                int offset = entryTableOffset + (i * ENTRY_HEADER_SIZE);
+                int otherOffset = BitConverter.ToInt32(rawBytes, offset + 8);
+
+                if (otherOffset > sampleStart && otherOffset < end)
+                    end = otherOffset;
+            }
+
+            int bytes = end - sampleStart;
+
+            if (bytes <= 0 || (bytes % sampleCount) != 0)
+                throw new InvalidDataException($"Could not detect BAS subEntry size. start={sampleStart}, end={end}, bytes={bytes}, count={sampleCount}");
+
+            int entrySize = bytes / sampleCount;
 
             switch (entrySize)
             {
@@ -72,6 +110,9 @@ namespace Xv2CoreLib.BAS
 
                 case ENTRY_SIZE_V2:
                     return 2;
+
+                case ENTRY_SIZE_V3:
+                    return 3;
 
                 default:
                     throw new InvalidDataException("BAS file version not supported.");
@@ -90,6 +131,9 @@ namespace Xv2CoreLib.BAS
 
                 case 2:
                     return ENTRY_SIZE_V2;
+
+                case 3:
+                    return ENTRY_SIZE_V3;
 
                 default:
                     throw new InvalidDataException("BAS file version not supported.");
@@ -182,6 +226,15 @@ namespace Xv2CoreLib.BAS
         [YAXSerializeAs("value")]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0)]
         public int I_88 { get; set; }
+        [YAXAttributeFor("F_92")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0#########")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0f)]
+        public float F_92 { get; set; }
+        [YAXAttributeFor("I_96")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0)]
+        public int I_96 { get; set; }
 
         public enum ActivationConditionTarget
         {

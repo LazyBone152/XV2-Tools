@@ -21,6 +21,7 @@ namespace Xv2CoreLib.QXD
         int questsOffset;
         int lastSectionOffset;
         int floatSectionOffset;
+        int characterEntrySize = 128;
 
         //counts
         int chara1Count;
@@ -78,10 +79,12 @@ namespace Xv2CoreLib.QXD
                 {
                     throw new Exception("The QXD format of this game version is no longer supported by the tool. Only game version 1.21 (and later) are supported.");
                 }
-                else if(entrySize != 128)
+                else if(entrySize != 128 && entrySize != 132)
                 {
                     throw new Exception("Unknown QXD version. Cannot parse file.");
                 }
+
+                characterEntrySize = entrySize;
             }
 
             if (lastSectionCount > 0)
@@ -124,26 +127,27 @@ namespace Xv2CoreLib.QXD
                     F_72 = BitConverter.ToSingle(rawBytes, offset + 72),
                     F_76 = BitConverter.ToSingle(rawBytes, offset + 76),
                     F_80 = BitConverter.ToSingle(rawBytes, offset + 80),
-                    I_84 = BitConverter.ToInt32(rawBytes, offset + 84),
+                    NEW_F_84 = (characterEntrySize >= 132) ? BitConverter.ToSingle(rawBytes, offset + 84) : -1f,
+                    I_84 = BitConverter.ToInt32(rawBytes, (characterEntrySize >= 132) ? offset + 88 : offset + 84),
                     _Skills = new Skills
                     {
-                        I_00 = BitConverter.ToUInt16(rawBytes, offset + 88),
-                        I_02 = BitConverter.ToUInt16(rawBytes, offset + 90),
-                        I_04 = BitConverter.ToUInt16(rawBytes, offset + 92),
-                        I_06 = BitConverter.ToUInt16(rawBytes, offset + 94),
-                        I_08 = BitConverter.ToUInt16(rawBytes, offset + 96),
-                        I_10 = BitConverter.ToUInt16(rawBytes, offset + 98),
-                        I_12 = BitConverter.ToUInt16(rawBytes, offset + 100),
-                        I_14 = BitConverter.ToUInt16(rawBytes, offset + 102),
-                        I_16 = BitConverter.ToUInt16(rawBytes, offset + 104),
+                        I_00 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 92 : offset + 88),
+                        I_02 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 94 : offset + 90),
+                        I_04 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 96 : offset + 92),
+                        I_06 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 98 : offset + 94),
+                        I_08 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 100 : offset + 96),
+                        I_10 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 102 : offset + 98),
+                        I_12 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 104 : offset + 100),
+                        I_14 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 106 : offset + 102),
+                        I_16 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 108 : offset + 104),
                     },
-                    I_106 = BitConverter_Ex.ToInt16Array(rawBytes, offset + 106, 7),
-                    I_120 = BitConverter.ToInt16(rawBytes, offset + 120),
-                    I_122 = BitConverter.ToUInt16(rawBytes, offset + 122),
-                    I_124 = BitConverter.ToUInt16(rawBytes, offset + 124),
-                    I_126 = BitConverter.ToUInt16(rawBytes, offset + 126)
+                    I_106 = BitConverter_Ex.ToInt16Array(rawBytes, (characterEntrySize >= 132) ? offset + 110 : offset + 106, 7),
+                    I_120 = BitConverter.ToInt16(rawBytes, (characterEntrySize >= 132) ? offset + 124 : offset + 120),
+                    I_122 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 126 : offset + 122),
+                    I_124 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 128 : offset + 124),
+                    I_126 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 130 : offset + 126)
                 });
-                offset += 128; //Previosuly 124 in < 1.21
+                offset += characterEntrySize; //Previosuly 124 in < 1.21
             }
 
             offset = chara2Offset;
@@ -173,24 +177,27 @@ namespace Xv2CoreLib.QXD
                     F_72 = BitConverter.ToSingle(rawBytes, offset + 72),
                     F_76 = BitConverter.ToSingle(rawBytes, offset + 76),
                     F_80 = BitConverter.ToSingle(rawBytes, offset + 80),
-                    I_84 = BitConverter.ToInt32(rawBytes, offset + 84),
+                    NEW_F_84 = (characterEntrySize >= 132) ? BitConverter.ToSingle(rawBytes, offset + 84) : -1f,
+                    I_84 = BitConverter.ToInt32(rawBytes, (characterEntrySize >= 132) ? offset + 88 : offset + 84),
                     _Skills = new Skills
                     {
-                        I_00 = BitConverter.ToUInt16(rawBytes, offset + 88),
-                        I_02 = BitConverter.ToUInt16(rawBytes, offset + 90),
-                        I_04 = BitConverter.ToUInt16(rawBytes, offset + 92),
-                        I_06 = BitConverter.ToUInt16(rawBytes, offset + 94),
-                        I_08 = BitConverter.ToUInt16(rawBytes, offset + 96),
-                        I_10 = BitConverter.ToUInt16(rawBytes, offset + 98),
-                        I_12 = BitConverter.ToUInt16(rawBytes, offset + 100),
-                        I_14 = BitConverter.ToUInt16(rawBytes, offset + 102),
-                        I_16 = BitConverter.ToUInt16(rawBytes, offset + 104),
+                        I_00 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 92 : offset + 88),
+                        I_02 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 94 : offset + 90),
+                        I_04 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 96 : offset + 92),
+                        I_06 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 98 : offset + 94),
+                        I_08 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 100 : offset + 96),
+                        I_10 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 102 : offset + 98),
+                        I_12 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 104 : offset + 100),
+                        I_14 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 106 : offset + 102),
+                        I_16 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 108 : offset + 104),
                     },
-                    I_106 = BitConverter_Ex.ToInt16Array(rawBytes, offset + 106, 7),
-                    I_120 = BitConverter.ToInt16(rawBytes, offset + 120),
-                    I_122 = BitConverter.ToUInt16(rawBytes, offset + 122)
+                    I_106 = BitConverter_Ex.ToInt16Array(rawBytes, (characterEntrySize >= 132) ? offset + 110 : offset + 106, 7),
+                    I_120 = BitConverter.ToInt16(rawBytes, (characterEntrySize >= 132) ? offset + 124 : offset + 120),
+                    I_122 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 126 : offset + 122),
+                    I_124 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 128 : offset + 124),
+                    I_126 = BitConverter.ToUInt16(rawBytes, (characterEntrySize >= 132) ? offset + 130 : offset + 126)
                 });
-                offset += 128; //Previosuly 124 in < 1.21
+                offset += characterEntrySize; //Previosuly 124 in < 1.21
             }
         }
 

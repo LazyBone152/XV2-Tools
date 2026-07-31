@@ -61,6 +61,7 @@ namespace Xv2CoreLib.BEV
                 int type6 = 0;
                 int type7 = 0;
                 int type8 = 0;
+                int type9 = 0;
 
                 if (count > 0)
                 {
@@ -109,10 +110,12 @@ namespace Xv2CoreLib.BEV
                                 bevFile.Entries[i].Type8 = GetType8(typeCount, typeoffset, bevFile.Entries[i].Type8, type8);
                                 type8++;
                                 break;
-                            default:
-                                Console.WriteLine(String.Format("Encountered undefined BEV_Type = {0} (offset = {1}). Unable to continue.", type, offset));
-                                Utils.WaitForInputThenQuit();
+                            case 9:
+                                bevFile.Entries[i].Type9 = GetType9(typeCount, typeoffset, bevFile.Entries[i].Type9, type9);
+                                type9++;
                                 break;
+                            default:
+                                throw new InvalidDataException(String.Format("Encountered undefined BEV_Type = {0} (offset = {1}).", type, offset));
 
                         }
                         offset += 8;
@@ -464,6 +467,43 @@ namespace Xv2CoreLib.BEV
                 });
 
                 offset += 80;
+
+            }
+
+            return _type;
+        }
+
+        List<Type_9> GetType9(short count, int offset, List<Type_9> _type, int idx)
+        {
+            if (_type == null)
+            {
+                _type = new List<Type_9>();
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                _type.Add(new Type_9()
+                {
+                    Idx = idx,
+                    I_00 = BitConverter.ToUInt16(rawBytes, offset + 0),
+                    I_02 = (ushort)(BitConverter.ToUInt16(rawBytes, offset + 2) - BitConverter.ToUInt16(rawBytes, offset + 0)),
+                    I_04 = BitConverter.ToUInt32(rawBytes, offset + 4),
+                    I_08 = BitConverter.ToUInt32(rawBytes, offset + 8),
+                    I_12 = BitConverter.ToUInt32(rawBytes, offset + 12),
+                    I_16 = BitConverter.ToUInt32(rawBytes, offset + 16),
+                    I_20 = BitConverter.ToUInt32(rawBytes, offset + 20),
+                    I_24 = BitConverter.ToUInt32(rawBytes, offset + 24),
+                    I_28 = BitConverter.ToUInt32(rawBytes, offset + 28),
+                    I_32 = BitConverter.ToUInt32(rawBytes, offset + 32),
+                    I_36 = BitConverter.ToUInt32(rawBytes, offset + 36),
+                    I_40 = BitConverter.ToUInt32(rawBytes, offset + 40),
+                    I_44 = BitConverter.ToUInt32(rawBytes, offset + 44),
+                    I_48 = BitConverter.ToUInt32(rawBytes, offset + 48),
+                    I_52 = BitConverter.ToUInt32(rawBytes, offset + 52),
+                    I_56 = BitConverter.ToUInt32(rawBytes, offset + 56),
+                });
+
+                offset += 60;
 
             }
 

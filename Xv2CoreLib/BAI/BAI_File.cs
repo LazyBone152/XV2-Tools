@@ -11,7 +11,7 @@ namespace Xv2CoreLib.BAI
     [YAXSerializeAs("BAI")]
     public class BAI_File : IIsNull
     {
-        internal const byte CURRENT_VERSION = 2;
+        internal const byte CURRENT_VERSION = 3;
         [YAXAttributeForClass]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = (byte)0)]
         public byte Version { get; set; } = CURRENT_VERSION;
@@ -20,6 +20,7 @@ namespace Xv2CoreLib.BAI
         public const int ENTRY_SIZE_OLD = 84;
         public const int ENTRY_SIZE_V1 = 88; //When they updated the AI for Crossversus
         public const int ENTRY_SIZE_V2 = 92; //New in v1.24/1.25(?)
+        public const int ENTRY_SIZE_V3 = 100;
 
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "AI")]
         public List<BAI_Entry> Entries { get; set; }
@@ -105,6 +106,7 @@ namespace Xv2CoreLib.BAI
                 case ENTRY_SIZE_OLD: return 0;
                 case ENTRY_SIZE_V1: return 1;
                 case ENTRY_SIZE_V2: return 2;
+                case ENTRY_SIZE_V3: return 3;
                 default:
                     throw new InvalidDataException($"BAI file version not supported. subEntrySize={entrySize}");
             }
@@ -122,6 +124,9 @@ namespace Xv2CoreLib.BAI
 
                 case 2:
                     return ENTRY_SIZE_V2;
+
+                case 3:
+                    return ENTRY_SIZE_V3;
 
                 default:
                     throw new InvalidDataException("BAI file version not supported.");
@@ -224,6 +229,15 @@ namespace Xv2CoreLib.BAI
         [YAXSerializeAs("value")]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = -1)]
         public int I_88 { get; set; }
+        [YAXAttributeFor("F_92")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0#########")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0f)]
+        public float F_92 { get; set; }
+        [YAXAttributeFor("I_96")]
+        [YAXSerializeAs("value")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = -1)]
+        public int I_96 { get; set; }
 
         public enum ActivationConditionTarget
         {

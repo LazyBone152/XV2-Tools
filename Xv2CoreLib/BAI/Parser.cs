@@ -104,6 +104,12 @@ namespace Xv2CoreLib.BAI
                                 subEntry.I_88 = BitConverter.ToInt32(rawBytes, subEntryOffset + 88);
                             }
 
+                            if (baiFile.Version >= 3)
+                            {
+                                subEntry.F_92 = BitConverter.ToSingle(rawBytes, subEntryOffset + 92);
+                                subEntry.I_96 = BitConverter.ToInt32(rawBytes, subEntryOffset + 96);
+                            }
+
                             baiFile.Entries[i].SubEntries.Add(subEntry);
 
                             subEntryOffset += entrySize;

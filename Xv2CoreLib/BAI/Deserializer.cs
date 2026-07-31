@@ -105,6 +105,12 @@ namespace Xv2CoreLib.BAI
 
                             if (baiFile.Version >= 2)
                                 bytes.AddRange(BitConverter.GetBytes(baiFile.Entries[i].SubEntries[a].I_88));
+
+                            if (baiFile.Version >= 3)
+                            {
+                                bytes.AddRange(BitConverter.GetBytes(baiFile.Entries[i].SubEntries[a].F_92));
+                                bytes.AddRange(BitConverter.GetBytes(baiFile.Entries[i].SubEntries[a].I_96));
+                            }
                         }
                     }
                 }
