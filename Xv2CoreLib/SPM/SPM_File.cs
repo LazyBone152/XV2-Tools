@@ -347,8 +347,7 @@ namespace Xv2CoreLib.SPM
         public float[] F_416 { get; set; }
 
         [CustomSerialize]
-        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
-        public int I_440 { get; set; }
+        public float EffectGlareTone { get; set; }
 
         [CustomSerialize("CharaGlaraAdditiveColor", "R")]
         public float CharacterGlareAdditiveColorR { get; set; }
@@ -382,7 +381,7 @@ namespace Xv2CoreLib.SPM
         public float[] F_480 { get; set; }
 
         [CustomSerialize]
-        public int I_496 { get; set; }
+        public float LayerReceiveShadowW { get; set; }
 
         [CustomSerialize]
         [YAXCollection(YAXCollectionSerializationTypes.Serially, SeparateBy = ", ")]
@@ -581,7 +580,7 @@ namespace Xv2CoreLib.SPM
             bytes.AddRange(BitConverter.GetBytes(BackgroundGlareAdditiveColorB));
             bytes.AddRange(BitConverter.GetBytes(BackgroundGlareAdditiveColorA));
             bytes.AddRange(BitConverter_Ex.GetBytes(F_416));
-            bytes.AddRange(BitConverter.GetBytes(I_440));
+            bytes.AddRange(BitConverter.GetBytes(EffectGlareTone));
             bytes.AddRange(BitConverter.GetBytes(CharacterGlareAdditiveColorR));
             bytes.AddRange(BitConverter.GetBytes(CharacterGlareAdditiveColorG));
             bytes.AddRange(BitConverter.GetBytes(CharacterGlareAdditiveColorB));
@@ -592,7 +591,7 @@ namespace Xv2CoreLib.SPM
             bytes.AddRange(BitConverter.GetBytes(EdgeStrokesColorG));
             bytes.AddRange(BitConverter.GetBytes(EdgeStrokesColorB));
             bytes.AddRange(BitConverter_Ex.GetBytes(F_480));
-            bytes.AddRange(BitConverter.GetBytes(I_496));
+            bytes.AddRange(BitConverter.GetBytes(LayerReceiveShadowW));
             bytes.AddRange(BitConverter_Ex.GetBytes(F_500));
             bytes.AddRange(BitConverter.GetBytes(I_512));
             bytes.AddRange(BitConverter_Ex.GetBytes(F_516));
@@ -702,7 +701,7 @@ namespace Xv2CoreLib.SPM
                 BackgroundGlareAdditiveColorB = BitConverter.ToSingle(bytes, offset + 408),
                 BackgroundGlareAdditiveColorA = BitConverter.ToSingle(bytes, offset + 412),
                 F_416 = BitConverter_Ex.ToFloat32Array(bytes, offset + 416, 6),
-                I_440 = BitConverter.ToInt32(bytes, offset + 440),
+                EffectGlareTone = BitConverter.ToSingle(bytes, offset + 440),
                 CharacterGlareAdditiveColorR = BitConverter.ToSingle(bytes, offset + 444),
                 CharacterGlareAdditiveColorG = BitConverter.ToSingle(bytes, offset + 448),
                 CharacterGlareAdditiveColorB = BitConverter.ToSingle(bytes, offset + 452),
@@ -713,7 +712,7 @@ namespace Xv2CoreLib.SPM
                 EdgeStrokesColorG = BitConverter.ToSingle(bytes, offset + 472),
                 EdgeStrokesColorB = BitConverter.ToSingle(bytes, offset + 476),
                 F_480 = BitConverter_Ex.ToFloat32Array(bytes, offset + 480, 4),
-                I_496 = BitConverter.ToInt32(bytes, offset + 496),
+                LayerReceiveShadowW = BitConverter.ToSingle(bytes, offset + 496),
                 F_500 = BitConverter_Ex.ToFloat32Array(bytes, offset + 500, 3),
                 I_512 = BitConverter.ToInt32(bytes, offset + 512),
                 F_516 = BitConverter_Ex.ToFloat32Array(bytes, offset + 516, 3),
