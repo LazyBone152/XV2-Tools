@@ -3,9 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using YAXLib;
+using Xv2CoreLib;
 
 namespace Xv2CoreLib.BCM
 {
@@ -25,7 +27,7 @@ namespace Xv2CoreLib.BCM
         public Deserializer (string location)
         {
             YAXSerializer serializer = new YAXSerializer(typeof(BCM_File), YAXSerializationOptions.DontSerializeNullObjects);
-            bcmFile = (BCM_File)serializer.DeserializeFromFile(location);
+            bcmFile = (BCM_File)serializer.Deserialize(XDocument.Load(location).Root);
             saveLocation = String.Format("{0}/{1}", Path.GetDirectoryName(location), Path.GetFileNameWithoutExtension(location));
             if (Validation())
             {

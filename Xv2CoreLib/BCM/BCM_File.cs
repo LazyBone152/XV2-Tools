@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 using YAXLib;
+using Xv2CoreLib;
 using System.IO;
 
 namespace Xv2CoreLib.BCM
@@ -204,7 +206,7 @@ namespace Xv2CoreLib.BCM
             else if(Path.GetExtension(path) == ".xml" && Path.GetExtension(Path.GetFileNameWithoutExtension(path)) == ".bcm")
             {
                 YAXSerializer serializer = new YAXSerializer(typeof(BCM_File), YAXSerializationOptions.DontSerializeNullObjects);
-                return (BCM_File)serializer.DeserializeFromFile(path);
+                return (BCM_File)serializer.Deserialize(XDocument.Load(path).Root);
             }
             else
             {
