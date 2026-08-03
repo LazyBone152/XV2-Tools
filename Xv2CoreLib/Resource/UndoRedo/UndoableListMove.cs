@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace Xv2CoreLib.Resource.UndoRedo
 {
@@ -11,7 +12,7 @@ namespace Xv2CoreLib.Resource.UndoRedo
         private int newIdx;
         private ObservableCollection<T> observableList;
         private AsyncObservableCollection<T> asyncObservableList;
-        private bool isAsync = false;
+        private IList<T> plainList;
 
         public UndoableListMove(ObservableCollection<T> _list, int _oldIdx, int _newIdx, string message = null)
         {
@@ -27,35 +28,54 @@ namespace Xv2CoreLib.Resource.UndoRedo
             newIdx = _newIdx;
             asyncObservableList = _list;
             Message = message;
-            isAsync = true;
+        }
+
+        // For plain lists that have no Move method. Like the other constructors, this does not mutate the list:
+        // the caller performs the move, then records this.
+        public UndoableListMove(IList<T> _list, int _oldIdx, int _newIdx, string message = null)
+        {
+            oldIdx = _oldIdx;
+            newIdx = _newIdx;
+            plainList = _list;
+            Message = message;
         }
 
         public void Undo()
         {
-            if (isAsync)
-            {
-                if (newIdx >= 0 && oldIdx >= 0 && newIdx <= asyncObservableList.Count - 1 && oldIdx <= asyncObservableList.Count - 1)
-                    asyncObservableList.Move(newIdx, oldIdx);
-            }
-            else
-            {
-                if (newIdx >= 0 && oldIdx >= 0 && newIdx <= observableList.Count - 1 && oldIdx <= observableList.Count - 1)
-                    observableList.Move(newIdx, oldIdx);
-            }
+            Move(newIdx, oldIdx);
         }
 
         public void Redo()
         {
-            if (isAsync)
+            Move(oldIdx, newIdx);
+        }
+
+        private void Move(int from, int to)
+        {
+            if (asyncObservableList != null)
             {
-                if (newIdx >= 0 && oldIdx >= 0 && newIdx <= asyncObservableList.Count - 1 && oldIdx <= asyncObservableList.Count - 1)
-                    asyncObservableList.Move(oldIdx, newIdx);
+                if (IsInRange(from, to, asyncObservableList.Count))
+                    asyncObservableList.Move(from, to);
+            }
+            else if (plainList != null)
+            {
+                if (IsInRange(from, to, plainList.Count))
+                {
+                    T item = plainList[from];
+                    plainList.RemoveAt(from);
+                    plainList.Insert(to, item);
+                }
             }
             else
             {
-                if (newIdx >= 0 && oldIdx >= 0 && newIdx <= observableList.Count - 1 && oldIdx <= observableList.Count - 1)
-                    observableList.Move(oldIdx, newIdx);
+                if (IsInRange(from, to, observableList.Count))
+                    observableList.Move(from, to);
             }
+        }
+
+        private static bool IsInRange(int from, int to, int count)
+        {
+            return from >= 0 && to >= 0 && from < count && to < count;
         }
     }
 }
