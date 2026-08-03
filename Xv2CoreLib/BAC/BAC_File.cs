@@ -43,7 +43,7 @@ namespace Xv2CoreLib.BAC
             {6, "Charge Control" }, {7, "BCM Callback"}, {8, "Effect"}, {9, "Projectile" }, {10, "Camera" }, {11, "Sound" },
             {12, "Targeting Assistance" }, {13, "BCS Part Visibility" }, {14, "Bone Modification" }, {15, "Function" },
             {16, "Post Effect" }, {17, "Throw Handler" }, {18, "Physics Object" }, {19, "Aura" }, {20, "Homing Movement" },
-            {21, "Eye Movement" }, {22, "BAC_Type22" }, {23, "Transparency Effect" }, {24, "Dual Skill Handler"}, {25, "Extended Charge Control"},
+            {21, "Eye Movement" }, {22, "Move to Object" }, {23, "Transparency Effect" }, {24, "Dual Skill Handler"}, {25, "Extended Charge Control"},
             {26, "Extended Camera Control" }, {27, "Effect Property Control" }, {28, "BAC_Type28"}, {29, "BAC_Type29"}, {30, "BAC_Type30"}, {31, "BAC_Type31"}
         };
 
@@ -560,7 +560,7 @@ namespace Xv2CoreLib.BAC
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "EyeMovement")]
         public List<BAC_Type21> Type21 { get; set; }
         [YAXDontSerializeIfNull]
-        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BAC_Type22")]
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "MoveToObject")]
         public List<BAC_Type22> Type22 { get; set; }
         [YAXDontSerializeIfNull]
         [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "TransparencyEffect")]
@@ -4551,29 +4551,29 @@ namespace Xv2CoreLib.BAC
         }
     }
 
-    [YAXSerializeAs("BAC_Type22")]
+    [YAXSerializeAs("MoveToObject")]
     [Serializable]
     public class BAC_Type22 : BAC_TypeBase
     {
         [YAXDontSerialize]
-        public override string Type => "BAC_Type22";
+        public override string Type => "Move to Object";
         [YAXDontSerialize]
         public override int TypeID => 22;
 
 
-        [YAXAttributeFor("I_08")]
+        [YAXAttributeFor("Object_Mode")]
         [YAXSerializeAs("value")]
-        public ushort I_08 { get; set; } //always 0
-        [YAXAttributeFor("I_10")]
+        public ushort I_08 { get; set; }
+        [YAXAttributeFor("Movement_Mode")]
         [YAXSerializeAs("value")]
-        public ushort I_10 { get; set; } //always 1
-        [YAXAttributeFor("F_12")]
+        public ushort I_10 { get; set; }
+        [YAXAttributeFor("Movement_Distance")]
         [YAXFormat("0.0########")]
         [YAXSerializeAs("value")]
-        public float F_12 { get; set; } //1, 10
-        [YAXAttributeFor("STR_16")]
+        public float F_12 { get; set; }
+        [YAXAttributeFor("Object_Name_Or_Prefix")]
         [YAXSerializeAs("value")]
-        public string STR_16 { get; set; } //HYPERSHOT_00, HYPERSHOT_return
+        public string STR_16 { get; set; }
 
         public static List<BAC_Type22> Read(byte[] rawBytes, int offset, int count)
         {
@@ -4607,7 +4607,7 @@ namespace Xv2CoreLib.BAC
             {
                 if (type.STR_16.Length > 32)
                 {
-                    throw new InvalidDataException(String.Format("BAcType22 > STR_16: \"{0}\" exceeds the maximum length of 32!", type.STR_16));
+                    throw new InvalidDataException(String.Format("BAC Type22 > STR_16: \"{0}\" exceeds the maximum length of 32!", type.STR_16));
                 }
 
                 bytes.AddRange(BitConverter.GetBytes(type.StartTime));

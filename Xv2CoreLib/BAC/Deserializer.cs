@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 using YAXLib;
+using Xv2CoreLib;
 
 namespace Xv2CoreLib.BAC
 {
@@ -16,7 +18,7 @@ namespace Xv2CoreLib.BAC
         {
             saveLocation = String.Format("{0}/{1}", Path.GetDirectoryName(location), Path.GetFileNameWithoutExtension(location));
             YAXSerializer serializer = new YAXSerializer(typeof(BAC_File), YAXSerializationOptions.DontSerializeNullObjects);
-            bacFile = (BAC_File)serializer.DeserializeFromFile(location);
+            bacFile = (BAC_File)serializer.Deserialize(XDocument.Load(location).Root);
 
             WriteBac();
             File.WriteAllBytes(saveLocation, bytes.ToArray());

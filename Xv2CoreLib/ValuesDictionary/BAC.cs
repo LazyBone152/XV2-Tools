@@ -772,6 +772,20 @@ namespace Xv2CoreLib.ValuesDictionary
             { 6 , "HenshinEnd (Transformation Ends)" }
         };
 
+        //BAC Type22 object movement.
+        public static Dictionary<ushort, string> ObjectMode { get; private set; } = new Dictionary<ushort, string>()
+        {
+            { 0, "Exact object name" },
+            { 1, "Current or linked position" },
+            { 2, "Nearest object by name prefix" }
+        };
+
+        public static Dictionary<ushort, string> ObjectMovementMode { get; private set; } = new Dictionary<ushort, string>()
+        {
+            { 0, "Fixed step" },
+            { 1, "Arrive by end frame" }
+        };
+
         //BacHomingType
         public static Dictionary<ushort, string> HomingType { get; private set; } = new Dictionary<ushort, string>()
         {

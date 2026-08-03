@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using YAXLib;
-using Xv2CoreLib;
 using System.IO;
+using Xv2CoreLib;
 
 namespace Xv2CoreLib.BCM
 {
@@ -863,7 +863,7 @@ namespace Xv2CoreLib.BCM
         [YAXSerializeAs("value")]
         [YAXHexValue]
         public uint I_104 { get; set; }
-        [YAXAttributeFor("I_108")]
+        [YAXAttributeFor("Character_Condition")]
         [YAXSerializeAs("value")]
         [YAXHexValue]
         public uint I_108 { get; set; }
