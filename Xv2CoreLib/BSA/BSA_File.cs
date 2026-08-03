@@ -1,10 +1,11 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using Xv2CoreLib.Resource;
+using Xv2CoreLib.Resource.UndoRedo;
 using YAXLib;
 
 namespace Xv2CoreLib.BSA
@@ -34,6 +35,19 @@ namespace Xv2CoreLib.BSA
     {
         On = 0,
         Off = 1
+    }
+
+    public enum ProjectileProtectionOperation : ushort
+    {
+        EnableOrReplace = 0,
+        DisableWithoutSignal = 1
+    }
+
+    public enum SpatialEffectGeometryMode : ushort
+    {
+        Default = 0,
+        DistanceRelative = 1,
+        FullVector = 2
     }
 
 
@@ -74,17 +88,17 @@ namespace Xv2CoreLib.BSA
             BSA_Entries.Sort((x, y) => x.SortID - y.SortID);
         }
 
+        /// <summary>
+        /// Adds the entry at the requested ID. Duplicate IDs are rejected because the deserializer sizes the
+        /// main entry pointer table by unique ID but writes bodies by list position, so a duplicate throws
+        /// from deep inside the writer on save.
+        /// </summary>
         public void AddEntry(int id, BSA_Entry entry)
         {
-            for (int i = 0; i < BSA_Entries.Count; i++)
-            {
-                if (int.Parse(BSA_Entries[i].Index) == id)
-                {
-                    BSA_Entries[i] = entry;
-                    return;
-                }
-            }
+            if (BSA_Entries.Any(existing => existing.SortID == id))
+                throw new ArgumentException($"A BSA entry with the ID {id} already exists.", nameof(id));
 
+            entry.SortID = id;
             BSA_Entries.Add(entry);
         }
 
@@ -171,21 +185,52 @@ namespace Xv2CoreLib.BSA
 
     [YAXSerializeAs("BSA_Entry")]
     [Serializable]
-    public class BSA_Entry : IUserDefinedName, IInstallable
+    public class BSA_Entry : IUserDefinedName, IInstallable, INotifyPropertyChanged
     {
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
         #region NonSerialized
         [YAXDontSerialize]
         public int SortID { get { return int.Parse(Index); } set { Index = value.ToString(); } }
+
+        private string _userDefinedName;
         [YAXDontSerialize]
-        public string UserDefinedName { get; set; }
+        public string UserDefinedName
+        {
+            get => _userDefinedName;
+            set
+            {
+                if (_userDefinedName == value) return;
+                _userDefinedName = value;
+                NotifyPropertyChanged(nameof(UserDefinedName));
+                NotifyPropertyChanged(nameof(HasUserDefinedName));
+            }
+        }
         [YAXDontSerialize]
         public bool HasUserDefinedName => !string.IsNullOrWhiteSpace(UserDefinedName);
         #endregion
 
+        private string _index = "0";
         [YAXAttributeForClass]
         [YAXSerializeAs("ID")]
         [BindingAutoId]
-        public string Index { get; set; } = "0"; //int32
+        public string Index //int32
+        {
+            get => _index;
+            set
+            {
+                if (_index == value) return;
+                _index = value;
+                NotifyPropertyChanged(nameof(Index));
+                NotifyPropertyChanged(nameof(SortID));
+            }
+        }
 
         [YAXAttributeFor("I_00")]
         [YAXSerializeAs("value")]
@@ -202,9 +247,19 @@ namespace Xv2CoreLib.BSA
         [YAXAttributeFor("I_18")]
         [YAXSerializeAs("value")]
         public int I_18 { get; set; }
+        private ushort _i22;
         [YAXAttributeFor("Lifetime")]
         [YAXSerializeAs("value")]
-        public ushort I_22 { get; set; }
+        public ushort I_22
+        {
+            get => _i22;
+            set
+            {
+                if (_i22 == value) return;
+                _i22 = value;
+                NotifyPropertyChanged(nameof(I_22));
+            }
+        }
         [YAXAttributeFor("I_24")]
         [YAXSerializeAs("value")]
         public ushort I_24 { get; set; }
@@ -240,7 +295,7 @@ namespace Xv2CoreLib.BSA
         [BindingSubList]
         public List<BSA_Type1> Type1 { get; set; }
         [YAXDontSerializeIfNull]
-        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BSA_Type2")]
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "ProjectileTimelineRemap")]
         [BindingSubList]
         public List<BSA_Type2> Type2 { get; set; }
         [YAXDontSerializeIfNull]
@@ -268,17 +323,17 @@ namespace Xv2CoreLib.BSA
         [BindingSubList]
         public List<BSA_Type10> Type10 { get; set; }
         [YAXDontSerializeIfNull]
-        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BSA_Type12")]
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "SendProjectileSignal")]
         [BindingSubList]
         public List<BSA_Type12> Type12 { get; set; }
 
         [YAXDontSerializeIfNull]
-        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BSA_Type13")]
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "ProjectileProtection")]
         [BindingSubList]
         public List<BSA_Type13> Type13 { get; set; }
 
         [YAXDontSerializeIfNull]
-        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "BSA_Type14")]
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "EffectPlacement")]
         [BindingSubList]
         public List<BSA_Type14> Type14 { get; set; }
         #region IBsaTypes
@@ -375,6 +430,22 @@ namespace Xv2CoreLib.BSA
             }
         }
 
+        /// <summary>
+        /// Inserts the type at the end of its own TypeID block, so the in-memory order always matches the
+        /// order the file will be written in. The BSA format stores one header per type, so cross-type order
+        /// cannot round-trip.
+        /// </summary>
+        public IUndoRedo AddIBsaType(IBsaType type)
+        {
+            if (IBsaTypes == null)
+                InitializeIBsaTypes();
+
+            int insertIdx = IBsaTypes.TakeWhile(x => x.TypeID <= type.TypeID).Count();
+
+            IBsaTypes.Insert(insertIdx, type);
+            return new UndoableListInsert<IBsaType>(IBsaTypes, insertIdx, type, "BSA Subtype Add");
+        }
+
         private void InitBsaLists()
         {
             if (Type0 == null)
@@ -429,28 +500,68 @@ namespace Xv2CoreLib.BSA
     [Serializable]
     public class BSA_SubEntries
     {
-        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Collision")]
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "CollisionEffect")]
         [BindingSubList]
         public List<BSA_Collision> CollisionEntries { get; set; } = new List<BSA_Collision>();
-        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Expiration")]
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "CollisionSound")]
         [BindingSubList]
         public List<BSA_Expiration> ExpirationEntries { get; set; } = new List<BSA_Expiration>();
     }
 
-    [YAXSerializeAs("Collision")]
+    [YAXSerializeAs("CollisionEffect")]
     [BindingSubClass]
     [Serializable]
-    public class BSA_Collision
+    public class BSA_Collision : INotifyPropertyChanged
     {
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private EepkType _eepkType;
         [YAXAttributeFor("EEPK")]
         [YAXSerializeAs("Type")]
-        public EepkType EepkType { get; set; } //int16
+        public EepkType EepkType //int16
+        {
+            get => _eepkType;
+            set
+            {
+                if (_eepkType == value) return;
+                _eepkType = value;
+                NotifyPropertyChanged(nameof(EepkType));
+            }
+        }
+
+        private ushort _skillID;
         [YAXAttributeFor("Skill_ID")]
         [YAXSerializeAs("value")]
-        public ushort SkillID { get; set; }
+        public ushort SkillID
+        {
+            get => _skillID;
+            set
+            {
+                if (_skillID == value) return;
+                _skillID = value;
+                NotifyPropertyChanged(nameof(SkillID));
+            }
+        }
+
+        private ushort _effectID;
         [YAXAttributeFor("Effect_ID")]
         [YAXSerializeAs("value")]
-        public ushort EffectID { get; set; }
+        public ushort EffectID
+        {
+            get => _effectID;
+            set
+            {
+                if (_effectID == value) return;
+                _effectID = value;
+                NotifyPropertyChanged(nameof(EffectID));
+            }
+        }
         [YAXAttributeFor("I_06")]
         [YAXSerializeAs("value")]
         public ushort I_06 { get; set; }
@@ -490,22 +601,73 @@ namespace Xv2CoreLib.BSA
 
     }
 
-    [YAXSerializeAs("Expiration")]
+    [YAXSerializeAs("CollisionSound")]
     [Serializable]
-    public class BSA_Expiration
+    public class BSA_Expiration : INotifyPropertyChanged
     {
-        [YAXAttributeFor("I_00")]
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private AcbType _i00;
+        [YAXAttributeFor("ACB_Type")]
         [YAXSerializeAs("value")]
-        public ushort I_00 { get; set; }
+        public AcbType I_00
+        {
+            get => _i00;
+            set
+            {
+                if (_i00 == value) return;
+                _i00 = value;
+                NotifyPropertyChanged(nameof(I_00));
+            }
+        }
+
+        private ushort _i02;
         [YAXAttributeFor("I_02")]
         [YAXSerializeAs("value")]
-        public ushort I_02 { get; set; }
-        [YAXAttributeFor("I_04")]
+        public ushort I_02
+        {
+            get => _i02;
+            set
+            {
+                if (_i02 == value) return;
+                _i02 = value;
+                NotifyPropertyChanged(nameof(I_02));
+            }
+        }
+
+        private ushort _i04;
+        [YAXAttributeFor("Cue_ID")]
         [YAXSerializeAs("value")]
-        public ushort I_04 { get; set; }
+        public ushort I_04
+        {
+            get => _i04;
+            set
+            {
+                if (_i04 == value) return;
+                _i04 = value;
+                NotifyPropertyChanged(nameof(I_04));
+            }
+        }
+
+        private ushort _i06;
         [YAXAttributeFor("I_06")]
         [YAXSerializeAs("value")]
-        public ushort I_06 { get; set; }
+        public ushort I_06
+        {
+            get => _i06;
+            set
+            {
+                if (_i06 == value) return;
+                _i06 = value;
+                NotifyPropertyChanged(nameof(I_06));
+            }
+        }
     }
 
     //Types
@@ -610,7 +772,7 @@ namespace Xv2CoreLib.BSA
         public float F_44 { get; set; }
     }
 
-    [YAXSerializeAs("BSA_Type2")]
+    [YAXSerializeAs("ProjectileTimelineRemap")]
     [Serializable]
     public class BSA_Type2 : BSA_TypeBase
     {
@@ -626,10 +788,10 @@ namespace Xv2CoreLib.BSA
         [YAXAttributeFor("I_00")]
         [YAXSerializeAs("value")]
         public short I_00 { get; set; }
-        [YAXAttributeFor("I_02")]
+        [YAXAttributeFor("Output_Start_Frame")]
         [YAXSerializeAs("value")]
         public short I_02 { get; set; }
-        [YAXAttributeFor("I_04")]
+        [YAXAttributeFor("Output_End_Frame")]
         [YAXSerializeAs("value")]
         public short I_04 { get; set; }
         [YAXAttributeFor("I_06")]
@@ -979,7 +1141,7 @@ namespace Xv2CoreLib.BSA
     }
 
 
-    [YAXSerializeAs("BSA_Type12")]
+    [YAXSerializeAs("SendProjectileSignal")]
     [Serializable]
     public class BSA_Type12 : BSA_TypeBase
     {
@@ -992,26 +1154,26 @@ namespace Xv2CoreLib.BSA
         [YAXAttributeFor("Duration")]
         [YAXSerializeAs("frames")]
         public override ushort Duration { get; set; }
-        [YAXAttributeFor("F_00")]
+        [YAXAttributeFor("Signal_Value")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
         public float F_00 { get; set; }
-        [YAXAttributeFor("EepkType")]
+        [YAXAttributeFor("Skill_Type")]
         [YAXSerializeAs("value")]
         public EepkType EepkType { get; set; }
         [YAXAttributeFor("Skill_ID")]
         [YAXSerializeAs("value")]
         public int SkillID { get; set; }
-        [YAXAttributeFor("I_12")]
+        [YAXAttributeFor("Delivery_Mode")]
         [YAXSerializeAs("value")]
-        public int I_12 { get; set; } //Effect ID or something?
-        [YAXAttributeFor("F_16")]
+        public int I_12 { get; set; }
+        [YAXAttributeFor("Pause_Recipient_Timeline")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
         public float F_16 { get; set; }
     }
 
-    [YAXSerializeAs("BSA_Type13")]
+    [YAXSerializeAs("ProjectileProtection")]
     [Serializable]
     public class BSA_Type13 : BSA_TypeBase
     {
@@ -1024,39 +1186,39 @@ namespace Xv2CoreLib.BSA
         [YAXAttributeFor("Duration")]
         [YAXSerializeAs("frames")]
         public override ushort Duration { get; set; }
-        [YAXAttributeFor("I_00")]
-        [YAXSerializeAs("value")]
-        public ushort I_00 { get; set; }
+        [YAXAttributeFor("Protection")]
+        [YAXSerializeAs("State")]
+        public ProjectileProtectionOperation I_00 { get; set; }
         [YAXAttributeFor("I_02")]
         [YAXSerializeAs("value")]
         public ushort I_02 { get; set; }
-        [YAXAttributeFor("F_04")]
+        [YAXAttributeFor("Max_Hitbox_Power")]
         [YAXSerializeAs("value")]
         public float F_04 { get; set; }
-        [YAXAttributeFor("F_08")]
+        [YAXAttributeFor("Protect_Selectors_0_3")]
         [YAXSerializeAs("value")]
         public float F_08 { get; set; }
-        [YAXAttributeFor("I_12")]
+        [YAXAttributeFor("Protect_Additional_Selectors")]
         [YAXSerializeAs("value")]
-        public int I_12 { get; set; } //Effect ID or something?
-        [YAXAttributeFor("F_16")]
+        public float I_12 { get; set; }
+        [YAXAttributeFor("Entry_Passing_Signal")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
         public float F_16 { get; set; }
-        [YAXAttributeFor("I_20")]
+        [YAXAttributeFor("Mark_Protected_Hit")]
         [YAXSerializeAs("value")]
-        public int I_20 { get; set; }
+        public float I_20 { get; set; }
         [YAXAttributeFor("I_24")]
         [YAXSerializeAs("value")]
         public int I_24 { get; set; }
-        [YAXAttributeFor("I_26")]
+        [YAXAttributeFor("I_28")]
         [YAXSerializeAs("value")]
         public int I_28 { get; set; }
 
 
     }
 
-    [YAXSerializeAs("BSA_Type14")]
+    [YAXSerializeAs("EffectPlacement")]
     [Serializable]
     public class BSA_Type14 : BSA_TypeBase
     {
@@ -1069,15 +1231,15 @@ namespace Xv2CoreLib.BSA
         [YAXAttributeFor("Duration")]
         [YAXSerializeAs("frames")]
         public override ushort Duration { get; set; }
-        [YAXAttributeFor("I_00")]
+        [YAXAttributeFor("Placement_Mode")]
         [YAXSerializeAs("value")]
-        public ushort I_00 { get; set; }
+        public SpatialEffectGeometryMode I_00 { get; set; }
         [YAXAttributeFor("I_02")]
         [YAXSerializeAs("value")]
         public ushort I_02 { get; set; }
-        [YAXAttributeFor("F_04")]
+        [YAXAttributeFor("Placement_Flags")]
         [YAXSerializeAs("value")]
-        public float F_04 { get; set; } // For some reason if we add YAXFormat to this, it always formats to 0
+        public uint F_04 { get; set; }
         [YAXAttributeFor("I_08")]
         [YAXSerializeAs("value")]
         public uint I_08 { get; set; }
@@ -1112,13 +1274,29 @@ namespace Xv2CoreLib.BSA
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
         public float F_44 { get; set; }
-        [YAXAttributeFor("I_48")]
-        [YAXSerializeAs("value")]
+        [YAXDontSerialize]
         public uint I_48 { get; set; }
-        [YAXAttributeFor("F_52")]
+
+        [YAXAttributeFor("EEPK")]
+        [YAXSerializeAs("Type")]
+        public EepkType EepkType
+        {
+            get => (EepkType)(I_48 & 0xFFFFu);
+            set => I_48 = (I_48 & 0xFFFF0000u) | (uint)value;
+        }
+
+        [YAXAttributeFor("Transform")]
+        [YAXSerializeAs("Selector")]
+        public ushort TransformSelector
+        {
+            get => (ushort)(I_48 >> 16);
+            set => I_48 = (I_48 & 0x0000FFFFu) | ((uint)value << 16);
+        }
+
+        [YAXAttributeFor("Skill_ID")]
         [YAXSerializeAs("value")]
-        public float F_52 { get; set; }
-        [YAXAttributeFor("I_56")]
+        public uint F_52 { get; set; }
+        [YAXAttributeFor("Effect_ID")]
         [YAXSerializeAs("value")]
         public uint I_56 { get; set; }
         [YAXAttributeFor("F_60")]
@@ -1141,7 +1319,7 @@ namespace Xv2CoreLib.BSA
         [YAXAttributeFor("I_80")]
         [YAXSerializeAs("value")]
         public uint I_80 { get; set; }
-        [YAXAttributeFor("I_84")]
+        [YAXAttributeFor("Effect_Placement_Flags")]
         [YAXSerializeAs("value")]
         public uint I_84 { get; set; }
     }
@@ -1157,7 +1335,7 @@ namespace Xv2CoreLib.BSA
                 case BSA_Type1 _:
                     return "Movement";
                 case BSA_Type2 _:
-                    return "Type2";
+                    return "Projectile Timeline Remap";
                 case BSA_Type3 _:
                     return "Hitbox";
                 case BSA_Type4 _:
@@ -1171,11 +1349,11 @@ namespace Xv2CoreLib.BSA
                 case BSA_Type10 _:
                     return "Unknown 10";
                 case BSA_Type12 _:
-                    return "Unknown 12";
+                    return "Send Projectile Signal";
                 case BSA_Type13 _:
-                    return "Unknown 13";
+                    return "Projectile Protection";
                 case BSA_Type14 _:
-                    return "Unknown 14";
+                    return "Effect Placement";
                 default:
                     return type?.GetType().Name ?? string.Empty;
             }
@@ -1190,7 +1368,7 @@ namespace Xv2CoreLib.BSA
                 case BSA_Type1 _:
                     return "Movement";
                 case BSA_Type2 type2:
-                    return $"Type2 ({type2.I_00}, {type2.I_02}, {type2.I_04}, {type2.I_06})";
+                    return $"Projectile Timeline Remap ({type2.I_00}, {type2.I_02}, {type2.I_04})";
                 case BSA_Type3 _:
                     return "Hitbox";
                 case BSA_Type4 type4:
@@ -1204,13 +1382,26 @@ namespace Xv2CoreLib.BSA
                 case BSA_Type10 type10:
                     return $"Unknown 10 ({type10.I_00}, {type10.I_04}, {type10.I_06})";
                 case BSA_Type12 type12:
-                    return $"Unknown 12 ({type12.EepkType}, {type12.SkillID}, {type12.I_12})";
+                    return $"Send Projectile Signal ({type12.EepkType}, {type12.SkillID}, {type12.I_12})";
                 case BSA_Type13 type13:
-                    return $"Unknown 13 ({type13.I_00}, {type13.I_02}, {type13.I_12})";
+                    return $"Projectile Protection ({GetProtectionStateName(type13.I_00)}, {type13.F_04:0.###}, {type13.I_12:0.###})";
                 case BSA_Type14 type14:
-                    return $"Unknown 14 ({type14.I_00}, {type14.I_02})";
+                    return $"Effect Placement ({type14.EepkType}, {type14.F_52}, {type14.I_56})";
                 default:
                     return type?.GetType().Name ?? string.Empty;
+            }
+        }
+
+        private static string GetProtectionStateName(ProjectileProtectionOperation state)
+        {
+            switch (state)
+            {
+                case ProjectileProtectionOperation.EnableOrReplace:
+                    return "On";
+                case ProjectileProtectionOperation.DisableWithoutSignal:
+                    return "Off";
+                default:
+                    return $"Unknown ({(ushort)state})";
             }
         }
     }

@@ -145,7 +145,7 @@ namespace Xv2CoreLib.BSA_XV1
 
                 for (int i = 0; i < unk2.Count(); i++)
                 {
-                    bytes.AddRange(BitConverter.GetBytes(unk2[i].I_00));
+                    bytes.AddRange(BitConverter.GetBytes((ushort)unk2[i].I_00));
                     bytes.AddRange(BitConverter.GetBytes(unk2[i].I_02));
                     bytes.AddRange(BitConverter.GetBytes(unk2[i].I_04));
                     bytes.AddRange(BitConverter.GetBytes(unk2[i].I_06));

@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using YAXLib;
+using Xv2CoreLib;
 
 namespace Xv2CoreLib.BSA
 {
@@ -23,7 +25,7 @@ namespace Xv2CoreLib.BSA
         {
             saveLocation = String.Format("{0}/{1}", Path.GetDirectoryName(location), Path.GetFileNameWithoutExtension(location));
             YAXSerializer serializer = new YAXSerializer(typeof(BSA_File), YAXSerializationOptions.DontSerializeNullObjects);
-            bsaFile = (BSA_File)serializer.DeserializeFromFile(location);
+            bsaFile = (BSA_File)serializer.Deserialize(XDocument.Load(location).Root);
             bsaFile.SortEntries();
             EntryCount = (bsaFile.BSA_Entries != null) ? int.Parse(bsaFile.BSA_Entries[bsaFile.BSA_Entries.Count() - 1].Index) + 1 : 0;
             Write();
@@ -128,7 +130,7 @@ namespace Xv2CoreLib.BSA
         
         private void WriteUnk1(List<BSA_Collision> unk1, int offsetToFill)
         {
-            if(unk1 != null)
+            if(unk1 != null && unk1.Count > 0)
             {
                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - offsetToFill + 8), offsetToFill);
 
@@ -150,13 +152,13 @@ namespace Xv2CoreLib.BSA
 
         private void WriteUnk2(List<BSA_Expiration> unk2, int offsetToFill)
         {
-            if (unk2 != null)
+            if (unk2 != null && unk2.Count > 0)
             {
                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count() - offsetToFill + 12), offsetToFill);
 
                 for (int i = 0; i < unk2.Count(); i++)
                 {
-                    bytes.AddRange(BitConverter.GetBytes(unk2[i].I_00));
+                    bytes.AddRange(BitConverter.GetBytes((ushort)unk2[i].I_00));
                     bytes.AddRange(BitConverter.GetBytes(unk2[i].I_02));
                     bytes.AddRange(BitConverter.GetBytes(unk2[i].I_04));
                     bytes.AddRange(BitConverter.GetBytes(unk2[i].I_06));
@@ -685,7 +687,7 @@ namespace Xv2CoreLib.BSA
 
                 for (int i = 0; i < type.Count; i++)
                 {
-                    bytes.AddRange(BitConverter.GetBytes(type[i].I_00));
+                    bytes.AddRange(BitConverter.GetBytes((ushort)type[i].I_00));
                     bytes.AddRange(BitConverter.GetBytes(type[i].I_02));
                     bytes.AddRange(BitConverter.GetBytes(type[i].F_04));
                     bytes.AddRange(BitConverter.GetBytes(type[i].F_08));
@@ -719,7 +721,7 @@ namespace Xv2CoreLib.BSA
 
                 for (int i = 0; i < type.Count; i++)
                 {
-                    bytes.AddRange(BitConverter.GetBytes(type[i].I_00));
+                    bytes.AddRange(BitConverter.GetBytes((ushort)type[i].I_00));
                     bytes.AddRange(BitConverter.GetBytes(type[i].I_02));
                     bytes.AddRange(BitConverter.GetBytes(type[i].F_04));
                     bytes.AddRange(BitConverter.GetBytes(type[i].I_08));
