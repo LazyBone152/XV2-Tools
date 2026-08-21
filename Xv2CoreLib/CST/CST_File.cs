@@ -493,8 +493,8 @@ namespace Xv2CoreLib.CST
         public int I_52 { get; set; }
         [YAXAttributeFor("flag_kfk")] // Added in game v 1.26. Adds "Ultra Supervillain Quelled" to the name
         [YAXSerializeAs("value")]
-        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = 0)]
-        public int flag_kfk { get; set; } // 0x38 - Added in game v 1.26. Adds the "Ultra Supervillain Quelled" to the name in CSS
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public int I_56 { get; set; }
 
         public CST_CharaCostumeSlot() { }
 
@@ -510,7 +510,6 @@ namespace Xv2CoreLib.CST
             DlcFlag1 = slot.DLC_Flag1;
             DlcFlag2 = slot.DLC_Flag2;
             flag_cgk2 = (ushort)(slot.flag_cgk2 == true ? 1 : 0);
-            flag_kfk = slot.flag_kfk ? 1 : 0;
         }
 
         public static CST_CharaCostumeSlot Read(byte[] bytes, int offset, int version)
@@ -551,7 +550,7 @@ namespace Xv2CoreLib.CST
 
             if (version >= 5)
             {
-                entry.flag_kfk = BitConverter.ToInt32(bytes, offset + 0x38);
+                entry.I_56 = BitConverter.ToInt32(bytes, offset + 0x38);
             }
 
             return entry;
@@ -594,7 +593,7 @@ namespace Xv2CoreLib.CST
 
             if (version >= 5)
             {
-                bytes.AddRange(BitConverter.GetBytes(flag_kfk));
+                bytes.AddRange(BitConverter.GetBytes(I_56));
             }
 
             if (bytes.Count != CST_File.VersionToEntrySize(version))
@@ -615,8 +614,7 @@ namespace Xv2CoreLib.CST
                 CssVoice2 = CssVoice2,
                 DLC_Flag1 = DlcFlag1,
                 Costume = Costume,
-                flag_cgk2 = (flag_cgk2 == 0) ? false : true,
-                flag_kfk = (flag_kfk == 0) ? false : true
+                flag_cgk2 = (flag_cgk2 == 0) ? false : true
             };
         }
     };
