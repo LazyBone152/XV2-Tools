@@ -863,6 +863,7 @@ namespace Xv2CoreLib.BCM
         [YAXSerializeAs("value")]
         [YAXHexValue]
         public uint I_104 { get; set; }
+        [YAXAltAliases("I_108/value")]
         [YAXAttributeFor("Character_Condition")]
         [YAXSerializeAs("value")]
         [YAXHexValue]

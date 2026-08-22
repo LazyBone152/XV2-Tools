@@ -4552,6 +4552,7 @@ namespace Xv2CoreLib.BAC
     }
 
     [YAXSerializeAs("MoveToObject")]
+    [YAXAltAliases("BAC_Type22")]
     [Serializable]
     public class BAC_Type22 : BAC_TypeBase
     {
@@ -4561,16 +4562,20 @@ namespace Xv2CoreLib.BAC
         public override int TypeID => 22;
 
 
+        [YAXAltAliases("I_08/value")]
         [YAXAttributeFor("Object_Mode")]
         [YAXSerializeAs("value")]
         public ushort I_08 { get; set; }
+        [YAXAltAliases("I_10/value")]
         [YAXAttributeFor("Movement_Mode")]
         [YAXSerializeAs("value")]
         public ushort I_10 { get; set; }
+        [YAXAltAliases("F_12/value")]
         [YAXAttributeFor("Movement_Distance")]
         [YAXFormat("0.0########")]
         [YAXSerializeAs("value")]
         public float F_12 { get; set; }
+        [YAXAltAliases("STR_16/value")]
         [YAXAttributeFor("Object_Name_Or_Prefix")]
         [YAXSerializeAs("value")]
         public string STR_16 { get; set; }

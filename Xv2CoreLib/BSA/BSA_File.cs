@@ -509,6 +509,7 @@ namespace Xv2CoreLib.BSA
     }
 
     [YAXSerializeAs("CollisionEffect")]
+    [YAXAltAliases("Collision")]
     [BindingSubClass]
     [Serializable]
     public class BSA_Collision : INotifyPropertyChanged
@@ -602,6 +603,7 @@ namespace Xv2CoreLib.BSA
     }
 
     [YAXSerializeAs("CollisionSound")]
+    [YAXAltAliases("Expiration")]
     [Serializable]
     public class BSA_Expiration : INotifyPropertyChanged
     {
@@ -614,6 +616,7 @@ namespace Xv2CoreLib.BSA
         }
 
         private AcbType _i00;
+        [YAXAltAliases("I_00/value")]
         [YAXAttributeFor("ACB_Type")]
         [YAXSerializeAs("value")]
         public AcbType I_00
@@ -642,6 +645,7 @@ namespace Xv2CoreLib.BSA
         }
 
         private ushort _i04;
+        [YAXAltAliases("I_04/value")]
         [YAXAttributeFor("Cue_ID")]
         [YAXSerializeAs("value")]
         public ushort I_04
@@ -773,6 +777,7 @@ namespace Xv2CoreLib.BSA
     }
 
     [YAXSerializeAs("ProjectileTimelineRemap")]
+    [YAXAltAliases("BSA_Type2")]
     [Serializable]
     public class BSA_Type2 : BSA_TypeBase
     {
@@ -788,9 +793,11 @@ namespace Xv2CoreLib.BSA
         [YAXAttributeFor("I_00")]
         [YAXSerializeAs("value")]
         public short I_00 { get; set; }
+        [YAXAltAliases("I_02/value")]
         [YAXAttributeFor("Output_Start_Frame")]
         [YAXSerializeAs("value")]
         public short I_02 { get; set; }
+        [YAXAltAliases("I_04/value")]
         [YAXAttributeFor("Output_End_Frame")]
         [YAXSerializeAs("value")]
         public short I_04 { get; set; }
@@ -1142,6 +1149,7 @@ namespace Xv2CoreLib.BSA
 
 
     [YAXSerializeAs("SendProjectileSignal")]
+    [YAXAltAliases("BSA_Type12")]
     [Serializable]
     public class BSA_Type12 : BSA_TypeBase
     {
@@ -1154,19 +1162,23 @@ namespace Xv2CoreLib.BSA
         [YAXAttributeFor("Duration")]
         [YAXSerializeAs("frames")]
         public override ushort Duration { get; set; }
+        [YAXAltAliases("F_00/value")]
         [YAXAttributeFor("Signal_Value")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
         public float F_00 { get; set; }
+        [YAXAltAliases("EepkType/value")]
         [YAXAttributeFor("Skill_Type")]
         [YAXSerializeAs("value")]
         public EepkType EepkType { get; set; }
         [YAXAttributeFor("Skill_ID")]
         [YAXSerializeAs("value")]
         public int SkillID { get; set; }
+        [YAXAltAliases("I_12/value")]
         [YAXAttributeFor("Delivery_Mode")]
         [YAXSerializeAs("value")]
         public int I_12 { get; set; }
+        [YAXAltAliases("F_16/value")]
         [YAXAttributeFor("Pause_Recipient_Timeline")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
@@ -1174,6 +1186,7 @@ namespace Xv2CoreLib.BSA
     }
 
     [YAXSerializeAs("ProjectileProtection")]
+    [YAXAltAliases("BSA_Type13")]
     [Serializable]
     public class BSA_Type13 : BSA_TypeBase
     {
@@ -1186,6 +1199,7 @@ namespace Xv2CoreLib.BSA
         [YAXAttributeFor("Duration")]
         [YAXSerializeAs("frames")]
         public override ushort Duration { get; set; }
+        [YAXAltAliases("I_00/value")]
         [YAXAttributeFor("Protection")]
         [YAXSerializeAs("State")]
         public ProjectileProtectionOperation I_00 { get; set; }
@@ -1195,22 +1209,27 @@ namespace Xv2CoreLib.BSA
         [YAXAttributeFor("Max_Hitbox_Power")]
         [YAXSerializeAs("value")]
         public float F_04 { get; set; }
+        [YAXAltAliases("F_08/value")]
         [YAXAttributeFor("Protect_Selectors_0_3")]
         [YAXSerializeAs("value")]
         public float F_08 { get; set; }
+        [YAXAltAliases("I_12/value:int")]
         [YAXAttributeFor("Protect_Additional_Selectors")]
         [YAXSerializeAs("value")]
         public float I_12 { get; set; }
+        [YAXAltAliases("F_16/value")]
         [YAXAttributeFor("Entry_Passing_Signal")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
         public float F_16 { get; set; }
+        [YAXAltAliases("I_20/value:int")]
         [YAXAttributeFor("Mark_Protected_Hit")]
         [YAXSerializeAs("value")]
         public float I_20 { get; set; }
         [YAXAttributeFor("I_24")]
         [YAXSerializeAs("value")]
         public int I_24 { get; set; }
+        [YAXAltAliases("I_26/value")]
         [YAXAttributeFor("I_28")]
         [YAXSerializeAs("value")]
         public int I_28 { get; set; }
@@ -1219,6 +1238,7 @@ namespace Xv2CoreLib.BSA
     }
 
     [YAXSerializeAs("EffectPlacement")]
+    [YAXAltAliases("BSA_Type14")]
     [Serializable]
     public class BSA_Type14 : BSA_TypeBase
     {
@@ -1231,12 +1251,14 @@ namespace Xv2CoreLib.BSA
         [YAXAttributeFor("Duration")]
         [YAXSerializeAs("frames")]
         public override ushort Duration { get; set; }
+        [YAXAltAliases("I_00/value")]
         [YAXAttributeFor("Placement_Mode")]
         [YAXSerializeAs("value")]
         public SpatialEffectGeometryMode I_00 { get; set; }
         [YAXAttributeFor("I_02")]
         [YAXSerializeAs("value")]
         public ushort I_02 { get; set; }
+        [YAXAltAliases("F_04/value:float")]
         [YAXAttributeFor("Placement_Flags")]
         [YAXSerializeAs("value")]
         public uint F_04 { get; set; }
@@ -1277,8 +1299,24 @@ namespace Xv2CoreLib.BSA
         [YAXDontSerialize]
         public uint I_48 { get; set; }
 
+        [YAXAltAliases("I_48/value")]
+        [YAXAttributeFor("Legacy_I_48")]
+        [YAXSerializeAs("value")]
+        [YAXDontSerializeIfNull]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
+        public uint? LegacyI48
+        {
+            // Read the packed legacy field without writing it back to XML.
+            set
+            {
+                if (value.HasValue)
+                    I_48 = value.Value;
+            }
+        }
+
         [YAXAttributeFor("EEPK")]
         [YAXSerializeAs("Type")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public EepkType EepkType
         {
             get => (EepkType)(I_48 & 0xFFFFu);
@@ -1287,15 +1325,18 @@ namespace Xv2CoreLib.BSA
 
         [YAXAttributeFor("Transform")]
         [YAXSerializeAs("Selector")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore)]
         public ushort TransformSelector
         {
             get => (ushort)(I_48 >> 16);
             set => I_48 = (I_48 & 0x0000FFFFu) | ((uint)value << 16);
         }
 
+        [YAXAltAliases("F_52/value:float")]
         [YAXAttributeFor("Skill_ID")]
         [YAXSerializeAs("value")]
         public uint F_52 { get; set; }
+        [YAXAltAliases("I_56/value")]
         [YAXAttributeFor("Effect_ID")]
         [YAXSerializeAs("value")]
         public uint I_56 { get; set; }
@@ -1319,6 +1360,7 @@ namespace Xv2CoreLib.BSA
         [YAXAttributeFor("I_80")]
         [YAXSerializeAs("value")]
         public uint I_80 { get; set; }
+        [YAXAltAliases("I_84/value")]
         [YAXAttributeFor("Effect_Placement_Flags")]
         [YAXSerializeAs("value")]
         public uint I_84 { get; set; }
