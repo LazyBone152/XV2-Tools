@@ -33,12 +33,17 @@ namespace Xv2CoreLib.EMB_CLASS
         {
             rawBytes = File.ReadAllBytes(fileLocation);
             saveLocation = String.Format("{0}.xml", fileLocation);
-            DecompressEmz();
-            Validation();
-            totalEntries = BitConverter.ToInt32(rawBytes, 12);
-            contentsOffset = BitConverter.ToInt32(rawBytes, 24);
-            fileNameTableOffset = BitConverter.ToInt32(rawBytes, 28);
-            ParseFile();
+
+            //Some emb files have zero bytes (see 635_TOW_PSM.trc.emb). Check for this to avoid crashing.
+            if (rawBytes.Length >= 32)
+            {
+                DecompressEmz();
+                Validation();
+                totalEntries = BitConverter.ToInt32(rawBytes, 12);
+                contentsOffset = BitConverter.ToInt32(rawBytes, 24);
+                fileNameTableOffset = BitConverter.ToInt32(rawBytes, 28);
+                ParseFile();
+            }
 
             if (writeXml)
             {
@@ -50,12 +55,16 @@ namespace Xv2CoreLib.EMB_CLASS
         public Parser(byte[] _rawBytes)
         {
             rawBytes = _rawBytes;
-            DecompressEmz();
-            Validation();
-            totalEntries = BitConverter.ToInt32(rawBytes, 12);
-            contentsOffset = BitConverter.ToInt32(rawBytes, 24);
-            fileNameTableOffset = BitConverter.ToInt32(rawBytes, 28);
-            ParseFile();
+
+            if (rawBytes.Length >= 32)
+            {
+                DecompressEmz();
+                Validation();
+                totalEntries = BitConverter.ToInt32(rawBytes, 12);
+                contentsOffset = BitConverter.ToInt32(rawBytes, 24);
+                fileNameTableOffset = BitConverter.ToInt32(rawBytes, 28);
+                ParseFile();
+            }
         }
         private void DecompressEmz()
         {

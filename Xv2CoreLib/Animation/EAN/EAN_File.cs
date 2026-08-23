@@ -2695,7 +2695,9 @@ namespace Xv2CoreLib.EAN
                 animations.Add(animation.DeserializeToEan(bindPose));
             });
 
-            return animations.ToList();
+            var list = animations.ToList();
+            list.Sort((x, y) => x.SortID - y.SortID);
+            return list;
         }
 
         public static List<EMA_Animation> DeserializeToEma(IList<SerializedAnimation> serialziedAnimations)

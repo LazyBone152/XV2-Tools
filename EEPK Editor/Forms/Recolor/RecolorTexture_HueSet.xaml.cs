@@ -1,15 +1,12 @@
-﻿using System;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Media.Imaging;
-using Xv2CoreLib.EMB_CLASS;
-using System.Drawing;
+﻿using System.Windows;
 using System.ComponentModel;
 using System.Diagnostics;
-using AForge;
-using MahApps.Metro.Controls;
-using Xv2CoreLib.Resource.UndoRedo;
+using System.Threading.Tasks;
 using System.Collections.Generic;
+using MahApps.Metro.Controls;
+using Xv2CoreLib.EMB_CLASS;
+using Xv2CoreLib.Resource.UndoRedo;
+using Xv2CoreLib.Resource.Image;
 
 namespace EEPK_Organiser.Forms.Recolor
 {
@@ -20,7 +17,7 @@ namespace EEPK_Organiser.Forms.Recolor
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void NotifyPropertyChanged(String propertyName = "")
+        private void NotifyPropertyChanged(string propertyName = "")
         {
             if (PropertyChanged != null)
             {
@@ -29,8 +26,8 @@ namespace EEPK_Organiser.Forms.Recolor
         }
 
         public EmbEntry CurrentTexture { get; set; }
-        private WriteableBitmap OriginalTextureBackup = null;
-        private bool cancelled = true;
+        private readonly WriteableBitmapEditOperation EditOperation;
+        private bool IsCancelled = true;
 
         //Parameters
         private int _hueValue = 0;
@@ -57,15 +54,6 @@ namespace EEPK_Organiser.Forms.Recolor
         private const int previewDelay = 100;
         private const int previewDelayWait = 10;
 
-        public bool IsSupportedFormat
-        {
-            get
-            {
-                var formats = new AForge.Imaging.Filters.HSLLinear().FormatTranslations;
-                return (formats.ContainsKey(((Bitmap)OriginalTextureBackup).PixelFormat));
-            }
-        }
-
         public RecolorTexture_HueSet(EmbEntry _texture, Window parent)
         {
             CurrentTexture = _texture;
@@ -73,17 +61,19 @@ namespace EEPK_Organiser.Forms.Recolor
             DataContext = this;
             Owner = parent;
 
-            OriginalTextureBackup = CurrentTexture.Texture;
             stopwatch.Start();
+
+            EditOperation = new WriteableBitmapEditOperation(CurrentTexture.Texture);
+            CurrentTexture.Texture = EditOperation.OutputBitmap;
         }
 
         private void Ok_Click(object sender, RoutedEventArgs e)
         {
-            cancelled = false;
+            IsCancelled = false;
             CurrentTexture.wasEdited = true;
             List<IUndoRedo> undos = new List<IUndoRedo>()
             {
-                new UndoableProperty<EmbEntry>(nameof(EmbEntry.Texture), CurrentTexture, OriginalTextureBackup, CurrentTexture.Texture)
+                new UndoableProperty<EmbEntry>(nameof(EmbEntry.Texture), CurrentTexture, EditOperation.SourceBitmap, CurrentTexture.Texture)
             };
             CurrentTexture.SaveDds(true, undos);
 
@@ -120,16 +110,7 @@ namespace EEPK_Organiser.Forms.Recolor
                 }
             }
 
-            //Create System.Drawing.Bitmap
-            Bitmap bitmap = (Bitmap)OriginalTextureBackup;
-            // Apply filters
-            var hueFilter = new AForge.Imaging.Filters.HueModifier(HueValue);
-
-
-            bitmap = hueFilter.Apply(bitmap);
-
-            //Convert back to WPF Bitmap
-            CurrentTexture.Texture = (WriteableBitmap)bitmap;
+            await EditOperation.ApplyHueSet(HueValue);
 
             //Restart the timer
             isImageProcessing = false;
@@ -138,12 +119,11 @@ namespace EEPK_Organiser.Forms.Recolor
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
-            if (cancelled)
+            if (IsCancelled)
             {
-                CurrentTexture.Texture = OriginalTextureBackup;
+                CurrentTexture.Texture = EditOperation.SourceBitmap;
             }
         }
-
 
         private void Button_UndoHueChange_Click(object sender, RoutedEventArgs e)
         {

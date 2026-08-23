@@ -1,13 +1,11 @@
-﻿using MahApps.Metro.Controls;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
+using MahApps.Metro.Controls;
 using Xv2CoreLib.EEPK;
 using Xv2CoreLib.EffectContainer;
-using Xv2CoreLib.EMB_CLASS;
 using Xv2CoreLib.EMM;
 using Xv2CoreLib.EMP_NEW;
 using Xv2CoreLib.ECF;
@@ -25,7 +23,7 @@ namespace EEPK_Organiser.Forms.Recolor
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void NotifyPropertyChanged(String propertyName = "")
+        private void NotifyPropertyChanged(string propertyName = "")
         {
             if (PropertyChanged != null)
             {

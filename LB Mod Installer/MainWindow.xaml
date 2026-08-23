@@ -41,7 +41,7 @@
                 <ItemsControl ItemsSource="{Binding CurrentInstallStep.OptionList}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <RadioButton IsChecked="{Binding IsSelected_Option, UpdateSourceTrigger=PropertyChanged}" Content="{Binding Name}" ToolTip="{Binding Tooltip}" GroupName="Options" Checked="RadioButtons_CheckedChanged" Foreground="{Binding Path=CurrentTextColor, RelativeSource={RelativeSource AncestorType={x:Type Controls:MetroWindow}}}"/>
+                            <RadioButton IsChecked="{Binding IsSelected_Option, UpdateSourceTrigger=PropertyChanged}" Content="{Binding Name}" ToolTip="{Binding Tooltip}" GroupName="Options" Checked="RadioButtons_CheckedChanged" Foreground="{Binding Path=CurrentTextColor, RelativeSource={RelativeSource AncestorType={x:Type Controls:MetroWindow}}}" Background="Transparent" Controls:RadioButtonHelper.ForegroundPointerOver="{Binding Path=CurrentTextColor, RelativeSource={RelativeSource AncestorType={x:Type Controls:MetroWindow}}}" Controls:RadioButtonHelper.ForegroundPressed="{Binding Path=CurrentTextColor, RelativeSource={RelativeSource AncestorType={x:Type Controls:MetroWindow}}}"/>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
@@ -51,7 +51,7 @@
                 <ItemsControl ItemsSource="{Binding CurrentInstallStep.OptionList}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <CheckBox Content="{Binding Name}" ToolTip="{Binding Tooltip}" IsChecked="{Binding IsSelected_OptionMultiSelect, UpdateSourceTrigger=PropertyChanged}" Foreground="{Binding Path=CurrentTextColor, RelativeSource={RelativeSource AncestorType={x:Type Controls:MetroWindow}}}" Checked="CheckBox_Checked" Unchecked="CheckBox_Checked"/>
+                            <CheckBox Content="{Binding Name}" ToolTip="{Binding Tooltip}" IsChecked="{Binding IsSelected_OptionMultiSelect, UpdateSourceTrigger=PropertyChanged}" Foreground="{Binding Path=CurrentTextColor, RelativeSource={RelativeSource AncestorType={x:Type Controls:MetroWindow}}}" Checked="CheckBox_Checked" Unchecked="CheckBox_Checked" Background="Transparent"/>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>

@@ -176,8 +176,17 @@
             Collection of draw spline extension methods for the WriteableBitmap class.
             </summary>
             <summary>
+            Collection of extension methods for the WriteableBitmap class.
+            </summary>
+            <summary>
             Collection of transformation extension methods for the WriteableBitmap class.
             </summary>
+        </member>
+        <member name="M:System.Windows.Media.Imaging.WriteableBitmapExtensions.AlphaBlendArgbPixels(System.Byte,System.Byte,System.Byte,System.Byte,System.Byte,System.Byte,System.Byte,System.Byte)">
+            <summary>
+            Belnds two pixels regarding their alpha
+            </summary>
+            <returns>blended</returns>
         </member>
         <member name="M:System.Windows.Media.Imaging.WriteableBitmapExtensions.Clear(System.Windows.Media.Imaging.WriteableBitmap,System.Windows.Media.Color)">
             <summary>
@@ -1284,7 +1293,24 @@
             <param name="points">The points of the polyline in x and y pairs, therefore the array is interpreted as (x1, y1, x2, y2, ..., xn, yn).</param>
             <param name="color">The color for the line.</param>
         </member>
+        <member name="M:System.Windows.Media.Imaging.WriteableBitmapExtensions.DrawPolylineAa(System.Windows.Media.Imaging.WriteableBitmap,System.Int32[],System.Windows.Media.Color,System.Int32)">
+            <summary>
+            Draws a polyline. Add the first point also at the end of the array if the line should be closed.
+            </summary>
+            <param name="bmp">The WriteableBitmap.</param>
+            <param name="points">The points of the polyline in x and y pairs, therefore the array is interpreted as (x1, y1, x2, y2, ..., xn, yn).</param>
+            <param name="color">The color for the line.</param>
+            <param name="thickness">The thickness for the line.</param>
+        </member>
         <member name="M:System.Windows.Media.Imaging.WriteableBitmapExtensions.DrawPolylineAa(System.Windows.Media.Imaging.WriteableBitmap,System.Int32[],System.Int32)">
+            <summary>
+            Draws a polyline anti-aliased. Add the first point also at the end of the array if the line should be closed.
+            </summary>
+            <param name="bmp">The WriteableBitmap.</param>
+            <param name="points">The points of the polyline in x and y pairs, therefore the array is interpreted as (x1, y1, x2, y2, ..., xn, yn).</param>
+            <param name="color">The color for the line.</param>
+        </member>
+        <member name="M:System.Windows.Media.Imaging.WriteableBitmapExtensions.DrawPolylineAa(System.Windows.Media.Imaging.WriteableBitmap,System.Int32[],System.Int32,System.Int32)">
             <summary>
             Draws a polyline anti-aliased. Add the first point also at the end of the array if the line should be closed.
             </summary>
@@ -1527,6 +1553,53 @@
             <param name="points">The points for the curve in x and y pairs, therefore the array is interpreted as (x1, y1, x2, y2, x3, y3, x4, y4, x1, x2 ..., xn, yn).</param>
             <param name="tension">The tension of the curve defines the shape. Usually between 0 and 1. 0 would be a straight line.</param>
             <param name="color">The color for the spline.</param>
+        </member>
+        <member name="M:System.Windows.Media.Imaging.WriteableBitmapExtensions.FillText(System.Windows.Media.Imaging.WriteableBitmap,System.Windows.Media.FormattedText,System.Int32,System.Int32,System.Windows.Media.Color)">
+            <summary>
+            Draws a filled text.
+            </summary>
+            <param name="bmp">The WriteableBitmap.</param>
+            <param name="formattedText">The text to be rendered</param>
+            <param name="x">The x-coordinate of the text origin</param>
+            <param name="y">The y-coordinate of the text origin</param>
+            <param name="color">the color.</param>
+        </member>
+        <member name="M:System.Windows.Media.Imaging.WriteableBitmapExtensions.FillGeometry(System.Windows.Media.Imaging.WriteableBitmap,System.Windows.Media.Geometry,System.Windows.Media.Color)">
+            <summary>
+            Draws a filled geometry.
+            </summary>
+            <param name="bmp">The WriteableBitmap.</param>
+            <param name="geometry">The geometry to be rendered</param>
+            <param name="color">the color.</param>
+        </member>
+        <member name="M:System.Windows.Media.Imaging.WriteableBitmapExtensions.DrawText(System.Windows.Media.Imaging.WriteableBitmap,System.Windows.Media.FormattedText,System.Int32,System.Int32,System.Windows.Media.Color)">
+            <summary>
+            Draws an outlined text.
+            </summary>
+            <param name="bmp">The WriteableBitmap.</param>
+            <param name="formattedText">The text to be rendered</param>
+            <param name="x">The x-coordinate of the text origin</param>
+            <param name="y">The y-coordinate of the text origin</param>
+            <param name="color">the color.</param>
+        </member>
+        <member name="M:System.Windows.Media.Imaging.WriteableBitmapExtensions.DrawTextAa(System.Windows.Media.Imaging.WriteableBitmap,System.Windows.Media.FormattedText,System.Int32,System.Int32,System.Windows.Media.Color,System.Int32)">
+            <summary>
+            Draws an outlined text.
+            </summary>
+            <param name="bmp">The WriteableBitmap.</param>
+            <param name="formattedText">The text to be rendered</param>
+            <param name="x">The x-coordinate of the text origin</param>
+            <param name="y">The y-coordinate of the text origin</param>
+            <param name="color">the color.</param>
+            <param name="thickness">the thickness.</param>
+        </member>
+        <member name="M:System.Windows.Media.Imaging.WriteableBitmapExtensions.DrawGeometry(System.Windows.Media.Imaging.WriteableBitmap,System.Windows.Media.Geometry,System.Windows.Media.Color)">
+            <summary>
+            Draws outline of a geometry.
+            </summary>
+            <param name="bmp">The WriteableBitmap.</param>
+            <param name="geometry">The geometry to be rendered</param>
+            <param name="color">the color.</param>
         </member>
         <member name="T:System.Windows.Media.Imaging.WriteableBitmapExtensions.Interpolation">
             <summary>

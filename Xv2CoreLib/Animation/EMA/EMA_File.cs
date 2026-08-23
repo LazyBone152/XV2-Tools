@@ -211,6 +211,9 @@ namespace Xv2CoreLib.EMA
                                 command.Int16ForTime = true;
                             if (keyframe.index > byte.MaxValue)
                                 command.Int24ForValueIndex = true;
+
+                            if (command.Int16ForTime && command.Int24ForValueIndex)
+                                break;
                         }
 
                         if (HasSkeleton)
@@ -688,7 +691,7 @@ namespace Xv2CoreLib.EMA
                     }
                 }
             }
-
+            
             //If the values not found in existing value list, then add them
             int idx = values.Count;
 
@@ -1365,6 +1368,7 @@ namespace Xv2CoreLib.EMA
 
             BitArray flags_b = new BitArray(new byte[1] { Int4Converter.ToInt4(rawBytes[offset + 3])[1] });
             BitArray flags_a = new BitArray(new byte[1] { Int4Converter.ToInt4(rawBytes[offset + 3])[0] });
+            
             command.I_03_b1 = flags_b[0];
             command.Int16ForTime = flags_b[1];
             command.Int24ForValueIndex = flags_b[2];
@@ -1374,6 +1378,7 @@ namespace Xv2CoreLib.EMA
             flags_a[2] = false;
             flags_a[3] = false;
             command.Component = Int4Converter.GetByte(Utils.ConvertToByte(flags_a), 0);
+
 
             ushort keyframeCount = BitConverter.ToUInt16(rawBytes, offset + 4);
             ushort indexOffset = BitConverter.ToUInt16(rawBytes, offset + 6);

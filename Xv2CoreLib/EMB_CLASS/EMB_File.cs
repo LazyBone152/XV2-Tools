@@ -1,16 +1,17 @@
-﻿using System;
+﻿using CSharpImageLibrary;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using YAXLib;
 using System.Windows.Media.Imaging;
+using Xv2CoreLib.BEV;
 using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.HslColor;
-using Xv2CoreLib.Resource.UndoRedo;
 using Xv2CoreLib.Resource;
-using CSharpImageLibrary;
 using Xv2CoreLib.Resource.Image;
+using Xv2CoreLib.Resource.UndoRedo;
+using YAXLib;
 
 namespace Xv2CoreLib.EMB_CLASS
 {
@@ -97,20 +98,20 @@ namespace Xv2CoreLib.EMB_CLASS
                 {
                     throw new FileNotFoundException("An .emb could not be found at the specified location.");
                 }
-                
+
             }
         }
 
         public void SaveXmlEmbFile(string saveLocation)
         {
-            if(Entry != null)
+            if (Entry != null)
             {
                 for (int i = 0; i < Entry.Count(); i++)
                 {
                     Entry[i].Index = i.ToString();
                 }
             }
-            
+
 
             if (!Directory.Exists(Path.GetDirectoryName(saveLocation)))
             {
@@ -126,7 +127,7 @@ namespace Xv2CoreLib.EMB_CLASS
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(saveLocation));
             }
-            
+
             new Deserializer(saveLocation, this);
         }
 
@@ -152,14 +153,14 @@ namespace Xv2CoreLib.EMB_CLASS
                     Entry = new AsyncObservableCollection<EmbEntry>()
                 };
             }
-            
+
         }
 
         public bool DoesFileExist(string file)
         {
-            for(int i = 0; i < Entry.Count(); i++)
+            for (int i = 0; i < Entry.Count(); i++)
             {
-                if(Entry[i].Name == file)
+                if (Entry[i].Name == file)
                 {
                     return true;
                 }
@@ -169,9 +170,9 @@ namespace Xv2CoreLib.EMB_CLASS
 
         public bool ContainsFileType(string extension)
         {
-            foreach(var e in Entry)
+            foreach (var e in Entry)
             {
-                if(Path.GetExtension(e.Name) == extension)
+                if (Path.GetExtension(e.Name) == extension)
                 {
                     return true;
                 }
@@ -179,7 +180,7 @@ namespace Xv2CoreLib.EMB_CLASS
 
             return false;
         }
-        
+
         public void AddEntry(byte[] data)
         {
             string name = GetUnusedName("DATA.dds");
@@ -193,15 +194,15 @@ namespace Xv2CoreLib.EMB_CLASS
 
         public int AddEntry(string name, byte[] bytes, bool overWrite, int expectedSize = -1)
         {
-            if(expectedSize != -1 && Entry.Count != expectedSize)
+            if (expectedSize != -1 && Entry.Count != expectedSize)
             {
                 throw new Exception(String.Format("The EEPK container and EMB are out of sync. Cannot add the entry."));
             }
 
             //Check if entry exists
-            for(int i = 0; i < Entry.Count; i++)
+            for (int i = 0; i < Entry.Count; i++)
             {
-                if(Entry[i].Name == name)
+                if (Entry[i].Name == name)
                 {
                     if (overWrite)
                     {
@@ -223,10 +224,10 @@ namespace Xv2CoreLib.EMB_CLASS
 
             return newIdx;
         }
-        
+
         public EmbEntry GetEntry(int index)
         {
-            if(index >= Entry.Count || index < 0)
+            if (index >= Entry.Count || index < 0)
             {
                 return null;
             }
@@ -241,7 +242,7 @@ namespace Xv2CoreLib.EMB_CLASS
 
         public EmbEntry GetEntry(string name)
         {
-            foreach(var entry in Entry)
+            foreach (var entry in Entry)
             {
                 if (entry.Name == name) return entry;
             }
@@ -252,7 +253,7 @@ namespace Xv2CoreLib.EMB_CLASS
 
         public EmbEntry Compare(EmbEntry embEntry2, bool ignoreName = false)
         {
-            foreach(var entry in Entry)
+            foreach (var entry in Entry)
             {
                 if (entry == embEntry2) return entry;
 
@@ -282,7 +283,7 @@ namespace Xv2CoreLib.EMB_CLASS
             }
 
             //Check entry size
-            if(Entry.Count >= MAX_EFFECT_TEXTURES)
+            if (Entry.Count >= MAX_EFFECT_TEXTURES)
             {
                 throw new Exception(String.Format("EMB_File.Add: Texture limit has been reached. Cannot add any more."));
             }
@@ -354,7 +355,7 @@ namespace Xv2CoreLib.EMB_CLASS
             string name = null;
             try
             {
-                foreach(var entry in Entry)
+                foreach (var entry in Entry)
                 {
                     name = entry.Name;
                     if (entry.loadDds)
@@ -390,7 +391,7 @@ namespace Xv2CoreLib.EMB_CLASS
 
         public int AddEntry(EmbEntry embEntry, string _idx, InstallMode _installMode)
         {
-            if(_installMode == InstallMode.MatchIndex)
+            if (_installMode == InstallMode.MatchIndex)
             {
                 int idx = int.Parse(_idx);
 
@@ -404,7 +405,7 @@ namespace Xv2CoreLib.EMB_CLASS
                     //Add empty entries until idx is reached
                     while ((Entry.Count - 1) < (idx - 1))
                     {
-                        Entry.Add(new EmbEntry() { Name = "dummy_" + (Entry.Count - 1).ToString(), Data = new byte[0]});
+                        Entry.Add(new EmbEntry() { Name = "dummy_" + (Entry.Count - 1).ToString(), Data = new byte[0] });
                     }
 
                     Entry.Add(embEntry);
@@ -413,9 +414,9 @@ namespace Xv2CoreLib.EMB_CLASS
             }
             else if (_installMode == InstallMode.MatchName)
             {
-                for(int i = 0; i < Entry.Count; i++)
+                for (int i = 0; i < Entry.Count; i++)
                 {
-                    if(Entry[i].Name == embEntry.Name)
+                    if (Entry[i].Name == embEntry.Name)
                     {
                         Entry[i] = embEntry;
                         return i;
@@ -433,7 +434,7 @@ namespace Xv2CoreLib.EMB_CLASS
         {
             int idx = int.Parse(_idx);
 
-            if(idx == Entry.Count - 1)
+            if (idx == Entry.Count - 1)
             {
                 //Last entry, so just remove it
                 Entry.RemoveAt(idx);
@@ -444,7 +445,7 @@ namespace Xv2CoreLib.EMB_CLASS
             else if (idx < Entry.Count - 1 && idx >= 0)
             {
                 //Replace entry with an empty entry
-                if(original != null)
+                if (original != null)
                 {
                     Entry[idx] = original;
                 }
@@ -462,8 +463,8 @@ namespace Xv2CoreLib.EMB_CLASS
                 if (!Entry[i].Name.Contains("dummy_"))
                     break;
 
-                if (Entry[i].IsNull()) 
-                { 
+                if (Entry[i].IsNull())
+                {
                     Entry.RemoveAt(i);
                 }
                 else
@@ -478,31 +479,31 @@ namespace Xv2CoreLib.EMB_CLASS
             if (Entry == null) Entry = AsyncObservableCollection<EmbEntry>.Create();
             List<RgbColor> colors = new List<RgbColor>();
 
-            foreach(var entry in Entry)
+            foreach (var entry in Entry)
             {
                 colors.Add(entry.GetDdsColor());
             }
 
             return colors;
         }
-    
+
         public List<EmbEntry> GetAllEmbEntriesByBitmap(List<WriteableBitmap> bitmaps)
         {
             List<EmbEntry> entries = new List<EmbEntry>();
 
-            foreach(var bitmap in bitmaps)
+            foreach (var bitmap in bitmaps)
             {
                 entries.Add(Entry.FirstOrDefault(x => x.Texture == bitmap));
             }
 
             return entries;
         }
-    
+
         public void MergeEmbFile(EMB_File embFile)
         {
             if (embFile == null) return;
 
-            foreach(var entry in embFile.Entry)
+            foreach (var entry in embFile.Entry)
             {
                 string name = embFile.UseFileNames ? GetUnusedName(entry.Name) : $"DATA{Entry.Count}.dds";
                 EmbEntry newEntry = entry.Clone();
@@ -511,12 +512,23 @@ namespace Xv2CoreLib.EMB_CLASS
                 Entry.Add(newEntry);
             }
         }
-    
+
         public void UpdateEntryIndex()
         {
-            for(int i = 0; i < Entry.Count; i++)
+            for (int i = 0; i < Entry.Count; i++)
             {
                 Entry[i].ID = i;
+            }
+        }
+    
+        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0)
+        {
+            if (Entry == null) return;
+
+            foreach (var entry in Entry)
+            {
+                entry.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
+                entry.SaveDds(true, undos);
             }
         }
     }
@@ -569,7 +581,7 @@ namespace Xv2CoreLib.EMB_CLASS
             get => _name;
             set
             {
-                if(_name != value)
+                if (_name != value)
                 {
                     _name = value;
                     NotifyPropertyChanged(nameof(Name));
@@ -606,7 +618,7 @@ namespace Xv2CoreLib.EMB_CLASS
                     {
                         //Reload the dds with the new image data
                         LoadDds();
-                        wasEdited = false; 
+                        wasEdited = false;
                     }
 
                     NotifyPropertyChanged(nameof(Data));
@@ -630,14 +642,14 @@ namespace Xv2CoreLib.EMB_CLASS
         private bool ddsIsLoading = false;
         [NonSerialized]
         public bool loadDdsFail = false;
-        [NonSerialized] 
+        [NonSerialized]
         private WriteableBitmap _texture = null;
         [YAXDontSerialize]
         public WriteableBitmap Texture
         {
             get
             {
-                if(_texture == null && !loadDdsFail && !ddsIsLoading)
+                if (_texture == null && !loadDdsFail && !ddsIsLoading)
                 {
                     LoadDds();
                 }
@@ -652,7 +664,7 @@ namespace Xv2CoreLib.EMB_CLASS
                 }
             }
         }
-        
+
 
         //Texture Details (readonly)
         [YAXDontSerialize]
@@ -679,14 +691,14 @@ namespace Xv2CoreLib.EMB_CLASS
         {
             get
             {
-                if(Data != null)
+                if (Data != null)
                 {
-                    if(Data.Length < 1000)
+                    if (Data.Length < 1000)
                     {
                         //Is less than a kilobyte
                         return String.Format("{0} bytes", Data.Length);
                     }
-                    else if(Data.Length < 1000000)
+                    else if (Data.Length < 1000000)
                     {
                         //Is atleast a kilobyte and less than a megabyte
                         return String.Format("{0} KB", Utils.BytesToKilobytes(Data.Length));
@@ -744,7 +756,7 @@ namespace Xv2CoreLib.EMB_CLASS
         public bool Compare(EmbEntry embEntry2, bool ignoreName = false)
         {
             //Name and bytes must be the same to return true
-            if(embEntry2.Name == Name || ignoreName)
+            if (embEntry2.Name == Name || ignoreName)
             {
                 return Data.SequenceEqual(embEntry2.Data);
             }
@@ -770,7 +782,7 @@ namespace Xv2CoreLib.EMB_CLASS
             newEntry.Texture = Texture;
             return newEntry;
         }
-        
+
         public static EmbEntry Empty(int idx = 0)
         {
             return new EmbEntry()
@@ -912,6 +924,34 @@ namespace Xv2CoreLib.EMB_CLASS
         }
 
         #endregion
-    }
 
+        public void ChangeHue(double hue, double _saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0)
+        {
+            if (Texture == null)
+                return;
+
+            WriteableBitmapEditOperation editOperation = new WriteableBitmapEditOperation(Texture);
+
+            if (hueSet)
+            {
+                if (variance != 0)
+                    hue += Random.Range(-variance, variance);
+
+                editOperation.ApplyHueSet((int)hue);
+            }
+            else
+            {
+                float brightness = (float)lightness / 5f;
+                float saturation = (float)_saturation;
+                editOperation.ApplyHueAdjust((int)hue, saturation, brightness);
+            }
+
+            wasEdited = true;
+            Texture = editOperation.OutputBitmap;
+
+            if (undos != null)
+                undos.Add(new UndoableProperty<EmbEntry>(nameof(Texture), this, editOperation.SourceBitmap, editOperation.OutputBitmap));
+        }
+
+    }
 }

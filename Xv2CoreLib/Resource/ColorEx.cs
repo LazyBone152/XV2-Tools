@@ -312,22 +312,33 @@ namespace Xv2CoreLib.HslColor
             }
         }
 
-        public static WriteableBitmap HueAdjust(WriteableBitmap bitmap, int hue)
+        public static System.Windows.Media.Color HueAdjust(byte r, byte g, byte b, byte a, int hue, double saturation, double lightness)
         {
-            //Does not work for whatever reason...
-            if (hue == 0) return bitmap;
+            RgbToHls(GetFloatColor(r), GetFloatColor(g), GetFloatColor(b), out double h, out double l, out double s);
 
-            bitmap.ForEach((x, y, color) => Work(color.R, color.G, color.B, color.A, hue));
+            h = (h + hue) % 360.0;
+            if (h < 0)
+                h += 360.0;
 
-            return bitmap;
+            // Apply saturation and lightness adjustments.
+            // Treat saturation and lightness as multipliers (1.0 = no change).
+            s = Math.Min(1.0, Math.Max(0.0, s * saturation));
+            l = Math.Min(1.0, Math.Max(0.0, l * lightness));
+
+            HlsToRgb(h, l, s, out double newR, out double newG, out double newB);
+            return new System.Windows.Media.Color() { R = (byte)(newR * 255.0), G = (byte)(newG * 255.0), B = (byte)(newB * 255.0), A = a };
         }
 
-        private static System.Windows.Media.Color Work(byte r, byte g, byte b, byte a, int hue)
+        public static System.Windows.Media.Color HueSet(byte r, byte g, byte b, byte a, int hue)
         {
-            HslColor hslColor = new RgbColor(r, g, b).ToHsl();
-            hslColor.ChangeHue(hue);
-            var newColor = hslColor.ToRgb();
-            return new System.Windows.Media.Color() { R = newColor.R_int, G = newColor.G_int, B = newColor.B_int, A = a };
+            RgbToHls(GetFloatColor(r), GetFloatColor(g), GetFloatColor(b), out double h, out double l, out double s);
+
+            h = hue % 360.0;
+            if (h < 0)
+                h += 360.0;
+
+            HlsToRgb(h, l, s, out double newR, out double newG, out double newB);
+            return new System.Windows.Media.Color() { R = (byte)(newR * 255.0), G = (byte)(newG * 255.0), B = (byte)(newB * 255.0), A = a };
         }
 
         public static RgbColor GetAverageColor(List<RgbColor> colors)

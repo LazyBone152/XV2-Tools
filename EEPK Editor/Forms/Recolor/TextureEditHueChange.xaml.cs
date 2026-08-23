@@ -1,15 +1,12 @@
-﻿using System;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Media.Imaging;
-using Xv2CoreLib.EMB_CLASS;
-using System.Drawing;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using AForge;
+using System.Threading.Tasks;
+using System.Windows;
 using MahApps.Metro.Controls;
+using Xv2CoreLib.EMB_CLASS;
+using Xv2CoreLib.Resource.Image;
 using Xv2CoreLib.Resource.UndoRedo;
-using System.Collections.Generic;
 
 namespace EEPK_Organiser.Forms
 {
@@ -22,7 +19,7 @@ namespace EEPK_Organiser.Forms
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void NotifyPropertyChanged(String propertyName = "")
+        private void NotifyPropertyChanged(string propertyName = "")
         {
             if (PropertyChanged != null)
             {
@@ -31,8 +28,8 @@ namespace EEPK_Organiser.Forms
         }
 
         public EmbEntry CurrentTexture { get; set; }
-        private WriteableBitmap OriginalTextureBackup = null;
-        private bool cancelled = true;
+        private readonly WriteableBitmapEditOperation EditOperation;
+        private bool IsCancelled = true;
 
         //Parameters
         private int _hueValue = 0;
@@ -91,25 +88,6 @@ namespace EEPK_Organiser.Forms
         private const int previewDelay = 100;
         private const int previewDelayWait = 10;
 
-        public bool IsSupportedFormat
-        {
-            get
-            {
-                var formats = new AForge.Imaging.Filters.HSLLinear().FormatTranslations;
-                try
-                {
-                    return (formats.ContainsKey(((Bitmap)CurrentTexture.Texture).PixelFormat));
-                }
-                catch (InsufficientMemoryException)
-                {
-                    return false;
-                }
-                catch (OutOfMemoryException)
-                {
-                    return false;
-                }
-            }
-        }
 
         public TextureEditHueChange(EmbEntry _texture, Window parent)
         {
@@ -117,19 +95,20 @@ namespace EEPK_Organiser.Forms
             InitializeComponent();
             DataContext = this;
             Owner = parent;
-
-            OriginalTextureBackup = CurrentTexture.Texture;
             stopwatch.Start();
+
+            EditOperation = new WriteableBitmapEditOperation(CurrentTexture.Texture);
+            CurrentTexture.Texture = EditOperation.OutputBitmap;
         }
 
         private void Ok_Click(object sender, RoutedEventArgs e)
         {
-            cancelled = false;
+            IsCancelled = false;
             CurrentTexture.wasEdited = true;
 
             List<IUndoRedo> undos = new List<IUndoRedo>()
             {
-                new UndoableProperty<EmbEntry>(nameof(EmbEntry.Texture), CurrentTexture, OriginalTextureBackup, CurrentTexture.Texture)
+                new UndoableProperty<EmbEntry>(nameof(EmbEntry.Texture), CurrentTexture, EditOperation.SourceBitmap, CurrentTexture.Texture)
             };
             CurrentTexture.SaveDds(true, undos);
 
@@ -172,44 +151,8 @@ namespace EEPK_Organiser.Forms
                 //}
             }
 
-            //Create System.Drawing.Bitmap
-            Bitmap bitmap = (Bitmap)OriginalTextureBackup;
-            // Apply filters
-            var hueFilter = new AForge.Imaging.Filters.HueAdjustment(HueValue);
-            var satFilter = new AForge.Imaging.Filters.SaturationCorrection((float)SaturationValue);
-            var hslFilter = new AForge.Imaging.Filters.HSLLinear();
-
-            float brightness = (float)LightnessValue;
-
-            if (brightness > 0)
-            {
-                hslFilter.InLuminance = new Range(0.0f, 1.0f - brightness); //TODO - isn't it better not to truncate, but compress?
-                hslFilter.OutLuminance = new Range(brightness, 1.0f);
-            }
-            else
-            {
-                hslFilter.InLuminance = new Range(-brightness, 1.0f);
-                hslFilter.OutLuminance = new Range(0.0f, 1.0f + brightness);
-            }
-            // create saturation filter
-            float saturation = (float)SaturationValue;
-            if (saturation > 0)
-            {
-                hslFilter.InSaturation = new Range(0.0f, 1.0f - saturation); //Ditto?
-                hslFilter.OutSaturation = new Range(saturation, 1.0f);
-            }
-            else
-            {
-                hslFilter.InSaturation = new Range(-saturation, 1.0f);
-                hslFilter.OutSaturation = new Range(0.0f, 1.0f + saturation);
-            }
-
-            bitmap = hueFilter.Apply(bitmap);
-            hslFilter.ApplyInPlace(bitmap);
-
-            //Convert back to WPF Bitmap
-            CurrentTexture.Texture = (WriteableBitmap)bitmap;
-
+            await EditOperation.ApplyHueAdjust(HueValue, SaturationValue, LightnessValue);
+            
             //Restart the timer
             isImageProcessing = false;
             stopwatch.Restart();
@@ -217,12 +160,11 @@ namespace EEPK_Organiser.Forms
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
-            if (cancelled)
+            if (IsCancelled)
             {
-                CurrentTexture.Texture = OriginalTextureBackup;
+                CurrentTexture.Texture = EditOperation.SourceBitmap;
             }
         }
-
 
         private void Button_UndoHueChange_Click(object sender, RoutedEventArgs e)
         {
