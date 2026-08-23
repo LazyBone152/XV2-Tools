@@ -4572,13 +4572,32 @@ namespace EEPK_Organiser.View
         private void effectPart_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             CreateEffectPartViewModel();
-
+            SetEffectPartGizmo();
         }
 
         private void effectDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             CreateEffectPartViewModel();
             PlaySelectedEffect();
+            SetEffectPartGizmo();
+        }
+
+        private void SetEffectPartGizmo()
+        {
+#if XenoKit
+            if (Viewport.Instance == null) return;
+
+            EffectPart effectPart = SelectedEffect?.SelectedEffectPart;
+
+            if (effectPart != null)
+            {
+                Viewport.Instance.EffectPartGizmo.SetContext(effectPart);
+            }
+            else
+            {
+                Viewport.Instance.EffectPartGizmo.RemoveContext();
+            }
+#endif
         }
 
         private void PlaySelectedEffect()
