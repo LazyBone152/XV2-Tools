@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using Xv2CoreLib.BEV;
 using Xv2CoreLib.EffectContainer;
@@ -521,13 +522,13 @@ namespace Xv2CoreLib.EMB_CLASS
             }
         }
     
-        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0)
+        public async void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0)
         {
             if (Entry == null) return;
 
             foreach (var entry in Entry)
             {
-                entry.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
+                await entry.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
                 entry.SaveDds(true, undos);
             }
         }
@@ -925,7 +926,7 @@ namespace Xv2CoreLib.EMB_CLASS
 
         #endregion
 
-        public void ChangeHue(double hue, double _saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0)
+        public async Task ChangeHue(double hue, double _saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0)
         {
             if (Texture == null)
                 return;
@@ -937,13 +938,13 @@ namespace Xv2CoreLib.EMB_CLASS
                 if (variance != 0)
                     hue += Random.Range(-variance, variance);
 
-                editOperation.ApplyHueSet((int)hue);
+                await editOperation.AsyncApplyHueSet((int)hue);
             }
             else
             {
                 float brightness = (float)lightness / 5f;
                 float saturation = (float)_saturation;
-                editOperation.ApplyHueAdjust((int)hue, saturation, brightness);
+                await editOperation.AsyncApplyHueAdjust((int)hue, saturation, brightness);
             }
 
             wasEdited = true;

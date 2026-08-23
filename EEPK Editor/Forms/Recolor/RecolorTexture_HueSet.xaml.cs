@@ -110,7 +110,7 @@ namespace EEPK_Organiser.Forms.Recolor
                 }
             }
 
-            await EditOperation.ApplyHueSet(HueValue);
+            await EditOperation.AsyncApplyHueSet(HueValue);
 
             //Restart the timer
             isImageProcessing = false;

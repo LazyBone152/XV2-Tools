@@ -26,7 +26,7 @@ namespace Xv2CoreLib.Resource.Image
         private readonly int _numThreads;
         private readonly Task[] _tasks;
 
-        public WriteableBitmapEditOperation(WriteableBitmap sourceBitmap)
+        public WriteableBitmapEditOperation(WriteableBitmap sourceBitmap, bool useMultiThreading = true)
         {
             _sourceBitmap = sourceBitmap;
             _outputBitmap = new WriteableBitmap(_sourceBitmap.PixelWidth, _sourceBitmap.PixelHeight, _sourceBitmap.DpiX, _sourceBitmap.DpiY, _sourceBitmap.Format, null);
@@ -45,14 +45,38 @@ namespace Xv2CoreLib.Resource.Image
 
             //Create threads. Ensure that the number of threads does not exceed the width or height of the source bitmap to avoid idle threads
             _numThreads = Math.Min(Math.Max(1, Environment.ProcessorCount), _sourceBitmap.PixelHeight);
-            _tasks = _numThreads > 1 ? new Task[_numThreads] : null;
+            _tasks = _numThreads > 1 && useMultiThreading ? new Task[_numThreads] : null;
         }
 
         /// <summary>
-        /// Applies a specific hue to every pixel in the bitmap. This method is allocation free.
+        /// Applies a specific hue to every pixel in the bitmap. This method performs the operation using a single thread.
         /// </summary>
         /// <param name="hue">A hue value (0-360)</param>
-        public async Task ApplyHueSet(int hue)
+        public void ApplyHueSet(int hue)
+        {
+            ResetWorkPixels();
+            ApplyHueAdjust(true, hue, 0, 0);
+            _outputBitmap.SetPixels(_workPixels);
+        }
+
+        /// <summary>
+        /// Applies a specific hue, saturation and lightness adjustment to every pixel in the bitmap. This method performs the operation using a single thread.
+        /// </summary>
+        /// <param name="hue">A hue value (0-360)</param>
+        /// <param name="saturation">A saturation value (-1.0 to 1.0)</param>
+        /// <param name="lightness">A lightness value (-1.0 to 1.0)</param>
+        public void ApplyHueAdjust(int hue, double saturation, double lightness)
+        {
+            ResetWorkPixels();
+            ApplyHueAdjust(false, hue, saturation, lightness);
+            _outputBitmap.SetPixels(_workPixels);
+        }
+
+        /// <summary>
+        /// Applies a specific hue to every pixel in the bitmap.
+        /// </summary>
+        /// <param name="hue">A hue value (0-360)</param>
+        public async Task AsyncApplyHueSet(int hue)
         {
             ResetWorkPixels();
 
@@ -75,12 +99,12 @@ namespace Xv2CoreLib.Resource.Image
         }
 
         /// <summary>
-        /// Applies a specific hue, saturation and lightness adjustment to every pixel in the bitmap. This method is allocation free.
+        /// Applies a specific hue, saturation and lightness adjustment to every pixel in the bitmap.
         /// </summary>
         /// <param name="hue">A hue value (0-360)</param>
         /// <param name="saturation">A saturation value (-1.0 to 1.0)</param>
         /// <param name="lightness">A lightness value (-1.0 to 1.0)</param>
-        public async Task ApplyHueAdjust(int hue, double saturation, double lightness)
+        public async Task AsyncApplyHueAdjust(int hue, double saturation, double lightness)
         {
             ResetWorkPixels();
 

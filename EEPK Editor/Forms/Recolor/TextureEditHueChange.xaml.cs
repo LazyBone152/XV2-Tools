@@ -151,7 +151,7 @@ namespace EEPK_Organiser.Forms
                 //}
             }
 
-            await EditOperation.ApplyHueAdjust(HueValue, SaturationValue, LightnessValue);
+            await EditOperation.AsyncApplyHueAdjust(HueValue, SaturationValue, LightnessValue);
             
             //Restart the timer
             isImageProcessing = false;
