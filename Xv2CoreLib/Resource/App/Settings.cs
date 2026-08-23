@@ -540,6 +540,7 @@ namespace Xv2CoreLib.Resource.App
         public bool XenoKit_HitboxSimulation { get; set; } = true;
         public bool XenoKit_ProjectileSimulation { get; set; } = true;
         public bool XenoKit_VfxSimulation { get; set; } = true;
+        public bool XenoKit_StageBgVfxSimulation { get; set; } = true;
         public bool XenoKit_PreserveCameraState { get; set; } = true;
         public bool XenoKit_RenderBoneNames { get; set; } = true;
         public bool XenoKit_RenderBoneNamesMouseOverOnly { get; set; } = true;
