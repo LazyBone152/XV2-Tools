@@ -206,7 +206,7 @@ namespace Xv2CoreLib.BSA
                 {
                     unk2.Add(new BSA_Expiration()
                     {
-                        I_00 = BitConverter.ToUInt16(rawBytes, offset + 0),
+                        I_00 = (AcbType)BitConverter.ToUInt16(rawBytes, offset + 0),
                         I_02 = BitConverter.ToUInt16(rawBytes, offset + 2),
                         I_04 = BitConverter.ToUInt16(rawBytes, offset + 4),
                         I_06 = BitConverter.ToUInt16(rawBytes, offset + 6)
@@ -585,13 +585,13 @@ namespace Xv2CoreLib.BSA
                 {
                     Type.Add(new BSA_Type13()
                     {
-                        I_00 = BitConverter.ToUInt16(rawBytes, offset + 0),
+                        I_00 = (ProjectileProtectionOperation)BitConverter.ToUInt16(rawBytes, offset + 0),
                         I_02 = BitConverter.ToUInt16(rawBytes, offset + 2),
                         F_04 = BitConverter.ToSingle(rawBytes, offset + 4),
                         F_08 = BitConverter.ToSingle(rawBytes, offset + 8),
-                        I_12 = BitConverter.ToInt32(rawBytes, offset + 12),
+                        I_12 = BitConverter.ToSingle(rawBytes, offset + 12),
                         F_16 = BitConverter.ToSingle(rawBytes, offset + 16),
-                        I_20 = BitConverter.ToInt32(rawBytes, offset + 20),
+                        I_20 = BitConverter.ToSingle(rawBytes, offset + 20),
                         I_24 = BitConverter.ToInt32(rawBytes, offset + 24),
                         I_28 = BitConverter.ToInt32(rawBytes, offset + 28),
                         StartTime = BitConverter.ToUInt16(rawBytes, hdrOffset + 0),
@@ -620,9 +620,9 @@ namespace Xv2CoreLib.BSA
                 {
                     Type.Add(new BSA_Type14()
                     {
-                        I_00 = BitConverter.ToUInt16(rawBytes, offset + 0),
+                        I_00 = (SpatialEffectGeometryMode)BitConverter.ToUInt16(rawBytes, offset + 0),
                         I_02 = BitConverter.ToUInt16(rawBytes, offset + 2),
-                        F_04 = BitConverter.ToSingle(rawBytes, offset + 4),
+                        F_04 = BitConverter.ToUInt32(rawBytes, offset + 4),
                         I_08 = BitConverter.ToUInt32(rawBytes, offset + 8),
                         F_12 = BitConverter.ToSingle(rawBytes, offset + 12),
                         I_16 = BitConverter.ToUInt32(rawBytes, offset + 16),
@@ -634,7 +634,7 @@ namespace Xv2CoreLib.BSA
                         I_40 = BitConverter.ToUInt32(rawBytes, offset + 40),
                         F_44 = BitConverter.ToSingle(rawBytes, offset + 44),
                         I_48 = BitConverter.ToUInt32(rawBytes, offset + 48),
-                        F_52 = BitConverter.ToSingle(rawBytes, offset + 52),
+                        F_52 = BitConverter.ToUInt32(rawBytes, offset + 52),
                         I_56 = BitConverter.ToUInt32(rawBytes, offset + 56),
                         F_60 = BitConverter.ToSingle(rawBytes, offset + 60),
                         I_64 = BitConverter.ToUInt32(rawBytes, offset + 64),

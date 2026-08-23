@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using YAXLib;
+using Xv2CoreLib;
 
 namespace Xv2CoreLib.BSA_XV1
 {
@@ -23,7 +25,7 @@ namespace Xv2CoreLib.BSA_XV1
         {
             saveLocation = String.Format("{0}/{1}", Path.GetDirectoryName(location), Path.GetFileNameWithoutExtension(location));
             YAXSerializer serializer = new YAXSerializer(typeof(BSA_File), YAXSerializationOptions.DontSerializeNullObjects);
-            bsaFile = (BSA_File)serializer.DeserializeFromFile(location);
+            bsaFile = (BSA_File)serializer.Deserialize(XDocument.Load(location).Root);
             EntryCount = (bsaFile.BSA_Entries != null) ? bsaFile.BSA_Entries[bsaFile.BSA_Entries.Count() - 1].Index + 1 : 0;
             Write();
             File.WriteAllBytes(saveLocation, bytes.ToArray());
@@ -143,7 +145,7 @@ namespace Xv2CoreLib.BSA_XV1
 
                 for (int i = 0; i < unk2.Count(); i++)
                 {
-                    bytes.AddRange(BitConverter.GetBytes(unk2[i].I_00));
+                    bytes.AddRange(BitConverter.GetBytes((ushort)unk2[i].I_00));
                     bytes.AddRange(BitConverter.GetBytes(unk2[i].I_02));
                     bytes.AddRange(BitConverter.GetBytes(unk2[i].I_04));
                     bytes.AddRange(BitConverter.GetBytes(unk2[i].I_06));

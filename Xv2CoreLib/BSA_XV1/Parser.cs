@@ -180,7 +180,7 @@ namespace Xv2CoreLib.BSA_XV1
                 {
                     unk2.Add(new BSA.BSA_Expiration()
                     {
-                        I_00 = BitConverter.ToUInt16(rawBytes, offset + 0),
+                        I_00 = (BSA.AcbType)BitConverter.ToUInt16(rawBytes, offset + 0),
                         I_02 = BitConverter.ToUInt16(rawBytes, offset + 2),
                         I_04 = BitConverter.ToUInt16(rawBytes, offset + 4),
                         I_06 = BitConverter.ToUInt16(rawBytes, offset + 6)

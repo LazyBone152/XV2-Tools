@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 using YAXLib;
 using System.IO;
+using Xv2CoreLib;
 
 namespace Xv2CoreLib.BCM
 {
@@ -204,7 +206,7 @@ namespace Xv2CoreLib.BCM
             else if(Path.GetExtension(path) == ".xml" && Path.GetExtension(Path.GetFileNameWithoutExtension(path)) == ".bcm")
             {
                 YAXSerializer serializer = new YAXSerializer(typeof(BCM_File), YAXSerializationOptions.DontSerializeNullObjects);
-                return (BCM_File)serializer.DeserializeFromFile(path);
+                return (BCM_File)serializer.Deserialize(XDocument.Load(path).Root);
             }
             else
             {
@@ -861,7 +863,8 @@ namespace Xv2CoreLib.BCM
         [YAXSerializeAs("value")]
         [YAXHexValue]
         public uint I_104 { get; set; }
-        [YAXAttributeFor("I_108")]
+        [YAXAltAliases("I_108/value")]
+        [YAXAttributeFor("Character_Condition")]
         [YAXSerializeAs("value")]
         [YAXHexValue]
         public uint I_108 { get; set; }
