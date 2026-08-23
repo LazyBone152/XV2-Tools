@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using YAXLib;
 
 namespace Xv2CoreLib.DEM
@@ -9,6 +10,10 @@ namespace Xv2CoreLib.DEM
     {
         [YAXDontSerialize]
         public const int DEM_SIGNATURE = 1296385059;
+        [YAXAttributeForClass]
+        [YAXSerializeAs("Version")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = DemVersion.XV2)]
+        public DemVersion Version { get; set; } = DemVersion.XV2;
         [YAXAttributeForClass]
         [YAXSerializeAs("Name")]
         public string Name { get; set; }
@@ -22,6 +27,12 @@ namespace Xv2CoreLib.DEM
         public List<Section2Entry> Section2Entries { get; set; }
         [YAXDontSerializeIfNull]
         public List<DEM_UnknownValues> DEM_UnkValues { get; set; }
+
+        public enum DemVersion
+        {
+            XV1,
+            XV2
+        }
     }
 
     [YAXSerializeAs("DemoSettings")]
@@ -48,21 +59,27 @@ namespace Xv2CoreLib.DEM
         [YAXAttributeFor("EMB")]
         [YAXSerializeAs("File")]
         public string Str_56 { get; set; }
+        [YAXAltAliases("Str_64/value")]
         [YAXAttributeFor("Movies")]
         [YAXSerializeAs("value")]
         public string Str_64 { get; set; }
+        [YAXAltAliases("Stage/ID")]
         [YAXAttributeFor("Stage0")]
         [YAXSerializeAs("ID")]
         public string Str_08 { get; set; }
+        [YAXAltAliases("Stage2/ID")]
         [YAXAttributeFor("Stage1")]
         [YAXSerializeAs("ID")]
         public string Str_72 { get; set; }
+        [YAXAltAliases("Stage3/ID")]
         [YAXAttributeFor("Stage2")]
         [YAXSerializeAs("ID")]
         public string Str_80 { get; set; }
+        [YAXAltAliases("Stage4/ID")]
         [YAXAttributeFor("Stage3")]
         [YAXSerializeAs("ID")]
         public string Str_88 { get; set; }
+        [YAXAltAliases("Stage5/ID")]
         [YAXAttributeFor("Stage4")]
         [YAXSerializeAs("ID")]
         public string Str_96 { get; set; }
@@ -128,7 +145,13 @@ namespace Xv2CoreLib.DEM
         [YAXSerializeAs("LightDir")]
         public Type0_3_8 Type0_3_8 { get; set; }
         [YAXDontSerializeIfNull]
+        public Type0_3_9 Type0_3_9 { get; set; }
+        [YAXDontSerializeIfNull]
         public Type0_16_1 Type0_16_1 { get; set; }
+        [YAXDontSerializeIfNull]
+        public Type0_17_3 Type0_17_3 { get; set; }
+        [YAXDontSerializeIfNull]
+        public Type0_18_1 Type0_18_1 { get; set; }
         [YAXDontSerializeIfNull]
         [YAXSerializeAs("AnimationSmall")]
         public Type1_0_9 Type1_0_9 { get; set; }
@@ -144,6 +167,8 @@ namespace Xv2CoreLib.DEM
         [YAXDontSerializeIfNull]
         public Type1_10_8 Type1_10_8 { get; set; }
         [YAXDontSerializeIfNull]
+        public Type1_4_3 Type1_4_3 { get; set; }
+        [YAXDontSerializeIfNull]
         [YAXSerializeAs("ScdForce")]
         public Type1_17_6 Type1_17_6 { get; set; }
         [YAXDontSerializeIfNull]
@@ -153,14 +178,20 @@ namespace Xv2CoreLib.DEM
         [YAXSerializeAs("Camera")]
         public Type2_0_1 Type2_0_1 { get; set; }
         [YAXDontSerializeIfNull]
+        public Type2_1_6 Type2_1_6 { get; set; }
+        [YAXDontSerializeIfNull]
         [YAXSerializeAs("SetTargetLook")]
         public Type2_7_8 Type2_7_8 { get; set; }
+        [YAXDontSerializeIfNull]
+        public Type2_2_6 Type2_2_6 { get; set; }
         [YAXDontSerializeIfNull]
         [YAXSerializeAs("Effect")]
         public Type4_0_12 Type4_0_12 { get; set; } 
         [YAXDontSerializeIfNull]
         [YAXSerializeAs("PostEffect")]
         public Type4_1_8 Type4_1_8 { get; set; }
+        [YAXDontSerializeIfNull]
+        public Type4_1_6 Type4_1_6 { get; set; }
         [YAXDontSerializeIfNull]
         [YAXSerializeAs("Sound")]
         public Type5_0_3 Type5_0_3 { get; set; }
@@ -252,10 +283,16 @@ namespace Xv2CoreLib.DEM
         [YAXDontSerializeIfNull]
         [YAXSerializeAs("Picture")]
         public Type7_0_5 Type7_0_5 { get; set; }
+        [YAXDontSerializeIfNull]
+        public Type7_1_6 Type7_1_6 { get; set; }
 
         //4th batch
         [YAXDontSerializeIfNull]
+        public Type0_19_0 Type0_19_0 { get; set; }
+        [YAXDontSerializeIfNull]
         public Type0_19_1 Type0_19_1 { get; set; }
+        [YAXDontSerializeIfNull]
+        public Type0_20_0 Type0_20_0 { get; set; }
         [YAXDontSerializeIfNull]
         public Type0_20_2 Type0_20_2 { get; set; }
         [YAXDontSerializeIfNull]
@@ -310,10 +347,15 @@ namespace Xv2CoreLib.DEM
             TextureSwitch, //0_1_6
             ScreenFade, //0_2_7
             LightDir, //0_3_8 LightDir? (I_1 = Actor, F_2 - F_4 = LightDir1, F_5 - F_7 = LightDir2, I_8 = Transition time)... all guesses but values line up
+            Type0_3_9,
             Type0_16_0,
             Type0_16_1,
             Type0_17_0,
+            Type0_17_3,
+            Type0_18_1,
+            Type0_19_0,
             Type0_19_1,
+            Type0_20_0,
             Type0_20_2,
             Type0_21_2,
             AnimationSmall, //1_0_9
@@ -324,6 +366,7 @@ namespace Xv2CoreLib.DEM
             RotateY_2, // 1_2_5
             ActorVisibility, //1_3_2
             Transformation, //1_4_2
+            Type1_4_3, //1_4_3
             StartTransparent, //1_6_4
             StopTransparent, //1_7_1
             SetEyes, //1_8_6
@@ -340,7 +383,9 @@ namespace Xv2CoreLib.DEM
             Scale, //1_26_2
             SetHologramMaterial, //1_27_2
             Camera, //2_0_1
+            Type2_1_6,
             Type2_6_3,
+            Type2_2_6,
             Type2_7_5,
             SetTargetLook, //2_7_8
             SetNearClip, //2_9_2
@@ -353,6 +398,7 @@ namespace Xv2CoreLib.DEM
             Type3_4_2,
             Effect, //4_0_12
             PostEffect, //4_1_8
+            Type4_1_6,
             AuraEffect, //4_2_3
             Type4_3_5, //SetDoF?
             Type4_4_1,
@@ -370,6 +416,7 @@ namespace Xv2CoreLib.DEM
             Type6_19_15,
             Type6_20_2,
             Picture, //7_0_5
+            Type7_1_6,
             YearDisplay, //9_0_2
             Subtitle, //9_1_5
             PlaySprite, //9_8_0
@@ -384,6 +431,16 @@ namespace Xv2CoreLib.DEM
                     return DemoDataTypes.TextureSwitch;
                 case "0_3_8":
                     return DemoDataTypes.LightDir;
+                case "0_3_9":
+                    return DemoDataTypes.Type0_3_9;
+                case "0_17_3":
+                    return DemoDataTypes.Type0_17_3;
+                case "0_18_1":
+                    return DemoDataTypes.Type0_18_1;
+                case "0_19_0":
+                    return DemoDataTypes.Type0_19_0;
+                case "0_20_0":
+                    return DemoDataTypes.Type0_20_0;
                 case "1_0_9":
                     return DemoDataTypes.AnimationSmall;
                 case "1_0_10":
@@ -404,6 +461,8 @@ namespace Xv2CoreLib.DEM
                     return DemoDataTypes.StopTransparent;
                 case "1_8_6":
                     return DemoDataTypes.SetEyes;
+                case "1_4_3":
+                    return DemoDataTypes.Type1_4_3;
                 case "1_11_2":
                     return DemoDataTypes.ShadowVisible;
                 case "1_12_2":
@@ -424,8 +483,12 @@ namespace Xv2CoreLib.DEM
                     return DemoDataTypes.ResetEyesColor;
                 case "2_0_1":
                     return DemoDataTypes.Camera;
+                case "2_1_6":
+                    return DemoDataTypes.Type2_1_6;
                 case "2_7_8":
                     return DemoDataTypes.SetTargetLook;
+                case "2_2_6":
+                    return DemoDataTypes.Type2_2_6;
                 case "2_9_2":
                     return DemoDataTypes.SetNearClip;
                 case "2_10_2":
@@ -440,6 +503,8 @@ namespace Xv2CoreLib.DEM
                     return DemoDataTypes.Effect;
                 case "4_1_8":
                     return DemoDataTypes.PostEffect;
+                case "4_1_6":
+                    return DemoDataTypes.Type4_1_6;
                 case "4_2_3":
                     return DemoDataTypes.AuraEffect;
                 case "5_0_2":
@@ -466,6 +531,8 @@ namespace Xv2CoreLib.DEM
                     return DemoDataTypes.ScreenFade;
                 case "7_0_5":
                     return DemoDataTypes.Picture;
+                case "7_1_6":
+                    return DemoDataTypes.Type7_1_6;
                 case "9_8_0":
                     return DemoDataTypes.PlaySprite;
             }
@@ -494,6 +561,16 @@ namespace Xv2CoreLib.DEM
                     return new int[3] { 0, 1, 6 };
                 case DemoDataTypes.LightDir:
                     return new int[3] { 0, 3, 8 };
+                case DemoDataTypes.Type0_3_9:
+                    return new int[3] { 0, 3, 9 };
+                case DemoDataTypes.Type0_17_3:
+                    return new int[3] { 0, 17, 3 };
+                case DemoDataTypes.Type0_18_1:
+                    return new int[3] { 0, 18, 1 };
+                case DemoDataTypes.Type0_19_0:
+                    return new int[3] { 0, 19, 0 };
+                case DemoDataTypes.Type0_20_0:
+                    return new int[3] { 0, 20, 0 };
                 case DemoDataTypes.AnimationSmall:
                     return new int[3] { 1, 0, 9 };
                 case DemoDataTypes.Animation:
@@ -514,6 +591,8 @@ namespace Xv2CoreLib.DEM
                     return new int[3] { 1, 7, 1 };
                 case DemoDataTypes.SetEyes:
                     return new int[3] { 1, 8, 6 };
+                case DemoDataTypes.Type1_4_3:
+                    return new int[3] { 1, 4, 3 };
                 case DemoDataTypes.ShadowVisible:
                     return new int[3] { 1, 11, 2 };
                 case DemoDataTypes.CancelAnimation:
@@ -534,8 +613,12 @@ namespace Xv2CoreLib.DEM
                     return new int[3] { 1, 27, 2 };
                 case DemoDataTypes.Camera:
                     return new int[3] { 2, 0, 1 };
+                case DemoDataTypes.Type2_1_6:
+                    return new int[3] { 2, 1, 6 };
                 case DemoDataTypes.SetTargetLook:
                     return new int[3] { 2, 7, 8 };
+                case DemoDataTypes.Type2_2_6:
+                    return new int[3] { 2, 2, 6 };
                 case DemoDataTypes.SetNearClip:
                     return new int[3] { 2, 9, 2 };
                 case DemoDataTypes.SetFarClip:
@@ -550,6 +633,8 @@ namespace Xv2CoreLib.DEM
                     return new int[3] { 4, 0, 12 };
                 case DemoDataTypes.PostEffect:
                     return new int[3] { 4, 1, 8 };
+                case DemoDataTypes.Type4_1_6:
+                    return new int[3] { 4, 1, 6 };
                 case DemoDataTypes.AuraEffect:
                     return new int[3] { 4, 2, 3 };
                 case DemoDataTypes.SoundSmall:
@@ -576,6 +661,8 @@ namespace Xv2CoreLib.DEM
                     return new int[3] { 0, 2, 7 };
                 case DemoDataTypes.Picture:
                     return new int[3] { 7, 0, 5 };
+                case DemoDataTypes.Type7_1_6:
+                    return new int[3] { 7, 1, 6 };
                 case DemoDataTypes.PlaySprite:
                     return new int[3] { 9, 8, 0 };
                 default:
@@ -693,23 +780,29 @@ namespace Xv2CoreLib.DEM
     //Types
     public class Type0_1_6
     {
+        [YAXAltAliases("I_1/value")]
         [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
+        [YAXAltAliases("I_2/value")]
         [YAXAttributeFor("DytBase")]
         [YAXSerializeAs("Index")]
         public int I_2 { get; set; }
+        [YAXAltAliases("I_3/value")]
         [YAXAttributeFor("DytReplace")]
         [YAXSerializeAs("Index")]
         public int I_3 { get; set; }
+        [YAXAltAliases("I_4/value:int")]
         [YAXAttributeFor("DytBase")]
         [YAXSerializeAs("Opacity")]
         [YAXFormat("0.0#######")]
         public float F_4 { get; set; }
+        [YAXAltAliases("I_5/value:int")]
         [YAXAttributeFor("DytReplace")]
         [YAXSerializeAs("Opacity")]
         [YAXFormat("0.0#######")]
         public float F_5 { get; set; }
+        [YAXAltAliases("I_6/value")]
         [YAXAttributeFor("SwapDuration")]
         [YAXSerializeAs("value")]
         public int I_6 { get; set; }
@@ -806,33 +899,41 @@ namespace Xv2CoreLib.DEM
 
     public class Type0_3_8
     {
+        [YAXAltAliases("I_1/value")]
         [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
+        [YAXAltAliases("F_2/value")]
         [YAXAttributeFor("X_From")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
         public float F_2 { get; set; }
+        [YAXAltAliases("F_3/value")]
         [YAXAttributeFor("Y_From")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
         public float F_3 { get; set; }
+        [YAXAltAliases("F_4/value")]
         [YAXAttributeFor("Z_From")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
         public float F_4 { get; set; }
+        [YAXAltAliases("F_5/value")]
         [YAXAttributeFor("X_To")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
         public float F_5 { get; set; }
+        [YAXAltAliases("F_6/value")]
         [YAXAttributeFor("Y_To")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
         public float F_6 { get; set; }
+        [YAXAltAliases("F_7/value")]
         [YAXAttributeFor("Z_To")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
         public float F_7 { get; set; }
+        [YAXAltAliases("I_8/value")]
         [YAXAttributeFor("SwapDuration")]
         [YAXSerializeAs("value")]
         public int I_8 { get; set; }
@@ -870,6 +971,76 @@ namespace Xv2CoreLib.DEM
         }
     }
 
+    public class Type0_3_9
+    {
+        [YAXAttributeFor("I_1")]
+        [YAXSerializeAs("value")]
+        public int I_1 { get; set; }
+        [YAXAttributeFor("F_2")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0#########")]
+        public float F_2 { get; set; }
+        [YAXAttributeFor("F_3")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0#########")]
+        public float F_3 { get; set; }
+        [YAXAttributeFor("F_4")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0#########")]
+        public float F_4 { get; set; }
+        [YAXAttributeFor("F_5")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0#########")]
+        public float F_5 { get; set; }
+        [YAXAttributeFor("F_6")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0#########")]
+        public float F_6 { get; set; }
+        [YAXAttributeFor("F_7")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0#########")]
+        public float F_7 { get; set; }
+        [YAXAttributeFor("I_8")]
+        [YAXSerializeAs("value")]
+        public int I_8 { get; set; }
+        [YAXAttributeFor("I_9")]
+        [YAXSerializeAs("value")]
+        public int I_9 { get; set; }
+
+        public static Type0_3_9 Read(byte[] rawBytes, List<byte> bytes, int offset)
+        {
+            return new Type0_3_9()
+            {
+                I_1 = BitConverter.ToInt32(rawBytes, BitConverter.ToInt32(rawBytes, offset + 0)),
+                F_2 = BitConverter.ToSingle(rawBytes, BitConverter.ToInt32(rawBytes, offset + 8)),
+                F_3 = BitConverter.ToSingle(rawBytes, BitConverter.ToInt32(rawBytes, offset + 16)),
+                F_4 = BitConverter.ToSingle(rawBytes, BitConverter.ToInt32(rawBytes, offset + 24)),
+                F_5 = BitConverter.ToSingle(rawBytes, BitConverter.ToInt32(rawBytes, offset + 32)),
+                F_6 = BitConverter.ToSingle(rawBytes, BitConverter.ToInt32(rawBytes, offset + 40)),
+                F_7 = BitConverter.ToSingle(rawBytes, BitConverter.ToInt32(rawBytes, offset + 48)),
+                I_8 = BitConverter.ToInt32(rawBytes, BitConverter.ToInt32(rawBytes, offset + 56)),
+                I_9 = BitConverter.ToInt32(rawBytes, BitConverter.ToInt32(rawBytes, offset + 64)),
+            };
+        }
+
+        public List<byte> Write(List<byte> bytes, List<int> valueOffsets)
+        {
+            ValueWriter writer = new ValueWriter(valueOffsets, bytes);
+
+            writer.WriteValue(I_1);
+            writer.WriteValue(F_2);
+            writer.WriteValue(F_3);
+            writer.WriteValue(F_4);
+            writer.WriteValue(F_5);
+            writer.WriteValue(F_6);
+            writer.WriteValue(F_7);
+            writer.WriteValue(I_8);
+            writer.WriteValue(I_9);
+
+            return writer.bytes;
+        }
+    }
+
     public class Type0_16_1
     {
         [YAXAttributeFor("I_1")]
@@ -897,6 +1068,101 @@ namespace Xv2CoreLib.DEM
 
     }
 
+    [YAXSerializeAs("Type0_17_3")]
+    public class Type0_17_3
+    {
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Value")]
+        public List<Type0_17_3_Value> Values { get; set; } = new List<Type0_17_3_Value>();
+
+        public static Type0_17_3 Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        {
+            Type0_17_3 type = new Type0_17_3();
+
+            for (int i = 0; i < count; i++)
+            {
+                int ptr = BitConverter.ToInt32(rawBytes, offset + (i * 8));
+                type.Values.Add(new Type0_17_3_Value()
+                {
+                    I_1 = BitConverter.ToInt32(rawBytes, ptr + 0),
+                    I_2 = BitConverter.ToInt32(rawBytes, ptr + 4),
+                    I_3 = BitConverter.ToInt32(rawBytes, ptr + 8)
+                });
+            }
+
+            return type;
+        }
+
+        public List<byte> Write(List<byte> bytes, List<int> valueOffsets)
+        {
+            for (int i = 0; i < Values.Count; i++)
+            {
+                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), valueOffsets[i]);
+                bytes.AddRange(BitConverter.GetBytes(Values[i].I_1));
+                bytes.AddRange(BitConverter.GetBytes(Values[i].I_2));
+                bytes.AddRange(BitConverter.GetBytes(Values[i].I_3));
+            }
+
+            return bytes;
+        }
+    }
+
+    [YAXSerializeAs("Value")]
+    public class Type0_17_3_Value
+    {
+        [YAXAttributeForClass]
+        [YAXSerializeAs("I_1")]
+        public int I_1 { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("I_2")]
+        public int I_2 { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("I_3")]
+        public int I_3 { get; set; }
+    }
+
+    [YAXSerializeAs("Type0_18_1")]
+    public class Type0_18_1
+    {
+        [YAXAttributeForClass]
+        [YAXSerializeAs("I_1")]
+        public int I_1 { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("I_2")]
+        public int I_2 { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("I_3")]
+        public int I_3 { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("I_4")]
+        public int I_4 { get; set; }
+
+        public static Type0_18_1 Read(byte[] rawBytes, List<byte> bytes, int offset)
+        {
+            int ptr = BitConverter.ToInt32(rawBytes, offset);
+            return new Type0_18_1()
+            {
+                I_1 = BitConverter.ToInt32(rawBytes, ptr + 0),
+                I_2 = BitConverter.ToInt32(rawBytes, ptr + 4),
+                I_3 = BitConverter.ToInt32(rawBytes, ptr + 8),
+                I_4 = BitConverter.ToInt32(rawBytes, ptr + 12)
+            };
+        }
+
+        public List<byte> Write(List<byte> bytes, List<int> valueOffsets)
+        {
+            bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), valueOffsets[0]);
+            bytes.AddRange(BitConverter.GetBytes(I_1));
+            bytes.AddRange(BitConverter.GetBytes(I_2));
+            bytes.AddRange(BitConverter.GetBytes(I_3));
+            bytes.AddRange(BitConverter.GetBytes(I_4));
+            return bytes;
+        }
+    }
+
+    public class Type0_19_0
+    {
+    }
+
     public class Type0_19_1
     {
         [YAXAttributeFor("I_1")]
@@ -920,6 +1186,10 @@ namespace Xv2CoreLib.DEM
 
             return writer.bytes;
         }
+    }
+
+    public class Type0_20_0
+    {
     }
 
     public class Type0_20_2
@@ -995,6 +1265,7 @@ namespace Xv2CoreLib.DEM
         [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
+        [YAXAltAliases("I_2/value")]
         [YAXAttributeFor("EAN")]
         [YAXSerializeAs("value")]
         public EanTypeEnum I_2 { get; set; }
@@ -1014,10 +1285,12 @@ namespace Xv2CoreLib.DEM
         [YAXAttributeFor("I_7")]
         [YAXSerializeAs("value")]
         public int I_7 { get; set; }
+        [YAXAltAliases("F_8/value")]
         [YAXAttributeFor("StartBlendWeight")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
         public float F_8 { get; set; }
+        [YAXAltAliases("F_9/value")]
         [YAXAttributeFor("BlendWeightFrameStep")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
@@ -1072,6 +1345,7 @@ namespace Xv2CoreLib.DEM
         [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
+        [YAXAltAliases("I_2/value")]
         [YAXAttributeFor("EAN")]
         [YAXSerializeAs("value")]
         public EanTypeEnum I_2 { get; set; }
@@ -1081,6 +1355,7 @@ namespace Xv2CoreLib.DEM
         [YAXAttributeFor("I_4")]
         [YAXSerializeAs("value")]
         public int I_4 { get; set; }
+        [YAXAltAliases("F_5/value")]
         [YAXAttributeFor("TimeScale")]
         [YAXSerializeAs("Amount")]
         [YAXFormat("0.0#########")]
@@ -1091,10 +1366,12 @@ namespace Xv2CoreLib.DEM
         [YAXAttributeFor("I_7")]
         [YAXSerializeAs("value")]
         public int I_7 { get; set; }
+        [YAXAltAliases("F_8/value")]
         [YAXAttributeFor("StartBlendWeight")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
         public float F_8 { get; set; }
+        [YAXAltAliases("F_9/value")]
         [YAXAttributeFor("BlendWeightFrameStep")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
@@ -1211,9 +1488,11 @@ namespace Xv2CoreLib.DEM
 
     public class Type1_2_5
     {
+        [YAXAltAliases("I_1/value")]
         [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
+        [YAXAltAliases("F_2/value")]
         [YAXAttributeFor("Angle")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
@@ -1369,9 +1648,11 @@ namespace Xv2CoreLib.DEM
 
     public class Type1_2_3
     {
+        [YAXAltAliases("I_1/value")]
         [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
+        [YAXAltAliases("I_2/value:int")]
         [YAXAttributeFor("Angle")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
@@ -1405,6 +1686,7 @@ namespace Xv2CoreLib.DEM
 
     public class Type1_6_4
     {
+        [YAXAltAliases("I_1/value")]
         [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
@@ -1446,6 +1728,7 @@ namespace Xv2CoreLib.DEM
 
     public class Type1_7_1
     {
+        [YAXAltAliases("I_1/value")]
         [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
@@ -1521,16 +1804,19 @@ namespace Xv2CoreLib.DEM
 
     public class Type1_9_5
     {
+        [YAXAltAliases("Actor/ID")]
         [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
         [YAXAttributeFor("I_2")]
         [YAXSerializeAs("value")]
         public int I_2 { get; set; }
+        [YAXAltAliases("I_3/value:int")]
         [YAXAttributeFor("F_3")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#######")]
         public float F_3 { get; set; }
+        [YAXAltAliases("I_4/value:int")]
         [YAXAttributeFor("F_4")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#######")]
@@ -1627,11 +1913,47 @@ namespace Xv2CoreLib.DEM
 
     }
 
+    [YAXSerializeAs("Type1_4_3")]
+    public class Type1_4_3
+    {
+        [YAXAttributeFor("I_1")]
+        [YAXSerializeAs("value")]
+        public int I_1 { get; set; }
+        [YAXAttributeFor("I_2")]
+        [YAXSerializeAs("value")]
+        public int I_2 { get; set; }
+        [YAXAttributeFor("I_3")]
+        [YAXSerializeAs("value")]
+        public int I_3 { get; set; }
+
+        public static Type1_4_3 Read(byte[] rawBytes, List<byte> bytes, int offset)
+        {
+            ValueReader reader = new ValueReader(rawBytes, bytes, offset, 3);
+            return new Type1_4_3()
+            {
+                I_1 = reader.ReadInt(),
+                I_2 = reader.ReadInt(),
+                I_3 = reader.ReadInt()
+            };
+        }
+
+        public List<byte> Write(List<byte> bytes, List<int> valueOffsets)
+        {
+            ValueWriter writer = new ValueWriter(valueOffsets, bytes);
+            writer.WriteValue(I_1);
+            writer.WriteValue(I_2);
+            writer.WriteValue(I_3);
+            return writer.bytes;
+        }
+    }
+
     public class Type1_11_2
     {
+        [YAXAltAliases("I_1/value")]
         [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
+        [YAXAltAliases("I_2/value")]
         [YAXAttributeFor("IsVisible")]
         [YAXSerializeAs("value")]
         public int I_2 { get; set; }
@@ -1659,6 +1981,7 @@ namespace Xv2CoreLib.DEM
 
     public class Type1_12_2
     {
+        [YAXAltAliases("I_1/value")]
         [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
@@ -1689,33 +2012,43 @@ namespace Xv2CoreLib.DEM
 
     public class Type1_13_10
     {
+        [YAXAltAliases("I_1/value")]
         [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
+        [YAXAltAliases("I_2/value")]
         [YAXAttributeFor("Color1")]
         [YAXSerializeAs("R")]
         public int I_2 { get; set; }
+        [YAXAltAliases("I_3/value")]
         [YAXAttributeFor("Color1")]
         [YAXSerializeAs("G")]
         public int I_3 { get; set; }
+        [YAXAltAliases("I_4/value")]
         [YAXAttributeFor("Color1")]
         [YAXSerializeAs("B")]
         public int I_4 { get; set; }
+        [YAXAltAliases("I_5/value")]
         [YAXAttributeFor("Color1")]
         [YAXSerializeAs("A")]
         public int I_5 { get; set; }
+        [YAXAltAliases("I_6/value")]
         [YAXAttributeFor("Color2")]
         [YAXSerializeAs("R")]
         public int I_6 { get; set; }
+        [YAXAltAliases("I_7/value")]
         [YAXAttributeFor("Color2")]
         [YAXSerializeAs("G")]
         public int I_7 { get; set; }
+        [YAXAltAliases("I_8/value")]
         [YAXAttributeFor("Color2")]
         [YAXSerializeAs("B")]
         public int I_8 { get; set; }
+        [YAXAltAliases("I_9/value")]
         [YAXAttributeFor("Color2")]
         [YAXSerializeAs("A")]
         public int I_9 { get; set; }
+        [YAXAltAliases("I_10/value")]
         [YAXAttributeFor("FadeDuration")]
         [YAXSerializeAs("value")]
         public int I_10 { get; set; }
@@ -1760,6 +2093,7 @@ namespace Xv2CoreLib.DEM
 
     public class Type1_14_1
     {
+        [YAXAltAliases("I_1/value")]
         [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
@@ -1815,12 +2149,14 @@ namespace Xv2CoreLib.DEM
 
     public class Type1_17_6
     {
+        [YAXAltAliases("I_1/value")]
         [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
         [YAXAttributeFor("I_2")]
         [YAXSerializeAs("value")]
         public int I_2 { get; set; }
+        [YAXAltAliases("I_3/value:int")]
         [YAXAttributeFor("F_3")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
@@ -1829,10 +2165,12 @@ namespace Xv2CoreLib.DEM
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
         public float F_4 { get; set; }
+        [YAXAltAliases("I_5/value:int")]
         [YAXAttributeFor("F_5")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
         public float F_5 { get; set; }
+        [YAXAltAliases("I_6/value:int")]
         [YAXAttributeFor("F_6")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
@@ -1870,12 +2208,15 @@ namespace Xv2CoreLib.DEM
 
     public class Type1_19_3
     {
+        [YAXAltAliases("I_1/value")]
         [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
+        [YAXAltAliases("I_2/value")]
         [YAXAttributeFor("Threshold")]
         [YAXSerializeAs("value")]
         public int I_2 { get; set; }
+        [YAXAltAliases("I_3/value")]
         [YAXAttributeFor("Switch")]
         [YAXSerializeAs("value")]
         public int I_3 { get; set; }
@@ -1905,6 +2246,7 @@ namespace Xv2CoreLib.DEM
 
     public class Type1_20_12
     {
+        [YAXAltAliases("I_1/value")]
         [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
@@ -1919,6 +2261,7 @@ namespace Xv2CoreLib.DEM
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
         public float F_4 { get; set; }
+        [YAXAltAliases("I_5/value:int")]
         [YAXAttributeFor("F_5")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
@@ -1929,6 +2272,7 @@ namespace Xv2CoreLib.DEM
         [YAXAttributeFor("I_7")]
         [YAXSerializeAs("value")]
         public int I_7 { get; set; }
+        [YAXAltAliases("I_8/value:int")]
         [YAXAttributeFor("F_8")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
@@ -1937,14 +2281,17 @@ namespace Xv2CoreLib.DEM
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
         public float F_9 { get; set; }
+        [YAXAltAliases("I_10/value:int")]
         [YAXAttributeFor("F_10")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
         public float F_10 { get; set; }
+        [YAXAltAliases("I_11/value:int")]
         [YAXAttributeFor("F_11")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
         public float F_11 { get; set; }
+        [YAXAltAliases("I_12/value:int")]
         [YAXAttributeFor("F_12")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
@@ -1993,9 +2340,11 @@ namespace Xv2CoreLib.DEM
 
     public class Type1_26_2
     {
+        [YAXAltAliases("I_1/value")]
         [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
+        [YAXAltAliases("F_2/value")]
         [YAXAttributeFor("Scale")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
@@ -2076,6 +2425,116 @@ namespace Xv2CoreLib.DEM
             return writer.bytes;
         }
 
+    }
+
+    [YAXSerializeAs("Type2_1_6")]
+    public class Type2_1_6
+    {
+        [YAXAttributeFor("F_1")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0#########")]
+        public float F_1 { get; set; }
+        [YAXAttributeFor("F_2")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0#########")]
+        public float F_2 { get; set; }
+        [YAXAttributeFor("F_3")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0#########")]
+        public float F_3 { get; set; }
+        [YAXAttributeFor("F_4")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0#########")]
+        public float F_4 { get; set; }
+        [YAXAttributeFor("F_5")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0#########")]
+        public float F_5 { get; set; }
+        [YAXAttributeFor("F_6")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0#########")]
+        public float F_6 { get; set; }
+
+        public static Type2_1_6 Read(byte[] rawBytes, List<byte> bytes, int offset)
+        {
+            ValueReader reader = new ValueReader(rawBytes, bytes, offset, 6);
+            return new Type2_1_6()
+            {
+                F_1 = reader.ReadFloat(),
+                F_2 = reader.ReadFloat(),
+                F_3 = reader.ReadFloat(),
+                F_4 = reader.ReadFloat(),
+                F_5 = reader.ReadFloat(),
+                F_6 = reader.ReadFloat()
+            };
+        }
+
+        public List<byte> Write(List<byte> bytes, List<int> valueOffsets)
+        {
+            ValueWriter writer = new ValueWriter(valueOffsets, bytes);
+            writer.WriteValue(F_1);
+            writer.WriteValue(F_2);
+            writer.WriteValue(F_3);
+            writer.WriteValue(F_4);
+            writer.WriteValue(F_5);
+            writer.WriteValue(F_6);
+            return writer.bytes;
+        }
+    }
+
+    [YAXSerializeAs("Type2_2_6")]
+    public class Type2_2_6
+    {
+        [YAXAttributeFor("F_1")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0#########")]
+        public float F_1 { get; set; }
+        [YAXAttributeFor("F_2")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0#########")]
+        public float F_2 { get; set; }
+        [YAXAttributeFor("F_3")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0#########")]
+        public float F_3 { get; set; }
+        [YAXAttributeFor("F_4")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0#########")]
+        public float F_4 { get; set; }
+        [YAXAttributeFor("F_5")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0#########")]
+        public float F_5 { get; set; }
+        [YAXAttributeFor("F_6")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0#########")]
+        public float F_6 { get; set; }
+
+        public static Type2_2_6 Read(byte[] rawBytes, List<byte> bytes, int offset)
+        {
+            ValueReader reader = new ValueReader(rawBytes, bytes, offset, 6);
+            return new Type2_2_6()
+            {
+                F_1 = reader.ReadFloat(),
+                F_2 = reader.ReadFloat(),
+                F_3 = reader.ReadFloat(),
+                F_4 = reader.ReadFloat(),
+                F_5 = reader.ReadFloat(),
+                F_6 = reader.ReadFloat()
+            };
+        }
+
+        public List<byte> Write(List<byte> bytes, List<int> valueOffsets)
+        {
+            ValueWriter writer = new ValueWriter(valueOffsets, bytes);
+            writer.WriteValue(F_1);
+            writer.WriteValue(F_2);
+            writer.WriteValue(F_3);
+            writer.WriteValue(F_4);
+            writer.WriteValue(F_5);
+            writer.WriteValue(F_6);
+            return writer.bytes;
+        }
     }
 
     public class Type2_6_3
@@ -2162,6 +2621,7 @@ namespace Xv2CoreLib.DEM
 
     public class Type2_7_8
     {
+        [YAXAltAliases("I_1/value")]
         [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
@@ -2177,6 +2637,7 @@ namespace Xv2CoreLib.DEM
         [YAXAttributeFor("I_5")]
         [YAXSerializeAs("value")]
         public int I_5 { get; set; }
+        [YAXAltAliases("F_6/value")]
         [YAXAttributeFor("Strength")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
@@ -2311,6 +2772,7 @@ namespace Xv2CoreLib.DEM
 
     public class Type3_0_1
     {
+        [YAXAltAliases("I_1/value")]
         [YAXAttributeFor("Switch")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; } // 0 = OFF, 1 = ON
@@ -2337,6 +2799,7 @@ namespace Xv2CoreLib.DEM
 
     public class Type3_1_1
     {
+        [YAXAltAliases("I_1/value")]
         [YAXAttributeFor("Stage_ID")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
@@ -2389,6 +2852,7 @@ namespace Xv2CoreLib.DEM
 
     public class Type3_3_1
     {
+        [YAXAltAliases("I_1/value")]
         [YAXAttributeFor("Switch")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
@@ -2465,6 +2929,7 @@ namespace Xv2CoreLib.DEM
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#######")]
         public float F_6 { get; set; }
+        [YAXAltAliases("I_7/value:int")]
         [YAXAttributeFor("F_7")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#######")]
@@ -2532,6 +2997,7 @@ namespace Xv2CoreLib.DEM
         [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
+        [YAXAltAliases("I_2/value")]
         [YAXAttributeFor("Bone_Link")]
         [YAXSerializeAs("value")]
         public int I_2 { get; set; }
@@ -2553,6 +3019,7 @@ namespace Xv2CoreLib.DEM
         [YAXAttributeFor("I_7")]
         [YAXSerializeAs("value")]
         public int I_7 { get; set; }
+        [YAXAltAliases("I_8/value")]
         [YAXAttributeFor("Switch")]
         [YAXSerializeAs("value")]
         public int I_8 { get; set; }
@@ -2590,14 +3057,69 @@ namespace Xv2CoreLib.DEM
         }
     }
 
+    public class Type4_1_6
+    {
+        [YAXAttributeFor("I_1")]
+        [YAXSerializeAs("value")]
+        public int I_1 { get; set; }
+        [YAXAttributeFor("I_2")]
+        [YAXSerializeAs("value")]
+        public int I_2 { get; set; }
+        [YAXAttributeFor("I_3")]
+        [YAXSerializeAs("value")]
+        public int I_3 { get; set; }
+        [YAXAttributeFor("F_4")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0#########")]
+        public float F_4 { get; set; }
+        [YAXAttributeFor("F_5")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0#########")]
+        public float F_5 { get; set; }
+        [YAXAttributeFor("F_6")]
+        [YAXSerializeAs("value")]
+        [YAXFormat("0.0#########")]
+        public float F_6 { get; set; }
+
+        public static Type4_1_6 Read(byte[] rawBytes, List<byte> bytes, int offset)
+        {
+            return new Type4_1_6()
+            {
+                I_1 = BitConverter.ToInt32(rawBytes, BitConverter.ToInt32(rawBytes, offset + 0)),
+                I_2 = BitConverter.ToInt32(rawBytes, BitConverter.ToInt32(rawBytes, offset + 8)),
+                I_3 = BitConverter.ToInt32(rawBytes, BitConverter.ToInt32(rawBytes, offset + 16)),
+                F_4 = BitConverter.ToSingle(rawBytes, BitConverter.ToInt32(rawBytes, offset + 24)),
+                F_5 = BitConverter.ToSingle(rawBytes, BitConverter.ToInt32(rawBytes, offset + 32)),
+                F_6 = BitConverter.ToSingle(rawBytes, BitConverter.ToInt32(rawBytes, offset + 40)),
+            };
+        }
+
+        public List<byte> Write(List<byte> bytes, List<int> valueOffsets)
+        {
+            ValueWriter writer = new ValueWriter(valueOffsets, bytes);
+
+            writer.WriteValue(I_1);
+            writer.WriteValue(I_2);
+            writer.WriteValue(I_3);
+            writer.WriteValue(F_4);
+            writer.WriteValue(F_5);
+            writer.WriteValue(F_6);
+
+            return writer.bytes;
+        }
+    }
+
     public class Type4_2_3
     {
+        [YAXAltAliases("I_1/value")]
         [YAXAttributeFor("Actor")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
+        [YAXAltAliases("I_2/value")]
         [YAXAttributeFor("AuraType")]
         [YAXSerializeAs("value")]
         public int I_2 { get; set; }
+        [YAXAltAliases("I_3/value")]
         [YAXAttributeFor("Switch")]
         [YAXSerializeAs("value")]
         public int I_3 { get; set; }
@@ -2708,9 +3230,11 @@ namespace Xv2CoreLib.DEM
             DemoVOX
         }
         
+        [YAXAltAliases("I_1/value")]
         [YAXAttributeFor("Acb_To_Use")]
         [YAXSerializeAs("value")]
         public Acb I_1 { get; set; }
+        [YAXAltAliases("I_2/value")]
         [YAXAttributeFor("Cue_ID")]
         [YAXSerializeAs("value")]
         public int I_2 { get; set; }
@@ -2971,6 +3495,7 @@ namespace Xv2CoreLib.DEM
 
     public class Type6_0_1
     {
+        [YAXAltAliases("I_1/value")]
         [YAXAttributeFor("Section")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
@@ -2996,13 +3521,16 @@ namespace Xv2CoreLib.DEM
 
     public class Type6_16_6
     {
+        [YAXAltAliases("I_1/value")]
         [YAXAttributeFor("Switch")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
+        [YAXAltAliases("Distance/value")]
         [YAXAttributeFor("FocalLength")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
         public float F_2 { get; set; }
+        [YAXAltAliases("F_3/value")]
         [YAXAttributeFor("Aperture")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
@@ -3013,6 +3541,7 @@ namespace Xv2CoreLib.DEM
         [YAXAttributeFor("I_5")]
         [YAXSerializeAs("value")]
         public int I_5 { get; set; }
+        [YAXAltAliases("I_6/value")]
         [YAXAttributeFor("TransitionLength")]
         [YAXSerializeAs("value")]
         public int I_6 { get; set; }
@@ -3048,56 +3577,69 @@ namespace Xv2CoreLib.DEM
 
     public class Type6_17_19
     {
+        [YAXAltAliases("I_1/value")]
         [YAXAttributeFor("Enabled")]
         [YAXSerializeAs("value")]
         public int I_1 { get; set; }
         [YAXAttributeFor("I_2")]
         [YAXSerializeAs("value")]
         public int I_2 { get; set; }
+        [YAXAltAliases("F_3/value")]
         [YAXAttributeFor("Saturation")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
         public float F_3 { get; set; }
+        [YAXAltAliases("F_4/value")]
         [YAXAttributeFor("RGB")]
         [YAXSerializeAs("R")]
         [YAXFormat("0.0##########")]
         public float F_4 { get; set; }
+        [YAXAltAliases("F_5/value")]
         [YAXAttributeFor("RGB")]
         [YAXSerializeAs("G")]
         [YAXFormat("0.0##########")]
         public float F_5 { get; set; }
+        [YAXAltAliases("F_6/value")]
         [YAXAttributeFor("RGB")]
         [YAXSerializeAs("B")]
         [YAXFormat("0.0##########")]
         public float F_6 { get; set; }
+        [YAXAltAliases("F_7/value")]
         [YAXAttributeFor("RGBCurves")]
         [YAXSerializeAs("R")]
         [YAXFormat("0.0##########")]
         public float F_7 { get; set; }
+        [YAXAltAliases("F_8/value")]
         [YAXAttributeFor("RGBCurves")]
         [YAXSerializeAs("G")]
         [YAXFormat("0.0##########")]
         public float F_8 { get; set; }
+        [YAXAltAliases("F_9/value")]
         [YAXAttributeFor("RGBCurves")]
         [YAXSerializeAs("B")]
         [YAXFormat("0.0##########")]
         public float F_9 { get; set; }
+        [YAXAltAliases("F_10/value")]
         [YAXAttributeFor("GlowRGB")]
         [YAXSerializeAs("R")]
         [YAXFormat("0.0##########")]
         public float F_10 { get; set; }
+        [YAXAltAliases("F_11/value")]
         [YAXAttributeFor("GlowRGB")]
         [YAXSerializeAs("G")]
         [YAXFormat("0.0##########")]
         public float F_11 { get; set; }
+        [YAXAltAliases("F_12/value")]
         [YAXAttributeFor("GlowRGB")]
         [YAXSerializeAs("B")]
         [YAXFormat("0.0##########")]
         public float F_12 { get; set; }
+        [YAXAltAliases("F_13/value")]
         [YAXAttributeFor("Temperature")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
         public float F_13 { get; set; }
+        [YAXAltAliases("F_14/value")]
         [YAXAttributeFor("Fade")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0##########")]
@@ -3117,6 +3659,7 @@ namespace Xv2CoreLib.DEM
         [YAXAttributeFor("I_18")]
         [YAXSerializeAs("value")]
         public int I_18 { get; set; }
+        [YAXAltAliases("I_19/value")]
         [YAXAttributeFor("Time")]
         [YAXSerializeAs("value")]
         public int I_19 { get; set; }
@@ -3189,6 +3732,7 @@ namespace Xv2CoreLib.DEM
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
         public float F_3 { get; set; }
+        [YAXAltAliases("I_4/value:int")]
         [YAXAttributeFor("F_4")]
         [YAXSerializeAs("value")]
         [YAXFormat("0.0#########")]
@@ -3419,6 +3963,134 @@ namespace Xv2CoreLib.DEM
             return writer.bytes;
         }
 
+    }
+
+    [YAXSerializeAs("Type7_1_6")]
+    public class Type7_1_6
+    {
+        [YAXCollection(YAXCollectionSerializationTypes.RecursiveWithNoContainingElement, EachElementName = "Value")]
+        public List<Type7_1_6_Value> Values { get; set; } = new List<Type7_1_6_Value>();
+
+        public static Type7_1_6 Read(byte[] rawBytes, List<byte> bytes, int offset, int count)
+        {
+            Type7_1_6 type = new Type7_1_6();
+
+            for (int i = 0; i < count; i++)
+            {
+                int ptr = BitConverter.ToInt32(rawBytes, offset + (i * 8));
+                int v1 = BitConverter.ToInt32(rawBytes, ptr + 0);
+                int v2 = BitConverter.ToInt32(rawBytes, ptr + 4);
+                int v3 = BitConverter.ToInt32(rawBytes, ptr + 8);
+                int v4 = BitConverter.ToInt32(rawBytes, ptr + 12);
+                int v5 = BitConverter.ToInt32(rawBytes, ptr + 16);
+                int v6 = BitConverter.ToInt32(rawBytes, ptr + 20);
+                type.Values.Add(new Type7_1_6_Value()
+                {
+                    I_1 = v1,
+                    I_2 = v2,
+                    I_3 = v3,
+                    I_4 = v4,
+                    I_5 = v5,
+                    I_6 = v6,
+                    I_1_Text = GetFourCcString(v1),
+                    I_2_Text = GetFourCcString(v2),
+                    I_3_Text = GetFourCcString(v3),
+                    I_4_Text = GetFourCcString(v4),
+                    I_5_Text = GetFourCcString(v5),
+                    I_6_Text = GetFourCcString(v6)
+                });
+            }
+
+            return type;
+        }
+
+        public List<byte> Write(List<byte> bytes, List<int> valueOffsets)
+        {
+            for (int i = 0; i < Values.Count; i++)
+            {
+                bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count), valueOffsets[i]);
+                bytes.AddRange(BitConverter.GetBytes(GetValueOrFourCc(Values[i].I_1, Values[i].I_1_Text)));
+                bytes.AddRange(BitConverter.GetBytes(GetValueOrFourCc(Values[i].I_2, Values[i].I_2_Text)));
+                bytes.AddRange(BitConverter.GetBytes(GetValueOrFourCc(Values[i].I_3, Values[i].I_3_Text)));
+                bytes.AddRange(BitConverter.GetBytes(GetValueOrFourCc(Values[i].I_4, Values[i].I_4_Text)));
+                bytes.AddRange(BitConverter.GetBytes(GetValueOrFourCc(Values[i].I_5, Values[i].I_5_Text)));
+                bytes.AddRange(BitConverter.GetBytes(GetValueOrFourCc(Values[i].I_6, Values[i].I_6_Text)));
+            }
+
+            return bytes;
+        }
+
+        private static string GetFourCcString(int value)
+        {
+            byte[] b = BitConverter.GetBytes(value);
+            for (int i = 0; i < b.Length; i++)
+            {
+                if (b[i] < 0x20 || b[i] > 0x7E)
+                    return null;
+            }
+
+            return Encoding.ASCII.GetString(b);
+        }
+
+        private static int GetValueOrFourCc(int value, string fourCc)
+        {
+            if (string.IsNullOrEmpty(fourCc))
+                return value;
+
+            byte[] b = Encoding.ASCII.GetBytes(fourCc.PadRight(4, '\0'));
+            if (b.Length > 4)
+            {
+                Array.Resize(ref b, 4);
+            }
+            return BitConverter.ToInt32(b, 0);
+        }
+    }
+
+    [YAXSerializeAs("Value")]
+    public class Type7_1_6_Value
+    {
+        [YAXAttributeForClass]
+        [YAXSerializeAs("I_1")]
+        public int I_1 { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("I_1_Text")]
+        [YAXDontSerializeIfNull]
+        public string I_1_Text { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("I_2")]
+        public int I_2 { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("I_2_Text")]
+        [YAXDontSerializeIfNull]
+        public string I_2_Text { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("I_3")]
+        public int I_3 { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("I_3_Text")]
+        [YAXDontSerializeIfNull]
+        public string I_3_Text { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("I_4")]
+        public int I_4 { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("I_4_Text")]
+        [YAXDontSerializeIfNull]
+        public string I_4_Text { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("I_5")]
+        public int I_5 { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("I_5_Text")]
+        [YAXDontSerializeIfNull]
+        public string I_5_Text { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("I_6")]
+        public int I_6 { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("I_6_Text")]
+        [YAXDontSerializeIfNull]
+        public string I_6_Text { get; set; }
     }
 
     public class Type9_0_2
