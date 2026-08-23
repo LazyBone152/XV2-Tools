@@ -57,21 +57,21 @@ namespace Xv2CoreLib.Eternity
             string[] charaSlotsText = rawText.Split('}');
 
 
-            foreach(var slot in charaSlotsText)
+            foreach (var slot in charaSlotsText)
             {
                 if (string.IsNullOrWhiteSpace(slot)) continue;
 
                 string[] costumeSlotsText = slot.Split(']');
                 CharaSlot charaSlot = new CharaSlot();
 
-                foreach(var costume in costumeSlotsText)
+                foreach (var costume in costumeSlotsText)
                 {
                     if (string.IsNullOrWhiteSpace(costume)) continue;
 
                     CharaCostumeSlot costumeSlot = new CharaCostumeSlot();
-                    
+
                     string[] parameters = costume.Split(',');
-                    if (parameters.Length != 10) throw new InvalidDataException($"Invalid number of CharaSlot parameters. Expected 10, found {parameters.Length}.");
+                    if (parameters.Length != 11) throw new InvalidDataException($"Invalid number of CharaSlot parameters. Expected 11, found {parameters.Length}.");
 
                     costumeSlot.CharaCode = parameters[0];
                     costumeSlot.Costume = int.Parse(parameters[1]);
@@ -83,6 +83,7 @@ namespace Xv2CoreLib.Eternity
                     costumeSlot.DLC_Flag1 = (CstDlcVer)uint.Parse(parameters[7]);
                     costumeSlot.DLC_Flag2 = (CstDlcVer2)uint.Parse(parameters[8]);
                     costumeSlot.flag_cgk2 = (parameters[9] == "1") ? true : false;
+                    costumeSlot.flag_kfk = (parameters[10] == "1") ? true : false;
 
                     charaSlot.CostumeSlots.Add(costumeSlot);
                 }
@@ -97,11 +98,11 @@ namespace Xv2CoreLib.Eternity
         {
             StringBuilder strBuilder = new StringBuilder();
 
-            foreach(var chara in CharaSlots)
+            foreach (var chara in CharaSlots)
             {
                 strBuilder.Append("{");
 
-                foreach(var costume in chara.CostumeSlots)
+                foreach (var costume in chara.CostumeSlots)
                 {
                     strBuilder.Append("[");
 
@@ -114,7 +115,8 @@ namespace Xv2CoreLib.Eternity
                     strBuilder.Append(costume.CssVoice2).Append(",");
                     strBuilder.Append((uint)costume.DLC_Flag1).Append(",");
                     strBuilder.Append((uint)costume.DLC_Flag2).Append(",");
-                    strBuilder.Append((costume.flag_cgk2) ? 1 : 0);
+                    strBuilder.Append((costume.flag_cgk2) ? 1 : 0).Append(",");
+                    strBuilder.Append((costume.flag_kfk) ? 1 : 0);
 
                     strBuilder.Append("]");
                 }
@@ -135,19 +137,19 @@ namespace Xv2CoreLib.Eternity
 
         public bool SlotExists(string charCode, int costume)
         {
-            foreach(var slot in CharaSlots)
+            foreach (var slot in CharaSlots)
             {
                 if (slot.CostumeSlots.FirstOrDefault(x => x.CharaCode == charCode && x.Costume == costume) != null) return true;
             }
 
             return false;
         }
-        
+
         public CST_File ConvertToCst()
         {
             CST_File cstFile = new CST_File();
 
-            foreach(var charaSlot in CharaSlots)
+            foreach (var charaSlot in CharaSlots)
             {
                 cstFile.CharaSlots.Add(new CST_CharaSlot(charaSlot));
             }
@@ -181,7 +183,7 @@ namespace Xv2CoreLib.Eternity
             SortBefore = charaSlots.SortBefore;
             SortAfter = charaSlots.SortAfter;
 
-            foreach(var slot in charaSlots.CharaCostumeSlots)
+            foreach (var slot in charaSlots.CharaCostumeSlots)
             {
                 CostumeSlots.Add(new CharaCostumeSlot(slot));
             }
@@ -231,6 +233,10 @@ namespace Xv2CoreLib.Eternity
         [YAXAttributeForClass]
         [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = false)]
         public bool flag_cgk2 { get; set; }
+        [YAXAttributeForClass]
+        [YAXSerializeAs("flag_kfk")]
+        [YAXErrorIfMissed(YAXExceptionTypes.Ignore, DefaultValue = false)]
+        public bool flag_kfk { get; set; }
 
         public CharaCostumeSlot() { }
 
@@ -246,6 +252,7 @@ namespace Xv2CoreLib.Eternity
             DLC_Flag1 = slot.DlcFlag1;
             DLC_Flag2 = slot.DlcFlag2;
             flag_cgk2 = slot.flag_cgk2 > 0;
+            flag_kfk = slot.I_56 > 0;
         }
     }
 }
