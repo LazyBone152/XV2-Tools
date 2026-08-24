@@ -57,6 +57,14 @@ namespace EEPK_Organiser.Forms.Recolor
         private int _variance = 0;
         private bool _textureVariance = false;
 
+        public bool ShiftGlareColor { get; set; } = true;
+
+        public Visibility ShiftGlareColorVisibility =>
+            currentMode == Mode.Material || currentMode == Mode.Global ||
+            (currentMode == Mode.Asset && assetType == AssetType.EMO)
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+
 
         private RgbColor _rgbColor = new RgbColor(255, 255, 255);
         public RgbColor rgbColor
@@ -293,7 +301,7 @@ namespace EEPK_Organiser.Forms.Recolor
             }
             else if (currentMode == Mode.Material)
             {
-                material.ChangeHsl(hueChange, 0f, 0f, undos, true, Variance);
+                material.ChangeHsl(hueChange, 0f, 0f, undos, hueSet: true, variance: Variance, shiftGlareColor: ShiftGlareColor);
             }
             else if (currentMode == Mode.Global)
             {
@@ -353,7 +361,7 @@ namespace EEPK_Organiser.Forms.Recolor
                                 file.EmbFile.ChangeHue(hueChange, 0f, 0f, undos, true, TextureVariance ? Variance : 0); //No lightness change
                                 break;
                             case ".emm":
-                                file.EmmFile.ChangeHsl(hueChange, 0f, 0f, undos, true, Variance);
+                                file.EmmFile.ChangeHsl(hueChange, 0f, 0f, undos, hueSet: true, variance: Variance, shiftGlareColor: ShiftGlareColor);
                                 break;
                             case ".mat.ema":
                                 EMM_File emmFile = _asset.Files.FirstOrDefault(x => x.fileType == EffectFile.FileType.EMM)?.EmmFile;
@@ -404,8 +412,8 @@ namespace EEPK_Organiser.Forms.Recolor
             ChangeHueForContainer(effectContainerFile.LightEma, undos);
             effectContainerFile.Pbind.File3_Ref.ChangeHue(hueChange, 0f, 0f, undos, true, TextureVariance ? Variance : 0);
             effectContainerFile.Tbind.File3_Ref.ChangeHue(hueChange, 0f, 0f, undos, true, TextureVariance ? Variance : 0);
-            effectContainerFile.Pbind.File2_Ref.ChangeHsl(hueChange, 0f, 0f, undos, true, Variance);
-            effectContainerFile.Tbind.File2_Ref.ChangeHsl(hueChange, 0f, 0f, undos, true, Variance);
+            effectContainerFile.Pbind.File2_Ref.ChangeHsl(hueChange, 0f, 0f, undos, hueSet: true, variance: Variance, shiftGlareColor: ShiftGlareColor);
+            effectContainerFile.Tbind.File2_Ref.ChangeHsl(hueChange, 0f, 0f, undos, hueSet: true, variance: Variance, shiftGlareColor: ShiftGlareColor);
         }
 
         private void ChangeHueForContainer(AssetContainerTool container, List<IUndoRedo> undos)

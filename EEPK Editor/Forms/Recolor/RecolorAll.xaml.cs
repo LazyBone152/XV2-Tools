@@ -70,6 +70,14 @@ namespace EEPK_Organiser.Forms
             }
         }
 
+        public bool ShiftGlareColor { get; set; } = true;
+
+        public Visibility ShiftGlareColorVisibility =>
+            currentMode == Mode.Material || currentMode == Mode.Global ||
+            (currentMode == Mode.Asset && assetType == AssetType.EMO)
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+
         private RgbColor _rgbColor = new RgbColor(255,255,255);
         public RgbColor rgbColor
         {
@@ -282,7 +290,7 @@ namespace EEPK_Organiser.Forms
             }
             else if(currentMode == Mode.Material)
             {
-                material.ChangeHsl(hueChange, saturationChange, lightnessChange, undos);
+                material.ChangeHsl(hueChange, saturationChange, lightnessChange, undos, shiftGlareColor: ShiftGlareColor);
             }
             else if(currentMode == Mode.Global)
             {
@@ -342,7 +350,7 @@ namespace EEPK_Organiser.Forms
                                 file.EmbFile.ChangeHue(hueChange, saturationChange, lightnessChange, undos); //No lightness change
                                 break;
                             case ".emm":
-                                file.EmmFile.ChangeHsl(hueChange, saturationChange, lightnessChange, undos);
+                                file.EmmFile.ChangeHsl(hueChange, saturationChange, lightnessChange, undos, shiftGlareColor: ShiftGlareColor);
                                 break;
                             case ".mat.ema":
                                 EMM_File emmFile = _asset.Files.FirstOrDefault(x => x.fileType == EffectFile.FileType.EMM)?.EmmFile;
@@ -393,8 +401,8 @@ namespace EEPK_Organiser.Forms
             ChangeHueForContainer(effectContainerFile.LightEma, hueChange, saturationChange, lightnessChange, undos);
             effectContainerFile.Pbind.File3_Ref.ChangeHue(hueChange, saturationChange, lightnessChange, undos);
             effectContainerFile.Tbind.File3_Ref.ChangeHue(hueChange, saturationChange, lightnessChange, undos);
-            effectContainerFile.Pbind.File2_Ref.ChangeHsl(hueChange, saturationChange, lightnessChange, undos);
-            effectContainerFile.Tbind.File2_Ref.ChangeHsl(hueChange, saturationChange, lightnessChange, undos);
+            effectContainerFile.Pbind.File2_Ref.ChangeHsl(hueChange, saturationChange, lightnessChange, undos, shiftGlareColor: ShiftGlareColor);
+            effectContainerFile.Tbind.File2_Ref.ChangeHsl(hueChange, saturationChange, lightnessChange, undos, shiftGlareColor: ShiftGlareColor);
         }
 
         private void ChangeHueForContainer(AssetContainerTool container, double hueChange, double saturationChange, double lightnessChange, List<IUndoRedo> undos)
