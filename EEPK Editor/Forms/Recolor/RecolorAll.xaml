@@ -24,7 +24,7 @@
         <Label Content="Hue" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="10,77,0,0" VerticalAlignment="Top" Width="75"/>
         <Grid Background="{Binding preview}" HorizontalAlignment="Left" Height="19" Margin="99,58,0,0" VerticalAlignment="Top" Width="188" ToolTip="{Binding RgbPreviewTooltip, UpdateSourceTrigger=PropertyChanged}"/>
         <Label Content="Preview" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="10,52,0,0" VerticalAlignment="Top" Width="75"/>
-        <CheckBox Content="Shift glare color" IsChecked="{Binding ShiftGlareColor, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding ShiftGlareColorVisibility}" HorizontalAlignment="Left" Margin="292,52,0,0" VerticalAlignment="Top" ToolTip="Include material glare colors in the hue adjustment."/>
+        <CheckBox Content="Shift glare color" IsChecked="{Binding ShiftGlareColor}" Visibility="{Binding ShiftGlareColorVisibility}" HorizontalAlignment="Left" Margin="292,52,0,0" VerticalAlignment="Top" ToolTip="Include material glare colors in the hue adjustment."/>
 
         <Slider ValueChanged="Slider_ValueChanged" Value="{Binding hslColor.Saturation, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="1" HorizontalAlignment="Left" Margin="90,113,0,0" VerticalAlignment="Top" Width="197"/>
         <Controls:NumericUpDown StringFormat="0.000" ValueChanged="IntegerUpDown_ValueChanged" Value="{Binding hslColor.Saturation, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="1" Margin="292,107,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="92" Interval="0.01"/>

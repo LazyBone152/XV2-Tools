@@ -74,7 +74,8 @@ namespace EEPK_Organiser.Forms
 
         public Visibility ShiftGlareColorVisibility =>
             currentMode == Mode.Material || currentMode == Mode.Global ||
-            (currentMode == Mode.Asset && assetType == AssetType.EMO)
+            (currentMode == Mode.Asset &&
+                (assetType == AssetType.EMO || assetType == AssetType.PBIND))
                 ? Visibility.Visible
                 : Visibility.Collapsed;
 
@@ -145,10 +146,11 @@ namespace EEPK_Organiser.Forms
         /// Hue shift a material.
         /// </summary>
         /// <param name="_material"></param>
-        public RecolorAll(EmmMaterial _material, Window parent)
+        public RecolorAll(EmmMaterial _material, Window parent, bool shiftGlareColor)
         {
             currentMode = Mode.Material;
             material = _material;
+            ShiftGlareColor = shiftGlareColor;
 
             InitializeComponent();
             Owner = parent;
@@ -213,6 +215,13 @@ namespace EEPK_Organiser.Forms
             if(currentMode == Mode.Asset)
             {
                 colors = asset.GetUsedColors();
+                if (assetType == AssetType.PBIND)
+                {
+                    foreach (var material in asset.Files[0].EmpFile.GetUsedMaterials())
+                    {
+                        colors.AddRange(material.GetUsedColors());
+                    }
+                }
             }
             else if (currentMode == Mode.Material)
             {
@@ -325,12 +334,12 @@ namespace EEPK_Organiser.Forms
         }
         
 
-        private void ChangeHueForAsset(Asset _asset, double hueChange, double saturationChange, double lightnessChange, List<IUndoRedo> undos)
+        private void ChangeHueForAsset(Asset _asset, double hueChange, double saturationChange, double lightnessChange, List<IUndoRedo> undos, bool shiftGlareColor = true)
         {
             switch (_asset.assetType)
             {
                 case AssetType.PBIND:
-                    _asset.Files[0].EmpFile.ChangeHue(hueChange, saturationChange, lightnessChange, undos);
+                    _asset.Files[0].EmpFile.ChangeHue(hueChange, saturationChange, lightnessChange, undos, shiftGlareColor: shiftGlareColor && ShiftGlareColor);
                     break;
                 case AssetType.TBIND:
                     _asset.Files[0].EtrFile.ChangeHue(hueChange, saturationChange, lightnessChange, undos);
@@ -394,7 +403,7 @@ namespace EEPK_Organiser.Forms
 
         private void ChangeHueForEverything(double hueChange, double saturationChange, double lightnessChange, List<IUndoRedo> undos)
         {
-            ChangeHueForContainer(effectContainerFile.Pbind, hueChange, saturationChange, lightnessChange, undos);
+            ChangeHueForContainer(effectContainerFile.Pbind, hueChange, saturationChange, lightnessChange, undos, false);
             ChangeHueForContainer(effectContainerFile.Tbind, hueChange, saturationChange, lightnessChange, undos);
             ChangeHueForContainer(effectContainerFile.Cbind, hueChange, saturationChange, lightnessChange, undos);
             ChangeHueForContainer(effectContainerFile.Emo, hueChange, saturationChange, lightnessChange, undos);
@@ -405,11 +414,11 @@ namespace EEPK_Organiser.Forms
             effectContainerFile.Tbind.File2_Ref.ChangeHsl(hueChange, saturationChange, lightnessChange, undos, shiftGlareColor: ShiftGlareColor);
         }
 
-        private void ChangeHueForContainer(AssetContainerTool container, double hueChange, double saturationChange, double lightnessChange, List<IUndoRedo> undos)
+        private void ChangeHueForContainer(AssetContainerTool container, double hueChange, double saturationChange, double lightnessChange, List<IUndoRedo> undos, bool shiftGlareColor = true)
         {
             foreach(var _asset in container.Assets)
             {
-                ChangeHueForAsset(_asset, hueChange, saturationChange, lightnessChange, undos);
+                ChangeHueForAsset(_asset, hueChange, saturationChange, lightnessChange, undos, shiftGlareColor);
             }
         }
 

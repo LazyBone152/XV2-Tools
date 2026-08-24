@@ -921,7 +921,7 @@ namespace Xv2CoreLib.EMA
 
         private void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos, bool hueSet, int variance, params EMA_Command[] commands)
         {
-            if (commands.All(x => x == null)) return;
+            if (commands == null || commands.Length < 3 || commands.Any(x => x == null || x.Keyframes == null || x.Keyframes.Any(keyframe => keyframe == null))) return;
             //EMA_Command r_command = GetCommand(EMA_Command.PARAMETER_COLOR, EMA_Command.COMPONENT_R);
             //EMA_Command g_command = GetCommand(EMA_Command.PARAMETER_COLOR, EMA_Command.COMPONENT_G);
             //EMA_Command b_command = GetCommand(EMA_Command.PARAMETER_COLOR, EMA_Command.COMPONENT_B);
