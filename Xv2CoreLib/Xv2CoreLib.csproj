@@ -365,7 +365,7 @@
     <Compile Include="UTF\UTF_File.cs" />
     <Compile Include="ValuesDictionary\BAC.cs" />
     <Compile Include="ValuesDictionary\BCS.cs" />
-		<Compile Include="ValuesDictionary\BSA.cs" />
+    <Compile Include="ValuesDictionary\BSA.cs" />
     <Compile Include="ValuesDictionary\BCM.cs" />
     <Compile Include="ValuesDictionary\EMP.cs" />
     <Compile Include="VLC\VLC_File.cs" />

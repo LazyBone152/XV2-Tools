@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using YAXLib;
 
 namespace Xv2CoreLib.CAT
@@ -55,11 +53,14 @@ namespace Xv2CoreLib.CAT
                 entry.CharaId = BitConverter.ToUInt16(bytes, offset + 0);
                 entry.Costume = BitConverter.ToUInt16(bytes, offset + 2);
                 entry.I_04 = BitConverter.ToUInt16(bytes, offset + 4);
-                entry.I_06 = BitConverter.ToUInt16(bytes, offset + 6);
+                entry.AwokenSkillID2 = BitConverter.ToUInt16(bytes, offset + 6);
                 entry.Str_08 = StringEx.GetString(bytes, offset + 8, false, StringEx.EncodingType.ASCII, 8);
                 entry.I_12 = BitConverter.ToInt32(bytes, offset + 12);
                 entry.I_16 = BitConverter.ToInt32(bytes, offset + 16);
-                entry.I_20 = BitConverter.ToInt32(bytes, offset + 20);
+                entry.I_20 = BitConverter.ToUInt16(bytes, offset + 20);
+                entry.TransformationEntry = bytes[offset + 22];
+                entry.I_23 = bytes[offset + 23];
+
 
                 offset += entrySize;
                 CATFile.Entries.Add(entry);
@@ -112,12 +113,14 @@ namespace Xv2CoreLib.CAT
                 bytes.AddRange(BitConverter.GetBytes(entry.CharaId));
                 bytes.AddRange(BitConverter.GetBytes(entry.Costume));
                 bytes.AddRange(BitConverter.GetBytes(entry.I_04));
-                bytes.AddRange(BitConverter.GetBytes(entry.I_06));
+                bytes.AddRange(BitConverter.GetBytes(entry.AwokenSkillID2));
                 bytes.AddRange(Encoding.ASCII.GetBytes(entry.Str_08));
                 bytes.AddRange(new byte[4 - entry.Str_08.Length]);
                 bytes.AddRange(BitConverter.GetBytes(entry.I_12));
                 bytes.AddRange(BitConverter.GetBytes(entry.I_16));
                 bytes.AddRange(BitConverter.GetBytes(entry.I_20));
+                bytes.Add(entry.TransformationEntry);
+                bytes.Add(entry.I_23);
             }
 
             //validation
@@ -191,23 +194,25 @@ namespace Xv2CoreLib.CAT
         [YAXAttributeForClass]
         [YAXSerializeAs("Costume")]
         public ushort Costume { get; set; }
-        [YAXAttributeFor("I_04")]
-        [YAXSerializeAs("value")]
+        [CustomSerialize("I_04")]
         public ushort I_04 { get; set; }
-        [YAXAttributeFor("Awoken_Skill_ID2")]
-        [YAXSerializeAs("value")]
-        public ushort I_06 { get; set; }
-        [YAXAttributeFor("Chara")]
-        [YAXSerializeAs("value")]
+        [CustomSerialize("Awoken_Skill_ID2")]
+        public ushort AwokenSkillID2 { get; set; }
+        [CustomSerialize("Chara")]
         public string Str_08 { get; set; }
-        [YAXAttributeFor("I_12")]
-        [YAXSerializeAs("value")]
+        [CustomSerialize("I_12")]
         public int I_12 { get; set; }
-        [YAXAttributeFor("I_16")]
-        [YAXSerializeAs("value")]
+        [CustomSerialize("I_16")]
         public int I_16 { get; set; }
-        [YAXAttributeFor("I_20")]
-        [YAXSerializeAs("value")]
-        public int I_20 { get; set; }
+
+        [CustomSerialize(parent: "I_20a")]
+        [YAXAltAliases("I_20/value:int0")]
+        public ushort I_20 { get; set; }
+        [CustomSerialize(parent: "TransformationEntry")]
+        [YAXAltAliases("I_20/value:int2")]
+        public byte TransformationEntry { get; set; }
+        [CustomSerialize(parent: "I_23")]
+        [YAXAltAliases("I_20/value:int3")]
+        public byte I_23 { get; set; }
     }
 }
