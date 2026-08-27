@@ -98,6 +98,12 @@ namespace Xv2CoreLib
             return RandomGenerator.NextDouble();
         }
 
+        public static void NextBytes(byte[] bytes)
+        {
+            InitRandomGenerator();
+            RandomGenerator.NextBytes(bytes);
+        }
+
         private static void InitRandomGenerator()
         {
             if (RandomGenerator == null) GenerateNewSeed();

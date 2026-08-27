@@ -38,9 +38,9 @@ namespace Xv2CoreLib.SAV
         //Misc
         public const int XV1_SAVE_SIZE = 210816;
         public const int DECRYPTED_SAVE_SIZE_V1 = 504720;
-        public const int ENECRYPTED_SAVE_SIZE_V1 = 504896;
+        public const int ENCRYPTED_SAVE_SIZE_V1 = 504896;
         public const int DECRYPTED_SAVE_SIZE_V10 = 722968;
-        public const int ENECRYPTED_SAVE_SIZE_V10 = 723136;
+        public const int ENCRYPTED_SAVE_SIZE_V10 = 723136;
         public const int ENCRYPTED_SAVE_SIZE_V21 = 914080;
         public const int DECRYPTED_SAVE_SIZE_V21 = 913912;
         public const int ENCRYPTED_SAVE_SIZE_V30 = 0x12A2A0;
@@ -736,6 +736,8 @@ namespace Xv2CoreLib.SAV
                     case 36:
                     case 37:
                     case 38:
+                    case 39:
+                    case 40:
                         return null;
                     default:
                         return "This save version is not supported. It is recommened to update the application (if one is available).";
@@ -786,6 +788,8 @@ namespace Xv2CoreLib.SAV
                     case 36:
                     case 37:
                     case 38:
+                    case 39:
+                    case 40:
                         return Brushes.Blue;
                     default:
                         return Brushes.Orange;
@@ -1013,33 +1017,16 @@ namespace Xv2CoreLib.SAV
             bool encrypted = false;
 
             //Check is a XV2 save
-            switch (rawBytes.Length)
+            if (!Encryption.IsValidSaveFile(rawBytes))
             {
-                case Offsets.DECRYPTED_SAVE_SIZE_V1:
-                case Offsets.DECRYPTED_SAVE_SIZE_V10:
-                case Offsets.DECRYPTED_SAVE_SIZE_V21:
-                case Offsets.DECRYPTED_SAVE_SIZE_V30:
-                    break;
-                case Offsets.ENECRYPTED_SAVE_SIZE_V1:
-                    encrypted = true;
-                    rawBytes = Crypt.DecryptManaged_V1(rawBytes);
-                    break;
-                case Offsets.ENECRYPTED_SAVE_SIZE_V10:
-                    encrypted = true;
-                    rawBytes = Crypt.DecryptManaged_V10(rawBytes);
-                    break;
-                case Offsets.ENCRYPTED_SAVE_SIZE_V21:
-                    encrypted = true;
-                    rawBytes = Crypt.DecryptManaged_V21(rawBytes);
-                    break;
-                case Offsets.ENCRYPTED_SAVE_SIZE_V30:
-                    encrypted = true;
-                    rawBytes = Crypt.DecryptManaged_V30(rawBytes);
-                    break;
-                case Offsets.XV1_SAVE_SIZE:
-                    throw new InvalidDataException("DBXV1 saves are not supported.");
-                default:
-                    throw new InvalidDataException("Unsupported save version. Load failed.");
+                throw new InvalidDataException("Unsupported save version. Load failed.");
+            }
+
+            //Decrypt 
+            if (Encryption.IsEncrypted(rawBytes))
+            {
+                encrypted = true;
+                rawBytes = Encryption.DecryptSaveFile(rawBytes);
             }
 
             List<byte> bytes = rawBytes.ToList();
@@ -1066,25 +1053,10 @@ namespace Xv2CoreLib.SAV
 
             //Encrypt if needed
             byte[] rawBytes = bytes.ToArray();
+
             if (IsEncrypted)
             {
-                switch (rawBytes.Length)
-                {
-                    case Offsets.DECRYPTED_SAVE_SIZE_V1:
-                        rawBytes = Crypt.EncryptManaged_V1(rawBytes);
-                        break;
-                    case Offsets.DECRYPTED_SAVE_SIZE_V10:
-                        rawBytes = Crypt.EncryptManaged_V10(rawBytes);
-                        break;
-                    case Offsets.DECRYPTED_SAVE_SIZE_V21:
-                        rawBytes = Crypt.EncryptManaged_V21(rawBytes);
-                        break;
-                    case Offsets.DECRYPTED_SAVE_SIZE_V30:
-                        rawBytes = Crypt.EncryptManaged_V30(rawBytes);
-                        break;
-                    default:
-                        throw new InvalidDataException("Invalid decrypted save size. Save failed.");
-                }
+                rawBytes = Encryption.EncryptSaveFile(rawBytes);
             }
 
             File.WriteAllBytes(path, rawBytes);
@@ -1109,23 +1081,7 @@ namespace Xv2CoreLib.SAV
 
             if (savFile.IsEncrypted)
             {
-                switch (rawBytes.Length)
-                {
-                    case Offsets.DECRYPTED_SAVE_SIZE_V1:
-                        rawBytes = Crypt.EncryptManaged_V1(rawBytes);
-                        break;
-                    case Offsets.DECRYPTED_SAVE_SIZE_V10:
-                        rawBytes = Crypt.EncryptManaged_V10(rawBytes);
-                        break;
-                    case Offsets.DECRYPTED_SAVE_SIZE_V21:
-                        rawBytes = Crypt.EncryptManaged_V21(rawBytes);
-                        break;
-                    case Offsets.DECRYPTED_SAVE_SIZE_V30:
-                        rawBytes = Crypt.EncryptManaged_V30(rawBytes);
-                        break;
-                    default:
-                        throw new InvalidDataException("Invalid decrypted save size. Save failed.");
-                }
+                rawBytes = Encryption.EncryptSaveFile(rawBytes);
             }
 
             File.WriteAllBytes(saveLocation, rawBytes);
