@@ -4963,6 +4963,45 @@ namespace EEPK_Organiser.View
 
         }
 
+        private async void ToolMenu_CleanAll_Click(object sender, RoutedEventArgs e)
+        {
+            if (effectContainerFile == null)
+                return;
+
+            var messageResult = await DialogCoordinator.Instance.ShowMessageAsync(
+                this,
+                "Clean All",
+                $"Delete all unused or duplicate assets, texture and material from this {effectContainerFile.saveFormat}?",
+                MessageDialogStyle.AffirmativeAndNegative,
+                DialogSettings.Default);
+
+            if (messageResult != MessageDialogResult.Affirmative)
+                return;
+
+            List<IUndoRedo> undos = new List<IUndoRedo>();
+            int[] totals = effectContainerFile.RemoveAllUnusedOrDuplicates(undos);
+
+            int emp = totals[0];
+            int etr = totals[1];
+            int ecf = totals[2];
+            int emo = totals[3];
+            int light = totals[4];
+            int empTextures = totals[5];
+            int textures = totals[6];
+            int materials = totals[7];
+            int total = totals[8];
+
+            if (undos.Count > 0)
+                UndoManager.Instance.AddCompositeUndo(undos, $"Clean All ({total})");
+
+            await DialogCoordinator.Instance.ShowMessageAsync(
+                this,
+                "Clean All",
+                $"{total} duplicate or unused references were purged.\n\nBreakdown by type:\nEMP: {emp}\nETR: {etr}\nECF: {ecf}\nEMO: {emo}\nLIGHT: {light}\nEMP Textures: {empTextures}\nTextures: {textures}\nMaterials: {materials}",
+                MessageDialogStyle.Affirmative,
+                DialogSettings.Default);
+        }
+
 #if !XenoKit
         private void NameList_Item_Click(object sender, RoutedEventArgs e)
         {

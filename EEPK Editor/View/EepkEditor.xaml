@@ -1012,6 +1012,8 @@
                     <ContextMenu>
                         <MenuItem Header="Hue Adjustment" Click="ToolMenu_HueAdjustment_Click"/>
                         <MenuItem Header="Hue Set" Click="ToolMenu_HueSet_Click"/>
+                        <Separator/>
+                        <MenuItem Header="Clean All" Click="ToolMenu_CleanAll_Click"/>
                     </ContextMenu>
                 </Button.ContextMenu>
 
