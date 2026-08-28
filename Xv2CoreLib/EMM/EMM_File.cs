@@ -216,14 +216,14 @@ namespace Xv2CoreLib.EMM
             return null;
         }
 
-        public void ChangeHsl(double hue, double saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0)
+        public void ChangeHsl(double hue, double saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0, bool shiftGlareColor = true)
         {
             if (Materials == null) return;
             if (undos == null) undos = new List<IUndoRedo>();
 
             foreach (var mat in Materials)
             {
-                mat.ChangeHsl(hue, saturation, lightness, undos, hueSet, variance);
+                mat.ChangeHsl(hue, saturation, lightness, undos, hueSet: hueSet, variance: variance, shiftGlareColor: shiftGlareColor);
             }
         }
     
@@ -400,47 +400,75 @@ namespace Xv2CoreLib.EMM
 
             return mat;
         }
-        public void ChangeHsl(double hue, double saturation = 0.0, double lightness = 0.0, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0)
+
+        private static bool TryGetColorForHsl(string parameterName, CustomColor color, out RgbColor rgbColor, out double glareScale)
+        {
+            rgbColor = null;
+            glareScale = 1.0;
+
+            if (color.IsBlack())
+                return false;
+
+            if (parameterName == "GlareCol")
+            {
+                if (color.R == color.G && color.G == color.B)
+                    return false;
+
+                glareScale = Math.Max(1.0, Math.Max(color.R, Math.Max(color.G, color.B)));
+            }
+
+            rgbColor = new RgbColor(color.R / glareScale, color.G / glareScale, color.B / glareScale);
+            return true;
+        }
+
+        public void ChangeHsl(double hue, double saturation = 0.0, double lightness = 0.0, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0, bool shiftGlareColor = true)
         {
             if (Parameters == null) return;
 
+            bool colorChanged = false;
+
             foreach (var param in DecompiledMaterial.ColorParameters)
             {
+                if (param == "GlareCol" && !shiftGlareColor)
+                    continue;
+
                 CustomColor col = DecompiledParameters.GetColor(param);
 
-                if (col.R != 0 || col.G != 0 || col.B != 0)
+                if (!TryGetColorForHsl(param, col, out RgbColor rgbColor, out double glareScale))
+                    continue;
+
+                var hslColor = rgbColor.ToHsl();
+
+                if (hueSet)
                 {
-                    //Create rgbColor
-                    RgbColor rgbColor = new RgbColor(col.R, col.G, col.B);
-                    var hslColor = rgbColor.ToHsl();
-                    RgbColor newColor;
-
-                    if (hueSet)
-                    {
-                        hslColor.SetHue(hue, variance);
-                    }
-                    else
-                    {
-                        hslColor.ChangeHue(hue);
-                        hslColor.ChangeLightness(lightness);
-                        hslColor.ChangeSaturation(saturation);
-                    }
-
-                    newColor = hslColor.ToRgb();
-                    float R = (float)newColor.R;
-                    float G = (float)newColor.G;
-                    float B = (float)newColor.B;
-
-                    undos.Add(new UndoablePropertyGeneric(nameof(col.R), col, col.R, R));
-                    undos.Add(new UndoablePropertyGeneric(nameof(col.G), col, col.G, G));
-                    undos.Add(new UndoablePropertyGeneric(nameof(col.B), col, col.B, B));
-
-                    //Add new color to parameters
-                    col.R = R;
-                    col.G = G;
-                    col.B = B;
+                    hslColor.SetHue(hue, variance);
                 }
+                else
+                {
+                    hslColor.ChangeHue(hue);
+                    hslColor.ChangeLightness(lightness);
+                    hslColor.ChangeSaturation(saturation);
+                }
+
+                RgbColor newColor = hslColor.ToRgb();
+                float R = (float)(newColor.R * glareScale);
+                float G = (float)(newColor.G * glareScale);
+                float B = (float)(newColor.B * glareScale);
+
+                if (col.R != R || col.G != G || col.B != B)
+                    colorChanged = true;
+
+                undos.Add(new UndoablePropertyGeneric(nameof(col.R), col, col.R, R));
+                undos.Add(new UndoablePropertyGeneric(nameof(col.G), col, col.G, G));
+                undos.Add(new UndoablePropertyGeneric(nameof(col.B), col, col.B, B));
+
+                col.R = R;
+                col.G = G;
+                col.B = B;
             }
+
+            if (colorChanged)
+                DecompiledParameters.ParametersChanged = 1;
         }
 
         #region Get
@@ -483,15 +511,11 @@ namespace Xv2CoreLib.EMM
             {
                 CustomColor col = DecompiledParameters.GetColor(param);
 
-                if (col.R != 0 || col.G != 0 || col.B != 0)
-                {
-                    var color = new RgbColor(col.R, col.G, col.B);
+                if (!TryGetColorForHsl(param, col, out RgbColor color, out _))
+                    continue;
 
-                    if (!color.IsWhiteOrBlack)
-                    {
-                        colors.Add(color);
-                    }
-                }
+                if (!color.IsWhiteOrBlack)
+                    colors.Add(color);
             }
 
             return colors;

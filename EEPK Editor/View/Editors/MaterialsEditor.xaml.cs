@@ -89,6 +89,8 @@ namespace EEPK_Organiser.View
         //ViewModel
         public MaterialViewModel MaterialViewModel { get; set; } = new MaterialViewModel();
 
+        public bool ShiftGlareColor { get; set; } = true;
+
         public string SelectedMaterialName
         {
             get => _selectedMaterial?.Name;
@@ -559,7 +561,7 @@ namespace EEPK_Organiser.View
         {
             if (SelectedMaterial != null)
             {
-                RecolorAll recolor = new RecolorAll(SelectedMaterial, Application.Current.Windows.OfType<MetroWindow>().SingleOrDefault(x => x.IsFocused));
+                RecolorAll recolor = new RecolorAll(SelectedMaterial, Application.Current.Windows.OfType<MetroWindow>().SingleOrDefault(x => x.IsFocused), ShiftGlareColor);
 
                 if (recolor.Initialize())
                     recolor.ShowDialog();
@@ -573,7 +575,7 @@ namespace EEPK_Organiser.View
         {
             if (SelectedMaterial != null)
             {
-                RecolorAll_HueSet recolor = new RecolorAll_HueSet(SelectedMaterial, Application.Current.Windows.OfType<MetroWindow>().SingleOrDefault(x => x.IsFocused));
+                RecolorAll_HueSet recolor = new RecolorAll_HueSet(SelectedMaterial, Application.Current.Windows.OfType<MetroWindow>().SingleOrDefault(x => x.IsFocused), ShiftGlareColor);
 
                 if (recolor.Initialize())
                     recolor.ShowDialog();

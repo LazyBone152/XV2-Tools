@@ -254,6 +254,14 @@
                                             <Label Content="GlareCol"/>
                                             <vector:CustomColor Grid.Column="1" Value="{Binding MaterialViewModel.GlareCol}"/>
                                         </Grid>
+                                        <Grid Margin="3,3" Width="450" ToolTip="Include this material's glare color in Hue Adjustment and Hue Set.">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="120"/>
+                                                <ColumnDefinition Width="20"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="Shift glare color"/>
+                                            <CheckBox Grid.Column="1" IsChecked="{Binding ShiftGlareColor}" Width="20" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                        </Grid>
                                     </StackPanel>
 
                                     <WrapPanel>

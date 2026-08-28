@@ -419,6 +419,36 @@ namespace Xv2CoreLib.EMP_NEW
             return textureParts;
         }
 
+        public List<EmmMaterial> GetUsedMaterials()
+        {
+            List<EmmMaterial> materials = new List<EmmMaterial>();
+
+            foreach (var particleEffect in ParticleNodes)
+            {
+                AddUsedMaterials(particleEffect, materials);
+            }
+
+            return materials;
+        }
+
+        private void AddUsedMaterials(ParticleNode particleEffect, List<EmmMaterial> materials)
+        {
+            if (particleEffect.NodeType == ParticleNodeType.Emission &&
+                particleEffect.EmissionNode?.Texture?.MaterialRef != null &&
+                !materials.Contains(particleEffect.EmissionNode.Texture.MaterialRef))
+            {
+                materials.Add(particleEffect.EmissionNode.Texture.MaterialRef);
+            }
+
+            if (particleEffect.ChildParticleNodes == null)
+                return;
+
+            foreach (var childParticle in particleEffect.ChildParticleNodes)
+            {
+                AddUsedMaterials(childParticle, materials);
+            }
+        }
+
         private List<ParticleTexture> GetTexturePartsThatUseMaterialRef_Recursive(EmmMaterial materialRef, List<ParticleTexture> textureParts, AsyncObservableCollection<ParticleNode> particleEffects)
         {
             foreach (var particleEffect in particleEffects)
@@ -519,7 +549,7 @@ namespace Xv2CoreLib.EMP_NEW
             return colors;
         }
 
-        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0)
+        public void ChangeHue(double hue, double saturation, double lightness, List<IUndoRedo> undos = null, bool hueSet = false, int variance = 0, bool shiftGlareColor = false)
         {
             if (ParticleNodes == null) return;
             if (undos == null) undos = new List<IUndoRedo>();
@@ -527,6 +557,14 @@ namespace Xv2CoreLib.EMP_NEW
             foreach (var particleEffects in ParticleNodes)
             {
                 particleEffects.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
+            }
+
+            if (shiftGlareColor)
+            {
+                foreach (var material in GetUsedMaterials())
+                {
+                    material.ChangeHsl(hue, saturation, lightness, undos, hueSet, variance, true);
+                }
             }
         }
 
