@@ -392,6 +392,9 @@ namespace Xv2CoreLib.DEM
                 case DEM_Type.DemoDataTypes.Type3_4_2:
                     subEntry.Type3_4_2 = Type3_4_2.Read(rawBytes, bytes, offset);
                     break;
+                case DEM_Type.DemoDataTypes.Type3_5_1:
+                    subEntry.Type3_5_1 = Type3_5_1.Read(rawBytes, bytes, offset);
+                    break;
                 case DEM_Type.DemoDataTypes.AuraEffect:
                     subEntry.Type4_2_3 = Type4_2_3.Read(rawBytes, bytes, offset);
                     break;

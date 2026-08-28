@@ -340,6 +340,9 @@ namespace Xv2CoreLib.DEM
                         case DEM_Type.DemoDataTypes.Type3_4_2:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type3_4_2.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
+                        case DEM_Type.DemoDataTypes.Type3_5_1:
+                            bytes = demFile.Section2Entries[i].SubEntries[a].Type3_5_1.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
+                            break;
                         case DEM_Type.DemoDataTypes.Effect:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type4_0_12.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
@@ -375,6 +378,9 @@ namespace Xv2CoreLib.DEM
                             break;
                         case DEM_Type.DemoDataTypes.Type5_4_3:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type5_4_3.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
+                            break;
+                        case DEM_Type.DemoDataTypes.Type5_4_6:
+                            bytes = demFile.Section2Entries[i].SubEntries[a].Type5_4_6.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
                         case DEM_Type.DemoDataTypes.SetSpm:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type6_0_1.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
@@ -732,6 +738,9 @@ namespace Xv2CoreLib.DEM
                         case DEM_Type.DemoDataTypes.Type3_4_2:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type3_4_2.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
+                        case DEM_Type.DemoDataTypes.Type3_5_1:
+                            bytes = demFile.Section2Entries[i].SubEntries[a].Type3_5_1.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
+                            break;
                         case DEM_Type.DemoDataTypes.Effect:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type4_0_12.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
@@ -767,6 +776,9 @@ namespace Xv2CoreLib.DEM
                             break;
                         case DEM_Type.DemoDataTypes.Type5_4_3:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type5_4_3.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
+                            break;
+                        case DEM_Type.DemoDataTypes.Type5_4_6:
+                            bytes = demFile.Section2Entries[i].SubEntries[a].Type5_4_6.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);
                             break;
                         case DEM_Type.DemoDataTypes.SetSpm:
                             bytes = demFile.Section2Entries[i].SubEntries[a].Type6_0_1.Write(bytes, demFile.Section2Entries[i].SubEntries[a].ValueOffsets);

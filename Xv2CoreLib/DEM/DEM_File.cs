@@ -329,6 +329,8 @@ namespace Xv2CoreLib.DEM
         public Type3_3_1 Type3_3_1 { get; set; }
         [YAXDontSerializeIfNull]
         public Type3_4_2 Type3_4_2 { get; set; }
+        [YAXDontSerializeIfNull]
+        public Type3_5_1 Type3_5_1 { get; set; }
 
         //New
         [YAXDontSerializeIfNull]
@@ -396,6 +398,7 @@ namespace Xv2CoreLib.DEM
             Type3_2_1,
             ToggleFRZShip, //3_3_1
             Type3_4_2,
+            Type3_5_1,
             Effect, //4_0_12
             PostEffect, //4_1_8
             Type4_1_6,
@@ -2908,6 +2911,28 @@ namespace Xv2CoreLib.DEM
 
     }
 
+    public class Type3_5_1
+    {
+        [YAXAttributeFor("I_1")]
+        [YAXSerializeAs("value")]
+        public int I_1 { get; set; }
+
+        public static Type3_5_1 Read(byte[] rawBytes, List<byte> bytes, int offset)
+        {
+            return new Type3_5_1()
+            {
+                I_1 = BitConverter.ToInt32(rawBytes, BitConverter.ToInt32(rawBytes, offset + 0)),
+            };
+        }
+
+        public List<byte> Write(List<byte> bytes, List<int> valueOffsets)
+        {
+            ValueWriter writer = new ValueWriter(valueOffsets, bytes);
+            writer.WriteValue(I_1);
+            return writer.bytes;
+        }
+    }
+
     public class Type4_0_12
     {
         [YAXAttributeFor("Actor")]
@@ -3456,10 +3481,6 @@ namespace Xv2CoreLib.DEM
         [YAXSerializeAs("value")]
         public int I_6 { get; set; }
 
-        [YAXAttributeFor("I_7")]
-        [YAXSerializeAs("value")]
-        public int I_7 { get; set; }
-
         public static Type5_4_6 Read(byte[] rawBytes, List<byte> bytes, int offset)
         {
             return new Type5_4_6()
@@ -3469,8 +3490,7 @@ namespace Xv2CoreLib.DEM
                 I_3 = BitConverter.ToInt32(rawBytes, BitConverter.ToInt32(rawBytes, offset + 16)),
                 I_4 = BitConverter.ToInt32(rawBytes, BitConverter.ToInt32(rawBytes, offset + 24)),
                 I_5 = BitConverter.ToInt32(rawBytes, BitConverter.ToInt32(rawBytes, offset + 32)),
-                I_6 = BitConverter.ToInt32(rawBytes, BitConverter.ToInt32(rawBytes, offset + 40)),
-                I_7 = BitConverter.ToInt32(rawBytes, BitConverter.ToInt32(rawBytes, offset + 48))
+                I_6 = BitConverter.ToInt32(rawBytes, BitConverter.ToInt32(rawBytes, offset + 40))
             };
         }
 
@@ -3485,7 +3505,6 @@ namespace Xv2CoreLib.DEM
             writer.WriteValue(I_4);
             writer.WriteValue(I_5);
             writer.WriteValue(I_6);
-            writer.WriteValue(I_7);
 
             return writer.bytes;
         }
