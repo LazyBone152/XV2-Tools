@@ -302,6 +302,41 @@ namespace EEPK_Organiser
 
                 MessageDialogResult messageResult = await this.ShowMessageAsync("Update Available", $"An update is available ({appUpdate.Version}). The application can automatically download and update itself (confirmation may be required), or you may also open the website in a browser and download the update manually. \n\nNote: All instances of the application will be closed and any unsaved work will be lost if Update is selected.\n\nChangelog:\n{appUpdate.Changelog}", MessageDialogStyle.AffirmativeAndNegativeAndSingleAuxiliary, dialogSettings);
 
+                if (messageResult == MessageDialogResult.FirstAuxiliary)
+                    return;
+
+                //Check that the required runtime is installed on the users machine
+                switch (Update.CheckRuntime())
+                {
+                    case RuntimeStatus.NotInstalled:
+                        {
+                            dialogSettings.AffirmativeButtonText = "Visit Site";
+                            dialogSettings.NegativeButtonText = "Cancel";
+                            dialogSettings.DefaultButtonFocus = MessageDialogResult.Affirmative;
+                            MessageDialogResult result = await this.ShowMessageAsync(".NET Update Required", $"This update requires that the .NET {Update.GetRequiredRuntime()} runtime be installed on this machine. Please install this runtime and try again.\n\nDo you want to be directed towards the download page for .NET {Update.GetRequiredRuntime()}? (it will open in your browser). Alternatively, you may cancel the update.\n\nOnce on the download page, you need to download the runtime labeled \"Desktop Runtime\" for Windows x64.", MessageDialogStyle.AffirmativeAndNegative, dialogSettings);
+
+                            if (result == MessageDialogResult.Affirmative)
+                                Process.Start(Update.GetRuntimePageUrl());
+
+                            return;
+                        }
+                    case RuntimeStatus.FolderNotFound:
+                        {
+                            dialogSettings.AffirmativeButtonText = "Visit Site";
+                            dialogSettings.NegativeButtonText = "Continue Update";
+                            dialogSettings.DefaultButtonFocus = MessageDialogResult.Affirmative;
+                            MessageDialogResult result = await this.ShowMessageAsync(".NET Runtime Version Not Found", $"This update requires that the .NET {Update.GetRequiredRuntime()} runtime be installed on this machine, but it could not be automatically located. If it is not installed already, you must install it before the update will run. \n\nDo you want to cancel the update and be directed towards the download page for .NET {Update.GetRequiredRuntime()}? (it will open in your browser). Alternatively, you may continue with the update if you believe that this specific runtime version is actually installed.\n\nOnce on the download page, you need to download the runtime labeled \"Desktop Runtime\" for Windows x64.", MessageDialogStyle.AffirmativeAndNegative, dialogSettings);
+
+                            if (result == MessageDialogResult.Affirmative)
+                            {
+                                Process.Start(Update.GetRuntimePageUrl());
+                                return;
+                            }
+
+                            break;
+                        }
+                }
+
                 if (messageResult == MessageDialogResult.Affirmative)
                 {
                     var controller = await this.ShowProgressAsync("Update Available", "Downloading...", false, DialogSettings.Default);
@@ -325,7 +360,12 @@ namespace EEPK_Organiser
                     }
                     else if (Update.UpdateState == UpdateState.DownloadFail)
                     {
-                        await this.ShowMessageAsync("Download Failed", Update.FailedErrorMessage, MessageDialogStyle.Affirmative, DialogSettings.Default);
+                        await this.ShowMessageAsync("Download Failed", "Received Error: " + Update.FailedErrorMessage, MessageDialogStyle.Affirmative, DialogSettings.Default);
+                    }
+
+                    if(Update.UpdateState == UpdateState.BootstrapperLaunchFailed)
+                    {
+                        await this.ShowMessageAsync("Update Failed", "Received Error: " + Update.FailedErrorMessage, MessageDialogStyle.Affirmative, DialogSettings.Default);
                     }
 
                 }
