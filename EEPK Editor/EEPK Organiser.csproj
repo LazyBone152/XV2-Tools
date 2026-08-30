@@ -130,17 +130,11 @@
     <Compile Include="Forms\Recolor\RecolorAll.xaml.cs">
       <DependentUpon>RecolorAll.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Forms\Recolor\RecolorAll_HueSet.xaml.cs">
-      <DependentUpon>RecolorAll_HueSet.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Recolor\RecolorTexture_HueSet.xaml.cs">
-      <DependentUpon>RecolorTexture_HueSet.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Forms\Settings.xaml.cs">
       <DependentUpon>Settings.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Forms\Recolor\TextureEditHueChange.xaml.cs">
-      <DependentUpon>TextureEditHueChange.xaml</DependentUpon>
+    <Compile Include="Forms\Recolor\RecolorTexture.xaml.cs">
+      <DependentUpon>RecolorTexture.xaml</DependentUpon>
     </Compile>
     <Compile Include="Misc\ClipboardDataTypes.cs" />
     <Compile Include="Name\Namelist.cs" />
@@ -273,14 +267,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Forms\Recolor\RecolorAll_HueSet.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Forms\Recolor\RecolorTexture_HueSet.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Forms\RenameForm.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -289,7 +275,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Forms\Recolor\TextureEditHueChange.xaml">
+    <Page Include="Forms\Recolor\RecolorTexture.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -10,21 +11,13 @@ using Xv2CoreLib.Resource.UndoRedo;
 
 namespace EEPK_Organiser.Forms
 {
-    //NOTE: In debug mode this can be quite crash prone when dealing with large textures (4k). Release build is fine.
-
-    /// <summary>
-    /// Interaction logic for TextureEditHueChange.xaml
-    /// </summary>
-    public partial class TextureEditHueChange : MetroWindow, INotifyPropertyChanged
+    public partial class RecolorTexture : MetroWindow, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void NotifyPropertyChanged(string propertyName = "")
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         public EmbEntry CurrentTexture { get; set; }
@@ -32,19 +25,21 @@ namespace EEPK_Organiser.Forms
         private bool IsCancelled = true;
 
         //Parameters
+        private readonly bool IsHueSet = false;
+        private int initialHue = 0;
         private int _hueValue = 0;
         public int HueValue
         {
             get
             {
-                return this._hueValue;
+                return _hueValue;
             }
             set
             {
-                if (value != this._hueValue)
+                if (value != _hueValue)
                 {
-                    this._hueValue = value;
-                    NotifyPropertyChanged("HueValue");
+                    _hueValue = value;
+                    NotifyPropertyChanged(nameof(HueValue));
                 }
             }
         }
@@ -53,14 +48,14 @@ namespace EEPK_Organiser.Forms
         {
             get
             {
-                return this._saturationValue;
+                return _saturationValue;
             }
             set
             {
-                if (value != this._saturationValue)
+                if (value != _saturationValue)
                 {
-                    this._saturationValue = value;
-                    NotifyPropertyChanged("SaturationValue");
+                    _saturationValue = value;
+                    NotifyPropertyChanged(nameof(SaturationValue));
                 }
             }
         }
@@ -69,36 +64,70 @@ namespace EEPK_Organiser.Forms
         {
             get
             {
-                return this._lightnessValue;
+                return _lightnessValue;
             }
             set
             {
-                if (value != this._lightnessValue)
+                if (value != _lightnessValue)
                 {
-                    this._lightnessValue = value;
-                    NotifyPropertyChanged("LightnessValue");
+                    _lightnessValue = value;
+                    NotifyPropertyChanged(nameof(LightnessValue));
                 }
             }
         }
 
         
         //Time
-        private Stopwatch stopwatch = new Stopwatch();
-        private bool isImageProcessing = false;
-        private const int previewDelay = 100;
-        private const int previewDelayWait = 10;
+        private readonly Stopwatch stopwatch = new Stopwatch();
+        private bool IsImageProcessing = false;
+        private readonly int PreviewMillisecondDelay;
+
+        //Tooltips
+        public string HueRevertTooltip => string.Format("Revert to original value of {0}", initialHue);
 
 
-        public TextureEditHueChange(EmbEntry _texture, Window parent)
+        public RecolorTexture(EmbEntry texture, bool isHueSet, Window parent)
         {
-            CurrentTexture = _texture;
+            IsHueSet = isHueSet;
+            CurrentTexture = texture;
+            EditOperation = new WriteableBitmapEditOperation(CurrentTexture.Texture);
+            CurrentTexture.Texture = EditOperation.OutputBitmap;
+
             InitializeComponent();
             DataContext = this;
             Owner = parent;
             stopwatch.Start();
 
-            EditOperation = new WriteableBitmapEditOperation(CurrentTexture.Texture);
-            CurrentTexture.Texture = EditOperation.OutputBitmap;
+            if (isHueSet)
+            {
+                var initial = CurrentTexture.GetDdsColor().ToHsl();
+                initialHue = (int)initial.Hue;
+
+                helpTextBlock.Text = "Sets the hue value to the desired amount on all pixels, keeping the saturation and lightness values the same. This will result in the texture being different shades of the same color.";
+                saturationGrid.Visibility = Visibility.Collapsed;
+                lightnessGrid.Visibility = Visibility.Collapsed;
+                Height = 210;
+                Title = "Hue Set";
+            }
+            else
+            {
+                helpTextBlock.Text = "Adjusts the hue, saturation and lightness (HSL) values, shifting them by the desired amount. This recolors the texture while preserving any color variation.";
+            }
+
+            //Dynamically set the delay time based on thread count
+            //WriteableBitmapEditOperation will use every thread available, so more generally.... more threads = shorter image processing times
+            if (Environment.ProcessorCount >= 16)
+            {
+                PreviewMillisecondDelay = 50;
+            }
+            else if(Environment.ProcessorCount >= 8)
+            {
+                PreviewMillisecondDelay = 100;
+            }
+            else
+            {
+                PreviewMillisecondDelay = 250;
+            }
         }
 
         private void Ok_Click(object sender, RoutedEventArgs e)
@@ -128,33 +157,29 @@ namespace EEPK_Organiser.Forms
             ProcessImage();
         }
 
-
         private async Task ProcessImage()
         {
             //If we are already waiting on another process request, then stop here.
-            if (isImageProcessing) return;
-            isImageProcessing = true;
+            if (IsImageProcessing) return;
+            IsImageProcessing = true;
 
             //If enough time has not passed since the last process then we must enter a waiting state
-            if (stopwatch.ElapsedMilliseconds < previewDelay)
+            if (stopwatch.ElapsedMilliseconds < PreviewMillisecondDelay)
             {
-                //For loop is safer than while.
-                for(int wait = 0; wait < previewDelay; wait += previewDelayWait)
-                {
-                    if (stopwatch.ElapsedMilliseconds >= previewDelay) break;
-                    await Task.Delay(previewDelayWait);
-                }
-
-                //while(stopwatch.ElapsedMilliseconds < previewDelay)
-                //{
-                //    await Task.Delay(10);
-                //}
+                await Task.Delay(PreviewMillisecondDelay - (int)stopwatch.ElapsedMilliseconds);
             }
 
-            await EditOperation.AsyncApplyHueAdjust(HueValue, SaturationValue, LightnessValue);
+            if (IsHueSet)
+            {
+                await EditOperation.AsyncApplyHueSet(HueValue);
+            }
+            else
+            {
+                await EditOperation.AsyncApplyHueAdjust(HueValue, SaturationValue, LightnessValue);
+            }
             
             //Restart the timer
-            isImageProcessing = false;
+            IsImageProcessing = false;
             stopwatch.Restart();
         }
 
@@ -168,7 +193,7 @@ namespace EEPK_Organiser.Forms
 
         private void Button_UndoHueChange_Click(object sender, RoutedEventArgs e)
         {
-            HueValue = 0;
+            HueValue = initialHue;
             ProcessImage();
         }
 

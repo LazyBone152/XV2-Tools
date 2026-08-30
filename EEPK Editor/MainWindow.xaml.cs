@@ -18,7 +18,6 @@ using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.Resource.App;
 using LB_Common.Utils;
 using AutoUpdater;
-using EEPK_Organiser.Forms.Recolor;
 using xv2 = Xv2CoreLib.Xenoverse2;
 using System.Globalization;
 
@@ -619,7 +618,7 @@ namespace EEPK_Organiser
             try
 #endif
             {
-                Forms.RecolorAll recolor = new Forms.RecolorAll(EepkFile, this);
+                Forms.RecolorAll recolor = new Forms.RecolorAll(EepkFile, false, this);
 
                 if(recolor.Initialize())
                     recolor.ShowDialog();
@@ -640,7 +639,7 @@ namespace EEPK_Organiser
             try
 #endif
             {
-                RecolorAll_HueSet recolor = new RecolorAll_HueSet(EepkFile, this);
+                Forms.RecolorAll recolor = new Forms.RecolorAll(EepkFile, true, this);
 
                 if (recolor.Initialize())
                     recolor.ShowDialog();

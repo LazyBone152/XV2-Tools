@@ -1091,7 +1091,7 @@ namespace Xv2CoreLib.EMP_NEW
             {
                 foreach (var child in ChildParticleNodes)
                 {
-                    child.ChangeHue(hue, saturation, lightness, undos, hueSet);
+                    child.ChangeHue(hue, saturation, lightness, undos, hueSet, variance);
                 }
             }
         }

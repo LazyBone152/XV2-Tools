@@ -8,7 +8,6 @@ using Xv2CoreLib.ECF;
 using Xv2CoreLib.Resource.UndoRedo;
 using EEPK_Organiser.ViewModel;
 using GalaSoft.MvvmLight.CommandWpf;
-using EEPK_Organiser.Forms.Recolor;
 using Xv2CoreLib.EffectContainer;
 
 namespace EEPK_Organiser.View.Editors
@@ -180,7 +179,7 @@ namespace EEPK_Organiser.View.Editors
         {
             Window editorWindow = ((Grid)System.Windows.Media.VisualTreeHelper.GetParent(this)).DataContext as Window;
 
-            Forms.RecolorAll recolor = new Forms.RecolorAll(SelectedNode, editorWindow);
+            Forms.RecolorAll recolor = new Forms.RecolorAll(SelectedNode, false, editorWindow);
 
             if (recolor.Initialize())
                 recolor.ShowDialog();
@@ -191,7 +190,7 @@ namespace EEPK_Organiser.View.Editors
         {
             Window editorWindow = ((Grid)System.Windows.Media.VisualTreeHelper.GetParent(this)).DataContext as Window;
 
-            RecolorAll_HueSet recolor = new RecolorAll_HueSet(SelectedNode, editorWindow);
+            Forms.RecolorAll recolor = new Forms.RecolorAll(SelectedNode, true, editorWindow);
 
             if (recolor.Initialize())
                 recolor.ShowDialog();

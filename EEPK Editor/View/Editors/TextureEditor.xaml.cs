@@ -16,7 +16,6 @@ using Microsoft.Win32;
 using EEPK_Organiser.Misc;
 using EEPK_Organiser.Forms;
 using MahApps.Metro.Controls;
-using EEPK_Organiser.Forms.Recolor;
 using Xv2CoreLib.EMP_NEW;
 
 namespace EEPK_Organiser.View
@@ -668,7 +667,7 @@ namespace EEPK_Organiser.View
                 }
                 else
                 {
-                    var editForm = new TextureEditHueChange(SelectedTexture, Application.Current.Windows.OfType<MetroWindow>().SingleOrDefault(x => x.IsFocused));
+                    var editForm = new RecolorTexture(SelectedTexture, false, Application.Current.Windows.OfType<MetroWindow>().SingleOrDefault(x => x.IsFocused));
                     editForm.ShowDialog();
                 }
             }
@@ -685,7 +684,7 @@ namespace EEPK_Organiser.View
                 }
                 else
                 {
-                    var editForm = new RecolorTexture_HueSet(SelectedTexture, Application.Current.Windows.OfType<MetroWindow>().SingleOrDefault(x => x.IsFocused));
+                    var editForm = new RecolorTexture(SelectedTexture, true, Application.Current.Windows.OfType<MetroWindow>().SingleOrDefault(x => x.IsFocused));
                     editForm.ShowDialog();
                 }
             }

@@ -31,7 +31,6 @@ using Xv2CoreLib.Resource;
 using EEPK_Organiser.Misc;
 using EEPK_Organiser.Forms;
 using EEPK_Organiser.Forms.Editors;
-using EEPK_Organiser.Forms.Recolor;
 using EEPK_Organiser.ViewModel;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
@@ -1162,7 +1161,7 @@ namespace EEPK_Organiser.View
 
                 if (asset != null)
                 {
-                    Forms.RecolorAll recolor = new Forms.RecolorAll(AssetType.EMO, asset, Application.Current.MainWindow);
+                    Forms.RecolorAll recolor = new Forms.RecolorAll(AssetType.EMO, asset, false, Application.Current.MainWindow);
 
                     if (recolor.Initialize())
                         recolor.ShowDialog();
@@ -1188,7 +1187,7 @@ namespace EEPK_Organiser.View
 
                 if (asset != null)
                 {
-                    RecolorAll_HueSet recolor = new RecolorAll_HueSet(AssetType.EMO, asset, Application.Current.MainWindow);
+                    RecolorAll recolor = new RecolorAll(AssetType.EMO, asset, true, Application.Current.MainWindow);
 
                     if (recolor.Initialize())
                         recolor.ShowDialog();
@@ -1745,7 +1744,7 @@ namespace EEPK_Organiser.View
 
                 if (asset != null)
                 {
-                    Forms.RecolorAll recolor = new Forms.RecolorAll(AssetType.PBIND, asset, Application.Current.MainWindow);
+                    Forms.RecolorAll recolor = new Forms.RecolorAll(AssetType.PBIND, asset, false, Application.Current.MainWindow);
 
                     if (recolor.Initialize())
                         recolor.ShowDialog();
@@ -1771,7 +1770,7 @@ namespace EEPK_Organiser.View
 
                 if (asset != null)
                 {
-                    RecolorAll_HueSet recolor = new RecolorAll_HueSet(AssetType.PBIND, asset, Application.Current.MainWindow);
+                    RecolorAll recolor = new RecolorAll(AssetType.PBIND, asset, true, Application.Current.MainWindow);
 
                     if (recolor.Initialize())
                         recolor.ShowDialog();
@@ -2157,7 +2156,7 @@ namespace EEPK_Organiser.View
 
                 if (asset != null)
                 {
-                    Forms.RecolorAll recolor = new Forms.RecolorAll(AssetType.TBIND, asset, Application.Current.MainWindow);
+                    Forms.RecolorAll recolor = new Forms.RecolorAll(AssetType.TBIND, asset, false, Application.Current.MainWindow);
 
                     if (recolor.Initialize())
                         recolor.ShowDialog();
@@ -2183,7 +2182,7 @@ namespace EEPK_Organiser.View
 
                 if (asset != null)
                 {
-                    RecolorAll_HueSet recolor = new RecolorAll_HueSet(AssetType.TBIND, asset, Application.Current.MainWindow);
+                    RecolorAll recolor = new RecolorAll(AssetType.TBIND, asset, true, Application.Current.MainWindow);
 
                     if (recolor.Initialize())
                         recolor.ShowDialog();
@@ -2620,7 +2619,7 @@ namespace EEPK_Organiser.View
 
                 if (asset != null)
                 {
-                    Forms.RecolorAll recolor = new Forms.RecolorAll(AssetType.CBIND, asset, Application.Current.MainWindow);
+                    Forms.RecolorAll recolor = new Forms.RecolorAll(AssetType.CBIND, asset, false, Application.Current.MainWindow);
 
                     if (recolor.Initialize())
                         recolor.ShowDialog();
@@ -2646,7 +2645,7 @@ namespace EEPK_Organiser.View
 
                 if (asset != null)
                 {
-                    RecolorAll_HueSet recolor = new RecolorAll_HueSet(AssetType.CBIND, asset, Application.Current.MainWindow);
+                    RecolorAll recolor = new RecolorAll(AssetType.CBIND, asset, true, Application.Current.MainWindow);
 
                     if (recolor.Initialize())
                         recolor.ShowDialog();
@@ -3062,7 +3061,7 @@ namespace EEPK_Organiser.View
 
                 if (asset != null)
                 {
-                    Forms.RecolorAll recolor = new Forms.RecolorAll(AssetType.LIGHT, asset, Application.Current.MainWindow);
+                    Forms.RecolorAll recolor = new Forms.RecolorAll(AssetType.LIGHT, asset, false, Application.Current.MainWindow);
 
                     if (recolor.Initialize())
                         recolor.ShowDialog();
@@ -3088,7 +3087,7 @@ namespace EEPK_Organiser.View
 
                 if (asset != null)
                 {
-                    RecolorAll_HueSet recolor = new RecolorAll_HueSet(AssetType.LIGHT, asset, Application.Current.MainWindow);
+                    RecolorAll recolor = new RecolorAll(AssetType.LIGHT, asset, true, Application.Current.MainWindow);
 
                     if (recolor.Initialize())
                         recolor.ShowDialog();
@@ -4928,7 +4927,7 @@ namespace EEPK_Organiser.View
             try
 #endif
             {
-                Forms.RecolorAll recolor = new Forms.RecolorAll(effectContainerFile, App.Current.MainWindow);
+                Forms.RecolorAll recolor = new Forms.RecolorAll(effectContainerFile, false, App.Current.MainWindow);
 
                 if (recolor.Initialize())
                     recolor.ShowDialog();
@@ -4949,7 +4948,7 @@ namespace EEPK_Organiser.View
             try
 #endif
             {
-                RecolorAll_HueSet recolor = new RecolorAll_HueSet(effectContainerFile, App.Current.MainWindow);
+                RecolorAll recolor = new RecolorAll(effectContainerFile, true, App.Current.MainWindow);
 
                 if (recolor.Initialize())
                     recolor.ShowDialog();

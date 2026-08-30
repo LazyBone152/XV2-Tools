@@ -12,7 +12,6 @@ using GalaSoft.MvvmLight.CommandWpf;
 using EEPK_Organiser.Forms;
 using Xv2CoreLib.EMP_NEW;
 using EEPK_Organiser.View.Controls;
-using EEPK_Organiser.Forms.Recolor;
 
 namespace EEPK_Organiser.View.Editors
 {
@@ -207,7 +206,7 @@ namespace EEPK_Organiser.View.Editors
         {
             Window editorWindow = ((Grid)System.Windows.Media.VisualTreeHelper.GetParent(this)).DataContext as Window;
 
-            Forms.RecolorAll recolor = new Forms.RecolorAll(SelectedNode, editorWindow);
+            Forms.RecolorAll recolor = new Forms.RecolorAll(SelectedNode, false, editorWindow);
 
             if (recolor.Initialize())
                 recolor.ShowDialog();
@@ -218,7 +217,7 @@ namespace EEPK_Organiser.View.Editors
         {
             Window editorWindow = ((Grid)System.Windows.Media.VisualTreeHelper.GetParent(this)).DataContext as Window;
 
-            RecolorAll_HueSet recolor = new RecolorAll_HueSet(SelectedNode, editorWindow);
+            Forms.RecolorAll recolor = new Forms.RecolorAll(SelectedNode, true, editorWindow);
 
             if (recolor.Initialize())
                 recolor.ShowDialog();

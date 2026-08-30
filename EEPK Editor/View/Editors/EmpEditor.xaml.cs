@@ -1,19 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Xv2CoreLib.EMP_NEW;
-using Xv2CoreLib.EMB_CLASS;
-using Xv2CoreLib.EMM;
 using Xv2CoreLib.EffectContainer;
 using System.Windows.Input;
 using Xv2CoreLib.Resource.UndoRedo;
 using GalaSoft.MvvmLight.CommandWpf;
 using Xv2CoreLib.Resource;
-using EEPK_Organiser.Forms.Recolor;
 using Xv2CoreLib;
 
 namespace EEPK_Organiser.View
@@ -214,7 +209,7 @@ namespace EEPK_Organiser.View
         {
             Window empEditor = ((Grid)System.Windows.Media.VisualTreeHelper.GetParent(this)).DataContext as Window;
 
-            Forms.RecolorAll recolor = new Forms.RecolorAll(SelectedNode, empEditor);
+            Forms.RecolorAll recolor = new Forms.RecolorAll(SelectedNode, false, empEditor);
 
             if (recolor.Initialize())
                 recolor.ShowDialog();
@@ -225,7 +220,7 @@ namespace EEPK_Organiser.View
         {
             Window empEditor = ((Grid)System.Windows.Media.VisualTreeHelper.GetParent(this)).DataContext as Window;
 
-            RecolorAll_HueSet recolor = new RecolorAll_HueSet(SelectedNode, empEditor);
+            Forms.RecolorAll recolor = new Forms.RecolorAll(SelectedNode, true, empEditor);
 
             if (recolor.Initialize())
                 recolor.ShowDialog();

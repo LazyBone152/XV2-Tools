@@ -6,18 +6,15 @@ using System.Windows.Data;
 using System.Windows.Controls;
 using System.ComponentModel;
 using System.Collections.Generic;
+using GalaSoft.MvvmLight.CommandWpf;
+using MahApps.Metro.Controls.Dialogs;
+using MahApps.Metro.Controls;
+using Xv2CoreLib.EMM.Analyzer;
 using Xv2CoreLib.EMM;
 using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.Resource.UndoRedo;
 using EEPK_Organiser.Forms;
-using EEPK_Organiser.Forms.Recolor;
 using EEPK_Organiser.ViewModel;
-using MahApps.Metro.Controls.Dialogs;
-using GalaSoft.MvvmLight.CommandWpf;
-using MahApps.Metro.Controls;
-using System.Windows.Media;
-using Xv2CoreLib.EMM.Analyzer;
-using LB_Common.Numbers;
 
 namespace EEPK_Organiser.View
 {
@@ -561,7 +558,7 @@ namespace EEPK_Organiser.View
         {
             if (SelectedMaterial != null)
             {
-                RecolorAll recolor = new RecolorAll(SelectedMaterial, Application.Current.Windows.OfType<MetroWindow>().SingleOrDefault(x => x.IsFocused), ShiftGlareColor);
+                RecolorAll recolor = new RecolorAll(SelectedMaterial, false, Application.Current.Windows.OfType<MetroWindow>().SingleOrDefault(x => x.IsFocused), ShiftGlareColor);
 
                 if (recolor.Initialize())
                     recolor.ShowDialog();
@@ -575,7 +572,7 @@ namespace EEPK_Organiser.View
         {
             if (SelectedMaterial != null)
             {
-                RecolorAll_HueSet recolor = new RecolorAll_HueSet(SelectedMaterial, Application.Current.Windows.OfType<MetroWindow>().SingleOrDefault(x => x.IsFocused), ShiftGlareColor);
+                RecolorAll recolor = new RecolorAll(SelectedMaterial, true, Application.Current.Windows.OfType<MetroWindow>().SingleOrDefault(x => x.IsFocused), ShiftGlareColor);
 
                 if (recolor.Initialize())
                     recolor.ShowDialog();
