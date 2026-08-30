@@ -3844,29 +3844,30 @@ namespace EEPK_Organiser.View
             {
                 if (SelectedEffect.SelectedEffectParts != null)
                 {
-                    var result = await DialogCoordinator.Instance.ShowInputAsync(Application.Current.MainWindow, "Rescale Factor", "Rescale the Min and Max values on the selected EffectParts (does not edit the underlying assets at all). \n\nEnter the factor to rescale by:", DialogSettings.Default);
+                    LB_Common.Forms.NumericInput inputForm = new LB_Common.Forms.NumericInput("Rescale", "Rescale Factor", 1f, 0, 50, 0.1, "Rescale the Min and Max size of the selected Effect Parts by the entered amount.");
+                    inputForm.ShowDialog();
 
-                    if (!float.TryParse(result, out float scaleFactor))
+                    if (!inputForm.IsCancelled)
                     {
-                        await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, "Invalid Input", "Only numbers are valid.", MessageDialogStyle.Affirmative, DialogSettings.Default);
-                        return;
+                        float scaleFactor = inputForm.GetValue<float>();
+
+                        List<IUndoRedo> undos = new List<IUndoRedo>();
+
+                        foreach (var effectPart in SelectedEffect.SelectedEffectParts)
+                        {
+                            float size1 = effectPart.ScaleMin * scaleFactor;
+                            float size2 = effectPart.ScaleMax * scaleFactor;
+
+                            undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.ScaleMin), effectPart, effectPart.ScaleMin, size1));
+                            undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.ScaleMax), effectPart, effectPart.ScaleMax, size2));
+
+                            effectPart.ScaleMin = size1;
+                            effectPart.ScaleMax = size2;
+                        }
+
+                        UndoManager.Instance.AddCompositeUndo(undos, "Rescale EffectPart");
+                        effectPartViewModel?.UpdateProperties();
                     }
-
-                    List<IUndoRedo> undos = new List<IUndoRedo>();
-
-                    foreach (var effectPart in SelectedEffect.SelectedEffectParts)
-                    {
-                        float size1 = effectPart.ScaleMin * scaleFactor;
-                        float size2 = effectPart.ScaleMax * scaleFactor;
-
-                        undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.ScaleMin), effectPart, effectPart.ScaleMin, size1));
-                        undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.ScaleMax), effectPart, effectPart.ScaleMax, size2));
-
-                        effectPart.ScaleMin = size1;
-                        effectPart.ScaleMax = size2;
-                    }
-
-                    UndoManager.Instance.AddCompositeUndo(undos, "Rescale EffectPart");
                 }
             }
         }
