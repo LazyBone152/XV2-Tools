@@ -1,36 +1,29 @@
 ﻿using System;
-using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using MahApps.Metro.Controls;
 
 namespace LB_Common.Forms
 {
-    public partial class NumericInput : MetroWindow
+    public partial class NumericBoolInput : MetroWindow
     {
         public string FormName { get; private set; }
         public bool IsCancelled { get; private set; } = true;
 
-        private static readonly Type[] ValidNumericTypes = new Type[]
-        {
-            typeof(byte), typeof(sbyte),
-            typeof(ushort), typeof(short),
-            typeof(uint), typeof(int),
-            typeof(ulong), typeof(long),
-            typeof(float), typeof(double)
-        };
+        public bool BoolValue { get; private set; }
 
-        public NumericInput(string formName, string valueName, object defaultValue, double min = 0.0, double max = 10000, double interval = 1.0, string tooltip = null, string helpText = null)
+        public NumericBoolInput(string formName, string valueName, object defaultValue, string boolValueName, bool defaultBoolValue = false, double min = 0.0, double max = 10000, double interval = 1.0, string tooltip = null, string helpText = null)
         {
             if (interval <= 0.0)
                 interval = 1.0;
 
-            if (!IsValidNumericType(defaultValue.GetType()))
+            if (!NumericInput.IsValidNumericType(defaultValue.GetType()))
             {
                 throw new ArgumentException($"NumericInput: Form not available for this type ({defaultValue.GetType()}). Only primitive, numeric types are supported.");
             }
 
             FormName = formName;
+            BoolValue = defaultBoolValue;
 
             InitializeComponent();
             DataContext = this;
@@ -43,8 +36,9 @@ namespace LB_Common.Forms
             valueControl.Minimum = min;
             valueControl.Maximum = max;
             valueControl.Interval = interval;
-            valueLabel.ToolTip = tooltip;
             valueLabel.Content = valueName;
+            valueLabel.ToolTip = tooltip;
+            boolLabel.Content = boolValueName;
 
             helpTestStackpanel.Visibility = string.IsNullOrWhiteSpace(helpText) ? Visibility.Collapsed : Visibility.Visible;
             helpTextBlock.Text = helpText;
@@ -52,7 +46,7 @@ namespace LB_Common.Forms
 
         public T GetValue<T>() where T : struct
         {
-            if (!IsValidNumericType(typeof(T)))
+            if (!NumericInput.IsValidNumericType(typeof(T)))
             {
                 throw new ArgumentException($"NumericInput.GetValue: Type ({typeof(T)}) is not a valid type. Only primitive, numeric types are supported.");
             }
@@ -86,11 +80,6 @@ namespace LB_Common.Forms
                 IsCancelled = true;
                 Close();
             }
-        }
-    
-        internal static bool IsValidNumericType(Type type)
-        {
-            return ValidNumericTypes.Contains(type);
         }
     }
 }

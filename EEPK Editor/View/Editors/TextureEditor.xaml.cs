@@ -1,6 +1,14 @@
-﻿using System;
+﻿using EEPK_Organiser.Forms;
+using EEPK_Organiser.Misc;
+using GalaSoft.MvvmLight.CommandWpf;
+using LB_Common.Forms;
+using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
+using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -8,15 +16,8 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.EMB_CLASS;
-using Xv2CoreLib.Resource.UndoRedo;
-using GalaSoft.MvvmLight.CommandWpf;
-using System.IO;
-using MahApps.Metro.Controls.Dialogs;
-using Microsoft.Win32;
-using EEPK_Organiser.Misc;
-using EEPK_Organiser.Forms;
-using MahApps.Metro.Controls;
 using Xv2CoreLib.EMP_NEW;
+using Xv2CoreLib.Resource.UndoRedo;
 
 namespace EEPK_Organiser.View
 {
@@ -648,11 +649,11 @@ namespace EEPK_Organiser.View
 
                 foreach (var asset in assets)
                 {
-                    str.Append(String.Format("{0}\r", asset));
+                    str.Append(string.Format("{0}\r", asset));
                 }
 
-                LogForm logForm = new LogForm(String.Format("The following {0} assets use this texture:", TextureEditorType.ToString().ToUpper()), str.ToString(), String.Format("{0}: Used By", SelectedTexture.Name), null, true);
-                logForm.Show();
+                MessagePrompt prompt = new MessagePrompt($"{SelectedTexture.Name}: Used By", $"The following {assets.Count} assets use this texture:", str.ToString());
+                prompt.Show();
             }
         }
 

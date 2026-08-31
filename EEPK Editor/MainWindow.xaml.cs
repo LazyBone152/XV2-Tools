@@ -20,6 +20,7 @@ using LB_Common.Utils;
 using AutoUpdater;
 using xv2 = Xv2CoreLib.Xenoverse2;
 using System.Globalization;
+using LB_Common.Forms;
 
 namespace EEPK_Organiser
 {
@@ -197,9 +198,9 @@ namespace EEPK_Organiser
             //If a file is already loaded then ask for confirmation
             if (EepkFile != null)
             {
-                var ret = MessageBox.Show(App.Current.MainWindow, String.Format("Do you want to save the currently opened file first?", EepkFile.Name), "Open", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+                var ret = MessagePrompt.Show(string.Format("Do you want to save the currently opened file first?", EepkFile.Name), "Open", MessagePromptButtons.YesNoCancel, MessagePromptIcon.Question);
 
-                if (ret == MessageBoxResult.Yes)
+                if (ret == MessagePromptResult.Yes)
                 {
                     if (EepkFile.CanSave)
                     {
@@ -210,7 +211,7 @@ namespace EEPK_Organiser
                         Menu_SaveAs_Click(null, null);
                     }
                 }
-                else if (ret == MessageBoxResult.Cancel)
+                else if (ret == MessagePromptResult.Cancel)
                 {
                     return;
                 }
@@ -397,9 +398,9 @@ namespace EEPK_Organiser
         {
             if (EepkFile != null)
             {
-                var ret = MessageBox.Show(this, String.Format("Do you want to save the currently opened file first?", EepkFile.Name), "Open", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+                var ret = MessagePrompt.Show(string.Format("Do you want to save the currently opened file first?", EepkFile.Name), "Open", MessagePromptButtons.YesNoCancel, MessagePromptIcon.Question);
 
-                if (ret == MessageBoxResult.Yes)
+                if (ret == MessagePromptResult.Yes)
                 {
                     if (EepkFile.CanSave)
                     {
@@ -410,7 +411,7 @@ namespace EEPK_Organiser
                         Menu_SaveAs_Click(null, null);
                     }
                 }
-                else if (ret == MessageBoxResult.Cancel)
+                else if (ret == MessagePromptResult.Cancel)
                 {
                     return;
                 }
@@ -445,13 +446,13 @@ namespace EEPK_Organiser
                     FileCleanUp();
                 }
 
-                MessageBox.Show("Save successful!", "Save", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessagePrompt.Show("Save successful!", "Save", MessagePromptButtons.OK, MessagePromptIcon.Information);
             }
 #if !DEBUG
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("Save failed.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Open", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("Save failed.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Open", MessagePromptButtons.OK, MessagePromptIcon.Error);
 
             }
 #endif
@@ -491,15 +492,15 @@ namespace EEPK_Organiser
                     }
                     
                     //No call to FileCleanUp because we are moving the EEPK location, thus the original EEPK wont be affected.
-                    MessageBox.Show("Save successful!", "Save", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessagePrompt.Show("Save successful!", "Save", MessagePromptButtons.OK, MessagePromptIcon.Information);
                 }
 
-                NotifyPropertyChanged("CanSave");
+                NotifyPropertyChanged(nameof(CanSave));
             }
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("Save failed.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Open", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("Save failed.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Open", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -532,7 +533,7 @@ namespace EEPK_Organiser
 
         private void HelpMenu_ShortcutKeys_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Ctrl + C = Copy\n" +
+            MessagePrompt.Show("Ctrl + C = Copy\n" +
                 "Ctrl + V = Paste\n" +
                 "Ctrl + X = Paste Values\n" +
                 "Del = Delete\n" +
@@ -544,36 +545,35 @@ namespace EEPK_Organiser
                 "Ctrl + H = Hue Adjustment\n" +
                 "Alt + H = Hue Set\n",
                 "S = Toggle Selection (Effect Selector)\n" +
-                "Hotkeys", MessageBoxButton.OK, MessageBoxImage.Information);
+                "Hotkeys", MessagePromptButtons.OK, MessagePromptIcon.Information);
         }
 
         private void HelpMenu_About_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show(String.Format("{0} is a tool for editing Dragon Ball Xenoverse 2 EEPKs and its " +
+            MessagePrompt.Show(string.Format("{0} is a tool for editing Dragon Ball Xenoverse 2 EEPKs and its " +
                 "associated effect files (emp, ecf, etr, emo, ema, emb, emm...).\n\n" +
                 "Frameworks/Libraries used:\n" +
                 "WPF (UI)\n" +
                 "MahApps (UI)\n" +
-                "AForge.NET (image processing)\n" +
                 "Pfim (primary texture loading)\n" +
                 "CSharpImageLibrary (texture saving and alternative texture loading)\n" +
-                "YAXLib (xml)", "EEPK Organiser", SettingsManager.Instance.CurrentVersionString), "About", MessageBoxButton.OK, MessageBoxImage.Information);
+                "YAXLib (xml)", "EEPK Organiser", SettingsManager.Instance.CurrentVersionString), "About", MessagePromptButtons.OK, MessagePromptIcon.Information);
         }
         
         private void ToolMenu_AssociateEepkExt_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                if (MessageBox.Show(String.Format("This will associate the .eepk extension with EEPK Organiser and make that the default application for those files.\n\nPlease note that the association will be with \"{0}\" and if the executable is moved anywhere else you will have to re-associate it.", System.Reflection.Assembly.GetEntryAssembly().Location), "Associate Extension?", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                if (MessagePrompt.Show(String.Format("This will associate the .eepk extension with EEPK Organiser and make that the default application for those files.\n\nPlease note that the association will be with \"{0}\" and if the executable is moved anywhere else you will have to re-associate it.", System.Reflection.Assembly.GetEntryAssembly().Location), "Associate Extension?", MessagePromptButtons.YesNo, MessagePromptIcon.Question) == MessagePromptResult.Yes)
                 {
                     FileAssociations.EepkOrganiser_EnsureAssociationsSetForEepk();
-                    MessageBox.Show(".eepk extension successfully associated!", "Associate Extension", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessagePrompt.Show(".eepk extension successfully associated!", "Associate Extension", MessagePromptButtons.OK, MessagePromptIcon.Information);
                 }
             }
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -581,16 +581,16 @@ namespace EEPK_Organiser
         {
             try
             {
-                if (MessageBox.Show(String.Format("This will associate the .vfxpackage extension with EEPK Organiser and make that the default application for those files.\n\nPlease note that the association will be with \"{0}\" and if the executable is moved anywhere else you will have to re-associate it.", System.Reflection.Assembly.GetEntryAssembly().Location), "Associate Extension?", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                if (MessagePrompt.Show(String.Format("This will associate the .vfxpackage extension with EEPK Organiser and make that the default application for those files.\n\nPlease note that the association will be with \"{0}\" and if the executable is moved anywhere else you will have to re-associate it.", System.Reflection.Assembly.GetEntryAssembly().Location), "Associate Extension?", MessagePromptButtons.YesNo, MessagePromptIcon.Question) == MessagePromptResult.Yes)
                 {
                     FileAssociations.EepkOrganiser_EnsureAssociationsSetForVfxPackage();
-                    MessageBox.Show(".vfxpackage extension successfully associated!", "Associate Extension", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessagePrompt.Show(".vfxpackage extension successfully associated!", "Associate Extension", MessagePromptButtons.OK, MessagePromptIcon.Information);
                 }
             }
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
         
@@ -608,7 +608,7 @@ namespace EEPK_Organiser
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An unknown error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An unknown error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
         
@@ -627,7 +627,7 @@ namespace EEPK_Organiser
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
 #endif
 
@@ -648,7 +648,7 @@ namespace EEPK_Organiser
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
 #endif
 
@@ -660,30 +660,29 @@ namespace EEPK_Organiser
             try
 #endif
             {
-                var messageResult = await this.ShowMessageAsync("Optimize Textures (SuperTexture)", $"This feature will attempt to optimize the number of textures used by this EEPK by combining them together. The result will be fewer, but larger individual textures. This should significantly increase the amount of textures that can be used.\n\nIt is advised to make backups of your files before using this feature.", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.Default);
 
-                if(messageResult == MessageDialogResult.Affirmative)
+                if(MessagePrompt.Show($"This feature will attempt to optimize the number of textures used by this EEPK by combining them together. The result will be fewer, but larger individual textures. This should significantly increase the amount of textures that can be used.\n\nIt is advised to make backups of your files before using this feature.",
+                    "Optimize Textures (SuperTexture)", MessagePromptButtons.YesNo, MessagePromptIcon.Question) == MessagePromptResult.Yes)
                 {
                     int[] ret = EepkFile.MergeAllTexturesIntoSuperTextures_PBIND();
+                    
+                    MessagePrompt.Show($"{ret[0]} textures were merged together to create {ret[1]} Super Textures.", "Optimize Textures (SuperTexture)", MessagePromptButtons.OK, MessagePromptIcon.Information);
 
-                    await this.ShowMessageAsync("Optimize Textures (SuperTexture)", $"{ret[0]} textures were merged together to create {ret[1]} Super Textures.", MessageDialogStyle.Affirmative, DialogSettings.Default);
                 }
-
             }
 #if !DEBUG
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
 #endif
         }
 
         private async void ToolMenu_CleanAll_Click(object sender, RoutedEventArgs e)
         {
-            var messageResult = await this.ShowMessageAsync("Clean All", $"Delete all unused or duplicate assets, texture and material from this {EepkFile.saveFormat}?", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.Default);
-
-            if (messageResult == MessageDialogResult.Affirmative)
+            if (MessagePrompt.Show($"Delete all unused or duplicate assets, texture and material from this {EepkFile.saveFormat}?", "Clean All", 
+                MessagePromptButtons.YesNo, MessagePromptIcon.Question) == MessagePromptResult.Yes)
             {
                 List<IUndoRedo> undos = new List<IUndoRedo>();
                 int[] totals = EepkFile.RemoveAllUnusedOrDuplicates(undos);
@@ -699,49 +698,53 @@ namespace EEPK_Organiser
                 int total = totals[8];
 
                 UndoManager.Instance.AddCompositeUndo(undos, $"Clean All ({total})");
-
-                await this.ShowMessageAsync("Clean All", $"{total} duplicate or unused references were purged.\n\nBreakdown by type:\nEMP: {emp}\nETR: {etr}\nECF: {ecf}\nEMO: {emo}\nLIGHT: {light}\nEMP Textures: {empTextures}\nTextures: {textures}\nMaterials: {materials}", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                MessagePrompt.Show($"{total} duplicate or unused references were purged.\n\nBreakdown by type:\nEMP: {emp}\nETR: {etr}\nECF: {ecf}\nEMO: {emo}\nLIGHT: {light}\nEMP Textures: {empTextures}\nTextures: {textures}\nMaterials: {materials}", "Clean All");
             }
         }
 
         private void UpdateSelectedVersion()
         {
-            NotifyPropertyChanged("IsVerDBXV2");
-            NotifyPropertyChanged("IsVerSDBH");
+            NotifyPropertyChanged(nameof(IsVerDBXV2));
+            NotifyPropertyChanged(nameof(IsVerSDBH));
         }
 
         private void FileCleanUp()
         {
             if (EepkFile.LoadedExternalFilesNotSaved.Count > 0 && !SettingsManager.Instance.Settings.FileCleanUp_Ignore)
             {
+                bool fileCleanUp = SettingsManager.Instance.Settings.FileCleanUp_Delete;
+
                 if (SettingsManager.Instance.Settings.FileCleanUp_Prompt)
                 {
                     StringBuilder str = new StringBuilder();
 
-                    foreach (var file in EepkFile.LoadedExternalFilesNotSaved)
+                    foreach (string file in EepkFile.LoadedExternalFilesNotSaved)
                     {
-                        str.Append(String.Format("{0}\r", file));
+                        str.Append(string.Format("{0}\r", file));
                     }
 
-                    var log = new Forms.LogPrompt("The files listed below are no longer in any of the asset containers. Do you want to also delete them from disk?", str.ToString(), "Save", this, false);
-                    log.ShowDialog();
-
-                    if (log.Result == MessageBoxResult.Yes)
+                    if(MessagePrompt.Show("The files listed below are no longer in any of the asset containers. Do you want to also delete them from disk?", "Save", 
+                        MessagePromptButtons.YesNo, MessagePromptIcon.Question, str.ToString()) == MessagePromptResult.Yes)
                     {
-                        foreach (var file in EepkFile.LoadedExternalFilesNotSaved)
+                        fileCleanUp = true;
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+                
+                if (fileCleanUp)
+                {
+                    try
+                    {
+                        foreach (string file in EepkFile.LoadedExternalFilesNotSaved)
                         {
                             if (File.Exists(file))
                                 File.Delete(file);
                         }
                     }
-                }
-                else if (SettingsManager.Instance.Settings.FileCleanUp_Delete)
-                {
-                    foreach (var file in EepkFile.LoadedExternalFilesNotSaved)
-                    {
-                        if (File.Exists(file))
-                            File.Delete(file);
-                    }
+                    catch { }
                 }
             }
         }
@@ -780,7 +783,7 @@ namespace EEPK_Organiser
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("Failed to apply the name list.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("Failed to apply the name list.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -808,7 +811,7 @@ namespace EEPK_Organiser
                 View.EepkEditor.CloseAllEditorForms();
 
                 EepkFile = effectFile;
-                NotifyPropertyChanged("CanSave");
+                NotifyPropertyChanged(nameof(CanSave));
                 UpdateSelectedVersion();
             }
         }
@@ -827,7 +830,7 @@ namespace EEPK_Organiser
                 View.EepkEditor.CloseAllEditorForms();
 
                 EepkFile = effectFile;
-                NotifyPropertyChanged("CanSave");
+                NotifyPropertyChanged(nameof(CanSave));
                 UpdateSelectedVersion();
             }
         }
@@ -838,37 +841,37 @@ namespace EEPK_Organiser
 
             var effectFile = await eepkEditor.LoadEepkFromGame(Forms.EntitySelector.EntityType.SuperSkill, false);
 
-            if (effectFile != null)
-            {
-                //Clear undo stack
-                UndoManager.Instance.Clear();
-                View.EepkEditor.CloseAllEditorForms();
+                if (effectFile != null)
+                {
+                    //Clear undo stack
+                    UndoManager.Instance.Clear();
+                    View.EepkEditor.CloseAllEditorForms();
 
-                EepkFile = effectFile;
-                NotifyPropertyChanged("CanSave");
-                UpdateSelectedVersion();
+                    EepkFile = effectFile;
+                    NotifyPropertyChanged(nameof(CanSave));
+                    UpdateSelectedVersion();
+                }
             }
-        }
 
-        private async void MenuItem_LoadFromGame_UltimateSkill_Click(object sender, RoutedEventArgs e)
+            private async void MenuItem_LoadFromGame_UltimateSkill_Click(object sender, RoutedEventArgs e)
         {
             if (!eepkEditor.GameDirectoryCheck()) return;
 
             var effectFile = await eepkEditor.LoadEepkFromGame(Forms.EntitySelector.EntityType.UltimateSkill, false);
 
-            if (effectFile != null)
-            {
-                //Clear undo stack
-                UndoManager.Instance.Clear();
-                View.EepkEditor.CloseAllEditorForms();
+                if (effectFile != null)
+                {
+                    //Clear undo stack
+                    UndoManager.Instance.Clear();
+                    View.EepkEditor.CloseAllEditorForms();
 
-                EepkFile = effectFile;
-                NotifyPropertyChanged("CanSave");
-                UpdateSelectedVersion();
+                    EepkFile = effectFile;
+                    NotifyPropertyChanged(nameof(CanSave));
+                    UpdateSelectedVersion();
+                }
             }
-        }
 
-        private async void MenuItem_LoadFromGame_EvasiveSkill_Click(object sender, RoutedEventArgs e)
+            private async void MenuItem_LoadFromGame_EvasiveSkill_Click(object sender, RoutedEventArgs e)
         {
             if (!eepkEditor.GameDirectoryCheck()) return;
 
@@ -881,7 +884,7 @@ namespace EEPK_Organiser
                 View.EepkEditor.CloseAllEditorForms();
 
                 EepkFile = effectFile;
-                NotifyPropertyChanged("CanSave");
+                NotifyPropertyChanged(nameof(CanSave));
                 UpdateSelectedVersion();
             }
         }
@@ -899,7 +902,7 @@ namespace EEPK_Organiser
                 View.EepkEditor.CloseAllEditorForms();
 
                 EepkFile = effectFile;
-                NotifyPropertyChanged("CanSave");
+                NotifyPropertyChanged(nameof(CanSave));
                 UpdateSelectedVersion();
             }
         }
@@ -917,7 +920,7 @@ namespace EEPK_Organiser
                 View.EepkEditor.CloseAllEditorForms();
 
                 EepkFile = effectFile;
-                NotifyPropertyChanged("CanSave");
+                NotifyPropertyChanged(nameof(CanSave));
                 UpdateSelectedVersion();
             }
         }
@@ -935,7 +938,7 @@ namespace EEPK_Organiser
                 View.EepkEditor.CloseAllEditorForms();
 
                 EepkFile = effectFile;
-                NotifyPropertyChanged("CanSave");
+                NotifyPropertyChanged(nameof(CanSave));
                 UpdateSelectedVersion();
             }
         }
@@ -988,7 +991,7 @@ namespace EEPK_Organiser
 
                     if (droppedFilePaths.Length == 1)
                     {
-                        switch (System.IO.Path.GetExtension(droppedFilePaths[0]))
+                        switch (Path.GetExtension(droppedFilePaths[0]))
                         {
                             case EffectContainerFile.ZipExtension:
                             case ".eepk":
@@ -1001,10 +1004,10 @@ namespace EEPK_Organiser
                             case ".emm":
                             case ".ema":
                             case ".emo":
-                                MessageBox.Show(System.Windows.Application.Current.MainWindow, String.Format("\"{0}\" files are not supported directly. Please load a .eepk.", System.IO.Path.GetExtension(droppedFilePaths[0])), "File Drop", MessageBoxButton.OK, MessageBoxImage.Error);
+                                MessagePrompt.Show(string.Format("\"{0}\" files are not supported directly. Please load a .eepk.", Path.GetExtension(droppedFilePaths[0])), "File Drop", MessagePromptButtons.OK, MessagePromptIcon.Error);
                                 break;
                             default:
-                                MessageBox.Show(System.Windows.Application.Current.MainWindow, String.Format("The filetype of the dropped file ({0}) is not supported.", System.IO.Path.GetExtension(droppedFilePaths[0])), "File Drop", MessageBoxButton.OK, MessageBoxImage.Error);
+                                MessagePrompt.Show(string.Format("The filetype of the dropped file ({0}) is not supported.", Path.GetExtension(droppedFilePaths[0])), "File Drop", MessagePromptButtons.OK, MessagePromptIcon.Error);
                                 break;
                         }
                     }
@@ -1012,7 +1015,7 @@ namespace EEPK_Organiser
             }
             catch (Exception ex)
             {
-                MessageBox.Show(System.Windows.Application.Current.MainWindow, String.Format("The dropped file could not be opened.\n\nThe reason given by the system: {0}", ex.Message), "File Drop", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(string.Format("The dropped file could not be opened.\n\nThe reason given by the system: {0}", ex.Message), "File Drop", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 

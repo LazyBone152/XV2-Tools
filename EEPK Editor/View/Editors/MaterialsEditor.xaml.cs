@@ -1,20 +1,21 @@
-﻿using System;
-using System.Linq;
-using System.Windows;
-using System.Text;
-using System.Windows.Data;
-using System.Windows.Controls;
-using System.ComponentModel;
-using System.Collections.Generic;
-using GalaSoft.MvvmLight.CommandWpf;
-using MahApps.Metro.Controls.Dialogs;
-using MahApps.Metro.Controls;
-using Xv2CoreLib.EMM.Analyzer;
-using Xv2CoreLib.EMM;
-using Xv2CoreLib.EffectContainer;
-using Xv2CoreLib.Resource.UndoRedo;
-using EEPK_Organiser.Forms;
+﻿using EEPK_Organiser.Forms;
 using EEPK_Organiser.ViewModel;
+using GalaSoft.MvvmLight.CommandWpf;
+using LB_Common.Forms;
+using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Text;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using Xv2CoreLib.EffectContainer;
+using Xv2CoreLib.EMM;
+using Xv2CoreLib.EMM.Analyzer;
+using Xv2CoreLib.Resource.UndoRedo;
 
 namespace EEPK_Organiser.View
 {
@@ -545,11 +546,11 @@ namespace EEPK_Organiser.View
 
                 foreach (var asset in assets)
                 {
-                    str.Append(String.Format("{0}\r", asset));
+                    str.Append(string.Format("{0}\r", asset));
                 }
 
-                LogForm logForm = new LogForm("The following assets use this material", str.ToString(), string.Format("{0}: Used By", SelectedMaterial.Name), null, true);
-                logForm.Show();
+                MessagePrompt prompt = new MessagePrompt($"{SelectedMaterial.Name}: Used By", $"The following {assets.Count} assets use this material", str.ToString());
+                prompt.Show();
             }
         }
 

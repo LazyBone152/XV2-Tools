@@ -89,7 +89,8 @@ namespace Xv2CoreLib.Resource.UndoRedo
 
         public void AddCompositeUndo(List<IUndoRedo> undos, string message, UndoGroup undoGroup = UndoGroup.Default, string undoArg = null, object undoContext = null)
         {
-            AddUndo(new CompositeUndo(undos, message, undoGroup, undoArg, undoContext));
+            if(undos.Count > 0)
+                AddUndo(new CompositeUndo(undos, message, undoGroup, undoArg, undoContext));
         }
 
         /// <summary>

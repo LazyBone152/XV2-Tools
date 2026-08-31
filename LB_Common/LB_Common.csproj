@@ -39,6 +39,12 @@
     <Reference Include="MahApps.Metro, Version=2.0.0.0, Culture=neutral, PublicKeyToken=51482d6f650b2b3f, processorArchitecture=MSIL">
       <HintPath>..\packages\MahApps.Metro.2.4.9\lib\net47\MahApps.Metro.dll</HintPath>
     </Reference>
+    <Reference Include="MahApps.Metro.IconPacks.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.IconPacks.MaterialLight.4.11.0\lib\net47\MahApps.Metro.IconPacks.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="MahApps.Metro.IconPacks.MaterialLight, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.IconPacks.MaterialLight.4.11.0\lib\net47\MahApps.Metro.IconPacks.MaterialLight.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Xaml.Behaviors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Xaml.Behaviors.Wpf.1.1.19\lib\net45\Microsoft.Xaml.Behaviors.dll</HintPath>
     </Reference>
@@ -424,6 +430,12 @@
     <Compile Include="Converters\NullToFalseConverter.cs" />
     <Compile Include="Converters\UInt16ToDoubleConverter.cs" />
     <Compile Include="Converters\VisibilityToNullableBoolean.cs" />
+    <Compile Include="Forms\NumericBoolInput.xaml.cs">
+      <DependentUpon>NumericBoolInput.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\MessagePrompt.xaml.cs">
+      <DependentUpon>MessagePrompt.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Forms\NumericInput.xaml.cs">
       <DependentUpon>NumericInput.xaml</DependentUpon>
     </Compile>
@@ -450,6 +462,14 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Forms\NumericBoolInput.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Forms\MessagePrompt.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Forms\NumericInput.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

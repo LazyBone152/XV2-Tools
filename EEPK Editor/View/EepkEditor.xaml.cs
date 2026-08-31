@@ -1,40 +1,41 @@
-﻿using System;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Collections.ObjectModel;
-using System.Runtime.ExceptionServices;
-using Application = System.Windows.Application;
-using Microsoft.Win32;
-using Xv2CoreLib;
-using Xv2CoreLib.EffectContainer;
-using Xv2CoreLib.EEPK;
-using Xv2CoreLib.ECF;
-using Xv2CoreLib.EMA;
-using Xv2CoreLib.EMP_NEW;
-using Xv2CoreLib.EMM;
-using Xv2CoreLib.EMB_CLASS;
-using Xv2CoreLib.EMD;
-using Xv2CoreLib.ESK;
-using Xv2CoreLib.EMO;
-using Xv2CoreLib.ETR;
-using Xv2CoreLib.Resource.UndoRedo;
-using Xv2CoreLib.Resource.App;
-using Xv2CoreLib.Resource;
-using EEPK_Organiser.Misc;
-using EEPK_Organiser.Forms;
+﻿using EEPK_Organiser.Forms;
 using EEPK_Organiser.Forms.Editors;
+using EEPK_Organiser.Misc;
 using EEPK_Organiser.ViewModel;
+using GalaSoft.MvvmLight.CommandWpf;
+using LB_Common.Forms;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
-using GalaSoft.MvvmLight.CommandWpf;
+using Microsoft.Win32;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.IO;
+using System.Linq;
+using System.Runtime.ExceptionServices;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using Xv2CoreLib;
+using Xv2CoreLib.ECF;
+using Xv2CoreLib.EEPK;
+using Xv2CoreLib.EffectContainer;
+using Xv2CoreLib.EMA;
+using Xv2CoreLib.EMB_CLASS;
+using Xv2CoreLib.EMD;
+using Xv2CoreLib.EMM;
+using Xv2CoreLib.EMO;
+using Xv2CoreLib.EMP_NEW;
+using Xv2CoreLib.ESK;
+using Xv2CoreLib.ETR;
+using Xv2CoreLib.Resource;
+using Xv2CoreLib.Resource.App;
+using Xv2CoreLib.Resource.UndoRedo;
+using Application = System.Windows.Application;
 
 #if XenoKit
 using XenoKit;
@@ -54,12 +55,9 @@ namespace EEPK_Organiser.View
         #region NotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void NotifyPropertyChanged(String propertyName = "")
+        private void NotifyPropertyChanged(string propertyName = "")
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         #endregion
 
@@ -161,7 +159,7 @@ namespace EEPK_Organiser.View
                     }
                     else
                     {
-                        MessageBox.Show($"This ID ({value}) is already used for another effect.", "ID Used", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessagePrompt.Show($"This ID ({value}) is already used for another effect.", "ID Used", MessagePromptButtons.OK, MessagePromptIcon.Error);
                     }
                 }
 
@@ -326,7 +324,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("Load failed.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Open", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(string.Format("Load failed.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Open", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
 
             return null;
@@ -473,7 +471,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -487,7 +485,7 @@ namespace EEPK_Organiser.View
                 {
                     if (asset.Files.Count == 5)
                     {
-                        MessageBox.Show("An asset cannot have more than 5 files assigned to it.", "Add File", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessagePrompt.Show("An asset cannot have more than 5 files assigned to it.", "Add File", MessagePromptButtons.OK, MessagePromptIcon.Error);
                         return;
                     }
 
@@ -524,7 +522,7 @@ namespace EEPK_Organiser.View
 
                         if (newName != originalName)
                         {
-                            MessageBox.Show(String.Format("The added file was renamed to \"{0}\" because \"{1}\" was already used.", newName, originalName), "Add File", MessageBoxButton.OK, MessageBoxImage.Information);
+                            MessagePrompt.Show(String.Format("The added file was renamed to \"{0}\" because \"{1}\" was already used.", newName, originalName), "Add File", MessagePromptButtons.OK, MessagePromptIcon.Information);
                         }
 
                         emoDataGrid.SelectedItem = asset;
@@ -536,7 +534,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
 
         }
@@ -555,7 +553,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -573,7 +571,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -591,7 +589,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -609,7 +607,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -647,7 +645,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -674,7 +672,7 @@ namespace EEPK_Organiser.View
                         {
                             if (EffectFile.GetExtension(openFile.FileName) != selectedFile.Extension)
                             {
-                                MessageBox.Show(String.Format("The file type of the selected external file ({0}) does not match that of {1}.", openFile.FileName, selectedFile.FullFileName), "Replace", MessageBoxButton.OK, MessageBoxImage.Error);
+                                MessagePrompt.Show(String.Format("The file type of the selected external file ({0}) does not match that of {1}.", openFile.FileName, selectedFile.FullFileName), "Replace", MessagePromptButtons.OK, MessagePromptIcon.Error);
                                 return;
                             }
 
@@ -703,13 +701,13 @@ namespace EEPK_Organiser.View
                                     break;
                             }
 
-                            if (MessageBox.Show("Do you want to keep the old file name?", "Keep Name?", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+                            if (MessagePrompt.Show("Do you want to keep the old file name?", "Keep Name?", MessagePromptButtons.YesNo, MessagePromptIcon.Question) == MessagePromptResult.No)
                             {
                                 selectedFile.SetName(newFileName);
 
                                 if (newFileName != originalNewFileName)
                                 {
-                                    MessageBox.Show(String.Format("The added file was renamed to \"{0}\" because \"{1}\" was already used.", newFileName, originalNewFileName), "Add File", MessageBoxButton.OK, MessageBoxImage.Information);
+                                    MessagePrompt.Show(String.Format("The added file was renamed to \"{0}\" because \"{1}\" was already used.", newFileName, originalNewFileName), "Add File", MessagePromptButtons.OK, MessagePromptIcon.Information);
                                 }
                             }
 
@@ -725,7 +723,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -755,7 +753,7 @@ namespace EEPK_Organiser.View
                             }
                             else
                             {
-                                MessageBox.Show(String.Format("Cannot delete the last file."), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                                MessagePrompt.Show(String.Format("Cannot delete the last file."), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
                             }
 
                             UndoManager.Instance.AddCompositeUndo(undos, "Delete File (EMO)");
@@ -765,7 +763,7 @@ namespace EEPK_Organiser.View
                         }
                         else
                         {
-                            MessageBox.Show(String.Format("Could not find the parent asset."), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessagePrompt.Show(String.Format("Could not find the parent asset."), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
                         }
                     }
                 }
@@ -775,7 +773,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -789,7 +787,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -810,7 +808,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -860,13 +858,13 @@ namespace EEPK_Organiser.View
 
                             if(emb == null || emb.EmbFile == null)
                             {
-                                MessageBox.Show("The Model Editor requires a .emb file.", "No Textures", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                MessagePrompt.Show("The Model Editor requires a .emb file.", "No Textures", MessagePromptButtons.OK, MessagePromptIcon.Warning);
                                 return;
                             }
 
                             if (emm == null || emm.EmmFile == null)
                             {
-                                MessageBox.Show("The Model Editor requires a .emm file.", "No Materials", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                MessagePrompt.Show("The Model Editor requires a .emm file.", "No Materials", MessagePromptButtons.OK, MessagePromptIcon.Warning);
                                 return;
                             }
 
@@ -887,7 +885,7 @@ namespace EEPK_Organiser.View
 #endif
                     default:
                         if(showError)
-                            MessageBox.Show(string.Format("Edit not possible for {0} files.", selectedFile.Extension), "Edit", MessageBoxButton.OK, MessageBoxImage.Stop);
+                            MessagePrompt.Show(string.Format("Edit not possible for {0} files.", selectedFile.Extension), "Edit", MessagePromptButtons.OK, MessagePromptIcon.Stop);
                         return;
                 }
 
@@ -923,14 +921,14 @@ namespace EEPK_Organiser.View
                     }
                     else
                     {
-                        MessageBox.Show("There are no cached files.", "From Cached Files", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessagePrompt.Show("There are no cached files.", "From Cached Files", MessagePromptButtons.OK, MessagePromptIcon.Information);
                     }
                 }
             }
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -1001,7 +999,7 @@ namespace EEPK_Organiser.View
                 catch (Exception ex)
                 {
                     SaveExceptionLog(ex.ToString());
-                    MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
                 }
             }
         }
@@ -1020,7 +1018,7 @@ namespace EEPK_Organiser.View
                 {
                     if (openFile.FileNames.Length > 5)
                     {
-                        MessageBox.Show(string.Format("EMO assets cannot have more than 5 files. {0} were selected.\n\nImport cancelled.", openFile.FileNames.Length), "Import Asset", MessageBoxButton.OK, MessageBoxImage.Stop);
+                        MessagePrompt.Show(string.Format("EMO assets cannot have more than 5 files. {0} were selected.\n\nImport cancelled.", openFile.FileNames.Length), "Import Asset", MessagePromptButtons.OK, MessagePromptIcon.Stop);
                         return;
                     }
 
@@ -1065,7 +1063,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -1083,7 +1081,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -1096,7 +1094,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -1111,7 +1109,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -1147,7 +1145,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -1171,7 +1169,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
 #endif
 
@@ -1197,20 +1195,20 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
 #endif
 
         }
 
-        private async void EMO_AssetContainer_AddEmd_Click(object sender, RoutedEventArgs e)
+        private void EMO_AssetContainer_AddEmd_Click(object sender, RoutedEventArgs e)
         {
             var asset = emoDataGrid.SelectedItem as Asset;
             if (asset == null) return;
 
             if (asset.Files.Any(x => x.fileType == EffectFile.FileType.EMB) || asset.Files.Any(x => x.fileType == EffectFile.FileType.EMM) || asset.Files.Any(x => x.fileType == EffectFile.FileType.EMO))
             {
-                await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, "File Already Exists", $"An EMO, EMB or EMM already exists on the selected asset. Please delete it/them to complete the conversion.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                MessagePrompt.Show($"An EMO, EMB or EMM already exists on the selected asset. Please delete it/them to complete the conversion.", "File Already Exists", MessagePromptIcon.Error);
                 return;
             }
 
@@ -1240,19 +1238,19 @@ namespace EEPK_Organiser.View
 
                         if (!File.Exists(emmPath))
                         {
-                            await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, "File Not Found", $"Could not find \"{emmPath}\".\n\nPlease note that each EMD file must have a EMM and EMB in the same directory.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                            MessagePrompt.Show($"Could not find \"{emmPath}\".\n\nPlease note that each EMD file must have a EMM and EMB in the same directory.", "File Already Exists", MessagePromptIcon.Error);
                             return;
                         }
 
                         if (!File.Exists(embPath))
                         {
-                            await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, "File Not Found", $"Could not find \"{embPath}\".\n\nPlease note that each EMD file must have a EMM and EMB in the same directory.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                            MessagePrompt.Show($"Could not find \"{embPath}\".\n\nPlease note that each EMD file must have a EMM and EMB in the same directory.", "File Already Exists", MessagePromptIcon.Error);
                             return;
                         }
 
                         if (!File.Exists(dytPath) && hasDyt)
                         {
-                            await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, "File Not Found", $"Could not find \"{dytPath}\".\n\nIf at least one of the EMD files have a dyt file, then one is required for each EMD.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                            MessagePrompt.Show($"Could not find \"{dytPath}\".\n\nIf at least one of the EMD files have a dyt file, then one is required for each EMD.", "File Already Exists", MessagePromptIcon.Error);
                             return;
                         }
 
@@ -1283,13 +1281,13 @@ namespace EEPK_Organiser.View
                 //Validation
                 if(emdFiles.Count == 0)
                 {
-                    await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, "No EMDs", $"No EMD files were selected/loaded, so no EMO can be created.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                    MessagePrompt.Show($"No EMD files were selected/loaded, so no EMO can be created.", "File Already Exists", MessagePromptIcon.Error);
                     return;
                 }
 
                 if (eskFile == null)
                 {
-                    await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, "No ESK", $"No ESK file was selected/loaded, so no EMO can be created.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                    MessagePrompt.Show($"No ESK file was selected/loaded, so no EMO can be created.", "File Already Exists", MessagePromptIcon.Error);
                     return;
                 }
 
@@ -1319,7 +1317,7 @@ namespace EEPK_Organiser.View
 
             if (asset.Files.Any(x => x.Extension == ".obj.ema"))
             {
-                await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, "File Already Exists", $"An OBJ.EMA already exists on the selected asset.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                MessagePrompt.Show($"An OBJ.EMA already exists on the selected asset.", "File Already Exists", MessagePromptIcon.Warning);
                 return;
             }
 
@@ -1366,7 +1364,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -1383,7 +1381,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -1401,7 +1399,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -1419,7 +1417,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -1437,7 +1435,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -1455,7 +1453,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -1474,7 +1472,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -1578,14 +1576,14 @@ namespace EEPK_Organiser.View
                     }
                     else
                     {
-                        MessageBox.Show("There are no cached files.", "From Cached Files", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessagePrompt.Show("There are no cached files.", "From Cached Files", MessagePromptButtons.OK, MessagePromptIcon.Information);
                     }
                 }
             }
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -1656,7 +1654,7 @@ namespace EEPK_Organiser.View
                 catch (Exception ex)
                 {
                     SaveExceptionLog(ex.ToString());
-                    MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
                 }
             }
         }
@@ -1679,7 +1677,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -1697,7 +1695,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -1710,7 +1708,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -1730,7 +1728,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -1754,7 +1752,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
 #endif
 
@@ -1780,7 +1778,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
 #endif
 
@@ -1800,11 +1798,11 @@ namespace EEPK_Organiser.View
                 if(undos.Count > 0)
                 {
                     UndoManager.Instance.AddCompositeUndo(undos, "Remove Color Animations (PBIND)");
-                    await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, "Remove Color Animations (PBIND)", $"{undos.Count} animations were removed", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                    MessagePrompt.Show($"{undos.Count} animations were removed", "Remove Color Animations (PBIND)");
                 }
                 else
                 {
-                    await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, "Remove Color Animations (PBIND)", $"No animations found.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                    MessagePrompt.Show("No animations found", "Remove Color Animations (PBIND)");
                 }
             }
         }
@@ -1820,7 +1818,16 @@ namespace EEPK_Organiser.View
                 foreach (var asset in selectedAssets)
                     undos.AddRange(asset.Files[0].EmpFile.RemoveRandomColorRange());
 
-                UndoManager.Instance.AddCompositeUndo(undos, "Remove Random Color Range (PBIND)");
+                if (undos.Count > 0)
+                {
+                    UndoManager.Instance.AddCompositeUndo(undos, "Remove Random Color Range (PBIND)");
+                    MessagePrompt.Show($"{undos.Count} random instances were removed", "Remove Random Color Range (PBIND)");
+                }
+                else
+                {
+                    MessagePrompt.Show("No random instances found", "Remove Random Color Range (PBIND)");
+                }
+
             }
         }
 
@@ -1841,7 +1848,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -1858,7 +1865,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -1876,7 +1883,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -1894,7 +1901,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -1912,7 +1919,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -1930,7 +1937,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -1949,7 +1956,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -2017,14 +2024,14 @@ namespace EEPK_Organiser.View
                     }
                     else
                     {
-                        MessageBox.Show("There are no cached files.", "From Cached Files", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessagePrompt.Show("There are no cached files.", "From Cached Files", MessagePromptButtons.OK, MessagePromptIcon.Information);
                     }
                 }
             }
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -2095,7 +2102,7 @@ namespace EEPK_Organiser.View
                 catch (Exception ex)
                 {
                     SaveExceptionLog(ex.ToString());
-                    MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
                 }
             }
         }
@@ -2114,7 +2121,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -2127,7 +2134,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -2142,7 +2149,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -2166,7 +2173,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
 #endif
 
@@ -2192,7 +2199,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
 #endif
 
@@ -2204,19 +2211,27 @@ namespace EEPK_Organiser.View
             try
 #endif
             {
-                var asset = tbindDataGrid.SelectedItem as Asset;
-
-                if (asset != null)
+                if (tbindDataGrid.SelectedItem is Asset asset)
                 {
-                    Forms.EtrScale scaleForm = new Forms.EtrScale(asset, App.Current.MainWindow);
-                    scaleForm.ShowDialog();
+                    float currentScale = asset.Files[0].EtrFile.GetAverageScale();
+                    LB_Common.Forms.NumericInput inputForm = new LB_Common.Forms.NumericInput("ETR Scale", "Scale Factor", currentScale, 0, 50, 0.01);
+                    inputForm.ShowDialog();
+
+                    if (!inputForm.IsCancelled)
+                    {
+                        List<IUndoRedo> undos = new List<IUndoRedo>();
+                        asset.Files[0].EtrFile.ScaleETRParts(Math.Max(0.001f, inputForm.GetValue<float>()) / Math.Max(0.001f, currentScale), undos);
+
+                        UndoManager.Instance.AddUndo(new CompositeUndo(undos, "ETR Scale"));
+                        UndoManager.Instance.ForceEventCall();
+                    }
                 }
             }
 #if !DEBUG
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
 #endif
         }
@@ -2285,7 +2300,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -2302,7 +2317,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -2320,7 +2335,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -2338,7 +2353,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -2356,7 +2371,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -2374,7 +2389,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -2393,7 +2408,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -2413,14 +2428,14 @@ namespace EEPK_Organiser.View
                     }
                     else
                     {
-                        MessageBox.Show("There are no cached files.", "From Cached Files", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessagePrompt.Show("There are no cached files.", "From Cached Files", MessagePromptButtons.OK, MessagePromptIcon.Information);
                     }
                 }
             }
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -2491,7 +2506,7 @@ namespace EEPK_Organiser.View
                 catch (Exception ex)
                 {
                     SaveExceptionLog(ex.ToString());
-                    MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
                 }
             }
         }
@@ -2535,7 +2550,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -2553,7 +2568,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -2566,7 +2581,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -2579,7 +2594,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -2605,7 +2620,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -2629,7 +2644,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
 #endif
 
@@ -2655,7 +2670,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
 #endif
 
@@ -2724,7 +2739,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -2741,7 +2756,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -2759,7 +2774,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -2777,7 +2792,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -2795,7 +2810,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -2813,7 +2828,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
 
         }
@@ -2833,7 +2848,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -2853,14 +2868,14 @@ namespace EEPK_Organiser.View
                     }
                     else
                     {
-                        MessageBox.Show("There are no cached files.", "From Cached Files", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessagePrompt.Show("There are no cached files.", "From Cached Files", MessagePromptButtons.OK, MessagePromptIcon.Information);
                     }
                 }
             }
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -2931,7 +2946,7 @@ namespace EEPK_Organiser.View
                 catch (Exception ex)
                 {
                     SaveExceptionLog(ex.ToString());
-                    MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
                 }
             }
         }
@@ -2975,7 +2990,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -2993,7 +3008,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -3006,7 +3021,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -3021,7 +3036,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -3047,7 +3062,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -3071,7 +3086,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
 #endif
 
@@ -3097,7 +3112,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
 #endif
 
@@ -3206,20 +3221,20 @@ namespace EEPK_Organiser.View
 
                 if (alreadyExistCount > 0)
                 {
-                    MessageBox.Show(String.Format("{0} assets were skipped because they already exist in this EEPK.\n\nHint: Use the duplicate function if that is what you want.", alreadyExistCount), "Add Asset(s)", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessagePrompt.Show(String.Format("{0} assets were skipped because they already exist in this EEPK.\n\nHint: Use the duplicate function if that is what you want.", alreadyExistCount), "Add Asset(s)", MessagePromptButtons.OK, MessagePromptIcon.Warning);
                 }
 
                 if (renameCount > 0 && addedCount > 0)
                 {
-                    MessageBox.Show(String.Format("Assets imported.\n\nNote: {0} files were renamed during the add process due to existing file(s) having the same name.", renameCount), "Add Asset(s)", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessagePrompt.Show(String.Format("Assets imported.\n\nNote: {0} files were renamed during the add process due to existing file(s) having the same name.", renameCount), "Add Asset(s)", MessagePromptButtons.OK, MessagePromptIcon.Information);
                 }
                 else if (addedCount > 0)
                 {
-                    MessageBox.Show(String.Format("Assets imported."), "Add Asset(s)", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessagePrompt.Show(String.Format("Assets imported."), "Add Asset(s)", MessagePromptButtons.OK, MessagePromptIcon.Information);
                 }
                 else
                 {
-                    MessageBox.Show("Operation aborted.", "Add Asset(s)", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessagePrompt.Show("Operation aborted.", "Add Asset(s)", MessagePromptButtons.OK, MessagePromptIcon.Warning);
                 }
 
                 //Add Undos
@@ -3239,11 +3254,11 @@ namespace EEPK_Organiser.View
 
             if (newAsset == null)
             {
-                MessageBox.Show("No asset was found in the clipboard. Cannot continue paste operation.", "Replace", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessagePrompt.Show("No asset was found in the clipboard. Cannot continue paste operation.", "Replace", MessagePromptButtons.OK, MessagePromptIcon.Warning);
                 return;
             }
 
-            if (MessageBox.Show(String.Format("The asset \"{0}\" will be replaced with a copy of \"{1}\". This cannot be undone.\n\nDo you want to continue?", asset.FileNamesPreview, newAsset[0].FileNamesPreview), "Replace", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+            if (MessagePrompt.Show(String.Format("The asset \"{0}\" will be replaced with a copy of \"{1}\". This cannot be undone.\n\nDo you want to continue?", asset.FileNamesPreview, newAsset[0].FileNamesPreview), "Replace", MessagePromptButtons.YesNo, MessagePromptIcon.Question) == MessagePromptResult.No)
             {
                 return;
             }
@@ -3303,7 +3318,7 @@ namespace EEPK_Organiser.View
 
                 int count = selectedAssets.Count + 1;
 
-                if (MessageBox.Show(string.Format("All currently selected assets will be MERGED into {0}.\n\nAll other selected assets will be deleted, with all references to them changed to {0}.\n\nDo you wish to continue?", primeAsset.FileNamesPreview), string.Format("Merge ({0} assets)", count), MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
+                if (MessagePrompt.Show(string.Format("All currently selected assets will be MERGED into {0}.\n\nAll other selected assets will be deleted, with all references to them changed to {0}.\n\nDo you wish to continue?", primeAsset.FileNamesPreview), string.Format("Merge ({0} assets)", count), MessagePromptButtons.OKCancel, MessagePromptIcon.Question) == MessagePromptResult.OK)
                 {
                     foreach (var assetToRemove in selectedAssets)
                     {
@@ -3320,7 +3335,7 @@ namespace EEPK_Organiser.View
             }
             else
             {
-                MessageBox.Show("Cannot merge with less than 2 assets selected.\n\nTip: Use Left Ctrl + Left Mouse Click to multi-select.", "Merge", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessagePrompt.Show("Cannot merge with less than 2 assets selected.\n\nTip: Use Left Ctrl + Left Mouse Click to multi-select.", "Merge", MessagePromptButtons.OK, MessagePromptIcon.Warning);
             }
         }
 
@@ -3328,7 +3343,7 @@ namespace EEPK_Organiser.View
         {
             List<IUndoRedo> undos = new List<IUndoRedo>();
 
-            if (MessageBox.Show(String.Format("{0} asset(s) will be deleted. Any EffectParts that are linked to them will also be deleted.\n\nDo you want to continue?", assets.Count), "Delete Asset(s)", MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
+            if (MessagePrompt.Show(String.Format("{0} asset(s) will be deleted. Any EffectParts that are linked to them will also be deleted.\n\nDo you want to continue?", assets.Count), "Delete Asset(s)", MessagePromptButtons.OKCancel, MessagePromptIcon.Question) == MessagePromptResult.OK)
             {
                 foreach (var asset in assets)
                 {
@@ -3391,11 +3406,11 @@ namespace EEPK_Organiser.View
 
                 if (alreadyExistCount > 0 && copied == 0)
                 {
-                    MessageBox.Show("All copied assets already exist. Copy failed.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessagePrompt.Show("All copied assets already exist. Copy failed.", "Warning", MessagePromptButtons.OK, MessagePromptIcon.Warning);
                 }
                 else if (alreadyExistCount > 0 && copied > 0)
                 {
-                    MessageBox.Show(String.Format("{0} assets were skipped as they already exist.", alreadyExistCount), "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessagePrompt.Show(String.Format("{0} assets were skipped as they already exist.", alreadyExistCount), "Warning", MessagePromptButtons.OK, MessagePromptIcon.Warning);
                 }
 
                 container.RefreshAssetCount();
@@ -3439,28 +3454,20 @@ namespace EEPK_Organiser.View
             effects.Sort();
             StringBuilder str = new StringBuilder();
 
-            foreach (var effect in effects)
+            foreach (int effect in effects)
             {
-                str.Append(String.Format("Effect ID: {0}\r", effect));
+                str.Append(string.Format("Effect ID: {0}\r", effect));
             }
 
-            if (showExt)
-            {
-                Forms.LogForm logForm = new Forms.LogForm("The following effects use this asset:", str.ToString(), String.Format("{0}: Used By", asset.FileNamesPreviewWithExtension), App.Current.MainWindow, true);
-                logForm.Show();
-            }
-            else
-            {
-                Forms.LogForm logForm = new Forms.LogForm("The following effects use this asset:", str.ToString(), String.Format("{0}: Used By", asset.FileNamesPreview), App.Current.MainWindow, true);
-                logForm.Show();
-            }
+            string shownName = showExt ? asset.FileNamesPreviewWithExtension : asset.FileNamesPreview;
 
-
+            MessagePrompt prompt = new MessagePrompt($"{shownName}: Used By", "The following effects use this asset:", str.ToString());
+            prompt.Show();
         }
 
         private void AssetContainer_RenameFile(EffectFile effectFile, Asset asset, AssetContainerTool container)
         {
-            Forms.RenameForm renameForm = new Forms.RenameForm(effectFile.FileName, effectFile.Extension, String.Format("Renaming {0}", effectFile.FullFileName), container, App.Current.MainWindow);
+            RenameForm renameForm = new RenameForm(effectFile.FileName, effectFile.Extension, string.Format("Renaming {0}", effectFile.FullFileName), container, App.Current.MainWindow);
             renameForm.ShowDialog();
 
             if (renameForm.WasNameChanged)
@@ -3485,11 +3492,11 @@ namespace EEPK_Organiser.View
             if (amountRemoved > 0)
             {
                 UndoManager.Instance.AddUndo(new CompositeUndo(undos, $"Remove Unusued ({type})"));
-                MessageBox.Show(String.Format("{0} unused assets were removed.", amountRemoved), "Remove Unused", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessagePrompt.Show(String.Format("{0} unused assets were removed.", amountRemoved), "Remove Unused", MessagePromptButtons.OK, MessagePromptIcon.Information);
             }
             else
             {
-                MessageBox.Show("There are no unused assets.", "Remove Unused", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessagePrompt.Show("There are no unused assets.", "Remove Unused", MessagePromptButtons.OK, MessagePromptIcon.Information);
             }
         }
 
@@ -3536,7 +3543,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An unknown error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An unknown error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -3556,7 +3563,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An unknown error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An unknown error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -3577,7 +3584,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -3604,7 +3611,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An unknown error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An unknown error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -3629,7 +3636,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An unknown error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An unknown error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -3673,7 +3680,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An unknown error occured while pasting the EffectParts.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An unknown error occured while pasting the EffectParts.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -3694,7 +3701,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured while copying the EffectParts.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured while copying the EffectParts.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -3725,7 +3732,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -3798,7 +3805,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -3843,7 +3850,7 @@ namespace EEPK_Organiser.View
             {
                 if (SelectedEffect.SelectedEffectParts != null)
                 {
-                    LB_Common.Forms.NumericInput inputForm = new LB_Common.Forms.NumericInput("Rescale", "Rescale Factor", 1f, 0, 50, 0.1, "Rescale the Min and Max size of the selected Effect Parts by the entered amount.");
+                    LB_Common.Forms.NumericInput inputForm = new LB_Common.Forms.NumericInput("Rescale", "Rescale Factor", 1f, 0, 50, 0.1, null, "The minimum and maximum sizes of the selected Effect Parts will be rescaled by the entered factor.");
                     inputForm.ShowDialog();
 
                     if (!inputForm.IsCancelled)
@@ -3897,7 +3904,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured while copying the EffectParts.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured while copying the EffectParts.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -3954,7 +3961,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An unknown error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An unknown error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -3976,7 +3983,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
 
         }
@@ -3992,7 +3999,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -4008,7 +4015,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -4024,7 +4031,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -4040,7 +4047,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -4056,7 +4063,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -4072,7 +4079,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -4088,7 +4095,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -4104,7 +4111,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -4120,7 +4127,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -4141,14 +4148,14 @@ namespace EEPK_Organiser.View
                     }
                     else
                     {
-                        MessageBox.Show("There are no cached files.", "From Cached Files", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessagePrompt.Show("There are no cached files.", "From Cached Files", MessagePromptButtons.OK, MessagePromptIcon.Information);
                     }
                 }
             }
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -4231,7 +4238,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("ListBox_MouseRightButtonUp: Failed to force select parent effect.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("ListBox_MouseRightButtonUp: Failed to force select parent effect.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -4263,7 +4270,7 @@ namespace EEPK_Organiser.View
             }
             catch (Exception ex)
             {
-                MessageBox.Show(Application.Current.MainWindow, String.Format("The dropped file could not be opened.\n\nThe reason given by the system: {0}", ex.Message), "File Drop", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(string.Format("The dropped file could not be opened.\n\nThe reason given by the system: {0}", ex.Message), "File Drop", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
 
         }
@@ -4430,7 +4437,7 @@ namespace EEPK_Organiser.View
         {
             if (!SettingsManager.settings.ValidGameDir)
             {
-                MessageBox.Show("Please set the game directory in the settings menu to use this option (File > Settings > Game Directory).", "Invalid Game Directory", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessagePrompt.Show("Please set the game directory in the settings menu to use this option (File > Settings > Game Directory).", "Invalid Game Directory", MessagePromptButtons.OK, MessagePromptIcon.Information);
                 return false;
             }
             return true;
@@ -4473,7 +4480,7 @@ namespace EEPK_Organiser.View
                         vfxPackage.Name = System.IO.Path.GetFileNameWithoutExtension(saveDialog.FileName);
                         vfxPackage.SaveVfxPackage();
 
-                        MessageBox.Show("Export successful.", "Export", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessagePrompt.Show("Export successful.", "Export", MessagePromptButtons.OK, MessagePromptIcon.Information);
                     }
 
                 }
@@ -4482,7 +4489,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -4936,7 +4943,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
 #endif
 
@@ -4957,7 +4964,7 @@ namespace EEPK_Organiser.View
             catch (Exception ex)
             {
                 SaveExceptionLog(ex.ToString());
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}\n\nA log containing more details about the error was saved at \"{1}\".", ex.Message, SettingsManager.Instance.GetErrorLogPath()), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
 #endif
 
@@ -4968,38 +4975,25 @@ namespace EEPK_Organiser.View
             if (effectContainerFile == null)
                 return;
 
-            var messageResult = await DialogCoordinator.Instance.ShowMessageAsync(
-                this,
-                "Clean All",
-                $"Delete all unused or duplicate assets, texture and material from this {effectContainerFile.saveFormat}?",
-                MessageDialogStyle.AffirmativeAndNegative,
-                DialogSettings.Default);
+            if (MessagePrompt.Show($"Delete all unused or duplicate assets, texture and material from this {effectContainerFile.saveFormat}?", "Clean All",
+                MessagePromptButtons.YesNo, MessagePromptIcon.Question) == MessagePromptResult.Yes)
+            {
+                List<IUndoRedo> undos = new List<IUndoRedo>();
+                int[] totals = effectContainerFile.RemoveAllUnusedOrDuplicates(undos);
 
-            if (messageResult != MessageDialogResult.Affirmative)
-                return;
+                int emp = totals[0];
+                int etr = totals[1];
+                int ecf = totals[2];
+                int emo = totals[3];
+                int light = totals[4];
+                int empTextures = totals[5];
+                int textures = totals[6];
+                int materials = totals[7];
+                int total = totals[8];
 
-            List<IUndoRedo> undos = new List<IUndoRedo>();
-            int[] totals = effectContainerFile.RemoveAllUnusedOrDuplicates(undos);
-
-            int emp = totals[0];
-            int etr = totals[1];
-            int ecf = totals[2];
-            int emo = totals[3];
-            int light = totals[4];
-            int empTextures = totals[5];
-            int textures = totals[6];
-            int materials = totals[7];
-            int total = totals[8];
-
-            if (undos.Count > 0)
                 UndoManager.Instance.AddCompositeUndo(undos, $"Clean All ({total})");
-
-            await DialogCoordinator.Instance.ShowMessageAsync(
-                this,
-                "Clean All",
-                $"{total} duplicate or unused references were purged.\n\nBreakdown by type:\nEMP: {emp}\nETR: {etr}\nECF: {ecf}\nEMO: {emo}\nLIGHT: {light}\nEMP Textures: {empTextures}\nTextures: {textures}\nMaterials: {materials}",
-                MessageDialogStyle.Affirmative,
-                DialogSettings.Default);
+                MessagePrompt.Show($"{total} duplicate or unused references were purged.\n\nBreakdown by type:\nEMP: {emp}\nETR: {etr}\nECF: {ecf}\nEMO: {emo}\nLIGHT: {light}\nEMP Textures: {empTextures}\nTextures: {textures}\nMaterials: {materials}", "Clean All");
+            }
         }
 
 #if !XenoKit

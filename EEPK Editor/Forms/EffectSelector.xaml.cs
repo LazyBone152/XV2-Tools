@@ -1,4 +1,5 @@
 ﻿using GalaSoft.MvvmLight.CommandWpf;
+using LB_Common.Forms;
 using MahApps.Metro.Controls;
 using System;
 using System.Collections.Generic;
@@ -92,14 +93,14 @@ namespace EEPK_Organiser.Forms
                         if (MainContainerFile.IsEffectIdUsed(effect.ImportIdIncrease))
                         {
                             wasError = true;
-                            str.Append(String.Format("Effect ID: {0} > New ID: {1}\r", effect.IndexNum, effect.ImportIdIncrease));
+                            str.Append(string.Format("Effect ID: {0} > New ID: {1}\r", effect.IndexNum, effect.ImportIdIncrease));
                         }
                     }
 
                     if (wasError)
                     {
-                        LogForm log = new LogForm("The following effect IDs are conflicting.\nPlease change them to be unique.", str.ToString(), "ID Conflict", this, true);
-                        log.Show();
+                        MessagePrompt prompt = new MessagePrompt("ID Conflict", "The following effect IDs are conflicting.\nPlease change them to be unique.", str.ToString());
+                        prompt.Show();
                     }
                     else
                     {
