@@ -6,10 +6,8 @@ using System.Text;
 using System.Collections;
 using System.Globalization;
 using YAXLib;
-using System.Security.Cryptography;
 using Xv2CoreLib.Resource.UndoRedo;
 using System.Reflection;
-using System.ComponentModel;
 
 namespace Xv2CoreLib
 {
@@ -579,6 +577,12 @@ namespace Xv2CoreLib
 
         public static string SanitizePath(string path)
         {
+            //Remove trailing slash, if present. This is important for comparing paths in CPKs, as they are stored without a trailing slash.
+            if (path[path.Length - 1] == Path.DirectorySeparatorChar || path[path.Length - 1] == Path.AltDirectorySeparatorChar)
+            {
+                path = path.Remove(path.Length - 1);
+            }
+
             return path.Replace(@"//", @"/").Replace(@"\\", @"/").Replace(@"\", @"/").
                 Replace(Path.DirectorySeparatorChar, '/').
                 Replace(Path.AltDirectorySeparatorChar, '/').
