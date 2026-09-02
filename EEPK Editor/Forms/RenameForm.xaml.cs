@@ -1,4 +1,5 @@
-﻿using MahApps.Metro.Controls;
+﻿using LB_Common.Forms;
+using MahApps.Metro.Controls;
 using System;
 using System.Windows;
 using System.Windows.Input;
@@ -61,15 +62,15 @@ namespace EEPK_Organiser.Forms
 
         private void Button_OK_Click(object sender, RoutedEventArgs e)
         {
-            if (String.IsNullOrWhiteSpace(NameValue))
+            if (string.IsNullOrWhiteSpace(NameValue))
             {
-                MessageBox.Show("The name cannot be empty or whitespace.", "Invalid Name", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show("The name cannot be empty or whitespace.", "Invalid Name", MessagePromptButtons.OK, MessagePromptIcon.Error);
                 return;
             }
 
             if (NameValue.Length > LengthLimit && LengthLimit != -1)
             {
-                MessageBox.Show(String.Format("The name cannot exceed {0} characters.", LengthLimit), "Invalid Name", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(string.Format("The name cannot exceed {0} characters.", LengthLimit), "Invalid Name", MessagePromptButtons.OK, MessagePromptIcon.Error);
                 return;
             }
 
@@ -84,7 +85,7 @@ namespace EEPK_Organiser.Forms
             {
                 if (assetContainer.NameUsed(NameValue + Extension))
                 {
-                    MessageBox.Show(String.Format("The name \"{0}{1}\" is already in use.", NameValue, Extension), "Rename", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessagePrompt.Show(String.Format("The name \"{0}{1}\" is already in use.", NameValue, Extension), "Rename", MessagePromptButtons.OK, MessagePromptIcon.Error);
                     return;
                 }
             }
@@ -92,7 +93,7 @@ namespace EEPK_Organiser.Forms
             {
                 if (EmbFile.NameUsed(NameValue + Extension))
                 {
-                    MessageBox.Show(String.Format("The name \"{0}{1}\" is already in use.", NameValue, Extension), "Rename", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessagePrompt.Show(String.Format("The name \"{0}{1}\" is already in use.", NameValue, Extension), "Rename", MessagePromptButtons.OK, MessagePromptIcon.Error);
                     return;
                 }
             }
@@ -100,7 +101,7 @@ namespace EEPK_Organiser.Forms
             {
                 if (EmmFile.NameUsed(NameValue))
                 {
-                    MessageBox.Show(String.Format("The name \"{0}{1}\" is already in use.", NameValue, Extension), "Rename", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessagePrompt.Show(String.Format("The name \"{0}{1}\" is already in use.", NameValue, Extension), "Rename", MessagePromptButtons.OK, MessagePromptIcon.Error);
                     return;
                 }
             }

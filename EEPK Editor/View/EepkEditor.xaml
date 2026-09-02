@@ -568,13 +568,13 @@
                             </Style>
                         </StackPanel.Resources>
                         <StackPanel VerticalAlignment="Center">
-                            <Button Command="{Binding EffectOptions_AddEffect_Command}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="20" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="20">
+                            <Button Command="{Binding EffectOptions_AddEffect_Command}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Height="30" Style="{DynamicResource MahApps.Styles.Button.Circle}">
                                 <iconPacks:PackIconMaterialLight Kind="Plus" />
                             </Button>
-                            <TextBlock Text="New" HorizontalAlignment="Center" FontSize="8"/>
+                            <TextBlock Text="New" HorizontalAlignment="Center" FontSize="10"/>
                         </StackPanel>
                         <StackPanel VerticalAlignment="Center">
-                            <Button HorizontalAlignment="Center" VerticalAlignment="Center" Width="20" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="20" lbUtils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
+                            <Button HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Height="30" Style="{DynamicResource MahApps.Styles.Button.Circle}" lbUtils:ContextMenuLeftClickBehavior.IsLeftClickEnabled="True">
                                 <Button.ContextMenu>
                                     <ContextMenu FontSize="12">
                                         <MenuItem Header="Load External EEPK" Click="EffectOptions_ImportEffectsFromFile_Click"/>
@@ -601,7 +601,7 @@
 
                                 <iconPacks:PackIconMaterialLight Kind="Plus" />
                             </Button>
-                            <TextBlock Text="Import" HorizontalAlignment="Center" FontSize="8"/>
+                            <TextBlock Text="Import" HorizontalAlignment="Center" FontSize="10"/>
                         </StackPanel>
 
                     </StackPanel>

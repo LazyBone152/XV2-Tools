@@ -4,13 +4,14 @@ using System.ComponentModel;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using GalaSoft.MvvmLight.CommandWpf;
+using LB_Common.Forms;
 using Xv2CoreLib.ETR;
+using Xv2CoreLib.EMP_NEW;
 using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.Resource.UndoRedo;
 using EEPK_Organiser.ViewModel;
-using GalaSoft.MvvmLight.CommandWpf;
 using EEPK_Organiser.Forms;
-using Xv2CoreLib.EMP_NEW;
 using EEPK_Organiser.View.Controls;
 
 namespace EEPK_Organiser.View.Editors
@@ -360,7 +361,7 @@ namespace EEPK_Organiser.View.Editors
             }
             else
             {
-                MessageBox.Show("\"Paste Values\" only works with an equal amount of copied and selected points.", "Paste Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show("\"Paste Values\" only works with an equal amount of copied and selected points.", "Paste Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 

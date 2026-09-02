@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using GalaSoft.MvvmLight.CommandWpf;
+using LB_Common.Forms;
 using Xv2CoreLib.EffectContainer;
 using Xv2CoreLib.EMP_NEW;
 using Xv2CoreLib.Resource.UndoRedo;
 using EEPK_Organiser.Misc;
 using EEPK_Organiser.ViewModel;
-using GalaSoft.MvvmLight.CommandWpf;
 
 namespace EEPK_Organiser.View.Editors.EMP
 {
@@ -117,7 +117,7 @@ namespace EEPK_Organiser.View.Editors.EMP
                 textureInstances.AddRange(TextureFile.GetNodesThatUseTexture(texture));
             }
 
-            if (MessageBox.Show(string.Format("The selected texture(s) will be deleted and all references to them on {0} nodes in this {1} will be removed.\n\nContinue?", textureInstances.Count, FileType), "Delete", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            if (MessagePrompt.Show(string.Format("The selected texture(s) will be deleted and all references to them on {0} nodes in this {1} will be removed.\n\nContinue?", textureInstances.Count, FileType), "Delete", MessagePromptButtons.YesNo, MessagePromptIcon.Question) == MessagePromptResult.Yes)
             {
                 foreach (EMP_TextureSamplerDef texture in SelectedTextures)
                 {
@@ -215,7 +215,7 @@ namespace EEPK_Organiser.View.Editors.EMP
                 List<IUndoRedo> undos = new List<IUndoRedo>();
                 int count = selectedTextures.Count + 1;
 
-                if (MessageBox.Show(string.Format("All currently selected textures will be MERGED into {0}.\n\nAll other selected textures will be deleted, with all references to them changed to {0}.\n\nDo you wish to continue?", texture.TextureName), string.Format("Merge ({0} textures)", count), MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
+                if (MessagePrompt.Show(string.Format("All currently selected textures will be MERGED into {0}.\n\nAll other selected textures will be deleted, with all references to them changed to {0}.\n\nDo you wish to continue?", texture.TextureName), string.Format("Merge ({0} textures)", count), MessagePromptButtons.OKCancel, MessagePromptIcon.Question) == MessagePromptResult.OK)
                 {
                     foreach (var textureToRemove in selectedTextures)
                     {
@@ -229,7 +229,7 @@ namespace EEPK_Organiser.View.Editors.EMP
             }
             else
             {
-                MessageBox.Show("Cannot merge with less than 2 textures selected.\n\nTip: Use Left Ctrl + Left Mouse Click to multi-select.", "Merge", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessagePrompt.Show("Cannot merge with less than 2 textures selected.\n\nTip: Use Left Ctrl + Left Mouse Click to multi-select.", "Merge", MessagePromptButtons.OK, MessagePromptIcon.Warning);
             }
         }
 

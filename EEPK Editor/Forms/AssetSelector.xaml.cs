@@ -1,4 +1,5 @@
 ﻿using EEPK_Organiser.View;
+using LB_Common.Forms;
 using MahApps.Metro.Controls;
 using System;
 using System.Collections.Generic;
@@ -330,14 +331,14 @@ namespace EEPK_Organiser.Forms
                     searchMode = true;
                     break;
                 default:
-                    MessageBox.Show("Unknown tab selected.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessagePrompt.Show("Unknown tab selected.", "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
                     Close();
                     return;
             }
             
             if(currentGrid.SelectedItems.Count < 1)
             {
-                MessageBox.Show("No asset is selected.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessagePrompt.Show("No asset is selected.", "Error", MessagePromptButtons.OK, MessagePromptIcon.Warning);
                 return;
             }
 
@@ -354,7 +355,7 @@ namespace EEPK_Organiser.Forms
                     {
                         if (!first && asset.assetType != prevAssetType)
                         {
-                            MessageBox.Show("All selected assets must be of the same type.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessagePrompt.Show("All selected assets must be of the same type.", "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
                             return;
                         }
                         else
@@ -372,7 +373,7 @@ namespace EEPK_Organiser.Forms
             }
             else
             {
-                MessageBox.Show("No asset is selected.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessagePrompt.Show("No asset is selected.", "Error", MessagePromptButtons.OK, MessagePromptIcon.Warning);
             }
 
         }

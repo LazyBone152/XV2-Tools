@@ -22,7 +22,7 @@
             <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="40"/>
+            <ColumnDefinition Width="50"/>
             <ColumnDefinition Width="350"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
@@ -67,13 +67,13 @@
                 <Button Command="{Binding ElementName=UserControl, Path=AddTextureFromFileCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="25" Height="25">
                     <iconPacks:PackIconMaterialLight Kind="Plus" />
                 </Button>
-                <TextBlock Text="Add" HorizontalAlignment="Center" FontSize="8"/>
+                <TextBlock Text="Add" HorizontalAlignment="Center" FontSize="10"/>
             </StackPanel>
             <StackPanel VerticalAlignment="Center">
                 <Button Command="{Binding ElementName=UserControl, Path=DeleteTextureCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{DynamicResource MahApps.Styles.Button.Circle}" Width="25" Height="25">
                     <iconPacks:PackIconMaterialLight Kind="Delete" />
                 </Button>
-                <TextBlock Text="Delete" HorizontalAlignment="Center" FontSize="8"/>
+                <TextBlock Text="Delete" HorizontalAlignment="Center" FontSize="10"/>
             </StackPanel>
             <Separator/>
             <!-- Currently this menu is only useful for container type EMBs, so it will be hidden for everything else. -->
@@ -87,7 +87,7 @@
                         </ContextMenu>
                     </Button.ContextMenu>
                 </Button>
-                <TextBlock Text="Tools" HorizontalAlignment="Center" FontSize="8"/>
+                <TextBlock Text="Tools" HorizontalAlignment="Center" FontSize="10"/>
             </StackPanel>
 
 

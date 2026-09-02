@@ -23,6 +23,7 @@ using LB_Common.Utils;
 using ControlzEx.Theming;
 using System.Linq;
 using System.Globalization;
+using LB_Common.Forms;
 
 namespace AudioCueEditor
 {
@@ -270,14 +271,14 @@ namespace AudioCueEditor
         }
 
         public RelayCommand NewAcbCommand => new RelayCommand(NewAcb);
-        private async void NewAcb()
+        private void NewAcb()
         {
             if(AcbFile != null)
             {
                 //Confirm
-                var result = await this.ShowMessageAsync("Discard current file?", "An acb file is already open. Any unsaved changes will be lost if you continue.", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.Default);
+                var result = MessagePrompt.Show("An acb file is already open. Any unsaved changes will be lost if you continue.", "Discard current file?", MessagePromptButtons.OKCancel, MessagePromptIcon.Question);
 
-                if (result != MessageDialogResult.Affirmative) return;
+                if (result != MessagePromptResult.OK) return;
             }
             
             AcbFile = ACB_Wrapper.NewXv2Acb();
@@ -302,9 +303,9 @@ namespace AudioCueEditor
         }
 
         public RelayCommand ForceLoadAcbCommand => new RelayCommand(ForceLoadAcb);
-        private async void ForceLoadAcb()
+        private void ForceLoadAcb()
         {
-            await this.ShowMessageAsync("Force Load", "Warning: Force loading disables most validation done on the ACB file when loading, such as checks about if columns exist or not. This can allow some ACBs to load that normally give errors but can also cause major issues!", MessageDialogStyle.Affirmative, DialogSettings.Default);
+            MessagePrompt.Show("WARNING: Force loading disables most validation done on the ACB file when loading, such as checks about if columns exist or not. This can allow some ACBs to load that normally give errors but can also cause major issues! Saving an ACB that is loaded this way is not recommended.", "Force Load", MessagePromptButtons.OK, MessagePromptIcon.Warning);
 
             OpenFileDialog openFile = new OpenFileDialog();
             openFile.Title = "Open ACB file...";
@@ -341,9 +342,9 @@ namespace AudioCueEditor
 
             if (File.Exists(acbPath) && !isInternalAwb)
             {
-                var ret = await this.ShowMessageAsync("ACB Found", "A matching ACB was found for this AWB. Do you want to load that instead?\n\nEditing is very limited when loading just the AWB. To unlock all the editing features of ACE, an ACB is required.", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.DefaultYesNo);
+                var ret = MessagePrompt.Show("A matching ACB was found for this AWB. Do you want to load that instead?\n\nEditing is very limited when loading just the AWB. To unlock all the editing features of ACE, an ACB is required.", "ACB Found", MessagePromptButtons.YesNo, MessagePromptIcon.Question, null, "Load ACB", null, "Just Load AWB", null);
 
-                if(ret == MessageDialogResult.Affirmative)
+                if(ret == MessagePromptResult.Affirmative)
                 {
                     LoadAcb(acbPath);
                     return;
@@ -366,13 +367,13 @@ namespace AudioCueEditor
                 {
                     if (awbFile.Type == AwbType.CpkUnsupported)
                     {
-                        await this.ShowMessageAsync("Unsupported AWB", "This is an older, unsupported type of AWB file (CPK based). Load failed.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                        MessagePrompt.Show("This is an older, unsupported type of AWB file (CPK based). Load failed.", "Unsupported AWB", MessagePromptButtons.OK, MessagePromptIcon.Error);
                         return;
                     }
 
                     if (awbFile.Type == AwbType.None)
                     {
-                        await this.ShowMessageAsync("Nothing Found", "No internal AWB file was found.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                        MessagePrompt.Show("No internal AWB file was found.", "Nothing Found", MessagePromptButtons.OK, MessagePromptIcon.Error);
                         return;
                     }
 
@@ -409,11 +410,11 @@ namespace AudioCueEditor
 
                     if (AcbFile.AcbFile.TableValidationFailed)
                     {
-                        await this.ShowMessageAsync("Validation Failed", "This file contains unknown data that could not be loaded and was skipped. Continuing at this point may very likely result in this ACB losing data or becoming corrupt.\n\nYou've been warned!", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                        MessagePrompt.Show("This file contains unknown data that could not be loaded and was skipped. Continuing at this point may very likely result in this ACB losing data or becoming corrupt.\n\nYou've been warned!", "Validation Failed", MessagePromptButtons.OK, MessagePromptIcon.Warning);
                     }
                     if (AcbFile.AcbFile.ExternalAwbError)
                     {
-                        await this.ShowMessageAsync("Validation Failed", "There should be an external AWB file with this ACB, but none was found. Because of this some tracks could not be loaded.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                        MessagePrompt.Show("There should be an external AWB file with this ACB, but none was found. Because of this some tracks could not be loaded.", "Validation Failed", MessagePromptButtons.OK, MessagePromptIcon.Warning);
                     }
                 }
                 
@@ -454,12 +455,9 @@ namespace AudioCueEditor
 
         private async void Save(string path)
         {
-            if(AcbFile?.AcbFile?.SaveFormat == SaveFormat.AudioPackage)
+            if(AcbFile?.AcbFile?.SaveFormat == SaveFormat.AudioPackage && !AudioPackageValidation())
             {
-                bool validate = await AudioPackageValidation();
-
-                if (!validate)
-                    return;
+                return;
             }
 
             var controller = await this.ShowProgressAsync($"Saving \"{Path.GetFileName(path)}\"...", $"", false, DialogSettings.Create(14));
@@ -483,7 +481,6 @@ namespace AudioCueEditor
                 });
 
                 await task;
-                //await this.ShowMessageAsync("Save successful", "The acb file was successfully saved!", MessageDialogStyle.Affirmative, DialogSettings.Default);
             }
             finally
             {
@@ -493,30 +490,22 @@ namespace AudioCueEditor
         }
 
         public RelayCommand SettingsCommand => new RelayCommand(OpenSettings);
-        private async void OpenSettings()
+        private void OpenSettings()
         {
-            string originalGameDir = SettingsManager.settings.GameDirectory;
-
             Forms.Settings settingsForm = new Forms.Settings(this);
             settingsForm.ShowDialog();
             SettingsManager.Instance.SaveSettings();
             InitTheme();
-
-            if (SettingsManager.settings.GameDirectory != originalGameDir && SettingsManager.settings.ValidGameDir)
-            {
-                //placeholder for whenever loading from game is added
-            }
-            
         }
 
         public RelayCommand ExitCommand => new RelayCommand(Exit);
-        private async void Exit()
+        private void Exit()
         {
             if(AcbFile != null)
             {
-                var result = await this.ShowMessageAsync("Exit?", "An ACB file is open. Any unsaved changes will be lost if you continue.", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.Default);
+                var result = MessagePrompt.Show("An ACB file is open. Any unsaved changes will be lost if you continue.", "Exit?", MessagePromptButtons.OKCancel, MessagePromptIcon.Question);
 
-                if (result != MessageDialogResult.Affirmative) return;
+                if (result != MessagePromptResult.OK) return;
             }
 
             Environment.Exit(0);
@@ -606,14 +595,14 @@ namespace AudioCueEditor
         }
 
         public RelayCommand FixSilentCuesCommand => new RelayCommand(FixSilentCues, CanFixSilentCues);
-        private async void FixSilentCues()
+        private void FixSilentCues()
         {
             if (AcbFile != null)
             {
                 //Confirm
-                var result = await this.ShowMessageAsync("Fix Silent Cues", "This tool is a fixer for old modded ACBs that have become broken with the 1.16 update of DBXV2, with all added tracks now being silent.\n\nFix the ACB?", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.Default);
+                var result = MessagePrompt.Show("This tool is a fixer for old modded ACBs that have become broken with the 1.16 update of DBXV2, with all added tracks now being silent.\n\nFix the ACB?", "Fix Silent Cues", MessagePromptButtons.OKCancel, MessagePromptIcon.Question);
 
-                if (result != MessageDialogResult.Affirmative) return;
+                if (result != MessagePromptResult.OK) return;
 
                 var undos = AcbFile.AcbFile.AddVolumeBusToCues();
                 UndoManager.Instance.AddCompositeUndo(undos, "Fix Silent Cues");
@@ -781,13 +770,13 @@ namespace AudioCueEditor
             }
         }
     
-        private async Task<bool> AudioPackageValidation()
+        private bool AudioPackageValidation()
         {
             if (AcbFile.AcbFile.SaveFormat != SaveFormat.AudioPackage) return true;
 
             if(AcbFile.AcbFile.AudioPackageType == AudioPackageType.None)
             {
-                await this.ShowMessageAsync("Invalid AudioPackage Type", "The AudioPackage Type has not been set.\n\nYou can do so in the Tools -> DBXV2 Installer menu at the top of the window.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                MessagePrompt.Show("The AudioPackage Type has not been set.\n\nYou can do so in the Tools -> DBXV2 Installer menu at the top of the window.", "Invalid AudioPackage Type", MessagePromptButtons.OK, MessagePromptIcon.Error);
                 return false;
             }
 
@@ -797,7 +786,7 @@ namespace AudioCueEditor
                 {
                     if (string.IsNullOrWhiteSpace(AcbFile.AcbFile.Cues[i].Name))
                     {
-                        await this.ShowMessageAsync("Invalid NewOption Configuration", "One or more of the cues does not have a name. Names are required for NewOption (BGM) AudioPackages.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                        MessagePrompt.Show("One or more of the cues does not have a name. Names are required for NewOption (BGM) AudioPackages.", "Invalid NewOption Configuration", MessagePromptButtons.OK, MessagePromptIcon.Error);
                         return false;
                     }
                 }
@@ -809,19 +798,19 @@ namespace AudioCueEditor
                 {
                     if (AcbFile.AcbFile.Cues.Any(x => x.Name == AcbFile.AcbFile.Cues[i].Name && x.VoiceLanguage == AcbFile.AcbFile.Cues[i].VoiceLanguage && x != AcbFile.AcbFile.Cues[i]))
                     {
-                        await this.ShowMessageAsync("Invalid AutoVoice Configuration", "The same name is used multiple times for different tracks!\n\nEnsure that ALL tracks have a unique name. Using the same name as another track will overwrite that track!", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                        MessagePrompt.Show("The same name is used multiple times for different tracks!\n\nEnsure that ALL tracks have a unique name. Using the same name as another track will overwrite that track!", "Invalid AutoVoice Configuration", MessagePromptButtons.OK, MessagePromptIcon.Error);
                         return false;
                     }
 
                     if (AcbFile.AcbFile.Cues.Any(x => x.InstallID_Lang == AcbFile.AcbFile.Cues[i].InstallID_Lang && x != AcbFile.AcbFile.Cues[i]))
                     {
-                        await this.ShowMessageAsync("Invalid AutoVoice Configuration", "Duplicate tracks of the same language have been detected in the AudioPackage. (A duplicate track is a track with the same name, alias and language).", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                        MessagePrompt.Show("Duplicate tracks of the same language have been detected in the AudioPackage. (A duplicate track is a track with the same name, alias and language).", "Invalid AutoVoice Configuration", MessagePromptButtons.OK, MessagePromptIcon.Error);
                         return false;
                     }
 
                     if (AcbFile.AcbFile.Cues.Any(x => x.AliasBinding == AcbFile.AcbFile.Cues[i].AliasBinding && !string.IsNullOrWhiteSpace(x.AliasBinding) && x.InstallID != AcbFile.AcbFile.Cues[i].InstallID && x != AcbFile.AcbFile.Cues[i]))
                     {
-                        await this.ShowMessageAsync("Invalid AutoVoice Configuration", "The same alias was used multiple times for different tracks. This is not allowed.\n\nEnsure that the same alias is never used for another track (different name). The same alias can only be used twice - once for an English track and for a Japanese track (same cue name!).", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                        MessagePrompt.Show("The same alias was used multiple times for different tracks. This is not allowed.\n\nEnsure that the same alias is never used for another track (different name). The same alias can only be used twice - once for an English track and for a Japanese track (same cue name!).", "Invalid AutoVoice Configuration", MessagePromptButtons.OK, MessagePromptIcon.Error);
                         return false;
                     }
 
@@ -829,14 +818,14 @@ namespace AudioCueEditor
                     {
                         if (!AcbFile.AcbFile.Cues.Any(x => x.VoiceLanguage == VoiceLanguageEnum.English && x.InstallID == AcbFile.AcbFile.Cues[i].InstallID))
                         {
-                            await this.ShowMessageAsync("Invalid AutoVoice Configuration", string.Format("No English track was found for the Japanese track named \"{0}\" with the alias \"{1}\".\n\nEnglish tracks are always mandatory.", AcbFile.AcbFile.Cues[i].Name, AcbFile.AcbFile.Cues[i].AliasBinding), MessageDialogStyle.Affirmative, DialogSettings.Default);
+                            MessagePrompt.Show($"No English track was found for the Japanese track named \"{AcbFile.AcbFile.Cues[i].Name}\" with the alias \"{AcbFile.AcbFile.Cues[i].AliasBinding}\".\n\nEnglish tracks are always mandatory.", "Invalid AutoVoice Configuration", MessagePromptButtons.OK, MessagePromptIcon.Error);
                             return false;
                         }
                     }
 
                     if (string.IsNullOrWhiteSpace(AcbFile.AcbFile.Cues[i].Name))
                     {
-                        await this.ShowMessageAsync("Invalid AutoVoice Configuration", "One or more of the cues does not have a name. Names are required for AutoVoice AudioPackages.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                        MessagePrompt.Show("One or more of the cues does not have a name. Names are required for AutoVoice AudioPackages.", "Invalid AutoVoice Configuration", MessagePromptButtons.OK, MessagePromptIcon.Error);
                         return false;
                     }
                 }
@@ -845,23 +834,22 @@ namespace AudioCueEditor
                 {
                     if (AcbFile.Cues[i].NumActionTracks > 0)
                     {
-                        await this.ShowMessageAsync("Invalid AutoVoice Configuration", "Actions are not allowed on AutoVoice AudioPackages.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                        MessagePrompt.Show("One or more of the cues has an action track. Action tracks are not allowed for AutoVoice AudioPackages.", "Invalid AutoVoice Configuration", MessagePromptButtons.OK, MessagePromptIcon.Error);
                         return false;
                     }
 
                     if (AcbFile.Cues[i].NumTracks != 1)
                     {
-                        await this.ShowMessageAsync("Invalid AutoVoice Configuration", string.Format("Invalid number of tracks on cue: {0}.\n\nAutoVoice cues must always have 1 track - no more or less.", AcbFile.Cues[i].CueRef.Name), MessageDialogStyle.Affirmative, DialogSettings.Default);
+                        MessagePrompt.Show($"Invalid number of tracks on cue: {AcbFile.Cues[i].CueRef.Name}.\n\nAutoVoice cues must always have 1 track - no more or less.", "Invalid AutoVoice Configuration", MessagePromptButtons.OK, MessagePromptIcon.Error);
                         return false;
                     }
                 }
 
                 if(AcbFile.AcbFile.Cues.Count == 0)
                 {
-                    await this.ShowMessageAsync("Invalid AutoVoice Configuration", "The AudioPackage has no cues.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                    MessagePrompt.Show("The AudioPackage has no cues. An AutoVoice AudioPackage must have at least 1 cue.", "Invalid AutoVoice Configuration", MessagePromptButtons.OK, MessagePromptIcon.Error);
                     return false;
                 }
-
             }
 
             return true;

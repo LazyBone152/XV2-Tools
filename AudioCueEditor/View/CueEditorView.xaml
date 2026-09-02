@@ -210,7 +210,7 @@
         </DataGrid>
         
         <!-- Audio playback controls. -->
-        <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left" Height="50" Margin="10,9,0,0" VerticalAlignment="Top" Width="370">
+        <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left" Height="50" Margin="10,9,0,0" VerticalAlignment="Top" Width="400">
             <StackPanel.Resources>
                 <Style TargetType="{x:Type StackPanel}">
                     <Setter Property="Margin" Value="10,0,0,0"/>
@@ -223,32 +223,32 @@
                 <Button Command="{Binding PlayCommand}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="30">
                     <iconPacks:PackIconMaterialLight Kind="Play" />
                 </Button>
-                <TextBlock Text="Play" HorizontalAlignment="Center" FontSize="8"/>
+                <TextBlock Text="Play" HorizontalAlignment="Center" FontSize="10"/>
             </StackPanel>
             <StackPanel VerticalAlignment="Center">
                 <Button Command="{Binding PauseCommand}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="30">
                     <iconPacks:PackIconMaterialLight Kind="Pause" />
                 </Button>
-                <TextBlock Text="Pause" HorizontalAlignment="Center" FontSize="8"/>
+                <TextBlock Text="Pause" HorizontalAlignment="Center" FontSize="10"/>
             </StackPanel>
             <StackPanel VerticalAlignment="Center">
                 <Button Command="{Binding StopCommand}" HorizontalAlignment="Left" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="30">
                     <iconPacks:PackIconMaterialLight Kind="Stop" />
                 </Button>
-                <TextBlock Text="Stop" HorizontalAlignment="Center" FontSize="8"/>
+                <TextBlock Text="Stop" HorizontalAlignment="Center" FontSize="10"/>
             </StackPanel>
 
             <StackPanel VerticalAlignment="Center">
                 <RepeatButton Command="{Binding RewindCommand}" ClickMode="Press" HorizontalAlignment="Left" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="30">
                     <iconPacks:PackIconMaterialLight Kind="SeekPrevious" />
                 </RepeatButton>
-                <TextBlock Text="Rewind" HorizontalAlignment="Center" FontSize="8"/>
+                <TextBlock Text="Rewind" HorizontalAlignment="Center" FontSize="10"/>
             </StackPanel>
             <StackPanel VerticalAlignment="Center">
                 <RepeatButton Command="{Binding FastForwardCommand}" ClickMode="Press" HorizontalAlignment="Left" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="30">
                     <iconPacks:PackIconMaterialLight Kind="SeekNext" />
                 </RepeatButton>
-                <TextBlock Text="Forward" HorizontalAlignment="Center" FontSize="8"/>
+                <TextBlock Text="Forward" HorizontalAlignment="Center" FontSize="10"/>
             </StackPanel>
 
 
@@ -271,21 +271,21 @@
                 <Button Command="{Binding AddNewCueCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="30">
                     <iconPacks:PackIconMaterialLight Kind="Plus"/>
                 </Button>
-                <TextBlock Text="New Cue" HorizontalAlignment="Center" FontSize="8"/>
+                <TextBlock Text="New Cue" HorizontalAlignment="Center" FontSize="10"/>
             </StackPanel>
 
             <StackPanel VerticalAlignment="Center">
                 <Button Command="{Binding AddTrackToCueCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="30">
                     <iconPacks:PackIconMaterialLight Kind="Plus"/>
                 </Button>
-                <TextBlock Text="Add Track" HorizontalAlignment="Center" FontSize="8"/>
+                <TextBlock Text="Add Track" HorizontalAlignment="Center" FontSize="10"/>
             </StackPanel>
 
             <StackPanel VerticalAlignment="Center">
                 <Button Command="{Binding AddActionToCueCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="30" Style="{DynamicResource MahApps.Styles.Button.Circle}" Height="30">
                     <iconPacks:PackIconMaterialLight Kind="Plus"/>
                 </Button>
-                <TextBlock Text="Add Action" HorizontalAlignment="Center" FontSize="8"/>
+                <TextBlock Text="Add Action" HorizontalAlignment="Center" FontSize="10"/>
             </StackPanel>
         </StackPanel>
 
@@ -369,7 +369,7 @@
                 </StackPanel>
 
             </ScrollViewer>
-            <Label Content="{Binding AcbFile.AcbFile._versionStrProp}" ToolTip="{Binding AcbFile.AcbFile.VersionToolTip}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-24,0,0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" Width="111" Height="25"/>
+            <Label x:Name="versionLabel" Content="{Binding AcbFile.AcbFile._versionStrProp}" ToolTip="{Binding AcbFile.AcbFile.VersionToolTip}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-24,0,0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" Width="111" Height="25"/>
         </Grid>
        
         <Label Content="{Binding audioPlayer.PlaybackTime}" HorizontalContentAlignment="Right" HorizontalAlignment="Stretch" Margin="380,17,9.927,0" VerticalAlignment="Top" Height="27"/>

@@ -160,7 +160,7 @@ namespace EEPK_Organiser.Forms
                         e.Cancel = true;
                         try
                         {
-                            MessageBox.Show(string.Format("The entered Effect ID contained invalid characters. Please enter a number between {0} and {1}.", ushort.MinValue, ushort.MaxValue), "Invalid ID", MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessagePrompt.Show(string.Format("The entered Effect ID contained invalid characters. Please enter a number between {0} and {1}.", ushort.MinValue, ushort.MaxValue), "Invalid ID", MessagePromptButtons.OK, MessagePromptIcon.Error);
                             editModeCancelling = true;
                             (sender as DataGrid).CancelEdit();
                         }
@@ -179,7 +179,7 @@ namespace EEPK_Organiser.Forms
                             e.Cancel = true;
                             try
                             {
-                                MessageBox.Show(string.Format("The entered New ID is already taken.", ushort.MinValue, ushort.MaxValue), "Invalid ID", MessageBoxButton.OK, MessageBoxImage.Error);
+                                MessagePrompt.Show(string.Format("The entered New ID is already taken.", ushort.MinValue, ushort.MaxValue), "Invalid ID", MessagePromptButtons.OK, MessagePromptIcon.Error);
                                 editModeCancelling = true;
                                 (sender as DataGrid).CancelEdit();
                             }

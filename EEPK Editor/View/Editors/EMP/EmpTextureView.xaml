@@ -20,19 +20,27 @@
         </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="40"/>
+            <ColumnDefinition Width="50"/>
             <ColumnDefinition Width="280"/>
             <ColumnDefinition Width="*" MaxWidth="500"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <StackPanel Margin="5, 20, 0, 0">
-            <Button Margin="2" HorizontalAlignment="Center" VerticalAlignment="Top" Width="22" Height="22" BorderThickness="1" Style="{DynamicResource MahApps.Styles.Button.Circle}" Command="{Binding ElementName=UserControl, Path=TextureAddCommand}">
-                <iconPacks:PackIconMaterialLight Kind="Plus" />
-            </Button>
-            <Button Margin="2" HorizontalAlignment="Center" VerticalAlignment="Top" Width="22" Height="22" BorderThickness="1" Style="{DynamicResource MahApps.Styles.Button.Circle}" Command="{Binding ElementName=UserControl, Path=TextureRemoveCommand}">
-                <iconPacks:PackIconMaterialLight Kind="Delete" />
-            </Button>
+
+            <StackPanel HorizontalAlignment="Center" Margin="2.5">
+                <Button Command="{Binding ElementName=UserControl, Path=TextureAddCommand}" HorizontalAlignment="Center" Width="30" Height="30" Style="{DynamicResource MahApps.Styles.Button.Circle}" >
+                    <iconPacks:PackIconMaterialLight Kind="Plus" Width="15" Height="15" />
+                </Button>
+                <TextBlock Text="Add" HorizontalAlignment="Center" FontSize="10"/>
+            </StackPanel>
+
+            <StackPanel HorizontalAlignment="Center" Margin="2.5">
+                <Button Command="{Binding ElementName=UserControl, Path=TextureRemoveCommand}" HorizontalAlignment="Center" Width="30" Height="30" Style="{DynamicResource MahApps.Styles.Button.Circle}" >
+                    <iconPacks:PackIconMaterialLight Kind="Delete" Width="15" Height="15" />
+                </Button>
+                <TextBlock Text="Delete" HorizontalAlignment="Center" FontSize="10"/>
+            </StackPanel>
 
         </StackPanel>
         <ListBox x:Name="textureListBox" Grid.Column="1" Margin="5, 20, 5, 20" BorderBrush="{DynamicResource MahApps.Brushes.SemiTransparent}" BorderThickness="1" SelectionMode="Extended" SelectedItem="{Binding ElementName=UserControl, Path=SelectedTexture}" ItemsSource="{Binding ElementName=UserControl, Path=TextureFile.Textures.Binding}" lbUtils:AttachedProperties.SelectedItems="{Binding ElementName=UserControl, Path=SelectedTextures}">

@@ -26,18 +26,30 @@
             <Controls:MetroTabItem Header="Nodes" Controls:HeaderedControlHelper.HeaderFontSize="16">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="40"/>
+                        <ColumnDefinition Width="50"/>
                         <ColumnDefinition Width="400" MinWidth="300" MaxWidth="500"/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Margin="5, 20, 0, 0">
-                        <Button Margin="2" HorizontalAlignment="Center" VerticalAlignment="Top" Width="22" Height="22" BorderThickness="1" Style="{DynamicResource MahApps.Styles.Button.Circle}" Command="{Binding ElementName=UserControl, Path=NewNodeCommand}">
-                            <iconPacks:PackIconMaterialLight Kind="Plus" />
-                        </Button>
-                        <Button Margin="2" HorizontalAlignment="Center" VerticalAlignment="Top" Width="22" Height="22" BorderThickness="1" Style="{DynamicResource MahApps.Styles.Button.Circle}" Command="{Binding ElementName=UserControl, Path=DeleteNodeCommand}">
-                            <iconPacks:PackIconMaterialLight Kind="Delete" />
-                        </Button>
+                        <StackPanel HorizontalAlignment="Center" Margin="2.5">
+                            <Button Command="{Binding ElementName=UserControl, Path=NewNodeCommand}" HorizontalAlignment="Center" Width="30" Height="30" Style="{DynamicResource MahApps.Styles.Button.Circle}" >
+                                <iconPacks:PackIconMaterialLight Kind="Plus" Width="15" Height="15" />
+                            </Button>
+                            <TextBlock Text="Add" HorizontalAlignment="Center" FontSize="10"/>
+                        </StackPanel>
+                        <StackPanel HorizontalAlignment="Center" Margin="2.5">
+                            <Button Command="{Binding ElementName=UserControl, Path=NewNodeChildCommand}" HorizontalAlignment="Center" Width="30" Height="30" Style="{DynamicResource MahApps.Styles.Button.Circle}" >
+                                <iconPacks:PackIconMaterialLight Kind="Plus" Width="15" Height="15" />
+                            </Button>
+                            <TextBlock Text="Child" HorizontalAlignment="Center" FontSize="10"/>
+                        </StackPanel>
+                        <StackPanel HorizontalAlignment="Center" Margin="2.5">
+                            <Button Command="{Binding ElementName=UserControl, Path=DeleteNodeCommand}" HorizontalAlignment="Center" Width="30" Height="30" Style="{DynamicResource MahApps.Styles.Button.Circle}" >
+                                <iconPacks:PackIconMaterialLight Kind="Delete" Width="15" Height="15" />
+                            </Button>
+                            <TextBlock Text="Delete" HorizontalAlignment="Center" FontSize="10"/>
+                        </StackPanel>
 
                     </StackPanel>
 

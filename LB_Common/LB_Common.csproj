@@ -436,6 +436,9 @@
     <Compile Include="Forms\MessagePrompt.xaml.cs">
       <DependentUpon>MessagePrompt.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Forms\StringInput.xaml.cs">
+      <DependentUpon>StringInput.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Forms\NumericInput.xaml.cs">
       <DependentUpon>NumericInput.xaml</DependentUpon>
     </Compile>
@@ -467,6 +470,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Forms\MessagePrompt.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Forms\StringInput.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

@@ -14,6 +14,7 @@ using MahApps.Metro.Controls.Dialogs;
 using AudioCueEditor.Data;
 using Xv2CoreLib.Resource;
 using System.Linq;
+using LB_Common.Forms;
 
 namespace AudioCueEditor.View
 {
@@ -219,7 +220,7 @@ namespace AudioCueEditor.View
             {
                 if (string.IsNullOrWhiteSpace(CueName))
                 {
-                    MessageBox.Show("Name is empty.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessagePrompt.Show("Name is empty.", "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
                     return;
                 }
 
@@ -227,7 +228,7 @@ namespace AudioCueEditor.View
                 {
                     if (string.IsNullOrWhiteSpace(AudioFilePath) || !File.Exists(AudioFilePath))
                     {
-                        MessageBox.Show("Path is not valid.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessagePrompt.Show("Path is not valid.", "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
                         return;
                     }
 
@@ -251,7 +252,7 @@ namespace AudioCueEditor.View
 
                     if (!ConversionSuccessful)
                     {
-                        await((MetroWindow)Owner).ShowMessageAsync("Encoding Error", string.Format("An exception occured during the encoding process:\n\n{0}", ConvertException?.Message), MessageDialogStyle.Affirmative, DialogSettings.Default);
+                        MessagePrompt.Show("An exception occured during the encoding process with the following message:", "Encoding Error", MessagePromptButtons.OK, MessagePromptIcon.Error, richText: ConvertException?.ToString());
                         Close();
                     }
                     else
@@ -265,12 +266,11 @@ namespace AudioCueEditor.View
                     Finished = true;
                     Close();
                 }
-                
             }
 #if !DEBUG
             catch (Exception ex)
             {
-                this.ShowMessageAsync($"Failed", $"An error occured while executing the command.\n\nDetails:{ex.Message}", MessageDialogStyle.Affirmative);
+                MessagePrompt.Show($"An error occured while executing the command.", "Failed", MessagePromptButtons.OK, MessagePromptIcon.Error, richText: ex.ToString());
             }
 #endif
         }

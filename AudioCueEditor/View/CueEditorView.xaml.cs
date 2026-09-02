@@ -1,22 +1,24 @@
 ﻿using AudioCueEditor.Audio;
+using AudioCueEditor.Data;
+using ControlzEx.Standard;
+using GalaSoft.MvvmLight.CommandWpf;
+using LB_Common.Forms;
+using MahApps.Metro.Controls.Dialogs;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using VGAudio.Cli;
 using Xv2CoreLib.ACB;
 using Xv2CoreLib.AFS2;
-using VGAudio.Cli;
-using System.IO;
-using Microsoft.Win32;
-using GalaSoft.MvvmLight.CommandWpf;
-using MahApps.Metro.Controls.Dialogs;
 using Xv2CoreLib.Resource.UndoRedo;
-using AudioCueEditor.Data;
 
 namespace AudioCueEditor.View
 {
@@ -246,6 +248,9 @@ namespace AudioCueEditor.View
             foreach (var key in HcaEncryptionKeysManager.Instance.EncryptionKeys.Keys)
                 VGAudio.Codecs.CriHca.CriHcaEncryption.AddKey(key.Key);
 
+#if XenoKit
+            versionLabel.Visibility = Visibility.Collapsed;
+#endif
         }
 
 
@@ -456,13 +461,13 @@ namespace AudioCueEditor.View
         }
 
         public RelayCommand EditLoopCommand => new RelayCommand(EditLoopOnSelectedTrack, IsTrackSelected);
-        private async void EditLoopOnSelectedTrack()
+        private void EditLoopOnSelectedTrack()
         {
             var track = GetSelectedTrack(TrackType.Track);
 
             if(track.WaveformWrapper.WaveformRef.EncodeType != EncodeType.HCA && track.WaveformWrapper.WaveformRef.EncodeType != EncodeType.HCA_ALT)
             {
-                await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, $"Unsupported operation", $"Edit Loop is only possible on HCA encoded tracks.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                MessagePrompt.Show($"Edit Loop is only possible on HCA encoded tracks.", "Unsupported operation", MessagePromptButtons.OK, MessagePromptIcon.Error);
                 return;
             }
 
@@ -497,7 +502,7 @@ namespace AudioCueEditor.View
         }
 
         public RelayCommand EditVolumeCommand => new RelayCommand(EditVolume, IsCueSelected);
-        private async void EditVolume()
+        private void EditVolume()
         {
             var cue = GetSelectedCue();
 
@@ -505,7 +510,7 @@ namespace AudioCueEditor.View
             {
                 if (cue.SequenceRef == null)
                 {
-                    await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, $"Unsupported operation", $"Edit Volume is not available on this cue type. Only Sequence type cues are supported.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                    MessagePrompt.Show($"Edit Volume is only possible on Sequence type cues.", "Unsupported operation", MessagePromptButtons.OK, MessagePromptIcon.Error);
                     return;
                 }
                 var trackForm = new VolumeControl(Application.Current.MainWindow, cue);
@@ -514,7 +519,7 @@ namespace AudioCueEditor.View
         }
 
         public RelayCommand EditCueLimitCommand => new RelayCommand(EditCueLimit, CanSetCueLimit);
-        private async void EditCueLimit()
+        private void EditCueLimit()
         {
             var cue = GetSelectedCue();
 
@@ -522,7 +527,7 @@ namespace AudioCueEditor.View
             {
                 if (cue.SequenceRef == null)
                 {
-                    await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, $"Unsupported operation", $"Edit Cue Limit is not available on this cue type. Only Sequence type cues are supported.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                    MessagePrompt.Show($"Edit Cue Limit is only possible on Sequence type cues.", "Unsupported operation", MessagePromptButtons.OK, MessagePromptIcon.Error);
                     return;
                 }
                 var trackForm = new EditCueLimit(Application.Current.MainWindow, cue);
@@ -531,32 +536,21 @@ namespace AudioCueEditor.View
         }
 
         public RelayCommand EditCueIdCommand => new RelayCommand(EditCueId, IsCueSelected);
-        private async void EditCueId()
+        private void EditCueId()
         {
             var cue = GetSelectedCue();
-            start:
-            var result = await DialogCoordinator.Instance.ShowInputAsync(Application.Current.MainWindow, "Change Cue ID", "Enter a new ID for the cue:", DialogSettings.Default);
+            uint newCueId = NumericInput.Show("Change Cue ID", "Enter a new ID for the cue:", cue.CueRef.ID, 0, uint.MaxValue, 1, "Enter a new cue ID. It must be unique.");
 
-            if (string.IsNullOrWhiteSpace(result))
+            if(newCueId != cue.CueRef.ID)
             {
-                return;
-            }
-
-            uint num;
-            if (!uint.TryParse(result, out num))
-            {
-                await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, "Invalid Characters", "The entered ID contains invalid characters.", MessageDialogStyle.Affirmative, DialogSettings.Default);
-                goto start;
-            }
-
-            if (AcbFile.Cues.FirstOrDefault(a => a.CueRef.ID == num && a != cue) != null)
-            {
-                await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, "ID Already Used", "The entered ID is already used by another cue. Please enter a unique one.", MessageDialogStyle.Affirmative, DialogSettings.Default);
-                goto start;
-            }
-            else
-            {
-                cue.UndoableCueId = num;
+                if (AcbFile.Cues.Any(a => a.CueRef.ID == newCueId && a != cue))
+                {
+                    MessagePrompt.Show($"The entered ID is already used by another cue. Please enter a unique one.", "ID Already Used", MessagePromptButtons.OK, MessagePromptIcon.Error);
+                }
+                else
+                {
+                    cue.UndoableCueId = newCueId;
+                }
             }
         }
 
@@ -730,7 +724,7 @@ namespace AudioCueEditor.View
                 ExtractSelectedTrack();
         }
 
-        private async void ListBoxEvent_EditVolumeOnTrack_Click(object sender, RoutedEventArgs e)
+        private void ListBoxEvent_EditVolumeOnTrack_Click(object sender, RoutedEventArgs e)
         {
             var track = GetSelectedTrack(TrackType.Track);
 
@@ -738,7 +732,7 @@ namespace AudioCueEditor.View
             {
                 if (track.TrackRef == null)
                 {
-                    await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, $"Unsupported operation", $"Edit Volume is not available on this cue type. Only Sequence type cues are supported.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                    MessagePrompt.Show($"Edit Volume is only possible on Sequence type cues.", "Unsupported operation", MessagePromptButtons.OK, MessagePromptIcon.Error);
                     return;
                 }
                 var trackForm = new VolumeControl(Application.Current.MainWindow, track);
@@ -811,7 +805,7 @@ namespace AudioCueEditor.View
                                 e.Handled = false; //Let parent window handle it
                                 break;
                             default:
-                                MessageBox.Show(String.Format("The filetype of the dropped file ({0}) is not supported.", System.IO.Path.GetExtension(droppedFile)), "File Drop", MessageBoxButton.OK, MessageBoxImage.Error);
+                                MessagePrompt.Show(string.Format("The filetype of the dropped file ({0}) is not supported.", Path.GetExtension(droppedFile)), "File Drop", MessagePromptButtons.OK, MessagePromptIcon.Error);
                                 break;
                         }
                     }
@@ -819,7 +813,7 @@ namespace AudioCueEditor.View
             }
             catch (Exception ex)
             {
-                MessageBox.Show(String.Format("The dropped file could not be opened.\n\nThe reason given by the system: {0}", ex.Message), "File Drop", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(string.Format("The dropped file could not be opened.\n\nThe reason given by the system: {0}", ex.Message), "File Drop", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -856,7 +850,7 @@ namespace AudioCueEditor.View
                                 }
                                 break;
                             default:
-                                MessageBox.Show(String.Format("The filetype of the dropped file ({0}) is not supported.", System.IO.Path.GetExtension(droppedFilePaths[0])), "File Drop", MessageBoxButton.OK, MessageBoxImage.Error);
+                                MessagePrompt.Show(String.Format("The filetype of the dropped file ({0}) is not supported.", System.IO.Path.GetExtension(droppedFilePaths[0])), "File Drop", MessagePromptButtons.OK, MessagePromptIcon.Error);
                                 break;
                         }
                     }
@@ -864,7 +858,7 @@ namespace AudioCueEditor.View
             }
             catch (Exception ex)
             {
-                MessageBox.Show(String.Format("The dropped file could not be opened.\n\nThe reason given by the system: {0}", ex.Message), "File Drop", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("The dropped file could not be opened.\n\nThe reason given by the system: {0}", ex.Message), "File Drop", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
             
         }
@@ -941,11 +935,11 @@ namespace AudioCueEditor.View
         }
 
         public RelayCommand EditLoopAwbCommand => new RelayCommand(EditLoopOnSelectedAwbTrack, CanEditAwbLoop);
-        private async void EditLoopOnSelectedAwbTrack()
+        private void EditLoopOnSelectedAwbTrack()
         {
             if (SelectedAwbEntry.HcaInfo.EncodeType != EncodeType.HCA)
             {
-                await DialogCoordinator.Instance.ShowMessageAsync(Application.Current.MainWindow, $"Unsupported operation", $"Edit Loop is only possible on HCA encoded tracks.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                MessagePrompt.Show($"Edit Loop is only possible on HCA encoded tracks.", "Unsupported operation", MessagePromptButtons.OK, MessagePromptIcon.Error);
                 return;
             }
 

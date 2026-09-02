@@ -63,17 +63,18 @@ namespace LB_Common.Forms
         public MessagePromptResult Result = MessagePromptResult.PromptClosed;
 
         public MessagePrompt(string title, string message, string richText = null) 
-            : this(title, message, MessagePromptIcon.Information, MessagePromptButtons.OK, richText, null, null, null, null)
+            : this(title, message, MessagePromptIcon.Information, MessagePromptButtons.OK, richText, null, null, null, null, topmost: false)
         {
 
         }
 
         public MessagePrompt(string title, string message, MessagePromptIcon icon, MessagePromptButtons buttons, string richText = null,
-            string affirmativeBtnAlias = null, string affirmativeAltBtnAlias = null, string negativeBtnAlias = null, string negativeAltBtnAlias = null)
+            string affirmativeBtnAlias = null, string affirmativeAltBtnAlias = null, string negativeBtnAlias = null, string negativeAltBtnAlias = null, bool topmost = false)
         {
             InitializeComponent();
             DataContext = this;
 
+            Topmost = topmost;
             Title = title;
             helpTextBlock.Text = message;
             richTextBox.Visibility = string.IsNullOrWhiteSpace(richText) ? Visibility.Collapsed : Visibility.Visible;
@@ -126,40 +127,40 @@ namespace LB_Common.Forms
 
         }
 
-        public static MessagePromptResult Show(string message, string title, bool noSound = false)
+        public static MessagePromptResult Show(string message, string title, bool noSound = false, bool topmost = true)
         {
-            return InternalShow(title, message, MessagePromptIcon.Information, MessagePromptButtons.OK, null, noSound: noSound);
+            return InternalShow(title, message, MessagePromptIcon.Information, MessagePromptButtons.OK, null, noSound: noSound, topmost: topmost);
         }
 
-        public static MessagePromptResult Show(string message, string title, string richText, bool noSound = false)
+        public static MessagePromptResult Show(string message, string title, string richText, bool noSound = false, bool topmost = true)
         {
-            return InternalShow(title, message, MessagePromptIcon.Information, MessagePromptButtons.OK, richText, noSound: noSound);
+            return InternalShow(title, message, MessagePromptIcon.Information, MessagePromptButtons.OK, richText, noSound: noSound, topmost: topmost);
         }
 
-        public static MessagePromptResult Show(string message, string title, MessagePromptIcon icon, bool noSound = false)
+        public static MessagePromptResult Show(string message, string title, MessagePromptIcon icon, bool noSound = false, bool topmost = true)
         {
-            return InternalShow(title, message, icon, MessagePromptButtons.OK, null, noSound: noSound);
+            return InternalShow(title, message, icon, MessagePromptButtons.OK, null, noSound: noSound, topmost: topmost);
         }
 
-        public static MessagePromptResult Show(string message, string title, MessagePromptButtons buttons, MessagePromptIcon icon, bool noSound = false)
+        public static MessagePromptResult Show(string message, string title, MessagePromptButtons buttons, MessagePromptIcon icon, bool noSound = false, bool topmost = true)
         {
-            return InternalShow(title, message, icon, buttons, null, noSound: noSound);
+            return InternalShow(title, message, icon, buttons, null, noSound: noSound, topmost: topmost);
         }
 
-        public static MessagePromptResult Show(string message, string title, MessagePromptButtons buttons, MessagePromptIcon icon, string richText, bool noSound = false)
+        public static MessagePromptResult Show(string message, string title, MessagePromptButtons buttons, MessagePromptIcon icon, string richText, bool noSound = false, bool topmost = true)
         {
-            return InternalShow(title, message, icon, buttons, richText, noSound: noSound);
+            return InternalShow(title, message, icon, buttons, richText, noSound: noSound, topmost: topmost);
         }
 
-        public static MessagePromptResult Show(string message, string title, MessagePromptButtons buttons, MessagePromptIcon icon, string richText, string affirmativeBtnAlias, string affirmativeAltBtnAlias, string negativeBtnAlias, string negativeAltBtnAlias, bool noSound = false)
+        public static MessagePromptResult Show(string message, string title, MessagePromptButtons buttons, MessagePromptIcon icon, string richText, string affirmativeBtnAlias, string affirmativeAltBtnAlias, string negativeBtnAlias, string negativeAltBtnAlias, bool noSound = false, bool topmost = true)
         {
-            return InternalShow(title, message, icon, buttons, richText, affirmativeBtnAlias, affirmativeAltBtnAlias, negativeBtnAlias, negativeAltBtnAlias, noSound);
+            return InternalShow(title, message, icon, buttons, richText, affirmativeBtnAlias, affirmativeAltBtnAlias, negativeBtnAlias, negativeAltBtnAlias, noSound: noSound, topmost: topmost);
         }
 
         private static MessagePromptResult InternalShow(string title, string message, MessagePromptIcon icon, MessagePromptButtons buttons, string richText = null,
-            string affirmativeBtnAlias = null, string affirmativeAltBtnAlias = null, string negativeBtnAlias = null, string negativeAltBtnAlias = null, bool noSound = false)
+            string affirmativeBtnAlias = null, string affirmativeAltBtnAlias = null, string negativeBtnAlias = null, string negativeAltBtnAlias = null, bool noSound = false, bool topmost = true)
         {
-            MessagePrompt prompt = new MessagePrompt(title, message, icon, buttons, richText, affirmativeBtnAlias, affirmativeAltBtnAlias, negativeBtnAlias, negativeAltBtnAlias);
+            MessagePrompt prompt = new MessagePrompt(title, message, icon, buttons, richText, affirmativeBtnAlias, affirmativeAltBtnAlias, negativeBtnAlias, negativeAltBtnAlias, topmost);
 
             if (!noSound)
             {

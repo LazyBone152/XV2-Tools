@@ -1,6 +1,10 @@
 ﻿using AudioCueEditor.Audio;
+using AudioCueEditor.Data;
 using GalaSoft.MvvmLight.CommandWpf;
+using LB_Common.Forms;
 using MahApps.Metro.Controls;
+using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -8,6 +12,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -17,13 +22,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using MahApps.Metro.Controls;
-using MahApps.Metro.Controls.Dialogs;
-using System.Threading;
 using Xv2CoreLib.ACB;
-using AudioCueEditor.Data;
-using Xv2CoreLib.Resource;
 using Xv2CoreLib.AFS2;
+using Xv2CoreLib.Resource;
 
 namespace AudioCueEditor.View
 {
@@ -184,7 +185,7 @@ namespace AudioCueEditor.View
 
             if(!ConversionSuccessful)
             {
-                await ((MetroWindow)Owner).ShowMessageAsync("Encoding Error", string.Format("An exception occured during the encoding process:\n\n{0}", ConvertException?.Message), MessageDialogStyle.Affirmative, DialogSettings.Default);
+                MessagePrompt.Show("An exception occured during the encoding process with the following message:", "Encoding Error", MessagePromptButtons.OK, MessagePromptIcon.Error, richText: ConvertException?.ToString());
                 Close();
             }
             else

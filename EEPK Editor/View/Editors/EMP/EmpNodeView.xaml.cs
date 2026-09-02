@@ -2,6 +2,7 @@
 using EEPK_Organiser.View.Controls;
 using EEPK_Organiser.ViewModel;
 using GalaSoft.MvvmLight.CommandWpf;
+using LB_Common.Forms;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -382,7 +383,7 @@ namespace EEPK_Organiser.View.Editors.EMP
             }
             else
             {
-                MessageBox.Show("\"Paste Values\" only works with an equal amount of copied and selected points.", "Paste Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show("\"Paste Values\" only works with an equal amount of copied and selected points.", "Paste Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
         }
 
@@ -421,13 +422,13 @@ namespace EEPK_Organiser.View.Editors.EMP
 
                     if (emo.Parts.Count != 1)
                     {
-                        MessageBox.Show($"Cannot set this model as the particle mesh because it has too many meshes! A particle can only have 1 mesh.", "Invalid Mesh File", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessagePrompt.Show($"Cannot set this model as the particle mesh because it has too many meshes! A particle can only have 1 mesh.", "Invalid Mesh File", MessagePromptButtons.OK, MessagePromptIcon.Error);
                         return;
                     }
 
                     if (emo.Parts[0].EmgFiles.Count != 1)
                     {
-                        MessageBox.Show($"Cannot set this model as the particle mesh because it has too many meshes! A particle can only have 1 mesh.", "Invalid Mesh File", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessagePrompt.Show($"Cannot set this model as the particle mesh because it has too many meshes! A particle can only have 1 mesh.", "Invalid Mesh File", MessagePromptButtons.OK, MessagePromptIcon.Error);
                         return;
                     }
 
@@ -442,20 +443,20 @@ namespace EEPK_Organiser.View.Editors.EMP
                 //A particle mesh can only have 1 mesh, and up to 1 texture def on that mesh (though, sometimes none... not sure on the purpose of this since the EMP has a texture def too).
                 if (emgFile.EmgMeshes.Count != 1)
                 {
-                    MessageBox.Show($"The model can only have 1 mesh, while this file has {emgFile.EmgMeshes.Count}.\n\nCannot set this model as the particle mesh. Import failed.", "Invalid Mesh File", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessagePrompt.Show($"The model can only have 1 mesh, while this file has {emgFile.EmgMeshes.Count}.\n\nCannot set this model as the particle mesh. Import failed.", "Invalid Mesh File", MessagePromptButtons.OK, MessagePromptIcon.Error);
                     return;
                 }
 
                 //if (emgFile.EmgMeshes[0].TextureLists.Count > 1)
                 //{
-                //    MessageBox.Show($"The mesh may only have up to 1 texture definition, while this file has {emgFile.EmgMeshes[0].TextureLists.Count}.\n\nCannot set this model as the particle mesh. Import failed.", "Invalid Mesh File", MessageBoxButton.OK, MessageBoxImage.Error);
+                //    MessagePrompt.Show($"The mesh may only have up to 1 texture definition, while this file has {emgFile.EmgMeshes[0].TextureLists.Count}.\n\nCannot set this model as the particle mesh. Import failed.", "Invalid Mesh File", MessagePromptButtons.OK, MessagePromptIcon.Error);
                 //}
 
                 if (emgFile.EmgMeshes[0].VertexFlags.HasFlag(Xv2CoreLib.EMD.VertexFlags.BlendWeight) || emgFile.EmgMeshes[0].VertexFlags.HasFlag(Xv2CoreLib.EMD.VertexFlags.Tangent) || emgFile.EmgMeshes[0].VertexFlags.HasFlag(Xv2CoreLib.EMD.VertexFlags.Tex2UV))
                 {
-                    MessageBoxResult result = MessageBox.Show($"The mesh has invalid vertex flags.\n\nDetected flags: {emgFile.EmgMeshes[0].VertexFlags}\nAllowed flags: Position, Normal, TexUV, Color, CompressedFormat.\n\nIf you choose to continue with the import then these flags, along with any associated vertex data, will be removed.", "Invalid Vertex Flags", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                    MessagePromptResult result = MessagePrompt.Show($"The mesh has invalid vertex flags.\n\nDetected flags: {emgFile.EmgMeshes[0].VertexFlags}\nAllowed flags: Position, Normal, TexUV, Color, CompressedFormat.\n\nIf you choose to continue with the import then these flags, along with any associated vertex data, will be removed.", "Invalid Vertex Flags", MessagePromptButtons.YesNo, MessagePromptIcon.Question);
 
-                    if (result == MessageBoxResult.Yes)
+                    if (result == MessagePromptResult.Yes)
                     {
                         emgFile.EmgMeshes[0].VertexFlags = emgFile.EmgMeshes[0].VertexFlags.RemoveFlag(Xv2CoreLib.EMD.VertexFlags.BlendWeight) | emgFile.EmgMeshes[0].VertexFlags.RemoveFlag(Xv2CoreLib.EMD.VertexFlags.Tangent) | emgFile.EmgMeshes[0].VertexFlags.RemoveFlag(Xv2CoreLib.EMD.VertexFlags.Tex2UV);
                     }

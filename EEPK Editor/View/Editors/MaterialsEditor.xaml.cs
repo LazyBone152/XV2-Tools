@@ -419,7 +419,7 @@ namespace EEPK_Organiser.View
         }
 
         public RelayCommand DeleteMaterialCommand => new RelayCommand(DeleteMaterial, IsMaterialSelected);
-        private async void DeleteMaterial()
+        private void DeleteMaterial()
         {
             bool materialInUse = false;
             int removed = 0;
@@ -445,11 +445,11 @@ namespace EEPK_Organiser.View
 
                     if (materialInUse && selectedMaterials.Count == 1)
                     {
-                        await DialogCoordinator.Instance.ShowMessageAsync(this, "Delete", "The selected material cannot be deleted because it is currently being used.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                        MessagePrompt.Show("The selected material cannot be deleted because it is currently being used.", "Delete", MessagePromptButtons.OK, MessagePromptIcon.Warning);
                     }
                     else if (materialInUse && selectedMaterials.Count > 1)
                     {
-                        await DialogCoordinator.Instance.ShowMessageAsync(this, "Delete", "One or more of the selected materials cannot be deleted because they are currently being used.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                        MessagePrompt.Show("One or more of the selected materials cannot be deleted because they are currently being used.", "Delete", MessagePromptButtons.OK, MessagePromptIcon.Warning);
                     }
                 }
                 else
@@ -505,7 +505,7 @@ namespace EEPK_Organiser.View
         }
 
         public RelayCommand MergeMaterialCommand => new RelayCommand(MergeMaterial, IsMaterialSelected);
-        private async void MergeMaterial()
+        private void MergeMaterial()
         {
             List<EmmMaterial> selectedMaterials = materialDataGrid.SelectedItems.Cast<EmmMaterial>().ToList();
             selectedMaterials.Remove(SelectedMaterial);
@@ -515,9 +515,13 @@ namespace EEPK_Organiser.View
                 List<IUndoRedo> undos = new List<IUndoRedo>();
                 int count = selectedMaterials.Count + 1;
 
-                var result = await DialogCoordinator.Instance.ShowMessageAsync(this, string.Format("Merge ({0} materials)", count), string.Format("All currently selected materials will be MERGED into {0}.\n\nAll other selected materials will be deleted, with all references to them changed to {0}.\n\nDo you wish to continue?", SelectedMaterial.Name), MessageDialogStyle.AffirmativeAndNegative, DialogSettings.Default);
+                var result = MessagePrompt.Show(
+                    string.Format("All currently selected materials will be MERGED into {0}.\n\nAll other selected materials will be deleted, with all references to them changed to {0}.\n\nDo you wish to continue?", SelectedMaterial.Name),
+                    string.Format("Merge ({0} materials)", count), 
+                    MessagePromptButtons.OKCancel, 
+                    MessagePromptIcon.Question);
 
-                if (result == MessageDialogResult.Affirmative)
+                if (result == MessagePromptResult.OK)
                 {
                     foreach (var materialToRemove in selectedMaterials)
                     {
@@ -531,7 +535,7 @@ namespace EEPK_Organiser.View
             }
             else
             {
-                await DialogCoordinator.Instance.ShowMessageAsync(this, "Merge", "Cannot merge with less than 2 materials selected.\n\nTip: Use Left Ctrl + Left Mouse Click to multi-select.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                MessagePrompt.Show("Cannot merge with less than 2 materials selected.\n\nTip: Use Left Ctrl + Left Mouse Click to multi-select.", "Merge", MessagePromptButtons.OK, MessagePromptIcon.Warning);
             }
         }
 
@@ -619,7 +623,7 @@ namespace EEPK_Organiser.View
         }
 
         public RelayCommand PasteMaterialValuesCommand => new RelayCommand(PasteMaterialValues, CanPasteMaterialValues);
-        private async void PasteMaterialValues()
+        private void PasteMaterialValues()
         {
             List<EmmMaterial> copiedMaterials = (List<EmmMaterial>)Clipboard.GetData(Misc.ClipboardDataTypes.EmmMaterial);
 
@@ -627,7 +631,7 @@ namespace EEPK_Organiser.View
             {
                 if (copiedMaterials.Count == 0 || copiedMaterials.Count > 1)
                 {
-                    await DialogCoordinator.Instance.ShowMessageAsync(this, "Paste Values", "Cannot paste the material values as there were more than 1 copied.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                    MessagePrompt.Show("Cannot paste the material values as there were more than 1 copied.", "Paste Values", MessagePromptButtons.OK, MessagePromptIcon.Warning);
                     return;
                 }
 
@@ -663,11 +667,11 @@ namespace EEPK_Organiser.View
 
         #region ToolsCommand
         public RelayCommand MergeDuplicatesCommand => new RelayCommand(MergeDuplicates);
-        private async void MergeDuplicates()
+        private void MergeDuplicates()
         {
-            var result = await DialogCoordinator.Instance.ShowMessageAsync(this, "Merge Duplicates", "All instances of duplicated materials will be merged into a single material. A duplicated material means any that share the same parameters, but have a different name. \n\nAll references to the duplicates in any assets will also be updated to reflect these changes.\n\nDo you want to continue?", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.Default);
+            var result = MessagePrompt.Show("All instances of duplicated materials will be merged into a single material. A duplicated material means any that share the same parameters, but have a different name. \n\nAll references to the duplicates in any assets will also be updated to reflect these changes.\n\nDo you want to continue?", "Merge Duplicates", MessagePromptButtons.OKCancel, MessagePromptIcon.Question);
 
-            if (result == MessageDialogResult.Affirmative)
+            if (result == MessagePromptResult.OK)
             {
                 List<IUndoRedo> undos = new List<IUndoRedo>();
                 int duplicateCount = AssetContainer.MergeDuplicateMaterials(undos);
@@ -676,22 +680,21 @@ namespace EEPK_Organiser.View
 
                 if (duplicateCount > 0)
                 {
-                    await DialogCoordinator.Instance.ShowMessageAsync(this, "Merge Duplicates", string.Format("{0} material instances were merged.", duplicateCount), MessageDialogStyle.Affirmative, DialogSettings.Default);
+                    MessagePrompt.Show($"{duplicateCount} material instances were merged.", "Merge Duplicates", MessagePromptButtons.OK, MessagePromptIcon.Information);
                 }
                 else
                 {
-                    await DialogCoordinator.Instance.ShowMessageAsync(this, "Merge Duplicates", "No instances of duplicated materials were found.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                    MessagePrompt.Show("No instances of duplicated materials were found.", "Merge Duplicates", MessagePromptButtons.OK, MessagePromptIcon.Information);
                 }
             }
-
         }
 
         public RelayCommand RemoveUnusedMaterialsCommand => new RelayCommand(RemoveUnusedMaterials);
-        private async void RemoveUnusedMaterials()
+        private void RemoveUnusedMaterials()
         {
-            var result = await DialogCoordinator.Instance.ShowMessageAsync(this, "Remove Unused", "Any material that is not currently used by a asset will be deleted.\n\nDo you want to continue?", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.Default);
+            var result = MessagePrompt.Show("All materials that are not currently used by an asset will be deleted.\n\nDo you want to continue?", "Remove Unused", MessagePromptButtons.YesNo, MessagePromptIcon.Question);
 
-            if (result == MessageDialogResult.Affirmative)
+            if (result == MessagePromptResult.Yes)
             {
                 List<IUndoRedo> undos = new List<IUndoRedo>();
                 int duplicateCount = AssetContainer.RemoveUnusedMaterials(undos);
@@ -700,16 +703,14 @@ namespace EEPK_Organiser.View
 
                 if (duplicateCount > 0)
                 {
-                    await DialogCoordinator.Instance.ShowMessageAsync(this, "Remove Unused ", string.Format("{0} material instances were removed.", duplicateCount), MessageDialogStyle.Affirmative, DialogSettings.Default);
+                    MessagePrompt.Show($"{duplicateCount} material instances were removed.", "Remove Unused", MessagePromptButtons.OK, MessagePromptIcon.Information);
                 }
                 else
                 {
-                    await DialogCoordinator.Instance.ShowMessageAsync(this, "Remove Unused ", "No unused materials were found.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                    MessagePrompt.Show("No unused materials were found.", "Remove Unused", MessagePromptButtons.OK, MessagePromptIcon.Information);
                 }
             }
-
         }
-
 
         #endregion
 
@@ -793,7 +794,7 @@ namespace EEPK_Organiser.View
             UndoManager.Instance.UndoOrRedoCalled -= Instance_UndoOrRedoCalled;
         }
 
-        private async void SetName(string name)
+        private void SetName(string name)
         {
             //Name should never be more than 32 since the UI is limited to just 32 characters, but just in case we will trim the name here if it exceeds the limit.
             if (name.Length > 32)
@@ -801,7 +802,7 @@ namespace EEPK_Organiser.View
 
             if (EmmFile.Materials.Any(x => x.Name == name && x != _selectedMaterial))
             {
-                await DialogCoordinator.Instance.ShowMessageAsync(this, "Name Already Used", $"Another material is already named\"{name}\".", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                MessagePrompt.Show($"Another material is already named \"{name}\".", "Name Already Used", MessagePromptButtons.OK, MessagePromptIcon.Warning);
                 NotifyPropertyChanged(nameof(SelectedMaterialName));
                 return;
             }

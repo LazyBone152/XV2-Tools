@@ -3,7 +3,6 @@ using EEPK_Organiser.Misc;
 using GalaSoft.MvvmLight.CommandWpf;
 using LB_Common.Forms;
 using MahApps.Metro.Controls;
-using MahApps.Metro.Controls.Dialogs;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -290,7 +289,7 @@ namespace EEPK_Organiser.View
             UndoManager.Instance.UndoOrRedoCalled -= Instance_UndoOrRedoCalled;
         }
 
-        public async void SetName(string newName)
+        public void SetName(string newName)
         {
             if(_selectedTexture != null)
             {
@@ -303,7 +302,7 @@ namespace EEPK_Organiser.View
 
                     if(EmbFile.Entry.Any(x => x.Name == fullNewName && x != SelectedTexture))
                     {
-                        await DialogCoordinator.Instance.ShowMessageAsync(this, "Name Already Used", $"Another texture is already named\"{fullNewName}\".", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                        MessagePrompt.Show($"Another texture is already named \"{fullNewName}\".", "Name Already Used", MessagePromptButtons.OK, MessagePromptIcon.Error);
                         return;
                     }
 
@@ -314,13 +313,13 @@ namespace EEPK_Organiser.View
             }
         }
 
-        public async void SetID(int newId)
+        public void SetID(int newId)
         {
             if(SelectedTexture != null)
             {
                 if(EmbFile.Entry.Any(x => x.ID == newId && x != SelectedTexture))
                 {
-                    await DialogCoordinator.Instance.ShowMessageAsync(this, "ID Already Used", $"Another texture already has ID \"{newId}\".", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                    MessagePrompt.Show($"Another texture already has ID \"{newId}\".", "ID Already Used", MessagePromptButtons.OK, MessagePromptIcon.Warning);
                     return;
                 }
 
@@ -345,7 +344,7 @@ namespace EEPK_Organiser.View
             //Validation
             if (EmbFile.Entry.Count >= EMB_File.MAX_EFFECT_TEXTURES)
             {
-                MessageBox.Show(String.Format("The maximum allowed amount of textures has been reached. Cannot add anymore.", EMB_File.MAX_EFFECT_TEXTURES), "Error", MessageBoxButton.OK, MessageBoxImage.Stop);
+                MessagePrompt.Show(String.Format("The maximum allowed amount of textures has been reached. Cannot add anymore.", EMB_File.MAX_EFFECT_TEXTURES), "Error", MessagePromptButtons.OK, MessagePromptIcon.Stop);
                 return;
             }
 
@@ -365,7 +364,7 @@ namespace EEPK_Organiser.View
                 {
                     if (Path.GetExtension(file) != ".dds")
                     {
-                        MessageBox.Show(String.Format("{0} is not a supported format.", System.IO.Path.GetExtension(file)), "Invalid Format", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessagePrompt.Show(String.Format("{0} is not a supported format.", System.IO.Path.GetExtension(file)), "Invalid Format", MessagePromptButtons.OK, MessagePromptIcon.Error);
                         continue;
                     }
 
@@ -382,7 +381,7 @@ namespace EEPK_Organiser.View
                     //Validat the emb again, so we dont go over the limit
                     if (EmbFile.Entry.Count >= EMB_File.MAX_EFFECT_TEXTURES && IsForContainer)
                     {
-                        MessageBox.Show(String.Format("The maximum allowed amount of textures has been reached. Cannot add anymore.\n\n{1} of the selected textures were added before the limit was reached.", EMB_File.MAX_EFFECT_TEXTURES, added), "Error", MessageBoxButton.OK, MessageBoxImage.Stop);
+                        MessagePrompt.Show(String.Format("The maximum allowed amount of textures has been reached. Cannot add anymore.\n\n{1} of the selected textures were added before the limit was reached.", EMB_File.MAX_EFFECT_TEXTURES, added), "Error", MessagePromptButtons.OK, MessagePromptIcon.Stop);
                         break;
                     }
 
@@ -410,7 +409,7 @@ namespace EEPK_Organiser.View
 
             if (renameCount > 0)
             {
-                MessageBox.Show(String.Format("{0} texture(s) were renamed during the add process because textures already existed in the EMB with the same name.", renameCount), "Add Texture", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessagePrompt.Show(String.Format("{0} texture(s) were renamed during the add process because textures already existed in the EMB with the same name.", renameCount), "Add Texture", MessagePromptButtons.OK, MessagePromptIcon.Information);
             }
 
             NotifyPropertyChanged(nameof(TextureCount));
@@ -487,11 +486,11 @@ namespace EEPK_Organiser.View
                 }
                 if (textureInUse && selectedTextures.Count == 1)
                 {
-                    MessageBox.Show("The selected texture cannot be deleted because it is currently being used.", "Delete", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessagePrompt.Show("The selected texture cannot be deleted because it is currently being used.", "Delete", MessagePromptButtons.OK, MessagePromptIcon.Error);
                 }
                 else if (textureInUse && selectedTextures.Count > 1)
                 {
-                    MessageBox.Show("One or more of the selected textures cannot be deleted because they are currently being used.", "Delete", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessagePrompt.Show("One or more of the selected textures cannot be deleted because they are currently being used.", "Delete", MessagePromptButtons.OK, MessagePromptIcon.Error);
                 }
 
                 undos.Add(new UndoActionDelegate(EmbFile, nameof(EmbFile.TriggerTexturesChanged), true));
@@ -514,7 +513,7 @@ namespace EEPK_Organiser.View
             {
                 if (EmbFile.Entry.Count >= EMB_File.MAX_EFFECT_TEXTURES && IsForContainer)
                 {
-                    MessageBox.Show("The maximum amount of textures has been reached. Cannot add anymore.", "Duplicate", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessagePrompt.Show("The maximum amount of textures has been reached. Cannot add anymore.", "Duplicate", MessagePromptButtons.OK, MessagePromptIcon.Warning);
                     break;
                 }
 
@@ -564,7 +563,7 @@ namespace EEPK_Organiser.View
                 {
                     if (EmbFile.Entry.Count >= EMB_File.MAX_EFFECT_TEXTURES && IsForContainer)
                     {
-                        MessageBox.Show("The maximum amount of textures has been reached. Cannot add anymore.", "Duplicate", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        MessagePrompt.Show("The maximum amount of textures has been reached. Cannot add anymore.", "Duplicate", MessagePromptButtons.OK, MessagePromptIcon.Warning);
                         break;
                     }
 
@@ -610,7 +609,7 @@ namespace EEPK_Organiser.View
                 {
                     int count = selectedTextures.Count + 1;
 
-                    if (MessageBox.Show(string.Format("All currently selected textures will be MERGED into {0}.\n\nAll other selected textures will be deleted, with all references to them changed to {0}.\n\nDo you wish to continue?", texture.Name), string.Format("Merge ({0} textures)", count), MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
+                    if (MessagePrompt.Show(string.Format("All currently selected textures will be MERGED into {0}.\n\nAll other selected textures will be deleted, with all references to them changed to {0}.\n\nDo you wish to continue?", texture.Name), string.Format("Merge ({0} textures)", count), MessagePromptButtons.OKCancel, MessagePromptIcon.Question) == MessagePromptResult.OK)
                     {
                         foreach (var textureToRemove in selectedTextures)
                         {
@@ -624,13 +623,13 @@ namespace EEPK_Organiser.View
                 }
                 else
                 {
-                    MessageBox.Show("Cannot merge with less than 2 textures selected.\n\nTip: Use Left Ctrl + Left Mouse Click to multi-select.", "Merge", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessagePrompt.Show("Cannot merge with less than 2 textures selected.\n\nTip: Use Left Ctrl + Left Mouse Click to multi-select.", "Merge", MessagePromptButtons.OK, MessagePromptIcon.Warning);
                 }
 
             }
             catch (Exception ex)
             {
-                MessageBox.Show(String.Format("An error occured.\n\nDetails: {0}", ex.Message), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show(String.Format("An error occured.\n\nDetails: {0}", ex.Message), "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
 
             NotifyPropertyChanged(nameof(TextureCount));
@@ -664,7 +663,7 @@ namespace EEPK_Organiser.View
             {
                 if (SelectedTexture.Texture == null)
                 {
-                    MessageBox.Show("Cannot edit because no texture was loaded.\n\nEither the texture loading failed or texture loading has been disabled in the settings.", "No Texture Loaded", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessagePrompt.Show("Cannot edit because no texture was loaded.\n\nEither the texture loading failed or texture loading has been disabled in the settings.", "No Texture Loaded", MessagePromptButtons.OK, MessagePromptIcon.Information);
                 }
                 else
                 {
@@ -681,7 +680,7 @@ namespace EEPK_Organiser.View
             {
                 if (SelectedTexture.Texture == null)
                 {
-                    MessageBox.Show("Cannot edit because no texture was loaded.\n\nEither the texture loading failed or texture loading has been disabled in the settings.", "No Texture Loaded", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessagePrompt.Show("Cannot edit because no texture was loaded.\n\nEither the texture loading failed or texture loading has been disabled in the settings.", "No Texture Loaded", MessagePromptButtons.OK, MessagePromptIcon.Information);
                 }
                 else
                 {
@@ -735,7 +734,7 @@ namespace EEPK_Organiser.View
 
             if (selectedTextures.Count < 2)
             {
-                MessageBox.Show("Cannot proceed. A SuperTexture requires atleast two selected textures.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show("Cannot proceed. A SuperTexture requires atleast two selected textures.", "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
                 return;
             }
 
@@ -744,7 +743,7 @@ namespace EEPK_Organiser.View
 
                 if (AssetContainer.GetAllTextureDefinitions(entry).Any(x => x.ScrollState.ScrollType == EMP_ScrollState.ScrollTypeEnum.Speed || x.RepetitionU == EMP_TextureSamplerDef.TextureRepitition.Mirror || x.RepetitionV == EMP_TextureSamplerDef.TextureRepitition.Mirror))
                 {
-                    MessageBox.Show("One of the selected textures is used by an EMP with an unallowed type. These can't be merged.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessagePrompt.Show("One of the selected textures is used by an EMP with an unallowed type. These can't be merged.", "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
                     return;
                 }
             }
@@ -754,7 +753,7 @@ namespace EEPK_Organiser.View
 
             if (selectedTextures.Count < 2)
             {
-                MessageBox.Show("Some of the selected textures cannot be merged and were removed from the process, but now only 1 texture remains. Aborting.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show("Some of the selected textures cannot be merged and were removed from the process, but now only 1 texture remains. Aborting.", "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
                 return;
             }
 
@@ -765,7 +764,7 @@ namespace EEPK_Organiser.View
 
             if (textureSize == -1)
             {
-                MessageBox.Show("Cannot proceed. The resulting texture would be too large (greater than 2048 x 2048).", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show("Cannot proceed. The resulting texture would be too large (greater than 2048 x 2048).", "Error", MessagePromptButtons.OK, MessagePromptIcon.Error);
                 return;
             }
 
@@ -803,11 +802,11 @@ namespace EEPK_Organiser.View
 
         #region ToolCommands
         public RelayCommand MergeDuplicatesCommand => new RelayCommand(MergeDuplicates);
-        private async void MergeDuplicates()
+        private void MergeDuplicates()
         {
-            var result = await DialogCoordinator.Instance.ShowMessageAsync(this, "Merge Duplicates", "All instances of duplicated textures will be merged into a single texture. A duplicated texture means any that share the exact same data, but have a different name. \n\nAll references to the duplicates in any assets will also be updated to reflect these changes.\n\nDo you want to continue?", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.Default);
+            var result = MessagePrompt.Show("All instances of duplicated textures will be merged into a single texture. A duplicated texture means any that share the exact same data, but have a different name. \n\nAll references to the duplicates in any assets will also be updated to reflect these changes.\n\nDo you want to continue?", "Merge Duplicates", MessagePromptButtons.YesNo, MessagePromptIcon.Question);
             
-            if(result == MessageDialogResult.Affirmative)
+            if(result == MessagePromptResult.Yes)
             {
                 List<IUndoRedo> undos = new List<IUndoRedo>();
                 int merged = AssetContainer.MergeDuplicateTextures(undos);
@@ -818,11 +817,11 @@ namespace EEPK_Organiser.View
                     EmbFile.TriggerTexturesChanged();
                     UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Merge Duplicates (Texture)"));
 
-                    await DialogCoordinator.Instance.ShowMessageAsync(this, "Merge Duplicates", string.Format("{0} texture instances were merged.", merged), MessageDialogStyle.Affirmative, DialogSettings.Default);
+                    MessagePrompt.Show($"{merged} texture instances were merged.", "Merge Duplicates", MessagePromptButtons.OK, MessagePromptIcon.Information);
                 }
                 else
                 {
-                    await DialogCoordinator.Instance.ShowMessageAsync(this, "Merge Duplicates", "No instances of duplicated texture were found.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                    MessagePrompt.Show("No instances of duplicated texture were found.", "Merge Duplicates", MessagePromptButtons.OK, MessagePromptIcon.Information);
                 }
             }
 
@@ -830,12 +829,12 @@ namespace EEPK_Organiser.View
         }
 
         public RelayCommand RemoveUnusedTexturesCommand => new RelayCommand(RemoveUnusedTextures);
-        private async void RemoveUnusedTextures()
+        private void RemoveUnusedTextures()
         {
             if (!IsForContainer) return;
-            var result = await DialogCoordinator.Instance.ShowMessageAsync(this, "Remove Unused", "Any texture that is not currently used by a asset will be deleted.\n\nDo you want to continue?", MessageDialogStyle.AffirmativeAndNegative, DialogSettings.Default);
+            var result = MessagePrompt.Show("Any texture that is not currently used by a asset will be deleted.\n\nDo you want to continue?", "Remove Unused", MessagePromptButtons.YesNo, MessagePromptIcon.Question);
 
-            if (result == MessageDialogResult.Affirmative)
+            if (result == MessagePromptResult.Yes)
             {
                 List<IUndoRedo> undos = new List<IUndoRedo>();
                 int unusued = AssetContainer.RemoveUnusedTextures(undos);
@@ -844,11 +843,11 @@ namespace EEPK_Organiser.View
 
                 if (unusued > 0)
                 {
-                    await DialogCoordinator.Instance.ShowMessageAsync(this, "Remove Unused ", string.Format("{0} texture instances were removed.", unusued), MessageDialogStyle.Affirmative, DialogSettings.Default);
+                    MessagePrompt.Show($"{unusued} texture instances were removed.", "Remove Unused", MessagePromptButtons.OK, MessagePromptIcon.Information);
                 }
                 else
                 {
-                    await DialogCoordinator.Instance.ShowMessageAsync(this, "Remove Unused ", "No unused textures were found.", MessageDialogStyle.Affirmative, DialogSettings.Default);
+                    MessagePrompt.Show("No unused textures were found.", "Remove Unused", MessagePromptButtons.OK, MessagePromptIcon.Information);
                 }
             }
 

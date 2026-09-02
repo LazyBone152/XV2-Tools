@@ -199,7 +199,7 @@ namespace AudioCueEditor.View
 #if !DEBUG
             catch (Exception ex)
             {
-                MessageBox.Show($"An error occured while processing the ApplyCommand command.\n\nDetails:{ex.Message}", $"ApplyCommand failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show($"An error occured while processing the ApplyCommand command.\n\nDetails:{ex.Message}", $"ApplyCommand failed", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
 #endif
             finally
@@ -230,7 +230,7 @@ namespace AudioCueEditor.View
 #if !DEBUG
             catch (Exception ex)
             {
-                MessageBox.Show($"An error occured while processing the PlayPreview command.\n\nDetails:{ex.Message}", $"PlayPreview failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show($"An error occured while processing the PlayPreview command.\n\nDetails:{ex.Message}", $"PlayPreview failed", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
 #endif
 
@@ -248,7 +248,7 @@ namespace AudioCueEditor.View
 #if !DEBUG
             catch (Exception ex)
             {
-                MessageBox.Show($"An error occured while processing the PausePreview command.\n\nDetails:{ex.Message}", $"PausePreview failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessagePrompt.Show($"An error occured while processing the PausePreview command.\n\nDetails:{ex.Message}", $"PausePreview failed", MessagePromptButtons.OK, MessagePromptIcon.Error);
             }
 #endif
 

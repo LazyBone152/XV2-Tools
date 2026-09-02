@@ -23,12 +23,9 @@ namespace Xv2CoreLib
         #region NotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void NotifyPropertyChanged(String propertyName = "")
+        private void NotifyPropertyChanged(string propertyName = "")
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         #endregion
 
@@ -49,9 +46,10 @@ namespace Xv2CoreLib
                         return "Face"; //Loaded on characters
                     case Xenoverse2.MoveFileTypes.EAN:
                     case Xenoverse2.MoveFileTypes.CAM_EAN:
-                        if (Costumes.Count == 0 && IsDefault)
+                        if (Costumes.Count == 1 && Costumes[0] == 0 && IsDefault)
                             return "Main";
-                        return (Costumes.Count == 1) ? System.IO.Path.GetFileNameWithoutExtension(Path) : CharaCode;
+                        return !string.IsNullOrWhiteSpace(CharaCode) ? CharaCode : System.IO.Path.GetFileNameWithoutExtension(Path);
+                        //return (Costumes.Count == 1 && !string.IsNullOrWhiteSpace(Path)) ? System.IO.Path.GetFileNameWithoutExtension(Path) : CharaCode;
                     case Xenoverse2.MoveFileTypes.VOX_ACB:
                     case Xenoverse2.MoveFileTypes.SE_ACB:
                         string lang = (IsEnglish) ? "EN" : "JP";
@@ -268,7 +266,7 @@ namespace Xv2CoreLib
             IsDefault = isDefault;
             Costumes = costume;
             MoveType = moveType;
-            Costumes.Add(0);
+            //Costumes.Add(0);
         }
 
 
@@ -452,11 +450,11 @@ namespace Xv2CoreLib
             return false;
         }
 
-        public static bool HasCostume(IList<Xv2File<T>> files, List<int> costumes, int excludeIndex = -1)
+        public static bool HasCostume(IList<Xv2File<T>> files, List<int> costumes, int excludeIndex = -1, bool isEnglish = false)
         {
             for (int i = 0; i < files.Count; i++)
             {
-                if (excludeIndex != i && files[i].HasCostume(costumes))
+                if (excludeIndex != i && files[i].IsEnglish == isEnglish && files[i].HasCostume(costumes))
                     return true;
             }
 
@@ -519,11 +517,11 @@ namespace Xv2CoreLib
             return file;
         }
 
-        public static bool IsCharaCodeUsed(IList<Xv2File<T>> files, string charaCode, int excludeIndex = -1)
+        public static bool IsCharaCodeUsed(IList<Xv2File<T>> files, string charaCode, int excludeIndex = -1, bool isEnglish = false)
         {
             for (int i = 0; i < files.Count; i++)
             {
-                if (excludeIndex != i && files[i].CharaCode == charaCode)
+                if (excludeIndex != i && files[i].IsEnglish == isEnglish && files[i].CharaCode == charaCode)
                     return true;
             }
 
