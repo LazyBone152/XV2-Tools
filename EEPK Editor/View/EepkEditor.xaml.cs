@@ -37,6 +37,7 @@ using Xv2CoreLib.Resource.App;
 using Xv2CoreLib.Resource.UndoRedo;
 using Application = System.Windows.Application;
 
+
 #if XenoKit
 using XenoKit;
 using XenoKit.Engine;
@@ -3631,6 +3632,9 @@ namespace EEPK_Organiser.View
                     effectDataGrid.ScrollIntoView(copiedEffect);
 
                     UndoManager.Instance.AddUndo(new UndoableListAdd<Effect>(effectContainerFile.Effects, copiedEffect, "Duplicate Effect"));
+#if XenoKit
+                    Log.Add("Effect duplicated with ID: " + copiedEffect.IndexNum);
+#endif
                 }
             }
             catch (Exception ex)
@@ -3978,6 +3982,10 @@ namespace EEPK_Organiser.View
 
                 effectDataGrid.SelectedItem = newEffect;
                 effectDataGrid.ScrollIntoView(newEffect);
+
+#if XenoKit
+                Log.Add("Effect added with ID: " + newEffect.IndexNum);
+#endif
 
             }
             catch (Exception ex)

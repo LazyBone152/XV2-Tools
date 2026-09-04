@@ -1,9 +1,7 @@
 ﻿using AudioCueEditor.Audio;
 using AudioCueEditor.Data;
-using ControlzEx.Standard;
 using GalaSoft.MvvmLight.CommandWpf;
 using LB_Common.Forms;
-using MahApps.Metro.Controls.Dialogs;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -212,10 +210,20 @@ namespace AudioCueEditor.View
 
             if (form.Finished)
             {
+                int cueId;
+
                 if (form.AddTrack)
-                    AcbFile.UndoableAddCue(form.CueName, form.ReferenceType, form.TrackBytes, form.Streaming, form.Loop, form.Is3DSound, form.EncodeType);
+                    cueId = AcbFile.UndoableAddCue(form.CueName, form.ReferenceType, form.TrackBytes, form.Streaming, form.Loop, form.Is3DSound, form.EncodeType);
                 else
-                    AcbFile.UndoableAddCue(form.CueName, form.ReferenceType, form.Is3DSound);
+                    cueId = AcbFile.UndoableAddCue(form.CueName, form.ReferenceType, form.Is3DSound);
+
+                var cue = AcbFile.Cues.FirstOrDefault(x => x.CueRef.ID == cueId);
+                dataGrid.ScrollIntoView(cue);
+                dataGrid.SelectedItem = cue;
+
+#if XenoKit
+                XenoKit.Editor.Log.Add("New cue added with ID: " + cueId);
+#endif
             }
         }
 
