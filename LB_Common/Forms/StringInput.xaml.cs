@@ -23,6 +23,8 @@ namespace LB_Common.Forms
 
             helpTestStackpanel.Visibility = string.IsNullOrWhiteSpace(helpText) ? Visibility.Collapsed : Visibility.Visible;
             helpTextBlock.Text = helpText;
+
+            textControl.Focus();
         }
 
         public static string Show(string formName, string inputFieldName, string defaultInputText, string tooltip = null, string helpText = null)
