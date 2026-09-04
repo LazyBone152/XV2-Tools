@@ -1,17 +1,17 @@
-﻿using AudioCueEditor.Audio;
-using GalaSoft.MvvmLight.CommandWpf;
-using MahApps.Metro.Controls;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
+using MahApps.Metro.Controls;
+using GalaSoft.MvvmLight.CommandWpf;
+using LB_Common.Forms;
 using Xv2CoreLib.ACB;
 using Xv2CoreLib.AFS2;
-using Xv2CoreLib.HCA;
 using Xv2CoreLib.Resource.UndoRedo;
+using AudioCueEditor.Audio;
 
 namespace AudioCueEditor.View
 {
