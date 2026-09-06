@@ -10,10 +10,7 @@ using Xv2CoreLib.Resource;
 using static Xv2CoreLib.BAC.BAC_Entry;
 using System.Windows.Media;
 using Xv2CoreLib.Resource.App;
-
-#if UndoRedo
 using Xv2CoreLib.Resource.UndoRedo;
-#endif
 
 namespace Xv2CoreLib.BAC
 {

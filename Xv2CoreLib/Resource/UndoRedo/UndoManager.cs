@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-
-#if !SaveEditor
 using GalaSoft.MvvmLight.CommandWpf;
 using System.Windows.Input;
-#endif
+
 
 
 namespace Xv2CoreLib.Resource.UndoRedo

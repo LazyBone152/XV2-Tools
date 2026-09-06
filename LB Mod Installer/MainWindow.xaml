@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:LB_Mod_Installer"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         mc:Ignorable="d"
-        Title="{Binding InstallerInfo.InstallerNameWithVersion}" BorderThickness="0" ShowIconOnTitleBar="False" Height="400" Width="640" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" Icon="Resources/DBXV2_101.ico">
+        Title="{Binding InstallerInfo.InstallerNameWithVersion}" BorderThickness="0" ShowIconOnTitleBar="False" Height="400" Width="640" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
     <Grid Background="{Binding CurrentBackground}">
         <Grid x:Name="installStepGrid" Visibility="{Binding InstallStepCountVisibility}">
             <Label x:Name="Label_StepNumber" Content="{Binding InstallerInfo.CurrentStepString}" Foreground="{Binding CurrentTextColor}" HorizontalAlignment="Left" Margin="507,0,0,0" VerticalAlignment="Top" Height="31" Width="89"/>

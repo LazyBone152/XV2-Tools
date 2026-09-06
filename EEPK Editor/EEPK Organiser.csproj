@@ -1,411 +1,54 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\Costura.Fody.3.2.0\build\Costura.Fody.props" Condition="Exists('..\packages\Costura.Fody.3.2.0\build\Costura.Fody.props')" />
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <ItemGroup>
-    <PackageReference Include="CommonServiceLocator">
-      <Version>2.0.2</Version>
-    </PackageReference>
-    <PackageReference Include="ControlzEx">
-      <Version>4.4.0</Version>
-    </PackageReference>
-    <PackageReference Include="gong-wpf-dragdrop">
-      <Version>3.2.0</Version>
-    </PackageReference>
-    <PackageReference Include="MahApps.Metro">
-      <Version>2.4.9</Version>
-    </PackageReference>
-    <PackageReference Include="MahApps.Metro.IconPacks.Material">
-      <Version>4.11.0</Version>
-    </PackageReference>
-    <PackageReference Include="MahApps.Metro.IconPacks.MaterialDesign">
-      <Version>4.11.0</Version>
-    </PackageReference>
-    <PackageReference Include="MahApps.Metro.IconPacks.MaterialLight">
-      <Version>4.11.0</Version>
-    </PackageReference>
-    <PackageReference Include="MvvmLightStd10">
-      <Version>5.4.1.2</Version>
-    </PackageReference>
-  </ItemGroup>
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{AED2B561-EFD8-4BCA-B8FD-04E0D6E661B9}</ProjectGuid>
+    <TargetFrameworks>net47</TargetFrameworks>
     <OutputType>WinExe</OutputType>
     <RootNamespace>EEPK_Organiser</RootNamespace>
     <AssemblyName>EEPK Organiser</AssemblyName>
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <WarningLevel>4</WarningLevel>
+    <UseWPF>true</UseWPF>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <ApplicationIcon>Resources\eepk organiser.ico</ApplicationIcon>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile />
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;UndoRedo, NvvmLight, EepkOrg</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <LangVersion>8</LangVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <LangVersion>latest</LangVersion>
     <PlatformTarget>x64</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;UndoRedo, NvvmLight, EepkOrg</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <LangVersion>8</LangVersion>
   </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationIcon>Resources\eepk organiser.ico</ApplicationIcon>
-  </PropertyGroup>
+
+  <!-- NuGet packages -->
+  <ItemGroup>
+    <PackageReference Include="CommonServiceLocator" Version="2.0.2" />
+    <PackageReference Include="ControlzEx" Version="4.4.0" />
+    <PackageReference Include="Costura.Fody" Version="6.2.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="gong-wpf-dragdrop" Version="3.2.0" />
+    <PackageReference Include="MahApps.Metro" Version="2.4.9" />
+    <PackageReference Include="MahApps.Metro.IconPacks.Material" Version="4.11.0" />
+    <PackageReference Include="MahApps.Metro.IconPacks.MaterialDesign" Version="4.11.0" />
+    <PackageReference Include="MahApps.Metro.IconPacks.MaterialLight" Version="4.11.0" />
+    <PackageReference Include="MvvmLightStd10" Version="5.4.1.2" />
+    <PackageReference Include="Ookii.Dialogs.Wpf" Version="1.1.0" />
+  </ItemGroup>
   <ItemGroup>
     <Reference Include="AutoUpdater">
       <HintPath>..\DLLs\AutoUpdater.dll</HintPath>
     </Reference>
-    <Reference Include="Costura, Version=3.2.0.0, Culture=neutral, PublicKeyToken=9919ef960d84173d, processorArchitecture=MSIL">
-      <HintPath>..\packages\Costura.Fody.3.2.0\lib\net46\Costura.dll</HintPath>
-    </Reference>
-    <Reference Include="Ookii.Dialogs.Wpf, Version=1.0.0.0, Culture=neutral, PublicKeyToken=66aa232afad40158, processorArchitecture=MSIL">
-      <HintPath>..\packages\Ookii.Dialogs.Wpf.1.1.0\lib\net45\Ookii.Dialogs.Wpf.dll</HintPath>
-    </Reference>
-    <Reference Include="PresentationFramework.Aero" />
-    <Reference Include="System" />
-    <Reference Include="System.Xaml">
-      <RequiredTargetFramework>4.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="WindowsBase" />
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
     <Reference Include="YAXLib">
       <HintPath>..\DLLs\YAXLib.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ApplicationDefinition Include="App.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </ApplicationDefinition>
-    <Compile Include="DialogSettings.cs" />
-    <Compile Include="Forms\AssetContainerSettings.xaml.cs">
-      <DependentUpon>AssetContainerSettings.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Editors\EcfEditorWindow.xaml.cs">
-      <DependentUpon>EcfEditorWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Editors\EmpEditorWindow.xaml.cs">
-      <DependentUpon>EmpEditorWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Editors\EtrEditorWindow.xaml.cs">
-      <DependentUpon>EtrEditorWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\EffectSelector.xaml.cs">
-      <DependentUpon>EffectSelector.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\EntitySelector.xaml.cs">
-      <DependentUpon>EntitySelector.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\KeyframeScale.xaml.cs">
-      <DependentUpon>KeyframeScale.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Editors\MaterialsEditorForm.xaml.cs">
-      <DependentUpon>MaterialsEditorForm.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Recolor\RecolorAll.xaml.cs">
-      <DependentUpon>RecolorAll.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Settings.xaml.cs">
-      <DependentUpon>Settings.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Recolor\RecolorTexture.xaml.cs">
-      <DependentUpon>RecolorTexture.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Misc\ClipboardDataTypes.cs" />
-    <Compile Include="Name\Namelist.cs" />
-    <Compile Include="Name\NameListManager.cs" />
-    <Compile Include="Misc\CacheManager.cs" />
-    <Compile Include="Misc\LoadFromGameHelper.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="ViewModel\AssetContainerViewModel.cs" />
-    <Compile Include="ViewModel\EcfNodeViewModel.cs" />
-    <Compile Include="ViewModel\EffectPartViewModel.cs" />
-    <Compile Include="ViewModel\EmpKeyframesViewModel.cs" />
-    <Compile Include="ViewModel\EmpNodeViewModel.cs" />
-    <Compile Include="ViewModel\EmpTextureViewModel.cs" />
-    <Compile Include="ViewModel\EtrNodeViewModel.cs" />
-    <Compile Include="ViewModel\MaterialViewModel.cs" />
-    <Compile Include="View\Controls\ShapeDraw.xaml.cs">
-      <DependentUpon>ShapeDraw.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Editors\EcfEditor.xaml.cs">
-      <DependentUpon>EcfEditor.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Editors\EMP\EmpKeyframesView.xaml.cs">
-      <DependentUpon>EmpKeyframesView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Editors\EMP\EmpKeyframeView.xaml.cs">
-      <DependentUpon>EmpKeyframeView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Editors\EMP\EmpModifiersView.xaml.cs">
-      <DependentUpon>EmpModifiersView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Editors\EMP\EmpNodeView.xaml.cs">
-      <DependentUpon>EmpNodeView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Editors\EMP\EmpTextureView.xaml.cs">
-      <DependentUpon>EmpTextureView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Editors\EMP\KeyframedValueView.xaml.cs">
-      <DependentUpon>KeyframedValueView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Editors\EtrEditor.xaml.cs">
-      <DependentUpon>EtrEditor.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\EepkEditor.xaml.cs">
-      <DependentUpon>EepkEditor.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Editors\MaterialsEditor.xaml.cs">
-      <DependentUpon>MaterialsEditor.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Editors\TextureEditor.xaml.cs">
-      <DependentUpon>TextureEditor.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Editors\EmpEditor.xaml.cs">
-      <DependentUpon>EmpEditor.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Vectors\CustomColor.xaml.cs">
-      <DependentUpon>CustomColor.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Vectors\CustomMatUV.xaml.cs">
-      <DependentUpon>CustomMatUV.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Vectors\CustomRgbColor.xaml.cs">
-      <DependentUpon>CustomRgbColor.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Vectors\CustomVector2.xaml.cs">
-      <DependentUpon>CustomVector2.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Vectors\CustomVector3.xaml.cs">
-      <DependentUpon>CustomVector3.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Vectors\CustomVector4.xaml.cs">
-      <DependentUpon>CustomVector4.xaml</DependentUpon>
-    </Compile>
-    <Page Include="Forms\AssetContainerSettings.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Forms\AssetSelector.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Forms\Editors\EcfEditorWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Forms\Editors\EmpEditorWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Forms\Editors\EtrEditorWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Forms\EffectSelector.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Forms\Editors\EmbEditForm.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Forms\EntitySelector.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Forms\KeyframeScale.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Forms\Editors\MaterialsEditorForm.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Forms\Recolor\RecolorAll.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Forms\RenameForm.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Forms\Settings.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Forms\Recolor\RecolorTexture.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Compile Include="App.xaml.cs">
-      <DependentUpon>App.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Forms\AssetSelector.xaml.cs">
-      <DependentUpon>AssetSelector.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Editors\EmbEditForm.xaml.cs">
-      <DependentUpon>EmbEditForm.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\RenameForm.xaml.cs">
-      <DependentUpon>RenameForm.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Page Include="View\Controls\ShapeDraw.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="View\Editors\EcfEditor.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Editors\EMP\EmpKeyframesView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Editors\EMP\EmpKeyframeView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Editors\EMP\EmpModifiersView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Editors\EMP\EmpNodeView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Editors\EMP\EmpTextureView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Editors\EMP\KeyframedValueView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Editors\EtrEditor.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\EepkEditor.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Editors\MaterialsEditor.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Editors\TextureEditor.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Editors\EmpEditor.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Vectors\CustomColor.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Vectors\CustomMatUV.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Vectors\CustomRgbColor.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Vectors\CustomVector2.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Vectors\CustomVector3.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Vectors\CustomVector4.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <SubType>Designer</SubType>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <None Include="packages.config" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\eepk organiser.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\LB_Common\LB_Common.csproj">
-      <Project>{513b1851-4576-45ec-8f8e-400a38b05502}</Project>
-      <Name>LB_Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Xv2CoreLib\Xv2CoreLib.csproj">
-      <Project>{fdb88e51-0d73-47b9-a342-e574ec0ba583}</Project>
-      <Name>Xv2CoreLib</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\transparent_checkerboard.png" />
   </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\packages\Fody.3.3.2\build\Fody.targets" Condition="Exists('..\packages\Fody.3.3.2\build\Fody.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Fody.3.3.2\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.3.3.2\build\Fody.targets'))" />
-    <Error Condition="!Exists('..\packages\Costura.Fody.3.2.0\build\Costura.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Costura.Fody.3.2.0\build\Costura.Fody.props'))" />
-  </Target>
+	
+  <ItemGroup>
+    <ProjectReference Include="..\LB_Common\LB_Common.csproj" />
+    <ProjectReference Include="..\Xv2CoreLib\Xv2CoreLib.csproj" />
+  </ItemGroup>
+	
+	<!-- PresentationFramework.Aero is not automatically included with UseWPF=true, so must be manually included here -->
+	<ItemGroup>
+		<Reference Include="PresentationFramework.Aero" />
+	</ItemGroup>
 </Project>

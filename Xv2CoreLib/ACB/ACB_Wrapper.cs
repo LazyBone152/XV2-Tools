@@ -7,10 +7,8 @@ using System.Windows;
 using Xv2CoreLib.AFS2;
 using Xv2CoreLib.Resource.UndoRedo;
 using Xv2CoreLib.Resource;
-
-#if NvvmLight
 using GalaSoft.MvvmLight.CommandWpf;
-#endif
+
 
 namespace Xv2CoreLib.ACB
 {

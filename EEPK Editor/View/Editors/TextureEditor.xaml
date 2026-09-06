@@ -171,7 +171,7 @@
         <Border BorderBrush="{DynamicResource MahApps.Brushes.SystemControlForegroundListMedium}" BorderThickness="1" Grid.Row="1" Grid.Column="2" Margin="10, 0">
             <Grid Margin="3, 3">
                 <Grid.Background>
-                    <ImageBrush ImageSource="{StaticResource gridlines}" Stretch="UniformToFill" Opacity="1"/>
+                    <ImageBrush ImageSource="{DynamicResource gridlines}" Stretch="UniformToFill" Opacity="1"/>
                 </Grid.Background>
                 <lbCommon:ZoomBorder ClipToBounds="True" Background="Transparent">
                     <Image x:Name="imagePreview" Source="{Binding ElementName=UserControl, Path=SelectedTexture.Texture}" Stretch="Uniform"/>
