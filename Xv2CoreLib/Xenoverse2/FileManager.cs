@@ -394,6 +394,8 @@ namespace Xv2CoreLib
                     return ((SPM_File)data).Write();
                 case ".fmp":
                     return ((FMP_File)data).Write();
+                case ".esk":
+                    return ((ESK_File)data).SaveToBytes();
                 default:
                     throw new InvalidDataException(String.Format("Xenoverse2.GetBytesFromParsedFile: The filetype of \"{0}\" is not supported.", path));
             }

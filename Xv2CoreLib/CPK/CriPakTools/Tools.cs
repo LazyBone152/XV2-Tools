@@ -13,6 +13,13 @@ namespace CriPakTools
         [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
         static extern int memcmp(byte[] b1, byte[] b2, long count);
 
+        static Tools()
+        {
+#if NETCOREAPP3_1_OR_GREATER
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+#endif
+        }
+
         public Tools()
         {
 
@@ -70,7 +77,6 @@ namespace CriPakTools
 
                 br.BaseStream.Seek(fTemp + Max, SeekOrigin.Begin);
             }
-
             return result;
         }
 

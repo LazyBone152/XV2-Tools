@@ -280,7 +280,7 @@ namespace Xv2CoreLib.EMA
                         commandIndex++;
                     }
                 }
-
+                
                 //Values
                 int valuesStartOffset = bytes.Count;
                 bytes = Utils.ReplaceRange(bytes, BitConverter.GetBytes(bytes.Count - animStartOffset), animStartOffset + 16);
@@ -288,7 +288,7 @@ namespace Xv2CoreLib.EMA
                 {
                     if (anim.FloatPrecision == ValueType.Float16)
                     {
-                        bytes.AddRange(Half.GetBytes((Half)value));
+                        bytes.AddRange(HalfHelper.GetBytes(value));
                     }
                     else if (anim.FloatPrecision == ValueType.Float32 || anim.FloatPrecision == ValueType.Vector4)
                     {
@@ -602,7 +602,8 @@ namespace Xv2CoreLib.EMA
             {
                 if (animation.FloatPrecision == ValueType.Float16)
                 {
-                    values[i] = Half.ToHalf(rawBytes, valueOffset + (i * 2));
+                    
+                    values[i] = HalfHelper.ReadHalf(rawBytes, valueOffset + (i * 2));
                 }
                 else if (animation.FloatPrecision == ValueType.Float32 || animation.FloatPrecision == ValueType.Vector4)
                 {

@@ -175,15 +175,17 @@ namespace Xv2CoreLib.EAN
                 //Floats
                 if (floatSize == 1)
                 {
-                    keyframes[i].X = Half.ToHalf(rawBytes, floatOffset + 0);
-                    keyframes[i].Y = Half.ToHalf(rawBytes, floatOffset + 2);
-                    keyframes[i].Z = Half.ToHalf(rawBytes, floatOffset + 4);
-                    keyframes[i].W = Half.ToHalf(rawBytes, floatOffset + 6);
+                    keyframes[i].X = HalfHelper.ReadHalf(rawBytes, floatOffset);
+                    keyframes[i].Y = HalfHelper.ReadHalf(rawBytes, floatOffset + 2);
+                    keyframes[i].Z = HalfHelper.ReadHalf(rawBytes, floatOffset + 4);
+                    keyframes[i].W = HalfHelper.ReadHalf(rawBytes, floatOffset + 6);
                     floatOffset += 8;
+
+
                 }
                 else if (floatSize == 2)
                 {
-                    keyframes[i].X = BitConverter.ToSingle(rawBytes, floatOffset + 0);
+                    keyframes[i].X = BitConverter.ToSingle(rawBytes, floatOffset);
                     keyframes[i].Y = BitConverter.ToSingle(rawBytes, floatOffset + 4);
                     keyframes[i].Z = BitConverter.ToSingle(rawBytes, floatOffset + 8);
                     keyframes[i].W = BitConverter.ToSingle(rawBytes, floatOffset + 12);

@@ -871,7 +871,6 @@ namespace Xv2CoreLib.ACB
 
         #endregion
 
-#if NvvmLight
         public RelayCommand CopyTrackCommand => new RelayCommand(CopyTrack);
         private void CopyTrack()
         {
@@ -907,7 +906,6 @@ namespace Xv2CoreLib.ACB
         {
             return (WrapperRoot.CanPasteTrack() || WrapperRoot.CanPasteAction());
         }
-#endif
 
         /// <summary>
         /// Creates a command for the sequence if required (Sequence-type cues only).

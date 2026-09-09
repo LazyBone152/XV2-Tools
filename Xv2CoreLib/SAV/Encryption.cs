@@ -50,7 +50,7 @@ namespace Xv2CoreLib.SAV
                 byte[] encryptedSectionMd5Hash = new byte[0x10];
                 Buffer.BlockCopy(input, 0x10, encryptedSectionMd5Hash, 0, 0x10);
 
-                using (MD5 _md5 = MD5Cng.Create())
+                using (MD5 _md5 = MD5.Create())
                 {
                     byte[] computedHash = _md5.ComputeHash(copy);
 
@@ -205,7 +205,7 @@ namespace Xv2CoreLib.SAV
             Buffer.BlockCopy(BitConverter.GetBytes(encryptedSize), 0, buf, 4, sizeof(int));
             Buffer.BlockCopy(BitConverter.GetBytes(decryptedSize + 0x80), 0, buf, 8, sizeof(int));
 
-            using(MD5 md5 = MD5Cng.Create())
+            using(MD5 md5 = MD5.Create())
             {
                 byte[] copy = new byte[decryptedSize + 0x80];
                 Buffer.BlockCopy(buf, 0x20, copy, 0, copy.Length);

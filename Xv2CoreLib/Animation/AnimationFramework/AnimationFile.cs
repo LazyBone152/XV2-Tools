@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.Remoting.Channels;
 using System.Threading.Tasks;
 using Xv2CoreLib.EAN;
 using Xv2CoreLib.EMA;

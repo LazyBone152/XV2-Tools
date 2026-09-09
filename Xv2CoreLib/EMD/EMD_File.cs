@@ -892,9 +892,9 @@ namespace Xv2CoreLib.EMD
                 {
                     if (isCompressed)
                     {
-                        vertex.NormalX = Half.ToHalf(rawBytes, offset + addedOffset + 0);
-                        vertex.NormalY = Half.ToHalf(rawBytes, offset + addedOffset + 2);
-                        vertex.NormalZ = Half.ToHalf(rawBytes, offset + addedOffset + 4);
+                        vertex.NormalX = HalfHelper.ReadHalf(rawBytes, offset + addedOffset + 0);
+                        vertex.NormalY = HalfHelper.ReadHalf(rawBytes, offset + addedOffset + 2);
+                        vertex.NormalZ = HalfHelper.ReadHalf(rawBytes, offset + addedOffset + 4);
                         addedOffset += GetVertexSizeFromFlags(VertexFlags.Normal | VertexFlags.CompressedFormat);
                     }
                     else
@@ -912,8 +912,8 @@ namespace Xv2CoreLib.EMD
                 {
                     if (isCompressed)
                     {
-                        vertex.TextureU = Half.ToHalf(rawBytes, offset + addedOffset + 0);
-                        vertex.TextureV = Half.ToHalf(rawBytes, offset + addedOffset + 2);
+                        vertex.TextureU = HalfHelper.ReadHalf(rawBytes, offset + addedOffset + 0);
+                        vertex.TextureV = HalfHelper.ReadHalf(rawBytes, offset + addedOffset + 2);
                         addedOffset += GetVertexSizeFromFlags(VertexFlags.TexUV | VertexFlags.CompressedFormat);
                     }
                     else
@@ -928,8 +928,8 @@ namespace Xv2CoreLib.EMD
                 {
                     if (isCompressed)
                     {
-                        vertex.Texture2U = Half.ToHalf(rawBytes, offset + addedOffset + 0);
-                        vertex.Texture2V = Half.ToHalf(rawBytes, offset + addedOffset + 2);
+                        vertex.Texture2U = HalfHelper.ReadHalf(rawBytes, offset + addedOffset + 0);
+                        vertex.Texture2V = HalfHelper.ReadHalf(rawBytes, offset + addedOffset + 2);
                         addedOffset += GetVertexSizeFromFlags(VertexFlags.Tex2UV | VertexFlags.CompressedFormat);
                     }
                     else
@@ -944,9 +944,9 @@ namespace Xv2CoreLib.EMD
                 {
                     if (isCompressed)
                     {
-                        vertex.TangentX = Half.ToHalf(rawBytes, offset + addedOffset + 0);
-                        vertex.TangentY = Half.ToHalf(rawBytes, offset + addedOffset + 2);
-                        vertex.TangentZ = Half.ToHalf(rawBytes, offset + addedOffset + 4);
+                        vertex.TangentX = HalfHelper.ReadHalf(rawBytes, offset + addedOffset + 0);
+                        vertex.TangentY = HalfHelper.ReadHalf(rawBytes, offset + addedOffset + 2);
+                        vertex.TangentZ = HalfHelper.ReadHalf(rawBytes, offset + addedOffset + 4);
                         addedOffset += GetVertexSizeFromFlags(VertexFlags.Tangent | VertexFlags.CompressedFormat);
                     }
                     else
@@ -976,9 +976,9 @@ namespace Xv2CoreLib.EMD
 
                     if (isCompressed)
                     {
-                        vertex.BlendWeights[0] = Half.ToHalf(rawBytes, offset + addedOffset + 4);
-                        vertex.BlendWeights[1] = Half.ToHalf(rawBytes, offset + addedOffset + 6);
-                        vertex.BlendWeights[2] = Half.ToHalf(rawBytes, offset + addedOffset + 8);
+                        vertex.BlendWeights[0] = HalfHelper.ReadHalf(rawBytes, offset + addedOffset + 4);
+                        vertex.BlendWeights[1] = HalfHelper.ReadHalf(rawBytes, offset + addedOffset + 6);
+                        vertex.BlendWeights[2] = HalfHelper.ReadHalf(rawBytes, offset + addedOffset + 8);
                         addedOffset += GetVertexSizeFromFlags(VertexFlags.BlendWeight | VertexFlags.CompressedFormat);
                     }
                     else
@@ -1063,9 +1063,9 @@ namespace Xv2CoreLib.EMD
             {
                 if (isCompressed)
                 {
-                    bytes.AddRange(Half.GetBytes((Half)NormalX));
-                    bytes.AddRange(Half.GetBytes((Half)NormalY));
-                    bytes.AddRange(Half.GetBytes((Half)NormalZ));
+                    bytes.AddRange(HalfHelper.GetBytes(NormalX));
+                    bytes.AddRange(HalfHelper.GetBytes(NormalY));
+                    bytes.AddRange(HalfHelper.GetBytes(NormalZ));
                     bytes.AddRange(new byte[2]);
                     size += GetVertexSizeFromFlags(VertexFlags.Normal | VertexFlags.CompressedFormat);
                 }
@@ -1082,8 +1082,8 @@ namespace Xv2CoreLib.EMD
             {
                 if (isCompressed)
                 {
-                    bytes.AddRange(Half.GetBytes((Half)TextureU));
-                    bytes.AddRange(Half.GetBytes((Half)TextureV));
+                    bytes.AddRange(HalfHelper.GetBytes(TextureU));
+                    bytes.AddRange(HalfHelper.GetBytes(TextureV));
                     size += GetVertexSizeFromFlags(VertexFlags.TexUV | VertexFlags.CompressedFormat);
                 }
                 else
@@ -1098,8 +1098,8 @@ namespace Xv2CoreLib.EMD
             {
                 if (isCompressed)
                 {
-                    bytes.AddRange(Half.GetBytes((Half)Texture2U));
-                    bytes.AddRange(Half.GetBytes((Half)Texture2V));
+                    bytes.AddRange(HalfHelper.GetBytes(Texture2U));
+                    bytes.AddRange(HalfHelper.GetBytes(Texture2V));
                     size += GetVertexSizeFromFlags(VertexFlags.Tex2UV | VertexFlags.CompressedFormat);
                 }
                 else
@@ -1114,9 +1114,9 @@ namespace Xv2CoreLib.EMD
             {
                 if (isCompressed)
                 {
-                    bytes.AddRange(Half.GetBytes((Half)TangentX));
-                    bytes.AddRange(Half.GetBytes((Half)TangentY));
-                    bytes.AddRange(Half.GetBytes((Half)TangentZ));
+                    bytes.AddRange(HalfHelper.GetBytes(TangentX));
+                    bytes.AddRange(HalfHelper.GetBytes(TangentY));
+                    bytes.AddRange(HalfHelper.GetBytes(TangentZ));
                     bytes.AddRange(new byte[2]);
                     size += GetVertexSizeFromFlags(VertexFlags.Tangent | VertexFlags.CompressedFormat);
                 }
@@ -1147,10 +1147,10 @@ namespace Xv2CoreLib.EMD
 
                 if (isCompressed)
                 {
-                    bytes.AddRange(Half.GetBytes((Half)BlendWeights[0]));
-                    bytes.AddRange(Half.GetBytes((Half)BlendWeights[1]));
-                    bytes.AddRange(Half.GetBytes((Half)BlendWeights[2]));
-                    bytes.AddRange(Half.GetBytes((Half)0f));
+                    bytes.AddRange(HalfHelper.GetBytes(BlendWeights[0]));
+                    bytes.AddRange(HalfHelper.GetBytes(BlendWeights[1]));
+                    bytes.AddRange(HalfHelper.GetBytes(BlendWeights[2]));
+                    bytes.AddRange(HalfHelper.GetBytes(0f));
                     size += GetVertexSizeFromFlags(VertexFlags.BlendWeight | VertexFlags.CompressedFormat);
                 }
                 else

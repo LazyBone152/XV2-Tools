@@ -354,27 +354,27 @@ namespace Xv2CoreLib.EAN
             if (!hasFirstKeyframe)
             {
                 EAN_Keyframe defaultFirstKeyframe = (keyframes.Count == 0) ? defaultKeyframe : keyframes[0];
-                bytes.AddRange(Half.GetBytes((Half)defaultFirstKeyframe.X));
-                bytes.AddRange(Half.GetBytes((Half)defaultFirstKeyframe.Y));
-                bytes.AddRange(Half.GetBytes((Half)defaultFirstKeyframe.Z));
-                bytes.AddRange(Half.GetBytes((Half)defaultFirstKeyframe.W));
+                bytes.AddRange(HalfHelper.GetBytes(defaultFirstKeyframe.X));
+                bytes.AddRange(HalfHelper.GetBytes(defaultFirstKeyframe.Y));
+                bytes.AddRange(HalfHelper.GetBytes(defaultFirstKeyframe.Z));
+                bytes.AddRange(HalfHelper.GetBytes(defaultFirstKeyframe.W));
             }
 
             for(int i = 0; i < keyframes.Count; i++)
             {
-                bytes.AddRange(Half.GetBytes((Half)keyframes[i].X));
-                bytes.AddRange(Half.GetBytes((Half)keyframes[i].Y));
-                bytes.AddRange(Half.GetBytes((Half)keyframes[i].Z));
-                bytes.AddRange(Half.GetBytes((Half)keyframes[i].W));
+                bytes.AddRange(HalfHelper.GetBytes(keyframes[i].X));
+                bytes.AddRange(HalfHelper.GetBytes(keyframes[i].Y));
+                bytes.AddRange(HalfHelper.GetBytes(keyframes[i].Z));
+                bytes.AddRange(HalfHelper.GetBytes(keyframes[i].W));
             }
 
             if (!hasFinalKeyframe)
             {
                 EAN_Keyframe defaultFinalKeyframe = (keyframes.Count == 0) ? defaultKeyframe : keyframes[keyframes.Count - 1];
-                bytes.AddRange(Half.GetBytes((Half)defaultFinalKeyframe.X));
-                bytes.AddRange(Half.GetBytes((Half)defaultFinalKeyframe.Y));
-                bytes.AddRange(Half.GetBytes((Half)defaultFinalKeyframe.Z));
-                bytes.AddRange(Half.GetBytes((Half)defaultFinalKeyframe.W));
+                bytes.AddRange(HalfHelper.GetBytes(defaultFinalKeyframe.X));
+                bytes.AddRange(HalfHelper.GetBytes(defaultFinalKeyframe.Y));
+                bytes.AddRange(HalfHelper.GetBytes(defaultFinalKeyframe.Z));
+                bytes.AddRange(HalfHelper.GetBytes(defaultFinalKeyframe.W));
             }
         }
 
