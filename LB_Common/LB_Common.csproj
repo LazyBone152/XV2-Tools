@@ -7,9 +7,13 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <UseWPF>true</UseWPF>
     <Deterministic>true</Deterministic>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>8</LangVersion>
   </PropertyGroup>
   
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net10.0-windows'">
+    <LangVersion>latest</LangVersion>
+	</PropertyGroup>
+	
   <ItemGroup>
     <PackageReference Include="ControlzEx" Version="4.4.0" />
     <PackageReference Include="MahApps.Metro" Version="2.4.9" />
@@ -18,7 +22,16 @@
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
   </ItemGroup>
 	
-  <ItemGroup>
+	<!-- .NET 10 specific reference -->
+	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows'">
+		<Reference Include="YAXLib">
+			<SpecificVersion>False</SpecificVersion>
+			<HintPath>..\..\XV2 Tools\DLLs\net10\YAXLib.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+	
+	<!-- .NET Framework reference -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net47'">
     <Reference Include="YAXLib">
       <HintPath>..\DLLs\YAXLib.dll</HintPath>
     </Reference>
