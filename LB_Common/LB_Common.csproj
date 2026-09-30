@@ -8,6 +8,7 @@
     <UseWPF>true</UseWPF>
     <Deterministic>true</Deterministic>
     <LangVersion>9</LangVersion>
+		<NoWarn>CA1416</NoWarn> <!-- Supress platform API warning since this project only targets Windows -->
   </PropertyGroup>
   
 	<PropertyGroup Condition="'$(TargetFramework)' == 'net10.0-windows'">

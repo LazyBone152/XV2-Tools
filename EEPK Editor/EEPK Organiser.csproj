@@ -13,6 +13,7 @@
 		<Nullable>disable</Nullable>
 		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <PlatformTarget>x64</PlatformTarget>
+		<NoWarn>CA1416</NoWarn> <!-- Supress platform API warning since this project only targets Windows -->
   </PropertyGroup>
 	
 	<PropertyGroup Condition="'$(TargetFramework)' == 'net10.0-windows'">

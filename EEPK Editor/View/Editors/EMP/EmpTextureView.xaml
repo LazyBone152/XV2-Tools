@@ -12,6 +12,7 @@
              xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
              xmlns:lbUtils="clr-namespace:LB_Common.Utils;assembly=LB_Common"
              xmlns:lbCommon="clr-namespace:LB_Common;assembly=LB_Common"
+             xmlns:helper="clr-namespace:LB_Common.AttachedProperties;assembly=LB_Common"
              xmlns:mvvm="clr-namespace:LB_Common.Mvvm;assembly=LB_Common"
              xmlns:dd="clr-namespace:GongSolutions.Wpf.DragDrop;assembly=GongSolutions.Wpf.DragDrop"
              mc:Ignorable="d"
@@ -44,7 +45,7 @@
             </StackPanel>
 
         </StackPanel>
-        <ListBox x:Name="textureListBox" Grid.Column="1" Margin="5, 20, 5, 20" BorderBrush="{DynamicResource MahApps.Brushes.SemiTransparent}" BorderThickness="1" SelectionMode="Extended" SelectedItem="{Binding ElementName=UserControl, Path=SelectedTexture}" ItemsSource="{Binding ElementName=UserControl, Path=TextureFile.Textures.Binding}" lbUtils:AttachedProperties.SelectedItems="{Binding ElementName=UserControl, Path=SelectedTextures}">
+        <ListBox x:Name="textureListBox" Grid.Column="1" Margin="5, 20, 5, 20" BorderBrush="{DynamicResource MahApps.Brushes.SemiTransparent}" BorderThickness="1" SelectionMode="Extended" SelectedItem="{Binding ElementName=UserControl, Path=SelectedTexture}" ItemsSource="{Binding ElementName=UserControl, Path=TextureFile.Textures.Binding}" helper:ListBoxHelper.SelectedItems="{Binding ElementName=UserControl, Path=SelectedTextures, Mode=OneWay}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Grid Margin="3,2">

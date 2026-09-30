@@ -5,6 +5,7 @@ using LB_Common.Forms;
 using LB_Common.Mvvm;
 using LB_Common.Utils;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
@@ -51,8 +52,7 @@ namespace EEPK_Organiser.View.Editors.EMP
                 UpdateVisibilities();
             }
         }
-        public List<EMP_TextureSamplerDef> SelectedTextures => textureListBox.SelectedItems.Cast<EMP_TextureSamplerDef>().ToList();
-
+        public ObservableCollection<EMP_TextureSamplerDef> SelectedTextures { get; } = new ObservableCollection<EMP_TextureSamplerDef>();
         private EmpTextureViewModel _viewModel = new EmpTextureViewModel();
         public EmpTextureViewModel ViewModel => SelectedTexture != null ? _viewModel : null;
 
@@ -111,14 +111,16 @@ namespace EEPK_Organiser.View.Editors.EMP
 
             if (MessagePrompt.Show(string.Format("The selected texture(s) will be deleted and all references to them on {0} nodes in this {1} will be removed.\n\nContinue?", textureInstances.Count, FileType), "Delete", MessagePromptButtons.YesNo, MessagePromptIcon.Question) == MessagePromptResult.Yes)
             {
-                foreach (EMP_TextureSamplerDef texture in SelectedTextures)
+                var texturesToRemove = SelectedTextures.ToArray(); //Create a copy
+
+                foreach (EMP_TextureSamplerDef texture in texturesToRemove)
                 {
                     TextureFile.RemoveTextureReferences(texture, undos);
                     undos.Add(new UndoableListRemove<EMP_TextureSamplerDef>(TextureFile.Textures, texture, TextureFile.Textures.IndexOf(texture)));
                     TextureFile.Textures.Remove(texture);
                 }
 
-                UndoManager.Instance.AddCompositeUndo(undos, SelectedTextures.Count > 1 ? $"Delete Textures ({FileType})" : $"Delete Texture ({FileType})");
+                UndoManager.Instance.AddCompositeUndo(undos, texturesToRemove.Length > 1 ? $"Delete Textures ({FileType})" : $"Delete Texture ({FileType})");
             }
         }
 
@@ -136,11 +138,25 @@ namespace EEPK_Organiser.View.Editors.EMP
         [RelayCommand(CanExecute = nameof(IsTextureSelected))]
         private void TextureDuplicate()
         {
-            EMP_TextureSamplerDef newTexture = SelectedTexture.Clone();
-            UndoManager.Instance.AddUndo(new UndoableListAdd<EMP_TextureSamplerDef>(TextureFile.Textures, newTexture, $"Duplicate Texture ({FileType})"));
-            TextureFile.Textures.Add(newTexture);
+            var selectedTextures = SelectedTextures;
 
-            SelectTexture(newTexture);
+            if(selectedTextures.Count > 0)
+            {
+                List<IUndoRedo> undos = new List<IUndoRedo>(selectedTextures.Count);
+                List<EMP_TextureSamplerDef> newTextures = new List<EMP_TextureSamplerDef>(selectedTextures.Count);
+
+                foreach (EMP_TextureSamplerDef texture in selectedTextures)
+                {
+                    EMP_TextureSamplerDef newTexture = texture.Clone();
+                    newTextures.Add(newTexture);
+                    undos.Add(new UndoableListAdd<EMP_TextureSamplerDef>(TextureFile.Textures, newTexture));
+                    TextureFile.Textures.Add(newTexture);
+
+                }
+
+                UndoManager.Instance.AddCompositeUndo(undos, selectedTextures.Count > 1 ? $"Duplicate Textures ({FileType})" : $"Duplicate Texture ({FileType})");
+                SelectTexture(newTextures.ToArray());
+            }
         }
 
         [RelayCommand(CanExecute = nameof(IsTextureSelected))]
@@ -158,11 +174,13 @@ namespace EEPK_Organiser.View.Editors.EMP
 
             if (copiedTextures != null)
             {
-                List<IUndoRedo> undos = new List<IUndoRedo>();
+                List<IUndoRedo> undos = new List<IUndoRedo>(copiedTextures.Count * 2);
+                List<EMP_TextureSamplerDef> newTextures = new List<EMP_TextureSamplerDef>(copiedTextures.Count);
 
                 foreach (EMP_TextureSamplerDef textureEntry in copiedTextures)
                 {
                     EMP_TextureSamplerDef newTexture = textureEntry.Clone();
+                    newTextures.Add(newTexture);
                     Xv2CoreLib.EMB_CLASS.EMB_TextureEntry newEmbEntry = AssetContainer.File3_Ref.AddTexture(newTexture.TextureRef, undos);
                     newTexture.TextureRef = newEmbEntry;
 
@@ -172,6 +190,7 @@ namespace EEPK_Organiser.View.Editors.EMP
                 }
 
                 UndoManager.Instance.AddCompositeUndo(undos, copiedTextures.Count > 1 ? "Paste Textures" : "Paste Texture");
+                SelectTexture(newTextures.ToArray());
             }
         }
 
@@ -356,13 +375,29 @@ namespace EEPK_Organiser.View.Editors.EMP
         }
         #endregion
 
-        public void SelectTexture(EMP_TextureSamplerDef texture)
+        public void SelectTexture(params EMP_TextureSamplerDef[] textures)
         {
-            if (TextureFile.Textures.Contains(texture))
+            SelectedTextures.Clear();
+
+            if (textures.Length == 0)
             {
-                SelectedTexture = texture;
-                textureListBox.ScrollIntoView(texture);
+                SelectedTexture = null;
+                return;
             }
+
+            if(textures.Length == 1)
+            {
+                SelectedTexture = textures[0];
+            }
+            else
+            {
+                foreach(var texture in textures)
+                {
+                    SelectedTextures.Add(texture);
+                }
+            }
+
+            textureListBox.ScrollIntoView(textures[0]);
         }
     }
 }

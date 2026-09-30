@@ -46,7 +46,7 @@ namespace EEPK_Organiser.View
                 NotifyPropertyChanged(nameof(SelectedEffectID));
 
                 //Force unselect effect part if it does not belong to currently selected effect
-                if (SelectedEffectPart != null && !_selectedEffect.EffectParts.Contains(SelectedEffectPart))
+                if (SelectedEffectPart != null && _selectedEffect != null && !_selectedEffect.EffectParts.Contains(SelectedEffectPart))
                 {
                     SelectedEffectPart = null;
                     SelectedEffectParts.Clear();
@@ -112,7 +112,9 @@ namespace EEPK_Organiser.View
         private void SelectEffect(Effect effect)
         {
             SelectedEffect = effect;
-            effectDataGrid.ScrollIntoView(effect);
+
+            if(effect != null)
+                effectDataGrid.ScrollIntoView(effect);
         }
 
         private void SelectEffectPart(EffectPart effectPart)
@@ -123,9 +125,29 @@ namespace EEPK_Organiser.View
             SelectedEffectParts.Clear();
         }
 
+        private void SetSelectedEffectParts(IList<EffectPart> effectParts)
+        {
+            SelectedEffectParts.Clear();
+
+            foreach(var effectPart in effectParts)
+            {
+                SelectedEffectParts.Add(effectPart);
+            }
+
+            SelectEffect(effectParts.Count > 0 ? effectContainerFile.GetEffectAssociatedWithEffectPart(effectParts[0]) : null);
+        }
+
         private IList<Effect> GetSelectedEffects()
         {
             return effectDataGrid.SelectedItems.Cast<Effect>().ToList();
+        }
+
+        /// <summary>
+        /// Helper method to synchronize <see cref="SelectedEffect"/> with <see cref="SelectedEffectParts"/>. This is a workaround for an issue when <see cref="SelectedEffect"/> is set to null incorrectly by external UI code when selection changes in the embedded ListBox.
+        /// </summary>
+        private void SyncSelectedEffectWithParts()
+        {
+            SelectEffect(SelectedEffectParts?.Count > 0 ? effectContainerFile.GetEffectAssociatedWithEffectPart(SelectedEffectParts[0]) : null);
         }
         #endregion
 
@@ -238,13 +260,16 @@ namespace EEPK_Organiser.View
         [RelayCommand(CanExecute = nameof(CanPasteEffectPart))]
         private void EffectPart_Paste()
         {
-            if (SelectedEffect != null)
+            Effect selectedEffect = SelectedEffect;
+
+            if (selectedEffect != null)
             {
                 CustomClipboard.TryGetData(ClipboardDataTypes.EffectPart, out ObservableCollection<EffectPart> effectParts);
 
                 if (effectParts != null)
                 {
                     List<IUndoRedo> undos = new List<IUndoRedo>();
+                    List<EffectPart> newEffectParts = new List<EffectPart>(effectParts.Count);
 
                     try
                     {
@@ -254,15 +279,19 @@ namespace EEPK_Organiser.View
                                 effectPart.AssetRef = effectContainerFile.AddAsset(effectPart.AssetRef, effectPart.AssetType, undos);
 
                             var newEffectPart = effectPart.Clone();
-                            SelectedEffect.EffectParts.Add(newEffectPart);
+                            newEffectParts.Add(newEffectPart);
+                            selectedEffect.EffectParts.Add(newEffectPart);
 
-                            undos.Add(new UndoableListAdd<EffectPart>(SelectedEffect.EffectParts, newEffectPart));
+                            undos.Add(new UndoableListAdd<EffectPart>(selectedEffect.EffectParts, newEffectPart));
                         }
                     }
                     finally
                     {
                         if (undos.Count > 0)
+                        {
                             UndoManager.Instance.AddUndo(new CompositeUndo(undos, (effectParts.Count > 1) ? "Paste EffectParts" : "Paste EffectPart"));
+                            SetSelectedEffectParts(newEffectParts);
+                        }
                     }
                 }
             }
@@ -284,7 +313,7 @@ namespace EEPK_Organiser.View
         [RelayCommand(CanExecute = nameof(IsEffectPartSelected))]
         private void EffectPart_Delete()
         {
-            var selectedEffect = SelectedEffect;
+            Effect selectedEffect = SelectedEffect;
 
             if (selectedEffect != null)
             {
@@ -307,21 +336,24 @@ namespace EEPK_Organiser.View
         [RelayCommand(CanExecute = nameof(IsEffectPartSelected))]
         private void EffectPart_Duplicate()
         {
-            var selectedEffect = SelectedEffect;
+            Effect selectedEffect = SelectedEffect;
 
             if (selectedEffect != null)
             {
                 if (SelectedEffectParts != null)
                 {
                     List<IUndoRedo> undos = new List<IUndoRedo>();
+                    List<EffectPart> newEffectParts = new List<EffectPart>(SelectedEffectParts.Count);
 
                     foreach (var effectPart in SelectedEffectParts)
                     {
                         var clone = effectPart.Clone();
+                        newEffectParts.Add(clone);
                         selectedEffect.EffectParts.Add(clone);
                         undos.Add(new UndoableListAdd<EffectPart>(selectedEffect.EffectParts, clone));
                     }
 
+                    SetSelectedEffectParts(newEffectParts);
                     UndoManager.Instance.AddCompositeUndo(undos, "EffectPart Duplicate");
                 }
             }
@@ -358,31 +390,28 @@ namespace EEPK_Organiser.View
         [RelayCommand(CanExecute = nameof(IsEffectPartSelected))]
         private void EffectPart_ChangeAsset()
         {
-            if (SelectedEffect != null)
+            if (SelectedEffectPart != null)
             {
-                if (SelectedEffectPart != null)
+                Forms.AssetSelector assetSel = new Forms.AssetSelector(effectContainerFile, false, false, SelectedEffectPart.AssetType, this, SelectedEffectPart.AssetRef);
+                assetSel.ShowDialog();
+
+                if (assetSel.SelectedAsset != null)
                 {
-                    Forms.AssetSelector assetSel = new Forms.AssetSelector(effectContainerFile, false, false, SelectedEffectPart.AssetType, this, SelectedEffectPart.AssetRef);
-                    assetSel.ShowDialog();
+                    List<IUndoRedo> undos = new List<IUndoRedo>();
 
-                    if (assetSel.SelectedAsset != null)
+                    foreach (var effectPart in SelectedEffectParts)
                     {
-                        List<IUndoRedo> undos = new List<IUndoRedo>();
+                        undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.AssetType), effectPart, effectPart.AssetType, assetSel.SelectedAssetType));
+                        undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.AssetRef), effectPart, effectPart.AssetRef, assetSel.SelectedAsset));
 
-                        foreach (var effectPart in SelectedEffectParts)
-                        {
-                            undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.AssetType), effectPart, effectPart.AssetType, assetSel.SelectedAssetType));
-                            undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.AssetRef), effectPart, effectPart.AssetRef, assetSel.SelectedAsset));
-
-                            effectPart.AssetType = assetSel.SelectedAssetType;
-                            effectPart.AssetRef = assetSel.SelectedAsset;
-                        }
-
-                        UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Change Asset(s)"));
-
-                        if (EffectPartViewModel != null)
-                            EffectPartViewModel.UpdateProperties();
+                        effectPart.AssetType = assetSel.SelectedAssetType;
+                        effectPart.AssetRef = assetSel.SelectedAsset;
                     }
+
+                    UndoManager.Instance.AddUndo(new CompositeUndo(undos, "Change Asset(s)"));
+
+                    if (EffectPartViewModel != null)
+                        EffectPartViewModel.UpdateProperties();
                 }
             }
         }
@@ -390,34 +419,31 @@ namespace EEPK_Organiser.View
         [RelayCommand(CanExecute = nameof(IsEffectPartSelected))]
         private void EffectPart_Rescale()
         {
-            if (SelectedEffect != null)
+            if (SelectedEffectParts != null)
             {
-                if (SelectedEffectParts != null)
+                LB_Common.Forms.NumericInput inputForm = new LB_Common.Forms.NumericInput("Rescale", "Rescale Factor", 1f, 0, 50, 0.1, null, "The minimum and maximum sizes of the selected Effect Parts will be rescaled by the entered factor.");
+                inputForm.ShowDialog();
+
+                if (!inputForm.IsCancelled)
                 {
-                    LB_Common.Forms.NumericInput inputForm = new LB_Common.Forms.NumericInput("Rescale", "Rescale Factor", 1f, 0, 50, 0.1, null, "The minimum and maximum sizes of the selected Effect Parts will be rescaled by the entered factor.");
-                    inputForm.ShowDialog();
+                    float scaleFactor = inputForm.GetValue<float>();
 
-                    if (!inputForm.IsCancelled)
+                    List<IUndoRedo> undos = new List<IUndoRedo>();
+
+                    foreach (var effectPart in SelectedEffectParts)
                     {
-                        float scaleFactor = inputForm.GetValue<float>();
+                        float size1 = effectPart.ScaleMin * scaleFactor;
+                        float size2 = effectPart.ScaleMax * scaleFactor;
 
-                        List<IUndoRedo> undos = new List<IUndoRedo>();
+                        undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.ScaleMin), effectPart, effectPart.ScaleMin, size1));
+                        undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.ScaleMax), effectPart, effectPart.ScaleMax, size2));
 
-                        foreach (var effectPart in SelectedEffectParts)
-                        {
-                            float size1 = effectPart.ScaleMin * scaleFactor;
-                            float size2 = effectPart.ScaleMax * scaleFactor;
-
-                            undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.ScaleMin), effectPart, effectPart.ScaleMin, size1));
-                            undos.Add(new UndoableProperty<EffectPart>(nameof(EffectPart.ScaleMax), effectPart, effectPart.ScaleMax, size2));
-
-                            effectPart.ScaleMin = size1;
-                            effectPart.ScaleMax = size2;
-                        }
-
-                        UndoManager.Instance.AddCompositeUndo(undos, "Rescale EffectPart");
-                        EffectPartViewModel?.UpdateProperties();
+                        effectPart.ScaleMin = size1;
+                        effectPart.ScaleMax = size2;
                     }
+
+                    UndoManager.Instance.AddCompositeUndo(undos, "Rescale EffectPart");
+                    EffectPartViewModel?.UpdateProperties();
                 }
             }
         }
@@ -425,7 +451,7 @@ namespace EEPK_Organiser.View
         [RelayCommand(CanExecute = nameof(CanPasteEffectPartValues))]
         private void EffectPart_PasteValues()
         {
-            if (SelectedEffect == null || SelectedEffectPart == null) return;
+            if (SelectedEffectPart == null) return;
 
             if (!CustomClipboard.TryGetData(ClipboardDataTypes.EffectPart, out ObservableCollection<EffectPart> effectParts))
                 return;
@@ -464,6 +490,14 @@ namespace EEPK_Organiser.View
             //MouseBinding isn't working, so as a quick fix I'm using an event
             if (e.LeftButton == MouseButtonState.Pressed)
                 EffectPart_DoubleClick();
+        }
+
+        private void EffectPartListBox_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            //Force select parent effect of selected effect parts
+            //This is a workaround for a bug where selecting effect parts in the embedded list box can cause the SelectedEffect in the parent DataGrid to be set to null
+            //Has a side effect of requiring two clicks to select a new effect part under a different effect
+            SyncSelectedEffectWithParts();
         }
 
         //EffectPart_EditAsset_Command

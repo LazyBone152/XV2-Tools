@@ -546,16 +546,6 @@ namespace Xv2CoreLib.ACB
 
         #region ViewBinding
         [NonSerialized]
-        private AsyncObservableCollection<Track_Wrapper> _selectedTracks = new AsyncObservableCollection<Track_Wrapper>();
-        public AsyncObservableCollection<Track_Wrapper> SelectedTracks
-        {
-            get
-            {
-                return this._selectedTracks;
-            }
-        }
-        
-        [NonSerialized]
         private Track_Wrapper _selectedTrack = null;
         public Track_Wrapper SelectedTrack
         {

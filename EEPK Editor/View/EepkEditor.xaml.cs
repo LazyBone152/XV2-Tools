@@ -312,6 +312,7 @@ namespace EEPK_Organiser.View
 
         private void EffectPart_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            SyncSelectedEffectWithParts();
             XenoKit_OnEffectPartSelectionChange();
         }
 
