@@ -149,20 +149,13 @@ namespace Xv2CoreLib.HslColor
     public class RgbColor
     {
         /// <summary>
-        /// Creates a RgbColor from three floating point values with a range of 0.0 to 10.0.
+        /// Creates a RgbColor from a HDR floating point color.
         /// </summary>
         public RgbColor(double r, double g, double b)
         {
-            var _r = ReadFloatColor(r);
-            var _g = ReadFloatColor(g);
-            var _b = ReadFloatColor(b);
-
-            R = _r[0];
-            G = _g[0];
-            B = _b[0];
-            R_Multi = _r[1];
-            G_Multi = _g[1];
-            B_Multi = _b[1];
+            R = r / (1.0 + r);
+            G = g / (1.0 + g);
+            B = b / (1.0 + b);
         }
 
         public RgbColor(byte r, byte g, byte b)
@@ -177,23 +170,11 @@ namespace Xv2CoreLib.HslColor
             R = customColor.R;
             G = customColor.G;
             B = customColor.B;
-
-
         }
 
         public double R { get; set; }
         public double G { get; set; }
         public double B { get; set; }
-
-        public double R_Multi { get; set; }
-        public double G_Multi { get; set; }
-        public double B_Multi { get; set; }
-
-        //Only preserve multi when value is 0.10 or greater. 
-        //public double R_WithMulti { get { return (R <= 0.09) ? R : R + R_Multi; } }
-        //public double G_WithMulti { get { return (G <= 0.09) ? G : G + G_Multi; } }
-        //public double B_WithMulti { get { return (B <= 0.09) ? B : B + B_Multi; } }
-        //private float[] ExtraColor = new float[3];
 
         public byte R_int { get { return (byte)(R * 255.0); } set { R = value / 255.0; } }
         public byte G_int { get { return (byte)(G * 255.0); } set { G = value / 255.0; } }
@@ -209,48 +190,6 @@ namespace Xv2CoreLib.HslColor
             }
         }
 
-        private double[] ReadFloatColor(double value)
-        {
-            int asInt = (int)value;
-
-            if (asInt == value)
-            {
-                //Whole value (0 or 1)
-                return new double[2] { value, 0 };
-            }
-            else
-            {
-                //Has remainder
-                return new double[2] { value - asInt, asInt };
-            }
-
-            /*
-            //0 = value, 1 = multi
-            double floored = Math.Floor(value);
-
-            if(value - 1.0 < 0.0)
-            {
-                //Color has no multi
-                return new double[] { value, 0.0};
-            }
-            else if(floored == value)
-            {
-                //Color is 1.0 + multi
-                return new double[] { value - (floored - 1.0), floored - 1.0 };
-            }
-            else if(floored != 0.0)
-            {
-                //Value has multi
-                return new double[] { value - floored, floored };
-            }
-            else
-            {
-                //Value does not have multi
-                return new double[] { value, floored };
-            }
-            */
-        }
-
         public HslColor ToHsl()
         {
             return ColorEx.RgbToHls(R, G, B);
@@ -264,10 +203,6 @@ namespace Xv2CoreLib.HslColor
             R = 1f - R;
             G = 1f - G;
             B = 1f - B;
-
-            R_Multi = 1f - R_Multi;
-            G_Multi = 1f - G_Multi;
-            B_Multi = 1f - B_Multi;
         }
     }
 

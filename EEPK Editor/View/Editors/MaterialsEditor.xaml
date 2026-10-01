@@ -138,6 +138,13 @@
                 </DataGrid.ContextMenu>
 
                 <DataGrid.Columns>
+                    <DataGridTemplateColumn MinWidth="50" Header="Color">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid Width="50" Height="15" Margin="5, 0" Background="{Binding PreviewBrush}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                     <DataGridTemplateColumn Header="Name" Width="150">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>

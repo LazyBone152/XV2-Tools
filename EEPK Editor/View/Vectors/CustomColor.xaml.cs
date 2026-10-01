@@ -161,7 +161,7 @@ namespace EEPK_Organiser.View.Vectors
 
         private void SetColorValue(Color? newValue)
         {
-            if (newValue.Value == null || Value == null) return;
+            if (newValue == null || Value == null) return;
 
             List<IUndoRedo> undos = new List<IUndoRedo>();
             undos.Add(SetFloatValue(newValue.Value.ScR, "R", false));
@@ -194,9 +194,7 @@ namespace EEPK_Organiser.View.Vectors
 
         private float NormalizedFloatColor(float value)
         {
-            int asInt = (int)value;
-            if (asInt == value) return value;
-            return value - asInt;
+            return value / (1f + value);
         }
     }
 }

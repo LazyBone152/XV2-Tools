@@ -4,6 +4,9 @@ using System.ComponentModel;
 using System.Collections.Generic;
 using LB_Common.Numbers;
 using Xv2CoreLib.Resource.UndoRedo;
+using Xv2CoreLib.EMM.Analyzer;
+using System.Linq;
+using Xv2CoreLib.HslColor;
 
 namespace Xv2CoreLib.EMM
 {
@@ -926,6 +929,14 @@ namespace Xv2CoreLib.EMM
             "MatAmb",
             "MatDif",
         };
+
+        public static readonly string[] ColorComponents = new string[]
+        {
+            "R",
+            "G",
+            "B",
+            "A",
+        };
         #endregion
 
         #region Editing
@@ -953,6 +964,9 @@ namespace Xv2CoreLib.EMM
 
         private void VectorValuesChangedEvent(object sender, PropertyChangedEventArgs e)
         {
+            if (ColorComponents.Contains(e.PropertyName))
+                NotifyPropertyChanged(e.PropertyName);
+
             _parametersChanged = 1;
             NotifyPropertyChanged(nameof(ParametersChanged));
         }
@@ -962,6 +976,40 @@ namespace Xv2CoreLib.EMM
             _parametersChanged = 0;
         }
 
+        private System.Windows.Media.Color CalculatePreviewColor(AnalyzedShader shader)
+        {
+            float r = 0, g = 0, b = 0;
+            int numColors = 0;
+
+            foreach (var colorParam in ColorParameters)
+            {
+                if (HasParameter(colorParam) && shader.Parameters.Any(x => x.Name == colorParam))
+                {
+                    var color = GetColor(colorParam);
+                    numColors++;
+
+                    //Convert HDR color into standard [0 - 1.0] range
+                    r += color.R / (1f + color.R);
+                    g += color.G / (1f + color.G);
+                    b += color.B / (1f + color.B);
+                }
+            }
+
+            if (numColors == 0) return System.Windows.Media.Colors.White;
+
+            return System.Windows.Media.Color.FromRgb((byte)((r / numColors) * 255), (byte)((g / numColors) * 255), (byte)((b / numColors) * 255));
+        }
+
+        public System.Windows.Media.Brush GetPreviewBrush(AnalyzedShader shader)
+        {
+            return new System.Windows.Media.SolidColorBrush(CalculatePreviewColor(shader));
+        }
+
+        public RgbColor GetPreviewColor(AnalyzedShader shader)
+        {
+            var color = CalculatePreviewColor(shader);
+            return new RgbColor(color.R, color.G, color.B);
+        }
     }
 
     public enum AlphaBlendType : int

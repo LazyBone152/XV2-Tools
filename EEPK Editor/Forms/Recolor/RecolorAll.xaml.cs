@@ -263,7 +263,7 @@ namespace EEPK_Organiser.Forms
                 Title += Materials.Count > 1 ? $" ({Materials.Count} Materials)" : " (1 Material)";
                 foreach (var material in Materials)
                 {
-                    colors.AddRange(material.GetUsedColors());
+                    colors.Add(material.GetUsedColor());
                 }
             }
             else if (currentMode == Mode.Global)
@@ -402,7 +402,7 @@ namespace EEPK_Organiser.Forms
                 {
                     foreach (var material in _asset.Files[0].EmpFile.GetUsedMaterials())
                     {
-                        colors.AddRange(material.GetUsedColors());
+                        colors.Add(material.GetUsedColor());
                     }
                 }
             }

@@ -1,13 +1,15 @@
-﻿using System;
+﻿using LB_Common.Numbers;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
+using System.Linq;
+using Xv2CoreLib.EMM.Analyzer;
+using Xv2CoreLib.EMP_NEW;
 using Xv2CoreLib.HslColor;
 using Xv2CoreLib.Resource;
 using Xv2CoreLib.Resource.UndoRedo;
-using LB_Common.Numbers;
 using YAXLib;
-using System.Linq;
-using System.ComponentModel;
 
 namespace Xv2CoreLib.EMM
 {
@@ -155,7 +157,7 @@ namespace Xv2CoreLib.EMM
 
             foreach (EmmMaterial mat in Materials)
             {
-                colors.AddRange(mat.GetUsedColors());
+                colors.Add(mat.GetUsedColor());
             }
 
             return colors;
@@ -253,6 +255,7 @@ namespace Xv2CoreLib.EMM
                 Materials.Add(newEntry);
             }
         }
+
     }
 
     [Serializable]
@@ -342,6 +345,7 @@ namespace Xv2CoreLib.EMM
                 {
                     shaderProgram = value;
                     NotifyPropertyChanged(nameof(ShaderProgram));
+                    NotifyPropertyChanged(nameof(PreviewBrush));
                 }
             }
         }
@@ -355,9 +359,21 @@ namespace Xv2CoreLib.EMM
         [YAXDontSerialize]
         public DecompiledMaterial DecompiledParameters { get; set; }
 
+        [YAXDontSerialize]
+        public System.Windows.Media.Brush PreviewBrush
+        {
+            get
+            {
+                AnalyzedShader shader = MaterialAnalyzer.Instance.ShaderHelper.Shaders.FirstOrDefault(x => x.ShaderProgram == ShaderProgram);
+                if (shader == null || DecompiledParameters == null) return System.Windows.Media.Brushes.White;
+                return DecompiledParameters.GetPreviewBrush(shader);
+            }
+        }
+
         public void DecompileParameters()
         {
             DecompiledParameters = DecompiledMaterial.Decompile(this);
+            DecompiledParameters.PropertyChanged += DecompiledParameters_PropertyChanged;
         }
 
         public void CompileParameters()
@@ -503,26 +519,26 @@ namespace Xv2CoreLib.EMM
             return GetParameter(paramName) != null;
         }
 
-        public List<RgbColor> GetUsedColors()
+        public RgbColor GetUsedColor()
         {
-            List<RgbColor> colors = new List<RgbColor>();
-            if (Parameters == null) return colors;
+            AnalyzedShader shader = MaterialAnalyzer.Instance.ShaderHelper.Shaders.FirstOrDefault(x => x.ShaderProgram == ShaderProgram);
+            if (DecompiledParameters == null || shader == null) return new RgbColor(1f, 1f, 1f);
 
-            foreach (var param in DecompiledMaterial.ColorParameters)
-            {
-                CustomColor col = DecompiledParameters.GetColor(param);
-
-                if (!TryGetColorForHsl(param, col, out RgbColor color, out _))
-                    continue;
-
-                if (!color.IsWhiteOrBlack)
-                    colors.Add(color);
-            }
-
-            return colors;
+            return DecompiledParameters.GetPreviewColor(shader);
         }
 
         #endregion
+
+        public void UpdatePreviewBrush()
+        {
+            NotifyPropertyChanged(nameof(PreviewBrush));
+        }
+
+        private void DecompiledParameters_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (DecompiledMaterial.ColorComponents.Contains(e.PropertyName))
+                NotifyPropertyChanged(nameof(PreviewBrush));
+        }
     }
 
     [Serializable]

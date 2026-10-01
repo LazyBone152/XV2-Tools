@@ -197,7 +197,7 @@ namespace EEPK_Organiser.View.Vectors
 
         private void SetColorValue(Color? newValue)
         {
-            if (newValue.Value == null || Value == null) return;
+            if (newValue == null || Value == null) return;
 
             List<IUndoRedo> undos = new List<IUndoRedo>();
             undos.Add(SetFloatValue(newValue.Value.ScR, "R", false));
